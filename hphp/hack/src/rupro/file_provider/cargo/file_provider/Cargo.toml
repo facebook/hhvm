@@ -8,10 +8,6 @@ edition = "2021"
 path = "../../file_provider.rs"
 
 [dependencies]
+anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
-dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
-ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../../pos/cargo/pos" }
-thiserror = "1.0.30"

@@ -2,28 +2,44 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_body, emit_memoize_helpers, emit_param};
-use ast_scope::{self, Scope, ScopeItem};
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_param;
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
+use ast_scope::{self};
 use emit_pos::emit_pos_then;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
-use ffi::{Slice, Str};
-use hhbc::{
-    hhas_attribute::{self, HhasAttribute},
-    hhas_body::HhasBody,
-    hhas_coeffects::HhasCoeffects,
-    hhas_function::{HhasFunction, HhasFunctionFlags},
-    hhas_param::HhasParam,
-    hhas_pos::HhasSpan,
-    hhas_type::HhasTypeInfo,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, TypedValue,
-};
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_attribute::{self};
+use hhbc::hhas_body::HhasBody;
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_function::HhasFunctionFlags;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::TypedValue;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options, RepoFlags};
-use oxidized::{ast, pos::Pos};
+use options::HhvmFlags;
+use options::Options;
+use options::RepoFlags;
+use oxidized::ast;
+use oxidized::pos::Pos;
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
@@ -97,16 +113,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
+    let should_emit_implicit_context = hhas_attribute::is_keyed_by_ic_memoize(attributes.iter());
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -256,6 +263,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
+        instr::verify_implicit_context_state(),
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
@@ -315,6 +323,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     );
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
+        instr::verify_implicit_context_state(),
         if is_async {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),

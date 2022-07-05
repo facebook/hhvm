@@ -24,8 +24,7 @@
 
 #include <folly/String.h>
 
-#include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
@@ -302,8 +301,9 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   auto print_mk = [&] (MemberKey m) {
     if (m.mcode == MEL || m.mcode == MPL) {
+      // FIXME: encode NamedLocal properly in hhas
       std::string ret = memberCodeString(m.mcode);
-      folly::toAppend(':', loc_name(finfo, m.iva), " ", subopToName(m.rop), &ret);
+      folly::toAppend(':', loc_name(finfo, m.local.id), " ", subopToName(m.rop), &ret);
       return ret;
     }
     return show(m);
@@ -322,10 +322,12 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto const print_nla = [&](const NamedLocal& nla) {
+    auto const locName = loc_name(finfo, nla.id);
+    if (nla.name == kInvalidLocalName) return folly::sformat("{};_", locName);
     auto const sd = finfo.func->localVarName(nla.name);
-    if (!sd) return folly::sformat("{};_", loc_name(finfo, nla.id));
+    if (!sd) return folly::sformat("{};_", locName);
     auto const name = folly::cEscape<std::string>(sd->slice());
-    return folly::sformat("{};\"{}\"", loc_name(finfo, nla.id), name);
+    return folly::sformat("{};\"{}\"", locName, name);
   };
 
 #define IMM_BLA    print_switch();
@@ -404,7 +406,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   out.nl();
 }
 
-template<bool isTest=false>
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
   if (RuntimeOption::EvalDisassemblerDocComments) {
@@ -437,8 +438,6 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
 
-  // TODO(voork): handle coeffects in HackCTranslator
-  if (isTest) return;
   auto const coeffects = func->staticCoeffectNames();
   if (!coeffects.empty()) {
     std::vector<std::string> names;
@@ -662,7 +661,7 @@ void print_func(Output& out, const Func* func) {
     func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives<isTest>(out, finfo);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -714,10 +713,8 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
 
 const StaticString s_coeffectsProp("86coeffects");
 
-// TODO: T112774575 remove isTest flag when HackC Translator is complete
 template<class T>
-void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
-  if (isTest && f.name() == s_coeffectsProp.get()) return;
+void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
     opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
@@ -731,9 +728,8 @@ void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
   });
 }
 
-template<bool isTest = false>
 void print_property(Output& out, const PreClass::Prop* prop) {
-  print_prop_or_field_impl(out, *prop, isTest);
+  print_prop_or_field_impl(out, *prop);
 }
 
 template<bool isTest=false>
@@ -749,7 +745,7 @@ void print_method(Output& out, const Func* func) {
     func_param_list<isTest>(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives<isTest>(out, finfo);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -811,6 +807,7 @@ void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
   out.fmtln(".require {} <{}>;", kind, req.name()->data());
 }
 
+template<bool isTest = false>
 void print_cls_directives(Output& out, const PreClass* cls) {
   if (RuntimeOption::EvalDisassemblerDocComments) {
     if (cls->docComment() && !cls->docComment()->empty()) {
@@ -822,21 +819,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
-  for (auto* m : cls->allMethods())    print_method(out, m);
-}
-
-void print_cls_directives_test(Output& out, const PreClass* cls) {
-  if (RuntimeOption::EvalDisassemblerDocComments) {
-    if (cls->docComment() && !cls->docComment()->empty()) {
-      out.fmtln(".doc {};", escaped_long(cls->docComment()));
-    }
-  }
-  print_cls_enum_ty(out, cls);
-  print_cls_used_traits(out, cls);
-  for (auto& r : cls->requirements())  print_requirement(out, r);
-  for (auto& c : cls->allConstants())  print_class_constant(out, &c);
-  for (auto& p : cls->allProperties()) print_property<true>(out, &p);
-  for (auto* m : cls->allMethods())    print_method<true>(out, m);
+  for (auto* m : cls->allMethods())    print_method<isTest>(out, m);
 }
 
 template<bool isTest = false>
@@ -867,11 +850,7 @@ void print_cls(Output& out, const PreClass* cls) {
   print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
-  if (isTest) {
-    indented(out, [&] { print_cls_directives_test(out, cls); });
-  } else {
-    indented(out, [&] { print_cls_directives(out, cls); });
-  }
+  indented(out, [&] { print_cls_directives<isTest>(out, cls); });
   out.fmtln("}}");
   out.nl();
 }
@@ -951,9 +930,8 @@ void print_unit_metadata(Output& out, const Unit* unit) {
     }
   }
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
-    auto const unitId = encodeUnitId(i);
-    auto const ad = unit->lookupArrayId(unitId);
-    out.fmtln(".adata A_{} = {};", unitId, escaped_long(ad));
+    auto const ad = unit->lookupArrayId(i);
+    out.fmtln(".adata A_{} = {};", i, escaped_long(ad));
   }
   out.nl();
 }
@@ -978,6 +956,7 @@ void print_unit_test(Output& out, const Unit* unit) {
   for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);
+  for (auto& m : unit->modules())         print_module(out, m);
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 

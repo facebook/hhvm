@@ -8,15 +8,21 @@ use std::borrow::Cow;
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
-use crate::lexer::{Lexer, StringLiteralKind};
-use crate::operator::{Assoc, Operator};
+use crate::lexer::Lexer;
+use crate::lexer::StringLiteralKind;
+use crate::operator::Assoc;
+use crate::operator::Operator;
 use crate::parser_env::ParserEnv;
-use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::{NodeType, SmartConstructors, Token};
+use crate::parser_trait::Context;
+use crate::parser_trait::ParserTrait;
+use crate::smart_constructors::NodeType;
+use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::Token;
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
 

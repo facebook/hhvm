@@ -2,10 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::{emitter::Emitter, LabelGen};
+use env::emitter::Emitter;
+use env::LabelGen;
 use error::Result;
-use hhbc::{Instruct, IterId, Label, Local, Opcode, Pseudo};
-use instruction_sequence::{instr, InstrSeq};
+use hhbc::Instruct;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::Opcode;
+use hhbc::Pseudo;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the

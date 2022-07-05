@@ -1,8 +1,12 @@
 [31;1mTyping[4163][0m [0;1mInvalid return type[0m [0;2m[[0m[31m1[0m[0;2m][0m
 [0;2m->[0m The field [0;4my[0m is [0;1moptional[0m [0;2m[[0m[36m2[0m[0;2m][0m
 [0;2m->[0m The field [0;4my[0m is defined as [0;1mrequired[0m [0;2m[[0m[32m3[0m[0;2m][0m
+[0;2m->[0m [0;4my[0m is defined here [0;2m[[0m[35m4[0m[0;2m][0m
 
 required_field_optional.php[0;2m:13:10[0m
+     [0;2m3[0m[0;2m |[0m type my_shape = shape(
+     [0;2m4[0m[0;2m |[0m   'x' => int,
+[0;2m[[0m[35m4[0m[0;2m][0m  [0;2m5[0m[0;2m |[0m   'y' => [35mb[0m[35mo[0m[35mo[0m[35ml[0m,
      [0;2m6[0m[0;2m |[0m );
      [0;2m7[0m[0;2m |[0m 
 [0;2m[[0m[32m3[0m[0;2m][0m  [0;2m8[0m[0;2m |[0m function foo(bool $cond): [32mm[0m[32my[0m[32m_[0m[32ms[0m[32mh[0m[32ma[0m[32mp[0m[32me[0m {

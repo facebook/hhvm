@@ -3,35 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use arena_collections::List;
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep::slab::OwnedSlab;
 use ocamlrep_caml_builtins::Int64;
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_info::NameType;
 
-use crate::{file_info, shallow_decl_defs, typing_defs};
+use crate::file_info;
+use crate::shallow_decl_defs;
+use crate::typing_defs;
 
 pub use shallow_decl_defs::Decl;
 
 // NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
-#[derive(
-    Copy,
-    Clone,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
+#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Deserialize, FromOcamlRepIn, NoPosHash, Serialize, ToOcamlRep)]
 pub struct ParsedFile<'a> {
     pub mode: Option<file_info::Mode>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

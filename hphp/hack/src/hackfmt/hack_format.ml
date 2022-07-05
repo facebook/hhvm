@@ -256,6 +256,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           alias_attribute_spec = attr;
           alias_modifiers = modifiers;
+          alias_module_kw_opt = mkw_opt;
           alias_keyword = kw;
           alias_name = name;
           alias_generic_parameter = generic;
@@ -270,6 +271,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env attr;
           when_present attr newline;
           handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env mkw_opt;
+          when_present mkw_opt space;
           t env kw;
           Space;
           t env name;

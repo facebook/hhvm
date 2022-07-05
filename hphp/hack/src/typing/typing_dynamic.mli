@@ -41,7 +41,7 @@ val sound_dynamic_interface_check_from_fun_ty :
 
 val maybe_wrap_with_supportdyn :
   should_wrap:bool ->
-  Typing_reason.decl_t ->
+  Typing_reason.t ->
   Typing_defs.locl_ty Typing_defs_core.fun_type ->
   Typing_defs.locl_ty
 

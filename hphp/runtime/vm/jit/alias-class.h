@@ -153,6 +153,16 @@ inline AIter aiter_all(SSATmp* fp, uint32_t id) {
   };
 }
 
+// Returns an AliasClass capturing all iterator states for iterators in the
+// range [start, end)
+inline AIter aiter_range(SSATmp* fp, uint32_t start, uint32_t end) {
+  using namespace detail;
+  return AIter {
+    fp,
+    AliasIdSet::IdRange(start * kSlotsPerAIter, end * kSlotsPerAIter)
+  };
+}
+
 /*
  * These singleton values are each associated with a given frame. AFContext
  * is the m_thisUnsafe field of ActRec, AFFunc is m_func, AFMeta holds the

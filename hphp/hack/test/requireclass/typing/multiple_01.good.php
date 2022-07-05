@@ -19,7 +19,7 @@ trait T2 {
   }
 }
 
-class C {
+final class C {
   use T1, T2;
 
   public function gee(): void {}

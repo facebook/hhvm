@@ -12,14 +12,46 @@ pub mod subst;
 mod to_oxidized;
 pub mod ty;
 
-pub use folded::{ClassConst, FoldedClass, FoldedElement, Requirement, SubstContext, TypeConst};
-pub use shallow::{
-    ConstDecl, FunDecl, ModuleDecl, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
-    ShallowTypeconst, TypedefDecl,
-};
-pub use ty::{
-    AbstractTypeconst, Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, EnumType,
-    FunParam, FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType, Tparam, Ty, Ty_,
-    Typeconst, UserAttribute, Visibility, WhereConstraint, XhpAttribute,
-};
+pub use folded::ClassConst;
+pub use folded::FoldedClass;
+pub use folded::FoldedElement;
+pub use folded::Requirement;
+pub use folded::SubstContext;
+pub use folded::TypeConst;
+pub use shallow::ConstDecl;
+pub use shallow::FunDecl;
+pub use shallow::ModuleDecl;
+pub use shallow::ShallowClass;
+pub use shallow::ShallowClassConst;
+pub use shallow::ShallowMethod;
+pub use shallow::ShallowProp;
+pub use shallow::ShallowTypeconst;
+pub use shallow::TypedefDecl;
+pub use ty::AbstractTypeconst;
+pub use ty::Abstraction;
+pub use ty::CeVisibility;
+pub use ty::ClassConstFrom;
+pub use ty::ClassConstKind;
+pub use ty::ClassConstRef;
+pub use ty::ClassEltFlags;
+pub use ty::ClassEltFlagsArgs;
+pub use ty::ClassishKind;
+pub use ty::ConcreteTypeconst;
+pub use ty::ConsistentKind;
+pub use ty::EnumType;
+pub use ty::FunParam;
+pub use ty::FunType;
+pub use ty::PossiblyEnforcedTy;
+pub use ty::Prim;
+pub use ty::ShapeFieldType;
+pub use ty::TaccessType;
+pub use ty::Tparam;
+pub use ty::TrefinementType;
+pub use ty::Ty;
+pub use ty::Ty_;
+pub use ty::TypeConstRef;
+pub use ty::Typeconst;
+pub use ty::UserAttribute;
+pub use ty::Visibility;
+pub use ty::WhereConstraint;
+pub use ty::XhpAttribute;

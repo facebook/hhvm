@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -103,7 +103,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
         resultLocal = kInvalidId;
         break;
       }
-      case Op::Jmp: case Op::JmpNS: {
+      case Op::Jmp: {
         sk = SrcKey(sk, sk.offset() + getImm(sk.pc(), 0).u_BA);
         continue;
       }
@@ -183,6 +183,14 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       auto const wh = gen(env, CreateAFWH, fp(env),
                           cns(env, func->numSlotsInFrame()),
                           resumeAddr(), suspendOff, child);
+      // Constructing a waithandle teleports locals and iterators to the heap,
+      // kill them here to improve alias analysis.
+      for (uint32_t i = 0; i < func->numLocals(); ++i) {
+        gen(env, KillLoc, LocalId{i}, fp(env));
+      }
+      for (uint32_t i = 0; i < func->numIterators(); ++i) {
+        gen(env, KillIter, IterId{i}, fp(env));
+      }
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
         gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);
@@ -214,7 +222,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       );
     }();
 
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
+    gen(env, StImplicitContextWH, waitHandle);
 
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
@@ -237,7 +245,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
 
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
+    gen(env, StImplicitContextWH, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});

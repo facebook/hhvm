@@ -5,8 +5,11 @@
 
 use crate::special_names as sn;
 use im::HashSet;
-use oxidized::aast_visitor::{Params, VisitorMut};
-use oxidized::{aast::*, ast, ast_defs::*};
+use oxidized::aast::*;
+use oxidized::aast_visitor::Params;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs::*;
 use utils::core::ns;
 
 struct ElaborateNamespacesVisitor<'node> {

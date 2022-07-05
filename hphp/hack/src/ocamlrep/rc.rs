@@ -10,14 +10,23 @@
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::ops::Deref;
 use std::rc::Rc;
 
 use bumpalo::Bump;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::Deserialize;
+use serde::Deserializer;
+use serde::Serialize;
+use serde::Serializer;
 
-use crate::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
+use crate::Allocator;
+use crate::FromError;
+use crate::FromOcamlRep;
+use crate::OpaqueValue;
+use crate::ToOcamlRep;
+use crate::Value;
 
 const UNIT: usize = crate::value::isize_to_ocaml_int(0);
 const INVALID_GENERATION: usize = usize::max_value();

@@ -196,6 +196,7 @@ struct APCHandle {
    * instance returned will be local to the request/thread that performed
    * the call.
    */
+  TypedValue toLazyProp() const;
   Variant toLocalHelper(bool pure) const;
   Variant toLocal(bool pure) const;
   bool toLocalMayRaise() const;

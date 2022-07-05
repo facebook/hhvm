@@ -1,0 +1,2 @@
+File "module_newtype_outside_module.php--module.php", line 3, characters 1-6:
+`module newtype` type aliases cannot be used outside of a module. Please define a module for this file. (Parsing[1002])

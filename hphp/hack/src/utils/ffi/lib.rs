@@ -22,4 +22,5 @@ pub use crate::ffi::Slice;
 pub use crate::ffi::Str;
 pub use crate::ffi::Triple;
 
-pub use crate::ffi::{Maybe, Maybe::*};
+pub use crate::ffi::Maybe;
+pub use crate::ffi::Maybe::*;

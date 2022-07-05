@@ -48,6 +48,9 @@ type keyword_with_hover_docs =
   | Public
   | Protected
   | Private
+  | Internal
+  | ModuleInModuleDeclaration
+  | ModuleInModuleMembershipDeclaration
 [@@deriving ord, eq]
 
 type built_in_type_hint =
@@ -97,6 +100,7 @@ type kind =
   | PureFunctionContext
   | BestEffortArgument of receiver * int
   | HhFixme
+  | Module
 [@@deriving eq]
 
 type 'a t = {

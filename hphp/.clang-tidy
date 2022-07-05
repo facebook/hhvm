@@ -16,5 +16,6 @@ Checks: '
 -facebook-hte-NullableReturn,
 -facebook-hte-ParameterUncheckedArrayBounds,
 -facebook-hte-BadImplicitCast
+-facebook-reserve
 '
 ...

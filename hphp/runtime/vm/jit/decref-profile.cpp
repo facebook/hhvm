@@ -61,7 +61,8 @@ void DecRefProfile::update(TypedValue tv) {
   auto const countable = tv.val().pcnt;
   if (countable->decWillRelease()) {
     released++;
-    if (isRealType(datatype) && isArrayLikeType(datatype)) {
+    if (isRealType(datatype) && isArrayLikeType(datatype) &&
+        tv.val().parr->isVanilla()) {
       size_t numProfiledElements = 0;
       bool hasRefcountedElement = false;
       IterateKV(tv.val().parr, [&](TypedValue key, TypedValue value){

@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Slice;
-use hhbc::{Instruct, Pseudo};
+use hhbc::Instruct;
+use hhbc::Pseudo;
 
 /// The various from_X functions below take some kind of AST
 /// (expression, statement, etc.) and produce what is logically a
@@ -162,15 +163,50 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 
 pub mod instr {
     use crate::InstrSeq;
-    use ffi::{BumpSliceMut, Slice, Str};
-    use hhbc::{
-        AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
-        FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, Instruct,
-        IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode,
-        MemberKey, MethodName, NumParams, OODeclExistsOp, ObjMethodOp, Opcode, PropName, Pseudo,
-        QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SrcLoc,
-        StackIndex, SwitchKind, TypeStructResolveOp,
-    };
+    use ffi::Slice;
+    use ffi::Str;
+    use hhbc::AdataId;
+    use hhbc::BareThisOp;
+    use hhbc::ClassName;
+    use hhbc::ClassNum;
+    use hhbc::CollectionType;
+    use hhbc::ConstName;
+    use hhbc::ContCheckOp;
+    use hhbc::Dummy;
+    use hhbc::FCallArgs;
+    use hhbc::FatalOp;
+    use hhbc::FloatBits;
+    use hhbc::FunctionName;
+    use hhbc::IncDecOp;
+    use hhbc::InitPropOp;
+    use hhbc::Instruct;
+    use hhbc::IsLogAsDynamicCallOp;
+    use hhbc::IsTypeOp;
+    use hhbc::IterArgs;
+    use hhbc::IterId;
+    use hhbc::Label;
+    use hhbc::Local;
+    use hhbc::LocalRange;
+    use hhbc::MOpMode;
+    use hhbc::MemberKey;
+    use hhbc::MethodName;
+    use hhbc::NumParams;
+    use hhbc::OODeclExistsOp;
+    use hhbc::ObjMethodOp;
+    use hhbc::Opcode;
+    use hhbc::PropName;
+    use hhbc::Pseudo;
+    use hhbc::QueryMOp;
+    use hhbc::ReadonlyOp;
+    use hhbc::RepoAuthType;
+    use hhbc::SetOpOp;
+    use hhbc::SetRangeOp;
+    use hhbc::SilenceOp;
+    use hhbc::SpecialClsRef;
+    use hhbc::SrcLoc;
+    use hhbc::StackIndex;
+    use hhbc::SwitchKind;
+    use hhbc::TypeStructResolveOp;
 
     // This macro builds helper functions for each of the given opcodes.  See
     // the definition of define_instr_seq_helpers for details.
@@ -330,7 +366,7 @@ pub mod instr {
             [label1, label2],
             // Need dummy immediate here to satisfy opcodes translator expectation of immediate
             // with name _0.
-            Dummy,
+            Dummy::DEFAULT,
             range,
         )))
     }
@@ -360,18 +396,16 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
-        let targets = BumpSliceMut::new(
-            alloc,
-            alloc.alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target)),
-        );
-        let cases = BumpSliceMut::new(
-            alloc,
-            alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
-        );
+        let targets = alloc
+            .alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target))
+            .into();
+        let cases = alloc
+            .alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s)))
+            .into();
         instr(Instruct::Opcode(Opcode::SSwitch {
             cases,
             targets,
-            _0: Dummy,
+            _0: Dummy::DEFAULT,
         }))
     }
 
@@ -382,14 +416,11 @@ pub mod instr {
         ))))
     }
 
-    pub fn switch<'a>(
-        alloc: &'a bumpalo::Bump,
-        targets: bumpalo::collections::Vec<'a, Label>,
-    ) -> InstrSeq<'a> {
+    pub fn switch<'a>(targets: bumpalo::collections::Vec<'a, Label>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcode::Switch(
             SwitchKind::Unbounded,
             0,
-            BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
+            targets.into_bump_slice().into(),
         )))
     }
 
@@ -539,7 +570,8 @@ impl<'a> InstrSeq<'a> {
 mod tests {
     use super::*;
     use ffi::Str;
-    use instr::{instr, instrs};
+    use instr::instr;
+    use instr::instrs;
     use pretty_assertions::assert_eq;
 
     #[test]

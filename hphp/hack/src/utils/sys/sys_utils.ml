@@ -530,15 +530,29 @@ let signal =
     fun _ _ ->
   ()
 
-external get_total_ram : unit -> int = "hh_sysinfo_totalram"
+type sysinfo = {
+  uptime: int;
+  totalram: int;
+  freeram: int;
+  sharedram: int;
+  bufferram: int;
+  totalswap: int;
+  freeswap: int;
+  totalhigh: int;
+  freehigh: int;
+}
 
-external uptime : unit -> int = "hh_sysinfo_uptime"
+external sysinfo : unit -> sysinfo option = "hh_sysinfo"
 
-external nproc : unit -> int = "nproc"
+external nprocs : unit -> int = "hh_nproc"
 
-let total_ram = get_total_ram ()
+let nbr_procs = nprocs ()
 
-let nbr_procs = nproc ()
+let total_ram =
+  Option.value_map (sysinfo ()) ~default:0 ~f:(fun si -> si.totalram)
+
+let uptime () =
+  Option.value_map (sysinfo ()) ~default:0 ~f:(fun si -> si.uptime)
 
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
   = "hh_set_priorities"

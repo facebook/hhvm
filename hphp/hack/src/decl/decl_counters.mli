@@ -86,6 +86,7 @@ type subdecl_kind =
   | SMethods
   | All_inherited_methods
   | All_inherited_smethods
+  | Overridden_method
   (* Misc *)
   | Deferred_init_members
 

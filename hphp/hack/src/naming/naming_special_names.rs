@@ -132,7 +132,8 @@ pub mod collections {
 }
 
 pub mod members {
-    use hash::{HashMap, HashSet};
+    use hash::HashMap;
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const M_GET_INSTANCE_KEY: &str = "getInstanceKey";
@@ -852,6 +853,10 @@ pub mod coeffects {
 
     pub const WRITE_PROPS: &str = "write_props";
 
+    pub const LEAK_SAFE_LOCAL: &str = "leak_safe_local";
+
+    pub const LEAK_SAFE_SHALLOW: &str = "leak_safe_shallow";
+
     pub const LEAK_SAFE: &str = "leak_safe";
 
     pub const ZONED_LOCAL: &str = "zoned_local";
@@ -904,6 +909,8 @@ pub mod coeffects {
         ZonedShallow,
         Zoned,
 
+        LeakSafeLocal,
+        LeakSafeShallow,
         LeakSafe,
 
         ReadGlobals,
@@ -928,6 +935,8 @@ pub mod coeffects {
                 ZonedLocal => write!(f, "{}", ZONED_LOCAL),
                 ZonedShallow => write!(f, "{}", ZONED_SHALLOW),
                 Zoned => write!(f, "{}", ZONED),
+                LeakSafeLocal => write!(f, "{}", LEAK_SAFE_LOCAL),
+                LeakSafeShallow => write!(f, "{}", LEAK_SAFE_SHALLOW),
                 LeakSafe => write!(f, "{}", LEAK_SAFE),
                 ReadGlobals => write!(f, "{}", READ_GLOBALS),
                 Globals => write!(f, "{}", GLOBALS),
@@ -949,6 +958,8 @@ pub mod coeffects {
             ZONED_LOCAL => Some(Ctx::ZonedLocal),
             ZONED_SHALLOW => Some(Ctx::ZonedShallow),
             ZONED => Some(Ctx::Zoned),
+            LEAK_SAFE_LOCAL => Some(Ctx::LeakSafeLocal),
+            LEAK_SAFE_SHALLOW => Some(Ctx::LeakSafeShallow),
             LEAK_SAFE => Some(Ctx::LeakSafe),
             GLOBALS => Some(Ctx::Globals),
             READ_GLOBALS => Some(Ctx::ReadGlobals),
@@ -972,7 +983,9 @@ pub mod coeffects {
         match ctx {
             Ctx::Defaults => self::capability_in_defaults_ctx(c),
             Ctx::Rx | Ctx::RxLocal | Ctx::RxShallow => self::capability_in_rx_ctx(c),
-            Ctx::LeakSafe => self::capability_in_controlled_ctx(c),
+            Ctx::LeakSafe | Ctx::LeakSafeLocal | Ctx::LeakSafeShallow => {
+                self::capability_in_controlled_ctx(c)
+            }
             Ctx::Zoned | Ctx::ZonedLocal | Ctx::ZonedShallow | Ctx::ZonedWith => {
                 self::capability_in_policied_ctx(c)
             }
@@ -1142,7 +1155,6 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_XHP: &str = "visitXhp";
-    pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
 
     pub const SPLICE: &str = "splice";
 

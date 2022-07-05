@@ -4,16 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
-use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
+use datastore::ChangesStore;
+use datastore::DeltaStore;
+use datastore::NonEvictingStore;
+use datastore::ReadonlyStore;
+use hh24_types::ToplevelCanonSymbolHash;
+use hh24_types::ToplevelSymbolHash;
 use naming_provider::NamingProvider;
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    file_info::{self, NameType},
-    naming_types,
-};
+use oxidized::file_info::NameType;
+use oxidized::file_info::{self};
+use oxidized::naming_types;
 use parking_lot::Mutex;
-use pos::{ConstName, FunName, ModuleName, RelativePath, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::ModuleName;
+use pos::RelativePath;
+use pos::TypeName;
 use reverse_naming_table::ReverseNamingTable;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -156,10 +163,13 @@ impl NamingTable {
 }
 
 impl NamingProvider for NamingTable {
-    fn get_type_path(&self, name: pos::TypeName) -> Result<Option<RelativePath>> {
+    fn get_type_path_and_kind(
+        &self,
+        name: pos::TypeName,
+    ) -> Result<Option<(RelativePath, naming_types::KindOfType)>> {
         Ok(self
             .get_type_pos(name)?
-            .map(|(pos, _kind)| pos.path().into()))
+            .map(|(pos, kind)| (pos.path().into(), kind)))
     }
     fn get_fun_path(&self, name: pos::FunName) -> Result<Option<RelativePath>> {
         Ok(self.get_fun_pos(name)?.map(|pos| pos.path().into()))
@@ -206,7 +216,7 @@ impl MaybeNamingDb {
         self.0.lock().as_ref().map(|(_, path)| path.clone())
     }
 
-    fn set_db_path(&self, db_path: PathBuf) -> rusqlite::Result<()> {
+    fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
         let mut lock = self.0.lock();
         *lock = Some((names::Names::from_file(&db_path)?, db_path));
         Ok(())
@@ -214,7 +224,7 @@ impl MaybeNamingDb {
 
     fn with_db<T, F>(&self, f: F) -> Result<Option<T>>
     where
-        F: FnOnce(&names::Names) -> rusqlite::Result<Option<T>>,
+        F: FnOnce(&names::Names) -> Result<Option<T>>,
     {
         match &*self.0.lock() {
             Some((db, _)) => Ok(f(db)?),
@@ -300,8 +310,12 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
 
 mod reverse_naming_table {
     use anyhow::Result;
-    use datastore::{ChangesStore, DeltaStore, NonEvictingStore, ReadonlyStore};
-    use hh24_types::{ToplevelCanonSymbolHash, ToplevelSymbolHash};
+    use datastore::ChangesStore;
+    use datastore::DeltaStore;
+    use datastore::NonEvictingStore;
+    use datastore::ReadonlyStore;
+    use hh24_types::ToplevelCanonSymbolHash;
+    use hh24_types::ToplevelSymbolHash;
     use std::hash::Hash;
     use std::sync::Arc;
 

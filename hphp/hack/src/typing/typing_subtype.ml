@@ -515,14 +515,21 @@ let transform_dynamic_upper_bound ~coerce env ty =
     | (Some TL.CoerceToDynamic, _) -> ty
     | _ -> ty
 
-let mk_issubtype_prop ~coerce _env ty1 ty2 =
+let mk_issubtype_prop ~coerce env ty1 ty2 =
   match ty2 with
   | LoclType ty2 ->
     let (coerce, ty2) =
-      match (coerce, get_node ty2) with
-      | (Some TL.CoerceToDynamic, Tdynamic) ->
+      (* If we are in dynamic-aware subtyping mode, that fact will be lost when ty2
+         ends up on the upper bound of a type variable. Here we find if ty2 contains
+         dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
+         require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
+      match (coerce, Typing_utils.try_strip_dynamic env ty2) with
+      | (Some TL.CoerceToDynamic, Some non_dyn_ty) ->
         let r = get_reason ty2 in
-        (None, MakeType.supportdyn r (MakeType.mixed r))
+        ( None,
+          MakeType.union
+            r
+            [non_dyn_ty; MakeType.supportdyn r (MakeType.mixed r)] )
       | _ -> (coerce, ty2)
     in
     TL.IsSubtype (coerce, ty1, LoclType ty2)
@@ -2151,7 +2158,7 @@ and simplify_subtype_i
             invalid_env env
         | (_, Tclass ((_, cname), ex, _))
           when String.equal cname SN.Classes.cStringish
-               && equal_exact ex Nonexact
+               && is_nonexact ex
                && Aast.(
                     equal_tprim tprim_super Tstring
                     || equal_tprim tprim_super Tarraykey) ->
@@ -2188,7 +2195,7 @@ and simplify_subtype_i
         (match deref ty_sub with
         | (_, Tnewtype (enum_name, _, _))
           when String.equal enum_name class_name
-               && equal_exact exact_super Nonexact
+               && is_nonexact exact_super
                && Env.is_enum env enum_name ->
           valid env
         | (_, Tnewtype (cid, _, _))
@@ -2207,18 +2214,18 @@ and simplify_subtype_i
           valid env
         | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
           when String.equal class_name SN.Classes.cXHPChild
-               && equal_exact exact_super Nonexact ->
+               && is_nonexact exact_super ->
           valid env
         | (_, Tprim Nast.Tstring)
           when String.equal class_name SN.Classes.cStringish
-               && equal_exact exact_super Nonexact ->
+               && is_nonexact exact_super ->
           valid env
         (* Match what's done in unify for non-strict code *)
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
           let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
           let exact_match =
             match (exact_sub, exact_super) with
-            | (Nonexact, Exact) -> false
+            | (Nonexact _, Exact) -> false
             | (_, _) -> true
           in
           if String.equal cid_super cid_sub then
@@ -2347,7 +2354,7 @@ and simplify_subtype_i
                   invalid_env env))
         | (_r_sub, Tvec_or_dict (_, tv)) ->
           (match (exact_super, tyl_super) with
-          | (Nonexact, [tv_super])
+          | (Nonexact _, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
                  || String.equal class_name SN.Collections.cContainer ->
             (* vec<tv> <: Traversable<tv_super>
@@ -2357,7 +2364,7 @@ and simplify_subtype_i
              *          and map<_,tv> <: Container<tv_super>
              *)
             simplify_subtype ~subtype_env ~this_ty tv tv_super env
-          | (Nonexact, [tk_super; tv_super])
+          | (Nonexact _, [tk_super; tv_super])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -2367,7 +2374,7 @@ and simplify_subtype_i
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
             | _ -> default_subtype env)
-          | (Nonexact, [])
+          | (Nonexact _, [])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
@@ -2436,6 +2443,7 @@ and simplify_subtype_shape
     | (`Required sub_ty, `Optional super_ty)
     | (`Optional sub_ty, `Optional super_ty) ->
       let super_ty = liken ~super_like env super_ty in
+
       res &&& simplify_subtype ~subtype_env ~this_ty sub_ty super_ty
     | (`Absent, `Optional _)
     | (`Absent, `Absent) ->
@@ -2458,7 +2466,7 @@ and simplify_subtype_shape
                      })
       in
       with_error ty_err_opt res
-    | (`Optional _, `Required _) ->
+    | (`Optional _, `Required super_ty) ->
       let ty_err_opt =
         Option.map
           subtype_env.on_error
@@ -2471,6 +2479,7 @@ and simplify_subtype_shape
                        pos = Reason.to_pos r_sub;
                        decl_pos = Reason.to_pos r_super;
                        name = printable_name;
+                       def_pos = get_pos super_ty;
                      })
       in
       with_error ty_err_opt res
@@ -4193,8 +4202,7 @@ let is_type_disjoint env ty1 ty2 =
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
     | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
     | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
-      when String.equal cname SN.Classes.cStringish && equal_exact ex Nonexact
-      ->
+      when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
       false
     | (Tprim _, (Tfun _ | Tclass _))
     | ((Tfun _ | Tclass _), Tprim _) ->

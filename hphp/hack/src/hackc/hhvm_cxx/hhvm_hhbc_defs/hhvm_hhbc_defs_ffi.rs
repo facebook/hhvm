@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::{BitAnd, BitOr, BitOrAssign};
+use std::ops::BitAnd;
+use std::ops::BitOr;
+use std::ops::BitOrAssign;
 
 #[allow(unreachable_patterns)]
 #[cxx::bridge(namespace = "HPHP")]

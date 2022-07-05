@@ -42,6 +42,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
   | REFACTOR _ -> true
+  | REFACTOR_CHECK_SD _ -> true
   | IDE_REFACTOR _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true
@@ -50,6 +51,9 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
   | GEN_PREFETCH_DIR _ -> false
+  | GEN_REMOTE_DECLS_FULL -> false
+  | GEN_REMOTE_DECLS_INCREMENTAL -> false
+  | GEN_SHALLOW_DECLS_DIR _ -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
@@ -74,7 +78,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | IDE_AUTOCOMPLETE _ -> false
-  | IDE_FFP_AUTOCOMPLETE _ -> false
   | CODE_ACTIONS _ -> false
   | OUTLINE _ -> false
   | IDE_IDLE -> false
@@ -85,6 +88,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | CLOSE_FILE _ -> false
   | EDIT_FILE _ -> false
   | FUN_DEPS_BATCH _ -> false
+  | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
@@ -96,6 +100,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | PAUSE false -> true
   | GLOBAL_INFERENCE _ -> true
   | VERBOSE _ -> false
+  | DEPS_IN_BATCH _ -> true
 
 let command_needs_full_check = function
   | Rpc (_metadata, x) -> rpc_command_needs_full_check x
@@ -252,7 +257,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     let hulk_lite_ran =
       Typing_service_delegate.did_run env.typing_service.delegate_state
     in
-    if genv.local_config.ServerLocalConfig.hulk_lite && hulk_lite_ran then (
+    let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
+    if HulkStrategy.is_hulk_lite mode && hulk_lite_ran then (
       Hh_logger.log
         "Killing hh_server since hulk lite hh_servers can't be reused";
       exit 0

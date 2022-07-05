@@ -5,12 +5,16 @@
 
 #![cfg(test)]
 
-use crate::{FacebookInit, TestContext};
+use crate::FacebookInit;
+use crate::TestContext;
 use anyhow::Result;
 use maplit::btreemap;
-use pos::{Prefix, RelativePath, TypeName};
+use pos::Prefix;
+use pos::RelativePath;
+use pos::TypeName;
 use std::fs;
-use ty::{decl::shallow, decl_error::DeclError};
+use ty::decl::shallow;
+use ty::decl_error::DeclError;
 
 #[fbinit::test]
 fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {
@@ -24,16 +28,10 @@ fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {
     let (a, b) = (TypeName::new(r#"\A"#), TypeName::new(r#"\B"#));
     // To declare B, we'll first declare A. During the declaring of A, the
     // dependency on B will be noted as a cycle in A's errors.
-    ctx.provider_backend
-        .folded_decl_provider
-        .get_class(b.into(), b)?;
+    ctx.folded_decl_provider.get_class(b.into(), b)?;
     // Since we already declared A incidentally above, this next line will
     // simply pull it from cache.
-    let decl = ctx
-        .provider_backend
-        .folded_decl_provider
-        .get_class(a.into(), a)?
-        .unwrap();
+    let decl = ctx.folded_decl_provider.get_class(a.into(), a)?.unwrap();
     // Now check that A has recorded the cyclic class error as we predict.
     match decl.decl_errors.first().unwrap() {
         DeclError::CyclicClassDef(_, ts) => {
@@ -65,11 +63,7 @@ fn results_stable(fb: FacebookInit) -> Result<()> {
             TypeName::new(r#"\C"#),
             TypeName::new(r#"\D"#),
         );
-        let decl = ctx
-            .provider_backend
-            .folded_decl_provider
-            .get_class(d.into(), d)?
-            .unwrap();
+        let decl = ctx.folded_decl_provider.get_class(d.into(), d)?.unwrap();
         itertools::assert_equal(decl.ancestors.keys().copied(), [a, b, c].into_iter())
     }
 
@@ -97,7 +91,6 @@ fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
 
     // check we can decl parse 'd.php'
     for decl in ctx
-        .provider_backend
         .decl_parser
         .parse(RelativePath::new(Prefix::Root, "d.php"))?
     {
@@ -114,11 +107,7 @@ fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
 
     // try getting a folded decl for 'D'
     use hackrs::folded_decl_provider::Error;
-    match ctx
-        .provider_backend
-        .folded_decl_provider
-        .get_class(d.into(), d)
-    {
+    match ctx.folded_decl_provider.get_class(d.into(), d) {
         Err(
             ref err @ Error::Parent {
                 ref class,

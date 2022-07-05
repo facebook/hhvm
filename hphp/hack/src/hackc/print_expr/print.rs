@@ -3,32 +3,46 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    context::Context,
-    write::{self, Error},
-};
-use bstr::{BString, ByteSlice};
+use crate::context::Context;
+use crate::write::Error;
+use crate::write::{self};
+use bstr::BString;
+use bstr::ByteSlice;
 use core_utils_rust::add_ns;
 use error::ErrorKind;
-use hhbc::{hhas_body::HhasBodyEnv, ClassName};
-use hhbc_string_utils::{
-    integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
-    strip_global_ns, strip_ns, types,
-};
+use hhbc::ClassName;
+use hhbc_string_utils::integer;
+use hhbc_string_utils::is_class;
+use hhbc_string_utils::is_parent;
+use hhbc_string_utils::is_self;
+use hhbc_string_utils::is_static;
+use hhbc_string_utils::is_xhp;
+use hhbc_string_utils::lstrip;
+use hhbc_string_utils::lstrip_bslice;
+use hhbc_string_utils::mangle;
+use hhbc_string_utils::strip_global_ns;
+use hhbc_string_utils::strip_ns;
+use hhbc_string_utils::types;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
-use oxidized::{
-    ast,
-    ast_defs::{self, ParamKind},
-    local_id,
-};
+use oxidized::ast;
+use oxidized::ast_defs::ParamKind;
+use oxidized::ast_defs::{self};
+use oxidized::local_id;
 use regex::Regex;
-use std::{
-    borrow::Cow,
-    io::{Result, Write},
-    write,
-};
+use std::borrow::Cow;
+use std::io::Result;
+use std::io::Write;
+use std::write;
 use write_bytes::write_bytes;
+
+#[derive(Default, Debug, Clone, Eq, PartialEq)]
+#[repr(C)]
+pub struct HhasBodyEnv<'a> {
+    pub is_namespaced: bool,
+    pub class_info: Option<(hhbc::ClassishKind, &'a str)>,
+    pub parent_name: Option<&'a str>,
+}
 
 pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
@@ -678,7 +692,8 @@ fn print_xml(
     id: &str,
     es: &[ast::Expr],
 ) -> Result<()> {
-    use ast::{Expr, Expr_};
+    use ast::Expr;
+    use ast::Expr_;
 
     fn syntax_error() -> Error {
         Error::NotImpl(String::from("print_xml: unexpected syntax"))

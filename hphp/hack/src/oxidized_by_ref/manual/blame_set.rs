@@ -5,12 +5,15 @@
 
 use std::cmp::Ordering;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
 
-use crate::{local_id::LocalId, typing_reason::Blame};
+use crate::local_id::LocalId;
+use crate::typing_reason::Blame;
 
 #[derive(
     Clone,

@@ -2,13 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::{
-    cell::Cell,
-    fmt::Debug,
-    io::{self, Result, Write},
-};
+use std::cell::Cell;
+use std::fmt::Debug;
+use std::io::Result;
+use std::io::Write;
+use std::io::{self};
 use thiserror::Error;
-use write_bytes::{BytesFormatter, DisplayBytes};
+use write_bytes::BytesFormatter;
+use write_bytes::DisplayBytes;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -255,7 +256,8 @@ where
 #[test]
 fn test_fmt_separated() -> Result<()> {
     use bstr::BStr;
-    use write_bytes::{format_bytes, write_bytes};
+    use write_bytes::format_bytes;
+    use write_bytes::write_bytes;
 
     let v: Vec<&str> = vec!["a", "b"];
     assert_eq!(

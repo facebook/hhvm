@@ -24,10 +24,12 @@ use std::borrow::Borrow;
 use std::fmt::Debug;
 
 use bumpalo::Bump;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use arena_trait::TrivialDrop;
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 
 /// Perform a linear search for the last entry in the slice with the given key.
 #[inline(always)]

@@ -21,7 +21,6 @@ open String_utils
 module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
-module GEnv = Naming_global.GEnv
 
 (*****************************************************************************)
 (* The types *)
@@ -402,7 +401,7 @@ and hint_
     N.Haccess ((pos, root_ty), ids)
   | Aast.Hrefinement (subject, members) ->
     let subject = hint env subject in
-    let member (Aast.TypeRef (ident, ref)) =
+    let member (Aast.Rtype (ident, ref)) =
       let ref =
         match ref with
         | Aast.Texact h -> N.Texact (hint env h)
@@ -413,7 +412,7 @@ and hint_
               N.tr_upper = List.map tr_upper ~f:(hint env);
             }
       in
-      N.TypeRef (ident, ref)
+      N.Rtype (ident, ref)
     in
     N.Hrefinement (subject, List.map members ~f:member)
   | Aast.Hshape { Aast.nsi_allows_unknown_fields; nsi_field_map } ->
@@ -1152,33 +1151,6 @@ and type_paraml ?(forbid_this = false) env tparams =
   every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
 *)
 and type_param ~forbid_this genv t =
-  begin
-    if
-    TypecheckerOptions.experimental_feature_enabled
-      (Provider_context.get_tcopt genv.ctx)
-      TypecheckerOptions.experimental_type_param_shadowing
-   then
-      (* Treat type params as inline class declarations that don't go into the naming heap *)
-      let (pos, name) =
-        NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
-      in
-      match Naming_provider.get_type_pos genv.ctx name with
-      | Some def_pos ->
-        let (def_pos, _) = GEnv.get_type_full_pos genv.ctx (def_pos, name) in
-        Errors.add_naming_error
-        @@ Naming_error.Error_name_already_bound
-             { pos; name; prev_name = name; prev_pos = def_pos }
-      | None ->
-        (match Naming_provider.get_type_canon_name genv.ctx name with
-        | Some canonical ->
-          let def_pos =
-            Option.value ~default:Pos.none (GEnv.type_pos genv.ctx canonical)
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { pos; name; prev_name = canonical; prev_pos = def_pos }
-        | None -> ())
-  end;
   let hk_types_enabled =
     TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
   in
@@ -1410,6 +1382,7 @@ and class_const env ~in_enum_class cc =
     N.cc_id = cc.Aast.cc_id;
     N.cc_kind = kind;
     N.cc_doc_comment = cc.Aast.cc_doc_comment;
+    N.cc_span = cc.Aast.cc_span;
     N.cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
   }
 
@@ -2530,10 +2503,9 @@ let program ctx ast =
       top_level_env := genv;
       acc
     | Aast.Module md -> N.Module (module_ ctx md) :: acc
+    | Aast.SetModule sm -> N.SetModule sm :: acc
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
-    | Aast.SetModule _
-    | Aast.FileAttributes _ ->
-      acc
+    | Aast.FileAttributes _ -> acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in

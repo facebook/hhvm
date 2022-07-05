@@ -880,6 +880,29 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     store(env, acls, env.global.unit.cns(value));
     break;
   }
+  case EndInlining:
+    if (RO::EvalHHIRInliningAssertMemoryEffects) {
+      assertx(inst.src(0)->inst()->is(BeginInlining));
+      auto const fp = inst.src(0);
+      auto const callee = fp->inst()->extra<BeginInlining>()->func;
+
+      auto const assertDead = [&] (AliasClass acls, const char* what) {
+        auto const canon = canonicalize(acls);
+        auto const mustBeDead = env.global.ainfo.expand(canon);
+        always_assert_flog(
+          (env.state.avail & mustBeDead).none(),
+          "Detected that {} locations were still live after accounting for all "
+          "effects at an EndInlining position\n    Locations: {}\n",
+          what,
+          show(mustBeDead)
+        );
+      };
+
+      // Assert that all of the locals and iterators for this frame as well as
+      // the ActRec itself and the minstr state have been marked dead.
+      for_each_frame_location(fp, callee, assertDead);
+    }
+    break;
   default:
     assert_mem(env, inst);
     break;

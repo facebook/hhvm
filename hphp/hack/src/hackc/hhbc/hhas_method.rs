@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_attribute::HhasAttribute, hhas_body::HhasBody, hhas_coeffects::HhasCoeffects,
-    hhas_pos::HhasSpan, hhbc_ast::Visibility, MethodName,
-};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_body::HhasBody;
+use crate::hhas_coeffects::HhasCoeffects;
+use crate::hhas_pos::HhasSpan;
+use crate::hhbc_ast::Visibility;
+use crate::MethodName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 

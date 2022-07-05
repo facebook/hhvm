@@ -17,6 +17,6 @@ class C {
   public static function bar(): void {}
 }
 
-class D extends C {
+final class D extends C {
   use T;
 }

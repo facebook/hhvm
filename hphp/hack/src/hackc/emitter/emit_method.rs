@@ -2,25 +2,35 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_body, emit_fatal, emit_memoize_helpers, emit_native_opcode};
-use ast_scope::{Lambda, Scope, ScopeItem};
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_fatal;
+use crate::emit_memoize_helpers;
+use crate::emit_native_opcode;
+use ast_scope::Lambda;
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use env::emitter::Emitter;
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use ffi::Slice;
-use hhbc::{
-    hhas_attribute::{self, HhasAttribute},
-    hhas_coeffects::HhasCoeffects,
-    hhas_method::{HhasMethod, HhasMethodFlags},
-    hhas_pos::HhasSpan,
-    Visibility,
-};
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_attribute::{self};
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_method::HhasMethod;
+use hhbc::hhas_method::HhasMethodFlags;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
-use naming_special_names_rust::{classes, user_attributes};
+use naming_special_names_rust::classes;
+use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options};
-use oxidized::{ast, ast_defs};
+use options::HhvmFlags;
+use options::Options;
+use oxidized::ast;
+use oxidized::ast_defs;
 use std::borrow::Cow;
 
 pub fn from_asts<'a, 'arena, 'decl>(

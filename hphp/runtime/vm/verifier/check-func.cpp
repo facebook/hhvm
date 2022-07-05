@@ -21,10 +21,11 @@
 #include "hphp/runtime/vm/verifier/pretty.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/vanilla-dict.h"
+
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -252,8 +253,8 @@ bool mayTakeExnEdges(Op op) {
   switch (op) {
     case Op::AssertRATL:
     case Op::AssertRATStk:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::Fatal:
     case Op::IterFree:
     case Op::LIterFree:
@@ -432,8 +433,8 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
     auto const targets = instrJumpTargets(bc, offset(branch));
     for (auto const& target : targets) {
       ok &= checkOffset("branch target", target, "primary body", base, past);
-      if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
-        error("JmpNS may not have zero offset in %s\n", "primary body");
+      if (peek_op(branch) == Op::Enter && target == offset(branch)) {
+        error("Enter may not have zero offset in %s\n", "primary body");
         ok = false;
       }
     }
@@ -462,19 +463,11 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC /*pc*/, Id id) {
-  if (!isUnitId(id)) {
-    return LitstrTable::get().contains(id);
-  }
-  auto unitID = decodeUnitId(id);
-  return unitID < unit()->numLitstrs();
+  return id < unit()->numLitstrs();
 }
 
 bool FuncChecker::checkArray(PC /*pc*/, Id id) {
-  if (!isUnitId(id)) {
-    return LitarrayTable::get().contains(id);
-  }
-  auto unitID = decodeUnitId(id);
-  return unitID < unit()->numArrays();
+  return id < unit()->numArrays();
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -1165,15 +1158,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        if (!LitstrTable::canRead()) {
-          // Unfortunately in order to check if the property name itself is
-          // valid we need to be able to read from the Litstr table, which we
-          // cannot do while verifying an optimized repo in hhbbc.
-          if (!checkString(pc, getImm(pc, 0).u_SA)) return false;
-          break;
-        }
-        auto const prop = m_func->ue().lookupLitstr(getImm(pc, 0).u_SA);
-        if (!m_func->pce() || !m_func->pce()->hasProp(prop)){
+        auto const prop = m_func->ue().lookupLitstrCopy(getImm(pc, 0).u_SA);
+        if (!m_func->pce() || !m_func->pce()->hasProp(prop.get())){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
              return false;
@@ -1240,10 +1226,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
                 #name, #name); \
         return false; \
       } \
-      if (!LitarrayTable::canRead()) { \
-        break; \
-      } \
-      auto const dt = unit()->lookupArray(id)->toDataType(); \
+      auto const dt = unit()->lookupArrayCopy(id)->toDataType(); \
       if (dt != KindOf##name) { \
         ferror("{} references array data that is a {}\n", #name, dt); \
         return false; \
@@ -1427,11 +1410,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
             return false;
           }
-          if (!LitarrayTable::canRead()) {
-            break;
-          }
-          auto const arr = unit()->lookupArray(id);
-          if (doesTypeStructureContainTUnresolved(arr)) {
+          auto const arr = unit()->lookupArrayCopy(id);
+          if (doesTypeStructureContainTUnresolved(arr.get())) {
             ferror("Generics passed to {} contain unresolved generics. "
                    "Call CombineAndResolveTypeStruct to resolve them\n",
                    opcodeToName(op));
@@ -1459,7 +1439,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
+    case Op::VerifyImplicitContextState:
+      if (!m_func->isMemoizeWrapper && !m_func->isMemoizeWrapperLSB) {
+        ferror("VerifyImplicitContextState can only be used in memoize wrappers\n");
+        return false;
+      }
+      break;
     default:
       break;
   }
@@ -1814,13 +1799,18 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
   }
 
-  for (int i = 0; i < b->succ_count; i++) {
-    auto const t = b->succs[i];
-    if (t && offset(t->start) == 0) {
+  if (peek_op(b->last) == OpEnter) {
+    assertx(b->succ_count == 1);
+    auto const t = b->succs[0];
+    if (offset(t->start) != 0) {
+      error("Enter target offset %d must point to the entry block\n",
+            offset(t->start));
+      ok = false;
+    } else {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
-        error("%s: Control flow cycles from the entry-block "
-              "to itself are not allowed\n", opcodeToName(peek_op(b->last)));
+        error("DV initializer at B%d can't be reachable from the entry block\n",
+              b->id);
         ok = false;
       }
     }

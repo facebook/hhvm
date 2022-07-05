@@ -7,28 +7,32 @@
 mod decl_mode_smart_constructors_generated;
 
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    source_text::SourceText,
-    syntax::{SyntaxTypeBase, SyntaxValueType},
-    syntax_by_ref::{has_arena::HasArena, syntax::Syntax, syntax_variant_generated::SyntaxVariant},
-    syntax_type::SyntaxType,
-    token_factory::TokenFactory,
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-};
-use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxTypeBase;
+use parser_core_types::syntax::SyntaxValueType;
+use parser_core_types::syntax_by_ref::has_arena::HasArena;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_type::SyntaxType;
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use syntax_smart_constructors::StateType;
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
-pub struct State<'src, 'arena, S> {
-    arena: &'arena Bump,
-    source: SourceText<'src>,
+pub struct State<'s, 'a, S> {
+    arena: &'a Bump,
+    source: SourceText<'s>,
     stack: Vec<bool>,
     phantom_s: std::marker::PhantomData<*const S>,
 }
 
-impl<'src, 'arena, S> State<'src, 'arena, S> {
-    fn new(source: &SourceText<'src>, arena: &'arena Bump) -> Self {
+impl<'s, 'a, S> State<'s, 'a, S> {
+    fn new(source: &SourceText<'s>, arena: &'a Bump) -> Self {
         Self {
             arena,
             source: source.clone(),
@@ -81,24 +85,22 @@ impl<S> StateType<S> for State<'_, '_, S> {
     }
 }
 
-impl<'arena, S> HasArena<'arena> for State<'_, 'arena, S> {
-    fn get_arena(&self) -> &'arena Bump {
+impl<'a, S> HasArena<'a> for State<'_, 'a, S> {
+    fn get_arena(&self) -> &'a Bump {
         self.arena
     }
 }
 
 pub use crate::decl_mode_smart_constructors_generated::*;
 
-pub struct DeclModeSmartConstructors<'src, 'arena, S, T, V, TF> {
-    pub state: State<'src, 'arena, S>,
+pub struct DeclModeSmartConstructors<'s, 'a, S, T, V, TF> {
+    pub state: State<'s, 'a, S>,
     pub token_factory: TF,
     phantom_value: std::marker::PhantomData<(V, T)>,
 }
 
-impl<'src, 'arena, T, V, TF>
-    DeclModeSmartConstructors<'src, 'arena, Syntax<'arena, T, V>, T, V, TF>
-{
-    pub fn new(src: &SourceText<'src>, token_factory: TF, arena: &'arena Bump) -> Self {
+impl<'s, 'a, T, V, TF> DeclModeSmartConstructors<'s, 'a, Syntax<'a, T, V>, T, V, TF> {
+    pub fn new(src: &SourceText<'s>, token_factory: TF, arena: &'a Bump) -> Self {
         Self {
             state: State::new(src, arena),
             token_factory,
@@ -107,7 +109,7 @@ impl<'src, 'arena, T, V, TF>
     }
 }
 
-impl<'src, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'src, '_, S, T, V, TF> {
+impl<'s, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'s, '_, S, T, V, TF> {
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
@@ -117,18 +119,18 @@ impl<'src, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'src, '_, S, 
     }
 }
 
-type SyntaxToken<'src, 'arena, T, V> =
-    <Syntax<'arena, T, V> as SyntaxTypeBase<State<'src, 'arena, Syntax<'arena, T, V>>>>::Token;
+type SyntaxToken<'s, 'a, T, V> =
+    <Syntax<'a, T, V> as SyntaxTypeBase<State<'s, 'a, Syntax<'a, T, V>>>>::Token;
 
-impl<'src, 'arena, T, V, TF>
-    SyntaxSmartConstructors<Syntax<'arena, T, V>, TF, State<'src, 'arena, Syntax<'arena, T, V>>>
-    for DeclModeSmartConstructors<'src, 'arena, Syntax<'arena, T, V>, T, V, TF>
+impl<'s, 'a, T, V, TF>
+    SyntaxSmartConstructors<Syntax<'a, T, V>, TF, State<'s, 'a, Syntax<'a, T, V>>>
+    for DeclModeSmartConstructors<'s, 'a, Syntax<'a, T, V>, T, V, TF>
 where
-    TF: TokenFactory<Token = SyntaxToken<'src, 'arena, T, V>>,
+    TF: TokenFactory<Token = SyntaxToken<'s, 'a, T, V>>,
 
     T: LexableToken + Copy,
     V: SyntaxValueType<T> + Clone,
-    Syntax<'arena, T, V>: SyntaxType<State<'src, 'arena, Syntax<'arena, T, V>>>,
+    Syntax<'a, T, V>: SyntaxType<State<'s, 'a, Syntax<'a, T, V>>>,
 {
     fn make_yield_expression(&mut self, _r1: Self::Output, _r2: Self::Output) -> Self::Output {
         self.state.pop_n(2);
@@ -224,16 +226,16 @@ where
     }
 }
 
-fn replace_body<'src, 'arena, T, V, TF>(
+fn replace_body<'s, 'a, T, V, TF>(
     token_factory: &mut TF,
-    st: &mut State<'src, 'arena, Syntax<'arena, T, V>>,
-    body: Syntax<'arena, T, V>,
+    st: &mut State<'s, 'a, Syntax<'a, T, V>>,
+    body: Syntax<'a, T, V>,
     saw_yield: bool,
-) -> Syntax<'arena, T, V>
+) -> Syntax<'a, T, V>
 where
     T: LexableToken + Copy,
     V: SyntaxValueType<T> + Clone,
-    TF: TokenFactory<Token = SyntaxToken<'src, 'arena, T, V>>,
+    TF: TokenFactory<Token = SyntaxToken<'s, 'a, T, V>>,
 {
     match body.children {
         SyntaxVariant::CompoundStatement(children) => {

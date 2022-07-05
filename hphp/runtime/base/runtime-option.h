@@ -144,6 +144,7 @@ struct RepoOptionsFlags {
     #undef H
     #undef E
     sd(m_sha1);
+    sd(m_repo);
   }
 
   template <typename SerDe>
@@ -152,6 +153,8 @@ struct RepoOptionsFlags {
     sd(f);
     return f;
   }
+
+  const boost::filesystem::path& repoRoot() const { return m_repo; }
 
 private:
   RepoOptionsFlags() = default;
@@ -168,6 +171,7 @@ private:
   #undef E
 
   SHA1 m_sha1;
+  boost::filesystem::path m_repo;
 
   friend struct RepoOptions;
 };
@@ -184,6 +188,8 @@ struct RepoOptions {
   std::string toJSON() const;
   const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   const struct stat& stat() const { return m_stat; }
+
+  const boost::filesystem::path& dir() const { return m_flags.repoRoot(); }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -248,7 +254,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static Optional<folly::fs::path> GetHomePath(
+  static Optional<boost::filesystem::path> GetHomePath(
     const folly::StringPiece user);
 
   static std::string GetDefaultUser();
@@ -259,7 +265,7 @@ struct RuntimeOption {
    *
    * Return true on success and false on failure.
    */
-  static bool ReadPerUserSettings(const folly::fs::path& confFileName,
+  static bool ReadPerUserSettings(const boost::filesystem::path& confFileName,
                                   IniSettingMap& ini, Hdf& config);
 
   static std::string getTraceOutputFile();
@@ -514,6 +520,7 @@ struct RuntimeOption {
 
   static bool AutoloadEnabled;
   static std::string AutoloadDBPath;
+  static bool AutoloadDBCanCreate;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;
@@ -749,6 +756,7 @@ struct RuntimeOption {
   F(bool, EnableFuncCoverage,          false)                           \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
+  F(bool, EnableExternFacts,           true)                            \
   /* Whether to log extern compiler performance */                      \
   F(bool, LogExternCompilerPerf,       false)                           \
   /* Whether to write verbose log messages to the error log and include
@@ -819,7 +827,6 @@ struct RuntimeOption {
    * 2 - Do not do implicit coercion
    */                                                                   \
   F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
-  F(bool, EnableImplicitContext,       true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, TranslateHackC,              false)                           \
@@ -928,9 +935,9 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
   F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
   F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 10500)                         \
-  F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
-  F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
+  F(uint32_t, HHIRInliningVasmCostLimit, 80000)                         \
+  F(uint32_t, HHIRInliningMinVasmCostLimit, 6500)                       \
+  F(uint32_t, HHIRInliningMaxVasmCostLimit, 30000)                      \
   F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
   F(uint32_t, HHIRInliningMaxDepth,    5)                               \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
@@ -942,6 +949,7 @@ struct RuntimeOption {
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, false)                        \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
+  F(bool,     HHIRInliningAssertMemoryEffects, true)                    \
   F(bool, HHIRAlwaysInterpIgnoreHint,  !debug)                          \
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
@@ -1167,7 +1175,9 @@ struct RuntimeOption {
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
-  F(int64_t, ObjProfMaxNesting, 5000)                                   \
+  F(int64_t, ObjProfMaxNesting, 2500)                                   \
+  /* Should we use type structures? */                                  \
+  F(bool, EmitBespokeTypeStructures, false)                             \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \

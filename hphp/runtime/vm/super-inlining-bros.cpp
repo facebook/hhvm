@@ -294,7 +294,6 @@ private:
     check(Attr::IsWeakRefed, "IsWeakRefed");
     check(Attr::HasDynPropArr, "HasDynPropArr");
     check(Attr::UsedMemoCache, "UsedMemoCache");
-    check(Attr::HasUninitProps, "HasUninitProps");
     if (error.size()) {
       throw ScanException(folly::sformat(
           "Unhandled object due to attribute(s) ({})", error));
@@ -1194,7 +1193,6 @@ bool mayReadOrWriteGlobals(Op op) {
       return true;
 
     case Op::Nop:
-    case Op::EntryNop:
     case Op::BreakTraceHint:
     case Op::PopC:
     case Op::PopU:
@@ -1272,8 +1270,8 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::ThrowAsTypeStructException:
     case Op::CombineAndResolveTypeStruct:
     case Op::Select:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::JmpZ:
     case Op::JmpNZ:
     case Op::Switch:
@@ -1339,6 +1337,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::CheckThis:
     case Op::ChainFaults:
     case Op::OODeclExists:
+    case Op::VerifyImplicitContextState:
     case Op::VerifyOutType:
     case Op::VerifyParamType:
     case Op::VerifyParamTypeTS:

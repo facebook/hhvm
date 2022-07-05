@@ -116,6 +116,11 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
   | Terr -> ((env, None), TUtils.terr env r)
+  | Trefinement _ ->
+    (* TODO(type-refinements) Expand to a class and apply localized
+       refinements; raising an error for the unsupported DTloose _
+       case *)
+    ((env, None), TUtils.terr env r)
   | Tany _ -> ((env, None), mk (r, TUtils.tany env))
   | Tvar _var ->
     let (env, tv) = Env.new_global_tyvar env r in
@@ -438,7 +443,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
         ~f:(localize ~ety_env:{ ety_env with expand_visible_newtype = true })
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    (env, mk (r, Tclass (sid, Nonexact, tyl)))
+    (env, mk (r, Tclass (sid, nonexact, tyl)))
   | Some class_info ->
     if Option.is_some (Cls.enum_type class_info) then
       let (ety_env, has_cycle) =
@@ -463,7 +468,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
            * the enum set and the type of elements, so the enum class
            * itself is seen as a Tclass
            *)
-          ((env, None), mk (r, Tclass (sid, Nonexact, [])))
+          ((env, None), mk (r, Tclass (sid, nonexact, [])))
         else
           let (env, cstr) =
             match Env.get_enum_constraint env name with
@@ -500,7 +505,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
             tyargs
             nkinds
       in
-      (env, mk (r, Tclass (sid, Nonexact, tyl)))
+      (env, mk (r, Tclass (sid, nonexact, tyl)))
 
 and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
     =
@@ -548,7 +553,7 @@ and localize_with_kind
           in
           if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
           then
-            ((env, None), mk (r, Tclass (id, Nonexact, [])))
+            ((env, None), mk (r, Tclass (id, nonexact, [])))
           else
             ((env, None), mk (Reason.none, Terr))
         | Some (Env.TypedefResult typedef) ->
@@ -916,7 +921,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
         in
         ((env, i + 1), ty))
   in
-  let c_ty = mk (r, Tclass (sid, Nonexact, tyl)) in
+  let c_ty = mk (r, Tclass (sid, nonexact, tyl)) in
   let ety_env =
     {
       empty_expand_env with

@@ -61,10 +61,8 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   RuntimeOption::RepoAuthoritative = true;
   RuntimeOption::EvalLowStaticArrays = false; // save some low mem
 
-  LitstrTable::init();
-  LitarrayTable::init();
   if (hasRepo) {
-    RepoFile::loadGlobalTables(false);
+    RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
 
@@ -74,6 +72,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                   "systemlib.php",
                                   Native::s_systemNativeFuncs,
+                                  nullptr,
                                   RepoOptions::defaults());
     addUnit(phpUnit);
   }
@@ -81,6 +80,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
                                    "systemlib.hhas",
                                    Native::s_systemNativeFuncs,
+                                   nullptr,
                                    RepoOptions::defaults());
     addUnit(hhasUnit);
   }

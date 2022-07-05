@@ -3,16 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    positioned_trivia::PositionedTrivium,
-    syntax_by_ref::{
-        positioned_token::PositionedToken, positioned_value::PositionedValue, syntax::Syntax,
-        syntax_variant_generated::SyntaxVariant,
-    },
-    syntax_kind::SyntaxKind,
-};
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::Allocator;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::positioned_trivia::PositionedTrivium;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_kind::SyntaxKind;
 
 pub struct WithContext<'a, T: ?Sized> {
     pub t: &'a T,

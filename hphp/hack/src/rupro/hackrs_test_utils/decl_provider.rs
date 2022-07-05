@@ -7,13 +7,13 @@ use crate::registrar::DependencyGraph;
 use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
 use datastore::NonEvictingStore;
-use hackrs::{
-    decl_parser::DeclParser,
-    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    shallow_decl_provider::{
-        EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclProvider, ShallowDeclStore,
-    },
-};
+use hackrs::decl_parser::DeclParser;
+use hackrs::folded_decl_provider::FoldedDeclProvider;
+use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
+use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
+use hackrs::shallow_decl_provider::LazyShallowDeclProvider;
+use hackrs::shallow_decl_provider::ShallowDeclProvider;
+use hackrs::shallow_decl_provider::ShallowDeclStore;
 use naming_provider::SqliteNamingTable;
 use std::path::PathBuf;
 use std::sync::Arc;

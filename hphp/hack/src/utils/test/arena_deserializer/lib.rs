@@ -7,7 +7,8 @@
 
 use arena_deserializer::*;
 use bumpalo::Bump;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 fn round_trip<'a, X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug>(x: X, arena: &'a Bump) {
     let se = serde_json::to_string(&x).unwrap();

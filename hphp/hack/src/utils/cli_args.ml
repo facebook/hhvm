@@ -101,7 +101,7 @@ let saved_state_json_descr =
 Saved state JSON looks like this:
 {
   "state": <saved state filename>,
-  "corresponding_base_revision" : <global rev #>,
+  "corresponding_base_revision" : <Mercurial commit hash>,
   "deptable": <dependency table filename>,
   "changes": [array of files changed since that saved state]
 }
@@ -112,7 +112,7 @@ For example:
   "state": "/home/unixname/saved-states/ss1",
   "changes": [],
   "prechecked_changes": [],
-  "corresponding_base_revision": "-1"
+  "corresponding_base_revision": "bab0de0041defb4d7a5d520d224aa4922ed04d37"
 }
 
 You can put this saved state JSON into a file and pass this JSON as the argument:
@@ -128,7 +128,7 @@ Alternatively, you can pass this JSON as the argument, with the saved state JSON
     "state": "/home/unixname/saved-states/ss1",
     "changes": [],
     "prechecked_changes": [],
-    "corresponding_base_revision": "-1"
+    "corresponding_base_revision": "bab0de0041defb4d7a5d520d224aa4922ed04d37"
   }
 }
 |}

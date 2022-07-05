@@ -96,6 +96,24 @@ let patches_to_json_string patches =
 
 let print_patches_json patches = print_endline (patches_to_json_string patches)
 
+let go_sound_dynamic
+    (conn : unit -> ClientConnect.conn Lwt.t)
+    (args : client_check_env)
+    (mode : string)
+    (name : string) =
+  let command =
+    match mode with
+    | "Class" -> ServerRefactorTypes.ClassRename (name, "")
+    | "Function" ->
+      let filename = None in
+      let definition = None in
+      ServerRefactorTypes.FunctionRename
+        { filename; definition; old_name = name; new_name = "" }
+    | _ -> failwith "Unexpected Mode"
+  in
+  ClientConnect.rpc_with_retry conn ~desc:args.desc
+  @@ ServerCommandTypes.REFACTOR_CHECK_SD command
+
 let go_ide
     (conn : unit -> ClientConnect.conn Lwt.t)
     ~(desc : string)

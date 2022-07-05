@@ -306,6 +306,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         ServerRefactor.go ctx refactor_action genv env)
+  | REFACTOR_CHECK_SD refactor_action ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    ServerRefactor.go_sound_dynamic ctx refactor_action genv env
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in
@@ -399,35 +402,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ~column:pos.File_content.column)
     in
     (env, results)
-  | IDE_FFP_AUTOCOMPLETE (path, pos) ->
-    let pos = pos |> Ide_api_types.ide_pos_to_fc in
-    let contents =
-      ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
-    in
-    let offset = File_content.get_offset contents pos in
-    (* will raise if out of bounds *)
-    let char_at_pos = File_content.get_char contents offset in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix path)
-        ~contents
-    in
-    let result =
-      FfpAutocompleteService.auto_complete
-        ctx
-        entry
-        pos
-        ~filter_by_token:false
-        ~sienv:env.ServerEnv.local_symbol_table
-    in
-    ( env,
-      {
-        AutocompleteTypes.completions = result;
-        char_at_pos;
-        is_complete = true;
-      } )
   | CODE_ACTIONS (path, range) ->
     let (ctx, entry) = single_ctx_path env path in
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
@@ -465,6 +439,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (* TODO(bobren) remove dir entirely from saved state job invocation *)
     let _ = dir in
     (env, ServerGenPrefetchDir.go env genv genv.workers)
+  | GEN_REMOTE_DECLS_FULL ->
+    (env, ServerGenRemoteDecls.go env genv genv.workers ~incremental:false)
+  | GEN_REMOTE_DECLS_INCREMENTAL ->
+    (env, ServerGenRemoteDecls.go env genv genv.workers ~incremental:true)
+  | GEN_SHALLOW_DECLS_DIR dir ->
+    (env, ServerGenShallowDeclsToDir.go env genv genv.workers dir)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
@@ -519,3 +499,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (* We are getting files in the reverse order*)
     let files = List.rev files in
     (env, ServerGlobalInference.execute ctx submode files)
+  | DEPS_OUT_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerDepsOutBatch.go ctx positions)
+  | DEPS_IN_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)

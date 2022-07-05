@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use im::{HashMap, HashSet};
+use im::HashMap;
+use im::HashSet;
 use pos::Pos;
 use pos::TypeName;
 use std::ops::Deref;
 use ty::local::Kind;
-use ty::local::{Ty, Ty_};
+use ty::local::Ty;
+use ty::local::Ty_;
 use ty::reason::Reason;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

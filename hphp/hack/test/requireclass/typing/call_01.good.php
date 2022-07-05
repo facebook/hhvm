@@ -12,7 +12,7 @@ trait T {
   public function foo(): void { $this->bar(); }
 }
 
-class C {
+final class C {
   use T;
 
   public function bar(): void { }

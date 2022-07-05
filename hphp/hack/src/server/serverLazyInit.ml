@@ -1167,10 +1167,9 @@ let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
-  let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
+  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
   let env =
-    if hulk_lite || hulk_heavy then
+    if HulkStrategy.is_hulk_v2 mode then
       ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
     else
       env
@@ -1222,7 +1221,7 @@ let full_init
   in
   let fnl = Relative_path.Map.keys defs_per_file in
   let env =
-    if is_check_mode && (not hulk_lite) && not hulk_heavy then
+    if is_check_mode && not (HulkStrategy.is_hulk_v2 mode) then
       ServerCheckUtils.start_delegate_if_needed
         env
         genv

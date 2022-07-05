@@ -29,7 +29,6 @@ namespace taint {
 using jit::TCA;
 
 void iopNop();
-void iopEntryNop();
 void iopBreakTraceHint();
 void iopPopC();
 void iopPopU();
@@ -113,8 +112,8 @@ void iopPrint();
 void iopClone();
 void iopExit();
 void iopFatal(FatalOp kind_char);
+void iopEnter(PC& pc, PC targetpc);
 void iopJmp(PC& pc, PC targetpc);
-void iopJmpNS(PC& pc, PC targetpc);
 void iopJmpZ(PC& pc, PC targetpc);
 void iopJmpNZ(PC& pc, PC targetpc);
 void iopSwitch(
@@ -250,6 +249,7 @@ void iopBareThis(BareThisOp bto);
 void iopCheckThis();
 void iopChainFaults();
 void iopOODeclExists(OODeclExistsOp subop);
+void iopVerifyImplicitContextState();
 void iopVerifyOutType(uint32_t paramId);
 void iopVerifyParamType(local_var param);
 void iopVerifyParamTypeTS(local_var param);

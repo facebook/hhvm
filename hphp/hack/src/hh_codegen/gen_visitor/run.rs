@@ -3,16 +3,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{
-    context::Context, generator::Generator, node_impl_generator::*, node_trait_generator::*,
-    type_params_generator::*, visitor_trait_generator::*,
-};
+use super::context::Context;
+use super::generator::Generator;
+use super::node_impl_generator::*;
+use super::node_trait_generator::*;
+use super::type_params_generator::*;
+use super::visitor_trait_generator::*;
 use anyhow::Result;
-use std::{
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

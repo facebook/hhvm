@@ -201,6 +201,7 @@ let log_telemetry
   | (Some (Ok start_cgroup), Ok cgroup) ->
     let total_hwm = max (max start_cgroup.total cgroup.total) total_hwm in
     let secs_above_total_gb_summary = secs_above_gb_summary secs_at_total_gb in
+    let sysinfo = Sys_utils.sysinfo () in
     telemetry_ref :=
       Telemetry.create ()
       |> SMap.fold
@@ -214,6 +215,15 @@ let log_telemetry
       |> Telemetry.int_opt
            ~key:"relative_to_initial"
            ~value:(Option.some_if initial_opt initial.total)
+      |> Telemetry.int_opt
+           ~key:"sysinfo_freeram"
+           ~value:(Option.map sysinfo ~f:(fun si -> si.Sys_utils.freeram))
+      |> Telemetry.int_opt
+           ~key:"sysinfo_freeswap"
+           ~value:(Option.map sysinfo ~f:(fun si -> si.Sys_utils.freeswap))
+      |> Telemetry.int_opt
+           ~key:"sysinfo_totalswap"
+           ~value:(Option.map sysinfo ~f:(fun si -> si.Sys_utils.totalswap))
       |> Option.some;
     HackEventLogger.CGroup.step
       ~cgroup:cgroup.cgroup_name

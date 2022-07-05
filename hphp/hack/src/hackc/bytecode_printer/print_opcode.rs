@@ -6,16 +6,51 @@
 use crate::print;
 use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, Dummy,
-    FCallArgs, FatalOp, FloatBits, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
-    IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodName,
-    NumParams, OODeclExistsOp, ObjMethodOp, Opcode, PropName, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
-};
+use hhbc::AdataId;
+use hhbc::BareThisOp;
+use hhbc::ClassName;
+use hhbc::ClassNum;
+use hhbc::CollectionType;
+use hhbc::ConstName;
+use hhbc::ContCheckOp;
+use hhbc::Dummy;
+use hhbc::FCallArgs;
+use hhbc::FatalOp;
+use hhbc::FloatBits;
+use hhbc::FunctionName;
+use hhbc::IncDecOp;
+use hhbc::InitPropOp;
+use hhbc::IsLogAsDynamicCallOp;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::MethodName;
+use hhbc::NumParams;
+use hhbc::OODeclExistsOp;
+use hhbc::ObjMethodOp;
+use hhbc::Opcode;
+use hhbc::PropName;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetOpOp;
+use hhbc::SetRangeOp;
+use hhbc::SilenceOp;
+use hhbc::SpecialClsRef;
+use hhbc::StackIndex;
+use hhbc::SwitchKind;
+use hhbc::TypeStructResolveOp;
 use hhbc_string_utils::float;
-use print_opcode::{PrintOpcode, PrintOpcodeTypes};
-use std::io::{Error, ErrorKind, Result, Write};
+use print_opcode::PrintOpcode;
+use print_opcode::PrintOpcodeTypes;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::io::Result;
+use std::io::Write;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]

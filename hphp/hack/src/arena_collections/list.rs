@@ -5,10 +5,13 @@
 
 use std::fmt::Debug;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use arena_trait::{Arena, TrivialDrop};
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use arena_trait::Arena;
+use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
 
 #[derive(
     Deserialize,

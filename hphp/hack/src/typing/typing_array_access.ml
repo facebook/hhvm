@@ -295,6 +295,19 @@ let pessimised_vec_dict_assign p env vec_ty arg_ty =
   let (env, ty) = pessimised_tup_assign p env arg_ty in
   Typing_union.union env vec_ty ty
 
+(* Typing of array-get like expressions; [ty1] is the type of the expression
+   into which we are indexing (the 'collection'), [e2] is the index expression
+   and [ty2] is the type of that expression.
+
+   We return:
+   1) the (modified) typing environment,
+   2) the type of the resulting expression (i.e. the type of the element we are 'getting')
+   3) the actual and expected type of the indexed expression, indicating a type mismatch (if any)
+   4) the actual and expected type of the indexing expression, indicating a type mismatch (if any)
+   and an optional type mismatch giving the actual vs expected type of the
+
+   The function has an error side-effect
+*)
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -489,7 +502,7 @@ let rec array_get
         if is_lvalue then
           let (env, ty1) = error_const_mutation env expr_pos ty1 in
           let ty_nothing = Typing_make_type.nothing Reason.none in
-          (env, (ty1, Ok ty2, Error (ty1, ty_nothing)))
+          (env, (ty1, Error (ty1, ty_nothing), Ok ty2))
         else
           let (_k, (env, v)) =
             match argl with
@@ -547,8 +560,8 @@ let rec array_get
         in
         Option.iter ~f:Errors.add_typing_error idx_ty_err_opt;
         let idx_err_res = mk_ty_mismatch_res ty2 tv idx_ty_err_opt in
-        (env, (ty1, idx_err_res, dflt_arr_res))
-      | Tdynamic -> (env, (ty1, Ok ty2, dflt_arr_res))
+        (env, (ty1, dflt_arr_res, idx_err_res))
+      | Tdynamic -> (env, (ty1, dflt_arr_res, Ok ty2))
       | Tany _ -> (env, (TUtils.mk_tany env expr_pos, dflt_arr_res, Ok ty2))
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
@@ -827,7 +840,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
       List.map_env env tyl ~f:(fun env _ty ->
           Env.fresh_type_invariant env expr_pos)
     in
-    let ty = mk (r, Tclass (id, Nonexact, params)) in
+    let ty = mk (r, Tclass (id, nonexact, params)) in
     ((env, None), Some ty)
   | _ -> ((env, None), None)
 
@@ -996,7 +1009,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
       List.map_env env tyl ~f:(fun env _ty ->
           Env.fresh_type_invariant env expr_pos)
     in
-    let ty = mk (r, Tclass (id, Nonexact, params)) in
+    let ty = mk (r, Tclass (id, nonexact, params)) in
     ((env, None), Some ty)
   | (r, Ttuple tyl) ->
     (* requires integer literal *)

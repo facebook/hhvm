@@ -4,23 +4,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bumpalo::Bump;
-
 use ast_and_decl_parser::Env;
-use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
+use bumpalo::Bump;
+use ocamlrep::bytes_from_ocamlrep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_caml_builtins::Int64;
+use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
-use oxidized_by_ref::{
-    decl_parser_options::DeclParserOptions,
-    direct_decl_parser::{Decls, ParsedFile, ParsedFileWithHashes},
-};
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 
-ocaml_ffi_with_arena! {
+ocaml_ffi_arena_result! {
     fn hh_parse_decls_ffi<'a>(
         arena: &'a Bump,
-        opts: &'a DeclParserOptions<'a>,
-        filename: &'a oxidized_by_ref::relative_path::RelativePath<'a>,
+        opts: DeclParserOptions,
+        filename: RelativePath,
         text: UnsafeOcamlPtr,
     ) -> ParsedFile<'a> {
         // SAFETY: Borrow the contents of the source file from the value on the
@@ -28,13 +30,13 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena)
+        direct_decl_parser::parse_decls(&opts, filename, text, arena)
     }
 
     fn hh_parse_and_hash_decls_ffi<'a>(
         arena: &'a Bump,
-        opts: &'a DeclParserOptions<'a>,
-        filename: &'a oxidized_by_ref::relative_path::RelativePath<'a>,
+        opts: DeclParserOptions,
+        filename: RelativePath,
         text: UnsafeOcamlPtr,
     ) -> ParsedFileWithHashes<'a> {
         // SAFETY: Borrow the contents of the source file from the value on the
@@ -42,9 +44,11 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls(opts, filename.to_oxidized(), text, arena).into()
+        direct_decl_parser::parse_decls(&opts, filename, text, arena).into()
     }
+}
 
+ocaml_ffi_with_arena! {
     fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
         Int64(hh_hash::position_insensitive_hash(&decls) as i64)
     }

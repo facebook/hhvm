@@ -129,6 +129,8 @@ let test_process_file_deferring () =
 
   true
 
+let expected_decling_count = 65
+
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
@@ -146,7 +148,6 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
 
-  let expected_decling_count = 65 in
   Asserter.Int_asserter.assert_equals
     expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")
@@ -156,7 +157,11 @@ let test_compute_tast_counting () =
     (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
     "There should be 0 disk_cat_count for shared_mem provider";
 
-  (* Now try the same with local_memory backend *)
+  true
+
+(* This test verifies that the deferral/counting machinery works for
+   ProviderUtils.compute_tast_and_errors_unquarantined, this time with local memory backend. *)
+let test_compute_tast_counting_local_mem () =
   Utils.with_context
     ~enter:(fun () ->
       Provider_backend.set_local_memory_backend_with_defaults_for_test ())
@@ -164,15 +169,14 @@ let test_compute_tast_counting () =
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())
     ~do_:(fun () ->
-      let ctx =
-        Provider_context.empty_for_tool
-          ~popt:ParserOptions.default
-          ~tcopt:TypecheckerOptions.default
-          ~backend:(Provider_backend.get ())
-          ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      let { Common_setup.ctx; foo_path; foo_contents; _ } =
+        Common_setup.setup ~sqlite:false tcopt_with_defer ~xhp_as:`Namespaces
       in
       let (ctx, entry) =
-        Provider_context.add_entry_if_missing ~ctx ~path:foo_path
+        Provider_context.add_or_overwrite_entry_contents
+          ~ctx
+          ~path:foo_path
+          ~contents:foo_contents
       in
       let { Tast_provider.Compute_tast_and_errors.telemetry; _ } =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
@@ -300,6 +304,8 @@ let tests =
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);
+    ( "test_compute_tast_counting_local_mem",
+      test_compute_tast_counting_local_mem );
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
     ("test_quarantine", test_quarantine);

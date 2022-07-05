@@ -1,0 +1,12 @@
+File "req_extends_xhp.php", line 6, characters 23-23:
+A name is expected here. (Parsing[1002])
+File "req_extends_xhp.php", line 6, characters 13-22:
+Some type arguments violate their constraints (Typing[4323])
+  File "req_extends_xhp.php", line 3, characters 10-10:
+  `T` is a constrained type parameter
+  File "req_extends_xhp.php", line 3, characters 15-17:
+  This type constraint is violated
+  File "req_extends_xhp.php", line 3, characters 15-17:
+  Expected `int`
+  File "req_extends_xhp.php", line 6, characters 16-21:
+  But got `string`

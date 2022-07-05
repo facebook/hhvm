@@ -1,7 +1,7 @@
 === Shape analysis results for await2.php
 Summary for \f:
-#{} [3:47-49] : shape()
-#{} [6:11-13] :
+[3:47-49] : shape()
+[6:11-13] :
   shape(
     k => int
   )

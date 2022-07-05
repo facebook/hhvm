@@ -110,6 +110,7 @@ module type Syntax_S = sig
     | AliasDeclaration of {
         alias_attribute_spec: t;
         alias_modifiers: t;
+        alias_module_kw_opt: t;
         alias_keyword: t;
         alias_name: t;
         alias_generic_parameter: t;
@@ -1108,7 +1109,8 @@ module type Syntax_S = sig
 
   val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
 
-  val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_alias_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_context_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
 

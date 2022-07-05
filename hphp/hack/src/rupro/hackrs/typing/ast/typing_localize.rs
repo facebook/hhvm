@@ -6,11 +6,17 @@ use crate::tast;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
-use crate::typing_decl_provider::{Class, TypeDecl};
+use crate::typing_decl_provider::Class;
+use crate::typing_decl_provider::TypeDecl;
 use oxidized::typing_defs_flags::FunTypeFlags;
-use pos::{Positioned, SymbolMap, TypeName};
+use pos::Positioned;
+use pos::SymbolMap;
+use pos::TypeName;
 use ty::decl;
-use ty::local::{self, Exact, FunParam, FunType};
+use ty::local::Exact;
+use ty::local::FunParam;
+use ty::local::FunType;
+use ty::local::{self};
 use ty::reason::Reason;
 
 /// Localization environment, controlling localization.

@@ -1,7 +1,7 @@
 <?hh
 
-class C extends B implements I, j {
+class C extends b implements i, j {
 }
 
-interface P extends K, l {
+interface P extends K, L {
 }

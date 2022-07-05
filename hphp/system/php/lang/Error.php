@@ -14,19 +14,22 @@ class Error implements Throwable {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
-  public function __construct($message = '', $code = 0,
-                              Throwable $previous = null)[] {
+  public function __construct(
+    mixed $message = '',
+    mixed $code = 0,
+    ?Throwable $previous = null,
+  )[] {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.
     // In this case we should not override it from the param.
 
     if ($message !== '' || $this->message === '') {
-      $this->message = $message;
+      $this->message = HH\FIXME\UNSAFE_CAST<mixed, string>($message);
     }
 
     if ($code !== 0 || $this->code === 0) {
-      $this->code = $code;
+      $this->code = HH\FIXME\UNSAFE_CAST<mixed, int>($code);
     }
 
     $this->previous = $previous;

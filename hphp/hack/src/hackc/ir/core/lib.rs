@@ -40,25 +40,53 @@ pub mod type_const;
 pub mod types;
 pub mod unit;
 
-pub use self::{
-    block::Block,
-    class::Class,
-    coeffects::{Coeffects, CtxConstant},
-    common::{Attr, Attribute, TypedValue},
-    func::{
-        ExFrameId, Func, Function, FunctionName, Method, MethodName, Param, TryCatchId, Visibility,
-    },
-    func_builder::FuncBuilder,
-    instr::{Call, HasEdges, Instr, LocalId, Predicate, SrcLoc, UnnamedLocalId},
-    literal::{HackConstant, Literal},
-    module::Module,
-    newtype::{
-        BlockId, BlockIdMap, BlockIdSet, ClassId, ConstId, FullInstrId, FunctionId, InstrId,
-        InstrIdMap, InstrIdSet, LiteralId, LocId, MethodId, PropId, ValueId, ValueIdMap,
-        ValueIdSet,
-    },
-    string_intern::{StringInterner, UnitStringId},
-    type_const::TypeConstant,
-    types::Type,
-    unit::{FatalOp, Unit},
-};
+pub use self::block::Block;
+pub use self::class::Class;
+pub use self::coeffects::Coeffects;
+pub use self::coeffects::CtxConstant;
+pub use self::common::Attr;
+pub use self::common::Attribute;
+pub use self::common::TypedValue;
+pub use self::func::ExFrameId;
+pub use self::func::Func;
+pub use self::func::Function;
+pub use self::func::FunctionName;
+pub use self::func::Method;
+pub use self::func::MethodName;
+pub use self::func::Param;
+pub use self::func::TryCatchId;
+pub use self::func::Visibility;
+pub use self::func_builder::FuncBuilder;
+pub use self::instr::Call;
+pub use self::instr::HasEdges;
+pub use self::instr::Instr;
+pub use self::instr::LocalId;
+pub use self::instr::Predicate;
+pub use self::instr::SrcLoc;
+pub use self::instr::UnnamedLocalId;
+pub use self::literal::HackConstant;
+pub use self::literal::Literal;
+pub use self::module::Module;
+pub use self::newtype::BlockId;
+pub use self::newtype::BlockIdMap;
+pub use self::newtype::BlockIdSet;
+pub use self::newtype::ClassId;
+pub use self::newtype::ConstId;
+pub use self::newtype::FullInstrId;
+pub use self::newtype::FunctionId;
+pub use self::newtype::InstrId;
+pub use self::newtype::InstrIdMap;
+pub use self::newtype::InstrIdSet;
+pub use self::newtype::LiteralId;
+pub use self::newtype::LocId;
+pub use self::newtype::MethodId;
+pub use self::newtype::PropId;
+pub use self::newtype::ValueId;
+pub use self::newtype::ValueIdMap;
+pub use self::newtype::ValueIdSet;
+pub use self::string_intern::StringInterner;
+pub use self::string_intern::UnitStringId;
+pub use self::type_const::TypeConstant;
+pub use self::types::Type;
+pub use self::unit::FatalOp;
+pub use self::unit::Unit;

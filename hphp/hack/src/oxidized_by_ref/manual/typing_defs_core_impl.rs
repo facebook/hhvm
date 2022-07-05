@@ -6,7 +6,8 @@
 use std::cmp::Ordering;
 
 use crate::aast_defs::Tprim;
-use crate::ast_defs::{Id, ParamKind};
+use crate::ast_defs::Id;
+use crate::ast_defs::ParamKind;
 use crate::ident::Ident;
 use crate::pos::Pos;
 use crate::typing_defs_core::*;
@@ -125,6 +126,7 @@ impl std::fmt::Debug for Ty_<'_> {
         match self {
             Tthis => write!(f, "Tthis"),
             Tapply((id, tys)) => f.debug_tuple("Tapply").field(id).field(tys).finish(),
+            Trefinement((ty, rs)) => f.debug_tuple("Trefinement").field(ty).field(rs).finish(),
             Taccess(taccess) => f.debug_tuple("Taccess").field(taccess).finish(),
             Tmixed => write!(f, "Tmixed"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),

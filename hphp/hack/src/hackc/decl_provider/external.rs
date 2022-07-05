@@ -3,11 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{DeclProvider, Error, Result};
+use crate::DeclProvider;
+use crate::Error;
+use crate::Result;
 use arena_deserializer::serde::Deserialize;
-use libc::{c_char, c_int};
+use libc::c_char;
+use libc::c_int;
+use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::file_info::NameType;
-use oxidized_by_ref::{direct_decl_parser, shallow_decl_defs::Decl};
+use oxidized_by_ref::shallow_decl_defs::Decl;
 use std::ffi::c_void;
 
 /**
@@ -75,6 +79,7 @@ pub type ProviderFunc<'decl> = unsafe extern "C" fn(
     // The symbol & len
     *const c_char,
     usize,
+    u64, // the depth
 ) -> ExternalDeclProviderResult<'decl>;
 
 #[derive(Debug)]
@@ -85,7 +90,7 @@ pub struct ExternalDeclProvider<'decl> {
 }
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
-    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
+    fn decl(&self, kind: NameType, symbol: &str, depth: u64) -> Result<Decl<'decl>> {
         // Need to convert NameType into HPHP::AutoloadMap::KindOf.
         if kind == NameType::Module {
             // TODO(T108206307, T111380364) During decls-in-compilation, we should actively panic
@@ -100,7 +105,7 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         let code: i32 = name_type_to_autoload_kind(kind);
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
-            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len())
+            (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len(), depth)
         };
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),

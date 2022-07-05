@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -174,6 +175,11 @@ bool ArrayLayout::is_struct() const {
   return index && bespoke::StructLayout::IsStructLayout(*index);
 }
 
+bool ArrayLayout::is_type_structure() const {
+  auto const index = layoutIndex();
+  return index && *index == bespoke::TypeStructure::GetLayoutIndex();
+}
+
 bool ArrayLayout::is_concrete() const {
   auto const layout = bespokeLayout();
   return layout && layout->isConcrete();
@@ -320,6 +326,9 @@ void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
     case bespoke::LocationType::APCKey:
       write_raw(ser, key.ak);
       break;
+    case bespoke::LocationType::TypeAlias:
+      write_typealias(ser, key.ta);
+      break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:
     case bespoke::LocationType::TypeConstant:
@@ -342,6 +351,9 @@ LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
       break;
     case bespoke::LocationType::APCKey:
       read_raw(des, key.ak);
+      break;
+    case bespoke::LocationType::TypeAlias:
+      key.ta = read_typealias(des);
       break;
     case bespoke::LocationType::InstanceProperty:
     case bespoke::LocationType::StaticProperty:

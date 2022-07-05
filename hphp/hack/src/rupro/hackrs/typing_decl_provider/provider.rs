@@ -3,15 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
-use crate::folded_decl_provider::{self, FoldedDeclProvider};
+use super::ClassType;
+use super::Result;
+use super::TypeDecl;
+use super::TypingDeclProvider;
+use crate::folded_decl_provider::FoldedDeclProvider;
+use crate::folded_decl_provider::{self};
 use datastore::LocalStore;
 use depgraph_api::DeclName;
-use pos::{ConstName, FunName, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::TypeName;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{ConstDecl, FunDecl};
+use ty::decl::ConstDecl;
+use ty::decl::FunDecl;
 use ty::reason::Reason;
 
 /// An implementation of TypingDeclProvider designed after the hh_server

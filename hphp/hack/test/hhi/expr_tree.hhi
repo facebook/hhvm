@@ -3,8 +3,8 @@
 /**
  * An example DSL for testing expression trees (ETs).
  *
- * Any class can be used an an expression tree visitor. It needs to implement 
- * the methods shown here, and expression tree literals MyClass`...` will be 
+ * Any class can be used an an expression tree visitor. It needs to implement
+ * the methods shown here, and expression tree literals MyClass`...` will be
  * converted (at compile time) to calls on these methods.
  *
  * This .hhi file is only used when testing the type checker. Otherwise
@@ -185,14 +185,6 @@ class ExampleDsl {
     string $_,
     dict<string, ExampleDsl::TAst> $_,
     vec<ExampleDsl::TAst> $_,
-  ): ExampleDsl::TAst {
-    throw new Exception();
-  }
-
-  public function visitInstanceMethod(
-    ?ExprPos $_,
-    ExampleDsl::TAst $_obj,
-    string $_method_name,
   ): ExampleDsl::TAst {
     throw new Exception();
   }

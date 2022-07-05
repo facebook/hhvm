@@ -4,20 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(allocator_api)]
 
-use ocaml_blob::{HeapValue, SerializedValue};
-use ocamlrep::{ptr::UnsafeOcamlPtr, Value};
+use ocaml_blob::HeapValue;
+use ocaml_blob::SerializedValue;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::Value;
 use ocamlrep_ocamlpool::catch_unwind;
-use once_cell::unsync::OnceCell;
-use shmrs::chashmap::{MINIMUM_EVICTABLE_BYTES_PER_SHARD, NUM_SHARDS};
-use shmrs::segment::{ShmemTableSegment, ShmemTableSegmentRef};
+use once_cell::sync::OnceCell;
+use shmrs::chashmap::MINIMUM_EVICTABLE_BYTES_PER_SHARD;
+use shmrs::chashmap::NUM_SHARDS;
+use shmrs::segment::ShmemTableSegment;
+use shmrs::segment::ShmemTableSegmentRef;
+use std::alloc::Layout;
 use std::convert::TryInto;
 
-thread_local! {
-    static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
-}
+static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
 
 fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
-    SEGMENT.with(|cell| f(cell.get().unwrap()))
+    f(SEGMENT.get().unwrap())
 }
 
 #[no_mangle]
@@ -37,20 +40,22 @@ pub extern "C" fn shmffi_init(
         max_evictable_bytes,
     ) as libc::size_t;
     catch_unwind(|| {
-        SEGMENT.with(move |cell| {
-            assert!(cell.get().is_none());
-            cell.get_or_init(move ||
-            // Safety:
-            //  - We are the only one initializing!
-            unsafe {
-                ShmemTableSegment::initialize(
-                    mmap_address,
-                    file_size,
-                    max_evictable_bytes / NUM_SHARDS,
-                )
-            });
-        });
-
+        if SEGMENT
+            .set(
+                // Safety:
+                //  - We are the only one initializing!
+                unsafe {
+                    ShmemTableSegment::initialize(
+                        mmap_address,
+                        file_size,
+                        max_evictable_bytes / NUM_SHARDS,
+                    )
+                },
+            )
+            .is_err()
+        {
+            panic!("Unexpected prior value in SEGMENT");
+        }
         0
     });
 }
@@ -58,16 +63,16 @@ pub extern "C" fn shmffi_init(
 #[no_mangle]
 pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc::size_t) {
     catch_unwind(|| {
-        SEGMENT.with(move |cell| {
-            assert!(cell.get().is_none());
-            cell.get_or_init(move ||
-            // Safety:
-            //  - Should be already initialized by the master process.
-            unsafe {
-                ShmemTableSegment::attach(mmap_address, file_size)
-            });
-        });
-
+        if SEGMENT
+            .set(
+                // Safety:
+                //  - Should be already initialized by the master process.
+                unsafe { ShmemTableSegment::attach(mmap_address, file_size) },
+            )
+            .is_err()
+        {
+            panic!("Unexpected prior value in SEGMENT");
+        }
         0
     });
 }
@@ -83,12 +88,11 @@ pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
         let did_insert = with(|segment| {
             segment.table.insert(
                 hash,
-                Some(compressed.layout_for_buffer()),
+                Some(Layout::from_size_align(compressed.as_slice().len(), 1).unwrap()),
                 evictable,
                 |buffer| compressed.to_heap_value_in(evictable, buffer),
             )
         });
-        compressed.free();
 
         // TODO(hverr): We don't have access to "total_size" (which includes
         // alignment overhead), remove the third field.
@@ -167,14 +171,21 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
 #[no_mangle]
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|segment| {
-        let (serialized_value, evictable) = segment.table.inspect_and_remove(&hash1, |value| {
-            SerializedValue::from_heap_value(value.unwrap())
+        let (header, data) = segment.table.inspect_and_remove(&hash1, |value| {
+            let value = value.unwrap();
+            (value.header, <Box<[u8]>>::from(value.as_slice()))
         });
         segment.table.insert(
             hash2,
-            Some(serialized_value.layout_for_buffer()),
-            evictable,
-            |buffer| serialized_value.to_heap_value_in(evictable, buffer),
+            Some(Layout::from_size_align(data.len(), 1).unwrap()),
+            header.is_evictable(),
+            |buffer| {
+                buffer.copy_from_slice(&data);
+                HeapValue {
+                    header,
+                    data: std::ptr::NonNull::new(buffer.as_mut_ptr()).unwrap(),
+                }
+            },
         );
     });
 }

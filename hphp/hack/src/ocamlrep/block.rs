@@ -4,11 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::HashMap;
-use std::fmt::{self, Debug};
+use std::fmt::Debug;
+use std::fmt::{self};
 use std::marker::PhantomData;
 use std::ops::Index;
 
-use crate::{Allocator, OpaqueValue, Value};
+use crate::Allocator;
+use crate::OpaqueValue;
+use crate::Value;
 
 /// Blocks with tags greater than or equal to NO_SCAN_TAG contain binary data,
 /// and are not scanned by the garbage collector. Likewise, we must avoid

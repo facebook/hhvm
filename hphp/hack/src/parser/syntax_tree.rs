@@ -5,10 +5,11 @@
 
 use oxidized::file_info::Mode;
 
-use crate::{
-    lexable_token::LexableToken, source_text::SourceText, syntax_by_ref::syntax::Syntax,
-    syntax_error::SyntaxError, syntax_trait::SyntaxTrait,
-};
+use crate::lexable_token::LexableToken;
+use crate::source_text::SourceText;
+use crate::syntax_by_ref::syntax::Syntax;
+use crate::syntax_error::SyntaxError;
+use crate::syntax_trait::SyntaxTrait;
 use std::borrow::Borrow;
 
 pub struct SyntaxTree<'a, Syntax, State> {

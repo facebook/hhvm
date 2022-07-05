@@ -622,3 +622,15 @@ let rpc_with_retry
       let%lwt conn = conn_f () in
       let%lwt (result, _telemetry) = rpc conn ~desc cmd in
       Lwt.return result)
+
+let rpc_with_retry_list
+    (conn_f : unit -> conn Lwt.t)
+    ~(desc : string)
+    (cmd : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t) :
+    'a list Lwt.t =
+  let call_here s =
+    ServerCommandTypes.Done_or_retry.call ~f:(fun () -> Lwt.return s)
+  in
+  let%lwt conn = conn_f () in
+  let%lwt (job_list, _) = rpc conn ~desc cmd in
+  List.map job_list ~f:call_here |> Lwt.all

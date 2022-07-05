@@ -2,28 +2,41 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use aast_parser::{rust_aast_parser_types::Env, Error as AastError};
+use aast_parser::rust_aast_parser_types::Env;
+use aast_parser::Error as AastError;
 use ocamlrep::rc::RcOc;
 use once_cell::sync::OnceCell;
-use oxidized::{
-    ast::{self, Def, Pos, Program},
-    errors,
-    parser_options::ParserOptions,
-    relative_path::{Prefix, RelativePath},
-};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::SyntaxError,
-};
-use proc_macro2::{Span, TokenStream};
-use quote::{quote, quote_spanned, ToTokens};
-use regex::{Match, Regex};
+use oxidized::ast::Def;
+use oxidized::ast::Pos;
+use oxidized::ast::Program;
+use oxidized::ast::{self};
+use oxidized::errors;
+use oxidized::parser_options::ParserOptions;
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::SyntaxError;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::quote_spanned;
+use quote::ToTokens;
+use regex::Match;
+use regex::Regex;
 use std::collections::HashMap;
-use syn::{
-    parse::{ParseStream, Parser},
-    punctuated::Punctuated,
-    spanned::Spanned,
-    Error, Expr, ExprLit, Ident, Lit, LitStr, Result, Token,
-};
+use syn::parse::ParseStream;
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
+use syn::Error;
+use syn::Expr;
+use syn::ExprLit;
+use syn::Ident;
+use syn::Lit;
+use syn::LitStr;
+use syn::Result;
+use syn::Token;
 
 /// A macro to build Hack Expr trees.
 ///
@@ -632,10 +645,14 @@ fn convert_lowpri_error(
 mod emit {
     // This section is more focused on `ast` than `syn` - so don't import too
     // much conflicting stuff from syn.
-    use super::{ReplVar, VarOp};
+    use super::ReplVar;
+    use super::VarOp;
     use oxidized::ast;
-    use proc_macro2::{Span, TokenStream};
-    use quote::{quote, quote_spanned, ToTokens};
+    use proc_macro2::Span;
+    use proc_macro2::TokenStream;
+    use quote::quote;
+    use quote::quote_spanned;
+    use quote::ToTokens;
     use std::collections::HashMap;
     use syn::Result;
 

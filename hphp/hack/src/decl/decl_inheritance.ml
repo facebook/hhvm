@@ -12,22 +12,12 @@ open Decl_defs
 open Decl_subst
 open Shallow_decl_defs
 open Typing_defs
+open Typing_class_types
 module DTT = Decl_to_typing
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
-type inherited_members = {
-  consts: class_const LSTable.t;
-  typeconsts: typeconst_type LSTable.t;
-  props: class_elt LSTable.t;
-  sprops: class_elt LSTable.t;
-  methods: class_elt LSTable.t;
-  smethods: class_elt LSTable.t;
-  all_inherited_methods: class_elt list LSTable.t;
-  all_inherited_smethods: class_elt list LSTable.t;
-  typeconst_enforceability: (Pos_or_decl.t * bool) LSTable.t;
-  construct: (class_elt option * consistent_kind) Lazy.t;
-}
+type inherited_members = Typing_class_types.inherited_members
 
 (** Are we targeting a particular member or all members. Different sequences
     will be generated depending on the [target] *)

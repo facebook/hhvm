@@ -371,6 +371,10 @@ function run_hhvm(OptionMap $opts): void {
   } else {
     $cmd = "$pfx $hhvm $flags --file $filename";
   }
+  if ($opts->containsKey('gdb')) {
+    // Trick gdb into thinking gdb_stderr->isatty()
+    $cmd = "script -q --return -c \" $cmd \"";
+  }
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";
   } else {

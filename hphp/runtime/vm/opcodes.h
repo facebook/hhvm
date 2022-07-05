@@ -25,7 +25,6 @@ namespace HPHP {
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(Nop,             NA,               NOV,             NOV,        NF) \
-  O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
@@ -114,8 +113,8 @@ namespace HPHP {
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    TF) \
   O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        TF) \
+  O(Enter,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
-  O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
   O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \
@@ -249,6 +248,8 @@ namespace HPHP {
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyImplicitContextState,                                         \
+                     NA,               NOV,             NOV,        NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \

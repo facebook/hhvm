@@ -55,6 +55,10 @@ struct Package {
   // state is already cleared.
   Optional<std::thread> clearAsyncState();
 
+  const extern_worker::Client::Stats& stats() const {
+    return m_async->m_client.getStats();
+  }
+
   void addSourceFile(const std::string& fileName);
   void addInputList(const std::string& listFileName);
   void addStaticFile(const std::string& fileName);
@@ -66,10 +70,7 @@ struct Package {
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
   void resetAr() { m_ar.reset(); }
 
-  size_t getTotalParses() const { return m_total.load(); }
-  size_t getParseCacheHits() const { return m_cacheHits.load(); }
-  size_t getFileStores() const { return m_storedFiles.load(); }
-  size_t getFileReads() const { return m_readFiles.load(); }
+  size_t getTotalFiles() const { return m_total.load(); }
 
   const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
@@ -118,9 +119,6 @@ private:
 
   bool m_parseOnDemand;
 
-  std::atomic<size_t> m_cacheHits;
-  std::atomic<size_t> m_readFiles;
-  std::atomic<size_t> m_storedFiles;
   std::atomic<size_t> m_total;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;

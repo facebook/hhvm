@@ -4,20 +4,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::iter::{empty, once};
+use std::iter::empty;
+use std::iter::once;
 
-use super::{
-    has_arena::HasArena, syntax_children_iterator::SyntaxChildrenIterator,
-    syntax_variant_generated::SyntaxVariant,
-};
-use crate::{
-    lexable_token::LexableToken,
-    syntax::{SyntaxTypeBase, SyntaxValueType},
-    syntax_kind::SyntaxKind,
-    token_kind::TokenKind,
-};
+use super::has_arena::HasArena;
+use super::syntax_children_iterator::SyntaxChildrenIterator;
+use super::syntax_variant_generated::SyntaxVariant;
+use crate::lexable_token::LexableToken;
+use crate::syntax::SyntaxTypeBase;
+use crate::syntax::SyntaxValueType;
+use crate::syntax_kind::SyntaxKind;
+use crate::token_kind::TokenKind;
 use bumpalo::collections::Vec;
-use itertools::Either::{Left, Right};
+use itertools::Either::Left;
+use itertools::Either::Right;
 
 #[derive(Debug, Clone)]
 pub struct Syntax<'a, T, V> {

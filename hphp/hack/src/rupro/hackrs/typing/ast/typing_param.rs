@@ -9,7 +9,8 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
-use ty::local::{ParamMode, Ty};
+use ty::local::ParamMode;
+use ty::local::Ty;
 use ty::reason::Reason;
 use utils::core::LocalId;
 

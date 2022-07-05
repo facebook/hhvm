@@ -4,10 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 
 fn val<T: FromOcamlRep + ToOcamlRep>(value: T) -> usize {
     let arena = Box::leak(Box::new(ocamlrep::Arena::new()));

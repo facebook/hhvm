@@ -1,4 +1,4 @@
-File "newtype_internal_bad.php", line 7, characters 26-36:
+File "newtype_internal_bad.php--test.php", line 6, characters 26-36:
 You cannot use this type in a public declaration. (Typing[4446])
-  File "newtype_internal_bad.php", line 5, characters 16-26:
+  File "newtype_internal_bad.php--test.php", line 4, characters 16-26:
   It is declared as `internal` here

@@ -4,10 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{context::Context, gen_helper, generator::Generator};
-use crate::{common::*, impl_generator};
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use super::context::Context;
+use super::gen_helper;
+use super::generator::Generator;
+use crate::common::*;
+use crate::impl_generator;
+use proc_macro2::Ident;
+use proc_macro2::TokenStream;
+use quote::format_ident;
+use quote::quote;
 
 trait NodeTrait {
     fn filename() -> String;

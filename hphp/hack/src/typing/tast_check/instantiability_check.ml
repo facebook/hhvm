@@ -79,7 +79,7 @@ let rec check_hint env (pos, hint) =
     else
       List.iter tal ~f:(check_hint env)
   | Aast.Hrefinement (h, members) ->
-    let member (Aast.TypeRef (_, ref)) =
+    let member (Aast.Rtype (_, ref)) =
       match ref with
       | Aast.Texact h -> check_hint env h
       | Aast.Tloose { Aast.tr_lower; tr_upper } ->

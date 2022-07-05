@@ -10,5 +10,7 @@ mod coeffects_check;
 mod expression_tree_check;
 mod modules_check;
 mod readonly_check;
-pub use aast_parser::{AastParser, Error, Result};
+pub use aast_parser::AastParser;
+pub use aast_parser::Error;
+pub use aast_parser::Result;
 pub use rust_aast_parser_types;

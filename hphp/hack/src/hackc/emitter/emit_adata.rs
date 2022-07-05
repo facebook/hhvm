@@ -5,10 +5,14 @@
 
 use adata_state::AdataState;
 use env::emitter::Emitter;
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use ffi::Str;
-use hhbc::{hhas_adata::HhasAdata, ClassName, TypedValue};
-use instruction_sequence::{instr, InstrSeq};
+use hhbc::hhas_adata::HhasAdata;
+use hhbc::ClassName;
+use hhbc::TypedValue;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use options::HhvmFlags;
 
 pub fn typed_value_to_instr<'arena, 'decl>(

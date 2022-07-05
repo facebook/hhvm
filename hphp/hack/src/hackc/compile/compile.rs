@@ -5,31 +5,40 @@
 
 pub mod dump_expr_tree;
 
-use aast_parser::{
-    rust_aast_parser_types::{Env as AastEnv, ParserResult},
-    AastParser, Error as AastError,
-};
-use anyhow::{anyhow, Result};
+use aast_parser::rust_aast_parser_types::Env as AastEnv;
+use aast_parser::rust_aast_parser_types::ParserResult;
+use aast_parser::AastParser;
+use aast_parser::Error as AastError;
+use anyhow::anyhow;
+use anyhow::Result;
 use bitflags::bitflags;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
 use env::emitter::Emitter;
-use error::{Error, ErrorKind};
-use hhbc::{hackc_unit::HackCUnit, FatalOp};
+use error::Error;
+use error::ErrorKind;
+use hhbc::hackc_unit::HackCUnit;
+use hhbc::FatalOp;
 use hhvm_options::HhvmConfig;
 use ocamlrep::rc::RcOc;
-use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
-use oxidized::{
-    ast,
-    namespace_env::Env as NamespaceEnv,
-    parser_options::ParserOptions,
-    pos::Pos,
-    relative_path::{Prefix, RelativePath},
-};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
-};
+use options::Arg;
+use options::HackLang;
+use options::Hhvm;
+use options::HhvmFlags;
+use options::LangFlags;
+use options::Options;
+use options::Php7Flags;
+use options::RepoFlags;
+use oxidized::ast;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::parser_options::ParserOptions;
+use oxidized::pos::Pos;
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::ErrorType;
 use thiserror::Error;
 
 /// Common input needed for compilation.
@@ -84,7 +93,7 @@ bitflags! {
         // No longer using bit 9.
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
-        const ENABLE_IMPLICIT_CONTEXT=1 << 12;
+        // No longer using bit 12.
         const ARRAY_PROVENANCE=1 << 13;
         // No longer using bit 14.
         const FOLD_LAZY_CLASS_KEYS=1 << 15;
@@ -159,14 +168,6 @@ impl HHBCFlags {
         {
             hhbc_options |= Self::EMIT_METH_CALLER_FUNC_POINTERS;
         }
-        // ini just uses hhvm.enable_implicit_context
-        // hdf uses Eval.EnableImplicitContext
-        if let Some(true) = config.get_bool("Eval.EnableImplicitContext")? {
-            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
-        }
-        if let Some(true) = config.get_bool("enable_implicit_context")? {
-            hhbc_options |= Self::ENABLE_IMPLICIT_CONTEXT;
-        }
         // ini might use hhvm.array_provenance
         // hdf might use Eval.ArrayProvenance
         // But super unclear here
@@ -216,9 +217,6 @@ impl HHBCFlags {
         }
         if self.contains(Self::LOG_EXTERN_COMPILER_PERF) {
             f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
-        }
-        if self.contains(Self::ENABLE_IMPLICIT_CONTEXT) {
-            f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
         }
         f
     }
@@ -428,7 +426,7 @@ pub fn from_text<'decl>(
     source_text: SourceText<'_>,
     native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
-    mut profile: &mut Profile,
+    profile: &mut Profile,
 ) -> Result<()> {
     let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
     let unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;

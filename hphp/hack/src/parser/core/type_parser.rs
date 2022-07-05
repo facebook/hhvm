@@ -11,9 +11,12 @@ use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
 use crate::parser_trait::SeparatedListKind;
-use crate::smart_constructors::{NodeType, SmartConstructors, Token};
+use crate::smart_constructors::NodeType;
+use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::Token;
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_kind::TokenKind;
 
 #[derive(Clone)]

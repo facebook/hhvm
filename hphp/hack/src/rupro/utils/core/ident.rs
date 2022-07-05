@@ -2,8 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
-use serde::{Deserialize, Serialize};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
+use serde::Deserialize;
+use serde::Serialize;
 use std::cell::RefCell;
 use std::rc::Rc;
 

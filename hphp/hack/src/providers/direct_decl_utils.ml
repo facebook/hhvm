@@ -91,12 +91,12 @@ let cache_decls ctx file decls =
     |> Sequence.of_list
     |> dedup_decls
     |> remove_naming_conflict_losers ctx file
+    |> Sequence.to_list
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
-    Sequence.iter decls ~f:(function
+    List.iter decls ~f:(function
         | (name, Class decl) ->
           Shallow_classes_heap.Classes.add name decl;
           if
@@ -108,8 +108,10 @@ let cache_decls ctx file decls =
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
         | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl)
         | (name, Module decl) -> Decl_store.((get ()).add_module name decl))
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.add_shallow_decls backend decls
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
-    Sequence.iter decls ~f:(function
+    List.iter decls ~f:(function
         | (name, Class decl) ->
           let (_ : shallow_class option) =
             Provider_backend.Shallow_decl_cache.find_or_add
@@ -222,10 +224,20 @@ let direct_decl_parse ctx file =
     Some parsed_file
 
 let direct_decl_parse_and_cache ctx file =
-  let result = direct_decl_parse ctx file in
-  (match result with
-  | Some parsed_file -> cache_decls ctx file parsed_file.pfh_decls
-  | None -> ());
-  result
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend backend ->
+    Counters.count Counters.Category.Get_decl @@ fun () ->
+    get_file_contents ctx file
+    |> Option.map ~f:(fun contents ->
+           Rust_provider_backend.Decl.direct_decl_parse_and_cache
+             backend
+             file
+             contents)
+  | _ ->
+    let result = direct_decl_parse ctx file in
+    (match result with
+    | Some parsed_file -> cache_decls ctx file parsed_file.pfh_decls
+    | None -> ());
+    result
 
 let decls_to_fileinfo = Direct_decl_parser.decls_to_fileinfo

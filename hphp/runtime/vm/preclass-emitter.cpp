@@ -106,16 +106,6 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
   return true;
 }
 
-void PreClassEmitter::renameMethod(const StringData* oldName,
-                                   const StringData* newName) {
-  assertx(m_methodMap.count(oldName));
-  auto it = m_methodMap.find(oldName);
-  auto fe = it->second;
-  m_methodMap.erase(it);
-  fe->name = newName;
-  m_methodMap[newName] = fe;
-}
-
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* userType,
                                   const TypeConstraint& typeConstraint,
@@ -218,7 +208,7 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
 }
 
 const StaticString
-  s_nativedata("__nativedata"),
+  s_NativeData("__NativeData"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
   s_invoke("__invoke"),
   s_coeffectsProp("86coeffects");
@@ -278,7 +268,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     if (!m_userAttributes.size()) return;
 
     // Check for <<__NativeData("Type")>>.
-    auto it = m_userAttributes.find(s_nativedata.get());
+    auto it = m_userAttributes.find(s_NativeData.get());
     if (it == m_userAttributes.end()) return;
 
     TypedValue ndiInfo = it->second;

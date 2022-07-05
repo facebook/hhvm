@@ -3,14 +3,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{gen_helper, syn_helper::*};
-use anyhow::{anyhow, Result};
+use super::gen_helper;
+use super::syn_helper::*;
+use anyhow::anyhow;
+use anyhow::Result;
 use proc_macro2::TokenStream;
 use quote::format_ident;
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    path::Path,
-};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::collections::VecDeque;
+use std::path::Path;
 use syn::*;
 
 pub struct Context<'a> {

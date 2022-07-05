@@ -68,6 +68,7 @@ TRACE_SET_MOD(hhir);
 #define DLastKey          HasDest
 #define DLoggingArrLike   HasDest
 #define DStructDict    HasDest
+#define DTypeStructElem   HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -145,6 +146,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetLastElem
 #undef DLoggingArrLike
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DAllocObj
 #undef DMulti
@@ -381,6 +383,8 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseImplicitContextStateInvalidException:
+  case RaiseModuleBoundaryViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -492,6 +496,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case CallViolatesModuleBoundary:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
@@ -583,6 +588,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DefFuncPrologueNumArgs:
   case DefLabel:
   case DefRegSP:
+  case DeserializeLazyProp:
   case DictFirst:
   case DictFirstKey:
   case DictGetK:
@@ -772,6 +778,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:

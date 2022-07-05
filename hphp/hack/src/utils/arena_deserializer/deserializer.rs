@@ -4,11 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use serde::de::{
-    DeserializeSeed, Deserializer, EnumAccess, MapAccess, SeqAccess, VariantAccess, Visitor,
-};
+use serde::de::DeserializeSeed;
+use serde::de::Deserializer;
+use serde::de::EnumAccess;
+use serde::de::MapAccess;
+use serde::de::SeqAccess;
+use serde::de::VariantAccess;
+use serde::de::Visitor;
+use std::any;
+use std::fmt;
 use std::marker::PhantomData;
-use std::{any, fmt, mem};
+use std::mem;
 
 #[repr(C)]
 pub struct ArenaDeserializer<'arena, 'de, D> {

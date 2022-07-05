@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{func::HhasSpan, Attribute, ClassId};
+use crate::func::HhasSpan;
+use crate::Attribute;
+use crate::ClassId;
 
 pub struct Module<'a> {
     pub attributes: Vec<Attribute<'a>>,

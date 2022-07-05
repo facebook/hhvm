@@ -10,28 +10,30 @@ use crate::expression_tree_check;
 use crate::modules_check;
 use crate::readonly_check;
 use bumpalo::Bump;
-use lowerer::{lower, ScourComment};
-use mode_parser::{parse_mode, Language};
+use lowerer::lower;
+use lowerer::ScourComment;
+use mode_parser::parse_mode;
+use mode_parser::Language;
 use namespaces_rust as namespaces;
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use oxidized::{
-    aast::Program, file_info::Mode, namespace_env::Env as NamespaceEnv, pos::Pos,
-    scoured_comments::ScouredComments,
-};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    parser_env::ParserEnv,
-    source_text::SourceText,
-    syntax_by_ref::{
-        positioned_syntax::PositionedSyntax,
-        positioned_token::{PositionedToken, TokenFactory},
-        positioned_value::PositionedValue,
-    },
-    syntax_error::SyntaxError,
-    syntax_tree::SyntaxTree,
-};
-pub use rust_aast_parser_types::{Env, ParserResult};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use oxidized::aast::Program;
+use oxidized::file_info::Mode;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::pos::Pos;
+use oxidized::scoured_comments::ScouredComments;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_token::TokenFactory;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_tree::SyntaxTree;
+pub use rust_aast_parser_types::Env;
+pub use rust_aast_parser_types::ParserResult;
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
 use std::borrow::Borrow;

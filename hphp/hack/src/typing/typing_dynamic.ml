@@ -43,7 +43,10 @@ let is_dynamic_decl env ty =
 let check_property_sound_for_dynamic_read ~on_error env classname id ty =
   if not (Typing_utils.is_supportdyn env ty) then (
     let pos = get_pos ty in
-    Typing_log.log_pessimise_prop env pos (snd id);
+    Typing_log.log_pessimise_prop
+      env
+      (Pos_or_decl.unsafe_to_raw_pos pos)
+      (snd id);
     Some
       (on_error
          (fst id)
@@ -77,7 +80,10 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
            ty)
     then (
       let pos = get_pos decl_ty in
-      Typing_log.log_pessimise_prop env pos (snd id);
+      Typing_log.log_pessimise_prop
+        env
+        (Pos_or_decl.unsafe_to_raw_pos pos)
+        (snd id);
       Some
         (on_error
            (fst id)
@@ -137,14 +143,20 @@ let make_like env changed ty =
     let r = get_reason ty in
     (true, Typing_make_type.locl_like r ty)
 
-let maybe_wrap_with_supportdyn ~should_wrap r ty =
-  let locl_r = Typing_reason.localize r in
-  let ty = Tfun ty in
+let maybe_wrap_with_supportdyn ~should_wrap locl_r ft =
   if should_wrap then
-    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r) in
-    Typing_make_type.supportdyn r (mk (locl_r, ty))
+    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos locl_r) in
+    let ft =
+      {
+        ft with
+        ft_flags =
+          Typing_defs_flags.(
+            set_bit ft_flags_support_dynamic_type false ft.ft_flags);
+      }
+    in
+    Typing_make_type.supportdyn r (mk (locl_r, Tfun ft))
   else
-    mk (locl_r, ty)
+    mk (locl_r, Tfun ft)
 
 let push_like_tyargs env tyl tparams =
   if List.length tyl <> List.length tparams then
@@ -158,22 +170,30 @@ let push_like_tyargs env tyl tparams =
       | Ast_defs.Contravariant -> (changed, ty)
       | _ ->
         let (changed', ty') = make_like env changed ty in
-        (* Only push like onto type argument if it produces a well-formed type
-         * i.e. satisfies any as constraints
+        (* Push like onto type argument; if the resulting type is not a subtype of
+         * the the upper bound on the type parameter, then intersect it with the
+         * upper bonud so that the resulting type is well-formed.
+         * For example, dict<~string & arraykey,bool> <: ~dict<string,bool>
+         * because the first type parameter has an upper bound of arraykey.
          *)
-        if
-          List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
+        let upper_bounds =
+          List.filter_map tp.tp_constraints ~f:(fun (c, cty) ->
               match c with
               | Ast_defs.Constraint_as ->
                 let (_env, cty) =
                   Typing_phase.localize_no_subst env ~ignore_errors:true cty
                 in
-                Typing_utils.is_sub_type_for_union env ty' cty
-              | _ -> true)
+                Some cty
+              | _ -> None)
+        in
+        (* Type meets all bounds, so leave alone *)
+        if
+          List.for_all upper_bounds ~f:(fun bound ->
+              Typing_utils.is_sub_type_for_union env ty' bound)
         then
           (changed', ty')
         else
-          (changed, ty)
+          (changed', mk (get_reason ty, Tintersection (ty' :: upper_bounds)))
     in
 
     List.map2_env false tyl tparams ~f:make_like

@@ -3,24 +3,60 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::{self, Reason};
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use crate::reason::Reason;
+use crate::reason::{self};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Hc;
-use oxidized::{aast, ast_defs};
-use pos::{Bytes, ModuleName, Positioned, Symbol, TypeConstName, TypeName};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use oxidized::aast;
+use oxidized::ast_defs;
+use pos::Bytes;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeName;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt;
 use utils::core::Ident;
 
-pub use oxidized::{
-    aast_defs::{ReifyKind, Tprim as Prim},
-    ast_defs::{Abstraction, ClassishKind, ConstraintKind, Visibility},
-    typing_defs::ClassConstKind,
-    typing_defs_core::{ConsistentKind, Enforcement, Exact, ParamMode, ShapeKind},
-    typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
-    xhp_attribute::{Tag, XhpAttribute},
-};
+pub use oxidized::aast_defs::ReifyKind;
+pub use oxidized::aast_defs::Tprim as Prim;
+pub use oxidized::ast_defs::Abstraction;
+pub use oxidized::ast_defs::ClassishKind;
+pub use oxidized::ast_defs::ConstraintKind;
+pub use oxidized::ast_defs::Visibility;
+pub use oxidized::typing_defs::ClassConstKind;
+pub use oxidized::typing_defs_core::ConsistentKind;
+pub use oxidized::typing_defs_core::Enforcement;
+pub use oxidized::typing_defs_core::ParamMode;
+pub use oxidized::typing_defs_core::ShapeKind;
+pub use oxidized::typing_defs_flags::ClassEltFlags;
+pub use oxidized::typing_defs_flags::ClassEltFlagsArgs;
+pub use oxidized::typing_defs_flags::FunParamFlags;
+pub use oxidized::typing_defs_flags::FunTypeFlags;
+pub use oxidized::typing_defs_flags::{self};
+pub use oxidized::xhp_attribute::Tag;
+pub use oxidized::xhp_attribute::XhpAttribute;
+
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+pub enum Exact {
+    Exact,
+    Nonexact,
+}
 
 // c.f. ast_defs::XhpEnumValue
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
@@ -296,6 +332,8 @@ pub enum Ty_<R: Reason> {
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
     Tapply(Box<(Positioned<TypeName, R::Pos>, Box<[Ty<R>]>)>),
+    /// 'With' refinements of the form `_ with { type T as int; type TC = C; }`.
+    Trefinement(Box<TrefinementType<Ty<R>>>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -411,6 +449,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
                 vty.accept(v)
             }
             Taccess(tt) => tt.accept(v),
+            Trefinement(tr) => tr.accept(v),
         }
     }
 }
@@ -437,6 +476,53 @@ pub struct TaccessType<R: Reason, TY> {
 }
 
 walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [ty]);
+
+/// A decl refinement type of the form 'T with { Refinements }'
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub struct TrefinementType<TY> {
+    /// Type expression to the left of `::`
+    pub ty: TY,
+
+    /// The type refinements
+    pub typeconsts: BTreeMap<TypeConstName, TypeConstRef<TY>>,
+}
+
+walkable!(TypeConstName); // To walk the typeconsts BTreeMap
+walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, typeconsts]);
+
+/// Type constant refinements
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    Hash,
+    PartialEq,
+    Serialize,
+    Deserialize
+)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub enum TypeConstRef<TY> {
+    Exact(TY),
+    Loose(Box<[TY]>, Box<[TY]>),
+}
+
+walkable!(impl<R: Reason, TY> for TypeConstRef<TY> => {
+    Self::Exact(ty) => [ty],
+    Self::Loose(lo, hi) => [lo, hi],
+});
 
 #[derive(
     Clone,

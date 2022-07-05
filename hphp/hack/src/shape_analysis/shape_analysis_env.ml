@@ -20,10 +20,10 @@ let fresh_var () : entity_ =
 let union_continuation_at_lid (entity1 : entity) (entity2 : entity) :
     constraint_ list * entity =
   match (entity1, entity2) with
-  | (Some entity1_, Some entity2_) ->
-    let var = fresh_var () in
-    let constraints = [Subset (entity1_, var); Subset (entity2_, var)] in
-    (constraints, Some var)
+  | (Some left, Some right) ->
+    let join = fresh_var () in
+    let join_constraint = Join { left; right; join } in
+    ([join_constraint], Some join)
   | (entity, None)
   | (None, entity) ->
     ([], entity)

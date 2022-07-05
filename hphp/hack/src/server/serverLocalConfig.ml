@@ -470,13 +470,13 @@ type t = {
   ide_serverless: bool;  (** whether clientLsp should use serverless-ide *)
   ide_ranked_autocomplete: bool;
       (** whether clientLsp should use ranked autocomplete *)
-  ide_ffp_autocomplete: bool;
-      (** whether clientLsp should use ffp-autocomplete *)
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
       (** like [symbolindex_search_provider] but for IDE *)
+  ide_use_shallow_decls: bool;
+      (** use shallow decls instead folded decls in Hack IDE *)
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
       (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
@@ -595,10 +595,13 @@ type t = {
   saved_state_manifold_api_key: string option;
       (** A string from hh.conf. The API key is used for saved state downloads
        when we call out to manifold *)
+  hulk_strategy: HulkStrategy.hulk_mode;
+  (*
   hulk_lite: bool;
       (** Rewrite of Hulk to be faster and simpler - Doesn't update dep graph *)
   hulk_heavy: bool;
       (** Rewrite of Hulk to be faster and simpler - Does update dep graph *)
+  *)
   specify_manifold_api_key: bool;
   remote_old_decls_no_limit: bool;
       (**  Remove remote old decl fetching limit *)
@@ -650,10 +653,10 @@ let default =
     re_worker = false;
     ide_serverless = false;
     ide_ranked_autocomplete = false;
-    ide_ffp_autocomplete = false;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     ide_max_num_linearizations = 10000;
+    ide_use_shallow_decls = true;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     use_max_typechecker_worker_memory_for_decl_deferral = false;
@@ -711,8 +714,7 @@ let default =
     enable_disk_heap = true;
     rollout_group = None;
     saved_state_manifold_api_key = None;
-    hulk_lite = false;
-    hulk_heavy = false;
+    hulk_strategy = HulkStrategy.Legacy;
     log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
@@ -1036,10 +1038,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.ide_ranked_autocomplete
       config
   in
-  (* ide_ffp_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
-  let ide_ffp_autocomplete =
-    bool_ "ide_ffp_autocomplete" ~default:default.ide_ffp_autocomplete config
-  in
   let ide_max_num_decls =
     int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
   in
@@ -1053,6 +1051,13 @@ let load_ fn ~silent ~current_version overrides =
     int_
       "ide_max_num_linearizations"
       ~default:default.ide_max_num_linearizations
+      config
+  in
+  let ide_use_shallow_decls =
+    bool_if_min_version
+      "ide_use_shallow_decls"
+      ~default:default.ide_use_shallow_decls
+      ~current_version
       config
   in
   let predeclare_ide =
@@ -1465,18 +1470,14 @@ let load_ fn ~silent ~current_version overrides =
       None
   in
   let hulk_lite =
-    bool_if_min_version
-      "hulk_lite"
-      ~default:default.hulk_lite
-      ~current_version
-      config
+    bool_if_min_version "hulk_lite" ~default:false ~current_version config
   in
   let hulk_heavy =
-    bool_if_min_version
-      "hulk_heavy"
-      ~default:default.hulk_heavy
-      ~current_version
-      config
+    bool_if_min_version "hulk_heavy" ~default:false ~current_version config
+  in
+  let hulk_mode = string_ "hulk_mode" ~default:"none" config in
+  let hulk_strategy =
+    HulkStrategy.config_to_strategy hulk_mode hulk_lite hulk_heavy
   in
   let remote_worker_saved_state_manifold_path =
     string_opt "remote_worker_saved_state_manifold_path" config
@@ -1526,11 +1527,11 @@ let load_ fn ~silent ~current_version overrides =
     re_worker;
     ide_serverless;
     ide_ranked_autocomplete;
-    ide_ffp_autocomplete;
     ide_max_num_decls;
     ide_max_num_shallow_decls;
     ide_max_num_linearizations;
     ide_symbolindex_search_provider;
+    ide_use_shallow_decls;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     use_max_typechecker_worker_memory_for_decl_deferral;
@@ -1596,8 +1597,7 @@ let load_ fn ~silent ~current_version overrides =
     enable_disk_heap;
     rollout_group;
     saved_state_manifold_api_key;
-    hulk_lite;
-    hulk_heavy;
+    hulk_strategy;
     log_saved_state_age_and_distance;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
@@ -1629,14 +1629,15 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       ide_max_num_linearizations = options.ide_max_num_linearizations;
+      ide_use_shallow_decls = options.ide_use_shallow_decls;
       max_bucket_size = options.max_bucket_size;
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =
         Option.value options.max_typechecker_worker_memory_mb ~default:(-1);
       use_max_typechecker_worker_memory_for_decl_deferral =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
-      hulk_lite = options.hulk_lite;
-      hulk_heavy = options.hulk_heavy;
+      hulk_lite = HulkStrategy.is_hulk_lite options.hulk_strategy;
+      hulk_heavy = HulkStrategy.is_hulk_heavy options.hulk_strategy;
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       no_marshalled_naming_table_in_saved_state =

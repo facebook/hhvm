@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::{BitAnd, BitOr};
+use std::ops::BitAnd;
+use std::ops::BitOr;
 
 #[allow(unreachable_patterns)]
 #[cxx::bridge(namespace = "HPHP")]
@@ -99,7 +100,8 @@ pub mod ffi {
 }
 
 use ffi::type_flags_to_string_ffi;
-pub use ffi::{Attr, TypeConstraintFlags};
+pub use ffi::Attr;
+pub use ffi::TypeConstraintFlags;
 
 impl Default for TypeConstraintFlags {
     fn default() -> Self {

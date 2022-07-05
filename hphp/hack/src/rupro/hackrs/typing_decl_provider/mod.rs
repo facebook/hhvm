@@ -5,14 +5,23 @@
 
 use defs::ClassType;
 use depgraph_api::DeclName;
-use pos::{ConstName, FunName, MethodName, PropName, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::PropName;
+use pos::TypeName;
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{
-    ty::ConsistentKind, ConstDecl, EnumType, FunDecl, Requirement, Tparam, Ty, TypedefDecl,
-    WhereConstraint,
-};
+use ty::decl::ty::ConsistentKind;
+use ty::decl::ConstDecl;
+use ty::decl::EnumType;
+use ty::decl::FunDecl;
+use ty::decl::Requirement;
+use ty::decl::Tparam;
+use ty::decl::Ty;
+use ty::decl::TypedefDecl;
+use ty::decl::WhereConstraint;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
 

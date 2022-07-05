@@ -69,6 +69,11 @@ let rec of_decl_ty (ty : decl_ty) : string =
     Printf.sprintf "vec_or_dict<%s, %s>" (of_decl_ty key_ty) (of_decl_ty val_ty)
   | Tlike ty -> of_decl_ty ty
   | Taccess (ty, (_, name)) -> Printf.sprintf "%s::%s" (of_decl_ty ty) name
+  | Trefinement (ty, rs) ->
+    Printf.sprintf
+      "%s with %s"
+      (of_decl_ty ty)
+      (Class_refinement.to_string of_decl_ty rs)
 
 and of_enforced_ty et : string = of_decl_ty et.et_type
 

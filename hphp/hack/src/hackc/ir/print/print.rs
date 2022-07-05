@@ -12,19 +12,33 @@
 //! `print_thing(thing: &Thing)`.
 //!
 
-use crate::{formatters::*, util::FmtCommaSep};
-use core::{
-    class::{Property, TraitReqKind},
-    instr::{
-        BaseOp, ContCheckOp, FCallArgsFlags, HasLoc, Hhbc, IncDecOp, IncludeKind,
-        IsLogAsDynamicCallOp, MOpMode, MemberKey, MemberOp, OODeclExistsOp, QueryMOp, ReadonlyOp,
-        Special, Terminator,
-    },
-    string_intern::StringInterner,
-    *,
-};
+use crate::formatters::*;
+use crate::util::FmtCommaSep;
+use core::class::Property;
+use core::class::TraitReqKind;
+use core::instr::BaseOp;
+use core::instr::ContCheckOp;
+use core::instr::FCallArgsFlags;
+use core::instr::HasLoc;
+use core::instr::Hhbc;
+use core::instr::IncDecOp;
+use core::instr::IncludeKind;
+use core::instr::IsLogAsDynamicCallOp;
+use core::instr::MOpMode;
+use core::instr::MemberKey;
+use core::instr::MemberOp;
+use core::instr::OODeclExistsOp;
+use core::instr::QueryMOp;
+use core::instr::ReadonlyOp;
+use core::instr::Special;
+use core::instr::Terminator;
+use core::string_intern::StringInterner;
+use core::*;
 use itertools::Itertools;
-use std::fmt::{Display, Error, Result, Write};
+use std::fmt::Display;
+use std::fmt::Error;
+use std::fmt::Result;
+use std::fmt::Write;
 
 pub(crate) struct FuncContext<'a, 'b> {
     pub(crate) cur_loc_id: LocId,
@@ -736,7 +750,6 @@ fn print_hhbc(
             )?;
         }
         Hhbc::CreateCont(_) => write!(w, "create_cont")?,
-        Hhbc::EntryNop(_) => write!(w, "entry_nop")?,
         Hhbc::GetMemoKeyL(lid, _) => {
             write!(w, "get_memo_key {}", FmtLid(lid, ctx.strings))?;
         }
@@ -1006,6 +1019,9 @@ fn print_hhbc(
         Hhbc::UnsetL(lid, _) => {
             write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
         }
+        Hhbc::VerifyImplicitContextState(_) => {
+            write!(w, "verify_implicit_context_state")?;
+        }
         Hhbc::VerifyOutType(vid, lid, _) => {
             write!(
                 w,
@@ -1114,6 +1130,9 @@ pub(crate) fn print_instr(
         Instr::Special(instr::Special::PopC) => write!(w, "popc")?,
         Instr::Special(instr::Special::PopL(lid)) => {
             write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
+        }
+        Instr::Special(Special::Copy(vid)) => {
+            write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
         Instr::Special(instr::Special::PushL(lid)) => {
             write!(w, "push {}", FmtLid(*lid, ctx.strings))?;

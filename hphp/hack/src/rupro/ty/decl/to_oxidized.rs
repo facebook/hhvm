@@ -3,10 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{folded, shallow, ty::*};
+use super::folded;
+use super::shallow;
+use super::ty::*;
 use crate::reason::Reason;
 use oxidized_by_ref::ast::Id;
-use pos::{Pos, ToOxidized};
+use pos::Pos;
+use pos::ToOxidized;
 
 use oxidized_by_ref as obr;
 
@@ -137,7 +140,8 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
     type Output = obr::typing_defs::Ty_<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use obr::t_shape_map::{TShapeField, TShapeMap};
+        use obr::t_shape_map::TShapeField;
+        use obr::t_shape_map::TShapeMap;
         use obr::typing_defs;
         match self {
             Ty_::Tthis => typing_defs::Ty_::Tthis,
@@ -167,6 +171,31 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized(arena)),
             Ty_::TvecOrDict(x) => typing_defs::Ty_::TvecOrDict(x.to_oxidized(arena)),
             Ty_::Taccess(x) => typing_defs::Ty_::Taccess(x.to_oxidized(arena)),
+            Ty_::Trefinement(tr) => typing_defs::Ty_::Trefinement(arena.alloc((
+                tr.ty.to_oxidized(arena),
+                typing_defs::ClassRefinement {
+                    cr_types: tr.typeconsts.to_oxidized(arena),
+                },
+            ))),
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TypeConstRef<Ty<R>> {
+    type Output = obr::typing_defs::ClassTypeRefinement<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::typing_defs::ClassTypeRefinement::*;
+        use obr::typing_defs::ClassTypeRefinementBounds;
+        match self {
+            Self::Exact(ty) => Texact(ty.to_oxidized(arena)),
+            Self::Loose(lo, hi) => {
+                let bounds = arena.alloc(ClassTypeRefinementBounds {
+                    lower: lo.to_oxidized(arena),
+                    upper: hi.to_oxidized(arena),
+                });
+                Tloose(bounds)
+            }
         }
     }
 }

@@ -3,38 +3,61 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    emit_adata, emit_attribute, emit_body, emit_constant, emit_expression, emit_memoize_method,
-    emit_method, emit_property, emit_type_constant, emit_xhp,
-};
+use crate::emit_adata;
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_constant;
+use crate::emit_expression;
+use crate::emit_memoize_method;
+use crate::emit_method;
+use crate::emit_property;
+use crate::emit_type_constant;
+use crate::emit_xhp;
 use emit_property::PropAndInit;
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Maybe::*, Slice, Str};
-use hhbc::{
-    hhas_attribute,
-    hhas_class::{HhasClass, TraitReqKind},
-    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
-    hhas_constant::HhasConstant,
-    hhas_method::{HhasMethod, HhasMethodFlags},
-    hhas_param::HhasParam,
-    hhas_pos::HhasSpan,
-    hhas_property::HhasProperty,
-    hhas_type::{self, HhasTypeInfo},
-    hhas_type_const::HhasTypeConstant,
-    ClassName, FCallArgs, FCallArgsFlags, FatalOp, HhasXhpAttribute, Local, ReadonlyOp,
-    SpecialClsRef, TypedValue, Visibility,
-};
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_attribute;
+use hhbc::hhas_class::HhasClass;
+use hhbc::hhas_class::TraitReqKind;
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_coeffects::HhasCtxConstant;
+use hhbc::hhas_constant::HhasConstant;
+use hhbc::hhas_method::HhasMethod;
+use hhbc::hhas_method::HhasMethodFlags;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::hhas_property::HhasProperty;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::hhas_type::{self};
+use hhbc::hhas_type_const::HhasTypeConstant;
+use hhbc::ClassName;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::FatalOp;
+use hhbc::HhasXhpAttribute;
+use hhbc::Local;
+use hhbc::ReadonlyOp;
+use hhbc::SpecialClsRef;
+use hhbc::TypedValue;
+use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
-use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
-use instruction_sequence::{instr, InstrSeq};
+use hhvm_types_ffi::ffi::Attr;
+use hhvm_types_ffi::ffi::TypeConstraintFlags;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use itertools::Itertools;
 use naming_special_names_rust as special_names;
-use oxidized::{
-    ast,
-    ast::{Hint, ReifyKind, RequireKind},
-    namespace_env,
-};
+use oxidized::ast;
+use oxidized::ast::Hint;
+use oxidized::ast::ReifyKind;
+use oxidized::ast::RequireKind;
+use oxidized::namespace_env;
 use std::collections::BTreeMap;
 
 fn add_symbol_refs<'arena, 'decl>(
@@ -324,7 +347,7 @@ fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
 ) -> Result<Option<HhasTypeInfo<'arena>>> {
-    use hhas_type::constraint::Constraint;
+    use hhas_type::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
@@ -410,7 +433,8 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     ast_class: &'a ast::Class_,
     init_meth_param_local: Local,
 ) -> Result<InstrSeq<'arena>> {
-    use string_utils::reified::{INIT_METH_NAME, PROP_NAME};
+    use string_utils::reified::INIT_METH_NAME;
+    use string_utils::reified::PROP_NAME;
 
     let alloc = env.arena;
     let check_length = InstrSeq::gather(vec![
@@ -466,7 +490,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhas_type::constraint::Constraint;
+    use hhas_type::Constraint;
 
     let alloc = env.arena;
     let num_reified = ast_class

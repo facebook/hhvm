@@ -6,16 +6,16 @@
 
 use ocamlrep::rc::RcOc;
 
-use crate::{
-    lexable_token::{LexablePositionedToken, LexableToken},
-    lexable_trivia::LexableTrivia,
-    positioned_trivia::{PositionedTrivia, PositionedTrivium},
-    source_text::SourceText,
-    token_factory::SimpleTokenFactory,
-    token_kind::TokenKind,
-    trivia_factory::SimpleTriviaFactory,
-    trivia_kind::TriviaKind,
-};
+use crate::lexable_token::LexablePositionedToken;
+use crate::lexable_token::LexableToken;
+use crate::lexable_trivia::LexableTrivia;
+use crate::positioned_trivia::PositionedTrivia;
+use crate::positioned_trivia::PositionedTrivium;
+use crate::source_text::SourceText;
+use crate::token_factory::SimpleTokenFactory;
+use crate::token_kind::TokenKind;
+use crate::trivia_factory::SimpleTriviaFactory;
+use crate::trivia_kind::TriviaKind;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositionedTokenImpl {

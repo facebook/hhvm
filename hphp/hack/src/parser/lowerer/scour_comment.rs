@@ -3,17 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::{i_set::ISet, pos::Pos, prim_defs::Comment, scoured_comments::ScouredComments};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::LexablePositionedToken,
-    lexable_trivia::LexableTrivium,
-    positioned_trivia::PositionedTrivium,
-    source_text::SourceText,
-    syntax_by_ref::{syntax::Syntax, syntax_variant_generated::SyntaxVariant::*},
-    syntax_trait::SyntaxTrait,
-    trivia_kind::TriviaKind,
-};
+use oxidized::i_set::ISet;
+use oxidized::pos::Pos;
+use oxidized::prim_defs::Comment;
+use oxidized::scoured_comments::ScouredComments;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexablePositionedToken;
+use parser_core_types::lexable_trivia::LexableTrivium;
+use parser_core_types::positioned_trivia::PositionedTrivium;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::trivia_kind::TriviaKind;
 use regex::bytes::Regex;
 use rescan_trivia::RescanTrivia;
 

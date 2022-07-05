@@ -267,7 +267,7 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
       ((env, None), None)
   | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
     let default () =
-      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
+      let ty = mk (r2, Tclass (class_id, nonexact, tyl)) in
       ((env, None), Some ty)
     in
     begin
@@ -370,6 +370,7 @@ let rec this_appears_covariantly ~contra env ty =
     List.exists fields ~f:(fun (_, f) ->
         this_appears_covariantly ~contra env f.sft_ty)
   | Taccess (ty, _)
+  | Trefinement (ty, _)
   | Tlike ty
   | Toption ty ->
     this_appears_covariantly ~contra env ty
@@ -722,7 +723,7 @@ and obj_get_concrete_class_with_member_info
           ~should_wrap:
             (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
             && get_ce_support_dynamic_type member_info)
-          r
+          (Typing_reason.localize r)
           ft1
       in
       let ((env, ft_ty_err_opt), ft_ty) =
@@ -804,7 +805,10 @@ and obj_get_concrete_class_with_member_info
   let eff () =
     let open Typing_env_types in
     if env.in_support_dynamic_type_method_check then
-      Typing_log.log_pessimise_prop env mem_pos id_str
+      Typing_log.log_pessimise_prop
+        env
+        (Pos_or_decl.unsafe_to_raw_pos mem_pos)
+        id_str
   in
   let (env, coerce_ty_err_opt, rval_mismatch) =
     Option.value_map
@@ -821,7 +825,17 @@ and obj_get_concrete_class_with_member_info
             ur
             env
             ty
-            { et_type = member_ty; et_enforced }
+            {
+              et_type =
+                (match et_enforced with
+                | Enforced
+                  when TypecheckerOptions.enable_sound_dynamic
+                         (Env.get_tcopt env)
+                       && Env.get_support_dynamic_type env ->
+                  Typing_utils.make_like env member_ty
+                | _ -> member_ty);
+              et_enforced;
+            }
             err
         in
         let coerce_ty_mismatch =

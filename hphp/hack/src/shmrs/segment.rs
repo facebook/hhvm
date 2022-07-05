@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::chashmap::{CMap, CMapRef};
+use crate::chashmap::CMap;
+use crate::chashmap::CMapRef;
 use crate::filealloc::FileAlloc;
 use nohash_hasher::NoHashHasher;
 use std::hash::BuildHasherDefault;

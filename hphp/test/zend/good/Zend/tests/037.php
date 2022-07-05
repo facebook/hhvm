@@ -1,11 +1,11 @@
 <?hh
 
-namespace closure;
+namespace Closure;
 
-class closure { static $x = 1;}
+class Closure { static $x = 1;}
 <<__EntryPoint>> function main(): void {
 $x = __NAMESPACE__;
-\var_dump(closure::$x);
+\var_dump(Closure::$x);
 
 \var_dump($x::$x);
 }

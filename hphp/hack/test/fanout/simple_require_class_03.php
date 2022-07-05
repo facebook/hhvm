@@ -21,7 +21,7 @@ class C {
 //// base-c.php
 <?hh
 
-class D extends C {
+final class D extends C {
   use A;
 }
 //// changed-a.php
@@ -47,6 +47,6 @@ class C {
 //// changed-c.php
 <?hh
 
-class D extends C {
+final class D extends C {
   use A;
 }

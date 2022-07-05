@@ -5,13 +5,17 @@
 
 use crate::datatypes::*;
 use crate::FileSummary;
-use crate::Result;
 
-use hh24_types::{Checksum, DeclHash, ToplevelSymbolHash};
-use nohash_hasher::{IntMap, IntSet};
+use hh24_types::Checksum;
+use hh24_types::DeclHash;
+use hh24_types::ToplevelSymbolHash;
+use nohash_hasher::IntMap;
+use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::params;
+use rusqlite::Connection;
+use rusqlite::OptionalExtension;
 
 #[derive(Clone, Debug)]
 pub struct SymbolItem {
@@ -20,7 +24,7 @@ pub struct SymbolItem {
     pub decl_hash: DeclHash,
 }
 
-pub fn create_tables(connection: &mut Connection) -> Result<()> {
+pub fn create_tables(connection: &mut Connection) -> anyhow::Result<()> {
     let tx = connection.transaction()?;
     tx.prepare_cached(
         "
@@ -65,10 +69,10 @@ pub fn create_tables(connection: &mut Connection) -> Result<()> {
     tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
         .execute(params![])?;
 
-    tx.commit()
+    Ok(tx.commit()?)
 }
 
-pub fn derive_checksum(connection: &Connection) -> Result<Checksum> {
+pub fn derive_checksum(connection: &Connection) -> anyhow::Result<Checksum> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
@@ -91,7 +95,7 @@ pub fn remove_symbol(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
     path: &RelativePath,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let file_info_id: FileInfoId = connection
         .prepare(
             "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
@@ -150,7 +154,7 @@ pub fn insert_file_summary(
     file_info_id: i64,
     dep_type: typing_deps_hash::DepType,
     items: impl Iterator<Item = SymbolItem>,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let insert_statement = "
         INSERT INTO NAMING_SYMBOLS (
             HASH,
@@ -236,7 +240,7 @@ pub fn insert_file_summary(
 fn get_overflow_row(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> Result<
+) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
         ToplevelCanonSymbolHash,
@@ -268,7 +272,7 @@ fn get_overflow_row(
         ";
 
     let mut select_statement = connection.prepare_cached(select_statement)?;
-    select_statement
+    let result = select_statement
         .query_row(params![symbol_hash], |row| {
             let prefix: SqlitePrefix = row.get(5)?;
             let suffix: SqlitePathBuf = row.get(6)?;
@@ -282,13 +286,15 @@ fn get_overflow_row(
                 path,
             ))
         })
-        .optional()
+        .optional();
+
+    Ok(result?)
 }
 
 fn get_row(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> Result<
+) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
         ToplevelCanonSymbolHash,
@@ -318,7 +324,7 @@ fn get_row(
         ";
 
     let mut select_statement = connection.prepare_cached(select_statement)?;
-    select_statement
+    let result = select_statement
         .query_row(params![symbol_hash], |row| {
             let prefix: SqlitePrefix = row.get(5)?;
             let suffix: SqlitePathBuf = row.get(6)?;
@@ -332,13 +338,15 @@ fn get_row(
                 path,
             ))
         })
-        .optional()
+        .optional();
+
+    Ok(result?)
 }
 
 pub fn get_path(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> Result<Option<(RelativePath, NameType)>> {
+) -> anyhow::Result<Option<(RelativePath, NameType)>> {
     let select_statement = "
         SELECT
             NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -356,20 +364,22 @@ pub fn get_path(
         ";
 
     let mut select_statement = connection.prepare_cached(select_statement)?;
-    select_statement
+    let result = select_statement
         .query_row(params![symbol_hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;
             let suffix: SqlitePathBuf = row.get(1)?;
             let kind: NameType = row.get(2)?;
             Ok((RelativePath::make(prefix.value, suffix.value), kind))
         })
-        .optional()
+        .optional();
+
+    Ok(result?)
 }
 
 pub fn get_path_case_insensitive(
     connection: &Connection,
     symbol_hash: ToplevelCanonSymbolHash,
-) -> Result<Option<RelativePath>> {
+) -> anyhow::Result<Option<RelativePath>> {
     let select_statement = "
         SELECT
             NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -385,19 +395,21 @@ pub fn get_path_case_insensitive(
         ";
 
     let mut select_statement = connection.prepare_cached(select_statement)?;
-    select_statement
+    let result = select_statement
         .query_row(params![symbol_hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;
             let suffix: SqlitePathBuf = row.get(1)?;
             Ok(RelativePath::make(prefix.value, suffix.value))
         })
-        .optional()
+        .optional();
+
+    Ok(result?)
 }
 
 pub fn get_symbol_hashes(
     connection: &Connection,
     path: &RelativePath,
-) -> Result<IntSet<ToplevelSymbolHash>> {
+) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH
@@ -425,7 +437,7 @@ pub fn get_symbol_hashes(
 pub fn get_overflow_symbol_hashes(
     connection: &Connection,
     path: &RelativePath,
-) -> Result<IntSet<ToplevelSymbolHash>> {
+) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS_OVERFLOW.HASH
@@ -453,7 +465,7 @@ pub fn get_overflow_symbol_hashes(
 pub fn get_symbol_and_decl_hashes(
     connection: &Connection,
     path: &RelativePath,
-) -> Result<IntMap<ToplevelSymbolHash, DeclHash>> {
+) -> anyhow::Result<IntMap<ToplevelSymbolHash, DeclHash>> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
@@ -482,7 +494,7 @@ pub fn insert_file_info(
     connection: &Connection,
     path_rel: &RelativePath,
     file_summary: &FileSummary,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let prefix_type = path_rel.prefix() as u8; // TODO(ljw): shouldn't this use prefix_to_i64?
     let suffix = path_rel.path().to_str().unwrap();
     let type_checker_mode = convert::mode_to_i64(file_summary.mode);
@@ -525,7 +537,7 @@ fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> Str
     s
 }
 
-pub fn delete(connection: &Connection, path: &RelativePath) -> Result<()> {
+pub fn delete(connection: &Connection, path: &RelativePath) -> anyhow::Result<()> {
     let file_info_id: Option<FileInfoId> = connection
         .prepare_cached(
             "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
@@ -549,9 +561,10 @@ pub fn delete(connection: &Connection, path: &RelativePath) -> Result<()> {
 pub fn get_decl_hash(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> Result<Option<DeclHash>> {
-    connection
+) -> anyhow::Result<Option<DeclHash>> {
+    let result = connection
         .prepare_cached("SELECT DECL_HASH FROM NAMING_SYMBOLS WHERE HASH = ?")?
         .query_row(params![symbol_hash], |row| row.get(0))
-        .optional()
+        .optional();
+    Ok(result?)
 }

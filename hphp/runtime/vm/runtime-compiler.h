@@ -19,6 +19,7 @@
 
 namespace HPHP {
 
+struct AutoloadMap;
 struct Unit;
 struct SHA1;
 struct RepoOptions;
@@ -33,6 +34,7 @@ struct FuncTable;
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
                    const Native::FuncTable& nativeFuncs,
+                   AutoloadMap*,
                    Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
@@ -42,7 +44,9 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
 Unit* compile_string(const char* s, size_t sz, const char* fname,
-                     const Native::FuncTable& nativeFuncs, const RepoOptions&,
+                     const Native::FuncTable& nativeFuncs,
+                     AutoloadMap*,
+                     const RepoOptions&,
                      bool isSystemLib = false,
                      bool forDebuggerEval = false);
 

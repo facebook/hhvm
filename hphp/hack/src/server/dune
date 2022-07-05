@@ -69,7 +69,7 @@
 (library
  (name server_find_refs)
  (wrapped false)
- (modules serverFindRefs)
+ (modules serverFindRefs serverDepsInBatch)
  (libraries
   provider_context
   server_command_types
@@ -109,6 +109,14 @@
  (wrapped false)
  (modules fileOutline)
  (libraries search utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name hulk_strategy)
+ (wrapped false)
+ (modules hulkStrategy)
+ (libraries utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -238,11 +246,6 @@
  (wrapped false)
  (modules
   autocompleteService
-  ffpAutocompleteContextParser
-  ffpAutocompleteGlobals
-  ffpAutocompleteKeywords
-  ffpAutocompleteService
-  ffpAutocompleteTypeCheck
   serverAutoComplete)
  (libraries
   provider_utils
@@ -262,6 +265,7 @@
   identifySymbolService
   methodJumps
   saveStateService
+  serverDepsOutBatch
   serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch
@@ -448,6 +452,8 @@
   serverFileSync
   serverFormat
   serverGenPrefetchDir
+  serverGenRemoteDecls
+  serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
   serverInvalidateUnits

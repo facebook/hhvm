@@ -4,12 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    compact_trivia::CompactTrivia,
-    compact_trivia::TriviaKinds,
-    syntax_by_ref::positioned_trivia::{self, PositionedTrivia},
-    trivia_factory::SimpleTriviaFactoryImpl,
-};
+use crate::compact_trivia::CompactTrivia;
+use crate::compact_trivia::TriviaKinds;
+use crate::syntax_by_ref::positioned_trivia::PositionedTrivia;
+use crate::syntax_by_ref::positioned_trivia::{self};
+use crate::trivia_factory::SimpleTriviaFactoryImpl;
 use bumpalo::Bump;
 
 pub type PositionedToken<'a> = internal::PositionedToken<'a, usize>;
@@ -108,18 +107,18 @@ impl<'a> internal::TokenFactory<'a, positioned_trivia::Factory<'a>, PositionedTr
 }
 
 pub(crate) mod internal {
-    use crate::{
-        compact_trivia::{CompactTrivia, TriviaKinds},
-        lexable_token::{LexablePositionedToken, LexableToken},
-        lexable_trivia::LexableTrivia,
-        positioned_trivia::PositionedTrivium,
-        source_text::SourceText,
-        token_factory,
-        token_kind::TokenKind,
-        trivia_factory::SimpleTriviaFactoryImpl,
-        trivia_factory::TriviaFactory,
-        trivia_kind::TriviaKind,
-    };
+    use crate::compact_trivia::CompactTrivia;
+    use crate::compact_trivia::TriviaKinds;
+    use crate::lexable_token::LexablePositionedToken;
+    use crate::lexable_token::LexableToken;
+    use crate::lexable_trivia::LexableTrivia;
+    use crate::positioned_trivia::PositionedTrivium;
+    use crate::source_text::SourceText;
+    use crate::token_factory;
+    use crate::token_kind::TokenKind;
+    use crate::trivia_factory::SimpleTriviaFactoryImpl;
+    use crate::trivia_factory::TriviaFactory;
+    use crate::trivia_kind::TriviaKind;
     use bumpalo::Bump;
 
     pub trait SizedTrivia {

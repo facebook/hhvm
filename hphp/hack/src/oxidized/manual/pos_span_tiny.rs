@@ -6,8 +6,11 @@
 use std::cmp::Ordering;
 use std::fmt;
 
-use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 use static_assertions::const_assert_eq;
 
 use crate::file_pos::FilePos;

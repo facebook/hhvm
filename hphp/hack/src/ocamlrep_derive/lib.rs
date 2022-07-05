@@ -7,7 +7,9 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
-use synstructure::{decl_derive, BindingInfo, VariantInfo};
+use synstructure::decl_derive;
+use synstructure::BindingInfo;
+use synstructure::VariantInfo;
 
 decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
 decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
@@ -379,7 +381,12 @@ fn boxed_tuple_variant_constructor(
 }
 
 fn get_boxed_tuple_len(variant: &VariantInfo<'_>) -> Option<usize> {
-    use syn::{Fields, GenericArgument, PathArguments, Type, TypePath, TypeReference};
+    use syn::Fields;
+    use syn::GenericArgument;
+    use syn::PathArguments;
+    use syn::Type;
+    use syn::TypePath;
+    use syn::TypeReference;
 
     match &variant.ast().fields {
         Fields::Unnamed(_) => {}

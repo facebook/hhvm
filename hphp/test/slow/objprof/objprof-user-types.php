@@ -42,8 +42,8 @@ class EmptyClass2 {}
 
 
 // TEST: sizes of classes (including private props)
-class SimpleProps { // 51:48
-  private string $prop1 = "one"; // 19:16
+class SimpleProps { // 16:48
+  private string $prop1 = "one"; // 16:16
   protected int $prop2 = 2; // 16:16
   public bool $prop3 = true; // 16:16
 }
@@ -51,16 +51,18 @@ class SimpleProps { // 51:48
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public varray $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
-  public darray $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (23:16) = 46:32
-    321 => 3, // 2 * (16:16) = 32:32
+  public varray $arrEmpty = varray[]; // 16 (tv) + static = 16
+  public darray $arrMixed = darray[ // 16 (tv) + static = 16
+    "somekey" => "someval", 321 => 3,
   ];
-  public varray<int> $arrNums = varray[
-    2012, // 16:16
-    2013, // 16:16
-    2014 // 16:16
-  ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  public varray<int> $arrNums = varray[];
+  function __construct() {
+    $this->arrNums = varray[
+      2012, // 16:16
+      2013, // 16:16
+      rand(1, 2) // 16:16
+    ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+  }
 }
 
 
@@ -91,19 +93,16 @@ class NestedArrayClass {
 
 
 // TEST: ref counted Maps
-class SimpleMapClass { // size = 2*(24(SimpleMapClass)+122) = 292
-                   // sized = 2*(24(SimpleMapClass)+116) = 280
+class SimpleMapClass { // size = 2*(24(SimpleMapClass)+116) = 286
   public Map<string,mixed> $map;
   public function __construct() {
-    $this->map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
-      'foo' => getStr(4), // size = 19+20 = 39
-                          // sized = 16+20 = 36
-      'bar' => getStr(8), // size = 19+24 = 43
-                          // sized = 16+24 = 40
+    $this->map = Map{ // size = 16(tv)+$MapSize+36+40 = 116
+      'foo' => getStr(4), // size = 16+20 = 36
+      'bar' => getStr(8), // size = 16+24 = 40
     };
   }
 }
-class SharedMapClass { // size = 2*(24(SharedMapClass)+122) = 292
+class SharedMapClass { // size = 2*(24(SharedMapClass)+116) = 286
                         // sized = 2*(24(SharedMapClass)+66) = 180
   public Map<string,mixed> $map;
   public function __construct(Map<string, mixed> $m) {
@@ -113,14 +112,11 @@ class SharedMapClass { // size = 2*(24(SharedMapClass)+122) = 292
 
 
 // TEST: back edge
-class SimpleMapClassWithBackEdge { // size = 24(Objsize)+114 = 138
-                                   // sized = 24(Objsize)+108 = 132
+class SimpleMapClassWithBackEdge { // size = 24(Objsize)+108 = 132
   public Map<string,mixed> $map;
   public function __construct() {
-    $this->map = Map{ // size = 16(tv)+$MapSize+39+35 = 114
-                      // sized = 16(tv)+$MapSize+36+32 = 108
-      'bar' => getStr(4), // size = 19+20 = 39
-                          // sized = 16+20 = 36
+    $this->map = Map{ // size = 16(tv)+$MapSize+36+32 = 108
+      'bar' => getStr(4), // size = 16+20 = 36
     };
   }
 }
@@ -185,7 +181,7 @@ __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
+echo get_bytes('SimpleProps', $objs) == $ObjSize + 48 &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps', $objs), $ObjSize + 48) ?
       "(GOOD) Bytes (props) works\n" :
       "(BAD) Bytes (props) failed: " . var_export($objs, true) . "\n";
@@ -195,22 +191,22 @@ $myClass = new SimpleArrays();
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays', $objs), $ObjSize + (16 * 3)) ?
+echo get_bytes('SimpleArrays', $objs) == $ObjSize + 16 * 2 + 80 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays', $objs), $ObjSize + 16 * 2 + 80) ?
       "(GOOD) Bytes (arrays) works\n" :
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $objs = null;
 $myClass = null;
 $myClass = new DynamicClass();
-$dynamic_field = 'abcd'; // 20:16
-$dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
+$dynamic_field = 'abcd'; // 16:16
+$dynamic_field2 = rand(1234,1235);  // 16:16 (dynamic properties - converted to static str)
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
-echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
-     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass', $objs), $ObjSize + (16 * 4)) ?
+echo get_bytes('DynamicClass', $objs) == $ObjSize + 16 * 4 &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass', $objs), $ObjSize + 16 * 4) ?
       "(GOOD) Bytes (dynamic) works\n" :
       "(BAD) Bytes (dynamic) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -358,7 +354,7 @@ $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SimpleMapClass', $objs) ==
-      2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
+      2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 40) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleMapClass', $objs), 2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 40)) ?
       "(GOOD) Bytes (SimpleMapClass) works\n" :
       "(BAD) Bytes (SimpleMapClass) failed: " . var_export($objs, true) . "\n";
@@ -368,12 +364,10 @@ $myClass2 = null;
 
 
 // TEST: multiple ref counted Maps
-$shared_map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
+$shared_map = Map{ // size = 16(tv)+$MapSize+36+40 = 116
                    // sized = 16(tv)+($MapSize+36+40)/2 = 66
-  'foo' => getStr(4), // size = 19+20 = 39
-                      // sized = 16+20 = 36
-  'bar' => getStr(8), // size = 19+24 = 43
-                      // sized = 16+24 = 40
+  'foo' => getStr(4), // size = 19+20 = 36
+  'bar' => getStr(8), // size = 19+24 = 40
 };
 $my_obj1 = new SharedMapClass($shared_map);
 $my_obj2 = new SharedMapClass($shared_map);
@@ -384,7 +378,7 @@ $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj1);
 __hhvm_intrinsics\launder_value($my_obj2);
 echo get_bytes('SharedMapClass', $objs) ==
-      2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
+      2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 40) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SharedMapClass', $objs), 2 * ($ObjSize + 16 /*(tv)*/ + ($MapSize + 36 + 40) / 2)) ?
       "(GOOD) Bytes (SharedMapClass) works\n" :
       "(BAD) Bytes (SharedMapClass) failed: " . var_export($objs, true) . "\n";
@@ -392,12 +386,12 @@ $objs = null;
 $my_obj1 = null;
 $my_obj2 = null;
 $my_obj = new SimpleMapClassWithBackEdge();
-$my_obj->map['foo'] = $my_obj; // size = 19+16(tv) = 35, sized = 16+16(tv) = 32
+$my_obj->map['foo'] = $my_obj; // size = 16+16(tv) = 32, sized = 16+16(tv) = 32
 __hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj);
 echo get_bytes('SimpleMapClassWithBackEdge', $objs) ==
-      ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 35) &&
+      ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 32) &&
      HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleMapClassWithBackEdge', $objs), ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 32)) ?
         "(GOOD) Bytes (SimpleMapClassWithBackEdge) works\n" :
         "(BAD) Bytes (SimpleMapClassWithBackEdge) failed: " .

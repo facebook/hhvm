@@ -9,7 +9,12 @@
 use std::fmt;
 use std::num::NonZeroUsize;
 
-use crate::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
+use crate::Allocator;
+use crate::FromError;
+use crate::FromOcamlRep;
+use crate::OpaqueValue;
+use crate::ToOcamlRep;
+use crate::Value;
 
 /// Unsafe pointer to an OCaml value which is (possibly) managed by the garbage
 /// collector.

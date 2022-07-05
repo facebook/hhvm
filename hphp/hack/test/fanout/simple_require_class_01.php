@@ -6,7 +6,7 @@
 trait A { require class C; }
 //// base-b.php
 <?hh
-class C { use A; }
+final class C { use A; }
 
 //// changed-a.php
 <?hh
@@ -16,6 +16,6 @@ class C { use A; }
 trait A { require class C; }
 //// changed-b.php
 <?hh
-class C {
+final class C {
   public function foo(): void {}
 }

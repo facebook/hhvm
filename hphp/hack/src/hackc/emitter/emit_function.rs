@@ -2,22 +2,29 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_body, emit_memoize_function, emit_memoize_helpers};
-use ast_scope::{self, Scope, ScopeItem};
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_function;
+use crate::emit_memoize_helpers;
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
+use ast_scope::{self};
 use env::emitter::Emitter;
 use error::Result;
-use ffi::{Slice, Str};
-use hhbc::{
-    hhas_attribute::{self, HhasAttribute},
-    hhas_coeffects::HhasCoeffects,
-    hhas_function::HhasFunction,
-    hhas_pos::HhasSpan,
-    ClassName, FunctionName,
-};
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::hhas_attribute::{self};
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::ClassName;
+use hhbc::FunctionName;
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast, ast_defs};
+use oxidized::ast;
+use oxidized::ast_defs;
 
 pub fn emit_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -111,7 +118,8 @@ pub fn emit_function<'a, 'arena, 'decl>(
         let native = user_attrs
             .iter()
             .any(|a| ua::is_native(a.name.unsafe_as_str()));
-        use emit_body::{Args as EmitBodyArgs, Flags as EmitBodyFlags};
+        use emit_body::Args as EmitBodyArgs;
+        use emit_body::Flags as EmitBodyFlags;
         let mut body_flags = EmitBodyFlags::empty();
         body_flags.set(
             EmitBodyFlags::ASYNC,

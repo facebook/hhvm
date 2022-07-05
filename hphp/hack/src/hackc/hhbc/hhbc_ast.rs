@@ -3,8 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{opcodes::Opcode, typed_value::TypedValue, FCallArgsFlags, PropName, ReadonlyOp};
-use ffi::{Slice, Str};
+use crate::opcodes::Opcode;
+use crate::typed_value::TypedValue;
+use crate::FCallArgsFlags;
+use crate::PropName;
+use crate::ReadonlyOp;
+use ffi::Slice;
+use ffi::Str;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -14,7 +19,11 @@ pub type ClassNum = u32;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
-pub struct Dummy;
+pub struct Dummy(bool);
+
+impl Dummy {
+    pub const DEFAULT: Dummy = Dummy(false);
+}
 
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.
@@ -102,14 +111,6 @@ impl<'arena> FCallArgs<'arena> {
             std::slice::from_ref(&self.async_eager_target)
         } else {
             &[]
-        }
-    }
-
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        if self.has_async_eager_target() {
-            std::slice::from_mut(&mut self.async_eager_target)
-        } else {
-            &mut []
         }
     }
 
@@ -313,11 +314,6 @@ pub trait Targets {
     /// instruction. This excludes the Label in an ILabel instruction, which is
     /// not a conditional branch.
     fn targets(&self) -> &[Label];
-
-    /// Return a mutable slice of labels for the conditional branch targets of
-    /// this instruction. This excludes the Label in an ILabel instruction,
-    /// which is not a conditional branch.
-    fn targets_mut(&mut self) -> &mut [Label];
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -349,28 +345,6 @@ impl Instruct<'_> {
                 | Pseudo::Comment(_)
                 | Pseudo::SrcLoc(_),
             ) => &[],
-        }
-    }
-
-    /// Return a mutable slice of labels for the conditional branch targets of this instruction.
-    /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self {
-            Self::Opcode(opcode) => opcode.targets_mut(),
-
-            // Make sure new variants with branch target Labels are handled
-            // above before adding items to this catch-all.
-            Self::Pseudo(
-                Pseudo::TypedValue(_)
-                | Pseudo::Continue(_)
-                | Pseudo::Break(_)
-                | Pseudo::Label(_)
-                | Pseudo::TryCatchBegin
-                | Pseudo::TryCatchMiddle
-                | Pseudo::TryCatchEnd
-                | Pseudo::Comment(_)
-                | Pseudo::SrcLoc(_),
-            ) => &mut [],
         }
     }
 

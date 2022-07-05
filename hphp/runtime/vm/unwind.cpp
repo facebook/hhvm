@@ -20,6 +20,7 @@
 
 #include <folly/ScopeGuard.h>
 
+#include <hphp/system/systemlib.h>
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/tv-refcount.h"
@@ -258,7 +259,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   auto const isException = [&](const TypeConstraint& tc) {
     if (!tc.isUnresolved() && !tc.isObject()) return false;
     auto const cls = Class::lookup(tc.anyNamedEntity());
-    return cls && cls == SystemLib::s_ExceptionClass;
+    return cls && cls == SystemLib::s_ThrowableClass;
   };
 
   return

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <hphp/runtime/base/datatype.h>
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -360,6 +361,16 @@ struct TypeConstraint {
   bool mayCoerce() const {
     return maybeStringCompatible();
   }
+
+  /**
+   * Return the correct `DataType` that represents this type constraint as used
+   * as a type within systemlib, specifically in the context of a `__Native`
+   * function. For example:
+   * - Nullable and soft types are always represented as `KindOfMixed`
+   * - Unresolved types are always represented as `KindOfObejct`
+   * - Otherwise, grab the result of `underlyingDataType`
+   */
+  MaybeDataType asSystemlibType() const;
 
 
 private:

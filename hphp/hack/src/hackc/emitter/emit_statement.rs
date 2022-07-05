@@ -2,26 +2,43 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
-use crate::{emit_fatal, try_finally_rewriter as tfr};
-use emit_pos::{emit_pos, emit_pos_then};
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
+use crate::emit_expression::emit_await;
+use crate::emit_expression::emit_expr;
+use crate::emit_expression::LValOp;
+use crate::emit_expression::SetRange;
+use crate::emit_expression::{self as emit_expr};
+use crate::emit_fatal;
+use crate::try_finally_rewriter as tfr;
+use emit_pos::emit_pos;
+use emit_pos::emit_pos_then;
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
 use ffi::Slice;
 use hack_macro::hack_expr;
-use hhbc::{
-    FCallArgs, FCallArgsFlags, IsTypeOp, IterArgs, Label, Local, MOpMode, MemberKey, QueryMOp,
-    ReadonlyOp, SetRangeOp,
-};
-use instruction_sequence::{instr, InstrSeq};
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetRangeOp;
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use lazy_static::lazy_static;
-use naming_special_names_rust::{special_idents, superglobals};
-use oxidized::{
-    aast as a, ast,
-    ast_defs::{self, ParamKind},
-    local_id,
-    pos::Pos,
-};
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::superglobals;
+use oxidized::aast as a;
+use oxidized::ast;
+use oxidized::ast_defs::ParamKind;
+use oxidized::ast_defs::{self};
+use oxidized::local_id;
+use oxidized::pos::Pos;
 use regex::Regex;
 use statement_state::StatementState;
 

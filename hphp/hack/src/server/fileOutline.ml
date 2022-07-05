@@ -394,6 +394,31 @@ let summarize_local name span =
     docblock = None;
   }
 
+let summarize_module_def md =
+  let kind = SymbolDefinition.Module in
+  let name = snd md.md_name in
+  let full_name = get_full_name None name in
+  let id = get_symbol_id kind None name in
+  let span = md.md_span in
+  let doc_comment = md.md_doc_comment in
+  let docblock =
+    match doc_comment with
+    | None -> None
+    | Some dc -> Some (snd dc)
+  in
+  {
+    kind;
+    name;
+    full_name;
+    id;
+    pos = span;
+    span;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock;
+  }
+
 let outline_ast ast =
   let outline =
     List.filter_map ast ~f:(function
@@ -413,7 +438,8 @@ let should_add_docblock = function
   | Interface
   | Trait
   | Typeconst
-  | Typedef ->
+  | Typedef
+  | Module ->
     true
   | LocalVar
   | TypeVar

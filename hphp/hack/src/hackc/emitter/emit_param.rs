@@ -2,23 +2,37 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{emit_attribute, emit_expression};
+use crate::emit_attribute;
+use crate::emit_expression;
 use ast_scope::Scope;
-use emit_type_hint::{hint_to_type_info, Kind};
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Nothing, Slice, Str};
-use hhbc::{hhas_param::HhasParam, hhas_type::HhasTypeInfo, Label, Local};
+use emit_type_hint::hint_to_type_info;
+use emit_type_hint::Kind;
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Nothing;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::Label;
+use hhbc::Local;
 use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{
-    aast_defs::{Hint, Hint_},
-    aast_visitor::{self, AstParams, Node},
-    ast as a,
-    ast_defs::{Id, ReadonlyKind},
-    pos::Pos,
-};
-use std::collections::{BTreeMap, BTreeSet};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::{self};
+use oxidized::ast as a;
+use oxidized::ast_defs::Id;
+use oxidized::ast_defs::ReadonlyKind;
+use oxidized::pos::Pos;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::marker::PhantomData;
 
 pub fn from_asts<'a, 'arena, 'decl>(
@@ -201,7 +215,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmp_ns(l)]),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::enter(l)]),
         ))
     }
 }

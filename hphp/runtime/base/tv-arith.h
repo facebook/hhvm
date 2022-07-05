@@ -79,6 +79,7 @@ TypedValue tvPow(TypedValue, TypedValue);
 TypedValue tvBitAnd(TypedValue, TypedValue);
 TypedValue tvBitOr(TypedValue, TypedValue);
 TypedValue tvBitXor(TypedValue, TypedValue);
+StringData* strBitXor(StringData*, StringData*);
 
 /*
  * PHP operators << and >>.

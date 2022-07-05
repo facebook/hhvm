@@ -5,7 +5,8 @@
 
 use escaper::*;
 use lazy_static::lazy_static;
-use naming_special_names_rust::{classes as ns_classes, members};
+use naming_special_names_rust::classes as ns_classes;
+use naming_special_names_rust::members;
 use regex::Regex;
 use std::borrow::Cow;
 use std::cell::Cell;

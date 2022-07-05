@@ -1,3 +1,5 @@
+File "requireclass_conflict_01.bad.php", line 9, characters 28-28:
+`C` is a `final` class, so it cannot be extended. (NastCheck[3072])
 File "requireclass_conflict_01.bad.php", line 11, characters 7-7:
 This trait defines incompatible requirements. (Typing[4111])
   File "requireclass_conflict_01.bad.php", line 8, characters 26-26:

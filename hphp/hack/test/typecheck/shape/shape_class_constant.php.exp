@@ -11,6 +11,6 @@ Shape uses literal string as field name (Typing[4050])
   File "shape_class_constant.php", line 13, characters 7-19:
   But expected a class constant
 File "shape_class_constant.php", line 20, characters 22-26:
-The field `baz` is undefined (Typing[4108])
+This shape doesn't have a field `baz` (Typing[4108])
   File "shape_class_constant.php", line 11, characters 9-16:
-  Definition is here
+  The shape is defined here

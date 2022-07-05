@@ -192,9 +192,7 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
-  if (RO::EvalEnableImplicitContext) {
-    this->m_implicitContext = *ImplicitContext::activeCtx;
-  }
+  this->m_implicitContext = *ImplicitContext::activeCtx;
 
   // Suspend the async function.
   resumable()->setResumeAddr(nullptr, suspendOffset);

@@ -3,22 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{emit_body, emit_expression};
+use crate::emit_body;
+use crate::emit_expression;
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
-use env::{emitter::Emitter, Env};
+use env::emitter::Emitter;
+use env::Env;
 use error::Result;
-use ffi::{Maybe, Slice, Str};
-use hhbc::{
-    hhas_coeffects::HhasCoeffects,
-    hhas_constant::HhasConstant,
-    hhas_function::{HhasFunction, HhasFunctionFlags},
-    hhas_pos::HhasSpan,
-    TypedValue,
-};
+use ffi::Maybe;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::hhas_constant::HhasConstant;
+use hhbc::hhas_function::HhasFunction;
+use hhbc::hhas_function::HhasFunctionFlags;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::TypedValue;
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use oxidized::ast;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(

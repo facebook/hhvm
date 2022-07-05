@@ -4,7 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{context::Context, generator::Generator};
+use super::context::Context;
+use super::generator::Generator;
 use crate::common::*;
 use proc_macro2::TokenStream;
 use quote::quote;

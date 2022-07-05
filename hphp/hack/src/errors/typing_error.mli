@@ -454,6 +454,11 @@ module Primary : sig
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Req_class_not_final of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+      }
     | Incompatible_reqs of {
         pos: Pos.t;
         req_name: string;
@@ -1504,6 +1509,7 @@ module Secondary : sig
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {

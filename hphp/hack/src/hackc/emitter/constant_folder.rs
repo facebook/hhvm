@@ -2,20 +2,27 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::{emitter::Emitter, ClassExpr};
-use ffi::{Pair, Str};
+use env::emitter::Emitter;
+use env::ClassExpr;
+use ffi::Pair;
+use ffi::Str;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use naming_special_names_rust::{math, members, typehints};
+use naming_special_names_rust::math;
+use naming_special_names_rust::members;
+use naming_special_names_rust::typehints;
 use options::HhvmFlags;
-use oxidized::{
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast, ast_defs,
-    pos::Pos,
-};
-use std::{collections::hash_map::RandomState, fmt};
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
+use std::collections::hash_map::RandomState;
+use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {

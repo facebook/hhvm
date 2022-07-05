@@ -23,8 +23,16 @@ let class_decl_if_missing_DEPRECATED
     in
     ()
   else
-    let (_ : _ option) =
-      Decl_folded_class.class_decl_if_missing ~sh ctx (snd c.Aast.c_name)
+    let name = snd c.Aast.c_name in
+    let () =
+      match Provider_context.get_backend ctx with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.declare_folded_class backend name
+      | _ ->
+        let (_ : _ option) =
+          Decl_folded_class.class_decl_if_missing ~sh ctx name
+        in
+        ()
     in
     ()
 
@@ -85,10 +93,14 @@ let make_env
       if not (shallow_decl_enabled ctx) then
         List.iter parsed_file.Direct_decl_utils.pfh_decls ~f:(function
             | (name, Shallow_decl_defs.Class _, _) ->
-              let (_ : _ option) =
-                Decl_folded_class.class_decl_if_missing ~sh ctx name
-              in
-              ()
+              (match Provider_context.get_backend ctx with
+              | Provider_backend.Rust_provider_backend backend ->
+                Rust_provider_backend.Decl.declare_folded_class backend name
+              | _ ->
+                let (_ : _ option) =
+                  Decl_folded_class.class_decl_if_missing ~sh ctx name
+                in
+                ())
             | _ -> ())
   ) else
     let ast = Ast_provider.get_ast ctx fn in

@@ -1,4 +1,4 @@
-[RESULT] \f: #{1} [6:3-20] :
+[RESULT] \f: [6:3-20] :
   shape(
     key => int
   )

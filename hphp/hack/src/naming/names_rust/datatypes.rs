@@ -7,7 +7,9 @@ use oxidized::file_info::Mode;
 
 use oxidized::relative_path::Prefix;
 use rusqlite::types::FromSql;
-use rusqlite::types::{FromSqlError, FromSqlResult, ValueRef};
+use rusqlite::types::FromSqlError;
+use rusqlite::types::FromSqlResult;
+use rusqlite::types::ValueRef;
 use std::path::PathBuf;
 
 pub use hh24_types::ToplevelCanonSymbolHash;

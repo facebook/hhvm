@@ -5,22 +5,25 @@
 
 use bumpalo::collections::String as BString;
 use bumpalo::collections::Vec as BVec;
-use bumpalo::{vec, Bump};
+use bumpalo::vec;
+use bumpalo::Bump;
 
 use arena_trait::Arena;
-use naming_special_names_rust::{classes, collections};
+use naming_special_names_rust::classes;
+use naming_special_names_rust::collections;
+use oxidized_by_ref::ident;
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::tany_sentinel::TanySentinel;
-use oxidized_by_ref::{
-    ident,
-    typing_defs_flags::{FunParamFlags, FunTypeFlags},
-};
+use oxidized_by_ref::typing_defs_flags::FunParamFlags;
+use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
 
 use crate::typing_defs::ExpandEnv;
 use crate::typing_defs_core::*;
-use crate::typing_logic::{SubtypeProp, SubtypePropEnum};
+use crate::typing_logic::SubtypeProp;
+use crate::typing_logic::SubtypePropEnum;
 use crate::typing_reason::*;
-use typing_collections_rust::{SMap, Vec};
+use typing_collections_rust::SMap;
+use typing_collections_rust::Vec;
 
 // Struct off which we call type builder methods
 // This gives us the option to keep some state here e.g. for hash consing
@@ -147,9 +150,12 @@ impl<'a> TypeBuilder<'a> {
         name: PosId<'a>,
         tys: &'a [&'a Ty<'a>],
     ) -> &'a Ty<'a> {
+        let r = oxidized_by_ref::decl_defs::ClassRefinement {
+            cr_types: SMap::empty(),
+        };
         self.mk(
             reason,
-            Ty_::Tclass(self.alloc((name, Exact::Nonexact, tys))),
+            Ty_::Tclass(self.alloc((name, Exact::Nonexact(self.alloc(r)), tys))),
         )
     }
     pub fn traversable(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {

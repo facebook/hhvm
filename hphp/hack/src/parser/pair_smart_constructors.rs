@@ -5,14 +5,14 @@
 
 #![allow(unused_variables)]
 
-use parser_core_types::{
-    lexable_token::LexableToken,
-    lexable_trivia::{LexableTrivia, LexableTrivium},
-    token_factory::{TokenFactory, Trivia},
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-    trivia_kind::TriviaKind,
-};
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::lexable_trivia::LexableTrivium;
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_factory::Trivia;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use parser_core_types::trivia_kind::TriviaKind;
 use smart_constructors::NodeType;
 
 mod pair_smart_constructors_generated;

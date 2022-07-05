@@ -141,8 +141,8 @@ where
         Node(self.0.make_enum_class_enumerator(modifiers.0, type_.0, name.0, initializer.0, semicolon.0), self.1.make_enum_class_enumerator(modifiers.1, type_.1, name.1, initializer.1, semicolon.1))
     }
 
-    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
-        Node(self.0.make_alias_declaration(attribute_spec.0, modifiers.0, keyword.0, name.0, generic_parameter.0, constraint.0, equal.0, type_.0, semicolon.0), self.1.make_alias_declaration(attribute_spec.1, modifiers.1, keyword.1, name.1, generic_parameter.1, constraint.1, equal.1, type_.1, semicolon.1))
+    fn make_alias_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, module_kw_opt: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, constraint: Self::Output, equal: Self::Output, type_: Self::Output, semicolon: Self::Output) -> Self::Output {
+        Node(self.0.make_alias_declaration(attribute_spec.0, modifiers.0, module_kw_opt.0, keyword.0, name.0, generic_parameter.0, constraint.0, equal.0, type_.0, semicolon.0), self.1.make_alias_declaration(attribute_spec.1, modifiers.1, module_kw_opt.1, keyword.1, name.1, generic_parameter.1, constraint.1, equal.1, type_.1, semicolon.1))
     }
 
     fn make_context_alias_declaration(&mut self, attribute_spec: Self::Output, keyword: Self::Output, name: Self::Output, generic_parameter: Self::Output, as_constraint: Self::Output, equal: Self::Output, context: Self::Output, semicolon: Self::Output) -> Self::Output {

@@ -3,20 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::borrow::{Borrow, Cow};
-use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, BTreeSet};
-use std::ffi::{OsStr, OsString};
+use std::borrow::Borrow;
+use std::borrow::Cow;
+use std::cell::Cell;
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::ffi::OsString;
 use std::mem::size_of;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use bstr::{BStr, BString};
+use bstr::BStr;
+use bstr::BString;
 use bumpalo::Bump;
 
-use crate::{block, from};
-use crate::{Allocator, FromError, FromOcamlRep, FromOcamlRepIn, OpaqueValue, ToOcamlRep, Value};
+use crate::block;
+use crate::from;
+use crate::Allocator;
+use crate::FromError;
+use crate::FromOcamlRep;
+use crate::FromOcamlRepIn;
+use crate::OpaqueValue;
+use crate::ToOcamlRep;
+use crate::Value;
 
 macro_rules! trivial_from_in_impl {
     ($ty:ty) => {

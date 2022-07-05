@@ -3,13 +3,24 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{simple_type::SimpleType, util::InterestingFields};
-use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{
-    spanned::Spanned, Attribute, Data, DataEnum, DataStruct, DeriveInput, Error, Lit, Meta,
-    NestedMeta, Result, Variant,
-};
+use crate::simple_type::SimpleType;
+use crate::util::InterestingFields;
+use proc_macro2::Ident;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
+use syn::spanned::Spanned;
+use syn::Attribute;
+use syn::Data;
+use syn::DataEnum;
+use syn::DataStruct;
+use syn::DeriveInput;
+use syn::Error;
+use syn::Lit;
+use syn::Meta;
+use syn::NestedMeta;
+use syn::Result;
+use syn::Variant;
 
 /// Builds a HasOperands impl.
 ///

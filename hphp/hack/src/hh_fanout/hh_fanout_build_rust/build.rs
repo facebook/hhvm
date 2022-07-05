@@ -6,16 +6,24 @@ use log::info;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::ffi::OsString;
-use std::hash::{BuildHasher, Hash, Hasher};
-use std::io::{BufReader, Read};
+use std::fs;
+use std::hash::BuildHasher;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::io;
+use std::io::BufReader;
+use std::io::Read;
 use std::path::Path;
-use std::{fs, io};
 
 use depgraph::dep::Dep;
-use depgraph::reader::{DepGraph, DepGraphOpener};
-use depgraph_writer::{DepGraphWriter, HashListIndex, ShardedLookupTableWriter};
+use depgraph::reader::DepGraph;
+use depgraph::reader::DepGraphOpener;
+use depgraph_writer::DepGraphWriter;
+use depgraph_writer::HashListIndex;
+use depgraph_writer::ShardedLookupTableWriter;
 use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
 

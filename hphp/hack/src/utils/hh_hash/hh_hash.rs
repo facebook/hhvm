@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use std::hash::{Hash, Hasher};
+pub use std::hash::Hash;
+pub use std::hash::Hasher;
 
 pub use no_pos_hash::position_insensitive_hash;
 

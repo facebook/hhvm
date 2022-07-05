@@ -243,6 +243,34 @@ let parse_check_args cmd =
       ( "--delete-checkpoint",
         Arg.String (fun x -> set_mode (MODE_DELETE_CHECKPOINT x)),
         "" );
+      ( "--deps-out-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_DEPS_OUT_AT_POS_BATCH [position]
+              | Some (MODE_DEPS_OUT_AT_POS_BATCH positions) ->
+                MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) for each entry in input list get list of what it depends on [file:line:character list]"
+      );
+      ( "--deps-in-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_DEPS_IN_AT_POS_BATCH [position]
+              | Some (MODE_DEPS_IN_AT_POS_BATCH positions) ->
+                MODE_DEPS_IN_AT_POS_BATCH (position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) for each entry in input list get list of what depends on it [file:line:character list]"
+      );
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x)),
         "" );
@@ -333,6 +361,18 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),
         " generate a directory of decls and typecheck dependencies to use for prefetching"
         ^ " Usage: --gen-prefetch-dir ~/prefetched-dir" );
+      ( "--gen-remote-decls-full",
+        Arg.Unit (fun () -> set_mode MODE_GEN_REMOTE_DECLS_FULL),
+        " generate a directory of decls and typecheck dependencies to use for prefetching"
+        ^ " Usage: --gen-remote-decls-full" );
+      ( "--gen-remote-decls-incremental",
+        Arg.Unit (fun () -> set_mode MODE_GEN_REMOTE_DECLS_INCREMENTAL),
+        " generate a directory of decls and typecheck dependencies to use for prefetching"
+        ^ " Usage: --gen-remote-decls-incremental" );
+      ( "--gen-shallow-decls-dir",
+        Arg.String (fun x -> set_mode (MODE_GEN_SHALLOW_DECLS_DIR x)),
+        " generate a directory of decls and typecheck dependencies to use for prefetching"
+        ^ " Usage: --gen-shallow-decls-dir <target_dir>" );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         " generate a saved state even if there are type errors (default: false)."
@@ -522,6 +562,15 @@ let parse_check_args cmd =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
+      ( "--refactor-check-sound-dynamic",
+        Arg.Tuple
+          [
+            Arg.Symbol (["Class"; "Function"], (fun x -> refactor_mode := x));
+            Arg.String
+              (fun x ->
+                set_mode @@ MODE_REFACTOR_CHECK_SOUND_DYNAMIC (!refactor_mode, x));
+          ],
+        "" );
       ( "--refactor",
         Arg.Tuple
           [
@@ -1105,6 +1154,7 @@ invocations of `hh` faster.|}
   let saved_state_type = ref None in
   let should_save_replay = ref false in
   let replay_token = ref None in
+  let saved_state_manifold_api_key = ref None in
   let options =
     Arg.align
       [
@@ -1117,6 +1167,10 @@ invocations of `hh` faster.|}
         ( "--save-replay",
           Arg.Set should_save_replay,
           " Produce a token that can be later consumed by --replay-token to replay the same saved-state download."
+        );
+        ( "--saved-state-manifold-api-key",
+          Arg.String (fun arg -> saved_state_manifold_api_key := Some arg),
+          " An API key for Manifold to use when downloading the specified saved state."
         );
         ( "--replay-token",
           Arg.String (fun arg -> replay_token := Some arg),
@@ -1159,6 +1213,7 @@ invocations of `hh` faster.|}
       ClientDownloadSavedState.root;
       from;
       saved_state_type;
+      saved_state_manifold_api_key = !saved_state_manifold_api_key;
       should_save_replay = !should_save_replay;
       replay_token = !replay_token;
     }

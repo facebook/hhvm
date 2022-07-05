@@ -227,11 +227,12 @@ std::string ServerStats::Report(const std::string& keys,
     auto const udf = iter.second;
     auto viter = values.find(key);
     if (viter == values.end()) continue;
+    auto const value = viter->second;
     if ((udf & UDF_HIT) && ts.m_hits) {
-      values[key + "/hit"] = viter->second * PRECISION / ts.m_hits;
+      values[key + "/hit"] = value * PRECISION / ts.m_hits;
     }
     if ((udf & UDF_SEC) && sec) {
-      values[key + "/sec"] = viter->second * PRECISION / sec;
+      values[key + "/sec"] = value * PRECISION / sec;
     }
   }
 

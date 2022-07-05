@@ -1,4 +1,4 @@
-[RESULT] \f: #{0} [5:3-20] :
+[RESULT] \f: [5:3-20] :
   shape(
     b => bool
   )

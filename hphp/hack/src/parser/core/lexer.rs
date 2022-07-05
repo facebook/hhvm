@@ -4,16 +4,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_core_types::{
-    lexable_token::LexableToken,
-    lexable_trivia::{LexableTrivia, LexableTrivium},
-    source_text::{SourceText, INVALID},
-    syntax_error::{self as Errors, Error, SyntaxError},
-    token_factory::{TokenFactory, Trivia, Trivium},
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-    trivia_kind::TriviaKind,
-};
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::lexable_trivia::LexableTrivium;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::source_text::INVALID;
+use parser_core_types::syntax_error::Error;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_factory::Trivia;
+use parser_core_types::token_factory::Trivium;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use parser_core_types::trivia_kind::TriviaKind;
 use static_assertions::*;
 
 use std::cell::RefCell;

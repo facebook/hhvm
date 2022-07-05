@@ -113,7 +113,6 @@ let get_class
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
     end
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
@@ -125,21 +124,23 @@ let get_class
       | Some v -> Some (counter, v, Some ctx)
     end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    let result : Obj.t option =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
-        ~default:(fun () ->
-          let v : Typing_classes_heap.class_t option =
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
-          in
-          Option.map v ~f:Obj.repr)
-    in
-    (match result with
-    | None -> None
-    | Some obj ->
-      let v : Typing_classes_heap.class_t = Obj.obj obj in
-      Some (counter, v, Some ctx))
+    let open Option.Monad_infix in
+    Typing_classes_heap.get_class_with_cache
+      ctx
+      class_name
+      decl_cache
+      declare_folded_class_in_file
+    >>| fun cls -> (counter, cls, Some ctx)
+  | Provider_backend.Rust_provider_backend backend ->
+    begin
+      match
+        lookup_or_populate_class_cache class_name (fun class_name ->
+            Rust_provider_backend.Decl.get_folded_class backend class_name
+            |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
+      with
+      | None -> None
+      | Some v -> Some (counter, v, Some ctx)
+    end
 
 let declare_fun_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
@@ -158,7 +159,6 @@ let get_fun
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
@@ -203,6 +203,8 @@ let get_fun
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_fun backend fun_name
 
 let declare_typedef_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
@@ -221,7 +223,6 @@ let get_typedef
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -266,6 +267,8 @@ let get_typedef
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_typedef backend typedef_name
 
 let declare_const_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
@@ -284,7 +287,6 @@ let get_gconst
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
@@ -329,6 +331,8 @@ let get_gconst
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_gconst backend gconst_name
 
 let prepare_for_typecheck
     (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
@@ -383,7 +387,6 @@ let get_module
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
-  | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Option.first_some
       Decl_store.((get ()).get_module module_name)
@@ -395,6 +398,14 @@ let get_module
       ~default:fetch_from_backing_store
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_module decl module_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_module backend module_name
+
+let get_overridden_method ctx ~class_name ~method_name ~is_static :
+    Typing_defs.class_elt option =
+  let open Option.Monad_infix in
+  get_class ctx class_name >>= fun cls ->
+  Class.overridden_method cls ~method_name ~is_static ~get_class
 
 let local_changes_push_sharedmem_stack () =
   Decl_store.((get ()).push_local_changes ())

@@ -3,21 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{ClassExpr, IterGen, LabelGen, LocalGen};
+use crate::ClassExpr;
+use crate::IterGen;
+use crate::LabelGen;
+use crate::LocalGen;
 use adata_state::AdataState;
 use decl_provider::DeclProvider;
-use ffi::{Pair, Slice, Str};
+use ffi::Slice;
+use ffi::Str;
 use global_state::GlobalState;
 use hash::IndexSet;
-use hhbc::hhas_body::HhasBodyEnv;
-use hhbc::{
-    hhas_symbol_refs::{HhasSymbolRefs, IncludePath, IncludePathSet},
-    ClassName, ConstName, FunctionName, Local,
-};
+use hhbc::hhas_symbol_refs::HhasSymbolRefs;
+use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::hhas_symbol_refs::IncludePathSet;
+use hhbc::ClassName;
+use hhbc::ConstName;
+use hhbc::FunctionName;
+use hhbc::Local;
 use options::Options;
-use oxidized::{ast, ast_defs, pos::Pos};
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
-use std::{borrow::Cow, collections::BTreeSet};
+use std::borrow::Cow;
+use std::collections::BTreeSet;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
@@ -228,16 +238,8 @@ impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> 
                 self,
                 true,
                 true,
-                body_env
-                    .class_info
-                    .as_ref()
-                    .map(|Pair(k, s)| (k.clone(), s.unsafe_as_str()))
-                    .into(),
-                body_env
-                    .parent_name
-                    .clone()
-                    .map(|s| s.unsafe_as_str().to_owned())
-                    .into(),
+                body_env.class_info.as_ref().map(|(k, s)| (k.clone(), *s)),
+                body_env.parent_name.clone().map(|s| s.to_owned()),
                 ast::Expr(
                     (),
                     Pos::make_none(),

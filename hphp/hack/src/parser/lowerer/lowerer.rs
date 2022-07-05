@@ -4,55 +4,67 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{desugar_expression_tree::desugar, modifier};
-use bstr::{BString, B};
+use crate::desugar_expression_tree::desugar;
+use crate::modifier;
+use bstr::BString;
+use bstr::B;
 use bumpalo::Bump;
 use escaper::*;
-use hash::{HashMap, HashSet};
-use itertools::{Either, Itertools};
+use hash::HashMap;
+use hash::HashSet;
+use itertools::Either;
+use itertools::Itertools;
 use lint_rust::LintError;
-use naming_special_names_rust::{
-    classes as special_classes, literal, special_functions, special_idents,
-    typehints as special_typehints, user_attributes as special_attrs,
-};
-use ocaml_helper::{int_of_string_opt, parse_int, ParseIntError};
+use naming_special_names_rust::classes as special_classes;
+use naming_special_names_rust::literal;
+use naming_special_names_rust::special_functions;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::typehints as special_typehints;
+use naming_special_names_rust::user_attributes as special_attrs;
+use ocaml_helper::int_of_string_opt;
+use ocaml_helper::parse_int;
+use ocaml_helper::ParseIntError;
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    aast,
-    aast_visitor::{AstParams, Node, Visitor},
-    ast,
-    ast::{Expr, Expr_},
-    doc_comment::DocComment,
-    errors::{Error as HHError, Naming, NastCheck},
-    file_info,
-    global_options::GlobalOptions,
-    namespace_env::Env as NamespaceEnv,
-    pos::Pos,
-};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::{LexablePositionedToken, LexableToken},
-    source_text::SourceText,
-    syntax::SyntaxValueWithKind,
-    syntax_by_ref::{
-        positioned_token::{PositionedToken, TokenFactory as PositionedTokenFactory},
-        positioned_value::PositionedValue,
-        syntax::Syntax,
-        syntax_variant_generated::{SyntaxVariant::*, *},
-    },
-    syntax_error, syntax_kind,
-    syntax_trait::SyntaxTrait,
-    token_factory::TokenMutator,
-    token_kind::TokenKind as TK,
-};
+use oxidized::aast;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
+use oxidized::doc_comment::DocComment;
+use oxidized::errors::Error as HHError;
+use oxidized::errors::Naming;
+use oxidized::errors::NastCheck;
+use oxidized::file_info;
+use oxidized::global_options::GlobalOptions;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::pos::Pos;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexablePositionedToken;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxValueWithKind;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_token::TokenFactory as PositionedTokenFactory;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::*;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_kind;
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::token_factory::TokenMutator;
+use parser_core_types::token_kind::TokenKind as TK;
 use regex::bytes::Regex;
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    matches, mem,
-    rc::Rc,
-    slice::Iter,
-    str::FromStr,
-};
+use std::cell::Ref;
+use std::cell::RefCell;
+use std::cell::RefMut;
+use std::matches;
+use std::mem;
+use std::rc::Rc;
+use std::slice::Iter;
+use std::str::FromStr;
 use thiserror::Error;
 
 fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
@@ -791,7 +803,8 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 suggest(&name, special_typehints::FLOAT);
             }
 
-            use naming_special_names_rust::coeffects::{CAPABILITIES, CONTEXTS};
+            use naming_special_names_rust::coeffects::CAPABILITIES;
+            use naming_special_names_rust::coeffects::CONTEXTS;
             if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
                 let sn = strip_ns(&name);
                 if sn.starts_with(CONTEXTS) || sn.starts_with(CAPABILITIES) {
@@ -962,7 +975,7 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
 
 fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refinement> {
     match &node.children {
-        TypeInRefinement(c) => Ok(ast::Refinement::TypeRef(
+        TypeInRefinement(c) => Ok(ast::Refinement::Rtype(
             pos_name(&c.name, env)?,
             if c.type_.is_missing() {
                 let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env)?;
@@ -2704,7 +2717,9 @@ fn lift_await<'a>(
     env: &mut Env<'a>,
     location: ExprLocation,
 ) -> Expr_ {
-    use ExprLocation::{AsStatement, RightOfAssignmentInUsingStatement, UsingStatement};
+    use ExprLocation::AsStatement;
+    use ExprLocation::RightOfAssignmentInUsingStatement;
+    use ExprLocation::UsingStatement;
     match (&env.lifted_awaits, location) {
         (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
             Expr_::mk_await(expr)
@@ -2741,7 +2756,8 @@ fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
 
 fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let pos = p_pos(node, env);
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
@@ -2782,7 +2798,8 @@ fn p_while_stmt<'a>(
     c: &'a WhileStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     Ok(new(
         pos,
@@ -2796,7 +2813,8 @@ fn p_throw_stmt<'a>(
     c: &'a ThrowStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
     lift_awaits_in_statement(node, env, |e| {
         Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
@@ -2809,7 +2827,8 @@ fn p_try_stmt<'a>(
     c: &'a TryStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     Ok(new(
@@ -2838,7 +2857,8 @@ fn p_concurrent_stmt<'a>(
     c: &'a ConcurrentStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let keyword_pos = p_pos(&c.keyword, env);
@@ -2914,7 +2934,8 @@ fn p_unset_stmt<'a>(
     c: &'a UnsetStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2944,7 +2965,8 @@ fn p_echo_stmt<'a>(
     c: &'a EchoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2999,7 +3021,8 @@ fn p_foreach_stmt<'a>(
     c: &'a ForeachStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3027,7 +3050,8 @@ fn p_for_stmt<'a>(
     c: &'a ForStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
         let ini = could_map(&c.initializer, e, p_expr)?;
@@ -3045,7 +3069,8 @@ fn p_using_statement_function_scoped_stmt<'a>(
     c: &'a UsingStatementFunctionScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3068,7 +3093,8 @@ fn p_using_statement_block_scoped_stmt<'a>(
     c: &'a UsingStatementBlockScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3091,7 +3117,8 @@ fn p_do_stmt<'a>(
     c: &'a DoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     Ok(new(
@@ -3109,7 +3136,8 @@ fn p_expression_stmt<'a>(
     c: &'a ExpressionStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let expr = &c.expression;
@@ -3136,7 +3164,8 @@ fn p_if_stmt<'a>(
     c: &'a IfStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -3158,7 +3187,8 @@ fn p_switch_stmt_<'a>(
     c: &'a SwitchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     node: S<'a>,
 ) -> Result<ast::Stmt> {
-    use ast::{Stmt, Stmt_ as S_};
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::GenCase> {
@@ -3339,7 +3369,10 @@ fn strip_ns(name: &str) -> &str {
 // The contexts `ctx $f`, `$a::C`, and `T::C` all depend on the ability to generate a backing tparam
 // on the function or method. The `this::C` context does not, so it may appear in more places.
 fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: bool) -> bool {
-    use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
+    use ast::Hint_::HfunContext;
+    use ast::Hint_::Hvar;
     match *hint.1 {
         HfunContext(_) => true,
         Haccess(ref root, _) => match &*root.1 {
@@ -3392,7 +3425,9 @@ fn rewrite_fun_ctx<'a>(
     hint: &mut ast::Hint,
     name: &str,
 ) {
-    use ast::{Hint_, ReifyKind, Variance};
+    use ast::Hint_;
+    use ast::ReifyKind;
+    use ast::Variance;
 
     let mut invalid =
         |p| raise_parsing_error_pos(p, env, &syntax_error::ctx_fun_invalid_type_hint(name));
@@ -3446,8 +3481,14 @@ fn rewrite_effect_polymorphism<'a>(
     contexts: Option<&ast::Contexts>,
     where_constraints: &mut Vec<ast::WhereConstraintHint>,
 ) {
-    use ast::{Hint, Hint_, ReifyKind, Variance};
-    use Hint_::{Haccess, Happly, HfunContext, Hvar};
+    use ast::Hint;
+    use ast::Hint_;
+    use ast::ReifyKind;
+    use ast::Variance;
+    use Hint_::Haccess;
+    use Hint_::Happly;
+    use Hint_::HfunContext;
+    use Hint_::Hvar;
 
     if !has_polymorphic_context(env, contexts) {
         return;
@@ -4081,6 +4122,25 @@ fn process_attribute_constructor_call<'a>(
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
     }
+    // TODO(T123026333): Remove once migration is over
+    if env.codegen()
+        && naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&name.1)
+    {
+        let memo_name =
+            if name.1 == naming_special_names_rust::user_attributes::POLICY_SHARDED_MEMOIZE {
+                naming_special_names_rust::user_attributes::MEMOIZE
+            } else {
+                naming_special_names_rust::user_attributes::MEMOIZE_LSB
+            };
+        return Ok(ast::UserAttribute {
+            name: ast::Id(name.0, String::from(memo_name)),
+            params: vec![ast::Expr(
+                (),
+                Pos::make_none(),
+                ast::Expr_::String("KeyedByIC".into()),
+            )],
+        });
+    }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e);
         p_expr(n, e)
@@ -4367,6 +4427,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let has_abstract = kinds.has(modifier::ABSTRACT);
             // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
             let type_ = map_optional(&c.type_specifier, env, p_hint)?;
+            let span = p_pos(node, env);
             // ocaml's behavior is that if anything throw, it will
             // discard all lowered elements. So adding to class
             // must be at the last.
@@ -4384,6 +4445,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                         type_: type_.clone(),
                         id,
                         kind,
+                        span: span.clone(),
                         doc_comment: doc_comment_opt.clone(),
                     })
                 }
@@ -4392,7 +4454,8 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(class.consts.append(&mut class_consts))
         }
         TypeConstDeclaration(c) => {
-            use ast::ClassTypeconst::{TCAbstract, TCConcrete};
+            use ast::ClassTypeconst::TCAbstract;
+            use ast::ClassTypeconst::TCConcrete;
             if !c.type_parameters.is_missing() {
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
@@ -4449,7 +4512,8 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             }))
         }
         ContextConstDeclaration(c) => {
-            use ast::ClassTypeconst::{TCAbstract, TCConcrete};
+            use ast::ClassTypeconst::TCAbstract;
+            use ast::ClassTypeconst::TCConcrete;
             if !c.type_parameters.is_missing() {
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
@@ -4460,7 +4524,8 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 "Context constants cannot alias polymorphic contexts",
             )?;
             if let Some(ref hint) = context {
-                use ast::Hint_::{Happly, Hintersection};
+                use ast::Hint_::Happly;
+                use ast::Hint_::Hintersection;
                 let ast::Hint(_, ref h) = hint;
                 if let Hintersection(hl) = &**h {
                     for h in hl {
@@ -4946,35 +5011,24 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    let has_policied = has_any_policied_context(contexts);
-    if has_policied {
-        if let Some(u) = user_attributes
-            .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1))
-        {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::effect_policied_memoized(kind),
-            )
-        }
-    }
-    if let Some(u) = user_attributes
-        .iter()
-        .find(|u| naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1))
-    {
-        if !has_policied {
-            raise_parsing_error_pos(
-                &u.name.0,
-                env,
-                &syntax_error::policy_sharded_memoized_without_policied(kind),
-            )
+    if env.is_typechecker() {
+        if let Some(u) = user_attributes.iter().find(|u| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
+        }) {
+            if !has_any_policied_context(contexts) {
+                raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::policy_sharded_memoized_without_policied(kind),
+                )
+            }
         }
     }
 }
 
 fn check_context_has_this<'a>(contexts: Option<&ast::Contexts>, env: &mut Env<'a>) {
-    use ast::Hint_::{Haccess, Happly};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
     if let Some(ast::Contexts(pos, ref context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
@@ -4999,7 +5053,8 @@ fn check_effect_polymorphic_reification<'a>(
     env: &mut Env<'a>,
     node: S<'a>,
 ) {
-    use ast::Hint_::{Haccess, Happly};
+    use ast::Hint_::Haccess;
+    use ast::Hint_::Happly;
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
@@ -5262,6 +5317,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             })])
         }
         EnumDeclaration(c) => {
+            let span = p_pos(node, env);
             let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
@@ -5269,6 +5325,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                         type_: None,
                         id: pos_name(&c.name, e)?,
                         kind: ast::ClassConstKind::CCConcrete(p_expr(&c.value, e)?),
+                        span: span.clone(),
                         doc_comment: None,
                     }),
                     _ => missing_syntax("enumerator", n, e),
@@ -5431,6 +5488,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             type_: Some(full_type),
                             id: name,
                             kind,
+                            span: p_pos(node, env),
                             doc_comment: None,
                         };
                         enum_class.consts.push(class_const)
@@ -5510,6 +5568,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             user_attributes: p_user_attributes(&md.attribute_spec, env)?,
             span: p_pos(node, env),
             mode: env.file_mode(),
+            doc_comment: doc_comment_opt,
         })]),
         ModuleMembershipDeclaration(mm) => {
             Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])
@@ -5520,7 +5579,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
 }
 
 fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
-    use aast::{Def, Def::*, Stmt_::*};
+    use aast::Def;
+    use aast::Def::*;
+    use aast::Stmt_::*;
     let mut saw_ns: Option<(ast::Sid, Vec<ast::Def>)> = None;
     for def in program.into_iter() {
         if let Namespace(_) = &def {

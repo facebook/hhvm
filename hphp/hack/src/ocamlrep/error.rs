@@ -8,7 +8,8 @@ use std::fmt;
 use std::num::TryFromIntError;
 use std::str::Utf8Error;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Returned by
 /// [`OcamlRep::from_ocamlrep`](trait.OcamlRep.html#tymethod.from_ocamlrep) when

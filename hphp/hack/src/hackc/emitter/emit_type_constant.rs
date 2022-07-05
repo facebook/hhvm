@@ -3,18 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use ffi::Pair;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::classes;
 use options::Options;
-use oxidized::{
-    aast, aast_defs,
-    aast_defs::{Hint, NastShapeInfo, ShapeFieldInfo},
-    ast_defs,
-    ast_defs::ShapeFieldName,
-};
+use oxidized::aast;
+use oxidized::aast_defs;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::NastShapeInfo;
+use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::ast_defs;
+use oxidized::ast_defs::ShapeFieldName;
 use std::collections::BTreeMap;
 
 fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {

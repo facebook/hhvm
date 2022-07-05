@@ -14,19 +14,17 @@
 //! generator. This parser tracks and returns this kind of data in its state.
 
 use bumpalo::Bump;
-use decl_mode_smart_constructors::{DeclModeSmartConstructors, State as DeclModeState};
-use parser::{
-    parser::Parser,
-    parser_env::ParserEnv,
-    smart_constructors_wrappers::WithKind,
-    source_text::SourceText,
-    syntax_by_ref::{
-        positioned_syntax::PositionedSyntax,
-        positioned_token::{PositionedToken, TokenFactory},
-        positioned_value::PositionedValue,
-    },
-    syntax_error::SyntaxError,
-};
+use decl_mode_smart_constructors::DeclModeSmartConstructors;
+use decl_mode_smart_constructors::State as DeclModeState;
+use parser::parser::Parser;
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors_wrappers::WithKind;
+use parser::source_text::SourceText;
+use parser::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser::syntax_by_ref::positioned_token::PositionedToken;
+use parser::syntax_by_ref::positioned_token::TokenFactory;
+use parser::syntax_by_ref::positioned_value::PositionedValue;
+use parser::syntax_error::SyntaxError;
 
 pub type SmartConstructors<'src, 'arena> = WithKind<
     DeclModeSmartConstructors<

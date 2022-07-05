@@ -7,16 +7,18 @@
 use naming_special_names_rust::coeffects;
 use naming_special_names_rust::special_idents;
 
-use oxidized::{
-    aast,
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast, ast_defs,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError, SyntaxQuickfix},
-};
+use oxidized::aast;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
 
 /// Does this hint look like `Awaitable<Foo>` or `<<__Soft>> Awaitable<Foo>`?
 ///
@@ -175,7 +177,11 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
+        use aast::ClassId;
+        use aast::ClassId_::*;
+        use aast::Expr;
+        use aast::Expr_::*;
+        use aast::Lid;
 
         if let Await(_) = p.2 {
             if !c.in_methodish {

@@ -42,8 +42,10 @@ struct RuntimeCoeffects {
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
   static RuntimeCoeffects zoned_with();
+  static RuntimeCoeffects zoned();
   static RuntimeCoeffects write_this_props();
   static RuntimeCoeffects globals_leak_safe();
+  static RuntimeCoeffects leak_safe_shallow();
 
   // This function is a placeholder to indicate that the correct coeffect needs
   // to be indentified and passed in its place

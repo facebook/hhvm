@@ -3,19 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf};
+use std::borrow::Cow;
+use std::cmp::Ordering;
+use std::ops::Range;
+use std::path::PathBuf;
 
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::file_pos::FilePos;
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::pos_span_raw::PosSpanRaw;
 use crate::pos_span_tiny::PosSpanTiny;
-use crate::relative_path::{Prefix, RelativePath};
+use crate::relative_path::Prefix;
+use crate::relative_path::RelativePath;
 
 #[derive(
     Clone,

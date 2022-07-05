@@ -13,17 +13,10 @@ module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
      conflict, we may put e.g. a function named 'foo' into the cache whose value is
      one type, and then later try to withdraw a class named 'foo' whose value is
-     another type.
-
-     The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
-     but that module depends on this module, so we can't write it down or else we
-     will cause a circular dependency. (It could probably be refactored to break
-     the dependency.) We just use [Obj.t] instead, which is better than using
-     [Obj.t] for all of the cases here.
-  *)
+     another type. *)
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t
@@ -61,6 +54,21 @@ module Shallow_decl_cache_entry = struct
 end
 
 module Shallow_decl_cache = Cache (Shallow_decl_cache_entry)
+
+module Folded_class_cache_entry = struct
+  type _ t = Folded_class_decl : string -> Decl_defs.decl_class_type t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  let get_size ~key:_ ~value:_ = 1
+
+  let key_to_log_string : type a. a key -> string =
+   (fun (Folded_class_decl key) -> "ClassFolded" ^ key)
+end
+
+module Folded_class_cache = Cache (Folded_class_cache_entry)
 
 module Linearization_cache_entry = struct
   type _ t = Linearization : string -> Decl_defs.lin t
@@ -181,8 +189,9 @@ module Reverse_naming_table_delta = struct
 end
 
 type local_memory = {
-  decl_cache: Decl_cache.t;
   shallow_decl_cache: Shallow_decl_cache.t;
+  folded_class_cache: Folded_class_cache.t;
+  decl_cache: Decl_cache.t;
   linearization_cache: Linearization_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
@@ -211,27 +220,103 @@ let backend_ref = ref Shared_memory
 
 let set_analysis_backend () : unit = backend_ref := Analysis
 
-let set_shared_memory_backend () : unit = backend_ref := Shared_memory
+let set_shared_memory_backend () : unit =
+  backend_ref := Shared_memory;
+  Decl_store.set Decl_store.shared_memory_store;
+  ()
 
 let set_rust_backend popt : unit =
   backend_ref := Rust_provider_backend (Rust_provider_backend.make popt)
+
+let make_decl_store_from_local_memory
+    ({ decl_cache; folded_class_cache; _ } : local_memory) :
+    Decl_store.decl_store =
+  {
+    Decl_store.add_class =
+      (fun k v ->
+        Folded_class_cache.add
+          folded_class_cache
+          ~key:(Folded_class_cache_entry.Folded_class_decl k)
+          ~value:v);
+    get_class =
+      (fun k : Decl_defs.decl_class_type option ->
+        Folded_class_cache.find_or_add
+          folded_class_cache
+          ~key:(Folded_class_cache_entry.Folded_class_decl k)
+          ~default:(fun _ -> None));
+    add_typedef =
+      (fun k v ->
+        Decl_cache.add
+          decl_cache
+          ~key:(Decl_cache_entry.Typedef_decl k)
+          ~value:v);
+    get_typedef =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Typedef_decl k)
+          ~default:(fun _ -> None));
+    add_module =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Module_decl k) ~value:v);
+    get_module =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Module_decl k)
+          ~default:(fun _ -> None));
+    add_fun =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Fun_decl k) ~value:v);
+    get_fun =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Fun_decl k)
+          ~default:(fun _ -> None));
+    add_gconst =
+      (fun k v ->
+        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Gconst_decl k) ~value:v);
+    get_gconst =
+      (fun k ->
+        Decl_cache.find_or_add
+          decl_cache
+          ~key:(Decl_cache_entry.Gconst_decl k)
+          ~default:(fun _ -> None));
+    add_method = (fun _ _ -> ());
+    get_method = (fun _ -> None);
+    add_static_method = (fun _ _ -> ());
+    get_static_method = (fun _ -> None);
+    add_prop = (fun _ _ -> ());
+    get_prop = (fun _ -> None);
+    add_static_prop = (fun _ _ -> ());
+    get_static_prop = (fun _ -> None);
+    add_constructor = (fun _ _ -> ());
+    get_constructor = (fun _ -> None);
+    push_local_changes = (fun () -> ());
+    pop_local_changes = (fun () -> ());
+  }
 
 let set_local_memory_backend_internal
     ~(max_num_decls : int)
     ~(max_num_shallow_decls : int)
     ~(max_num_linearizations : int) : unit =
-  backend_ref :=
-    Local_memory
-      {
-        decl_cache = Decl_cache.make ~max_size:max_num_decls;
-        shallow_decl_cache =
-          Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
-        linearization_cache =
-          Linearization_cache.make ~max_size:max_num_linearizations;
-        reverse_naming_table_delta = Reverse_naming_table_delta.make ();
-        fixmes = empty_fixmes;
-        naming_db_path_ref = ref None;
-      }
+  let local_memory =
+    {
+      decl_cache = Decl_cache.make ~max_size:max_num_decls;
+      folded_class_cache = Folded_class_cache.make ~max_size:max_num_decls;
+      shallow_decl_cache =
+        Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+      linearization_cache =
+        Linearization_cache.make ~max_size:max_num_linearizations;
+      reverse_naming_table_delta = Reverse_naming_table_delta.make ();
+      fixmes = empty_fixmes;
+      naming_db_path_ref = ref None;
+    }
+  in
+  backend_ref := Local_memory local_memory;
+  Decl_store.set @@ make_decl_store_from_local_memory local_memory;
+  ()
 
 let set_local_memory_backend
     ~(max_num_decls : int)

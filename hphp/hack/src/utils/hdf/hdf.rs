@@ -31,7 +31,8 @@ pub(crate) mod ffi {
 #[cfg(test)]
 mod test {
     use super::*;
-    use cxx::{let_cxx_string, UniquePtr};
+    use cxx::let_cxx_string;
+    use cxx::UniquePtr;
     use std::ffi::CStr;
 
     fn abc() -> UniquePtr<ffi::Hdf> {

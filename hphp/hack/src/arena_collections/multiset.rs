@@ -27,9 +27,12 @@ use bumpalo::Bump;
 use serde::Serialize;
 
 use arena_trait::TrivialDrop;
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 
-use crate::{AssocList, AssocListMut, SortedAssocList};
+use crate::AssocList;
+use crate::AssocListMut;
+use crate::SortedAssocList;
 
 /// A readonly array-based multiset.
 ///

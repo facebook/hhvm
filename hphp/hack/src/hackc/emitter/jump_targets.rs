@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{IterId, Label};
+use hhbc::IterId;
+use hhbc::Label;
 
 #[derive(Clone, Debug, Default, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct StateId(pub u32);

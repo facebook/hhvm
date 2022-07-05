@@ -6,22 +6,31 @@
 use crate::FileOpts;
 use anyhow::Result;
 use clap::Parser;
-use compile::{EnvFlags, HHBCFlags, NativeEnv, ParserFlags, Profile};
-use decl_provider::{DeclProvider, Error};
-use direct_decl_parser::{self, Decls};
+use compile::EnvFlags;
+use compile::HHBCFlags;
+use compile::NativeEnv;
+use compile::ParserFlags;
+use compile::Profile;
+use decl_provider::DeclProvider;
+use decl_provider::Error;
+use direct_decl_parser::Decls;
+use direct_decl_parser::{self};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::{Prefix, RelativePath};
-use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::file_info::NameType;
+use oxidized_by_ref::shallow_decl_defs::Decl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use std::{
-    cell::RefCell,
-    fs::{self, File},
-    io::{stdout, Write},
-    path::{Path, PathBuf},
-    sync::Mutex,
-};
+use std::cell::RefCell;
+use std::fs::File;
+use std::fs::{self};
+use std::io::stdout;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::Mutex;
 
 #[derive(Parser, Debug)]
 pub struct Opts {
@@ -107,6 +116,26 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     results.into_iter().collect()
 }
 
+pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv<'_> {
+    let mut flags = EnvFlags::empty();
+    flags.set(
+        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        opts.disable_toplevel_elaboration,
+    );
+    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
+        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
+        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
+        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
+    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
+    NativeEnv {
+        filepath,
+        hhbc_flags,
+        parser_flags,
+        flags,
+        ..Default::default()
+    }
+}
+
 pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
@@ -118,23 +147,7 @@ pub(crate) fn process_single_file(
     }
     let filepath = RelativePath::make(Prefix::Dummy, filepath);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
-    let mut flags = EnvFlags::empty();
-    flags.set(
-        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
-        opts.disable_toplevel_elaboration,
-    );
-    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
-        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
-        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
-        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
-    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
-    let env = NativeEnv {
-        filepath,
-        hhbc_flags,
-        parser_flags,
-        flags,
-        ..Default::default()
-    };
+    let env = native_env(filepath, opts);
     let arena = bumpalo::Bump::new();
     let mut output = Vec::new();
     compile::from_text(&arena, &mut output, source_text, &env, None, profile)?;
@@ -174,15 +187,22 @@ fn compile_impl<'decl>(
     Ok(hhas)
 }
 
-pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()> {
+pub(crate) fn daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        compile_from_text(hackc_opts)
+    })
+}
+
+pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
 
         // Parse decls
-        let arena = bumpalo::Bump::new();
-        let decl_opts = hackc_opts.decl_opts(&arena);
+        let decl_opts = hackc_opts.decl_opts();
         let filename = RelativePath::make(Prefix::Root, path.clone());
+        let arena = bumpalo::Bump::new();
         let parsed_file = direct_decl_parser::parse_decls_without_reference_text(
             &decl_opts,
             filename,
@@ -212,6 +232,13 @@ pub(crate) fn test_compile_with_decls(hackc_opts: &mut crate::Opts) -> Result<()
     Ok(())
 }
 
+pub(crate) fn test_decl_compile_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        test_decl_compile(hackc_opts)
+    })
+}
+
 #[derive(Debug)]
 enum DeclsHolder<'a> {
     ByRef(Decls<'a>),
@@ -233,7 +260,7 @@ struct SingleDeclProvider<'a> {
 }
 
 impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
-    fn decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'a>, Error> {
+    fn decl(&self, kind: NameType, symbol: &str, _depth: u64) -> Result<Decl<'a>, Error> {
         let query = |decls: &Decls<'a>| {
             decls
                 .iter()

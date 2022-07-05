@@ -364,9 +364,10 @@ void scheduleSerializeOptProf() {
  *   1) Get ordering of functions in the TC using hfsort on the call graph (or
  *   from a precomputed order when deserializing).
  *   2) Compute a bespoke coloring and finalize the layout hierarchy.
- *   3) Optionally serialize profile data when configured.
- *   4) Generate machine code for each of the profiled functions.
- *   5) Relocate the functions in the TC according to the selected order.
+ *   3) Finalize the list of "lazy APC classes".
+ *   4) Optionally serialize profile data when configured.
+ *   5) Generate machine code for each of the profiled functions.
+ *   6) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll(bool skipSerialize) {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
@@ -393,13 +394,19 @@ void retranslateAll(bool skipSerialize) {
 
   if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
 
-  // 3) Check if we should dump profile data. We may exit here in
+  // 3) Stop adding new classes to the "lazy APC classes" list. After we
+  //    finalize this list, we can skip lazy deserialization checks for any
+  //    classes that are NOT on the list when JIT-ing access to them.
+
+  Class::finalizeLazyAPCClasses();
+
+  // 4) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless
   //    serialization of optimized code's profile is also enabled.
 
   if (serialize && !skipSerialize && serializeProfDataAndLog()) return;
 
-  // 4) Generate machine code for all the profiled functions.
+  // 5) Generate machine code for all the profiled functions.
 
   auto const initialSize = 512;
   std::vector<tc::FuncMetaInfo> jobs;
@@ -461,7 +468,7 @@ void retranslateAll(bool skipSerialize) {
       runParallelRetranslate();
     }
 
-    // 5) Relocate the machine code into code.hot in the desired order
+    // 6) Relocate the machine code into code.hot in the desired order
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {

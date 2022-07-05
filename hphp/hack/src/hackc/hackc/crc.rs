@@ -10,20 +10,22 @@ use compile::Profile;
 use log::info;
 use multifile_rust as multifile;
 use rayon::prelude::*;
-use std::{
-    borrow::Cow,
-    ffi::OsStr,
-    fmt::{self, Display},
-    fs,
-    hash::{Hash, Hasher},
-    io::Write,
-    path::{Path, PathBuf},
-    sync::{
-        atomic::{AtomicBool, AtomicUsize, Ordering},
-        Arc, Mutex,
-    },
-    time::{Duration, Instant},
-};
+use std::borrow::Cow;
+use std::fmt::Display;
+use std::fmt::{self};
+use std::fs;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::time::Duration;
+use std::time::Instant;
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
@@ -395,76 +397,13 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
     Ok(())
 }
 
-fn collect_files(
-    paths: &[PathBuf],
-    limit: Option<usize>,
-    _num_threads: usize,
-) -> Result<Vec<PathBuf>> {
-    fn is_php_file_name(file: &OsStr) -> bool {
-        use std::os::unix::ffi::OsStrExt;
-        let file = file.as_bytes();
-        file.ends_with(b".php") || file.ends_with(b".hack")
-    }
-
-    let mut files: Vec<(u64, PathBuf)> = paths
-        .iter()
-        .map(|path| {
-            use jwalk::{DirEntry, Result, WalkDir};
-            fn on_read_dir(
-                _: Option<usize>,
-                _: &Path,
-                _: &mut (),
-                children: &mut Vec<Result<DirEntry<((), ())>>>,
-            ) {
-                children.retain(|dir_entry_result| {
-                    dir_entry_result.as_ref().map_or(false, |dir_entry| {
-                        let file_type = &dir_entry.file_type;
-                        if file_type.is_file() {
-                            is_php_file_name(dir_entry.file_name())
-                        } else {
-                            true
-                        }
-                    })
-                });
-            }
-            let walker = WalkDir::new(path).process_read_dir(on_read_dir);
-
-            let mut files = Vec::new();
-            for dir_entry in walker {
-                let dir_entry = dir_entry?;
-                if dir_entry.file_type.is_file() {
-                    let len = dir_entry.metadata()?.len();
-                    files.push((len, dir_entry.path()));
-                }
-            }
-            Ok(files)
-        })
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .flatten()
-        .collect();
-
-    // Sort largest first process outliers first, then by path.
-    files.sort_unstable_by(|(len1, path1), (len2, path2)| {
-        len1.cmp(len2).reverse().then(path1.cmp(path2))
-    });
-    let mut files: Vec<PathBuf> = files.into_iter().map(|(_, path)| path).collect();
-    if let Some(limit) = limit {
-        if files.len() > limit {
-            files.resize_with(limit, || unreachable!());
-        }
-    }
-
-    Ok(files)
-}
-
 pub fn run(opts: Opts) -> Result<()> {
     let writer: SyncWrite = Mutex::new(Box::new(std::io::stdout()));
 
     info!("Collecting files");
     let files = {
         let start = Instant::now();
-        let files = collect_files(&opts.paths, None, opts.num_threads)?;
+        let files = crate::util::collect_files(&opts.paths, None, opts.num_threads)?;
         let duration = start.elapsed();
         info!("{} files found in {}", files.len(), duration.display());
         files

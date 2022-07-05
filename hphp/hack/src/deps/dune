@@ -17,7 +17,7 @@
 (library
  (name typing_deps)
  (wrapped false)
- (modules typing_deps typing_deps_mode)
+ (modules typing_deps typing_deps_mode typing_fine_deps)
  (libraries
   collections
   decl_reference
@@ -29,6 +29,8 @@
   logging
   ocamlpool
   relative_path
+  sqlite3
+  sqlite_utils
   typing_deps_rust
   worker_cancel)
  (preprocess

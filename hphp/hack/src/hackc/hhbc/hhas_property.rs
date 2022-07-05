@@ -3,11 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_attribute::HhasAttribute, hhas_type::HhasTypeInfo, hhbc_ast::Visibility,
-    typed_value::TypedValue, PropName,
-};
-use ffi::{Maybe, Slice, Str};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_type::HhasTypeInfo;
+use crate::hhbc_ast::Visibility;
+use crate::typed_value::TypedValue;
+use crate::PropName;
+use ffi::Maybe;
+use ffi::Slice;
+use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
 
 #[derive(Debug, Eq, PartialEq)]

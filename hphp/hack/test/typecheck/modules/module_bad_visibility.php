@@ -1,9 +1,12 @@
+//// modules.php
 <?hh
-
+<<file:__EnableUnstableFeatures('modules')>>
+new module A {}
+//// test.php
+<?hh
 <<file:__EnableUnstableFeatures('modules')>>
 module A;
 
-new module A {}
 
 class A {
   private internal function bad1(): void {}

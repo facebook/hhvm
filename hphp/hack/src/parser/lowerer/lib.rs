@@ -11,5 +11,6 @@ mod lowerer;
 mod modifier;
 mod scour_comment;
 
-pub use lowerer::{lower, Env};
+pub use lowerer::lower;
+pub use lowerer::Env;
 pub use scour_comment::ScourComment;

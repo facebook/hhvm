@@ -12,3 +12,7 @@ class Cls {
     echo "in foo\n";
   }
 }
+
+internal function foo() {
+  echo "in foo\n";
+}

@@ -3,14 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Pair, Slice, Str, Triple};
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
+use ffi::Triple;
 use hhbc_string_utils::strip_ns;
-use naming_special_names_rust::{self as sn, coeffects as c, coeffects::Ctx};
-use oxidized::{
-    aast as a,
-    aast_defs::{Hint, Hint_},
-    ast_defs::Id,
-};
+use naming_special_names_rust::coeffects as c;
+use naming_special_names_rust::coeffects::Ctx;
+use naming_special_names_rust::{self as sn};
+use oxidized::aast as a;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::ast_defs::Id;
 
 #[derive(Debug, Eq, PartialEq)]
 #[repr(C)]
@@ -50,6 +54,8 @@ impl<'arena> HhasCoeffects<'arena> {
                 c::ZONED_LOCAL => Some(Ctx::ZonedLocal),
                 c::ZONED_SHALLOW => Some(Ctx::ZonedShallow),
                 c::ZONED => Some(Ctx::Zoned),
+                c::LEAK_SAFE_LOCAL => Some(Ctx::LeakSafeLocal),
+                c::LEAK_SAFE_SHALLOW => Some(Ctx::LeakSafeShallow),
                 c::LEAK_SAFE => Some(Ctx::LeakSafe),
                 c::GLOBALS => Some(Ctx::Globals),
                 c::READ_GLOBALS => Some(Ctx::ReadGlobals),
@@ -65,6 +71,7 @@ impl<'arena> HhasCoeffects<'arena> {
             .map(|c| match c {
                 Ctx::RxLocal => Ctx::RxShallow,
                 Ctx::ZonedLocal => Ctx::ZonedShallow,
+                Ctx::LeakSafeLocal => Ctx::LeakSafeShallow,
                 _ => *c,
             })
             .collect()

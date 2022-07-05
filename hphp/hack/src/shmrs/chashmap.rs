@@ -3,8 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::{AllocError, Allocator, Layout};
-use std::hash::{BuildHasher, Hash, Hasher};
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
+use std::hash::BuildHasher;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
@@ -13,8 +17,13 @@ use owning_ref::OwningRef;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
-use crate::shardalloc::{ShardAlloc, ShardAllocControlData, SHARD_ALLOC_MIN_CHUNK_SIZE};
-use crate::sync::{RwLock, RwLockReadGuard, RwLockRef, RwLockWriteGuard};
+use crate::shardalloc::ShardAlloc;
+use crate::shardalloc::ShardAllocControlData;
+use crate::shardalloc::SHARD_ALLOC_MIN_CHUNK_SIZE;
+use crate::sync::RwLock;
+use crate::sync::RwLockReadGuard;
+use crate::sync::RwLockRef;
+use crate::sync::RwLockWriteGuard;
 
 /// Timeout for acquiring shard locks.
 ///
@@ -443,7 +452,8 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 mod integration_tests {
     use super::*;
 
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashMap;
+    use std::collections::HashSet;
     use std::time::Duration;
 
     use nix::sys::wait::WaitStatus;

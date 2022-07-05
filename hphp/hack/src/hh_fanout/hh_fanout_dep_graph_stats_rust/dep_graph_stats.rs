@@ -7,7 +7,8 @@ use log::info;
 use std::collections::HashSet;
 use std::ffi::OsString;
 
-use depgraph::reader::{Dep, DepGraphOpener};
+use depgraph::reader::Dep;
+use depgraph::reader::DepGraphOpener;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 fn main(dep_graph: OsString) {

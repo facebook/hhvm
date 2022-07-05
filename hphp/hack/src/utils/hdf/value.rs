@@ -2,8 +2,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::hdf::ffi;
-use cxx::{let_cxx_string, UniquePtr};
-use std::{borrow::Cow, ffi::CStr, os::unix::ffi::OsStrExt, path::Path};
+use cxx::let_cxx_string;
+use cxx::UniquePtr;
+use std::borrow::Cow;
+use std::ffi::CStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -49,7 +53,7 @@ impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.inner.toString().map_err(|_| std::fmt::Error)? {
             cstr if cstr.is_null() => f.write_str("{null}"),
-            cstr => unsafe { CStr::from_ptr(cstr) }.fmt(f),
+            cstr => f.write_str(&unsafe { CStr::from_ptr(cstr) }.to_string_lossy()),
         }
     }
 }
@@ -65,7 +69,9 @@ impl Value {
 
     /// Construct an HDF value from the given INI file.
     pub fn from_ini_file(filename: &Path) -> Result<Value> {
-        use std::{fs::File, io::BufRead, io::BufReader};
+        use std::fs::File;
+        use std::io::BufRead;
+        use std::io::BufReader;
         let input = BufReader::new(File::open(filename)?);
         let mut kv = Value::default();
         for line in input.lines() {
@@ -341,7 +347,7 @@ mod test {
         let mut hdf = Value::default();
 
         hdf.set_hdf("a.b.c=d").unwrap();
-        assert_eq!(format!("{:?}", hdf), r#""a {\n  b {\n    c = d\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", hdf), "a {\n  b {\n    c = d\n  }\n}\n");
         assert_eq!(hdf.get_str("a").unwrap(), None);
         assert_eq!(hdf.get_str("a.b").unwrap(), None);
         assert_eq!(hdf.get_str("a.b.c").unwrap(), Some("d".into()));
@@ -354,20 +360,20 @@ mod test {
         hdf.set_hdf("a.c.q=f").unwrap();
         assert_eq!(
             format!("{:?}", hdf),
-            r#""a {\n  b {\n    c = d\n  }\n  q = g\n  c {\n    q = f\n  }\n}\nq = h\n""#
+            "a {\n  b {\n    c = d\n  }\n  q = g\n  c {\n    q = f\n  }\n}\nq = h\n"
         );
     }
 
     #[test]
     fn test_ini() {
         let a = Value::from_ini_string("a.b.c=d").expect("expected to parse");
-        assert_eq!(format!("{:?}", a), r#""a {\n  b {\n    c = d\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", a), "a {\n  b {\n    c = d\n  }\n}\n");
 
         let a = Value::from_ini_string("hhvm.php7.all\nhhvm.php7.all=false")
             .expect("expected to parse");
         assert_eq!(
             format!("{:?}", a),
-            r#""hhvm {\n  php7 {\n    all = false\n  }\n}\n""#
+            "hhvm {\n  php7 {\n    all = false\n  }\n}\n"
         );
     }
 
@@ -379,7 +385,7 @@ mod test {
 a.b.c=d ; this is also a comment",
         )
         .expect("expected to parse");
-        assert_eq!(format!("{:?}", a), r#""a {\n  b {\n    c = d\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", a), "a {\n  b {\n    c = d\n  }\n}\n");
     }
 
     #[test]
@@ -390,7 +396,7 @@ a.b.c=d ; this is also a comment",
 a.b.c=d",
         )
         .expect("expected to parse");
-        assert_eq!(format!("{:?}", a), r#""a {\n  b {\n    c = d\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", a), "a {\n  b {\n    c = d\n  }\n}\n");
     }
 
     #[test]
@@ -401,7 +407,7 @@ a.b.c="d e"
 "#,
         )
         .expect("expected to parse");
-        assert_eq!(format!("{:?}", a), r#""a {\n  b {\n    c = d e\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", a), "a {\n  b {\n    c = d e\n  }\n}\n");
         assert_eq!(a.get_str("a.b.c").unwrap().as_deref(), Some("d e"));
 
         let a = Value::from_ini_string(
@@ -410,7 +416,7 @@ a.b.c="d;e"
 "#,
         )
         .expect("expected to parse");
-        assert_eq!(format!("{:?}", a), r#""a {\n  b {\n    c = d;e\n  }\n}\n""#);
+        assert_eq!(format!("{:?}", a), "a {\n  b {\n    c = d;e\n  }\n}\n");
     }
 
     #[test]

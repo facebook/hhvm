@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b6dbd38f1d559fc91e3530491a00d70>>
+// @generated SignedSource<<7f946d2ac10b9b206329cbc119e54016>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,13 +13,15 @@
 use super::node::Node;
 use super::type_params::Params;
 use super::visitor::Visitor;
-use crate::{
-    aast::{self, *},
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    doc_comment::{self, *},
-    *,
-};
+use crate::aast::*;
+use crate::aast::{self};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::doc_comment::*;
+use crate::doc_comment::{self};
+use crate::*;
 impl<P: Params> Node<P> for Abstraction {
     fn accept<'node>(
         &'node self,
@@ -277,6 +279,7 @@ impl<P: Params> Node<P> for ClassConst<P::Ex, P::En> {
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
         self.kind.accept(c, v)?;
+        self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)
     }
 }
@@ -1552,7 +1555,8 @@ impl<P: Params> Node<P> for ModuleDef<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
-        self.mode.accept(c, v)
+        self.mode.accept(c, v)?;
+        self.doc_comment.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for NastShapeInfo {
@@ -1699,7 +1703,7 @@ impl<P: Params> Node<P> for Refinement {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Refinement::TypeRef(a0, a1) => {
+            Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }

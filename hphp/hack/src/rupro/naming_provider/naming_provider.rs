@@ -6,16 +6,24 @@
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
+use oxidized::naming_types::KindOfType;
 use parking_lot::Mutex;
-use pos::{ConstName, FunName, RelativePath, TypeName};
-use std::fmt::{self, Debug};
+use pos::ConstName;
+use pos::FunName;
+use pos::RelativePath;
+use pos::TypeName;
+use std::fmt::Debug;
+use std::fmt::{self};
 use std::path::Path;
 
 /// An abstraction over the global symbol table. Should be used by
 /// `LazyShallowDeclProvider` only, since folding and typechecking logic should
 /// have no need for a `NamingProvider`.
 pub trait NamingProvider: Debug + Send + Sync {
-    fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>>;
+    fn get_type_path_and_kind(&self, name: TypeName) -> Result<Option<(RelativePath, KindOfType)>>;
+    fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>> {
+        Ok(self.get_type_path_and_kind(name)?.map(|(path, _kind)| path))
+    }
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>>;
     fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>>;
 }
@@ -27,31 +35,27 @@ pub struct SqliteNamingTable {
 }
 
 impl SqliteNamingTable {
-    pub fn new(path: impl AsRef<Path>) -> rusqlite::Result<Self> {
+    pub fn new(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         Ok(Self {
             names: Mutex::new(names::Names::from_file(path)?),
         })
     }
+}
 
-    pub fn get_type_path_and_kind(
-        &self,
-        name: TypeName,
-    ) -> Result<Option<(RelativePath, NameType)>> {
+impl NamingProvider for SqliteNamingTable {
+    fn get_type_path_and_kind(&self, name: TypeName) -> Result<Option<(RelativePath, KindOfType)>> {
         let path_opt = self
             .names
             .lock()
             .get_filename(ToplevelSymbolHash::from_type(name.as_str()))?;
-        Ok(path_opt.map(|(path, kind)| (RelativePath::from(&path), kind)))
-    }
-}
-
-impl NamingProvider for SqliteNamingTable {
-    fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>> {
-        let path_opt = self
-            .names
-            .lock()
-            .get_path_by_symbol_hash(ToplevelSymbolHash::from_type(name.as_str()))?;
-        Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
+        Ok(path_opt.and_then(|(path, name_type)| {
+            let kind = match name_type {
+                NameType::Class => KindOfType::TClass,
+                NameType::Typedef => KindOfType::TTypedef,
+                _ => return None,
+            };
+            Some((RelativePath::from(&path), kind))
+        }))
     }
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>> {
         let path_opt = self

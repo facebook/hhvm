@@ -8,48 +8,14 @@
  *)
 
 open Hh_prelude
-open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
+open Typing_class_types
 module Attrs = Typing_defs.Attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
-type lazy_class_type = {
-  lin_members: Decl_defs.mro_element list;
-  lin_ancestors: Decl_defs.mro_element list;
-  ih: inherited_members;
-  ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
-  req_ancestor_names: unit LSTable.t;
-  all_req_extends_implements_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
-  all_req_class_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
-}
-
-type eager_members = {
-  props: class_elt String.Table.t;
-  static_props: class_elt String.Table.t;
-  methods: class_elt String.Table.t;
-  static_methods: class_elt String.Table.t;
-  construct: Provider_context.t option -> class_elt option * consistent_kind;
-}
-
-(** class_t:
-This type is an abstraction layer over shallow vs folded decl,
-and provides a view of classes which includes all
-inherited members and their types.
-
-In legacy folded decl, that view is constructed by merging a single
-heap entry for the folded class with many entries for the types
-of each of its members (those member entries are looked up lazily,
-as needed).
-
-In shallow decl, that view is constructed even more lazily,
-by iterating over the shallow representation of the class
-and its ancestors one at a time. *)
-type class_t =
-  | Lazy of shallow_class * (lazy_class_type Lazy.t[@opaque])
-  | Eager of Decl_defs.decl_class_type * (eager_members[@opaque])
-[@@deriving show]
+type class_t = Typing_class_types.class_t [@@deriving show]
 
 let make_lazy_class_type ctx class_name =
   match Shallow_classes_provider.get ctx class_name with
@@ -103,21 +69,7 @@ let make_eager_class_decl decl =
         static_methods = String.Table.create ();
         props = String.Table.create ();
         static_props = String.Table.create ();
-        construct =
-          (let cstr_ref = ref None in
-           fun ctx ->
-             match !cstr_ref with
-             | Some cstr -> cstr
-             | None ->
-               let cstr =
-                 Decl_class.lookup_constructor_lazy
-                   ctx
-                   ~child_class_name:decl.Decl_defs.dc_name
-                   decl.Decl_defs.dc_substs
-                   decl.Decl_defs.dc_construct
-               in
-               cstr_ref := Some cstr;
-               cstr);
+        construct = ref None;
       } )
 
 let make_eager_class_type ctx class_name declare_folded_class_in_file =
@@ -329,7 +281,19 @@ module ApiLazy = struct
     Decl_counters.count_subdecl decl Decl_counters.Construct @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).ih.construct
-    | Eager (_, members) -> members.construct ctx
+    | Eager (cls, members) ->
+      (match !(members.construct) with
+      | Some x -> x
+      | None ->
+        let x =
+          Decl_class.lookup_constructor_lazy
+            ctx
+            ~child_class_name:cls.Decl_defs.dc_name
+            cls.Decl_defs.dc_substs
+            cls.Decl_defs.dc_construct
+        in
+        members.construct := Some x;
+        x)
 
   let need_init (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Need_init @@ fun () ->
@@ -615,6 +579,25 @@ module ApiEager = struct
       LSTable.get (Lazy.force lc).ih.all_inherited_smethods id
       |> Option.value ~default:[]
     | Eager _ -> failwith "shallow_class_decl is disabled"
+
+  let overridden_method (decl, t, ctx) ~method_name ~is_static ~get_class =
+    let open Option.Monad_infix in
+    Decl_counters.count_subdecl decl Decl_counters.Overridden_method
+    @@ fun () ->
+    ctx >>= fun ctx ->
+    let get_method (ty : decl_ty) : class_elt option =
+      let (_, (_, class_name), _) = Decl_utils.unwrap_class_type ty in
+      get_class ctx class_name >>= fun cls ->
+      ApiLazy.get_any_method ~is_static cls method_name
+    in
+    match t with
+    | Lazy (_sc, lc) ->
+      (Lazy.force lc).ancestors
+      |> LSTable.to_list
+      |> List.find_map ~f:(fun (_, ty) -> get_method ty)
+    | Eager (cls, _members) ->
+      Shallow_classes_provider.get ctx cls.Decl_defs.dc_name
+      >>= Decl_inherit.find_overridden_method ~get_method
 end
 
 module Api = struct
@@ -649,3 +632,10 @@ module Api = struct
     else
       false
 end
+
+let get_class_with_cache ctx class_name decl_cache declare_folded_class_in_file
+    =
+  Provider_backend.Decl_cache.find_or_add
+    decl_cache
+    ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
+    ~default:(fun () -> get ctx class_name declare_folded_class_in_file)

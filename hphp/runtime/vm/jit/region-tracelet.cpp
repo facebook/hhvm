@@ -294,9 +294,9 @@ bool traceThroughJmp(Env& env) {
   }
 
   auto offset = env.inst.imm[0].u_BA;
-  // Only trace through backwards jumps if it's a JmpNS and we're
+  // Only trace through backwards jumps if it's an Enter and we're
   // inlining. This is to get DV funclets.
-  if (offset <= 0 && (env.inst.op() != OpJmpNS || !env.inlining)) {
+  if (offset <= 0 && (env.inst.op() != OpEnter || !env.inlining)) {
     return false;
   }
 

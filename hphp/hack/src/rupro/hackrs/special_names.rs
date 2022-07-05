@@ -8,10 +8,15 @@
 
 use naming_special_names_rust as sn;
 use once_cell::sync::Lazy;
-use pos::{
-    ClassConstName, ConstName, FunName, MethodName, PropName, Symbol, TypeConstName, TypeName,
-    TypeNameSet,
-};
+use pos::ClassConstName;
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::PropName;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeName;
+use pos::TypeNameSet;
 
 macro_rules! lazy {
     ($value:expr) => {

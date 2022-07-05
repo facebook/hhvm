@@ -427,7 +427,7 @@ end = struct
         ->
         aux acc @@ snd hint
       | Aast_defs.Hrefinement (hint, members) ->
-        let member_hints (Aast_defs.TypeRef (_, ref)) =
+        let member_hints (Aast_defs.Rtype (_, ref)) =
           match ref with
           | Aast_defs.Texact hint -> [hint]
           | Aast_defs.Tloose { Aast_defs.tr_lower; tr_upper } ->

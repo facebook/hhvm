@@ -4,10 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use arena_trait::TrivialDrop;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexMap;
+use indexmap::IndexSet;
 use ocamlrep::ToOcamlRep;
-use oxidized_by_ref::{i_map::IMap, s_map::SMap, s_set::SSet};
-use std::collections::{BTreeMap, HashMap};
+use oxidized_by_ref::i_map::IMap;
+use oxidized_by_ref::s_map::SMap;
+use oxidized_by_ref::s_set::SSet;
+use std::collections::BTreeMap;
+use std::collections::HashMap;
 
 pub trait ToOxidized<'a> {
     type Output: TrivialDrop + Clone + ToOcamlRep + 'a;
@@ -95,18 +99,15 @@ impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> 
     }
 }
 
-pub struct IImmutableHashMapToOxidized<'input, K, V>(pub &'input im::HashMap<K, V>);
-
-impl<'a, 'input, K: ToOxidized<'a, Output = isize>, V: ToOxidized<'a>> ToOxidized<'a>
-    for IImmutableHashMapToOxidized<'input, K, V>
+impl<'a, K: ToOxidized<'a, Output = isize>, V: ToOxidized<'a>> ToOxidized<'a>
+    for &im::HashMap<K, V>
 {
     type Output = IMap<'a, &'a V::Output>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         IMap::from(
             arena,
-            self.0
-                .iter()
+            self.iter()
                 .map(|(k, v)| (k.to_oxidized(arena), &*arena.alloc(v.to_oxidized(arena)))),
         )
     }

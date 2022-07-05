@@ -5,11 +5,16 @@
 
 use std::cell::RefCell;
 use std::cmp::max;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
-use crate::{
-    block::Header, Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep, Value,
-};
+use crate::block::Header;
+use crate::Allocator;
+use crate::BlockBuilder;
+use crate::MemoizationCache;
+use crate::OpaqueValue;
+use crate::ToOcamlRep;
+use crate::Value;
 
 struct Chunk {
     data: Box<[OpaqueValue<'static>]>,

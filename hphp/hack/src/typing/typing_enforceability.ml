@@ -22,10 +22,9 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let rec enforcement include_dynamic env visited ty =
     match get_node ty with
     | Tthis -> Unenforced
-    | Tapply ((_, name), _)
-      when Env.is_enum env name
-           && not (TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
-      Unenforced
+    (* Enums are only enforced at their underlying type, in contrast to as and is
+     * tests which check for validity of values *)
+    | Tapply ((_, name), _) when Env.is_enum env name -> Unenforced
     | Tapply ((_, name), tyl) ->
       (* Cyclic type definition error will be produced elsewhere *)
       if SSet.mem name visited then
@@ -85,6 +84,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
        * be enforced at the moment; they are disallowed to have upper bounds.
        *)
       Unenforced
+    | Trefinement _ -> Unenforced
     | Taccess _ -> Unenforced
     | Tlike ty when enable_sound_dynamic ->
       enforcement include_dynamic env visited ty

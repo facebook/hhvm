@@ -196,7 +196,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
  * Check for too few or too many arguments and trim extra args.
  */
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
-                                   uint32_t argc) {
+                                   uint32_t& argc) {
   if (argc < callee->numRequiredParams()) {
     gen(env, ThrowMissingArg, FuncArgData { callee, argc });
   }
@@ -204,6 +204,7 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
   if (argc > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(argc == callee->numNonVariadicParams() + 1);
+    --argc;
 
     // Pop unpack args, skipping generics (we already know their type).
     auto const generics = callee->hasReifiedGenerics()
@@ -372,7 +373,7 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   }
 }
 
-void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
+void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
                       SSATmp* prologueFlags, SSATmp* prologueCtx) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
@@ -393,6 +394,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
 } // namespace
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
+  assertx(argc <= callee->numParams());
   if (argc == callee->numParams()) return;
 
   // Generics and coeffects are already initialized
@@ -422,10 +424,6 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
     assertx(callee->hasVariadicCaptureParam());
     push(env, cns(env, ArrayData::CreateVec()));
     ++argc;
-  } else if (argc > callee->numParams()) {
-    // Extra arguments already popped by emitCalleeArgumentArityChecks().
-    assertx(!callee->hasVariadicCaptureParam());
-    --argc;
   }
 
   assertx(argc == callee->numParams());
@@ -440,7 +438,7 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
 namespace {
 
-void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
+void emitSpillFrame(IRGS& env, const Func* callee,
                     SSATmp* prologueFlags, SSATmp* prologueCtx) {
   auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
   auto const calleeId = cns(env, callee->getFuncId().toInt());
@@ -517,7 +515,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
-  emitSpillFrame(env, callee, argc, prologueFlags, prologueCtx);
+  emitSpillFrame(env, callee, prologueFlags, prologueCtx);
   emitJmpFuncBody(env, callee, argc);
 }
 

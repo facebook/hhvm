@@ -6,7 +6,7 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-class C {
+final class C {
   use T;
 
   protected function foo(): void {}

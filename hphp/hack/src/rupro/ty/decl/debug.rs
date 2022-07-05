@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{folded::FoldedClass, shallow::ShallowClass};
+use super::folded::FoldedClass;
+use super::shallow::ShallowClass;
 use crate::reason::Reason;
 use std::fmt;
 

@@ -3,12 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_attribute::HhasAttribute, hhas_coeffects::HhasCtxConstant, hhas_constant::HhasConstant,
-    hhas_method::HhasMethod, hhas_pos::HhasSpan, hhas_property::HhasProperty,
-    hhas_type::HhasTypeInfo, hhas_type_const::HhasTypeConstant, ClassName,
-};
-use ffi::{Maybe, Pair, Slice, Str};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_coeffects::HhasCtxConstant;
+use crate::hhas_constant::HhasConstant;
+use crate::hhas_method::HhasMethod;
+use crate::hhas_pos::HhasSpan;
+use crate::hhas_property::HhasProperty;
+use crate::hhas_type::HhasTypeInfo;
+use crate::hhas_type_const::HhasTypeConstant;
+use crate::ClassName;
+use ffi::Maybe;
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
 
 #[derive(Debug, Eq, PartialEq)]

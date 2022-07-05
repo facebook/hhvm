@@ -7,7 +7,9 @@ use log::info;
 use std::ffi::OsString;
 use std::io;
 
-use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
+use depgraph::reader::Dep;
+use depgraph::reader::DepGraph;
+use depgraph::reader::DepGraphOpener;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 struct MissingEdge {

@@ -186,16 +186,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AliasDeclaration(x) => {
-                get_index(9).and_then(|index| { match index {
+                get_index(10).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.modifiers),
-                    2 => Some(&x.keyword),
-                    3 => Some(&x.name),
-                    4 => Some(&x.generic_parameter),
-                    5 => Some(&x.constraint),
-                    6 => Some(&x.equal),
-                    7 => Some(&x.type_),
-                    8 => Some(&x.semicolon),
+                    2 => Some(&x.module_kw_opt),
+                    3 => Some(&x.keyword),
+                    4 => Some(&x.name),
+                    5 => Some(&x.generic_parameter),
+                    6 => Some(&x.constraint),
+                    7 => Some(&x.equal),
+                    8 => Some(&x.type_),
+                    9 => Some(&x.semicolon),
                         _ => None,
                     }
                 })

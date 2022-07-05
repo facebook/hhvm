@@ -1,2 +1,2 @@
-File "internal_keyword2.php", line 6, characters 10-17:
+File "internal_keyword2.php--test.php", line 5, characters 10-17:
 Methods cannot have multiple visibility modifiers (Parsing[1002])

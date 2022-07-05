@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
-use eq_modulo_pos::{EqModuloPos, EqModuloPosAndReason};
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 
-use crate::xhp_attribute::{self, XhpAttribute};
+use crate::xhp_attribute::XhpAttribute;
+use crate::xhp_attribute::{self};
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
@@ -77,6 +79,7 @@ bitflags! {
         const XA_TAG_LATEINIT          = 1 << 11;
         const READONLY_PROP            = 1 << 12;
         const NEEDS_INIT               = 1 << 13;
+        const SAFE_GLOBAL_VARIABLE     = 1 << 14;
 
         const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits | Self::XA_TAG_REQUIRED.bits | Self::XA_TAG_LATEINIT.bits;
     }
@@ -96,6 +99,7 @@ pub struct ClassEltFlagsArgs {
     pub is_readonly_prop: bool,
     pub supports_dynamic_type: bool,
     pub needs_init: bool,
+    pub safe_global_variable: bool,
 }
 
 impl From<xhp_attribute::Tag> for ClassEltFlags {
@@ -140,6 +144,7 @@ impl ClassEltFlags {
             is_readonly_prop,
             supports_dynamic_type,
             needs_init,
+            safe_global_variable,
         } = args;
         let mut flags = Self::empty();
         flags.set(Self::ABSTRACT, is_abstract);
@@ -154,6 +159,7 @@ impl ClassEltFlags {
         flags.set(Self::READONLY_PROP, is_readonly_prop);
         flags.set(Self::SUPPORT_DYNAMIC_TYPE, supports_dynamic_type);
         flags.set(Self::NEEDS_INIT, needs_init);
+        flags.set(Self::SAFE_GLOBAL_VARIABLE, safe_global_variable);
         flags
     }
 

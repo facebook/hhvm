@@ -6,7 +6,8 @@
 
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
 

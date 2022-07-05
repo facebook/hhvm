@@ -8,7 +8,8 @@ pub mod by_ref_context;
 pub mod by_ref_node;
 
 use std::fmt::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 pub use anyhow::Result;
 
@@ -67,7 +68,8 @@ pub fn insert_header(s: &str, command: &str) -> Result<String> {
 
 pub mod gen_helpers {
     use proc_macro2::TokenStream;
-    use quote::{format_ident, quote};
+    use quote::format_ident;
+    use quote::quote;
 
     pub fn gen_module_uses(ms: impl Iterator<Item = impl AsRef<str>>) -> TokenStream {
         let mods = ms.map(|m| format_ident!("{}", m.as_ref()));
@@ -80,7 +82,8 @@ pub mod gen_helpers {
 pub mod syn_helpers {
     use std::collections::HashSet;
 
-    use anyhow::{anyhow, Result};
+    use anyhow::anyhow;
+    use anyhow::Result;
     use syn::*;
 
     pub fn get_ty_def_name(i: &Item) -> Result<String> {

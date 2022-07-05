@@ -5,7 +5,10 @@
 
 #![cfg(test)]
 
-use ocamlrep::{Allocator, Arena, FromOcamlRep, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::Arena;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 
 #[test]
 fn shared_str() {

@@ -11,7 +11,7 @@ trait T {
   }
 }
 
-class C {
+final class C {
   use T;
 
   public static function bar(): void {}

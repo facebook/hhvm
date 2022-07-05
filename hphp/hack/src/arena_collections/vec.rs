@@ -2,7 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use bumpalo::collections::{vec::IntoIter, Vec as BVec};
+use bumpalo::collections::vec::IntoIter;
+use bumpalo::collections::Vec as BVec;
 use bumpalo::Bump;
 use std::ops::Deref;
 use std::slice;

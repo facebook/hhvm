@@ -19,6 +19,25 @@ module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
 (*****************************************************************************)
+(* Profiling utilities *)
+(*****************************************************************************)
+
+let mean samples =
+  List.fold ~init:0.0 ~f:( +. ) samples /. Float.of_int (List.length samples)
+
+let standard_deviation mean samples =
+  let sosq =
+    List.fold
+      ~init:0.0
+      ~f:(fun acc sample ->
+        let diff = sample -. mean in
+        (diff *. diff) +. acc)
+      samples
+  in
+  let sosqm = sosq /. Float.of_int (List.length samples) in
+  Float.sqrt sosqm
+
+(*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
 
@@ -68,7 +87,7 @@ type options = {
   verbosity: int;
   should_print_position: bool;
   custom_hhi_path: string option;
-  profile_type_check_twice: bool;
+  profile_type_check_multi: int option;
   memtrace: string option;
   pessimise_builtins: bool;
   rust_provider_backend: bool;
@@ -285,6 +304,7 @@ let parse_options () =
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
   let enable_strict_const_semantics = ref 0 in
+  let strict_wellformedness = ref 0 in
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
   let strict_value_equality = ref false in
@@ -301,7 +321,7 @@ let parse_options () =
   let type_printer_fuel =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
-  let profile_type_check_twice = ref false in
+  let profile_type_check_multi = ref None in
   let profile_top_level_definitions =
     ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
@@ -322,6 +342,7 @@ let parse_options () =
     | _ -> enable_global_write_check_functions := SSet.empty
   in
   let allow_all_files_for_module_declarations = ref true in
+  let loop_iteration_upper_bound = ref None in
   let options =
     [
       ( "--no-print-position",
@@ -702,6 +723,9 @@ let parse_options () =
         Arg.Int (fun x -> enable_strict_const_semantics := x),
         " Raise an error when a concrete constants is overridden or multiply defined"
       );
+      ( "--strict-wellformedness",
+        Arg.Int (fun x -> strict_wellformedness := x),
+        " Re-introduce missing well-formedness checks in AST positions" );
       ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         " Controls whether meth_caller can be used on non-public methods" );
@@ -750,8 +774,11 @@ let parse_options () =
         " Raise an error for class constants missing types; 1 for abstract constants, 2 for all "
       );
       ( "--profile-type-check-twice",
-        Arg.Set profile_type_check_twice,
+        Arg.Unit (fun () -> profile_type_check_multi := Some 1),
         " Typecheck the file twice" );
+      ( "--profile-type-check-multi",
+        Arg.Int (fun n -> profile_type_check_multi := Some n),
+        " Typecheck the files n times extra (!)" );
       ( "--profile-top-level-definitions",
         Arg.Set profile_top_level_definitions,
         " Profile typechecking of top-level definitions" );
@@ -771,6 +798,10 @@ let parse_options () =
       ( "--enable-global-write-check-functions",
         Arg.String set_enable_global_write_check_functions,
         " Run global write checker on functions listed in the given JSON file"
+      );
+      ( "--overwrite-loop-iteration-upper-bound",
+        Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
+        " Sets the maximum number of iterations that will be used to typecheck loops"
       );
     ]
   in
@@ -919,6 +950,7 @@ let parse_options () =
       ~tco_math_new_code:!math_new_code
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_enable_strict_const_semantics:!enable_strict_const_semantics
+      ~tco_strict_wellformedness:!strict_wellformedness
       ~tco_meth_caller_only_public_visibility:
         !meth_caller_only_public_visibility
       ~tco_require_extends_implements_ancestors:
@@ -933,6 +965,7 @@ let parse_options () =
       ~tco_profile_top_level_definitions:!profile_top_level_definitions
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
+      ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -994,7 +1027,7 @@ let parse_options () =
       verbosity = !verbosity;
       should_print_position = !print_position;
       custom_hhi_path = !custom_hhi_path;
-      profile_type_check_twice = !profile_type_check_twice;
+      profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
       pessimise_builtins = !pessimise_builtins;
       rust_provider_backend = !rust_provider_backend;
@@ -1135,8 +1168,9 @@ let print_elapsed fn desc ~start_time =
     desc
     elapsed_ms
 
-let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
-  if profile_type_check_twice then
+let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
+  let profiling = Option.is_some profile_type_check_multi in
+  if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         let start_time = Unix.gettimeofday () in
         let _ = Typing_check_utils.type_file ctx fn fileinfo in
@@ -1148,17 +1182,49 @@ let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
           ~sampling_rate:Memtrace.default_sampling_rate
           ~filename)
   in
-  let errors =
-    Relative_path.Map.fold
-      files_info
-      ~f:(fun fn fileinfo errors ->
-        let start_time = Unix.gettimeofday () in
-        let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
-        if profile_type_check_twice then
-          print_elapsed fn "second typecheck" ~start_time;
-        errors @ Errors.get_sorted_error_list new_errors)
-      ~init:errors
+  let add_timing fn timings closure =
+    let start_cpu = Sys.time () in
+    let result = Lazy.force closure in
+    let elapsed_cpu_time = Sys.time () -. start_cpu in
+    let add_sample = function
+      | Some samples -> Some (elapsed_cpu_time :: samples)
+      | None -> Some [elapsed_cpu_time]
+    in
+    let timings = Relative_path.Map.update fn add_sample timings in
+    (result, timings)
   in
+  let rec go n timings =
+    let (errors, timings) =
+      Relative_path.Map.fold
+        files_info
+        ~f:(fun fn fileinfo (errors, timings) ->
+          let ((_, new_errors), timings) =
+            add_timing fn timings
+            @@ lazy (Typing_check_utils.type_file ctx fn fileinfo)
+          in
+          (errors @ Errors.get_sorted_error_list new_errors, timings))
+        ~init:(errors, timings)
+    in
+    if n > 1 then
+      go (n - 1) timings
+    else
+      (errors, timings)
+  in
+  let n_of_times_to_typecheck =
+    max 1 (Option.value ~default:1 profile_type_check_multi)
+  in
+  let timings = Relative_path.Map.empty in
+  let (errors, timings) = go n_of_times_to_typecheck timings in
+  let print_elapsed_cpu_time fn samples =
+    let mean = mean samples in
+    Printf.printf
+      "%s: %d typechecks - %f ± %f (s)\n"
+      (Relative_path.to_absolute fn |> Filename.basename)
+      n_of_times_to_typecheck
+      mean
+      (standard_deviation mean samples)
+  in
+  if profiling then Relative_path.Map.iter timings ~f:print_elapsed_cpu_time;
   Option.iter tracer ~f:Memtrace.stop_tracing;
   errors
 
@@ -1670,7 +1736,7 @@ let handle_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity =
   let expect_single_file () : Relative_path.t =
@@ -1710,7 +1776,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let error_list = Errors.get_sorted_error_list parse_errors in
       let check_errors =
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
+        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -1752,7 +1818,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let check_errors =
         let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
+        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -2140,7 +2206,7 @@ let handle_mode
                   ctx
                   (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
-                  ~profile_type_check_twice
+                  ~profile_type_check_multi
                   ~memtrace
               in
               write_error_list error_format errors oc max_errors)
@@ -2176,7 +2242,7 @@ let handle_mode
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
-      check_file ctx parse_errors files_info ~profile_type_check_twice ~memtrace
+      check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
@@ -2481,7 +2547,7 @@ let decl_and_run_mode
       verbosity;
       should_print_position;
       custom_hhi_path;
-      profile_type_check_twice;
+      profile_type_check_multi;
       memtrace;
       pessimise_builtins;
       rust_provider_backend;
@@ -2616,15 +2682,14 @@ let decl_and_run_mode
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
   | _ -> ());
   let ctx =
-    if rust_provider_backend then
+    if rust_provider_backend then (
+      Provider_backend.set_rust_backend popt;
       Provider_context.empty_for_tool
         ~popt
         ~tcopt
-        ~backend:
-          (Provider_backend.Rust_provider_backend
-             (Rust_provider_backend.make popt))
+        ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    else
+    ) else
       Provider_context.empty_for_test
         ~popt
         ~tcopt
@@ -2672,7 +2737,7 @@ let decl_and_run_mode
     dbg_deps
     dbg_glean_deps
     ~should_print_position
-    ~profile_type_check_twice
+    ~profile_type_check_multi
     ~memtrace
     ~verbosity
 

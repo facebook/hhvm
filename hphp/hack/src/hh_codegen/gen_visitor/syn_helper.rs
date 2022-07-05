@@ -4,11 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::{anyhow, Result};
+use anyhow::anyhow;
+use anyhow::Result;
 use quote::format_ident;
 use syn::*;
 
-pub use crate::common::syn_helpers::{get_dep_tys, get_ty_def_name};
+pub use crate::common::syn_helpers::get_dep_tys;
+pub use crate::common::syn_helpers::get_ty_def_name;
 
 pub fn is_alias(i: &Item) -> bool {
     match i {

@@ -10,13 +10,13 @@ open Hh_prelude
 
 let get_context_from_hint ctx h =
   let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; ctx } in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
   Typing_print.full_decl tcopt (Decl_hint.context_hint decl_env h)
 
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mhhi in
-  let decl_env = Decl_env.{ mode; droot = None; ctx } in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
   Typing_print.full_decl tcopt (Decl_hint.hint decl_env h)
 

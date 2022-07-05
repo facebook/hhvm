@@ -16,6 +16,6 @@ class D {
   protected function bar(): void {}
 }
 
-class C extends D {
+final class C extends D {
   use T;
 }

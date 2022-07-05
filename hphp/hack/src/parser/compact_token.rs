@@ -4,14 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    compact_trivia::{CompactTrivia, TriviaKinds},
-    lexable_token::LexableToken,
-    source_text::SourceText,
-    token_factory::SimpleTokenFactory,
-    token_kind::TokenKind,
-    trivia_kind::TriviaKind,
-};
+use crate::compact_trivia::CompactTrivia;
+use crate::compact_trivia::TriviaKinds;
+use crate::lexable_token::LexableToken;
+use crate::source_text::SourceText;
+use crate::token_factory::SimpleTokenFactory;
+use crate::token_kind::TokenKind;
+use crate::trivia_kind::TriviaKind;
 
 /// A compact version of parser_core_types::PositionedToken. Most tokens will be
 /// represented inline in 16 bytes (the same size as a slice). Tokens which do

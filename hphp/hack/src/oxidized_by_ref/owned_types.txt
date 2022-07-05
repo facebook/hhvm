@@ -18,7 +18,6 @@ typing_defs_core::ConsistentKind
 typing_defs_core::DependentType
 typing_defs_core::DestructureKind
 typing_defs_core::Enforcement
-typing_defs_core::Exact
 typing_defs_core::FunTparamsKind
 typing_defs_core::ParamMode
 typing_defs_core::ParamMutability
@@ -32,7 +31,6 @@ typing_defs::ClassConstKind
 typing_defs::CollectionStyle
 typing_defs::ConsistentKind
 typing_defs::DestructureKind
-typing_defs::Exact
 typing_defs::FunTparamsKind
 typing_defs::ParamMode
 typing_defs::ParamMutability

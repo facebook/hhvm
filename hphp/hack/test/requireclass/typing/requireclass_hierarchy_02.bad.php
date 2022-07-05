@@ -9,6 +9,6 @@ trait T {
 
 class C {}
 
-class D {
+final class D {
   use T;
 }

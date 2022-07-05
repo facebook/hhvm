@@ -764,6 +764,8 @@ struct MemoryManager {
   /*
    * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
    * is not contained in any heap allocation.
+   *
+   * This will initialize free node headers if not already initialized.
    */
   HeapObject* find(const void* p);
 
@@ -1093,6 +1095,11 @@ private:
   uint64_t m_freedOnOtherThread;
 
   int64_t m_req_start_micros;
+
+  // Used to check free node headers and holes are initialized when we want to
+  // count on them.
+  int64_t m_lastInitFreeAllocated{-1};
+  int64_t m_lastInitFreeFreed{-1};
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
 };

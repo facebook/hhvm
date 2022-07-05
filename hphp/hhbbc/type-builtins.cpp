@@ -77,11 +77,11 @@ bool is_collection_method_returning_this(const php::Class* cls,
 }
 
 Type native_function_return_type(const php::Func* f) {
-  assertx(f->nativeInfo);
+  assertx(f->isNative);
 
   // Infer the type from the HNI declaration
   auto t = [&]{
-    auto const hni = f->nativeInfo->returnType;
+    auto const hni = f->retTypeConstraint.asSystemlibType();
     return hni ? from_DataType(*hni) : TInitCell;
   }();
 

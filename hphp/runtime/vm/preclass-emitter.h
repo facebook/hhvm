@@ -204,7 +204,6 @@ struct PreClassEmitter {
             const StringData* parent, const StringData* docComment);
 
   UnitEmitter& ue() const { return m_ue; }
-  bool useGlobalIds() const { return m_ue.useGlobalIds(); }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
@@ -242,7 +241,6 @@ struct PreClassEmitter {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
-  void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
                    Attr attrs,
                    const StringData* userType,

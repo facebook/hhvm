@@ -599,8 +599,6 @@ void in(ISS& env, const bc::PopU2&) {
   push(env, std::move(val), equiv != StackDupId ? equiv : NoLocalId);
 }
 
-void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
-
 void in(ISS& env, const bc::Dup& /*op*/) {
   effect_free(env);
   auto equiv = topStkEquiv(env);
@@ -945,9 +943,11 @@ void in(ISS& env, const bc::ClsCns& op) {
   auto const cls = topC(env);
 
   if (cls.subtypeOf(BCls) && is_specialized_cls(cls)) {
-    auto const dcls = dcls_of(cls);
-    if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::PopC {}, bc::ClsCnsD { op.str1, dcls.cls.name() });
+    auto const& dcls = dcls_of(cls);
+    if (dcls.isExact()) {
+      return reduce(
+        env, bc::PopC {}, bc::ClsCnsD { op.str1, dcls.cls().name() }
+      );
     }
   }
 
@@ -1028,11 +1028,11 @@ void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
 void in(ISS& env, const bc::ClassName& op) {
   auto const ty = topC(env);
   if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
-    auto const dcls = dcls_of(ty);
-    if (dcls.type == DCls::Exact) {
+    auto const& dcls = dcls_of(ty);
+    if (dcls.isExact()) {
       return reduce(env,
                     bc::PopC {},
-                    bc::String { dcls.cls.name() });
+                    bc::String { dcls.cls().name() });
     }
     effect_free(env);
   }
@@ -1043,11 +1043,11 @@ void in(ISS& env, const bc::ClassName& op) {
 void in(ISS& env, const bc::LazyClassFromClass&) {
   auto const ty = topC(env);
   if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
-    auto const dcls = dcls_of(ty);
-    if (dcls.type == DCls::Exact) {
+    auto const& dcls = dcls_of(ty);
+    if (dcls.isExact()) {
       return reduce(env,
                     bc::PopC {},
-                    bc::LazyClass { dcls.cls.name() });
+                    bc::LazyClass { dcls.cls().name() });
     }
     effect_free(env);
   }
@@ -1681,8 +1681,9 @@ void in(ISS& env, const bc::Clone& /*op*/) {
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
 void in(ISS& env, const bc::Fatal&) { popC(env); }
 
-void in(ISS& /*env*/, const bc::JmpNS&) {
-  always_assert(0 && "blocks should not contain JmpNS instructions");
+void in(ISS& env, const bc::Enter& op) {
+  always_assert(op.target1 == env.ctx.func->mainEntry);
+  env.propagate(env.ctx.func->mainEntry, &env.state);
 }
 
 void in(ISS& /*env*/, const bc::Jmp&) {
@@ -1837,11 +1838,10 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
     ctxType,
     memo_impl_func
   );
-  auto const effectFree = [&] {
-    auto const f = memo_impl_func.exactFunc();
-    if (!f) return false;
-    return env.index.is_effect_free(f);
-  }();
+  auto const effectFree = env.index.is_effect_free(
+    env.ctx,
+    memo_impl_func
+  );
   // Regardless of anything we know the return type will be an InitCell (this is
   // a requirement of memoize functions).
   if (!retTy.subtypeOf(BInitCell)) return { TInitCell, effectFree };
@@ -2126,6 +2126,20 @@ void in(ISS& env, const bc::Throw& /*op*/) {
 
 void in(ISS& env, const bc::ThrowNonExhaustiveSwitch& /*op*/) {}
 
+void in(ISS& env, const bc::VerifyImplicitContextState& /*op*/) {
+  assertx(env.ctx.func->coeffectRules.empty());
+  assertx(env.ctx.func->isMemoizeWrapper || env.ctx.func->isMemoizeWrapperLSB);
+  auto const providedCoeffects =
+    RuntimeCoeffects::fromValue(env.ctx.func->requiredCoeffects.value() |
+                                env.ctx.func->coeffectEscapes.value());
+  if (!providedCoeffects.canCall(RuntimeCoeffects::zoned()) &&
+      !providedCoeffects.canCall(RuntimeCoeffects::leak_safe_shallow())) {
+    // If the current function cannot call zoned code, it cannot retrieve the
+    // implicit context, so it is safe to kill the verify instruction.
+    return reduce(env, bc::Nop {});
+  }
+}
+
 void in(ISS& env, const bc::RaiseClassStringConversionWarning& /*op*/) {}
 
 void in(ISS& env, const bc::ChainFaults&) {
@@ -2140,7 +2154,7 @@ void in(ISS& env, const bc::NativeImpl&) {
     return doRet(env, objExact(resCls), true);
   }
 
-  if (env.ctx.func->nativeInfo) {
+  if (env.ctx.func->isNative) {
     return doRet(env, native_function_return_type(env.ctx.func), true);
   }
   doRet(env, TInitCell, true);
@@ -2521,7 +2535,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // generic mode, which can handle collections or classes which don't
       // implement getInstanceKey.
       if (resolvedCls &&
-          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
@@ -2543,7 +2557,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // or the integer 0. This might seem wasteful, but the JIT does a good job
       // inlining away the call in the null case.
       if (resolvedCls &&
-          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
@@ -2762,13 +2776,10 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   }
 
   if (t1.subtypeOf(BObj) && is_specialized_obj(t1)) {
-    auto const dobj = dobj_of(t1);
-    switch (dobj.type) {
-    case DObj::Sub:
-      break;
-    case DObj::Exact:
+    auto const& dobj = dobj_of(t1);
+    if (dobj.isExact()) {
       return reduce(env, bc::PopC {},
-                         bc::InstanceOfD { dobj.cls.name() });
+                         bc::InstanceOfD { dobj.cls().name() });
     }
   }
 
@@ -3077,14 +3088,14 @@ void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
   effect_free(env);
   constprop(env);
   auto const t = [&] {
-    if (!is_specialized_cls(cls) || dcls_of(cls).type != DCls::Exact) {
+    if (!is_specialized_cls(cls) || !dcls_of(cls).isExact()) {
       return TBool;
     }
     auto const& dcls = dcls_of(cls);
-    if (!dcls.cls.couldHaveReifiedGenerics()) {
+    if (!dcls.cls().couldHaveReifiedGenerics()) {
       return TFalse;
     }
-    if (dcls.cls.mustHaveReifiedGenerics()) {
+    if (dcls.cls().mustHaveReifiedGenerics()) {
       return TTrue;
     }
     return TBool;
@@ -3106,14 +3117,14 @@ void in(ISS& env, const bc::HasReifiedParent& op) {
   effect_free(env);
   constprop(env);
   auto const t = [&] {
-    if (!is_specialized_cls(cls) || dcls_of(cls).type != DCls::Exact) {
+    if (!is_specialized_cls(cls) || !dcls_of(cls).isExact()) {
       return TBool;
     }
     auto const& dcls = dcls_of(cls);
-    if (!dcls.cls.couldHaveReifiedParent()) {
+    if (!dcls.cls().couldHaveReifiedParent()) {
       return TFalse;
     }
-    if (dcls.cls.mustHaveReifiedParent()) {
+    if (dcls.cls().mustHaveReifiedParent()) {
       return TTrue;
     }
     return TBool;
@@ -4166,9 +4177,9 @@ template<bool reifiedVersion = false>
 void resolveClsMethodSImpl(ISS& env, SpecialClsRef ref, LSString meth_name) {
   auto const clsTy = specialClsRefToCls(env, ref);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, meth_name);
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       !rfunc.couldHaveReifiedGenerics()) {
-    auto const clsName = dcls_of(clsTy).cls.name();
+    auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(env, bc::ResolveClsMethodD { clsName, meth_name });
   }
   if (reifiedVersion) popC(env);
@@ -4300,8 +4311,11 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
                         bool dynamic, uint32_t numExtraInputs, SString clsHint,
                         UpdateBC updateBC) {
   if (isBadContext(op.fca)) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
     for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
-    fcallUnknownImpl(env, op.fca);
+    fcallUnknownImpl(env, op.fca, TBottom);
     unreachable(env);
     return;
   }
@@ -4376,9 +4390,9 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
-    auto const clsName = dcls_of(clsTy).cls.name();
+    auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(
       env,
       bc::PopC {},
@@ -4397,8 +4411,20 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const t = topC(env);
   if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      // Kill the async eager target if the function never returns.
+      return reduce(
+        env,
+        bc::FCallClsMethodM {
+          op.fca.withoutAsyncEagerTarget(),
+          op.str2,
+          op.subop3,
+          op.str4
+        }
+      );
+    }
     popC(env);
-    fcallUnknownImpl(env, op.fca);
+    fcallUnknownImpl(env, op.fca, TBottom);
     unreachable(env);
     return;
   }
@@ -4421,13 +4447,13 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall
       )
   ) {
-    auto const clsName = dcls_of(clsTy).cls.name();
+    auto const clsName = dcls_of(clsTy).cls().name();
     return reduce(
       env,
       bc::PopC {},
@@ -4448,9 +4474,9 @@ template <typename Op, class UpdateBC>
 void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
                          bool extraInput, UpdateBC updateBC) {
   auto const clsTy = specialClsRefToCls(env, op.subop3);
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
       !dynamic && op.subop3 == SpecialClsRef::LateBoundCls) {
-    auto const clsName = dcls_of(clsTy).cls.name();
+    auto const clsName = dcls_of(clsTy).cls().name();
     reduce(env, bc::FCallClsMethodD { op.fca, clsName, methName });
     return;
   }
@@ -4555,11 +4581,11 @@ void in(ISS& env, const bc::NewObjS& op) {
     return;
   }
 
-  auto const dcls = dcls_of(cls);
-  auto const exact = dcls.type == DCls::Exact;
-  if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
-      (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))) {
-    return reduce(env, bc::NewObjD { dcls.cls.name() });
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
+      (!dcls.cls().couldBeOverriden() ||
+       equivalently_refined(cls, unctx(cls)))) {
+    return reduce(env, bc::NewObjD { dcls.cls().name() });
   }
 
   push(env, toobj(cls));
@@ -4573,13 +4599,12 @@ void in(ISS& env, const bc::NewObj& op) {
     return;
   }
 
-  auto const dcls = dcls_of(cls);
-  auto const exact = dcls.type == DCls::Exact;
-  if (exact && !dcls.cls.mightCareAboutDynConstructs()) {
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact() && !dcls.cls().mightCareAboutDynConstructs()) {
     return reduce(
       env,
       bc::PopC {},
-      bc::NewObjD { dcls.cls.name() }
+      bc::NewObjD { dcls.cls().name() }
     );
   }
 
@@ -4606,9 +4631,8 @@ void in(ISS& env, const bc::NewObjR& op) {
     return;
   }
 
-  auto const dcls = dcls_of(cls);
-  auto const exact = dcls.type == DCls::Exact;
-  if (exact && !dcls.cls.couldHaveReifiedGenerics()) {
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
@@ -4626,14 +4650,13 @@ namespace {
 bool objMightHaveConstProps(const Type& t) {
   assertx(t.subtypeOf(BObj));
   assertx(is_specialized_obj(t));
-  auto const dobj = dobj_of(t);
-  switch (dobj.type) {
-    case DObj::Exact:
-      return dobj.cls.couldHaveConstProp();
-    case DObj::Sub:
-      return dobj.cls.derivedCouldHaveConstProp();
+  auto const& dobj = dobj_of(t);
+  if (dobj.isExact()) return dobj.cls().couldHaveConstProp();
+  if (dobj.isSub()) return dobj.cls().subCouldHaveConstProp();
+  for (auto const cls : dobj.isect()) {
+    if (!cls.subCouldHaveConstProp()) return false;
   }
-  not_reached();
+  return true;
 }
 
 }
@@ -4652,9 +4675,8 @@ void in(ISS& env, const bc::FCallCtor& op) {
     );
   }
 
-  auto const dobj = dobj_of(obj);
-  auto const exact = dobj.type == DObj::Exact;
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls, exact);
+  auto const& dobj = dobj_of(obj);
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls(), dobj.isExact());
   if (!rfunc) {
     return fcallUnknownImpl(env, op.fca);
   }
@@ -4954,13 +4976,21 @@ void in(ISS& env, const bc::OODeclExists& op) {
 
 namespace {
 bool couldBeMocked(const Type& t) {
-  if (is_specialized_cls(t)) {
-    return dcls_of(t).cls.couldBeMocked();
-  } else if (is_specialized_obj(t)) {
-    return dobj_of(t).cls.couldBeMocked();
+  auto const dcls = [&] () -> const DCls* {
+    if (is_specialized_cls(t)) {
+      return &dcls_of(t);
+    } else if (is_specialized_obj(t)) {
+      return &dobj_of(t);
+    }
+    return nullptr;
+  }();
+  // In practice this should not occur since this is used mostly on
+  // the result of looked up type constraints.
+  if (!dcls) return true;
+  if (!dcls->isIsect()) return dcls->cls().couldBeMocked();
+  for (auto const cls : dcls->isect()) {
+    if (!cls.couldBeMocked()) return false;
   }
-  // In practice this should not occur since this is used mostly on the result
-  // of looked up type constraints.
   return true;
 }
 }
@@ -4975,40 +5005,13 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     return reduce(env);
   }
 
-  auto const& pinfo = env.ctx.func->params[op.loc1];
-  // Generally we won't know anything about the params, but
-  // analyze_func_inline does - and this can help with effect-free analysis
-  TCVec tcs = {&pinfo.typeConstraint};
-  for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
-  if (std::all_of(std::begin(tcs), std::end(tcs),
-        [&](const TypeConstraint* tc) {
-          return env.index.satisfies_constraint(env.ctx,
-                                                locAsCell(env, op.loc1),
-                                                *tc);
-          })) {
-    if (!locAsCell(env, op.loc1).couldBe(BCls)) {
-      return reduce(env);
-    }
-  }
+  auto [newTy, effectFree] =
+    env.index.verify_param_type(env.ctx, op.loc1, locAsCell(env, op.loc1));
 
-  /*
-   * We assume that if this opcode doesn't throw, the parameter was of the
-   * specified type.
-   */
-  auto tcT = TTop;
-  for (auto const& constraint : tcs) {
-    if (constraint->hasConstraint() && !constraint->isTypeVar() &&
-      !constraint->isTypeConstant()) {
-      auto t = env.index.lookup_constraint(env.ctx, *constraint);
-      if (constraint->isThis() && couldBeMocked(t)) {
-        t = unctx(std::move(t));
-      }
-      FTRACE(2, "     {} ({})\n", constraint->displayName(), show(t));
-      tcT = intersection_of(std::move(tcT), std::move(t));
-      if (tcT.subtypeOf(BBottom)) unreachable(env);
-    }
-  }
-  if (tcT != TTop) setLoc(env, op.loc1, std::move(tcT));
+  if (effectFree) return reduce(env);
+  if (newTy.subtypeOf(BBottom)) unreachable(env);
+
+  setLoc(env, op.loc1, std::move(newTy));
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
@@ -5922,6 +5925,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
     }
     if (needsUpdate) {
       auto& bc = mutate_last_op(env);
+      assertx(bc.op != Op::Enter);
       forEachTakenEdge(
         bc,
         [&] (BlockId& bid) {

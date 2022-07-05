@@ -5,11 +5,12 @@
 
 use hhbc::hhas_coeffects::HhasCoeffects;
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    ast_defs::{Abstraction, ClassishKind},
-    namespace_env::Env as NamespaceEnv,
-};
-use unique_id_builder::{get_unique_id_for_method, SMap, SSet};
+use oxidized::ast_defs::Abstraction;
+use oxidized::ast_defs::ClassishKind;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use unique_id_builder::get_unique_id_for_method;
+use unique_id_builder::SMap;
+use unique_id_builder::SSet;
 
 #[derive(Debug, Clone)]
 pub struct ClosureEnclosingClassInfo {

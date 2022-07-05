@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
+use std::ops::DerefMut;
 
-use hashbrown::{hash_map::DefaultHashBuilder, HashMap};
+use hashbrown::hash_map::DefaultHashBuilder;
+use hashbrown::HashMap;
 
 use crate::filealloc::FileAlloc;
 
@@ -59,7 +61,8 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
 mod integration_tests {
     use super::*;
 
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashMap;
+    use std::collections::HashSet;
     use std::mem::MaybeUninit;
     use std::time::Duration;
 

@@ -1,3 +1,5 @@
+# Do not edit the Cargo.toml file - edit .cargo/Cargo.toml.ocaml_build instead.
+
 [workspace]
 members = [
     "src/arena_collections",
@@ -36,6 +38,7 @@ members = [
     "src/facts/cargo/facts_rust",
     "src/facts/cargo/rust_facts_ffi",
     "src/hackc/bytecode_printer",
+    "src/hackc/cargo/hackc",
     "src/hackc/compile/cargo/closure_convert",
     "src/hackc/compile/cargo/compile",
     "src/hackc/compile/cargo/options",

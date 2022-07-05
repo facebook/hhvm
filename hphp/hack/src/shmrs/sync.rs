@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::UnsafeCell;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
+use std::ops::DerefMut;
 use std::time::Duration;
 
 use owning_ref::StableAddress;
@@ -396,7 +397,8 @@ mod integration_tests {
     use super::*;
 
     use std::mem::MaybeUninit;
-    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::atomic::AtomicBool;
+    use std::sync::atomic::Ordering;
     use std::time::Duration;
 
     use nix::sys::wait::WaitStatus;

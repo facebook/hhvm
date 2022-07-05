@@ -154,7 +154,7 @@ function ignore_user_abort(bool $setting = false): int;
  * @return mixed - Returns a binary string containing data.
  */
 <<__Native, __IsFoldable>>
-function pack(string $format, ...$args)[]: mixed;
+function pack(string $format, mixed... $args)[]: mixed;
 
 /** @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was
@@ -236,7 +236,7 @@ function unpack(string $format,
  * minutes).
  */
 <<__Native>>
-function sys_getloadavg(): varray;
+function sys_getloadavg(): vec<float>;
 
 /** Casts a given value to a string.
  * @param mixed $v - The value being casted to a string.

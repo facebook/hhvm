@@ -145,12 +145,21 @@ Options Package::AsyncState::makeOptions() {
     .setUseEdenFS(RuntimeOption::EvalUseEdenFS)
     .setUseRichClient(Option::ExternWorkerUseRichClient)
     .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
-    .setUseP2P(Option::ExternWorkerUseP2P);
+    .setUseP2P(Option::ExternWorkerUseP2P)
+    .setVerboseLogging(Option::ExternWorkerVerboseLogging);
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
   }
   if (!Option::ExternWorkerWorkingDir.empty()) {
     options.setWorkingDir(Option::ExternWorkerWorkingDir);
+  }
+  if (Option::ExternWorkerThrottleRetries >= 0) {
+    options.setThrottleRetries(Option::ExternWorkerThrottleRetries);
+  }
+  if (Option::ExternWorkerThrottleBaseWaitMSecs >= 0) {
+    options.setThrottleBaseWait(
+      std::chrono::milliseconds{Option::ExternWorkerThrottleBaseWaitMSecs}
+    );
   }
   return options;
 }
@@ -160,9 +169,6 @@ Options Package::AsyncState::makeOptions() {
 Package::Package(const char* root, bool parseOnDemand)
   : m_parseFailed{false}
   , m_parseOnDemand{parseOnDemand}
-  , m_cacheHits{0}
-  , m_readFiles{0}
-  , m_storedFiles{0}
   , m_total{0}
 {
   m_root = FileUtil::normalizeDir(root);
@@ -369,7 +375,7 @@ struct UnitEmitterWrapper {
         sd(filepath);
 
         auto ue = std::make_unique<UnitEmitter>(
-          sha1, SHA1{}, Native::s_noNativeFuncs, false
+          sha1, SHA1{}, Native::s_noNativeFuncs
         );
         ue->m_filepath = makeStaticString(filepath);
         ue->serde(sd, false);
@@ -492,6 +498,7 @@ struct ParseJob {
         loader,
         fileName.c_str(),
         Native::s_noNativeFuncs,
+        nullptr, // TODO: repo mode support for decl providers
         false,
         false
       );
@@ -940,59 +947,106 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     decltype(group.m_files){}.swap(group.m_files);
     auto const workItems = paths.size();
 
-    // Store the inputs and get their refs
-    size_t readFiles = 0;
-    size_t storedFiles = 0;
-    auto [fileRefs, metaRefs, optionRefs, configRef] =
-      HPHP_CORO_AWAIT(coro::collect(
-        m_async->m_client.storeFile(
-          std::move(paths), &readFiles, &storedFiles
-        ),
-        m_async->m_client.storeMulti(std::move(metas)),
-        coro::collectRange(std::move(options)),
-        *m_async->m_config
-      ));
+    Optional<std::vector<Ref<RepoOptionsFlags>>> storedOptions;
 
-    assertx(fileRefs.size() == workItems);
-    assertx(metaRefs.size() == workItems);
-    assertx(optionRefs.size() == workItems);
+    using InputsT = std::vector<decltype(g_parseJob)::InputsT>;
+    using OutputsT = std::vector<decltype(g_parseJob)::ReturnT>;
 
-    assertx(readFiles <= workItems);
-    assertx(storedFiles <= workItems);
-    m_readFiles += readFiles;
-    m_storedFiles += storedFiles;
+    auto const doStore =
+      [&] (bool opportunistic) ->
+      coro::Task<std::pair<const Ref<Config>*, InputsT>> {
+      // Store the inputs and get their refs
+      auto [fileRefs, metaRefs, optionRefs, configRef] =
+        HPHP_CORO_AWAIT(
+          coro::collect(
+            m_async->m_client.storeFile(
+              paths,
+              opportunistic
+            ),
+            m_async->m_client.storeMulti(
+              metas,
+              opportunistic
+            ),
+            // If we already called doStore, then options will be
+            // empty here (but storedOptions will be set).
+            coro::collectRange(std::move(options)),
+            *m_async->m_config
+          )
+        );
 
-    // "Tuplize" the input refs (so they're in the format that
-    // extern-worker expects).
-    std::vector<decltype(g_parseJob)::InputsT> inputs;
-    inputs.reserve(workItems);
-    for (size_t i = 0; i < workItems; ++i) {
-      inputs.emplace_back(
-        std::move(fileRefs[i]),
-        std::move(metaRefs[i]),
-        std::move(optionRefs[i])
+      assertx(fileRefs.size() == workItems);
+      assertx(metaRefs.size() == workItems);
+
+      // Options are never stored opportunistically. The first time we
+      // call doStore, we'll store them above and store the results in
+      // storedOptions. If we call this again, the above store for
+      // options will do nothing, and we'll just reload the
+      // storedOptions.
+      if (storedOptions) {
+        assertx(!opportunistic);
+        assertx(optionRefs.empty());
+        assertx(storedOptions->size() == workItems);
+        optionRefs = *std::move(storedOptions);
+      } else {
+        assertx(optionRefs.size() == workItems);
+        if (opportunistic) storedOptions = optionRefs;
+      }
+
+      // "Tuplize" the input refs (so they're in the format that
+      // extern-worker expects).
+      std::vector<decltype(g_parseJob)::InputsT> inputs;
+      inputs.reserve(workItems);
+      for (size_t i = 0; i < workItems; ++i) {
+        inputs.emplace_back(
+          std::move(fileRefs[i]),
+          std::move(metaRefs[i]),
+          std::move(optionRefs[i])
+        );
+      }
+      HPHP_CORO_RETURN(std::make_pair(configRef, std::move(inputs)));
+    };
+
+    auto const doExec = [&] (auto inputs,
+                             bool opportunistic) -> coro::Task<OutputsT> {
+      // Run the job. This does the parsing.
+      auto outputRefs = HPHP_CORO_AWAIT(
+        m_async->m_client.exec(
+          g_parseJob,
+          std::make_tuple(*inputs.first),
+          std::move(inputs.second),
+          opportunistic
+        )
       );
-    }
-    decltype(fileRefs){}.swap(fileRefs);
-    decltype(metaRefs){}.swap(metaRefs);
-    decltype(optionRefs){}.swap(optionRefs);
+      assertx(outputRefs.size() == workItems);
+      HPHP_CORO_MOVE_RETURN(outputRefs);
+    };
 
-    // Run the job. This does the parsing.
-    bool cached = false;
-    auto outputRefs = HPHP_CORO_AWAIT(m_async->m_client.exec(
-      g_parseJob,
-      std::make_tuple(*configRef),
-      std::move(inputs),
-      &cached
+    auto outputRefs = HPHP_CORO_AWAIT(coro::invoke(
+      [&] () -> coro::Task<OutputsT> {
+        if (Option::ParserOptimisticStore &&
+            m_async->m_client.supportsOptimistic()) {
+          // Try optimistic mode first. We won't actually store
+          // anything, just generate the Refs. If something isn't
+          // actually present in the workers, the execution will throw
+          // an exception. If everything is present, we've skipped a
+          // lot of work.
+          auto inputs = HPHP_CORO_AWAIT(doStore(true));
+          try {
+            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(std::move(inputs), true)));
+          } catch (const extern_worker::Error&) {}
+        }
+        // Either optimistic mode isn't enabled, or it failed
+        // above. Try again, actually storing everything this time.
+        auto inputs = HPHP_CORO_AWAIT(doStore(false));
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(std::move(inputs), false)));
+      }
     ));
-    assertx(outputRefs.size() == workItems);
 
     // Load the outputs
     auto outputs =
       HPHP_CORO_AWAIT(m_async->m_client.load(std::move(outputRefs)));
     assertx(outputs.size() == workItems);
 
-    if (cached) m_cacheHits += workItems;
     m_total += workItems;
 
     // Process the outputs

@@ -3,14 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
+use hhbc_gen::ImmType;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
 use std::collections::HashSet;
-use syn::{
-    spanned::Spanned, DeriveInput, Error, Lit, LitByteStr, LitStr, Meta, MetaList, MetaNameValue,
-    NestedMeta, Result,
-};
+use syn::spanned::Spanned;
+use syn::DeriveInput;
+use syn::Error;
+use syn::Lit;
+use syn::LitByteStr;
+use syn::LitStr;
+use syn::Meta;
+use syn::MetaList;
+use syn::MetaNameValue;
+use syn::NestedMeta;
+use syn::Result;
 
 // ----------------------------------------------------------------------------
 
@@ -53,7 +65,8 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
 
         if is_override {
             let override_call = {
-                use convert_case::{Case, Casing};
+                use convert_case::Case;
+                use convert_case::Casing;
                 let name = opcode.name.to_case(Case::Snake);
                 Ident::new(&format!("print_{}", name), Span::call_site())
             };
@@ -217,7 +230,8 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::NA => panic!("NA is not expected"),
         ImmType::NLA => quote!(self.print_local(w, #name)?;),
         ImmType::OA(ty) | ImmType::OAL(ty) => {
-            use convert_case::{Case, Casing};
+            use convert_case::Case;
+            use convert_case::Casing;
             let handler = Ident::new(
                 &format!("print_{}", ty.to_case(Case::Snake)),
                 Span::call_site(),

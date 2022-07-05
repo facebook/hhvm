@@ -31,7 +31,8 @@ fn to_type<'a, 'de>(
 mod tests {
     use super::*;
 
-    use serde_json::{json, value::Value as Json};
+    use serde_json::json;
+    use serde_json::value::Value as Json;
 
     fn roundtrip(js: &[Json]) -> Vec<Json> {
         trait JsonRoundtrip: AsMut<Vec<Json>> {
@@ -111,7 +112,6 @@ mod tests {
     fn de_ser_const_vec_arraykey_eq_vec_string_and_int() {
         // JSONs of types in: const vec<arraykey> AK = vec["4", 7];
         let js = vec![
-            json!([{"Rwitness":{"Tiny":{"file":"|f.php","span":26388480394827i64}}},{"Tclass":[[{"Tiny":{"file":"|f.php","span":26388480394827i64}},"\\HH\\vec"],"Nonexact",[[{"Rhint":{"Tiny":{"file":"|f.php","span":26388480393864i64}}},{"Tprim":"Tarraykey"}]]]}]),
             json!([{"Rwitness":{"Tiny":{"file":"|f.php","span":26388480395075i64}}},{"Tprim":"Tstring"}]),
             json!([{"Rwitness":{"Tiny":{"file":"|f.php","span":26388480395393i64}}},{"Tprim":"Tint"}]),
         ];

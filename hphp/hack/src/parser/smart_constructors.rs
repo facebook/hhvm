@@ -7,14 +7,14 @@
 pub mod smart_constructors_generated;
 pub mod smart_constructors_wrappers;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 
-use parser_core_types::{
-    lexable_token::LexableToken,
-    syntax_by_ref::{syntax::Syntax, syntax_variant_generated::SyntaxVariant},
-    syntax_kind::SyntaxKind,
-    token_kind::TokenKind,
-};
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::smart_constructors_generated::*;
 pub use crate::smart_constructors_wrappers::*;

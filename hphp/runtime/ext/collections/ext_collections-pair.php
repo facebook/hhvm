@@ -150,11 +150,13 @@ final class Pair implements \ConstVector {
     return new \LazyKeyedIterableView($this);
   }
 
-  <<__Native>>
-  public function toVArray()[]: varray;
+  public function toVArray()[]: varray {
+    return vec($this);
+  }
 
-  <<__Native>>
-  public function toDArray()[]: darray;
+  public function toDArray()[]: darray {
+    return dict($this);
+  }
 
   /**
     * Returns a `Vector` containing the elements of the current `Pair`.
@@ -236,8 +238,9 @@ final class Pair implements \ConstVector {
    *
    * @return - an `varray` containing the values from the current `Pair`.
    */
-  <<__Native>>
-  public function toValuesArray()[]: varray;
+  public function toValuesArray()[]: varray {
+    return vec($this);
+  }
 
   /**
    * Returns an iterator that points to beginning of the current `Pair`.

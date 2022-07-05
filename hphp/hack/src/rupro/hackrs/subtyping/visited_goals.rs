@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use im::{HashMap, HashSet};
+use im::HashMap;
+use im::HashSet;
 use pos::TypeName;
 use ty::local::Ty;
 use ty::reason::Reason;

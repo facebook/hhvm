@@ -4,8 +4,11 @@
 use anyhow::Result;
 use clap::Parser;
 use facts_rust::Facts;
-use oxidized::relative_path::{Prefix, RelativePath};
-use serde_json::{json, Value};
+use facts_rust::{self as facts};
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
+use serde_json::json;
+use serde_json::Value;
 
 /// Facts subcommand options
 #[derive(Parser, Debug, Default)]
@@ -29,12 +32,12 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
     let filenames = opts.files.gather_input_files()?;
     let mut file_to_facts = serde_json::Map::with_capacity(filenames.len());
     for path in filenames {
-        let arena = bumpalo::Bump::new();
-        let dp_opts = hackc_opts.decl_opts(&arena);
+        let dp_opts = hackc_opts.decl_opts();
 
         // Parse decls
         let text = std::fs::read(&path)?;
         let filename = RelativePath::make(Prefix::Root, path.clone());
+        let arena = bumpalo::Bump::new();
         let parsed_file = direct_decl_parser::parse_decls_without_reference_text(
             &dp_opts, filename, &text, &arena,
         );
@@ -55,7 +58,7 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
         let json = if opts.nohash {
             json!(facts)
         } else {
-            facts.to_json_value(&text)
+            facts.to_json_value(&facts::sha1(&text))
         };
         file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }
@@ -66,4 +69,19 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
         crate::daemon_print(hackc_opts, output.as_bytes())?;
     }
     Ok(())
+}
+
+pub(crate) fn run_flag(hackc_opts: &mut crate::Opts) -> Result<()> {
+    let facts_opts = Opts {
+        files: std::mem::take(&mut hackc_opts.files),
+        ..Default::default()
+    };
+    extract_facts(hackc_opts, facts_opts)
+}
+
+pub(crate) fn run_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_mode(|path| {
+        hackc_opts.files.filenames = vec![path];
+        run_flag(hackc_opts)
+    })
 }

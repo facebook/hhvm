@@ -31,6 +31,7 @@ const StaticString s_value("value");
 const StaticString s_nullable("nullable");
 const StaticString s_soft("soft");
 const StaticString s_like("like");
+const StaticString s_opaque("opaque");
 const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
 const StaticString s_wildcard("_");

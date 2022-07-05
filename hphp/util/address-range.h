@@ -46,6 +46,7 @@ constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
 constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
+constexpr uintptr_t kDebugAddr = 3ull << 39;
 
 namespace alloc {
 
@@ -140,12 +141,8 @@ struct RangeState {
     return high() - low();
   }
 
-  void lock() {
-    low_internal.lock_for_update();
-  }
-
-  void unlock() {
-    low_internal.unlock();
+  LockFreePtrWrapper<char*>::ScopedLock lock() {
+    return low_internal.lock_for_update();
   }
 
   // Whether it is possible (but not guaranteed when multiple threads are

@@ -244,6 +244,7 @@ let () =
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
       ignored_arg "--enable-strict-const-semantics";
+      ignored_arg "--strict-wellformedness";
       ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";

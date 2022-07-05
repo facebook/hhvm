@@ -3,25 +3,43 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl::{
-    ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
-    ClassEltFlags, EnumType, Tparam, Ty, Typeconst, WhereConstraint, XhpAttribute,
-};
+use crate::decl::ty::ConsistentKind;
+use crate::decl::ty::XhpEnumValue;
+use crate::decl::CeVisibility;
+use crate::decl::ClassConstKind;
+use crate::decl::ClassConstRef;
+use crate::decl::ClassEltFlags;
+use crate::decl::EnumType;
+use crate::decl::Tparam;
+use crate::decl::Ty;
+use crate::decl::Typeconst;
+use crate::decl::WhereConstraint;
+use crate::decl::XhpAttribute;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use eq_modulo_pos::EqModuloPos;
-use pos::{
-    Bytes, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropNameIndexMap,
-    PropNameIndexSet, Symbol, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
-    TypeNameIndexSet,
-};
+use pos::Bytes;
+use pos::ClassConstNameIndexMap;
+use pos::MethodNameIndexMap;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::PropNameIndexMap;
+use pos::PropNameIndexSet;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeConstNameIndexMap;
+use pos::TypeName;
+use pos::TypeNameIndexMap;
+use pos::TypeNameIndexSet;
 use std::collections::BTreeMap;
 use std::fmt;
 
 pub use crate::decl::subst::Subst;
-pub use oxidized::ast_defs::{Abstraction, ClassishKind};
+pub use oxidized::ast_defs::Abstraction;
+pub use oxidized::ast_defs::ClassishKind;
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 pub struct FoldedElement {

@@ -47,7 +47,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
     BuildMayNoticeOnMethCallerHelperIsObject;
   RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
-  RO::EvalEnableImplicitContext                    = EnableImplicitContext;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -105,7 +104,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(TraitConstantInterfaceBehavior);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
   SHOW(DiamondTraitMethods);
-  SHOW(EnableImplicitContext);
 #undef SHOW
   folly::format(
     &out, "  SourceRootForFileBC: {}\n",

@@ -46,6 +46,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
+#include <folly/lang/UncaughtExceptions.h>
 #include <vector>
 
 namespace HPHP {
@@ -465,12 +466,6 @@ TypedValue HHVM_FUNCTION(array_keys,
 
 namespace {
 
-void php_array_merge(Array& arr1, const Array& arr2) {
-  assertx(arr1->isVanillaDict());
-  arr1.reset(!arr2.empty() ? VanillaDict::Merge(arr1.get(), arr2.get())
-                           : VanillaDict::Renumber(arr1.get()));
-}
-
 void php_array_merge_recursive(Array& arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
@@ -580,34 +575,6 @@ TypedValue HHVM_FUNCTION(array_map,
     }
   }
   return tvReturn(ret_ai.toVariant());
-}
-
-TypedValue HHVM_FUNCTION(array_merge,
-                         const Variant& array1,
-                         const Array& arrays /* = null array */) {
-  getCheckedContainer(array1);
-  Array ret = Array::CreateDict();
-  php_array_merge(ret, arr_array1);
-
-  bool success = true;
-  IterateV(
-    arrays.get(),
-    [&](TypedValue v) -> bool {
-      if (!tvIsArrayLike(v)) {
-        raise_expected_array_warning("array_merge");
-        success = false;
-        return true;
-      }
-
-      php_array_merge(ret, asCArrRef(&v));
-      return false;
-    }
-  );
-
-  if (UNLIKELY(!success)) {
-    return make_tv<KindOfNull>();
-  }
-  return tvReturn(std::move(ret));
 }
 
 TypedValue HHVM_FUNCTION(array_merge_recursive,
@@ -2503,6 +2470,17 @@ struct ArraySortTmp {
     if (!old->isVanilla()) {
       m_ad = BespokeArray::PostSort(old, m_ad);
     }
+
+    // Do not update the inout value if we are throwing an exception. Builtins
+    // receive inout values by a TV pointer. The JIT expects that the inout
+    // value will not be updated if the builtin throws. For example, it assumes
+    // that the type remains the same and if an exception is thrown, it uses the
+    // corresponding destructor.
+    if (folly::uncaught_exceptions() > m_excCount) {
+      if (m_ad != old) decRefArr(m_ad);
+      return;
+    }
+
     if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
     }
@@ -2518,6 +2496,7 @@ struct ArraySortTmp {
  private:
   TypedValue* m_tv;
   ArrayData* m_ad;
+  int m_excCount{folly::uncaught_exceptions()};
 };
 }
 
@@ -3164,7 +3143,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_keys);
     HHVM_FALIAS(__SystemLib\\array_map, array_map);
     HHVM_FE(array_merge_recursive);
-    HHVM_FE(array_merge);
     HHVM_FE(array_replace_recursive);
     HHVM_FE(array_replace);
     HHVM_FE(array_pad);

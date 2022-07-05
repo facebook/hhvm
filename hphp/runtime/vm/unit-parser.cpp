@@ -165,11 +165,10 @@ CompilerResult hackc_compile(
   bool forDebuggerEval,
   bool& internal_error,
   const RepoOptionsFlags& options,
-  CompileAbortMode mode
+  CompileAbortMode mode,
+  HhvmDeclProvider* provider
 ) {
-  // Create DeclProvider. Returns nullptr if disabled or too early.
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
-  auto provider = HhvmDeclProvider::create(options);
 
   uint8_t flags = make_env_flags(
     isSystemLib,                    // is_systemlib
@@ -179,7 +178,7 @@ CompilerResult hackc_compile(
   );
 
   NativeEnv const native_env{
-    reinterpret_cast<uint64_t>(provider.get()),
+    reinterpret_cast<uint64_t>(provider),
     reinterpret_cast<uint64_t>(provider ? &hhvm_decl_provider_get_decl : nullptr),
     filename,
     aliased_namespaces,
@@ -269,6 +268,53 @@ CompilerResult hackc_compile(
 
   return res;
 }
+
+/// A simple UnitCompiler that invokes hackc in-process.
+struct HackcUnitCompiler final : public UnitCompiler {
+  using UnitCompiler::UnitCompiler;
+
+  virtual std::unique_ptr<UnitEmitter> compile(
+    bool& cacheHit,
+    HhvmDeclProvider*,
+    CompileAbortMode = CompileAbortMode::Never) override;
+
+  virtual const char* getName() const override { return "HackC"; }
+};
+
+// UnitCompiler which first tries to retrieve the UnitEmitter via the
+// g_unit_emitter_cache_hook. If that fails, delegate to the
+// UnitCompiler produced by the "makeFallback" lambda (this avoids
+// having to create the fallback UnitEmitter until we need it). The
+// lambda will only be called once. Its output is cached afterwards.
+struct CacheUnitCompiler final : public UnitCompiler {
+  CacheUnitCompiler(LazyUnitContentsLoader& loader,
+                    const char* filename,
+                    const Native::FuncTable& nativeFuncs,
+                    AutoloadMap* map,
+                    bool isSystemLib,
+                    bool forDebuggerEval,
+                    std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
+    : UnitCompiler{
+        loader,
+        filename,
+        nativeFuncs,
+        map,
+        isSystemLib,
+        forDebuggerEval
+      }
+    , m_makeFallback{std::move(makeFallback)} {}
+
+  virtual std::unique_ptr<UnitEmitter> compile(
+    bool& cacheHit,
+    HhvmDeclProvider*,
+    CompileAbortMode = CompileAbortMode::Never) override;
+
+  virtual const char* getName() const override { return "Cache"; }
+private:
+  std::function<std::unique_ptr<UnitCompiler>()> m_makeFallback;
+  std::unique_ptr<UnitCompiler> m_fallback;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -304,8 +350,8 @@ ParseFactsResult extract_facts(
   folly::StringPiece expect_sha1
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
+    auto actual_sha1 = string_sha1(source_text);
     if (!expect_sha1.empty()) {
-      auto actual_sha1 = string_sha1(source_text);
       if (actual_sha1 != expect_sha1) {
         return folly::sformat(
             "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
@@ -319,11 +365,11 @@ ParseFactsResult extract_facts(
           decl_flags,
           options.getAliasedNamespacesConfig());
       DeclResult decls = hackc_direct_decl_parse(*decl_opts, filename, source_text);
-      FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, source_text);
-      rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(
-          facts, source_text, /* pretty= */ false
+      FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, actual_sha1);
+      rust::String json = hackc_facts_to_json_cpp_ffi(
+          facts, /* pretty= */ false
       );
-      return FactsJSONString { std::string(facts_as_json) };
+      return FactsJSONString { std::string(json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC
     }
@@ -356,13 +402,16 @@ std::unique_ptr<UnitCompiler>
 UnitCompiler::create(LazyUnitContentsLoader& loader,
                      const char* filename,
                      const Native::FuncTable& nativeFuncs,
+                     AutoloadMap* map,
                      bool isSystemLib,
                      bool forDebuggerEval) {
-  auto make = [&loader, &nativeFuncs, filename, isSystemLib, forDebuggerEval] {
+  auto make = [&loader, &nativeFuncs, filename, isSystemLib, forDebuggerEval,
+               map] {
     return std::make_unique<HackcUnitCompiler>(
       loader,
       filename,
       nativeFuncs,
+      map,
       isSystemLib,
       forDebuggerEval
     );
@@ -373,6 +422,7 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
       loader,
       filename,
       nativeFuncs,
+      map,
       isSystemLib,
       false,
       std::move(make)
@@ -382,8 +432,16 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
   }
 }
 
+std::unique_ptr<UnitEmitter> UnitCompiler::compile(
+    bool& cacheHit,
+    CompileAbortMode mode) {
+  auto provider = HhvmDeclProvider::create(m_map, m_loader.options());
+  return compile(cacheHit, provider.get(), mode);
+}
+
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
     bool& cacheHit,
+    HhvmDeclProvider* provider,
     CompileAbortMode mode) {
   auto ice = false;
   cacheHit = false;
@@ -396,7 +454,8 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_forDebuggerEval,
                            ice,
                            m_loader.options(),
-                           mode);
+                           mode,
+                           provider);
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(
     res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
@@ -428,22 +487,27 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   );
 
   if (unitEmitter) unitEmitter->m_ICE = ice;
+  if (unitEmitter && provider) unitEmitter->m_deps = provider->getFlatDeps();
   return unitEmitter;
 }
 
 std::unique_ptr<UnitEmitter>
-CacheUnitCompiler::compile(bool& cacheHit, CompileAbortMode mode) {
+CacheUnitCompiler::compile(bool& cacheHit,
+                           HhvmDeclProvider* provider,
+                           CompileAbortMode mode) {
   assertx(g_unit_emitter_cache_hook);
   cacheHit = true;
   return g_unit_emitter_cache_hook(
     m_filename,
     m_loader.sha1(),
     m_loader.fileLength(),
+    provider,
     [&] (bool wantsICE) {
       if (!m_fallback) m_fallback = m_makeFallback();
       assertx(m_fallback);
       return m_fallback->compile(
         cacheHit,
+        provider,
         wantsICE ? mode : CompileAbortMode::AllErrorsNull
       );
     },

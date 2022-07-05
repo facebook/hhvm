@@ -381,6 +381,9 @@ module Simple = struct
       (* Because type constants cannot depend on type parameters,
          we allow Foo::the_type even if Foo has type parameters *)
       check_well_kinded_type ~allow_missing_targs:true ~in_signature env ty
+    | Trefinement (ty, rs) ->
+      check ty;
+      Class_refinement.iter check rs
     | Tshape (_, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
       check_possibly_enforced_ty ~in_signature env ft.ft_ret;

@@ -1,6 +1,6 @@
 === Shape analysis results for elvis.php
 Summary for \f:
-#{} [3:32-34] :
+[3:32-34] :
   shape(
     key1 => mixed
     key2 => mixed

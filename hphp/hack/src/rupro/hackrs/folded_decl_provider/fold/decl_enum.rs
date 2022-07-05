@@ -2,15 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-#![allow(unused_imports)]
-
 use super::DeclFolder;
 use crate::special_names as sn;
-use pos::{ClassConstName, ClassConstNameIndexMap, Positioned, TypeName, TypeNameIndexMap};
-use std::sync::Arc;
-use ty::decl::folded::{ClassConst, FoldedClass};
-use ty::decl::{Prim, Ty, Ty_};
+use pos::ClassConstNameIndexMap;
+use pos::Positioned;
+use pos::TypeNameIndexMap;
+use ty::decl::folded::ClassConst;
+use ty::decl::Prim;
+use ty::decl::Ty;
+use ty::decl::Ty_;
 use ty::reason::Reason;
 
 struct EnumKind<R: Reason> {

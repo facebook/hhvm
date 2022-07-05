@@ -70,8 +70,6 @@ struct VariableUnserializer {
    */
   Variant unserialize();
 
-  void reserialize(StringBuffer& buf);
-
   const char* head() const;
 
   /*

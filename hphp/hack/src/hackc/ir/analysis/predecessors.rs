@@ -3,8 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use core::{BlockId, BlockIdMap, BlockIdSet, Func};
+use core::BlockId;
+use core::BlockIdMap;
+use core::BlockIdSet;
+use core::Func;
 use newtype::IdVec;
+
+pub type Predecessors = BlockIdMap<BlockIdSet>;
 
 /// Compute the predecessor Blocks for a Func's Blocks.
 ///
@@ -12,13 +17,10 @@ use newtype::IdVec;
 ///
 /// The result is guaranteed to have an entry for every known block, even if it
 /// has no predecessors.
-pub fn compute_predecessor_blocks(
-    func: &Func<'_>,
-    flags: PredecessorFlags,
-) -> BlockIdMap<BlockIdSet> {
-    let mut predecessors: BlockIdMap<BlockIdSet> = Default::default();
+pub fn compute_predecessor_blocks(func: &Func<'_>, flags: PredecessorFlags) -> Predecessors {
+    let mut predecessors: Predecessors = Default::default();
 
-    if flags.mark_externals {
+    if flags.mark_entry_blocks {
         // Insert BlockId::NONE as a source of ENTRY_BID to indicate that it's
         // called externally.
         mark_edge(&mut predecessors, BlockId::NONE, Func::ENTRY_BID);
@@ -62,7 +64,7 @@ impl Default for PredecessorCatchMode {
 }
 
 impl PredecessorCatchMode {
-    fn mark(self, predecessors: &mut BlockIdMap<BlockIdSet>, func: &Func<'_>, mut src: BlockId) {
+    fn mark(self, predecessors: &mut Predecessors, func: &Func<'_>, mut src: BlockId) {
         if self == PredecessorCatchMode::Ignore {
             return;
         }
@@ -82,27 +84,48 @@ impl PredecessorCatchMode {
 
 #[derive(Default)]
 pub struct PredecessorFlags {
-    // If mark_externals is true then blocks that can be called from outside the
-    // function (such as the entry block and default value blocks) will be
+    // If mark_entry_blocks is true then blocks that can be called from outside
+    // the function (such as the entry block and default value blocks) will be
     // marked as having a predecessor of BlockId::NONE.
-    pub mark_externals: bool,
+    pub mark_entry_blocks: bool,
     pub catch: PredecessorCatchMode,
 }
 
-fn mark_edge(predecessors: &mut BlockIdMap<BlockIdSet>, src: BlockId, dst: BlockId) {
+fn mark_edge(predecessors: &mut Predecessors, src: BlockId, dst: BlockId) {
     predecessors.entry(dst).or_default().insert(src);
 }
 
 /// Compute the number of incoming control-flow edges to each block. If there are no
 /// critical edges, this is also the number of predecessor blocks.
-pub fn compute_num_predecessors(func: &Func<'_>) -> IdVec<BlockId, u32> {
+pub fn compute_num_predecessors(func: &Func<'_>, flags: PredecessorFlags) -> IdVec<BlockId, u32> {
     let mut counts = IdVec::new_from_vec(vec![0; func.blocks.len()]);
-    for bid in func.block_ids() {
-        if let Some(edges) = func.get_edges(bid) {
-            for &target in edges {
-                counts[target] += 1;
+
+    if flags.mark_entry_blocks {
+        // Entry
+        counts[BlockId::NONE] += 1;
+
+        // Default Params
+        for param in &func.params {
+            if let Some((bid, _)) = param.default_value {
+                counts[bid] += 1;
             }
         }
     }
+
+    let note_catch = !matches!(flags.catch, PredecessorCatchMode::Ignore);
+
+    for bid in func.block_ids() {
+        for &target in func.edges(bid) {
+            counts[target] += 1;
+
+            if note_catch {
+                let dst = func.catch_target(bid);
+                if dst != BlockId::NONE {
+                    counts[dst] += 1;
+                }
+            }
+        }
+    }
+
     counts
 }

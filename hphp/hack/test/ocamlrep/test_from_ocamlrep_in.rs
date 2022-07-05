@@ -9,8 +9,10 @@ use std::fmt::Debug;
 
 use bumpalo::Bump;
 
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
 
 fn test_round_trip<'a, T>(bump: &'a Bump, rust_value: T)
 where

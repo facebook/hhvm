@@ -234,6 +234,90 @@ Func* Unit::getEntryPoint() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Literal strings.
+
+StringData* Unit::lookupLitstrId(Id id) const {
+  assertx(id >= 0 && id < m_litstrs.size());
+
+  auto& elem = m_litstrs[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
+    return const_cast<StringData*>(wrapper.ptr());
+  }
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
+    return const_cast<StringData*>(wrapper.ptr());
+  }
+  auto const str = UnitEmitter::loadLitstrFromRepo(m_sn, wrapper.token(), true);
+  assertx(!str || str->isStatic());
+  lock.update(StringOrToken::FromPtr(str));
+  return const_cast<StringData*>(str);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Literal arrays.
+
+const ArrayData* Unit::lookupArrayId(Id id) const {
+  assertx(id >= 0 && id < m_arrays.size());
+
+  auto& elem = m_arrays[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return wrapper.ptr();
+  }
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    assertx(wrapper.ptr()->isStatic());
+    return wrapper.ptr();
+  }
+  auto const array = UnitEmitter::loadLitarrayFromRepo(
+    m_sn, wrapper.token(), m_origFilepath, true
+  );
+  assertx(array);
+  assertx(array->isStatic());
+  lock.update(ArrayOrToken::FromPtr(array));
+  return array;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// RAT arrays.
+
+const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
+  assertx(id >= 0 && id < m_rats.size());
+  auto& elem = m_rats[id];
+  auto wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+  auto lock = elem.lock_for_update();
+  wrapper = elem.copy();
+  if (wrapper.isPtr()) {
+    assertx(wrapper.ptr());
+    return wrapper.ptr();
+  }
+
+  assertx(!BlobEncoderHelper<const StringData*>::tl_unit);
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = nullptr;
+  };
+
+  auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
+  assertx(array);
+  lock.update(RATArrayOrToken::FromPtr(array));
+  return array;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
 namespace {

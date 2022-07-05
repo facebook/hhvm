@@ -3,14 +3,32 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{ImmType, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
+use hhbc::ImmType;
+use hhbc::InstrFlags;
+use hhbc::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
 use std::collections::HashSet;
-use syn::{
-    spanned::Spanned, Attribute, Data, DataEnum, DataStruct, DeriveInput, Error, Lit, LitByteStr,
-    LitStr, Meta, MetaList, MetaNameValue, NestedMeta, Path, Result, Variant,
-};
+use syn::spanned::Spanned;
+use syn::Attribute;
+use syn::Data;
+use syn::DataEnum;
+use syn::DataStruct;
+use syn::DeriveInput;
+use syn::Error;
+use syn::Lit;
+use syn::LitByteStr;
+use syn::LitStr;
+use syn::Meta;
+use syn::MetaList;
+use syn::MetaNameValue;
+use syn::NestedMeta;
+use syn::Path;
+use syn::Result;
+use syn::Variant;
 
 /// Builds a HasOperands impl.
 ///

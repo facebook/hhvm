@@ -550,10 +550,20 @@ let fun_is_constructor env = env.genv.fun_is_ctor
 let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
+let add_fine_dep_if_enabled env dependency =
+  let denv = env.decl_env in
+  if TypecheckerOptions.record_fine_grained_dependencies @@ get_tcopt env then
+    Typing_fine_deps.try_add_fine_dep
+      (get_deps_mode env)
+      denv.droot
+      denv.droot_member
+      dependency
+
 let make_depend_on_class env class_name =
   let dep = Dep.Type class_name in
   Option.iter env.decl_env.droot ~f:(fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
+  add_fine_dep_if_enabled env dep;
   ()
 
 let make_depend_on_constructor env class_name =
@@ -561,6 +571,7 @@ let make_depend_on_constructor env class_name =
   let dep = Dep.Constructor class_name in
   Option.iter env.decl_env.droot ~f:(fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
+  add_fine_dep_if_enabled env dep;
   ()
 
 let make_depend_on_class_def env x cd =
@@ -573,9 +584,20 @@ let make_depend_on_module env =
     let dep = Dep.Module mid in
     Option.iter env.decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep;
     ()
   in
   Option.iter ~f env.genv.this_module
+
+let env_with_method_droot_member env m ~static =
+  let child =
+    if static then
+      Typing_fine_deps.SMethod m
+    else
+      Typing_fine_deps.Method m
+  in
+  let decl_env = { env.decl_env with droot_member = Some child } in
+  { env with decl_env }
 
 let get_typedef env x =
   let res =
@@ -643,6 +665,7 @@ let get_fun env x =
     let dep = Typing_deps.Dep.Fun x in
     Option.iter env.decl_env.Decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep;
     res
 
 let get_enum_constraint env x =
@@ -674,7 +697,8 @@ let get_typeconst env class_ mid =
     let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
     Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
+        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep
   end;
   Cls.get_typeconst class_ mid
 
@@ -684,7 +708,8 @@ let get_const env class_ mid =
     let dep = Dep.Const (Cls.name class_, mid) in
     make_depend_on_class env (Cls.name class_);
     Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
+        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep
   end;
   Cls.get_const class_ mid
 
@@ -709,6 +734,7 @@ let get_gconst env cst_name =
     let dep = Dep.GConst cst_name in
     Option.iter env.decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep;
     res
 
 let get_static_member is_method env class_ mid =
@@ -732,7 +758,8 @@ let get_static_member is_method env class_ mid =
           Dep.SProp (x, mid)
       in
       Option.iter env.decl_env.droot ~f:(fun root ->
-          Typing_deps.add_idep (get_deps_mode env) root dep)
+          Typing_deps.add_idep (get_deps_mode env) root dep);
+      add_fine_dep_if_enabled env dep
     in
     add_dep (Cls.name class_);
     Option.iter ce_opt ~f:(fun ce -> add_dep ce.ce_origin)
@@ -793,7 +820,8 @@ let get_member is_method env (class_ : Cls.t) mid =
         Dep.Prop (x, mid)
     in
     Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep)
+        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep
   in
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member

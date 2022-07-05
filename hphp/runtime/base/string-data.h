@@ -38,6 +38,8 @@ struct Array;
 struct String;
 struct APCHandle;
 struct NamedEntity;
+struct UnitEmitter;
+struct Unit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -230,11 +232,8 @@ struct StringData final : MaybeCountable,
    * May not be called for strings created with MakeUncounted or
    * MakeStatic.
    *
-   * Returns: possibly a new StringData, if we decided to reallocate. The new
-   * string's reference count is be pre-initialized to 1.  shrinkImpl
-   * always returns a new StringData.
+   * Returns: a new StringData with reference count 1
    */
-  StringData* shrink(size_t len);
   StringData* shrinkImpl(size_t len);
 
   /*
@@ -618,9 +617,19 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 template<>
 struct BlobEncoderHelper<const StringData*> {
   static void serde(BlobEncoder&, const StringData*);
-  static void serde(BlobDecoder&, const StringData*&);
+  static void serde(BlobDecoder&, const StringData*&,
+                    bool makeStatic = true);
+
+  static folly::StringPiece asStringPiece(BlobDecoder&);
 
   static void skip(BlobDecoder&);
+  static size_t peekSize(BlobDecoder&);
+
+  // If set, will utilize the UnitEmitter's string table.
+  static __thread UnitEmitter* tl_unitEmitter;
+  // Likewise, but only for lazy loading (so only deserializing
+  // supported).
+  static __thread Unit* tl_unit;
 };
 
 //////////////////////////////////////////////////////////////////////

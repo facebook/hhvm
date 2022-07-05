@@ -3,10 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Punct, Spacing, Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{punctuated::Punctuated, token, ItemEnum, Lifetime, Result, Variant};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::quote;
+use quote::ToTokens;
+use syn::punctuated::Punctuated;
+use syn::token;
+use syn::ItemEnum;
+use syn::Lifetime;
+use syn::Result;
+use syn::Variant;
 
 pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
     let mut enum_def = syn::parse2::<ItemEnum>(input)?;
@@ -131,7 +144,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
     let (impl_generics, impl_types, impl_where) = item_enum.generics.split_for_impl();
 
     let mut with_targets_ref: Vec<TokenStream> = Vec::new();
-    let mut with_targets_mut: Vec<TokenStream> = Vec::new();
     let mut without_targets: Punctuated<TokenStream, token::Or> = Punctuated::new();
 
     for opcode in opcodes {
@@ -215,8 +227,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 if i == idx {
                     match_parts.push(imm_name.to_token_stream());
                     let result_ref = compute_label(opcode.name, &imm_name, imm_ty, true);
-                    let result_mut = compute_label(opcode.name, &imm_name, imm_ty, false);
-                    let old = result.replace((result_ref, result_mut));
+                    let old = result.replace(result_ref);
                     if old.is_some() {
                         panic!("Unable to build targets for opcode with multiple labels");
                     }
@@ -227,14 +238,12 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                 }
             }
 
-            let (result_ref, result_mut) = result.unwrap();
+            let result_ref = result.unwrap();
 
             if is_struct {
                 with_targets_ref.push(quote!(#variant_name { #match_parts } => #result_ref, ));
-                with_targets_mut.push(quote!(#variant_name { #match_parts } => #result_mut, ));
             } else {
                 with_targets_ref.push(quote!(#variant_name ( #match_parts ) => #result_ref, ));
-                with_targets_mut.push(quote!(#variant_name ( #match_parts ) => #result_mut, ));
             }
         } else {
             // Non-label opcodes.
@@ -256,13 +265,6 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
                     #without_targets => &[],
                 }
             }
-
-            fn targets_mut(&mut self) -> &mut [Label] {
-                match self {
-                    #(#with_targets_mut)*
-                    #without_targets => &mut [],
-                }
-            }
         }),
     )
 }
@@ -272,11 +274,11 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         ImmType::AA => quote!(AdataId<#lifetime>),
         ImmType::ARR(sub) => {
             let sub_ty = convert_imm_type(sub, lifetime);
-            quote!(BumpSliceMut<#lifetime, #sub_ty>)
+            quote!(Slice<#lifetime, #sub_ty>)
         }
         ImmType::BA => quote!(Label),
         ImmType::BA2 => quote!([Label; 2]),
-        ImmType::BLA => quote!(BumpSliceMut<#lifetime, Label>),
+        ImmType::BLA => quote!(Slice<#lifetime, Label>),
         ImmType::DA => quote!(FloatBits),
         ImmType::DUMMY => quote!(Dummy),
         ImmType::FCA => quote!(FCallArgs<#lifetime>),
@@ -300,7 +302,7 @@ fn convert_imm_type(imm: &ImmType, lifetime: &Lifetime) -> TokenStream {
         }
         ImmType::RATA => quote!(RepoAuthType<#lifetime>),
         ImmType::SA => quote!(Str<#lifetime>),
-        ImmType::SLA => quote!(BumpSliceMut<#lifetime, SwitchLabel>),
+        ImmType::SLA => quote!(Slice<#lifetime, SwitchLabel>),
         ImmType::VSA => quote!(Slice<#lifetime, Str<#lifetime>>),
     }
 }
@@ -344,13 +346,14 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
     // Foo | Bar | Baz => default
     // Foo | Bar | Baz => {}
 
-    use convert_case::{Case, Casing};
+    use convert_case::Case;
+    use convert_case::Casing;
     use proc_macro2::TokenTree;
     use std::collections::HashMap;
-    use syn::{
-        parse::{ParseStream, Parser},
-        Error, Token,
-    };
+    use syn::parse::ParseStream;
+    use syn::parse::Parser;
+    use syn::Error;
+    use syn::Token;
 
     #[derive(Debug)]
     struct Helper<'a> {
@@ -563,10 +566,10 @@ mod tests {
                     TestAsStruct { str1: Str<'a>, str2: Str<'a> },
                     // --------------------
                     TestAA(AdataId<'a>),
-                    TestARR(BumpSliceMut<'a, Str<'a>>),
+                    TestARR(Slice<'a, Str<'a>>),
                     TestBA(Label),
                     TestBA2([Label; 2]),
-                    TestBLA(BumpSliceMut<'a, Label>),
+                    TestBLA(Slice<'a, Label>),
                     TestDA(FloatBits),
                     TestFCA(FCallArgs<'a>),
                     TestI64A(i64),
@@ -582,7 +585,7 @@ mod tests {
                     TestOAL(OaSubType<'a>),
                     TestRATA(RepoAuthType<'a>),
                     TestSA(Str<'a>),
-                    TestSLA(BumpSliceMut<'a, SwitchLabel>),
+                    TestSLA(Slice<'a, SwitchLabel>),
                     TestVSA(Slice<'a, Str<'a>>),
                 }
                 impl<'a> MyOps<'a> {

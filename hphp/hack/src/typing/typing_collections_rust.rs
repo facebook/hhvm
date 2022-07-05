@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub use arena_collections::map::Map;
+pub use arena_collections::pvec;
 pub use arena_collections::set::Set;
-pub use arena_collections::{pvec, vec::Vec};
+pub use arena_collections::vec::Vec;
 
 pub type ISet<'a> = Set<'a, isize>;
 

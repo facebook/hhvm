@@ -8,11 +8,11 @@ use namespaces_rust as namespaces;
 use naming_special_names_rust as sn;
 use std::collections::HashSet;
 
-use oxidized::{
-    aast_visitor::{AstParams, NodeMut, VisitorMut},
-    ast::*,
-    namespace_env,
-};
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast::*;
+use oxidized::namespace_env;
 
 fn is_special_identifier(name: &str) -> bool {
     use lazy_static::lazy_static;

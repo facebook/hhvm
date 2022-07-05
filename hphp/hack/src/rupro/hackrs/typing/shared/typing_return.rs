@@ -9,8 +9,9 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
+use ty::decl;
+use ty::local;
 use ty::reason::Reason;
-use ty::{decl, local};
 
 pub struct TypingReturn;
 

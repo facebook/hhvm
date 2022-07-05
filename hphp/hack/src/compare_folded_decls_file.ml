@@ -36,7 +36,7 @@ let popt
   let po = ParserOptions.with_everything_sdt po everything_sdt in
   po
 
-let init popt : Provider_context.t =
+let init ~enable_strict_const_semantics popt : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
@@ -46,6 +46,8 @@ let init popt : Provider_context.t =
       GlobalOptions.tco_shallow_class_decl = false;
       tco_higher_kinded_types = true;
       tco_use_direct_decl_parser = true;
+      GlobalOptions.tco_enable_strict_const_semantics =
+        enable_strict_const_semantics;
     }
   in
   let ctx =
@@ -142,6 +144,7 @@ let () =
   let disallow_static_memoized = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
+  let enable_strict_const_semantics = ref 0 in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -168,6 +171,10 @@ let () =
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
       ("--everything-sdt", Arg.Set everything_sdt, "Classes have SDT");
+      ( "--enable-strict-const-semantics",
+        Arg.Int (fun x -> enable_strict_const_semantics := x),
+        " Raise an error when a concrete constants is overridden or multiply defined"
+      );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -218,7 +225,7 @@ let () =
       ignored_flag "--math-new-code";
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
-      ignored_arg "--enable-strict-const-semantics";
+      ignored_arg "--strict-wellformedness";
       ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
@@ -242,6 +249,7 @@ let () =
     let interpret_soft_types_as_like_types =
       !interpret_soft_types_as_like_types
     in
+    let enable_strict_const_semantics = !enable_strict_const_semantics in
     let everything_sdt = !everything_sdt in
     let popt =
       popt
@@ -281,7 +289,7 @@ let () =
           Disk.write_file ~file:filename ~contents;
           (Relative_path.(create Root filename), contents))
     in
-    let ctx = init popt in
+    let ctx = init ~enable_strict_const_semantics popt in
     let iter_files f =
       let multifile = List.length files > 1 in
       List.fold files ~init:true ~f:(fun matched (filename, contents) ->

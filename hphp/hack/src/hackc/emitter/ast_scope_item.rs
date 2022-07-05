@@ -4,7 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::hhas_coeffects::HhasCoeffects;
-use oxidized::{ast, file_info, pos::Pos};
+use oxidized::ast;
+use oxidized::file_info;
+use oxidized::pos::Pos;
 
 use std::rc::Rc;
 
@@ -137,7 +139,7 @@ impl<'a> Fun<'a> {
         }
     }
 
-    pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
+    pub(crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
         match self {
             Self::Borrowed(x) => &x.fun.user_attributes,
             Self::Counted(x) => &x.user_attributes,
@@ -220,7 +222,7 @@ impl<'a> Method<'a> {
         }
     }
 
-    pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
+    pub(crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
         match self {
             Self::Borrowed(x) => &x.user_attributes,
             Self::Counted(x) => &x.user_attributes,

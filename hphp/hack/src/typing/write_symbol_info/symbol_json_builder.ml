@@ -158,7 +158,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
             Build.build_class_const_decl_json_ref
             ~path
             pos
-            None
+            (Some const.cc_span)
             id
             const
             const.cc_doc_comment

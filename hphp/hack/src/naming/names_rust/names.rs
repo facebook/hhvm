@@ -5,11 +5,10 @@
 
 mod datatypes;
 mod naming_sqlite;
+mod naming_table;
 mod summary;
 
-pub mod naming_table;
-
-pub use naming_table::{Names, NamingTable};
-pub use summary::{DeclSummary, FileSummary};
-
-pub use rusqlite::{Error, Result};
+pub use naming_table::Names;
+pub use naming_table::NamingTable;
+pub use summary::DeclSummary;
+pub use summary::FileSummary;

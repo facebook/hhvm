@@ -14,15 +14,20 @@ use crate::typaram_env::TyparamEnv;
 use crate::typing::typing_error::Result;
 use im::HashSet;
 use oracle::Oracle;
-use pos::{Symbol, TypeName};
-pub use solve::{always_solve_wrt_variance_or_down, solve};
-use std::{ops::Deref, rc::Rc};
-use ty::{
-    local::{Ty, Tyvar},
-    local_error::TypingError,
-    prop::{CstrTy, Prop, PropF},
-    reason::Reason,
-};
+use pos::Symbol;
+use pos::TypeName;
+pub use solve::force_solve;
+pub use solve::solve;
+use std::ops::Deref;
+use std::rc::Rc;
+use ty::local::Ty;
+use ty::local::Ty_;
+use ty::local::Tyvar;
+use ty::local_error::TypingError;
+use ty::prop::Cstr;
+use ty::prop::Prop;
+use ty::prop::PropF;
+use ty::reason::Reason;
 
 /// A structure that can handle and normalize subtyping constraints, and
 /// propagate them to the inference environment.
@@ -96,15 +101,21 @@ impl<'a, R: Reason> Subtyper<'a, R> {
         unimplemented!("Inference for `has_member` propositions is not implemented")
     }
 
-    pub fn always_solve_wrt_variance_or_down(
-        &mut self,
-        tvar: Tyvar,
-        r: &R,
-    ) -> Result<Option<Vec<TypingError<R>>>> {
-        let mut normalize_env = self.normalize_env();
-        always_solve_wrt_variance_or_down(&mut normalize_env, tvar, r)?;
-        self.commit(normalize_env);
+    pub fn force_solve(&mut self, tvar: Tyvar, r: &R) -> Result<Option<Vec<TypingError<R>>>> {
+        if self.inf_env.is_unsolved(&tvar) {
+            let mut normalize_env = self.normalize_env();
+            solve::force_solve(&mut normalize_env, tvar, r, false)?;
+            self.commit(normalize_env);
+        }
         Ok(None)
+    }
+
+    pub fn force_solve_ty(&mut self, ty: &Ty<R>) -> Result<Option<Vec<TypingError<R>>>> {
+        match &**ty {
+            Ty_::Tvar(var) => self.force_solve(var.clone(), ty.reason()),
+            Ty_::Tunion(..) => todo!(),
+            _ => Ok(None),
+        }
     }
 
     /// Traverse a proposition and add any bounds appearing in sub-propositions of
@@ -145,9 +156,12 @@ impl<'a, R: Reason> Subtyper<'a, R> {
                 // TODO[mjt] simplify the disjuncton
                 Self::disjs_to_env(env, disjs, err, remain, errs)
             }
-            PropF::Subtype(cty_sub, cty_sup) => {
-                Self::subtype_to_env(env, cty_sub, cty_sup, props, remain);
-            }
+            PropF::Atom(cstr) => match cstr {
+                Cstr::Subtype(cty_sub, cty_sup) => {
+                    Self::subtype_to_env(env, cty_sub, cty_sup, props, remain);
+                }
+                _ => {}
+            },
         }
     }
 
@@ -188,21 +202,21 @@ impl<'a, R: Reason> Subtyper<'a, R> {
     /// of subtyping
     fn subtype_to_env(
         env: &mut NormalizeEnv<R>,
-        cty_sub: &CstrTy<R>,
-        cty_sup: &CstrTy<R>,
+        ty_sub: &Ty<R>,
+        ty_sup: &Ty<R>,
         props: &mut Vec<Prop<R>>,
         remain: &mut Vec<Prop<R>>,
     ) {
-        let tv_sub_opt = cty_sub.tyvar_opt();
-        let tv_sup_opt = cty_sup.tyvar_opt();
+        let tv_sub_opt = ty_sub.tyvar_opt();
+        let tv_sup_opt = ty_sup.tyvar_opt();
 
         if tv_sub_opt.is_none() && tv_sup_opt.is_none() {
             // TODO[mjt] clarify with Andrew what is going on here
-            remain.push(Prop::subtype(cty_sub.clone(), cty_sup.clone()))
+            remain.push(Prop::subtype(ty_sub.clone(), ty_sup.clone()))
         } else {
             // At least one is a tyvar, add bounds and apply transitivity
             tv_sub_opt.into_iter().for_each(|tv_sub| {
-                let upper_bounds_delta = Self::add_upper_bound(env, tv_sub, cty_sup);
+                let upper_bounds_delta = Self::add_upper_bound(env, tv_sub, ty_sup);
                 let lower_bounds = env.inf_env.lower_bounds(tv_sub).unwrap_or_default();
                 let prop = Self::close_upper_bounds(env, &lower_bounds, &upper_bounds_delta);
                 props.push(prop);
@@ -211,7 +225,7 @@ impl<'a, R: Reason> Subtyper<'a, R> {
             // tyvar in supertype position
             tv_sup_opt.into_iter().for_each(|tv_sup| {
                 // at our type as a lower bound and return the difference
-                let lower_bounds_delta = Self::add_lower_bound(env, tv_sup, cty_sub);
+                let lower_bounds_delta = Self::add_lower_bound(env, tv_sup, ty_sub);
                 // get all existing upper bounds
                 let upper_bounds = env.inf_env.upper_bounds(tv_sup).unwrap_or_default();
                 // for each new lower bound & each upper bound, simplify the
@@ -225,20 +239,12 @@ impl<'a, R: Reason> Subtyper<'a, R> {
     fn add_lower_bound(
         env: &mut NormalizeEnv<R>,
         tv_sup: &Tyvar,
-        cty_sub: &CstrTy<R>,
-    ) -> HashSet<CstrTy<R>> {
+        ty_sub: &Ty<R>,
+    ) -> HashSet<Ty<R>> {
         let lower_bounds_pre = env.inf_env.lower_bounds(tv_sup).unwrap_or_default();
-        let get_tparam_variance = |cn| {
-            let class_res = env.decl_env.get_class(cn);
-            match class_res {
-                Ok(cls_opt) => {
-                    cls_opt.map(|cls| cls.get_tparams().iter().map(|tp| tp.variance).collect())
-                }
-                _ => None,
-            }
-        };
+        let get_tparam_variance = |nm| env.decl_env.get_variance(nm).unwrap();
         env.inf_env
-            .add_lower_bound_update_variances(*tv_sup, cty_sub, &get_tparam_variance);
+            .add_lower_bound_update_variances(*tv_sup, ty_sub, &get_tparam_variance);
         let lower_bounds_post = env.inf_env.lower_bounds(tv_sup).unwrap_or_default();
         // TODO[mjt] We are using set difference since when we start
         // simplifying lower bounds (as a union) when adding a new bound,
@@ -249,22 +255,14 @@ impl<'a, R: Reason> Subtyper<'a, R> {
     fn add_upper_bound(
         env: &mut NormalizeEnv<R>,
         tv_sub: &Tyvar,
-        cty_sup: &CstrTy<R>,
-    ) -> HashSet<CstrTy<R>> {
+        ty_sup: &Ty<R>,
+    ) -> HashSet<Ty<R>> {
         let upper_bounds_pre = env.inf_env.upper_bounds(tv_sub).unwrap_or_default();
 
-        let get_tparam_variance = |cn| {
-            let class_res = env.decl_env.get_class(cn);
-            match class_res {
-                Ok(cls_opt) => {
-                    cls_opt.map(|cls| cls.get_tparams().iter().map(|tp| tp.variance).collect())
-                }
-                _ => None,
-            }
-        };
+        let get_tparam_variance = |nm| env.decl_env.get_variance(nm).unwrap();
 
         env.inf_env
-            .add_upper_bound_update_variances(*tv_sub, cty_sup, &get_tparam_variance);
+            .add_upper_bound_update_variances(*tv_sub, ty_sup, &get_tparam_variance);
 
         let upper_bounds_post = env.inf_env.upper_bounds(tv_sub).unwrap();
 
@@ -276,25 +274,20 @@ impl<'a, R: Reason> Subtyper<'a, R> {
 
     fn close_lower_bounds(
         env: &mut NormalizeEnv<R>,
-        lower_bounds_delta: &HashSet<CstrTy<R>>,
-        upper_bounds: &HashSet<CstrTy<R>>,
+        lower_bounds_delta: &HashSet<Ty<R>>,
+        upper_bounds: &HashSet<Ty<R>>,
     ) -> Prop<R> {
         lower_bounds_delta
             .iter()
-            .try_fold(Prop::valid(), |acc, cty_sub| {
+            .try_fold(Prop::valid(), |acc, ty_sub| {
                 // TODO[mjt] type constants
-                upper_bounds.iter().try_fold(acc, |acc, cty_sup| {
+                upper_bounds.iter().try_fold(acc, |acc, ty_sup| {
                     // TODO[mjt] capture the failure in return type
-                    match (cty_sub, cty_sup) {
-                        (CstrTy::Locl(ty_sub), CstrTy::Locl(ty_sup)) => {
-                            let next = env.simp_ty(ty_sub, ty_sup).unwrap();
-                            if next.is_unsat() {
-                                Err(next)
-                            } else {
-                                Ok(acc.conj(next))
-                            }
-                        }
-                        _ => unimplemented!("Inference is not implemented for constraint types"),
+                    let next = env.simp_ty(ty_sub, ty_sup).unwrap();
+                    if next.is_unsat() {
+                        Err(next)
+                    } else {
+                        Ok(acc.conj(next))
                     }
                 })
             })
@@ -303,25 +296,20 @@ impl<'a, R: Reason> Subtyper<'a, R> {
 
     fn close_upper_bounds(
         env: &mut NormalizeEnv<R>,
-        lower_bounds: &HashSet<CstrTy<R>>,
-        upper_bounds_delta: &HashSet<CstrTy<R>>,
+        lower_bounds: &HashSet<Ty<R>>,
+        upper_bounds_delta: &HashSet<Ty<R>>,
     ) -> Prop<R> {
         upper_bounds_delta
             .iter()
-            .try_fold(Prop::valid(), |acc, cty_sup| {
-                lower_bounds
-                    .iter()
-                    .try_fold(acc, |acc, cty_sub| match (cty_sub, cty_sup) {
-                        (CstrTy::Locl(ty_sub), CstrTy::Locl(ty_sup)) => {
-                            let next = env.simp_ty(ty_sub, ty_sup).unwrap();
-                            if next.is_unsat() {
-                                Err(next)
-                            } else {
-                                Ok(acc.conj(next))
-                            }
-                        }
-                        _ => unimplemented!("Inference is not implemented for constraint types"),
-                    })
+            .try_fold(Prop::valid(), |acc, ty_sup| {
+                lower_bounds.iter().try_fold(acc, |acc, ty_sub| {
+                    let next = env.simp_ty(ty_sub, ty_sup).unwrap();
+                    if next.is_unsat() {
+                        Err(next)
+                    } else {
+                        Ok(acc.conj(next))
+                    }
+                })
             })
             .unwrap_or_else(std::convert::identity)
     }
@@ -409,10 +397,9 @@ mod tests {
 
         let tv_sub: Tyvar = gen.make().into();
         let ty_sup = Ty::num(NReason::none());
-        let cty_sup = CstrTy::Locl(ty_sup);
 
-        let delta = Subtyper::add_upper_bound(&mut env, &tv_sub, &cty_sup);
-        assert!(delta.contains(&cty_sup));
+        let delta = Subtyper::add_upper_bound(&mut env, &tv_sub, &ty_sup);
+        assert!(delta.contains(&ty_sup));
     }
 
     #[test]
@@ -428,10 +415,9 @@ mod tests {
 
         let tv_sup: Tyvar = gen.make().into();
         let ty_sub = Ty::num(NReason::none());
-        let cty_sub = CstrTy::Locl(ty_sub);
 
-        let delta = Subtyper::add_lower_bound(&mut env, &tv_sup, &cty_sub);
-        assert!(delta.contains(&cty_sub));
+        let delta = Subtyper::add_lower_bound(&mut env, &tv_sup, &ty_sub);
+        assert!(delta.contains(&ty_sub));
     }
 
     #[test]
@@ -448,8 +434,6 @@ mod tests {
         let ty_v1 = Ty::var(NReason::none(), tv_1);
         let ty_num = Ty::num(NReason::none());
         let ty_int = Ty::int(NReason::none());
-        let cty_num = CstrTy::Locl(ty_num.clone());
-        let cty_int = CstrTy::Locl(ty_int.clone());
 
         let mut subtyper = Subtyper::new(&mut inf_env, &mut tp_env, oracle, None);
 
@@ -461,7 +445,7 @@ mod tests {
                 .inf_env
                 .upper_bounds(&tv_0)
                 .unwrap()
-                .contains(&cty_num)
+                .contains(&ty_num)
         );
 
         // Now assert that int <: #1;
@@ -472,15 +456,15 @@ mod tests {
                 .inf_env
                 .lower_bounds(&tv_1)
                 .unwrap()
-                .contains(&cty_int)
+                .contains(&ty_int)
         );
 
         // Now assert that  #1 <: #0; we should then have num as an upper bound
         // on #1 and int as a lower bound on #0
         let res3 = subtyper.subtype(&ty_v1, &ty_v0);
         assert!(res3.unwrap().is_none());
-        assert!(inf_env.upper_bounds(&tv_1).unwrap().contains(&cty_num));
-        assert!(inf_env.lower_bounds(&tv_0).unwrap().contains(&cty_int));
+        assert!(inf_env.upper_bounds(&tv_1).unwrap().contains(&ty_num));
+        assert!(inf_env.lower_bounds(&tv_0).unwrap().contains(&ty_int));
     }
 
     #[test]
@@ -497,8 +481,6 @@ mod tests {
         let ty_v1 = Ty::var(NReason::none(), tv_1);
         let ty_num = Ty::num(NReason::none());
         let ty_string = Ty::string(NReason::none());
-        let cty_num = CstrTy::Locl(ty_num.clone());
-        let cty_string = CstrTy::Locl(ty_string.clone());
 
         let mut subtyper = Subtyper::new(&mut inf_env, &mut tp_env, oracle, None);
 
@@ -510,7 +492,7 @@ mod tests {
                 .inf_env
                 .upper_bounds(&tv_0)
                 .unwrap()
-                .contains(&cty_num)
+                .contains(&ty_num)
         );
 
         // Now assert that string <: #1;
@@ -521,7 +503,7 @@ mod tests {
                 .inf_env
                 .lower_bounds(&tv_1)
                 .unwrap()
-                .contains(&cty_string)
+                .contains(&ty_string)
         );
 
         // Now assert that #1 <: #0; this should result in an error

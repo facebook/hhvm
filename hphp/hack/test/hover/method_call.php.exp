@@ -1,0 +1,2 @@
+// Defined in FooParent
+public function bar(): void

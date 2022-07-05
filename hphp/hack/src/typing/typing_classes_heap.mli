@@ -190,4 +190,21 @@ module Api : sig
   val shallow_decl : t -> Shallow_decl_defs.shallow_class
 
   val valid_newable_class : t -> bool
+
+  val overridden_method :
+    t ->
+    method_name:string ->
+    is_static:bool ->
+    get_class:(Provider_context.t -> string -> t option) ->
+    class_elt option
 end
+
+val get_class_with_cache :
+  Provider_context.t ->
+  string ->
+  Provider_backend.Decl_cache.t ->
+  (Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Decl_defs.decl_class_type * 'a) ->
+  class_t option

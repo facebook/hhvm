@@ -12,7 +12,7 @@ module Cache (Entry : Lfu_cache.Entry) : module type of Lfu_cache.Cache (Entry)
 module Decl_cache_entry : sig
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t
@@ -41,6 +41,20 @@ module Shallow_decl_cache_entry : sig
 end
 
 module Shallow_decl_cache : module type of Cache (Shallow_decl_cache_entry)
+
+module Folded_class_cache_entry : sig
+  type _ t = Folded_class_decl : string -> Decl_defs.decl_class_type t
+
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  val get_size : key:'a key -> value:'a value -> int
+
+  val key_to_log_string : 'a key -> string
+end
+
+module Folded_class_cache : module type of Cache (Folded_class_cache_entry)
 
 module Linearization_cache_entry : sig
   type _ t = Linearization : string -> Decl_defs.lin t
@@ -129,8 +143,16 @@ module Reverse_naming_table_delta : sig
 end
 
 type local_memory = {
-  decl_cache: Decl_cache.t;
   shallow_decl_cache: Shallow_decl_cache.t;
+      (** A cache for shallow classes.
+        This corresponds to Shallow_class_heap.Classes used when we use the shared memory backend. *)
+  folded_class_cache: Folded_class_cache.t;
+      (** A cache for folded classes.
+        This corresponds to Decl_heap.Classes used when we use the shared memory backend. *)
+  decl_cache: Decl_cache.t;
+      (** This contains top-level decls: functions, classish types, type aliases, global constants, etc.
+        The classes in this cache correspond to Decl_provider.Cache used when we use the shared memory backend.
+        The other top-level definitions correspond to Decl_heap.Typedefs/GConsts/Modules/etc. *)
   linearization_cache: Linearization_cache.t;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated

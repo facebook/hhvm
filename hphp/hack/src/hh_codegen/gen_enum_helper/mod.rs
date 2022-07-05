@@ -6,18 +6,20 @@
 
 mod ref_kind;
 
-use crate::{common::*, quote_helper::*};
+use crate::common::*;
+use crate::quote_helper::*;
 
-use anyhow::{anyhow, Result};
+use anyhow::anyhow;
+use anyhow::Result;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::format_ident;
+use quote::quote;
 use ref_kind::RefKind;
-use std::{
-    fmt::Write,
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::fmt::Write;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 use structopt::StructOpt;
 use syn::*;
 

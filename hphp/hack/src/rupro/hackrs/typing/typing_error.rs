@@ -26,4 +26,6 @@ pub enum Error {
     DeclProvider(#[from] crate::typing_decl_provider::Error),
     #[error("Decl Not Found: {0:?}")]
     DeclNotFound(DeclName),
+    #[error("An invariant expected after the naming phase was violated")]
+    NamingInvariantViolated,
 }

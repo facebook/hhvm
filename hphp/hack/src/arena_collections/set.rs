@@ -3,13 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::map::{Map, MapIter};
-use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use crate::map::Map;
+use crate::map::MapIter;
+use arena_trait::Arena;
+use arena_trait::TrivialDrop;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 
-/// An arena-allocated map.
+/// An arena-allocated set.
 ///
 /// See `Map` for more info.
 #[derive(Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

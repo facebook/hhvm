@@ -31,14 +31,24 @@ use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
 use emit_file_attributes::emit_file_attributes_from_program;
 use emit_function::emit_functions_from_program;
-use emit_module::{emit_module_use_from_program, emit_modules_from_program};
+use emit_module::emit_module_use_from_program;
+use emit_module::emit_modules_from_program;
 use emit_typedef::emit_typedefs_from_program;
-use env::{self, emitter::Emitter, Env};
-use error::{Error, ErrorKind, Result};
-use ffi::{Maybe::*, Slice, Str};
-use hhbc::{hackc_unit::HackCUnit, FatalOp};
+use env::emitter::Emitter;
+use env::Env;
+use env::{self};
+use error::Error;
+use error::ErrorKind;
+use error::Result;
+use ffi::Maybe::*;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hackc_unit::HackCUnit;
+use hhbc::FatalOp;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast, namespace_env, pos::Pos};
+use oxidized::ast;
+use oxidized::namespace_env;
+use oxidized::pos::Pos;
 
 // PUBLIC INTERFACE (ENTRY POINTS)
 

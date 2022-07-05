@@ -4,8 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
-use std::fmt::{self, Display};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
+use std::fmt::Display;
+use std::fmt::{self};
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]

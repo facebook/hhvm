@@ -5,10 +5,13 @@
 
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::fmt::{self, Debug};
+use std::fmt::Debug;
+use std::fmt::{self};
 use std::marker::PhantomData;
 
-use crate::block::{self, Block, Header};
+use crate::block::Block;
+use crate::block::Header;
+use crate::block::{self};
 use crate::Allocator;
 
 #[inline(always)]

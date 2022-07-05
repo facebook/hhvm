@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::aast_defs::*;
+use crate::ast_defs::*;
 use crate::pos::Pos;
-use crate::{aast_defs::*, ast_defs::*};
 
 impl Lid {
     pub fn new(p: Pos, s: String) -> Self {

@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-/// `once_cell::unsync::Lazy` equivalent that takes an arbitrary closure,
-/// instead of a function pointer.
-use std::cell::{Cell, UnsafeCell};
+//! `once_cell::unsync::Lazy` equivalent that takes an arbitrary closure,
+//! instead of a function pointer.
+
+use std::cell::Cell;
+use std::cell::UnsafeCell;
 
 /// A lazy value that accepts a `dyn FnOnce`.
 pub struct Lazy<'a, T> {

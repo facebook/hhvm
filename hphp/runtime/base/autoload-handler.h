@@ -107,6 +107,13 @@ struct AutoloadHandler final : RequestEventHandler {
 
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
 
+  /**
+   * Initialize a listener callback which will run after we autoload a symbol.
+   *
+   * Don't use this. We'll probably remove it.
+   */
+  void setPostAutoloadHandler(Variant onPostAutoloadFunc);
+
 private:
   /**
    * This method may return Success or Failure.
@@ -148,6 +155,11 @@ private:
 
   static String getSignature(const Variant& handler);
 
+  /**
+   * Invoke `m_onPostAutoloadFunc` after autoloading a class.
+   */
+  void onPostAutoload(AutoloadMap::KindOf kind, const String& clsName);
+
 private:
 
   // The value of m_map determines which data structure, if any, we'll be
@@ -158,6 +170,7 @@ private:
   FactsStore* m_facts = nullptr;
   req::unique_ptr<UserAutoloadMap> m_req_map;
   AutoloadMap* m_map = nullptr;
+  Variant m_onPostAutoloadFunc{Variant::NullInit{}};
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };

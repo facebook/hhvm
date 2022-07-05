@@ -10,13 +10,13 @@ pub type PositionedValue<'a> = internal::PositionedValue<'a, usize>;
 pub type PositionedValueFullTrivia<'a> = internal::PositionedValue<'a, PositionedTrivia<'a>>;
 
 mod internal {
-    use crate::{
-        lexable_token::LexableToken,
-        syntax::{SyntaxValueType, SyntaxValueWithKind},
-        syntax_by_ref::positioned_token::internal::{PositionedToken, TriviaRep},
-        syntax_kind::SyntaxKind,
-        token_kind::TokenKind,
-    };
+    use crate::lexable_token::LexableToken;
+    use crate::syntax::SyntaxValueType;
+    use crate::syntax::SyntaxValueWithKind;
+    use crate::syntax_by_ref::positioned_token::internal::PositionedToken;
+    use crate::syntax_by_ref::positioned_token::internal::TriviaRep;
+    use crate::syntax_kind::SyntaxKind;
+    use crate::token_kind::TokenKind;
     use std::matches;
 
     #[derive(Debug, Clone)]

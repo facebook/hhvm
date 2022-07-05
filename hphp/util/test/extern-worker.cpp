@@ -271,33 +271,23 @@ TEST(ExternWorker, Files) {
   std::vector<folly::fs::path> ps;
   for (size_t i = 0; i < 5; ++i) ps.emplace_back(makeFile());
 
-  bool read1;
-  bool read2;
-  bool uploaded1;
-  bool uploaded2;
-
-  Ref<std::string> r1 = coro::wait(client.storeFile(p1, &read1, &uploaded1));
-  EXPECT_TRUE(read1);
-  EXPECT_TRUE(uploaded1);
+  Ref<std::string> r1 = coro::wait(client.storeFile(p1));
+  EXPECT_EQ(client.getStats().files.load(), 1);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 1);
 
   std::tuple<Ref<std::string>, Ref<std::string>> t1 = coro::wait(coro::collect(
-    client.storeFile(p2, &read1, &uploaded1),
-    client.storeFile(p3, &read2, &uploaded2)
+    client.storeFile(p2),
+    client.storeFile(p3)
   ));
-  EXPECT_TRUE(read1);
-  EXPECT_TRUE(uploaded1);
-  EXPECT_TRUE(read2);
-  EXPECT_TRUE(uploaded2);
+  EXPECT_EQ(client.getStats().files.load(), 3);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 3);
   Ref<std::string> r2 = std::get<0>(t1);
   Ref<std::string> r3 = std::get<1>(t1);
 
-  size_t readCount;
-  size_t uploadedCount;
-  std::vector<Ref<std::string>> refs =
-    coro::wait(client.storeFile(ps, &readCount, &uploadedCount));
+  std::vector<Ref<std::string>> refs = coro::wait(client.storeFile(ps));
   EXPECT_EQ(refs.size(), ps.size());
-  EXPECT_EQ(readCount, ps.size());
-  EXPECT_EQ(uploadedCount, ps.size());
+  EXPECT_EQ(client.getStats().files.load(), 3 + ps.size());
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 3 + ps.size());
 
   std::string s1 = coro::wait(client.load(r1));
   EXPECT_EQ(s1, makeString(p1));

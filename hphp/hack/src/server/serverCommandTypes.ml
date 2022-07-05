@@ -376,6 +376,7 @@ type _ t =
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
+  | REFACTOR_CHECK_SD : ServerRefactorTypes.action -> string Done_or_retry.t t
   | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
@@ -408,7 +409,6 @@ type _ t =
   | IDE_AUTOCOMPLETE :
       string * position * bool
       -> AutocompleteTypes.ide_result t
-  | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t
@@ -417,6 +417,9 @@ type _ t =
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
   | GEN_PREFETCH_DIR : string -> unit t
+  | GEN_REMOTE_DECLS_FULL : unit t
+  | GEN_REMOTE_DECLS_INCREMENTAL : unit t
+  | GEN_SHALLOW_DECLS_DIR : string -> unit t
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
@@ -430,6 +433,10 @@ type _ t =
       ServerGlobalInferenceTypes.mode * string list
       -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
+  | DEPS_OUT_BATCH : (string * int * int) list -> string list t
+  | DEPS_IN_BATCH :
+      (string * int * int) list
+      -> Find_refs.result_or_retry list t
 
 type cmd_metadata = {
   from: string;

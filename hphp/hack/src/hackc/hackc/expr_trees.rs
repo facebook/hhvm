@@ -1,15 +1,23 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::Opts;
+use crate::FileOpts;
 use anyhow::Result;
-use oxidized::relative_path::{Prefix, RelativePath};
+use clap::Parser;
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
 
-pub(crate) fn dump_expr_trees(opts: &mut Opts) -> Result<()> {
+#[derive(Parser, Debug, Default)]
+pub(crate) struct Opts {
+    #[clap(flatten)]
+    pub files: FileOpts,
+}
+
+pub(crate) fn desugar_expr_trees(hackc_opts: &crate::Opts, mut opts: Opts) -> Result<()> {
     for path in opts.files.gather_input_files()? {
         compile::dump_expr_tree::desugar_and_print(
             RelativePath::make(Prefix::Dummy, path),
-            opts.env_flags(),
+            hackc_opts.env_flags(),
         );
     }
     Ok(())

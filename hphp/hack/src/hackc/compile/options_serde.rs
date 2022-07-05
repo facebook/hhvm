@@ -9,11 +9,19 @@
 #[allow(unused_extern_crates)]
 extern crate proc_macro;
 
-use proc_macro::{Ident, Span, TokenStream, TokenTree};
+use proc_macro::Ident;
+use proc_macro::Span;
+use proc_macro::TokenStream;
+use proc_macro::TokenTree;
 use quote::ToTokens;
-use syn::{
-    parse_macro_input, parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, LitStr,
-};
+use syn::parse_macro_input;
+use syn::parse_quote;
+use syn::Attribute;
+use syn::Data;
+use syn::DataEnum;
+use syn::DataStruct;
+use syn::DeriveInput;
+use syn::LitStr;
 
 fn create_attribute(prefix: &str, field_name: &str) -> Attribute {
     let serde_name = format!("{}{}", prefix, field_name);

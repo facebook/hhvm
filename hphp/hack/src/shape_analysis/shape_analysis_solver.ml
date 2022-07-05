@@ -61,20 +61,48 @@ let partition_constraint constraints = function
   | Join { left; right; join } ->
     { constraints with joins = (left, right, join) :: constraints.joins }
 
+let subset_lookups subsets =
+  let update entity entity' =
+    EntityMap.update entity (function
+        | None -> Some (EntitySet.singleton entity')
+        | Some set -> Some (EntitySet.add entity' set))
+  in
+  let (subset_map, superset_map) =
+    let update_maps (e, e') (subset_map, superset_map) =
+      let subset_map = update e' e subset_map in
+      let superset_map = update e e' superset_map in
+      (subset_map, superset_map)
+    in
+    PointsToSet.fold update_maps subsets (EntityMap.empty, EntityMap.empty)
+  in
+
+  (* Generate lookup functions *)
+  let collect map entity =
+    match EntityMap.find_opt entity map with
+    | Some entities -> EntitySet.elements entities
+    | None -> []
+  in
+  (collect subset_map, collect superset_map)
+
 (* The following program roughly summarises the solver.
 
-  subset'(A,B) :- subset(A,B).
-  subset'(A,B) :- union(A,_,B).
-  subset'(A,B) :- union(_,A,B).
+  // Reflexive closure
+  subset'(A,A) :-
+    subset(A,_); subset(_,A);
+    union(A,_,_); union(_,A,_); union(_,_,A);
+    has_static_key(A,_,_);
+    has_dynamic_key(A,_,_).
+  // Transitive closure closure
+  subset'(A,B) :- subset(A,B); union(A,_,B); union(_,A,B).
   subset'(A,C) :- subset(A,B), subset'(B,C).
 
-  subset''(A, Literal Pos) :- subset'(A, Literal Pos).
+  has_static_key'(Entity, Key, Ty) :- has_static_key(Entity, Key, Ty).
+  has_static_key'(B, Key, Ty) :- has_static_key(A, Key, Ty), subset'(A,B).
 
-  has_static_key'(Literal Pos, Key, Ty) :- has_static_key(Literal Pos, Key, Ty).
-  has_static_key'(B, Key, Ty) :- has_static_key(A, Key, Ty), subset''(A,B).
-
-  has_dynamic_key'(Literal Pos) :- has_dynamic_key(Literal Pos).
-  has_dynamic_key'(B) :- has_dynamic_key(A), subset''(A,B).
+  has_dynamic_key'(Entity) :- has_dynamic_key(Entity).
+  has_dynamic_key'(Entity') :-
+    has_dynamic_key(Entity),
+    (subset'(Entity,Entity'); subset'(Entity',Entity)).
 
   static_shape_result(A) :- exists(A), not has_dynamic_key'(A).
   static_shape_result_key(A,K,Ty) :- has_static_key'(A,K,Ty)
@@ -87,61 +115,27 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
+  let subsets_reflexive =
+    List.map ~f:(fun pos -> Literal pos) exists
+    @ List.map static_accesses ~f:(fun (e, _, _) -> e)
+    @ dynamic_accesses
+    @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
+    @ List.concat_map joins ~f:(fun (e, e', e'') -> [e; e'; e''])
+    |> List.map ~f:(fun e -> (e, e))
+  in
   let subsets_through_joins =
     List.concat_map joins ~f:(fun (e1, e2, join) -> [(e1, join); (e2, join)])
   in
-  let subsets = subsets_through_joins @ subsets in
+  let subsets = subsets_through_joins @ subsets_reflexive @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
-  let (concrete_superset_map, concrete_subset_map) =
-    let update entity pos map =
-      EntityMap.update
-        entity
-        (function
-          | None -> Some (Pos.Set.singleton pos)
-          | Some set -> Some (Pos.Set.add pos set))
-        map
-    in
-    let f elt (concrete_superset_map, concrete_subset_map) =
-      match elt with
-      | ((Literal pos as e), (Literal pos' as e')) ->
-        let concrete_superset_map = update e pos' concrete_superset_map in
-        let concrete_subset_map = update e' pos concrete_subset_map in
-        (concrete_superset_map, concrete_subset_map)
-      | ((Variable _ as e), Literal pos) ->
-        let concrete_superset_map = update e pos concrete_superset_map in
-        (concrete_superset_map, concrete_subset_map)
-      | (Literal pos, (Variable _ as e)) ->
-        let concrete_subset_map = update e pos concrete_subset_map in
-        (concrete_superset_map, concrete_subset_map)
-      | (Variable _, Variable _) -> (concrete_superset_map, concrete_subset_map)
-    in
-    PointsToSet.fold f subsets (EntityMap.empty, EntityMap.empty)
-  in
-  (* Find all concrete supersets. This means all concrete positions that are
-     supersets of a variable, or in the case of a literal all concrete
-     positions that are supersets of a variable + the concrete position we have
-     at hand. *)
-  let collect_concrete map entity =
-    let find_poss entity =
-      match EntityMap.find_opt entity map with
-      | Some poss -> Pos.Set.elements poss
-      | None -> []
-    in
-    match entity with
-    | Literal pos -> pos :: find_poss entity
-    | Variable _ -> find_poss entity
-  in
-  let collect_concrete_supersets = collect_concrete concrete_superset_map in
-  let collect_concrete_subsets = collect_concrete concrete_subset_map in
+  let (collect_subsets, collect_supersets) = subset_lookups subsets in
 
-  let static_accesses collect_all_concrete =
+  let static_accesses_upwards_closed =
     List.concat_map
       ~f:(fun (entity, key, ty) ->
-        collect_all_concrete entity |> List.map ~f:(fun pos -> (pos, key, ty)))
+        collect_supersets entity
+        |> List.map ~f:(fun entity -> (entity, key, ty)))
       static_accesses
-  in
-  let static_accesses_upwards_closed =
-    static_accesses collect_concrete_supersets
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
@@ -155,17 +149,18 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   (* Invalidate candidates that are observed to experience dynamic access *)
   let dynamic_accesses =
     let upward_dynamic_accesses =
-      dynamic_accesses |> List.concat_map ~f:collect_concrete_supersets
+      dynamic_accesses |> List.concat_map ~f:collect_supersets
     in
     let downward_dynamic_accesses =
-      dynamic_accesses |> List.concat_map ~f:collect_concrete_subsets
+      dynamic_accesses |> List.concat_map ~f:collect_subsets
     in
 
-    Pos.Set.of_list @@ upward_dynamic_accesses @ downward_dynamic_accesses
+    EntitySet.of_list @@ upward_dynamic_accesses @ downward_dynamic_accesses
   in
   let static_shape_results : shape_keys Pos.Map.t =
     static_shape_results
-    |> Pos.Map.filter (fun pos _ -> not @@ Pos.Set.mem pos dynamic_accesses)
+    |> Pos.Map.filter (fun pos _ ->
+           not @@ EntitySet.mem (Literal pos) dynamic_accesses)
   in
 
   (* Add known keys *)
@@ -175,6 +170,9 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
       | Some shape_keys' -> Some (Logic.(singleton key ty <> shape_keys') ~env)
     in
     static_accesses_upwards_closed
+    |> List.filter_map ~f:(function
+           | (Literal pos, key, ty) -> Some (pos, key, ty)
+           | (Variable _, _, _) -> None)
     |> List.fold ~init:static_shape_results ~f:(fun pos_map (pos, key, ty) ->
            Pos.Map.update pos (update_entity key ty) pos_map)
   in
@@ -188,9 +186,12 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   let dynamic_shape_results =
-    Pos.Set.inter (Pos.Set.of_list exists) dynamic_accesses
-    |> Pos.Set.elements
-    |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict (Literal entity_))
+    exists
+    |> List.map ~f:(fun pos -> Literal pos)
+    |> EntitySet.of_list
+    |> EntitySet.inter dynamic_accesses
+    |> EntitySet.elements
+    |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict entity_)
   in
 
   static_shape_results @ dynamic_shape_results

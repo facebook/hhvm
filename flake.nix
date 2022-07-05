@@ -16,20 +16,23 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         rec {
-          packages.default = pkgs.callPackage ./hhvm.nix {
+          packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
           };
+          packages.default = packages.hhvm;
 
           devShells.default =
             pkgs.callPackage "${nixpkgs.outPath}/pkgs/build-support/mkshell/default.nix"
-              { stdenv = packages.default.stdenv; }
+              { stdenv = packages.hhvm.stdenv; }
               {
                 inputsFrom = [
-                  packages.default
+                  packages.hhvm
                 ];
                 packages = [
                   pkgs.rnix-lsp
                 ];
+                NIX_CFLAGS_COMPILE = packages.hhvm.NIX_CFLAGS_COMPILE;
+                CMAKE_INIT_CACHE = packages.hhvm.cmakeInitCache;
               };
 
         }

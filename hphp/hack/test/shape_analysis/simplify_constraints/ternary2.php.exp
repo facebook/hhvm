@@ -10,6 +10,6 @@ Summary for \f:
   )
 [5:11-13] :
   shape(
-    a => int
-    b => int
+    ?a => int
+    ?b => int
   )

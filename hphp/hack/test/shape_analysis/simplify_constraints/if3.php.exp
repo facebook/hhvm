@@ -10,7 +10,7 @@ Summary for \f:
   )
 [11:11-13] :
   shape(
-    a => int
-    b => bool
+    ?a => int
+    ?b => bool
     c => string
   )

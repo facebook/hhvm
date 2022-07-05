@@ -7,6 +7,6 @@ Summary for \f:
   )
 [14:11-13] :
   shape(
-    a => bool
+    ?a => bool
     c => float
   )

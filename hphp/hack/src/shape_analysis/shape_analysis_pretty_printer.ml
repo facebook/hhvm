@@ -38,8 +38,10 @@ let show_constraint_ env =
 let show_shape_result env = function
   | Shape_like_dict (pos, keys_and_types) ->
     let show_ty = show_ty env in
-    let show_key_and_type (key, ty) =
-      Format.asprintf "    %s => %s" (show_key key) (show_ty ty)
+    let show_key_and_type (key, ty, optional) =
+      match optional with
+      | FRequired -> Format.asprintf "    %s => %s" (show_key key) (show_ty ty)
+      | FOptional -> Format.asprintf "    ?%s => %s" (show_key key) (show_ty ty)
     in
     if List.is_empty keys_and_types then
       Format.asprintf "%s : shape()" (Format.asprintf "%a" Pos.pp pos)

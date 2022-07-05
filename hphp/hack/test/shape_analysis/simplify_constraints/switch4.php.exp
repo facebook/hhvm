@@ -12,13 +12,13 @@ Summary for \f:
   )
 [18:15-17] :
   shape(
-    b => string
+    ?b => string
     c => bool
   )
 [21:11-13] :
   shape(
-    a => int
-    b => string
-    c => bool
+    ?a => int
+    ?b => string
+    ?c => bool
     d => float
   )

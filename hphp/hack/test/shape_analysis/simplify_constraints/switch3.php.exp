@@ -16,8 +16,8 @@ Summary for \f:
   )
 [21:11-13] :
   shape(
-    a => int
-    b => string
-    c => bool
+    ?a => int
+    ?b => string
+    ?c => bool
     d => float
   )

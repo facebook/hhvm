@@ -104,6 +104,13 @@ let subset_lookups subsets =
     has_dynamic_key(Entity),
     (subset'(Entity,Entity'); subset'(Entity',Entity)).
 
+  // Has optional key constraint only exists within the solver. When there is a
+  // join but we cannot see a key appearing in both incoming branches, we mark
+  // the key as optional.
+  has_optional_key'(Entity') :-
+    has_optional_key(Entity),
+    subset'(Entity, Entity').
+
   static_shape_result(A) :- exists(A), not has_dynamic_key'(A).
   static_shape_result_key(A,K,Ty) :- has_static_key'(A,K,Ty)
 
@@ -138,6 +145,52 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
       static_accesses
   in
 
+  let optional_keys =
+    let add_optional_key (left, right, join) =
+      let filter_keys e =
+        List.filter_map
+          ~f:(fun (e', key, _) ->
+            if equal_entity_ e e' then
+              Some key
+            else
+              None)
+          static_accesses_upwards_closed
+      in
+      let left_static_keys = filter_keys left |> ShapeKeySet.of_list in
+      let right_static_keys = filter_keys right |> ShapeKeySet.of_list in
+      ShapeKeySet.diff
+        (ShapeKeySet.union left_static_keys right_static_keys)
+        (ShapeKeySet.inter left_static_keys right_static_keys)
+      |> ShapeKeySet.elements
+      |> List.map ~f:(fun optional_key -> (join, optional_key))
+    in
+    List.concat_map ~f:add_optional_key joins
+  in
+  let optional_keys_upwards_closed =
+    List.concat_map
+      ~f:(fun (entity, key) ->
+        collect_supersets entity |> List.map ~f:(fun entity -> (entity, key)))
+      optional_keys
+    |> List.fold
+         ~f:(fun map (entity, key) ->
+           EntityMap.update
+             entity
+             (function
+               | None -> Some (ShapeKeySet.singleton key)
+               | Some keys -> Some (ShapeKeySet.add key keys))
+             map)
+         ~init:EntityMap.empty
+  in
+  let is_optional entity key =
+    match EntityMap.find_opt entity optional_keys_upwards_closed with
+    | Some set ->
+      if ShapeKeySet.mem key set then
+        FOptional
+      else
+        FRequired
+    | None -> FRequired
+  in
+
   (* Start collecting shape results starting with empty shapes of candidates *)
   let static_shape_results : shape_keys Pos.Map.t =
     exists
@@ -165,16 +218,18 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
   (* Add known keys *)
   let static_shape_results : shape_keys Pos.Map.t =
-    let update_entity key ty = function
+    let update_entity entity key ty = function
       | None -> None
-      | Some shape_keys' -> Some (Logic.(singleton key ty <> shape_keys') ~env)
+      | Some shape_keys' ->
+        let optional_field = is_optional entity key in
+        Some (Logic.(singleton key ty optional_field <> shape_keys') ~env)
     in
     static_accesses_upwards_closed
-    |> List.filter_map ~f:(function
-           | (Literal pos, key, ty) -> Some (pos, key, ty)
-           | (Variable _, _, _) -> None)
-    |> List.fold ~init:static_shape_results ~f:(fun pos_map (pos, key, ty) ->
-           Pos.Map.update pos (update_entity key ty) pos_map)
+    |> List.fold ~init:static_shape_results ~f:(fun pos_map (entity, key, ty) ->
+           match entity with
+           | Literal pos ->
+             Pos.Map.update pos (update_entity entity key ty) pos_map
+           | Variable _ -> pos_map)
   in
 
   (* Convert to individual statically accessed dict results *)
@@ -182,7 +237,10 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     static_shape_results
     |> Pos.Map.bindings
     |> List.map ~f:(fun (pos, keys_and_types) ->
-           Shape_like_dict (pos, ShapeKeyMap.bindings keys_and_types))
+           Shape_like_dict
+             ( pos,
+               ShapeKeyMap.bindings keys_and_types
+               |> List.map ~f:(fun (a, (b, c)) -> (a, b, c)) ))
   in
 
   let dynamic_shape_results =

@@ -45,7 +45,13 @@ type shape_key = SK_string of string [@@deriving eq, ord]
 
 module ShapeKeyMap : Map.S with type key = shape_key
 
-type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
+module ShapeKeySet : Set.S with type elt = shape_key
+
+type optional_field =
+  | FOptional
+  | FRequired
+
+type shape_keys = (Typing_defs.locl_ty * optional_field) ShapeKeyMap.t
 
 type exists_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
@@ -76,9 +82,10 @@ type constraint_ =
           statement. *)
 
 type shape_result =
-  | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
-      (** A dict that acts like a shape along with its keys and types the keys
-          point to *)
+  | Shape_like_dict of
+      Pos.t * (shape_key * Typing_defs.locl_ty * optional_field) list
+      (** A dict that acts like a shape along with its keys, types the keys
+          point to, and the keys are optional *)
   | Dynamically_accessed_dict of entity_
       (** A dict that is accessed or used dynamically. This is important
           in inter-procedural setting where a locally static dict calls a

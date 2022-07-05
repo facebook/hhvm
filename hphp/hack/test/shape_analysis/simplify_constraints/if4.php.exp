@@ -22,10 +22,10 @@ Summary for \f:
   )
 [23:11-13] :
   shape(
-    a => int
-    b => float
-    c => bool
-    d => bool
-    e => int
+    ?a => int
+    ?b => float
+    ?c => bool
+    ?d => bool
+    ?e => int
     f => int
   )

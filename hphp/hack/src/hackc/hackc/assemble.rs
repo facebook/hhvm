@@ -1256,11 +1256,6 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::Concat,
                         "Concat",
                     ),
-                    b"ClassGetC" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ClassGetC,
-                        "ClassGetC",
-                    ),
                     b"Null" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Null, "Null")
                     }
@@ -1321,47 +1316,12 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::VerifyParamTypeTS,
                         "VerifyParamTypeTS",
                     ),
-                    b"SetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::SetL,
-                        "SetL",
-                    ),
-                    b"UnsetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::UnsetL,
-                        "UnsetL",
-                    ),
+
                     b"PopL" => assemble_local_carrying_opcode_instr(
                         &mut sl_lexer,
                         decl_map,
                         hhbc::Opcode::PopL,
                         "PopL",
-                    ),
-                    b"ClsCnsL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::ClsCnsL,
-                        "ClsCnsL",
-                    ),
-                    b"CGetL2" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::CGetL2,
-                        "CGetL2",
-                    ),
-                    b"CGetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::CGetL,
-                        "CGetL",
-                    ),
-                    b"CUGetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::CUGetL,
-                        "CUGetL",
                     ),
                     b"PushL" => assemble_local_carrying_opcode_instr(
                         &mut sl_lexer,
@@ -1380,18 +1340,6 @@ fn assemble_instr<'arena, 'a>(
                         decl_map,
                         hhbc::Opcode::IssetL,
                         "IssetL",
-                    ),
-                    b"CGetQuietL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::CGetQuietL,
-                        "CGetQuietL",
-                    ),
-                    b"IsUnsetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::IsUnsetL,
-                        "IsUnsetL",
                     ),
                     b"JmpZ" => {
                         assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ")
@@ -1437,23 +1385,9 @@ fn assemble_instr<'arena, 'a>(
                     }
                     b"Dim" => assemble_dim(alloc, &mut sl_lexer, decl_map),
                     b"QueryM" => assemble_query_m(alloc, &mut sl_lexer, decl_map),
-                    b"SetM" => assemble_set_unset_m(
-                        alloc,
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::SetM,
-                        "SetM",
-                    ),
+
                     b"IncDecM" => assemble_inc_dec_m(alloc, &mut sl_lexer, decl_map),
-                    b"SetOpM" => assemble_set_op_m(&mut sl_lexer, decl_map),
-                    b"UnsetM" => assemble_set_unset_m(
-                        alloc,
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::UnsetM,
-                        "UnsetM",
-                    ),
-                    b"ClsCns" => assemble_cls_cns(alloc, &mut sl_lexer),
+
                     b"RetM" => assemble_retm_opcode_instr(&mut sl_lexer),
                     b"NewObj" => assemble_single_opcode_instr(
                         &mut sl_lexer,
@@ -1485,6 +1419,133 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"Dup" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dup, "Dup")
+                    }
+                    b"Throw" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Throw, "Throw")
+                    }
+                    b"InstanceOfD" => assemble_obj_class_name_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::InstanceOfD,
+                        "InstanceOfD",
+                    ),
+                    b"CreateCl" => assemble_create_cl(&mut sl_lexer),
+                    b"ResolveFunc" => assemble_resolve_func(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::ResolveFunc,
+                        "ResolveFunc",
+                    ),
+                    b"ResolveMethCaller" => assemble_resolve_func(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::ResolveMethCaller,
+                        "ResolveMethCaller",
+                    ),
+                    b"ResolveRFunc" => assemble_resolve_func(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::ResolveRFunc,
+                        "ResolveRFunc",
+                    ),
+                    b"NewDictArray" => assemble_u32_carrying_opcode(
+                        &mut sl_lexer,
+                        hhbc::Opcode::NewDictArray,
+                        "NewDictArray",
+                    ),
+                    b"NewVec" => {
+                        assemble_u32_carrying_opcode(&mut sl_lexer, hhbc::Opcode::NewVec, "NewVec")
+                    }
+                    b"NewKeysetArray" => assemble_u32_carrying_opcode(
+                        &mut sl_lexer,
+                        hhbc::Opcode::NewKeysetArray,
+                        "NewKeysetArray",
+                    ),
+                    b"ConcatN" => assemble_u32_carrying_opcode(
+                        &mut sl_lexer,
+                        hhbc::Opcode::ConcatN,
+                        "ConcatN",
+                    ),
+                    b"CombineAndResolveTypeStruct" => assemble_u32_carrying_opcode(
+                        &mut sl_lexer,
+                        hhbc::Opcode::CombineAndResolveTypeStruct,
+                        "CombineAndResolveTypeStruct",
+                    ),
+                    b"SetL"
+                    | b"SetG"
+                    | b"SetS"
+                    | b"SetOpL"
+                    | b"SetOpG"
+                    | b"SetOpS"
+                    | b"SetImplicitContextByValue"
+                    | b"SetM"
+                    | b"SetRangeM"
+                    | b"SetOpM"
+                    | b"UnsetL"
+                    | b"IsUnsetL"
+                    | b"UnsetG"
+                    | b"UnsetM" => assemble_set_instruct(alloc, &mut sl_lexer, decl_map),
+                    b"CnsE" | b"ClsCns" | b"ClsCnsD" | b"ClsCnsL" => {
+                        assemble_cns(alloc, &mut sl_lexer, decl_map)
+                    }
+                    b"VerifyRetTypeC" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::VerifyRetTypeC,
+                        "VerifyRetTypeC",
+                    ),
+                    b"VerifyRetTypeTS" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::VerifyRetTypeTS,
+                        "VerifyRetTypeTS",
+                    ),
+                    b"VerifyRetNonNullC" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::VerifyRetNonNullC,
+                        "VerifyRetNonNullC",
+                    ),
+                    b"SelfCls" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::SelfCls,
+                        "SelfCls",
+                    ),
+                    b"ParentCls" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ParentCls,
+                        "ParentCls",
+                    ),
+                    b"LateBoundCls" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::LateBoundCls,
+                        "LateBoundCls",
+                    ),
+                    b"RecordReifiedGeneric" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::RecordReifiedGeneric,
+                        "RecordReifiedGeneric",
+                    ),
+                    b"CheckClsReifiedGenericMismatch" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::CheckClsReifiedGenericMismatch,
+                        "CheckClsReifiedGenericMismatch",
+                    ),
+                    b"ClassHasReifiedGenerics" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ClassHasReifiedGenerics,
+                        "ClassHasReifiedGenerics",
+                    ),
+                    b"HasReifiedParent" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::HasReifiedParent,
+                        "HasReifiedParent",
+                    ),
+                    b"NativeImpl" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::NativeImpl,
+                        "NativeImpl",
+                    ),
+                    b"CGetCUNop" | b"CUGetCUNop" | b"CGetL" | b"CGetQuietL" | b"CUGetL"
+                    | b"CGetL2" | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => {
+                        assemble_cget(&mut sl_lexer, decl_map)
                     }
                     _ => todo!("assembling instrs: {}", tok),
                 }
@@ -1834,17 +1895,6 @@ fn assemble_is_type_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instru
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeC(type_op)))
 }
 
-/// Ex: ClsCns "CLASSNAME"
-fn assemble_cls_cns<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::Instruct<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "ClsCns")?;
-    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ClsCns(
-        hhbc::ConstName::new(token_iter.expect_identifier_into_ffi_str(alloc)?),
-    )))
-}
-
 /// IsTypeStructC (Resolve|DontResolve)
 fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeStructC")?;
@@ -2007,24 +2057,6 @@ fn assemble_query_m<'arena>(
     )))
 }
 
-/// (SetM|UnsetM) stackIndex MemberKey
-fn assemble_set_unset_m<
-    'arena,
-    F: FnOnce(hhbc::StackIndex, hhbc::MemberKey<'arena>) -> hhbc::Opcode<'arena>,
->(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
-    op_con: F,
-    op_str: &str,
-) -> Result<hhbc::Instruct<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    Ok(hhbc::Instruct::Opcode(op_con(
-        assemble_stack_index(token_iter)?,
-        assemble_member_key(alloc, token_iter, decl_map)?,
-    )))
-}
-
 /// IncDecM stackIndex IncDecOp MemberKey
 fn assemble_inc_dec_m<'arena>(
     alloc: &'arena Bump,
@@ -2037,14 +2069,6 @@ fn assemble_inc_dec_m<'arena>(
         assemble_inc_dec_op(token_iter)?,
         assemble_member_key(alloc, token_iter, decl_map)?,
     )))
-}
-
-/// SetOpM ...
-fn assemble_set_op_m<'arena>(
-    _token_iter: &mut Lexer<'_>,
-    _decl_map: &HashMap<&'_ [u8], u32>,
-) -> Result<hhbc::Instruct<'arena>> {
-    todo!()
 }
 
 /// BaseGL $var MOpMode
@@ -2100,6 +2124,96 @@ fn assemble_base_gc_or_c<
     )))
 }
 
+fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp> {
+    let sro = match token_iter.expect(Token::into_identifier)? {
+        b"Forward" => hhbc::SetRangeOp::Forward,
+        b"Reverse" => hhbc::SetRangeOp::Reverse,
+        sro => bail!("Unknown SetRangeOp: {:?}", sro),
+    };
+    Ok(sro)
+}
+
+fn assemble_cns<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    let op = match token_iter.expect(Token::into_identifier)? {
+        b"CnsE" => hhbc::Opcode::CnsE(assemble_const_name_from_str(alloc, token_iter)?),
+        b"ClsCns" => hhbc::Opcode::ClsCns(assemble_const_name_from_str(alloc, token_iter)?),
+        b"ClsCnsD" => hhbc::Opcode::ClsCnsD(
+            assemble_const_name_from_str(alloc, token_iter)?,
+            assemble_class_name_from_str(alloc, token_iter)?,
+        ),
+        b"ClsCnsL" => hhbc::Opcode::ClsCnsL(assemble_var_to_local(token_iter, decl_map)?),
+        cns => bail!("Unknown cns opcode: {:?}", cns),
+    };
+    Ok(hhbc::Instruct::Opcode(op))
+}
+
+fn assemble_set_instruct<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    let op = match token_iter.expect(Token::into_identifier)? {
+        b"SetL" => hhbc::Opcode::SetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"SetG" => hhbc::Opcode::SetG,
+        b"SetS" => hhbc::Opcode::SetS(assemble_readonly_op(token_iter)?),
+        b"SetOpL" => hhbc::Opcode::SetOpL(
+            assemble_var_to_local(token_iter, decl_map)?,
+            assemble_set_op_op(token_iter)?,
+        ),
+        b"SetOpG" => hhbc::Opcode::SetOpG(assemble_set_op_op(token_iter)?),
+        b"SetOpS" => hhbc::Opcode::SetOpS(assemble_set_op_op(token_iter)?),
+        b"SetImplicitContextByValue" => hhbc::Opcode::SetImplicitContextByValue,
+        b"SetM" => hhbc::Opcode::SetM(
+            assemble_stack_index(token_iter)?,
+            assemble_member_key(alloc, token_iter, decl_map)?,
+        ),
+        b"SetRangeM" => hhbc::Opcode::SetRangeM(
+            assemble_stack_index(token_iter)?,
+            token_iter.expect_and_get_number()?,
+            assemble_set_range_op(token_iter)?,
+        ),
+        b"SetOpM" => hhbc::Opcode::SetOpM(
+            assemble_stack_index(token_iter)?,
+            assemble_set_op_op(token_iter)?,
+            assemble_member_key(alloc, token_iter, decl_map)?,
+        ),
+        b"UnsetL" => hhbc::Opcode::UnsetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"IsUnsetL" => hhbc::Opcode::IsUnsetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"UnsetG" => hhbc::Opcode::UnsetG,
+        b"UnsetM" => hhbc::Opcode::UnsetM(
+            assemble_stack_index(token_iter)?,
+            assemble_member_key(alloc, token_iter, decl_map)?,
+        ),
+        _ => todo!(),
+    };
+    Ok(hhbc::Instruct::Opcode(op))
+}
+
+fn assemble_set_op_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetOpOp> {
+    match token_iter.expect(Token::into_identifier)? {
+        b"PlusEqual" => Ok(hhbc::SetOpOp::PlusEqual),
+        b"MinusEqual" => Ok(hhbc::SetOpOp::MinusEqual),
+        b"MulEqual" => Ok(hhbc::SetOpOp::MulEqual),
+        b"ConcatEqual" => Ok(hhbc::SetOpOp::ConcatEqual),
+        b"DivEqual" => Ok(hhbc::SetOpOp::DivEqual),
+        b"PowEqual" => Ok(hhbc::SetOpOp::PowEqual),
+        b"ModEqual" => Ok(hhbc::SetOpOp::ModEqual),
+        b"AndEqual" => Ok(hhbc::SetOpOp::AndEqual),
+        b"OrEqual" => Ok(hhbc::SetOpOp::OrEqual),
+        b"XorEqual" => Ok(hhbc::SetOpOp::XorEqual),
+        b"SlEqual" => Ok(hhbc::SetOpOp::SlEqual),
+        b"SrEqual" => Ok(hhbc::SetOpOp::SrEqual),
+        b"PlusEqualO" => Ok(hhbc::SetOpOp::PlusEqualO),
+        b"MinusEqualO" => Ok(hhbc::SetOpOp::MinusEqualO),
+        b"MulEqualO" => Ok(hhbc::SetOpOp::MulEqualO),
+        sop => bail!("Expected a SetOpOp but got: {:?}", sop),
+    }
+}
+
 fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
     match token_iter.expect(Token::into_identifier)? {
         b"PreInc" => Ok(hhbc::IncDecOp::PreInc),
@@ -2113,6 +2227,26 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
 
         ido => bail!("Expected a IncDecOp but got: {:?}", ido),
     }
+}
+
+fn assemble_cget<'arena>(
+    token_iter: &mut Lexer<'_>,
+    decl_map: &HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    let cg = match token_iter.expect(Token::into_identifier)? {
+        b"CGetCUNop" => hhbc::Opcode::CGetCUNop,
+        b"UGetCUNop" => hhbc::Opcode::UGetCUNop,
+        b"CGetL" => hhbc::Opcode::CGetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"CGetQuietL" => hhbc::Opcode::CGetQuietL(assemble_var_to_local(token_iter, decl_map)?),
+        b"CUGetL" => hhbc::Opcode::CUGetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"CGetL2" => hhbc::Opcode::CGetL2(assemble_var_to_local(token_iter, decl_map)?),
+        b"CGetG" => hhbc::Opcode::CGetG,
+        b"CGetS" => hhbc::Opcode::CGetS(assemble_readonly_op(token_iter)?),
+        b"ClassGetC" => hhbc::Opcode::ClassGetC,
+        b"ClassGetTS" => hhbc::Opcode::ClassGetTS,
+        cg => bail!("Unknown cget: {:?}", cg),
+    };
+    Ok(hhbc::Instruct::Opcode(cg))
 }
 
 /// IncDecL $var IncDecOp
@@ -2153,6 +2287,30 @@ fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc:
     } else {
         bail!("Unknown label");
     }
+}
+
+/// Ex:
+/// ResolveFunc "my_func"
+fn assemble_resolve_func<'arena, F: FnOnce(hhbc::FunctionName<'arena>) -> hhbc::Opcode<'arena>>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    Ok(hhbc::Instruct::Opcode(op_con(
+        assemble_function_name_from_str(alloc, token_iter)?,
+    )))
+}
+
+/// Ex:
+/// CreateCl 0 1
+fn assemble_create_cl<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "CreateCl")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::CreateCl(
+        token_iter.expect_and_get_number()?,
+        token_iter.expect_and_get_number()?,
+    )))
 }
 
 /// Assembles one of Enter/Jmp/JmpZ/JmpNZ
@@ -2252,6 +2410,17 @@ fn assemble_int_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instr
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Int(num)))
 }
 
+fn assemble_u32_carrying_opcode<'arena, F: FnOnce(u32) -> hhbc::Opcode<'arena>>(
+    token_iter: &mut Lexer<'_>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    Ok(hhbc::Instruct::Opcode(op_con(
+        token_iter.expect_and_get_number()?,
+    )))
+}
+
 fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Double")?;
     let num: f64 = token_iter.expect_and_get_number()?;
@@ -2259,6 +2428,15 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
     )))
+}
+
+fn assemble_const_name_from_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::ConstName<'arena>> {
+    Ok(hhbc::ConstName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
 }
 
 fn assemble_function_name_from_str<'arena>(

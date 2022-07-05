@@ -1138,7 +1138,7 @@ let fun_type_of_id env x tal el =
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
           ~should_wrap:fe_support_dynamic_type
-          (get_reason fe_type)
+          (Typing_reason.localize (get_reason fe_type))
           ft
       in
       Option.iter
@@ -3718,11 +3718,14 @@ and expr_
             ft_ifc_decl = fty.ft_ifc_decl;
           }
         in
-        make_result
-          env
-          p
-          (Aast.Method_caller (pos_cname, meth_name))
-          (mk (reason, Tfun caller))
+        let ty =
+          Typing_dynamic.maybe_wrap_with_supportdyn
+            ~should_wrap:
+              (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
+            reason
+            caller
+        in
+        make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
       | _ ->
         (* This can happen if the method lives in PHP *)
         make_result
@@ -5616,17 +5619,7 @@ and closure_make
       ~explicit:decl_ty
       ~default:ret_ty
   in
-  let ft =
-    {
-      ft with
-      ft_ret = hret;
-      ft_flags =
-        Typing_defs_flags.set_bit
-          Typing_defs_flags.ft_flags_support_dynamic_type
-          support_dynamic_type
-          ft.ft_flags;
-    }
-  in
+  let ft = { ft with ft_ret = hret } in
   let env =
     Env.set_return
       env
@@ -7737,7 +7730,7 @@ and class_get_inner
                   ~should_wrap:
                     (get_ce_support_dynamic_type ce
                     && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-                  r
+                  (Typing_reason.localize r)
                   ft
               in
               (env, fty, Unenforced, explicit_targs)
@@ -8266,7 +8259,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
         ( env,
           Typing_dynamic.maybe_wrap_with_supportdyn
             ~should_wrap
-            (get_reason m)
+            (Typing_reason.localize (get_reason m))
             ft )
       | _ ->
         Errors.internal_error p "Expected function type for constructor";

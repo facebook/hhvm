@@ -143,14 +143,20 @@ let make_like env changed ty =
     let r = get_reason ty in
     (true, Typing_make_type.locl_like r ty)
 
-let maybe_wrap_with_supportdyn ~should_wrap r ty =
-  let locl_r = Typing_reason.localize r in
-  let ty = Tfun ty in
+let maybe_wrap_with_supportdyn ~should_wrap locl_r ft =
   if should_wrap then
-    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r) in
-    Typing_make_type.supportdyn r (mk (locl_r, ty))
+    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos locl_r) in
+    let ft =
+      {
+        ft with
+        ft_flags =
+          Typing_defs_flags.(
+            set_bit ft_flags_support_dynamic_type false ft.ft_flags);
+      }
+    in
+    Typing_make_type.supportdyn r (mk (locl_r, Tfun ft))
   else
-    mk (locl_r, ty)
+    mk (locl_r, Tfun ft)
 
 let push_like_tyargs env tyl tparams =
   if List.length tyl <> List.length tparams then

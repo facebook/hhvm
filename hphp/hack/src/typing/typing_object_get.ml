@@ -723,7 +723,7 @@ and obj_get_concrete_class_with_member_info
           ~should_wrap:
             (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
             && get_ce_support_dynamic_type member_info)
-          r
+          (Typing_reason.localize r)
           ft1
       in
       let ((env, ft_ty_err_opt), ft_ty) =

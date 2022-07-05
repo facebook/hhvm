@@ -1,10 +1,10 @@
-[RESULT] \f: #{0} [4:8-36] :
+[RESULT] \f: [4:8-36] :
   shape(
     a => int
     b => bool
   )
-[RESULT] \f: #{1} [10:8-14] : shape()
-[RESULT] \f: #{2} [11:8-25] :
+[RESULT] \f: [10:8-14] : shape()
+[RESULT] \f: [11:8-25] :
   shape(
     a => bool
   )

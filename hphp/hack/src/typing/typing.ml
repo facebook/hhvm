@@ -1138,7 +1138,7 @@ let fun_type_of_id env x tal el =
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
           ~should_wrap:fe_support_dynamic_type
-          (get_reason fe_type)
+          (Typing_reason.localize (get_reason fe_type))
           ft
       in
       Option.iter
@@ -3718,11 +3718,14 @@ and expr_
             ft_ifc_decl = fty.ft_ifc_decl;
           }
         in
-        make_result
-          env
-          p
-          (Aast.Method_caller (pos_cname, meth_name))
-          (mk (reason, Tfun caller))
+        let ty =
+          Typing_dynamic.maybe_wrap_with_supportdyn
+            ~should_wrap:
+              (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
+            reason
+            caller
+        in
+        make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
       | _ ->
         (* This can happen if the method lives in PHP *)
         make_result
@@ -5616,17 +5619,7 @@ and closure_make
       ~explicit:decl_ty
       ~default:ret_ty
   in
-  let ft =
-    {
-      ft with
-      ft_ret = hret;
-      ft_flags =
-        Typing_defs_flags.set_bit
-          Typing_defs_flags.ft_flags_support_dynamic_type
-          support_dynamic_type
-          ft.ft_flags;
-    }
-  in
+  let ft = { ft with ft_ret = hret } in
   let env =
     Env.set_return
       env
@@ -7737,7 +7730,7 @@ and class_get_inner
                   ~should_wrap:
                     (get_ce_support_dynamic_type ce
                     && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-                  r
+                  (Typing_reason.localize r)
                   ft
               in
               (env, fty, Unenforced, explicit_targs)
@@ -8266,7 +8259,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
         ( env,
           Typing_dynamic.maybe_wrap_with_supportdyn
             ~should_wrap
-            (get_reason m)
+            (Typing_reason.localize (get_reason m))
             ft )
       | _ ->
         Errors.internal_error p "Expected function type for constructor";
@@ -9109,8 +9102,33 @@ and call
         (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
       | (_, Tnewtype (name, [ty], _))
         when String.equal name SN.Classes.cSupportDyn ->
-        Errors.try_
-          (fun () ->
+        let (env, ty) = Env.expand_type env ty in
+        begin
+          match get_node ty with
+          (* If we have a function type of the form supportdyn<(function(t):~u)> then it does no
+           * harm to treat it as supportdyn<(function(~t):~u)> and may produce a more precise
+           * type for function application e.g. consider
+           *   function expect<T as supportdyn<mixed> >(T $obj)[]: ~Invariant<T>;
+           * If we have an argument of type ~t then checking against this signature will
+           * produce ~t <: T <: supportdyn<mixed>, so T will be assigned a like type.
+           * But if we check against the signature transformed as above, we will get
+           * t <: T <: supportdyn<mixed> which is more precise.
+           *)
+          | Tfun ft
+            when Option.is_some (TUtils.try_strip_dynamic env ft.ft_ret.et_type)
+                 && List.length ft.ft_params = 1 ->
+            let ft_params =
+              List.map ft.ft_params ~f:(fun fp ->
+                  {
+                    fp with
+                    fp_type =
+                      {
+                        fp.fp_type with
+                        et_type = Typing_utils.make_like env fp.fp_type.et_type;
+                      };
+                  })
+            in
+            let ty = mk (get_reason ty, Tfun { ft with ft_params }) in
             call
               ~expected
               ~nullsafe
@@ -9120,18 +9138,32 @@ and call
               env
               ty
               el
-              unpacked_element)
-          (fun _ ->
-            call_supportdyn
-              ~expected
-              ~nullsafe
-              ?in_await
-              ?dynamic_func
-              pos
-              env
-              ty
-              el
-              unpacked_element)
+              unpacked_element
+          | _ ->
+            Errors.try_
+              (fun () ->
+                call
+                  ~expected
+                  ~nullsafe
+                  ?in_await
+                  ?dynamic_func
+                  pos
+                  env
+                  ty
+                  el
+                  unpacked_element)
+              (fun _ ->
+                call_supportdyn
+                  ~expected
+                  ~nullsafe
+                  ?in_await
+                  ?dynamic_func
+                  pos
+                  env
+                  ty
+                  el
+                  unpacked_element)
+        end
       | _ ->
         bad_call env pos efty;
         let (env, ty_err_opt) =

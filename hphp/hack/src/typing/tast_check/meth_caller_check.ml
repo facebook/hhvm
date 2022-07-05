@@ -59,6 +59,13 @@ let check_readonly_return env pos ft =
                { pos; decl_pos = rpos })
   | _ -> ()
 
+let strip_supportdyn ty =
+  match get_node ty with
+  | Tnewtype (name, [ty], _)
+    when String.equal name Naming_special_names.Classes.cSupportDyn ->
+    ty
+  | _ -> ty
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -66,6 +73,7 @@ let handler =
     method! at_expr env e =
       match e with
       | (ft, pos, Method_caller _) ->
+        let ft = strip_supportdyn ft in
         check_parameters pos ft;
         check_readonly_return env pos ft
       | _ -> ()

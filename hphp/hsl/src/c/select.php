@@ -377,7 +377,7 @@ function onlyx<T>(
  */
 function pop_back<T as Container<Tv>, Tv>(
   inout T $container,
-)[]: ?Tv {
+)[write_props]: ?Tv {
   if (is_empty($container)) {
     return null;
   }
@@ -401,7 +401,7 @@ function pop_back<T as Container<Tv>, Tv>(
  */
 function pop_backx<T as Container<Tv>, Tv>(
   inout T $container,
-)[]: Tv {
+)[write_props]: Tv {
   invariant(
     !is_empty($container),
     '%s: Expected at least one element',

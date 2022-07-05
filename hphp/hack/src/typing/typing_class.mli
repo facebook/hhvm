@@ -6,6 +6,20 @@
  *
  *)
 
+type class_member_standalone_check_env
+
+(** Create an environment from a class that can be used to subsequently
+  type-check members of that class individually *)
+val make_class_member_standalone_check_env :
+  Provider_context.t -> Nast.class_ -> class_member_standalone_check_env option
+
+(** Type-checks the given method of the class that was specific when creating
+  the [class_member_standalone_check_env] *)
+val method_def_standalone :
+  class_member_standalone_check_env ->
+  string ->
+  (Tast.method_ * Typing_inference_env.t_global_with_pos) option
+
 val class_def :
   Provider_context.t ->
   Nast.class_ ->

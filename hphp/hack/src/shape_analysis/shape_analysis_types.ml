@@ -51,6 +51,11 @@ type constraint_ =
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
   | Subset of entity_ * entity_
+  | Join of {
+      left: entity_;
+      right: entity_;
+      join: entity_;
+    }
 
 type shape_result =
   | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list

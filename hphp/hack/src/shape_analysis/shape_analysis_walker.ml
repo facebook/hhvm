@@ -15,6 +15,12 @@ module SN = Naming_special_names
 module Env = Shape_analysis_env
 module Utils = Shape_analysis_utils
 
+let join env left right =
+  let join = Env.fresh_var () in
+  let constraint_ = Join { left; right; join } in
+  let env = Env.add_constraint env @@ constraint_ in
+  (env, join)
+
 let when_tast_check tast_env ~default f =
   let tcopt = Tast_env.get_tcopt tast_env |> TypecheckerOptions.log_levels in
   match SMap.find_opt "shape_analysis" tcopt with
@@ -196,10 +202,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity) =
       match (then_entity, else_entity) with
       | (Some then_entity_, Some else_entity_) ->
-        let var = Env.fresh_var () in
-        let env = Env.add_constraint env @@ Subset (then_entity_, var) in
-        let env = Env.add_constraint env @@ Subset (else_entity_, var) in
-        (env, Some var)
+        let (env, join) = join env then_entity_ else_entity_ in
+        (env, Some join)
       | (None, Some _) -> (env, else_entity)
       | (_, _) -> (env, then_entity)
     in
@@ -212,10 +216,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity) =
       match (cond_entity, else_entity) with
       | (Some then_entity_, Some else_entity_) ->
-        let var = Env.fresh_var () in
-        let env = Env.add_constraint env @@ Subset (then_entity_, var) in
-        let env = Env.add_constraint env @@ Subset (else_entity_, var) in
-        (env, Some var)
+        let (env, join) = join env then_entity_ else_entity_ in
+        (env, Some join)
       | (None, Some _) -> (env, else_entity)
       | (_, _) -> (env, cond_entity)
     in

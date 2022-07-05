@@ -15,10 +15,17 @@ type constraints = {
   static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
+  joins: (entity_ * entity_ * entity_) list;
 }
 
 let constraints_init =
-  { exists = []; static_accesses = []; dynamic_accesses = []; subsets = [] }
+  {
+    exists = [];
+    static_accesses = [];
+    dynamic_accesses = [];
+    subsets = [];
+    joins = [];
+  }
 
 let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
   let immediate_consequence (x, y) set =
@@ -51,10 +58,14 @@ let partition_constraint constraints = function
     }
   | Subset (sub, sup) ->
     { constraints with subsets = (sub, sup) :: constraints.subsets }
+  | Join { left; right; join } ->
+    { constraints with joins = (left, right, join) :: constraints.joins }
 
 (* The following program roughly summarises the solver.
 
   subset'(A,B) :- subset(A,B).
+  subset'(A,B) :- union(A,_,B).
+  subset'(A,B) :- union(_,A,B).
   subset'(A,C) :- subset(A,B), subset'(B,C).
 
   subset''(A, Literal Pos) :- subset'(A, Literal Pos).
@@ -72,10 +83,14 @@ let partition_constraint constraints = function
 *)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let { exists; static_accesses; dynamic_accesses; subsets } =
+  let { exists; static_accesses; dynamic_accesses; subsets; joins } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
+  let subsets_through_joins =
+    List.concat_map joins ~f:(fun (e1, e2, join) -> [(e1, join); (e2, join)])
+  in
+  let subsets = subsets_through_joins @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
   let (concrete_superset_map, concrete_subset_map) =
     let update entity pos map =

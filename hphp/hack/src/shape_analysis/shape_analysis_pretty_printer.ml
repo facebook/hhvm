@@ -32,6 +32,8 @@ let show_constraint_ env =
       (show_ty ty)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subset (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
+  | Join { left; right; join } ->
+    show_entity left ^ " ∪ " ^ show_entity right ^ " = " ^ show_entity join
 
 let show_shape_result env = function
   | Shape_like_dict (pos, keys_and_types) ->

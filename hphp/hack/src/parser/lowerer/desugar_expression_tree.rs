@@ -1,18 +1,30 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::{
-    classes, expression_trees as et, pseudo_functions, special_idents,
-};
-use oxidized::{
-    aast,
-    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
-    ast,
-    ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
-    ast_defs,
-    ast_defs::*,
-    local_id,
-    pos::Pos,
-};
+use naming_special_names_rust::classes;
+use naming_special_names_rust::expression_trees as et;
+use naming_special_names_rust::pseudo_functions;
+use naming_special_names_rust::special_idents;
+use oxidized::aast;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast;
+use oxidized::ast::ClassId;
+use oxidized::ast::ClassId_;
+use oxidized::ast::Expr;
+use oxidized::ast::Expr_;
+use oxidized::ast::Hint_;
+use oxidized::ast::Sid;
+use oxidized::ast::Stmt;
+use oxidized::ast::Stmt_;
+use oxidized::ast_defs;
+use oxidized::ast_defs::*;
+use oxidized::local_id;
+use oxidized::pos::Pos;
 
 pub struct DesugarResult {
     pub expr: Expr,
@@ -1129,59 +1141,11 @@ fn rewrite_expr(
                 // Virtualized: $x->bar()
                 // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
                 ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
-                    let (e1, e2, null_flavor, is_prop_call) = *og;
-                    if null_flavor == OgNullFlavor::OGNullsafe {
-                        errors.push((
-                            pos.clone(),
-                            "Expression Trees do not support nullsafe method calls".into(),
-                        ));
-                    }
-                    let rewritten_e1 = rewrite_expr(temps, e1, visitor_name, errors);
-                    let id = if let Id(id) = &e2.2 {
-                        string_literal(id.0.clone(), &id.1)
-                    } else {
-                        errors.push((
-                            pos.clone(),
-                            "Expression trees only support named method calls.".into(),
-                        ));
-                        e2.clone()
-                    };
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_CALL,
-                        vec![
-                            pos_expr.clone(),
-                            v_meth_call(
-                                et::VISIT_INSTANCE_METHOD,
-                                vec![pos_expr, rewritten_e1.desugar_expr, id],
-                                &pos,
-                            ),
-                            vec_literal(desugar_args),
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Call(Box::new((
-                            Expr(
-                                (),
-                                pos,
-                                ObjGet(Box::new((
-                                    rewritten_e1.virtual_expr,
-                                    e2,
-                                    null_flavor,
-                                    is_prop_call,
-                                ))),
-                            ),
-                            vec![],
-                            build_args(virtual_args),
-                            None,
-                        ))),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
-                    }
+                    errors.push((
+                        pos,
+                        "Expression trees do not support calling instance methods".into(),
+                    ));
+                    unchanged_result
                 }
                 _ => {
                     let rewritten_recv =

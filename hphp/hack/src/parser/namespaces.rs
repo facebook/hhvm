@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust as sn;
-use oxidized::{ast::*, namespace_env};
+use oxidized::ast::*;
+use oxidized::namespace_env;
 
 use std::borrow::Cow;
 
@@ -257,7 +258,8 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
     use ocamlrep::rc::RcOc;
-    use oxidized::{ast::*, namespace_env};
+    use oxidized::ast::*;
+    use oxidized::namespace_env;
 
     fn elaborate_xhp_namespace(id: &mut String) {
         if let Some(s) = super::elaborate_xhp_namespace(id.as_str()) {

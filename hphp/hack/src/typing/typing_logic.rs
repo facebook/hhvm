@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 use arena_trait::TrivialDrop;
 use bumpalo::Bump;
-use typing_collections_rust::{pvec, Vec};
+use typing_collections_rust::pvec;
+use typing_collections_rust::Vec;
 
-use crate::typing_defs_core::{InternalType, Ty};
+use crate::typing_defs_core::InternalType;
+use crate::typing_defs_core::Ty;
 
 #[derive(Debug)]
 pub enum SubtypePropEnum<'a> {

@@ -4,8 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 
 #[derive(Clone, Debug, Default)]
 pub struct ParserEnv {
@@ -36,8 +36,8 @@ impl From<FullFidelityParserEnv> for ParserEnv {
     }
 }
 
-impl From<&DeclParserOptions<'_>> for ParserEnv {
-    fn from(opts: &DeclParserOptions<'_>) -> Self {
+impl From<&DeclParserOptions> for ParserEnv {
+    fn from(opts: &DeclParserOptions) -> Self {
         Self {
             hhvm_compat_mode: opts.hhvm_compat_mode,
             php5_compat_mode: opts.php5_compat_mode,

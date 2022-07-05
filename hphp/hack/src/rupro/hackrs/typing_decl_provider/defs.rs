@@ -3,19 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{Class, Error, Result};
-use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
+use super::Class;
+use super::Error;
+use super::Result;
+use crate::folded_decl_provider::FoldedDeclProvider;
+use crate::folded_decl_provider::Substitution;
 use depgraph_api::DeclName;
 use once_cell::unsync::OnceCell;
 use oxidized::ast_defs::ConstraintKind;
-use pos::{MethodName, MethodNameMap, PropName, PropNameMap, TypeName};
+use pos::MethodName;
+use pos::MethodNameMap;
+use pos::PropName;
+use pos::PropNameMap;
+use pos::TypeName;
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use std::sync::Arc;
-use ty::decl::{
-    ty::ConsistentKind, EnumType, FoldedClass, Requirement, Tparam, Ty, Ty_, WhereConstraint,
-};
+use ty::decl::ty::ConsistentKind;
+use ty::decl::EnumType;
+use ty::decl::FoldedClass;
+use ty::decl::Requirement;
+use ty::decl::Tparam;
+use ty::decl::Ty;
+use ty::decl::Ty_;
+use ty::decl::WhereConstraint;
 use ty::decl_error::DeclError;
 use ty::local::ClassElt;
 use ty::reason::Reason;
@@ -265,7 +277,9 @@ impl<R: Reason> Class<R> for ClassType<R> {
     }
 
     fn upper_bounds_on_this_from_constraints(&self) -> Vec<Ty<R>> {
-        use ConstraintKind::{ConstraintAs, ConstraintEq, ConstraintSuper};
+        use ConstraintKind::ConstraintAs;
+        use ConstraintKind::ConstraintEq;
+        use ConstraintKind::ConstraintSuper;
         self.where_constraints()
             .iter()
             .filter_map(|WhereConstraint(lhs, cstr_kind, rhs)| {

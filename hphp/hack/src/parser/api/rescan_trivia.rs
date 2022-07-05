@@ -4,10 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser::{
-    lexable_token::LexableToken, positioned_trivia::PositionedTrivium, source_text::SourceText,
-    syntax_by_ref::positioned_token::PositionedToken, token_kind::TokenKind,
-};
+use parser::lexable_token::LexableToken;
+use parser::positioned_trivia::PositionedTrivium;
+use parser::source_text::SourceText;
+use parser::syntax_by_ref::positioned_token::PositionedToken;
+use parser::token_kind::TokenKind;
 
 pub trait RescanTrivia<Trivium> {
     fn scan_leading(&self, source_text: &SourceText<'_>) -> Vec<Trivium>;

@@ -196,6 +196,13 @@ let rpc_with_retry
   let%lwt result = rpc args command ClientConnect.rpc_with_retry in
   Lwt.return result
 
+let rpc_with_retry_list
+    (args : ClientEnv.client_check_env)
+    (command : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t)
+    : 'a list Lwt.t =
+  let%lwt result = rpc args command ClientConnect.rpc_with_retry_list in
+  Lwt.return result
+
 let rpc
     (args : ClientEnv.client_check_env) (command : 'result ServerCommandTypes.t)
     : ('result * Telemetry.t) Lwt.t =
@@ -285,6 +292,15 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_GEN_PREFETCH_DIR dirname ->
       let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_PREFETCH_DIR dirname in
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_GEN_REMOTE_DECLS_FULL ->
+      let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_REMOTE_DECLS_FULL in
+      Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_GEN_REMOTE_DECLS_INCREMENTAL ->
+      let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_REMOTE_DECLS_INCREMENTAL in
+      Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_GEN_SHALLOW_DECLS_DIR dir ->
+      let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_SHALLOW_DECLS_DIR dir in
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_GO_TO_IMPL_CLASS class_name ->
       let%lwt results =
         rpc_with_retry args
@@ -343,6 +359,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_DUMP_SYMBOL_INFO files ->
       let%lwt conn = connect args in
       let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
+      Lwt.return (Exit_status.No_error, Telemetry.create ())
+    | MODE_REFACTOR_CHECK_SOUND_DYNAMIC (ref_mode, name) ->
+      let conn () = connect args in
+      let%lwt result =
+        ClientRefactor.go_sound_dynamic conn args ref_mode name
+      in
+      let () = Printf.printf "%s" result in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_REFACTOR (ref_mode, before, after) ->
       let conn () = connect args in
@@ -560,6 +583,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let positions = parse_positions positions in
       let%lwt (responses, telemetry) =
         rpc args @@ Rpc.FUN_DEPS_BATCH positions
+      in
+      List.iter responses ~f:print_endline;
+      Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_DEPS_OUT_AT_POS_BATCH positions ->
+      let positions = parse_positions positions in
+      let%lwt (responses, telemetry) =
+        rpc args @@ Rpc.DEPS_OUT_BATCH positions
       in
       List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
@@ -931,6 +961,13 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_VERBOSE verbose ->
       let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_DEPS_IN_AT_POS_BATCH positions ->
+      let positions = parse_positions positions in
+      let%lwt results =
+        rpc_with_retry_list args @@ Rpc.DEPS_IN_BATCH positions
+      in
+      List.iter results ~f:(fun s -> ClientFindRefs.go s true);
+      Lwt.return (Exit_status.No_error, Telemetry.create ())
   in
   HackEventLogger.client_check exit_status telemetry;
   Lwt.return exit_status

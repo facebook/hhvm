@@ -5,7 +5,8 @@
 
 use eq_modulo_pos::EqModuloPos;
 use pos::TypeName;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum DeclError<P> {

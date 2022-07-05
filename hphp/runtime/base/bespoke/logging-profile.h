@@ -93,6 +93,7 @@ enum class LocationType : uint8_t {
   StaticProperty,
   TypeConstant,
   Runtime,
+  TypeAlias,
 };
 
 struct LoggingProfileKey {
@@ -118,6 +119,12 @@ struct LoggingProfileKey {
     : cls(cls)
     , slot(slot)
     , locationType(loc)
+  {}
+
+  explicit LoggingProfileKey(const TypeAlias* ta)
+    : ta(ta)
+    , slot(kInvalidSlot)
+    , locationType(LocationType::TypeAlias)
   {}
 
   bool operator==(const LoggingProfileKey& o) const {
@@ -150,6 +157,7 @@ struct LoggingProfileKey {
       case LocationType::Runtime:
       case LocationType::StaticProperty:
       case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
         return std::nullopt;
     }
     always_assert(false);
@@ -173,6 +181,8 @@ struct LoggingProfileKey {
         auto const& cns = cls->constants()[slot];
         return folly::sformat("{}::{}", cls->name(), cns.name);
       }
+      case LocationType::TypeAlias:
+        return folly::sformat("{}", ta->name());
       case LocationType::Runtime:
         return runtimeStruct->toString()->toCppString();
     }
@@ -189,6 +199,7 @@ struct LoggingProfileKey {
       case LocationType::Runtime:
       case LocationType::StaticProperty:
       case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
         return toString();
     }
     always_assert(false);
@@ -207,6 +218,8 @@ struct LoggingProfileKey {
           return cls->stableHash() ^ slot;
         case LocationType::Runtime:
           return runtimeStruct->stableHash();
+        case LocationType::TypeAlias:
+          return ta->stableHash();
       }
       always_assert(false);
     }();
@@ -218,6 +231,7 @@ struct LoggingProfileKey {
     APCKey ak;
     const Class* cls;
     RuntimeStruct* runtimeStruct;
+    const TypeAlias* ta;
     uintptr_t ptr;
   };
 
@@ -281,6 +295,8 @@ struct LoggingProfile {
   // a LayoutFunction - MakeFromVanilla - to do so as cleanly as possible.)
   BespokeArray* getStaticBespokeArray() const;
   void setStaticBespokeArray(BespokeArray* array);
+
+  bool shouldUseBespokeTypeStructure();
 
   jit::ArrayLayout getLayout() const;
   void setLayout(jit::ArrayLayout layout);
@@ -363,6 +379,7 @@ LoggingProfile* getLoggingProfile(APCKey ak);
 LoggingProfile* getLoggingProfile(RuntimeStruct* runtimeStruct);
 LoggingProfile* getLoggingProfile(const Class* cls, Slot slot,
                                   LocationType loc);
+LoggingProfile* getLoggingProfile(const TypeAlias* ta);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.

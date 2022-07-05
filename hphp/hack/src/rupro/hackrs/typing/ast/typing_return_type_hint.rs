@@ -9,8 +9,9 @@ use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
 use pos::Symbol;
+use ty::decl;
+use ty::local;
 use ty::reason::Reason;
-use ty::{decl, local};
 
 /// This trait provides typing for return type hints.
 ///

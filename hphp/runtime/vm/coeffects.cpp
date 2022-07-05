@@ -57,9 +57,11 @@ RuntimeCoeffects RuntimeCoeffects::globals_leak_safe() {
   return c;
 }
 
-#define COEFFECTS     \
-  X(pure)             \
-  X(zoned_with)       \
+#define COEFFECTS      \
+  X(pure)              \
+  X(zoned_with)        \
+  X(zoned)             \
+  X(leak_safe_shallow) \
   X(write_this_props)
 
 #define X(x)                                                             \

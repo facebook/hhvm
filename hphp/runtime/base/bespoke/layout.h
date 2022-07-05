@@ -61,6 +61,7 @@ constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b10011010;
 constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b10010110;
 constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b10000110;
 constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b10000010;
+constexpr uint8_t kTypeStructureLayoutByte         = 0b10011110;
 constexpr uint8_t kBespokeVtableMask               = 0b00011111;
 
 // Log that we're calling the given function for the given array.

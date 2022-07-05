@@ -315,15 +315,26 @@ pub mod slab;
 pub use bumpalo::Bump;
 
 pub use arena::Arena;
-pub use block::{Block, BlockBuilder};
-pub use block::{CLOSURE_TAG, CUSTOM_TAG, DOUBLE_TAG, NO_SCAN_TAG, STRING_TAG};
+pub use block::Block;
+pub use block::BlockBuilder;
+pub use block::CLOSURE_TAG;
+pub use block::CUSTOM_TAG;
+pub use block::DOUBLE_TAG;
+pub use block::NO_SCAN_TAG;
+pub use block::STRING_TAG;
 pub use cache::MemoizationCache;
-pub use error::{FromError, SlabIntegrityError};
-pub use impls::{
-    bytes_from_ocamlrep, bytes_to_ocamlrep, sorted_iter_to_ocaml_map, sorted_iter_to_ocaml_set,
-    str_from_ocamlrep, str_to_ocamlrep, vec_from_ocaml_map_in, vec_from_ocaml_set_in,
-};
-pub use value::{OpaqueValue, Value};
+pub use error::FromError;
+pub use error::SlabIntegrityError;
+pub use impls::bytes_from_ocamlrep;
+pub use impls::bytes_to_ocamlrep;
+pub use impls::sorted_iter_to_ocaml_map;
+pub use impls::sorted_iter_to_ocaml_set;
+pub use impls::str_from_ocamlrep;
+pub use impls::str_to_ocamlrep;
+pub use impls::vec_from_ocaml_map_in;
+pub use impls::vec_from_ocaml_set_in;
+pub use value::OpaqueValue;
+pub use value::Value;
 
 /// A data structure that can be converted to an OCaml value.
 ///

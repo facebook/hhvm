@@ -157,7 +157,7 @@ void dump_func_state(std::ostream& out,
 
   auto const retTy = index.lookup_return_type_raw(f).first;
   out << name << " :: " << show(retTy) <<
-    (index.is_effect_free(f) ? " (effect-free)\n" : "\n");
+    (index.is_effect_free_raw(f) ? " (effect-free)\n" : "\n");
 }
 
 }

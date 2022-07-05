@@ -13,7 +13,6 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
 deps_rust = { path = "../../../deps/cargo/deps_rust" }
-file_provider = { path = "../../../rupro/file_provider/cargo/file_provider" }
 hackrs_provider_backend = { path = "../../hackrs_provider_backend" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }

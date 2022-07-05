@@ -5,8 +5,12 @@
 use crate::emit_attribute;
 use env::emitter::Emitter;
 use error::Result;
-use ffi::{Maybe, Slice, Str};
-use hhbc::{hhas_module::HhasModule, hhas_pos::HhasSpan, ClassName};
+use ffi::Maybe;
+use ffi::Slice;
+use ffi::Str;
+use hhbc::hhas_module::HhasModule;
+use hhbc::hhas_pos::HhasSpan;
+use hhbc::ClassName;
 use oxidized::ast;
 
 pub fn emit_module<'a, 'arena, 'decl>(

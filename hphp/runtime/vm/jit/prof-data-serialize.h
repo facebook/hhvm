@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include <string>
+#include "hphp/runtime/base/repo-auth-type.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+
+#include <string>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////

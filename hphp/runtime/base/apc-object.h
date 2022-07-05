@@ -93,6 +93,7 @@ private:
 
   friend size_t getMemSize(const APCObject*);
   Object createObject(bool) const;
+  Object createObjectLazy(bool) const;
   Object createObjectSlow(bool) const;
 
   Prop* props() { return reinterpret_cast<Prop*>(this + 1); }
@@ -115,6 +116,7 @@ private:
   uint8_t m_may_raise:1;
   uint8_t m_no_wakeup:1;
   uint8_t m_no_verify_prop_types:1;
+  uint8_t m_lazy_deserialization:1;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{ReadonlyStore, Store};
+use crate::ReadonlyStore;
+use crate::Store;
 use anyhow::Result;
 use std::hash::Hash;
 use std::sync::Arc;

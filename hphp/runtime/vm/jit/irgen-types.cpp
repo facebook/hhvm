@@ -351,6 +351,13 @@ void verifyTypeImpl(IRGS& env,
     return result;
   }();
 
+  if (fallbackAction == None &&
+      std::all_of(options.begin(), options.end(), [] (auto const& pair) {
+        return pair.second == AnnotAction::Pass;
+      })) {
+    return;
+  }
+
   // TODO(kshaunak): If we were a bit more sophisticated here, we could
   // merge the cases for certain types, like TVec|TDict, or TArrLike.
   MultiCond mc{env};

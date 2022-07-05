@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -96,6 +97,7 @@ void AutoloadHandler::requestInit() {
   assertx(!m_map);
   assertx(!m_facts);
   assertx(!m_req_map);
+  assertx(m_onPostAutoloadFunc.isNull());
   m_facts = getFactsForRequest();
   if (RuntimeOption::RepoAuthoritative) {
     m_map = s_repoAutoloadMap.get();
@@ -109,6 +111,7 @@ void AutoloadHandler::requestShutdown() {
   m_map = nullptr;
   m_facts = nullptr;
   m_req_map = nullptr;
+  m_onPostAutoloadFunc.setNull();
 }
 
 bool AutoloadHandler::setMap(const Array& map, String root) {
@@ -286,6 +289,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
     err = msg;
   }
   if (ok && checkExists()) {
+    onPostAutoload(kind, clsName);
     return AutoloadMap::Result::Success;
   }
   return AutoloadMap::Result::Failure;
@@ -405,6 +409,33 @@ void AutoloadHandler::setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap> map) {
   assertx(RO::RepoAuthoritative);
   assertx(!s_repoAutoloadMap);
   s_repoAutoloadMap = std::move(map);
+}
+
+void AutoloadHandler::setPostAutoloadHandler(Variant onPostAutoloadFunc) {
+  always_assert(!RO::RepoAuthoritative);
+  always_assert(
+    onPostAutoloadFunc.isFunc() ||
+    onPostAutoloadFunc.isObject() ||
+    onPostAutoloadFunc.isClsMeth());
+  m_onPostAutoloadFunc = std::move(onPostAutoloadFunc);
+}
+
+void AutoloadHandler::onPostAutoload(
+    AutoloadMap::KindOf kind, const String& clsName) {
+  if (m_onPostAutoloadFunc.isNull()) return;
+  // We're merging type aliases into types in the autoloader
+  switch (kind) {
+    case AutoloadMap::KindOf::Type:
+    case AutoloadMap::KindOf::TypeAlias:
+    case AutoloadMap::KindOf::TypeOrTypeAlias:
+      kind = AutoloadMap::KindOf::Type;
+      break;
+    default:
+      break;
+  }
+  Variant action = vm_call_user_func(
+    m_onPostAutoloadFunc,
+    make_vec_array(Variant{static_cast<uint8_t>(kind)}, clsName));
 }
 
 //////////////////////////////////////////////////////////////////////

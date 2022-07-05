@@ -511,6 +511,13 @@ let set_no_load options is_no_load = { options with no_load = is_no_load }
 
 let set_config options config = { options with config }
 
+let set_save_64bit options save_64bit = { options with save_64bit }
+
+let set_save_naming_filename options save_naming_filename =
+  { options with save_naming_filename }
+
+let set_save_filename options save_filename = { options with save_filename }
+
 (****************************************************************************)
 (* Misc *)
 (****************************************************************************)

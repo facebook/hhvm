@@ -139,8 +139,9 @@ final class Set implements \MutableSet {
   <<__Native>>
   public function reserve(int $sz)[]: void;
 
-  <<__Native>>
-  public function toVArray()[]: varray;
+  public function toVArray()[]: varray {
+    return vec($this);
+  }
 
   /** Returns a darray built from the values from this Set, darray[val1 => val1,
    * val2 => val2, ...]. This maintains set-like semantics in darray[] land:
@@ -148,8 +149,9 @@ final class Set implements \MutableSet {
    *  `foreach($a as $member)`.
    * @return darray
    */
-  <<__Native>>
-  public function toDArray()[]: darray;
+  public function toDArray()[]: darray {
+    return dict($this);
+  }
 
   /** Returns a Vector built from the values of this Set.
    * @return object
@@ -508,8 +510,9 @@ final class ImmSet implements \ConstSet {
   <<__Native>>
   public function contains(mixed $val)[]: bool;
 
-  <<__Native>>
-  public function toVArray()[]: varray;
+  public function toVArray()[]: varray {
+    return vec($this);
+  }
 
   /** Returns a darray built from the values from this ImmSet, darray[val1 =>
    * val1, val2 => val2, ...]. This maintains set-like semantics in darray[]
@@ -517,8 +520,9 @@ final class ImmSet implements \ConstSet {
    * with `foreach($a as $member)`.
    * @return darray
    */
-  <<__Native>>
-  public function toDArray()[]: darray;
+  public function toDArray()[]: darray {
+    return dict($this);
+  }
 
   /** Returns a Vector built from the values of this ImmSet.
    * @return object

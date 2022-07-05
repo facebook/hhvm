@@ -5,11 +5,14 @@
 
 use file_info::Mode;
 use lint_rust::LintError;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use oxidized::{
-    aast::Program, errors::Error, file_info, parser_options::ParserOptions, pos::Pos,
-    scoured_comments::ScouredComments,
-};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use oxidized::aast::Program;
+use oxidized::errors::Error;
+use oxidized::file_info;
+use oxidized::parser_options::ParserOptions;
+use oxidized::pos::Pos;
+use oxidized::scoured_comments::ScouredComments;
 use parser_core_types::syntax_error::SyntaxError;
 
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep, Default)]

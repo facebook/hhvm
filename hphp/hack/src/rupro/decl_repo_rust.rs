@@ -7,7 +7,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use indicatif::ParallelProgressIterator;
@@ -16,13 +17,21 @@ use rayon::prelude::*;
 use structopt::StructOpt;
 use tempdir::TempDir;
 
-use ty::reason::{BReason, NReason, Reason};
+use ty::reason::BReason;
+use ty::reason::NReason;
+use ty::reason::Reason;
 
-use hackrs::{decl_parser::DeclParser, folded_decl_provider::FoldedDeclProvider};
+use hackrs::decl_parser::DeclParser;
+use hackrs::folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
-use hackrs_test_utils::serde_store::{Compression, StoreOpts};
-use hackrs_test_utils::store::{make_shallow_decl_store, populate_shallow_decl_store};
-use pos::{Prefix, RelativePath, RelativePathCtx, TypeName};
+use hackrs_test_utils::serde_store::Compression;
+use hackrs_test_utils::serde_store::StoreOpts;
+use hackrs_test_utils::store::make_shallow_decl_store;
+use hackrs_test_utils::store::populate_shallow_decl_store;
+use pos::Prefix;
+use pos::RelativePath;
+use pos::RelativePathCtx;
+use pos::TypeName;
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {
@@ -99,7 +108,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let names = collect_file_or_class_names(opts, &ctx);
 
     let file_provider: Arc<dyn file_provider::FileProvider> =
-        Arc::new(file_provider::PlainFileProvider::new(Arc::clone(&ctx)));
+        Arc::new(file_provider::DiskProvider::new(Arc::clone(&ctx)));
     let parser = DeclParser::new(file_provider);
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.serialize {
         StoreOpts::Unserialized

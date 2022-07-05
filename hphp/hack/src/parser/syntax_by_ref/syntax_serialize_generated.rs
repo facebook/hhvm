@@ -171,11 +171,12 @@ ss.serialize_field("enum_class_enumerator_initializer", &self.with(initializer))
 ss.serialize_field("enum_class_enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,modifiers,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
-      let mut ss = s.serialize_struct("", 10)?;
+SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,modifiers,module_kw_opt,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 11)?;
       ss.serialize_field("kind", "alias_declaration")?;
       ss.serialize_field("alias_attribute_spec", &self.with(attribute_spec))?;
 ss.serialize_field("alias_modifiers", &self.with(modifiers))?;
+ss.serialize_field("alias_module_kw_opt", &self.with(module_kw_opt))?;
 ss.serialize_field("alias_keyword", &self.with(keyword))?;
 ss.serialize_field("alias_name", &self.with(name))?;
 ss.serialize_field("alias_generic_parameter", &self.with(generic_parameter))?;

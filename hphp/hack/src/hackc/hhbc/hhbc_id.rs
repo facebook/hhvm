@@ -7,7 +7,8 @@
 // (`class::Type<'arena>`, `function::Type<'arena>`, ...). We intend that these
 // types borrow strings stored in `InstrSeq` arenas.
 
-use bstr::{BStr, ByteSlice};
+use bstr::BStr;
+use bstr::ByteSlice;
 use ffi::Str;
 
 macro_rules! impl_id {

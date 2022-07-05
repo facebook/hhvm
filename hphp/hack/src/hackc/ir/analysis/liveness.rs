@@ -5,9 +5,14 @@
 
 // Everything you want to know about what InstrIds are alive when.
 
-use core::{
-    instr::HasOperands, BlockId, BlockIdMap, BlockIdSet, Func, InstrId, InstrIdSet, ValueId,
-};
+use core::instr::HasOperands;
+use core::BlockId;
+use core::BlockIdMap;
+use core::BlockIdSet;
+use core::Func;
+use core::InstrId;
+use core::InstrIdSet;
+use core::ValueId;
 use itertools::Itertools;
 use newtype::IdVec;
 use std::collections::VecDeque;
@@ -28,7 +33,8 @@ pub struct LiveInstrs {
 
 impl std::fmt::Debug for LiveInstrs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use print::{FmtCommaSep, FmtRawVid};
+        use print::FmtCommaSep;
+        use print::FmtRawVid;
         use std::fmt::Display;
         writeln!(f, "instr_last_use: {{")?;
         for (vid, v) in self.instr_last_use.iter().enumerate() {

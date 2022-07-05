@@ -71,7 +71,6 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-NO_PROFILING
 inline void ArrayData::release() DEBUG_NOEXCEPT {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);

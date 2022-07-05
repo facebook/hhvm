@@ -1,7 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures("modules")>>
-new module foo {}
 module foo;
 internal enum class E : mixed {
   int A = 42;
@@ -21,6 +20,7 @@ internal enum class H : mixed extends F, G {
 
 <<__EntryPoint>>
 function main(): void {
+  include 'enum_class_internal.inc';
   echo H::A; echo "\n";
   echo H::B; echo "\n";
   echo H::C; echo "\n";

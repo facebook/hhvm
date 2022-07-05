@@ -1819,10 +1819,10 @@ Type builtinReturnType(const Func* builtin) {
     // If this is a collection method which returns $this, use that fact to
     // infer the exact returning type. Otherwise try to use HNI declaration.
     if (collectionMethodReturnsThis(builtin)) {
-      assertx(builtin->hniReturnType() == KindOfObject);
+      assertx(builtin->returnTypeConstraint().asSystemlibType() == KindOfObject);
       return Type::ExactObj(builtin->implCls());
     }
-    if (auto const hniType = builtin->hniReturnType()) {
+    if (auto const hniType = builtin->returnTypeConstraint().asSystemlibType()) {
       return Type{*hniType};
     }
     return TInitCell;
@@ -2512,11 +2512,6 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 }
 
 void emitSetImplicitContextByValue(IRGS& env) {
-  if (!RO::EvalEnableImplicitContext) {
-    popDecRef(env, DecRefProfileId::Default);
-    push(env, cns(env, make_tv<KindOfNull>()));
-    return;
-  }
   auto const tv = topC(env);
   auto const prev_ctx = cond(
     env,
@@ -2540,6 +2535,29 @@ void emitSetImplicitContextByValue(IRGS& env) {
   );
   popC(env);
   push(env, prev_ctx);
+}
+
+void emitVerifyImplicitContextState(IRGS& env) {
+  auto const func = curFunc(env);
+  assertx(!func->hasCoeffectRules());
+  assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+  if (!func->isKeyedByImplicitContextMemoize() &&
+      providedCoeffectsKnownStatically(env).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const ctx = gen(env, LdImplicitContext);
+        gen(env, CheckType, TInitNull, taken, ctx);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseImplicitContextStateInvalidException, FuncData { func });
+        return cns(env, TBottom);
+      }
+    );
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

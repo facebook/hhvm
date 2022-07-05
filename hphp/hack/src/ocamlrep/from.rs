@@ -8,7 +8,11 @@
 
 use bumpalo::Bump;
 
-use crate::{Block, FromError, FromOcamlRep, FromOcamlRepIn, Value};
+use crate::Block;
+use crate::FromError;
+use crate::FromOcamlRep;
+use crate::FromOcamlRepIn;
+use crate::Value;
 
 pub fn expect_int(value: Value<'_>) -> Result<isize, FromError> {
     match value.as_int() {

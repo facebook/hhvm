@@ -315,6 +315,7 @@ pub struct EnumClassEnumeratorChildren<'a, T, V> {
 pub struct AliasDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
     pub modifiers: Syntax<'a, T, V>,
+    pub module_kw_opt: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub generic_parameter: Syntax<'a, T, V>,

@@ -75,6 +75,10 @@ and instantiate_ subst x =
   | Taccess (ty, id) ->
     let ty = instantiate subst ty in
     Taccess (ty, id)
+  | Trefinement (ty, rs) ->
+    let ty = instantiate subst ty in
+    let rs = Class_refinement.map (instantiate subst) rs in
+    Trefinement (ty, rs)
   | Tvec_or_dict (ty1, ty2) ->
     let ty1 = instantiate subst ty1 in
     let ty2 = instantiate subst ty2 in

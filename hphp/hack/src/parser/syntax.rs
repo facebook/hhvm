@@ -8,12 +8,12 @@ use crate::lexable_token::LexableToken;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
 
-use itertools::Either::{Left, Right};
-use std::{
-    fmt::Debug,
-    iter::{empty, once},
-    marker::Sized,
-};
+use itertools::Either::Left;
+use itertools::Either::Right;
+use std::fmt::Debug;
+use std::iter::empty;
+use std::iter::once;
+use std::marker::Sized;
 
 pub use crate::syntax_generated::*;
 pub use crate::syntax_type::*;

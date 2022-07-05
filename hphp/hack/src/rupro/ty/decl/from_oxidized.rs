@@ -3,7 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl::{self, folded, shallow, ty, Ty, Ty_};
+use crate::decl::folded;
+use crate::decl::shallow;
+use crate::decl::ty;
+use crate::decl::Ty;
+use crate::decl::Ty_;
+use crate::decl::{self};
 use crate::reason::Reason;
 use pos::Pos;
 
@@ -152,6 +157,16 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                     })
                     .collect(),
             ))),
+            typing_defs_core::Ty_::Trefinement(&(ty, tr)) => {
+                Trefinement(Box::new(decl::TrefinementType {
+                    ty: ty.into(),
+                    typeconsts: tr
+                        .cr_types
+                        .iter()
+                        .map(|(k, v)| ((*k).into(), v.into()))
+                        .collect(),
+                }))
+            }
             typing_defs_core::Ty_::Tvar(ident) => Tvar(ident.into()),
             typing_defs_core::Ty_::Tgeneric(&(pos_id, tys)) => {
                 Tgeneric(Box::new((pos_id.into(), slice(tys))))
@@ -171,6 +186,17 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             }
         };
         Ty::new(reason, ty_)
+    }
+}
+
+impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>> for ty::TypeConstRef<Ty<R>> {
+    fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
+        use obr::typing_defs::ClassTypeRefinement::Texact;
+        use obr::typing_defs::ClassTypeRefinement::Tloose;
+        match ctr {
+            &Texact(ty) => Self::Exact(ty.into()),
+            Tloose(bnds) => Self::Loose(slice(bnds.lower), slice(bnds.upper)),
+        }
     }
 }
 

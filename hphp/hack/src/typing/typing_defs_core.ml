@@ -29,11 +29,6 @@ type ifc_fun_decl =
 (* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
 let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
 
-type exact =
-  | Exact
-  | Nonexact
-[@@deriving eq, ord, show]
-
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
 
@@ -228,6 +223,8 @@ and _ ty_ =
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
   | Tapply : pos_id * decl_ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
+  | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
+      (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
   | Tmixed : decl_phase ty_
       (** "Any" is the type of a variable with a missing annotation, and "mixed" is
        * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -352,6 +349,23 @@ and _ ty_ =
 
 and 'phase taccess_type = 'phase ty * pos_id
 
+and exact =
+  | Exact
+  | Nonexact of locl_phase class_refinement
+
+and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
+
+and 'phase class_type_refinement =
+  | Texact : 'phase ty -> 'phase class_type_refinement
+  | Tloose :
+      decl_phase class_type_refinement_bounds
+      -> decl_phase class_type_refinement
+
+and 'phase class_type_refinement_bounds = {
+  tr_lower: 'phase ty list;
+  tr_upper: 'phase ty list;
+}
+
 and 'ty capability =
   | CapDefaults of Pos_or_decl.t
   | CapTy of 'ty
@@ -386,6 +400,12 @@ and 'ty fun_param = {
 }
 
 and 'ty fun_params = 'ty fun_param list
+
+let nonexact = Nonexact { cr_types = SMap.empty }
+
+let is_nonexact = function
+  | Nonexact _ -> true
+  | Exact -> false
 
 module Flags = struct
   open Typing_defs_flags
@@ -550,22 +570,19 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tapply (@,";
       let () = pp_pos_id fmt a0 in
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
+      Format.fprintf fmt "@,))@]"
+    | Trefinement (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Trefinement (@,";
+      pp_ty fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_class_refinement fmt a1;
       Format.fprintf fmt "@,))@]"
     | Tgeneric (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tgeneric (@,";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
-      pp_ty_list fmt a1;
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt "@,)@])"
     | Tunapplied_alias a0 ->
       Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
@@ -599,16 +616,7 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Ttuple a0 ->
       Format.fprintf fmt "(@[<2>Ttuple@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a0);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a0;
       Format.fprintf fmt "@])"
     | Tshape (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tshape (@,";
@@ -624,16 +632,7 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tnewtype (@,";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt ",@ ";
       pp_ty fmt a2;
       Format.fprintf fmt "@,))@]"
@@ -645,11 +644,11 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tunion tyl ->
       Format.fprintf fmt "(@[<2>Tunion@ ";
-      pp_ty_list fmt tyl;
+      pp_list pp_ty fmt tyl;
       Format.fprintf fmt "@])"
     | Tintersection tyl ->
       Format.fprintf fmt "(@[<2>Tintersection@ ";
-      pp_ty_list fmt tyl;
+      pp_list pp_ty fmt tyl;
       Format.fprintf fmt "@])"
     | Tclass (a0, a2, a1) ->
       Format.fprintf fmt "(@[<2>Tclass (@,";
@@ -657,34 +656,60 @@ module Pp = struct
       Format.fprintf fmt ",@ ";
       pp_exact fmt a2;
       Format.fprintf fmt ",@ ";
-      Format.fprintf fmt "@[<2>[";
-      ignore
-        (List.fold_left
-           ~f:(fun sep x ->
-             if sep then Format.fprintf fmt ";@ ";
-             pp_ty fmt x;
-             true)
-           ~init:false
-           a1);
-      Format.fprintf fmt "@,]@]";
+      pp_list pp_ty fmt a1;
       Format.fprintf fmt "@,))@]"
     | Tneg a0 ->
       Format.fprintf fmt "(@[<2>Tneg@ ";
       pp_neg_type fmt a0;
       Format.fprintf fmt "@])"
 
-  and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
-   fun fmt tyl ->
+  and pp_list :
+      type a.
+      (Format.formatter -> a -> unit) -> Format.formatter -> a list -> unit =
+   fun pp_elem fmt l ->
     Format.fprintf fmt "@[<2>[";
     ignore
       (List.fold_left
          ~f:(fun sep x ->
            if sep then Format.fprintf fmt ";@ ";
-           pp_ty fmt x;
+           pp_elem fmt x;
            true)
          ~init:false
-         tyl);
+         l);
     Format.fprintf fmt "@,]@]"
+
+  and pp_class_type_refinement :
+      type a. Format.formatter -> a class_type_refinement -> unit =
+   fun fmt r ->
+    match r with
+    | Texact a0 ->
+      Format.pp_print_string fmt "Texact ";
+      pp_ty fmt a0
+    | Tloose { tr_lower = a0; tr_upper = a1 } ->
+      Format.fprintf fmt "Tloose @[<2>{";
+      Format.pp_print_string fmt "tr_lower = ";
+      pp_list pp_ty fmt a0;
+      Format.fprintf fmt ";@ ";
+      Format.pp_print_string fmt "tr_lower = ";
+      pp_list pp_ty fmt a1;
+      Format.fprintf fmt ";@ ";
+      Format.fprintf fmt "}@]"
+
+  and pp_class_refinement :
+      type a. Format.formatter -> a class_refinement -> unit =
+   fun fmt { cr_types = trs } ->
+    Format.fprintf fmt "@[<2>{";
+    Format.fprintf fmt "cr_types = ";
+    SMap.pp pp_class_type_refinement fmt trs;
+    Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "}@]"
+
+  and pp_exact fmt e =
+    match e with
+    | Exact -> Format.pp_print_string fmt "Exact"
+    | Nonexact cr ->
+      Format.pp_print_string fmt "Nonexact ";
+      pp_class_refinement fmt cr
 
   and pp_taccess_type : type a. Format.formatter -> a taccess_type -> unit =
    fun fmt (a0, a1) ->
@@ -761,35 +786,17 @@ module Pp = struct
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_tparams";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_tparam_ fmt x;
-           true)
-         ~init:false
-         x.ft_tparams);
-    Format.fprintf fmt "@,]@]";
+    pp_list pp_tparam_ fmt x.ft_tparams;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_where_constraints";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_where_constraint_ fmt x;
-           true)
-         ~init:false
-         x.ft_where_constraints);
-    Format.fprintf fmt "@,]@]";
+    pp_list pp_where_constraint_ fmt x.ft_where_constraints;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_params";
-    pp_fun_params fmt x.ft_params;
+    pp_list pp_fun_param fmt x.ft_params;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
@@ -924,19 +931,6 @@ module Pp = struct
 
       Format.fprintf fmt "@ }@]"
 
-  and pp_fun_params : type a. Format.formatter -> a ty fun_params -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_fun_param fmt x;
-           true)
-         ~init:false
-         x);
-    Format.fprintf fmt "@,]@]"
-
   and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
    (fun fmt tparam -> pp_tparam pp_ty fmt tparam)
 
@@ -990,6 +984,14 @@ type locl_fun_param = locl_ty fun_param
 type decl_fun_params = decl_ty fun_params
 
 type locl_fun_params = locl_ty fun_params
+
+type decl_class_refinement = decl_phase class_refinement
+
+type locl_class_refinement = locl_phase class_refinement
+
+type decl_type_refinement = decl_phase class_type_refinement
+
+type locl_type_refinement = locl_phase class_type_refinement
 
 type destructure_kind =
   | ListDestructure

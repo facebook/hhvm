@@ -88,6 +88,7 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func*);
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const Func* callee,
                                   const StringData* callerModule);
+void raiseImplicitContextStateInvalidException(const Func* func);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

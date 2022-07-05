@@ -33,7 +33,7 @@ function preg_filter(mixed $pattern,
  */
 <<__Native>>
 function preg_grep(string $pattern,
-                   varray_or_darray $input,
+                   varray_or_darray<mixed> $input,
                    int $flags = 0)[]: mixed;
 
 /**
@@ -46,7 +46,7 @@ function preg_grep(string $pattern,
 <<__Native>>
 function preg_grep_with_error(
   string $pattern,
-  varray_or_darray $input,
+  varray_or_darray<mixed> $input,
   inout ?int $error,
   int $flags = 0,
 )[]: mixed;

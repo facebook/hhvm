@@ -6,22 +6,26 @@
 
 use bitflags::bitflags;
 use core_utils_rust as utils;
-use naming_special_names_rust::{
-    coeffects, coeffects::Ctx, members, special_idents, user_attributes,
-};
-use oxidized::{
-    aast,
-    aast::Hint_,
-    aast_defs,
-    aast_defs::Hint,
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast, ast_defs, local_id,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
+use naming_special_names_rust::coeffects;
+use naming_special_names_rust::coeffects::Ctx;
+use naming_special_names_rust::members;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::user_attributes;
+use oxidized::aast;
+use oxidized::aast::Hint_;
+use oxidized::aast_defs;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::local_id;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
 
 fn hints_contain_capability(hints: &[aast_defs::Hint], capability: Ctx) -> bool {
     for hint in hints {

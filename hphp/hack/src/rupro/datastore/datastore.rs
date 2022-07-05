@@ -5,6 +5,7 @@
 
 mod changes_store;
 mod delta_store;
+mod empty;
 mod non_evicting;
 
 use anyhow::Result;
@@ -12,7 +13,9 @@ use std::fmt::Debug;
 
 pub use changes_store::ChangesStore;
 pub use delta_store::DeltaStore;
-pub use non_evicting::{NonEvictingLocalStore, NonEvictingStore};
+pub use empty::EmptyStore;
+pub use non_evicting::NonEvictingLocalStore;
+pub use non_evicting::NonEvictingStore;
 
 /// A threadsafe datastore, intended for global decl storage. The key type is
 /// intended to be a `Symbol` or tuple of `Symbol`s, and the value type is

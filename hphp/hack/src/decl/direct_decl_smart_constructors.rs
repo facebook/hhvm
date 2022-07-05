@@ -4,49 +4,89 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod direct_decl_smart_constructors_generated;
 
-use arena_collections::{AssocListMut, List, MultiSetMut};
+use arena_collections::AssocListMut;
+use arena_collections::List;
+use arena_collections::MultiSetMut;
 use bstr::BStr;
-use bumpalo::{collections as bump, Bump};
+use bumpalo::collections as bump;
+use bumpalo::Bump;
 use flatten_smart_constructors::FlattenSmartConstructors;
+use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as naming_special_names;
-use oxidized_by_ref::{
-    aast,
-    ast_defs::{
-        Abstraction, Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance,
-        XhpEnumValue,
-    },
-    decl_parser_options::DeclParserOptions,
-    direct_decl_parser::Decls,
-    file_info::Mode,
-    method_flags::MethodFlags,
-    namespace_env::Env as NamespaceEnv,
-    nast,
-    pos::Pos,
-    prop_flags::PropFlags,
-    relative_path::RelativePath,
-    s_map::SMap,
-    shallow_decl_defs::{
-        self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
-    },
-    shape_map::ShapeField,
-    t_shape_map::TShapeField,
-    typing_defs::{
-        self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
-        Enforcement, EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
-        ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
-        TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint,
-    },
-    typing_defs_flags::{FunParamFlags, FunTypeFlags},
-    typing_reason::Reason,
-    xhp_attribute,
-};
-use parser_core_types::{
-    compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
-    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
-};
+use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized_by_ref::aast;
+use oxidized_by_ref::ast_defs::Abstraction;
+use oxidized_by_ref::ast_defs::Bop;
+use oxidized_by_ref::ast_defs::ClassishKind;
+use oxidized_by_ref::ast_defs::ConstraintKind;
+use oxidized_by_ref::ast_defs::FunKind;
+use oxidized_by_ref::ast_defs::Id;
+use oxidized_by_ref::ast_defs::ShapeFieldName;
+use oxidized_by_ref::ast_defs::Uop;
+use oxidized_by_ref::ast_defs::Variance;
+use oxidized_by_ref::ast_defs::XhpEnumValue;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::file_info::Mode;
+use oxidized_by_ref::method_flags::MethodFlags;
+use oxidized_by_ref::namespace_env::Env as NamespaceEnv;
+use oxidized_by_ref::nast;
+use oxidized_by_ref::pos::Pos;
+use oxidized_by_ref::prop_flags::PropFlags;
+use oxidized_by_ref::relative_path::RelativePath;
+use oxidized_by_ref::s_map::SMap;
+use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::ShallowClassConst;
+use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
+use oxidized_by_ref::shallow_decl_defs::ShallowProp;
+use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst;
+use oxidized_by_ref::shallow_decl_defs::{self};
+use oxidized_by_ref::shape_map::ShapeField;
+use oxidized_by_ref::t_shape_map::TShapeField;
+use oxidized_by_ref::typing_defs::AbstractTypeconst;
+use oxidized_by_ref::typing_defs::Capability::*;
+use oxidized_by_ref::typing_defs::ClassConstKind;
+use oxidized_by_ref::typing_defs::ClassRefinement;
+use oxidized_by_ref::typing_defs::ClassTypeRefinement;
+use oxidized_by_ref::typing_defs::ClassTypeRefinementBounds;
+use oxidized_by_ref::typing_defs::ConcreteTypeconst;
+use oxidized_by_ref::typing_defs::ConstDecl;
+use oxidized_by_ref::typing_defs::Enforcement;
+use oxidized_by_ref::typing_defs::EnumType;
+use oxidized_by_ref::typing_defs::FunElt;
+use oxidized_by_ref::typing_defs::FunImplicitParams;
+use oxidized_by_ref::typing_defs::FunParam;
+use oxidized_by_ref::typing_defs::FunParams;
+use oxidized_by_ref::typing_defs::FunType;
+use oxidized_by_ref::typing_defs::IfcFunDecl;
+use oxidized_by_ref::typing_defs::ParamMode;
+use oxidized_by_ref::typing_defs::PosByteString;
+use oxidized_by_ref::typing_defs::PosId;
+use oxidized_by_ref::typing_defs::PosString;
+use oxidized_by_ref::typing_defs::PossiblyEnforcedTy;
+use oxidized_by_ref::typing_defs::ShapeFieldType;
+use oxidized_by_ref::typing_defs::ShapeKind;
+use oxidized_by_ref::typing_defs::TaccessType;
+use oxidized_by_ref::typing_defs::Tparam;
+use oxidized_by_ref::typing_defs::TshapeFieldName;
+use oxidized_by_ref::typing_defs::Ty;
+use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::Typeconst;
+use oxidized_by_ref::typing_defs::TypedefType;
+use oxidized_by_ref::typing_defs::WhereConstraint;
+use oxidized_by_ref::typing_defs::{self};
+use oxidized_by_ref::typing_defs_flags::FunParamFlags;
+use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
+use oxidized_by_ref::typing_reason::Reason;
+use oxidized_by_ref::xhp_attribute;
+use parser_core_types::compact_token::CompactToken;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use parser_core_types::token_kind::TokenKind;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
@@ -55,19 +95,19 @@ type SK = SyntaxKind;
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
-pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 'a>> {
+pub struct DirectDeclSmartConstructors<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
 
-    pub source_text: IndexedSourceText<'text>,
+    pub source_text: IndexedSourceText<'t>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
     pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
 
     // const_refs will accumulate all scope-resolution-expressions it
     // encounters while it's "Some"
-    const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
+    const_refs: Option<HashSet<typing_defs::ClassConstRef<'a>>>,
 
-    opts: &'a DeclParserOptions<'a>,
+    opts: &'o DeclParserOptions,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -79,10 +119,10 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     module: Option<Id<'a>>,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     pub fn new(
-        opts: &'a DeclParserOptions<'a>,
-        src: &SourceText<'text>,
+        opts: &'o DeclParserOptions,
+        src: &SourceText<'t>,
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
@@ -99,18 +139,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
             source_text,
             arena,
-            opts,
             filename: arena.alloc(filename),
             file_mode,
             decls: Decls::empty(),
             file_attributes: List::empty(),
             const_refs: None,
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
-                opts.auto_namespace_map,
+                &opts.auto_namespace_map,
                 opts.disable_xhp_element_mangling,
                 elaborate_xhp_namespaces_for_facts,
                 arena,
             )),
+            opts,
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new()),
             // EndOfFile is used here as a None value (signifying "beginning of
@@ -258,7 +298,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn start_accumulating_const_refs(&mut self) {
-        self.const_refs = Some(arena_collections::set::Set::empty());
+        self.const_refs = Some(Default::default());
     }
 
     fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
@@ -268,38 +308,34 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // TODO: Hack is the wrong place to detect circularity (because we can never do
         // it completely soundly, and because it's a cross-body problem). The right place
         // to do it is in a linter. All this should be removed from here and put into a linter.
-        if let Some(const_refs) = self.const_refs {
+        if let Some(const_refs) = &mut self.const_refs {
             match class_id.2 {
                 nast::ClassId_::CI(sid) => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(
-                            typing_defs::ClassConstFrom::From(sid.1),
-                            value_id.1,
-                        ),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::From(sid.1),
+                        value_id.1,
                     ));
                 }
                 nast::ClassId_::CIself => {
-                    self.const_refs = Some(const_refs.add(
-                        self.arena,
-                        typing_defs::ClassConstRef(typing_defs::ClassConstFrom::Self_, value_id.1),
+                    const_refs.insert(typing_defs::ClassConstRef(
+                        typing_defs::ClassConstFrom::Self_,
+                        value_id.1,
                     ));
                 }
-                // Not allowed
                 nast::ClassId_::CIparent | nast::ClassId_::CIstatic | nast::ClassId_::CIexpr(_) => {
+                    // Not allowed
                 }
             }
         }
     }
 
     fn stop_accumulating_const_refs(&mut self) -> &'a [typing_defs::ClassConstRef<'a>] {
-        let const_refs = self.const_refs;
-        self.const_refs = None;
-        match const_refs {
+        match self.const_refs.take() {
             Some(const_refs) => {
                 let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
-                    bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
+                    bumpalo::collections::Vec::with_capacity_in(const_refs.len(), self.arena);
                 elements.extend(const_refs.into_iter());
+                elements.sort_unstable();
                 elements.into_bump_slice()
             }
             None => &[],
@@ -307,26 +343,26 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 }
 
-pub trait SourceTextAllocator<'text, 'target>: Clone {
-    fn alloc(&self, text: &'text str) -> &'target str;
+pub trait SourceTextAllocator<'s, 'd>: Clone {
+    fn alloc(&self, text: &'s str) -> &'d str;
 }
 
 #[derive(Clone)]
 pub struct NoSourceTextAllocator;
 
-impl<'text> SourceTextAllocator<'text, 'text> for NoSourceTextAllocator {
+impl<'t> SourceTextAllocator<'t, 't> for NoSourceTextAllocator {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'text str {
+    fn alloc(&self, text: &'t str) -> &'t str {
         text
     }
 }
 
 #[derive(Clone)]
-pub struct ArenaSourceTextAllocator<'arena>(pub &'arena bumpalo::Bump);
+pub struct ArenaSourceTextAllocator<'a>(pub &'a bumpalo::Bump);
 
-impl<'text, 'arena> SourceTextAllocator<'text, 'arena> for ArenaSourceTextAllocator<'arena> {
+impl<'t, 'a> SourceTextAllocator<'t, 'a> for ArenaSourceTextAllocator<'a> {
     #[inline]
-    fn alloc(&self, text: &'text str) -> &'arena str {
+    fn alloc(&self, text: &'t str) -> &'a str {
         self.0.alloc_str(text)
     }
 }
@@ -406,11 +442,18 @@ struct NamespaceBuilder<'a> {
 
 impl<'a> NamespaceBuilder<'a> {
     fn new_in(
-        auto_ns_map: &'a [(&'a str, &'a str)],
+        auto_ns_map: &[(String, String)],
         disable_xhp_element_mangling: bool,
         elaborate_xhp_namespaces_for_facts: bool,
         arena: &'a Bump,
     ) -> Self {
+        // Copy auto_namespace_map entries into the arena so decls can use them.
+        let auto_ns_map = arena.alloc_slice_fill_iter(
+            auto_ns_map
+                .iter()
+                .map(|(n, v)| (arena.alloc_str(n) as &str, arena.alloc_str(v) as &str)),
+        );
+
         let mut ns_uses = SMap::empty();
         for &alias in hh_autoimport::NAMESPACES {
             ns_uses = ns_uses.add(arena, alias, concat(arena, "HH\\", alias));
@@ -424,7 +467,7 @@ impl<'a> NamespaceBuilder<'a> {
             class_uses = class_uses.add(arena, alias, concat(arena, "HH\\", alias));
         }
 
-        NamespaceBuilder {
+        Self {
             arena,
             stack: vec![NamespaceEnv {
                 ns_uses,
@@ -846,6 +889,7 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
+    ClassTypeRefinement(&'a (&'a str, ClassTypeRefinement<'a>)),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -1013,7 +1057,7 @@ struct Attributes<'a> {
     safe_global_variable: bool,
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
@@ -1035,7 +1079,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         concat(self.arena, str1, str2)
     }
 
-    fn token_bytes(&self, token: &CompactToken) -> &'text [u8] {
+    fn token_bytes(&self, token: &CompactToken) -> &'t [u8] {
         self.source_text
             .source_text()
             .sub(token.start_offset(), token.width())
@@ -1044,7 +1088,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     // Check that the slice is valid UTF-8. If it is, return a &str referencing
     // the same data. Otherwise, copy the slice into our arena using
     // String::from_utf8_lossy_in, and return a reference to the arena str.
-    fn str_from_utf8(&self, slice: &'text [u8]) -> &'a str {
+    fn str_from_utf8(&self, slice: &'t [u8]) -> &'a str {
         if let Ok(s) = std::str::from_utf8(slice) {
             self.source_text_allocator.alloc(s)
         } else {
@@ -1334,15 +1378,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         _ => None,
                     }
                 }
-                fn create_vars_for_reinfer_types<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
-                    this: &DirectDeclSmartConstructors<'a, 'text, S>,
+                fn create_vars_for_reinfer_types<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
+                    this: &DirectDeclSmartConstructors<'a, 'o, 't, S>,
                     ty: &'a Ty<'a>,
                     tvar: &'a Ty<'a>,
                 ) -> &'a Ty<'a> {
                     let mk = |r, ty_| this.alloc(Ty(r, ty_));
                     let must_reinfer_type = |ty| match reinfer_type_to_string_opt(this.arena, ty) {
                         None => false,
-                        Some(ty_str) => this.opts.gi_reinfer_types.contains(&ty_str),
+                        Some(ty_str) => this.opts.gi_reinfer_types.iter().any(|t| t == ty_str),
                     };
                     match *ty {
                         Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
@@ -1961,7 +2005,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         ))
     }
 
-    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
+    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'t [u8] {
         let start = pos.start_offset();
         let end = pos.end_offset();
         self.source_text.source_text().sub(start, end - start)
@@ -2454,8 +2498,8 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
     }
 }
 
-impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
-    for DirectDeclSmartConstructors<'a, 'text, S>
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
+    for DirectDeclSmartConstructors<'a, 'o, 't, S>
 {
     // type Output = Node<'a> in direct_decl_smart_constructors_generated.rs
 
@@ -3026,6 +3070,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
         &mut self,
         attributes: Self::Output,
         modifiers: Self::Output,
+        _module_kw_opt: Self::Output,
         keyword: Self::Output,
         name: Self::Output,
         generic_params: Self::Output,
@@ -5384,6 +5429,69 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> FlattenSmartConstructors
         Node::Ty(self.alloc(Ty(
             reason,
             Ty_::Taccess(self.alloc(TaccessType(ty, id.into()))),
+        )))
+    }
+
+    fn make_type_in_refinement(
+        &mut self,
+        _type_keyword: Self::Output,
+        type_constant_name: Self::Output,
+        _type_params: Self::Output,
+        constraints: Self::Output,
+        _equal_token: Self::Output,
+        type_specifier: Self::Output,
+    ) -> Self::Output {
+        let Id(_, id) = match self.expect_name(type_constant_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::TypeInRefinement),
+        };
+        if type_specifier.is_ignored() {
+            // A loose refinement, with bounds
+            let (lower, upper) = self.partition_bounds_into_lower_and_upper(constraints);
+            Node::ClassTypeRefinement(self.alloc((
+                id,
+                ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                    lower: self.alloc(lower),
+                    upper: self.alloc(upper),
+                })),
+            )))
+        } else {
+            // An exact refinement
+            let ty = match self.node_to_ty(type_specifier) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeInRefinement),
+            };
+            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::Texact(ty))))
+        }
+    }
+
+    fn make_type_refinement(
+        &mut self,
+        root_type: Self::Output,
+        _with_keyword: Self::Output,
+        _left_brace: Self::Output,
+        members: Self::Output,
+        right_brace: Self::Output,
+    ) -> Self::Output {
+        let pos = self.merge_positions(root_type, right_brace);
+        let reason = self.alloc(Reason::hint(pos));
+        let root_type = match self.node_to_ty(root_type) {
+            Some(ty) => ty,
+            None => return Node::Ignored(SK::TypeRefinement),
+        };
+        let type_members = arena_collections::map::Map::from(
+            self.arena,
+            members.iter().filter_map(|node| match node {
+                Node::ClassTypeRefinement(&(id, ctr)) => Some((id, ctr)),
+                _ => None,
+            }),
+        );
+        let class_ref = ClassRefinement {
+            cr_types: type_members,
+        };
+        Node::Ty(self.alloc(Ty(
+            reason,
+            Ty_::Trefinement(self.alloc((root_type, class_ref))),
         )))
     }
 

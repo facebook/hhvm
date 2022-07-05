@@ -812,11 +812,7 @@ VanillaDict* VanillaDict::prepareForInsert(bool copy) {
   return this;
 }
 
-void VanillaDict::compact(bool renumber /* = false */) {
-  // Set m_nextKI to 0 for now to prepare for renumbering integer keys
-  if (UNLIKELY(renumber)) m_nextKI = 0;
-
-  // Perform compaction
+void VanillaDict::compact() {
   auto elms = data();
   auto const mask = this->mask();
   auto const table = initHash(m_scale);
@@ -829,21 +825,16 @@ void VanillaDict::compact(bool renumber /* = false */) {
     if (toPos != frPos) {
       toE = elms[frPos];
     }
-    if (UNLIKELY(renumber && toE.hasIntKey())) {
-      toE.setIntKey(m_nextKI, hash_int64(m_nextKI));
-      m_nextKI++;
-    }
     *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
 
   m_used = m_size;
-  // Even if renumber is true, we'll leave string keys in the array untouched,
-  // so the only keyTypes update we can do here is to unset the tombstone bit.
+  // We leave string keys in the array untouched, so the only keyTypes update
+  // we can do here is to unset the tombstone bit.
   mutableKeyTypes()->makeCompact();
   assertx(checkInvariants());
 }
 
-template <bool Move>
 void VanillaDict::nextInsert(TypedValue v) {
   assertx(m_nextKI >= 0);
   assertx(!isFull());
@@ -860,11 +851,7 @@ void VanillaDict::nextInsert(TypedValue v) {
   e->setIntKey(ki, h);
   mutableKeyTypes()->recordInt();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  if constexpr (Move) {
-    tvCopy(v, e->data);
-  } else {
-    tvDup(v, e->data);
-  }
+  tvCopy(v, e->data);
 }
 
 template <class K> ALWAYS_INLINE
@@ -1087,7 +1074,7 @@ ArrayData* VanillaDict::AppendMove(ArrayData* ad, TypedValue v) {
     return a;
   }
   auto const res = a->prepareForInsert(copy);
-  res->nextInsert<true>(v);
+  res->nextInsert(v);
   if (res != a && a->decReleaseCheck()) VanillaDict::Release(a);
   return res;
 }
@@ -1168,61 +1155,6 @@ VanillaDict* VanillaDict::CopyReserve(const VanillaDict* src,
   return ad;
 }
 
-NEVER_INLINE
-ArrayData* VanillaDict::ArrayMergeGeneric(VanillaDict* ret,
-                                         const ArrayData* elems) {
-  assertx(ret->isVanillaDict());
-
-  for (ArrayIter it(elems); !it.end(); it.next()) {
-    Variant key = it.first();
-    auto const value = it.secondVal();
-    if (key.asTypedValue()->m_type == KindOfInt64) {
-      ret->nextInsert<false>(value);
-    } else {
-      StringData* sd = key.getStringData();
-      auto const lval = ret->addLvalImpl(sd);
-      assertx(value.m_type != KindOfUninit);
-      tvSet(value, lval);
-    }
-  }
-  return ret;
-}
-
-ArrayData* VanillaDict::Merge(ArrayData* ad, const ArrayData* elems) {
-  assertx(as(ad)->checkInvariants());
-  auto const ret = CopyReserve(as(ad), ad->size() + elems->size());
-  assertx(ret->hasExactlyOneRef());
-  *ret->mutableKeyTypes() = as(ad)->keyTypes();
-
-  if (elems->isVanillaDict()) {
-    auto const rhs = as(elems);
-    auto srcElem = rhs->data();
-    auto const srcStop = rhs->data() + rhs->m_used;
-
-    for (; srcElem != srcStop; ++srcElem) {
-      if (isTombstone(srcElem->data.m_type)) continue;
-
-      if (srcElem->hasIntKey()) {
-        ret->nextInsert<false>(srcElem->data);
-      } else {
-        auto const lval = ret->addLvalImpl(srcElem->skey);
-        assertx(srcElem->data.m_type != KindOfUninit);
-        tvSet(srcElem->data, lval);
-      }
-    }
-    return ret;
-  }
-
-  if (UNLIKELY(!elems->isVanillaVec())) {
-    return ArrayMergeGeneric(ret, elems);
-  }
-
-  VanillaVec::IterateV(elems, [&](TypedValue tv) {
-    ret->nextInsert<false>(tv);
-  });
-  return ret;
-}
-
 ArrayData* VanillaDict::PopMove(ArrayData* ad, Variant& value) {
   if (ad->empty()) {
     value = uninit_null();
@@ -1243,16 +1175,10 @@ ArrayData* VanillaDict::PopMove(ArrayData* ad, Variant& value) {
 
 }
 
-ArrayData* VanillaDict::Renumber(ArrayData* adIn) {
-  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-  as(ad)->compact(true);
-  return ad;
-}
-
 void VanillaDict::OnSetEvalScalar(ArrayData* ad) {
   auto a = as(ad);
   if (UNLIKELY(a->m_size < a->m_used)) {
-    a->compact(/*renumber=*/false);
+    a->compact();
   }
   a->mutableKeyTypes()->makeStatic();
   auto elm = a->data();

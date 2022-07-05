@@ -531,7 +531,7 @@ constexpr bool instrIsControlFlow(Op opcode) {
 }
 
 constexpr bool isUnconditionalJmp(Op opcode) {
-  return opcode == Op::Jmp || opcode == Op::JmpNS;
+  return opcode == Op::Enter || opcode == Op::Jmp;
 }
 
 constexpr bool isConditionalJmp(Op opcode) {
@@ -540,8 +540,8 @@ constexpr bool isConditionalJmp(Op opcode) {
 
 constexpr bool isJmp(Op opcode) {
   return
+    opcode == Op::Enter ||
     opcode == Op::Jmp   ||
-    opcode == Op::JmpNS ||
     opcode == Op::JmpZ  ||
     opcode == Op::JmpNZ;
 }

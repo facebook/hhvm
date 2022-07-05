@@ -5,7 +5,8 @@
 
 use crate::deserializer::obtain_arena;
 use crate::impls::DeserializeInArena;
-use serde::de::{DeserializeSeed, Deserializer};
+use serde::de::DeserializeSeed;
+use serde::de::Deserializer;
 use std::marker::PhantomData;
 
 pub struct ArenaSeed<T> {

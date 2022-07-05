@@ -105,7 +105,8 @@
 (105,8)-(105,8) An expression is expected here.
 (106,8)-(106,8) An expression is expected here.
 (107,10)-(107,10) An expression is expected here.
-(108,7)-(108,7) An expression is expected here.
+(108,7)-(108,7) Encountered unexpected token `public`.
+(108,9)-(108,9) An expression is expected here.
 (109,10)-(109,10) An expression is expected here.
 (110,15)-(110,15) An expression is expected here.
 (111,9)-(111,9) An expression is expected here.

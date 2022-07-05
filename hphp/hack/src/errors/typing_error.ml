@@ -1592,6 +1592,11 @@ module Primary = struct
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Req_class_not_final of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+      }
     | Incompatible_reqs of {
         pos: Pos.t;
         req_name: string;
@@ -2641,6 +2646,24 @@ module Primary = struct
       lazy
         ( pos,
           "This class does not satisfy all the requirements of its traits or interfaces."
+        )
+    in
+    (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let req_class_not_final pos trait_pos req_pos =
+    let reasons =
+      lazy
+        (let r =
+           (trait_pos, "The trait with a require class constraint is used here")
+         in
+         if Pos_or_decl.equal trait_pos req_pos then
+           [r]
+         else
+           [r; (req_pos, "The require class constraint is here")])
+    and claim =
+      lazy
+        ( pos,
+          "This class must be final because it uses a trait with a require class constraint."
         )
     in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
@@ -4719,8 +4742,9 @@ module Primary = struct
   let undefined_field use_pos name shape_type_pos =
     ( Error_code.UndefinedField,
       lazy
-        (use_pos, "The field " ^ Markdown_lite.md_codify name ^ " is undefined"),
-      lazy [(shape_type_pos, "Definition is here")],
+        ( use_pos,
+          "This shape doesn't have a field " ^ Markdown_lite.md_codify name ),
+      lazy [(shape_type_pos, "The shape is defined here")],
       [] )
 
   let array_access code pos1 pos2 ty =
@@ -5430,6 +5454,8 @@ module Primary = struct
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req_class pos trait_pos req_name req_pos
+    | Req_class_not_final { pos; trait_pos; req_pos } ->
+      req_class_not_final pos trait_pos req_pos
     | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->
       incompatible_reqs pos req_name req_class_pos req_extends_pos
     | Invalid_echo_argument pos -> invalid_echo_argument pos
@@ -6323,6 +6349,7 @@ and Secondary : sig
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -6590,6 +6617,7 @@ end = struct
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+        def_pos: Pos_or_decl.t;
         name: string;
       }
     | Return_disposable_mismatch of {
@@ -7004,7 +7032,7 @@ end = struct
     in
     (Error_code.IFCExternalContravariant, reasons, [])
 
-  let required_field_is_optional pos name decl_pos =
+  let required_field_is_optional pos name decl_pos def_pos =
     let reasons =
       lazy
         [
@@ -7013,6 +7041,7 @@ end = struct
             "The field "
             ^ Markdown_lite.md_codify name
             ^ " is defined as **required**" );
+          (def_pos, Markdown_lite.md_codify name ^ " is defined here");
         ]
     in
     (Error_code.RequiredFieldIsOptional, reasons, [])
@@ -7454,8 +7483,8 @@ end = struct
       Eval_result.single (accept_disposable_invariant pos decl_pos)
     | Ifc_external_contravariant { pos_sub; pos_super } ->
       Eval_result.single (ifc_external_contravariant pos_sub pos_super)
-    | Required_field_is_optional { pos; name; decl_pos } ->
-      Eval_result.single (required_field_is_optional pos name decl_pos)
+    | Required_field_is_optional { pos; name; decl_pos; def_pos } ->
+      Eval_result.single (required_field_is_optional pos name decl_pos def_pos)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
       Eval_result.single

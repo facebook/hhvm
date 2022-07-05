@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type class_members = {
   m_properties: Typing_defs.decl_ty SMap.t;
   m_static_properties: Typing_defs.decl_ty SMap.t;
@@ -70,32 +72,33 @@ let pop_local_changes () : unit =
   Decl_heap.Modules.LocalChanges.pop_stack ();
   ()
 
-let store =
-  ref
-    {
-      add_prop = Decl_heap.Props.add;
-      get_prop = Decl_heap.Props.get;
-      add_static_prop = Decl_heap.StaticProps.add;
-      get_static_prop = Decl_heap.StaticProps.get;
-      add_method = Decl_heap.Methods.add;
-      get_method = Decl_heap.Methods.get;
-      add_static_method = Decl_heap.StaticMethods.add;
-      get_static_method = Decl_heap.StaticMethods.get;
-      add_constructor = Decl_heap.Constructors.add;
-      get_constructor = Decl_heap.Constructors.get;
-      add_class = Decl_heap.Classes.add;
-      get_class = Decl_heap.Classes.get;
-      add_fun = Decl_heap.Funs.add;
-      get_fun = Decl_heap.Funs.get;
-      add_typedef = Decl_heap.Typedefs.add;
-      get_typedef = Decl_heap.Typedefs.get;
-      add_gconst = Decl_heap.GConsts.add;
-      get_gconst = Decl_heap.GConsts.get;
-      add_module = Decl_heap.Modules.add;
-      get_module = Decl_heap.Modules.get;
-      push_local_changes;
-      pop_local_changes;
-    }
+let shared_memory_store =
+  {
+    add_prop = Decl_heap.Props.add;
+    get_prop = Decl_heap.Props.get;
+    add_static_prop = Decl_heap.StaticProps.add;
+    get_static_prop = Decl_heap.StaticProps.get;
+    add_method = Decl_heap.Methods.add;
+    get_method = Decl_heap.Methods.get;
+    add_static_method = Decl_heap.StaticMethods.add;
+    get_static_method = Decl_heap.StaticMethods.get;
+    add_constructor = Decl_heap.Constructors.add;
+    get_constructor = Decl_heap.Constructors.get;
+    add_class = Decl_heap.Classes.add;
+    get_class = Decl_heap.Classes.get;
+    add_fun = Decl_heap.Funs.add;
+    get_fun = Decl_heap.Funs.get;
+    add_typedef = Decl_heap.Typedefs.add;
+    get_typedef = Decl_heap.Typedefs.get;
+    add_gconst = Decl_heap.GConsts.add;
+    get_gconst = Decl_heap.GConsts.get;
+    add_module = Decl_heap.Modules.add;
+    get_module = Decl_heap.Modules.get;
+    push_local_changes;
+    pop_local_changes;
+  }
+
+let store = ref shared_memory_store
 
 let set s = store := s
 

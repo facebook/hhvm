@@ -5057,4 +5057,89 @@ std::vector<Class*> prioritySerializeClasses() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+Mutex s_lazy_apc_mutex;
+bool s_lazy_apc_classes_serialized = false;
+std::vector<const Class*> s_lazy_apc_classes;
+std::atomic<bool> s_lazy_apc_classes_final = false;
+
+bool supportsLazyAPCDeserialization(const Class* cls) {
+  return classHasPersistentRDS(cls) && !cls->isClosureClass();
+}
+}
+
+bool Class::enableLazyAPCDeserialization() {
+  auto const done = s_lazy_apc_classes_final.load(std::memory_order_acquire);
+  auto const okay = m_useLazyAPCDeserialization.load(std::memory_order_acquire);
+  if (okay) return true;
+  if (done) return false;
+
+  if (!supportsLazyAPCDeserialization(this)) return false;
+
+  Lock lock(s_lazy_apc_mutex);
+  auto const redone = s_lazy_apc_classes_final.load(std::memory_order_acquire);
+  auto const reokay = m_useLazyAPCDeserialization.load(std::memory_order_acquire);
+  if (reokay) return true;
+  if (redone) return false;
+
+  auto cur = this;
+  while (cur != nullptr) {
+    auto expected = false;
+    auto& flag = const_cast<Class*>(cur)->m_useLazyAPCDeserialization;
+    auto const changed = flag.compare_exchange_strong(expected, true);
+    if (!changed) break;
+    s_lazy_apc_classes.push_back(this);
+    cur = cur->m_parent.get();
+  }
+  return true;
+}
+
+bool Class::mayUseLazyAPCDeserialization() const {
+  if (!supportsLazyAPCDeserialization(this)) return false;
+  auto const done = s_lazy_apc_classes_final.load(std::memory_order_acquire);
+  auto const okay = m_useLazyAPCDeserialization.load(std::memory_order_acquire);
+  return !done || okay;
+}
+
+bool Class::currentlyUsingLazyAPCDeserialization() const {
+  return m_useLazyAPCDeserialization.load(std::memory_order_acquire);
+}
+
+void Class::finalizeLazyAPCClasses() {
+  Lock lock(s_lazy_apc_mutex);
+  s_lazy_apc_classes_final.store(true, std::memory_order_release);
+}
+
+std::vector<const Class*> Class::serializeLazyAPCClasses() {
+  auto const done = s_lazy_apc_classes_final.load(std::memory_order_acquire);
+  always_assert(!s_lazy_apc_classes_serialized);
+  always_assert(done);
+
+  std::vector<const Class*> result;
+  std::swap(result, s_lazy_apc_classes);
+  s_lazy_apc_classes_serialized = true;
+  return result;
+}
+
+void Class::deserializeLazyAPCClasses(const std::vector<const Class*>& list) {
+  auto const done = s_lazy_apc_classes_final.load(std::memory_order_acquire);
+  always_assert(!done);
+
+  for (auto const cls : list) {
+    auto cur = cls;
+    while (cur != nullptr) {
+      auto expected = false;
+      auto& flag = const_cast<Class*>(cur)->m_useLazyAPCDeserialization;
+      auto const changed = flag.compare_exchange_strong(expected, true);
+      if (!changed) break;
+      cur = cur->m_parent.get();
+    }
+  }
+
+  s_lazy_apc_classes_final.store(true, std::memory_order_release);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

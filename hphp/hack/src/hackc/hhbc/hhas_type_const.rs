@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typed_value::TypedValue;
-use ffi::{Maybe, Str};
+use ffi::Maybe;
+use ffi::Str;
 
 #[derive(Debug, Eq, PartialEq)]
 #[repr(C)]

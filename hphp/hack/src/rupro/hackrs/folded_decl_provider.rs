@@ -6,13 +6,19 @@
 use depgraph_api::DeclName;
 
 use itertools::Itertools;
-use pos::{ConstName, FunName, MethodName, PropName, TypeName};
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::PropName;
+use pos::TypeName;
 use std::fmt::Debug;
 use std::sync::Arc;
-use ty::{
-    decl::{ConstDecl, FoldedClass, FunDecl, Ty, TypedefDecl},
-    reason::Reason,
-};
+use ty::decl::ConstDecl;
+use ty::decl::FoldedClass;
+use ty::decl::FunDecl;
+use ty::decl::Ty;
+use ty::decl::TypedefDecl;
+use ty::reason::Reason;
 
 mod fold;
 mod inherit;

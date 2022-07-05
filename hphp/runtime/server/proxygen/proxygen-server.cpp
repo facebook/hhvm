@@ -709,6 +709,9 @@ void ProxygenServer::vmStopped() {
 }
 
 void ProxygenServer::forceStop() {
+  auto evb = m_workers[0]->getEventBase();
+  evb->checkIsInEventBaseThread();
+  if (getStatus() == RunStatus::STOPPED) return;
   Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
                this, m_port, m_enqueuedCount.load(std::memory_order_relaxed),
                getLibEventConnectionCount());

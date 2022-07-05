@@ -4,7 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use proc_macro2::{Ident, Punct, Spacing, TokenStream};
+use proc_macro2::Ident;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
+use proc_macro2::TokenStream;
 use quote::quote;
 
 pub use crate::common::gen_helpers::gen_module_uses;

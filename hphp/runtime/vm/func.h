@@ -453,24 +453,6 @@ public:
   // Return type.                                                       [const]
 
   /*
-   * CPP builtin's return type. Returns std::nullopt if function is not a CPP
-   * builtin.
-   *
-   * There are a number of caveats regarding this value:
-   *
-   *    - If the return type is std::nullopt, the return is a Variant.
-   *
-   *    - If the return type is a string, array-like, object, ref, or resource
-   *      type, null may also be returned.
-   *
-   *    - Likewise, if the function is marked AttrParamCoerceModeNull, null
-   *      might also be returned.
-   *
-   *    - This list of caveats may be incorrect and/or incomplete.
-   */
-  MaybeDataType hniReturnType() const;
-
-  /*
    * Return type inferred by HHBBC's static analysis. TGen if no data is
    * available.
    */
@@ -722,7 +704,7 @@ public:
    */
   bool isMemoizeWrapperLSB() const;
 
-  bool isPolicyShardedMemoize() const;
+  bool isKeyedByImplicitContextMemoize() const;
 
   /*
    * Is this string the name of a memoize implementation.
@@ -1271,6 +1253,13 @@ public:
   static Func* load(const StringData* name);
 
   /*
+   * Same as Func::load but also checks for module boundary violations
+   */
+  static Func* resolve(const NamedEntity* ne, const StringData* name,
+                       const Func* callerFunc);
+  static Func* resolve(const StringData* name, const Func* callerFunc);
+
+  /*
    * Lookup the builtin in this request with name `name', or nullptr if none
    * exists. This does not access RDS so it is safe to use from within the
    * compiler. Note that does not mean imply that the name binding for the
@@ -1334,7 +1323,7 @@ private:
         bool m_returnByValue : true; // only for builtins
         bool m_isMemoizeWrapper : true;
         bool m_isMemoizeWrapperLSB : true;
-        bool m_isPolicyShardedMemoize : true;
+        bool m_isKeyedByImplicitContextMemoize : true;
         bool m_isPhpLeafFn : true;
         bool m_hasReifiedGenerics : true;
         bool m_hasParamsWithMultiUBs : true;
@@ -1412,7 +1401,6 @@ private:
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
-    MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
     LowStringPtr m_docComment;

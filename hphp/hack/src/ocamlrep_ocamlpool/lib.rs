@@ -6,10 +6,16 @@
 use std::ffi::CString;
 use std::panic::UnwindSafe;
 
-use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep};
+use ocamlrep::Allocator;
+use ocamlrep::BlockBuilder;
+use ocamlrep::MemoizationCache;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
 
 pub use bumpalo::Bump;
-pub use ocamlrep::{FromOcamlRep, FromOcamlRepIn, Value};
+pub use ocamlrep::FromOcamlRep;
+pub use ocamlrep::FromOcamlRepIn;
+pub use ocamlrep::Value;
 
 extern "C" {
     fn ocamlpool_enter();
@@ -270,7 +276,9 @@ macro_rules! ocaml_ffi_with_arena_fn {
                 use $crate::FromOcamlRepIn;
                 let arena = &$crate::Bump::new();
                 fn inner<$lifetime>($arena: $arena_ty, $($param: usize,)*) -> $ret {
-                    $(let $param = unsafe { <$ty>::from_ocamlrep_in($crate::Value::from_bits($param), $arena).unwrap() };)*
+                    $(let $param = unsafe {
+                        <$ty>::from_ocamlrep_in($crate::Value::from_bits($param), $arena).unwrap()
+                    };)*
                     $code
                 }
                 let result = inner(arena, $($param,)*);
@@ -337,6 +345,69 @@ macro_rules! ocaml_ffi_with_arena_fn {
 macro_rules! ocaml_ffi_with_arena {
     ($(fn $name:ident<$lifetime:lifetime>($($param:ident: $ty:ty),* $(,)?) $(-> $ret:ty)? $code:block)*) => {
         $($crate::ocaml_ffi_with_arena_fn! {
+            fn $name<$lifetime>($($param: $ty),*) $(-> $ret)* $code
+        })*
+    };
+}
+
+#[macro_export]
+macro_rules! ocaml_ffi_arena_result_fn {
+    (fn $name:ident<$lifetime:lifetime>($arena:ident: $arena_ty:ty, $($param:ident: $ty:ty),+ $(,)?) -> $ret:ty $code:block) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
+            $crate::catch_unwind(|| {
+                fn inner<$lifetime>($arena: $arena_ty, $($param: $ty,)*) -> $ret {
+                    $code
+                }
+                use $crate::FromOcamlRep;
+                $(let $param = <$ty>::from_ocaml($param).unwrap();)*
+                let arena = &$crate::Bump::new();
+                let result = inner(arena, $($param,)*);
+                $crate::to_ocaml(&result)
+            })
+        }
+    };
+}
+
+/// Convenience macro for declaring OCaml FFI wrappers which use an arena to
+/// just the return value.
+///
+/// FFI functions declared with this macro must declare exactly one lifetime
+/// parameter. The function's first value parameter must be a reference to a
+/// `bumpalo::Bump` arena with that lifetime:
+///
+/// ```
+/// ocaml_ffi_arena_result! {
+///     fn parse_example<'a>(arena: &'a Bump, text: String) -> ('a str, &'a str) {
+///         /* copy parts of text into arena while parsing */
+///         (pair.1, pair.0)
+///     }
+/// }
+/// ```
+///
+/// An OCaml extern declaration for this function would look like this:
+///
+/// ```
+/// external parse_example : string -> string * string = "parse_example"
+/// ```
+///
+/// Note that no parameter for the arena appears on the OCaml side--it is
+/// constructed on the Rust side and lives only for the duration of one FFI
+/// call.
+///
+/// Each parameter after the arena parameter will be converted from OCaml using
+/// `ocamlrep` and passed in as an owned value.
+///
+/// The return value (which may be allocated in the given arena, if convenient)
+/// will be converted to OCaml using `ocamlrep::ToOcamlRep`. The converted OCaml
+/// value will be allocated on the OCaml heap using `ocamlpool`.
+///
+/// Panics in the function body will be caught and converted to an OCaml
+/// exception of type `Failure`.
+#[macro_export]
+macro_rules! ocaml_ffi_arena_result {
+    ($(fn $name:ident<$lifetime:lifetime>($($param:ident: $ty:ty),* $(,)?) $(-> $ret:ty)? $code:block)*) => {
+        $($crate::ocaml_ffi_arena_result_fn! {
             fn $name<$lifetime>($($param: $ty),*) $(-> $ret)* $code
         })*
     };

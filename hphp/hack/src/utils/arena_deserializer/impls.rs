@@ -6,7 +6,9 @@
 use crate::seed::ArenaSeed;
 use bumpalo::collections::Vec as ArenaVec;
 use bumpalo::Bump;
-use serde::de::{Deserializer, SeqAccess, Visitor};
+use serde::de::Deserializer;
+use serde::de::SeqAccess;
+use serde::de::Visitor;
 use serde::Deserialize;
 use std::fmt;
 use std::marker::PhantomData;

@@ -448,13 +448,11 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   auto const childOff = AFWH::childrenOff() + AFWH::Node::childOff();
   v << store{child, parentAR[ar_rel(childOff)]};
 
-  if (RO::EvalEnableImplicitContext) {
-    // parent->m_implicitContext = *ImplicitContext::activeCtx
-    markRDSAccess(v, ImplicitContext::activeCtx.handle());
-    auto const implicitContext = v.makeReg();
-    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
-    v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
-  }
+  // parent->m_implicitContext = *ImplicitContext::activeCtx
+  markRDSAccess(v, ImplicitContext::activeCtx.handle());
+  auto const implicitContext = v.makeReg();
+  v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
+  v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
 }
 
 void cgAFWHPushTailFrame(IRLS& env, const IRInstruction* inst) {

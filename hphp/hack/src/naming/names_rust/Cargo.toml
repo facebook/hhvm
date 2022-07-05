@@ -8,6 +8,7 @@ edition = "2021"
 path = "names.rs"
 
 [dependencies]
+anyhow = "1.0.56"
 hh24_types = { path = "../../utils/hh24_types" }
 nohash-hasher = "0.2"
 oxidized = { path = "../../oxidized" }

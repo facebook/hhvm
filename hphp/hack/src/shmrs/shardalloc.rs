@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::alloc::{AllocError, Allocator, Layout};
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
 use std::ptr::NonNull;
 
 use crate::filealloc::FileAlloc;
@@ -84,6 +86,19 @@ pub struct ShardAllocControlData {
     /// End of the current chunk. Do not allocate past this pointer.
     current_end: *mut u8,
 }
+
+/**
+* Safety:
+* - The methods of ShardAllocControlData below all mutate the direct fields
+*   by taking &mut self, so there is no concurrent writes to the fields themselves
+* - ChunkPtr is a bookkeeping struct, and we perform all mutations to the inner
+    linked list pointers via methods taking &mut self, so again we are
+    protected by the upper level rwlock.
+* - current_next and current_end are simply raw pointer types for bookkeeping
+*   and are not dereferenced directly in concurrent context
+*/
+unsafe impl Sync for ShardAllocControlData {}
+unsafe impl Send for ShardAllocControlData {}
 
 impl ShardAllocControlData {
     /// A new empty allocator. Useful as a placeholder.

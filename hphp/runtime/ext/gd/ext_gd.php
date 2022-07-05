@@ -4,7 +4,20 @@
  * library.
  */
 <<__Native>>
-function gd_info(): darray;
+function gd_info(): shape(
+  'GD Version' => string,
+  'FreeType Support' => bool,
+  'FreeType Linkage' => string,
+  'T1Lib Support' => bool,
+  'GIF Read Support' => bool,
+  'GIF Create Support' => bool,
+  'JPG Support' => bool,
+  'PNG Support' => bool,
+  'WBMP Support' => bool,
+  'XPM Support' => bool,
+  'XBM Support' => bool,
+  'JIS-mapped Japanese Font Support' => bool,
+);
 
 /* The getimagesize() function will determine the size of any given image file
  * and return the dimensions along with the file type and a height/width text
@@ -53,14 +66,21 @@ function image2wbmp(resource $image,
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffine(resource $image,
-                     varray $affine = varray[],
-                     darray $clip = darray[]): mixed;
+function imageaffine(
+  resource $image,
+  varray<mixed> $affine = varray[],
+  shape(
+    ?'x' => int,
+    ?'y' => int,
+    ?'width' => int,
+    ?'height' => int,
+  ) $clip = shape()
+): mixed;
 
 /* Concat two matrices.
  */
 <<__Native>>
-function imageaffinematrixconcat(varray $m1, varray $m2): mixed;
+function imageaffinematrixconcat(varray<mixed> $m1, varray<mixed> $m2): mixed;
 
 /* Return an image containing the affine tramsformed src image, using
  * an optional clipping area.
@@ -287,10 +307,12 @@ function imagecolortransparent(resource $image,
  * offset.
  */
 <<__Native>>
-function imageconvolution(resource $image,
-                          varray $matrix,
-                          float $div,
-                          float $offset): bool;
+function imageconvolution(
+  resource $image,
+  varray<varray<float>> $matrix,
+  float $div,
+  float $offset,
+): bool;
 
 /* Copy a part of src_im onto dst_im starting at the x,y coordinates src_x,
  * src_y with a width of src_w and a height of src_h. The portion defined will
@@ -520,7 +542,15 @@ function imagecreatetruecolor(int $width,
 /* Crop an image using the given coordinates and size, x, y, width and height.
  */
 <<__Native>>
-function imagecrop(resource $image, darray $rect): mixed;
+function imagecrop(
+  resource $image,
+  shape(
+    'x' => int,
+    'y' => int,
+    'width' => int,
+    'height' => int,
+  ) $rect,
+): mixed;
 
 /* Crop an image automatically using one of the available modes.
  */
@@ -596,7 +626,7 @@ function imagefilledellipse(resource $image,
  */
 <<__Native>>
 function imagefilledpolygon(resource $image,
-                            varray $points,
+                            varray<int> $points,
                             int $num_points,
                             int $color): bool;
 
@@ -650,7 +680,7 @@ function imageftbbox(float $size,
                      float $angle,
                      string $font_file,
                      string $text,
-                     darray $extrainfo = darray[]): mixed;
+                     shape(?'linespacing' => float) $extrainfo = shape()): mixed;
 
 <<__Native>>
 function imagefttext(resource $image,
@@ -661,7 +691,7 @@ function imagefttext(resource $image,
                      int $col,
                      string $font_file,
                      string $text,
-                     darray $extrainfo = darray[]): mixed;
+                     shape(?'linespacing' => float) $extrainfo = shape()): mixed;
 
 /* Applies gamma correction to the given gd image given an input and an output
  * gamma.
@@ -755,7 +785,7 @@ function imagewebp(resource $image,
  */
 <<__Native>>
 function imagepolygon(resource $image,
-                      varray $points,
+                      varray<int> $points,
                       int $num_points,
                       int $color): bool;
 
@@ -820,7 +850,7 @@ function imagesetpixel(resource $image,
  */
 <<__Native>>
 function imagesetstyle(resource $image,
-                       varray $style): bool;
+                       varray<int> $style): bool;
 
 /* imagesetthickness() sets the thickness of the lines drawn when drawing
  * rectangles, polygons, ellipses etc. etc. to thickness pixels.

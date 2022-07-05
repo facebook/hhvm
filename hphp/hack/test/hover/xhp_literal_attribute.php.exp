@@ -1,2 +1,2 @@
-public ?string name
+attribute ?string name
 docs for name

@@ -402,6 +402,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     ++curSrc;
   };
 
+  auto checkTypeStructure = [&]() {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      check(t.arrSpec().is_type_structure(), Type(), "TArrLike=TypeStructure");
+    }
+    ++curSrc;
+  };
+
   auto checkStructDict = [&]() {
     auto const t = src()->type();
     if (t != TBottom) {
@@ -445,6 +453,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     }
     return types;
   };
+  auto const addNullptr = [&] (std::vector<Type> types) {
+    for (auto& type : types) type = type|TNullptr;
+    return types;
+  };
   auto const getTypeNames = [&] (const std::vector<Type>& types) {
     auto parts = std::vector<std::string>{};
     for (auto const& type : types) parts.push_back(type.toString());
@@ -467,6 +479,13 @@ using TypeNames::TCA;
                         checkMultiple(src(), types, names);                 \
                         ++curSrc;                                           \
                       }
+#define SNullptr(T...){                                                     \
+                        static auto const types                             \
+                          = addNullptr(checkLayoutFlags({T}));              \
+                        static auto const names = getTypeNames(types);      \
+                        checkMultiple(src(), types, names);                 \
+                        ++curSrc;                                           \
+                      }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;
 #define CStr          C(StaticStr)
@@ -480,6 +499,7 @@ using TypeNames::TCA;
 #define SBespokeArr   checkBespokeArr();
 #define SMonotypeVec  checkMonotypeArr(TVec);
 #define SMonotypeDict checkMonotypeArr(TDict);
+#define STypeStructure checkTypeStructure();
 #define SStructDict   checkStructDict();
 #define ND
 #define DMulti
@@ -527,6 +547,7 @@ using TypeNames::TCA;
 #define DMemoKey
 #define DLvalOfPtr
 #define DTypeCnsClsName
+#define DTypeStructElem
 #define DVerifyCoerce
 #define DPropLval
 #define DElemLval
@@ -546,12 +567,14 @@ using TypeNames::TCA;
 
 #undef NA
 #undef S
+#undef SNullptr
 #undef AK
 #undef C
 #undef CStr
 #undef SBespokeArr
 #undef SMonotypeVec
 #undef SMonotypeDict
+#undef STypeStructure
 #undef SStructDict
 #undef SKnownArrLike
 
@@ -596,6 +619,7 @@ using TypeNames::TCA;
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
+#undef DTypeStructElem
 #undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval

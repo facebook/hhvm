@@ -20,12 +20,13 @@
 //! using a single call to [`LineFeedEscaper::escape`].  The reverse is
 //! done using [`LineFeedUnescaper::unescape`].
 
-use std::{
-    borrow::Cow,
-    io::{BufRead, BufReader, Read},
-};
+use std::borrow::Cow;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Read;
 
-use regex::bytes::{NoExpand, Regex};
+use regex::bytes::NoExpand;
+use regex::bytes::Regex;
 
 /// A struct that abstracts away the escaping of \x0A bytes,
 /// which are interpreted as LF (Line Feed) characters under ASCII encoding.

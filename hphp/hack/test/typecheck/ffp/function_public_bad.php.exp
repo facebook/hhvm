@@ -1,5 +1,7 @@
+File "function_public_bad.php", line 4, characters 1-37:
+Cannot use unstable feature: `modules` (Parsing[1002])
 File "function_public_bad.php", line 4, characters 7-12:
-Top-level functions cannot be declared `public` (Parsing[1002])
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
 File "function_public_bad.php", line 4, characters 30-33:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "function_public_bad.php", line 4, characters 23-25:

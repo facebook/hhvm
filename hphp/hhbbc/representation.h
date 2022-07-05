@@ -82,8 +82,7 @@ struct Block {
    * Edges coming out of blocks are repesented in three ways:
    *
    *  - fallthrough edges (the end of the block unconditionally jumps
-   *    to the named block).  If fallthroughNS is true, this edge
-   *    represents a no-surprise jump.
+   *    to the named block).
    *
    *  - throwExit (the edges traversed for exceptions from this block)
    *
@@ -100,7 +99,6 @@ struct Block {
     uint8_t initializer{0};
     struct {
       bool catchEntry: 1;
-      bool fallthroughNS: 1;
       bool multiPred: 1;
       bool multiSucc: 1;
       bool dead: 1;
@@ -222,17 +220,6 @@ struct Local {
   uint32_t unusedName : 1;
 };
 
-/*
- * Extra information for function with a HNI native implementation.
- */
-struct NativeInfo {
-  /*
-   * Return type from the C++ implementation function, as an optional DataType;
-   * std::nullopt stands for a Variant return.
-   */
-  Optional<DataType> returnType;
-};
-
 using BlockVec = CompactVector<copy_ptr<Block>>;
 
 /*
@@ -256,11 +243,9 @@ struct FuncBase {
   CompactVector<ExnNode> exnNodes;
 
   /*
-   * For HNI-based extensions, additional information for functions
-   * with a native-implementation is here.  If this isn't a function
-   * with an HNI-based native implementation, this will be nullptr.
+   * Does this function have a native (C++) implementation?
    */
-  std::unique_ptr<NativeInfo> nativeInfo;
+  bool isNative;
 
 private:
   /*

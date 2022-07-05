@@ -35,7 +35,6 @@ struct UnitChecker {
  private:
   template<class T> bool checkLiteral(size_t, const T*, const char*);
   bool checkStrings();
-  bool checkArrays();
   bool checkSourceLocs();
   bool checkPreClasses();
   bool checkFuncs();
@@ -86,59 +85,9 @@ UnitChecker::UnitChecker(const UnitEmitter* unit, ErrorMode mode)
 }
 
 bool UnitChecker::verify() {
-  return checkStrings() &&
-         checkArrays() &&
-         //checkSourceLocs() &&
-         checkPreClasses() &&
+  return checkPreClasses() &&
          checkMetadata() &&
          checkFuncs();
-}
-
-template<class LitType>
-bool UnitChecker::checkLiteral(size_t id,
-                               const LitType* lt,
-                               const char* what) {
-  bool ok = true;
-  if (!lt) {
-    error("null %s id %zu in unit %s\n", what, id,
-                 m_unit->sha1().toString().c_str());
-    ok = false;
-  }
-  if (!lt->isStatic()) {
-    error("non-static %s id %zu in unit %s\n", what, id,
-                 m_unit->sha1().toString().c_str());
-    ok = false;
-  }
-  return ok;
-}
-
-bool UnitChecker::checkStrings() {
-  bool ok = true;
-  for (size_t i = 0, n = m_unit->numLitstrs(); i < n; ++i) {
-    ok &= checkLiteral(i, m_unit->lookupLitstr(encodeUnitId(i)), "string");
-  }
-  return ok;
-  // Notes
-  // * Any string in repo can be null.  repo litstrId is checked on load
-  // then discarded.  Each Litstr entry becomes a static string.
-  // Strings are hash-commoned so presumably only one can be null per unit.
-  // string_data_hash and string_data_same both crash/assert on null.
-  // * If DB has dups then UnitEmitter commons them - spec should outlaw
-  // dups because UE will assert if db has dups with different ids.
-  // StringData statically keeps a map of loaded static strings
-  // * UE keeps a (String->id) mapping and assigns dups the same id, plus
-  // a table of litstrs indexed by id.  Unit stores them as
-  // m_namedInfo, a vector<StringData,NamedEntity=null> of pairs.
-  // * are null characters allowed inside the string?
-  // * are strings utf8-encoded?
-}
-
-bool UnitChecker::checkArrays() {
-  bool ok = true;
-  for (size_t i = 0, n = m_unit->numArrays(); i < n; ++i) {
-    ok &= checkLiteral(i, m_unit->lookupArray(encodeUnitId(i)), "array");
-  }
-  return ok;
 }
 
 bool UnitChecker::checkConstructor(

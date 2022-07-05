@@ -4,18 +4,29 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use hack_macro::hack_stmt;
 use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
-use oxidized::{
-    ast,
-    ast::{Def, FunDef, FunKind, Fun_, FuncBody, Id, Pos, Stmt, Stmt_, TypeHint, UserAttribute},
-    file_info::Mode,
-    local_id, namespace_env,
-    relative_path::{Prefix, RelativePath},
-};
+use oxidized::ast;
+use oxidized::ast::Def;
+use oxidized::ast::FunDef;
+use oxidized::ast::FunKind;
+use oxidized::ast::Fun_;
+use oxidized::ast::FuncBody;
+use oxidized::ast::Id;
+use oxidized::ast::Pos;
+use oxidized::ast::Stmt;
+use oxidized::ast::Stmt_;
+use oxidized::ast::TypeHint;
+use oxidized::ast::UserAttribute;
+use oxidized::file_info::Mode;
+use oxidized::local_id;
+use oxidized::namespace_env;
+use oxidized::relative_path::Prefix;
+use oxidized::relative_path::RelativePath;
 use rewrite_xml::rewrite_xml;
 use std::path::PathBuf;
 
@@ -124,7 +135,7 @@ fn extract_debugger_main(
             let name = local_id::make_unscoped(name);
             hack_stmt!(
                 pos = p(),
-                r#"if (\__systemlib\__debugger_is_uninit(#{lvar(clone(name))})) {
+                r#"if (\__SystemLib\__debugger_is_uninit(#{lvar(clone(name))})) {
                        #{lvar(name)} = new __uninitSentinel();
                      }
                 "#

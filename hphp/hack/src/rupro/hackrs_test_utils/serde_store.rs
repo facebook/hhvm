@@ -5,7 +5,8 @@
 
 use anyhow::Result;
 use dashmap::DashMap;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::cmp::Eq;
 use std::fmt::Debug;
 use std::hash::Hash;

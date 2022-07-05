@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use super::*;
 use itertools::Itertools;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 impl From<compile_ffi::TypeKind> for facts::TypeKind {
     fn from(type_kind: compile_ffi::TypeKind) -> facts::TypeKind {

@@ -5,7 +5,8 @@
 
 use emit_pos::emit_pos;
 use hhbc::FatalOp;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
 
 pub fn emit_fatal<'arena>(

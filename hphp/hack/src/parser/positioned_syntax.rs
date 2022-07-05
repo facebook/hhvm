@@ -4,10 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    lexable_token::LexableToken, positioned_token::PositionedToken, source_text::SourceText,
-    syntax::*, syntax_kind::SyntaxKind, syntax_trait::SyntaxTrait, token_kind::TokenKind,
-};
+use crate::lexable_token::LexableToken;
+use crate::positioned_token::PositionedToken;
+use crate::source_text::SourceText;
+use crate::syntax::*;
+use crate::syntax_kind::SyntaxKind;
+use crate::syntax_trait::SyntaxTrait;
+use crate::token_kind::TokenKind;
 use ocamlrep::rc::RcOc;
 
 #[derive(Debug, Clone)]

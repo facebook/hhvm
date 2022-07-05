@@ -3,7 +3,7 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-class C {}
+final class C {}
 
 trait T {
   require class C;

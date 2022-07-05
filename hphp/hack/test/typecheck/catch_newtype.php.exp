@@ -1,0 +1,4 @@
+File "catch_newtype.php", line 9, characters 12-25:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "catch_newtype.php", line 3, characters 9-22:
+  Alias definition is here.

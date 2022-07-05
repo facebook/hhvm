@@ -7,20 +7,18 @@ edition = "2021"
 [lib]
 path = "../../hackrs_test.rs"
 
-[dependencies]
+[dev-dependencies]
 anyhow = "1.0.56"
 datastore = { path = "../../../datastore" }
+depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../../hackrs/cargo/hackrs" }
-hackrs_provider_backend = { path = "../../../../providers/hackrs_provider_backend" }
 hackrs_test_utils = { path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_test = { path = "../../../../facebook/utils/cargo/hh24_test" }
+itertools = "0.10.3"
+maplit = "1.0"
+naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 pos = { path = "../../../pos/cargo/pos" }
 tempdir = "0.3"
 ty = { path = "../../../ty/cargo/ty" }
-
-[dev-dependencies]
-depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
-itertools = "0.10.3"
-maplit = "1.0"

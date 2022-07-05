@@ -1,19 +1,43 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::{
-    BlockId, ClassId, ConstId, FunctionId, LocId, MethodId, PropId, UnitStringId, ValueId,
-};
-use macros::{HasLoc, HasLocals, HasOperands};
+use crate::BlockId;
+use crate::ClassId;
+use crate::ConstId;
+use crate::FunctionId;
+use crate::LocId;
+use crate::MethodId;
+use crate::PropId;
+use crate::UnitStringId;
+use crate::ValueId;
+use macros::HasLoc;
+use macros::HasLocals;
+use macros::HasOperands;
 use newtype::newtype_int;
 use smallvec::SmallVec;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
-pub use hhbc::{
-    BareThisOp, ClassishKind, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp,
-    InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterId, MOpMode, OODeclExistsOp, ObjMethodOp,
-    QueryMOp, ReadonlyOp, SetOpOp, SilenceOp, SpecialClsRef, SrcLoc, TypeStructResolveOp,
-};
+pub use hhbc::BareThisOp;
+pub use hhbc::ClassishKind;
+pub use hhbc::CollectionType;
+pub use hhbc::ContCheckOp;
+pub use hhbc::FCallArgsFlags;
+pub use hhbc::FatalOp;
+pub use hhbc::IncDecOp;
+pub use hhbc::InitPropOp;
+pub use hhbc::IsLogAsDynamicCallOp;
+pub use hhbc::IsTypeOp;
+pub use hhbc::IterId;
+pub use hhbc::MOpMode;
+pub use hhbc::OODeclExistsOp;
+pub use hhbc::ObjMethodOp;
+pub use hhbc::QueryMOp;
+pub use hhbc::ReadonlyOp;
+pub use hhbc::SetOpOp;
+pub use hhbc::SilenceOp;
+pub use hhbc::SpecialClsRef;
+pub use hhbc::SrcLoc;
+pub use hhbc::TypeStructResolveOp;
 
 pub trait HasLoc {
     fn loc_id(&self) -> LocId;
@@ -419,7 +443,6 @@ pub enum Hhbc {
     },
     CreateCont(LocId),
     Div([ValueId; 2], LocId),
-    EntryNop(LocId),
     GetMemoKeyL(LocalId, LocId),
     Idx([ValueId; 3], LocId),
     #[has_operands(none)]
@@ -480,6 +503,7 @@ pub enum Hhbc {
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),
     UnsetL(LocalId, LocId),
+    VerifyImplicitContextState(LocId),
     VerifyOutType(ValueId, LocalId, LocId),
     VerifyParamType(LocalId, LocId),
     VerifyParamTypeTS(ValueId, LocalId, LocId),
@@ -903,6 +927,7 @@ pub enum CmpOp {
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
+    Copy(ValueId),
     Param,
     // Used during ir_to_bc - not in normal IR.
     PopC,
@@ -962,6 +987,10 @@ impl Instr {
 
     pub fn tombstone() -> Instr {
         Instr::Special(Special::Tombstone)
+    }
+
+    pub fn copy(value: ValueId) -> Instr {
+        Instr::Special(Special::Copy(value))
     }
 
     pub fn unreachable() -> Instr {

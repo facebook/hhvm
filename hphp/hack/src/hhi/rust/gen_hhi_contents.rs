@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 use structopt::StructOpt;
 

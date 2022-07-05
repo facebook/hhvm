@@ -781,7 +781,14 @@ and class_decl
   let internal = c.sc_internal in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
-  let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
+  let env =
+    {
+      Decl_env.mode = c.sc_mode;
+      droot = Some class_dep;
+      droot_member = None;
+      ctx;
+    }
+  in
   let inherited = Decl_inherit.make env c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =
@@ -955,7 +962,15 @@ and class_decl
       Typing_deps.add_idep
         (Provider_context.get_deps_mode ctx)
         (Dep.Type cls_name)
-        (Dep.Type x)
+        (Dep.Type x);
+      if
+        TypecheckerOptions.record_fine_grained_dependencies
+        @@ Provider_context.get_tcopt ctx
+      then
+        Typing_fine_deps.add_coarse_dep
+          (Provider_context.get_deps_mode ctx)
+          (Dep.Type cls_name)
+          (Dep.Type x)
     end
     impl;
   (tc, member_heaps_values)

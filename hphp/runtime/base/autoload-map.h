@@ -41,13 +41,34 @@ struct AutoloadMap {
     RetryAutoloading
   };
 
-  enum class KindOf {
-    TypeOrTypeAlias,
-    Type,
-    Function,
-    Constant,
-    TypeAlias,
-    Module,
+  /**
+   * Keep enum values in sync with `HH\Facts\SymbolKind` in `ext_facts.php`
+   */
+  enum class KindOf : int {
+    Type = 1,
+    Function = 2,
+    Constant = 3,
+    Module = 4,
+    TypeAlias = 5,
+    TypeOrTypeAlias = 6,
+  };
+
+  struct Holder {
+    Holder() = default;
+    Holder(AutoloadMap* map, std::function<void()>&& release)
+      : m_map(map)
+      , m_release(std::move(release))
+    {}
+    Holder(Holder&&) = default;
+    Holder& operator=(Holder&&) = default;
+    ~Holder() { if (m_release) m_release(); }
+
+    operator bool() const { return !!m_map; }
+    AutoloadMap* operator->() const { return m_map; }
+    AutoloadMap* get() const { return m_map; }
+  private:
+    AutoloadMap* m_map{nullptr};
+    std::function<void()> m_release{nullptr};
   };
 
   AutoloadMap() = default;
@@ -71,6 +92,13 @@ struct AutoloadMap {
    * run.
    */
   virtual bool isNative() const noexcept = 0;
+
+  /**
+   * Returns a Holder object which wraps a native AutoloadMap in a manner which
+   * is safe to be shared across threads. For non-native or non-shareable maps
+   * returns an empty holder.
+   */
+  virtual Holder getNativeHolder() noexcept { return Holder(); }
 
   /**
    * Given a symbol and the kind we're looking for, return the absolute path

@@ -76,7 +76,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         ret.append(input.substr(pos0, pos - pos0));
         pos += len;
         pos0 = pos;
-      } while ((pos = input.find(delimiter, pos)) >= 0 && --limit > 1);
+      } while (--limit > 1 && (pos = input.find(delimiter, pos)) >= 0);
 
       if (pos0 <= input.size()) {
         ret.append(input.substr(pos0));

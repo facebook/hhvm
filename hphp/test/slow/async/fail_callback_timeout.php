@@ -6,7 +6,7 @@ function a() {
 
 async function heh() {
   await RescheduleWaitHandle::create(0, 0);
-  throw new exception('x');
+  throw new Exception('x');
 }
 <<__EntryPoint>> function main(): void {
 set_time_limit(6);
@@ -14,7 +14,7 @@ AsyncFunctionWaitHandle::setOnFailCallback(() ==> a());
 $x = heh();
 try {
   HH\Asio\join($x);
-} catch (exception $y) {
+} catch (Exception $y) {
 }
 while (true) { mt_rand(); }
 }

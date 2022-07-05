@@ -131,7 +131,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
   Config::Bind(PurgeInterval, ini, config, "Server.APC.PurgeIntervalSeconds",
                PurgeInterval);
-  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
+  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject", true);
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
   Config::Bind(DeferredExpiration, ini, config,
                "Server.APC.DeferredExpiration", DeferredExpiration);
@@ -811,18 +811,6 @@ Variant apc_unserialize(const char* data, int len, bool pure) {
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Internal;
   return unserialize_ex(data, len, sType, null_array, pure);
-}
-
-String apc_reserialize(const String& str) {
-  if (str.empty() ||
-      !apcExtension::EnableApcSerialize) return str;
-
-  VariableUnserializer uns(str.data(), str.size(),
-                           VariableUnserializer::Type::APCSerialize);
-  StringBuffer buf;
-  uns.reserialize(buf);
-
-  return buf.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

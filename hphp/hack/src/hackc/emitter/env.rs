@@ -10,12 +10,16 @@ pub mod jump_targets;
 mod label;
 mod local;
 
-use ast_scope::{Scope, ScopeItem};
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use bitflags::bitflags;
 use emitter::Emitter;
-use hhbc::{IterId, Label, Local};
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast, namespace_env::Env as NamespaceEnv};
+use oxidized::ast;
+use oxidized::namespace_env::Env as NamespaceEnv;
 
 pub use class_expr::ClassExpr;
 pub use iterator::*;

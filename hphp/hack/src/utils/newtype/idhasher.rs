@@ -10,7 +10,8 @@
 //
 // It's a utility type/trait so duplication is fine.
 
-use std::hash::{BuildHasherDefault, Hasher};
+use std::hash::BuildHasherDefault;
+use std::hash::Hasher;
 use std::marker::PhantomData;
 
 pub type BuildIdHasher<T> = BuildHasherDefault<IdHasher<T>>;

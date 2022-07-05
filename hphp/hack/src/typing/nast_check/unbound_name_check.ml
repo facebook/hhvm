@@ -336,7 +336,7 @@ let handler ctx =
       let () =
         check_type_name
           env
-          ~allow_typedef:true
+          ~allow_typedef:false
           ~allow_generics:false
           ~kind:Name_context.ClassContext
           id

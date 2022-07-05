@@ -4,10 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use aast_parser::{rust_aast_parser_types::Env, AastParser};
+use aast_parser::rust_aast_parser_types::Env;
+use aast_parser::AastParser;
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
-use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::source_text::SourceText;
 
 #[no_mangle]
 extern "C" fn from_text(env: usize, source_text: usize) -> usize {

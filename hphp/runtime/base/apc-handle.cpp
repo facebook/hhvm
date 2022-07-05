@@ -437,7 +437,7 @@ void APCHandle::unreferenceRoot(size_t size) {
   assertx(isSingletonKind() || m_unref_root_count++ == 0);
   if (!isUncounted()) {
     atomicDecRef();
-  } else if (APCTypedValue::UseHazardPointers()) {
+  } else if (APCTypedValue::UseStringHazardPointers()) {
     APCTypedValue::fromHandle(this)->deleteUncounted();
   } else {
     g_context->enqueueAPCHandle(this, size);

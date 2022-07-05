@@ -1,6 +1,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::{instr::HasOperands, BlockId, Func, Instr, InstrId, TryCatchId, ValueId, ValueIdMap};
+use crate::instr::HasOperands;
+use crate::BlockId;
+use crate::Func;
+use crate::Instr;
+use crate::InstrId;
+use crate::TryCatchId;
+use crate::ValueId;
+use crate::ValueIdMap;
 use newtype::IdVec;
 
 /// A Block represents a basic-block in a CFG. A well-formed Block contains zero

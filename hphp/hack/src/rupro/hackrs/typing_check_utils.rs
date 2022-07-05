@@ -5,7 +5,8 @@
 
 use std::rc::Rc;
 
-use oxidized::{aast, nast};
+use oxidized::aast;
+use oxidized::nast;
 
 use crate::errors::HackError;
 use crate::parsing_error::ParsingError;

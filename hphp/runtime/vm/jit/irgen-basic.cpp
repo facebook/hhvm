@@ -512,7 +512,6 @@ void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 //////////////////////////////////////////////////////////////////////
 
 void emitNop(IRGS&)                {}
-void emitEntryNop(IRGS&)           {}
 void emitCGetCUNop(IRGS& env) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   auto const knownType = env.irb->stack(offset, DataTypeSpecific).type;

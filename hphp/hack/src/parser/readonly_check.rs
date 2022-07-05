@@ -9,18 +9,20 @@ use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use oxidized::{
-    aast,
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast::*,
-    ast_defs, local_id,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
-use std::collections::{HashMap, HashSet};
+use oxidized::aast;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::local_id;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 // Local environment which keeps track of how many readonly values it has
 #[derive(PartialEq, Clone)]

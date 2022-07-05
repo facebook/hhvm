@@ -478,6 +478,11 @@ let process_workitems
     Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
   in
   let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+  if
+    Provider_context.get_tcopt ctx
+    |> TypecheckerOptions.record_fine_grained_dependencies
+  then
+    Typing_fine_deps.finalize (Provider_context.get_deps_mode ctx);
 
   (* Gather up our various forms of telemetry... *)
   let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
@@ -689,8 +694,7 @@ let next
     (workitems_processed_count : int ref)
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
-    (hulk_lite : bool)
-    (hulk_heavy : bool)
+    (mode : HulkStrategy.hulk_mode)
     (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
   let max_size = Bucket.max_size () in
   let num_workers =
@@ -713,7 +717,9 @@ let next
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
     let controller_started = Delegate.controller_started !delegate_state in
-    let should_run_hulk_v2 = controller_started && (hulk_lite || hulk_heavy) in
+    let should_run_hulk_v2 =
+      controller_started && HulkStrategy.is_hulk_v2 mode
+    in
     let delegate_job =
       if should_run_hulk_v2 then (
         (*
@@ -728,7 +734,7 @@ let next
         in
         let ( remaining_workitems_to_process,
               controller,
-              payloads,
+              remaining_payloads,
               job,
               _telemetry ) =
           Typing_service_delegate.collect
@@ -737,20 +743,23 @@ let next
             !workitems_to_process
             workitems_to_process_length
             !remote_payloads
-            hulk_heavy
+            (HulkStrategy.is_hulk_heavy mode)
         in
         (* Update the total workitems_processed_count after remote workers
            are done, so we can update the progress bar with the correct number
            of files typechecked.
         *)
-        if List.length payloads = 0 then
+        if
+          List.length !remote_payloads <> 0
+          && List.length remaining_payloads = 0
+        then
           workitems_processed_count :=
             !workitems_processed_count
             + remote_workitems_to_process_length
             - BigList.length remaining_workitems_to_process;
         workitems_to_process := remaining_workitems_to_process;
         delegate_state := controller;
-        remote_payloads := payloads;
+        remote_payloads := remaining_payloads;
         job
       ) else
         None
@@ -864,8 +873,7 @@ let process_in_parallel
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
+    ~(mode : HulkStrategy.hulk_mode)
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
@@ -897,7 +905,7 @@ let process_in_parallel
     ~extra:delegate_progress;
 
   let (telemetry, telemetry_start_t) : Telemetry.t * float option =
-    if controller_started && (hulk_lite || hulk_heavy) then (
+    if controller_started && HulkStrategy.is_hulk_v2 mode then (
       Hh_logger.log "Dispatch hulk lite initial payloads";
       let workitems_to_process_length = BigList.length !workitems_to_process in
       let ( payloads,
@@ -926,8 +934,7 @@ let process_in_parallel
       workitems_processed_count
       remote_payloads
       record
-      hulk_lite
-      hulk_heavy
+      mode
       telemetry
   in
   let should_prefetch_deferred_files =
@@ -1000,7 +1007,7 @@ let process_in_parallel
     List.concat (List.map cancelled_results ~f:paths_of)
   in
   let _ =
-    if controller_started && (hulk_lite || hulk_heavy) then
+    if controller_started && HulkStrategy.is_hulk_v2 mode then
       HackEventLogger.hulk_type_check_end
         telemetry
         workitems_initial_count
@@ -1012,7 +1019,7 @@ let process_in_parallel
       ()
   in
   let _ =
-    if hulk_heavy then
+    if HulkStrategy.is_hulk_heavy mode then
       (* We want to ensure controller state is reset for the recheck *)
       delegate_state := Typing_service_delegate.stop !delegate_state
     else
@@ -1131,8 +1138,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
+    ~(mode : HulkStrategy.hulk_mode)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
@@ -1151,11 +1157,12 @@ let go_with_interrupt
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl =
-    if hulk_lite || hulk_heavy then
+    match mode with
+    | HulkStrategy.Lite
+    | HulkStrategy.Heavy ->
       (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
       List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
-    else
-      fnl
+    | HulkStrategy.Legacy -> fnl
   in
   let fnl = BigList.create fnl in
   let fnl =
@@ -1227,8 +1234,7 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~longlived_workers
-        ~hulk_lite
-        ~hulk_heavy
+        ~mode
         ~check_info
         ~typecheck_info
     end
@@ -1250,8 +1256,7 @@ let go
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(hulk_lite : bool)
-    ~(hulk_heavy : bool)
+    ~(mode : HulkStrategy.hulk_mode)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
@@ -1265,8 +1270,7 @@ let go
       ~interrupt
       ~memory_cap
       ~longlived_workers
-      ~hulk_lite
-      ~hulk_heavy
+      ~mode
       ~check_info
   in
   assert (List.is_empty cancelled);

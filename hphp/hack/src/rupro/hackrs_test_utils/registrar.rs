@@ -3,8 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use dashmap::{mapref::entry::Entry, DashMap};
-use depgraph_api::{DeclName, DepGraphReader, DepGraphWriter, DependencyName, Result};
+use dashmap::mapref::entry::Entry;
+use dashmap::DashMap;
+use depgraph_api::DeclName;
+use depgraph_api::DepGraphReader;
+use depgraph_api::DepGraphWriter;
+use depgraph_api::DependencyName;
+use depgraph_api::Result;
 use deps_rust::Dep;
 use std::collections::HashSet;
 

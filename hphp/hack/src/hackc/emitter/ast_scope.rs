@@ -4,14 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod ast_scope_item;
-pub use crate::ast_scope_item::{Class, Fun, Lambda, Method, ScopeItem};
+pub use crate::ast_scope_item::Class;
+pub use crate::ast_scope_item::Fun;
+pub use crate::ast_scope_item::Lambda;
+pub use crate::ast_scope_item::Method;
+pub use crate::ast_scope_item::ScopeItem;
 
 use hhbc::hhas_coeffects::HhasCoeffects;
-use oxidized::{
-    ast,
-    ast_defs::{FunKind, Id},
-    pos::Pos,
-};
+use oxidized::ast;
+use oxidized::ast_defs::FunKind;
+use oxidized::ast_defs::Id;
+use oxidized::pos::Pos;
 use std::borrow::Cow;
 
 #[derive(Clone, Default, Debug, Eq, PartialEq)]

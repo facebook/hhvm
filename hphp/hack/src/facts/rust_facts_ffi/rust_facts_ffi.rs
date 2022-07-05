@@ -6,8 +6,10 @@
 
 use direct_decl_parser::DeclParserOptions;
 use facts_rust::Facts;
+use facts_rust::{self as facts};
 use hhbc_string_utils::without_xhp_mangling;
-use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
+use ocamlrep::bytes_from_ocamlrep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::relative_path::RelativePath;
 
@@ -48,16 +50,6 @@ fn extract_facts_as_json_ffi(
     text: &[u8],
     mangle_xhp: bool,
 ) -> Option<String> {
-    let bump = bumpalo::Bump::new();
-    let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let auto_namespace_map =
-        alloc.alloc_slice_fill_iter(auto_namespace_map.iter().map(|(k, v)| {
-            (
-                alloc.alloc_str(k.as_str()) as &str,
-                alloc.alloc_str(v.as_str()) as &str,
-            )
-        }));
     let opts = DeclParserOptions {
         auto_namespace_map,
         hhvm_compat_mode,
@@ -67,27 +59,32 @@ fn extract_facts_as_json_ffi(
         disable_xhp_element_mangling,
         ..Default::default()
     };
+
+    let arena = bumpalo::Bump::new();
     let decls =
-        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, alloc);
+        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, &arena);
 
     let pretty = false;
     if decls.has_first_pass_parse_errors {
         None
-    } else if mangle_xhp {
-        let facts = Facts::from_decls(
-            &decls.decls,
-            decls.file_attributes,
-            disable_xhp_element_mangling,
-        );
-        Some(facts.to_json(pretty, text))
     } else {
-        without_xhp_mangling(|| {
+        let sha1sum = facts::sha1(text);
+        if mangle_xhp {
             let facts = Facts::from_decls(
                 &decls.decls,
                 decls.file_attributes,
                 disable_xhp_element_mangling,
             );
-            Some(facts.to_json(pretty, text))
-        })
+            Some(facts.to_json(pretty, &sha1sum))
+        } else {
+            without_xhp_mangling(|| {
+                let facts = Facts::from_decls(
+                    &decls.decls,
+                    decls.file_attributes,
+                    disable_xhp_element_mangling,
+                );
+                Some(facts.to_json(pretty, &sha1sum))
+            })
+        }
     }
 }

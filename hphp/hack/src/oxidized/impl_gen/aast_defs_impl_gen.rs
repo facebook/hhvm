@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6d7b5c5d0cfad5a2327ad1976f6d790>>
+// @generated SignedSource<<59a153c855ab440abb144288231d63e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -776,25 +776,25 @@ impl Tprim {
     }
 }
 impl Refinement {
-    pub fn mk_type_ref(p0: Sid, p1: TypeRefinement) -> Self {
-        Refinement::TypeRef(p0, p1)
+    pub fn mk_rtype(p0: Sid, p1: TypeRefinement) -> Self {
+        Refinement::Rtype(p0, p1)
     }
-    pub fn is_type_ref(&self) -> bool {
+    pub fn is_rtype(&self) -> bool {
         true
     }
-    pub fn as_type_ref(&self) -> Option<(&Sid, &TypeRefinement)> {
+    pub fn as_rtype(&self) -> Option<(&Sid, &TypeRefinement)> {
         match self {
-            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+            Refinement::Rtype(p0, p1) => Some((p0, p1)),
         }
     }
-    pub fn as_type_ref_mut(&mut self) -> Option<(&mut Sid, &mut TypeRefinement)> {
+    pub fn as_rtype_mut(&mut self) -> Option<(&mut Sid, &mut TypeRefinement)> {
         match self {
-            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+            Refinement::Rtype(p0, p1) => Some((p0, p1)),
         }
     }
-    pub fn as_type_ref_into(self) -> Option<(Sid, TypeRefinement)> {
+    pub fn as_rtype_into(self) -> Option<(Sid, TypeRefinement)> {
         match self {
-            Refinement::TypeRef(p0, p1) => Some((p0, p1)),
+            Refinement::Rtype(p0, p1) => Some((p0, p1)),
         }
     }
 }

@@ -3,9 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::emit_expression;
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use hhbc::{hhas_attribute::HhasAttribute, TypedValue};
+use env::emitter::Emitter;
+use env::Env;
+use error::Error;
+use error::Result;
+use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;

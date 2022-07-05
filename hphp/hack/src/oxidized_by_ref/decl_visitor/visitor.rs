@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<791a177595aa44e51b4be7427fbbbd77>>
+// @generated SignedSource<<376f4c6f79682f55d0e4949d582d3d9d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,18 +11,25 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 use super::node::Node;
-use crate::{
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    direct_decl_parser::{self, *},
-    shallow_decl_defs::{self, *},
-    t_shape_map::{self, *},
-    typing_defs::{self, *},
-    typing_defs_core::{self, *},
-    typing_reason::{self, *},
-    xhp_attribute::{self, *},
-    *,
-};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::direct_decl_parser::*;
+use crate::direct_decl_parser::{self};
+use crate::shallow_decl_defs::*;
+use crate::shallow_decl_defs::{self};
+use crate::t_shape_map::*;
+use crate::t_shape_map::{self};
+use crate::typing_defs::*;
+use crate::typing_defs::{self};
+use crate::typing_defs_core::*;
+use crate::typing_defs_core::{self};
+use crate::typing_reason::*;
+use crate::typing_reason::{self};
+use crate::xhp_attribute::*;
+use crate::xhp_attribute::{self};
+use crate::*;
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
     fn visit_abstract_typeconst(&mut self, p: &'a AbstractTypeconst<'a>) {
@@ -52,6 +59,15 @@ pub trait Visitor<'a> {
     fn visit_class_const_ref(&mut self, p: &'a ClassConstRef<'a>) {
         p.recurse(self.object())
     }
+    fn visit_class_refinement(&mut self, p: &'a ClassRefinement<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_class_type_refinement(&mut self, p: &'a ClassTypeRefinement<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_class_type_refinement_bounds(&mut self, p: &'a ClassTypeRefinementBounds<'a>) {
+        p.recurse(self.object())
+    }
     fn visit_classish_kind(&mut self, p: &'a ClassishKind) {
         p.recurse(self.object())
     }
@@ -79,7 +95,7 @@ pub trait Visitor<'a> {
     fn visit_enum_type(&mut self, p: &'a EnumType<'a>) {
         p.recurse(self.object())
     }
-    fn visit_exact(&mut self, p: &'a Exact) {
+    fn visit_exact(&mut self, p: &'a Exact<'a>) {
         p.recurse(self.object())
     }
     fn visit_expr_dep_type_reason(&mut self, p: &'a ExprDepTypeReason<'a>) {

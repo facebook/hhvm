@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<19cd87c779957528537857e2afe4d81d>>
+// @generated SignedSource<<c779c4e267033a8e85997b6cb5e5e26f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -71,32 +71,6 @@ pub enum IfcFunDecl {
     FDPolicied(Option<String>),
     FDInferFlows,
 }
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum Exact {
-    Exact,
-    Nonexact,
-}
-impl TrivialDrop for Exact {}
-arena_deserializer::impl_deserialize_in_arena!(Exact);
 
 #[derive(
     Clone,
@@ -518,6 +492,8 @@ pub enum Ty_ {
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
     Tapply(PosId, Vec<Ty>),
+    /// 'With' refinements of the form `_ with { type T as int; type TC = C; }`.
+    Trefinement(Ty, ClassRefinement),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -650,6 +626,93 @@ pub enum Ty_ {
 )]
 #[repr(C)]
 pub struct TaccessType(pub Ty, pub PosId);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum Exact {
+    Exact,
+    Nonexact(ClassRefinement),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ClassRefinement {
+    pub cr_types: s_map::SMap<ClassTypeRefinement>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum ClassTypeRefinement {
+    Texact(Ty),
+    Tloose(ClassTypeRefinementBounds),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ClassTypeRefinementBounds {
+    pub lower: Vec<Ty>,
+    pub upper: Vec<Ty>,
+}
 
 #[derive(
     Clone,

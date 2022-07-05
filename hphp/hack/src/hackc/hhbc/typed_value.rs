@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Pair, Slice, Str};
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that the default
 /// hash/equality have the right interning behavior: -0.0 != 0.0, NaN == NaN.

@@ -2,7 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ocamlrep::{from, Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
+use ocamlrep::from;
+use ocamlrep::Allocator;
+use ocamlrep::FromError;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::Value;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Dep(u64);

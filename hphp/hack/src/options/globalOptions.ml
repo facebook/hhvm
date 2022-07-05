@@ -122,6 +122,7 @@ type t = {
   tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
   tco_enable_strict_const_semantics: int;
+  tco_strict_wellformedness: int;
   tco_meth_caller_only_public_visibility: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
@@ -139,6 +140,8 @@ type t = {
   tco_allow_all_files_for_module_declarations: bool;
   tco_allowed_files_for_module_declarations: string list;
   tco_use_manifold_cython_client: bool;
+  tco_record_fine_grained_dependencies: bool;
+  tco_loop_iteration_upper_bound: int option;
 }
 [@@deriving eq, show]
 
@@ -159,11 +162,6 @@ let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 *)
 
 let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
-
-(**
- * Prevent type param names from shadowing class names
- *)
-let tco_experimental_type_param_shadowing = "type_param_shadowing"
 
 (**
  * Enable abstract const type with default syntax, i.e.
@@ -310,6 +308,7 @@ let default =
     tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
     tco_enable_strict_const_semantics = 0;
+    tco_strict_wellformedness = 0;
     tco_meth_caller_only_public_visibility = true;
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
@@ -327,6 +326,8 @@ let default =
     tco_allow_all_files_for_module_declarations = false;
     tco_allowed_files_for_module_declarations = [];
     tco_use_manifold_cython_client = false;
+    tco_record_fine_grained_dependencies = false;
+    tco_loop_iteration_upper_bound = None;
   }
 
 let make
@@ -462,6 +463,7 @@ let make
       default.tco_typeconst_concrete_concrete_error)
     ?(tco_enable_strict_const_semantics =
       default.tco_enable_strict_const_semantics)
+    ?(tco_strict_wellformedness = default.tco_strict_wellformedness)
     ?(tco_meth_caller_only_public_visibility =
       default.tco_meth_caller_only_public_visibility)
     ?(tco_require_extends_implements_ancestors =
@@ -487,6 +489,9 @@ let make
     ?(tco_allowed_files_for_module_declarations =
       default.tco_allowed_files_for_module_declarations)
     ?(tco_use_manifold_cython_client = default.tco_use_manifold_cython_client)
+    ?(tco_record_fine_grained_dependencies =
+      default.tco_record_fine_grained_dependencies)
+    ?(tco_loop_iteration_upper_bound = default.tco_loop_iteration_upper_bound)
     () =
   {
     tco_experimental_features;
@@ -601,6 +606,7 @@ let make
     tco_math_new_code;
     tco_typeconst_concrete_concrete_error;
     tco_enable_strict_const_semantics;
+    tco_strict_wellformedness;
     tco_meth_caller_only_public_visibility;
     tco_require_extends_implements_ancestors;
     tco_strict_value_equality;
@@ -618,6 +624,8 @@ let make
     tco_allow_all_files_for_module_declarations;
     tco_allowed_files_for_module_declarations;
     tco_use_manifold_cython_client;
+    tco_record_fine_grained_dependencies;
+    tco_loop_iteration_upper_bound;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -876,6 +884,8 @@ let tco_typeconst_concrete_concrete_error t =
 
 let tco_enable_strict_const_semantics t = t.tco_enable_strict_const_semantics
 
+let tco_strict_wellformedness t = t.tco_strict_wellformedness
+
 let tco_meth_caller_only_public_visibility t =
   t.tco_meth_caller_only_public_visibility
 
@@ -915,3 +925,8 @@ let tco_allowed_files_for_module_declarations t =
   t.tco_allowed_files_for_module_declarations
 
 let tco_use_manifold_cython_client t = t.tco_use_manifold_cython_client
+
+let tco_record_fine_grained_dependencies t =
+  t.tco_record_fine_grained_dependencies
+
+let tco_loop_iteration_upper_bound t = t.tco_loop_iteration_upper_bound

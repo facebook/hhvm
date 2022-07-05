@@ -5,7 +5,8 @@
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use im::HashMap;
 use std::cell::RefCell;
-use ty::local::{ParamMode, Ty};
+use ty::local::ParamMode;
+use ty::local::Ty;
 use ty::reason::Reason;
 use utils::core::LocalId;
 

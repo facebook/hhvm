@@ -19,6 +19,7 @@ hhi = { path = "../../../hhi/rust" }
 indicatif = { version = "0.16", features = ["with_rayon"] }
 jwalk = "0.6"
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../pos/cargo/pos" }
 rayon = "1.2"

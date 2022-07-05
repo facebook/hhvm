@@ -1,12 +1,16 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::{
-    instr::{HasLoc, HasOperands},
-    LocId, TypedValue, ValueId,
-};
+use crate::instr::HasLoc;
+use crate::instr::HasOperands;
+use crate::LocId;
+use crate::TypedValue;
+use crate::ValueId;
 use ffi::Str;
 
-pub use hhbc::{AdataId, CollectionType, ConstName, FloatBits};
+pub use hhbc::AdataId;
+pub use hhbc::CollectionType;
+pub use hhbc::ConstName;
+pub use hhbc::FloatBits;
 
 /// A literal value. Note that since these refer to a LocId they're only valid
 /// in relation to a specific Func.

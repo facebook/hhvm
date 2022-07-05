@@ -6,10 +6,11 @@
 
 use std::fmt::Debug;
 
-use crate::{
-    lexable_trivia::LexableTrivia, positioned_trivia::PositionedTrivium, source_text::SourceText,
-    token_kind::TokenKind, trivia_kind::TriviaKind,
-};
+use crate::lexable_trivia::LexableTrivia;
+use crate::positioned_trivia::PositionedTrivium;
+use crate::source_text::SourceText;
+use crate::token_kind::TokenKind;
+use crate::trivia_kind::TriviaKind;
 
 pub trait LexableToken: Clone + Debug {
     type Trivia: LexableTrivia;

@@ -3,13 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt::{self, Display};
-use std::path::{Path, PathBuf};
+use std::fmt::Display;
+use std::fmt::{self};
+use std::path::Path;
+use std::path::PathBuf;
 
+use camino::Utf8Path;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
-use serde::{Deserialize, Serialize};
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(
     Clone,
@@ -143,6 +149,10 @@ impl RelativePath {
         let mut r = PathBuf::from(prefix);
         r.push(self.path.as_path());
         r
+    }
+
+    pub fn utf8_path(&self) -> &Utf8Path {
+        Utf8Path::new(self.path_str())
     }
 }
 

@@ -22,12 +22,17 @@
 //! versions of the same parser with some small tweaks necessary for
 //! particular applications in `hackc` / `hh_server`.
 
-use parser::{
-    lexer::Lexer, parser::Parser, parser_env::ParserEnv, positioned_syntax::PositionedSyntax,
-    positioned_token::PositionedToken, positioned_trivia::PositionedTrivium,
-    smart_constructors_wrappers::WithKind, source_text::SourceText, syntax_error::SyntaxError,
-    token_factory::SimpleTokenFactoryImpl, NoState,
-};
+use parser::lexer::Lexer;
+use parser::parser::Parser;
+use parser::parser_env::ParserEnv;
+use parser::positioned_syntax::PositionedSyntax;
+use parser::positioned_token::PositionedToken;
+use parser::positioned_trivia::PositionedTrivium;
+use parser::smart_constructors_wrappers::WithKind;
+use parser::source_text::SourceText;
+use parser::syntax_error::SyntaxError;
+use parser::token_factory::SimpleTokenFactoryImpl;
+use parser::NoState;
 use positioned_smart_constructors::*;
 
 pub type SmartConstructors = WithKind<

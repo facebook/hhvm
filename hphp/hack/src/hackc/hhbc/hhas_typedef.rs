@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    hhas_attribute::HhasAttribute, hhas_pos::HhasSpan, hhas_type::HhasTypeInfo,
-    typed_value::TypedValue, ClassName,
-};
+use crate::hhas_attribute::HhasAttribute;
+use crate::hhas_pos::HhasSpan;
+use crate::hhas_type::HhasTypeInfo;
+use crate::typed_value::TypedValue;
+use crate::ClassName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 

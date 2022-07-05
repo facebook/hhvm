@@ -7,15 +7,23 @@
 use bumpalo::Bump;
 
 use mode_parser::parse_mode;
-use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep, ToOcamlRep};
-use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml, Pool};
-use operator::{Assoc, Operator};
-use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
-use parser_core_types::{
-    parser_env::ParserEnv, source_text::SourceText,
-    syntax_by_ref::positioned_trivia::PositionedTrivia, syntax_error::SyntaxError,
-    syntax_tree::SyntaxTree, token_kind::TokenKind,
-};
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::Allocator;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_ocamlpool::ocaml_ffi;
+use ocamlrep_ocamlpool::to_ocaml;
+use ocamlrep_ocamlpool::Pool;
+use operator::Assoc;
+use operator::Operator;
+use oxidized::file_info;
+use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_by_ref::positioned_trivia::PositionedTrivia;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_tree::SyntaxTree;
+use parser_core_types::token_kind::TokenKind;
 
 use to_ocaml_impl::*;
 
@@ -109,7 +117,8 @@ macro_rules! parse_with_arena {
         #[no_mangle]
         pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
             ocamlrep_ocamlpool::catch_unwind(|| {
-                use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
+                use ocamlrep::ptr::UnsafeOcamlPtr;
+                use ocamlrep::FromOcamlRep;
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
 
                 let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };

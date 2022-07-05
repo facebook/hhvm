@@ -1896,7 +1896,8 @@ static int execute_program_impl(int argc, char** argv) {
 
     LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults().flags()};
     auto compiled =
-      compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
+      compile_file(loader, file.c_str(), Native::s_noNativeFuncs,
+                   nullptr, nullptr);
 
     if (po.mode == "verify") {
       return 0;
@@ -2052,9 +2053,7 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_thread_init();
     always_assert(RO::RepoAuthoritative);
     init_repo_file();
-    LitstrTable::init();
-    LitarrayTable::init();
-    RepoFile::loadGlobalTables(RO::RepoLitstrLazyLoad);
+    RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
     return 0;
   }
@@ -2116,7 +2115,8 @@ static int execute_program_impl(int argc, char** argv) {
 
       LazyUnitContentsLoader loader{sha1, str, repoOptions.flags()};
       auto const unit =
-        compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
+        compile_file(loader, file.c_str(), Native::s_noNativeFuncs,
+                     nullptr, nullptr);
       if (!unit) {
         std::cerr << "Unable to compile \"" << file << "\"\n";
         return 1;
@@ -2557,11 +2557,6 @@ void hphp_process_init(bool skipModules) {
     BootStats::mark("extra_process_init_concurrent_wait");
   };
 
-  // Allocate this even if EvalEnableImplicitContext is false. The
-  // correct setting might come from RepoGlobalData, and that isn't
-  // loaded until we call g_vmProcessInit. This needs to run prior to
-  // emitting unique stubs (in jit::mcgen::processInit), so we cannot
-  // move it after the RepoGlobalData load.
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
 
@@ -2980,6 +2975,9 @@ void hphp_memory_cleanup() {
   // so we can't destroy it yet
   mm.sweep();
 
+  // Freeing hazard pointers can enqueue APCHandles into g_context.
+  APCTypedValue::FreeHazardPointers();
+
   // We should never have any registered RequestEventHandlers. If we do
   // something after onRequestShutdown registered a RequestEventHandler.
   // Its now too late to run the requestShutdown functions, but if we carry
@@ -2996,8 +2994,6 @@ void hphp_memory_cleanup() {
   weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
-
-  APCTypedValue::FreeHazardPointers();
 }
 
 void hphp_session_exit(Transport* transport) {

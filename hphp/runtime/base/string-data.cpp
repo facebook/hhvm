@@ -35,6 +35,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
+#include "hphp/runtime/vm/unit-emitter.h"
+
 #include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
@@ -517,16 +519,6 @@ StringData* StringData::shrinkImpl(size_t len) {
   return sd;
 }
 
-StringData* StringData::shrink(size_t len) {
-  assertx(!hasMultipleRefs());
-  if (capacity() - len > kMinShrinkThreshold) {
-    return shrinkImpl(len);
-  }
-  assertx(len < MaxSize);
-  setSize(len);
-  return this;
-}
-
 void StringData::dump() const {
   auto s = slice();
 
@@ -875,8 +867,17 @@ StringData::substr(int start, int length /* = StringData::MaxSize */) {
 ///////////////////////////////////////////////////////////////////////////////
 // Serialization
 
+__thread UnitEmitter* BlobEncoderHelper<const StringData*>::tl_unitEmitter{nullptr};
+__thread Unit* BlobEncoderHelper<const StringData*>::tl_unit{nullptr};
+
 void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
                                                  const StringData* sd) {
+  assertx(!tl_unit);
+  if (auto const ue = tl_unitEmitter) {
+    Id id = ue->mergeLitstr(sd);
+    encoder(id);
+    return;
+  }
   if (!sd) {
     encoder(uint32_t(0));
     return;
@@ -888,7 +889,20 @@ void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
 }
 
 void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
-                                                 const StringData*& sd) {
+                                                 const StringData*& sd,
+                                                 bool makeStatic) {
+  if (auto const ue = tl_unitEmitter) {
+    Id id;
+    decoder(id);
+    sd = ue->lookupLitstr(id);
+    return;
+  } else if (auto const u = tl_unit) {
+    Id id;
+    decoder(id);
+    sd = u->lookupLitstrId(id);
+    return;
+  }
+
   uint32_t size;
   decoder(size);
   if (size == 0) {
@@ -903,11 +917,40 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
 
   assertx(decoder.remaining() >= size);
   auto const data = decoder.data();
-  sd = makeStaticString(std::string{data, data+size});
+  sd = makeStatic
+    ? makeStaticString((const char*)data, size)
+    : StringData::Make((const char*)data, size, CopyString);
   decoder.advance(size);
 }
 
+folly::StringPiece
+BlobEncoderHelper<const StringData*>::asStringPiece(BlobDecoder& decoder) {
+  if (auto const ue = tl_unitEmitter) {
+    Id id;
+    decoder(id);
+    auto const sd = ue->lookupLitstr(id);
+    if (!sd) return { nullptr, size_t{0} };
+    return sd->slice();
+  }
+
+  uint32_t size;
+  decoder(size);
+  if (size == 0) return { (const char*)nullptr, size_t{0} };
+  auto const data = reinterpret_cast<const char*>(decoder.data());
+  if (size == 1) return { data, size_t{0} };
+  --size;
+  assertx(decoder.remaining() >= size);
+  decoder.advance(size);
+  return { data, size };
+}
+
 void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
+  if (auto const ue = tl_unitEmitter) {
+    Id id;
+    decoder(id);
+    return;
+  }
+
   uint32_t size;
   decoder(size);
   // Any size less than 2 has no data (0 is a nullptr, and 1 is an
@@ -916,6 +959,39 @@ void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
   --size;
   assertx(decoder.remaining() >= size);
   decoder.advance(size);
+}
+
+size_t BlobEncoderHelper<const StringData*>::peekSize(BlobDecoder& decoder) {
+  if (auto const ue = tl_unitEmitter) {
+    auto const before = decoder.advanced();
+    Id id;
+    decoder(id);
+    auto const size = decoder.advanced() - before;
+    decoder.retreat(size);
+    return size;
+  }
+
+  auto const before = decoder.advanced();
+  uint32_t size;
+  decoder(size);
+  auto const sizeBytes = decoder.advanced() - before;
+  decoder.retreat(sizeBytes);
+  if (size <= 1) return sizeBytes;
+  --size;
+  return sizeBytes + size;
+}
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobEncoder& encoder,
+                                            LowStringPtr s) {
+  auto const sd = s.get();
+  encoder(sd);
+}
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobDecoder& decoder,
+                                            LowStringPtr& s) {
+  const StringData* sd;
+  decoder(sd);
+  s = sd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

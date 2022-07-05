@@ -34,7 +34,6 @@
 #include <folly/ScopeGuard.h>
 #include <folly/sorted_vector_types.h>
 
-#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/func-emitter.h"
@@ -529,9 +528,8 @@ void populate_block(ParseUnitState& puState,
   };
 
   switch (blk.hhbcs.back().op) {
-  case Op::Jmp:   make_fallthrough();                           break;
-  case Op::JmpNS: make_fallthrough(); blk.fallthroughNS = true; break;
-  default:                                                      break;
+  case Op::Jmp:   make_fallthrough();                              break;
+  default:                                                         break;
   }
 }
 
@@ -707,6 +705,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
   ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
+  ret->isNative            = fe.isNative;
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
   ret->isReadonlyReturn    = fe.attrs & AttrReadonlyReturn;
@@ -793,8 +792,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       }
     }();
 
-    ret->nativeInfo                   = std::make_unique<php::NativeInfo>();
-    ret->nativeInfo->returnType       = fe.hniReturnType;
     if (f && ret->params.size()) {
       for (auto i = 0; i < ret->params.size(); i++) {
         auto& pi = ret->params[i];

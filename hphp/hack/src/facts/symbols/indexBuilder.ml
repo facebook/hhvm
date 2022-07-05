@@ -162,7 +162,7 @@ let entry =
 
 (* Create one worker per cpu *)
 let init_workers () =
-  let nbr_procs = Sys_utils.nproc () in
+  let nbr_procs = Sys_utils.nbr_procs in
   let gc_control = GlobalConfig.gc_control in
   let config = SharedMem.default_config in
   let heap_handle = SharedMem.init config ~num_workers:nbr_procs in

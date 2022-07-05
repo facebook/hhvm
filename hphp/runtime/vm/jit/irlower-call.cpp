@@ -254,7 +254,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;
-  auto const funcReturnType = callee->hniReturnType();
+  auto const funcReturnType = callee->returnTypeConstraint().asSystemlibType();
   auto const returnByValue = callee->isReturnByValue();
 
   auto& v = vmain(env);
@@ -560,6 +560,21 @@ void cgLdFuncFromRClsMeth(IRLS& env, const IRInstruction* inst) {
 
 void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
   ldFromRClsMethCommon(env, inst, RClsMethData::genericsOffset());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
+  auto& v = vmain(env);
+
+  auto const unit = v.makeReg();
+  auto const sf = v.makeReg();
+  v << load{func[Func::unitOff()], unit};
+  emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
+  v << setcc{CC_NZ, sf, dst};
 }
 
 }

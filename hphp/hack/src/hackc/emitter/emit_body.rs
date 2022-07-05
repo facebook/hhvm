@@ -2,30 +2,51 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{
-    emit_expression, emit_param, emit_statement, generator, reified_generics_helpers as RGH,
-};
-use ast_scope::{Scope, ScopeItem};
+use crate::emit_expression;
+use crate::emit_param;
+use crate::emit_statement;
+use crate::generator;
+use crate::reified_generics_helpers as RGH;
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use bitflags::bitflags;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
-use env::{emitter::Emitter, ClassExpr, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
+use env::emitter::Emitter;
+use env::ClassExpr;
+use env::Env;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Pair;
+use ffi::Slice;
+use ffi::Str;
 use hash::HashSet;
-use hhbc::{
-    decl_vars,
-    hhas_body::{HhasBody, HhasBodyEnv},
-    hhas_param::HhasParam,
-    hhas_type::{self, HhasTypeInfo},
-    FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, Label, Local, Pseudo, TypedValue,
-};
+use hhbc::decl_vars;
+use hhbc::hhas_body::HhasBody;
+use hhbc::hhas_param::HhasParam;
+use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::hhas_type::{self};
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::IsTypeOp;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::instr;
+use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
 use options::CompilerFlags;
-use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use oxidized::aast;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::doc_comment::DocComment;
+use oxidized::namespace_env;
+use oxidized::pos::Pos;
+use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 
 static THIS: &str = "$this";
@@ -194,15 +215,8 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         ast_params,
         flags,
     )?;
-    let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::Pseudo(Pseudo::Label(_))) => true,
-        _ => false,
-    };
-    let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(vec![begin_label, instr::entry_nop()])
-    } else {
-        InstrSeq::gather(vec![begin_label, header_content])
-    };
+
+    let header = InstrSeq::gather(vec![begin_label, header_content]);
 
     let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
@@ -294,8 +308,8 @@ pub fn emit_return_type_info<'arena>(
 ) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
-            Just(Str::new_str(alloc, "")),
-            hhas_type::constraint::Constraint::default(),
+            Just("".into()),
+            hhas_type::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,
@@ -366,7 +380,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::RELABEL)
     {
-        label_rewriter::relabel_function(&mut params, &mut body_instrs);
+        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -378,19 +392,14 @@ pub fn make_body<'a, 'arena, 'decl>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Just(
-                    (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
-                ),
-                parent_name: ClassExpr::get_parent_class_name(cd)
-                    .as_ref()
-                    .map(|s| Str::new_str(alloc, s))
-                    .into(),
+                class_info: Some((cd.get_kind().into(), cd.get_name_str())),
+                parent_name: ClassExpr::get_parent_class_name(cd),
             })
         } else {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Nothing,
-                parent_name: Nothing,
+                class_info: None,
+                parent_name: None,
             })
         }
     } else {
@@ -401,7 +410,8 @@ pub fn make_body<'a, 'arena, 'decl>(
     // to make it available for reflection.
     params.iter_mut().for_each(|(p, default_value)| {
         p.default_value = Maybe::from(default_value.as_ref().map(|(l, expr)| {
-            use print_expr::{Context, ExprEnv};
+            use print_expr::Context;
+            use print_expr::ExprEnv;
             let ctx = Context::new(emitter);
             let expr_env = ExprEnv {
                 codegen_env: body_env.as_ref(),
@@ -434,7 +444,6 @@ pub fn make_body<'a, 'arena, 'decl>(
         params: Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p)),
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
-        env: body_env.into(),
     })
 }
 
@@ -782,10 +791,11 @@ fn body_contains_finally(body: &[ast::Stmt]) -> bool {
     struct V {
         has_finally: bool,
     }
-    use oxidized::{
-        aast_visitor::{AstParams, Node, Visitor},
-        ast::{Expr_, Stmt_},
-    };
+    use oxidized::aast_visitor::AstParams;
+    use oxidized::aast_visitor::Node;
+    use oxidized::aast_visitor::Visitor;
+    use oxidized::ast::Expr_;
+    use oxidized::ast::Stmt_;
     impl<'a> Visitor<'a> for V {
         type Params = AstParams<(), ()>;
         fn object(&mut self) -> &mut dyn Visitor<'a, Params = Self::Params> {

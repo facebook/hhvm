@@ -15,17 +15,23 @@
 
 use std::cell::RefCell;
 use std::collections::HashSet;
-use std::fmt::{self, Debug};
+use std::fmt::Debug;
+use std::fmt::{self};
 use std::mem;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
 use bytes::buf::UninitSlice;
 
+use crate::block::Header;
 use crate::block::NO_SCAN_TAG;
-use crate::{
-    block::Header, Allocator, BlockBuilder, MemoizationCache, OpaqueValue, SlabIntegrityError,
-    ToOcamlRep, Value,
-};
+use crate::Allocator;
+use crate::BlockBuilder;
+use crate::MemoizationCache;
+use crate::OpaqueValue;
+use crate::SlabIntegrityError;
+use crate::ToOcamlRep;
+use crate::Value;
 
 // The first three words in a slab are for the base pointer, the offset (in
 // words) of the root value from that base, and the magic number.

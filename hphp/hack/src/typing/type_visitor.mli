@@ -73,6 +73,13 @@ class type ['a] decl_type_visitor_type =
       Typing_reason.decl_t ->
       Typing_defs.decl_phase Typing_defs.taccess_type ->
       'a
+
+    method on_trefinement :
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_class_refinement ->
+      'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type

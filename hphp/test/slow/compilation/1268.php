@@ -1,6 +1,6 @@
 <?hh
 
-class E extends exception {
+class E extends Exception {
   public string $message;
   public int $code;
 }

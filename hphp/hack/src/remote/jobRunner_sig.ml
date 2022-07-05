@@ -39,8 +39,7 @@ module type S = sig
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
     eden:bool ->
-    hulk_lite:bool ->
-    hulk_heavy:bool ->
+    mode:HulkStrategy.hulk_mode ->
     saved_state_manifold_path:string option ->
     command Future.t
 

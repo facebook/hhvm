@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c88336921c230c12cdc82440e0ad00e2>>
+// @generated SignedSource<<312204e91e7170da5b915fddfeb5b555>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,18 +13,25 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use super::visitor::Visitor;
-use crate::{
-    aast_defs::{self, *},
-    ast_defs::{self, *},
-    direct_decl_parser::{self, *},
-    shallow_decl_defs::{self, *},
-    t_shape_map::{self, *},
-    typing_defs::{self, *},
-    typing_defs_core::{self, *},
-    typing_reason::{self, *},
-    xhp_attribute::{self, *},
-    *,
-};
+use crate::aast_defs::*;
+use crate::aast_defs::{self};
+use crate::ast_defs::*;
+use crate::ast_defs::{self};
+use crate::direct_decl_parser::*;
+use crate::direct_decl_parser::{self};
+use crate::shallow_decl_defs::*;
+use crate::shallow_decl_defs::{self};
+use crate::t_shape_map::*;
+use crate::t_shape_map::{self};
+use crate::typing_defs::*;
+use crate::typing_defs::{self};
+use crate::typing_defs_core::*;
+use crate::typing_defs_core::{self};
+use crate::typing_reason::*;
+use crate::typing_reason::{self};
+use crate::xhp_attribute::*;
+use crate::xhp_attribute::{self};
+use crate::*;
 impl<'a> Node<'a> for AbstractTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_abstract_typeconst(self)
@@ -133,6 +140,47 @@ impl<'a> Node<'a> for ClassConstRef<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ClassConstRef(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ClassRefinement<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_refinement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassRefinement {
+                cr_types: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassTypeRefinement<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_type_refinement(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassTypeRefinement::Texact(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeRefinement::Tloose(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassTypeRefinementBounds<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_type_refinement_bounds(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassTypeRefinementBounds {
+                lower: ref __binding_0,
+                upper: ref __binding_1,
+            } => {
                 {
                     __binding_0.accept(v)
                 }
@@ -264,14 +312,14 @@ impl<'a> Node<'a> for EnumType<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Exact {
+impl<'a> Node<'a> for Exact<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_exact(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             Exact::Exact => {}
-            Exact::Nonexact => {}
+            Exact::Nonexact(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1020,6 +1068,7 @@ impl<'a> Node<'a> for Ty_<'a> {
         match self {
             Ty_::Tthis => {}
             Ty_::Tapply(ref __binding_0) => __binding_0.accept(v),
+            Ty_::Trefinement(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tmixed => {}
             Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tany(ref __binding_0) => __binding_0.accept(v),

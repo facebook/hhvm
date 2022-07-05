@@ -3,9 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use env::{emitter::Emitter, LabelGen};
-use hash::{HashMap, HashSet};
-use hhbc::{hhas_param::HhasParam, Instruct, Label, Pseudo};
+use env::emitter::Emitter;
+use env::LabelGen;
+use hash::HashMap;
+use hash::HashSet;
+use hhbc::hhas_param::HhasParam;
+use hhbc::Instruct;
+use hhbc::Label;
+use hhbc::Opcode;
+use hhbc::Pseudo;
 use instruction_sequence::InstrSeq;
 use oxidized::ast;
 
@@ -59,13 +65,20 @@ fn create_label_ref_map<'arena>(
 }
 
 fn rewrite_params_and_body<'arena>(
+    alloc: &'arena bumpalo::Bump,
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
     params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
-    let relabel = |id: Label| offset_to_label[&label_to_offset[&id]];
+    let relabel = |id: Label| {
+        if id == Label::INVALID {
+            Label::INVALID
+        } else {
+            offset_to_label[&label_to_offset[&id]]
+        }
+    };
     for (_, dv) in params.iter_mut() {
         if let Some((l, _)) = dv {
             *l = relabel(*l);
@@ -80,21 +93,27 @@ fn rewrite_params_and_body<'arena>(
                 false
             }
         } else {
-            for target in instr.targets_mut() {
-                *target = relabel(*target);
-            }
+            rewrite_labels(alloc, instr, relabel);
             true
         }
     });
 }
 
 pub fn relabel_function<'arena>(
+    alloc: &'arena bumpalo::Bump,
     params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);
     let (used, offset_to_label) = create_label_ref_map(&label_to_offset, params, body);
-    rewrite_params_and_body(&label_to_offset, &used, &offset_to_label, params, body)
+    rewrite_params_and_body(
+        alloc,
+        &label_to_offset,
+        &used,
+        &offset_to_label,
+        params,
+        body,
+    )
 }
 
 pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
@@ -109,16 +128,278 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     }
 
     if !old_to_new.is_empty() {
+        let relabel = |target: Label| old_to_new.get(&target).copied().unwrap_or(target);
         for instr in block.iter_mut() {
-            let labels = match instr {
-                Instruct::Pseudo(Pseudo::Label(label)) => std::slice::from_mut(label),
-                _ => instr.targets_mut(),
-            };
-            for label in labels {
-                if let Some(new_label) = old_to_new.get(label) {
-                    *label = *new_label;
-                }
-            }
+            rewrite_labels(emitter.alloc, instr, relabel);
+        }
+    }
+}
+
+/// Apply the given function to every Label in the Instruct.
+///
+/// If this turns out to be needed elsewhere it should probably be moved into the
+/// Targets trait.
+fn rewrite_labels<'a, F>(alloc: &'a bumpalo::Bump, instr: &mut Instruct<'a>, f: F)
+where
+    F: Fn(Label) -> Label,
+{
+    match instr {
+        Instruct::Pseudo(Pseudo::Label(label))
+        | Instruct::Opcode(
+            Opcode::Enter(label)
+            | Opcode::IterInit(_, label)
+            | Opcode::IterNext(_, label)
+            | Opcode::Jmp(label)
+            | Opcode::JmpNZ(label)
+            | Opcode::JmpZ(label)
+            | Opcode::LIterInit(_, _, label)
+            | Opcode::LIterNext(_, _, label)
+            | Opcode::MemoGet(label, _),
+        ) => {
+            *label = f(*label);
+        }
+        Instruct::Opcode(
+            Opcode::FCallClsMethod(fca, _, _)
+            | Opcode::FCallClsMethodD(fca, _, _)
+            | Opcode::FCallClsMethodM(fca, _, _, _)
+            | Opcode::FCallClsMethodS(fca, _, _)
+            | Opcode::FCallClsMethodSD(fca, _, _, _)
+            | Opcode::FCallCtor(fca, _)
+            | Opcode::FCallFunc(fca)
+            | Opcode::FCallFuncD(fca, _)
+            | Opcode::FCallObjMethod(fca, _, _)
+            | Opcode::FCallObjMethodD(fca, _, _, _),
+        ) => {
+            fca.async_eager_target = f(fca.async_eager_target);
+        }
+        Instruct::Opcode(Opcode::MemoGetEager([label1, label2], _, _)) => {
+            *label1 = f(*label1);
+            *label2 = f(*label2);
+        }
+        Instruct::Opcode(Opcode::Switch(_, _, labels)) => {
+            *labels = ffi::Slice::fill_iter(alloc, labels.into_iter().copied().map(f));
+        }
+        Instruct::Opcode(Opcode::SSwitch { targets, .. }) => {
+            *targets = ffi::Slice::fill_iter(alloc, targets.into_iter().copied().map(f));
+        }
+        Instruct::Pseudo(
+            Pseudo::Break(..)
+            | Pseudo::Comment(..)
+            | Pseudo::Continue(..)
+            | Pseudo::SrcLoc(..)
+            | Pseudo::TryCatchBegin
+            | Pseudo::TryCatchEnd
+            | Pseudo::TryCatchMiddle
+            | Pseudo::TypedValue(..),
+        )
+        | Instruct::Opcode(
+            Opcode::AKExists
+            | Opcode::AddElemC
+            | Opcode::AddNewElemC
+            | Opcode::AddO
+            | Opcode::Add
+            | Opcode::ArrayIdx
+            | Opcode::ArrayMarkLegacy
+            | Opcode::ArrayUnmarkLegacy
+            | Opcode::AssertRATL(..)
+            | Opcode::AssertRATStk(..)
+            | Opcode::AwaitAll(..)
+            | Opcode::Await
+            | Opcode::BareThis(..)
+            | Opcode::BaseC(..)
+            | Opcode::BaseGC(..)
+            | Opcode::BaseGL(..)
+            | Opcode::BaseH
+            | Opcode::BaseL(..)
+            | Opcode::BaseSC(..)
+            | Opcode::BitAnd
+            | Opcode::BitNot
+            | Opcode::BitOr
+            | Opcode::BitXor
+            | Opcode::BreakTraceHint
+            | Opcode::CGetCUNop
+            | Opcode::CGetG
+            | Opcode::CGetL(..)
+            | Opcode::CGetL2(..)
+            | Opcode::CGetQuietL(..)
+            | Opcode::CGetS(..)
+            | Opcode::CUGetL(..)
+            | Opcode::CastBool
+            | Opcode::CastDict
+            | Opcode::CastDouble
+            | Opcode::CastInt
+            | Opcode::CastKeyset
+            | Opcode::CastString
+            | Opcode::CastVec
+            | Opcode::ChainFaults
+            | Opcode::CheckClsReifiedGenericMismatch
+            | Opcode::CheckProp(..)
+            | Opcode::CheckThis
+            | Opcode::ClassGetC
+            | Opcode::ClassGetTS
+            | Opcode::ClassHasReifiedGenerics
+            | Opcode::ClassName
+            | Opcode::Clone
+            | Opcode::ClsCns(..)
+            | Opcode::ClsCnsD(..)
+            | Opcode::ClsCnsL(..)
+            | Opcode::Cmp
+            | Opcode::CnsE(..)
+            | Opcode::ColFromArray(..)
+            | Opcode::CombineAndResolveTypeStruct(..)
+            | Opcode::ConcatN(..)
+            | Opcode::Concat
+            | Opcode::ContCheck(..)
+            | Opcode::ContCurrent
+            | Opcode::ContEnter
+            | Opcode::ContGetReturn
+            | Opcode::ContKey
+            | Opcode::ContRaise
+            | Opcode::ContValid
+            | Opcode::CreateCl(..)
+            | Opcode::CreateCont
+            | Opcode::DblAsBits
+            | Opcode::Dict(..)
+            | Opcode::Dim(..)
+            | Opcode::Dir
+            | Opcode::Div
+            | Opcode::Double(..)
+            | Opcode::Dup
+            | Opcode::Eq
+            | Opcode::Eval
+            | Opcode::Exit
+            | Opcode::False
+            | Opcode::Fatal(..)
+            | Opcode::File
+            | Opcode::FuncCred
+            | Opcode::GetMemoKeyL(..)
+            | Opcode::Gte
+            | Opcode::Gt
+            | Opcode::HasReifiedParent
+            | Opcode::Idx
+            | Opcode::IncDecG(..)
+            | Opcode::IncDecL(..)
+            | Opcode::IncDecM(..)
+            | Opcode::IncDecS(..)
+            | Opcode::InclOnce
+            | Opcode::Incl
+            | Opcode::InitProp(..)
+            | Opcode::InstanceOfD(..)
+            | Opcode::InstanceOf
+            | Opcode::Int(..)
+            | Opcode::IsLateBoundCls
+            | Opcode::IsTypeC(..)
+            | Opcode::IsTypeL(..)
+            | Opcode::IsTypeStructC(..)
+            | Opcode::IsUnsetL(..)
+            | Opcode::IssetG
+            | Opcode::IssetL(..)
+            | Opcode::IssetS
+            | Opcode::IterFree(..)
+            | Opcode::Keyset(..)
+            | Opcode::LIterFree(..)
+            | Opcode::LateBoundCls
+            | Opcode::LazyClass(..)
+            | Opcode::LazyClassFromClass
+            | Opcode::LockObj
+            | Opcode::Lte
+            | Opcode::Lt
+            | Opcode::MemoSet(..)
+            | Opcode::MemoSetEager(..)
+            | Opcode::Method
+            | Opcode::Mod
+            | Opcode::MulO
+            | Opcode::Mul
+            | Opcode::NSame
+            | Opcode::NativeImpl
+            | Opcode::Neq
+            | Opcode::NewCol(..)
+            | Opcode::NewDictArray(..)
+            | Opcode::NewKeysetArray(..)
+            | Opcode::NewObjD(..)
+            | Opcode::NewObjRD(..)
+            | Opcode::NewObjR
+            | Opcode::NewObjS(..)
+            | Opcode::NewObj
+            | Opcode::NewPair
+            | Opcode::NewStructDict(..)
+            | Opcode::NewVec(..)
+            | Opcode::Nop
+            | Opcode::Not
+            | Opcode::NullUninit
+            | Opcode::Null
+            | Opcode::OODeclExists(..)
+            | Opcode::ParentCls
+            | Opcode::PopC
+            | Opcode::PopL(..)
+            | Opcode::PopU2
+            | Opcode::PopU
+            | Opcode::Pow
+            | Opcode::Print
+            | Opcode::PushL(..)
+            | Opcode::QueryM(..)
+            | Opcode::RaiseClassStringConversionWarning
+            | Opcode::RecordReifiedGeneric
+            | Opcode::ReqDoc
+            | Opcode::ReqOnce
+            | Opcode::Req
+            | Opcode::ResolveClass(..)
+            | Opcode::ResolveClsMethod(..)
+            | Opcode::ResolveClsMethodD(..)
+            | Opcode::ResolveClsMethodS(..)
+            | Opcode::ResolveFunc(..)
+            | Opcode::ResolveMethCaller(..)
+            | Opcode::ResolveRClsMethod(..)
+            | Opcode::ResolveRClsMethodD(..)
+            | Opcode::ResolveRClsMethodS(..)
+            | Opcode::ResolveRFunc(..)
+            | Opcode::RetCSuspended
+            | Opcode::RetC
+            | Opcode::RetM(..)
+            | Opcode::Same
+            | Opcode::Select
+            | Opcode::SelfCls
+            | Opcode::SetG
+            | Opcode::SetImplicitContextByValue
+            | Opcode::SetL(..)
+            | Opcode::SetM(..)
+            | Opcode::SetOpG(..)
+            | Opcode::SetOpL(..)
+            | Opcode::SetOpM(..)
+            | Opcode::SetOpS(..)
+            | Opcode::SetRangeM(..)
+            | Opcode::SetS(..)
+            | Opcode::Shl
+            | Opcode::Shr
+            | Opcode::Silence(..)
+            | Opcode::String(..)
+            | Opcode::SubO
+            | Opcode::Sub
+            | Opcode::This
+            | Opcode::ThrowAsTypeStructException
+            | Opcode::ThrowNonExhaustiveSwitch
+            | Opcode::Throw
+            | Opcode::True
+            | Opcode::UGetCUNop
+            | Opcode::UnsetG
+            | Opcode::UnsetL(..)
+            | Opcode::UnsetM(..)
+            | Opcode::Vec(..)
+            | Opcode::VerifyImplicitContextState
+            | Opcode::VerifyOutType(..)
+            | Opcode::VerifyParamType(..)
+            | Opcode::VerifyParamTypeTS(..)
+            | Opcode::VerifyRetNonNullC
+            | Opcode::VerifyRetTypeC
+            | Opcode::VerifyRetTypeTS
+            | Opcode::WHResult
+            | Opcode::YieldK
+            | Opcode::Yield,
+        ) => {
+            debug_assert!(
+                instr.targets().is_empty(),
+                "bad instr {instr:?} shouldn't have targets"
+            );
         }
     }
 }

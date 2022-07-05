@@ -16,6 +16,7 @@ open Nast
 module DICheck = Decl_init_check
 module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
+module Native = Typing_native
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
@@ -697,6 +698,12 @@ let class_ tenv c =
   match c_constructor with
   | _ when Ast_defs.is_c_interface c.c_kind -> ()
   | Some _ when FileInfo.is_hhi c.c_mode -> ()
+  | Some m when Native.is_native_meth ~env:tenv m ->
+    (* If we're checking a `__Native` constructor then all bets are off: there's
+     * no way to verify that properties are initialized correctly, including if
+     * we've called parent::__construct.
+     *)
+    ()
   | _ ->
     let p =
       match c_constructor with

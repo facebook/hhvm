@@ -47,13 +47,22 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
     (* in a `require class t;` trait constraint, t must be a non-generic class
      * name.  Since lowering enforces _paraml to be empty, so it is safe to
      * ignore _param here.  Additionally we enforce that the class that uses
-     * the trait with a require class constraint does not have type parameters.
-     *
+     * the trait with a require class constraint does not have type parameters
+     * and is final.
      *)
     if String.equal req_name (Cls.name tc) && List.is_empty (Cls.tparams tc)
-    then
-      env
-    else
+    then (
+      if Cls.final tc then
+        env
+      else
+        let req_pos = Typing_defs.get_pos req_ty in
+        (Errors.add_typing_error
+        @@ Typing_error.(
+             primary
+             @@ Primary.Req_class_not_final
+                  { pos = class_pos; trait_pos; req_pos }));
+        env
+    ) else
       let req_pos = Typing_defs.get_pos req_ty in
       (Errors.add_typing_error
       @@ Typing_error.(

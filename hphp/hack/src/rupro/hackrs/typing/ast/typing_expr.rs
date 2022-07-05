@@ -3,14 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::tast;
-use crate::typing::ast::typing_localize::{LocalizeEnv, LocalizeFunTypeParams};
+use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_localize::LocalizeFunTypeParams;
 use crate::typing::ast::typing_obj_get::TCObjGet;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Result;
 use pos::FunName;
 use ty::decl;
-use ty::local::{FunParam, Ty, Ty_};
+use ty::local::FunParam;
+use ty::local::Ty;
+use ty::local::Ty_;
 use ty::reason::Reason;
 use utils::core::LocalId;
 
@@ -46,6 +49,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Expr<(), ()> {
         let p = R::Pos::from(&self.1);
         let (e, ty) = match &self.2 {
             Int(s) => (Int(s.clone()), Ty::int(R::witness(p))),
+            String(s) => (String(s.clone()), Ty::string(R::witness(p))),
             Binop(box (op, e1, e2)) => infer_binop(env, p, op, e1, e2)?,
             Lvar(box id) => infer_lvar(env, id)?,
             Call(box (e, explicit_targs, el, unpacked_element)) => {

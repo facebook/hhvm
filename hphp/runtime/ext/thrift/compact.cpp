@@ -274,6 +274,7 @@ struct CompactWriter {
       SpecHolder specHolder;
       auto const& fields = specHolder.getSpec(cls).fields;
       auto prop = cls->declProperties().begin();
+      obj->deserializeAllLazyProps();
       auto objProps = obj->props();
       const size_t numProps = cls->numDeclProperties();
       const size_t numFields = fields.size();

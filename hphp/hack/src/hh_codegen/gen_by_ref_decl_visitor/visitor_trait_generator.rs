@@ -4,9 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::format_ident;
+use quote::quote;
 
-use crate::common::{gen_helpers, to_snake};
+use crate::common::gen_helpers;
+use crate::common::to_snake;
 
 use super::Context;
 

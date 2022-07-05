@@ -57,7 +57,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -82,7 +81,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -202,8 +200,9 @@ void FuncEmitter::finish() {
 const StaticString
   s_construct("__construct"),
   s_DynamicallyCallable("__DynamicallyCallable"),
-  s_PolicyShardedMemoize("__PolicyShardedMemoize"),
-  s_PolicyShardedMemoizeLSB("__PolicyShardedMemoizeLSB");
+  s_Memoize("__Memoize"),
+  s_MemoizeLSB("__MemoizeLSB"),
+  s_KeyedByIC("KeyedByIC");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -299,7 +298,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
-    ex->m_allFlags.m_isPolicyShardedMemoize = false;
+    ex->m_allFlags.m_isKeyedByImplicitContextMemoize = false;
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
@@ -356,13 +355,20 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
 
-  if ((isMemoizeWrapper &&
-       userAttributes.find(s_PolicyShardedMemoize.get()) != userAttributes.end()) ||
-      (isMemoizeWrapperLSB &&
-       userAttributes.find(s_PolicyShardedMemoizeLSB.get()) != userAttributes.end())) {
-    f->shared()->m_allFlags.m_isPolicyShardedMemoize = true;
+  if (isMemoizeWrapper || isMemoizeWrapperLSB) {
+    auto const hasKeyedByIC = [&] (TypedValue tv) {
+      assertx(tvIsVec(tv));
+      bool found = false;
+      IterateV(tv.m_data.parr, [&](TypedValue elem) {
+        found |= tvIsString(elem) && elem.m_data.pstr->same(s_KeyedByIC.get());
+      });
+      return found;
+    };
+    auto const attrName = isMemoizeWrapperLSB ? s_MemoizeLSB : s_Memoize;
+    auto const it = userAttributes.find(attrName.get());
+    f->shared()->m_allFlags.m_isKeyedByImplicitContextMemoize =
+      it != userAttributes.end() && hasKeyedByIC(it->second);
   }
-
 
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);
@@ -398,8 +404,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (isNative) {
     auto const ex = f->extShared();
-
-    ex->m_hniReturnType = hniReturnType;
 
     auto const info = getNativeInfo();
 
@@ -668,7 +672,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (a)
     (m_bclen)
     (staticCoeffects)
-    (hniReturnType)
     (repoReturnType)
     (repoAwaitedReturnType)
     (docComment)
@@ -792,17 +795,16 @@ LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
 
   auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
   always_assert(remaining >= sizeof(uint64_t));
-  auto const size = std::min<size_t>(remaining, 128);
-
-  auto data = std::make_unique<unsigned char[]>(size);
-  RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
 
   size_t actualSize;
   {
     // We encoded the size of the line table along with the table. So,
     // peek its size and bail if the decoder doesn't have enough data
     // remaining.
-    BlobDecoder decoder{data.get(), size, false};
+    auto const size = std::min<size_t>(remaining, 128);
+    auto const data = std::make_unique<unsigned char[]>(size);
+    RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
+    BlobDecoder decoder{data.get(), size};
     actualSize = decoder.peekSize();
     if (actualSize <= decoder.remaining()) {
       LineTable lineTable;
@@ -816,9 +818,9 @@ LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
   always_assert(actualSize <= remaining);
 
   LineTable lineTable;
-  data = std::make_unique<unsigned char[]>(actualSize);
+  auto const data = std::make_unique<unsigned char[]>(actualSize);
   RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
-  BlobDecoder decoder{data.get(), actualSize, false};
+  BlobDecoder decoder{data.get(), actualSize};
   deserializeLineTable(decoder, lineTable);
   decoder.assertDone();
   return lineTable;

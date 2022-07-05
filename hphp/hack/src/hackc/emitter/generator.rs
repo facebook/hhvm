@@ -2,10 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use oxidized::{
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast,
-};
+use oxidized::aast_visitor::visit;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
 
 pub fn is_function_generator<'a>(body: &'a [ast::Stmt]) -> (bool, bool) {
     struct S((bool, bool));

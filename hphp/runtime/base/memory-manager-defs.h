@@ -480,6 +480,21 @@ inline HeapObject* Slab::find(const void* ptr) const {
   return nullptr;
 }
 
+inline HeapObject* MemoryManager::find(const void* p) {
+  if (m_lastInitFreeAllocated != m_stats.mmAllocated()
+      || m_lastInitFreeFreed != m_stats.mm_freed) {
+    initFree();
+  }
+  if (auto const ptr = m_heap.find(p)) {
+    if (UNLIKELY(ptr->kind() != HeaderKind::Slab)) return ptr;
+    auto const slab = static_cast<Slab*>(ptr);
+    auto const obj = slab->find(p);
+    if (obj) return obj;
+    return slab;
+  }
+  return nullptr;
+}
+
 template<class OnBig, class OnSlab>
 void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   // slabs and bigs are sorted; walk through both in address order
@@ -515,6 +530,7 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {
   m_heap.iterate([&](HeapObject* h, size_t allocSize) {
+    assertx(m_stats.mm_freed == m_lastInitFreeFreed);
     if (h->kind() >= HeaderKind::Hole) {
       assertx(unsigned(h->kind()) < NumHeaderKinds);
       // no valid pointer can point here.
@@ -534,9 +550,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   std::vector<const ObjectData*> ptrs;
   forEachHeapObject([&](HeapObject* h, size_t) {
     if (auto obj = innerObj(h)) {
-      if (!obj->hasUninitProps()) {
-        ptrs.push_back(obj);
-      }
+      ptrs.push_back(obj);
     }
   });
   for (auto ptr : ptrs) {

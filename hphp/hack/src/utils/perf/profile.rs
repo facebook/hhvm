@@ -1,5 +1,6 @@
 use std::mem;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use std::time::Instant;
 
 /// Gets CPU times for this and all child processes.
 /// Returns

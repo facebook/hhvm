@@ -5,11 +5,14 @@
 
 use crate::ToOxidized;
 use intern::string::BytesId;
-use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 pub use oxidized::relative_path::Prefix;
 

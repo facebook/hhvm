@@ -24,6 +24,7 @@ let debug_describe_t : type a. a t -> string = function
   | IDE_GO_TO_IMPL _ -> "IDE_GO_TO_IMPL"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | REFACTOR _ -> "REFACTOR"
+  | REFACTOR_CHECK_SD _ -> "REFACTOR_CHECK_SD"
   | IDE_REFACTOR _ -> "IDE_REFACTOR"
   | DUMP_SYMBOL_INFO _ -> "DUMP_SYMBOL_INFO"
   | REMOVE_DEAD_FIXMES _ -> "REMOVE_DEAD_FIXMES"
@@ -48,7 +49,6 @@ let debug_describe_t : type a. a t -> string = function
   | CLOSE_FILE _ -> "CLOSE_FILE"
   | EDIT_FILE _ -> "EDIT_FILE"
   | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
-  | IDE_FFP_AUTOCOMPLETE _ -> "IDE_FFP_AUTOCOMPLETE"
   | CODE_ACTIONS _ -> "CODE_ACTIONS"
   | DISCONNECT -> "DISCONNECT"
   | OUTLINE _ -> "OUTLINE"
@@ -57,6 +57,9 @@ let debug_describe_t : type a. a t -> string = function
   | CST_SEARCH _ -> "CST_SEARCH"
   | NO_PRECHECKED_FILES -> "NO_PRECHECKED_FILES"
   | GEN_PREFETCH_DIR _ -> "GEN_PREFETCH_DIR"
+  | GEN_REMOTE_DECLS_FULL -> "GEN_REMOTE_DECLS_FULL"
+  | GEN_REMOTE_DECLS_INCREMENTAL -> "GEN_REMOTE_DECLS_INCREMENTAL"
+  | GEN_SHALLOW_DECLS_DIR _ -> "GEN_SHALLOW_DECLS_DIR"
   | FUN_DEPS_BATCH _ -> "FUN_DEPS_BATCH"
   | LIST_FILES_WITH_ERRORS -> "LIST_FILES_WITH_ERRORS"
   | FILE_DEPENDENTS _ -> "FILE_DEPENDENTS"
@@ -68,6 +71,8 @@ let debug_describe_t : type a. a t -> string = function
   | PAUSE _ -> "PAUSE"
   | GLOBAL_INFERENCE _ -> "GLOBAL_INFERENCE"
   | VERBOSE _ -> "VERBOSE"
+  | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
+  | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc ({ ServerCommandTypes.from; _ }, rpc) ->

@@ -3,7 +3,7 @@
     a => int
     b => bool
   )
-[RESULT] \f: #{1} [10:8-14] : shape()
+[RESULT] \f: #{} [10:8-14] : shape()
 [RESULT] \f: #{2} [11:8-25] :
   shape(
     a => bool

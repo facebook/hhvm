@@ -61,9 +61,9 @@ type exists_kind =
 
 type constraint_ =
   | Exists of exists_kind * Pos.t  (** Records creation of a dict *)
-  | Has_static_keys of entity_ * shape_keys
-      (** Records the static keys an entity is accessed with along with the Hack
-          types of those keys *)
+  | Has_static_key of entity_ * ResultID.t * shape_key * Typing_defs.locl_ty
+      (** Records a static key an entity is accessed with along with the Hack
+          type of that key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
   | Subset of entity_ * entity_

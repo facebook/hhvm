@@ -50,7 +50,7 @@ type exists_kind =
 
 type constraint_ =
   | Exists of exists_kind * Pos.t
-  | Has_static_keys of entity_ * shape_keys
+  | Has_static_key of entity_ * ResultID.t * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
   | Subset of entity_ * entity_
 

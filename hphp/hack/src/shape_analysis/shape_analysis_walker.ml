@@ -78,35 +78,19 @@ let rec is_suitable_target_ty tast_env ty =
     || Typing_utils.is_nothing (Tast_env.tast_env_as_typing_env tast_env) key_ty
   | _ -> false
 
-type proto_constraint =
-  | Static_keys of Typing_defs.locl_ty ShapeKeyMap.t
-  | Dynamic_key
-
-let add_key_constraints
+let add_key_constraint
     (result_id : ResultID.t)
     (env : env)
     entity
-    (keys_and_tys : (T.expr * Typing_defs.locl_ty) list) : env =
-  let prep_key_and_ty acc ((_, _, key), ty) =
-    match (key, acc) with
-    | (A.String str, Static_keys static_keys) ->
-      let ty = Tast_env.fully_expand env.tast_env ty in
-      Static_keys (ShapeKeyMap.add (SK_string str) ty static_keys)
-    | _ -> Dynamic_key
-  in
+    (((_, _, key), ty) : T.expr * Typing_defs.locl_ty) : env =
   match entity with
   | Some entity ->
-    let proto_constraint =
-      List.fold
-        ~f:prep_key_and_ty
-        ~init:(Static_keys ShapeKeyMap.empty)
-        keys_and_tys
-    in
     let constraint_ =
-      match proto_constraint with
-      | Static_keys shape_keys ->
-        Has_static_keys (entity, (result_id, shape_keys))
-      | Dynamic_key -> Has_dynamic_key entity
+      match key with
+      | A.String str ->
+        let ty = Tast_env.fully_expand env.tast_env ty in
+        Has_static_key (entity, result_id, SK_string str, ty)
+      | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_
   | None -> env
@@ -134,11 +118,11 @@ let rec assign
           Env.add_constraint env (Subset (entity_, current_assignment))
         in
         let env =
-          add_key_constraints
+          add_key_constraint
             ResultID.empty
             env
             (Some current_assignment)
-            [(ix, ty_rhs)]
+            (ix, ty_rhs)
         in
 
         (* Handle copy-on-write by creating a variable indirection *)
@@ -166,16 +150,13 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let entity = Some entity_ in
     let env = Env.add_constraint env (Exists (Allocation, pos)) in
     let result_id = Logic.fresh_result_id () in
-    let collect_key_constraint (env, keys_and_tys) (key, ((ty, _, _) as value))
-        : env * (T.expr * Typing_defs.locl_ty) list =
+    let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
       let (env, _val_entity) = expr_ env value in
-      (env, (key, ty) :: keys_and_tys)
+      let env = add_key_constraint result_id env entity (key, ty) in
+      env
     in
-    let (env, keys_and_tys) =
-      List.fold ~init:(env, []) ~f:collect_key_constraint key_value_pairs
-    in
-    let env = add_key_constraints result_id env entity keys_and_tys in
+    let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
 
     (* Handle copy-on-write by creating a variable indirection *)
     let (env, var) = redirect env entity_ in
@@ -183,7 +164,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Array_get (base, Some ix) ->
     let (env, entity_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
-    let env = add_key_constraints ResultID.empty env entity_exp [(ix, ty)] in
+    let env = add_key_constraint ResultID.empty env entity_exp (ix, ty) in
     (env, None)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in

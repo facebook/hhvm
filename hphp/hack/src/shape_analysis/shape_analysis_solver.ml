@@ -12,7 +12,8 @@ module Logic = Shape_analysis_logic
 
 type constraints = {
   exists: Pos.t list;
-  static_accesses: (entity_ * shape_keys) list;
+  static_accesses:
+    (entity_ * ResultID.t * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
 }
@@ -39,10 +40,11 @@ let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
 let partition_constraint constraints = function
   | Exists (_, entity) ->
     { constraints with exists = entity :: constraints.exists }
-  | Has_static_keys (entity, shape_keys) ->
+  | Has_static_key (entity, result_id, key, ty) ->
     {
       constraints with
-      static_accesses = (entity, shape_keys) :: constraints.static_accesses;
+      static_accesses =
+        (entity, result_id, key, ty) :: constraints.static_accesses;
     }
   | Has_dynamic_key entity ->
     {
@@ -121,9 +123,9 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
   let static_accesses collect_all_concrete =
     List.concat_map
-      ~f:(fun (entity, shape_keys) ->
+      ~f:(fun (entity, result_id, key, ty) ->
         collect_all_concrete entity
-        |> List.map ~f:(fun pos -> (pos, shape_keys)))
+        |> List.map ~f:(fun pos -> (pos, result_id, key, ty)))
       static_accesses
   in
   let static_accesses_upwards_closed =
@@ -157,13 +159,16 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
   (* Add known keys *)
   let static_shape_results : shape_keys Pos.Map.t =
-    let update_entity shape_keys = function
+    let update_entity result_id key ty = function
       | None -> None
-      | Some shape_keys' -> Some (Logic.(shape_keys <> shape_keys') ~env)
+      | Some shape_keys' ->
+        Some (Logic.(singleton result_id key ty <> shape_keys') ~env)
     in
     static_accesses_upwards_closed
-    |> List.fold ~init:static_shape_results ~f:(fun pos_map (pos, shape_keys) ->
-           Pos.Map.update pos (update_entity shape_keys) pos_map)
+    |> List.fold
+         ~init:static_shape_results
+         ~f:(fun pos_map (pos, result_id, key, ty) ->
+           Pos.Map.update pos (update_entity result_id key ty) pos_map)
   in
 
   (* Convert to individual statically accessed dict results *)

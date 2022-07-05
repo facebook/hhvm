@@ -24,13 +24,7 @@ let show_constraint_ env =
   | Exists (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
   | Exists (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
   | Exists (Argument, pos) -> Format.asprintf "Argument at %a" Pos.pp pos
-  | Has_static_keys (entity, (result_id, shape_keys)) ->
-    let static_keys =
-      ShapeKeyMap.bindings shape_keys
-      |> List.map ~f:(fun (key, ty) ->
-             Format.asprintf "%s => %s" (show_key key) (show_ty ty))
-      |> String.concat ~sep:", "
-    in
+  | Has_static_key (entity, result_id, key, ty) ->
     let result_id_str =
       ResultID.elements result_id
       |> List.map ~f:string_of_int
@@ -38,10 +32,11 @@ let show_constraint_ env =
       |> Format.asprintf "{%s}"
     in
     Format.asprintf
-      "SK #%s %s : shape(%s)"
+      "SK #%s %s : shape(%s => %s)"
       result_id_str
       (show_entity entity)
-      static_keys
+      (show_key key)
+      (show_ty ty)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subset (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 

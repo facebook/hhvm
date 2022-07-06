@@ -2272,6 +2272,11 @@ To string conversions:
   Raises a runtime error unless whether each generic in S1 is reified or erased
   matches exactly to the expectations of the cls in S0.
 
+| CheckClsRGSoft, ND, S(Cls), NF
+
+  Raise a warning if all the reified generics on class S0 are soft,
+  otherwise raise an error. S0 must be a reified class.
+
 | CheckFunReifiedGenericMismatch, ND, S(Func) S(Vec), LA
 
   Raises a runtime error unless whether each generic in S1 is reified or erased

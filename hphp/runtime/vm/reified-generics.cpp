@@ -220,6 +220,15 @@ void raise_warning_for_soft_reified(size_t i, bool fun,
                 name->data());
 }
 
+void checkClassReifiedGenericsSoft(const Class* cls) {
+  assertx(cls->hasReifiedGenerics());
+  if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
+    raise_warning_for_soft_reified(0, false, cls->name());
+  } else {
+    raise_error("Cannot create a new instance of a reified class without "
+                "the reified generics");
+  }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -125,12 +125,7 @@ NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
     raiseAbstractClassError(cls);
   }
   if (cls->hasReifiedGenerics()) {
-    if (areAllGenericsSoft(cls->getReifiedGenericsInfo())) {
-      raise_warning_for_soft_reified(0, false, cls->name());
-    } else {
-      raise_error("Cannot create a new instance of a reified class without "
-                  "the reified generics");
-    }
+    checkClassReifiedGenericsSoft(cls);
   }
   auto obj = ObjectData::newInstanceImpl<Unlocked>(
     cls,

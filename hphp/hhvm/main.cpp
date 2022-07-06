@@ -46,7 +46,7 @@
  * but the build succeeds, and the references get set to nullptr (so
  * calls to vector<string>::~vector() end up as a call to 0.
  *
- * See t15096405
+ * See T15096405
  */
 std::vector<std::string> dummy_vec { "hello", "foo" };
 std::set<std::string> dummy_set { "hello" };

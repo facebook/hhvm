@@ -15,10 +15,10 @@ pub use formatters::FmtRawBid;
 pub use formatters::FmtRawVid;
 pub use formatters::FmtVid;
 pub use print::print_unit;
-pub use util::FmtCommaSep;
 pub use util::FmtEscapedString;
 pub use util::FmtOption;
 pub use util::FmtOptionOr;
+pub use util::FmtSep;
 
 // This isn't used by the print crate but is useful for code that wants to print
 // a Func for debugging purposes.

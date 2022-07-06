@@ -16,8 +16,8 @@
 //!
 
 use crate::print::FuncContext;
-use crate::util::FmtCommaSep;
 use crate::util::FmtEscapedString;
+use crate::util::FmtSep;
 use core::instr::BareThisOp;
 use core::instr::CollectionType;
 use core::instr::HasLoc;
@@ -42,8 +42,9 @@ pub(crate) struct FmtAttr(pub Attr);
 impl Display for FmtAttr {
     fn fmt(&self, w: &mut Formatter<'_>) -> Result {
         let FmtAttr(attr) = *self;
-        FmtCommaSep::new_with_wrapper(
+        FmtSep::new(
             "[",
+            ", ",
             "]",
             [
                 attr.is_final().then(|| "is_final"),
@@ -85,7 +86,7 @@ impl Display for FmtAttribute<'_> {
             write!(
                 f,
                 "({})",
-                FmtCommaSep::new(attr.arguments.iter(), |w, tv| { FmtTypedValue(tv).fmt(w) })
+                FmtSep::comma(attr.arguments.iter(), |w, tv| { FmtTypedValue(tv).fmt(w) })
             )?;
         }
         Ok(())
@@ -181,7 +182,7 @@ impl Display for FmtFuncParams<'_> {
         write!(
             w,
             "({})",
-            FmtCommaSep::new(&func.params, |w, param| crate::print::print_param(
+            FmtSep::comma(&func.params, |w, param| crate::print::print_param(
                 w, strings, func, param
             ))
         )
@@ -194,7 +195,7 @@ impl Display for FmtIdentifier<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         // Ideally we print identifiers as non-quoted strings - but if they
         // contain "strange" characters then we need to quote and escape them.
-        let needs_quote = self.0.iter().all(u8::is_ascii_graphic);
+        let needs_quote = !self.0.iter().all(u8::is_ascii_graphic);
         if needs_quote {
             let mut s = String::new();
             s.reserve(self.0.len() * 2);
@@ -387,7 +388,7 @@ impl Display for FmtLids<'_, '_> {
         write!(
             f,
             "[{}]",
-            FmtCommaSep::new(slice.iter(), |f, v| { FmtLid(*v, strings).fmt(f) })
+            FmtSep::comma(slice.iter(), |f, v| { FmtLid(*v, strings).fmt(f) })
         )
     }
 }
@@ -580,21 +581,21 @@ impl Display for FmtTypedValue<'_> {
                 write!(
                     f,
                     "vec[{}]",
-                    FmtCommaSep::new(values.as_ref(), |f, v| { FmtTypedValue(v).fmt(f) })
+                    FmtSep::comma(values.as_ref(), |f, v| { FmtTypedValue(v).fmt(f) })
                 )
             }
             TypedValue::Keyset(values) => {
                 write!(
                     f,
                     "keyset[{}]",
-                    FmtCommaSep::new(values.as_ref(), |f, v| { FmtTypedValue(v).fmt(f) })
+                    FmtSep::comma(values.as_ref(), |f, v| { FmtTypedValue(v).fmt(f) })
                 )
             }
             TypedValue::Dict(values) => {
                 write!(
                     f,
                     "dict[{}]",
-                    FmtCommaSep::new(values.as_ref(), |f, Pair(k, v)| {
+                    FmtSep::comma(values.as_ref(), |f, Pair(k, v)| {
                         write!(f, "{} => {}", FmtTypedValue(k), FmtTypedValue(v))
                     })
                 )

@@ -2,7 +2,7 @@
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
 <<__SupportDynamicType>>
-function expect<T as supportdyn<mixed> >(T $obj)[]: ~ExpectObj<T> {
+function expect<T as supportdyn<mixed> >(T $obj, mixed ...$args)[]: ~ExpectObj<T> {
   throw new Exception("A");
 }
 

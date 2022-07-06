@@ -9116,7 +9116,7 @@ and call
            *)
           | Tfun ft
             when Option.is_some (TUtils.try_strip_dynamic env ft.ft_ret.et_type)
-                 && List.length ft.ft_params = 1 ->
+                 && List.length el = 1 ->
             let ft_params =
               List.map ft.ft_params ~f:(fun fp ->
                   {

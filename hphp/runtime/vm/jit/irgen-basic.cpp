@@ -524,4 +524,12 @@ void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////
 
+void emitResolveClass(IRGS& env, const StringData* name) {
+  if (auto const cls = lookupUniqueClass(env, name)) {
+    push(env, cns(env, cls));
+    return;
+  }
+  interpOne(env);
+}
+
 }

@@ -370,8 +370,6 @@ void emitReqOnce(IRGS& env)                   { interpOne(env); }
 void emitEval(IRGS& env)                      { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
-void emitResolveClass(IRGS& env, const StringData*)
-                                              { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
 }

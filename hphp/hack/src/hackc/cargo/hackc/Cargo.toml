@@ -14,7 +14,7 @@ anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../bytecode_printer" }
-clap = { version = "3.2.6", features = ["derive", "regex", "unicode", "wrap_help"] }
+clap = { version = "3.2.8", features = ["derive", "regex", "unicode", "wrap_help"] }
 compile = { path = "../../compile/cargo/compile" }
 decl_provider = { path = "../../decl_provider" }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }

@@ -31,6 +31,7 @@ use core::instr::OODeclExistsOp;
 use core::instr::QueryMOp;
 use core::instr::ReadonlyOp;
 use core::instr::Special;
+use core::instr::SwitchKind;
 use core::instr::Terminator;
 use core::string_intern::StringInterner;
 use core::*;
@@ -647,6 +648,13 @@ fn print_hhbc(
                 FmtVid(func, ops[1], verbose)
             )?;
         }
+        Hhbc::CheckClsReifiedGenericMismatch(vid, _) => {
+            write!(
+                w,
+                "check_cls_reified_generic_mismatch {}",
+                FmtVid(func, vid, verbose)
+            )?;
+        }
         Hhbc::CheckProp(prop, _) => {
             write!(w, "check_prop {}", FmtIdentifierId(prop.id, ctx.strings))?
         }
@@ -654,6 +662,12 @@ fn print_hhbc(
             write!(w, "check_this")?;
         }
         Hhbc::ClassGetC(vid, _) => write!(w, "class_get_c {}", FmtVid(func, vid, verbose))?,
+        Hhbc::ClassGetTS(vid, _) => write!(w, "class_get_ts {}", FmtVid(func, vid, verbose))?,
+        Hhbc::ClassHasReifiedGenerics(vid, _) => write!(
+            w,
+            "class_has_reified_generics {}",
+            FmtVid(func, vid, verbose)
+        )?,
         Hhbc::ClassName(vid, _) => {
             write!(w, "class_name {}", FmtVid(func, vid, verbose))?;
         }
@@ -753,6 +767,9 @@ fn print_hhbc(
         Hhbc::GetMemoKeyL(lid, _) => {
             write!(w, "get_memo_key {}", FmtLid(lid, ctx.strings))?;
         }
+        Hhbc::HasReifiedParent(vid, _) => {
+            write!(w, "has_reified_parent {}", FmtVid(func, vid, verbose))?
+        }
         Hhbc::Idx(vids, _) => {
             write!(
                 w,
@@ -816,8 +833,19 @@ fn print_hhbc(
                 FmtIsTypeOp(op)
             )?;
         }
+        Hhbc::IssetG(vid, _) => {
+            write!(w, "isset_g {}", FmtVid(func, vid, verbose))?;
+        }
         Hhbc::IssetL(lid, _) => {
             write!(w, "isset_l {}", FmtLid(lid, ctx.strings))?;
+        }
+        Hhbc::IssetS([cls, prop], _) => {
+            write!(
+                w,
+                "isset_s {}::{}",
+                FmtVid(func, cls, verbose),
+                FmtVid(func, prop, verbose)
+            )?;
         }
         Hhbc::IterFree(iter_id, _loc) => {
             write!(w, "iterator ^{} free", iter_id.idx)?;
@@ -864,6 +892,14 @@ fn print_hhbc(
                 w,
                 "new_obj direct {}",
                 FmtIdentifierId(clsid.id, ctx.strings)
+            )?;
+        }
+        Hhbc::NewObjR([cls, rp], _) => {
+            write!(
+                w,
+                "new_obj_r {}, {}",
+                FmtVid(func, cls, verbose),
+                FmtVid(func, rp, verbose)
             )?;
         }
         Hhbc::NewObjRD(_, clsid, _) => {
@@ -925,6 +961,19 @@ fn print_hhbc(
             write!(w, "parent")?;
         }
         Hhbc::Print(vid, _) => write!(w, "print {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::RecordReifiedGeneric(vid, _) => write!(
+            w,
+            "record_reified_generic {}",
+            FmtVid(func, vid, ctx.verbose)
+        )?,
+        Hhbc::ResolveClsMethod(vid, method, _) => {
+            write!(
+                w,
+                "resolve_cls_method {}::{}",
+                FmtVid(func, vid, ctx.verbose),
+                FmtIdentifierId(method.id, ctx.strings),
+            )?;
+        }
         Hhbc::ResolveClsMethodD(clsid, method, _) => {
             write!(
                 w,
@@ -941,8 +990,43 @@ fn print_hhbc(
                 FmtIdentifierId(method.id, ctx.strings),
             )?;
         }
+        Hhbc::ResolveRClsMethod([clsid, vid], method, _) => {
+            write!(
+                w,
+                "resolve_cls_method {}::{}, {}",
+                FmtVid(func, clsid, verbose),
+                FmtIdentifierId(method.id, ctx.strings),
+                FmtVid(func, vid, verbose),
+            )?;
+        }
+        Hhbc::ResolveRClsMethodS(vid, clsref, method, _) => {
+            write!(
+                w,
+                "resolve_cls_method_s {}::{}, {}",
+                FmtSpecialClsRef(clsref),
+                FmtIdentifierId(method.id, ctx.strings),
+                FmtVid(func, vid, verbose),
+            )?;
+        }
         Hhbc::ResolveFunc(func, _) => {
             write!(w, "resolve_func {}", FmtIdentifierId(func.id, ctx.strings))?;
+        }
+        Hhbc::ResolveRClsMethodD(vid, clsid, method, _) => {
+            write!(
+                w,
+                "resolve_r_cls_method_d {}::{}, {}",
+                FmtIdentifierId(clsid.id, ctx.strings),
+                FmtIdentifierId(method.id, ctx.strings),
+                FmtVid(func, vid, verbose),
+            )?;
+        }
+        Hhbc::ResolveRFunc(rid, fid, _) => {
+            write!(
+                w,
+                "resolve_r_func {}, {}",
+                FmtIdentifierId(fid.id, ctx.strings),
+                FmtVid(func, rid, verbose)
+            )?;
         }
         Hhbc::ResolveMethCaller(func, _) => {
             write!(
@@ -986,6 +1070,15 @@ fn print_hhbc(
                 FmtVid(func, vid, verbose)
             )?;
         }
+        Hhbc::SetOpG([x, y], op, _) => {
+            write!(
+                w,
+                "set_op_global {}, {}, {}",
+                FmtVid(func, x, verbose),
+                FmtSetOpOp(op),
+                FmtVid(func, y, verbose)
+            )?;
+        }
         Hhbc::SetOpS(vids, op, _) => {
             write!(
                 w,
@@ -1015,6 +1108,9 @@ fn print_hhbc(
         }
         Hhbc::ThrowNonExhaustiveSwitch(_) => {
             write!(w, "throw_nonexhaustive_switch")?;
+        }
+        Hhbc::UnsetG(vid, _) => {
+            write!(w, "unset {}", FmtVid(func, vid, verbose))?;
         }
         Hhbc::UnsetL(lid, _) => {
             write!(w, "unset {}", FmtLid(lid, ctx.strings))?;
@@ -1543,6 +1639,27 @@ fn print_terminator(
                 w,
                 "ret [{}]",
                 FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+            )?;
+        }
+        Terminator::Switch {
+            cond,
+            bounded,
+            targets,
+            ..
+        } => {
+            let bounded = match *bounded {
+                SwitchKind::Bounded => "bounded",
+                SwitchKind::Unbounded => "unbounded",
+                _ => unreachable!(),
+            };
+            write!(
+                w,
+                "switch {} {} [{}]",
+                bounded,
+                FmtVid(func, *cond, verbose),
+                FmtSep::comma(targets.iter(), |w, target| {
+                    write!(w, "{}", FmtBid(func, *target, verbose),)
+                })
             )?;
         }
         Terminator::SSwitch {

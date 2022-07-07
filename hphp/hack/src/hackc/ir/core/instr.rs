@@ -37,6 +37,7 @@ pub use hhbc::SetOpOp;
 pub use hhbc::SilenceOp;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;
+pub use hhbc::SwitchKind;
 pub use hhbc::TypeStructResolveOp;
 
 pub trait HasLoc {
@@ -169,6 +170,14 @@ pub enum Terminator {
     Ret(ValueId, LocId),
     RetCSuspended(ValueId, LocId),
     RetM(Box<[ValueId]>, LocId),
+    #[has_locals(none)]
+    Switch {
+        cond: ValueId,
+        bounded: SwitchKind,
+        base: i64,
+        targets: Box<[BlockId]>,
+        loc: LocId,
+    },
     SSwitch {
         cond: ValueId,
         cases: Box<[UnitStringId]>,
@@ -223,7 +232,7 @@ impl HasEdges for Terminator {
             | Terminator::IterNext(IteratorArgs { targets, .. })
             | Terminator::JmpOp { targets, .. } => targets,
 
-            Terminator::SSwitch { targets, .. } => targets,
+            Terminator::Switch { targets, .. } | Terminator::SSwitch { targets, .. } => targets,
 
             Terminator::Exit(..)
             | Terminator::Fatal(..)
@@ -251,7 +260,7 @@ impl HasEdges for Terminator {
             | Terminator::IterNext(IteratorArgs { targets, .. })
             | Terminator::JmpOp { targets, .. } => targets,
 
-            Terminator::SSwitch { targets, .. } => targets,
+            Terminator::Switch { targets, .. } | Terminator::SSwitch { targets, .. } => targets,
 
             Terminator::Exit(..)
             | Terminator::Fatal(..)
@@ -292,6 +301,7 @@ impl CanThrow for Terminator {
             | Terminator::IterNext(..)
             | Terminator::JmpOp { .. }
             | Terminator::NativeImpl(..)
+            | Terminator::Switch { .. }
             | Terminator::SSwitch { .. }
             | Terminator::Throw(..)
             | Terminator::ThrowAsTypeStructException(..)
@@ -413,9 +423,12 @@ pub enum Hhbc {
     CastString(ValueId, LocId),
     CastVec(ValueId, LocId),
     ChainFaults([ValueId; 2], LocId),
+    CheckClsReifiedGenericMismatch(ValueId, LocId),
     CheckProp(PropId, LocId),
     CheckThis(LocId),
     ClassGetC(ValueId, LocId),
+    ClassGetTS(ValueId, LocId),
+    ClassHasReifiedGenerics(ValueId, LocId),
     ClassName(ValueId, LocId),
     Clone(ValueId, LocId),
     ClsCns(ValueId, ConstId, LocId),
@@ -444,6 +457,7 @@ pub enum Hhbc {
     CreateCont(LocId),
     Div([ValueId; 2], LocId),
     GetMemoKeyL(LocalId, LocId),
+    HasReifiedParent(ValueId, LocId),
     Idx([ValueId; 3], LocId),
     #[has_operands(none)]
     IncDecL(LocalId, IncDecOp, LocId),
@@ -456,7 +470,9 @@ pub enum Hhbc {
     #[has_operands(none)]
     IsTypeL(LocalId, IsTypeOp, LocId),
     IsTypeStructC([ValueId; 2], TypeStructResolveOp, LocId),
+    IssetG(ValueId, LocId),
     IssetL(LocalId, LocId),
+    IssetS([ValueId; 2], LocId),
     #[has_operands(none)]
     IterFree(IterId, LocId),
     LateBoundCls(LocId),
@@ -469,6 +485,7 @@ pub enum Hhbc {
     NewKeysetArray(Box<[ValueId]>, LocId),
     NewObj(ValueId, LocId),
     NewObjD(ClassId, LocId),
+    NewObjR([ValueId; 2], LocId),
     NewObjRD(ValueId, ClassId, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
@@ -482,17 +499,25 @@ pub enum Hhbc {
     ParentCls(LocId),
     Pow([ValueId; 2], LocId),
     Print(ValueId, LocId),
+    RecordReifiedGeneric(ValueId, LocId),
+    ResolveClsMethod(ValueId, MethodId, LocId),
     ResolveClsMethodD(ClassId, MethodId, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
     ResolveClsMethodS(SpecialClsRef, MethodId, LocId),
+    ResolveRClsMethod([ValueId; 2], MethodId, LocId),
+    #[has_locals(none)]
+    ResolveRClsMethodS(ValueId, SpecialClsRef, MethodId, LocId),
     ResolveFunc(FunctionId, LocId),
+    ResolveRClsMethodD(ValueId, ClassId, MethodId, LocId),
+    ResolveRFunc(ValueId, FunctionId, LocId),
     ResolveMethCaller(FunctionId, LocId),
     SelfCls(LocId),
     SetG([ValueId; 2], LocId),
     SetImplicitContextByValue(ValueId, LocId),
     SetL(ValueId, LocalId, LocId),
     SetOpL(ValueId, LocalId, SetOpOp, LocId),
+    SetOpG([ValueId; 2], SetOpOp, LocId),
     SetOpS([ValueId; 3], SetOpOp, LocId),
     SetS([ValueId; 3], ReadonlyOp, LocId),
     Shl([ValueId; 2], LocId),
@@ -502,6 +527,7 @@ pub enum Hhbc {
     Sub([ValueId; 2], LocId),
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),
+    UnsetG(ValueId, LocId),
     UnsetL(LocalId, LocId),
     VerifyImplicitContextState(LocId),
     VerifyOutType(ValueId, LocalId, LocId),

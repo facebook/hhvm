@@ -10,6 +10,7 @@ use analysis::PredecessorFlags;
 use analysis::Predecessors;
 use core::instr::HasEdges;
 use core::instr::HasOperands;
+use core::instr::Hhbc;
 use core::instr::Special;
 use core::instr::Terminator;
 use core::string_intern::StringInterner;
@@ -386,6 +387,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             // instruction.
             let expects_select = match *prev_instr {
                 Instr::Call(ref call) => call.num_rets >= 2,
+                Instr::Hhbc(Hhbc::ClassGetTS(..)) => true,
                 _ => false,
             };
             if !expects_select {
@@ -443,6 +445,9 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 if call.num_rets > 1 {
                     self.verify_selects(call.num_rets as usize, block, iid, iid_idx)?;
                 }
+            }
+            Instr::Hhbc(Hhbc::ClassGetTS(..)) => {
+                self.verify_selects(2, block, iid, iid_idx)?;
             }
             Instr::Terminator(Terminator::CallAsync(_, targets)) => {
                 self.verify_block_args(iid, targets[0], 1)?;

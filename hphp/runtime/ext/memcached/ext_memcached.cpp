@@ -477,7 +477,7 @@ bool HHVM_METHOD(Memcached, quit) {
   return true;
 }
 
-Variant HHVM_METHOD(Memcached, getallkeys) {
+Variant HHVM_METHOD(Memcached, getAllKeys) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_dump_fn callbacks[] = {
     &memcached_dump_callback,
@@ -523,7 +523,7 @@ Variant getByKeyImpl(ObjectData* const this_, const String& server_key,
                               &result.value, &status)) {
     if (status == MEMCACHED_END) status = MEMCACHED_NOTFOUND;
     if (status == MEMCACHED_NOTFOUND && !cache_cb.isNull()) {
-      raise_warning("Memcached::getbykey() no longer supports callbacks");
+      raise_warning("Memcached::getByKey() no longer supports callbacks");
     }
     data->handleError(status);
     return false;
@@ -585,13 +585,13 @@ Variant getMultiByKeyImpl(ObjectData* const this_, const String& server_key,
 }
 } // anonymous namespace
 
-Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
+Variant HHVM_METHOD(Memcached, getByKey, const String& server_key,
                                          const String& key,
                                          const Variant& cache_cb /*= null*/) {
   return getByKeyImpl(this_, server_key, key, cache_cb, nullptr);
 }
 
-Variant HHVM_METHOD(Memcached, getbykeywithcastoken,
+Variant HHVM_METHOD(Memcached, getByKeyWithCasToken,
                     const String& server_key,
                     const String& key,
                     const Variant& cache_cb,
@@ -599,13 +599,13 @@ Variant HHVM_METHOD(Memcached, getbykeywithcastoken,
   return getByKeyImpl(this_, server_key, key, cache_cb, &cas_token);
 }
 
-Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
+Variant HHVM_METHOD(Memcached, getMultiByKey, const String& server_key,
                                const Array& keys,
                                int64_t flags /*= 0*/) {
   return getMultiByKeyImpl(this_, server_key, keys, nullptr, flags);
 }
 
-Variant HHVM_METHOD(Memcached, getmultibykeywithcastokens,
+Variant HHVM_METHOD(Memcached, getMultiByKeyWithCasTokens,
                     const String& server_key,
                     const Array& keys,
                     Variant& cas_tokens,
@@ -613,7 +613,7 @@ Variant HHVM_METHOD(Memcached, getmultibykeywithcastokens,
   return getMultiByKeyImpl(this_, server_key, keys, &cas_tokens, flags);
 }
 
-bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
+bool HHVM_METHOD(Memcached, getDelayedByKey, const String& server_key,
                             const Array& keys, bool with_cas /*= false*/,
                             const Variant& value_cb /*= uninit_variant*/) {
   auto data = Native::data<MemcachedData>(this_);
@@ -642,7 +642,7 @@ Variant HHVM_METHOD(Memcached, fetch) {
   return item;
 }
 
-Variant HHVM_METHOD(Memcached, fetchall) {
+Variant HHVM_METHOD(Memcached, fetchAll) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = MEMCACHED_SUCCESS;
 
@@ -656,7 +656,7 @@ Variant HHVM_METHOD(Memcached, fetchall) {
   return returnValue;
 }
 
-bool HHVM_METHOD(Memcached, setbykey, const String& server_key,
+bool HHVM_METHOD(Memcached, setByKey, const String& server_key,
                                       const String& key, const Variant& value,
                                       int64_t expiration /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
@@ -664,7 +664,7 @@ bool HHVM_METHOD(Memcached, setbykey, const String& server_key,
                           expiration);
 }
 
-bool HHVM_METHOD(Memcached, addbykey, const String& server_key,
+bool HHVM_METHOD(Memcached, addByKey, const String& server_key,
                                       const String& key, const Variant& value,
                                       int64_t expiration /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
@@ -672,7 +672,7 @@ bool HHVM_METHOD(Memcached, addbykey, const String& server_key,
                                                       expiration);
 }
 
-bool HHVM_METHOD(Memcached, appendbykey, const String& server_key,
+bool HHVM_METHOD(Memcached, appendByKey, const String& server_key,
                                          const String& key,
                                          const String& value) {
   auto data = Native::data<MemcachedData>(this_);
@@ -684,7 +684,7 @@ bool HHVM_METHOD(Memcached, appendbykey, const String& server_key,
                                 value, 0);
 }
 
-bool HHVM_METHOD(Memcached, prependbykey, const String& server_key,
+bool HHVM_METHOD(Memcached, prependByKey, const String& server_key,
                                           const String& key,
                                           const String& value) {
   auto data = Native::data<MemcachedData>(this_);
@@ -696,7 +696,7 @@ bool HHVM_METHOD(Memcached, prependbykey, const String& server_key,
                                 value, 0);
 }
 
-bool HHVM_METHOD(Memcached, replacebykey, const String& server_key,
+bool HHVM_METHOD(Memcached, replaceByKey, const String& server_key,
                                           const String& key,
                                           const Variant& value,
                                           int64_t expiration /*= 0*/) {
@@ -705,7 +705,7 @@ bool HHVM_METHOD(Memcached, replacebykey, const String& server_key,
                                 value, expiration);
 }
 
-bool HHVM_METHOD(Memcached, casbykey, double cas_token,
+bool HHVM_METHOD(Memcached, casByKey, double cas_token,
                                       const String& server_key,
                                       const String& key,
                                       const Variant& value,
@@ -726,7 +726,7 @@ bool HHVM_METHOD(Memcached, casbykey, double cas_token,
       payload.data(), payload.size(), expiration, flags, (uint64_t)cas_token));
 }
 
-bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
+bool HHVM_METHOD(Memcached, deleteByKey, const String& server_key,
                                          const String& key,
                                          int64_t time /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
@@ -742,7 +742,7 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
                      key.c_str(), key.length(), time));
 }
 
-Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
+Variant HHVM_METHOD(Memcached, deleteMultiByKey, const String& server_key,
                                          const Array& keys,
                                          int64_t time /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
@@ -780,7 +780,7 @@ Variant HHVM_METHOD(Memcached, increment,
     true, nullptr, key.get(), offset, initial_value, expiry);
 }
 
-Variant HHVM_METHOD(Memcached, incrementbykey,
+Variant HHVM_METHOD(Memcached, incrementByKey,
                     const String& server_key,
                     const String& key,
                     int64_t offset /* = 1 */,
@@ -799,7 +799,7 @@ Variant HHVM_METHOD(Memcached, decrement,
     false, nullptr, key.get(), offset, initial_value, expiry);
 }
 
-Variant HHVM_METHOD(Memcached, decrementbykey,
+Variant HHVM_METHOD(Memcached, decrementByKey,
                     const String& server_key,
                     const String& key,
                     int64_t offset /* = 1 */,
@@ -809,7 +809,7 @@ Variant HHVM_METHOD(Memcached, decrementbykey,
     false, server_key.get(), key.get(), offset, initial_value, expiry);
 }
 
-bool HHVM_METHOD(Memcached, addserver, const String& host, int64_t port,
+bool HHVM_METHOD(Memcached, addServer, const String& host, int64_t port,
                                        int64_t weight /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = MEMCACHED_SUCCESS;
@@ -852,7 +852,7 @@ doServerListCallback(const memcached_st* /*ptr*/,
 }
 }
 
-Array HHVM_METHOD(Memcached, getserverlist) {
+Array HHVM_METHOD(Memcached, getServerList) {
   auto data = Native::data<MemcachedData>(this_);
   Array returnValue = Array::CreateVec();
   memcached_server_function callbacks[] = { doServerListCallback };
@@ -860,13 +860,13 @@ Array HHVM_METHOD(Memcached, getserverlist) {
   return returnValue;
 }
 
-bool HHVM_METHOD(Memcached, resetserverlist) {
+bool HHVM_METHOD(Memcached, resetServerList) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_servers_reset(&data->m_impl->memcached);
   return true;
 }
 
-Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
+Variant HHVM_METHOD(Memcached, getServerByKey, const String& server_key) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = MEMCACHED_SUCCESS;
   if (server_key.empty()) {
@@ -976,7 +976,7 @@ doStatsCallback(const memcached_st* /*ptr*/,
 }
 }
 
-Variant HHVM_METHOD(Memcached, getstats) {
+Variant HHVM_METHOD(Memcached, getStats) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_return_t error;
   memcached_stat_st *stats = memcached_stat(&data->m_impl->memcached,
@@ -1024,7 +1024,7 @@ doVersionCallback(const memcached_st* /*ptr*/,
 }
 }
 
-Variant HHVM_METHOD(Memcached, getversion) {
+Variant HHVM_METHOD(Memcached, getVersion) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_version(&data->m_impl->memcached);
 
@@ -1039,7 +1039,7 @@ bool HHVM_METHOD(Memcached, flush, int64_t delay /*= 0*/) {
   return data->handleError(memcached_flush(&data->m_impl->memcached, delay));
 }
 
-Variant HHVM_METHOD(Memcached, getoption, int64_t option) {
+Variant HHVM_METHOD(Memcached, getOption, int64_t option) {
   auto data = Native::data<MemcachedData>(this_);
   switch (option) {
   case q_Memcached$$OPT_COMPRESSION:
@@ -1074,7 +1074,7 @@ Variant HHVM_METHOD(Memcached, getoption, int64_t option) {
   }
 }
 
-bool HHVM_METHOD(Memcached, setoption, int64_t option, const Variant& value) {
+bool HHVM_METHOD(Memcached, setOption, int64_t option, const Variant& value) {
   auto data = Native::data<MemcachedData>(this_);
   switch (option) {
   case q_Memcached$$OPT_COMPRESSION:
@@ -1153,12 +1153,12 @@ bool HHVM_METHOD(Memcached, setoption, int64_t option, const Variant& value) {
   return true;
 }
 
-int64_t HHVM_METHOD(Memcached, getresultcode) {
+int64_t HHVM_METHOD(Memcached, getResultCode) {
   auto data = Native::data<MemcachedData>(this_);
   return data->m_impl->rescode;
 }
 
-String HHVM_METHOD(Memcached, getresultmessage) {
+String HHVM_METHOD(Memcached, getResultMessage) {
   auto data = Native::data<MemcachedData>(this_);
   if (data->m_impl->rescode == q_Memcached$$RES_PAYLOAD_FAILURE) {
     return "PAYLOAD FAILURE";
@@ -1168,17 +1168,17 @@ String HHVM_METHOD(Memcached, getresultmessage) {
   }
 }
 
-bool HHVM_METHOD(Memcached, ispersistent) {
+bool HHVM_METHOD(Memcached, isPersistent) {
   auto data = Native::data<MemcachedData>(this_);
   return data->m_impl->is_persistent;
 }
 
-bool HHVM_METHOD(Memcached, ispristine) {
+bool HHVM_METHOD(Memcached, isPristine) {
   auto data = Native::data<MemcachedData>(this_);
   return data->m_impl->is_pristine;
 }
 
-bool HHVM_METHOD(Memcached, touchbykey,
+bool HHVM_METHOD(Memcached, touchByKey,
                  ATTRIBUTE_UNUSED const String& server_key,
                  ATTRIBUTE_UNUSED const String& key,
                  ATTRIBUTE_UNUSED int64_t expiration /*= 0*/) {
@@ -1239,40 +1239,40 @@ struct MemcachedExtension final : Extension {
   void moduleInit() override {
     HHVM_ME(Memcached, __construct);
     HHVM_ME(Memcached, quit);
-    HHVM_ME(Memcached, getallkeys);
-    HHVM_ME(Memcached, getbykey);
-    HHVM_ME(Memcached, getbykeywithcastoken);
-    HHVM_ME(Memcached, getmultibykey);
-    HHVM_ME(Memcached, getmultibykeywithcastokens);
-    HHVM_ME(Memcached, getdelayedbykey);
+    HHVM_ME(Memcached, getAllKeys);
+    HHVM_ME(Memcached, getByKey);
+    HHVM_ME(Memcached, getByKeyWithCasToken);
+    HHVM_ME(Memcached, getMultiByKey);
+    HHVM_ME(Memcached, getMultiByKeyWithCasTokens);
+    HHVM_ME(Memcached, getDelayedByKey);
     HHVM_ME(Memcached, fetch);
-    HHVM_ME(Memcached, fetchall);
-    HHVM_ME(Memcached, setbykey);
-    HHVM_ME(Memcached, addbykey);
-    HHVM_ME(Memcached, appendbykey);
-    HHVM_ME(Memcached, prependbykey);
-    HHVM_ME(Memcached, replacebykey);
-    HHVM_ME(Memcached, casbykey);
-    HHVM_ME(Memcached, deletebykey);
-    HHVM_ME(Memcached, deletemultibykey);
+    HHVM_ME(Memcached, fetchAll);
+    HHVM_ME(Memcached, setByKey);
+    HHVM_ME(Memcached, addByKey);
+    HHVM_ME(Memcached, appendByKey);
+    HHVM_ME(Memcached, prependByKey);
+    HHVM_ME(Memcached, replaceByKey);
+    HHVM_ME(Memcached, casByKey);
+    HHVM_ME(Memcached, deleteByKey);
+    HHVM_ME(Memcached, deleteMultiByKey);
     HHVM_ME(Memcached, increment);
-    HHVM_ME(Memcached, incrementbykey);
+    HHVM_ME(Memcached, incrementByKey);
     HHVM_ME(Memcached, decrement);
-    HHVM_ME(Memcached, decrementbykey);
-    HHVM_ME(Memcached, addserver);
-    HHVM_ME(Memcached, getserverlist);
-    HHVM_ME(Memcached, resetserverlist);
-    HHVM_ME(Memcached, getserverbykey);
-    HHVM_ME(Memcached, getstats);
-    HHVM_ME(Memcached, getversion);
+    HHVM_ME(Memcached, decrementByKey);
+    HHVM_ME(Memcached, addServer);
+    HHVM_ME(Memcached, getServerList);
+    HHVM_ME(Memcached, resetServerList);
+    HHVM_ME(Memcached, getServerByKey);
+    HHVM_ME(Memcached, getStats);
+    HHVM_ME(Memcached, getVersion);
     HHVM_ME(Memcached, flush);
-    HHVM_ME(Memcached, getoption);
-    HHVM_ME(Memcached, setoption);
-    HHVM_ME(Memcached, getresultcode);
-    HHVM_ME(Memcached, getresultmessage);
-    HHVM_ME(Memcached, ispersistent);
-    HHVM_ME(Memcached, ispristine);
-    HHVM_ME(Memcached, touchbykey);
+    HHVM_ME(Memcached, getOption);
+    HHVM_ME(Memcached, setOption);
+    HHVM_ME(Memcached, getResultCode);
+    HHVM_ME(Memcached, getResultMessage);
+    HHVM_ME(Memcached, isPersistent);
+    HHVM_ME(Memcached, isPristine);
+    HHVM_ME(Memcached, touchByKey);
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 

@@ -326,7 +326,7 @@ static Variant HHVM_METHOD(IntlCalendar, getTime) {
   return (double)ret;
 }
 
-static Object HHVM_METHOD(IntlCalendar, getTimeZone) {
+static Object HHVM_METHOD(IntlCalendar, getTimezone) {
   CAL_FETCH(data, this_, Object());
   return IntlTimeZone::newInstance(
     data->calendar()->getTimeZone().clone());
@@ -495,7 +495,7 @@ static bool HHVM_METHOD(IntlCalendar, setTime, const Variant& date) {
   return true;
 }
 
-static bool HHVM_METHOD(IntlCalendar, setTimeZone, const Variant& timeZone) {
+static bool HHVM_METHOD(IntlCalendar, setTimezone, const Variant& timeZone) {
   CAL_FETCH(data, this_, false);
   auto tz = IntlTimeZone::ParseArg(timeZone, "intlcal_set_time_zone",
                                    data);
@@ -829,7 +829,7 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlCalendar, getMinimum);
   HHVM_STATIC_ME(IntlCalendar, getNow);
   HHVM_ME(IntlCalendar, getTime);
-  HHVM_ME(IntlCalendar, getTimeZone);
+  HHVM_ME(IntlCalendar, getTimezone);
   HHVM_ME(IntlCalendar, getType);
   HHVM_ME(IntlCalendar, inDaylightTime);
   HHVM_ME(IntlCalendar, isEquivalentTo);
@@ -841,7 +841,7 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlCalendar, setLenient);
   HHVM_ME(IntlCalendar, setMinimalDaysInFirstWeek);
   HHVM_ME(IntlCalendar, setTime);
-  HHVM_ME(IntlCalendar, setTimeZone);
+  HHVM_ME(IntlCalendar, setTimezone);
 
 #if ((U_ICU_VERSION_MAJOR_NUM * 100) + U_ICU_VERSION_MINOR_NUM) >= 402
   HHVM_STATIC_ME(IntlCalendar, getKeywordValuesForLocale);

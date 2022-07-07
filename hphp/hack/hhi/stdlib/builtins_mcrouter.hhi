@@ -51,9 +51,21 @@ class MCRouter {
   public async function del(string $key): Awaitable<void>;
   public async function flushAll(int $delay = 0): Awaitable<void>;
   public async function get(string $key): Awaitable<string>;
+  public async function gets(string $key): Awaitable<shape(
+    'value' => string,
+    'cas' => int,
+    'flags' => int,
+  )>;
   public async function version(): Awaitable<string>;
   public static function getOpName(int $op): string;
   public static function getResultName(int $op): string;
+
+  public async function cas(
+    int $cas,
+    string $key,
+    string $value,
+    int $expiration = 0,
+  ): Awaitable<void>;
 
   // From mcrouter/lib/mc/msg.h enum mc_op_e:
   const int mc_op_unknown = 0;

@@ -44,7 +44,7 @@ File root|module_hint.php--here.php
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }))
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 File root|module_hint.php--there.php
@@ -60,7 +60,7 @@ File root|module_hint.php--there.php
        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\G",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -78,7 +78,7 @@ File root|module_hint.php--there.php
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -105,8 +105,8 @@ File root|module_hint.php--there.php
         sc_user_attributes = [];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([9:19-22]), (Tprim Tint));
-                te_constraint = None; te_includes = [] })
-        }))
+                te_constraint = None; te_includes = [] });
+        sc_docs_url = None }))
   ]
 
 File root|module_hint.php--everywhere.php
@@ -169,7 +169,7 @@ File root|module_hint.php--everywhere.php
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

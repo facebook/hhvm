@@ -3950,9 +3950,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut methods = bump::Vec::with_capacity_in(methods_len, self.arena);
 
         let mut user_attributes = bump::Vec::with_capacity_in(user_attributes_len, self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4114,6 +4123,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             methods,
             user_attributes,
             enum_type: None,
+            docs_url,
         });
         self.add_class(name, cls);
 
@@ -4544,6 +4554,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint,
                 includes,
             })),
+            // Currently ignoring <<__Docs()>> on enum declarations.
+            docs_url: None,
         });
         self.add_class(key, cls);
 
@@ -4715,6 +4727,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint: None,
                 includes,
             })),
+            // Currently ignoring <<__Docs()>> on enum class declarations.
+            docs_url: None,
         });
         self.add_class(name.1, cls);
 
@@ -5074,7 +5088,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Docs" => true,
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {

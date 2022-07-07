@@ -15,7 +15,7 @@
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -31,7 +31,7 @@
         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -51,7 +51,7 @@
         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\test",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

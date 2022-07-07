@@ -285,6 +285,7 @@ struct
       dc_support_dynamic_type = dc.dc_support_dynamic_type;
       dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = [];
+      dc_docs_url = dc.dc_docs_url;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
@@ -341,6 +342,7 @@ struct
       sc_methods = List.map sc.sc_methods ~f:shallow_method;
       sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
+      sc_docs_url = sc.sc_docs_url;
     }
 
   and shallow_class_const scc =

@@ -405,6 +405,7 @@ let class_DEPRECATED ctx c =
       sc_methods = List.map ~f:(method_ ~support_dynamic_type env) rest;
       sc_user_attributes;
       sc_enum_type = Option.map c.c_enum ~f:(enum_type hint);
+      sc_docs_url = c.c_docs_url;
     }
   in
   if not (Errors.is_empty errs) then (

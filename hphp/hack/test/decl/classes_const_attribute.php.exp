@@ -14,7 +14,8 @@
           sp_visibility = Public; sp_flags = abstract | const | needs_init }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-       sc_methods = []; sc_user_attributes = []; sc_enum_type = None }));
+       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+       sc_docs_url = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -33,7 +34,8 @@
            sp_visibility = Public; sp_flags = const }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
+        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+        sc_docs_url = None }))
   ]
 
 They matched!

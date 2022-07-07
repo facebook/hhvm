@@ -141,6 +141,7 @@ type shallow_class = {
   sc_methods: shallow_method list;
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
+  sc_docs_url: string option;
 }
 [@@deriving eq, show]
 

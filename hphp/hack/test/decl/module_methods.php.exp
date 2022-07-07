@@ -32,7 +32,7 @@ File root|module_methods.php--A.php
           sm_visibility = Internal; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }))
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 File root|module_methods.php--main.php

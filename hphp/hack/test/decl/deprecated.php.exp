@@ -83,7 +83,7 @@
            (Some "The method foo2 is deprecated: use bar2() instead");
            sm_flags = (empty); sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =

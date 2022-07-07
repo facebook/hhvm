@@ -49,7 +49,7 @@
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None }));
    ("\\Bar",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -65,7 +65,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\SingleAttribute",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -81,7 +81,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\SingleAttributeWithOneParam",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -136,7 +136,7 @@
                  sm_visibility = Public; sm_deprecated = None;
                  sm_flags = (empty); sm_attributes = [] });
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\SingleAttributeWithTwoParams",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -206,7 +206,7 @@
                  sm_visibility = Public; sm_deprecated = None;
                  sm_flags = (empty); sm_attributes = [] });
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Multiple",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -259,7 +259,7 @@
                  sm_visibility = Public; sm_deprecated = None;
                  sm_flags = (empty); sm_attributes = [] });
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Attributes",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -327,7 +327,7 @@
                  sm_visibility = Public; sm_deprecated = None;
                  sm_flags = (empty); sm_attributes = [] });
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\T1",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [21:6-8];

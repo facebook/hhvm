@@ -29,8 +29,8 @@
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:13-19]), (Tprim Tstring));
                te_constraint = (Some (Rhint ([3:23-29]), (Tprim Tstring)));
-               te_includes = [] })
-       }));
+               te_includes = [] });
+       sc_docs_url = None }));
   ("\\TestClassConstReferencingEnum",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -62,7 +62,7 @@
         [{ Typing_defs_core.ua_name = ([8:3-24], "__ConsistentConstruct");
            ua_classname_params = [] }
           ];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

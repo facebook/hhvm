@@ -47,6 +47,7 @@ type subdecl_kind =
   | Enum_type
   | Xhp_enum_values
   | Sealed_whitelist
+  | Docs_url
   | Decl_errors
   | Support_dynamic_type
   (* Lazy *)

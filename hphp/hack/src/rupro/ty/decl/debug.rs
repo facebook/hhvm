@@ -45,6 +45,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             methods,
             user_attributes,
             enum_type,
+            docs_url,
         } = self;
 
         let mut s = f.debug_struct("ShallowClass");
@@ -135,6 +136,10 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         }
         if let Some(enum_type) = enum_type {
             s.field("enum_type", enum_type);
+        }
+
+        if let Some(docs_url) = docs_url {
+            s.field("docs_url", docs_url);
         }
 
         s.finish()

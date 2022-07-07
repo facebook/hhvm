@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<312204e91e7170da5b915fddfeb5b555>>
+// @generated SignedSource<<afb6506b9039a742739205f4e8fe92cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -610,6 +610,7 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 methods: ref __binding_26,
                 user_attributes: ref __binding_27,
                 enum_type: ref __binding_28,
+                docs_url: ref __binding_29,
             } => {
                 {
                     __binding_0.accept(v)
@@ -695,7 +696,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_27.accept(v)
                 }
-                { __binding_28.accept(v) }
+                {
+                    __binding_28.accept(v)
+                }
+                { __binding_29.accept(v) }
             }
         }
     }

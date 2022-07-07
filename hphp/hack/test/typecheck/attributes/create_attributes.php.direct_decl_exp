@@ -16,7 +16,7 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None }));
    ("\\Cc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -32,7 +32,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\E",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -48,7 +48,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\F",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -64,7 +64,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Met",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -80,7 +80,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\IProp",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -96,7 +96,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\SProp",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -112,7 +112,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\P",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -128,7 +128,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\T",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -144,7 +144,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Fi",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -160,7 +160,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Ec",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -176,7 +176,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\TParam",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -192,7 +192,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\Tc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -208,7 +208,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\L",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -224,7 +224,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\ff",
     (Shallow_decl_defs.Fun
        { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -314,7 +314,7 @@
          [{ Typing_defs_core.ua_name = ([26:3-4], "\\C");
             ua_classname_params = [] }
            ];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\CT",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -337,7 +337,7 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-         sc_enum_type = None }));
+         sc_enum_type = None; sc_docs_url = None }));
    ("\\EE",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -361,8 +361,8 @@
            ];
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([43:10-13]), (Tprim Tint));
-                 te_constraint = None; te_includes = [] })
-         }));
+                 te_constraint = None; te_includes = [] });
+         sc_docs_url = None }));
    ("\\tt",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [46:6-8];
@@ -407,6 +407,6 @@
          sc_enum_type =
          (Some { Typing_defs.te_base =
                  (Rhint ([49:18-20]), (Tapply (([49:18-20], "\\EE"), [])));
-                 te_constraint = None; te_includes = [] })
-         }))
+                 te_constraint = None; te_includes = [] });
+         sc_docs_url = None }))
    ]

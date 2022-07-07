@@ -28,7 +28,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -61,7 +61,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = override;
            sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }))
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

@@ -50,7 +50,7 @@
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }))
+       sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

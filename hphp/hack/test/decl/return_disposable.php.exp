@@ -30,7 +30,7 @@
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\gen",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

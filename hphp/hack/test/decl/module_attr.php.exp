@@ -70,7 +70,7 @@ File root|module_attr.php--there.php
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }))
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 File root|module_attr.php--elsewhere.php
@@ -101,8 +101,8 @@ File root|module_attr.php--elsewhere.php
        sc_user_attributes = [];
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([6:10-13]), (Tprim Tint));
-               te_constraint = None; te_includes = [] })
-       }))
+               te_constraint = None; te_includes = [] });
+       sc_docs_url = None }))
   ]
 
 They matched!

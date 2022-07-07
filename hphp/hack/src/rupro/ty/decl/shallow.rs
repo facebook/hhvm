@@ -151,6 +151,7 @@ pub struct ShallowClass<R: Reason> {
     pub methods: Box<[ShallowMethod<R>]>,
     pub user_attributes: Box<[UserAttribute<R::Pos>]>,
     pub enum_type: Option<EnumType<R>>,
+    pub docs_url: Option<String>,
 }
 
 walkable!(ShallowClass<R> => [

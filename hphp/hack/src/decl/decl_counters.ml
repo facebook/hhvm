@@ -44,6 +44,7 @@ type subdecl_kind =
   | Enum_type
   | Xhp_enum_values
   | Sealed_whitelist
+  | Docs_url
   | Decl_errors
   | Support_dynamic_type
   (* Lazy *)
@@ -135,6 +136,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Enum_type
   | Xhp_enum_values
   | Sealed_whitelist
+  | Docs_url
   | Decl_errors
   | Support_dynamic_type ->
     "shallow"

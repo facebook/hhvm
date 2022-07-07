@@ -487,6 +487,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             xhp_attr_deps: xhp_attr_deps.to_oxidized(arena),
             enum_type: enum_type.as_ref().map(|et| et.to_oxidized(arena)),
             decl_errors: decl_errors.to_oxidized(arena),
+            docs_url: None,
         }
     }
 }
@@ -669,6 +670,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
             methods,
             user_attributes,
             enum_type,
+            docs_url,
         } = self;
 
         arena.alloc(obr::shallow_decl_defs::ClassDecl {
@@ -704,6 +706,9 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
             methods: methods.to_oxidized(arena),
             user_attributes: user_attributes.to_oxidized(arena),
             enum_type: enum_type.as_ref().map(|e| e.to_oxidized(arena)),
+            docs_url: docs_url
+                .as_ref()
+                .map(|s| bumpalo::collections::String::from_str_in(s, arena).into_bump_str()),
         })
     }
 }

@@ -45,7 +45,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Fliers",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -77,7 +77,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Plane",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -113,7 +113,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\HasEngine",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -145,7 +145,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Startable",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -181,7 +181,7 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\AirBus",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -238,7 +238,7 @@
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
           ];
-        sc_user_attributes = []; sc_enum_type = None }))
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

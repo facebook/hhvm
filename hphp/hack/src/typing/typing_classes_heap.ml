@@ -198,6 +198,12 @@ module ApiShallow = struct
     | Lazy (sc, _lc) -> get_sealed_whitelist sc
     | Eager (c, _) -> c.Decl_defs.dc_sealed_whitelist
 
+  let get_docs_url (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.Docs_url @@ fun () ->
+    match t with
+    | Lazy (sc, _lc) -> sc.sc_docs_url
+    | Eager (c, _) -> c.Decl_defs.dc_docs_url
+
   let get_module (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Module @@ fun () ->
     match t with

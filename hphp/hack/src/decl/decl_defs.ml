@@ -215,6 +215,7 @@ type decl_class_type = {
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   dc_enum_type: enum_type option;
   dc_decl_errors: decl_error list;
+  dc_docs_url: string option;
 }
 [@@deriving show]
 

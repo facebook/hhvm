@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,225 +1,225 @@
+@@ -1,226 +1,226 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -56,7 +56,8 @@
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];
-        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }));
+        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+        sc_docs_url = None }));
    ("\\TestE",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -88,8 +89,8 @@
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([7:13-16]), (Tprim Tint));
                  te_constraint = (Some (Rhint ([7:20-23]), (Tprim Tint)));
-                 te_includes = [] })
-         }));
+                 te_includes = [] });
+         sc_docs_url = None }));
    ("\\TestRefs1",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -127,7 +128,7 @@
            ];
          sc_typeconsts = []; sc_props = []; sc_sprops = [];
          sc_constructor = None; sc_static_methods = []; sc_methods = [];
-         sc_user_attributes = []; sc_enum_type = None }));
+         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
    ("\\TestRefs2",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -225,6 +226,6 @@
            ];
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([17:22-27]), Tmixed);
-                 te_constraint = None; te_includes = [] })
-         }))
+                 te_constraint = None; te_includes = [] });
+         sc_docs_url = None }))
    ]

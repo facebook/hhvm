@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,151 +1,151 @@
+@@ -1,152 +1,152 @@
  [("\\DeclPos",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -152,5 +152,6 @@
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
           ];
-        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
+        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+        sc_docs_url = None }))
    ]

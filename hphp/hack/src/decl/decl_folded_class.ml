@@ -945,6 +945,7 @@ and class_decl
       dc_req_class_ancestors = req_class_ancestors;
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
+      dc_docs_url = c.sc_docs_url;
     }
   in
   let member_heaps_values =

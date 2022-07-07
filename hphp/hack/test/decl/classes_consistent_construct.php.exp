@@ -14,7 +14,7 @@
        [{ Typing_defs_core.ua_name = ([3:3-24], "__ConsistentConstruct");
           ua_classname_params = [] }
          ];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\C2",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -64,7 +64,7 @@
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None }));
   ("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -77,7 +77,7 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None }))
   ]
 
 They matched!

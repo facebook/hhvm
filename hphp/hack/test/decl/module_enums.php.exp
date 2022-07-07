@@ -37,8 +37,8 @@ File root|module_enums.php--X.php
        sc_user_attributes = [];
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([5:18-21]), (Tprim Tint));
-               te_constraint = None; te_includes = [] })
-       }));
+               te_constraint = None; te_includes = [] });
+       sc_docs_url = None }));
   ("\\f1",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));

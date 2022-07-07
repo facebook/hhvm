@@ -73,6 +73,7 @@ type mode =
   | Hover of (int * int) option
   | Apply_quickfixes
   | Shape_analysis of string
+  | Refactor_sound_dynamic of string * string
 
 type options = {
   files: string list;
@@ -328,6 +329,7 @@ let parse_options () =
   let memtrace = ref None in
   let enable_global_write_check = ref [] in
   let enable_global_write_check_functions = ref SSet.empty in
+  let refactor_mode = ref "" in
   let set_enable_global_write_check_functions s =
     let json_obj = Hh_json.json_of_file s in
     let add_function f =
@@ -365,6 +367,18 @@ let parse_options () =
           (fun mode ->
             batch_mode := true;
             set_mode (Shape_analysis mode) ()),
+        " Run the flow analysis" );
+      ( "--refactor-sound-dynamic",
+        Arg.Tuple
+          [
+            Arg.Symbol
+              ( ["flag"; "dump"; "simplify"; "solve"],
+                (fun x -> refactor_mode := x) );
+            Arg.String
+              (fun x ->
+                batch_mode := true;
+                set_mode (Refactor_sound_dynamic (!refactor_mode, x)) ());
+          ],
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -1721,6 +1735,53 @@ let dump_dep_hashes (nast : Nast.program) : unit =
   in
   handler#on_program None nast
 
+let handle_constraint_mode
+    ~do_
+    name
+    opts
+    ctx
+    error_format
+    ~iter_over_files
+    ~profile_type_check_multi
+    ~memtrace =
+  (* Process a single typechecked file *)
+  let process_file path info =
+    match info.FileInfo.file_mode with
+    | Some FileInfo.Mstrict ->
+      let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+      let { Tast_provider.Compute_tast.tast; _ } =
+        Tast_provider.compute_tast_unquarantined ~ctx ~entry
+      in
+      do_ opts ctx tast
+    | _ ->
+      (* We are not interested in partial files and there is nothing in HHI
+         files to analyse *)
+      ()
+  in
+  let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+  (* Process a multifile that is not typechecked *)
+  let process_multifile filename =
+    Printf.printf
+      "=== %s analysis results for %s\n%!"
+      name
+      (Relative_path.to_absolute filename);
+    let files_contents = Multifile.file_to_files filename in
+    let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+    let error_list = Errors.get_sorted_error_list parse_errors in
+    let check_errors =
+      check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
+    in
+    if not (List.is_empty check_errors) then
+      print_errors check_errors
+    else
+      Relative_path.Map.iter file_info ~f:process_file
+  in
+  let process_multifile filename =
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        process_multifile filename)
+  in
+  iter_over_files process_multifile
+
 let handle_mode
     mode
     filenames
@@ -1746,48 +1807,36 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
+  | Refactor_sound_dynamic (mode, function_name) ->
+    let opts =
+      match Refactor_sd_options.parse mode with
+      | Some options -> options
+      | None -> die "invalid refactor sd analysis mode"
+    in
+    handle_constraint_mode
+      ~do_:(Refactor_sd.do_ function_name)
+      "Sound Dynamic"
+      opts
+      ctx
+      error_format
+      ~iter_over_files
+      ~profile_type_check_multi
+      ~memtrace
   | Shape_analysis mode ->
     let opts =
       match Shape_analysis_options.parse mode with
       | Some options -> options
       | None -> die "invalid shape analysis mode"
     in
-    (* Process a single typechecked file *)
-    let process_file path info =
-      match info.FileInfo.file_mode with
-      | Some FileInfo.Mstrict ->
-        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
-        Shape_analysis.do_ opts ctx tast
-      | _ ->
-        (* We are not interested in partial files and there is nothing in HHI
-           files to analyse *)
-        ()
-    in
-    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
-    (* Process a multifile that is not typechecked *)
-    let process_multifile filename =
-      Printf.printf
-        "=== Shape analysis results for %s\n%!"
-        (Relative_path.to_absolute filename);
-      let files_contents = Multifile.file_to_files filename in
-      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
-      let error_list = Errors.get_sorted_error_list parse_errors in
-      let check_errors =
-        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
-      in
-      if not (List.is_empty check_errors) then
-        print_errors check_errors
-      else
-        Relative_path.Map.iter file_info ~f:process_file
-    in
-    let process_multifile filename =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          process_multifile filename)
-    in
-    iter_over_files process_multifile
+    handle_constraint_mode
+      ~do_:Shape_analysis.do_
+      "Shape"
+      opts
+      ctx
+      error_format
+      ~iter_over_files
+      ~profile_type_check_multi
+      ~memtrace
   | Ifc (mode, lattice) ->
     (* Timing mode is same as check except we print out the time it takes to
        analyse the file. *)

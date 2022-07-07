@@ -12,5 +12,7 @@ open Refactor_sd_types
 
 exception Refactor_sd_exn of string
 
+val do_ : string -> options -> Provider_context.t -> Tast.program -> unit
+
 (** Relationship with shape_analysis: is_shape_like_dict *)
 val contains_upcast : refactor_sd_result -> bool

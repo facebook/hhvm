@@ -13,6 +13,7 @@ aast_parser = { path = "../../../parser/cargo/aast_parser" }
 anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
+byte-unit = "4.0.14"
 bytecode_printer = { path = "../../bytecode_printer" }
 clap = { version = "3.2.8", features = ["derive", "regex", "unicode", "wrap_help"] }
 compile = { path = "../../compile/cargo/compile" }

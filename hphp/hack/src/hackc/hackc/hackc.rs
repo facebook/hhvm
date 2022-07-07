@@ -16,6 +16,7 @@ use ::compile::HHBCFlags;
 use ::compile::NativeEnv;
 use ::compile::ParserFlags;
 use anyhow::Result;
+use byte_unit::Byte;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
@@ -60,9 +61,14 @@ struct Opts {
     #[clap(long, default_value("0"))]
     check_int_overflow: i32,
 
-    /// Number of parallel worker threads. If 0, use num-cpu worker threads.
+    /// Number of parallel worker threads for subcommands that support parallelism,
+    /// otherwise ignored. If 0, use available parallelism, typically num-cpus.
     #[clap(long, default_value("0"))]
     num_threads: usize,
+
+    /// Stack size to use for parallel worker threads. Supports unit suffixes like KB, MiB, etc.
+    #[clap(long, default_value("32 MiB"))]
+    stack_size: Byte,
 
     /// Instead of printing the unit, print a list of the decls requested during compilation.
     /// (only used by --test-compile-with-decls)
@@ -235,15 +241,14 @@ fn main() -> Result<()> {
     env_logger::init();
     let mut opts = Opts::parse();
 
-    let builder = rayon::ThreadPoolBuilder::new().num_threads(opts.num_threads);
-    let builder = if matches!(&opts.command, Some(Command::Crc(_)))
-        || matches!(&opts.command, Some(Command::Verify(_)))
-    {
-        builder.stack_size(32 * 1024 * 1024)
-    } else {
-        builder
-    };
-    builder.build_global().unwrap();
+    // Some subcommands need worker threads with larger than default stacks,
+    // even when using Stacker. In particular, various derived traits (e.g. Drop)
+    // on AAST nodes are inherently recursive.
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(opts.num_threads)
+        .stack_size(opts.stack_size.get_bytes().try_into()?)
+        .build_global()
+        .unwrap();
 
     match opts.command.take() {
         Some(Command::Assemble(opts)) => assemble::run(opts),

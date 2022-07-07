@@ -320,11 +320,82 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     self.func.instr(select_iid),
                     Instr::Special(Special::Select(..))
                 ),
-                "iid {} returns {} values but is only followed by {} selects (or pops)",
+                "iid {} returns {} values but is only followed by {} selects",
                 iid,
                 n,
                 i - 1
             );
+        }
+
+        Ok(())
+    }
+
+    fn verify_select(
+        &self,
+        iid: InstrId,
+        iid_idx: usize,
+        prev_vid: Option<ValueId>,
+        target_vid: ValueId,
+        idx: u32,
+    ) -> Result {
+        // The select instruction must follow either another select for the
+        // same target or the target it's selecting from.
+        check!(
+            self,
+            iid_idx > 0,
+            "iid {} select cannot be first instr in block",
+            iid
+        );
+        let prev_vid = prev_vid.unwrap();
+        let prev_instr = self.func.instr(prev_vid.expect_instr("instr expected"));
+        if prev_vid != target_vid {
+            // If the previous vid is not our target then it must be a
+            // select with the same target as us.
+            match *prev_instr {
+                Instr::Special(Special::Select(prev_target, prev_idx)) => {
+                    if prev_target != target_vid {
+                        return Err(check_failed!(
+                            self,
+                            "iid {} select with target {} follows a select with a different target instr {}",
+                            iid,
+                            FmtRawVid(target_vid),
+                            FmtRawVid(prev_target)
+                        ));
+                    }
+                    if prev_idx + 1 != idx {
+                        return Err(check_failed!(
+                            self,
+                            "iid {} select with index {} follows a non-contiguous select index {}",
+                            iid,
+                            idx,
+                            prev_idx
+                        ));
+                    }
+                }
+                _ => {
+                    return Err(check_failed!(
+                        self,
+                        "iid {} select is not contiguous with its target",
+                        iid
+                    ));
+                }
+            }
+        } else {
+            // Check that the previous instruction expects a select. The actual
+            // number of expected selects was checked when we saw the previous
+            // instruction.
+            let expects_select = match *prev_instr {
+                Instr::Call(ref call) => call.num_rets >= 2,
+                _ => false,
+            };
+            if !expects_select {
+                return Err(check_failed!(
+                    self,
+                    "iid {} select follows non-selectable instr {:?}",
+                    iid,
+                    prev_instr
+                ));
+            }
         }
 
         Ok(())
@@ -415,80 +486,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 );
             }
             Instr::Special(Special::Select(target_vid, idx)) => {
-                // The select instruction must follow either another select for the
-                // same target or the target it's selecting from.
-                check!(
-                    self,
-                    iid_idx > 0,
-                    "iid {} select cannot be first instr in block",
-                    iid
-                );
-                let prev_vid = prev_vid.unwrap();
-                if prev_vid != target_vid {
-                    // If the previous vid is not our target then it must be a
-                    // select with the same target as us.
-                    let prev_instr = self.func.instr(prev_vid.expect_instr("instr expected"));
-                    match *prev_instr {
-                        Instr::Special(Special::Select(prev_target, prev_idx)) => {
-                            if prev_target != target_vid {
-                                return Err(check_failed!(
-                                    self,
-                                    "iid {} select with target {} follows a select with a different target instr {}",
-                                    iid,
-                                    FmtRawVid(target_vid),
-                                    FmtRawVid(prev_target)
-                                ));
-                            }
-                            if prev_idx + 1 != idx {
-                                return Err(check_failed!(
-                                    self,
-                                    "iid {} select with index {} follows a non-contiguous select index {}",
-                                    iid,
-                                    idx,
-                                    prev_idx
-                                ));
-                            }
-                        }
-                        _ => {
-                            return Err(check_failed!(
-                                self,
-                                "iid {} select is not contiguous with its target",
-                                iid
-                            ));
-                        }
-                    }
-                } else {
-                    let prev_instr = self.func.instr(prev_vid.expect_instr("instr expected"));
-                    match prev_instr {
-                        Instr::Call(call) => {
-                            if call.num_rets < 2 {
-                                return Err(check_failed!(
-                                    self,
-                                    "iid {} select follows Call with only {} returns",
-                                    iid,
-                                    call.num_rets
-                                ));
-                            }
-                            if idx >= call.num_rets {
-                                return Err(check_failed!(
-                                    self,
-                                    "iid {} select references index {} from call with only {} returns",
-                                    iid,
-                                    idx,
-                                    call.num_rets
-                                ));
-                            }
-                        }
-                        _ => {
-                            return Err(check_failed!(
-                                self,
-                                "iid {} select follows non-selectable instr {:?}",
-                                iid,
-                                prev_instr
-                            ));
-                        }
-                    }
-                }
+                self.verify_select(iid, iid_idx, prev_vid, target_vid, idx)?;
             }
             Instr::Special(Special::Tombstone) => {
                 // We should never see a tombstone as part of the graph.

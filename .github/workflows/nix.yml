@@ -33,12 +33,33 @@ jobs:
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
-    - if: github.event_name != 'pull_request'
+    - name: Build the deb package
+      if: runner.os == 'Linux'
+      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1"
+    - name: Show the deb package's information
+      if: runner.os == 'Linux'
+      run: dpkg-deb --info bundle.deb
+    - name: Show the deb package's content
+      if: runner.os == 'Linux'
+      run: dpkg-deb --contents bundle.deb
+    - name: Build the rpm package
+      if: runner.os == 'Linux'
+      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1"
+    - name: Show the rpm package's information
+      if: runner.os == 'Linux'
+      run: rpm --query --info --package bundle.rpm
+    - name: Show the rpm package's content
+      if: runner.os == 'Linux'
+      run: rpm --query --list --package bundle.rpm
+    - name: Assume the AWS role
+      if: github.event_name != 'pull_request'
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
-    - if: github.event_name != 'pull_request'
+    - name: Sign Nix binaries with a private key downloaded from AWS Secrets Manager
+      if: github.event_name != 'pull_request'
       run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
-    - if: github.event_name != 'pull_request'
+    - name: Upload Nix binaries to the binary cache server on S3
+      if: github.event_name != 'pull_request'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

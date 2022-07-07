@@ -243,6 +243,19 @@ stdenv.mkDerivation rec {
       "x86_64-linux"
     ];
     homepage = "https://hhvm.com";
-    license = "PHP/Zend";
+    license = [
+      lib.licenses.php301
+      {
+        spdxId = "Zend-2.0";
+        fullName = "Zend License v2.0";
+        url = "https://www.zend.com/sites/zend/files/pdfs/2_00.txt";
+      }
+    ];
+    maintainers = [{
+      email = "hhvm-oss@fb.com";
+      github = "hhvm";
+      githubId = 4553654;
+      name = "HHVM/Hack Open Source";
+    }];
   };
 }

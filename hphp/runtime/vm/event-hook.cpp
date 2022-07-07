@@ -171,6 +171,7 @@ Array getReifiedClasses(const ActRec* ar) {
   for (auto const& pinfo : tparams.m_typeParamInfo) {
     if (!pinfo.m_isReified) {
       clist.append(init_null());
+      idx++;
       continue;
     }
     auto const ts = generics->at(idx++);

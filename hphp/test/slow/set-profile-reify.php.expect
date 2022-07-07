@@ -10,7 +10,7 @@ vec(2) {
 rfunc2
 vec(2) {
   NULL
-  string(1) "E"
+  string(1) "Q"
 }
 rfunc3
 NULL
@@ -39,7 +39,7 @@ vec(2) {
 T::rsmeth2
 vec(2) {
   NULL
-  string(1) "E"
+  string(1) "Q"
 }
 T::rsmeth3
 NULL
@@ -68,7 +68,7 @@ vec(2) {
 T::rmeth2
 vec(2) {
   NULL
-  string(1) "E"
+  string(1) "Q"
 }
 T::rmeth3
 NULL

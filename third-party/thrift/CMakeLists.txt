@@ -21,9 +21,9 @@ find_package(BISON 3.0 REQUIRED)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   THRIFT_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/fbthrift/archive/refs/tags/v2022.03.14.00.tar.gz"
+  "https://github.com/facebook/fbthrift/archive/refs/tags/v2022.07.04.00.tar.gz"
   SOURCE_HASH
-  "SHA256=20d1efabb57678f8fe4aa3ae49c620ede5c2f154ea068a54b3c048394f9a691e"
+  "SHA256=45e7ffb38655d9b518d28066f4276000a298990c7c32b9460ddb7a37f2af78bd"
   FILENAME_PREFIX
   "fbthrift-"
 )
@@ -125,12 +125,16 @@ thrift_lib(concurrency)
 thrift_lib(rpcmetadata)
 thrift_lib(thrift-core)
 thrift_lib(thriftmetadata)
+thrift_lib(thriftannotation)
+thrift_lib(thrifttype)
+thrift_lib(thrifttyperep thriftannotation)
+thrift_lib(thriftanyrep thriftannotation thrifttype)
 
 thrift_lib(transport concurrency thrift-core rpcmetadata)
 thrift_lib(async concurrency transport)
 thrift_lib(thriftprotocol thrift-core)
 thrift_lib(thriftfrozen2 thriftmetadata thriftprotocol)
-thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol transport async)
+thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftannotation thriftanyrep thrifttyperep thriftfrozen2 thriftprotocol transport async)
 
 # ----- Export the thrift compiler as a target -----
 

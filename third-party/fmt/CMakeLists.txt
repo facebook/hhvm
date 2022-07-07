@@ -4,9 +4,9 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FMT_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/fmtlib/fmt/releases/download/6.1.2/fmt-6.1.2.zip"
+  "https://github.com/fmtlib/fmt/releases/download/8.0.0/fmt-8.0.0.zip"
   SOURCE_HASH
-  "SHA512=d21085a2010786ff18c47acb033d9e4d51a3d58f9707cd9adf0f44642c1e4d80fd8cddafe58d95bb4f3e4a84ac5799caafead4a9feb12cc549b03d4d389fcc93"
+  "SHA512=70848739642bebf2820d661e7547208445329325a0d8b5919d85f375d683c0f9bef763bc7e9d7823def15100134fd9a126a9e418223b20bf8d567e5084334778"
 )
 
 set(INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt-prefix")

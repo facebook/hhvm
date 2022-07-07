@@ -246,6 +246,26 @@ template <typename C> struct ReturnRefs {
     typename ToRefReturn<typename Return<decltype(C::run)>::type>::type;
 };
 
+template <typename C> struct FiniRefs {
+  using type =
+    typename ToRefReturn<typename Return<decltype(C::fini)>::type>::type;
+};
+
+// The return type of exec called with a job. This is either
+// ReturnRefs, or a tuple of ReturnRefs and FiniRefs (if fini returns
+// anything).
+template <typename C> struct ExecRet {
+  using type =
+    std::conditional_t<
+      std::is_void_v<typename Return<decltype(C::fini)>::type>,
+      std::vector<typename ReturnRefs<C>::type>,
+      std::tuple<
+        std::vector<typename ReturnRefs<C>::type>,
+        typename FiniRefs<C>::type
+      >
+    >;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 // Iterate over a tuple. Just a wrapper around folly::for_each, which
@@ -312,7 +332,7 @@ protected:
 
 private:
   virtual void init(const folly::fs::path&) const = 0;
-  virtual void fini() const = 0;
+  virtual void fini(const folly::fs::path&) const = 0;
   virtual void run(const folly::fs::path&, const folly::fs::path&) const = 0;
 
   std::string m_name;

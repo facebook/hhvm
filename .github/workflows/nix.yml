@@ -30,6 +30,7 @@ jobs:
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
     - run: nix-build --no-sandbox
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - if: github.event_name != 'pull_request'

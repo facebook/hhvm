@@ -1,0 +1,2 @@
+File "docs_url_bad_arity.php", line 3, characters 3-8:
+The attribute `__Docs` expects exactly 1 argument (Typing[4126])

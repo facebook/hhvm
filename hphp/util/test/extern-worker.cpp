@@ -425,10 +425,24 @@ struct Test13 {
   run(const std::tuple<int, std::string>& x) { return x; }
 };
 
+struct Test14 {
+  static std::string name() { return "test-job14"; }
+  static std::vector<int> fini() { return s_fini; }
+  static void init() {}
+  static int run() {
+    auto const i = s_fini.size();
+    s_fini.emplace_back(i + 100);
+    return i + 200;
+  }
+
+  static std::vector<int> s_fini;
+};
+
 int Test3::s_add{0};
 std::string Test4::s_add;
 std::string Test5::s_add;
 std::string Test6::s_add;
+std::vector<int> Test14::s_fini;
 
 Job<Test1> s_test1;
 Job<Test2> s_test2;
@@ -443,6 +457,7 @@ Job<Test10> s_test10;
 Job<Test11> s_test11;
 Job<Test12> s_test12;
 Job<Test13> s_test13;
+Job<Test14> s_test14;
 
 }
 
@@ -833,6 +848,50 @@ TEST(ExternWorker, Exec) {
     EXPECT_EQ(std::get<1>(output), "tuple");
   };
   testJob13();
+}
+
+TEST(ExternWorker, Fini) {
+  Options options;
+  options.setUseSubprocess(Options::UseSubprocess::Always);
+
+  Client client{folly::getGlobalCPUExecutor(), options};
+
+  EXPECT_TRUE(client.usingSubprocess());
+  EXPECT_EQ(client.implName(), "subprocess");
+
+  auto const testJob14Empty = [&] {
+    std::tuple<std::vector<Ref<int>>, Ref<std::vector<int>>> refs =
+      coro::wait(client.exec(s_test14, {}, {}));
+    ASSERT_TRUE(std::get<0>(refs).empty());
+
+    std::vector<int> fini = coro::wait(client.load(std::get<1>(refs)));
+    ASSERT_TRUE(fini.empty());
+  };
+  testJob14Empty();
+
+  auto const testJob14NotEmpty = [&] {
+    std::vector<std::tuple<>> inputs;
+    inputs.resize(3);
+
+    std::tuple<std::vector<Ref<int>>, Ref<std::vector<int>>> refs =
+      coro::wait(client.exec(s_test14, {}, inputs));
+    std::vector<Ref<int>> outputRefs = std::get<0>(refs);
+    ASSERT_EQ(outputRefs.size(), 3);
+
+    std::vector<int> outputs = coro::wait(client.load(outputRefs));
+    ASSERT_EQ(outputs.size(), 3);
+
+    EXPECT_EQ(outputs[0], 200);
+    EXPECT_EQ(outputs[1], 201);
+    EXPECT_EQ(outputs[2], 202);
+
+    std::vector<int> fini = coro::wait(client.load(std::get<1>(refs)));
+    ASSERT_EQ(fini.size(), 3);
+    EXPECT_EQ(fini[0], 100);
+    EXPECT_EQ(fini[1], 101);
+    EXPECT_EQ(fini[2], 102);
+  };
+  testJob14NotEmpty();
 }
 
 TEST(ExternWorker, RefCache) {

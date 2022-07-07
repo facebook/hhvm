@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff375493522292cc5a6f9b583a11322b>>
+// @generated SignedSource<<d2499ae64fd1099a4e3a14d090eb2e38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,20 +73,6 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_ca_field(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut CaField<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_ca_type(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut CaType,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_case(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -105,13 +91,6 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut ClassAbstractTypeconst,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_class_attr(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut ClassAttr<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

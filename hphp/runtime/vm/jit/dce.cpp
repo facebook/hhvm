@@ -536,6 +536,7 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseImplicitContextStateInvalidException:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
+  case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:

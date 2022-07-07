@@ -13,14 +13,14 @@
               c_atc_default = None });
          c_tconst_span = [4:3-49]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
         ];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
-      c_xhp_attrs = [];
+      c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Class
      { c_span = [7:1-9:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cinterface; 
@@ -36,12 +36,12 @@
                c_atc_default = None });
           c_tconst_span = [8:3-58]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
          ];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
-       c_xhp_attrs = [];
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None })
   ]

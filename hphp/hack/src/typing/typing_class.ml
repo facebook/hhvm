@@ -1771,12 +1771,12 @@ let class_def_ env c tc =
       Aast.c_namespace = c.c_namespace;
       Aast.c_enum = c.c_enum;
       Aast.c_doc_comment = c.c_doc_comment;
-      Aast.c_attributes = [];
       Aast.c_xhp_children = c.c_xhp_children;
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;
       Aast.c_internal = c.c_internal;
       Aast.c_module = c.c_module;
+      Aast.c_docs_url = c.c_docs_url;
     },
     global_inference_envs )
 
@@ -1817,3 +1817,26 @@ let class_def ctx c =
       None
     else
       Some (class_def_ env c tc)
+
+type class_member_standalone_check_env = {
+  cls: Cls.t;
+  env: env;
+  class_: Nast.class_;
+}
+
+let make_class_member_standalone_check_env ctx class_ =
+  let env = setup_env_for_class_def_check ctx class_ in
+
+  let name = Ast_defs.get_id class_.c_name in
+  let open Option in
+  Env.get_class env name >>| fun cls -> { env; cls; class_ }
+
+let method_def_standalone standalone_env method_name =
+  let open Option in
+  let is_disposable =
+    Typing_disposable.is_disposable_class standalone_env.env standalone_env.cls
+  in
+  List.find standalone_env.class_.Aast.c_methods ~f:(fun m ->
+      String.equal (snd m.Aast.m_name) method_name)
+  >>= fun method_ ->
+  method_def ~is_disposable standalone_env.env standalone_env.cls method_

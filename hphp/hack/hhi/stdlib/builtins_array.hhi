@@ -196,7 +196,7 @@ function array_multisort9(
 <<__PHPStdLib>>
 function array_pad($input, int $pad_size, $pad_value)[];
 <<__PHPStdLib>>
-function array_pop(inout $array)[];
+function array_pop(inout $array)[write_props];
 <<__PHPStdLib>>
 function array_push(inout $array, $var, ...$args)[];
 <<__PHPStdLib>>

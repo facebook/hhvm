@@ -960,11 +960,11 @@ let rec class_ ctx c =
     N.c_doc_comment = c.Aast.c_doc_comment;
     N.c_xhp_children = c.Aast.c_xhp_children;
     (* Naming and typechecking shouldn't use these fields *)
-    N.c_attributes = [];
     N.c_xhp_attrs = [];
     N.c_emit_id = c.Aast.c_emit_id;
     N.c_internal = c.Aast.c_internal;
     N.c_module = c.Aast.c_module;
+    N.c_docs_url = c.Aast.c_docs_url;
   }
 
 and user_attributes env attrl =

@@ -2118,10 +2118,34 @@ let rec bind_param
     }
   in
   let mode = get_param_mode param.param_callconv in
+  let out_ty =
+    match mode with
+    | FPinout ->
+      let decl_hint =
+        Option.map
+          ~f:(Decl_hint.hint env.decl_env)
+          (hint_of_type_hint param.param_type_hint)
+      in
+      let enforced =
+        match decl_hint with
+        | None -> Unenforced
+        | Some ty -> Typing_enforceability.get_enforcement env ty
+      in
+
+      begin
+        match enforced with
+        | Enforced
+          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+               && Env.get_support_dynamic_type env ->
+          Some (Typing_utils.make_like env ty1)
+        | _ -> Some ty1
+      end
+    | _ -> None
+  in
   let id = Local_id.make_unscoped param.param_name in
 
   let env = Env.set_local ~immutable env id ty1 param.param_pos in
-  let env = Env.set_param env id (ty1, param.param_pos, mode) in
+  let env = Env.set_param env id (ty1, param.param_pos, out_ty) in
   let env =
     if has_accept_disposable_attribute param then
       Env.set_using_var env id
@@ -9116,7 +9140,7 @@ and call
            *)
           | Tfun ft
             when Option.is_some (TUtils.try_strip_dynamic env ft.ft_ret.et_type)
-                 && List.length ft.ft_params = 1 ->
+                 && List.length el = 1 ->
             let ft_params =
               List.map ft.ft_params ~f:(fun fp ->
                   {

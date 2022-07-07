@@ -13,13 +13,14 @@
          m_ret = ((int), (Some ([5:26-29], (Hprim Tint)))); m_external = false; 
          m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Class
      { c_span = [10:1-14:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -35,13 +36,14 @@
           m_ret = ((string), (Some ([11:26-32], (Hprim Tstring)))); m_external = false; 
           m_doc_comment = None }
          ];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

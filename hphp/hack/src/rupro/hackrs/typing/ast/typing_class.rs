@@ -58,7 +58,6 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
             typeconsts: typed_typeconsts,
             vars: typed_static_vars,
             methods: typed_methods,
-            attributes: vec![],
             xhp_children: self.xhp_children.clone(),
             xhp_attrs: vec![],
             namespace: self.namespace.clone(),
@@ -70,6 +69,7 @@ impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
             // TODO(T116039119): Populate value with presence of internal attribute
             internal: false,
             module: None,
+            docs_url: None,
         };
         Ok(res)
     }

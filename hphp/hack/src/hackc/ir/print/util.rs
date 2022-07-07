@@ -16,45 +16,57 @@ use std::fmt::Result;
 
 /// Display the iterator by calling the helper to display each value separated
 /// by commas.
-pub struct FmtCommaSep<'a, T, I, F>(&'a str, &'a str, Cell<Option<I>>, F)
+pub struct FmtSep<'a, T, I, F>(&'a str, &'a str, &'a str, Cell<Option<I>>, F)
 where
     I: Iterator<Item = T>,
     F: Fn(&mut Formatter<'_>, T) -> Result;
 
-impl<'a, T, I, F> FmtCommaSep<'a, T, I, F>
+impl<'a, T, I, F> FmtSep<'a, T, I, F>
 where
     I: Iterator<Item = T>,
     F: Fn(&mut Formatter<'_>, T) -> Result,
 {
-    pub fn new(iter: impl IntoIterator<Item = T, IntoIter = I>, f: F) -> Self {
-        let iter2 = iter.into_iter();
-        Self("", "", Cell::new(Some(iter2)), f)
-    }
-
-    pub fn new_with_wrapper(
+    /// Create a new FmtSep. Note that the difference between:
+    ///
+    ///   format!("({})", FmtSep::new("", ", ", "", ...))
+    ///
+    /// and
+    ///
+    ///   format!("{}", FmtSep::new("(", ", ", ")", ...))
+    ///
+    /// is that in the first example the parentheses are always printed and in
+    /// the second they're only printed if the iter is non-empty.
+    ///
+    pub fn new(
         prefix: &'a str,
+        infix: &'a str,
         postfix: &'a str,
         iter: impl IntoIterator<Item = T, IntoIter = I>,
         f: F,
     ) -> Self {
         let iter2 = iter.into_iter();
-        Self(prefix, postfix, Cell::new(Some(iter2)), f)
+        Self(prefix, infix, postfix, Cell::new(Some(iter2)), f)
+    }
+
+    pub fn comma(iter: impl IntoIterator<Item = T, IntoIter = I>, f: F) -> Self {
+        let iter2 = iter.into_iter();
+        Self("", ", ", "", Cell::new(Some(iter2)), f)
     }
 }
 
-impl<T, I, F> Display for FmtCommaSep<'_, T, I, F>
+impl<T, I, F> Display for FmtSep<'_, T, I, F>
 where
     I: Iterator<Item = T>,
     F: Fn(&mut Formatter<'_>, T) -> Result,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtCommaSep(prefix, postfix, iter, callback) = self;
+        let FmtSep(prefix, infix, postfix, iter, callback) = self;
         let mut iter = iter.take().unwrap();
         if let Some(e) = iter.next() {
             f.write_str(prefix)?;
             callback(f, e)?;
             for e in iter {
-                f.write_str(", ")?;
+                f.write_str(infix)?;
                 callback(f, e)?;
             }
             f.write_str(postfix)?;

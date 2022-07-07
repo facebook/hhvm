@@ -19,7 +19,7 @@ function extension_loaded(string $name)[read_globals]: bool;
  * the PHP interpreter.
  */
 <<__Native>>
-function get_loaded_extensions(bool $zend_extensions = false)[read_globals]: varray;
+function get_loaded_extensions(bool $zend_extensions = false)[read_globals]: varray<string>;
 
 /* This function returns the names of all the functions defined in the module
  * indicated by module_name or false if $module_name is not a valid extension.
@@ -43,7 +43,7 @@ function get_current_user(): string;
  * includes those created by extensions.
  */
 <<__Native>>
-function get_defined_constants(bool $categorize = false): darray;
+function get_defined_constants(bool $categorize = false): darray<string, mixed>;
 
 <<__Native>>
 function get_include_path(): string;
@@ -60,9 +60,9 @@ function set_include_path(mixed $new_include_path): string;
  * include_once(), require() or require_once().
  */
 <<__Native>>
-function get_included_files(): varray;
+function get_included_files(): varray<string>;
 
-function get_required_files(): varray {
+function get_required_files(): varray<string> {
   return get_included_files();
 }
 
@@ -103,8 +103,10 @@ function getmyuid(): mixed;
  * as options takes a string (where each character is the option).
  */
 <<__Native>>
-function getopt(string $options,
-                mixed $longopts = null): darray;
+function getopt(
+  string $options,
+  mixed $longopts = null,
+): darray<arraykey, mixed>;
 
 /* Similar to getopt but accepts an inout optind which controls the argument
  * at which parsing begins. Sets the optind to the index of the first unparsed
@@ -119,7 +121,25 @@ function getopt_with_optind(string $options,
  * call.
  */
 <<__Native>>
-function getrusage(int $who = 0): darray;
+function getrusage(int $who = 0): shape(
+  'ru_oublock' => int,
+  'ru_inblock' => int,
+  'ru_msgsnd' => int,
+  'ru_msgrcv' => int,
+  'ru_maxrss' => int,
+  'ru_ixrss' => int,
+  'ru_idrss' => int,
+  'ru_minflt' => int,
+  'ru_majflt' => int,
+  'ru_nsignals' => int,
+  'ru_nvcsw' => int,
+  'ru_nivcsw' => int,
+  'ru_nswap' => int,
+  'ru_utime_tv_usec' => int,
+  'ru_utime_tv_sec' => int,
+  'ru_stime_tv_usec' => int,
+  'ru_stime_tv_sec' => int,
+);
 
 /* Gets resolution of system clock. "man 3 clock_getres" for more details.
  */
@@ -163,8 +183,10 @@ function ini_get(string $varname)[read_globals]: mixed;
 /* Gets all configuration options
  */
 <<__Native>>
-function ini_get_all(string $extension = "",
-                     bool $details = true): darray;
+function ini_get_all(
+  string $extension = "",
+  bool $details = true,
+): darray<string, mixed>;
 
 /* Restores a given configuration option to its original value.
  */
@@ -361,25 +383,43 @@ namespace __SystemLib {
       $this->body = $this->element('body');
     }
 
-    private function is_cli() { return \php_sapi_name() == 'cli'; }
+    private function is_cli(): bool { return \php_sapi_name() == 'cli'; }
 
-    private function appendChildren(\DOMElement $el, ?varray $children) {
+    private function appendChildren(
+      \DOMElement $el,
+      ?varray<mixed> $children,
+    ): void {
       if ($children) {
         foreach ($children as $v) {
           if ($v === null) {
           } else if ($v is \DOMElement) {
             $el->appendChild($v);
           } else if (\HH\is_any_array($v)) {
-            $this->appendChildren($el, $v);
+            $this->appendChildren(
+              $el,
+              HH\FIXME\UNSAFE_CAST<AnyArray<arraykey, mixed>, varray<mixed>>($v),
+            );
           } else {
-            $el->appendChild($this->xml->createTextNode($v));
+            $el->appendChild(
+              HH\FIXME\UNSAFE_CAST<mixed, \DOMNode>(
+                $this->xml->createTextNode(
+                  HH\FIXME\UNSAFE_CAST<mixed, string>($v),
+                )
+              )
+            );
           }
         }
       }
     }
 
-    private function element(string $tag, ?darray $attr = null, ...$children) {
-      $el = $this->xml->createElement($tag);
+    private function element(
+      string $tag,
+      ?darray<string, string> $attr = null,
+      mixed... $children
+    ): \DOMElement {
+      $el = HH\FIXME\UNSAFE_CAST<mixed, \DOMElement>(
+        $this->xml->createElement($tag)
+      );
       if ($attr) {
         foreach ($attr as $k => $v) {
           $el->setAttribute($k, $v);
@@ -389,7 +429,7 @@ namespace __SystemLib {
       return $el;
     }
 
-    private function tr(string $l, mixed $d) {
+    private function tr(string $l, mixed $d): \DOMElement {
       return
         $this->element(
           'tr', darray[],
@@ -397,14 +437,21 @@ namespace __SystemLib {
           $this->element('td', darray['class' => 'r'], $d));
     }
 
-    private function table(string $title, darray $data) {
+    private function table(
+      string $title,
+      darray<string, mixed> $data,
+    ): ?varray<\DOMElement> {
       if ($this->is_cli()) {
         echo $title . "\n";
         echo "\n";
         foreach ($data as $k => $v) {
-          echo $k . " => " . \print_r($v, true) . "\n";
+          echo $k .
+            " => " .
+            HH\FIXME\UNSAFE_CAST<mixed, string>(\print_r($v, true)) .
+            "\n";
         }
         echo "\n";
+        return null;
       } else {
         $children = darray[];
         foreach ($data as $k => $v) {
@@ -418,7 +465,7 @@ namespace __SystemLib {
       }
     }
 
-    private function appendHead(\DOMElement $html) {
+    private function appendHead(\DOMElement $html): void {
       $style =
         'body { margin: auto; text-align: center; width: 600px; }' .
         'hr { margin-top: 30px; }' .
@@ -434,7 +481,7 @@ namespace __SystemLib {
           $this->element('style', darray['type' => 'text/css'], $style)));
     }
 
-    private function reportVersionTitle() {
+    private function reportVersionTitle(): void {
       if ($this->is_cli()) {
         echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
@@ -443,7 +490,7 @@ namespace __SystemLib {
       }
     }
 
-    private function reportVersions() {
+    private function reportVersions(): void {
       if (!$this->is_cli()) {
         $this->body->appendChild($this->element('h2', darray[], 'Version'));
       }
@@ -460,26 +507,28 @@ namespace __SystemLib {
       $this->appendChildren($this->body, $this->table('Version', $data));
     }
 
-    private function reportIni() {
+    private function reportIni(): void {
       $this->appendChildren($this->body,
                             $this->table('INI', \ini_get_all('', false)));
     }
 
-    private function reportHeaders() {
+    private function reportHeaders(): void {
       if (!\function_exists('getallheaders')) return;
       $this->appendChildren($this->body,
                             $this->table('Headers', \getallheaders()));
     }
 
-    private function reportMap(string $name, darray $map) {
+    private function reportMap(string $name, darray<string, mixed> $map): void {
       $data = darray[];
       foreach ($map as $k => $v) {
-        $data[\sprintf("%s['%s']", $name, $k)] = $v;
+        $data[
+          HH\FIXME\UNSAFE_CAST<mixed, string>(\sprintf("%s['%s']", $name, $k))
+        ] = $v;
       }
       $this->appendChildren($this->body, $this->table($name, $data));
     }
 
-    public function report() {
+    public function report(): void {
 
       $html = $this->element('html');
 
@@ -498,14 +547,24 @@ namespace __SystemLib {
       $this->reportIni();
       $this->reportHeaders();
 
-      $this->reportMap('$_SERVER', $_SERVER);
-      $this->reportMap('$_ENV', $_ENV);
+      $this->reportMap(
+        '$_SERVER',
+        HH\FIXME\UNSAFE_CAST<mixed, darray<string, mixed>>(
+          \HH\global_get('_SERVER')
+        ),
+      );
+      $this->reportMap(
+        '$_ENV',
+        HH\FIXME\UNSAFE_CAST<mixed, darray<string, mixed>>(
+          \HH\global_get('_ENV')
+        ),
+      );
 
       if (!$this->is_cli()) {
         $this->body->appendChild($this->element('br'));
         $this->xml->appendChild($html);
         \header('content-type: text/html; charset=UTF-8');
-        echo $this->xml->saveHTML();
+        echo $this->xml->saveHTML() as dynamic;
       }
     }
   }

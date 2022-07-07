@@ -828,12 +828,12 @@ and ('ex, 'en) class_ = {
   c_typeconsts: ('ex, 'en) class_typeconst_def list;
   c_vars: ('ex, 'en) class_var list;
   c_methods: ('ex, 'en) method_ list;
-  c_attributes: ('ex, 'en) class_attr list;
   c_xhp_children: (pos * xhp_child) list;
   c_xhp_attrs: ('ex, 'en) xhp_attr list;
   c_namespace: nsenv;
   c_user_attributes: ('ex, 'en) user_attribute list;
   c_file_attributes: ('ex, 'en) file_attribute list;
+  c_docs_url: string option;
   c_enum: enum_ option;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
@@ -856,21 +856,6 @@ and ('ex, 'en) xhp_attr =
   * ('ex, 'en) class_var
   * xhp_attr_tag option
   * (pos * ('ex, 'en) expr list) option
-
-and ('ex, 'en) class_attr =
-  | CA_name of sid
-  | CA_field of ('ex, 'en) ca_field
-
-and ('ex, 'en) ca_field = {
-  ca_type: ca_type;
-  ca_id: sid;
-  ca_value: ('ex, 'en) expr option;
-  ca_required: bool;
-}
-
-and ca_type =
-  | CA_hint of hint
-  | CA_enum of string list
 
 and ('ex, 'en) class_const_kind =
   | CCAbstract of ('ex, 'en) expr option

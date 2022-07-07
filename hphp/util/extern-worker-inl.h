@@ -68,11 +68,18 @@ void Job<C>::init(const folly::fs::path& root) const {
 }
 
 template <typename C>
-void Job<C>::fini() const {
-  using Ret = typename detail::Return<decltype(C::fini)>::type;
-  static_assert(std::is_void_v<Ret>, "fini() must return void");
-  // fini() is easy since it doesn't receive nor return anything.
-  C::fini();
+void Job<C>::fini(const folly::fs::path& outputRoot) const {
+  using namespace detail;
+
+  using Ret = typename Return<decltype(C::fini)>::type;
+  if constexpr (std::is_void_v<Ret>) {
+    C::fini();
+  } else {
+    auto const output = outputRoot / "fini";
+    folly::fs::create_directory(output, outputRoot);
+    auto const v = C::fini();
+    time("writing fini outputs", [&] { return serialize(v, 0, output); });
+  }
 }
 
 template <typename C>
@@ -886,7 +893,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
   HPHP_CORO_MOVE_RETURN(out);
 }
 
-template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
+template <typename C> coro::Task<typename Job<C>::ExecT>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
@@ -1071,19 +1078,18 @@ Client::exec(const Job<C>& job,
     return v;
   };
 
-  using RetT = typename Job<C>::ReturnT;
-
   // OutputType is similar to RefVals, but for outputs. Since there's
   // no RefId (yet) for the outputs, we can use a simple enum to
   // describe the output format.
-  auto const outputTypes = [&] () -> folly::Range<const OutputType*> {
+  auto const makeOutputTypes = [&] (auto tag) -> folly::Range<const OutputType*> {
+    using T = typename decltype(tag)::Type;
     // For the common cases, we can just use a pointer to a static
     // OutputType.
-    if constexpr (IsVector<RetT>::value) {
+    if constexpr (IsVector<T>::value) {
       return s_vecOutputType;
-    } else if constexpr (IsOptional<RetT>::value) {
+    } else if constexpr (IsOptional<T>::value) {
       return s_optOutputType;
-    } else if constexpr (IsTuple<RetT>::value) {
+    } else if constexpr (IsTuple<T>::value) {
       // Tuple output types are still static, but they're calculated
       // at compile time for each instantiation of the job.
       return std::apply(
@@ -1091,25 +1097,36 @@ Client::exec(const Job<C>& job,
           static std::array<OutputType, sizeof...(v)> a{std::move(v)...};
           return a;
         },
-        typesToValues<RetT>(
+        typesToValues<T>(
           [] (size_t, auto tag) {
-            using T = typename decltype(tag)::Type;
-            if constexpr (IsVector<T>::value) {
+            using T2 = typename decltype(tag)::Type;
+            if constexpr (IsVector<T2>::value) {
               return OutputType::Vec;
-            } else if constexpr (IsOptional<T>::value) {
+            } else if constexpr (IsOptional<T2>::value) {
               return OutputType::Opt;
             } else {
-              static_assert(IsRef<T>::value);
+              static_assert(IsRef<T2>::value);
               return OutputType::Val;
             }
           }
         )
       );
     } else {
-      static_assert(IsRef<RetT>::value);
+      static_assert(IsRef<T>::value);
       return s_valOutputType;
     }
-  }();
+  };
+
+  using RetT = typename Job<C>::ReturnT;
+  using FiniT = typename Job<C>::FiniT;
+
+  constexpr bool hasFini =
+    !std::is_void_v<typename Return<decltype(C::fini)>::type>;
+
+  auto outputTypes = makeOutputTypes(Tag<RetT>{});
+  auto finiTypes = hasFini
+    ? HPHP::make_optional(makeOutputTypes(Tag<FiniT>{}))
+    : std::nullopt;
 
   // Execute the job using the appropriate executor, receiving the
   // outputs as RefVals (with the format prescribed by the
@@ -1129,7 +1146,8 @@ Client::exec(const Job<C>& job,
               job.name(),
               std::move(configRefVals),
               std::move(inputsRefVals),
-              outputTypes
+              outputTypes,
+              finiTypes.get_pointer()
             )
           )
         );
@@ -1161,7 +1179,8 @@ Client::exec(const Job<C>& job,
                   job.name(),
                   std::move(configRefVals),
                   std::move(inputsRefVals),
-                  outputTypes
+                  outputTypes,
+                  finiTypes.get_pointer()
                 )));
               },
               useFallback,
@@ -1176,11 +1195,10 @@ Client::exec(const Job<C>& job,
       }
     }
   ));
-  assertx(outputs.size() == inputs.size());
 
   // Map a RefVal for a particular output into a Ref<T>, where T is
   // the type corresponding to their output.
-  auto const toRetTSingle = [&] (RefVal&& v, auto tag)
+  auto const toRefSingle = [&] (RefVal&& v, auto tag)
     -> typename decltype(tag)::Type {
     using T = typename decltype(tag)::Type;
     if constexpr (IsVector<T>::value) {
@@ -1212,37 +1230,56 @@ Client::exec(const Job<C>& job,
   // The return type for the job can either be a single type, or a
   // tuple. This takes all the RefVals corresponding to the output and
   // maps them to that return type as appropriate.
-  auto const toRetT = [&] (RefValVec&& v) -> RetT {
-    if constexpr (IsVector<RetT>::value ||
-                  IsOptional<RetT>::value ||
-                  IsRef<RetT>::value) {
+  auto const toRef = [&] (RefValVec&& v, auto tag) {
+    using T = typename decltype(tag)::Type;
+    if constexpr (IsVector<T>::value ||
+                  IsOptional<T>::value ||
+                  IsRef<T>::value) {
       // Non-tuple. There should be only one output RefVal.
       assertx(v.size() == 1);
-      return toRetTSingle(std::move(v[0]), Tag<RetT>{});
+      return toRefSingle(std::move(v[0]), Tag<T>{});
     } else {
       // Otherwise there should be enough RefVals for the tuple
       // size. Build the tuple from converting the components.
-      static_assert(IsTuple<RetT>::value);
-      assertx(v.size() == std::tuple_size<RetT>{});
-      return typesToValues<RetT>(
+      static_assert(IsTuple<T>::value);
+      assertx(v.size() == std::tuple_size<T>{});
+      return typesToValues<T>(
         [&] (size_t idx, auto tag) {
           assertx(idx < v.size());
-          return toRetTSingle(std::move(v[idx]), tag);
+          return toRefSingle(std::move(v[idx]), tag);
         }
       );
     }
+  };
+
+  auto const toRetT = [&] (RefValVec&& v) {
+    return toRef(std::move(v), Tag<RetT>{});
   };
 
   if (optimistic && supportsOptimistic()) {
     m_stats.optimisticExecs += inputs.size();
   }
 
-  // Map over the outputs for each input set, and map them to Refs.
-  auto out = from(outputs)
-    | move
-    | mapped(toRetT)
-    | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  if constexpr (hasFini) {
+    assertx(outputs.size() == inputs.size() + 1);
+    // Map over the outputs for each input set, and map them to Refs.
+    auto out = inputs.empty()
+      ? std::vector<typename ReturnRefs<C>::type>{}
+      : seq(size_t{0}, inputs.size() - 1)
+          | mapped([&] (size_t i) { return toRetT(std::move(outputs[i])); } )
+          | as<std::vector>();
+    auto fini = toRef(std::move(outputs.back()), Tag<FiniT>{});
+    HPHP_CORO_RETURN(std::make_tuple(std::move(out), std::move(fini)));
+  } else {
+    assertx(outputs.size() == inputs.size());
+
+    // Map over the outputs for each input set, and map them to Refs.
+    auto out = from(outputs)
+      | move
+      | mapped(toRetT)
+      | as<std::vector>();
+    HPHP_CORO_MOVE_RETURN(out);
+  }
 }
 
 // Turn the given blob into a value of type T.

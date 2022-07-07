@@ -417,7 +417,8 @@ struct ParseMeta {
 struct ParseJob {
   static std::string name() { return "hphpc-parse"; }
 
-  static void init(const Package::Config& config) {
+  static void init(const Package::Config& config,
+                   std::vector<FileMeta> meta) {
     rds::local::init();
 
     Hdf hdf;
@@ -439,23 +440,37 @@ struct ParseJob {
     // This is a lie, but a lot of stuff breaks if you don't set it to
     // true (when false, everything assumes you're parsing systemlib).
     SystemLib::s_inited = true;
+
+    s_fileMetas = std::move(meta);
+    s_fileMetasIdx = 0;
   }
-  static void fini() {
+  static std::vector<ParseMeta> fini() {
+    assertx(s_fileMetasIdx == s_fileMetas.size());
+    assertx(s_parseMetas.size() == s_fileMetas.size());
     hphp_process_exit();
     rds::local::fini();
+    return std::move(s_parseMetas);
   }
 
-  static Multi<ParseMeta, UnitEmitterWrapper>
-  makeOutput(std::unique_ptr<UnitEmitter> ue) {
-    if (!ue) return std::make_tuple(ParseMeta{}, UnitEmitterWrapper{});
-    auto symbolRefs = std::move(ue->m_symbol_refs);
-    return std::make_tuple(ParseMeta{std::move(symbolRefs)}, std::move(ue));
+  static UnitEmitterWrapper output(std::unique_ptr<UnitEmitter> ue) {
+    if (!ue) {
+      s_parseMetas.emplace_back();
+      return UnitEmitterWrapper{};
+    }
+    s_parseMetas.emplace_back(ParseMeta{std::move(ue->m_symbol_refs)});
+    return std::move(ue);
   }
 
-  static Multi<ParseMeta, UnitEmitterWrapper> run(
+  static UnitEmitterWrapper run(
       const std::string& content,
-      const FileMeta& meta,
       const RepoOptionsFlags& repoOptions) {
+    if (s_fileMetasIdx >= s_fileMetas.size()) {
+      throw Error{
+        folly::sformat("Encountered {} inputs, but only {} file metas",
+                       s_fileMetasIdx+1, s_fileMetas.size())
+      };
+    }
+    auto const& meta = s_fileMetas[s_fileMetasIdx++];
     auto const& fileName = meta.m_filename;
 
     try {
@@ -476,10 +491,10 @@ struct ParseJob {
             if (!ue) {
               // If the symlink contains no EntryPoint we don't do
               // anything but it is still success
-              return makeOutput(nullptr);
+              return output(nullptr);
             }
           }
-          return makeOutput(std::move(ue));
+          return output(std::move(ue));
         }
       }
 
@@ -512,7 +527,8 @@ struct ParseJob {
         // hits.
         assertx(!cacheHit);
       } catch (const CompilerAbort& exn) {
-        return std::make_tuple(ParseMeta{{}, exn.what()}, UnitEmitterWrapper{});
+        s_parseMetas.emplace_back(ParseMeta{{}, exn.what()});
+        return UnitEmitterWrapper{};
       }
 
       if (ue) {
@@ -522,10 +538,10 @@ struct ParseJob {
           if (!ue) {
             // If the symlink contains no EntryPoint we don't do anything but it
             // is still success
-            return makeOutput(nullptr);
+            return output(nullptr);
           }
         }
-        return makeOutput(std::move(ue));
+        return output(std::move(ue));
       } else {
         throw Error{
           folly::sformat(
@@ -541,8 +557,18 @@ struct ParseJob {
       };
     }
   }
+
+  static std::vector<FileMeta> s_fileMetas;
+  static size_t s_fileMetasIdx;
+
+  static std::vector<ParseMeta> s_parseMetas;
 };
 Job<ParseJob> g_parseJob;
+
+std::vector<FileMeta> ParseJob::s_fileMetas;
+std::vector<ParseMeta> ParseJob::s_parseMetas;
+
+size_t ParseJob::s_fileMetasIdx{0};
 
 }
 
@@ -950,23 +976,24 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     Optional<std::vector<Ref<RepoOptionsFlags>>> storedOptions;
 
     using InputsT = std::vector<decltype(g_parseJob)::InputsT>;
-    using OutputsT = std::vector<decltype(g_parseJob)::ReturnT>;
+    using ExecT = decltype(g_parseJob)::ExecT;
 
     auto const doStore =
       [&] (bool opportunistic) ->
-      coro::Task<std::pair<const Ref<Config>*, InputsT>> {
+      coro::Task<
+        std::tuple<const Ref<Config>*, Ref<std::vector<FileMeta>>, InputsT>
+      > {
       // Store the inputs and get their refs
-      auto [fileRefs, metaRefs, optionRefs, configRef] =
+      auto [fileRefs, metasRef, optionRefs, configRef] =
         HPHP_CORO_AWAIT(
           coro::collect(
             m_async->m_client.storeFile(
               paths,
               opportunistic
             ),
-            m_async->m_client.storeMulti(
-              metas,
-              opportunistic
-            ),
+            opportunistic
+              ? m_async->m_client.storeOptimistically(metas)
+              : m_async->m_client.store(metas),
             // If we already called doStore, then options will be
             // empty here (but storedOptions will be set).
             coro::collectRange(std::move(options)),
@@ -975,7 +1002,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
         );
 
       assertx(fileRefs.size() == workItems);
-      assertx(metaRefs.size() == workItems);
 
       // Options are never stored opportunistically. The first time we
       // call doStore, we'll store them above and store the results in
@@ -999,30 +1025,31 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
       for (size_t i = 0; i < workItems; ++i) {
         inputs.emplace_back(
           std::move(fileRefs[i]),
-          std::move(metaRefs[i]),
           std::move(optionRefs[i])
         );
       }
-      HPHP_CORO_RETURN(std::make_pair(configRef, std::move(inputs)));
+
+      HPHP_CORO_RETURN(std::make_tuple(configRef, metasRef, std::move(inputs)));
     };
 
     auto const doExec = [&] (auto inputs,
-                             bool opportunistic) -> coro::Task<OutputsT> {
-      // Run the job. This does the parsing.
-      auto outputRefs = HPHP_CORO_AWAIT(
+                             bool opportunistic) -> coro::Task<ExecT> {
+      auto out = HPHP_CORO_AWAIT(
         m_async->m_client.exec(
           g_parseJob,
-          std::make_tuple(*inputs.first),
-          std::move(inputs.second),
+          std::make_tuple(
+            *std::get<0>(inputs),
+            std::move(std::get<1>(inputs))
+          ),
+          std::move(std::get<2>(inputs)),
           opportunistic
         )
       );
-      assertx(outputRefs.size() == workItems);
-      HPHP_CORO_MOVE_RETURN(outputRefs);
+      HPHP_CORO_MOVE_RETURN(out);
     };
 
     auto outputRefs = HPHP_CORO_AWAIT(coro::invoke(
-      [&] () -> coro::Task<OutputsT> {
+      [&] () -> coro::Task<ExecT> {
         if (Option::ParserOptimisticStore &&
             m_async->m_client.supportsOptimistic()) {
           // Try optimistic mode first. We won't actually store
@@ -1043,15 +1070,23 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     ));
 
     // Load the outputs
-    auto outputs =
-      HPHP_CORO_AWAIT(m_async->m_client.load(std::move(outputRefs)));
-    assertx(outputs.size() == workItems);
-
+    auto [wrappers, parseMetas] = HPHP_CORO_AWAIT(coro::collect(
+      m_async->m_client.load(
+        std::get<0>(std::move(outputRefs))
+      ),
+      m_async->m_client.load(
+        std::get<1>(std::move(outputRefs))
+      )
+    ));
+    assertx(wrappers.size() == workItems);
+    always_assert(parseMetas.size() == workItems);
     m_total += workItems;
 
     // Process the outputs
     FileAndSizeVec ondemand;
-    for (auto& [meta, wrapper] : outputs) {
+    for (size_t i = 0; i < workItems; ++i) {
+      auto const& meta = parseMetas[i];
+      auto& wrapper = wrappers[i];
       // The Unit had an ICE and we're configured to treat that as a
       // fatal error. Here is where we die on it.
       if (!meta.m_abort.empty()) {
@@ -1064,7 +1099,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
       // Resolve any symbol refs into files to parse ondemand
       resolveOnDemand(ondemand, meta.m_symbol_refs);
     }
-
     HPHP_CORO_MOVE_RETURN(ondemand);
   } catch (const Exception& e) {
     Logger::FError(

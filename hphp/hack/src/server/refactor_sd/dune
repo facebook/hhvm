@@ -1,0 +1,17 @@
+(library
+  (name refactor_sd)
+  (wrapped false)
+  (flags (:standard -linkall))
+  (modules
+    refactor_sd
+    refactor_sd_options
+    refactor_sd_types)
+  (libraries
+    core_kernel
+    provider_context
+    relative_path
+    tast_env
+    typing_defs
+    typing_env_types)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std)))

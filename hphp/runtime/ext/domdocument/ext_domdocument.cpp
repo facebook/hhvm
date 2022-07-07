@@ -5136,7 +5136,7 @@ Array HHVM_METHOD(DOMNamedNodeMap, __debugInfo) {
   return domnamednodemap_properties_map.debugInfo(Object{this_});
 }
 
-Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
+Object HHVM_METHOD(DOMNamedNodeMap, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
@@ -5253,7 +5253,7 @@ Variant HHVM_METHOD(DOMNodeList, item,
   return Object();
 }
 
-Variant HHVM_METHOD(DOMNodeList, getIterator) {
+Object HHVM_METHOD(DOMNodeList, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
@@ -5774,11 +5774,11 @@ Variant HHVM_METHOD(DOMNodeIterator, key) {
   return data->m_index;
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, next) {
+void HHVM_METHOD(DOMNodeIterator, next) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   if (data->m_iter) {
     data->m_iter.next();
-    return init_null();
+    return;
   }
 
   XMLNode curnode = nullptr;
@@ -5790,7 +5790,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
         data->m_objmap->m_nodetype == XML_ELEMENT_NODE) {
       if (!curnode->nodep()) {
         php_dom_throw_error(INVALID_STATE_ERR, 0);
-        return false;
+        return;
       }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
@@ -5799,7 +5799,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
         data->m_objmap->getBaseNodeData()->nodep();
       if (!basenode) {
         php_dom_throw_error(INVALID_STATE_ERR, 0);
-        return false;
+        return;
       }
       if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
                        basenode->type == XML_HTML_DOCUMENT_NODE)) {
@@ -5835,18 +5835,17 @@ err:
   } else {
     data->m_curobj.reset();
   }
-  return init_null();
+  return;
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, rewind) {
+void HHVM_METHOD(DOMNodeIterator, rewind) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   data->m_iter.reset();
   data->m_index = -1;
   data->reset_iterator();
-  return init_null();
 }
 
-Variant HHVM_METHOD(DOMNodeIterator, valid) {
+bool HHVM_METHOD(DOMNodeIterator, valid) {
   auto* data = Native::data<DOMNodeIterator>(this_);
   if (data->m_iter) {
     return !data->m_iter.end();

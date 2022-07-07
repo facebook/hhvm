@@ -380,7 +380,7 @@ function array_pad(
 <<__Native>>
 function array_pop(
   inout mixed $array
-)[]: mixed;
+)[write_props]: mixed;
 
 /**
  * array_product() returns the product of values in an array.

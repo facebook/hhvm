@@ -168,7 +168,7 @@ class IntlDateFormatter {
    *   by this formatter.
    */
   <<__Native>>
-  public function getCalendarObject(): object;
+  public function getCalendarObject(): IntlCalendar;
 
   /**
    * Get formatter's timezone
@@ -176,7 +176,7 @@ class IntlDateFormatter {
    * @return IntlTimeZone - The associated IntlTimeZone object.
    */
   <<__Native>>
-  public function getTimezone(): object;
+  public function getTimezone(): IntlTimeZone;
 
   /**
    * Get the lenient used for the IntlDateFormatter
@@ -472,7 +472,7 @@ function datefmt_get_timezone_id(IntlDateFormatter $fmt): string {
  * @return IntlCalendar - A copy of the internal calendar object used by
  *   this formatter.
  */
-function datefmt_get_calendar_object(IntlDateFormatter $fmt): Object {
+function datefmt_get_calendar_object(IntlDateFormatter $fmt): IntlCalendar {
   return $fmt->getCalendarObject();
 }
 
@@ -481,7 +481,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $fmt): Object {
  *
  * @return IntlTimeZone - The associated IntlTimeZone object.
  */
-function datefmt_get_timezone(IntlDateFormatter $fmt): Object {
+function datefmt_get_timezone(IntlDateFormatter $fmt): IntlTimeZone {
   return $fmt->getTimezone();
 }
 

@@ -239,6 +239,7 @@ IMPL_OPCODE_CALL(RestoreErrorLevel)
 
 IMPL_OPCODE_CALL(CheckClsMethFunc)
 IMPL_OPCODE_CALL(CheckClsReifiedGenericMismatch)
+IMPL_OPCODE_CALL(CheckClsRGSoft)
 IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckInOutMismatch)
 IMPL_OPCODE_CALL(CheckReadonlyMismatch)

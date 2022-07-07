@@ -1795,6 +1795,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseStrToClassNotice:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
+  case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:

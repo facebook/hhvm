@@ -73,6 +73,10 @@ bool areAllGenericsSoft(const ReifiedGenericsInfo& info);
 // Raises warning for parameter at index i for function/class name
 void raise_warning_for_soft_reified(size_t i, bool fun, const StringData *name);
 
+// Raises warning if any reified generics on the class are not soft,
+// otherwise throws an error
+void checkClassReifiedGenericsSoft(const Class* cls);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

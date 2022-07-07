@@ -3114,7 +3114,7 @@ static bool HHVM_METHOD(PDOStatement, setFetchMode,
   return pdo_stmt_set_fetch_mode(data->m_stmt, argc, mode, _argv);
 }
 
-static bool HHVM_METHOD(PDOStatement, nextRowSet) {
+static bool HHVM_METHOD(PDOStatement, nextRowset) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3154,7 +3154,7 @@ static bool HHVM_METHOD(PDOStatement, closeCursor) {
     do {
       while (data->m_stmt->fetcher(PDO_FETCH_ORI_NEXT, 0));
       // if (!data->t_nextrowset()) {
-      if (HHVM_MN(PDOStatement, nextRowSet)(this_)) {
+      if (HHVM_MN(PDOStatement, nextRowset)(this_)) {
         break;
       }
     } while (true);
@@ -3323,7 +3323,7 @@ static struct PDOExtension final : Extension {
     HHVM_ME(PDOStatement, columnCount);
     HHVM_ME(PDOStatement, getColumnMeta);
     HHVM_ME(PDOStatement, setFetchMode);
-    HHVM_ME(PDOStatement, nextRowSet);
+    HHVM_ME(PDOStatement, nextRowset);
     HHVM_ME(PDOStatement, closeCursor);
     HHVM_ME(PDOStatement, debugDumpParams);
     HHVM_ME(PDOStatement, current);

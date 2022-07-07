@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca13550a61fb9da96c80f3b822647f95>>
+// @generated SignedSource<<d3bf55c154aa73c01adf75dca322c35a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2747,118 +2747,6 @@ impl XhpAttrTag {
         match self {
             XhpAttrTag::LateInit => true,
             _ => false,
-        }
-    }
-}
-impl<Ex, En> ClassAttr<Ex, En> {
-    pub fn mk_caname(p0: Sid) -> Self {
-        ClassAttr::CAName(p0)
-    }
-    pub fn mk_cafield(p0: CaField<Ex, En>) -> Self {
-        ClassAttr::CAField(p0)
-    }
-    pub fn is_caname(&self) -> bool {
-        match self {
-            ClassAttr::CAName(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_cafield(&self) -> bool {
-        match self {
-            ClassAttr::CAField(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_caname(&self) -> Option<&Sid> {
-        match self {
-            ClassAttr::CAName(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cafield(&self) -> Option<&CaField<Ex, En>> {
-        match self {
-            ClassAttr::CAField(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_caname_mut(&mut self) -> Option<&mut Sid> {
-        match self {
-            ClassAttr::CAName(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cafield_mut(&mut self) -> Option<&mut CaField<Ex, En>> {
-        match self {
-            ClassAttr::CAField(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_caname_into(self) -> Option<Sid> {
-        match self {
-            ClassAttr::CAName(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cafield_into(self) -> Option<CaField<Ex, En>> {
-        match self {
-            ClassAttr::CAField(p0) => Some(p0),
-            _ => None,
-        }
-    }
-}
-impl CaType {
-    pub fn mk_cahint(p0: Hint) -> Self {
-        CaType::CAHint(p0)
-    }
-    pub fn mk_caenum(p0: Vec<String>) -> Self {
-        CaType::CAEnum(p0)
-    }
-    pub fn is_cahint(&self) -> bool {
-        match self {
-            CaType::CAHint(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_caenum(&self) -> bool {
-        match self {
-            CaType::CAEnum(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_cahint(&self) -> Option<&Hint> {
-        match self {
-            CaType::CAHint(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_caenum(&self) -> Option<&Vec<String>> {
-        match self {
-            CaType::CAEnum(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cahint_mut(&mut self) -> Option<&mut Hint> {
-        match self {
-            CaType::CAHint(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_caenum_mut(&mut self) -> Option<&mut Vec<String>> {
-        match self {
-            CaType::CAEnum(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cahint_into(self) -> Option<Hint> {
-        match self {
-            CaType::CAHint(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_caenum_into(self) -> Option<Vec<String>> {
-        match self {
-            CaType::CAEnum(p0) => Some(p0),
-            _ => None,
         }
     }
 }

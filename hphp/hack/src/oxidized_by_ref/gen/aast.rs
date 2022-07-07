@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2b43d33ace096c053aa8f91b8a3f7787>>
+// @generated SignedSource<<8ee610cf61f9e9d1c0ae875d64e11387>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1684,8 +1684,6 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub methods: &'a [&'a Method_<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub attributes: &'a [ClassAttr<'a, Ex, En>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_children: &'a [(&'a Pos<'a>, &'a XhpChild<'a>)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_attrs: &'a [&'a XhpAttr<'a, Ex, En>],
@@ -1695,6 +1693,8 @@ pub struct Class_<'a, Ex, En> {
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub docs_url: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_: Option<&'a Enum_<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1742,89 +1742,6 @@ pub struct XhpAttr<'a, Ex, En>(
 );
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for XhpAttr<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(XhpAttr<'arena, Ex, En>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(
-    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
-#[repr(C, u8)]
-pub enum ClassAttr<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CAName(&'a Sid<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CAField(&'a CaField<'a, Ex, En>),
-}
-impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ClassAttr<'a, Ex, En> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassAttr<'arena, Ex, En>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(
-    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
-#[repr(C)]
-pub struct CaField<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: CaType<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub id: Sid<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub value: Option<&'a Expr<'a, Ex, En>>,
-    pub required: bool,
-}
-impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for CaField<'a, Ex, En> {}
-arena_deserializer::impl_deserialize_in_arena!(CaField<'arena, Ex, En>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum CaType<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CAHint(&'a Hint<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CAEnum(&'a [&'a str]),
-}
-impl<'a> TrivialDrop for CaType<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(CaType<'arena>);
 
 #[derive(
     Clone,

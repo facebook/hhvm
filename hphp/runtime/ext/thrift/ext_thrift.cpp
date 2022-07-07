@@ -297,13 +297,6 @@ Object HHVM_METHOD(RpcOptions, setFaultToInject, const String& key, const String
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const String& payload) {
-  auto data = RpcOptions::GetDataOrThrowException(this_);
-  data->rpcOptions.setSerializedAuthProofs(
-      apache::thrift::SerializedAuthProofs(folly::IOBuf::copyBuffer(payload.data(), payload.size())));
-  return Object(this_);
-}
-
 String HHVM_METHOD(RpcOptions, __toString) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   std::string result("RpcOptions(");
@@ -373,7 +366,6 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setChunkTimeout);
     HHVM_ME(RpcOptions, setInteractionId);
     HHVM_ME(RpcOptions, setFaultToInject);
-    HHVM_ME(RpcOptions, setSerializedAuthProofs);
     HHVM_ME(RpcOptions, __toString);
 
     Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());

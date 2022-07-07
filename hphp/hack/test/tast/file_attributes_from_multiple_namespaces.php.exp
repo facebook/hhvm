@@ -5,7 +5,7 @@
       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
       c_implements = [([7:24-41], (Happly (([7:24-41], "\\HH\\FileAttribute"), [])))]; 
       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-      c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
@@ -25,8 +25,8 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
         ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None });
   (Class
      { c_span = [13:1-45]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -34,7 +34,7 @@
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = [([13:24-41], (Happly (([13:24-41], "\\HH\\FileAttribute"), [])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "B"); 
@@ -54,5 +54,5 @@
              ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
            }
          ];
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None })
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None })

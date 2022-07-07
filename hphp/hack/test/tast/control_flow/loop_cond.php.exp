@@ -4,13 +4,14 @@
       c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-      c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

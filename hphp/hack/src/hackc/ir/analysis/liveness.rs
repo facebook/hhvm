@@ -33,8 +33,8 @@ pub struct LiveInstrs {
 
 impl std::fmt::Debug for LiveInstrs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use print::FmtCommaSep;
         use print::FmtRawVid;
+        use print::FmtSep;
         use std::fmt::Display;
         writeln!(f, "instr_last_use: {{")?;
         for (vid, v) in self.instr_last_use.iter().enumerate() {
@@ -42,7 +42,7 @@ impl std::fmt::Debug for LiveInstrs {
                 f,
                 "  {} => ({}),",
                 vid,
-                FmtCommaSep::new(v.iter(), |f, i| { Display::fmt(&i, f) })
+                FmtSep::comma(v.iter(), |f, i| { Display::fmt(&i, f) })
             )?;
         }
         writeln!(f, "}},")?;
@@ -52,7 +52,7 @@ impl std::fmt::Debug for LiveInstrs {
                 f,
                 "  {} => [{}],",
                 vid,
-                FmtCommaSep::new(v.iter(), |f, i| { Display::fmt(&i, f) })
+                FmtSep::comma(v.iter(), |f, i| { Display::fmt(&i, f) })
             )?;
         }
         writeln!(f, "}},")?;
@@ -62,10 +62,10 @@ impl std::fmt::Debug for LiveInstrs {
                 f,
                 "  {} => {{ entry: [{}], exit: [{}] }}",
                 bid,
-                FmtCommaSep::new(bi.entry.iter(), |f, i| {
+                FmtSep::comma(bi.entry.iter(), |f, i| {
                     FmtRawVid(ValueId::from_instr(*i)).fmt(f)
                 }),
-                FmtCommaSep::new(bi.exit.iter(), |f, i| {
+                FmtSep::comma(bi.exit.iter(), |f, i| {
                     FmtRawVid(ValueId::from_instr(*i)).fmt(f)
                 }),
             )?;

@@ -484,11 +484,13 @@ let lenv_as_value env lenv =
       ("local_using_vars", local_id_set_as_value local_using_vars);
     ]
 
-let param_as_value env (ty, _pos, mode) =
+let param_as_value env (ty, _pos, ty_opt) =
   let ty_str = Typing_print.debug env ty in
-  match mode with
-  | FPnormal -> Atom ty_str
-  | FPinout -> Atom (Printf.sprintf "[inout]%s" ty_str)
+  match ty_opt with
+  | None -> Atom ty_str
+  | Some ty2 ->
+    let ty2_str = Typing_print.debug env ty2 in
+    Atom (Printf.sprintf "%s inout %s" ty_str ty2_str)
 
 let genv_as_value env genv =
   let {

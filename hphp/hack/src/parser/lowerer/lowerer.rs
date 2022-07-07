@@ -4236,6 +4236,43 @@ fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::User
     Ok(attributes.into_iter().flatten().collect())
 }
 
+/// Extract the URL in `<<__Docs("http://example.com")>>` if the __Docs attribute
+/// is present.
+fn p_docs_url<'a>(attrs: &[ast::UserAttribute], env: &mut Env<'a>) -> Option<String> {
+    let mut url = None;
+
+    for attr in attrs {
+        if attr.name.1 == naming_special_names_rust::user_attributes::DOCS {
+            match attr.params.as_slice() {
+                [param] => match &param.2 {
+                    ast::Expr_::String(s) => match String::from_utf8(s.to_vec()) {
+                        Ok(s) => {
+                            url = Some(s);
+                        }
+                        Err(_) => raise_parsing_error_pos(
+                            &attr.name.0,
+                            env,
+                            "`__Docs` URLs must be valid UTF-8",
+                        ),
+                    },
+                    _ => raise_parsing_error_pos(
+                        &attr.name.0,
+                        env,
+                        "`__Docs` URLs must be a string literal",
+                    ),
+                },
+                _ => {
+                    // Wrong number of arguments to __Docs,
+                    // ignore. The attribute arity checks will tell
+                    // the user their code is wrong.
+                }
+            }
+        }
+    }
+
+    url
+}
+
 fn map_yielding<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<(R, bool)>
 where
     F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
@@ -5124,6 +5161,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let env = env.as_mut();
             let mode = env.file_mode();
             let user_attributes = p_user_attributes(&c.attribute, env)?;
+            let docs_url = p_docs_url(&user_attributes, env);
+
             let kinds = p_kinds(&c.modifiers, env)?;
             let final_ = kinds.has(modifier::FINAL);
             let is_xhp = matches!(
@@ -5174,8 +5213,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 typeconsts: vec![],
                 vars: vec![],
                 methods: vec![],
-                // TODO: what is this attbiute? check ast_to_aast
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 namespace,
@@ -5186,6 +5223,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
+                docs_url,
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5379,12 +5417,12 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 vars: vec![],
                 typeconsts: vec![],
                 methods: vec![],
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
+                docs_url: None,
             })])
         }
 
@@ -5453,12 +5491,12 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 vars: vec![],
                 typeconsts: vec![],
                 methods: vec![],
-                attributes: vec![],
                 xhp_children: vec![],
                 xhp_attrs: vec![],
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
+                docs_url: None,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

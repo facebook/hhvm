@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7f946d2ac10b9b206329cbc119e54016>>
+// @generated SignedSource<<4663f33dc340eac94f007d08add7615d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -136,44 +136,6 @@ impl<P: Params> Node<P> for Bop {
         }
     }
 }
-impl<P: Params> Node<P> for CaField<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_ca_field(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.type_.accept(c, v)?;
-        self.id.accept(c, v)?;
-        self.value.accept(c, v)?;
-        self.required.accept(c, v)
-    }
-}
-impl<P: Params> Node<P> for CaType {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_ca_type(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            CaType::CAHint(a0) => a0.accept(c, v),
-            CaType::CAEnum(a0) => a0.accept(c, v),
-        }
-    }
-}
 impl<P: Params> Node<P> for Case<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
@@ -225,25 +187,6 @@ impl<P: Params> Node<P> for ClassAbstractTypeconst {
         self.as_constraint.accept(c, v)?;
         self.super_constraint.accept(c, v)?;
         self.default.accept(c, v)
-    }
-}
-impl<P: Params> Node<P> for ClassAttr<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_attr(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ClassAttr::CAName(a0) => a0.accept(c, v),
-            ClassAttr::CAField(a0) => a0.accept(c, v),
-        }
     }
 }
 impl<P: Params> Node<P> for ClassConcreteTypeconst {
@@ -462,12 +405,12 @@ impl<P: Params> Node<P> for Class_<P::Ex, P::En> {
         self.typeconsts.accept(c, v)?;
         self.vars.accept(c, v)?;
         self.methods.accept(c, v)?;
-        self.attributes.accept(c, v)?;
         self.xhp_children.accept(c, v)?;
         self.xhp_attrs.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
+        self.docs_url.accept(c, v)?;
         self.enum_.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         self.emit_id.accept(c, v)?;

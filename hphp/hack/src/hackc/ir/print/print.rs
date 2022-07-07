@@ -13,7 +13,7 @@
 //!
 
 use crate::formatters::*;
-use crate::util::FmtCommaSep;
+use crate::util::FmtSep;
 use core::class::Property;
 use core::class::TraitReqKind;
 use core::instr::BaseOp;
@@ -221,7 +221,7 @@ fn print_call(
     write!(
         w,
         "({})",
-        FmtCommaSep::new(args, |w, (arg, inout, readonly)| {
+        FmtSep::comma(args, |w, (arg, inout, readonly)| {
             let inout = if inout { "inout " } else { "" };
             let readonly = if readonly { "readonly " } else { "" };
             write!(w, "{}{}{}", readonly, inout, FmtVid(func, *arg, verbose))
@@ -321,7 +321,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner<'_
             w,
             "  upper_bound {}: [{}]",
             FmtIdentifier(name.as_ref()),
-            FmtCommaSep::new(tys.iter(), |w, ty| FmtType(ty).fmt(w))
+            FmtSep::comma(tys.iter(), |w, ty| FmtType(ty).fmt(w))
         )?;
     }
 
@@ -419,8 +419,8 @@ fn print_ctx_context(w: &mut dyn Write, ctx: &CtxConstant<'_>) -> Result {
         w,
         "  ctx_context {} [{}] [{}]{}",
         FmtIdentifier(&ctx.name),
-        FmtCommaSep::new(ctx.recognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
-        FmtCommaSep::new(ctx.unrecognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
+        FmtSep::comma(ctx.recognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
+        FmtSep::comma(ctx.unrecognized.iter(), |w, i| FmtIdentifier(i).fmt(w)),
         if ctx.is_abstract { " abstract" } else { "" }
     )
 }
@@ -491,7 +491,7 @@ pub(crate) fn print_func_body(
             write!(
                 w,
                 "({})",
-                FmtCommaSep::new(&block.params, |w, iid| FmtVid(
+                FmtSep::comma(&block.params, |w, iid| FmtVid(
                     func,
                     ValueId::from_instr(*iid),
                     verbose
@@ -694,14 +694,14 @@ fn print_hhbc(
             write!(
                 w,
                 "combine_and_resolve_type_struct {}",
-                FmtCommaSep::new(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Hhbc::ConcatN(ref vids, _) => {
             write!(
                 w,
                 "concatn {}",
-                FmtCommaSep::new(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Hhbc::ConsumeL(lid, _) => {
@@ -742,7 +742,7 @@ fn print_hhbc(
                 w,
                 "create_class {}({})",
                 FmtIdentifierId(clsid.id, ctx.strings),
-                FmtCommaSep::new(operands.iter(), |w, arg| write!(
+                FmtSep::comma(operands.iter(), |w, arg| write!(
                     w,
                     "{}",
                     FmtVid(func, *arg, verbose)
@@ -849,7 +849,7 @@ fn print_hhbc(
             write!(
                 w,
                 "new_keyset_array [{}]",
-                FmtCommaSep::new(operands.iter(), |w, arg| write!(
+                FmtSep::comma(operands.iter(), |w, arg| write!(
                     w,
                     "{}",
                     FmtVid(func, *arg, verbose)
@@ -888,7 +888,7 @@ fn print_hhbc(
             write!(
                 w,
                 "new_struct_dict [{}]",
-                FmtCommaSep::new(keys.iter().zip(values.iter()), |w, (k, v)| {
+                FmtSep::comma(keys.iter().zip(values.iter()), |w, (k, v)| {
                     write!(
                         w,
                         "{} => {}",
@@ -902,7 +902,7 @@ fn print_hhbc(
             write!(
                 w,
                 "new_vec [{}]",
-                FmtCommaSep::new(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Hhbc::Not(vid, _) => write!(w, "not {}", FmtVid(func, vid, ctx.verbose))?,
@@ -1416,12 +1416,12 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>) -> Result {
         "  {} {}{}",
         FmtIdentifier(property.name.as_bytes()),
         FmtAttr(property.flags),
-        FmtCommaSep::new_with_wrapper(" <", ">", property.attributes.as_ref(), |w, attr| {
+        FmtSep::new(" <", ", ", ">", property.attributes.as_ref(), |w, attr| {
             write!(
                 w,
                 "{}({})",
                 FmtIdentifier(attr.name.as_ref()),
-                FmtCommaSep::new(attr.arguments.as_ref(), |w, arg| {
+                FmtSep::comma(attr.arguments.as_ref(), |w, arg| {
                     FmtTypedValue(arg).fmt(w)
                 })
             )
@@ -1483,7 +1483,7 @@ fn print_terminator(
             "jmp to {}{} with ({})",
             FmtBid(func, *bid, verbose),
             surprise_check(*check),
-            FmtCommaSep::new(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+            FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
         )?,
         Terminator::JmpOp {
             cond,
@@ -1542,7 +1542,7 @@ fn print_terminator(
             write!(
                 w,
                 "ret [{}]",
-                FmtCommaSep::new(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
+                FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
             )?;
         }
         Terminator::SSwitch {
@@ -1555,7 +1555,7 @@ fn print_terminator(
                 w,
                 "sswitch {} [{}]",
                 FmtVid(func, *cond, verbose),
-                FmtCommaSep::new(cases.iter().zip(targets.iter()), |w, (case, target)| {
+                FmtSep::comma(cases.iter().zip(targets.iter()), |w, (case, target)| {
                     write!(
                         w,
                         "{} => {}",

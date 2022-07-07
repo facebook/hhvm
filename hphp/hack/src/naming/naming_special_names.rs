@@ -240,6 +240,8 @@ pub mod user_attributes {
 
     pub const DEPRECATED: &str = "__Deprecated";
 
+    pub const DOCS: &str = "__Docs";
+
     pub const ENTRY_POINT: &str = "__EntryPoint";
 
     pub const MEMOIZE: &str = "__Memoize";
@@ -326,6 +328,7 @@ pub mod user_attributes {
             CONSISTENT_CONSTRUCT,
             CONST,
             DEPRECATED,
+            DOCS,
             ENTRY_POINT,
             MEMOIZE,
             MEMOIZE_LSB,

@@ -632,7 +632,6 @@ fn make_closure(
         typeconsts: vec![],
         vars: cvl.collect(),
         methods: vec![md],
-        attributes: vec![],
         xhp_children: vec![],
         xhp_attrs: vec![],
         namespace: RcOc::clone(&ro_state.empty_namespace),
@@ -643,6 +642,7 @@ fn make_closure(
         internal: false,
         // TODO: closures should have the visibility of the module they are defined in
         module: None,
+        docs_url: None,
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?

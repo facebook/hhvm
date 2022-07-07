@@ -157,10 +157,12 @@ struct Job : public detail::JobBase {
   using ConfigT = typename detail::ConfigRefs<C>::type;
   using InputsT = typename detail::InputRefs<C>::type;
   using ReturnT = typename detail::ReturnRefs<C>::type;
+  using FiniT   = typename detail::FiniRefs<C>::type;
+  using ExecT   = typename detail::ExecRet<C>::type;
 
 private:
   void init(const folly::fs::path&) const override;
-  void fini() const override;
+  void fini(const folly::fs::path&) const override;
   void run(const folly::fs::path&, const folly::fs::path&) const override;
 };
 
@@ -503,7 +505,7 @@ struct Client {
   // side. If it doesn't, the execution will fail (by throwing an
   // exception), and the caller should (actually) store the data and
   // retry. The flag disables automatic fallback.
-  template <typename C> coro::Task<std::vector<typename Job<C>::ReturnT>>
+  template <typename C> coro::Task<typename Job<C>::ExecT>
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs,
@@ -634,7 +636,8 @@ struct Client::Impl {
        const std::string& command,
        RefValVec config,
        std::vector<RefValVec> inputs,
-       const folly::Range<const OutputType*>& output) = 0;
+       const folly::Range<const OutputType*>& output,
+       const folly::Range<const OutputType*>* finiOutput) = 0;
 protected:
   Impl(std::string name, Client& parent)
     : m_name{std::move(name)}

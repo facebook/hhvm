@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
       }
     });
     // Do any cleanup
-    time("fini", [&] { worker->fini(); });
+    time("fini", [&] { worker->fini(outputPath); });
 
     return 0;
   } catch (const std::exception& exn) {
@@ -301,7 +301,8 @@ struct SubprocessImpl : public Client::Impl {
        const std::string&,
        RefValVec,
        std::vector<RefValVec>,
-       const folly::Range<const OutputType*>&) override;
+       const folly::Range<const OutputType*>&,
+       const folly::Range<const OutputType*>*) override;
 
 private:
   folly::fs::path newBlob();
@@ -458,7 +459,8 @@ SubprocessImpl::exec(const RequestId& requestId,
                      const std::string& command,
                      RefValVec config,
                      std::vector<RefValVec> inputs,
-                     const folly::Range<const OutputType*>& output) {
+                     const folly::Range<const OutputType*>& output,
+                     const folly::Range<const OutputType*>* finiOutput) {
   auto const execPath = newExec();
   auto const configPath = execPath / "config";
   auto const inputsPath = execPath / "input";
@@ -555,13 +557,15 @@ SubprocessImpl::exec(const RequestId& requestId,
     always_assert(false);
   };
 
-  auto const makeOutputs = [&] (const folly::fs::path& path) {
+  auto const makeOutputs =
+    [&] (const folly::fs::path& path,
+         const folly::Range<const OutputType*>& outputTypes) {
     RefValVec vec;
-    vec.reserve(output.size());
-    for (size_t i = 0; i < output.size(); ++i) {
+    vec.reserve(outputTypes.size());
+    for (size_t i = 0; i < outputTypes.size(); ++i) {
       vec.emplace_back(
         makeOutput(
-          output[i],
+          outputTypes[i],
           path / folly::to<std::string>(i)
         )
       );
@@ -570,9 +574,22 @@ SubprocessImpl::exec(const RequestId& requestId,
   };
 
   std::vector<RefValVec> out;
-  out.reserve(inputs.size());
+  out.reserve(inputs.size() + (finiOutput ? 1 : 0));
   for (size_t i = 0; i < inputs.size(); ++i) {
-    out.emplace_back(makeOutputs(outputsPath / folly::to<std::string>(i)));
+    out.emplace_back(
+      makeOutputs(
+        outputsPath / folly::to<std::string>(i),
+        output
+      )
+    );
+  }
+  if (finiOutput) {
+    out.emplace_back(
+      makeOutputs(
+        outputsPath / "fini",
+        *finiOutput
+      )
+    );
   }
   HPHP_CORO_MOVE_RETURN(out);
 }

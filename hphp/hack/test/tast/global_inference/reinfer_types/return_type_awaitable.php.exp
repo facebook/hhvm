@@ -39,7 +39,7 @@
           m_ret = ((Awaitable<int>), (Some ([8:38-54], (Happly (([8:38-47], "\\HH\\Awaitable"), [([8:48-53], Hmixed)]))))); 
           m_external = false; m_doc_comment = None }
          ];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

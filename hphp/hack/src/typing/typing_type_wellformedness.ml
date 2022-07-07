@@ -279,17 +279,6 @@ let method_opt env = Option.value_map ~default:[] ~f:(method_ env)
 
 let hint_no_kind_check env (p, h) = hint_ ~in_signature:true env p h
 
-let class_attrs env attrs =
-  let f = function
-    | CA_name _ -> []
-    | CA_field { ca_type; ca_id = _; ca_value = _; ca_required = _ } ->
-      (match ca_type with
-      | CA_hint h -> hint env h
-      | CA_enum _ -> [])
-  in
-
-  List.concat_map ~f attrs
-
 let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
   let {
@@ -312,7 +301,6 @@ let class_ tenv c =
     c_typeconsts;
     c_vars;
     c_methods;
-    c_attributes;
     c_xhp_children = _;
     c_xhp_attrs = _;
     (* Collapsed into c_vars during Naming *)
@@ -376,7 +364,6 @@ let class_ tenv c =
       consts env c_consts;
       methods env c_statics;
       methods env c_methods;
-      class_attrs env c_attributes;
       enum_opt env c_enum;
     ]
 

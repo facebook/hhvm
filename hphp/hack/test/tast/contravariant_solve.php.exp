@@ -4,8 +4,8 @@
       c_name = ([4:11-12], "\\I"); c_tparams = [{ tp_variance = Contravariant; tp_name = ([4:14-15], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
-      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
-      c_xhp_children = []; c_xhp_attrs = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
+      c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -20,7 +20,7 @@
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = [([6:23-27], (Happly (([6:23-24], "\\I"), [([6:25-26], (Habstr ("T", [])))])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

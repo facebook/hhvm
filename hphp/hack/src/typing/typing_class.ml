@@ -1771,7 +1771,6 @@ let class_def_ env c tc =
       Aast.c_namespace = c.c_namespace;
       Aast.c_enum = c.c_enum;
       Aast.c_doc_comment = c.c_doc_comment;
-      Aast.c_attributes = [];
       Aast.c_xhp_children = c.c_xhp_children;
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;

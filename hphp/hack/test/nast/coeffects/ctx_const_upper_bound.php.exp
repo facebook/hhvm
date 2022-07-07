@@ -11,8 +11,7 @@
             { c_atc_as_constraint = (Some ([4:27-40], (Hintersection [([4:28-39], (Happly (([4:28-39], "\\HH\\Contexts\\write_props"), [])))]))); c_atc_super_constraint = None; c_atc_default = None });
          c_tconst_span = [4:3-41]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
         ];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
-      c_xhp_attrs = [];
+      c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -31,8 +30,7 @@
           c_tconst_kind = (TCConcrete { c_tc_type = ([8:34-44], (Hintersection [([8:35-43], (Happly (([8:35-43], "\\HH\\Contexts\\defaults"), [])))])) }); 
           c_tconst_span = [8:3-45]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
          ];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
-       c_xhp_attrs = [];
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

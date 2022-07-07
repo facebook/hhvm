@@ -632,7 +632,6 @@ fn make_closure(
         typeconsts: vec![],
         vars: cvl.collect(),
         methods: vec![md],
-        attributes: vec![],
         xhp_children: vec![],
         xhp_attrs: vec![],
         namespace: RcOc::clone(&ro_state.empty_namespace),

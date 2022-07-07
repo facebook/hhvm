@@ -14,8 +14,8 @@ Errors:
              (KeyValCollection (Dict, None, [(((string), [6:5-8], (String "a")), ((int), [6:12-13], (Int "1"))); (((string), [7:5-8], (String "b")), ((int), [7:12-13], (Int "2")))]))));
          cc_span = [5:3-8:5]; cc_doc_comment = None }
         ];
-      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
-      c_xhp_children = []; c_xhp_attrs = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
+      c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

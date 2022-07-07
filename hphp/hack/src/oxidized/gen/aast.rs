@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2abc1b50c5c8dbc44a30c38131a22352>>
+// @generated SignedSource<<1b8c22939205debafd143f421f304090>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1332,7 +1332,6 @@ pub struct Class_<Ex, En> {
     pub typeconsts: Vec<ClassTypeconstDef<Ex, En>>,
     pub vars: Vec<ClassVar<Ex, En>>,
     pub methods: Vec<Method_<Ex, En>>,
-    pub attributes: Vec<ClassAttr<Ex, En>>,
     pub xhp_children: Vec<(Pos, XhpChild)>,
     pub xhp_attrs: Vec<XhpAttr<Ex, En>>,
     pub namespace: Nsenv,
@@ -1397,68 +1396,6 @@ pub struct XhpAttr<Ex, En>(
     pub Option<XhpAttrTag>,
     pub Option<(Pos, Vec<Expr<Ex, En>>)>,
 );
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum ClassAttr<Ex, En> {
-    CAName(Sid),
-    CAField(CaField<Ex, En>),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct CaField<Ex, En> {
-    pub type_: CaType,
-    pub id: Sid,
-    pub value: Option<Expr<Ex, En>>,
-    pub required: bool,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum CaType {
-    CAHint(Hint),
-    CAEnum(Vec<String>),
-}
 
 #[derive(
     Clone,

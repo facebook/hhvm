@@ -980,7 +980,6 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_xhp_category = _;
     c_reqs = _;
     c_consts = _;
-    c_attributes = _;
     c_xhp_children = _;
     c_xhp_attrs = _;
     c_namespace = _;

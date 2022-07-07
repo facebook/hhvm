@@ -206,9 +206,9 @@ let check_inout_return ret_pos env =
     List.fold
       params
       ~init:(env, [])
-      ~f:(fun (env, ty_errs) (id, (ty, param_pos, mode)) ->
-        match mode with
-        | FPinout ->
+      ~f:(fun (env, ty_errs) (id, (_ty, param_pos, out_ty_opt)) ->
+        match out_ty_opt with
+        | Some out_ty ->
           (* Whenever the function exits normally, we require that each local
            * corresponding to an inout parameter be compatible with the original
            * type for the parameter (under subtyping rules). *)
@@ -222,7 +222,9 @@ let check_inout_return ret_pos env =
             else
               param_pos
           in
-          let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
+          let param_ty =
+            mk (Reason.Rinout_param (get_pos out_ty), get_node out_ty)
+          in
           let (env, ty_err_opt) =
             Typing_ops.sub_type
               pos
@@ -239,7 +241,7 @@ let check_inout_return ret_pos env =
               ty_err_opt
           in
           (env, ty_errs)
-        | _ -> (env, ty_errs))
+        | None -> (env, ty_errs))
   in
   Option.iter ~f:Errors.add_typing_error @@ Typing_error.multiple_opt ty_errs;
   env

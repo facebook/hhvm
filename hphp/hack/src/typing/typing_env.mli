@@ -165,9 +165,9 @@ val get_readonly : env -> bool
 
 val set_readonly : env -> bool -> env
 
-val get_params : env -> (locl_ty * Pos.t * param_mode) Local_id.Map.t
+val get_params : env -> (locl_ty * Pos.t * locl_ty option) Local_id.Map.t
 
-val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env
+val set_param : env -> Local_id.t -> locl_ty * Pos.t * locl_ty option -> env
 
 val set_log_level : env -> string -> int -> env
 

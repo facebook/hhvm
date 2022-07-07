@@ -49,9 +49,8 @@ and genv = {
   readonly: bool;
   (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
+      (** For each function/method parameter, its type, position, and inout "return" type. *)
   condition_types: decl_ty SMap.t;
       (** condition types associated with parameters.
           For every mayberx parameter that has condition type we create

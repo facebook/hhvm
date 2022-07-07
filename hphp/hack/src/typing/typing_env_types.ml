@@ -70,7 +70,7 @@ and genv = {
   callable_pos: Pos.t;
   readonly: bool;
   return: Typing_env_return_info.t;
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
   condition_types: decl_ty SMap.t;
   parent: (string * decl_ty) option;
   self: (string * locl_ty) option;

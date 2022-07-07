@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<615be1ac2593e579eb640175cf0c1980>>
+// @generated SignedSource<<6ea03f141ec1903e3561f18cd4566411>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -112,7 +112,7 @@ pub struct Genv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub return_: &'a typing_env_return_info::TypingEnvReturnInfo<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub params: local_id::map::Map<'a, (&'a Ty<'a>, &'a pos::Pos<'a>, ParamMode)>,
+    pub params: local_id::map::Map<'a, (&'a Ty<'a>, &'a pos::Pos<'a>, Option<&'a Ty<'a>>)>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

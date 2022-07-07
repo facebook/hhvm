@@ -65,7 +65,7 @@
 , unzip
 , uwimap
 , which
-, writeTextFile
+, writeTextDir
 , zlib
 , zstd
 }:
@@ -181,21 +181,23 @@ hhvmStdenv.mkDerivation rec {
       "-Wno-error=unused-command-line-argument"
     ];
 
-  cmakeInitCache = writeTextFile {
-    name = "init-cache.cmake";
-    text =
-      ''
-        set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
-        set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE STRING "The zoneinfo directory" FORCE)
-        set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
-        set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE STRING "The MySQL unix socket" FORCE)
-        ${
-          lib.optionalString hostPlatform.isMacOS ''
-            set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
-          ''
-        }
-      '';
-  };
+  cmakeInitCache =
+    let
+      # Use writeTextDir instead of writeTextFile as a workaround of https://github.com/xtruder/nix-devcontainer/issues/9
+      dir = writeTextDir "init-cache.cmake"
+        ''
+          set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
+          set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE STRING "The zoneinfo directory" FORCE)
+          set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
+          set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE STRING "The MySQL unix socket" FORCE)
+          ${
+            lib.optionalString hostPlatform.isMacOS ''
+              set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
+            ''
+          }
+        '';
+    in
+    dir + "/init-cache.cmake";
 
   cmakeFlags = [ "-C" cmakeInitCache ];
 

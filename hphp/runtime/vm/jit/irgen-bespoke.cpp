@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/tiny-vector.h"
@@ -1985,6 +1986,130 @@ void lowerStructBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
 
   block->erase(inst);
   block->append(slot);
+}
+
+void lowerTypeStructureBespokeGet(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGet));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+
+  assertx(arr->type().arrSpec().is_type_structure());
+  assertx(key->isA(TStr));
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:InitCell = BespokeGet t2:Dict, t1:Str
+   *   Bar
+   *
+   * After:
+   *
+   * B1:
+   *   Foo
+   *   t4:InitCell = LdTypeStructureVal t2:Dict, t1:Str -> B2, B3
+   *
+   * B2:
+   *   Jmp B4 t4
+   *
+   * B3:
+   *   Jmp B4 Uninit
+   *
+   * B4:
+   *   t5:Uninit|InitCell = DefLabel
+   *   Bar
+   */
+  auto const present = unit.defBlock(block->profCount(), block->hint());
+  auto const notPresent = unit.defBlock(block->profCount(), block->hint());
+  auto const join = unit.defBlock(block->profCount(), block->hint());
+
+  auto const tsVal = unit.gen(
+    LdTypeStructureVal,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  tsVal->setNext(present);
+
+  auto const jmp = unit.gen(Jmp, inst->bcctx(), join, tsVal->dst());
+  present->append(jmp);
+
+  auto const val = inst->dst();
+  if (val->type().maybe(TUninit)) {
+    notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
+  } else {
+    notPresent->append(unit.gen(Unreachable, inst->bcctx(), ASSERT_REASON));
+  }
+
+  auto const defLabel = unit.defLabel(1, join, inst->bcctx());
+  val->setInstruction(defLabel);
+  defLabel->setDst(val, 0);
+  retypeDests(tsVal, &unit);
+
+  auto iter = block->iteratorTo(inst);
+  ++iter;
+  join->splice(join->end(), block, iter, block->end());
+  block->erase(inst);
+  block->append(tsVal);
+  inst->convertToNop();
+}
+
+
+void lowerTypeStructureBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGetThrow));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+  auto const catchBlock = inst->taken();
+  auto const next = inst->next();
+
+  assertx(arr->type().arrSpec().is_type_structure());
+  assertx(key->isA(TStr));
+  assertx(catchBlock->isCatch());
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:InitCell = BespokeGetThrow t2:Dict, t1:Str -> B2, B3<Catch>
+   *
+   * After:
+   *
+   * B1:
+   *   t3:InitCell = LdTypeStructureVal t2:Dict, t1:Str -> B2, B4
+   *
+   * B4:
+   *   ThrowOutOfBounds -> B3<Catch>
+   */
+  auto const notPresent =
+    unit.defBlock(block->profCount(), Block::Hint::Unlikely);
+
+  auto const tsVal = unit.gen(
+    LdTypeStructureVal,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  tsVal->setNext(next);
+
+  auto const val = inst->dst();
+  val->setInstruction(tsVal);
+  tsVal->setDst(val);
+  retypeDests(tsVal, &unit);
+
+  notPresent->append(
+    unit.gen(ThrowOutOfBounds, inst->bcctx(), catchBlock, arr, key)
+  );
+
+  block->erase(inst);
+  block->append(tsVal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -141,26 +141,40 @@ bool lowerBespokes(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_lowerbespokes, "lowerBespokes"};
   Timer t{Timer::optimize_lowerBespokes, unit.logEntry().get_pointer()};
 
-  jit::fast_set<IRInstruction*> insts;
+  jit::fast_set<IRInstruction*> structDictInsts;
+  jit::fast_set<IRInstruction*> typeStructInsts;
 
   auto blocks = rpoSortCfg(unit);
   for (auto& block : blocks) {
     for (auto& inst : *block) {
       if (!inst.is(BespokeGet, BespokeGetThrow)) continue;
       auto const arr = inst.src(0);
-      if (!arr->type().arrSpec().is_struct()) continue;
       if (!inst.src(1)->isA(TStr)) continue;
-      insts.emplace(&inst);
+      if (arr->type().arrSpec().is_struct()) {
+        structDictInsts.emplace(&inst);
+      } else if (arr->type().arrSpec().is_type_structure()) {
+        typeStructInsts.emplace(&inst);
+      }
     }
   }
 
-  if (insts.empty()) return false;
+  if (structDictInsts.empty() && typeStructInsts.empty()) return false;
 
-  for (auto inst : insts) {
+  for (auto inst : structDictInsts) {
     if (inst->is(BespokeGet)) {
       lowerStructBespokeGet(unit, inst);
     } else if (inst->is(BespokeGetThrow)) {
       lowerStructBespokeGetThrow(unit, inst);
+    } else {
+      always_assert(false);
+    }
+  }
+
+  for (auto inst : typeStructInsts) {
+    if (inst->is(BespokeGet)) {
+      lowerTypeStructureBespokeGet(unit, inst);
+    } else if (inst->is(BespokeGetThrow)) {
+      lowerTypeStructureBespokeGetThrow(unit, inst);
     } else {
       always_assert(false);
     }

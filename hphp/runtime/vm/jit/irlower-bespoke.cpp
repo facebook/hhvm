@@ -509,7 +509,8 @@ void cgLdTypeStructureVal(IRLS &env, const IRInstruction *inst) {
   v << jcc{CC_E, sf, {next, label(env, inst->taken())}};
   v = next;
   v << copy{data, dst.reg(0)};
-  v << copy{dt, dst.reg(1)};
+  // if return type is known (ie. key is constant), dst uses only one register
+  if (dst.hasReg(1)) v << copy{dt, dst.reg(1)};
 }
 
 void cgLdTypeStructureValCns(IRLS &env, const IRInstruction *inst) {

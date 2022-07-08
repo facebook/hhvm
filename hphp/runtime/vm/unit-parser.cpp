@@ -435,7 +435,11 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
 std::unique_ptr<UnitEmitter> UnitCompiler::compile(
     bool& cacheHit,
     CompileAbortMode mode) {
-  auto provider = HhvmDeclProvider::create(m_map, m_loader.options());
+  auto provider = HhvmDeclProvider::create(
+    m_map,
+    m_loader.options(),
+    m_loader.repoRoot()
+  );
   return compile(cacheHit, provider.get(), mode);
 }
 

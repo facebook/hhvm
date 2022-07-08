@@ -43,7 +43,8 @@ struct HhvmDeclProvider {
   // for use by std::unique_ptr within create().
   static std::unique_ptr<HhvmDeclProvider> create(
     AutoloadMap*,
-    const RepoOptionsFlags&
+    const RepoOptionsFlags&,
+    const folly::fs::path&
   );
 
   // Callback invoked by hackc's ExternalDeclProvider.

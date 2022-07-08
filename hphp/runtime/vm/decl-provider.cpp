@@ -27,7 +27,9 @@ namespace HPHP {
 TRACE_SET_MOD(unit_parse);
 
 std::unique_ptr<HhvmDeclProvider>
-HhvmDeclProvider::create(AutoloadMap* map, const RepoOptionsFlags& options) {
+HhvmDeclProvider::create(AutoloadMap* map,
+                         const RepoOptionsFlags& options,
+                         const folly::fs::path& repoRoot) {
   if (!RuntimeOption::EvalEnableDecl) {
     return {nullptr};
   }
@@ -44,7 +46,7 @@ HhvmDeclProvider::create(AutoloadMap* map, const RepoOptionsFlags& options) {
   auto decl_flags = options.getDeclFlags();
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
   return std::make_unique<HhvmDeclProvider>(
-      decl_flags, aliased_namespaces, map, options.repoRoot()
+      decl_flags, aliased_namespaces, map, repoRoot
   );
 }
 

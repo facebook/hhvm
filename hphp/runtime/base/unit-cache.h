@@ -257,6 +257,7 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(const char* path,
                          Stream::Wrapper* wrapper,
                          const RepoOptionsFlags& options,
+                         boost::filesystem::path repoRoot,
                          size_t fileLength,
                          bool forceEager);
 
@@ -265,7 +266,8 @@ struct LazyUnitContentsLoader {
   // for the lifetime of the loader.
   LazyUnitContentsLoader(SHA1 sha,
                          folly::StringPiece contents,
-                         const RepoOptionsFlags& options);
+                         const RepoOptionsFlags& options,
+                         boost::filesystem::path repoRoot);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
   LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
@@ -275,6 +277,8 @@ struct LazyUnitContentsLoader {
   const SHA1& sha1() const { return m_hash; }
   const RepoOptionsFlags& options() const { return m_options; }
   size_t fileLength() const { return m_file_length; }
+
+  const boost::filesystem::path& repoRoot() const { return m_repo; }
 
   // Did we actually perform the load?
   bool didLoad() const { return m_loaded; }
@@ -308,6 +312,8 @@ private:
   SHA1 m_hash;
   SHA1 m_file_hash;
   size_t m_file_length;
+
+  boost::filesystem::path m_repo;
 
   // Points to either m_contents (if loaded from file), or some
   // external string (if provided in ctor).

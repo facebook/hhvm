@@ -501,7 +501,8 @@ struct ParseJob {
       LazyUnitContentsLoader loader{
         SHA1{mangleUnitSha1(string_sha1(content), fileName, repoOptions)},
         content,
-        repoOptions
+        repoOptions,
+        {} // TODO: repo mode support for decl providers
       };
 
       auto const mode =

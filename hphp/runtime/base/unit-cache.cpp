@@ -704,6 +704,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       path->data(),
       wrapper,
       options.flags(),
+      options.dir(),
       (size_t)statInfo->st_size,
       !tryLazy
     };
@@ -2326,12 +2327,14 @@ void shutdownUnitPrefetcher() {
 LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
                                                Stream::Wrapper* wrapper,
                                                const RepoOptionsFlags& options,
+                                               boost::filesystem::path repoRoot,
                                                size_t fileLength,
                                                bool forceEager)
   : m_path{path}
   , m_wrapper{wrapper}
   , m_options{options}
   , m_file_length{fileLength}
+  , m_repo{std::move(repoRoot)}
   , m_loaded{false}
 {
   assertx(m_path);
@@ -2356,12 +2359,14 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
                                                folly::StringPiece contents,
-                                               const RepoOptionsFlags& options)
+                                               const RepoOptionsFlags& options,
+                                               boost::filesystem::path repoRoot)
   : m_path{nullptr}
   , m_wrapper{nullptr}
   , m_options{options}
   , m_hash{sha}
   , m_file_length{contents.size()}
+  , m_repo{std::move(repoRoot)}
   , m_contents_ptr{contents}
   , m_loaded{true}
 {

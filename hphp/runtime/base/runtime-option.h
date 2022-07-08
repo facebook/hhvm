@@ -132,6 +132,8 @@ struct RepoOptionsFlags {
     return IndexedMethodAttributes;
   }
 
+  // NB: Everything serialized here affects the cache for RE. Do not
+  // put anything unnecessary or that changes spuriously.
   template <typename SerDe> void serde(SerDe& sd) {
     #define N(t, n, ...) sd(n);
     #define P(t, n, ...) sd(n);
@@ -144,7 +146,6 @@ struct RepoOptionsFlags {
     #undef H
     #undef E
     sd(m_sha1);
-    sd(m_repo);
   }
 
   template <typename SerDe>
@@ -153,8 +154,6 @@ struct RepoOptionsFlags {
     sd(f);
     return f;
   }
-
-  const boost::filesystem::path& repoRoot() const { return m_repo; }
 
 private:
   RepoOptionsFlags() = default;
@@ -171,7 +170,6 @@ private:
   #undef E
 
   SHA1 m_sha1;
-  boost::filesystem::path m_repo;
 
   friend struct RepoOptions;
 };
@@ -189,7 +187,7 @@ struct RepoOptions {
   const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   const struct stat& stat() const { return m_stat; }
 
-  const boost::filesystem::path& dir() const { return m_flags.repoRoot(); }
+  const boost::filesystem::path& dir() const { return m_repo; }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -215,6 +213,8 @@ private:
 
   std::string m_path;
   struct stat m_stat;
+
+  boost::filesystem::path m_repo;
 
   folly::dynamic m_cachedDynamic;
 

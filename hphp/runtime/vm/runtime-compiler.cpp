@@ -165,7 +165,7 @@ Unit* compile_string(const char* s,
   auto const sha1 = SHA1{mangleUnitSha1(
     string_sha1(folly::StringPiece{s, sz}), name, options.flags()
   )};
-  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags()};
+  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags(), options.dir()};
   return parse(
     loader,
     fname,
@@ -191,7 +191,13 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
     fname,
     RepoOptions::defaults().flags()
   )};
-  LazyUnitContentsLoader loader{sha1, {s, sz}, RepoOptions::defaults().flags()};
+  auto const& defaults = RepoOptions::defaults();
+  LazyUnitContentsLoader loader{
+    sha1,
+    {s, sz},
+    defaults.flags(),
+    defaults.dir()
+  };
   auto ue = parse(
     loader,
     fname,

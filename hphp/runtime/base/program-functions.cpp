@@ -1894,7 +1894,13 @@ static int execute_program_impl(int argc, char** argv) {
     // Ensure write to SystemLib::s_inited is visible by other threads.
     std::atomic_thread_fence(std::memory_order_release);
 
-    LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults().flags()};
+    auto const& defaults = RepoOptions::defaults();
+    LazyUnitContentsLoader loader{
+      sha1,
+      str,
+      defaults.flags(),
+      defaults.dir()
+    };
     auto compiled =
       compile_file(loader, file.c_str(), Native::s_noNativeFuncs,
                    nullptr, nullptr);
@@ -2113,7 +2119,12 @@ static int execute_program_impl(int argc, char** argv) {
       // if we're just going to lint (and they might be expensive).
       g_unit_emitter_cache_hook = nullptr;
 
-      LazyUnitContentsLoader loader{sha1, str, repoOptions.flags()};
+      LazyUnitContentsLoader loader{
+        sha1,
+        str,
+        repoOptions.flags(),
+        repoOptions.dir()
+      };
       auto const unit =
         compile_file(loader, file.c_str(), Native::s_noNativeFuncs,
                      nullptr, nullptr);

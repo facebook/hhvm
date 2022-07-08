@@ -6,6 +6,9 @@
  *
  *)
 
+module LMap = Local_id.Map
+module KMap = Typing_continuations.Map
+
 (** A generic exception for all refactor sound dynamic specific failures
    Relationship with shape_analysis: Shape_analysis_exn *)
 exception Refactor_sd_exn of string
@@ -23,7 +26,34 @@ type mode =
 
 type options = { mode: mode }
 
+type entity_ =
+  | Literal of Pos.t
+  | Variable of int
+[@@deriving eq, ord]
+
+type entity = entity_ option
+
+(** Relationship with shape_analysis: constraint_ constructors are different *)
+type constraint_ =
+  | Introduction of Pos.t
+      (** Records introduction of an instance of function pointer *)
+  | Upcast of entity_  (** Records existance of upcast dynamic *)
+  | Subset of entity_ * entity_
+      (** Records that the first keys of the first entity are all present in
+          the second. *)
+
 (** Relationship with shape_analysis: shape_result *)
 type refactor_sd_result =
   | Exists_Upcast
   | No_Upcast
+
+(** Local variable environment. Its values are `entity`, i.e., `entity_
+    option`, so that we can avoid pattern matching in constraint extraction. *)
+type lenv = entity LMap.t KMap.t
+
+type env = {
+  constraints: constraint_ list;  (** Append-only set of constraints *)
+  lenv: lenv;  (** Local variable information *)
+  tast_env: Tast_env.env;
+      (** TAST env associated with the definition being analysed *)
+}

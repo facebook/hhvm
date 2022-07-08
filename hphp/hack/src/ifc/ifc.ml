@@ -1604,7 +1604,10 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
       Typing_error.(
         ifc
         @@ Primary.Ifc.Unknown_information_flow
-             { pos; what = sprintf "expression (%s)" (Utils.expr_name e) });
+             {
+               pos;
+               what = sprintf "expression (%s)" (Aast_names_utils.expr_name e);
+             });
     (env, Lift.ty renv ety)
 
 and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
@@ -2013,7 +2016,10 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       Typing_error.(
         ifc
         @@ Primary.Ifc.Unknown_information_flow
-             { pos; what = sprintf "statement (%s)" (Utils.stmt_name s) });
+             {
+               pos;
+               what = sprintf "statement (%s)" (Aast_names_utils.stmt_name s);
+             });
     Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =

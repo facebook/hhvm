@@ -18,6 +18,7 @@
   naming_special_names
   nast
   provider_context
+  aast_names_utils
   relative_path
   sys_utils
   tast_provider
@@ -58,6 +59,7 @@
   naming_special_names
   nast
   provider_context
+  aast_names_utils
   relative_path
   sys_utils
   typechecker_options

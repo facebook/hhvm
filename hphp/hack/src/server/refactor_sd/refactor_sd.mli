@@ -16,3 +16,7 @@ val do_ : string -> options -> Provider_context.t -> Tast.program -> unit
 
 (** Relationship with shape_analysis: is_shape_like_dict *)
 val contains_upcast : refactor_sd_result -> bool
+
+(** Relationship with shape_analysis: show_shape_result *)
+val show_refactor_sd_result :
+  Typing_env_types.env -> refactor_sd_result -> string

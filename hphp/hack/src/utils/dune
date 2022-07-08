@@ -180,6 +180,14 @@
  (modules connection_tracker))
 
 (library
+ (name aast_names_utils)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries annotated_ast utils_core)
+ (modules aast_names_utils))
+
+(library
  (name biglist)
  (wrapped false)
  (preprocess

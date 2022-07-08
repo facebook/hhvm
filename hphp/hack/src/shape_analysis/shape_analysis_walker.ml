@@ -13,7 +13,7 @@ module A = Aast
 module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
-module Utils = Shape_analysis_utils
+module Utils = Aast_names_utils
 
 let join env left right =
   let join = Env.fresh_var () in

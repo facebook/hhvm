@@ -4,11 +4,14 @@
   (flags (:standard -linkall))
   (modules
     refactor_sd
+    Refactor_sd_env
     refactor_sd_options
+    refactor_sd_pretty_printer
     refactor_sd_types)
   (libraries
     core_kernel
     provider_context
+    aast_names_utils
     relative_path
     tast_env
     typing_defs

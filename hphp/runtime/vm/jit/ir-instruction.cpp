@@ -875,6 +875,7 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
     // Profiling
     case DebugBacktrace:
     case LogArrayReach:
+    case LogGuardFailure:
     case NewLoggingArray:
     case ProfileArrLikeProps:
     case ProfileDictAccess:

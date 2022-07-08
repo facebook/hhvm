@@ -38,7 +38,7 @@ let do_
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
-    Walker.program ctx tast function_name
+    Walker.program function_name ctx tast
     |> SMap.iter print_function_constraints
   | SimplifyConstraints
   | SolveConstraints ->

@@ -27,18 +27,52 @@ let filter_class_and_constructor results =
   else
     results |> List.map ~f:snd
 
+(* If [classish_name] (or any of its parents) has a documentation URL,
+   return the name and URL of the closest type. *)
+let first_docs_url ctx classish_name : (string * string) option =
+  let docs_url name =
+    match Decl_provider.get_class ctx name with
+    | Some decl -> Decl_provider.Class.get_docs_url decl
+    | None -> None
+  in
+
+  let qualified_name = "\\" ^ classish_name in
+  let ancestors =
+    match Decl_provider.get_class ctx qualified_name with
+    | Some decl -> Decl_provider.Class.all_ancestor_names decl
+    | None -> []
+  in
+  List.find_map (qualified_name :: ancestors) ~f:(fun ancestor ->
+      match docs_url ancestor with
+      | Some url -> Some (ancestor, url)
+      | None -> None)
+
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
   | Some def when not occurrence.SymbolOccurrence.is_declaration ->
     (* The docblock is useful at the call site, but it's redundant at
        the definition site. *)
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_comments_for_symbol_ctx
-      ~ctx
-      ~entry
-      ~def
-      ~base_class_name
-    |> Option.to_list
+    let doc_block_hover =
+      ServerDocblockAt.go_comments_for_symbol_ctx
+        ~ctx
+        ~entry
+        ~def
+        ~base_class_name
+      |> Option.to_list
+    in
+    let docs_url_addendum =
+      match first_docs_url ctx def.SymbolDefinition.name with
+      | Some (ancestor_name, url) ->
+        [
+          Printf.sprintf
+            "See the [documentation for %s](%s)."
+            (Markdown_lite.md_codify (Utils.strip_ns ancestor_name))
+            url;
+        ]
+      | None -> []
+    in
+    doc_block_hover @ docs_url_addendum
   | None
   | Some _ ->
     []

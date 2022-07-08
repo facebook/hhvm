@@ -180,7 +180,7 @@ private:
 private:
   // Map from trait method name to NameData.
   hphp_fast_map<String, NameData,
-                string_data_hash, string_data_isame> m_dataForName;
+                string_data_hash, string_data_same> m_dataForName;
 
   // Method names in order of first declaration.
   std::vector<String> m_orderedNames;

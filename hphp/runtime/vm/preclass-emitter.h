@@ -44,7 +44,7 @@ struct BuiltinObjExtents {
 };
 
 struct PreClassEmitter {
-  typedef std::vector<FuncEmitter*> MethodVec;
+  using MethodVec = std::vector<FuncEmitter*>;
   using UpperBoundVec = CompactVector<TypeConstraint>;
   using UpperBoundMap =
     std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
@@ -194,8 +194,8 @@ struct PreClassEmitter {
     bool m_fromTrait;
   };
 
-  typedef IndexedStringMap<Prop, Slot> PropMap;
-  typedef IndexedStringMap<Const, Slot> ConstMap;
+  using PropMap = IndexedStringMap<Prop, Slot>;
+  using ConstMap = IndexedStringMap<Const, Slot>;
 
   PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name);
   ~PreClassEmitter();
@@ -298,10 +298,9 @@ struct PreClassEmitter {
   }
 
  private:
-  typedef hphp_hash_map<LowStringPtr,
-                        FuncEmitter*,
-                        string_data_hash,
-                        string_data_isame> MethodMap;
+  using MethodMap = hphp_hash_map<
+    LowStringPtr, FuncEmitter*, string_data_hash, string_data_same
+  >;
 
   UnitEmitter& m_ue;
   int m_line1;

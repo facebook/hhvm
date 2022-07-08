@@ -378,7 +378,7 @@ impl<'a> AsMut<Env<'a>> for Env<'a> {
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum Error {
     #[error(
         "missing case in {expecting:?}.\n - pos: {pos:?}\n - unexpected: '{node_name:?}'\n - kind: {kind:?}\n"
@@ -4104,6 +4104,23 @@ fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast::FunKind {
     }
 }
 
+fn memoized_attribute_arg_to_string<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Option<ast::Expr>> {
+    match &node.children {
+        EnumClassLabelExpression(c) => {
+            let ast::Id(p, id) = pos_name(&c.expression, env)?;
+            if id == "KeyedByIC" || id == "MakeICInaccessible" || id == "SoftMakeICInaccessible" {
+                Ok(Some(ast::Expr((), p, ast::Expr_::String(id.into()))))
+            } else {
+                Ok(None)
+            }
+        }
+        _ => Ok(None),
+    }
+}
+
 fn process_attribute_constructor_call<'a>(
     node: S<'a>,
     constructor_call_argument_list: S<'a>,
@@ -4142,8 +4159,16 @@ fn process_attribute_constructor_call<'a>(
         });
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
-        is_valid_attribute_arg(n, e);
-        p_expr(n, e)
+        is_valid_attribute_arg(n, e, &name.1);
+        if naming_special_names_rust::user_attributes::is_memoized_regular(&name.1) {
+            if let Ok(Some(str)) = memoized_attribute_arg_to_string(n, e) {
+                Ok(str)
+            } else {
+                p_expr(n, e)
+            }
+        } else {
+            p_expr(n, e)
+        }
     })?;
     Ok(ast::UserAttribute { name, params })
 }
@@ -4151,17 +4176,21 @@ fn process_attribute_constructor_call<'a>(
 // Arguments to attributes must be literals (int, string, etc), collections
 // (eg vec, dict, keyset, etc), Foo::class strings, shapes, string
 // concatenations, or tuples.
-fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
-    let mut is_valid_list = |nodes: S<'a>| {
+fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
+    let is_valid_list = |nodes: S<'a>, env: &mut Env<'a>| {
         let _ = could_map(nodes, env, |n, e| {
-            is_valid_attribute_arg(n, e);
+            is_valid_attribute_arg(n, e, attr_name);
             Ok(())
         });
     };
     match &node.children {
-        ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env),
+        ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env, attr_name),
         // Normal literals (string, int, etc)
         LiteralExpression(_) => {}
+        // Special tokens for memoization
+        EnumClassLabelExpression(_)
+            if naming_special_names_rust::user_attributes::is_memoized_regular(attr_name)
+                && memoized_attribute_arg_to_string(node, env) != Ok(None) => {}
         // ::class strings
         ScopeResolutionExpression(c) => {
             if let Some(TK::Class) = token_kind(&c.name) {
@@ -4171,7 +4200,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
         }
         // Negations
         PrefixUnaryExpression(c) => {
-            is_valid_attribute_arg(&c.operand, env);
+            is_valid_attribute_arg(&c.operand, env, attr_name);
             match token_kind(&c.operator) {
                 Some(TK::Minus) => {}
                 Some(TK::Plus) => {}
@@ -4183,28 +4212,28 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
         // String concatenation
         BinaryExpression(c) => {
             if let Some(TK::Dot) = token_kind(&c.operator) {
-                is_valid_attribute_arg(&c.left_operand, env);
-                is_valid_attribute_arg(&c.right_operand, env);
+                is_valid_attribute_arg(&c.left_operand, env, attr_name);
+                is_valid_attribute_arg(&c.right_operand, env, attr_name);
             } else {
                 raise_parsing_error(node, env, &syntax_error::expression_as_attribute_arguments);
             }
         }
         // Top-level Collections
-        DarrayIntrinsicExpression(c) => is_valid_list(&c.members),
-        DictionaryIntrinsicExpression(c) => is_valid_list(&c.members),
-        KeysetIntrinsicExpression(c) => is_valid_list(&c.members),
-        VarrayIntrinsicExpression(c) => is_valid_list(&c.members),
-        VectorIntrinsicExpression(c) => is_valid_list(&c.members),
-        ShapeExpression(c) => is_valid_list(&c.fields),
-        TupleExpression(c) => is_valid_list(&c.items),
+        DarrayIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        DictionaryIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        KeysetIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        VarrayIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        VectorIntrinsicExpression(c) => is_valid_list(&c.members, env),
+        ShapeExpression(c) => is_valid_list(&c.fields, env),
+        TupleExpression(c) => is_valid_list(&c.items, env),
         // Collection Internals
         FieldInitializer(c) => {
-            is_valid_attribute_arg(&c.name, env);
-            is_valid_attribute_arg(&c.value, env);
+            is_valid_attribute_arg(&c.name, env, attr_name);
+            is_valid_attribute_arg(&c.value, env, attr_name);
         }
         ElementInitializer(c) => {
-            is_valid_attribute_arg(&c.key, env);
-            is_valid_attribute_arg(&c.value, env);
+            is_valid_attribute_arg(&c.key, env, attr_name);
+            is_valid_attribute_arg(&c.value, env, attr_name);
         }
         // Everything else is not allowed
         _ => raise_parsing_error(node, env, &syntax_error::expression_as_attribute_arguments),

@@ -1,11 +1,11 @@
 <?hh
 
 class A {
-  <<__PolicyShardedMemoize>>
+  <<__Memoize(#KeyedByIC)>>
   static function f()[zoned] {
     echo "ok: " . static::class ."\n";
   }
-  <<__PolicyShardedMemoizeLSB>>
+  <<__MemoizeLSB(#KeyedByIC)>>
   static function f_lsb()[zoned] {
     echo "ok_lsb: " . static::class ."\n";
   }

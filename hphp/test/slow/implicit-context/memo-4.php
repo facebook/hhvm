@@ -1,6 +1,6 @@
 <?hh
 
-<<__PolicyShardedMemoize>>
+<<__Memoize(#KeyedByIC)>>
 function memo<reify T>()[zoned] {
   $hash = quoted_printable_encode(
     HH\ImplicitContext\_Private\get_implicit_context_memo_key()

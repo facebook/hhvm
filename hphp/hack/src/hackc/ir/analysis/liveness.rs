@@ -5,6 +5,8 @@
 
 // Everything you want to know about what InstrIds are alive when.
 
+use crate::PredecessorCatchMode;
+use crate::PredecessorFlags;
 use core::instr::HasOperands;
 use core::BlockId;
 use core::BlockIdMap;
@@ -18,16 +20,16 @@ use newtype::IdVec;
 use std::collections::VecDeque;
 
 /// Used to compute the set of live InstrIds across a Func.
-#[derive(Default)]
 pub struct LiveInstrs {
-    // This is a list of where a given InstrId dies.  It's a set because an
-    // InstrId could end its lifetime in multiple blocks.
+    /// This is a list of where a given InstrId dies.  It's a set because an
+    /// InstrId could end its lifetime in multiple blocks.
     pub instr_last_use: IdVec<InstrId, InstrIdSet>,
 
-    // This is the inverse of instr_last_use - for a given InstrId what
-    // InstrIds have their last use there.
+    /// This is the inverse of instr_last_use - for a given InstrId what
+    /// InstrIds have their last use there.
     pub instrs_dead_at: IdVec<InstrId, InstrIdSet>,
 
+    /// Per-block liveness information.
     pub blocks: IdVec<BlockId, LiveBlockInfo>,
 }
 
@@ -40,8 +42,7 @@ impl std::fmt::Debug for LiveInstrs {
         for (vid, v) in self.instr_last_use.iter().enumerate() {
             writeln!(
                 f,
-                "  {} => ({}),",
-                vid,
+                "  {vid} => ({}),",
                 FmtSep::comma(v.iter(), |f, i| { Display::fmt(&i, f) })
             )?;
         }
@@ -50,8 +51,7 @@ impl std::fmt::Debug for LiveInstrs {
         for (vid, v) in self.instrs_dead_at.iter().enumerate() {
             writeln!(
                 f,
-                "  {} => [{}],",
-                vid,
+                "  {vid} => [{}],",
                 FmtSep::comma(v.iter(), |f, i| { Display::fmt(&i, f) })
             )?;
         }
@@ -60,12 +60,14 @@ impl std::fmt::Debug for LiveInstrs {
         for (bid, bi) in self.blocks.iter().enumerate() {
             writeln!(
                 f,
-                "  {} => {{ entry: [{}], exit: [{}] }}",
-                bid,
-                FmtSep::comma(bi.entry.iter(), |f, i| {
+                "  {bid} => {{ entry: [{entry}], dead_on_entry: [{doe}], exit: [{exit}] }}",
+                entry = FmtSep::comma(bi.entry.iter(), |f, i| {
                     FmtRawVid(ValueId::from_instr(*i)).fmt(f)
                 }),
-                FmtSep::comma(bi.exit.iter(), |f, i| {
+                doe = FmtSep::comma(bi.dead_on_entry.iter(), |f, i| {
+                    FmtRawVid(ValueId::from_instr(*i)).fmt(f)
+                }),
+                exit = FmtSep::comma(bi.exit.iter(), |f, i| {
                     FmtRawVid(ValueId::from_instr(*i)).fmt(f)
                 }),
             )?;
@@ -76,12 +78,11 @@ impl std::fmt::Debug for LiveInstrs {
 
 impl LiveInstrs {
     pub fn compute(func: &Func<'_>) -> Self {
-        let mut live = LiveInstrs::default();
-        live.instr_last_use
-            .resize_with(func.instrs_len(), Default::default);
-        live.instrs_dead_at
-            .resize_with(func.instrs_len(), Default::default);
-        live.blocks.resize_with(func.blocks.len(), Default::default);
+        let mut live = LiveInstrs {
+            instr_last_use: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
+            instrs_dead_at: IdVec::new_from_vec(vec![Default::default(); func.instrs_len()]),
+            blocks: IdVec::new_from_vec(vec![Default::default(); func.blocks.len()]),
+        };
 
         // Start by computing what InstrIds are introduced and referenced in
         // each block.
@@ -89,7 +90,13 @@ impl LiveInstrs {
             live.compute_referenced(func, bid);
         }
 
-        let predecessor_blocks = crate::compute_predecessor_blocks(func, Default::default());
+        let predecessor_blocks = crate::compute_predecessor_blocks(
+            func,
+            PredecessorFlags {
+                mark_entry_blocks: false,
+                catch: PredecessorCatchMode::Throw,
+            },
+        );
 
         // Next compute the entry and exit InstrIds for each block.
         //
@@ -153,7 +160,11 @@ impl LiveInstrs {
         // - The LiveBlockInfo::exit is a subset of the "correct" info (we loop
         //   until we hit a steady state).
         let block_info = &self.blocks[bid];
-        let created: InstrIdSet = func.block(bid).iids().collect();
+        let created: InstrIdSet = func
+            .block(bid)
+            .iids()
+            .chain(func.block(bid).params.iter().copied())
+            .collect();
         let entry = &(&block_info.exit | &block_info.referenced) - &created;
 
         for &src in &predecessor_blocks[&bid] {
@@ -176,6 +187,11 @@ impl LiveInstrs {
         let exit = self.blocks[bid].exit.clone();
         for &edge in func.edges(bid) {
             self.blocks[edge].entry.extend(exit.iter().copied());
+        }
+
+        let catch_bid = func.catch_target(bid);
+        if catch_bid != BlockId::NONE {
+            self.blocks[catch_bid].entry.extend(exit.iter().copied());
         }
     }
 
@@ -208,9 +224,16 @@ impl LiveInstrs {
             }
         }
 
-        if live != self.blocks[bid].entry {
-            // Anything in entry that isn't in live needs to be marked dead
-            // at our start!  This can happen like this:
+        let mostly_dead = {
+            let mut s: InstrIdSet = self.blocks[bid].entry.clone();
+            s.extend(func.block(bid).params.iter());
+            s.retain(|item| !live.contains(item));
+            s
+        };
+        if !mostly_dead.is_empty() {
+            // Anything in entry or params that isn't in live needs to be marked
+            // dead at our start (note that this includes block params)!  This
+            // can happen like this:
             //
             //     b0:
             //       %1 = call...
@@ -228,26 +251,36 @@ impl LiveInstrs {
             // to be at %3 and %5 - but b2 never actually sees a use of %1 so it
             // doesn't know that it dies there.
 
-            let mostly_dead = &self.blocks[bid].entry - &live;
-
             // Mark it dead at the first InstrId of the block (an argument
             // could be made for doing it at the terminal as well).
 
             let dead_at = *block.iids.first().unwrap();
-            for vid in mostly_dead {
-                self.instr_last_use[vid].insert(dead_at);
-                self.instrs_dead_at[dead_at].insert(vid);
+            for &iid in &mostly_dead {
+                self.instr_last_use[iid].insert(dead_at);
             }
+            self.instrs_dead_at[dead_at].extend(&mostly_dead);
+
+            self.blocks[bid].dead_on_entry = mostly_dead;
         }
     }
 }
 
-#[derive(Debug, Default)]
+/// Information about what InstrIds are live at different points in a block.
+/// The relationship is:
+///
+///     entry - dead_on_entry - referenced = exit
+///
+/// dead_on_entry and referenced are mutually exclusive - no InstrId should
+/// appear in both sets.
+///
+#[derive(Debug, Default, Clone)]
 pub struct LiveBlockInfo {
-    // What InstrIds are live on entry to this block.
+    /// What InstrIds are live on entry to this block.
     pub entry: InstrIdSet,
-    // What InstrIds are live on exit from this block.
+    /// What InstrIds are live on exit from this block.
     pub exit: InstrIdSet,
-    // What InstrIds are referenced by this block.
+    /// What InstrIds are referenced by this block.
     pub referenced: InstrIdSet,
+    /// What InstrIds are dead immediately on block entry.
+    pub dead_on_entry: InstrIdSet,
 }

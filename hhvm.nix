@@ -13,7 +13,6 @@
 , fmt
 , freetype
 , fribidi
-, gcc10Stdenv
 , gd
 , gdb
 , gettext
@@ -70,12 +69,6 @@
 , zstd
 }:
 let
-  # Use gcc10 in Linux because fbthrift is not compatible with gcc 11+.
-  # For macOS, use the the default compiler, which should be clang.
-  hhvmStdenv =
-    if hostPlatform.isLinux
-    then gcc10Stdenv
-    else stdenv;
   versionParts =
     builtins.match
       ''
@@ -92,7 +85,7 @@ let
   makeVersion = major: minor: patch: suffix:
     if suffix == "-dev" then "${major}.${minor}.${patch}-${lastModifiedDate}" else "${major}.${minor}.${patch}";
 in
-hhvmStdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = builtins.foldl' lib.trivial.id makePName versionParts;
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -227,19 +220,19 @@ hhvmStdenv.mkDerivation rec {
         -f third-party/rustc/CMakeFiles/bundled_rust.dir/build.make \
         third-party/rustc/bundled_rust-prefix/src/bundled_rust-stamp/bundled_rust-install
       patchelf \
-        --set-interpreter ${hhvmStdenv.cc.bintools.dynamicLinker} \
+        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
         --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib hhvmStdenv.cc.cc.lib]}" \
+        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
         third-party/rustc/bundled_rust-prefix/bin/rustc
       patchelf \
-        --set-interpreter ${hhvmStdenv.cc.bintools.dynamicLinker} \
+        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
         --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib hhvmStdenv.cc.cc.lib]}" \
+        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
         third-party/rustc/bundled_rust-prefix/bin/cargo
       patchelf \
-        --set-interpreter ${hhvmStdenv.cc.bintools.dynamicLinker} \
+        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
         --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib hhvmStdenv.cc.cc.lib]}" \
+        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
         third-party/rustc/bundled_rust-prefix/bin/rustfmt
     '';
 

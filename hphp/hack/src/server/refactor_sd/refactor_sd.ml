@@ -9,15 +9,23 @@ open Hh_prelude
 open Refactor_sd_types
 open Refactor_sd_pretty_printer
 module T = Tast
+module Walker = Refactor_sd_walker
 
 exception Refactor_sd_exn = Refactor_sd_exn
 
+let add_ns name =
+  if Char.equal name.[0] '\\' then
+    name
+  else
+    "\\" ^ name
+
 let do_
-    (_function_name : string)
+    (function_name : string)
     (options : options)
     (ctx : Provider_context.t)
-    (_tast : T.program) =
+    (tast : T.program) =
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
+  let function_name = add_ns function_name in
   match options.mode with
   | FlagTargets -> ()
   | DumpConstraints ->
@@ -30,10 +38,13 @@ let do_
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
-    print_function_constraints "test printing" [Subset (Variable 1, Variable 2)]
+    Walker.program ctx tast function_name
+    |> SMap.iter print_function_constraints
   | SimplifyConstraints
   | SolveConstraints ->
     ()
+
+let callable = Walker.callable
 
 let show_refactor_sd_result = show_refactor_sd_result
 

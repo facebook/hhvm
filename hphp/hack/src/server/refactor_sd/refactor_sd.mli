@@ -14,6 +14,13 @@ exception Refactor_sd_exn of string
 
 val do_ : string -> options -> Provider_context.t -> Tast.program -> unit
 
+val callable :
+  Tast_env.t ->
+  Tast.fun_param list ->
+  Tast.func_body ->
+  string ->
+  constraint_ list
+
 (** Relationship with shape_analysis: is_shape_like_dict *)
 val contains_upcast : refactor_sd_result -> bool
 

@@ -1,4 +1,26 @@
-File "recursion_no_base_case.php", line 3, characters 1-66:
-There is no condition to terminate this recursive function (Lint[5645])
+File "recursion_no_base_case.php", line 3, characters 1-68:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
 File "recursion_no_base_case.php", line 6, characters 1-78:
-There is no condition to terminate this recursive function (Lint[5645])
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 14, characters 1-65:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 20, characters 1-80:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 25, characters 3-80:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 28, characters 3-85:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 31, characters 3-78:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 34, characters 3-91:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 37, characters 3-98:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 40, characters 3-103:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 44, characters 3-101:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 48, characters 3-96:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])
+File "recursion_no_base_case.php", line 52, characters 3-130:
+This is a recursive function with no base case to terminate. This will result in a Stack Overflow error. Consider adding a base case. (Lint[5645])

@@ -439,4 +439,5 @@ let unconditional_recursion p =
     Codes.unconditional_recursion
     Lint_error
     p
-    "There is no condition to terminate this recursive function"
+    ("This is a recursive function with no base case to terminate. This will result in a Stack Overflow error."
+    ^ " Consider adding a base case.")

@@ -21,11 +21,17 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/struct-data-layout.h"
 #include "hphp/runtime/base/string-data.h"
 
 namespace HPHP::bespoke {
 
 struct StructLayout;
+
+namespace detail_struct_data_layout {
+struct TypePosValLayout;
+struct UnalignedTVLayout;
+}
 
 /*
  * Hidden-class style layout for a dict/darray. Static string keys are stored
@@ -33,6 +39,9 @@ struct StructLayout;
  * to physical slots. Each array has space for all of its layout's slots.
  */
 struct StructDict : public BespokeArray {
+
+  using PosType = uint8_t;
+
   static StructDict* MakeFromVanilla(ArrayData* ad, const StructLayout* layout);
 
   template<bool Static>
@@ -43,7 +52,7 @@ struct StructDict : public BespokeArray {
 
   static StructDict* MakeStructDict(
       uint8_t sizeIndex, uint32_t extra, uint32_t size,
-      const uint8_t* slots, const TypedValue* vals);
+      const PosType* slots, const TypedValue* vals);
 
   static size_t sizeFromLayout(const StructLayout*);
 
@@ -64,17 +73,14 @@ struct StructDict : public BespokeArray {
   const StructLayout* layout() const;
 
   size_t numFields() const;
-  size_t typeOffset() const;
-  size_t valueOffset() const;
+
   size_t positionOffset() const;
 
-  const DataType* rawTypes() const;
-  DataType* rawTypes();
-  const Value* rawValues() const;
-  Value* rawValues();
-  const uint8_t* rawPositions() const;
-  uint8_t* rawPositions();
-  TypedValue typedValueUnchecked(Slot slot) const;
+  const PosType* rawPositions() const;
+  PosType* rawPositions();
+
+  tv_lval lvalUnchecked(Slot slot);
+  tv_rval rvalUnchecked(Slot slot) const;
 
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   arr_lval elemImpl(StringData* k, bool throwOnMissing);
@@ -86,13 +92,6 @@ struct StructDict : public BespokeArray {
   void removeSlot(Slot slot);
   Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
-
-  static constexpr size_t valueOffsetOffset() {
-    return offsetof(StructDict, m_extra_hi8);
-  }
-  static constexpr size_t valueOffsetSize() {
-    return sizeof(m_extra_hi8);
-  }
 
   static constexpr size_t numFieldsOffset() {
     return offsetof(StructDict, m_extra_lo8);
@@ -121,6 +120,7 @@ struct StructDict : public BespokeArray {
  *     make some fields required, we can skip existence checks on lookup.
  */
 struct StructLayout : public ConcreteLayout {
+
   struct Field {
     LowStringPtr key;
     bool required = false;
@@ -161,11 +161,6 @@ struct StructLayout : public ConcreteLayout {
 
   const Field& field(Slot slot) const;
 
-  // Types come first in a StructDict payload, so this offset can be static.
-  static constexpr size_t staticTypeOffset() { return sizeof(StructDict); }
-
-  size_t typeOffset() const { return typeOffsetForSlot(0); }
-  size_t valueOffset() const { return valueOffsetForSlot(0); }
   size_t positionOffset() const;
 
   // Offset of DataType and Value for 'slot' from beginning of a StructDict.
@@ -196,9 +191,8 @@ struct StructLayout : public ConcreteLayout {
   // Perfect hashing implementation.
   struct PerfectHashEntry {
     LowStringPtr str;
-    uint16_t valueOffset;
     uint8_t typeMask;
-    uint8_t slot;
+    StructDict::PosType slot;
   };
 
   static constexpr size_t kMaxColor = 255;
@@ -235,19 +229,14 @@ private:
 
   StructLayout(LayoutIndex index, const FieldVector&);
 
-  // Fields used to initialize a new StructDict. The "m_extra_initializer" is
-  // computed when we create the layout and used to initialize three fields in
-  // the array header in one go in the JIT.
-  //
-  // The field's layout should pun our usage of ArrayData's m_extra field.
+  friend detail_struct_data_layout::TypePosValLayout;
+  friend detail_struct_data_layout::UnalignedTVLayout;
+
   union {
-    struct {
-      uint8_t m_num_fields;
-      uint8_t m_value_offset_in_values;
-      bespoke::LayoutIndex m_layout_index;
-    };
+    StructDataLayout::HeaderData m_header;
     uint32_t m_extra_initializer;
   };
+  static_assert(sizeof(StructDataLayout::HeaderData) == 4);
   uint8_t m_size_index;
   uint8_t m_num_required_fields = 0;
 
@@ -270,5 +259,4 @@ struct TopStructLayout : public AbstractLayout {
   Type iterPosType(Type pos, bool isKey) const override;
   Type getTypeBound(Type slot) const override;
 };
-
 }

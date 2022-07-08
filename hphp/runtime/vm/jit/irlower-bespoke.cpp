@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/bespoke/struct-data-layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/vanilla-dict.h"
@@ -629,12 +630,15 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const n = static_cast<size_t>((extra->numSlots + 7) & ~7);
-  auto const slots = reinterpret_cast<uint8_t*>(v.allocData<uint64_t>(n / 8));
+  auto constexpr slotsPerAlloc = sizeof(uint64_t) / sizeof(StructDict::PosType);
+  auto const slots = reinterpret_cast<StructDict::PosType*>(
+    v.allocData<uint64_t>(n / slotsPerAlloc)
+  );
   for (auto i = 0; i < extra->numSlots; i++) {
-    slots[i] = safe_cast<uint8_t>(extra->slots[i]);
+    slots[i] = safe_cast<StructDict::PosType>(extra->slots[i]);
   }
   for (auto i = extra->numSlots; i < n; i++) {
-    slots[i] = static_cast<uint8_t>(KindOfUninit);
+    slots[i] = static_cast<StructDict::PosType>(KindOfUninit);
   }
 
   auto const layout = StructLayout::As(extra->layout.bespokeLayout());
@@ -839,43 +843,60 @@ void cgStructDictElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const& layout = arr->type().arrSpec().layout();
   assertx(layout.is_struct());
 
-  if (layout.bespokeLayout()->isConcrete()) {
+  if (layout.bespokeLayout()->isConcrete() && slot->hasConstVal(TInt)) {
     auto const slayout = StructLayout::As(layout.bespokeLayout());
-
-    if (slot->hasConstVal(TInt)) {
-      v << lea{
-        rarr[slayout->valueOffsetForSlot(slot->intVal())],
-        dst.reg(tv_lval::val_idx)
-      };
-      v << lea{
-        rarr[slayout->typeOffsetForSlot(slot->intVal())],
-        dst.reg(tv_lval::type_idx)
-      };
-      return;
-    }
-
-    auto const valBegin = slayout->valueOffset();
     v << lea{
-      rarr[rslot * safe_cast<int>(sizeof(Value)) + valBegin],
+      rarr[slayout->valueOffsetForSlot(slot->intVal())],
       dst.reg(tv_lval::val_idx)
     };
-  } else {
-    static_assert(StructDict::valueOffsetSize() == 1);
-    auto const valBegin = v.makeReg();
-    auto const valIdx = v.makeReg();
-    v << loadzbq{rarr[StructDict::valueOffsetOffset()], valBegin};
-    v << addq{valBegin, rslot, valIdx, v.makeReg()};
     v << lea{
-      rarr[valIdx * safe_cast<int>(sizeof(Value))],
-      dst.reg(tv_lval::val_idx)
+      rarr[slayout->typeOffsetForSlot(slot->intVal())],
+      dst.reg(tv_lval::type_idx)
     };
+    return;
   }
 
-  v << lea{
-    rarr[rslot * safe_cast<int>(sizeof(DataType))
-         + StructLayout::staticTypeOffset()],
-    dst.reg(tv_lval::type_idx)
-  };
+  if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+    static_assert(sizeof(UnalignedTypedValue) == 9);
+    auto const rslot_times_9 = v.makeReg();
+    v << lea{rslot[rslot * 8], rslot_times_9};
+    auto constexpr val_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_data);
+    auto constexpr type_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_type);
+    static_assert(type_offset == val_offset + 8);
+    v << lea{
+      rarr[rslot_times_9 + val_offset], dst.reg(tv_lval::val_idx)
+    };
+    v << addqi{
+      8, dst.reg(tv_lval::val_idx), dst.reg(tv_lval::type_idx), v.makeReg()
+    };
+  } else {
+    using DataLayout = bespoke::detail_struct_data_layout::TypePosValLayout;
+    if (layout.bespokeLayout()->isConcrete()) {
+      auto const slayout = StructLayout::As(layout.bespokeLayout());
+      auto const valBegin = DataLayout::valueOffsetForSlot(slayout, 0);
+      v << lea{
+        rarr[rslot * safe_cast<int>(sizeof(Value)) + valBegin],
+        dst.reg(tv_lval::val_idx)
+      };
+    } else {
+      static_assert(DataLayout::valueOffsetSize() == 1);
+      auto const valBegin = v.makeReg();
+      auto const valIdx = v.makeReg();
+      v << loadzbq{rarr[DataLayout::valueOffsetOffset()], valBegin};
+      v << addq{valBegin, rslot, valIdx, v.makeReg()};
+      v << lea{
+        rarr[valIdx * safe_cast<int>(sizeof(Value))],
+        dst.reg(tv_lval::val_idx)
+      };
+    }
+    v << lea{
+      rarr[rslot * safe_cast<int>(sizeof(DataType))
+        + DataLayout::staticTypeOffset()],
+      dst.reg(tv_lval::type_idx)
+    };
+  }
 }
 
 void cgStructDictTypeBoundCheck(IRLS& env, const IRInstruction* inst) {
@@ -964,9 +985,17 @@ void cgStructDictAddNextSlot(IRLS& env, const IRInstruction* inst) {
     v << storeb{smallSlot, rarr[size + slayout->positionOffset()]};
   } else {
     auto const numFields = v.makeReg();
-    auto const positionsOffset = v.makeReg();
     v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
-    v << addq{size, numFields, positionsOffset, v.makeReg()};
+    auto const positionsOffset = v.makeReg();
+    assertx(sizeof(StructDict::PosType) == 1);
+    if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+      static_assert(sizeof(UnalignedTypedValue) == 9);
+      auto const num_fields_times_9 = v.makeReg();
+      v << lea{numFields[numFields * 8], num_fields_times_9};
+      v << addq{size, num_fields_times_9, positionsOffset, v.makeReg()};
+    } else {
+      v << addq{size, numFields, positionsOffset, v.makeReg()};
+    }
     auto const smallSlot = v.makeReg();
     v << movtqb{rslot, smallSlot};
     v << storeb{smallSlot, rarr[positionsOffset + sizeof(StructDict)]};
@@ -1018,9 +1047,18 @@ void cgStructDictSlotInPos(IRLS& env, const IRInstruction* inst) {
     assertx(StructDict::numFieldsSize() == 1);
     auto const numFields = v.makeReg();
     v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
-    auto const pos_offset = v.makeReg();
-    v << lea{rpos[numFields + sizeof(StructDict)], pos_offset};
-    v << loadzbq{rarr[pos_offset], rdst};
+    if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+      static_assert(sizeof(UnalignedTypedValue) == 9);
+      auto const num_fields_times_9 = v.makeReg();
+      v << lea{numFields[numFields * 8], num_fields_times_9};
+      auto const pos_offset = v.makeReg();
+      v << lea{rpos[num_fields_times_9 + sizeof(StructDict)], pos_offset};
+      v << loadzbq{rarr[pos_offset], rdst};
+    } else {
+      auto const pos_offset = v.makeReg();
+      v << lea{rpos[numFields + sizeof(StructDict)], pos_offset};
+      v << loadzbq{rarr[pos_offset], rdst};
+    }
   }
 }
 
@@ -1063,25 +1101,38 @@ void cgLdStructDictVal(IRLS& env, const IRInstruction* inst) {
   auto const rslot = srcLoc(env, inst, 1).reg();
   auto const dst = dstLoc(env, inst, 0);
 
-  auto const layout =
-      inst->src(0)->type().arrSpec().layout().bespokeLayout();
-
-  auto const val = [&] {
-    if (layout->isConcrete()) {
-      auto const slayout = StructLayout::As(layout);
-      auto const val_begin = slayout->valueOffsetForSlot(0);
-      return rarr[rslot * safe_cast<int>(sizeof(Value)) + val_begin];
-    }  else {
-      static_assert(StructDict::valueOffsetSize() == 1);
-      auto const val_begin = v.makeReg();
-      v << loadzbq{rarr[StructDict::valueOffsetOffset()], val_begin};
-      auto const val_offset = v.makeReg();
-      v << addq{val_begin, rslot, val_offset, v.makeReg()};
-      return rarr[val_offset * safe_cast<int>(sizeof(Value))];
-    }
-  }();
-  auto const type = rarr[rslot + StructLayout::staticTypeOffset()];
-  loadTV(v, inst->dst()->type(), dst, type, val);
+	if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+    static_assert(sizeof(UnalignedTypedValue) == 9);
+    auto const rslot_times_9 = v.makeReg();
+    v << lea{rslot[rslot * 8], rslot_times_9};
+    auto constexpr val_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_data);
+    auto constexpr type_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_type);
+    static_assert(type_offset == val_offset + 8);
+    auto const val = rarr[rslot_times_9 + val_offset];
+    auto const type = rarr[rslot_times_9 + type_offset];
+    loadTV(v, inst->dst()->type(), dst, type, val);
+  } else {
+    auto const layout = inst->src(0)->type().arrSpec().layout().bespokeLayout();
+    using DataLayout = bespoke::detail_struct_data_layout::TypePosValLayout;
+    auto const val = [&] {
+      if (layout->isConcrete()) {
+        auto const slayout = StructLayout::As(layout);
+        auto const val_begin = slayout->valueOffsetForSlot(0);
+        return rarr[rslot * safe_cast<int>(sizeof(Value)) + val_begin];
+      } else {
+        static_assert(DataLayout::valueOffsetSize() == 1);
+        auto const val_begin = v.makeReg();
+        v << loadzbq{rarr[DataLayout::valueOffsetOffset()], val_begin};
+        auto const val_offset = v.makeReg();
+        v << addq{val_begin, rslot, val_offset, v.makeReg()};
+        return rarr[val_offset * safe_cast<int>(sizeof(Value))];
+      }
+    }();
+    auto const type = rarr[rslot + DataLayout::staticTypeOffset()];
+    loadTV(v, inst->dst()->type(), dst, type, val);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

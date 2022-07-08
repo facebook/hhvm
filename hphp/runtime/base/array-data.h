@@ -47,6 +47,10 @@ namespace bespoke {
   struct LoggingArray;
   struct MonotypeVec;
 
+  namespace detail_struct_data_layout {
+    struct TypePosValLayout;
+  }
+
   // Type-safe layout index, so that we can't mix it up with other ints.
   struct LayoutIndex {
     bool operator==(LayoutIndex o) const { return raw == o.raw; }
@@ -641,6 +645,7 @@ protected:
   friend struct c_ImmMap;
   friend struct bespoke::LoggingArray;
   friend struct bespoke::MonotypeVec;
+  friend struct bespoke::detail_struct_data_layout::TypePosValLayout;
 
   uint32_t m_size;
 

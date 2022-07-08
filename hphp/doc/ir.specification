@@ -3234,9 +3234,9 @@ fields of that struct for holding intermediate values.
 
   Returns the slot at iterator position S1 in the struct dict S0.
 
-| LdStructDictKey, D(StaticStr), SStructDict S(Int), NF
+| LdStructDictKey, DBespokePosKey, SStructDict S(Int), NF
 
-| LdStructDictVal, D(InitCell),  SStructDict S(Int), NF
+| LdStructDictVal, DBespokePosVal,  SStructDict S(Int), NF
 
   Returns the key or value at slot S1 in the struct dict S0. This slot must be
   known to be present. (The result of StructDictSlotInPos is always present.)

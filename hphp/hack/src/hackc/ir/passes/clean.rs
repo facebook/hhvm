@@ -20,14 +20,60 @@ use newtype::IdVec;
 use print::FmtRawVid;
 
 /// Attempt to clean a Func by doing several clean-up steps:
+/// - merge simple jumps
 /// - rpo_sort
 /// - remove common JmpArgs parameters
 /// - renumber Instrs
 /// - remove unreferenced Instrs.
 pub fn run<'a>(func: &mut Func<'a>) {
+    merge_simple_jumps(func);
     crate::rpo_sort(func);
     remove_common_args(func);
     renumber(func);
+}
+
+/// Go through the blocks. Any blocks that are connected by a singular edge are
+/// merged.
+fn merge_simple_jumps(func: &mut Func<'_>) {
+    let predecessors = analysis::compute_predecessor_blocks(
+        func,
+        PredecessorFlags {
+            mark_entry_blocks: true,
+            catch: PredecessorCatchMode::Throw,
+        },
+    );
+
+    for bid in func.block_ids() {
+        loop {
+            let terminator = func.get_terminator(bid);
+            match terminator {
+                Some(Terminator::Jmp(target_bid, _, _)) => {
+                    let target_bid = *target_bid;
+                    if (func.block(bid).tcid == func.block(target_bid).tcid)
+                        && (predecessors[&target_bid].len() == 1)
+                    {
+                        // Steal the target's iids.  If the target is later then
+                        // it will show as having no terminator.
+                        let target_iids = std::mem::take(&mut func.block_mut(target_bid).iids);
+
+                        let block = func.block_mut(bid);
+                        // ...remove the terminator
+                        block.iids.pop();
+                        // ...amend the target block.
+                        block.iids.extend(target_iids.into_iter());
+
+                        // Don't need to update the predecessors - since we only
+                        // check that there is only a single predecessor that
+                        // will still be true when we check the new terminator.
+                        continue;
+                    }
+                }
+                _ => {}
+            }
+
+            break;
+        }
+    }
 }
 
 /// Go through a Func and for any BlockParam that is passed the same value from
@@ -98,8 +144,6 @@ fn remove_common_args(func: &mut Func<'_>) {
                     }
                 }
                 CommonArgs::SomeCommon(common_params) => {
-                    changed = true;
-
                     trace!(
                         "    common: [{}]",
                         common_params
@@ -120,6 +164,10 @@ fn remove_common_args(func: &mut Func<'_>) {
                         trace!("    remap: {} => {}", param, FmtRawVid(common));
                         remap[param] = common;
                         remove.push(i);
+                    }
+
+                    if !remove.is_empty() {
+                        changed = true;
                     }
 
                     // Remove the unused args from the predecessors.

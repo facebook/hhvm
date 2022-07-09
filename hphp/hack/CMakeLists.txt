@@ -290,15 +290,8 @@ function(build_cxx_bridge NAME)
   target_compile_options("${NAME}" PRIVATE "-iquote" "${GENERATED_CXXBRIDGE}")
 endfunction()
 
-build_cxx_bridge(
-  parser_ffi
-  DIR "src/parser/ffi_bridge"
-)
-build_cxx_bridge(
-  compiler_ffi
-  DIR "src/hackc/ffi_bridge"
-  LINK_LIBS hdf
-)
+build_cxx_bridge(parser_ffi DIR "src/parser/ffi_bridge")
+build_cxx_bridge(compiler_ffi DIR "src/hackc/ffi_bridge" LINK_LIBS hdf)
 build_cxx_bridge(
   hdf
   DIR "src/utils/hdf"
@@ -314,11 +307,6 @@ build_cxx_bridge(
  hhvm_hhbc_defs_ffi
  DIR "src/hackc/hhvm_cxx/hhvm_hhbc_defs"
  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp"
-)
-
-add_library(external_decl_provider_cpp
-  STATIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
 )
 
 if (NOT LZ4_FOUND)

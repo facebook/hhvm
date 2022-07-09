@@ -13,13 +13,14 @@ use compile::ParserFlags;
 use compile::Profile;
 use decl_provider::DeclProvider;
 use decl_provider::Error;
-use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
 use direct_decl_parser::{self};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::file_info::NameType;
+use oxidized_by_ref::shallow_decl_defs::Decl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use std::cell::RefCell;
@@ -214,13 +215,14 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts) -> Result<()> {
                 false => DeclsHolder::ByRef(parsed_file.decls),
                 true => DeclsHolder::Ser(decl_provider::serialize_decls(&parsed_file.decls)?),
             },
-            type_requests: Default::default(),
+            requests: Default::default(),
         };
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, Some(&provider))?;
         if hackc_opts.log_decls_requested {
-            for a in provider.type_requests.borrow().iter() {
-                println!("type/{}: {}, {}", a.depth, a.symbol, a.found);
+            for a in provider.requests.borrow().iter() {
+                let kind = decl_provider::external::name_type_to_autoload_kind(a.kind);
+                println!("{}, {}, {}", a.symbol, kind, a.found);
             }
             println!();
         } else {
@@ -245,8 +247,8 @@ enum DeclsHolder<'a> {
 
 #[derive(Debug)]
 struct Access {
+    kind: NameType,
     symbol: String,
-    depth: u64,
     found: bool,
 }
 
@@ -254,21 +256,25 @@ struct Access {
 struct SingleDeclProvider<'a> {
     arena: &'a bumpalo::Bump,
     decls: DeclsHolder<'a>,
-    type_requests: RefCell<Vec<Access>>,
+    requests: RefCell<Vec<Access>>,
 }
 
 impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>, Error> {
-        let decl = match &self.decls {
-            DeclsHolder::ByRef(decls) => decl_provider::find_type_decl(decls, symbol),
-            DeclsHolder::Ser(data) => decl_provider::find_type_decl(
-                &decl_provider::deserialize_decls(self.arena, data)?,
-                symbol,
-            ),
+    fn decl(&self, kind: NameType, symbol: &str, _depth: u64) -> Result<Decl<'a>, Error> {
+        let query = |decls: &Decls<'a>| {
+            decls
+                .iter()
+                .find(|(sym, decl)| *sym == symbol && decl.kind() == kind)
+                .map(|(_, decl)| decl)
+                .ok_or(Error::NotFound)
         };
-        self.type_requests.borrow_mut().push(Access {
+        let decl = match &self.decls {
+            DeclsHolder::ByRef(decls) => query(decls),
+            DeclsHolder::Ser(data) => query(&decl_provider::deserialize_decls(self.arena, data)?),
+        };
+        self.requests.borrow_mut().push(Access {
+            kind,
             symbol: symbol.into(),
-            depth,
             found: decl.is_ok(),
         });
         decl

@@ -61,13 +61,12 @@ HhvmDeclProvider::HhvmDeclProvider(
   , m_repo{repo}
 {}
 
-// Called by hackc.
-ExternalDeclProviderResult HhvmDeclProvider::getType(
+// Called by hackc, potentially on a different thread.
+DeclProviderResult HhvmDeclProvider::getDecl(
+  AutoloadMap::KindOf kind,
   std::string_view symbol,
   uint64_t depth
-) noexcept {
-  auto const kind = AutoloadMap::KindOf::TypeOrTypeAlias;
-
+) {
   // TODO(T110866581): symbol should be normalized by hackc
   std::string_view sym(normalizeNS(symbol));
   ITRACE(3, "DP lookup {}\n", sym);
@@ -80,7 +79,7 @@ ExternalDeclProviderResult HhvmDeclProvider::getType(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return ExternalDeclProviderResult::from_decls(result->second);
+      return DeclProviderResult::from_decls(result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -103,11 +102,11 @@ ExternalDeclProviderResult HhvmDeclProvider::getType(
     // Insert decl_result into the cache, return DeclResult::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return ExternalDeclProviderResult::from_decls(it->second);
+    return DeclProviderResult::from_decls(it->second);
   }
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
   m_sawMissing = true;
-  return ExternalDeclProviderResult::missing();
+  return DeclProviderResult::missing();
 }
 
 std::vector<DeclDep> HhvmDeclProvider::getFlatDeps() const {
@@ -151,4 +150,25 @@ std::vector<std::vector<DeclLoc>> HhvmDeclProvider::getDeps() const {
 
   return ret;
 }
+
+extern "C" {
+
+DeclProviderResult hhvm_decl_provider_get_decl(
+    void* provider, int symbol_kind, char const* symbol, size_t len,
+    uint64_t depth
+) {
+  try {
+    // Unsafe: if `symbol_kind` is out of range the result of this cast is UB.
+    HPHP::AutoloadMap::KindOf kind {
+      static_cast<HPHP::AutoloadMap::KindOf>(symbol_kind)
+    };
+    return ((HhvmDeclProvider*)provider)->getDecl(
+        kind, std::string_view(symbol, len), depth
+    );
+  } catch(...) {
+    not_reached();
+  }
+}
+
+} //extern "C"
 }//namespace HPHP

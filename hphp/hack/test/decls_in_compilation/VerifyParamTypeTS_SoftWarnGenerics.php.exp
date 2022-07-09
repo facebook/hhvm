@@ -1,3 +1,3 @@
-type/0: \WarnReifiedGenericsClass, true
-type/0: \SoftReifiedGenericsClass, true
+\WarnReifiedGenericsClass, 0, true
+\SoftReifiedGenericsClass, 0, true
 

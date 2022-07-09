@@ -111,7 +111,7 @@ struct SoapServiceScope {
     SOAP_GLOBAL(soap_version) = server->m_version;
     SOAP_GLOBAL(sdl) = server->m_sdl;
     SOAP_GLOBAL(encoding) = server->m_encoding;
-    SOAP_GLOBAL(classmap) = server->m_classmap;
+    SOAP_GLOBAL(soap_classmap) = server->m_server_classmap;
     SOAP_GLOBAL(typemap) = server->m_typemap;
     SOAP_GLOBAL(features) = server->m_features;
   }
@@ -122,7 +122,7 @@ struct SoapServiceScope {
     SOAP_GLOBAL(soap_version) = client->m_soap_version;
     SOAP_GLOBAL(sdl) = client->m_sdl;
     SOAP_GLOBAL(encoding) = client->m_encoding;
-    SOAP_GLOBAL(classmap) = client->m_classmap;
+    SOAP_GLOBAL(soap_classmap) = client->m_client_classmap;
     SOAP_GLOBAL(typemap) = client->m_typemap;
     SOAP_GLOBAL(features) = client->m_features;
   }
@@ -132,7 +132,7 @@ struct SoapServiceScope {
     SOAP_GLOBAL(soap_version) = m_old_soap_version;
     SOAP_GLOBAL(encoding) = m_old_encoding;
     SOAP_GLOBAL(sdl) = m_old_sdl;
-    SOAP_GLOBAL(classmap) = m_old_classmap;
+    SOAP_GLOBAL(soap_classmap) = m_old_classmap;
     SOAP_GLOBAL(typemap) = m_old_typemap;
     SOAP_GLOBAL(features) = m_old_features;
   }
@@ -150,7 +150,7 @@ private:
     m_old_soap_version = SOAP_GLOBAL(soap_version);
     m_old_sdl = SOAP_GLOBAL(sdl);
     m_old_encoding = SOAP_GLOBAL(encoding);
-    m_old_classmap = SOAP_GLOBAL(classmap);
+    m_old_classmap = SOAP_GLOBAL(soap_classmap);
     m_old_typemap = SOAP_GLOBAL(typemap);
     m_old_features = SOAP_GLOBAL(features);
   }
@@ -1982,7 +1982,7 @@ void HHVM_METHOD(SoapServer, __construct,
     }
 
     if (options[s_classmap].isArray()) {
-      data->m_classmap = options[s_classmap].toArray();
+      data->m_server_classmap = options[s_classmap].toArray();
     }
 
     if (options[s_typemap].isArray()) {
@@ -2518,7 +2518,7 @@ void HHVM_METHOD(SoapClient, __construct,
       }
       s_soap_data->register_encoding(data->m_encoding);
     }
-    data->m_classmap = options[s_classmap].toArray();
+    data->m_client_classmap = options[s_classmap].toArray();
     data->m_features = options[s_features].toInt32();
     data->m_ssl_method = options[s_ssl_method].toInt32();
     data->m_connection_timeout = options[s_connection_timeout].toInt64();

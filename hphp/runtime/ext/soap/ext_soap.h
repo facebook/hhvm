@@ -42,7 +42,7 @@ struct SoapServer {
   int                        m_version;
   sdl                       *m_sdl;
   xmlCharEncodingHandlerPtr  m_encoding;
-  Array                      m_classmap;
+  Array                      m_server_classmap;
   encodeMap                 *m_typemap;
   int                        m_features;
   Array                      m_soap_headers;
@@ -60,7 +60,7 @@ struct SoapClient {
   sdl                        *m_sdl;
   xmlCharEncodingHandlerPtr   m_encoding;
   encodeMap                  *m_typemap;
-  Array                       m_classmap;
+  Array                       m_client_classmap;
   int                         m_features;
   String                      m_uri;
   String                      m_location;

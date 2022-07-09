@@ -118,7 +118,7 @@ public:
   int m_soap_version;
   sdl *m_sdl;
   xmlCharEncodingHandlerPtr m_encoding;
-  Array m_classmap; // typename => class name
+  Array m_soap_classmap; // typename => class name
   encodeMap *m_typemap;  // typename => encode
   int m_features;
 

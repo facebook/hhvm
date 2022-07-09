@@ -593,10 +593,10 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
       xmlSetNs(node, nsp);
     }
   } else {
-    if (check_class_map && !SOAP_GLOBAL(classmap).empty() &&
+    if (check_class_map && !SOAP_GLOBAL(soap_classmap).empty() &&
         data.isObject()) {
       auto clsname = data.toObject()->getClassName();
-      for (ArrayIter iter(SOAP_GLOBAL(classmap)); iter; ++iter) {
+      for (ArrayIter iter(SOAP_GLOBAL(soap_classmap)); iter; ++iter) {
         if (same(iter.second(), clsname.get())) {
           /* TODO: namespace isn't stored */
           encodePtr enc = nullptr;
@@ -1397,10 +1397,10 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
   String clsname;
   if (pce) {
     ce = pce;
-  } else if (!SOAP_GLOBAL(classmap).empty() && !etype->type_str.empty()) {
+  } else if (!SOAP_GLOBAL(soap_classmap).empty() && !etype->type_str.empty()) {
     String type_str(etype->type_str);
-    if (SOAP_GLOBAL(classmap).exists(type_str)) {
-      clsname = SOAP_GLOBAL(classmap)[type_str].toString();
+    if (SOAP_GLOBAL(soap_classmap).exists(type_str)) {
+      clsname = SOAP_GLOBAL(soap_classmap)[type_str].toString();
       ce = clsname.data();
     }
   }

@@ -115,7 +115,7 @@ void SoapData::reset() {
   m_soap_version = SOAP_1_1;
   m_sdl = nullptr;
   m_encoding = nullptr;
-  m_classmap.reset();
+  m_soap_classmap.reset();
   m_typemap = nullptr;
   m_features = 0;
 

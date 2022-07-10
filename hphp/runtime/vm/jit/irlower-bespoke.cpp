@@ -1116,7 +1116,7 @@ void cgLdStructDictVal(IRLS& env, const IRInstruction* inst) {
   } else {
     auto const layout = inst->src(0)->type().arrSpec().layout().bespokeLayout();
     using DataLayout = bespoke::detail_struct_data_layout::TypePosValLayout;
-    auto const val = [&] {
+    auto const val = [&]() -> Vptr {
       if (layout->isConcrete()) {
         auto const slayout = StructLayout::As(layout);
         auto const val_begin = slayout->valueOffsetForSlot(0);

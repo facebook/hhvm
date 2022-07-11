@@ -1,14 +1,14 @@
 === Shape analysis results for if3.php
 Summary for \f:
-[6:10-25] :
+[6:10-25] [Allocation]:
   shape(
     a => int
   )
-[8:10-27] :
+[8:10-27] [Allocation]:
   shape(
     b => bool
   )
-[11:11-13] :
+[11:11-13] [Argument]:
   shape(
     ?a => int
     ?b => bool

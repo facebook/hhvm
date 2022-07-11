@@ -1,10 +1,10 @@
 === Shape analysis results for nested.php
 Summary for \f:
-[4:3-31] :
+[4:3-31] [Allocation]:
   shape(
     a => \HH\dict<string, int>
   )
-[4:15-30] :
+[4:15-30] [Allocation]:
   shape(
     b => int
   )

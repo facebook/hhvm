@@ -11,7 +11,7 @@ open Shape_analysis_types
 module Logic = Shape_analysis_logic
 
 type constraints = {
-  markers: Pos.t list;
+  markers: (marker_kind * Pos.t) list;
   static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
@@ -44,8 +44,8 @@ let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
     transitive_closure new_set
 
 let partition_constraint constraints = function
-  | Marks (_, entity) ->
-    { constraints with markers = entity :: constraints.markers }
+  | Marks (kind, entity) ->
+    { constraints with markers = (kind, entity) :: constraints.markers }
   | Has_static_key (entity, key, ty) ->
     {
       constraints with
@@ -123,7 +123,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   let subsets_reflexive =
-    List.map ~f:(fun pos -> Literal pos) markers
+    List.map ~f:(fun (_, pos) -> Literal pos) markers
     @ List.map static_accesses ~f:(fun (e, _, _) -> e)
     @ dynamic_accesses
     @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
@@ -192,10 +192,11 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
-  let static_shape_results : shape_keys Pos.Map.t =
+  let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
     markers
     |> List.fold
-         ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
+         ~f:(fun map (kind, pos) ->
+           Pos.Map.add pos (kind, ShapeKeyMap.empty) map)
          ~init:Pos.Map.empty
   in
 
@@ -210,19 +211,19 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
     EntitySet.of_list @@ upward_dynamic_accesses @ downward_dynamic_accesses
   in
-  let static_shape_results : shape_keys Pos.Map.t =
+  let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
     static_shape_results
     |> Pos.Map.filter (fun pos _ ->
            not @@ EntitySet.mem (Literal pos) dynamic_accesses)
   in
 
   (* Add known keys *)
-  let static_shape_results : shape_keys Pos.Map.t =
+  let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
     let update_entity entity key ty = function
       | None -> None
-      | Some shape_keys' ->
+      | Some (kind, shape_keys') ->
         let optional_field = is_optional entity key in
-        Some (Logic.(singleton key ty optional_field <> shape_keys') ~env)
+        Some (kind, Logic.(singleton key ty optional_field <> shape_keys') ~env)
     in
     static_accesses_upwards_closed
     |> List.fold ~init:static_shape_results ~f:(fun pos_map (entity, key, ty) ->
@@ -236,16 +237,17 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   let static_shape_results : shape_result list =
     static_shape_results
     |> Pos.Map.bindings
-    |> List.map ~f:(fun (pos, keys_and_types) ->
+    |> List.map ~f:(fun (pos, (marker_kind, keys_and_types)) ->
            Shape_like_dict
              ( pos,
+               marker_kind,
                ShapeKeyMap.bindings keys_and_types
                |> List.map ~f:(fun (a, (b, c)) -> (a, b, c)) ))
   in
 
   let dynamic_shape_results =
     markers
-    |> List.map ~f:(fun pos -> Literal pos)
+    |> List.map ~f:(fun (_, pos) -> Literal pos)
     |> EntitySet.of_list
     |> EntitySet.inter dynamic_accesses
     |> EntitySet.elements

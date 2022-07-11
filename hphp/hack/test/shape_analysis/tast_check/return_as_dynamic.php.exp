@@ -1,4 +1,4 @@
-[RESULT] \f: [5:8-25] :
+[RESULT] \f: [5:8-25] [Allocation]:
   shape(
     b => bool
   )

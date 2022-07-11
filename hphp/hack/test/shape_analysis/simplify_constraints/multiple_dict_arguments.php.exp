@@ -1,18 +1,18 @@
 === Shape analysis results for multiple_dict_arguments.php
 Summary for \f:
-[4:8-23] :
+[4:8-23] [Allocation]:
   shape(
     a => int
   )
-[5:8-25] :
+[5:8-25] [Allocation]:
   shape(
     b => bool
   )
-[6:12-14] :
+[6:12-14] [Argument]:
   shape(
     a => int
   )
-[6:16-18] :
+[6:16-18] [Argument]:
   shape(
     b => bool
   )

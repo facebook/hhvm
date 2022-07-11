@@ -20,12 +20,21 @@ let of_pos pos =
       ("end", JSON.int_ ecol);
     ]
 
-let of_marker pos _fields = JSON.JSON_Object [("pos", of_pos pos)]
+let of_marker pos kind _fields =
+  JSON.JSON_Object
+    [("pos", of_pos pos); ("kind", JSON.string_ (show_marker_kind kind))]
 
 let of_results results =
   List.filter_map
     ~f:(function
-      | Shape_like_dict (pos, fields) -> Some (of_marker pos fields)
+      | Shape_like_dict (pos, kind, fields) ->
+        begin
+          match kind with
+          | Allocation
+          | Parameter ->
+            Some (of_marker pos kind fields)
+          | Argument -> None
+        end
       | Dynamically_accessed_dict _ -> None)
     results
   |> JSON.array_ (fun x -> x)

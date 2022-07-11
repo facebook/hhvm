@@ -1,10 +1,10 @@
 === Shape analysis results for entity_assignment.php
 Summary for \f:
-[4:8-23] :
+[4:8-23] [Allocation]:
   shape(
     a => int
   )
-[6:11-13] :
+[6:11-13] [Argument]:
   shape(
     a => int
     b => int

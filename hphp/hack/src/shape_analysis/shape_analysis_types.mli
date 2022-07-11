@@ -64,6 +64,7 @@ type marker_kind =
   | Argument
       (** A dict argument to a function or method such as `$d = dict[]; f($d)`
        *)
+[@@deriving show]
 
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
@@ -86,9 +87,12 @@ type constraint_ =
 
 type shape_result =
   | Shape_like_dict of
-      Pos.t * (shape_key * Typing_defs.locl_ty * optional_field) list
+      Pos.t
+      * marker_kind
+      * (shape_key * Typing_defs.locl_ty * optional_field) list
       (** A dict that acts like a shape along with its keys, types the keys
-          point to, and the keys are optional *)
+          point to, and the keys are optional. The marker kind distinguishes
+          for what we are reporting a result. *)
   | Dynamically_accessed_dict of entity_
       (** A dict that is accessed or used dynamically. This is important
           in inter-procedural setting where a locally static dict calls a

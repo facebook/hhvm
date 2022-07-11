@@ -21,9 +21,8 @@ let show_ty env = Typing_print.full env
 let show_constraint_ env =
   let show_ty = show_ty env in
   function
-  | Marks (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
-  | Marks (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
-  | Marks (Argument, pos) -> Format.asprintf "Argument at %a" Pos.pp pos
+  | Marks (kind, pos) ->
+    Format.asprintf "%s at %a" (show_marker_kind kind) Pos.pp pos
   | Has_static_key (entity, key, ty) ->
     Format.asprintf
       "SK %s : shape(%s => %s)"
@@ -36,7 +35,7 @@ let show_constraint_ env =
     show_entity left ^ " ∪ " ^ show_entity right ^ " = " ^ show_entity join
 
 let show_shape_result env = function
-  | Shape_like_dict (pos, keys_and_types) ->
+  | Shape_like_dict (pos, kind, keys_and_types) ->
     let show_ty = show_ty env in
     let show_key_and_type (key, ty, optional) =
       match optional with
@@ -44,11 +43,15 @@ let show_shape_result env = function
       | FOptional -> Format.asprintf "    ?%s => %s" (show_key key) (show_ty ty)
     in
     if List.is_empty keys_and_types then
-      Format.asprintf "%s : shape()" (Format.asprintf "%a" Pos.pp pos)
+      Format.asprintf
+        "%s [%s]: shape()"
+        (Format.asprintf "%a" Pos.pp pos)
+        (show_marker_kind kind)
     else
       Format.asprintf
-        "%s :\n  shape(\n%s\n  )"
+        "%s [%s]:\n  shape(\n%s\n  )"
         (Format.asprintf "%a" Pos.pp pos)
+        (show_marker_kind kind)
         (String.concat ~sep:"\n" (List.map keys_and_types ~f:show_key_and_type))
   | Dynamically_accessed_dict entity ->
     Format.asprintf "%s : dynamic" (show_entity entity)

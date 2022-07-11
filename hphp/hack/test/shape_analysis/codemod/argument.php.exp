@@ -1,0 +1,9 @@
+=== Shape analysis results for argument.php
+[
+  [
+    {"pos":{"path":"argument.php","line":4,"start":12,"end":30},"kind":"Parameter"}
+  ],
+  [
+    {"pos":{"path":"argument.php","line":8,"start":8,"end":24},"kind":"Allocation"}
+  ]
+]

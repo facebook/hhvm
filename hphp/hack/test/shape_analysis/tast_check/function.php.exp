@@ -1,10 +1,10 @@
-[RESULT] \f: [4:8-36] :
+[RESULT] \f: [4:8-36] [Allocation]:
   shape(
     a => int
     b => bool
   )
-[RESULT] \f: [10:8-14] : shape()
-[RESULT] \f: [11:8-25] :
+[RESULT] \f: [10:8-14] [Allocation]: shape()
+[RESULT] \f: [11:8-25] [Allocation]:
   shape(
     a => bool
   )

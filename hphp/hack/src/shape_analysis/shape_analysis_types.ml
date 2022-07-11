@@ -56,6 +56,7 @@ type marker_kind =
   | Allocation
   | Parameter
   | Argument
+[@@deriving show { with_path = false }]
 
 type constraint_ =
   | Marks of marker_kind * Pos.t
@@ -70,7 +71,9 @@ type constraint_ =
 
 type shape_result =
   | Shape_like_dict of
-      Pos.t * (shape_key * Typing_defs.locl_ty * optional_field) list
+      Pos.t
+      * marker_kind
+      * (shape_key * Typing_defs.locl_ty * optional_field) list
   | Dynamically_accessed_dict of entity_
 
 type lenv = entity LMap.t KMap.t

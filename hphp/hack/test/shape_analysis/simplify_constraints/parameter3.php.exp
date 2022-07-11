@@ -1,6 +1,6 @@
 === Shape analysis results for parameter3.php
 Summary for \f:
-[3:30-32] : shape()
+[3:12-29] : shape()
 [4:8-14] : shape()
 [6:11-13] :
   shape(

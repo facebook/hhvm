@@ -83,6 +83,21 @@ let rec is_suitable_target_ty tast_env ty =
     || Typing_utils.is_nothing (Tast_env.tast_env_as_typing_env tast_env) key_ty
   | _ -> false
 
+(* Extract position of a dictionary hint. This requires searching for the
+   dictionary hint recursively in the case of awaitables. *)
+let dict_pos_of_hint hint_opt =
+  let rec go (pos, hint) =
+    match hint with
+    | A.Happly ((_, id), [_; _]) when String.equal id SN.Collections.cDict ->
+      pos
+    | A.Happly ((_, id), [hint]) when String.equal id SN.Classes.cAwaitable ->
+      go hint
+    | _ -> failwith "seeked position of unsuitable parameter hint"
+  in
+  match hint_opt with
+  | Some hint -> go hint
+  | None -> failwith "parameter hint is missing"
+
 let add_key_constraint
     (env : env) entity (((_, _, key), ty) : T.expr * Typing_defs.locl_ty) : env
     =
@@ -315,17 +330,17 @@ let init_params tast_env (params : T.fun_param list) :
   let add_param (constraints, lmap) = function
     | A.
         {
-          param_pos;
           param_name;
-          param_type_hint = (ty, _);
+          param_type_hint = (ty, hint);
           param_is_variadic = false;
           _;
         } ->
       if is_suitable_target_ty tast_env ty then
         let param_lid = Local_id.make_unscoped param_name in
-        let entity_ = Literal param_pos in
+        let hint_pos = dict_pos_of_hint hint in
+        let entity_ = Literal hint_pos in
         let lmap = LMap.add param_lid (Some entity_) lmap in
-        let constraints = Exists (Parameter, param_pos) :: constraints in
+        let constraints = Exists (Parameter, hint_pos) :: constraints in
         let constraints =
           when_tast_check tast_env ~default:constraints @@ fun () ->
           Has_dynamic_key entity_ :: constraints

@@ -1,8 +1,8 @@
 === Shape analysis results for if5.php
 Summary for \f:
-[4:8-14] [Allocation]: shape()
-[7:10-16] [Allocation]: shape()
+[4:8-14] [Allocation]:
+  shape()
+[7:10-16] [Allocation]:
+  shape()
 [10:11-13] [Argument]:
-  shape(
-    a => int
-  )
+  shape('a' => int)

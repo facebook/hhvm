@@ -6,10 +6,11 @@
  *
  *)
 
+module T = Typing_defs
 open Shape_analysis_types
 
 (** Create a singleton shape key, e.g., shape('a' => int) *)
-val singleton : shape_key -> Typing_defs.locl_ty -> optional_field -> shape_keys
+val singleton : T.TShapeField.t -> T.locl_ty -> bool -> shape_keys
 
 (** Merge shape keys, e.g.,
 

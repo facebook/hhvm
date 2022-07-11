@@ -1,11 +1,5 @@
 [RESULT] \C::f: [5:10-38] [Allocation]:
-  shape(
-    a => int
-    b => bool
-  )
+  shape('a' => int, 'b' => bool)
 [RESULT] \C::g: [13:10-38] [Allocation]:
-  shape(
-    a => int
-    b => bool
-  )
+  shape('a' => int, 'b' => bool)
 No errors

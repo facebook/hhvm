@@ -1,5 +1,3 @@
 [RESULT] \f: [6:3-20] [Allocation]:
-  shape(
-    key => int
-  )
+  shape('key' => int)
 No errors

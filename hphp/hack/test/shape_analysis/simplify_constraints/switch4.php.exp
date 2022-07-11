@@ -1,24 +1,14 @@
 === Shape analysis results for switch4.php
 Summary for \f:
-[4:8-14] [Allocation]: shape()
+[4:8-14] [Allocation]:
+  shape()
 [9:15-17] [Argument]:
-  shape(
-    a => int
-  )
-[12:12-18] [Allocation]: shape()
+  shape('a' => int)
+[12:12-18] [Allocation]:
+  shape()
 [14:15-17] [Argument]:
-  shape(
-    b => string
-  )
+  shape('b' => string)
 [18:15-17] [Argument]:
-  shape(
-    ?b => string
-    c => bool
-  )
+  shape(?'b' => string, 'c' => bool)
 [21:11-13] [Argument]:
-  shape(
-    ?a => int
-    ?b => string
-    ?c => bool
-    d => float
-  )
+  shape(?'a' => int, ?'b' => string, ?'c' => bool, 'd' => float)

@@ -1,15 +1,8 @@
 === Shape analysis results for while2.php
 Summary for \f:
 [4:8-23] [Allocation]:
-  shape(
-    a => int
-  )
+  shape('a' => int)
 [7:10-26] [Allocation]:
-  shape(
-    b => string
-  )
+  shape('b' => string)
 [9:13-15] [Argument]:
-  shape(
-    b => string
-    c => bool
-  )
+  shape('b' => string, 'c' => bool)

@@ -1,6 +1,4 @@
 === Shape analysis results for await.php
 Summary for \f:
 [5:3-18] [Allocation]:
-  shape(
-    a => int
-  )
+  shape('a' => int)

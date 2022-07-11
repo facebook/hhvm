@@ -1,5 +1,3 @@
 [RESULT] \f: [7:8-25] [Allocation]:
-  shape(
-    b => bool
-  )
+  shape('b' => bool)
 No errors

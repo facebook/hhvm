@@ -1,31 +1,14 @@
 === Shape analysis results for if4.php
 Summary for \f:
 [7:12-27] [Allocation]:
-  shape(
-    a => int
-  )
+  shape('a' => int)
 [9:12-29] [Allocation]:
-  shape(
-    b => float
-  )
+  shape('b' => float)
 [13:12-29] [Allocation]:
-  shape(
-    c => bool
-  )
+  shape('c' => bool)
 [16:14-32] [Allocation]:
-  shape(
-    d => bool
-  )
+  shape('d' => bool)
 [18:14-29] [Allocation]:
-  shape(
-    e => int
-  )
+  shape('e' => int)
 [23:11-13] [Argument]:
-  shape(
-    ?a => int
-    ?b => float
-    ?c => bool
-    ?d => bool
-    ?e => int
-    f => int
-  )
+  shape(?'a' => int, ?'b' => float, ?'c' => bool, ?'d' => bool, ?'e' => int, 'f' => int)

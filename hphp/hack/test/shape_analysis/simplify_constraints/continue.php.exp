@@ -1,12 +1,8 @@
 === Shape analysis results for continue.php
 Summary for \f:
-[5:8-14] [Allocation]: shape()
+[5:8-14] [Allocation]:
+  shape()
 [8:13-15] [Argument]:
-  shape(
-    a => bool
-  )
+  shape('a' => bool)
 [14:11-13] [Argument]:
-  shape(
-    ?a => bool
-    c => float
-  )
+  shape(?'a' => bool, 'c' => float)

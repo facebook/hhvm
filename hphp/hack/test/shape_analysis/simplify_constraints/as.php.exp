@@ -1,6 +1,4 @@
 === Shape analysis results for as.php
 Summary for \f:
 [4:8-23] [Allocation]:
-  shape(
-    k => int
-  )
+  shape('k' => int)

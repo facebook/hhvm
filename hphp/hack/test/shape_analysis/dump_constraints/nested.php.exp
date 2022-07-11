@@ -2,8 +2,8 @@
 Constraints for \f:
 Allocation at [4:15-30]
 Allocation at [4:3-31]
-SK [4:15-30] : shape(b => int)
-SK [4:3-31] : shape(a => \HH\dict<string, int>)
+SK [4:15-30] : shape('b' => int)
+SK [4:3-31] : shape('a' => \HH\dict<string, int>)
 [4:15-30] ⊆ ?1
 [4:3-31] ⊆ ?2
 

@@ -6,6 +6,7 @@
  *
  *)
 
+module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 
@@ -44,17 +45,7 @@ type entity_ =
 
 type entity = entity_ option
 
-type shape_key = SK_string of string [@@deriving eq, ord]
-
-module ShapeKeyMap : Map.S with type key = shape_key
-
-module ShapeKeySet : Set.S with type elt = shape_key
-
-type optional_field =
-  | FOptional
-  | FRequired
-
-type shape_keys = (Typing_defs.locl_ty * optional_field) ShapeKeyMap.t
+type shape_keys = T.locl_phase T.shape_field_type T.TShapeMap.t
 
 type marker_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
@@ -68,7 +59,7 @@ type marker_kind =
 
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
-  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
+  | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
       (** Records a static key an entity is accessed with along with the Hack
           type of that key *)
   | Has_dynamic_key of entity_
@@ -86,10 +77,7 @@ type constraint_ =
           statement. *)
 
 type shape_result =
-  | Shape_like_dict of
-      Pos.t
-      * marker_kind
-      * (shape_key * Typing_defs.locl_ty * optional_field) list
+  | Shape_like_dict of Pos.t * marker_kind * shape_keys
       (** A dict that acts like a shape along with its keys, types the keys
           point to, and the keys are optional. The marker kind distinguishes
           for what we are reporting a result. *)

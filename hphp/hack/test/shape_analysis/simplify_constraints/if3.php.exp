@@ -1,16 +1,8 @@
 === Shape analysis results for if3.php
 Summary for \f:
 [6:10-25] [Allocation]:
-  shape(
-    a => int
-  )
+  shape('a' => int)
 [8:10-27] [Allocation]:
-  shape(
-    b => bool
-  )
+  shape('b' => bool)
 [11:11-13] [Argument]:
-  shape(
-    ?a => int
-    ?b => bool
-    c => string
-  )
+  shape(?'a' => int, ?'b' => bool, 'c' => string)

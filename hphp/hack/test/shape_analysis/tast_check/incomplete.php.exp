@@ -1,7 +1,4 @@
 [FAILURE] \C::f: [15:5-12]: Unsupported expression: Xml
 [RESULT] \C::g: [19:5-33] [Allocation]:
-  shape(
-    a => int
-    b => bool
-  )
+  shape('a' => int, 'b' => bool)
 No errors

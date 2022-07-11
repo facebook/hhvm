@@ -107,7 +107,8 @@ let add_key_constraint
       match key with
       | A.String str ->
         let ty = Tast_env.fully_expand env.tast_env ty in
-        Has_static_key (entity, SK_string str, ty)
+        Has_static_key
+          (entity, Typing_defs.TSFlit_str (Pos_or_decl.none, str), ty)
       | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_

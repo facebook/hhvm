@@ -8,11 +8,12 @@
 
 open Hh_prelude
 open Shape_analysis_types
+module T = Typing_defs
 module Logic = Shape_analysis_logic
 
 type constraints = {
   markers: (marker_kind * Pos.t) list;
-  static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
+  static_accesses: (entity_ * T.TShapeMap.key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
   joins: (entity_ * entity_ * entity_) list;
@@ -156,12 +157,12 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
               None)
           static_accesses_upwards_closed
       in
-      let left_static_keys = filter_keys left |> ShapeKeySet.of_list in
-      let right_static_keys = filter_keys right |> ShapeKeySet.of_list in
-      ShapeKeySet.diff
-        (ShapeKeySet.union left_static_keys right_static_keys)
-        (ShapeKeySet.inter left_static_keys right_static_keys)
-      |> ShapeKeySet.elements
+      let left_static_keys = filter_keys left |> T.TShapeSet.of_list in
+      let right_static_keys = filter_keys right |> T.TShapeSet.of_list in
+      T.TShapeSet.diff
+        (T.TShapeSet.union left_static_keys right_static_keys)
+        (T.TShapeSet.inter left_static_keys right_static_keys)
+      |> T.TShapeSet.elements
       |> List.map ~f:(fun optional_key -> (join, optional_key))
     in
     List.concat_map ~f:add_optional_key joins
@@ -176,19 +177,15 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
            EntityMap.update
              entity
              (function
-               | None -> Some (ShapeKeySet.singleton key)
-               | Some keys -> Some (ShapeKeySet.add key keys))
+               | None -> Some (T.TShapeSet.singleton key)
+               | Some keys -> Some (T.TShapeSet.add key keys))
              map)
          ~init:EntityMap.empty
   in
   let is_optional entity key =
     match EntityMap.find_opt entity optional_keys_upwards_closed with
-    | Some set ->
-      if ShapeKeySet.mem key set then
-        FOptional
-      else
-        FRequired
-    | None -> FRequired
+    | Some set -> T.TShapeSet.mem key set
+    | None -> false
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
@@ -196,7 +193,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     markers
     |> List.fold
          ~f:(fun map (kind, pos) ->
-           Pos.Map.add pos (kind, ShapeKeyMap.empty) map)
+           Pos.Map.add pos (kind, T.TShapeMap.empty) map)
          ~init:Pos.Map.empty
   in
 
@@ -238,11 +235,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     static_shape_results
     |> Pos.Map.bindings
     |> List.map ~f:(fun (pos, (marker_kind, keys_and_types)) ->
-           Shape_like_dict
-             ( pos,
-               marker_kind,
-               ShapeKeyMap.bindings keys_and_types
-               |> List.map ~f:(fun (a, (b, c)) -> (a, b, c)) ))
+           Shape_like_dict (pos, marker_kind, keys_and_types))
   in
 
   let dynamic_shape_results =

@@ -1,13 +1,7 @@
 === Shape analysis results for literals.php
 Summary for \darray_constraints:
 [8:3-36] [Allocation]:
-  shape(
-    a => int
-    c => string
-  )
+  shape('a' => int, 'c' => string)
 Summary for \dict_constraints:
 [4:3-31] [Allocation]:
-  shape(
-    a => int
-    b => bool
-  )
+  shape('a' => int, 'b' => bool)

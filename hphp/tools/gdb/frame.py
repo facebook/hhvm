@@ -54,39 +54,20 @@ def php_filename(func):
 
 
 def php_line_number_from_repo(func, pc):
-    unit = func['m_unit']
-    repo_id = unit['m_repoId']
-    sn = int(unit['m_sn'])
+    """ Get the line number in the php file associated with the given function and pc
 
-    conn = repo.get(repo_id)
-    if conn is None:
-        return None
+    Uses the repo.
 
-    # Query for the line table.
-    c = conn.cursor()
-    table = repo.table('UnitLineTable')
-    c.execute('SELECT data FROM %s WHERE unitSn == ?;' % table, (sn,))
+    Args:
+        func: gdb.Value[HPHP::Func*].
+        pc: gdb.Value[HPHP::CompactTaggedPtr<T, uint8_t>::Opaque].
 
-    row = c.fetchone()
-    if row is None:
-        return None
-    buf = row[0]
-
-    # Unpack the line table structure.
+    Returns:
+        line: Option[int].
+    """
+    # TODO(T125686040)
+    # unit = func['m_unit']
     line_table = []
-
-    decoder = repo.Decoder(buf)
-    size = decoder.decode()
-
-    for _i in xrange(size):
-        line_table.append({
-            'm_pastOffset': decoder.decode(),
-            'm_val':        decoder.decode(),
-        })
-
-    if not decoder.finished():
-        # Something went wrong.
-        return None
 
     # Find the upper bound for our PC.  Note that this relies on the Python
     # dict comparison operator comparing componentwise lexicographically based
@@ -101,9 +82,19 @@ def php_line_number_from_repo(func, pc):
 
 
 def php_line_number(func, pc):
-    unit = func['m_unit']
+    """ Get the line number in the php file associated with the given function and pc
 
-    line_map = unit['m_lineMap']['val']
+    Uses the shared lineMap if the pc is present.
+
+    Args:
+        func: gdb.Value[HPHP::Func*].
+        pc: gdb.Value[HPHP::CompactTaggedPtr<T, uint8_t>::Opaque].
+
+    Returns:
+        line: int.
+    """
+    shared = rawptr(func['m_shared'])
+    line_map = shared['m_lineMap']['val']
 
     if line_map is not None:
         i = 0
@@ -122,6 +113,18 @@ def php_line_number(func, pc):
 
 
 def create_native(idx, fp, rip, native_frame=None, name=None):
+    """ Collect metadata for a native frame.
+
+    Args:
+        idx: int.
+        fp: Union[int, gdb.Value(uintptr_t)].
+        native_frame: Option[gdb.Frame].
+        name: Option[str].
+
+    Returns:
+        dict with keys 'idx', 'fp', 'rip', 'func', and
+        optionally 'file' and 'line'
+    """
     # Try to get the function name.
     if native_frame is None:
         if name is None:
@@ -158,11 +161,19 @@ def create_native(idx, fp, rip, native_frame=None, name=None):
 def create_php(idx, ar, rip='0x????????', pc=None):
     """Collect metadata for a PHP frame.
 
-    All arguments are expected to be gdb.Values, except `idx'.
+    Args:
+        idx: int.
+        ar: gdb.Value[HPHP::ActRec].
+        rip: Union[str, gdb.Value[uintptr_t]].
+        pc: Option[gdb.Value[HPHP::Offset]].
+
+    Returns:
+        dict with keys 'idx', 'fp', 'rip', 'func', and
+        optionally 'file' and 'line'
     """
-    func = lookup_func_from_fp(ar)
-    shared = rawptr(func['m_shared'])
-    flags = shared['m_allFlags']
+    func = lookup_func_from_fp(ar)  # gdb.Value[HPHP::Func*]
+    shared = rawptr(func['m_shared'])  # gdb.Value[HPHP::SharedData]
+    flags = shared['m_allFlags']  # gdb.Value[HPHP::Func::SharedData::Flags]
 
     # Pull the function name.
     if not flags['m_isClosureBody']:
@@ -181,7 +192,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
         'func': '[PHP] %s()' % func_name,
     }
 
-    attrs = atomic_get(func['m_attrs']['m_attrs'])
+    attrs = atomic_get(func['m_attrs']['m_attrs'])  # HPHP::Attr
 
     if attrs & V('HPHP::AttrBuiltin'):
         # Builtins don't have source files.
@@ -189,7 +200,8 @@ def create_php(idx, ar, rip='0x????????', pc=None):
 
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
-        pc = shared['m_base'] + (ar['m_callOffAndFlags'] >> 2)
+        bc = rawptr(shared['m_bc'])
+        pc = bc + (ar['m_callOffAndFlags'] >> 2)
 
     frame['file'] = php_filename(func)
     frame['line'] = php_line_number(func, pc)

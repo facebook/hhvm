@@ -338,6 +338,13 @@ def rawptr(val):
     if name == 'HPHP::CompactSizedPtr':
         ptr = rawptr(val['m_data'])
 
+    if name == 'HPHP::LockFreePtrWrapper':
+        ptr = rawptr(val['val'])
+
+    if name == 'HPHP::TokenOrPtr':
+        inner = val['m_compact'].type
+        ptr = rawptr((val['m_compact'] >> 2).cast(inner.pointer()))
+
     if ptr is not None:
         return rawptr(ptr)
 

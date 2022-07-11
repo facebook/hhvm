@@ -30,6 +30,13 @@ LookupCommand()
 # `lookup func' command.
 
 def lookup_func(val):
+    """
+    Args:
+        val: gdb.Value[HPHP::FuncId].
+
+    Returns:
+        func: gdb.Value[HPHP::Func*]
+    """
     funcid = val.cast(T('HPHP::FuncId'))
     try:
         # Not LowPtr
@@ -43,6 +50,14 @@ def lookup_func(val):
 
 
 def lookup_func_from_fp(fp):
+    """ Get the function pointed to by the given frame pointer.
+
+    Args:
+        fp: gdb.Value[HPHP::ActRec].
+
+    Returns:
+        func: gdb.Value[HPHP::Func*]
+    """
     return lookup_func(fp['m_funcId'])
 
 

@@ -278,7 +278,7 @@ class InfoAsioCommand(gdb.Command):
 
         # Get the current vmfp().
         header_ptype = T('HPHP::rds::Header').pointer()
-        vmfp = TL('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']
+        vmfp = TL('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']  # gdb.Value[HPHP::ActRec]
 
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 

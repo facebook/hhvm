@@ -12,5 +12,6 @@ let parse = function
   | "flag" -> Some { mode = FlagTargets }
   | "dump" -> Some { mode = DumpConstraints }
   | "simplify" -> Some { mode = SimplifyConstraints }
+  | "codemod" -> Some { mode = Codemod }
   | "solve" -> Some { mode = SolveConstraints }
   | _ -> None

@@ -12,6 +12,8 @@ open Shape_analysis_pretty_printer
 module T = Tast
 module Solver = Shape_analysis_solver
 module Walker = Shape_analysis_walker
+module Codemod = Shape_analysis_codemod
+module JSON = Hh_json
 
 exception Shape_analysis_exn = Shape_analysis_exn
 
@@ -49,6 +51,15 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Solver.simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast |> SMap.iter process_callable
+  | Codemod ->
+    let process_callable constraints =
+      Solver.simplify empty_typing_env constraints |> Codemod.of_results
+    in
+    Walker.program ctx tast
+    |> SMap.map process_callable
+    |> SMap.values
+    |> JSON.array_ (fun json -> json)
+    |> Format.printf "%a" JSON.pp_json
   | SolveConstraints -> ()
 
 let callable = Walker.callable

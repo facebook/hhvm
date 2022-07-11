@@ -28,6 +28,9 @@ type mode =
       (** Partially solve key constraints within functions and methods and
           report back summaries about which `dict`s might be `shape`s and which
           functions/methods they depend on. *)
+  | Codemod
+      (** Same as simplify constraints, but outputs JSON that represents
+          instructions to codemod source code. *)
   | SolveConstraints
       (** Globally solve the key constraints and report back `dict`s that can
           be `shape`s along with the `shape` keys *)

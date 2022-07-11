@@ -20,6 +20,7 @@ type mode =
   | FlagTargets
   | DumpConstraints
   | SimplifyConstraints
+  | Codemod
   | SolveConstraints [@deriving eq]
 
 type options = { mode: mode }

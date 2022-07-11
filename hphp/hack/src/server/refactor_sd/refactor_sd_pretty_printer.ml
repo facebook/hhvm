@@ -15,9 +15,9 @@ let show_entity = function
 
 let show_constraint_ _env = function
   | Introduction pos -> Format.asprintf "Introduction at %a" Pos.pp pos
-  | Upcast ent -> Format.asprintf "Upcast at %s" (show_entity ent)
+  | Upcast (ent, _) -> Format.asprintf "Upcast at %s" (show_entity ent)
   | Subset (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 
 let show_refactor_sd_result _env = function
-  | Exists_Upcast -> Format.asprintf "Upcast exists"
+  | Exists_Upcast pos -> Format.asprintf "Upcast exists at %a" Pos.pp pos
   | No_Upcast -> Format.asprintf "No upcast"

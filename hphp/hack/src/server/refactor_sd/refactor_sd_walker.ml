@@ -46,7 +46,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, entity) = expr_ upcasted_id env e in
     let env =
       match entity with
-      | Some entity -> Env.add_constraint env (Upcast entity)
+      | Some entity -> Env.add_constraint env (Upcast (entity, pos))
       | None -> env
     in
     (env, None)

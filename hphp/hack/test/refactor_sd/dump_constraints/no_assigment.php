@@ -3,7 +3,11 @@
 <<__SupportDynamicType>>
 function f(): void {}
 
+<<__SupportDynamicType>>
+function g(): void {}
+
 function h(): void {
-  $x = f<>;
+  $x = g<>;
+  g<> upcast dynamic;
   $x upcast dynamic;
 }

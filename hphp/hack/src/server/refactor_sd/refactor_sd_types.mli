@@ -37,14 +37,15 @@ type entity = entity_ option
 type constraint_ =
   | Introduction of Pos.t
       (** Records introduction of an instance of function pointer *)
-  | Upcast of entity_  (** Records existance of upcast dynamic *)
+  | Upcast of entity_ * Pos.t
+      (** Records existance and position of upcast dynamic *)
   | Subset of entity_ * entity_
       (** Records that the first keys of the first entity are all present in
           the second. *)
 
 (** Relationship with shape_analysis: shape_result *)
 type refactor_sd_result =
-  | Exists_Upcast
+  | Exists_Upcast of Pos.t
   | No_Upcast
 
 (** Local variable environment. Its values are `entity`, i.e., `entity_
@@ -57,3 +58,9 @@ type env = {
   tast_env: Tast_env.env;
       (** TAST env associated with the definition being analysed *)
 }
+
+module PointsToSet : Set.S with type elt = entity_ * entity_
+
+module EntityMap : Map.S with type key = entity_
+
+module EntitySet : Set.S with type elt = entity_

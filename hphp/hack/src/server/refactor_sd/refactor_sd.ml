@@ -9,6 +9,7 @@ open Hh_prelude
 open Refactor_sd_types
 open Refactor_sd_pretty_printer
 module T = Tast
+module Solver = Refactor_sd_solver
 module Walker = Refactor_sd_walker
 
 exception Refactor_sd_exn = Refactor_sd_exn
@@ -40,16 +41,27 @@ let do_
     in
     Walker.program function_name ctx tast
     |> SMap.iter print_function_constraints
-  | SimplifyConstraints
-  | SolveConstraints ->
-    ()
+  | SimplifyConstraints ->
+    let print_callable_summary (id : string) (results : refactor_sd_result list)
+        : unit =
+      Format.printf "Summary for %s:\n" id;
+      List.iter results ~f:(fun result ->
+          Format.printf "%s\n" (show_refactor_sd_result empty_typing_env result))
+    in
+    let process_callable id constraints =
+      Solver.simplify empty_typing_env constraints |> print_callable_summary id
+    in
+    Walker.program function_name ctx tast |> SMap.iter process_callable
+  | SolveConstraints -> ()
 
 let callable = Walker.callable
+
+let simplify = Solver.simplify
 
 let show_refactor_sd_result = show_refactor_sd_result
 
 let contains_upcast = function
-  | Exists_Upcast -> true
+  | Exists_Upcast _ -> true
   | _ -> false
 
 let show_refactor_sd_result = show_refactor_sd_result

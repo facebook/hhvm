@@ -8,6 +8,7 @@
     refactor_sd_options
     refactor_sd_pretty_printer
     refactor_sd_walker
+    refactor_sd_solver
     refactor_sd_types)
   (libraries
     core_kernel

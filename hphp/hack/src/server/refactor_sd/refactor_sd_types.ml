@@ -28,11 +28,11 @@ type entity = entity_ option
 
 type constraint_ =
   | Introduction of Pos.t
-  | Upcast of entity_
+  | Upcast of entity_ * Pos.t
   | Subset of entity_ * entity_
 
 type refactor_sd_result =
-  | Exists_Upcast
+  | Exists_Upcast of Pos.t
   | No_Upcast
 
 type lenv = entity LMap.t KMap.t
@@ -42,3 +42,24 @@ type env = {
   lenv: lenv;
   tast_env: Tast_env.t;
 }
+
+module PointsToSet = Set.Make (struct
+  type t = entity_ * entity_
+
+  let compare (a, b) (c, d) =
+    match compare_entity_ a c with
+    | 0 -> compare_entity_ b d
+    | x -> x
+end)
+
+module EntityMap = Map.Make (struct
+  type t = entity_
+
+  let compare = compare_entity_
+end)
+
+module EntitySet = Set.Make (struct
+  type t = entity_
+
+  let compare = compare_entity_
+end)

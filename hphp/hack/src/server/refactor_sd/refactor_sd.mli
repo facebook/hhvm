@@ -14,6 +14,9 @@ exception Refactor_sd_exn of string
 
 val do_ : string -> options -> Provider_context.t -> Tast.program -> unit
 
+val simplify :
+  Typing_env_types.env -> constraint_ list -> refactor_sd_result list
+
 val callable :
   string ->
   Tast_env.t ->

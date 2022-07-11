@@ -789,11 +789,11 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   // Build up the initial worklist:
   for (auto const& f : ctx.cls->methods) {
-    if (f->name->isame(s_86pinit.get()) ||
-        f->name->isame(s_86sinit.get()) ||
-        f->name->isame(s_86linit.get()) ||
-        f->name->isame(s_86cinit.get()) ||
-        f->name->isame(s_86reifiedinit.get())) {
+    if (f->name == s_86pinit.get() ||
+        f->name == s_86sinit.get() ||
+        f->name == s_86linit.get() ||
+        f->name == s_86cinit.get() ||
+        f->name == s_86reifiedinit.get()) {
       continue;
     }
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);

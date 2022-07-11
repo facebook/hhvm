@@ -864,7 +864,7 @@ void add_stringish(php::Class* cls) {
   const auto has_toString = std::any_of(
     begin(cls->methods),
     end(cls->methods),
-    [](const auto& func) { return func->name->isame(s_toString.get()); });
+    [](const auto& func) { return func->name == s_toString.get(); });
   if (has_toString) {
     FTRACE(2, "Adding Stringish, StringishObject and XHPChild to {}\n", cls->name->data());
     cls->interfaceNames.push_back(s_StringishObject.get());

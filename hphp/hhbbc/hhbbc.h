@@ -48,7 +48,8 @@ struct OpHash {
 
 namespace HHBBC {
 
-using MethodMap = hphp_fast_string_imap<hphp_fast_string_iset>;
+// Map case-insensitive class name => Set<case-sensitive method name>
+using MethodMap = hphp_fast_string_imap<hphp_fast_string_set>;
 using OpcodeSet = hphp_fast_set<Op,OpHash>;
 
 //////////////////////////////////////////////////////////////////////

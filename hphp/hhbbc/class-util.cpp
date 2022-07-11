@@ -51,7 +51,7 @@ bool is_collection(res::Class cls) {
 
 php::Func* find_method(const php::Class* cls, SString name) {
   for (auto& m : cls->methods) {
-    if (m->name->isame(name)) {
+    if (m->name == name) {
       return m.get();
     }
   }
@@ -173,7 +173,7 @@ Type loosen_this_prop_for_serialization(const php::Class& ctx,
                                         Type type) {
   // The 86reified_prop has special enforcement for serialization, so
   // we don't have to pessimize it as much.
-  if (name->isame(s_86reified_prop.get())) {
+  if (name == s_86reified_prop.get()) {
     return union_of(
       std::move(type),
       get_type_of_reified_list(ctx.userAttributes)

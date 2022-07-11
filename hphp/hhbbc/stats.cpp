@@ -89,16 +89,6 @@ struct TypeStat {
 #undef X
 };
 
-struct ISameCmp {
-  bool equal(SString s1, SString s2) const {
-    return s1->isame(s2);
-  }
-
-  size_t hash(SString s) const {
-    return s->hash();
-  }
-};
-
 #define TAG(x,...) 1 +
 constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS(TAG) 0 ;
 #undef TAG

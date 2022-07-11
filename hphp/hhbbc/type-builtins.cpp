@@ -28,14 +28,14 @@ const StaticString s_Map("HH\\Map");
 const StaticString s_Set("HH\\Set");
 
 const StaticString s_add("add");
-const StaticString s_addall("addall");
+const StaticString s_addAll("addAll");
 const StaticString s_append("append");
 const StaticString s_clear("clear");
 const StaticString s_remove("remove");
-const StaticString s_removeall("removeall");
-const StaticString s_removekey("removekey");
+const StaticString s_removeAll("removeAll");
+const StaticString s_removeKey("removeKey");
 const StaticString s_set("set");
-const StaticString s_setall("setall");
+const StaticString s_setAll("setAll");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -45,32 +45,32 @@ bool is_collection_method_returning_this(const php::Class* cls,
 
   if (cls->name->isame(s_Vector.get())) {
     return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_append.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_removekey.get()) ||
-      func->name->isame(s_set.get()) ||
-      func->name->isame(s_setall.get());
+      func->name->same(s_add.get()) ||
+      func->name->same(s_addAll.get()) ||
+      func->name->same(s_append.get()) ||
+      func->name->same(s_clear.get()) ||
+      func->name->same(s_removeKey.get()) ||
+      func->name->same(s_set.get()) ||
+      func->name->same(s_setAll.get());
   }
 
   if (cls->name->isame(s_Map.get())) {
     return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_remove.get()) ||
-      func->name->isame(s_set.get()) ||
-      func->name->isame(s_setall.get());
+      func->name->same(s_add.get()) ||
+      func->name->same(s_addAll.get()) ||
+      func->name->same(s_clear.get()) ||
+      func->name->same(s_remove.get()) ||
+      func->name->same(s_set.get()) ||
+      func->name->same(s_setAll.get());
   }
 
   if (cls->name->isame(s_Set.get())) {
     return
-      func->name->isame(s_add.get()) ||
-      func->name->isame(s_addall.get()) ||
-      func->name->isame(s_clear.get()) ||
-      func->name->isame(s_remove.get()) ||
-      func->name->isame(s_removeall.get());
+      func->name->same(s_add.get()) ||
+      func->name->same(s_addAll.get()) ||
+      func->name->same(s_clear.get()) ||
+      func->name->same(s_remove.get()) ||
+      func->name->same(s_removeAll.get());
   }
 
   return false;

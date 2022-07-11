@@ -944,7 +944,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   MethProfile data = profile.data();
 
   if (auto const uniqueMeth = data.uniqueMeth()) {
-    assertx(uniqueMeth->name()->isame(methodName));
+    assertx(uniqueMeth->name()->same(methodName));
     if (auto const uniqueClass = data.uniqueClass()) {
       // Profiling saw a unique class.
       // Check for it, then burn in the func
@@ -990,7 +990,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   }
 
   if (auto const baseMeth = data.baseMeth()) {
-    if (!baseMeth->name()->isame(methodName)) {
+    if (!baseMeth->name()->same(methodName)) {
       emitFCall();
       return;
     }
@@ -1025,7 +1025,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   }
 
   if (auto const intfMeth = data.interfaceMeth()) {
-    if (!intfMeth->name()->isame(methodName)) {
+    if (!intfMeth->name()->same(methodName)) {
       emitFCall();
       return;
     }

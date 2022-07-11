@@ -117,7 +117,8 @@ const StaticString
   s_type_hint_nullable("type_hint_nullable"),
   s_is_reified("is_reified"),
   s_is_soft("is_soft"),
-  s_is_warn("is_warn");
+  s_is_warn("is_warn"),
+  s___construct("__construct");
 
 Class* Reflection::s_ReflectionExceptionClass = nullptr;
 Class* Reflection::s_ReflectionExtensionClass = nullptr;
@@ -385,7 +386,7 @@ static bool isConstructor(const Func* func) {
   PreClass* pcls = func->preClass();
   if (!pcls || (pcls->attrs() & AttrInterface)) { return false; }
   if (func->implCls()) { return func == func->implCls()->getCtor(); }
-  if (0 == strcasecmp("__construct", func->name()->data())) { return true; }
+  if (func->name() == s___construct.get()) { return true; }
   /* A same named function is not a constructor in a trait */
   if (pcls->attrs() & AttrTrait) return false;
   return pcls->name()->isame(func->name());

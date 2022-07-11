@@ -1703,48 +1703,48 @@ void emitNativeImpl(IRGS& env) {
 namespace {
 
 const StaticString s_add("add");
-const StaticString s_addall("addall");
+const StaticString s_addAll("addAll");
 const StaticString s_append("append");
 const StaticString s_clear("clear");
 const StaticString s_remove("remove");
-const StaticString s_removeall("removeall");
-const StaticString s_removekey("removekey");
+const StaticString s_removeAll("removeAll");
+const StaticString s_removeKey("removeKey");
 const StaticString s_set("set");
-const StaticString s_setall("setall");
+const StaticString s_setAll("setAll");
 
-// Whitelist of known collection methods that always return $this (ignoring
+// List of known collection methods that always return $this (ignoring
 // parameter coercion failure issues).
 bool collectionMethodReturnsThis(const Func* callee) {
   auto const cls = callee->implCls();
 
   if (cls == c_Vector::classof()) {
     return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_append.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_removekey.get()) ||
-      callee->name()->isame(s_set.get()) ||
-      callee->name()->isame(s_setall.get());
+      callee->name() == s_add.get() ||
+      callee->name() == s_addAll.get() ||
+      callee->name() == s_append.get() ||
+      callee->name() == s_clear.get() ||
+      callee->name() == s_removeKey.get() ||
+      callee->name() == s_set.get() ||
+      callee->name() == s_setAll.get();
   }
 
   if (cls == c_Map::classof()) {
     return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_remove.get()) ||
-      callee->name()->isame(s_set.get()) ||
-      callee->name()->isame(s_setall.get());
+      callee->name() == s_add.get() ||
+      callee->name() == s_addAll.get() ||
+      callee->name() == s_clear.get() ||
+      callee->name() == s_remove.get() ||
+      callee->name() == s_set.get() ||
+      callee->name() == s_setAll.get();
   }
 
   if (cls == c_Set::classof()) {
     return
-      callee->name()->isame(s_add.get()) ||
-      callee->name()->isame(s_addall.get()) ||
-      callee->name()->isame(s_clear.get()) ||
-      callee->name()->isame(s_remove.get()) ||
-      callee->name()->isame(s_removeall.get());
+      callee->name() == s_add.get() ||
+      callee->name() == s_addAll.get() ||
+      callee->name() == s_clear.get() ||
+      callee->name() == s_remove.get() ||
+      callee->name() == s_removeAll.get();
   }
 
   return false;

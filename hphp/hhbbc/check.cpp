@@ -171,7 +171,7 @@ bool check(const php::Class& c) {
   }
   if (isClo) {
     assertx(c.methods.size() == 1 || c.methods.size() == 2);
-    assertx(c.methods[0]->name->isame(s_invoke.get()));
+    assertx(c.methods[0]->name == s_invoke.get());
     assertx(c.methods[0]->isClosureBody);
     assertx(c.methods.size() == 1);
   } else {

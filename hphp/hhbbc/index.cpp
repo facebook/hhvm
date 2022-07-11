@@ -2339,7 +2339,7 @@ struct TMIOps {
     auto const& m = cls->cls->methods;
     if (std::find_if(m.begin(), m.end(),
                      [&] (auto const& f) {
-                       return f->name->isame(methName);
+                       return f->name->same(methName);
                      }) != m.end()) {
       // the duplicate methods will be overridden by the class method.
       return;
@@ -4153,7 +4153,7 @@ void define_func_families(IndexData& index) {
           // We need function family for constructor even if it is private,
           // as `new static()` may still call a non-private constructor from
           // subclass.
-          if (!mte->first->isame(s_construct.get()) &&
+          if (mte->first != s_construct.get() &&
               mte->second.attrs & AttrPrivate) {
             continue;
           }
@@ -4736,7 +4736,7 @@ void check_invariants(const ClassInfo* cinfo) {
     always_assert(mfam.second->possibleFuncs().size() > 1);
     auto const name = mfam.second->possibleFuncs().front()->first;
     for (auto const pf : mfam.second->possibleFuncs()) {
-      always_assert(pf->first->isame(name));
+      always_assert(pf->first->same(name));
     }
     always_assert(!cinfo->singleMethodFamilies.count(mfam.first));
   }
@@ -5931,7 +5931,7 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
           // Give the 86reified_prop a special default value to avoid
           // pessimizing the inferred type (we want it to always be a
           // vec of a specific size).
-          if (prop.name->isame(s_86reified_prop.get())) {
+          if (prop.name == s_86reified_prop.get()) {
             return get_default_value_of_reified_list(c->userAttributes);
           }
           return prop.typeConstraint.defaultValue();

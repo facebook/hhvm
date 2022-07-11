@@ -374,7 +374,7 @@ function run_hhvm(OptionMap $opts): void {
   }
   if ($opts->containsKey('gdb')) {
     // Trick gdb into thinking gdb_stderr->isatty()
-    $cmd = "script -q --return -c \" $cmd \"";
+    $cmd = "script -q --return -c \" $cmd \" /dev/null";
   }
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";

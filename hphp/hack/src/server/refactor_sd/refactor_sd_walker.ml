@@ -30,6 +30,18 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
   | A.True
   | A.False ->
     (env, None)
+  | A.Lvar (_, lid) ->
+    let entity = Env.get_local env lid in
+    (env, entity)
+  | A.Binop (Ast_defs.Eq None, e1, ((_ty_rhs, _, _) as e2)) ->
+    let (env, entity_rhs) = expr_ upcasted_id env e2 in
+    let (_, pos, lval) = e1 in
+    let env =
+      match lval with
+      | A.Lvar (_, lid) -> Env.set_local env lid entity_rhs
+      | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
+    in
+    (env, None)
   | A.Upcast (e, _) ->
     let (env, entity) = expr_ upcasted_id env e in
     let env =

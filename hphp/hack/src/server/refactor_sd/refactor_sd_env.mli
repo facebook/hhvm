@@ -29,3 +29,9 @@ val add_constraint : env -> constraint_ -> env
     unnecessary duplication of constraints when multiple environments need to
     be merged. *)
 val reset_constraints : env -> env
+
+(** Find an entity that a local variable points to *)
+val get_local : env -> Local_id.t -> entity
+
+(** Set an entity to a local variable *)
+val set_local : env -> Local_id.t -> entity -> env

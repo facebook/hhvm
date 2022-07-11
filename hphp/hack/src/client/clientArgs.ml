@@ -129,7 +129,7 @@ let parse_check_args cmd =
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let refactor_before = ref "" in
-  let refactor_mode = ref "" in
+  let refactor_mode = ref Unspecified in
   let remote = ref false in
   let sort_results = ref false in
   let stdin_name = ref None in
@@ -565,7 +565,9 @@ let parse_check_args cmd =
       ( "--refactor-check-sound-dynamic",
         Arg.Tuple
           [
-            Arg.Symbol (["Class"; "Function"], (fun x -> refactor_mode := x));
+            Arg.Symbol
+              ( ["Class"; "Function"],
+                (fun x -> refactor_mode := string_to_refactor_mode x) );
             Arg.String
               (fun x ->
                 set_mode @@ MODE_REFACTOR_CHECK_SOUND_DYNAMIC (!refactor_mode, x));
@@ -575,7 +577,8 @@ let parse_check_args cmd =
         Arg.Tuple
           [
             Arg.Symbol
-              (["Class"; "Function"; "Method"], (fun x -> refactor_mode := x));
+              ( ["Class"; "Function"; "Method"],
+                (fun x -> refactor_mode := string_to_refactor_mode x) );
             Arg.String (fun x -> refactor_before := x);
             Arg.String
               (fun x ->

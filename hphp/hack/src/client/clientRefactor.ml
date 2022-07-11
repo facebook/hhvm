@@ -99,12 +99,12 @@ let print_patches_json patches = print_endline (patches_to_json_string patches)
 let go_sound_dynamic
     (conn : unit -> ClientConnect.conn Lwt.t)
     (args : client_check_env)
-    (mode : string)
+    (mode : refactor_mode)
     (name : string) =
   let command =
     match mode with
-    | "Class" -> ServerRefactorTypes.ClassRename (name, "")
-    | "Function" ->
+    | Class -> ServerRefactorTypes.ClassRename (name, "")
+    | Function ->
       let filename = None in
       let definition = None in
       ServerRefactorTypes.FunctionRename
@@ -142,13 +142,13 @@ let go
     (conn : unit -> ClientConnect.conn Lwt.t)
     ~(desc : string)
     (args : client_check_env)
-    (mode : string)
+    (mode : refactor_mode)
     (before : string)
     (after : string) : unit Lwt.t =
   let command =
     match mode with
-    | "Class" -> ServerRefactorTypes.ClassRename (before, after)
-    | "Function" ->
+    | Class -> ServerRefactorTypes.ClassRename (before, after)
+    | Function ->
       (*
         We set these to `None` here because we don't want to add a deprecated
           wrapper after the rename. Likewise for `MethodRename`
@@ -157,7 +157,7 @@ let go
       let definition = None in
       ServerRefactorTypes.FunctionRename
         { filename; definition; old_name = before; new_name = after }
-    | "Method" ->
+    | Method ->
       let befores = Str.split (Str.regexp "::") before in
       if List.length befores <> 2 then
         failwith "Before string should be of the format class::method";

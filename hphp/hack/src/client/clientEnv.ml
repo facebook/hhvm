@@ -7,6 +7,12 @@
  *
  *)
 
+type refactor_mode =
+  | Function
+  | Class
+  | Method
+  | Unspecified
+
 type client_mode =
   | MODE_AI_QUERY of string
   | MODE_AUTO_COMPLETE
@@ -49,8 +55,8 @@ type client_mode =
   | MODE_OUTLINE
   | MODE_OUTLINE2
   | MODE_PAUSE of bool
-  | MODE_REFACTOR of string * string * string
-  | MODE_REFACTOR_CHECK_SOUND_DYNAMIC of string * string
+  | MODE_REFACTOR of refactor_mode * string * string
+  | MODE_REFACTOR_CHECK_SOUND_DYNAMIC of refactor_mode * string
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
   | MODE_REWRITE_TYPE_PARAMS_TYPE of string list
@@ -173,3 +179,13 @@ let mode_to_string = function
   | MODE_VERBOSE _ -> "MODE_VERBOSE"
   | MODE_DEPS_OUT_AT_POS_BATCH _ -> "MODE_DEPS_OUT_AT_POS_BATCH"
   | MODE_DEPS_IN_AT_POS_BATCH _ -> "MODE_DEPS_IN_AT_POS_BATCH"
+
+let string_to_refactor_mode = function
+  | "Function" -> Function
+  | "Class" -> Class
+  | "Method" -> Method
+  | _ ->
+    Printf.fprintf
+      stderr
+      "Error: please provide one of the following refactor modes: Function, Class, or Method. \n%!";
+    exit 1

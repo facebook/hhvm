@@ -1,0 +1,15 @@
+=== Sound Dynamic analysis results for if2.php
+Constraints for \f:
+
+Constraints for \g:
+
+Constraints for \h:
+Introduction at [16:7-10]
+Introduction at [20:12-15]
+Introduction at [22:7-10]
+Upcast at ?1
+Upcast at ?3
+[16:7-10] ⊆ ?1
+[20:12-15] ⊆ ?2
+[22:7-10] ⊆ ?3
+

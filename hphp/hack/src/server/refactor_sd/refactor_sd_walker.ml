@@ -70,16 +70,22 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
 let expr (upcasted_id : string) (env : env) (e : T.expr) : env =
   expr_ upcasted_id env e |> fst
 
-let stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
+let rec stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e -> expr upcasted_id env e
+  | A.If (cond, then_bl, else_bl) ->
+    let parent_env = expr upcasted_id env cond in
+    let base_env = Env.reset_constraints parent_env in
+    let then_env = block upcasted_id base_env then_bl in
+    let else_env = block upcasted_id base_env else_bl in
+    Env.union parent_env then_env else_env
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->
     env
   | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)
 
-let block (env : env) (upcasted_id : string) : T.block -> env =
+and block (upcasted_id : string) (env : env) : T.block -> env =
   List.fold ~init:env ~f:(stmt upcasted_id)
 
 let init_params _tast_env (params : T.fun_param list) :
@@ -92,7 +98,7 @@ let init_params _tast_env (params : T.fun_param list) :
 let callable function_id tast_env params body : constraint_ list =
   let (param_constraints, param_env) = init_params tast_env params in
   let env = Env.init tast_env param_constraints param_env in
-  let env = block env function_id body.A.fb_ast in
+  let env = block function_id env body.A.fb_ast in
   env.constraints
 
 let program

@@ -35,3 +35,7 @@ val get_local : env -> Local_id.t -> entity
 
 (** Set an entity to a local variable *)
 val set_local : env -> Local_id.t -> entity -> env
+
+(** The first environment is the parent environment. The others are combined.
+    This is useful in branching code. *)
+val union : env -> env -> env -> env

@@ -6,9 +6,16 @@
  *
  *)
 
+open Hh_prelude
 open Refactor_sd_types
 module LMap = Local_id.Map
 module Cont = Typing_continuations
+
+let var_counter : int ref = ref 0
+
+let fresh_var () : entity_ =
+  var_counter := !var_counter + 1;
+  Variable !var_counter
 
 module LEnv = struct
   type t = lenv
@@ -18,3 +25,8 @@ end
 
 let init tast_env constraints bindings =
   { constraints; lenv = LEnv.init bindings; tast_env }
+
+let add_constraint env constraint_ =
+  { env with constraints = constraint_ :: env.constraints }
+
+let reset_constraints env = { env with constraints = [] }

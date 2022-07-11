@@ -16,12 +16,59 @@ module Utils = Aast_names_utils
 let failwithpos pos msg =
   raise @@ Refactor_sd_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
 
-let stmt (env : env) ((pos, stmt) : T.stmt) : env =
+let redirect (env : env) (entity_ : entity_) : env * entity_ =
+  let var = Env.fresh_var () in
+  let env = Env.add_constraint env (Subset (entity_, var)) in
+  (env, var)
+
+let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
+    env * entity =
+  match e with
+  | A.Int _
+  | A.Float _
+  | A.String _
+  | A.True
+  | A.False ->
+    (env, None)
+  | A.Upcast (e, _) ->
+    let (env, entity) = expr_ upcasted_id env e in
+    let env =
+      match entity with
+      | Some entity -> Env.add_constraint env (Upcast entity)
+      | None -> env
+    in
+    (env, None)
+  | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
+    if String.equal upcasted_id id then
+      let entity_ = Literal pos in
+      let env = Env.add_constraint env (Introduction pos) in
+      (* Handle copy-on-write by creating a variable indirection *)
+      let (env, var) = redirect env entity_ in
+      (env, Some var)
+    else
+      (env, None)
+  | A.Await e -> expr_ upcasted_id env e
+  | A.As (e, _ty, _) -> expr_ upcasted_id env e
+  | A.Is (e, _ty) ->
+    (* `is` expressions always evaluate to bools, so we discard the entity. *)
+    let (env, _) = expr_ upcasted_id env e in
+    (env, None)
+  | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+
+let expr (upcasted_id : string) (env : env) (e : T.expr) : env =
+  expr_ upcasted_id env e |> fst
+
+let stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
-  | A.Noop -> env
+  | A.Expr e -> expr upcasted_id env e
+  | A.Noop
+  | A.AssertEnv _
+  | A.Markup _ ->
+    env
   | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)
 
-let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
+let block (env : env) (upcasted_id : string) : T.block -> env =
+  List.fold ~init:env ~f:(stmt upcasted_id)
 
 let init_params _tast_env (params : T.fun_param list) :
     constraint_ list * entity LMap.t =
@@ -30,10 +77,10 @@ let init_params _tast_env (params : T.fun_param list) :
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 
-let callable _function_id tast_env params body : constraint_ list =
+let callable function_id tast_env params body : constraint_ list =
   let (param_constraints, param_env) = init_params tast_env params in
   let env = Env.init tast_env param_constraints param_env in
-  let env = block env body.A.fb_ast in
+  let env = block env function_id body.A.fb_ast in
   env.constraints
 
 let program

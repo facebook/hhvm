@@ -1,2 +1,2 @@
 extension imagick
-method imagick importImagePixels
+method Imagick importImagePixels

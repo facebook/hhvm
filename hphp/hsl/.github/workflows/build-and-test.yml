@@ -11,7 +11,7 @@ jobs:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
       matrix:
-        os: [ ubuntu, macos ]
+        os: [ ubuntu ]
         hhvm:
           - nightly
     runs-on: ${{matrix.os}}-latest

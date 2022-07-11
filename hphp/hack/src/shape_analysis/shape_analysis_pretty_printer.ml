@@ -21,9 +21,9 @@ let show_ty env = Typing_print.full env
 let show_constraint_ env =
   let show_ty = show_ty env in
   function
-  | Exists (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
-  | Exists (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
-  | Exists (Argument, pos) -> Format.asprintf "Argument at %a" Pos.pp pos
+  | Marks (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
+  | Marks (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
+  | Marks (Argument, pos) -> Format.asprintf "Argument at %a" Pos.pp pos
   | Has_static_key (entity, key, ty) ->
     Format.asprintf
       "SK %s : shape(%s => %s)"
@@ -31,8 +31,8 @@ let show_constraint_ env =
       (show_key key)
       (show_ty ty)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
-  | Subset (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
-  | Join { left; right; join } ->
+  | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
+  | Joins { left; right; join } ->
     show_entity left ^ " ∪ " ^ show_entity right ^ " = " ^ show_entity join
 
 let show_shape_result env = function

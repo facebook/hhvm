@@ -11,7 +11,7 @@ open Shape_analysis_types
 module Logic = Shape_analysis_logic
 
 type constraints = {
-  exists: Pos.t list;
+  markers: Pos.t list;
   static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
@@ -20,7 +20,7 @@ type constraints = {
 
 let constraints_init =
   {
-    exists = [];
+    markers = [];
     static_accesses = [];
     dynamic_accesses = [];
     subsets = [];
@@ -44,8 +44,8 @@ let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
     transitive_closure new_set
 
 let partition_constraint constraints = function
-  | Exists (_, entity) ->
-    { constraints with exists = entity :: constraints.exists }
+  | Marks (_, entity) ->
+    { constraints with markers = entity :: constraints.markers }
   | Has_static_key (entity, key, ty) ->
     {
       constraints with
@@ -56,9 +56,9 @@ let partition_constraint constraints = function
       constraints with
       dynamic_accesses = entity :: constraints.dynamic_accesses;
     }
-  | Subset (sub, sup) ->
+  | Subsets (sub, sup) ->
     { constraints with subsets = (sub, sup) :: constraints.subsets }
-  | Join { left; right; join } ->
+  | Joins { left; right; join } ->
     { constraints with joins = (left, right, join) :: constraints.joins }
 
 let subset_lookups subsets =
@@ -111,19 +111,19 @@ let subset_lookups subsets =
     has_optional_key(Entity),
     subset'(Entity, Entity').
 
-  static_shape_result(A) :- exists(A), not has_dynamic_key'(A).
+  static_shape_result(A) :- marks(A), not has_dynamic_key'(A).
   static_shape_result_key(A,K,Ty) :- has_static_key'(A,K,Ty)
 
-  dynamic_shape_result(A) :- exists(A), has_dynamic_key'(A).
+  dynamic_shape_result(A) :- marks(A), has_dynamic_key'(A).
 *)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let { exists; static_accesses; dynamic_accesses; subsets; joins } =
+  let { markers; static_accesses; dynamic_accesses; subsets; joins } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
   let subsets_reflexive =
-    List.map ~f:(fun pos -> Literal pos) exists
+    List.map ~f:(fun pos -> Literal pos) markers
     @ List.map static_accesses ~f:(fun (e, _, _) -> e)
     @ dynamic_accesses
     @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
@@ -193,7 +193,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
   (* Start collecting shape results starting with empty shapes of candidates *)
   let static_shape_results : shape_keys Pos.Map.t =
-    exists
+    markers
     |> List.fold
          ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
          ~init:Pos.Map.empty
@@ -244,7 +244,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   let dynamic_shape_results =
-    exists
+    markers
     |> List.map ~f:(fun pos -> Literal pos)
     |> EntitySet.of_list
     |> EntitySet.inter dynamic_accesses

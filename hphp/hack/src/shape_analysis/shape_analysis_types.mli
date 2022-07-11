@@ -56,7 +56,7 @@ type optional_field =
 
 type shape_keys = (Typing_defs.locl_ty * optional_field) ShapeKeyMap.t
 
-type exists_kind =
+type marker_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
   | Parameter
       (** A dict parameter to a function or method such as `function
@@ -66,16 +66,16 @@ type exists_kind =
        *)
 
 type constraint_ =
-  | Exists of exists_kind * Pos.t  (** Records creation of a dict *)
+  | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
       (** Records a static key an entity is accessed with along with the Hack
           type of that key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
-  | Subset of entity_ * entity_
+  | Subsets of entity_ * entity_
       (** Records that the first keys of the first entity are all present in
           the second. *)
-  | Join of {
+  | Joins of {
       left: entity_;
       right: entity_;
       join: entity_;

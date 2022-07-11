@@ -22,7 +22,7 @@ let union_continuation_at_lid (entity1 : entity) (entity2 : entity) :
   match (entity1, entity2) with
   | (Some left, Some right) ->
     let join = fresh_var () in
-    let join_constraint = Join { left; right; join } in
+    let join_constraint = Joins { left; right; join } in
     ([join_constraint], Some join)
   | (entity, None)
   | (None, entity) ->
@@ -189,7 +189,7 @@ let loop_continuation cont_key ~env_before_iteration ~env_after_iteration =
       let new_constraints =
         match (entity_before_opt, entity_after_opt) with
         | (Some (Some entity_before), Some (Some entity_after)) ->
-          [Subset (entity_after, entity_before)]
+          [Subsets (entity_after, entity_before)]
         | _ -> []
       in
       let constraints = new_constraints @ constraints in

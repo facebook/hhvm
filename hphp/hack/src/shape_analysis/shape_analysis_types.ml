@@ -52,17 +52,17 @@ type optional_field =
 
 type shape_keys = (Typing_defs.locl_ty * optional_field) ShapeKeyMap.t
 
-type exists_kind =
+type marker_kind =
   | Allocation
   | Parameter
   | Argument
 
 type constraint_ =
-  | Exists of exists_kind * Pos.t
+  | Marks of marker_kind * Pos.t
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
-  | Subset of entity_ * entity_
-  | Join of {
+  | Subsets of entity_ * entity_
+  | Joins of {
       left: entity_;
       right: entity_;
       join: entity_;

@@ -17,7 +17,7 @@ module Utils = Aast_names_utils
 
 let join env left right =
   let join = Env.fresh_var () in
-  let constraint_ = Join { left; right; join } in
+  let constraint_ = Joins { left; right; join } in
   let env = Env.add_constraint env @@ constraint_ in
   (env, join)
 
@@ -115,7 +115,7 @@ let add_key_constraint
 
 let redirect (env : env) (entity_ : entity_) : env * entity_ =
   let var = Env.fresh_var () in
-  let env = Env.add_constraint env (Subset (entity_, var)) in
+  let env = Env.add_constraint env (Subsets (entity_, var)) in
   (env, var)
 
 let rec assign
@@ -133,7 +133,7 @@ let rec assign
       | Some entity_ ->
         let current_assignment = Literal assignment_pos in
         let env =
-          Env.add_constraint env (Subset (entity_, current_assignment))
+          Env.add_constraint env (Subsets (entity_, current_assignment))
         in
         let env =
           add_key_constraint env (Some current_assignment) (ix, ty_rhs)
@@ -162,7 +162,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.KeyValCollection (A.Dict, _, key_value_pairs) ->
     let entity_ = Literal pos in
     let entity = Some entity_ in
-    let env = Env.add_constraint env (Exists (Allocation, pos)) in
+    let env = Env.add_constraint env (Marks (Allocation, pos)) in
     let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
       let (env, _val_entity) = expr_ env value in
@@ -194,13 +194,13 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       let (env, arg_entity) = expr_ env arg in
       match arg_entity with
       | Some arg_entity_ ->
-        let env = Env.add_constraint env (Exists (Argument, pos)) in
+        let env = Env.add_constraint env (Marks (Argument, pos)) in
         let new_entity_ = Literal pos in
         let env =
           when_tast_check env.tast_env ~default:env @@ fun () ->
           Env.add_constraint env @@ Has_dynamic_key new_entity_
         in
-        let env = Env.add_constraint env (Subset (arg_entity_, new_entity_)) in
+        let env = Env.add_constraint env (Subsets (arg_entity_, new_entity_)) in
         env
       | None -> env
     in
@@ -340,7 +340,7 @@ let init_params tast_env (params : T.fun_param list) :
         let hint_pos = dict_pos_of_hint hint in
         let entity_ = Literal hint_pos in
         let lmap = LMap.add param_lid (Some entity_) lmap in
-        let constraints = Exists (Parameter, hint_pos) :: constraints in
+        let constraints = Marks (Parameter, hint_pos) :: constraints in
         let constraints =
           when_tast_check tast_env ~default:constraints @@ fun () ->
           Has_dynamic_key entity_ :: constraints

@@ -83,8 +83,8 @@ PCREglobals::~PCREglobals() {
 // PCRECache definition
 
 struct PCRECache {
-  typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
-  typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
+  using EntryPtr = std::shared_ptr<const pcre_cache_entry>;
+  using TempKeyCache = std::unique_ptr<LRUCacheKey>;
 
   enum class CacheKind {
     Static,
@@ -100,13 +100,13 @@ private:
     }
   };
 
-  typedef folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
-          string_data_hash, ahm_string_data_same> StaticCache;
-  typedef ConcurrentLRUCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> LRUCache;
-  typedef ConcurrentScalableCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> ScalableCache;
-  typedef StaticCache::value_type StaticCachePair;
+  using StaticCache = folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
+          string_data_hash, ahm_string_data_same>;
+  using LRUCache = ConcurrentLRUCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using ScalableCache = ConcurrentScalableCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using StaticCachePair = StaticCache::value_type;
 
 public:
   struct Accessor {
@@ -617,7 +617,7 @@ private:
   void* p;
 };
 
-typedef FreeHelperImpl<true> SmartFreeHelper;
+using SmartFreeHelper = FreeHelperImpl<true>;
 }
 
 static void init_local_extra(pcre_extra* local, pcre_extra* shared) {

@@ -47,8 +47,8 @@ struct BCPattern {
 
   struct Atom;
 
-  typedef std::vector<Atom> Expr;
-  typedef std::vector<PC> CaptureVec;
+  using Expr = std::vector<Atom>;
+  using CaptureVec = std::vector<PC>;
 
   /**
    * Opcode plus pattern-matching metadata.

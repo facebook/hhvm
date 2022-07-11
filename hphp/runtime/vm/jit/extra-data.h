@@ -2782,7 +2782,7 @@ struct AliasClassData : IRExtraData {
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
-  template<> struct IRExtraDataType<op> { typedef data type; };       \
+  template<> struct IRExtraDataType<op> { using type = data; };       \
   template<> struct OpHasExtraData<op> { enum { value = 1 }; };       \
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
@@ -3048,7 +3048,7 @@ template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
-  typedef typename IRExtraDataType<opc>::type ExtraType;
+  using ExtraType = typename IRExtraDataType<opc>::type;
 
   static void doassertx() {
     if (!std::is_base_of<T,ExtraType>::value) {

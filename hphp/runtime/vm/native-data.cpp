@@ -29,7 +29,7 @@
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 
-typedef std::unordered_map<const StringData*,NativeDataInfo> NativeDataInfoMap;
+using NativeDataInfoMap = std::unordered_map<const StringData*,NativeDataInfo>;
 static NativeDataInfoMap s_nativedatainfo;
 
 namespace {

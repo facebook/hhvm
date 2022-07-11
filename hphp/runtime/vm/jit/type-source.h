@@ -76,7 +76,7 @@ struct TypeSource {
   Kind kind;
 };
 
-typedef jit::flat_set<TypeSource> TypeSourceSet;
+using TypeSourceSet = jit::flat_set<TypeSource>;
 
 std::string show(const TypeSource&);
 std::string show(const TypeSourceSet&);

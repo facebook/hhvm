@@ -69,8 +69,8 @@ struct FuncEmitter {
     UpperBoundVec upperBounds;
   };
 
-  typedef std::vector<ParamInfo> ParamInfoVec;
-  typedef std::vector<EHEnt> EHEntVec;
+  using ParamInfoVec = std::vector<ParamInfo>;
+  using EHEntVec = std::vector<EHEnt>;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
   using StaticCoeffectsVec = std::vector<LowStringPtr>;

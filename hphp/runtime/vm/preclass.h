@@ -285,17 +285,17 @@ struct PreClass : AtomicCountable {
   };
 
 private:
-  typedef IndexedStringMap<Func*,Slot> MethodMap;
-  typedef IndexedStringMap<Prop,Slot> PropMap;
-  typedef IndexedStringMap<Const,Slot> ConstMap;
+  using MethodMap = IndexedStringMap<Func*,Slot>;
+  using PropMap = IndexedStringMap<Prop,Slot>;
+  using ConstMap = IndexedStringMap<Const,Slot>;
 
 public:
-  typedef VMFixedVector<LowStringPtr> InterfaceVec;
-  typedef VMFixedVector<LowStringPtr> IncludedEnumsVec;
-  typedef VMFixedVector<LowStringPtr> UsedTraitVec;
-  typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
-  typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef VMFixedVector<TraitAliasRule> TraitAliasRuleVec;
+  using InterfaceVec = VMFixedVector<LowStringPtr>;
+  using IncludedEnumsVec = VMFixedVector<LowStringPtr>;
+  using UsedTraitVec = VMFixedVector<LowStringPtr>;
+  using ClassRequirementsVec = VMFixedVector<ClassRequirement>;
+  using TraitPrecRuleVec = VMFixedVector<TraitPrecRule>;
+  using TraitAliasRuleVec = VMFixedVector<TraitAliasRule>;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -481,7 +481,7 @@ private:
   int64_t m_dynConstructSampleRate;
 };
 
-typedef AtomicSharedPtr<PreClass> PreClassPtr;
+using PreClassPtr = AtomicSharedPtr<PreClass>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

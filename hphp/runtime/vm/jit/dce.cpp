@@ -786,14 +786,14 @@ private:
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
-typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef StateVector<SSATmp, uint32_t> UseCounts;
+using DceState = StateVector<IRInstruction, DceFlags>;
+using UseCounts = StateVector<SSATmp, uint32_t>;
 // Set of live DefLabel operands (keyed by DefLabel and index)
-typedef jit::fast_set<std::pair<IRInstruction*, size_t>> DefLabelLiveness;
+using DefLabelLiveness = jit::fast_set<std::pair<IRInstruction*, size_t>>;
 // Worklist is instruction to process. If the instruction is a
 // DefLabel, the second item is the index of the operand (DefLabel is
 // treated separately for each operand).
-typedef jit::vector<std::pair<IRInstruction*, size_t>> WorkList;
+using WorkList = jit::vector<std::pair<IRInstruction*, size_t>>;
 
 void removeDeadInstructions(IRUnit& unit,
                             const DceState& state,

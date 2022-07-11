@@ -383,7 +383,7 @@ bool FuncChecker::checkOffsets() {
  */
 bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
   bool ok = true;
-  typedef std::list<PC> BranchList;
+  using BranchList = std::list<PC>;
   BranchList branches;
   PC bc = m_func->bc();
   // Find instruction boundaries and branch instructions.

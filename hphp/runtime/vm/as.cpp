@@ -1030,7 +1030,7 @@ std::vector<std::string> read_jmpvector(AsmState& as) {
   return ret;
 }
 
-typedef std::vector<std::pair<Id, std::string>> SSwitchJmpVector;
+using SSwitchJmpVector = std::vector<std::pair<Id, std::string>>;
 
 SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
   SSwitchJmpVector ret;

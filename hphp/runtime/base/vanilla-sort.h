@@ -83,11 +83,11 @@ ALWAYS_INLINE void swap(VanillaLvalRef a, VanillaLvalRef b) {
 // For intuition for these operations, consider what a pointer would support.
 //
 struct VanillaLvalIterator {
-  typedef std::random_access_iterator_tag iterator_category;
-  typedef VanillaLval value_type;
-  typedef int64_t difference_type;
-  typedef VanillaLvalRef pointer;
-  typedef VanillaLvalRef reference;
+  using iterator_category = std::random_access_iterator_tag;
+  using value_type = VanillaLval;
+  using difference_type = int64_t;
+  using pointer = VanillaLvalRef;
+  using reference = VanillaLvalRef;
 
   reference operator*() const {
     assertx(0 <= m_index && m_index < m_arr->size());
@@ -145,7 +145,7 @@ struct VanillaLvalIterator {
 // iterator directly. That would let us move ArrayData* from the iterator type
 // into the accessor (and would not affect pure-pointer iterators).
 struct VanillaLvalAccessor {
-  typedef tv_rval ElmT;
+  using ElmT = tv_rval;
   bool isInt(ElmT elm) const { return type(elm) == KindOfInt64; }
   bool isStr(ElmT elm) const { return isStringType(type(elm)); }
   int64_t getInt(ElmT elm) const { return val(elm).num; }

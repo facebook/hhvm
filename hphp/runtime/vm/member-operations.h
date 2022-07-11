@@ -79,9 +79,9 @@ enum class KeyType {
 
 /* KeyTypeTraits maps from KeyType to the C++ type holding they key. */
 template<KeyType> struct KeyTypeTraits;
-template<> struct KeyTypeTraits<KeyType::Any> { typedef TypedValue type; };
-template<> struct KeyTypeTraits<KeyType::Int> { typedef int64_t type; };
-template<> struct KeyTypeTraits<KeyType::Str> { typedef StringData* type; };
+template<> struct KeyTypeTraits<KeyType::Any> { using type = TypedValue; };
+template<> struct KeyTypeTraits<KeyType::Int> { using type = int64_t; };
+template<> struct KeyTypeTraits<KeyType::Str> { using type = StringData*; };
 
 /* key_type is the type used in the signatures of functions taking a member
  * key. */

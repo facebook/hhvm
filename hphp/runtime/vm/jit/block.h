@@ -36,12 +36,12 @@ namespace HPHP::jit {
  * IRInstruction::m_block transparently.
  */
 struct Block {
-  typedef InstructionList::iterator iterator;
-  typedef InstructionList::const_iterator const_iterator;
-  typedef InstructionList::reverse_iterator reverse_iterator;
-  typedef InstructionList::const_reverse_iterator const_reverse_iterator;
-  typedef InstructionList::reference reference;
-  typedef InstructionList::const_reference const_reference;
+  using iterator = InstructionList::iterator;
+  using const_iterator = InstructionList::const_iterator;
+  using reverse_iterator = InstructionList::reverse_iterator;
+  using const_reverse_iterator = InstructionList::const_reverse_iterator;
+  using reference = InstructionList::reference;
+  using const_reference = InstructionList::const_reference;
 
   /*
    * Execution frequency hint; codegen will put Unlikely blocks in acold,

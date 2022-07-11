@@ -50,7 +50,7 @@ struct Hop {
   const Func* to;
 };
 
-typedef ArenaImpl<32768> PathArena;
+using PathArena = ArenaImpl<32768>;
 /*
  * A Path is a full trace.
  *

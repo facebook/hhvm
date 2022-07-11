@@ -90,7 +90,7 @@ template<typename E> struct AssocValAccessor {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct IntElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     int64_t iLeft = acc.getInt(left);
@@ -156,7 +156,7 @@ struct IntElmCompare {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct StrElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     StringData* sdLeft = acc.getStr(left);
@@ -205,7 +205,7 @@ struct StrElmCompare {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct ElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     // Fast paths
@@ -320,7 +320,7 @@ struct ElmCompare {
 
 template <typename AccessorT>
 struct ElmUCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   const CallCtx* ctx;
 

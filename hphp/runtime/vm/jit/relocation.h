@@ -99,7 +99,7 @@ struct RelocationInfo {
   bool isSmashableRelocation(TCA ip) {
     return m_smashableRelocations.count(ip);
   }
-  typedef std::vector<std::pair<TCA,TCA>> RangeVec;
+  using RangeVec = std::vector<std::pair<TCA,TCA>>;
   const RangeVec& srcRanges() { return m_srcRanges; }
   const RangeVec& dstRanges() { return m_dstRanges; }
  private:

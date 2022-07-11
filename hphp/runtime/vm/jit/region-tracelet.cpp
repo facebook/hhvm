@@ -45,7 +45,7 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(region);
 
-typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
+using InterpSet = hphp_hash_set<SrcKey, SrcKey::Hasher>;
 
 namespace {
 

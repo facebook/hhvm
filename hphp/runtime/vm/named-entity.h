@@ -75,11 +75,11 @@ struct NamedEntity {
    * (unless they are deleted, which never happens here).  Any standard
    * associative container will meet this requirement.
    */
-  typedef folly::AtomicHashMap<const StringData*,
+  using Map = folly::AtomicHashMap<const StringData*,
                                NamedEntity,
                                string_data_hash,
                                ahm_string_data_isame,
-                               LowAllocator<char>> Map;
+                               LowAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.

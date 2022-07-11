@@ -173,7 +173,7 @@ private:
  */
 struct GraphBuilder {
 private:
-  typedef hphp_hash_map<PC, Block*> BlockMap;
+  using BlockMap = hphp_hash_map<PC, Block*>;
   enum EdgeKind { FallThrough, Taken };
  public:
   template<class F>

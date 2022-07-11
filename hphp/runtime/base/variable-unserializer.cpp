@@ -653,11 +653,11 @@ static const StaticString
  * If no alternate name is found, returns nullptr.
  */
 const StringData* getAlternateCollectionName(const StringData* clsName) {
-  typedef hphp_hash_map<const StringData*, const StringData*,
-                        string_data_hash, string_data_isame> ClsNameMap;
+  using ClsNameMap = hphp_hash_map<const StringData*, const StringData*,
+                        string_data_hash, string_data_isame>;
 
   auto getAltMap = [] {
-    typedef std::pair<StaticString, StaticString> SStringPair;
+    using SStringPair = std::pair<StaticString, StaticString>;
 
     static ClsNameMap m;
 

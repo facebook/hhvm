@@ -34,8 +34,8 @@ namespace HPHP::jit {
 /*
  * Core types.
  */
-typedef unsigned char* TCA; // "Translation cache address."
-typedef const unsigned char* CTCA;
+using TCA = unsigned char*; // "Translation cache address."
+using CTCA = const unsigned char*;
 
 using TcaRange = folly::Range<TCA>;
 

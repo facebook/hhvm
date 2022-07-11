@@ -133,16 +133,16 @@ template<class T> T* calloc_raw_array(size_t count);
 
 template <class T, typename Action = type_scan::Action::Auto>
 struct Allocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+  using reference = T&;
+  using const_reference = const T&;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
 
-  typedef std::true_type folly_has_default_object_construct;
-  typedef std::true_type folly_has_default_object_destroy;
+  using folly_has_default_object_construct = std::true_type;
+  using folly_has_default_object_destroy = std::true_type;
 
   template<typename U, typename A> struct action_helper {
     using type = A;

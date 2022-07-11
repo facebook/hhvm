@@ -37,9 +37,9 @@ namespace HPHP {
 
 struct StatCache {
   struct Node;
-  typedef AtomicSharedPtr<Node> NodePtr;
-  typedef tbb::concurrent_hash_map<std::string, NodePtr,
-                                   stringHashCompare> NameNodeMap;
+  using NodePtr = AtomicSharedPtr<Node>;
+  using NameNodeMap = tbb::concurrent_hash_map<std::string, NodePtr,
+                                   stringHashCompare>;
   using WatchNodeMap = hphp_hash_map<int, NodePtr, int64_hash>;
 
   struct Node : AtomicCountable {

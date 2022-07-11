@@ -49,8 +49,8 @@ struct TransCFG {
     bool    m_guessed; // whether or not m_weight was guessed
   };
 
-  typedef std::vector<Arc*>                      ArcPtrVec;
-  typedef hphp_hash_set<Arc*, pointer_hash<Arc>> ArcPtrSet;
+  using ArcPtrVec = std::vector<Arc*>                     ;
+  using ArcPtrSet = hphp_hash_set<Arc*, pointer_hash<Arc>>;
 
   struct Node {
     Node(TransID id, int64_t w)

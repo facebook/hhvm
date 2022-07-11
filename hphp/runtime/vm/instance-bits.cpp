@@ -151,7 +151,7 @@ void init() {
       // current set of counts as quickly as possible to minimize
       // blocking other threads still trying to profile instance
       // checks.
-      typedef std::pair<const StringData*, unsigned> Count;
+      using Count = std::pair<const StringData*, unsigned>;
       std::vector<Count> counts;
       uint64_t total = 0;
       {

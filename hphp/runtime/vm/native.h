@@ -564,7 +564,7 @@ NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
 //////////////////////////////////////////////////////////////////////////////
 // Global constants
 
-typedef std::map<const StringData*,TypedValueAux> ConstantMap;
+using ConstantMap = std::map<const StringData*,TypedValueAux>;
 extern ConstantMap s_constant_map;
 
 inline
@@ -605,8 +605,8 @@ bool registerConstant(const StringData*, ConstantCallback);
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 
-typedef hphp_hash_map<const StringData*, ConstantMap,
-                      string_data_hash, string_data_isame> ClassConstantMapMap;
+using ClassConstantMapMap = hphp_hash_map<const StringData*, ConstantMap,
+                      string_data_hash, string_data_isame>;
 extern ClassConstantMapMap s_class_constant_map;
 
 inline

@@ -26,16 +26,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct Variant;
 struct IniSettingMap;
-typedef std::map<std::string, std::string> ConfigMap;
-typedef hphp_fast_string_map<std::string> ConfigFastMap;
-typedef std::set<std::string> ConfigSet;
+using ConfigMap = std::map<std::string, std::string>;
+using ConfigFastMap = hphp_fast_string_map<std::string>;
+using ConfigSet = std::set<std::string>;
 // with comparer
-typedef std::set<std::string, stdltistr> ConfigSetC;
-typedef std::map<std::string, std::string, stdltistr> ConfigMapC;
-typedef boost::container::flat_set<std::string> ConfigFlatSet;
-typedef hphp_string_imap<std::string> ConfigIMap;
-typedef hphp_fast_string_imap<std::string> ConfigIFastMap;
-typedef hphp_fast_string_set ConfigFastSet;
+using ConfigSetC = std::set<std::string, stdltistr>;
+using ConfigMapC = std::map<std::string, std::string, stdltistr>;
+using ConfigFlatSet = boost::container::flat_set<std::string>;
+using ConfigIMap = hphp_string_imap<std::string>;
+using ConfigIFastMap = hphp_fast_string_imap<std::string>;
+using ConfigFastSet = hphp_fast_string_set;
 
 /**
  * Parts of the language can individually be made stricter, warning or

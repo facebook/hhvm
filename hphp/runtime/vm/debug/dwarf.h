@@ -154,11 +154,11 @@ struct DwarfChunk {
   bool isSynced() const { return m_synced; }
 };
 
-typedef std::map<TCA, FunctionInfo* > FuncDB;
-typedef std::vector<FunctionInfo* > FuncPtrDB;
+using FuncDB = std::map<TCA, FunctionInfo* >;
+using FuncPtrDB = std::vector<FunctionInfo* >;
 
 struct DwarfInfo {
-  typedef std::map<TCA, jit::TransRec> TransDB;
+  using TransDB = std::map<TCA, jit::TransRec>;
 
   std::vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.

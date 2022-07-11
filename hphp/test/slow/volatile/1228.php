@@ -11,5 +11,5 @@ function main_1228() {
     __DIR__.'/',
   );
   new CaT(1);
-  var_dump(class_exists('cat', false));
+  var_dump(class_exists('CaT', false));
 }

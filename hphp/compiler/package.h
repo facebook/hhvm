@@ -34,29 +34,35 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct AnalysisResult;
-using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
-
-/**
- * A package contains a list of directories and files that will be parsed
- * and analyzed together. No files outside of a package will be considered
- * in type inferences. One single AnalysisResult will be generated and it
- * contains all classes, functions, variables, constants and their types.
- * Therefore, a package is really toppest entry point for parsing.
- */
 struct Package {
-  Package(const char* root, bool parseOnDemand);
+  Package(const std::string& root, bool parseOnDemand);
 
-  // Set up the async portion of Package. This cannot be done in the
-  // constructor because it must be done after hphp_process_init().
-  void createAsyncState();
-  // Optionally return a running thread clearing the async state
+  using Callback = std::function<void(std::unique_ptr<UnitEmitter>)>;
+
+  bool parse(const Callback&);
+
+  // Optionally return a running thread clearing the package state
   // (which can take a long time). If std::nullopt is returned, the
   // state is already cleared.
-  Optional<std::thread> clearAsyncState();
+  Optional<std::thread> asyncClear();
 
   const extern_worker::Client::Stats& stats() const {
     return m_async->m_client.getStats();
+  }
+  size_t getTotalFiles() const { return m_total.load(); }
+
+  const std::string& externWorkerImpl() const {
+    return m_async->m_client.implName();
+  }
+  bool externWorkerFellback() const {
+    return m_async->m_client.fellback();
+  }
+
+  Optional<std::chrono::microseconds> parsingInputsTime() const {
+    return m_parsingInputs;
+  }
+  Optional<std::chrono::microseconds> parsingOndemandTime() const {
+    return m_parsingOndemand;
   }
 
   void addSourceFile(const std::string& fileName);
@@ -65,14 +71,6 @@ struct Package {
   void addDirectory(const std::string& path);
   void addStaticDirectory(const std::string& path);
 
-  bool parse();
-
-  AnalysisResultPtr getAnalysisResult() { return m_ar;}
-  void resetAr() { m_ar.reset(); }
-
-  size_t getTotalFiles() const { return m_total.load(); }
-
-  const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
 
   struct Config;
@@ -105,8 +103,6 @@ private:
   coro::Task<FileAndSizeVec> parseGroups(ParseGroups);
   coro::Task<FileAndSizeVec> parseGroup(ParseGroup);
 
-  void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
-
   void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, bool report = false);
 
   std::string m_root;
@@ -115,11 +111,13 @@ private:
 
   std::atomic<bool> m_parseFailed;
 
-  AnalysisResultPtr m_ar;
-
   bool m_parseOnDemand;
 
   std::atomic<size_t> m_total;
+  Optional<std::chrono::microseconds> m_parsingInputs;
+  Optional<std::chrono::microseconds> m_parsingOndemand;
+
+  const Callback* m_callback;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::shared_ptr<FileCache> m_fileCache;

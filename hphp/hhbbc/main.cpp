@@ -107,7 +107,7 @@ void parse_options(int argc, char** argv) {
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
   auto const defaultFinalThreadCount =
-    std::max<long>(defaultThreadCount - 2, 1);
+    std::max<long>(defaultThreadCount - 1, 1);
 
   std::vector<std::string> interceptable_fns;
   std::vector<std::string> trace_fns;
@@ -359,47 +359,24 @@ void compile_repo() {
     }
   );
 
-  RepoAutoloadMapBuilder autoloadMapBuilder;
-  UnitEmitterQueue ueq{&autoloadMapBuilder};
+  RepoAutoloadMapBuilder autoload;
+  RepoFileBuilder repo{output_repo};
+  std::mutex repoLock;
 
-  std::exception_ptr wp_thread_ex = nullptr;
-  VMWorker wp_thread(
-    [&] {
-      HphpSession _{Treadmill::SessionKind::CompileRepo};
-      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-      try {
-        StructuredLogEntry sample;
-        whole_program(std::move(program), ueq, std::move(sample));
-      } catch (...) {
-        wp_thread_ex = std::current_exception();
-        ueq.finish();
-      }
+  auto const onUE = [&] (std::unique_ptr<UnitEmitter> ue) {
+    autoload.addUnit(*ue);
+    RepoFileBuilder::EncodedUE encoded{*ue};
+    {
+      std::scoped_lock<std::mutex> _{repoLock};
+      repo.add(encoded);
     }
-  );
-  wp_thread.start();
+  };
 
-  {
-    RepoFileBuilder repoBuilder{output_repo};
+  HphpSession session{Treadmill::SessionKind::CompileRepo};
+  whole_program(std::move(program), onUE);
 
-    Optional<trace_time> timer;
-    while (auto ue = ueq.pop()) {
-      if (!timer) timer.emplace("writing output repo");
-      repoBuilder.add(*ue);
-    }
-
-    if (!wp_thread_ex) {
-      trace_time timer2("finalizing repo");
-      repoBuilder.finish(
-        get_global_data(),
-        autoloadMapBuilder
-      );
-    }
-  }
-
-  wp_thread.waitForEnd();
-  if (wp_thread_ex) {
-    rethrow_exception(wp_thread_ex);
-  }
+  trace_time timer{"finalizing repo"};
+  repo.finish(get_global_data(), autoload);
 }
 
 void print_repo_bytecode_stats() {
@@ -485,7 +462,6 @@ int main(int argc, char** argv) try {
   }
 
   RO::Load(ini, config);
-  // T103431933 RO::Load() loads default runtime option which might not be correct.
   RO::RepoAuthoritative                     = true;
   RO::EvalJit                               = false;
   RO::EvalLowStaticArrays                   = false;

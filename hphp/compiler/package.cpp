@@ -32,7 +32,6 @@
 #include <folly/portability/Dirent.h>
 #include <folly/portability/Unistd.h>
 
-#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/option.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/base/coeffects-config.h"
@@ -166,22 +165,18 @@ Options Package::AsyncState::makeOptions() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Package::Package(const char* root, bool parseOnDemand)
-  : m_parseFailed{false}
+Package::Package(const std::string& root, bool parseOnDemand)
+  : m_root{root}
+  , m_parseFailed{false}
   , m_parseOnDemand{parseOnDemand}
   , m_total{0}
+  , m_callback{nullptr}
+  , m_fileCache{std::make_shared<FileCache>()}
+  , m_async{std::make_unique<AsyncState>()}
 {
-  m_root = FileUtil::normalizeDir(root);
-  m_ar = std::make_shared<AnalysisResult>();
-  m_fileCache = std::make_shared<FileCache>();
 }
 
-void Package::createAsyncState() {
-  assertx(!m_async);
-  m_async = std::make_unique<AsyncState>();
-}
-
-Optional<std::thread> Package::clearAsyncState() {
+Optional<std::thread> Package::asyncClear() {
   if (!m_async) return std::nullopt;
   if (!Option::ParserAsyncCleanup) {
     // If we don't want to cleanup asynchronously, do so now.
@@ -845,7 +840,7 @@ void Package::parseAll() {
       {
         Timer timer{Timer::WallTime, "parsing inputs"};
         ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups)));
-        m_ar->sample().setInt("parsing_inputs_micros", timer.getMicroSeconds());
+        m_parsingInputs = std::chrono::microseconds{timer.getMicroSeconds()};
       }
 
       if (ondemand.empty()) HPHP_CORO_RETURN_VOID;
@@ -858,7 +853,7 @@ void Package::parseAll() {
         groupFiles(groups, std::move(ondemand));
         ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups)));
       } while (!ondemand.empty());
-      m_ar->sample().setInt("parsing_ondemand_micros", timer.getMicroSeconds());
+      m_parsingOndemand = std::chrono::microseconds{timer.getMicroSeconds()};
 
       HPHP_CORO_RETURN_VOID;
     }
@@ -866,8 +861,9 @@ void Package::parseAll() {
   coro::wait(std::move(work));
 }
 
-bool Package::parse() {
-  assertx(m_async);
+bool Package::parse(const Callback& callback) {
+  assertx(callback);
+  assertx(!m_callback);
 
   Logger::FInfo(
     "parsing using {} threads using {}{}",
@@ -875,6 +871,9 @@ bool Package::parse() {
     m_async->m_client.implName(),
     coro::using_coros ? "" : " (coros disabled!)"
   );
+
+  m_callback = &callback;
+  SCOPE_EXIT { m_callback = nullptr; };
 
   HphpSession _{Treadmill::SessionKind::CompilerEmit};
 
@@ -884,7 +883,7 @@ bool Package::parse() {
     FileAndSizeVec ondemand;
     resolveOnDemand(ondemand, ue->m_symbol_refs, true);
     for (auto const& p : ondemand) addSourceFile(p.m_path);
-    addUnitEmitter(std::move(ue));
+    (*m_callback)(std::move(ue));
   }
   parseAll();
   return !m_parseFailed.load();
@@ -1096,7 +1095,10 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
       }
       // If we produced an UnitEmitter, hand it off for whatever
       // processing we need to do with it.
-      if (wrapper.m_ue) addUnitEmitter(std::move(wrapper.m_ue));
+      if (wrapper.m_ue) {
+        assertx(m_callback);
+        (*m_callback)(std::move(wrapper.m_ue));
+      }
       // Resolve any symbol refs into files to parse ondemand
       resolveOnDemand(ondemand, meta.m_symbol_refs);
     }
@@ -1123,14 +1125,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
   }
 
   HPHP_CORO_RETURN(FileAndSizeVec{});
-}
-
-void Package::addUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
-  if (m_ar->program().get()) {
-    HHBBC::add_unit_to_program(ue.get(), *m_ar->program());
-  } else {
-    m_ar->addHhasFile(std::move(ue));
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

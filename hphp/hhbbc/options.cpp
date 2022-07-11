@@ -99,7 +99,7 @@ void profile_memory(const char* what, const char* when,
   jemalloc_pprof_dump(name, true);
 }
 
-void summarize_memory(StructuredLogEntry& sample) {
+void summarize_memory(StructuredLogEntry* sample) {
   std::string phase, lowPhase;
   int64_t usageMb;
   size_t lowMb, sstrMb;
@@ -122,11 +122,13 @@ void summarize_memory(StructuredLogEntry& sample) {
     "Max low-mem at {}: {} Mb [{} Mb sstrings]", lowPhase, lowMb, sstrMb
   ).c_str());
 
-  sample.setStr("max_rss_phase", phase);
-  sample.setInt("max_rss", usageMb << 20);
-  sample.setStr("max_lowmem_phase", lowPhase);
-  sample.setInt("max_lowmem", lowMb << 20);
-  sample.setInt("max_sstr", sstrMb << 20);
+  if (sample) {
+    sample->setStr("max_rss_phase", phase);
+    sample->setInt("max_rss", usageMb << 20);
+    sample->setStr("max_lowmem_phase", lowPhase);
+    sample->setInt("max_lowmem", lowMb << 20);
+    sample->setInt("max_sstr", sstrMb << 20);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

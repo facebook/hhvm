@@ -483,53 +483,6 @@ void final_pass(Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-void UnitEmitterQueue::push(std::unique_ptr<UnitEmitter> ue) {
-  assertx(!m_done.load(std::memory_order_relaxed));
-
-  if (m_repoBuilder) m_repoBuilder->addUnit(*ue);
-  RepoFileBuilder::EncodedUE encoded{*ue};
-
-  {
-    Lock lock(this);
-    m_encoded.emplace_back(std::move(encoded));
-    if (m_storeUnitEmitters) m_ues.emplace_back(std::move(ue));
-    notify();
-  }
-}
-
-void UnitEmitterQueue::finish() {
-  assertx(!m_done.load(std::memory_order_relaxed));
-  Lock lock(this);
-  m_done.store(true, std::memory_order_relaxed);
-  notify();
-}
-
-Optional<RepoFileBuilder::EncodedUE> UnitEmitterQueue::pop() {
-  Lock lock(this);
-  while (m_encoded.empty()) {
-    if (m_done.load(std::memory_order_relaxed)) return std::nullopt;
-    wait();
-  }
-  assertx(m_encoded.size() > 0);
-  auto encoded = std::move(m_encoded.front());
-  m_encoded.pop_front();
-  return encoded;
-}
-
-std::unique_ptr<UnitEmitter> UnitEmitterQueue::popUnitEmitter() {
-  Lock lock(this);
-  while (m_ues.empty()) {
-    if (m_done.load(std::memory_order_relaxed)) return nullptr;
-    wait();
-  }
-  assertx(m_ues.size() > 0);
-  auto ue = std::move(m_ues.front());
-  m_ues.pop_front();
-  return ue;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 namespace php {
 
 void ProgramPtr::clear() { delete m_program; }
@@ -545,8 +498,8 @@ void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
 }
 
 void whole_program(php::ProgramPtr program,
-                   UnitEmitterQueue& ueq,
-                   StructuredLogEntry sample,
+                   const UnitEmitterCallback& callback,
+                   Optional<StructuredLogEntry> sample,
                    int num_threads) {
   trace_time tracer("whole program");
 
@@ -556,15 +509,15 @@ void whole_program(php::ProgramPtr program,
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
-    // Leave 2 threads free for writing UnitEmitters and for cleanup
-    parallel::final_threads = (num_threads > 2) ? (num_threads - 2) : 1;
+    // Leave a thread free for cleanup
+    parallel::final_threads = (num_threads > 1) ? (num_threads - 1) : 1;
   }
 
   state_after("parse", *program);
 
   Index index(program.get());
   auto stats = allocate_stats();
-  auto emitUnit = [&] (php::Unit& unit) {
+  auto const emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);
     if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
       fprintf(
@@ -575,13 +528,11 @@ void whole_program(php::ProgramPtr program,
       );
       _Exit(1);
     }
-    ueq.push(std::move(ue));
+    callback(std::move(ue));
   };
 
-  std::thread cleanup_pre_analysis;
-  std::thread cleanup_for_final;
   if (!options.NoOptimizations) {
-    cleanup_pre_analysis = std::thread([&] { index.cleanup_pre_analysis(); });
+    auto cleanup_pre_analysis = std::thread([&] { index.cleanup_pre_analysis(); });
     assertx(check(*program));
     prop_type_hint_pass(index, *program);
     index.rewrite_default_initial_values(*program);
@@ -595,10 +546,12 @@ void whole_program(php::ProgramPtr program,
     index.preinit_bad_initial_prop_values();
     index.use_class_dependencies(options.HardPrivatePropInference);
     analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
-    cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
+    auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
     index.join_iface_vtable_thread();
     parallel::num_threads = parallel::final_threads;
     final_pass(index, *program, stats, emitUnit);
+    cleanup_pre_analysis.join();
+    cleanup_for_final.join();
   } else {
     debug_dump_program(index, *program);
     index.join_iface_vtable_thread();
@@ -611,33 +564,24 @@ void whole_program(php::ProgramPtr program,
     );
   }
 
-  auto num_units = program->units.size();
-
-  auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
-  // running cleanup_for_emit can take a while... start it as early as
-  // possible, and run in its own thread.
-  auto cleanup_post = std::thread([&, program = std::move(program)] () mutable {
-      auto const enable =
-        logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
-      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
-      index.cleanup_post_emit(std::move(program));
-    }
-  );
-
   print_stats(stats);
 
-  ueq.finish();
-  cleanup_pre_analysis.join();
-  cleanup_for_final.join();
-  cleanup_post.join();
+  auto const numUnits = program->units.size();
+  {
+    auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+    auto const enable =
+      logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+    Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
+    index.cleanup_post_emit(std::move(program));
+  }
 
-  summarize_memory(sample);
-  if (num_units >= RuntimeOption::EvalHHBBCMinUnitsToLog) {
+  summarize_memory(sample.get_pointer());
+  if (sample && numUnits >= RO::EvalHHBBCMinUnitsToLog) {
     // num_units includes systemlib, around 200 units. Only log big builds.
-    sample.setInt("num_units", num_units);
-    sample.setInt(tracer.label(), tracer.elapsed_ms());
-    sample.force_init = true;
-    StructuredLog::log("hhvm_whole_program", sample);
+    sample->setInt("num_units", numUnits);
+    sample->setInt(tracer.label(), tracer.elapsed_ms());
+    sample->force_init = true;
+    StructuredLog::log("hhvm_whole_program", *sample);
   }
 }
 

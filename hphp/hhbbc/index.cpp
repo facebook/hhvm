@@ -3046,17 +3046,6 @@ bool build_cls_info(const php::Program* program,
 
 //////////////////////////////////////////////////////////////////////
 
-void add_system_constants_to_index(IndexData& index) {
-  for (auto cnsPair : Native::getConstants()) {
-    assertx(cnsPair.second.m_type != KindOfUninit ||
-            cnsPair.second.dynamic());
-    auto pc = new php::Constant { nullptr, cnsPair.first, cnsPair.second, AttrUnique | AttrPersistent };
-    add_symbol(index.constants, pc, "constant");
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 uint32_t func_num_inout(const php::Func* func) {
   if (!func->hasInOutArgs) return 0;
   uint32_t count = 0;
@@ -3072,22 +3061,30 @@ TriBool func_supports_AER(const php::Func* func) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ClassInfoData {
-  // Map from name to types that directly use that name (as parent,
-  // interface or trait).
-  hphp_hash_map<SString,
-                CompactVector<const php::Class*>,
-                string_data_hash,
-                string_data_isame>     users;
-  // Map from types to number of dependencies, used in
-  // conjunction with users field above.
-  hphp_hash_map<const php::Class*, uint32_t> depCounts;
+template <typename T, typename R>
+void add_symbol_to_index(R& map, T t, const char* type) {
+  auto const name = t->name;
+  auto const ret = map.emplace(name, std::move(t));
+  always_assert_flog(
+    ret.second,
+    "More than one {} with the name {} "
+    "(should have been caught by parser)",
+    type,
+    name
+  );
+}
 
-  uint32_t cqFront{};
-  uint32_t cqBack{};
-  std::vector<const php::Class*> queue;
-  bool hasPseudoCycles{};
-};
+template <typename T, typename R, typename E>
+void add_symbol_to_index(R& map, T t, const char* type, const E& other) {
+  auto const it = other.find(t->name);
+  always_assert_flog(
+    it == other.end(),
+    "More than one symbol with the name {} "
+    "(should have been caught by parser)",
+    t->name
+  );
+  add_symbol_to_index(map, std::move(t), type);
+}
 
 // We want const qualifiers on various index data structures for php
 // object pointers, but during index creation time we need to
@@ -3096,6 +3093,20 @@ struct ClassInfoData {
 // code below.
 void attribute_setter(const Attr& attrs, bool set, Attr attr) {
   attrSetter(const_cast<Attr&>(attrs), set, attr);
+}
+
+void add_system_constants_to_index(IndexData& index) {
+  for (auto cnsPair : Native::getConstants()) {
+    assertx(cnsPair.second.m_type != KindOfUninit ||
+            cnsPair.second.dynamic());
+    auto pc = new php::Constant {
+      nullptr,
+      cnsPair.first,
+      cnsPair.second,
+      AttrUnique | AttrPersistent
+    };
+    add_symbol_to_index(index.constants, pc, "constant");
+  }
 }
 
 void add_unit_to_index(IndexData& index, php::Unit& unit) {
@@ -3108,10 +3119,10 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
     assertx(!(c->attrs & AttrNoOverride));
 
     if (c->attrs & AttrEnum) {
-      add_symbol(index.enums, c.get(), "enum");
+      add_symbol_to_index(index.enums, c.get(), "enum");
     }
 
-    add_symbol(index.classes, c.get(), "class", index.typeAliases);
+    add_symbol_to_index(index.classes, c.get(), "class", index.typeAliases);
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
@@ -3139,22 +3150,46 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
       unit.funcs.erase(i);
       continue;
     }
-    add_symbol(index.funcs, f.get(), "function");
+    add_symbol_to_index(index.funcs, f.get(), "function");
     ++i;
   }
 
   for (auto& ta : unit.typeAliases) {
-    add_symbol(index.typeAliases, ta.get(), "type alias", index.classes);
+    add_symbol_to_index(
+      index.typeAliases,
+      ta.get(),
+      "type alias",
+      index.classes
+    );
   }
 
   for (auto& c : unit.constants) {
-    add_symbol(index.constants, c.get(), "constant");
+    add_symbol_to_index(index.constants, c.get(), "constant");
   }
 
   for (auto& m : unit.modules) {
-    add_symbol(index.modules, m.get(), "module");
+    add_symbol_to_index(index.modules, m.get(), "module");
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+struct ClassInfoData {
+  // Map from name to types that directly use that name (as parent,
+  // interface or trait).
+  hphp_hash_map<SString,
+                CompactVector<const php::Class*>,
+                string_data_hash,
+                string_data_isame>     users;
+  // Map from types to number of dependencies, used in
+  // conjunction with users field above.
+  hphp_hash_map<const php::Class*, uint32_t> depCounts;
+
+  uint32_t cqFront{};
+  uint32_t cqBack{};
+  std::vector<const php::Class*> queue;
+  bool hasPseudoCycles{};
+};
 
 std::unique_ptr<php::Func> clone_meth_helper(
   php::Unit* unit,

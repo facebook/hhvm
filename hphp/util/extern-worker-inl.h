@@ -302,6 +302,10 @@ inline bool Client::supportsOptimistic() const {
   return m_impl->supportsOptimistic() && !m_impl->isDisabled();
 }
 
+inline bool Client::fellback() const {
+  return m_fallbackImpl.present();
+}
+
 // Run the given callable, retrying if Throttle is thrown, until the
 // configured retry limit is reached.
 template <typename T, typename F>

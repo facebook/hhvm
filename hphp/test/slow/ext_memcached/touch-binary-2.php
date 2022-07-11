@@ -2,7 +2,7 @@
 
 function resolve_to_constant($code)
 {
-    $refl = new ReflectionClass('memcached');
+    $refl = new ReflectionClass('Memcached');
     $c = $refl->getConstants();
 
     foreach($c as $name => $value) {

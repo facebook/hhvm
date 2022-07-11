@@ -2,14 +2,14 @@
 
 <<__EntryPoint>>
 function main() {
-  $o1 = __Systemlib\create_opaque_value(42, vec[1, 2, 3]);
-  $o2 = __Systemlib\create_opaque_value(1337, vec[1, 2, 3]);
+  $o1 = __SystemLib\create_opaque_value(42, vec[1, 2, 3]);
+  $o2 = __SystemLib\create_opaque_value(1337, vec[1, 2, 3]);
 
-  $o3 = __Systemlib\create_opaque_value(42, vec[1, 2, 3]);
-  $o4 = __Systemlib\create_opaque_value(1337, vec[1, 2, 3]);
+  $o3 = __SystemLib\create_opaque_value(42, vec[1, 2, 3]);
+  $o4 = __SystemLib\create_opaque_value(1337, vec[1, 2, 3]);
 
-  $o5 = __Systemlib\create_opaque_value(42, vec[1, 3]);
-  $o6 = __Systemlib\create_opaque_value(1337, vec[2, 3]);
+  $o5 = __SystemLib\create_opaque_value(42, vec[1, 3]);
+  $o6 = __SystemLib\create_opaque_value(1337, vec[2, 3]);
 
   var_dump($o1 === $o2); // F
   var_dump($o1 === $o3); // T

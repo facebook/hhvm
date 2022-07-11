@@ -3388,8 +3388,8 @@ fn emit_label<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
 
-    // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
-    let create_opaque_value = "__Systemlib\\create_opaque_value".to_string();
+    // emitting E#A as __SystemLib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
+    let create_opaque_value = "__SystemLib\\create_opaque_value".to_string();
     let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
     let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
     let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);

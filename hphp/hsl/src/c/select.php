@@ -432,7 +432,7 @@ function pop_backx<T as Container<Tv>, Tv>(
  * Space complexity: O(1 or N): If the operation can happen in-place, O(1);
  *   if it must copy the Container, O(N).
  */
-function pop_front<T as Container<Tv>, Tv>(inout T $container): ?Tv {
+function pop_front<T as Container<Tv>, Tv>(inout T $container)[write_props]: ?Tv {
   if (is_empty($container)) {
     return null;
   }
@@ -442,7 +442,7 @@ function pop_front<T as Container<Tv>, Tv>(inout T $container): ?Tv {
 /**
  * Like `pop_front` but enforces non-empty container as input.
  */
-function pop_frontx<T as Container<Tv>, Tv>(inout T $container): Tv {
+function pop_frontx<T as Container<Tv>, Tv>(inout T $container)[write_props]: Tv {
   invariant(
     !is_empty($container),
     '%s: Expected at least one element',

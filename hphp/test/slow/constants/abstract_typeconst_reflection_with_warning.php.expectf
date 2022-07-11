@@ -1,0 +1,4 @@
+bool(true)
+
+Warning: Calling ReflectionTypeConstant::isAbstract on abstract type constant with default in %s
+bool(false)

@@ -1426,7 +1426,12 @@ struct RuntimeOption {
   F(int32_t, RequestTearingSkewMicros, 1500)                            \
   F(bool,    SampleRequestTearingForce, true)                           \
   F(bool, EnableAbstractContextConstants, true)                         \
-  F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
+  /* For ReflectionTypeConstant::isAbstract when is abstract w/ default
+   * 0 - return true iff abstract w/o default
+   * 1 - return true iff abstract w/o default, raise warning if abstract w/
+   *     default
+   * 2 - return true iff abstract w/ or w/o default */                  \
+  F(uint32_t, TypeconstAbstractDefaultReflectionIsAbstract, 0)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   /* 0 nothing, 1 notice, 2 error */                                    \

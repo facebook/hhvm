@@ -1805,11 +1805,15 @@ static String HHVM_METHOD(ReflectionTypeConstant, getName) {
 
 static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
-  if (RO::EvalTypeconstAbstractDefaultReflectionIsAbstract) {
+  if (RO::EvalTypeconstAbstractDefaultReflectionIsAbstract > 1) {
     return cns->isAbstract();
-  } else {
-    return cns->isAbstractAndUninit();
   }
+  if (RO::EvalTypeconstAbstractDefaultReflectionIsAbstract > 0
+      && cns->isAbstract() != cns->isAbstractAndUninit()) {
+    raise_warning("Calling ReflectionTypeConstant::isAbstract on abstract type "
+                  "constant with default");
+  }
+  return cns->isAbstractAndUninit();
 }
 
 // helper for getAssignedTypeText

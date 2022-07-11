@@ -129,11 +129,6 @@ enum Command {
 /// New commands should be defined as subcommands using the Command enum.
 #[derive(Parser, Debug, Default)]
 struct FlagCommands {
-    /// Print the source code with expression tree literals desugared.
-    /// Deprecated: use desugar-expr-trees subcommand.
-    #[clap(long)]
-    dump_desugared_expression_trees: bool,
-
     /// Parse decls from source text, transform them into facts, and print the facts
     /// in JSON format.
     #[clap(long)]
@@ -259,13 +254,6 @@ fn main() -> Result<()> {
 
         // Expr trees
         Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
-        None if opts.flag_commands.dump_desugared_expression_trees => {
-            let expr_opts = expr_trees::Opts {
-                files: std::mem::take(&mut opts.files),
-                ..Default::default()
-            };
-            expr_trees::desugar_expr_trees(&opts, expr_opts)
-        }
 
         // Facts
         Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),

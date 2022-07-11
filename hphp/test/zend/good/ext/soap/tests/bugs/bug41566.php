@@ -17,7 +17,7 @@ class User {
   public $sName;
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
+$server = new SoapServer(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
 $server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

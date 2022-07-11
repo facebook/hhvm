@@ -121,7 +121,7 @@ where
                     let text = t.text_raw(self.source_text());
                     let pos = self.p_pos(node);
                     let line = pos.line() as isize;
-                    let p = self.pos_of_offset(t.start_offset(), t.end_offset());
+                    let p = self.pos_of_offset(t.start_offset(), t.end_offset() + 1);
                     match IGNORE_ERROR
                         .captures(text)
                         .and_then(|c| c.get(1))

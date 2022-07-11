@@ -157,13 +157,13 @@ pub(crate) fn process_single_file(
     Ok(output)
 }
 
-pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts) -> Result<()> {
+pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, None)?;
-        crate::daemon_print(hackc_opts, &hhas)?;
+        w.write_all(&hhas)?;
     }
     Ok(())
 }
@@ -188,13 +188,13 @@ fn compile_impl<'decl>(
 }
 
 pub(crate) fn daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
-    crate::daemon_mode(|path| {
+    crate::daemon_loop(|path, w| {
         hackc_opts.files.filenames = vec![path];
-        compile_from_text(hackc_opts)
+        compile_from_text(hackc_opts, w)
     })
 }
 
-pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts) -> Result<()> {
+pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
         let source_text = fs::read(&path)?;
@@ -226,16 +226,16 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts) -> Result<()> {
             }
             println!();
         } else {
-            crate::daemon_print(hackc_opts, &hhas)?;
+            w.write_all(&hhas)?;
         }
     }
     Ok(())
 }
 
 pub(crate) fn test_decl_compile_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
-    crate::daemon_mode(|path| {
+    crate::daemon_loop(|path, w| {
         hackc_opts.files.filenames = vec![path];
-        test_decl_compile(hackc_opts)
+        test_decl_compile(hackc_opts, w)
     })
 }
 

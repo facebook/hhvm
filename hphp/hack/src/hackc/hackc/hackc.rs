@@ -22,9 +22,7 @@ use hhvm_options::HhvmOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path::RelativePath;
 use oxidized::relative_path::{self};
-use std::fs;
 use std::io::BufRead;
-use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -141,9 +139,10 @@ struct FlagCommands {
 
 impl FileOpts {
     pub fn gather_input_files(&mut self) -> Result<Vec<PathBuf>> {
+        use std::io::BufReader;
         let mut files: Vec<PathBuf> = Default::default();
         if let Some(list_path) = self.input_file_list.take() {
-            for line in BufReader::new(fs::File::open(list_path)?).lines() {
+            for line in BufReader::new(std::fs::File::open(list_path)?).lines() {
                 files.push(Path::new(&line?).to_path_buf());
             }
         }
@@ -256,51 +255,47 @@ fn main() -> Result<()> {
         Some(Command::DesugarExprTrees(et_opts)) => expr_trees::desugar_expr_trees(&opts, et_opts),
 
         // Facts
-        Some(Command::Facts(facts_opts)) => facts::extract_facts(&mut opts, facts_opts),
-        None if opts.daemon && opts.flag_commands.extract_facts_from_decls => {
-            facts::run_daemon(&mut opts)
+        Some(Command::Facts(facts_opts)) => {
+            facts::extract_facts(&opts, facts_opts, &mut std::io::stdout())
         }
-        None if opts.flag_commands.extract_facts_from_decls => facts::run_flag(&mut opts),
+        None if opts.daemon && opts.flag_commands.extract_facts_from_decls => {
+            facts::daemon(&mut opts)
+        }
+        None if opts.flag_commands.extract_facts_from_decls => {
+            facts::run_flag(&mut opts, &mut std::io::stdout())
+        }
 
         // Test Decls-in-Compilation
         None if opts.daemon && opts.flag_commands.test_compile_with_decls => {
             compile::test_decl_compile_daemon(&mut opts)
         }
-        None if opts.flag_commands.test_compile_with_decls => compile::test_decl_compile(&mut opts),
+        None if opts.flag_commands.test_compile_with_decls => {
+            compile::test_decl_compile(&mut opts, &mut std::io::stdout())
+        }
 
         // Compile to hhas
         Some(Command::Compile(mut opts)) => compile::run(&mut opts),
         None if opts.daemon => compile::daemon(&mut opts),
-        None => compile::compile_from_text(&mut opts),
+        None => compile::compile_from_text(&mut opts, &mut std::io::stdout()),
     }
 }
 
 /// In daemon mode, hackc blocks waiting for a filename on stdin.
 /// Then, using the originally invoked options, dispatches that file to be compiled.
-fn daemon_mode(mut f: impl FnMut(PathBuf) -> Result<()>) -> Result<()> {
-    for line in std::io::stdin().lock().lines() {
-        f(Path::new(&line?).to_path_buf())?;
-    }
-    Ok(())
-}
-
-/// Utility print for daemon mode compatibility
-/// Prints the number of characters of the compiled result to stdout along with
-/// \n and flushes Then prints the compiled result, \n, and flushes.
-/// Do not rely on daemon mode for production use cases.
-pub(crate) fn daemon_print(opts: &Opts, output: &[u8]) -> Result<()> {
+fn daemon_loop(mut f: impl FnMut(PathBuf, &mut Vec<u8>) -> Result<()>) -> Result<()> {
     use std::io::Write;
-    let mut w = std::io::stdout();
-    if opts.daemon {
-        // Need to account for utf-8 encoding and text streams with the python test
-        // runner A whole mess:
+    for line in std::io::stdin().lock().lines() {
+        let mut buf = Vec::new();
+        f(Path::new(&line?).to_path_buf(), &mut buf)?;
+        // Account for utf-8 encoding and text streams with the python test runner:
         // https://stackoverflow.com/questions/3586923/counting-unicode-characters-in-c
-        let nbytes = output.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1;
-        writeln!(w, "{nbytes}",)?;
+        let mut w = std::io::stdout();
+        let num_chars = buf.iter().filter(|&b| (b & 0xc0) != 0x80).count() + 1;
+        writeln!(w, "{num_chars}")?;
+        w.write_all(&buf)?;
+        w.write_all(b"\n")?;
+        w.flush()?;
     }
-    w.write_all(output)?;
-    w.write_all(b"\n")?;
-    w.flush()?;
     Ok(())
 }
 

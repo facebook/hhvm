@@ -9,6 +9,7 @@ use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use serde_json::json;
 use serde_json::Value;
+use std::io::Write;
 
 /// Facts subcommand options
 #[derive(Parser, Debug, Default)]
@@ -25,7 +26,11 @@ pub(crate) struct Opts {
 /// If input-file-list was specified or if there are multiple CLI files,
 /// the result is a JSON object will map filenames to facts. Otherwise
 /// the result is just the single file's Facts.
-pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Result<()> {
+pub(crate) fn extract_facts(
+    hackc_opts: &crate::Opts,
+    mut opts: Opts,
+    w: &mut impl Write,
+) -> Result<()> {
     // If --input-file-list, output a json wrapper object mapping
     // filenames to facts objects
     let is_batch = !hackc_opts.daemon && opts.files.is_batch_mode();
@@ -45,9 +50,6 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
         // Decls to facts
         if parsed_file.has_first_pass_parse_errors {
             // Swallowing errors is bad.
-            if !is_batch {
-                crate::daemon_print(hackc_opts, b"")?;
-            }
             continue;
         }
         let facts = Facts::from_decls(
@@ -63,25 +65,24 @@ pub(crate) fn extract_facts(hackc_opts: &mut crate::Opts, mut opts: Opts) -> Res
         file_to_facts.insert(path.to_str().unwrap().to_owned(), json);
     }
     if is_batch {
-        serde_json::to_writer(std::io::stdout(), &Value::Object(file_to_facts))?;
-    } else if let Some((_, json)) = file_to_facts.into_iter().next() {
-        let output = serde_json::to_string_pretty(&json)?;
-        crate::daemon_print(hackc_opts, output.as_bytes())?;
+        serde_json::to_writer(w, &Value::Object(file_to_facts))?;
+    } else if let Some((_, facts)) = file_to_facts.into_iter().next() {
+        serde_json::to_writer_pretty(w, &facts)?;
     }
     Ok(())
 }
 
-pub(crate) fn run_flag(hackc_opts: &mut crate::Opts) -> Result<()> {
+pub(crate) fn run_flag(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let facts_opts = Opts {
         files: std::mem::take(&mut hackc_opts.files),
         ..Default::default()
     };
-    extract_facts(hackc_opts, facts_opts)
+    extract_facts(hackc_opts, facts_opts, w)
 }
 
-pub(crate) fn run_daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
-    crate::daemon_mode(|path| {
+pub(crate) fn daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
+    crate::daemon_loop(|path, w| {
         hackc_opts.files.filenames = vec![path];
-        run_flag(hackc_opts)
+        run_flag(hackc_opts, w)
     })
 }

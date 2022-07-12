@@ -49,7 +49,6 @@
 , oniguruma
 , openldap
 , openssl
-, patchelf
 , pcre
 , perl
 , pkg-config
@@ -101,7 +100,6 @@ stdenv.mkDerivation rec {
       cacert
       cmake
       flex
-      patchelf
       pkg-config
       python3
       unixtools.getconf

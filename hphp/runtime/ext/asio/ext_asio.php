@@ -318,7 +318,7 @@ async function void()[]: Awaitable<void> {}
  * until the provided Awaitable is finished.
  */
 <<__Native("NoFCallBuiltin")>>
-function join<T>(Awaitable<T> $awaitable)[]: mixed; // TODO(T121714228)
+function join<T>(Awaitable<T> $awaitable)[]: T;
 
 /**
  * Get result of an already finished Awaitable.

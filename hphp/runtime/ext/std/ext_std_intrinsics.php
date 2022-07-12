@@ -26,6 +26,14 @@ function trigger_crash(): void;
 <<__Native>>
 function launder_value(mixed $value): mixed;
 
+/**
+ * Do nothing to the given value. This function is purposefully not optimized.
+ * It's really here as a way to verify how systemlib handles generic inout
+ * functions.
+ */
+<<__Native>>
+function launder_value_inout<T>(inout T $value): void;
+
 /*
  * Builtins for testing array-ish builtin typehints.
  */
@@ -58,6 +66,9 @@ function dummy_darray_await(): Awaitable;
 
 <<__Native>>
 function dummy_dict_await(): Awaitable;
+
+<<__Native>>
+function dummy_int_upper_bound<T as int>(): T;
 
 <<__Native>>
 function create_class_pointer(string $name): mixed;

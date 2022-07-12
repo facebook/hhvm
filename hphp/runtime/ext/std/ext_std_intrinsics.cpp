@@ -54,6 +54,10 @@ TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
   return tvReturn(val);
 }
 
+void HHVM_FUNCTION(launder_value_inout, Variant& val) {
+  return;
+}
+
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
   if (arr.isVec()) return arr;
   return Array::CreateVec();
@@ -372,6 +376,10 @@ Object HHVM_FUNCTION(dummy_dict_await) {
   return Object{ev->getWaitHandle()};
 }
 
+int64_t HHVM_FUNCTION(dummy_int_upper_bound) {
+  return 42;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(create_class_pointer, StringArg name) {
@@ -455,6 +463,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_break, trigger_break);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
+  HHVM_FALIAS(__hhvm_intrinsics\\launder_value_inout, launder_value_inout);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
@@ -469,6 +478,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
 
   HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
   HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);

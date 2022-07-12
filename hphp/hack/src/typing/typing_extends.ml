@@ -1834,14 +1834,18 @@ let check_no_conflicting_inherited_concrete_constants name constants class_pos =
  * -vEval.TraitConstantInterfaceBehavior=1 extends this behavior to traits. This function reports
  * such cases, pointing to the definitions of the constants and reporting which parent brings them
  * in, e.g. declared in an interface brought in via a trait use. *)
-let check_no_conflicting_inherited_concrete_typeconsts name typeconsts class_pos
-    =
+let check_no_conflicting_inherited_concrete_typeconsts
+    env name typeconsts class_pos =
   let open ParentTypeConst in
   let definitions =
     ParentTypeConstSet.filter
-      (fun { typeconst = { ttc_kind; _ }; _ } ->
+      (fun { typeconst = { ttc_kind; ttc_synthesized; _ }; _ } ->
         match ttc_kind with
-        | TCConcrete _ -> true
+        | TCConcrete _ ->
+          if TCO.enable_strict_const_semantics (Env.get_tcopt env) > 2 then
+            not ttc_synthesized
+          else
+            true
         | TCAbstract _ -> false)
       typeconsts
     |> ParentTypeConstSet.elements
@@ -1894,12 +1898,14 @@ let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
                acc)
            consts)
 
-let union_parent_typeconsts parents : ParentTypeConstSet.t MemberNameMap.t =
+let union_parent_typeconsts env parents : ParentTypeConstSet.t MemberNameMap.t =
   let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
     let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
     let typeconsts =
       Cls.typeconsts parent_class
-      |> List.filter ~f:(fun (_, ttc) -> not ttc.ttc_synthesized)
+      |> List.filter ~f:(fun (_, ttc) ->
+             TCO.enable_strict_const_semantics (Env.get_tcopt env) > 2
+             || not ttc.ttc_synthesized)
       |> List.map
            ~f:(Tuple.T2.map_snd ~f:(Inst.instantiate_typeconst_type psubst))
     in
@@ -1990,7 +1996,7 @@ let check_class_extends_parents_typeconsts
     (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
   let typeconsts : ParentTypeConstSet.t MemberNameMap.t =
-    union_parent_typeconsts parents
+    union_parent_typeconsts env parents
   in
   let class_pos = fst class_ast.Aast.c_name in
 
@@ -1998,6 +2004,7 @@ let check_class_extends_parents_typeconsts
     (fun tconst_name inherited env ->
       if TCO.enable_strict_const_semantics (Env.get_tcopt env) > 1 then
         check_no_conflicting_inherited_concrete_typeconsts
+          env
           tconst_name
           inherited
           class_pos;

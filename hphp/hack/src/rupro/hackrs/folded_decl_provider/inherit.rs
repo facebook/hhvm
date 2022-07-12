@@ -236,7 +236,9 @@ impl<R: Reason> Inherited<R> {
                         &old_const.kind,
                         &new_const.kind,
                     ) {
-                        (false, true, _, _) => {}
+                        // TODO(T125402906) Re-enable this after fixing inheritance
+                        // (false, true, _, _) => {}
+
                         // This covers the following case
                         // ```
                         // interface I1 { abstract const type T; }

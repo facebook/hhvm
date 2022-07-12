@@ -296,7 +296,7 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   in
   (ce, Decl_utils.coalesce_consistent acc_consist cstr_consist)
 
-let add_inherited env inherited acc =
+let add_inherited _env inherited acc =
   {
     ih_substs =
       SMap.merge
@@ -331,14 +331,18 @@ let add_inherited env inherited acc =
     ih_cstr = add_constructor inherited.ih_cstr acc.ih_cstr;
     ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
-      (let strict_const_semantics =
-         TypecheckerOptions.enable_strict_const_semantics (Decl_env.tcopt env)
-         > 2
-       in
-       SMap.fold
-         (add_typeconst ~strict_const_semantics)
-         inherited.ih_typeconsts
-         acc.ih_typeconsts);
+      begin
+        (* TODO(T125402906) Re-enable this after fixing inheritance *)
+        let strict_const_semantics =
+          false
+          (* TypecheckerOptions.enable_strict_const_semantics (Decl_env.tcopt env)
+             > 2 *)
+        in
+        SMap.fold
+          (add_typeconst ~strict_const_semantics)
+          inherited.ih_typeconsts
+          acc.ih_typeconsts
+      end;
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;

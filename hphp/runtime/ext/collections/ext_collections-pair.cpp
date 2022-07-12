@@ -23,7 +23,7 @@ static Variant HHVM_METHOD(PairIterator, current) {
   return Native::data<PairIterator>(this_)->current();
 }
 
-static Variant HHVM_METHOD(PairIterator, key) {
+static int64_t HHVM_METHOD(PairIterator, key) {
   return Native::data<PairIterator>(this_)->key();
 }
 

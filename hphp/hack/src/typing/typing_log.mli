@@ -112,7 +112,12 @@ val log_pessimise_prop : Typing_env_types.env -> Pos.t -> string -> unit
 val log_pessimise_return : Typing_env_types.env -> Pos.t -> unit
 
 val log_pessimise_param :
-  Typing_env_types.env -> is_promoted_property:bool -> Pos.t -> string -> unit
+  Typing_env_types.env ->
+  is_promoted_property:bool ->
+  Pos.t ->
+  Ast_defs.param_kind ->
+  string ->
+  unit
 
 module GlobalInference : sig
   val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit

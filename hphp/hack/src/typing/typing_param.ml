@@ -103,6 +103,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
           env
           ~is_promoted_property:(Option.is_some param.param_visibility)
           param.param_pos
+          param.param_callconv
           param.param_name
       | Enforced -> ());
       (* If a non-inout parameter hint has the form ~t, where t is enforced,

@@ -5376,6 +5376,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
           env
           ~is_promoted_property:false
           param.param_pos
+          param.param_callconv
           param.param_name
       | Enforced -> ());
       let ((env, ty_err_opt1), h) =

@@ -777,9 +777,12 @@ let log_pessimise_ env kind pos name =
 let log_pessimise_prop env pos prop_name =
   log_pessimise_ env "prop" (Pos_or_decl.of_raw_pos pos) ("$" ^ prop_name)
 
-let log_pessimise_param env ~is_promoted_property pos param_name =
+let log_pessimise_param env ~is_promoted_property pos mode param_name =
   if
     is_promoted_property
+    || (match mode with
+       | Ast_defs.Pinout _ -> true
+       | _ -> false)
     || Typing_env_types.get_log_level env "pessimise.params" >= 1
   then
     log_pessimise_

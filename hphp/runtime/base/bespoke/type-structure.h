@@ -95,8 +95,6 @@ struct TypeStructure : BespokeArray {
     kOptionalShapeFieldOffset = 4
   };
 
-  static auto constexpr kNumFields = 9;
-
   static constexpr size_t kindOffset() {
     static_assert(folly::kIsLittleEndian);
     return offsetof(TypeStructure, m_extra_hi8);
@@ -117,7 +115,6 @@ struct TypeStructure : BespokeArray {
 #undef X
 
   static bool setField(TypeStructure* tad, StringData* k, TypedValue v);
-  static ssize_t numFields(Kind);
 
   bool nullable() const { return m_extra_lo8 & (1 << kNullableOffset); }
   bool soft() const { return m_extra_lo8 & (1 << kSoftOffset); }

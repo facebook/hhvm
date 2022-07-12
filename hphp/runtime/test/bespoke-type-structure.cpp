@@ -83,11 +83,10 @@ TEST(BespokeTypeStructure, Methods) {
     arr.set(Variant{"kind"}, kindInt);
     arr.set(Variant{"soft"}, Variant{true});
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
-    auto tv = bespoke::TypeStructure::GetPosKey(ts, 1);
-    EXPECT_TRUE(tv.m_type == KindOfString);
+    auto tv = bespoke::TypeStructure::GetPosKey(ts, 0);
+    EXPECT_TRUE(isStringType(tv.m_type));
     EXPECT_TRUE(val(tv).pstr->same(soft));
-    auto numFields = bespoke::TypeStructure::numFields(ts->typeKind());
-    auto tvUninit = bespoke::TypeStructure::GetPosKey(ts, numFields + 5);
+    auto tvUninit = bespoke::TypeStructure::GetPosKey(ts, ts->size());
     EXPECT_TRUE(tvUninit.m_type == KindOfUninit);
   }
   {
@@ -95,18 +94,20 @@ TEST(BespokeTypeStructure, Methods) {
     arr.set(Variant{"kind"}, kindInt);
     arr.set(Variant{"soft"}, Variant{true});
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
-    auto tv = bespoke::TypeStructure::GetPosVal(ts, 1);
+    auto tv = bespoke::TypeStructure::GetPosVal(ts, 0);
     EXPECT_TRUE(tv.m_type == KindOfBoolean);
     EXPECT_TRUE(val(tv).num == 1);
   }
   {
     Array arr = Array::CreateDict();
     arr.set(Variant{"kind"}, kindInt);
+    arr.set(Variant{"alias"}, Variant{t});
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
-    auto tvKey = bespoke::TypeStructure::GetPosKey(ts, 6);
+    auto tvKey = bespoke::TypeStructure::GetPosKey(ts, 1);
+    EXPECT_TRUE(isStringType(tvKey.m_type));
     EXPECT_TRUE(val(tvKey).pstr->same(alias));
-    auto tvVal = bespoke::TypeStructure::GetPosVal(ts, 6);
-    EXPECT_TRUE(tvVal.m_type == KindOfUninit);
+    auto tvVal = bespoke::TypeStructure::GetPosVal(ts, 1);
+    EXPECT_TRUE(isStringType(tvVal.m_type));
   }
 
   Array arr = Array::CreateDict();
@@ -115,8 +116,7 @@ TEST(BespokeTypeStructure, Methods) {
   arr.set(Variant{"soft"}, Variant{true});
   arr.set(Variant{"alias"}, Variant{t});
   auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
-  auto numFields = bespoke::TypeStructure::numFields(ts->typeKind());
-  auto const* vad = ts->escalateWithCapacity(numFields, __func__);
+  auto const* vad = bespoke::TypeStructure::EscalateToVanilla(ts, __func__);
   EXPECT_TRUE(vad->isVanilla());
 
   auto const vadKind = vad->get(Variant{"kind"});
@@ -127,7 +127,7 @@ TEST(BespokeTypeStructure, Methods) {
   EXPECT_TRUE(vadLike.m_type == KindOfUninit);
 
   auto const vadAlias = vad->get(Variant{"alias"});
-  EXPECT_TRUE(vadAlias.m_type == KindOfString);
+  EXPECT_TRUE(isStringType(vadAlias.m_type));
   EXPECT_TRUE(val(vadAlias).pstr->same(t));
 
   bespoke::TypeStructure* ts2 = ts->copy();

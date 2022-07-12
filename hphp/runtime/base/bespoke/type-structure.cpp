@@ -85,7 +85,7 @@ void TypeStructure::InitializeLayouts() {
 
 template <bool Static>
 TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
-  auto const index = MemoryManager::size2Index(getSizeOfTypeStruct(kind));
+  auto const index = sizeIndex(kind);
   auto const size = MemoryManager::sizeIndex2Size(index);
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
@@ -98,7 +98,9 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   tad->initHeader_16(HeaderKind::BespokeDict,
     Static ? StaticValue : OneReference, aux);
 
-  tad->m_size = numFields(kind);
+  // need to initialize this to actual size in MakeFromVanilla
+  tad->m_size = 0;
+
   tad->m_layout_index = GetLayoutIndex();
   tad->m_extra_lo8 = 0;
   tad->m_extra_hi8 = 0;
@@ -111,12 +113,16 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
 }
 
 template <typename Type>
-void setFields(Type* result, ArrayData* ad) {
+size_t setFields(Type* ts, ArrayData* ad) {
+  auto fields = 0;
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) {
     assertx(tvIsString(k));
-    auto const res = Type::setField(result, val(k).pstr, v);
-    if (res && isRefcountedType(v.m_type)) tvIncRefGen(v);
+    if (Type::setField(ts, val(k).pstr, v)) {
+      fields++;
+      tvIncRefGen(v);
+    }
   });
+  return fields;
 }
 
 void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
@@ -128,28 +134,24 @@ void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
 
 // caller must incref TypedValue
 bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
-  auto compare = k->isStatic()
-    ? [](StringData* a, StringData* b) { return a == b; }
-    : [](StringData* a, StringData* b) { return a->same(b); };
-
-  if (compare(s_kind.get(), k)) {
+  if (s_kind.same(k)) {
     assertx(tvIsInt(v));
     tad->m_extra_hi8 = safe_cast<uint8_t>(val(v).num);
-  } else if (compare(s_nullable.get(), k)) {
+  } else if (s_nullable.same(k)) {
     tad->setBitField(v, kNullableOffset);
-  } else if (compare(s_soft.get(), k)) {
+  } else if (s_soft.same(k)) {
     tad->setBitField(v, kSoftOffset);
-  } else if (compare(s_like.get(), k)) {
+  } else if (s_like.same(k)) {
     tad->setBitField(v, kLikeOffset);
-  } else if (compare(s_opaque.get(), k)) {
+  } else if (s_opaque.same(k)) {
     tad->setBitField(v, kOpaqueOffset);
-  } else if (compare(s_optional_shape_field.get(), k)) {
+  } else if (s_optional_shape_field.same(k)) {
     tad->setBitField(v, kOptionalShapeFieldOffset);
-  } else if (compare(s_alias.get(), k)) {
+  } else if (s_alias.same(k)) {
     setStringField(tad->m_alias, v);
-  } else if (compare(s_typevars.get(), k)) {
+  } else if (s_typevars.same(k)) {
     setStringField(tad->m_typevars, v);
-  } else if (compare(s_typevar_types.get(), k)) {
+  } else if (s_typevar_types.same(k)) {
     setArrayField(tad->m_typevar_types, v);
   } else {
     return false;
@@ -166,7 +168,10 @@ TypeStructure* TypeStructure::MakeFromVanilla(ArrayData* ad) {
     ? MakeReserve<true>(ad->isLegacyArray(), kind)
     : MakeReserve<false>(ad->isLegacyArray(), kind);
 
-  setFields<TypeStructure>(result, ad);
+  auto const size = setFields<TypeStructure>(result, ad);
+  assertx(ad->size() == size);
+
+  result->m_size = size;
 
   assertx(result->checkInvariants());
   return result;
@@ -199,7 +204,7 @@ TYPE_STRUCTURE_FIELDS
 
 ArrayData* TypeStructure::escalateWithCapacity(
     size_t capacity, const char* reason) const {
-  assertx(capacity >= numFields(typeKind()));
+  assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 
   auto ad = VanillaDict::MakeReserveDict(capacity);
@@ -252,35 +257,19 @@ void TypeStructure::decRefFields() {
   if (m_typevar_types) m_typevar_types->decRefAndRelease();
 }
 
-ssize_t TypeStructure::numFields(Kind kind) {
-  // TODO: return different field counts for children structs
-  return kNumFields;
-}
-
 bool TypeStructure::containsField(const StringData* k) const {
-  auto compare = k->isStatic()
-    ? [](StringData* a, const StringData* b) { return a == b; }
-    : [](StringData* a, const StringData* b) { return a->same(b); };
-
 #define X(Field, FieldString, KindOfType) \
-  if (compare(s_##FieldString.get(), k)) return true;
+  if (s_##FieldString.same(k)) return true;
 TYPE_STRUCTURE_FIELDS
 #undef X
   return false;
 }
 
 DataType TypeStructure::getKindOfField(const StringData* k) {
-  if (k->isStatic()) {
 #define X(Field, FieldString, KindOfType) \
-    if (k == s_##FieldString.get()) return KindOfType;
+  if (s_##FieldString.same(k)) return KindOfType;
   TYPE_STRUCTURE_FIELDS
 #undef X
-  } else {
-#define X(Field, FieldString, KindOfType) \
-    if (s_##FieldString.same(k)) return KindOfType;
-  TYPE_STRUCTURE_FIELDS
-#undef X
-  }
   return KindOfUninit;
 }
 
@@ -329,18 +318,29 @@ TypedValue make_tv_safe(bool val) {
   return val ? make_tv<KindOfBoolean>(true) : make_tv<KindOfUninit>();
 }
 TypedValue make_tv_safe(StringData* val) {
-  return val ? make_tv<KindOfString>(val) : make_tv<KindOfUninit>();
+  if (val == nullptr) return make_tv<KindOfUninit>();
+  return val->isStatic()
+    ? make_tv<KindOfPersistentString>(val)
+    : make_tv<KindOfString>(val);
 }
 TypedValue make_tv_safe(ArrayData* val) {
   if (val == nullptr) return make_tv<KindOfUninit>();
-  return val->isDictType() ? make_tv<KindOfDict>(val) : make_tv<KindOfVec>(val);
+  if (val->isDictType()) {
+    return val->isStatic()
+      ? make_tv<KindOfPersistentDict>(val)
+      : make_tv<KindOfDict>(val);
+  }
+  assertx(val->isVecType());
+  return val->isStatic()
+    ? make_tv<KindOfPersistentVec>(val)
+    : make_tv<KindOfVec>(val);
 }
 
 }
 
 ArrayData* TypeStructure::EscalateToVanilla(
     const TypeStructure* tad, const char* reason) {
-  return tad->escalateWithCapacity(numFields(tad->typeKind()), reason);
+  return tad->escalateWithCapacity(tad->size(), reason);
 }
 
 void TypeStructure::ConvertToUncounted(
@@ -378,12 +378,8 @@ TypedValue TypeStructure::NvGetInt(const TypeStructure*, int64_t) {
 
 TypedValue TypeStructure::NvGetStr(
     const TypeStructure* tad, const StringData* k) {
-  auto compare = k->isStatic()
-    ? [](StringData* a, const StringData* b) { return a == b; }
-    : [](StringData* a, const StringData* b) { return a->same(b); };
-
 #define X(Field, FieldString, KindOfType)                             \
-  if (compare(s_##FieldString.get(), k)) {                            \
+  if (s_##FieldString.same(k)) {                                      \
     return make_tv_safe(tad->Field());                                \
   }
 TYPE_STRUCTURE_FIELDS
@@ -393,8 +389,8 @@ TYPE_STRUCTURE_FIELDS
 
 TypedValue TypeStructure::GetPosKey(const TypeStructure* tad, ssize_t pos) {
 #define X(Field, FieldString, KindOfType)                             \
-  if (pos-- == 0) {                                                   \
-    return make_tv<KindOfString>(s_##FieldString.get());              \
+  if (tad->Field() && pos-- == 0) {                                   \
+    return make_tv<KindOfPersistentString>(s_##FieldString.get());    \
   }
 TYPE_STRUCTURE_FIELDS
 #undef X
@@ -403,7 +399,7 @@ TYPE_STRUCTURE_FIELDS
 
 TypedValue TypeStructure::GetPosVal(const TypeStructure* tad, ssize_t pos) {
 #define X(Field, FieldString, KindOfType)                             \
-  if (pos-- == 0) {                                                   \
+  if (tad->Field() && pos-- == 0) {                                   \
     return make_tv_safe(tad->Field());                                \
   }
 TYPE_STRUCTURE_FIELDS
@@ -412,23 +408,23 @@ TYPE_STRUCTURE_FIELDS
 }
 
 bool TypeStructure::PosIsValid(const TypeStructure* tad, ssize_t pos) {
-  return 0 <= pos && pos < numFields(tad->typeKind());
+  return 0 <= pos && pos < tad->size();
 }
 
 ssize_t TypeStructure::IterBegin(const TypeStructure*) {
   return 0;
 }
 ssize_t TypeStructure::IterLast(const TypeStructure* tad) {
-  return numFields(tad->typeKind()) - 1;
+  return tad->size() - 1;
 }
 ssize_t TypeStructure::IterEnd(const TypeStructure* tad) {
-  return numFields(tad->typeKind());
+  return tad->size();
 }
 ssize_t TypeStructure::IterAdvance(const TypeStructure* tad, ssize_t pos) {
-  return pos < numFields(tad->typeKind()) ? pos + 1 : pos;
+  return pos < tad->size() ? pos + 1 : pos;
 }
 ssize_t TypeStructure::IterRewind(const TypeStructure* tad, ssize_t pos) {
-  return pos > 0 ? pos - 1 : numFields(tad->typeKind());
+  return pos > 0 ? pos - 1 : tad->size();
 }
 
 arr_lval TypeStructure::LvalInt(TypeStructure* tad, int64_t k) {
@@ -439,7 +435,7 @@ arr_lval TypeStructure::LvalInt(TypeStructure* tad, int64_t k) {
 // so escalate
 arr_lval TypeStructure::LvalStr(TypeStructure* tad, StringData* k) {
   auto const vad =
-    tad->escalateWithCapacity(numFields(tad->typeKind()), __func__);
+    tad->escalateWithCapacity(tad->size(), __func__);
   assert(vad != nullptr);
   auto const result = vad->lval(k);
   assertx(result.arr == vad);
@@ -467,7 +463,7 @@ tv_lval TypeStructure::ElemStr(
 
 ArrayData* TypeStructure::SetIntMove(
     TypeStructure* tad, int64_t k, TypedValue v) {
-  auto const capacity = numFields(tad->typeKind()) + 1;
+  auto const capacity = tad->size() + 1;
   auto const vad = tad->escalateWithCapacity(capacity, __func__);
   auto const res = VanillaDict::SetIntMove(vad, k, v);
   assertx(vad == res);
@@ -477,8 +473,7 @@ ArrayData* TypeStructure::SetIntMove(
 
 ArrayData* TypeStructure::SetStrMove(
     TypeStructure* tad, StringData* k, TypedValue v) {
-  auto const capacity = numFields(tad->typeKind()) + 1;
-  auto const vad = tad->escalateWithCapacity(capacity, __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
   auto const res = VanillaDict::SetStrMove(vad, k, v);
   if (tad->decReleaseCheck()) Release(tad);
   return res;
@@ -493,15 +488,13 @@ ArrayData* TypeStructure::RemoveStrMove(
   if (!tad->containsField(k)) return tad;
 
   // type structure fields should not be removed, so escalate
-  auto const capacity = numFields(tad->typeKind());
-  auto const vad = tad->escalateWithCapacity(capacity, __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
   if (tad->decReleaseCheck()) Release(tad);
   return VanillaDict::RemoveStrMove(vad, k);
 }
 
 ArrayData* TypeStructure::AppendMove(TypeStructure* tad, TypedValue v) {
-  auto const capacity = numFields(tad->typeKind()) + 1;
-  auto const vad = tad->escalateWithCapacity(capacity, __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
   auto const res = VanillaDict::AppendMove(vad, v);
   assertx(vad == res);
   if (tad->decReleaseCheck()) Release(tad);
@@ -510,15 +503,13 @@ ArrayData* TypeStructure::AppendMove(TypeStructure* tad, TypedValue v) {
 
 // type structure fields should not be removed, so escalate
 ArrayData* TypeStructure::PopMove(TypeStructure* tad, Variant& value) {
-  auto const capacity = numFields(tad->typeKind());
-  auto const vad = tad->escalateWithCapacity(capacity, __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
   if (tad->decReleaseCheck()) Release(tad);
   return VanillaDict::PopMove(vad, value);
 }
 
 ArrayData* TypeStructure::PreSort(TypeStructure* tad, SortFunction sf) {
-  auto const capacity = numFields(tad->typeKind());
-  return tad->escalateWithCapacity(capacity, sortFunctionName(sf));
+  return tad->escalateWithCapacity(tad->size(), sortFunctionName(sf));
 }
 
 ArrayData* TypeStructure::PostSort(TypeStructure*, ArrayData* vad) {

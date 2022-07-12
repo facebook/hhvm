@@ -155,7 +155,7 @@ pub fn catch_unwind_with_handler(
         Ok(value) => return value,
         Err(err) => unsafe {
             let msg = CString::new(err).unwrap();
-            caml_failwith(msg.as_ptr());
+            caml_failwith(msg.as_ptr().cast());
         },
     }
     unreachable!();

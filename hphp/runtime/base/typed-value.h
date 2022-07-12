@@ -54,7 +54,7 @@ struct BlobDecoder;
  * This union may only be used in contexts that have a discriminator, e.g. in
  * TypedValue (below), or when the type is known beforehand.
  */
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 #pragma pack(push, 1)
 #endif
 union Value {
@@ -73,11 +73,11 @@ union Value {
   RClsMethData* prclsmeth; // KindOfRClsMeth
   LazyClassData plazyclass;   // KindOfLazyClass
 };
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 #pragma pack(pop)
 #endif
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 static_assert(alignof(Value) == 1);
 #else
 static_assert(alignof(Value) == 8);

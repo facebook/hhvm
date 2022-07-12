@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #pragma once
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
 // This must be kept in sync with `enum ExternalDeclProviderResult` in
 // 'hackc/decl_provider/external.rs' so they both are layout compatible.

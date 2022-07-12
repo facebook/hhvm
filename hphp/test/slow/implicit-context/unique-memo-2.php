@@ -13,7 +13,7 @@ function f()[zoned] {
 
 final class ArraykeyContext extends HH\ImplicitContext {
   const type T = arraykey;
-  public static function set($value, $fun) { parent::set($value, $fun); }
+  public static function set($value, $fun) { parent::runWith($value, $fun); }
 }
 
 

@@ -13,7 +13,7 @@ function f()[zoned] {
 
 trait T {
   const type T = int;
-  public static function set($value, $fun) { parent::set($value, $fun); }
+  public static function set($value, $fun) { parent::runWith($value, $fun); }
 }
 
 final class IntContext extends HH\ImplicitContext { use T; }

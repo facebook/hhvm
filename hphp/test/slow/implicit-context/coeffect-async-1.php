@@ -4,7 +4,7 @@ final class IntContext extends HH\ImplicitContext {
   const type T = int;
   public static async function setAsync(int $context, (function (): int) $f)[zoned] {
     echo 'Setting context to ' . $context . "\n";
-    return await parent::setAsync($context, $f);
+    return await parent::runWithAsync($context, $f);
   }
   public static function getContext()[zoned]: int {
     return parent::get() as nonnull;

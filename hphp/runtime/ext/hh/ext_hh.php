@@ -362,7 +362,7 @@ function get_implicit_context_memo_key()[zoned]: string;
 abstract class ImplicitContext {
   abstract const type T as nonnull;
 
-  protected static async function setAsync<Tout>(
+  protected static async function runWithAsync<Tout>(
     this::T $context,
     (function (): Awaitable<Tout>) $f
   )[zoned]: Awaitable<Tout> {
@@ -380,7 +380,7 @@ abstract class ImplicitContext {
     return await $result;
   }
 
-  protected static function set<Tout>(
+  protected static function runWith<Tout>(
     this::T $context,
     (function (): Tout) $f
   )[zoned]: Tout {

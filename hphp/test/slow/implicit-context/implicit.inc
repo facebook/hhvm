@@ -15,7 +15,7 @@ class D extends Base {}
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
   public static function start(int $context, (function (): int) $f)[zoned] {
-    return parent::set($context, $f);
+    return parent::runWith($context, $f);
   }
   public static function getContext()[zoned]: ?int {
     return parent::get();
@@ -25,7 +25,7 @@ abstract final class IntContext extends HH\ImplicitContext {
 trait ClassContextDefs {
   const type T = Base;
   public static function start(Base $context, (function (): int) $f)[zoned] {
-    return parent::set($context, $f);
+    return parent::runWith($context, $f);
   }
   public static function getContext()[zoned]: Base {
     return parent::get() as nonnull;

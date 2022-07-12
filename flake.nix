@@ -3,9 +3,10 @@
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat.url = "github:edolstra/flake-compat";
     flake-compat.flake = false;
+    nixpkgs-mozilla.url = "github:mozilla/nixpkgs-mozilla";
   };
   outputs =
-    { self, nixpkgs, flake-utils, flake-compat }:
+    { self, nixpkgs, flake-utils, flake-compat, nixpkgs-mozilla }:
     flake-utils.lib.eachSystem [
       "x86_64-darwin"
       "x86_64-linux"
@@ -13,7 +14,12 @@
       (
         system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              nixpkgs-mozilla.overlays.rust
+            ];
+          };
         in
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm.nix {

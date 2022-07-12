@@ -475,6 +475,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   else if (!strcasecmp("PTR",   stype)) ntype = DNS_T_PTR;
   else if (!strcasecmp("ANY",   stype)) ntype = DNS_T_ANY;
   else if (!strcasecmp("SOA",   stype)) ntype = DNS_T_SOA;
+  else if (!strcasecmp("CAA",   stype)) ntype = DNS_T_CAA;
   else if (!strcasecmp("TXT",   stype)) ntype = DNS_T_TXT;
   else if (!strcasecmp("CNAME", stype)) ntype = DNS_T_CNAME;
   else if (!strcasecmp("AAAA",  stype)) ntype = DNS_T_AAAA;
@@ -530,6 +531,7 @@ void StandardExtension::initNetwork() {
   HHVM_RC_INT(DNS_AAAA, PHP_DNS_AAAA);
   HHVM_RC_INT(DNS_ALL, PHP_DNS_ALL);
   HHVM_RC_INT(DNS_ANY, PHP_DNS_ANY);
+  HHVM_RC_INT(DNS_CAA, PHP_DNS_CAA);
   HHVM_RC_INT(DNS_CNAME, PHP_DNS_CNAME);
   HHVM_RC_INT(DNS_HINFO, PHP_DNS_HINFO);
   HHVM_RC_INT(DNS_MX, PHP_DNS_MX);

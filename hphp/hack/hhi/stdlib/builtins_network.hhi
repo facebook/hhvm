@@ -13,6 +13,7 @@ const int DNS_A6 = 16777216;
 const int DNS_AAAA = 134217728;
 const int DNS_ALL = 251713587;
 const int DNS_ANY = 268435456;
+const int DNS_CAA = 8192;
 const int DNS_CNAME = 16;
 const int DNS_HINFO = 4096;
 const int DNS_MX = 16384;

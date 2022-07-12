@@ -81,7 +81,7 @@ function dns_get_mx(string $host, inout mixed $mxhosts, inout mixed $weight)[def
  * @param int $type - By default, dns_get_record() will search for any
  *   resource records associated with hostname. To limit the query, specify
  *   the optional type parameter. May be any one of the following: DNS_A,
- *   DNS_CNAME, DNS_HINFO, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT,
+ *   DNS_CNAME, DNS_HINFO, DNS_CAA, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT,
  *   DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY.    Because
  *   of eccentricities in the performance of libresolv between platforms,
  *   DNS_ANY will not always return every record, the slower DNS_ALL will

@@ -152,12 +152,15 @@ const StaticString
   s_replacement("replacement"),
   s_class("class"),
   s_ttl("ttl"),
+  s_tag("tag"),
+  s_value("value"),
   s_A("A"),
   s_MX("MX"),
   s_CNAME("CNAME"),
   s_NS("NS"),
   s_PTR("PTR"),
   s_HINFO("HINFO"),
+  s_CAA("CAA"),
   s_TXT("TXT"),
   s_SOA("SOA"),
   s_AAAA("AAAA"),
@@ -260,6 +263,27 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     cp++;
     CHECKCP(n);
     subarray.set(s_os, String((const char *)cp, n, CopyString));
+    cp += n;
+    break;
+  case DNS_T_CAA:
+    /* See RFC 8659 for values https://datatracker.ietf.org/doc/html/rfc8659 */
+    subarray.set(s_type, s_CAA);
+    CHECKCP(1);
+    n = *cp & 0xFF;
+    subarray.set(s_flags, n);
+    cp++;
+    CHECKCP(1);
+    n = *cp & 0xFF;
+    cp++;
+    CHECKCP(n);
+    subarray.set(s_tag, String((const char *)cp, n, CopyString));
+    cp += n;
+		if ( (size_t) dlen < ((size_t)n) + 2 ) {
+			return NULL;
+	  }
+    n = dlen - n - 2;
+    CHECKCP(n);
+    subarray.set(s_value, String((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_TXT: {
@@ -527,6 +551,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
     case 9:  type_to_fetch = type & PHP_DNS_SRV   ? DNS_T_SRV   : 0; break;
     case 10: type_to_fetch = type & PHP_DNS_NAPTR ? DNS_T_NAPTR : 0; break;
     case 11: type_to_fetch = type & PHP_DNS_A6    ? DNS_T_A6    : 0; break;
+    case 12: type_to_fetch = type & PHP_DNS_CAA   ? DNS_T_CAA   : 0; break;
     case PHP_DNS_NUM_TYPES:
       store_results = false;
       continue;

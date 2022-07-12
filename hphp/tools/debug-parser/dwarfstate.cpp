@@ -229,15 +229,15 @@ DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
   auto initialLength = read<uint32_t>(sp);
   context.is64Bit = (initialLength == (uint32_t)-1);
   context.size = context.is64Bit ? read<uint64_t>(sp) : initialLength;
-  assertx(context.size <= sp.size());
+  always_assert(context.size <= sp.size());
   context.size += context.is64Bit ? 12 : 4;
 
   context.version = read<uint16_t>(sp);
-  assertx(context.version >= 2 && context.version <= 4);
+  always_assert(context.version >= 2 && context.version <= 4);
 
   context.abbrevOffset = readOffset(sp, context.is64Bit);
   context.addrSize = read<uint8_t>(sp);
-  assertx(context.addrSize == 4 || context.addrSize == 8);
+  always_assert(context.addrSize == 4 || context.addrSize == 8);
 
   if (context.isInfo) {
     context.typeSignature = context.typeOffset = 0;
@@ -404,7 +404,7 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
       attrVal.assign(attrVal.data(), sp.data() - 1);
       break;
     case DW_FORM_indirect: // form is explicitly specified
-      assert(false);
+      always_assert(false);
   }
 
   return { spec, die, attrVal };

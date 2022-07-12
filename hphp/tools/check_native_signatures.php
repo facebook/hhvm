@@ -18,7 +18,11 @@
 A helper script to check that HNI signatures in a PHP file match how the
 functions are defined in the C++ file.
 
-Currently only matches functions, so won't match classes/methods.
+Hack method names are case sensitive.
+
+Classes and toplevel functions in Hack are not yet case sensitive,
+but this tool intentionally requires matching case between PHP bindings
+and C++ implementations.
 */
 
 function parse_php_functions(string $file):
@@ -72,7 +76,7 @@ function parse_php_functions(string $file):
           }
         }
       }
-      $functions[strtolower($name)] = Pair { $retType, $argTypes };
+      $functions[$name] = Pair { $retType, $argTypes };
     }
   }
   return $functions;
@@ -106,7 +110,7 @@ function parse_cpp_functions(string $file):
           $argTypes[] = $type;
         }
       }
-      $functions[strtolower($name)] = Pair { $retType, $argTypes };
+      $functions[$name] = Pair { $retType, $argTypes };
     }
   }
   return $functions;
@@ -169,7 +173,7 @@ function parse_php_methods(string $file):
               }
             }
           }
-          $methods[strtolower("$cname::$mname")] = Pair { $retType, $argTypes };
+          $methods["$cname::$mname"] = Pair { $retType, $argTypes };
         }
       }
     }
@@ -207,7 +211,7 @@ function parse_cpp_methods(string $file):
           $argTypes[] = $type;
         }
       }
-      $methods[strtolower("$cname::$mname")] = Pair { $retType, $argTypes };
+      $methods["$cname::$mname"] = Pair { $retType, $argTypes };
     }
   }
   return $methods;

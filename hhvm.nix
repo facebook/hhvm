@@ -56,6 +56,7 @@
 , python3
 , re2
 , re2c
+, rustChannelOf
 , stdenv
 , sqlite
 , tbb
@@ -84,6 +85,11 @@ let
     if suffix == "-dev" then "hhvm_nightly" else "hhvm";
   makeVersion = major: minor: patch: suffix:
     if suffix == "-dev" then "${major}.${minor}.${patch}-${lastModifiedDate}" else "${major}.${minor}.${patch}";
+  rustNightly = rustChannelOf {
+    sha256 = "TpJKRroEs7V2BTo2GFPJlEScYVArFY2MnGpYTxbnSo8=";
+    date = "2022-02-24";
+    channel = "nightly";
+  };
 in
 stdenv.mkDerivation rec {
   pname = builtins.foldl' lib.trivial.id makePName versionParts;
@@ -183,6 +189,8 @@ stdenv.mkDerivation rec {
           set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE STRING "The zoneinfo directory" FORCE)
           set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
           set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE STRING "The MySQL unix socket" FORCE)
+          set(CARGO_EXECUTABLE "${rustNightly.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
+          set(RUSTC_EXECUTABLE "${rustNightly.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
           ${
             lib.optionalString hostPlatform.isMacOS ''
               set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
@@ -206,34 +214,6 @@ stdenv.mkDerivation rec {
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch
       patchShebangs \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen
-
-      make \
-        -f third-party/rustc/CMakeFiles/bundled_rust.dir/build.make \
-        third-party/rustc/bundled_rust-prefix/src/bundled_rust-stamp/bundled_rust-patch
-      patchShebangs \
-        third-party/rustc/bundled_rust-prefix/src/bundled_rust
-    ''
-    # Prebuilt rustc and cargo needs patch if HHVM is built either
-    # on NixOS or in a Nix sandbox
-    + lib.optionalString hostPlatform.isLinux ''
-      make \
-        -f third-party/rustc/CMakeFiles/bundled_rust.dir/build.make \
-        third-party/rustc/bundled_rust-prefix/src/bundled_rust-stamp/bundled_rust-install
-      patchelf \
-        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-        --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
-        third-party/rustc/bundled_rust-prefix/bin/rustc
-      patchelf \
-        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-        --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
-        third-party/rustc/bundled_rust-prefix/bin/cargo
-      patchelf \
-        --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-        --add-needed ${zlib}/lib/libz.so.1 \
-        --add-rpath "${lib.makeLibraryPath [zlib stdenv.cc.cc.lib]}" \
-        third-party/rustc/bundled_rust-prefix/bin/rustfmt
     '';
 
   meta = {

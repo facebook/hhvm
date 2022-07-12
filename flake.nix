@@ -53,8 +53,9 @@
                   pkgs.fpm
                   pkgs.rpm
                 ];
-                NIX_CFLAGS_COMPILE = packages.hhvm.NIX_CFLAGS_COMPILE;
-                CMAKE_INIT_CACHE = packages.hhvm.cmakeInitCache;
+                inherit (packages.hhvm)
+                  NIX_CFLAGS_COMPILE
+                  CMAKE_INIT_CACHE;
               };
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =

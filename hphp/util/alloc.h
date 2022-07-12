@@ -338,11 +338,7 @@ inline void* low_malloc(size_t size) {
   return malloc(size);
 #else
   assert(size);
-  auto ptr = mallocx(size, low_arena_flags);
-#ifndef USE_LOWPTR
-  if (ptr == nullptr) ptr = uncounted_malloc(size);
-#endif
-  return ptr;
+  return mallocx(size, low_arena_flags);
 #endif
 }
 

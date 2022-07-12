@@ -42,6 +42,12 @@ jobs:
     - name: Show the deb package's content
       if: runner.os == 'Linux'
       run: dpkg-deb --contents bundle.deb
+    - name: Save the deb package as build artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v2
+      with:
+        name: bundle.deb
+        path: bundle.deb
     - name: Build the rpm package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1"
@@ -51,6 +57,12 @@ jobs:
     - name: Show the rpm package's content
       if: runner.os == 'Linux'
       run: rpm --query --list --package bundle.rpm
+    - name: Save the rpm package as build artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v2
+      with:
+        name: bundle.rpm
+        path: bundle.rpm
     - name: Assume the AWS role
       if: github.event_name != 'pull_request'
       uses: aws-actions/configure-aws-credentials@v1

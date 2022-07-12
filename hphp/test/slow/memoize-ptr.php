@@ -35,9 +35,9 @@ function main() {
   memo_cptr(class_meth(A::class, 'b'), 3);
   memo_cptr(__hhvm_intrinsics\launder_value(class_meth(A::class, 'b')), 4);
 
-  memo_cptr(varray[a::class, 'b'], 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(varray[a::class, 'b']), 4);
+  memo_cptr(varray[A::class, 'b'], 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(varray[A::class, 'b']), 4);
 
-  memo_cptr(varray[a::class, 'b'], 3);
-  memo_cptr(__hhvm_intrinsics\launder_value(varray[a::class, 'b']), 4);
+  memo_cptr(varray[A::class, 'b'], 3);
+  memo_cptr(__hhvm_intrinsics\launder_value(varray[A::class, 'b']), 4);
 }

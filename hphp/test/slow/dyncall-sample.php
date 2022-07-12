@@ -50,7 +50,7 @@ function main() {
   echo "Class method pointer call (laundered)\n";
   $cm2();
 
-  $klass = __hhvm_intrinsics\launder_value('klass');
+  $klass = __hhvm_intrinsics\launder_value('Klass');
   $funktion = __hhvm_intrinsics\launder_value('funktion');
 
   echo "Class/method string call (laundered)\n";
@@ -58,7 +58,7 @@ function main() {
   $klass::funktion();
   $klass::$funktion();
 
-  $klass2 = 'klass';
+  $klass2 = 'Klass';
   $funktion2 = 'funktion';
 
   echo "Class/method string call\n";
@@ -79,7 +79,7 @@ function main() {
   echo "Raw method call\n";
   (new Alpha)->beta();
 
-  $alpha = __hhvm_intrinsics\launder_value('alpha');
+  $alpha = __hhvm_intrinsics\launder_value('Alpha');
   $beta = __hhvm_intrinsics\launder_value('beta');
 
   echo "Method string call (laundered)\n";
@@ -87,7 +87,7 @@ function main() {
   (new $alpha)->beta();
   (new $alpha)->$beta();
 
-  $alpha2 = 'alpha';
+  $alpha2 = 'Alpha';
   $beta2 = 'beta';
 
   echo "Method string call\n";

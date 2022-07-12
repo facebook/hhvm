@@ -12,6 +12,7 @@ use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
 use crate::Literal;
+use crate::LiteralId;
 use crate::LocId;
 use crate::SrcLoc;
 use crate::ValueId;
@@ -21,6 +22,7 @@ pub struct FuncBuilder<'a> {
     pub func: Func<'a>,
     cur_bid: BlockId,
     pub loc_lookup: HashMap<SrcLoc, LocId>,
+    pub literal_lookup: HashMap<Literal<'a>, LiteralId>,
     block_rewrite_stopped: bool,
     changed: bool,
 
@@ -49,10 +51,17 @@ impl<'a> FuncBuilder<'a> {
     }
 
     pub fn with_func(func: Func<'a>) -> Self {
+        let literal_lookup: HashMap<Literal<'a>, LiteralId> = func
+            .literals
+            .iter()
+            .enumerate()
+            .map(|(idx, literal)| (literal.clone(), LiteralId::from_usize(idx)))
+            .collect();
         FuncBuilder {
             func,
             cur_bid: BlockId::NONE,
             loc_lookup: Default::default(),
+            literal_lookup,
             block_rewrite_stopped: false,
             changed: false,
             replacements: Default::default(),
@@ -113,7 +122,11 @@ impl<'a> FuncBuilder<'a> {
     }
 
     pub fn emit_literal(&mut self, literal: Literal<'a>) -> ValueId {
-        ValueId::from_literal(self.func.alloc_literal(literal))
+        let lit_id = self
+            .literal_lookup
+            .entry(literal)
+            .or_insert_with_key(|literal| self.func.alloc_literal(literal.clone()));
+        ValueId::from_literal(*lit_id)
     }
 
     pub fn finish(self) -> Func<'a> {

@@ -447,19 +447,12 @@ pub(crate) fn print_func_body(
         writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment))?;
     }
     for lid in func.literals.keys() {
-        write!(
+        writeln!(
             w,
             "  .const {} = {}",
             FmtRawVid(ValueId::from_literal(lid)),
             FmtLiteralId(func, lid),
         )?;
-
-        let loc_id = func.literal(lid).loc_id();
-        if let Some(loc) = func.get_loc(loc_id) {
-            write!(w, " (@ line {})", loc.line_begin)?;
-        }
-
-        writeln!(w)?;
     }
 
     for (id, func::ExFrame { parent, catch_bid }) in &func.ex_frames {

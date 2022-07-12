@@ -33,7 +33,7 @@ pub fn build_test_func<'a>(testcase: &[(&str, Vec<&str>)]) -> Func<'a> {
             );
         }
 
-        let zero_iid = fb.emit_literal(Literal::null(loc));
+        let null_iid = fb.emit_literal(Literal::Null);
 
         for (name, edges) in testcase {
             fb.start_block(name_to_bid[name]);
@@ -48,9 +48,9 @@ pub fn build_test_func<'a>(testcase: &[(&str, Vec<&str>)]) -> Func<'a> {
                 .collect();
 
             let terminator = match e.len() {
-                0 => Instr::ret(zero_iid, loc),
+                0 => Instr::ret(null_iid, loc),
                 1 => Instr::jmp(e[0], loc),
-                2 => Instr::jmp_op(zero_iid, instr::Predicate::NonZero, e[0], e[1], loc),
+                2 => Instr::jmp_op(null_iid, instr::Predicate::NonZero, e[0], e[1], loc),
                 _ => panic!("unhandled edge count"),
             };
             fb.emit(terminator);

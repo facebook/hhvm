@@ -234,22 +234,22 @@ impl Display for FmtLiteral<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtLiteral(literal) = self;
         match literal {
-            Literal::Bool(false, _) => write!(f, "false")?,
-            Literal::Bool(true, _) => write!(f, "true")?,
-            Literal::Dict(name, _) => write!(f, "dict({})", FmtQuotedStr(name))?,
-            Literal::Dir(_) => write!(f, "dir")?,
-            Literal::Double(value, _) => write!(f, "{}", value.0)?,
-            Literal::File(_) => write!(f, "file")?,
-            Literal::FuncCred(_) => write!(f, "func_cred")?,
-            Literal::Int(value, _) => write!(f, "{}", value)?,
-            Literal::Keyset(name, _) => write!(f, "keyset({})", FmtQuotedStr(name))?,
-            Literal::Method(_) => write!(f, "method")?,
-            Literal::Named(name, _) => write!(f, "literal({})", FmtIdentifier(name.as_bytes()))?,
-            Literal::NewCol(k, _) => write!(f, "new_col({:?})", k)?,
-            Literal::Null(_) => write!(f, "null")?,
-            Literal::NullUninit(_) => write!(f, "null_uninit")?,
-            Literal::String(value, _) => FmtQuotedStr(value).fmt(f)?,
-            Literal::Vec(name, _) => write!(f, "vec({})", FmtQuotedStr(name))?,
+            Literal::Bool(false) => write!(f, "false")?,
+            Literal::Bool(true) => write!(f, "true")?,
+            Literal::Dict(name) => write!(f, "dict({})", FmtQuotedStr(name))?,
+            Literal::Dir => write!(f, "dir")?,
+            Literal::Double(value) => write!(f, "{}", value.0)?,
+            Literal::File => write!(f, "file")?,
+            Literal::FuncCred => write!(f, "func_cred")?,
+            Literal::Int(value) => write!(f, "{}", value)?,
+            Literal::Keyset(name) => write!(f, "keyset({})", FmtQuotedStr(name))?,
+            Literal::Method => write!(f, "method")?,
+            Literal::Named(name) => write!(f, "literal({})", FmtIdentifier(name.as_bytes()))?,
+            Literal::NewCol(k) => write!(f, "new_col({:?})", k)?,
+            Literal::Null => write!(f, "null")?,
+            Literal::String(value) => FmtQuotedStr(value).fmt(f)?,
+            Literal::Uninit => write!(f, "uninit")?,
+            Literal::Vec(name) => write!(f, "vec({})", FmtQuotedStr(name))?,
         }
 
         Ok(())

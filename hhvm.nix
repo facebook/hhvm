@@ -85,7 +85,11 @@ let
     if suffix == "-dev" then "hhvm_nightly" else "hhvm";
   makeVersion = major: minor: patch: suffix:
     if suffix == "-dev" then "${major}.${minor}.${patch}-${lastModifiedDate}" else "${major}.${minor}.${patch}";
-  rustNightly = rustChannelOf { date = "2022-02-24"; channel = "nightly"; };
+  rustNightly = rustChannelOf {
+    sha256 = "TpJKRroEs7V2BTo2GFPJlEScYVArFY2MnGpYTxbnSo8=";
+    date = "2022-02-24";
+    channel = "nightly";
+  };
 in
 stdenv.mkDerivation rec {
   pname = builtins.foldl' lib.trivial.id makePName versionParts;

@@ -773,7 +773,6 @@ where
                 TokenKind::Default
                 | TokenKind::Case
                 | TokenKind::RightBrace
-                | TokenKind::Endswitch
                 | TokenKind::EndOfFile => None,
                 _ => {
                     let statement = self.parse_statement();

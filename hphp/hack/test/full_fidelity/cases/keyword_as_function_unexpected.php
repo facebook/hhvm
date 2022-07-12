@@ -20,8 +20,6 @@ function else() {}
 function endfor() {}
 function endforeach() {}
 function endif() {}
-function endswitch() {}
-function endwhile() {}
 function eval() {}
 function extends() {}
 function final() {}

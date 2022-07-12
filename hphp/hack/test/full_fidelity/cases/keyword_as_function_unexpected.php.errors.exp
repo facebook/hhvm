@@ -13,109 +13,101 @@
 (17,12)-(17,12) A name or `__construct` keyword is expected here.
 (18,14)-(18,14) A name or `__construct` keyword is expected here.
 (19,14)-(19,14) A name or `__construct` keyword is expected here.
-(20,16)-(20,16) A name or `__construct` keyword is expected here.
-(21,20)-(21,20) A name or `__construct` keyword is expected here.
 (22,15)-(22,15) A name or `__construct` keyword is expected here.
-(23,19)-(23,19) A name or `__construct` keyword is expected here.
-(24,18)-(24,18) A name or `__construct` keyword is expected here.
-(25,14)-(25,14) A name or `__construct` keyword is expected here.
+(23,14)-(23,14) A name or `__construct` keyword is expected here.
+(24,17)-(24,17) A name or `__construct` keyword is expected here.
+(25,15)-(25,15) A name or `__construct` keyword is expected here.
 (26,17)-(26,17) A name or `__construct` keyword is expected here.
-(27,15)-(27,15) A name or `__construct` keyword is expected here.
+(27,13)-(27,13) A name or `__construct` keyword is expected here.
 (28,17)-(28,17) A name or `__construct` keyword is expected here.
-(29,13)-(29,13) A name or `__construct` keyword is expected here.
-(30,17)-(30,17) A name or `__construct` keyword is expected here.
-(31,18)-(31,18) A name or `__construct` keyword is expected here.
-(32,16)-(32,16) A name or `__construct` keyword is expected here.
-(33,12)-(33,12) A name or `__construct` keyword is expected here.
-(34,20)-(34,20) A name or `__construct` keyword is expected here.
-(35,17)-(35,17) A name or `__construct` keyword is expected here.
-(36,22)-(36,22) A name or `__construct` keyword is expected here.
-(37,15)-(37,15) A name or `__construct` keyword is expected here.
-(38,20)-(38,20) A name or `__construct` keyword is expected here.
-(39,19)-(39,19) A name or `__construct` keyword is expected here.
+(29,18)-(29,18) A name or `__construct` keyword is expected here.
+(30,16)-(30,16) A name or `__construct` keyword is expected here.
+(31,12)-(31,12) A name or `__construct` keyword is expected here.
+(32,20)-(32,20) A name or `__construct` keyword is expected here.
+(33,17)-(33,17) A name or `__construct` keyword is expected here.
+(34,22)-(34,22) A name or `__construct` keyword is expected here.
+(35,15)-(35,15) A name or `__construct` keyword is expected here.
+(36,20)-(36,20) A name or `__construct` keyword is expected here.
+(37,19)-(37,19) A name or `__construct` keyword is expected here.
+(38,19)-(38,19) A name or `__construct` keyword is expected here.
+(39,14)-(39,14) A name or `__construct` keyword is expected here.
 (40,19)-(40,19) A name or `__construct` keyword is expected here.
-(41,14)-(41,14) A name or `__construct` keyword is expected here.
-(42,19)-(42,19) A name or `__construct` keyword is expected here.
-(43,13)-(43,13) A name or `__construct` keyword is expected here.
-(44,15)-(44,15) A name or `__construct` keyword is expected here.
-(45,17)-(45,17) A name or `__construct` keyword is expected here.
-(46,19)-(46,19) A name or `__construct` keyword is expected here.
-(47,16)-(47,16) A name or `__construct` keyword is expected here.
-(48,17)-(48,17) A name or `__construct` keyword is expected here.
-(49,22)-(49,22) A name or `__construct` keyword is expected here.
+(41,13)-(41,13) A name or `__construct` keyword is expected here.
+(42,15)-(42,15) A name or `__construct` keyword is expected here.
+(43,17)-(43,17) A name or `__construct` keyword is expected here.
+(44,19)-(44,19) A name or `__construct` keyword is expected here.
+(45,16)-(45,16) A name or `__construct` keyword is expected here.
+(46,17)-(46,17) A name or `__construct` keyword is expected here.
+(47,22)-(47,22) A name or `__construct` keyword is expected here.
+(48,16)-(48,16) A name or `__construct` keyword is expected here.
+(49,15)-(49,15) A name or `__construct` keyword is expected here.
 (50,16)-(50,16) A name or `__construct` keyword is expected here.
-(51,15)-(51,15) A name or `__construct` keyword is expected here.
-(52,16)-(52,16) A name or `__construct` keyword is expected here.
-(53,16)-(53,16) A name or `__construct` keyword is expected here.
-(54,15)-(54,15) A name or `__construct` keyword is expected here.
-(55,15)-(55,15) A name or `__construct` keyword is expected here.
-(56,13)-(56,13) A name or `__construct` keyword is expected here.
+(51,16)-(51,16) A name or `__construct` keyword is expected here.
+(52,15)-(52,15) A name or `__construct` keyword is expected here.
+(53,15)-(53,15) A name or `__construct` keyword is expected here.
+(54,13)-(54,13) A name or `__construct` keyword is expected here.
+(55,13)-(55,13) A name or `__construct` keyword is expected here.
+(56,15)-(56,15) A name or `__construct` keyword is expected here.
 (57,13)-(57,13) A name or `__construct` keyword is expected here.
 (58,15)-(58,15) A name or `__construct` keyword is expected here.
-(59,13)-(59,13) A name or `__construct` keyword is expected here.
-(60,15)-(60,15) A name or `__construct` keyword is expected here.
-(61,15)-(61,15) A name or `__construct` keyword is expected here.
-(65,3)-(65,3) An expression is expected here.
-(66,8)-(66,8) A lambda arrow `==>` is expected here.
-(67,8)-(67,8) An expression is expected here.
-(68,6)-(68,6) A semicolon `;` is expected here.
-(68,8)-(68,8) An expression is expected here.
-(69,7)-(69,7) An expression is expected here.
-(69,7)-(69,8) A colon `:` is expected here.
-(69,8)-(70,1) A `case` statement may only appear directly inside a `switch`.
-(70,6)-(70,6) An expression is expected here.
-(72,8)-(72,8) An expression is expected here.
-(73,6)-(73,6) A name is expected here.
-(73,6)-(73,6) A concrete constant declaration must have an initializer.
-(73,8)-(73,8) An expression is expected here.
-(74,9)-(74,9) A semicolon `;` is expected here.
-(74,11)-(74,11) An expression is expected here.
-(76,8)-(76,8) A colon `:` is expected here.
-(76,10)-(76,10) An expression is expected here.
+(59,15)-(59,15) A name or `__construct` keyword is expected here.
+(63,3)-(63,3) An expression is expected here.
+(64,8)-(64,8) A lambda arrow `==>` is expected here.
+(65,8)-(65,8) An expression is expected here.
+(66,6)-(66,6) A semicolon `;` is expected here.
+(66,8)-(66,8) An expression is expected here.
+(67,7)-(67,7) An expression is expected here.
+(67,7)-(67,8) A colon `:` is expected here.
+(67,8)-(68,1) A `case` statement may only appear directly inside a `switch`.
+(68,6)-(68,6) An expression is expected here.
+(70,8)-(70,8) An expression is expected here.
+(71,6)-(71,6) A name is expected here.
+(71,6)-(71,6) A concrete constant declaration must have an initializer.
+(71,8)-(71,8) An expression is expected here.
+(72,9)-(72,9) A semicolon `;` is expected here.
+(72,11)-(72,11) An expression is expected here.
+(74,8)-(74,8) A colon `:` is expected here.
+(74,10)-(74,10) An expression is expected here.
+(75,5)-(75,5) An expression is expected here.
+(75,6)-(76,1) The `while` keyword is expected here.
+(76,1)-(76,5) Encountered unexpected token `echo`.
+(76,7)-(76,7) An expression is expected here.
 (77,5)-(77,5) An expression is expected here.
-(77,6)-(78,1) The `while` keyword is expected here.
-(78,1)-(78,5) Encountered unexpected token `echo`.
-(78,7)-(78,7) An expression is expected here.
-(79,5)-(79,5) An expression is expected here.
-(80,7)-(80,7) An expression is expected here.
-(81,11)-(81,11) An expression is expected here.
-(83,6)-(83,6) An expression is expected here.
-(84,10)-(84,10) An expression is expected here.
-(85,9)-(85,9) An expression is expected here.
-(86,7)-(86,7) An expression is expected here.
+(81,6)-(81,6) An expression is expected here.
+(84,7)-(84,7) An expression is expected here.
+(85,8)-(85,8) An expression is expected here.
 (87,8)-(87,8) An expression is expected here.
+(88,6)-(88,6) An expression is expected here.
 (89,8)-(89,8) An expression is expected here.
-(90,6)-(90,6) An expression is expected here.
-(91,8)-(91,8) An expression is expected here.
-(92,12)-(93,1) A right parenthesis `)` is expected here.
-(93,7)-(93,7) An expression is expected here.
-(94,5)-(94,5) An expression is expected here.
-(95,11)-(95,11) An expression is expected here.
-(96,10)-(96,10) An expression is expected here.
-(97,15)-(97,15) An expression is expected here.
-(98,6)-(98,6) An expression is expected here.
-(99,11)-(99,11) An expression is expected here.
-(100,10)-(100,10) An expression is expected here.
-(103,1)-(103,10) No code may exist outside of namespace {}
-(103,1)-(103,10) Namespace declaration statement has to be the very first statement in the script
-(103,10)-(103,10) A name is expected here.
-(103,12)-(103,12) An expression is expected here.
-(104,4)-(104,6) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
-(104,6)-(104,6) An expression is expected here.
-(105,8)-(105,8) An expression is expected here.
-(106,8)-(106,8) An expression is expected here.
+(90,12)-(91,1) A right parenthesis `)` is expected here.
+(91,7)-(91,7) An expression is expected here.
+(92,5)-(92,5) An expression is expected here.
+(93,11)-(93,11) An expression is expected here.
+(94,10)-(94,10) An expression is expected here.
+(95,15)-(95,15) An expression is expected here.
+(96,6)-(96,6) An expression is expected here.
+(97,11)-(97,11) An expression is expected here.
+(98,10)-(98,10) An expression is expected here.
+(101,1)-(101,10) No code may exist outside of namespace {}
+(101,1)-(101,10) Namespace declaration statement has to be the very first statement in the script
+(101,10)-(101,10) A name is expected here.
+(101,12)-(101,12) An expression is expected here.
+(102,4)-(102,6) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
+(102,6)-(102,6) An expression is expected here.
+(103,8)-(103,8) An expression is expected here.
+(104,8)-(104,8) An expression is expected here.
+(105,10)-(105,10) An expression is expected here.
+(106,7)-(106,7) Encountered unexpected token `public`.
+(106,9)-(106,9) An expression is expected here.
 (107,10)-(107,10) An expression is expected here.
-(108,7)-(108,7) Encountered unexpected token `public`.
-(108,9)-(108,9) An expression is expected here.
-(109,10)-(109,10) An expression is expected here.
-(110,15)-(110,15) An expression is expected here.
-(111,9)-(111,9) An expression is expected here.
-(115,8)-(115,8) An expression is expected here.
-(118,4)-(118,4) A name is expected here.
-(118,6)-(118,6) An expression is expected here.
-(119,1)-(119,9) Using statement in function scoped form may only be used at the top level of a function or a method
+(108,15)-(108,15) An expression is expected here.
+(109,9)-(109,9) An expression is expected here.
+(113,8)-(113,8) An expression is expected here.
+(116,4)-(116,4) A name is expected here.
+(116,6)-(116,6) An expression is expected here.
+(117,1)-(117,9) Using statement in function scoped form may only be used at the top level of a function or a method
+(117,8)-(117,8) An expression is expected here.
+(118,4)-(118,4) An expression is expected here.
 (119,8)-(119,8) An expression is expected here.
-(120,4)-(120,4) An expression is expected here.
-(121,8)-(121,8) An expression is expected here.
-(122,1)-(122,8) `yield` can only be used inside a function
-(122,8)-(122,8) An expression is expected here.
+(120,1)-(120,8) `yield` can only be used inside a function
+(120,8)-(120,8) An expression is expected here.

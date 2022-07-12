@@ -16,11 +16,7 @@ class do {}
 class echo {}
 class else {}
 class empty {}
-class endfor {}
-class endforeach {}
 class endif {}
-class endswitch {}
-class endwhile {}
 class eval {}
 class extends {}
 class final {}

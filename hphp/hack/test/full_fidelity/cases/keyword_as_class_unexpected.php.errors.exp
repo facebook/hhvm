@@ -27,209 +27,193 @@
 (18,7)-(18,7) A name is expected here.
 (18,7)-(18,12) Encountered unexpected token `empty`.
 (19,7)-(19,7) A name is expected here.
-(19,7)-(19,13) Encountered unexpected token `endfor`.
+(19,7)-(19,12) Encountered unexpected token `endif`.
 (20,7)-(20,7) A name is expected here.
-(20,7)-(20,17) Encountered unexpected token `endforeach`.
+(20,7)-(20,11) Encountered unexpected token `eval`.
 (21,7)-(21,7) A name is expected here.
-(21,7)-(21,12) Encountered unexpected token `endif`.
+(21,15)-(21,15) A type specifier is expected here.
 (22,7)-(22,7) A name is expected here.
-(22,7)-(22,16) Encountered unexpected token `endswitch`.
+(22,7)-(22,12) Encountered unexpected token `final`.
 (23,7)-(23,7) A name is expected here.
-(23,7)-(23,15) Encountered unexpected token `endwhile`.
+(23,7)-(23,14) Encountered unexpected token `finally`.
 (24,7)-(24,7) A name is expected here.
-(24,7)-(24,11) Encountered unexpected token `eval`.
+(24,7)-(24,10) Encountered unexpected token `for`.
 (25,7)-(25,7) A name is expected here.
-(25,15)-(25,15) A type specifier is expected here.
+(25,7)-(25,14) Encountered unexpected token `foreach`.
 (26,7)-(26,7) A name is expected here.
-(26,7)-(26,12) Encountered unexpected token `final`.
+(26,7)-(26,15) Encountered unexpected token `function`.
 (27,7)-(27,7) A name is expected here.
-(27,7)-(27,14) Encountered unexpected token `finally`.
+(27,7)-(27,13) Encountered unexpected token `global`.
 (28,7)-(28,7) A name is expected here.
-(28,7)-(28,10) Encountered unexpected token `for`.
+(28,7)-(28,9) Encountered unexpected token `if`.
 (29,7)-(29,7) A name is expected here.
-(29,7)-(29,14) Encountered unexpected token `foreach`.
+(29,18)-(29,18) A type specifier is expected here.
 (30,7)-(30,7) A name is expected here.
-(30,7)-(30,15) Encountered unexpected token `function`.
+(30,7)-(30,14) Encountered unexpected token `include`.
 (31,7)-(31,7) A name is expected here.
-(31,7)-(31,13) Encountered unexpected token `global`.
+(31,7)-(31,19) Encountered unexpected token `include_once`.
 (32,7)-(32,7) A name is expected here.
-(32,7)-(32,9) Encountered unexpected token `if`.
+(32,7)-(32,12) Encountered unexpected token `inout`.
 (33,7)-(33,7) A name is expected here.
-(33,18)-(33,18) A type specifier is expected here.
+(33,7)-(33,17) Encountered unexpected token `instanceof`.
 (34,7)-(34,7) A name is expected here.
-(34,7)-(34,14) Encountered unexpected token `include`.
+(34,7)-(34,16) Encountered unexpected token `insteadof`.
 (35,7)-(35,7) A name is expected here.
-(35,7)-(35,19) Encountered unexpected token `include_once`.
+(35,7)-(35,16) Encountered unexpected token `interface`.
 (36,7)-(36,7) A name is expected here.
-(36,7)-(36,12) Encountered unexpected token `inout`.
+(36,7)-(36,12) Encountered unexpected token `isset`.
 (37,7)-(37,7) A name is expected here.
-(37,7)-(37,17) Encountered unexpected token `instanceof`.
+(37,7)-(37,11) Encountered unexpected token `list`.
 (38,7)-(38,7) A name is expected here.
-(38,7)-(38,16) Encountered unexpected token `insteadof`.
+(38,7)-(38,16) Encountered unexpected token `namespace`.
 (39,7)-(39,7) A name is expected here.
-(39,7)-(39,16) Encountered unexpected token `interface`.
+(39,7)-(39,10) Encountered unexpected token `new`.
 (40,7)-(40,7) A name is expected here.
-(40,7)-(40,12) Encountered unexpected token `isset`.
+(40,7)-(40,12) Encountered unexpected token `print`.
 (41,7)-(41,7) A name is expected here.
-(41,7)-(41,11) Encountered unexpected token `list`.
+(41,7)-(41,14) Encountered unexpected token `private`.
 (42,7)-(42,7) A name is expected here.
-(42,7)-(42,16) Encountered unexpected token `namespace`.
+(42,7)-(42,16) Encountered unexpected token `protected`.
 (43,7)-(43,7) A name is expected here.
-(43,7)-(43,10) Encountered unexpected token `new`.
+(43,7)-(43,13) Encountered unexpected token `public`.
 (44,7)-(44,7) A name is expected here.
-(44,7)-(44,12) Encountered unexpected token `print`.
+(44,7)-(44,14) Encountered unexpected token `require`.
 (45,7)-(45,7) A name is expected here.
-(45,7)-(45,14) Encountered unexpected token `private`.
+(45,7)-(45,19) Encountered unexpected token `require_once`.
 (46,7)-(46,7) A name is expected here.
-(46,7)-(46,16) Encountered unexpected token `protected`.
+(46,7)-(46,13) Encountered unexpected token `return`.
 (47,7)-(47,7) A name is expected here.
-(47,7)-(47,13) Encountered unexpected token `public`.
+(47,7)-(47,12) Encountered unexpected token `shape`.
 (48,7)-(48,7) A name is expected here.
-(48,7)-(48,14) Encountered unexpected token `require`.
+(48,7)-(48,13) Encountered unexpected token `static`.
 (49,7)-(49,7) A name is expected here.
-(49,7)-(49,19) Encountered unexpected token `require_once`.
+(49,7)-(49,13) Encountered unexpected token `switch`.
 (50,7)-(50,7) A name is expected here.
-(50,7)-(50,13) Encountered unexpected token `return`.
+(50,7)-(50,12) Encountered unexpected token `throw`.
 (51,7)-(51,7) A name is expected here.
-(51,7)-(51,12) Encountered unexpected token `shape`.
+(51,7)-(51,12) Encountered unexpected token `trait`.
 (52,7)-(52,7) A name is expected here.
-(52,7)-(52,13) Encountered unexpected token `static`.
+(52,7)-(52,10) Encountered unexpected token `try`.
 (53,7)-(53,7) A name is expected here.
-(53,7)-(53,13) Encountered unexpected token `switch`.
+(53,7)-(53,12) Encountered unexpected token `unset`.
 (54,7)-(54,7) A name is expected here.
-(54,7)-(54,12) Encountered unexpected token `throw`.
+(54,7)-(54,10) Encountered unexpected token `use`.
 (55,7)-(55,7) A name is expected here.
-(55,7)-(55,12) Encountered unexpected token `trait`.
+(55,7)-(55,12) Encountered unexpected token `using`.
 (56,7)-(56,7) A name is expected here.
-(56,7)-(56,10) Encountered unexpected token `try`.
+(56,7)-(56,10) Encountered unexpected token `var`.
 (57,7)-(57,7) A name is expected here.
-(57,7)-(57,12) Encountered unexpected token `unset`.
+(57,7)-(57,12) Encountered unexpected token `while`.
 (58,7)-(58,7) A name is expected here.
-(58,7)-(58,10) Encountered unexpected token `use`.
-(59,7)-(59,7) A name is expected here.
-(59,7)-(59,12) Encountered unexpected token `using`.
-(60,7)-(60,7) A name is expected here.
-(60,7)-(60,10) Encountered unexpected token `var`.
-(61,7)-(61,7) A name is expected here.
-(61,7)-(61,12) Encountered unexpected token `while`.
-(62,7)-(62,7) A name is expected here.
-(62,7)-(62,12) Encountered unexpected token `yield`.
-(64,5)-(64,13) `new` requires a class name or local variable, but got: `token`
-(64,13)-(64,13) An expression is expected here.
-(66,5)-(66,7) `new` requires a class name or local variable, but got: `token`
-(66,7)-(66,7) An expression is expected here.
-(67,5)-(67,10) `new` requires a class name or local variable, but got: `token`
-(67,10)-(67,10) An expression is expected here.
-(68,5)-(68,9) `new` requires a class name or local variable, but got: `token`
-(68,9)-(68,9) An expression is expected here.
-(69,5)-(69,10) `new` requires a class name or local variable, but got: `token`
-(69,10)-(69,10) An expression is expected here.
-(71,5)-(71,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new clone()()`?
-(71,5)-(71,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
+(58,7)-(58,12) Encountered unexpected token `yield`.
+(60,5)-(60,13) `new` requires a class name or local variable, but got: `token`
+(60,13)-(60,13) An expression is expected here.
+(62,5)-(62,7) `new` requires a class name or local variable, but got: `token`
+(62,7)-(62,7) An expression is expected here.
+(63,5)-(63,10) `new` requires a class name or local variable, but got: `token`
+(63,10)-(63,10) An expression is expected here.
+(64,5)-(64,9) `new` requires a class name or local variable, but got: `token`
+(64,9)-(64,9) An expression is expected here.
+(65,5)-(65,10) `new` requires a class name or local variable, but got: `token`
+(65,10)-(65,10) An expression is expected here.
+(67,5)-(67,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new clone()()`?
+(67,5)-(67,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
+(67,12)-(67,12) An expression is expected here.
+(68,5)-(68,10) `new` requires a class name or local variable, but got: `token`
+(68,10)-(68,10) An expression is expected here.
+(69,5)-(69,13) `new` requires a class name or local variable, but got: `token`
+(69,13)-(69,13) An expression is expected here.
+(71,5)-(71,12) `new` requires a class name or local variable, but got: `token`
 (71,12)-(71,12) An expression is expected here.
-(72,5)-(72,10) `new` requires a class name or local variable, but got: `token`
-(72,10)-(72,10) An expression is expected here.
-(73,5)-(73,13) `new` requires a class name or local variable, but got: `token`
-(73,13)-(73,13) An expression is expected here.
-(75,5)-(75,12) `new` requires a class name or local variable, but got: `token`
-(75,12)-(75,12) An expression is expected here.
-(76,5)-(76,7) `new` requires a class name or local variable, but got: `token`
-(76,7)-(76,7) An expression is expected here.
-(77,5)-(77,9) `new` requires a class name or local variable, but got: `token`
-(77,9)-(77,9) An expression is expected here.
-(78,5)-(78,9) `new` requires a class name or local variable, but got: `token`
-(78,9)-(78,9) An expression is expected here.
-(79,5)-(79,5) The `empty()` expression has been removed from Hack.
+(72,5)-(72,7) `new` requires a class name or local variable, but got: `token`
+(72,7)-(72,7) An expression is expected here.
+(73,5)-(73,9) `new` requires a class name or local variable, but got: `token`
+(73,9)-(73,9) An expression is expected here.
+(74,5)-(74,9) `new` requires a class name or local variable, but got: `token`
+(74,9)-(74,9) An expression is expected here.
+(75,5)-(75,5) The `empty()` expression has been removed from Hack.
+(75,5)-(75,10) `new` requires a class name or local variable, but got: `token`
 (79,5)-(79,10) `new` requires a class name or local variable, but got: `token`
-(80,5)-(80,11) `new` requires a class name or local variable, but got: `token`
-(80,11)-(80,11) An expression is expected here.
-(81,5)-(81,15) `new` requires a class name or local variable, but got: `token`
-(81,15)-(81,15) An expression is expected here.
-(83,5)-(83,10) `new` requires a class name or local variable, but got: `token`
-(83,10)-(83,10) An expression is expected here.
-(84,5)-(84,14) `new` requires a class name or local variable, but got: `token`
-(84,14)-(84,14) An expression is expected here.
-(85,5)-(85,13) `new` requires a class name or local variable, but got: `token`
-(85,13)-(85,13) An expression is expected here.
-(86,5)-(86,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new eval()()`?
-(86,5)-(86,11) `new` requires a class name or local variable, but got: `eval_expression`
-(86,11)-(86,11) An expression is expected here.
+(79,10)-(79,10) An expression is expected here.
+(82,5)-(82,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new eval()()`?
+(82,5)-(82,11) `new` requires a class name or local variable, but got: `eval_expression`
+(82,11)-(82,11) An expression is expected here.
+(83,5)-(83,12) `new` requires a class name or local variable, but got: `token`
+(83,12)-(83,12) An expression is expected here.
+(84,5)-(84,10) `new` requires a class name or local variable, but got: `token`
+(84,10)-(84,10) An expression is expected here.
+(85,5)-(85,12) `new` requires a class name or local variable, but got: `token`
+(85,12)-(85,12) An expression is expected here.
+(86,5)-(86,8) `new` requires a class name or local variable, but got: `token`
+(86,8)-(86,8) An expression is expected here.
 (87,5)-(87,12) `new` requires a class name or local variable, but got: `token`
 (87,12)-(87,12) An expression is expected here.
-(88,5)-(88,10) `new` requires a class name or local variable, but got: `token`
-(88,10)-(88,10) An expression is expected here.
-(89,5)-(89,12) `new` requires a class name or local variable, but got: `token`
-(89,12)-(89,12) An expression is expected here.
-(90,5)-(90,8) `new` requires a class name or local variable, but got: `token`
-(90,8)-(90,8) An expression is expected here.
-(91,5)-(91,12) `new` requires a class name or local variable, but got: `token`
-(91,12)-(91,12) An expression is expected here.
-(92,5)-(92,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new function();()`?
-(92,5)-(92,16) `new` requires a class name or local variable, but got: `anonymous_function`
-(92,16)-(93,1) A semicolon `;` is expected here.
-(93,5)-(93,11) `new` requires a class name or local variable, but got: `token`
-(93,11)-(93,11) An expression is expected here.
-(94,5)-(94,7) `new` requires a class name or local variable, but got: `token`
-(94,7)-(94,7) An expression is expected here.
+(88,5)-(88,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new function();()`?
+(88,5)-(88,16) `new` requires a class name or local variable, but got: `anonymous_function`
+(88,16)-(89,1) A semicolon `;` is expected here.
+(89,5)-(89,11) `new` requires a class name or local variable, but got: `token`
+(89,11)-(89,11) An expression is expected here.
+(90,5)-(90,7) `new` requires a class name or local variable, but got: `token`
+(90,7)-(90,7) An expression is expected here.
+(91,5)-(91,15) `new` requires a class name or local variable, but got: `token`
+(91,15)-(91,15) An expression is expected here.
+(92,5)-(92,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include()()`?
+(92,5)-(92,14) `new` requires a class name or local variable, but got: `inclusion_expression`
+(92,14)-(92,14) An expression is expected here.
+(93,5)-(93,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include_once()()`?
+(93,5)-(93,19) `new` requires a class name or local variable, but got: `inclusion_expression`
+(93,19)-(93,19) An expression is expected here.
+(94,5)-(94,10) `new` requires a class name or local variable, but got: `token`
+(94,10)-(94,10) An expression is expected here.
 (95,5)-(95,15) `new` requires a class name or local variable, but got: `token`
 (95,15)-(95,15) An expression is expected here.
-(96,5)-(96,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include()()`?
-(96,5)-(96,14) `new` requires a class name or local variable, but got: `inclusion_expression`
+(96,5)-(96,14) `new` requires a class name or local variable, but got: `token`
 (96,14)-(96,14) An expression is expected here.
-(97,5)-(97,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include_once()()`?
-(97,5)-(97,19) `new` requires a class name or local variable, but got: `inclusion_expression`
-(97,19)-(97,19) An expression is expected here.
-(98,5)-(98,10) `new` requires a class name or local variable, but got: `token`
-(98,10)-(98,10) An expression is expected here.
-(99,5)-(99,15) `new` requires a class name or local variable, but got: `token`
-(99,15)-(99,15) An expression is expected here.
+(98,5)-(98,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new isset()()`?
+(98,5)-(98,12) `new` requires a class name or local variable, but got: `isset_expression`
+(99,5)-(99,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new list()()`?
+(99,5)-(99,11) `new` requires a class name or local variable, but got: `list_expression`
 (100,5)-(100,14) `new` requires a class name or local variable, but got: `token`
-(100,14)-(100,14) An expression is expected here.
-(102,5)-(102,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new isset()()`?
-(102,5)-(102,12) `new` requires a class name or local variable, but got: `isset_expression`
-(103,5)-(103,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new list()()`?
-(103,5)-(103,11) `new` requires a class name or local variable, but got: `list_expression`
+(101,5)-(101,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new new()()`?
+(101,5)-(101,10) `new` requires a class name or local variable, but got: `object_creation_expression`
+(101,8)-(101,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
+(101,10)-(101,10) An expression is expected here.
+(102,5)-(102,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new print()()`?
+(102,5)-(102,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
+(102,12)-(102,12) An expression is expected here.
+(103,5)-(103,12) `new` requires a class name or local variable, but got: `token`
+(103,12)-(103,12) An expression is expected here.
 (104,5)-(104,14) `new` requires a class name or local variable, but got: `token`
-(105,5)-(105,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new new()()`?
-(105,5)-(105,10) `new` requires a class name or local variable, but got: `object_creation_expression`
-(105,8)-(105,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
-(105,10)-(105,10) An expression is expected here.
-(106,5)-(106,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new print()()`?
-(106,5)-(106,12) `new` requires a class name or local variable, but got: `prefix_unary_expression`
-(106,12)-(106,12) An expression is expected here.
-(107,5)-(107,12) `new` requires a class name or local variable, but got: `token`
-(107,12)-(107,12) An expression is expected here.
-(108,5)-(108,14) `new` requires a class name or local variable, but got: `token`
-(108,14)-(108,14) An expression is expected here.
-(109,5)-(109,11) `new` requires a class name or local variable, but got: `token`
-(109,11)-(109,11) An expression is expected here.
-(110,5)-(110,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require()()`?
-(110,5)-(110,14) `new` requires a class name or local variable, but got: `inclusion_expression`
-(110,14)-(110,14) An expression is expected here.
-(111,5)-(111,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require_once()()`?
-(111,5)-(111,19) `new` requires a class name or local variable, but got: `inclusion_expression`
-(111,19)-(111,19) An expression is expected here.
-(112,5)-(112,11) `new` requires a class name or local variable, but got: `token`
-(112,11)-(112,11) An expression is expected here.
-(113,5)-(113,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new shape()()`?
-(113,5)-(113,12) `new` requires a class name or local variable, but got: `shape_expression`
-(115,5)-(115,11) `new` requires a class name or local variable, but got: `token`
-(115,11)-(115,11) An expression is expected here.
-(116,5)-(116,10) `new` requires a class name or local variable, but got: `token`
-(116,10)-(116,10) An expression is expected here.
+(104,14)-(104,14) An expression is expected here.
+(105,5)-(105,11) `new` requires a class name or local variable, but got: `token`
+(105,11)-(105,11) An expression is expected here.
+(106,5)-(106,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require()()`?
+(106,5)-(106,14) `new` requires a class name or local variable, but got: `inclusion_expression`
+(106,14)-(106,14) An expression is expected here.
+(107,5)-(107,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require_once()()`?
+(107,5)-(107,19) `new` requires a class name or local variable, but got: `inclusion_expression`
+(107,19)-(107,19) An expression is expected here.
+(108,5)-(108,11) `new` requires a class name or local variable, but got: `token`
+(108,11)-(108,11) An expression is expected here.
+(109,5)-(109,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new shape()()`?
+(109,5)-(109,12) `new` requires a class name or local variable, but got: `shape_expression`
+(111,5)-(111,11) `new` requires a class name or local variable, but got: `token`
+(111,11)-(111,11) An expression is expected here.
+(112,5)-(112,10) `new` requires a class name or local variable, but got: `token`
+(112,10)-(112,10) An expression is expected here.
+(114,5)-(114,8) `new` requires a class name or local variable, but got: `token`
+(114,8)-(114,8) An expression is expected here.
+(115,5)-(115,10) `new` requires a class name or local variable, but got: `token`
+(115,10)-(115,10) An expression is expected here.
+(116,5)-(116,8) `new` requires a class name or local variable, but got: `token`
+(116,8)-(116,8) An expression is expected here.
+(117,5)-(117,10) `new` requires a class name or local variable, but got: `token`
+(117,10)-(117,10) An expression is expected here.
 (118,5)-(118,8) `new` requires a class name or local variable, but got: `token`
 (118,8)-(118,8) An expression is expected here.
 (119,5)-(119,10) `new` requires a class name or local variable, but got: `token`
 (119,10)-(119,10) An expression is expected here.
-(120,5)-(120,8) `new` requires a class name or local variable, but got: `token`
-(120,8)-(120,8) An expression is expected here.
-(121,5)-(121,10) `new` requires a class name or local variable, but got: `token`
-(121,10)-(121,10) An expression is expected here.
-(122,5)-(122,8) `new` requires a class name or local variable, but got: `token`
-(122,8)-(122,8) An expression is expected here.
-(123,5)-(123,10) `new` requires a class name or local variable, but got: `token`
-(123,10)-(123,10) An expression is expected here.
-(124,5)-(124,12) `yield` can only be used inside a function
-(124,5)-(124,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new yield()()`?
-(124,5)-(124,12) `new` requires a class name or local variable, but got: `yield_expression`
-(124,12)-(124,12) An expression is expected here.
+(120,5)-(120,12) `yield` can only be used inside a function
+(120,5)-(120,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new yield()()`?
+(120,5)-(120,12) `new` requires a class name or local variable, but got: `yield_expression`
+(120,12)-(120,12) An expression is expected here.

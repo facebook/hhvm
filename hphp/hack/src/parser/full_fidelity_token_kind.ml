@@ -39,24 +39,20 @@ type t =
   | Class
   | Classname
   | Clone
+  | Concurrent
   | Const
   | Construct
   | Continue
   | Ctx
   | Darray
   | Default
-  | Define
   | Dict
   | Do
   | Double
   | Echo
   | Else
   | Empty
-  | Endfor
-  | Endforeach
   | Endif
-  | Endswitch
-  | Endwhile
   | Enum
   | Eval
   | Extends
@@ -67,10 +63,8 @@ type t =
   | Finally
   | For
   | Foreach
-  | From
   | Function
   | Global
-  | Concurrent
   | If
   | Implements
   | Include
@@ -84,6 +78,7 @@ type t =
   | Is
   | Isset
   | Keyset
+  | Lateinit
   | List
   | Mixed
   | Module
@@ -103,7 +98,6 @@ type t =
   | Require
   | Require_once
   | Required
-  | Lateinit
   | Resource
   | Return
   | Self
@@ -253,24 +247,20 @@ let from_string keyword ~only_reserved =
   | "class" -> Some Class
   | "classname" when not only_reserved -> Some Classname
   | "clone" -> Some Clone
+  | "concurrent" -> Some Concurrent
   | "const" -> Some Const
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
   | "ctx" -> Some Ctx
   | "darray" when not only_reserved -> Some Darray
   | "default" -> Some Default
-  | "define" when not only_reserved -> Some Define
   | "dict" when not only_reserved -> Some Dict
   | "do" -> Some Do
   | "double" when not only_reserved -> Some Double
   | "echo" -> Some Echo
   | "else" -> Some Else
   | "empty" -> Some Empty
-  | "endfor" -> Some Endfor
-  | "endforeach" -> Some Endforeach
   | "endif" -> Some Endif
-  | "endswitch" -> Some Endswitch
-  | "endwhile" -> Some Endwhile
   | "enum" when not only_reserved -> Some Enum
   | "eval" -> Some Eval
   | "extends" -> Some Extends
@@ -281,10 +271,8 @@ let from_string keyword ~only_reserved =
   | "finally" -> Some Finally
   | "for" -> Some For
   | "foreach" -> Some Foreach
-  | "from" when not only_reserved -> Some From
   | "function" -> Some Function
   | "global" -> Some Global
-  | "concurrent" -> Some Concurrent
   | "if" -> Some If
   | "implements" -> Some Implements
   | "include" -> Some Include
@@ -298,6 +286,7 @@ let from_string keyword ~only_reserved =
   | "is" when not only_reserved -> Some Is
   | "isset" -> Some Isset
   | "keyset" when not only_reserved -> Some Keyset
+  | "lateinit" -> Some Lateinit
   | "list" -> Some List
   | "mixed" when not only_reserved -> Some Mixed
   | "module" -> Some Module
@@ -317,7 +306,6 @@ let from_string keyword ~only_reserved =
   | "require" -> Some Require
   | "require_once" -> Some Require_once
   | "required" -> Some Required
-  | "lateinit" -> Some Lateinit
   | "resource" when not only_reserved -> Some Resource
   | "return" -> Some Return
   | "self" when not only_reserved -> Some Self
@@ -442,24 +430,20 @@ let to_string kind =
   | Class -> "class"
   | Classname -> "classname"
   | Clone -> "clone"
+  | Concurrent -> "concurrent"
   | Const -> "const"
   | Construct -> "__construct"
   | Continue -> "continue"
   | Ctx -> "ctx"
   | Darray -> "darray"
   | Default -> "default"
-  | Define -> "define"
   | Dict -> "dict"
   | Do -> "do"
   | Double -> "double"
   | Echo -> "echo"
   | Else -> "else"
   | Empty -> "empty"
-  | Endfor -> "endfor"
-  | Endforeach -> "endforeach"
   | Endif -> "endif"
-  | Endswitch -> "endswitch"
-  | Endwhile -> "endwhile"
   | Enum -> "enum"
   | Eval -> "eval"
   | Extends -> "extends"
@@ -470,10 +454,8 @@ let to_string kind =
   | Finally -> "finally"
   | For -> "for"
   | Foreach -> "foreach"
-  | From -> "from"
   | Function -> "function"
   | Global -> "global"
-  | Concurrent -> "concurrent"
   | If -> "if"
   | Implements -> "implements"
   | Include -> "include"
@@ -487,6 +469,7 @@ let to_string kind =
   | Is -> "is"
   | Isset -> "isset"
   | Keyset -> "keyset"
+  | Lateinit -> "lateinit"
   | List -> "list"
   | Mixed -> "mixed"
   | Module -> "module"
@@ -506,7 +489,6 @@ let to_string kind =
   | Require -> "require"
   | Require_once -> "require_once"
   | Required -> "required"
-  | Lateinit -> "lateinit"
   | Resource -> "resource"
   | Return -> "return"
   | Self -> "self"

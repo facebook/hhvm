@@ -1,2 +1,2 @@
 extension sqlite3
-method sqlite3 loadExtension
+method SQLite3 loadExtension

@@ -717,6 +717,10 @@ inline bool isAbstract(const Class* cls) {
   return cls->attrs() & AttrAbstract;
 }
 
+inline bool isFinal(const Class* cls) {
+  return cls->attrs() & AttrFinal;
+}
+
 inline bool classHasPersistentRDS(const Class* cls) {
   return cls != nullptr &&
     rds::isPersistentHandle(cls->classHandle());

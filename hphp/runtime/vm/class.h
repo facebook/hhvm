@@ -1999,6 +1999,7 @@ bool isEnum(const Class* cls);
 bool isEnumClass(const Class* cls);
 bool isAnyEnum(const Class* cls);
 bool isAbstract(const Class* cls);
+bool isFinal(const Class* cls);
 bool isNormalClass(const Class* cls);
 
 /*

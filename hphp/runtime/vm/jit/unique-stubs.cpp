@@ -1365,7 +1365,10 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 #undef ADD
 
   emitAllResumable(code, dbg);
+
+#ifdef CTI_SUPPORTED
   if (cti_enabled()) compile_cti_stubs();
+#endif
 
   tc::updateCodeSizeCounters();
 }

@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/vm/cti.h"
+
+#ifdef CTI_SUPPORTED
+
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -263,3 +266,11 @@ void compile_cti_stubs() {
 }
 
 }
+#else
+namespace HPHP {
+
+void free_cti(Offset, uint32_t) {
+}
+
+}
+#endif

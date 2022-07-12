@@ -5600,6 +5600,7 @@ OPCODES
 #undef O
 };
 
+#ifdef CTI_SUPPORTED
 // fast path to look up native pc; try entry point first.
 PcPair lookup_cti(const Func* func, PC pc) {
   auto unitpc = func->entry();
@@ -5626,6 +5627,7 @@ JitResumeAddr dispatchThreaded(bool coverage) {
   CALLEE_SAVED_BARRIER();
   return JitResumeAddr::trans(retAddr);
 }
+#endif
 
 template <bool breakOnCtlFlow>
 JitResumeAddr dispatchImpl() {
@@ -5650,9 +5652,11 @@ JitResumeAddr dispatchImpl() {
     }
   }();
 
+#ifdef CTI_SUPPORTED
   if (cti_enabled() && !inlineInterp) {
     return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
   }
+#endif
 
   // Unfortunately, MSVC doesn't support computed
   // gotos, so use a switch instead.
@@ -5824,6 +5828,7 @@ JitResumeAddr dispatchBB() {
 ///////////////////////////////////////////////////////////////////////////////
 // Call-threaded entry points
 
+#ifdef CTI_SUPPORTED
 namespace {
 
 constexpr auto do_prof = false;
@@ -5992,5 +5997,7 @@ const CodeAddress ctid_ops[] = {
   OPCODES
   #undef O
 };
+
+#endif
 
 }

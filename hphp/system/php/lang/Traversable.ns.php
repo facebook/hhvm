@@ -4,15 +4,11 @@ namespace HH {
 
 <<__Sealed(
   \HH\Container::class,
-  /* HH_FIXME[2049] */
   \DOMNodeList::class,
   /* HH_FIXME[2049] */
   \Imagick::class,
-  /* HH_FIXME[2049] */
   \HH\Iterable::class,
-  /* HH_FIXME[2049] */
   \HH\Iterator::class,
-  /* HH_FIXME[2049] */
   \IteratorAggregate::class,
   \HH\KeyedTraversable::class,
   /* HH_FIXME[2049] */
@@ -31,15 +27,12 @@ interface Traversable<+Tv> {
   \ArrayIterator::class,
   /* HH_FIXME[2049] */
   \AsyncMysqlRowBlock::class,
-  /* HH_FIXME[2049] */
   \DOMNamedNodeMap::class,
   /* HH_FIXME[2049] */
   \ImagickPixelIterator::class,
   /* HH_FIXME[2049] */
   \IntlBreakIterator::class,
-  /* HH_FIXME[2049] */
   \HH\KeyedIterable::class,
-  /* HH_FIXME[2049] */
   \HH\KeyedIterator::class,
   /* HH_FIXME[2049] */
   \MysqlRow::class,

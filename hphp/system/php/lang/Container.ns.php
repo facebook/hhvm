@@ -7,11 +7,8 @@ interface Container<+Tv> extends Traversable<Tv> {
 }
 
 <<__Sealed(
-  /* HH_FIXME[2049] */
   \ConstVector::class,
-  /* HH_FIXME[2049] */
   \ConstMap::class,
-  /* HH_FIXME[2049] */
   \ConstSet::class,
   AnyArray::class,
 )>>

@@ -1,11 +1,6 @@
 <?hh // partial
 
-<<__Sealed(
-  /* HH_FIXME[2049] */
-  Error::class,
-  /* HH_FIXME[2049] */
-  Exception::class,
-)>>
+<<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
   public function getCode()[]: int;

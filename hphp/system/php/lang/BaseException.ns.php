@@ -204,7 +204,6 @@ trait BaseException {
           \substr($cls, \strlen("__SystemLib\\"))
         );
       }
-      /* HH_FIXME[2049] */
       $res .= $ex is \Error
         ? $cls . ": " . $get_message($ex)
         : "exception '" . $cls . "' with message '" . $get_message($ex) .  "'";

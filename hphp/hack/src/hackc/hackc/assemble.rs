@@ -780,7 +780,14 @@ fn assemble_typed_value<'arena>(
             Ok(hhbc::TypedValue::string(Str::new_slice(alloc, st))) // Have to check escaping
         }
         b"l" => todo!(), // LazyClass
-        b"d" => todo!(), // Float
+        b"d" => {
+            // Float
+            token_iter.expect_is_str(Token::into_identifier, "d")?;
+            token_iter.expect(Token::into_colon)?;
+            let n = token_iter.expect_and_get_number()?;
+            token_iter.expect(Token::into_semicolon)?;
+            Ok(hhbc::TypedValue::float(n))
+        }
         b"i" => {
             // Int
             token_iter.expect_is_str(Token::into_identifier, "i")?;

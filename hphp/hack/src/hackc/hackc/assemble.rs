@@ -105,6 +105,8 @@ fn assemble_from_toks<'arena>(
     let mut constant_refs = None;
     let mut include_refs = None;
     let mut typedefs = Vec::new();
+    let mut constants = Vec::new();
+    let mut type_constants = Vec::new(); // Should be empty
     let mut fatal = None;
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
@@ -163,6 +165,11 @@ fn assemble_from_toks<'arena>(
             )?)
         } else if token_iter.peek_if_str(Token::is_decl, ".alias") {
             typedefs.push(assemble_typedef(alloc, token_iter)?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".const") {
+            assemble_const_or_type_const(alloc, token_iter, &mut constants, &mut type_constants)?;
+            if !type_constants.is_empty() {
+                bail!("Type constants defined outside of a class");
+            }
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -184,7 +191,7 @@ fn assemble_from_toks<'arena>(
             constants: constant_refs.unwrap_or_default(),
             includes: include_refs.unwrap_or_default(),
         },
-        constants: Default::default(),
+        constants: Slice::fill_iter(alloc, constants.into_iter()),
         fatal: fatal.into(),
     };
 

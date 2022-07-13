@@ -534,6 +534,12 @@ bool CurlResource::isLongOption(long option) {
     case CURLOPT_UPKEEP_INTERVAL_MS:
     case CURLOPT_UPLOAD_BUFFERSIZE:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074000 /* Available since 7.64.0 */
+    case CURLOPT_HTTP09_ALLOWED:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC_CTRL:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -692,6 +698,9 @@ bool CurlResource::isStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
     case CURLOPT_DOH_URL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC:
 #endif
       return true;
     default:

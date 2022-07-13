@@ -202,6 +202,8 @@ const int CURLOPT_ABSTRACT_UNIX_SOCKET = 0;
 const int CURLOPT_ACCEPT_ENCODING = 0;
 const int CURLOPT_ACCEPTTIMEOUT_MS = 0;
 const int CURLOPT_ADDRESS_SCOPE = 0;
+const int CURLOPT_ALTSVC = 0;
+const int CURLOPT_ALTSVC_CTRL = 0;
 const int CURLOPT_APPEND = 0;
 const int CURLOPT_CERTINFO = 0;
 const int CURLOPT_CONNECT_ONLY = 0;
@@ -230,6 +232,7 @@ const int CURLOPT_FTP_USE_PRET = 0;
 const int CURLOPT_GSSAPI_DELEGATION = 0;
 const int CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS = 0;
 const int CURLOPT_HAPROXYPROTOCOL = 0;
+const int CURLOPT_HTTP09_ALLOWED = 0;
 const int CURLOPT_HTTP200ALIASES = 0;
 const int CURLOPT_HTTP_CONTENT_DECODING = 0;
 const int CURLOPT_HTTP_TRANSFER_DECODING = 0;
@@ -430,6 +433,7 @@ const int CURLGSSAPI_DELEGATION_FLAG = 0;
 const int CURLGSSAPI_DELEGATION_POLICY_FLAG = 0;
 
 const int CURLVERSION_NOW = 0;
+const int CURL_VERSION_ALTSVC = 0;
 const int CURL_VERSION_BROTLI = 0;
 const int CURL_VERSION_HTTP2 = 0;
 const int CURL_VERSION_IPV6 = 0;
@@ -556,6 +560,10 @@ const int CURLSHE_OK = 0;
 const int CURLSHOPT_SHARE = 0;
 const int CURLSHOPT_UNSHARE = 0;
 
+const int CURLALTSVC_READONLYFILE = 0;
+const int CURLALTSVC_H1 = 0;
+const int CURLALTSVC_H2 = 0;
+const int CURLALTSVC_H3 = 0;
 
 <<__PHPStdLib>>
 function curl_init($url = null)[leak_safe];

@@ -93,8 +93,9 @@ fn verify_assemble_file(
     compile::unit_to_string(&env, &mut output, &pre_unit)
         .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
-    let (post_unit, _) = crate::assemble::assemble_from_bytes(&alloc, &output)
-        .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
+    let (post_unit, _) =
+        crate::assemble::assemble_from_bytes(&alloc, &output, false) // Don't print tokens
+            .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
 
     crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
         .map_err(VerifyError::UnitMismatchError)?;

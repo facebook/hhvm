@@ -34,6 +34,29 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Mutex;
 
+#[derive(Parser, Debug)]
+pub struct Opts {
+    /// Output file. Creates it if necessary
+    #[clap(short = 'o')]
+    output_file: Option<PathBuf>,
+
+    /// The input hhas file(s) to deserialize back to HackCUnit
+    #[clap(flatten)]
+    files: FileOpts,
+
+    /// Print tokens
+    #[clap(short = 't')]
+    print_toks: bool,
+}
+
+type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub struct Pos {
+    pub line: usize,
+    pub col: usize,
+}
+
 pub fn run(mut opts: Opts) -> Result<()> {
     let writer: SyncWrite = match &opts.output_file {
         None => Mutex::new(Box::new(stdout())),
@@ -73,17 +96,21 @@ pub fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
 pub fn assemble<'arena>(
     alloc: &'arena Bump,
     f: &Path,
-    _opts: &Opts,
+    opts: &Opts,
 ) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
-    assemble_from_bytes(alloc, &s)
+    assemble_from_bytes(alloc, &s, opts.print_toks)
 }
 
 /// Assembles the hhas represented by the slice of bytes input
 pub fn assemble_from_bytes<'arena>(
     alloc: &'arena Bump,
     s: &[u8],
+    print_toks: bool,
 ) -> Result<(hhbc::hackc_unit::HackCUnit<'arena>, PathBuf)> {
+    if print_toks {
+        print_tokens(s);
+    }
     let mut lex = Lexer::from_slice(s, 1);
     assemble_from_toks(alloc, &mut lex)
 }
@@ -367,6 +394,10 @@ fn assemble_const_or_type_const<'arena>(
     Ok(())
 }
 
+/// Ex:
+/// .method {}{} [public abstract] (15,15) <"" N > a(<"?HH\\varray" "HH\\varray" nullable extended_hint display_nullable> $a1 = DV1("""NULL"""), <"HH\\varray" "HH\\varray" > $a2 = DV2("""varray[]""")) {
+///    ...
+/// }
 fn assemble_method<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -1224,7 +1255,7 @@ fn assemble_params<'arena, 'a>(
     Ok(Slice::from_vec(alloc, params))
 }
 
-/// a: <user_attributes>? inout? readonly? ...?<type_info>?name (= default_value)?
+/// a: [user_attributes]? inout? readonly? ...?<type_info>?name (= default_value)?
 fn assemble_param<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
@@ -2777,11 +2808,11 @@ fn assemble_local(
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Local> {
     match token_iter.next() {
-        Some(Token::Variable(v, _)) => {
+        Some(Token::Variable(v, p)) => {
             if let Some(idx) = decl_map.get(v) {
                 Ok(hhbc::Local { idx: *idx })
             } else {
-                bail!("Unknown local var: {:?}", v);
+                bail!("Unknown local var: {:?} at {:?}", v, p);
             }
         }
         Some(Token::Identifier(i, _)) => {
@@ -2884,25 +2915,6 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
     )))
-}
-
-#[derive(Parser, Debug)]
-pub struct Opts {
-    /// Output file. Creates it if necessary
-    #[clap(short = 'o')]
-    output_file: Option<PathBuf>,
-
-    /// The input hhas file(s) to deserialize back to HackCUnit
-    #[clap(flatten)]
-    files: FileOpts,
-}
-
-type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
-
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub struct Pos {
-    pub line: usize,
-    pub col: usize,
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -3642,7 +3654,7 @@ fn build_tokens_helper<'a>(
 }
 
 /// Tokenizes input string using a Lexer. Prints all tokens in the Lexer
-fn _print_tokens<'a>(s: &'a [u8]) {
+fn print_tokens<'a>(s: &'a [u8]) {
     let lex: Lexer<'a> = Lexer::from_slice(s, 1);
     for tok in lex {
         println!("{}", tok);
@@ -3731,7 +3743,7 @@ mod test {
         let s = ".srloc 3:7,3:22";
         let s = s.as_bytes();
         let alloc = Bump::default();
-        assert!(matches!(assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(matches!(assemble_from_bytes(&alloc, s, false), Ok(_)))
     }
     #[test]
     #[should_panic]
@@ -3739,7 +3751,7 @@ mod test {
         let s = r#".filepath "aaaa""#;
         let s = s.as_bytes();
         let alloc = Bump::default();
-        assert!(matches!(assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(matches!(assemble_from_bytes(&alloc, s, false), Ok(_)))
     }
     #[test]
     #[should_panic]
@@ -3747,7 +3759,7 @@ mod test {
         let s = r#".filepath aaa"#;
         let s = s.as_bytes();
         let alloc = Bump::default();
-        assert!(matches!(assemble_from_bytes(&alloc, s), Ok(_)))
+        assert!(matches!(assemble_from_bytes(&alloc, s, false), Ok(_)))
     }
     #[test]
     fn difficult_strings() {

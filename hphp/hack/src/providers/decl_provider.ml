@@ -33,10 +33,22 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
-let direct_decl_parse_and_cache ctx filename name =
-  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
+let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
+    =
+  let parse_result =
+    if cache_results then
+      Direct_decl_utils.direct_decl_parse_and_cache ctx filename
+    else
+      Direct_decl_utils.direct_decl_parse ctx filename
+  in
+  match parse_result with
   | None -> err_not_found filename name
-  | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
+  | Some parsed_file ->
+    let decls = parsed_file.Direct_decl_utils.pfh_decls in
+    List.find_map decls ~f:(function
+        | (decl_name, decl, _) when String.equal decl_name name ->
+          extract_decl_opt decl
+        | _ -> None)
 
 let use_direct_decl_parser ctx =
   TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
@@ -166,12 +178,12 @@ let get_fun
       (match Naming_provider.get_fun_path ctx fun_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename fun_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Fun decl, _)
-                   when String.equal fun_name name ->
-                   Some decl
-                 | _ -> None)
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
         else
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
@@ -188,12 +200,12 @@ let get_fun
         match Naming_provider.get_fun_path ctx fun_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename fun_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Fun decl, _)
-                     when String.equal fun_name name ->
-                     Some decl
-                   | _ -> None)
+            find_in_direct_decl_parse
+              ~cache_results:true
+              ctx
+              filename
+              fun_name
+              Shallow_decl_defs.to_fun_decl_opt
           else
             let ft =
               Errors.run_in_decl_mode filename (fun () ->
@@ -230,12 +242,12 @@ let get_typedef
       (match Naming_provider.get_typedef_path ctx typedef_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename typedef_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Typedef decl, _)
-                   when String.equal typedef_name name ->
-                   Some decl
-                 | _ -> None)
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
         else
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
@@ -252,12 +264,12 @@ let get_typedef
         match Naming_provider.get_typedef_path ctx typedef_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename typedef_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Typedef decl, _)
-                     when String.equal typedef_name name ->
-                     Some decl
-                   | _ -> None)
+            find_in_direct_decl_parse
+              ~cache_results:true
+              ctx
+              filename
+              typedef_name
+              Shallow_decl_defs.to_typedef_decl_opt
           else
             let tdecl =
               Errors.run_in_decl_mode filename (fun () ->
@@ -294,12 +306,12 @@ let get_gconst
       (match Naming_provider.get_const_path ctx gconst_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename gconst_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Const decl, _)
-                   when String.equal gconst_name name ->
-                   Some decl
-                 | _ -> None)
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
         else
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
@@ -316,12 +328,12 @@ let get_gconst
         match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename gconst_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Const decl, _)
-                     when String.equal gconst_name name ->
-                     Some decl
-                   | _ -> None)
+            find_in_direct_decl_parse
+              ~cache_results:true
+              ctx
+              filename
+              gconst_name
+              Shallow_decl_defs.to_const_decl_opt
           else
             let gconst =
               Errors.run_in_decl_mode filename (fun () ->
@@ -371,12 +383,12 @@ let get_module
     Naming_provider.get_module_path ctx module_name
     |> Option.bind ~f:(fun filename ->
            if use_direct_decl_parser ctx then
-             direct_decl_parse_and_cache ctx filename module_name
-             |> List.find_map ~f:(function
-                    | (name, Shallow_decl_defs.Module decl, _)
-                      when String.equal module_name name ->
-                      Some decl
-                    | _ -> None)
+             find_in_direct_decl_parse
+               ~cache_results:true
+               ctx
+               filename
+               module_name
+               Shallow_decl_defs.to_module_decl_opt
            else
              let module_ =
                Errors.run_in_decl_mode filename (fun () ->

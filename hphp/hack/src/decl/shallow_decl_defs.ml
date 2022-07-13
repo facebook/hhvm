@@ -287,3 +287,23 @@ type decl =
   | Const of const_decl
   | Module of module_decl
 [@@deriving show]
+
+let to_class_decl_opt = function
+  | Class decl -> Some decl
+  | _ -> None
+
+let to_fun_decl_opt = function
+  | Fun decl -> Some decl
+  | _ -> None
+
+let to_typedef_decl_opt = function
+  | Typedef decl -> Some decl
+  | _ -> None
+
+let to_const_decl_opt = function
+  | Const decl -> Some decl
+  | _ -> None
+
+let to_module_decl_opt = function
+  | Module decl -> Some decl
+  | _ -> None

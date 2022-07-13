@@ -190,3 +190,13 @@ type decl =
   | Const of const_decl
   | Module of module_decl
 [@@deriving show]
+
+val to_class_decl_opt : decl -> class_decl option
+
+val to_fun_decl_opt : decl -> fun_decl option
+
+val to_typedef_decl_opt : decl -> typedef_decl option
+
+val to_const_decl_opt : decl -> const_decl option
+
+val to_module_decl_opt : decl -> module_decl option

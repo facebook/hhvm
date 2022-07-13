@@ -1969,6 +1969,9 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::AKExists,
                         "AKExists",
                     ),
+                    b"Await" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Await, "Await")
+                    }
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2056,13 +2059,12 @@ fn assemble_inouts_or_readonly<'arena>(
     Ok(Slice::from_vec(alloc, tr?))
 }
 
-/// -
+/// - or a label
 fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc::Label>> {
     if token_iter.next_if(Token::is_dash) {
-        // Not sure how this appears otherwise. If it's just a dash means no async eager target
         Ok(None)
     } else {
-        todo!()
+        Ok(Some(assemble_label(token_iter, false)?))
     }
 }
 

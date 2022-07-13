@@ -1726,6 +1726,7 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
                     b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
+                    b"NewStructDict" => assemble_new_struct_dict(alloc, &mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -1892,6 +1893,14 @@ fn assemble_unescaped_unquoted_str<'arena>(
         token_iter.expect(Token::into_str_literal)?,
     ))?;
     Ok(Str::new_slice(alloc, &st))
+}
+
+fn assemble_unquoted_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    let st = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+    Ok(Str::new_slice(alloc, st))
 }
 
 fn assemble_unescaped_unquoted_triple_str<'arena>(
@@ -2523,6 +2532,24 @@ fn assemble_incdecl_opcode<'arena>(
     } else {
         bail!("Unknown local var given to IncDecL instr");
     }
+}
+
+/// Ex:
+/// NewStructDict <"sc" "l_o" "l_b_t">
+fn assemble_new_struct_dict<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "NewStructDict")?;
+    token_iter.expect(Token::into_lt)?;
+    let mut d = Vec::new();
+    while !token_iter.peek_if(Token::is_gt) {
+        d.push(assemble_unquoted_str(alloc, token_iter)?);
+    }
+    token_iter.expect(Token::into_gt)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewStructDict(
+        Slice::from_vec(alloc, d),
+    )))
 }
 
 /// L#: or DV#: if needs_colon else L# or DV#

@@ -377,7 +377,7 @@ let remove_members_except_to_string sc =
    We consider any difference between normalized classes to be a "Major change".
    This means only that we have not implemented some means of computing a fanout
    for that change which is smaller than what would be added by
-   AffectedDeps.add_maximum_fanout (e.g., since we DO have fine-grained
+   Shallow_class_fanout.add_maximum_fanout (e.g., since we DO have fine-grained
    dependency tracking for uses of members, and can handle them in a more
    intelligent way, we remove them during major-change-detection).
 

@@ -48,6 +48,6 @@ val mark_all_dependents_as_needing_recheck :
 
 val mark_all_dependents_as_needing_recheck_from_hash : Mode.t -> t -> Dep.t -> t
 
-val add_maximum_fanout : Mode.t -> t -> Dep.t -> t
+val get_maximum_fanout : Mode.t -> Dep.t -> t
 
 val union : t -> t -> t

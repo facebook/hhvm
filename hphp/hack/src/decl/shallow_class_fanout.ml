@@ -21,13 +21,13 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
           else
             acc))
 
-let add_minor_change_fanout
+let get_minor_change_fanout
     ~(ctx : Provider_context.t)
-    (acc : AffectedDeps.t)
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
   let changed = DepSet.singleton (Dep.make (Dep.Type class_name)) in
+  let acc = AffectedDeps.empty () in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
   let {
@@ -127,19 +127,18 @@ let add_minor_change_fanout
   in
   acc
 
-let add_maximum_fanout
-    (ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name : string) =
+let get_maximum_fanout (ctx : Provider_context.t) (class_name : string) =
   let mode = Provider_context.get_deps_mode ctx in
-  AffectedDeps.add_maximum_fanout mode acc (Dep.make (Dep.Type class_name))
+  AffectedDeps.get_maximum_fanout mode (Dep.make (Dep.Type class_name))
 
-let add_fanout
-    ~(ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name, diff) :
-    AffectedDeps.t =
+let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
   match diff with
-  | Unchanged -> acc
-  | Major_change -> add_maximum_fanout ctx acc class_name
+  | Unchanged -> AffectedDeps.empty ()
+  | Major_change -> get_maximum_fanout ctx class_name
   | Minor_change minor_change ->
-    add_minor_change_fanout ~ctx acc class_name minor_change
+    get_minor_change_fanout ~ctx class_name minor_change
+
+let add_fanout ~ctx acc diff = AffectedDeps.union acc (get_fanout ~ctx diff)
 
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :

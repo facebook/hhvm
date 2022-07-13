@@ -425,17 +425,7 @@ fn assemble_method<'arena>(
     };
     // the visibility is printed in the attrs
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
-    let visibility = if attr.is_internal() && attr.is_public() {
-        hhbc::Visibility::Internal
-    } else if attr.is_public() {
-        hhbc::Visibility::Public
-    } else if attr.is_private() {
-        hhbc::Visibility::Private
-    } else if attr.is_protected() {
-        hhbc::Visibility::Protected
-    } else {
-        bail!("No visibility specified in method def")
-    };
+    let visibility = determine_visibility(&attr)?;
     let met = hhbc::hhas_method::HhasMethod {
         attributes,
         visibility,
@@ -497,15 +487,31 @@ fn assemble_property<'arena>(
     token_iter.expect(Token::into_equal)?;
     let initial_value = assemble_property_initial_value(alloc, token_iter)?;
     token_iter.expect(Token::into_semicolon)?;
+    let visibility = determine_visibility(&flags)?;
     Ok(hhbc::hhas_property::HhasProperty {
         name,
         flags,
         attributes,
-        visibility: hhbc::Visibility::Public,
+        visibility,
         initial_value,
         type_info,
         doc_comment,
     })
+}
+
+fn determine_visibility(attr: &hhvm_types_ffi::ffi::Attr) -> Result<hhbc::Visibility> {
+    let v = if attr.is_internal() && attr.is_public() {
+        hhbc::Visibility::Internal
+    } else if attr.is_public() {
+        hhbc::Visibility::Public
+    } else if attr.is_private() {
+        hhbc::Visibility::Private
+    } else if attr.is_protected() {
+        hhbc::Visibility::Protected
+    } else {
+        bail!("No visibility specified")
+    };
+    Ok(v)
 }
 
 /// Initial values are printed slightly differently from typed values:
@@ -2263,9 +2269,9 @@ fn assemble_obj_class_name_instr<
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let nm = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-    let nm = hhbc::ClassName::new(Str::new_slice(alloc, nm));
-    Ok(hhbc::Instruct::Opcode(op_con(nm)))
+    Ok(hhbc::Instruct::Opcode(op_con(
+        assemble_class_name_from_str(alloc, token_iter)?,
+    )))
 }
 
 /// Ex: IterFree 0

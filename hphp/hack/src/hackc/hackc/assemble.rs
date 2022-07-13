@@ -1392,6 +1392,12 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::Vec,
                         "Vec",
                     ),
+                    b"Keyset" => assemble_adata_id_carrying_instr(
+                        alloc,
+                        &mut sl_lexer,
+                        hhbc::Opcode::Keyset,
+                        "Keyset",
+                    ),
                     b"True" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::True, "True")
                     }
@@ -1644,6 +1650,54 @@ fn assemble_instr<'arena, 'a>(
                     | b"CGetL2" | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => {
                         assemble_cget(&mut sl_lexer, decl_map)
                     }
+                    b"Fatal" => assemble_fatal_opcode(&mut sl_lexer),
+                    b"CheckThis" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::CheckThis,
+                        "CheckThis",
+                    ),
+                    b"This" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::This, "This")
+                    }
+                    b"CreateCont" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::CreateCont,
+                        "CreateCont",
+                    ),
+                    b"Yield" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Yield, "Yield")
+                    }
+                    b"File" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::File, "File")
+                    }
+                    b"Incl" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Incl, "Incl")
+                    }
+                    b"AddElemC" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::AddElemC,
+                        "AddElemC",
+                    ),
+                    b"ClassName" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ClassName,
+                        "ClassName",
+                    ),
+                    b"Req" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Req, "Req")
+                    }
+                    b"ReqDoc" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ReqDoc,
+                        "ReqDoc",
+                    ),
+                    b"ReqOnce" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ReqOnce,
+                        "ReqOnce",
+                    ),
+                    b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
+                    b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2344,6 +2398,61 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
 
         ido => bail!("Expected a IncDecOp but got: {:?}", ido),
     }
+}
+
+fn assemble_fatal_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::FatalOp> {
+    let fop = match token_iter.expect(Token::into_identifier)? {
+        b"Runtime" => hhbc::FatalOp::Runtime,
+        b"Parse" => hhbc::FatalOp::Parse,
+        b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
+        f => bail!("Expected a FatalOp, got: {:?}", f),
+    };
+    Ok(fop)
+}
+
+fn assemble_fatal_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Fatal")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Fatal(
+        assemble_fatal_op(token_iter)?,
+    )))
+}
+
+fn assemble_bare_this_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::BareThisOp> {
+    let bop = match token_iter.expect(Token::into_identifier)? {
+        b"Notice" => hhbc::BareThisOp::Notice,
+        b"NoNotice" => hhbc::BareThisOp::NoNotice,
+        b"NeverNull" => hhbc::BareThisOp::NeverNull,
+        f => bail!("Expected a FatalOp, got: {:?}", f),
+    };
+    Ok(bop)
+}
+
+fn assemble_bare_this_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "BareThis")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BareThis(
+        assemble_bare_this_op(token_iter)?,
+    )))
+}
+
+fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::CollectionType> {
+    let ct = match token_iter.expect(Token::into_identifier)? {
+        b"Vector" => hhbc::CollectionType::Vector,
+        b"Map" => hhbc::CollectionType::Map,
+        b"Set" => hhbc::CollectionType::Set,
+        b"Pair" => hhbc::CollectionType::Pair,
+        b"ImmVector" => hhbc::CollectionType::ImmVector,
+        b"ImmMap" => hhbc::CollectionType::ImmMap,
+        b"ImmSet" => hhbc::CollectionType::ImmSet,
+        f => bail!("Expected a FatalOp, got: {:?}", f),
+    };
+    Ok(ct)
+}
+
+fn assemble_col_from_array<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "ColFromArray")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ColFromArray(
+        assemble_collection_type(token_iter)?,
+    )))
 }
 
 /// Ex:

@@ -665,7 +665,9 @@ fn assemble_enum_ty<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".enum_ty") {
-        Ok(assemble_type_info(alloc, token_iter, true)?)
+        let ti = assemble_type_info(alloc, token_iter, true)?;
+        token_iter.expect(Token::into_semicolon)?;
+        Ok(ti)
     } else {
         Ok(Maybe::Nothing)
     }

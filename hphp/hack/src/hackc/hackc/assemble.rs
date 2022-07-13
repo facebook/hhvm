@@ -1936,6 +1936,7 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
                     b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
+                    b"NewCol" => assemble_new_col(&mut sl_lexer),
                     b"NewStructDict" => assemble_new_struct_dict(alloc, &mut sl_lexer),
                     b"IssetG" => assemble_single_opcode_instr(
                         &mut sl_lexer,
@@ -1981,6 +1982,23 @@ fn assemble_instr<'arena, 'a>(
                     b"Await" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Await, "Await")
                     }
+                    b"InclOnce" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::InclOnce,
+                        "InclOnce",
+                    ),
+                    b"OODeclExists" => assemble_oodecl_exists(&mut sl_lexer),
+                    b"Silence" => assemble_silence(&mut sl_lexer, decl_map),
+                    b"ThrowNonExhaustiveSwitch" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ThrowNonExhaustiveSwitch,
+                        "ThrowNonExhaustiveSwitch",
+                    ),
+                    b"ArrayIdx" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ArrayIdx,
+                        "ArrayIdx",
+                    ),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2690,6 +2708,44 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
     }
 }
 
+fn assemble_silence_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SilenceOp> {
+    let so = match token_iter.expect(Token::into_identifier)? {
+        b"Start" => hhbc::SilenceOp::Start,
+        b"End" => hhbc::SilenceOp::End,
+        so => bail!("Expected a SilenceOp but got: {:?}", so),
+    };
+    Ok(so)
+}
+
+/// Ex:
+/// Silence _2 End
+fn assemble_silence<'arena>(
+    token_iter: &mut Lexer<'_>,
+    decl_map: &mut HashMap<&'_ [u8], u32>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Silence")?;
+    let lcl = assemble_local(token_iter, decl_map)?;
+    let sop = assemble_silence_op(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Silence(lcl, sop)))
+}
+
+fn assemble_oodecl_exists_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::OODeclExistsOp> {
+    let oo = match token_iter.expect(Token::into_identifier)? {
+        b"Class" => hhbc::OODeclExistsOp::Class,
+        b"Interface" => hhbc::OODeclExistsOp::Interface,
+        b"Trait" => hhbc::OODeclExistsOp::Trait,
+        oo => bail!("Expected a OODeclExistsOp but got: {:?}", oo),
+    };
+    Ok(oo)
+}
+
+fn assemble_oodecl_exists<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "OODeclExists")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::OODeclExists(
+        assemble_oodecl_exists_op(token_iter)?,
+    )))
+}
+
 fn assemble_fatal_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::FatalOp> {
     let fop = match token_iter.expect(Token::into_identifier)? {
         b"Runtime" => hhbc::FatalOp::Runtime,
@@ -2741,6 +2797,13 @@ fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::Collecti
 fn assemble_col_from_array<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "ColFromArray")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ColFromArray(
+        assemble_collection_type(token_iter)?,
+    )))
+}
+
+fn assemble_new_col<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "NewCol")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewCol(
         assemble_collection_type(token_iter)?,
     )))
 }

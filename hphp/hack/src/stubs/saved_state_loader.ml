@@ -103,6 +103,8 @@ let medium_user_message_of_error _ =
 let long_user_message_of_error _ =
   "Saved states are not supported in this build."
 
+let saved_state_manifold_api_key_of_error _ = None
+
 let debug_details_of_error _ = ""
 
 let category_of_error _ = ""

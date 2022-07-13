@@ -72,7 +72,11 @@ let load_state_error_to_verbose_string (err : load_state_error) :
              ~value:(Saved_state_loader.category_of_error err)
         |> Telemetry.string_
              ~key:"debug_details"
-             ~value:(Saved_state_loader.debug_details_of_error err);
+             ~value:(Saved_state_loader.debug_details_of_error err)
+        |> Telemetry.string_opt
+             ~key:"saved_state_manifold_api_key"
+             ~value:
+               (Saved_state_loader.saved_state_manifold_api_key_of_error err);
     }
   | Load_state_dirty_files_failure error ->
     let Future.{ message; stack = Utils.Callstack stack; environment } =

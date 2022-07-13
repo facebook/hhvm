@@ -543,6 +543,9 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x074100 /* Available since 7.65.0 */
     case CURLOPT_MAXAGE_CONN:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS_CTRL:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -707,6 +710,15 @@ bool CurlResource::isStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
     case CURLOPT_SASL_AUTHZID:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
+    case CURLOPT_SSL_EC_CURVES:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0 */
+    case CURLOPT_AWS_SIGV4:
 #endif
       return true;
     default:

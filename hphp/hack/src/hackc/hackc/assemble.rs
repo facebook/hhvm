@@ -1759,6 +1759,13 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::ResolveRFunc,
                         "ResolveRFunc",
                     ),
+                    b"ResolveClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveRClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveRClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveRClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
+                    b"ResolveClass" => assemble_resolve_class(alloc, &mut sl_lexer),
                     b"NewDictArray" => assemble_u32_carrying_opcode(
                         &mut sl_lexer,
                         hhbc::Opcode::NewDictArray,
@@ -1907,6 +1914,11 @@ fn assemble_instr<'arena, 'a>(
                     b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
                     b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
                     b"NewStructDict" => assemble_new_struct_dict(alloc, &mut sl_lexer),
+                    b"IssetG" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::IssetG,
+                        "IssetG",
+                    ),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2774,6 +2786,41 @@ fn assemble_resolve_func<'arena, F: FnOnce(hhbc::FunctionName<'arena>) -> hhbc::
     Ok(hhbc::Instruct::Opcode(op_con(
         assemble_function_name_from_str(alloc, token_iter)?,
     )))
+}
+
+fn assemble_resolve_class<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    let op = match token_iter.expect(Token::into_identifier)? {
+        b"ResolveClsMethod" => {
+            hhbc::Opcode::ResolveClsMethod(assemble_method_name_from_str(alloc, token_iter)?)
+        }
+        b"ResolveClsMethodD" => hhbc::Opcode::ResolveClsMethodD(
+            assemble_class_name_from_str(alloc, token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"ResolveClsMethodS" => hhbc::Opcode::ResolveClsMethodS(
+            assemble_special_class_ref(token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"ResolveRClsMethod" => {
+            hhbc::Opcode::ResolveRClsMethod(assemble_method_name_from_str(alloc, token_iter)?)
+        }
+        b"ResolveRClsMethodD" => hhbc::Opcode::ResolveRClsMethodD(
+            assemble_class_name_from_str(alloc, token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"ResolveRClsMethodS" => hhbc::Opcode::ResolveRClsMethodS(
+            assemble_special_class_ref(token_iter)?,
+            assemble_method_name_from_str(alloc, token_iter)?,
+        ),
+        b"ResolveClass" => {
+            hhbc::Opcode::ResolveClass(assemble_class_name_from_str(alloc, token_iter)?)
+        }
+        b => bail!("Unknown resolve class opcode: {:?}", b),
+    };
+    Ok(hhbc::Instruct::Opcode(op))
 }
 
 /// Ex:

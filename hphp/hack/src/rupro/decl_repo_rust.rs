@@ -58,11 +58,11 @@ struct CliOptions {
     #[structopt(long)]
     fold: bool,
 
-    /// Store decls in a data store which serializes and compresses them.
+    /// Keep all decls in memory rather than serializing and compressing them.
     #[structopt(long)]
-    serialize: bool,
+    no_serialize: bool,
 
-    /// If `--serialize` was given, use the given compression algorithm.
+    /// Use the given compression algorithm when serializing decls (if serialization is enabled).
     #[structopt(default_value, long)]
     compression: Compression,
 
@@ -110,7 +110,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::DiskProvider::new(Arc::clone(&ctx)));
     let parser = DeclParser::new(file_provider);
-    let shallow_decl_store = make_shallow_decl_store::<R>(if opts.serialize {
+    let shallow_decl_store = make_shallow_decl_store::<R>(if opts.no_serialize {
         StoreOpts::Unserialized
     } else {
         StoreOpts::Serialized(opts.compression)
@@ -132,10 +132,10 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
     };
 
     let folded_decl_provider = make_folded_decl_provider(
-        if opts.serialize {
-            StoreOpts::Serialized(opts.compression)
-        } else {
+        if opts.no_serialize {
             StoreOpts::Unserialized
+        } else {
+            StoreOpts::Serialized(opts.compression)
         },
         opts.naming_table.as_ref(),
         shallow_decl_store,

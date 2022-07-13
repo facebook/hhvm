@@ -564,6 +564,33 @@ fn cmp_module(a: &HhasModule<'_>, b: &HhasModule<'_>) -> Result<()> {
     Ok(())
 }
 
+/// Compares two include paths. a can be a relative path and b an aboslute path as long as
+/// a is the end of b
+fn cmp_includes(
+    a: &hhbc::hhas_symbol_refs::IncludePath<'_>,
+    b: &hhbc::hhas_symbol_refs::IncludePath<'_>,
+) -> Result<()> {
+    if a != b {
+        match (a, b) {
+            (
+                hhbc::hhas_symbol_refs::IncludePath::SearchPathRelative(a_bs),
+                hhbc::hhas_symbol_refs::IncludePath::Absolute(b_bs),
+            ) => {
+                let a_bs = a_bs.as_bstr();
+                let b_bs = b_bs.as_bstr();
+                if b_bs.ends_with(a_bs) {
+                    Ok(())
+                } else {
+                    bail!("Mismatch {:?} vs {:?}", a, b)
+                }
+            }
+            _ => bail!("Mismatch {:?} vs {:?}", a, b),
+        }
+    } else {
+        Ok(())
+    }
+}
+
 fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()> {
     let HhasSymbolRefs {
         includes: a_includes,
@@ -578,7 +605,7 @@ fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()>
         classes: b_classes,
     } = b;
 
-    cmp_slice(a_includes, b_includes, cmp_eq).qualified("includes")?;
+    cmp_slice(a_includes, b_includes, cmp_includes).qualified("includes")?; // Change this to cmp_includes
     cmp_slice(a_constants, b_constants, cmp_eq).qualified("constants")?;
     cmp_slice(a_functions, b_functions, cmp_eq).qualified("functions")?;
     cmp_slice(a_classes, b_classes, cmp_eq).qualified("classes")?;

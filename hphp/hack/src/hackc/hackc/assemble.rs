@@ -15,6 +15,7 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use naming_special_names_rust::coeffects::Ctx;
 use options::Options;
 use oxidized::relative_path::RelativePath;
 use oxidized::relative_path::{self};
@@ -415,7 +416,7 @@ fn assemble_method<'arena>(
     let mut decl_map: HashMap<&[u8], u32> = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
-    let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?;
+    let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
     let body = hhbc::hhas_body::HhasBody {
         params,
         return_type_info,
@@ -432,7 +433,7 @@ fn assemble_method<'arena>(
         name,
         body,
         span,
-        coeffects: Default::default(), // Get this from the body -- it's printed there (?)
+        coeffects,
         flags,
         attrs: attr,
     };
@@ -979,7 +980,7 @@ fn assemble_function<'arena>(
     let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(token_iter)?;
-    let partial_body = assemble_body(alloc, token_iter, &mut decl_map)?; // Takes ownership of decl_map
+    let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
         params,
@@ -992,7 +993,7 @@ fn assemble_function<'arena>(
         name,
         body,
         span,
-        coeffects: Default::default(), // todo!()
+        coeffects,
         flags,
         attrs: attr,
     };
@@ -1336,10 +1337,14 @@ fn assemble_body<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
     decl_map: &mut HashMap<&'a [u8], u32>,
-) -> Result<hhbc::hhas_body::HhasBody<'arena>> {
+) -> Result<(
+    hhbc::hhas_body::HhasBody<'arena>,
+    hhbc::hhas_coeffects::HhasCoeffects<'arena>,
+)> {
     let mut instrs = Vec::new();
     let mut decl_vars = Slice::default();
     let mut num_iters = 0;
+    let mut coeff = hhbc::hhas_coeffects::HhasCoeffects::default();
     // For now we don't parse params, so will just have decl_vars (might need to move this later)
     token_iter.expect(Token::into_open_curly)?;
     // In body, before instructions, are 5 possible constructs:
@@ -1360,11 +1365,15 @@ fn assemble_body<'arena, 'a>(
                 bail!("Cannot have more than one .declvars per function body");
             }
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
+        } else if token_iter.peek_if_str(Token::is_decl, ".coeffects_static") {
+            let mut scs = Vec::new();
+
+            assemble_static_coeffects(token_iter, &mut scs)?;
+            coeff = hhbc::hhas_coeffects::HhasCoeffects::from_static_coeffects(alloc, scs);
         } else {
             break;
         }
     }
-    // And maybe coeffects, not sure what that is yet
     // tcb_count tells how many TryCatchBegins there are that are still unclosed
     // we only stop parsing instructions once we see a is_close_curly and tcb_count is 0
     let mut tcb_count = 0;
@@ -1378,7 +1387,21 @@ fn assemble_body<'arena, 'a>(
         num_iters,
         ..Default::default()
     };
-    Ok(tr)
+    Ok((tr, coeff))
+}
+
+/// Ex: .coeffects_static pure
+fn assemble_static_coeffects<'arena>(token_iter: &mut Lexer<'_>, scs: &mut Vec<Ctx>) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_static")?;
+    while !token_iter.peek_if(Token::is_semicolon) {
+        match token_iter.expect(Token::into_identifier)? {
+            b"pure" => scs.push(Ctx::Pure),
+            b"defaults" => scs.push(Ctx::Defaults),
+            d => bail!("Unknown static coeffect: {:?}", d),
+        }
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
 }
 
 /// Expects .numiters #+;
@@ -1998,6 +2021,11 @@ fn assemble_instr<'arena, 'a>(
                         &mut sl_lexer,
                         || hhbc::Opcode::ArrayIdx,
                         "ArrayIdx",
+                    ),
+                    b"ChainFaults" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ChainFaults,
+                        "ChainFaults",
                     ),
                     _ => todo!("assembling instrs: {}", tok),
                 }

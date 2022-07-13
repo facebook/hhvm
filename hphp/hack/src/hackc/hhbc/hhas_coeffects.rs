@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
@@ -40,6 +41,13 @@ pub struct HhasCoeffects<'arena> {
 }
 
 impl<'arena> HhasCoeffects<'arena> {
+    pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> HhasCoeffects<'arena> {
+        HhasCoeffects {
+            static_coeffects: Slice::from_vec(alloc, scs),
+
+            ..Default::default()
+        }
+    }
     fn from_type_static(hint: &Hint) -> Option<Ctx> {
         let Hint(_, h) = hint;
         match &**h {

@@ -44,6 +44,7 @@ fn field_might_contain_buried_value_id(ty: &SimpleType<'_>) -> bool {
             || ident == "LocalId"
             || ident == "ParamId"
             || ident == "PropId"
+            || ident == "VarId"
             || ident == "usize"
             || ident == "u32")
     } else {

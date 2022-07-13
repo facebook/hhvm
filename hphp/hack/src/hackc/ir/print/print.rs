@@ -31,6 +31,7 @@ use core::instr::OODeclExistsOp;
 use core::instr::QueryMOp;
 use core::instr::ReadonlyOp;
 use core::instr::Special;
+use core::instr::Ssa;
 use core::instr::SwitchKind;
 use core::instr::Terminator;
 use core::string_intern::StringInterner;
@@ -1215,27 +1216,38 @@ pub(crate) fn print_instr(
         Instr::Call(call) => print_call(w, ctx, func, call)?,
         Instr::Hhbc(hhbc) => print_hhbc(w, ctx, func, hhbc)?,
         Instr::MemberOp(op) => print_member_op(w, ctx, func, op)?,
-        Instr::Special(instr::Special::Param) => write!(w, "param")?,
-        Instr::Special(instr::Special::PopC) => write!(w, "popc")?,
-        Instr::Special(instr::Special::PopL(lid)) => {
-            write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
-        }
         Instr::Special(Special::Copy(vid)) => {
             write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
-        Instr::Special(instr::Special::PushL(lid)) => {
+        Instr::Special(Special::Ssa(Ssa::GetVar(var))) => {
+            write!(w, "get_var &{}", var.as_usize())?;
+        }
+        Instr::Special(Special::Ssa(Ssa::SetVar(var, value))) => {
+            write!(
+                w,
+                "set_var &{}, {}",
+                var.as_usize(),
+                FmtVid(func, *value, ctx.verbose)
+            )?;
+        }
+        Instr::Special(Special::Param) => write!(w, "param")?,
+        Instr::Special(Special::PopC) => write!(w, "popc")?,
+        Instr::Special(Special::PopL(lid)) => {
+            write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
+        }
+        Instr::Special(Special::PushL(lid)) => {
             write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
         }
-        Instr::Special(instr::Special::PushLiteral(vid)) => {
+        Instr::Special(Special::PushLiteral(vid)) => {
             write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?
         }
-        Instr::Special(instr::Special::Select(vid, index)) => write!(
+        Instr::Special(Special::Select(vid, index)) => write!(
             w,
             "select {} from {}",
             index,
             FmtVid(func, *vid, ctx.verbose)
         )?,
-        Instr::Special(instr::Special::Tombstone) => write!(w, "tombstone")?,
+        Instr::Special(Special::Tombstone) => write!(w, "tombstone")?,
         Instr::Terminator(t) => print_terminator(w, ctx, func, iid, t)?,
     }
     Ok(true)

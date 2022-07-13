@@ -9,6 +9,7 @@ use crate::MethodId;
 use crate::PropId;
 use crate::UnitStringId;
 use crate::ValueId;
+use crate::VarId;
 use macros::HasLoc;
 use macros::HasLocals;
 use macros::HasOperands;
@@ -614,32 +615,43 @@ impl CanThrow for MemberOp {
 
 #[derive(Debug)]
 pub enum CallDetail {
+    // A::$b(42);
+    // $a::$b(42);
     FCallClsMethod {
         log: IsLogAsDynamicCallOp,
     },
+    // A::foo(42);
     FCallClsMethodD {
         clsid: ClassId,
         method: MethodId,
     },
+    // $a::foo(42);
     FCallClsMethodM {
         method: MethodId,
         log: IsLogAsDynamicCallOp,
     },
+    // self::$a();
     FCallClsMethodS {
         clsref: SpecialClsRef,
     },
+    // self::foo();
     FCallClsMethodSD {
         clsref: SpecialClsRef,
         method: MethodId,
     },
+    // new A(42);
     FCallCtor,
+    // $a(42);
     FCallFunc,
+    // foo(42);
     FCallFuncD {
         func: FunctionId,
     },
+    // $a->$b(42);
     FCallObjMethod {
         flavor: ObjMethodOp,
     },
+    // $a->foo(42);
     FCallObjMethodD {
         flavor: ObjMethodOp,
         method: MethodId,
@@ -650,16 +662,16 @@ impl CallDetail {
     pub fn args<'a>(&self, operands: &'a [ValueId]) -> &'a [ValueId] {
         let len = operands.len();
         match self {
-            CallDetail::FCallClsMethod { .. } => &operands[2..len - 2],
-            CallDetail::FCallFunc
-            | CallDetail::FCallObjMethod { .. }
-            | CallDetail::FCallClsMethodM { .. }
-            | CallDetail::FCallClsMethodS { .. } => &operands[2..len - 1],
-            CallDetail::FCallClsMethodD { .. }
-            | CallDetail::FCallClsMethodSD { .. }
-            | CallDetail::FCallCtor
-            | CallDetail::FCallFuncD { .. }
-            | CallDetail::FCallObjMethodD { .. } => &operands[2..],
+            CallDetail::FCallClsMethod { .. } => &operands[..len - 2],
+            CallDetail::FCallFunc => &operands[..len - 1],
+            CallDetail::FCallObjMethod { .. } => &operands[1..len - 1],
+            CallDetail::FCallClsMethodM { .. } => &operands[..len - 1],
+            CallDetail::FCallClsMethodS { .. } => &operands[..len - 1],
+            CallDetail::FCallClsMethodD { .. } => operands,
+            CallDetail::FCallClsMethodSD { .. } => operands,
+            CallDetail::FCallCtor => &operands[1..],
+            CallDetail::FCallFuncD { .. } => operands,
+            CallDetail::FCallObjMethodD { .. } => &operands[1..],
         }
     }
 
@@ -952,6 +964,12 @@ pub enum CmpOp {
 }
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
+pub enum Ssa {
+    SetVar(VarId, ValueId), // var, value
+    GetVar(VarId),          // var
+}
+
+#[derive(Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
     Copy(ValueId),
     Param,
@@ -964,6 +982,10 @@ pub enum Special {
     // Used during ir_to_bc - not in normal IR.
     PushLiteral(ValueId),
     Select(ValueId, u32),
+    // Used to build SSA.
+    #[has_locals(none)]
+    #[has_loc(none)]
+    Ssa(Ssa),
     Tombstone,
 }
 
@@ -978,6 +1000,19 @@ impl CanThrow for Special {
 impl Instr {
     pub fn call(call: Call) -> Instr {
         Instr::Call(Box::new(call))
+    }
+
+    pub fn simple_call(func: FunctionId, operands: &[ValueId], loc: LocId) -> Instr {
+        Self::call(Call {
+            operands: operands.into(),
+            context: UnitStringId::NONE,
+            detail: CallDetail::FCallFuncD { func },
+            flags: FCallArgsFlags::default(),
+            num_rets: 0,
+            inouts: None,
+            readonly: None,
+            loc,
+        })
     }
 
     pub fn jmp(bid: BlockId, loc: LocId) -> Instr {
@@ -1021,6 +1056,14 @@ impl Instr {
 
     pub fn unreachable() -> Instr {
         Instr::Terminator(Terminator::Unreachable)
+    }
+
+    pub fn set_var(var: VarId, value: ValueId) -> Instr {
+        Instr::Special(Special::Ssa(Ssa::SetVar(var, value)))
+    }
+
+    pub fn get_var(var: VarId) -> Instr {
+        Instr::Special(Special::Ssa(Ssa::GetVar(var)))
     }
 }
 

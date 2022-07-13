@@ -28,7 +28,7 @@ pub use hhbc::TypeStructResolveOp;
 
 macro_rules! interned_hhbc_id {
     ($name: ident, $hhbc: ident) => {
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+        #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
         pub struct $name {
             pub id: UnitStringId,
         }
@@ -40,6 +40,15 @@ macro_rules! interned_hhbc_id {
 
             pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &mut StringInterner<'a>) -> Self {
                 Self::new(strings.intern_str(id.as_ffi_str()))
+            }
+
+            pub fn from_str<'a>(
+                name: &str,
+                alloc: &'a bumpalo::Bump,
+                strings: &mut StringInterner<'a>,
+            ) -> Self {
+                let name = ffi::Str::new_str(alloc, name);
+                Self::new(strings.intern_str(name))
             }
 
             pub fn to_hhbc<'a>(
@@ -71,6 +80,10 @@ newtype_int!(LiteralId, u32, LiteralIdMap, LiteralIdSet);
 
 // A LocId represents a SrcLoc interned within a Func.
 newtype_int!(LocId, u32, LocIdMap, LocIdSet);
+
+// A VarId represents an internal variable which is removed by the ssa pass.
+// They are disjoint from LocalIds.
+newtype_int!(VarId, u32, VarIdMap, VarIdSet);
 
 /// An ValueId can be either an InstrId or a LiteralId.
 ///

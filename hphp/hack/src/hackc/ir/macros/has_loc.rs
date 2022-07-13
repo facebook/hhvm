@@ -52,7 +52,9 @@ fn field_might_contain_buried_loc_id(ty: &SimpleType<'_>) -> bool {
             || ident == "ConstId"
             || ident == "ValueId"
             || ident == "LocalId"
+            || ident == "MethodId"
             || ident == "ParamId"
+            || ident == "VarId"
             || ident == "usize"
             || ident == "u32")
     } else {

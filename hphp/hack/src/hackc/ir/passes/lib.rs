@@ -7,6 +7,7 @@ pub mod clean;
 pub mod control;
 pub mod critedge;
 pub mod rpo_sort;
+pub mod ssa;
 
 pub use critedge::split_critical_edges;
 pub use rpo_sort::rpo_sort;

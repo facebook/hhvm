@@ -2045,6 +2045,7 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"MemoGet" => assemble_memo_get(&mut sl_lexer),
                     b"MemoSet" => assemble_memo_set(&mut sl_lexer),
+                    b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2427,6 +2428,36 @@ fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc:
             res_op
         ),
     }
+}
+
+/// Ex:
+/// SSwitch <"ARRAY7":L0 "ARRAY8":L1 "ARRAY9":L2 -:L3>
+fn assemble_sswitch<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    let mut cases = Vec::new(); // Of Str<'arena>
+    let mut targets = Vec::new(); // Of Labels
+    token_iter.expect_is_str(Token::into_identifier, "SSwitch")?;
+    token_iter.expect(Token::into_lt)?;
+    // The last case is printed as '-' but interior it is "default"
+    while !token_iter.peek_if(Token::is_gt) {
+        if token_iter.peek_if(Token::is_dash) {
+            // Last item; printed as '-' but is "default"
+            token_iter.next();
+            cases.push(Str::new_str(alloc, "default"));
+        } else {
+            cases.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
+        }
+        token_iter.expect(Token::into_colon)?;
+        targets.push(assemble_label(token_iter, false)?);
+    }
+    token_iter.expect(Token::into_gt)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
+        cases: Slice::from_vec(alloc, cases),
+        targets: Slice::from_vec(alloc, targets),
+        _0: hhbc::Dummy::DEFAULT,
+    }))
 }
 
 /// Ex:
@@ -3800,13 +3831,13 @@ impl<'a> Lexer<'a> {
     pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
         // First create the regex that matches any token. Done this way for readability
         let v = [
-            r#"""".*?""""#,                                                 // Triple str literal
-            "#.*",                                                          // Comment
+            r#"""".*?""""#,                                                   // Triple str literal
+            "#.*",                                                            // Comment
             r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, global. (?-u) turns off utf8 check
             r"(?-u)\$[_a-zA-Z0-9\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Var. See /home/almathaler/fbsource/fbcode/hphp/test/quick/reified-and-variadic.php's assembly for a var w/ a digit at front
             r#""((\\.)|[^\\"])*""#,                                 // Str literal
             r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",     // Number
-            r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#]|::)*", // Identifier
+            r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#\-]|::)*", // Identifier
             ";",
             "-",
             "=",

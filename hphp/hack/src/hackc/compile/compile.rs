@@ -431,7 +431,6 @@ pub fn from_text<'decl>(
     let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
     let unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
     let opts = emitter.into_options();
-
     let (print_result, printing_t) = time(|| {
         bytecode_printer::print_unit(
             &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),

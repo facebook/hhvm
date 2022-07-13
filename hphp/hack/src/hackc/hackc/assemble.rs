@@ -563,9 +563,18 @@ fn assemble_prop_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::PropName<'arena>> {
-    Ok(hhbc::PropName::new(
-        token_iter.expect_identifier_into_ffi_str(alloc)?,
-    ))
+    let nm = if token_iter.peek_if_str(Token::is_number, "86") {
+        // Only properties that can start with #s start with
+        // 86 and are compiler added ones
+        let under86 = token_iter.expect(Token::into_number)?;
+        let name = token_iter.expect(Token::into_identifier)?;
+        let mut under86 = under86.to_vec();
+        under86.extend_from_slice(name);
+        Str::new_slice(alloc, &under86)
+    } else {
+        token_iter.expect_identifier_into_ffi_str(alloc)?
+    };
+    Ok(hhbc::PropName::new(nm))
 }
 
 fn assemble_method_name_from_str<'arena>(
@@ -1133,7 +1142,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"dyn_constructible" => Attr::AttrDynamicallyConstructible,
         b"builtin" => Attr::AttrBuiltin,
         b"is_const" => Attr::AttrIsConst,
-        b"no_reified_init" => Attr::AttrNoReifiedInit,
+        b"noreifiedinit" => Attr::AttrNoReifiedInit,
         b"is_meth_caller" => Attr::AttrIsMethCaller,
         b"is_closure_class" => Attr::AttrIsClosureClass,
         b"has_closure_coeffects_prop" => Attr::AttrHasClosureCoeffectsProp,
@@ -1965,7 +1974,7 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
     while !token_iter.peek_if(Token::is_gt) {
         match token_iter.expect(Token::into_identifier)? {
             b"HasUnpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
-            b"HasGenerics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
+            b"Generics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),
             b"SkipRepack" => flags.add(hhbc::FCallArgsFlags::SkipRepack),
             b"SkipCoeffectsCheck" => flags.add(hhbc::FCallArgsFlags::SkipCoeffectsCheck),
@@ -1977,7 +1986,7 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
             b"EnforceReadonly" => flags.add(hhbc::FCallArgsFlags::EnforceReadonly),
             b"HasAsyncEagerOffset" => flags.add(hhbc::FCallArgsFlags::HasAsyncEagerOffset),
             b"NumArgsStart" => flags.add(hhbc::FCallArgsFlags::NumArgsStart),
-            _ => bail!("Unrecognized FCallArgsFlags"),
+            f => bail!("Unrecognized FCallArgsFlags: {:?}", f),
         }
     }
     token_iter.expect(Token::into_gt)?;

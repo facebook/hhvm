@@ -103,6 +103,7 @@ fn assemble_from_toks<'arena>(
     let mut func_refs = None;
     let mut class_refs = None;
     let mut constant_refs = None;
+    let mut include_refs = None;
     let mut fatal = None;
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
@@ -145,6 +146,20 @@ fn assemble_from_toks<'arena>(
                 ".constant_refs",
                 assemble_const_name,
             )?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".includes") {
+            if include_refs.is_some() {
+                bail!("Includes defined mulitple times in file");
+            }
+            include_refs = Some(assemble_refs(
+                alloc,
+                token_iter,
+                ".includes",
+                |alloc, t| {
+                    Ok(hhbc::hhas_symbol_refs::IncludePath::Absolute(
+                        t.expect_identifier_into_ffi_str(alloc)?,
+                    ))
+                },
+            )?)
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -164,7 +179,7 @@ fn assemble_from_toks<'arena>(
             functions: func_refs.unwrap_or_default(),
             classes: class_refs.unwrap_or_default(),
             constants: constant_refs.unwrap_or_default(),
-            ..Default::default()
+            includes: include_refs.unwrap_or_default(),
         },
         constants: Default::default(),
         fatal: fatal.into(),
@@ -491,9 +506,63 @@ fn assemble_method_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::MethodName<'arena>> {
-    Ok(hhbc::MethodName::new(
+    let nm = if token_iter.peek_if_str(Token::is_number, "86") {
+        // Only methods that can start with #s start with
+        // 86 and are compiler added ones
+        let under86 = token_iter.expect(Token::into_number)?;
+        let name = token_iter.expect(Token::into_identifier)?;
+        let mut under86 = under86.to_vec();
+        under86.extend_from_slice(name);
+        Str::new_slice(alloc, &under86)
+    } else {
+        token_iter.expect_identifier_into_ffi_str(alloc)?
+    };
+    Ok(hhbc::MethodName::new(nm))
+}
+
+fn assemble_const_name_from_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::ConstName<'arena>> {
+    Ok(hhbc::ConstName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
+fn assemble_const_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::ConstName<'arena>> {
+    Ok(hhbc::ConstName::new(
         token_iter.expect_identifier_into_ffi_str(alloc)?,
     ))
+}
+
+fn assemble_function_name_from_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::FunctionName<'arena>> {
+    Ok(hhbc::FunctionName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
+fn assemble_function_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::FunctionName<'arena>> {
+    let nm = if token_iter.peek_if_str(Token::is_number, "86") {
+        // Only functions that can start with #s start with
+        // 86 and are compiler added ones
+        let under86 = token_iter.expect(Token::into_number)?;
+        let name = token_iter.expect(Token::into_identifier)?;
+        let mut under86 = under86.to_vec();
+        under86.extend_from_slice(name);
+        Str::new_slice(alloc, &under86)
+    } else {
+        token_iter.expect_identifier_into_ffi_str(alloc)?
+    };
+    Ok(hhbc::FunctionName::new(nm))
 }
 
 /// Ex:
@@ -779,12 +848,12 @@ where
 {
     token_iter.expect_is_str(Token::into_decl, name_str)?;
     token_iter.expect(Token::into_open_curly)?;
-    let mut class_names = Vec::new();
+    let mut names = Vec::new();
     while !token_iter.peek_if(Token::is_close_curly) {
-        class_names.push(assemble_name(alloc, token_iter)?);
+        names.push(assemble_name(alloc, token_iter)?);
     }
     token_iter.expect(Token::into_close_curly)?;
-    Ok(Slice::from_vec(alloc, class_names))
+    Ok(Slice::from_vec(alloc, names))
 }
 
 /// A function def is composed of the following:
@@ -2746,42 +2815,6 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
     )))
-}
-
-fn assemble_const_name_from_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::ConstName<'arena>> {
-    Ok(hhbc::ConstName::new(assemble_unescaped_unquoted_str(
-        alloc, token_iter,
-    )?))
-}
-
-fn assemble_const_name<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::ConstName<'arena>> {
-    Ok(hhbc::ConstName::new(
-        token_iter.expect_identifier_into_ffi_str(alloc)?,
-    ))
-}
-
-fn assemble_function_name_from_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::FunctionName<'arena>> {
-    Ok(hhbc::FunctionName::new(assemble_unescaped_unquoted_str(
-        alloc, token_iter,
-    )?))
-}
-
-fn assemble_function_name<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::FunctionName<'arena>> {
-    Ok(hhbc::FunctionName::new(
-        token_iter.expect_identifier_into_ffi_str(alloc)?,
-    ))
 }
 
 #[derive(Parser, Debug)]

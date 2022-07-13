@@ -604,19 +604,37 @@ fn assemble_typed_value<'arena>(
             }
         }
         b"v" => assemble_tv_vec(alloc, token_iter), // Vec
-        b"k" => assemble_tv_keyset(token_iter),     // Keyset
+        b"k" => assemble_tv_keyset(alloc, token_iter), // Keyset
         b"D" => assemble_tv_dict(alloc, token_iter), // Dict
         _ => bail!("Unknown typed value passed to .adata: {}", tok),
     }
 }
 
-// For these collection data types, `print_pos_as_prov_tag` is called in bytecode_printer if
-// context has `array_provenance` true... but rarely happens and not sure how to parse that, so todo!()
 fn assemble_tv_vec<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "v")?;
+    Ok(hhbc::TypedValue::Vec(assemble_tv_vec_or_key(
+        alloc, token_iter,
+    )?))
+}
+
+fn assemble_tv_keyset<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "k")?;
+    Ok(hhbc::TypedValue::Keyset(assemble_tv_vec_or_key(
+        alloc, token_iter,
+    )?))
+}
+
+/// Builds whawt follows v or k in a TypedValue::Vec or TypedValue::KeySet
+fn assemble_tv_vec_or_key<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
     token_iter.expect(Token::into_colon)?;
     let ln: usize = token_iter.expect_and_get_number()?;
     token_iter.expect(Token::into_colon)?;
@@ -626,7 +644,7 @@ fn assemble_tv_vec<'arena>(
         vec.push(assemble_typed_value(alloc, token_iter)?);
     }
     token_iter.expect(Token::into_close_curly)?;
-    Ok(hhbc::TypedValue::Vec(Slice::from_vec(alloc, vec)))
+    Ok(Slice::from_vec(alloc, vec))
 }
 
 /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
@@ -649,10 +667,6 @@ fn assemble_tv_dict<'arena>(
     }
     token_iter.expect(Token::into_close_curly)?;
     Ok(hhbc::TypedValue::Dict(Slice::from_vec(alloc, dict)))
-}
-
-fn assemble_tv_keyset<'arena>(_token_iter: &mut Lexer<'_>) -> Result<hhbc::TypedValue<'arena>> {
-    todo!()
 }
 
 /// Class refs look like:

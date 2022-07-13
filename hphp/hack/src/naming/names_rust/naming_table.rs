@@ -415,6 +415,20 @@ impl Names {
             ToplevelCanonSymbolHash::from_type(name),
         )
     }
+
+    pub fn get_type_name_case_insensitive(
+        &self,
+        hash: ToplevelCanonSymbolHash,
+    ) -> anyhow::Result<Option<String>> {
+        naming_sqlite::get_type_name_case_insensitive(&self.connection, hash)
+    }
+
+    pub fn get_fun_name_case_insensitive(
+        &self,
+        hash: ToplevelCanonSymbolHash,
+    ) -> anyhow::Result<Option<String>> {
+        naming_sqlite::get_fun_name_case_insensitive(&self.connection, hash)
+    }
 }
 
 #[cfg(test)]

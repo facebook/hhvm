@@ -261,8 +261,9 @@ impl ReadonlyStore<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for Type
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
-    fn get(&self, _key: ToplevelCanonSymbolHash) -> Result<Option<TypeName>> {
-        self.0.with_db(|_db| todo!())
+    fn get(&self, key: ToplevelCanonSymbolHash) -> Result<Option<TypeName>> {
+        self.0
+            .with_db(|db| Ok(db.get_type_name_case_insensitive(key)?.map(TypeName::new)))
     }
 }
 
@@ -280,8 +281,9 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for FunDb {
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
-    fn get(&self, _key: ToplevelCanonSymbolHash) -> Result<Option<FunName>> {
-        self.0.with_db(|_db| todo!())
+    fn get(&self, key: ToplevelCanonSymbolHash) -> Result<Option<FunName>> {
+        self.0
+            .with_db(|db| Ok(db.get_fun_name_case_insensitive(key)?.map(FunName::new)))
     }
 }
 

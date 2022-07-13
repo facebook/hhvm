@@ -406,6 +406,85 @@ pub fn get_path_case_insensitive(
     Ok(result?)
 }
 
+pub fn get_type_name_case_insensitive(
+    connection: &Connection,
+    symbol_hash: ToplevelCanonSymbolHash,
+) -> anyhow::Result<Option<String>> {
+    let select_statement = "
+        SELECT
+            NAMING_FILE_INFO.CLASSES,
+            NAMING_FILE_INFO.TYPEDEFS
+        FROM
+            NAMING_SYMBOLS
+        LEFT JOIN
+            NAMING_FILE_INFO
+        ON
+            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+        WHERE
+            NAMING_SYMBOLS.CANON_HASH = ?
+        LIMIT 1
+        ";
+
+    let mut select_statement = connection.prepare_cached(select_statement)?;
+    let names_opt = select_statement
+        .query_row(params![symbol_hash], |row| {
+            let classes: String = row.get(0)?;
+            let typedefs: String = row.get(1)?;
+            Ok((classes, typedefs))
+        })
+        .optional()?;
+
+    if let Some((classes, typedefs)) = names_opt {
+        for class in classes.split('|') {
+            if symbol_hash == ToplevelCanonSymbolHash::from_type(class.to_owned()) {
+                return Ok(Some(class.to_owned()));
+            }
+        }
+        for typedef in typedefs.split('|') {
+            if symbol_hash == ToplevelCanonSymbolHash::from_type(typedef.to_owned()) {
+                return Ok(Some(typedef.to_owned()));
+            }
+        }
+    }
+    Ok(None)
+}
+
+pub fn get_fun_name_case_insensitive(
+    connection: &Connection,
+    symbol_hash: ToplevelCanonSymbolHash,
+) -> anyhow::Result<Option<String>> {
+    let select_statement = "
+        SELECT
+            NAMING_FILE_INFO.FUNS
+        FROM
+            NAMING_SYMBOLS
+        LEFT JOIN
+            NAMING_FILE_INFO
+        ON
+            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
+        WHERE
+            NAMING_SYMBOLS.CANON_HASH = ?
+        LIMIT 1
+        ";
+
+    let mut select_statement = connection.prepare_cached(select_statement)?;
+    let names_opt = select_statement
+        .query_row(params![symbol_hash], |row| {
+            let funs: String = row.get(0)?;
+            Ok(funs)
+        })
+        .optional()?;
+
+    if let Some(funs) = names_opt {
+        for fun in funs.split('|') {
+            if symbol_hash == ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
+                return Ok(Some(fun.to_owned()));
+            }
+        }
+    }
+    Ok(None)
+}
+
 pub fn get_symbol_hashes(
     connection: &Connection,
     path: &RelativePath,

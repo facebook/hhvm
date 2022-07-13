@@ -273,7 +273,7 @@ fn assemble_class<'arena>(
     let implements = assemble_imp_or_enum_includes(alloc, token_iter, "implements")?;
     let enum_includes = assemble_imp_or_enum_includes(alloc, token_iter, "enum_includes")?;
     token_iter.expect(Token::into_open_curly)?;
-    let doc_comment = assemble_doc_comment(token_iter)?;
+    let doc_comment = assemble_doc_comment(alloc, token_iter)?;
     let uses = assemble_uses(alloc, token_iter)?;
     let enum_type = assemble_enum_ty(alloc, token_iter)?;
     // Prints content of class in this order: all requirements,
@@ -713,9 +713,14 @@ fn assemble_imp_or_enum_includes<'arena>(
 }
 
 /// Ex: .doc """doc""";
-fn assemble_doc_comment<'arena>(token_iter: &mut Lexer<'_>) -> Result<Maybe<Str<'arena>>> {
+fn assemble_doc_comment<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Maybe<Str<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".doc") {
-        todo!()
+        let com = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
+        token_iter.expect(Token::into_semicolon)?;
+        Ok(Maybe::Just(com))
     } else {
         Ok(Maybe::Nothing)
     }
@@ -1364,6 +1369,7 @@ fn assemble_body<'arena, 'a>(
     hhbc::hhas_body::HhasBody<'arena>,
     hhbc::hhas_coeffects::HhasCoeffects<'arena>,
 )> {
+    let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
     let mut decl_vars = Slice::default();
     let mut num_iters = 0;
@@ -1376,7 +1382,7 @@ fn assemble_body<'arena, 'a>(
     // only .declvars can be declared more than once
     while token_iter.peek_if(Token::is_decl) {
         if token_iter.peek_if_str(Token::is_decl, ".doc") {
-            todo!("Have yet to do: {}", token_iter.peek().unwrap())
+            doc_comment = assemble_doc_comment(alloc, token_iter)?;
         } else if token_iter.peek_if_str(Token::is_decl, ".ismemoizewrapperlsb") {
             token_iter.expect_is_str(Token::into_decl, ".ismemoizewrapperlsb")?;
             token_iter.expect(Token::into_semicolon)?;
@@ -1417,6 +1423,7 @@ fn assemble_body<'arena, 'a>(
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
+        doc_comment,
         ..Default::default()
     };
     Ok((tr, coeff))

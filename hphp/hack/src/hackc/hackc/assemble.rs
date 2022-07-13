@@ -447,7 +447,10 @@ fn assemble_shadowed_tparams<'arena>(
     token_iter.expect(Token::into_open_curly)?;
     let mut stp = Vec::new();
     while token_iter.peek_if(Token::is_identifier) {
-        stp.push(token_iter.expect_identifier_into_ffi_str(alloc)?)
+        stp.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+        if !token_iter.peek_if(Token::is_close_curly) {
+            token_iter.expect(Token::into_comma)?;
+        }
     }
     token_iter.expect(Token::into_close_curly)?;
     Ok(Slice::from_vec(alloc, stp))

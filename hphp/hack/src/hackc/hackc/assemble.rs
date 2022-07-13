@@ -104,6 +104,7 @@ fn assemble_from_toks<'arena>(
     let mut class_refs = None;
     let mut constant_refs = None;
     let mut include_refs = None;
+    let mut typedefs = Vec::new();
     let mut fatal = None;
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
@@ -160,6 +161,8 @@ fn assemble_from_toks<'arena>(
                     ))
                 },
             )?)
+        } else if token_iter.peek_if_str(Token::is_decl, ".alias") {
+            typedefs.push(assemble_typedef(alloc, token_iter)?);
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -171,7 +174,7 @@ fn assemble_from_toks<'arena>(
         adata: Slice::fill_iter(alloc, adatas.into_iter()),
         functions: Slice::fill_iter(alloc, funcs.into_iter()),
         classes: Slice::fill_iter(alloc, classes.into_iter()),
-        typedefs: Default::default(),
+        typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
         file_attributes: Default::default(),
         modules: Default::default(),
         module_use: Maybe::Nothing,
@@ -186,6 +189,40 @@ fn assemble_from_toks<'arena>(
     };
 
     Ok((hcu, fp))
+}
+
+/// Ex:
+/// .alias ShapeKeyEscaping = <"HH\\darray"> (3,6) """D:2:{s:4:\"kind\";i:14;s:6:\"fields\";D:2:{s:11:\"Whomst'd've\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:1;}}s:25:\"Whomst\\u{0027}d\\u{0027}ve\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:4;}}}}""";
+fn assemble_typedef<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_typedef::HhasTypedef<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".alias")?;
+    let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    let name = assemble_class_name(alloc, token_iter)?;
+    token_iter.expect(Token::into_equal)?;
+    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, true)? {
+        // won't be any user_type
+        let span = assemble_span(token_iter)?;
+        //tv
+        let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
+        debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
+        let tv = &tv[3..tv.len() - 3];
+        let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
+        let mut tv_lexer = Lexer::from_slice(tv, tv_line);
+        let type_structure = assemble_typed_value(alloc, &mut tv_lexer)?;
+        token_iter.expect(Token::into_semicolon)?;
+        Ok(hhbc::hhas_typedef::HhasTypedef {
+            name,
+            attributes,
+            type_info,
+            type_structure,
+            span,
+            attrs,
+        })
+    } else {
+        bail!("No type info provided to type def")
+    }
 }
 
 fn assemble_class<'arena>(

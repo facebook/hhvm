@@ -587,3 +587,9 @@ module Rage = struct
       ~start_time:_ =
     ()
 end
+
+module Fanouts = struct
+  let log ~class_name:_ ~class_diff:_ ~class_diff_category:_ ~fanout_cardinal:_
+      =
+    ()
+end

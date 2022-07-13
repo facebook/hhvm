@@ -73,6 +73,57 @@ let method_or_property_change_affects_descendants member_change =
 
 type constructor_change = member_change option [@@deriving eq, ord]
 
+let constructor_change_to_json : constructor_change -> Hh_json.json =
+  Hh_json.opt_ (fun x -> Hh_json.string_ @@ show_member_change x)
+
+module MembersChangeCategory = struct
+  type t = {
+    some_added: bool;
+    some_removed: bool;
+    some_changed_inheritance: bool;
+    some_modified: bool;
+    some_private_change: bool;
+  }
+
+  let no_change =
+    {
+      some_added = false;
+      some_removed = false;
+      some_changed_inheritance = false;
+      some_modified = false;
+      some_private_change = false;
+    }
+
+  let of_member_change_map (changes : member_change SMap.t) : t =
+    SMap.fold
+      (fun _ change acc ->
+        match change with
+        | Added -> { acc with some_added = true }
+        | Removed -> { acc with some_removed = true }
+        | Changed_inheritance -> { acc with some_changed_inheritance = true }
+        | Modified -> { acc with some_modified = true }
+        | Private_change -> { acc with some_private_change = true })
+      changes
+      no_change
+
+  let to_json
+      {
+        some_added;
+        some_removed;
+        some_changed_inheritance;
+        some_modified;
+        some_private_change;
+      } =
+    Hh_json.JSON_Object
+      [
+        ("some_added", Hh_json.bool_ some_added);
+        ("some_removed", Hh_json.bool_ some_removed);
+        ("some_changed_inheritance", Hh_json.bool_ some_changed_inheritance);
+        ("some_modified", Hh_json.bool_ some_modified);
+        ("some_private_change", Hh_json.bool_ some_private_change);
+      ]
+end
+
 type member_diff = {
   consts: member_change SMap.t;
   typeconsts: member_change SMap.t;
@@ -83,6 +134,52 @@ type member_diff = {
   constructor: constructor_change;
 }
 [@@deriving eq]
+
+module MemberDiffCategory = struct
+  type t = {
+    consts_category: MembersChangeCategory.t;
+    typeconsts_category: MembersChangeCategory.t;
+    props_category: MembersChangeCategory.t;
+    sprops_category: MembersChangeCategory.t;
+    methods_category: MembersChangeCategory.t;
+    smethods_category: MembersChangeCategory.t;
+    constructor_category: constructor_change;
+  }
+
+  let of_member_diff
+      { consts; typeconsts; props; sprops; methods; smethods; constructor } =
+    {
+      consts_category = MembersChangeCategory.of_member_change_map consts;
+      typeconsts_category =
+        MembersChangeCategory.of_member_change_map typeconsts;
+      props_category = MembersChangeCategory.of_member_change_map props;
+      sprops_category = MembersChangeCategory.of_member_change_map sprops;
+      methods_category = MembersChangeCategory.of_member_change_map methods;
+      smethods_category = MembersChangeCategory.of_member_change_map smethods;
+      constructor_category = constructor;
+    }
+
+  let to_json
+      {
+        consts_category;
+        typeconsts_category;
+        props_category;
+        sprops_category;
+        methods_category;
+        smethods_category;
+        constructor_category;
+      } =
+    Hh_json.JSON_Object
+      [
+        ("consts", MembersChangeCategory.to_json consts_category);
+        ("typeconsts", MembersChangeCategory.to_json typeconsts_category);
+        ("props", MembersChangeCategory.to_json props_category);
+        ("sprops", MembersChangeCategory.to_json sprops_category);
+        ("methods", MembersChangeCategory.to_json methods_category);
+        ("smethods", MembersChangeCategory.to_json smethods_category);
+        ("constructor", constructor_change_to_json constructor_category);
+      ]
+end
 
 let empty_member_diff =
   {
@@ -159,6 +256,8 @@ module ValueChange = struct
     | Removed
     | Modified of 'change
   [@@deriving eq, show { with_path = false }]
+
+  let to_json x = Hh_json.string_ @@ show (fun _ _ -> ()) x
 end
 
 module NamedItemsListChange = struct
@@ -182,27 +281,43 @@ type parent_changes = {
 }
 [@@deriving eq, show { with_path = false }]
 
-type kind_change = {
-  old_kind: Ast_defs.classish_kind;
-  new_kind: Ast_defs.classish_kind;
-}
-[@@deriving eq, show { with_path = false }]
+module KindChange = struct
+  type t = {
+    old_kind: Ast_defs.classish_kind;
+    new_kind: Ast_defs.classish_kind;
+  }
+  [@@deriving eq, show { with_path = false }]
 
-type bool_change =
-  | Became
-  | No_more
-[@@deriving eq, show { with_path = false }]
+  let classish_kind_to_json kind =
+    Hh_json.string_ @@ Ast_defs.show_classish_kind kind
+
+  let to_json { old_kind; new_kind } =
+    Hh_json.JSON_Object
+      [
+        ("old_kind", classish_kind_to_json old_kind);
+        ("new_kind", classish_kind_to_json new_kind);
+      ]
+end
+
+module BoolChange = struct
+  type t =
+    | Became
+    | No_more
+  [@@deriving eq, show { with_path = false }]
+
+  let to_json x = Hh_json.string_ @@ show x
+end
 
 type class_shell_change = {
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
-  kind_change: kind_change option;
-  final_change: bool_change option;
-  abstract_change: bool_change option;
-  is_xhp_change: bool_change option;
-  internal_change: bool_change option;
-  has_xhp_keyword_change: bool_change option;
-  support_dynamic_type_change: bool_change option;
+  kind_change: KindChange.t option;
+  final_change: BoolChange.t option;
+  abstract_change: BoolChange.t option;
+  is_xhp_change: BoolChange.t option;
+  internal_change: BoolChange.t option;
+  has_xhp_keyword_change: BoolChange.t option;
+  support_dynamic_type_change: BoolChange.t option;
   module_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes: unit NamedItemsListChange.t option;
@@ -230,3 +345,247 @@ type t =
   | Major_change of MajorChange.t
   | Minor_change of minor_change
 [@@deriving eq, show { with_path = false }]
+
+module ClassShellChangeCategory = struct
+  module ListChange = struct
+    type t = {
+      some_added: bool;
+      some_removed: bool;
+      some_modified: bool;
+      order_change: bool;
+    }
+
+    let no_change : t =
+      {
+        some_added = false;
+        some_removed = false;
+        some_modified = false;
+        order_change = false;
+      }
+
+    let of_list_change_map
+        { NamedItemsListChange.per_name_changes = changes; order_change } =
+      SMap.fold
+        (fun _ change acc ->
+          match change with
+          | ValueChange.Added -> { acc with some_added = true }
+          | ValueChange.Removed -> { acc with some_removed = true }
+          | ValueChange.Modified _ -> { acc with some_modified = true })
+        changes
+        { no_change with order_change }
+
+    let to_json { some_added; some_removed; some_modified; order_change } =
+      Hh_json.JSON_Object
+        [
+          ("some_added", Hh_json.bool_ some_added);
+          ("some_removed", Hh_json.bool_ some_removed);
+          ("some_modified", Hh_json.bool_ some_modified);
+          ("order_change", Hh_json.bool_ order_change);
+        ]
+  end
+
+  module ParentsChangeCategory = struct
+    type t = {
+      extends_changes_category: ListChange.t option;
+      implements_changes_category: ListChange.t option;
+      req_extends_changes_category: ListChange.t option;
+      req_implements_changes_category: ListChange.t option;
+      req_class_changes_category: ListChange.t option;
+      uses_changes_category: ListChange.t option;
+      xhp_attr_changes_category: ListChange.t option;
+    }
+
+    let of_parents_change
+        {
+          extends_changes;
+          implements_changes;
+          req_extends_changes;
+          req_implements_changes;
+          req_class_changes;
+          uses_changes;
+          xhp_attr_changes;
+        } =
+      {
+        extends_changes_category =
+          Option.map ListChange.of_list_change_map extends_changes;
+        implements_changes_category =
+          Option.map ListChange.of_list_change_map implements_changes;
+        req_extends_changes_category =
+          Option.map ListChange.of_list_change_map req_extends_changes;
+        req_implements_changes_category =
+          Option.map ListChange.of_list_change_map req_implements_changes;
+        req_class_changes_category =
+          Option.map ListChange.of_list_change_map req_class_changes;
+        uses_changes_category =
+          Option.map ListChange.of_list_change_map uses_changes;
+        xhp_attr_changes_category =
+          Option.map ListChange.of_list_change_map xhp_attr_changes;
+      }
+
+    let to_json
+        {
+          extends_changes_category;
+          implements_changes_category;
+          req_extends_changes_category;
+          req_implements_changes_category;
+          req_class_changes_category;
+          uses_changes_category;
+          xhp_attr_changes_category;
+        } =
+      Hh_json.JSON_Object
+        [
+          ( "extends_changes",
+            Hh_json.opt_ ListChange.to_json extends_changes_category );
+          ( "implements_changes",
+            Hh_json.opt_ ListChange.to_json implements_changes_category );
+          ( "req_extends_changes",
+            Hh_json.opt_ ListChange.to_json req_extends_changes_category );
+          ( "req_implements_changes",
+            Hh_json.opt_ ListChange.to_json req_implements_changes_category );
+          ( "req_class_changes",
+            Hh_json.opt_ ListChange.to_json req_class_changes_category );
+          ("uses_changes", Hh_json.opt_ ListChange.to_json uses_changes_category);
+          ( "xhp_attr_changes",
+            Hh_json.opt_ ListChange.to_json xhp_attr_changes_category );
+        ]
+  end
+
+  type t = {
+    parent_changes_category: ParentsChangeCategory.t option;
+    type_parameters_change_category: ListChange.t option;
+    kind_change_category: KindChange.t option;
+    final_change_category: BoolChange.t option;
+    abstract_change_category: BoolChange.t option;
+    is_xhp_change_category: BoolChange.t option;
+    internal_change_category: BoolChange.t option;
+    has_xhp_keyword_change_category: BoolChange.t option;
+    support_dynamic_type_change_category: BoolChange.t option;
+    module_change_category: unit ValueChange.t option;
+    xhp_enum_values_change_category: bool;
+    user_attributes_changes_category: ListChange.t option;
+    enum_type_change_category: unit ValueChange.t option;
+  }
+
+  let of_class_shell_change
+      {
+        parent_changes;
+        type_parameters_change;
+        kind_change;
+        final_change;
+        abstract_change;
+        is_xhp_change;
+        internal_change;
+        has_xhp_keyword_change;
+        support_dynamic_type_change;
+        module_change;
+        xhp_enum_values_change;
+        user_attributes_changes;
+        enum_type_change;
+      } =
+    {
+      parent_changes_category =
+        Option.map ParentsChangeCategory.of_parents_change parent_changes;
+      type_parameters_change_category =
+        Option.map ListChange.of_list_change_map type_parameters_change;
+      kind_change_category = kind_change;
+      final_change_category = final_change;
+      abstract_change_category = abstract_change;
+      is_xhp_change_category = is_xhp_change;
+      internal_change_category = internal_change;
+      has_xhp_keyword_change_category = has_xhp_keyword_change;
+      support_dynamic_type_change_category = support_dynamic_type_change;
+      module_change_category = module_change;
+      xhp_enum_values_change_category = xhp_enum_values_change;
+      user_attributes_changes_category =
+        Option.map ListChange.of_list_change_map user_attributes_changes;
+      enum_type_change_category = enum_type_change;
+    }
+
+  let to_json
+      {
+        parent_changes_category;
+        type_parameters_change_category;
+        kind_change_category;
+        final_change_category;
+        abstract_change_category;
+        is_xhp_change_category;
+        internal_change_category;
+        has_xhp_keyword_change_category;
+        support_dynamic_type_change_category;
+        module_change_category;
+        xhp_enum_values_change_category;
+        user_attributes_changes_category;
+        enum_type_change_category;
+      } =
+    let open Hh_json in
+    JSON_Object
+      [
+        ( "parent_changes",
+          Hh_json.opt_ ParentsChangeCategory.to_json parent_changes_category );
+        ( "type_parameters_change",
+          Hh_json.opt_ ListChange.to_json type_parameters_change_category );
+        ("kind_change", Hh_json.opt_ KindChange.to_json kind_change_category);
+        ("final_change", Hh_json.opt_ BoolChange.to_json final_change_category);
+        ( "abstract_change",
+          Hh_json.opt_ BoolChange.to_json abstract_change_category );
+        ("is_xhp_change", Hh_json.opt_ BoolChange.to_json is_xhp_change_category);
+        ( "internal_change",
+          Hh_json.opt_ BoolChange.to_json internal_change_category );
+        ( "has_xhp_keyword_change",
+          Hh_json.opt_ BoolChange.to_json has_xhp_keyword_change_category );
+        ( "support_dynamic_type_change",
+          Hh_json.opt_ BoolChange.to_json support_dynamic_type_change_category
+        );
+        ( "module_change",
+          Hh_json.opt_ ValueChange.to_json module_change_category );
+        ("xhp_enum_values_change", Hh_json.bool_ xhp_enum_values_change_category);
+        ( "user_attributes_changes",
+          Hh_json.opt_ ListChange.to_json user_attributes_changes_category );
+        ( "enum_type_change",
+          Hh_json.opt_ ValueChange.to_json enum_type_change_category );
+      ]
+end
+
+module MajorChangeCategory = struct
+  type t =
+    | Unknown
+    | Added
+    | Removed
+    | Modified of ClassShellChangeCategory.t
+
+  let of_major_change = function
+    | MajorChange.Unknown -> Unknown
+    | MajorChange.Added -> Added
+    | MajorChange.Removed -> Removed
+    | MajorChange.Modified change ->
+      Modified (ClassShellChangeCategory.of_class_shell_change change)
+
+  let to_json = function
+    | Unknown -> Hh_json.string_ "Unknown"
+    | Added -> Hh_json.string_ "Added"
+    | Removed -> Hh_json.string_ "Removed"
+    | Modified change -> ClassShellChangeCategory.to_json change
+end
+
+module ChangeCategory = struct
+  type t =
+    | CUnchanged
+    | CMajor_change of MajorChangeCategory.t
+    | CMinor_change of MemberDiffCategory.t
+
+  let of_change = function
+    | Unchanged -> CUnchanged
+    | Major_change change ->
+      CMajor_change (MajorChangeCategory.of_major_change change)
+    | Minor_change { mro_positions_changed = _; member_diff } ->
+      CMinor_change (MemberDiffCategory.of_member_diff member_diff)
+
+  let to_json = function
+    | CUnchanged -> Hh_json.string_ "Unchanged"
+    | CMajor_change change ->
+      Hh_json.JSON_Object [("Major_change", MajorChangeCategory.to_json change)]
+    | CMinor_change change ->
+      Hh_json.JSON_Object [("Minor_change", MemberDiffCategory.to_json change)]
+end
+
+let to_category_json x = ChangeCategory.to_json @@ ChangeCategory.of_change x

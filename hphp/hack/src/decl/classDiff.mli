@@ -56,27 +56,31 @@ type parent_changes = {
   xhp_attr_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
 }
 
-type kind_change = {
-  old_kind: Ast_defs.classish_kind;
-  new_kind: Ast_defs.classish_kind;
-}
-[@@deriving eq, show]
+module KindChange : sig
+  type t = {
+    old_kind: Ast_defs.classish_kind;
+    new_kind: Ast_defs.classish_kind;
+  }
+  [@@deriving eq, show]
+end
 
-type bool_change =
-  | Became
-  | No_more
-[@@deriving eq, show]
+module BoolChange : sig
+  type t =
+    | Became
+    | No_more
+  [@@deriving eq, show]
+end
 
 type class_shell_change = {
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
-  kind_change: kind_change option;
-  final_change: bool_change option;
-  abstract_change: bool_change option;
-  is_xhp_change: bool_change option;
-  internal_change: bool_change option;
-  has_xhp_keyword_change: bool_change option;
-  support_dynamic_type_change: bool_change option;
+  kind_change: KindChange.t option;
+  final_change: BoolChange.t option;
+  abstract_change: BoolChange.t option;
+  is_xhp_change: BoolChange.t option;
+  internal_change: BoolChange.t option;
+  has_xhp_keyword_change: BoolChange.t option;
+  support_dynamic_type_change: BoolChange.t option;
   module_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes: unit NamedItemsListChange.t option;
@@ -117,3 +121,5 @@ val method_or_property_change_affects_descendants : member_change -> bool
 (** The maximum of two constructor changes is the change which has the largest fanout. *)
 val max_constructor_change :
   constructor_change -> constructor_change -> constructor_change
+
+val to_category_json : t -> Hh_json.json

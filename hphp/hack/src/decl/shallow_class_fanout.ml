@@ -138,7 +138,21 @@ let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
   | Minor_change minor_change ->
     get_minor_change_fanout ~ctx class_name minor_change
 
-let add_fanout ~ctx acc diff = AffectedDeps.union acc (get_fanout ~ctx diff)
+let log_fanout
+    ((class_name : string), (diff : ClassDiff.t)) (fanout : AffectedDeps.t) :
+    unit =
+  let fanout_cardinal = DepSet.cardinal fanout.AffectedDeps.needs_recheck in
+  if fanout_cardinal >= 100_000 then
+    HackEventLogger.Fanouts.log
+      ~class_name
+      ~class_diff:(ClassDiff.show diff)
+      ~fanout_cardinal
+      ~class_diff_category:(ClassDiff.to_category_json diff)
+
+let add_fanout ~ctx acc diff =
+  let fanout = get_fanout ~ctx diff in
+  log_fanout diff fanout;
+  AffectedDeps.union acc fanout
 
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :

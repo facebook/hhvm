@@ -522,15 +522,15 @@ let diff_kinds kind1 kind2 =
   if Ast_defs.equal_classish_kind kind1 kind2 then
     None
   else
-    Some { old_kind = kind1; new_kind = kind2 }
+    Some { KindChange.old_kind = kind1; new_kind = kind2 }
 
 let diff_bools b1 b2 =
   match (b1, b2) with
   | (true, true)
   | (false, false) ->
     None
-  | (false, true) -> Some Became
-  | (true, false) -> Some No_more
+  | (false, true) -> Some BoolChange.Became
+  | (true, false) -> Some BoolChange.No_more
 
 let diff_options option1 option2 ~equal =
   match (option1, option2) with

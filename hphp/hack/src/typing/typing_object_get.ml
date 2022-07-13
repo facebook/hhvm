@@ -961,6 +961,15 @@ and obj_get_concrete_class_without_member_info
 and nullable_obj_get
     args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty :
     internal_result =
+  let (rcv_is_option, rcv_is_nothing) =
+    match deref ety1 with
+    | (_, Toption inner) ->
+      (match get_node inner with
+      | Tnonnull -> (false, true)
+      | _ -> (true, false))
+    | _ -> (false, false)
+  in
+
   match args.nullsafe with
   | Some r_null ->
     let (env, ty_errs, (method_, tal), lval_mismatch, rval_mismatch) =
@@ -978,61 +987,69 @@ and nullable_obj_get
       | _ -> (env, method_)
     in
     (env, ty_errs, (ty, tal), lval_mismatch, rval_mismatch)
+  | None when rcv_is_option ->
+    (* Try to type this as though it were nullsafe *)
+    let (env, _ty_errs, (method_, tal), lval_mismatch, rval_mismatch) =
+      obj_get_inner args env ty id on_error
+    in
+    let r = get_reason ety1 in
+    (* If this _had_ been a nullsafe access and we would have reported no error
+       we special case the error and type mismatch here to get better
+       suggested types in holes *)
+    let ty_errs =
+      Typing_error.(
+        primary
+        @@ Primary.Null_member
+             {
+               pos = id_pos;
+               member_name = id_str;
+               reason = lazy (Reason.to_string "This can be null" r);
+               kind =
+                 (if args.is_method then
+                   `method_
+                 else
+                   `property);
+               ctxt =
+                 (if read_context then
+                   `read
+                 else
+                   `write);
+             })
+    in
+    let lval_mismatch =
+      match lval_mismatch with
+      | Ok _ -> Error (ety1, ty)
+      | Error (_, suggest) -> Error (ety1, suggest)
+    in
+    (env, Some ty_errs, (method_, tal), lval_mismatch, rval_mismatch)
   | None ->
     let (ty_expect, ty_err) =
-      match deref ety1 with
-      | (r, Toption opt_ty) ->
-        begin
-          match get_node opt_ty with
-          | Tnonnull ->
-            let ty_err =
-              Typing_error.(
-                primary
-                @@ Primary.Top_member
-                     {
-                       pos = id_pos;
-                       name = id_str;
-                       ctxt =
-                         (if read_context then
-                           `read
-                         else
-                           `write);
-                       kind =
-                         (if args.is_method then
-                           `method_
-                         else
-                           `property);
-                       is_nullable = true;
-                       decl_pos = Reason.to_pos r;
-                       ty_name = lazy (Typing_print.error env ety1);
-                     })
-            in
-            (MakeType.nothing Reason.none, ty_err)
-          | _ ->
-            let ty_err =
-              Typing_error.(
-                primary
-                @@ Primary.Null_member
-                     {
-                       pos = id_pos;
-                       member_name = id_str;
-                       reason = lazy (Reason.to_string "This can be null" r);
-                       kind =
-                         (if args.is_method then
-                           `method_
-                         else
-                           `property);
-                       ctxt =
-                         (if read_context then
-                           `read
-                         else
-                           `write);
-                     })
-            in
-
-            (MakeType.nothing Reason.none, ty_err)
-        end
-      | (r, _) ->
+      let r = get_reason ety1 in
+      if rcv_is_nothing then
+        let ty_err =
+          Typing_error.(
+            primary
+            @@ Primary.Top_member
+                 {
+                   pos = id_pos;
+                   name = id_str;
+                   ctxt =
+                     (if read_context then
+                       `read
+                     else
+                       `write);
+                   kind =
+                     (if args.is_method then
+                       `method_
+                     else
+                       `property);
+                   is_nullable = true;
+                   decl_pos = Reason.to_pos r;
+                   ty_name = lazy (Typing_print.error env ety1);
+                 })
+        in
+        (MakeType.nothing Reason.none, ty_err)
+      else
         let ty_err =
           Typing_error.(
             primary

@@ -278,9 +278,9 @@ fn assemble_class<'arena>(
     let enum_type = assemble_enum_ty(alloc, token_iter)?;
     // Prints content of class in this order: all requirements,
     // all constants, all type_constants, all ctx_constants, all properties, all method_defs.
-    let requirements = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".requirement") {
-        todo!()
+    let mut requirements = Vec::new();
+    while token_iter.peek_if_str(Token::is_decl, ".require") {
+        requirements.push(assemble_requirement(alloc, token_iter)?)
     }
     // Both constants and type_constants start with .const
     // the differences is that type constants are printed as
@@ -324,6 +324,26 @@ fn assemble_class<'arena>(
         flags,
     };
     Ok(hhas_class)
+}
+
+/// Ex:
+/// .require extends <C>;
+fn assemble_requirement<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Pair<hhbc::ClassName<'arena>, hhbc::hhas_class::TraitReqKind>> {
+    token_iter.expect_is_str(Token::into_decl, ".require")?;
+    let trq = match token_iter.expect(Token::into_identifier)? {
+        b"extends" => hhbc::hhas_class::TraitReqKind::MustExtend,
+        b"implements" => hhbc::hhas_class::TraitReqKind::MustImplement,
+        b"class" => hhbc::hhas_class::TraitReqKind::MustBeClass,
+        trq => bail!("Expected TraitReqKind, saw: {:?}", trq),
+    };
+    token_iter.expect(Token::into_lt)?;
+    let cn = assemble_class_name(alloc, token_iter)?;
+    token_iter.expect(Token::into_gt)?;
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(Pair(cn, trq))
 }
 
 /// Ex:

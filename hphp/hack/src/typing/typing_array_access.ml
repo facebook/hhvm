@@ -939,18 +939,19 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           match check_set_value env expr_pos ty1 ty2 with
           | (_, Error _) as err_res -> err_res
           | (env, _) ->
-            let tv' =
+            let (env, tv') =
               let ak_t = MakeType.arraykey (Reason.Ridx_vector expr_pos) in
+              let (env, tv) = maybe_pessimise_type env tv in
               if Typing_utils.is_sub_type_for_union env ak_t tv then
                 (* hhvm will enforce that the key is an arraykey, so if
                    $x : Set<arraykey>, then it should be allowed to
                    set $x[] = e where $d : dynamic. *)
-                MakeType.enforced tv
+                (env, MakeType.enforced tv)
               else
                 (* It is unsound to allow $x[] = e if $x : Set<string>
                    since the dynamic $d might be an int and hhvm wouldn't
                    complain.*)
-                MakeType.unenforced tv
+                (env, MakeType.unenforced tv)
             in
             let (env, ty_err_opt) =
               Typing_coercion.coerce_type

@@ -195,8 +195,12 @@ let method_def ~is_disposable env cls m =
   with_timeout env m.m_name @@ fun env ->
   FunUtils.check_params m.m_params;
   let method_name = Ast_defs.get_id m.m_name in
+  let is_ctor = String.equal method_name SN.Members.__construct in
   let env =
-    Typing_env.env_with_method_droot_member env method_name ~static:m.m_static
+    if is_ctor then
+      Typing_env.env_with_constructor_droot_member env
+    else
+      Typing_env.env_with_method_droot_member env method_name ~static:m.m_static
   in
   let initial_env = env in
   (* reset the expression dependent display ids for each method body *)
@@ -231,7 +235,7 @@ let method_def ~is_disposable env cls m =
   let (env, _) =
     Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
   in
-  let is_ctor = String.equal method_name SN.Members.__construct in
+
   let env = Env.set_fun_is_constructor env is_ctor in
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints

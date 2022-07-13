@@ -115,6 +115,8 @@ val make_depend_on_module : env -> unit
 
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
+val env_with_constructor_droot_member : env -> env
+
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
 

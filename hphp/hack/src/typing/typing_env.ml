@@ -599,6 +599,11 @@ let env_with_method_droot_member env m ~static =
   let decl_env = { env.decl_env with droot_member = Some child } in
   { env with decl_env }
 
+let env_with_constructor_droot_member env =
+  let member = Typing_fine_deps.Constructor in
+  let decl_env = { env.decl_env with droot_member = Some member } in
+  { env with decl_env }
+
 let get_typedef env x =
   let res =
     Decl_provider.get_typedef

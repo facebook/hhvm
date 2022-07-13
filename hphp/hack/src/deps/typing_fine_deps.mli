@@ -18,6 +18,7 @@ type coarse_dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
   * child/member of the toplevel definition represented by
   * [coarse_dependent] *)
 type dependent_member =
+  | Constructor
   | Method of string
   | SMethod of string
 

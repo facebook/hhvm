@@ -9,6 +9,7 @@
 open Hh_prelude
 
 type dependent_member =
+  | Constructor
   | Method of string
   | SMethod of string
 
@@ -226,6 +227,7 @@ let fine_dependent_of_coarse_and_member :
   in
   match (coarse, member) with
   | (root, None) -> Typing_deps.Dep.dependency_of_variant root
+  | (Typing_deps.Dep.Type t, Some Constructor) -> Typing_deps.Dep.Constructor t
   | (Typing_deps.Dep.Type t, Some (Method m)) -> Typing_deps.Dep.Method (t, m)
   | (Typing_deps.Dep.Type t, Some (SMethod m)) -> Typing_deps.Dep.SMethod (t, m)
   | (_, Some _) ->

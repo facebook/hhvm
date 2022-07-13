@@ -138,20 +138,37 @@ let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
   | Minor_change minor_change ->
     get_minor_change_fanout ~ctx class_name minor_change
 
+let direct_references_cardinal mode class_name : int =
+  Typing_deps.get_ideps mode (Dep.Type class_name) |> DepSet.cardinal
+
+let descendants_cardinal mode class_name : int =
+  (Typing_deps.add_extend_deps
+     mode
+     (DepSet.singleton @@ Dep.make @@ Dep.Type class_name)
+  |> DepSet.cardinal)
+  - 1
+
+let children_cardinal mode class_name : int =
+  Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
+
 let log_fanout
-    ((class_name : string), (diff : ClassDiff.t)) (fanout : AffectedDeps.t) :
-    unit =
+    ~ctx ((class_name : string), (diff : ClassDiff.t)) (fanout : AffectedDeps.t)
+    : unit =
   let fanout_cardinal = DepSet.cardinal fanout.AffectedDeps.needs_recheck in
   if fanout_cardinal >= 100_000 then
+    let mode = Provider_context.get_deps_mode ctx in
     HackEventLogger.Fanouts.log
       ~class_name
       ~class_diff:(ClassDiff.show diff)
       ~fanout_cardinal
       ~class_diff_category:(ClassDiff.to_category_json diff)
+      ~direct_references_cardinal:(direct_references_cardinal mode class_name)
+      ~descendants_cardinal:(descendants_cardinal mode class_name)
+      ~children_cardinal:(children_cardinal mode class_name)
 
 let add_fanout ~ctx acc diff =
   let fanout = get_fanout ~ctx diff in
-  log_fanout diff fanout;
+  log_fanout ~ctx diff fanout;
   AffectedDeps.union acc fanout
 
 let fanout_of_changes

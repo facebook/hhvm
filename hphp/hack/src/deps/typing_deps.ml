@@ -813,8 +813,7 @@ let get_ideps_from_hash mode hash =
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
-  match (visited, acc) with
-  | (visited, acc) -> CustomGraph.get_extend_deps mode visited source_class acc
+  CustomGraph.get_extend_deps mode visited source_class acc
 
 let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 

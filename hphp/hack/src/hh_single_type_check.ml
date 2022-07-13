@@ -1349,7 +1349,9 @@ let test_shallow_class_diff popt filename =
         ( Utils.strip_ns cid,
           match old_and_new with
           | (Some c1, Some c2) -> Shallow_class_diff.diff_class c1 c2
-          | _ -> ClassDiff.Major_change ))
+          | (None, None) -> ClassDiff.(Major_change MajorChange.Unknown)
+          | (None, Some _) -> ClassDiff.(Major_change MajorChange.Added)
+          | (Some _, None) -> ClassDiff.(Major_change MajorChange.Removed) ))
   in
   List.iter diffs ~f:(fun (cid, diff) ->
       Format.printf "%s: %a@." cid ClassDiff.pp diff)

@@ -28,6 +28,71 @@ type member_diff = {
 }
 [@@deriving eq, show]
 
+module ValueChange : sig
+  type 'change t =
+    | Added
+    | Removed
+    | Modified of 'change
+  [@@deriving eq, show]
+end
+
+module NamedItemsListChange : sig
+  type 'change t = {
+    per_name_changes: 'change ValueChange.t SMap.t;
+    order_change: bool;
+  }
+  [@@deriving eq, show]
+end
+
+type parent_changes = {
+  extends_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+  implements_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+  req_extends_changes:
+    unit NamedItemsListChange.t NamedItemsListChange.t option;
+  req_implements_changes:
+    unit NamedItemsListChange.t NamedItemsListChange.t option;
+  req_class_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+  uses_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+  xhp_attr_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+}
+
+type kind_change = {
+  old_kind: Ast_defs.classish_kind;
+  new_kind: Ast_defs.classish_kind;
+}
+[@@deriving eq, show]
+
+type bool_change =
+  | Became
+  | No_more
+[@@deriving eq, show]
+
+type class_shell_change = {
+  parent_changes: parent_changes option;
+  type_parameters_change: unit NamedItemsListChange.t option;
+  kind_change: kind_change option;
+  final_change: bool_change option;
+  abstract_change: bool_change option;
+  is_xhp_change: bool_change option;
+  internal_change: bool_change option;
+  has_xhp_keyword_change: bool_change option;
+  support_dynamic_type_change: bool_change option;
+  module_change: unit ValueChange.t option;
+  xhp_enum_values_change: bool;
+  user_attributes_changes: unit NamedItemsListChange.t option;
+  enum_type_change: unit ValueChange.t option;
+}
+[@@deriving eq, show]
+
+module MajorChange : sig
+  type t =
+    | Unknown
+    | Added
+    | Removed
+    | Modified of class_shell_change
+  [@@deriving eq, show]
+end
+
 type minor_change = {
   mro_positions_changed: bool;
   member_diff: member_diff;
@@ -36,7 +101,7 @@ type minor_change = {
 
 type t =
   | Unchanged
-  | Major_change
+  | Major_change of MajorChange.t
   | Minor_change of minor_change
 [@@deriving eq, show]
 

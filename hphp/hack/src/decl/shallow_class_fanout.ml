@@ -134,7 +134,7 @@ let get_maximum_fanout (ctx : Provider_context.t) (class_name : string) =
 let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
   match diff with
   | Unchanged -> AffectedDeps.empty ()
-  | Major_change -> get_maximum_fanout ctx class_name
+  | Major_change _major_change -> get_maximum_fanout ctx class_name
   | Minor_change minor_change ->
     get_minor_change_fanout ~ctx class_name minor_change
 

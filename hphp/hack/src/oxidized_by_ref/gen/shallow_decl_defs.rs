@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed4d20e6bee79af3ed586e2e8cdd784e>>
+// @generated SignedSource<<1abaedab5bc542afebad379b1602d5f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -151,6 +151,8 @@ pub struct ShallowMethod<'a> {
 }
 impl<'a> TrivialDrop for ShallowMethod<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);
+
+pub type XhpEnumValues<'a> = s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>;
 
 #[derive(
     Clone,

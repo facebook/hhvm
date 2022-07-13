@@ -111,6 +111,8 @@ type shallow_method = {
 }
 [@@deriving eq, show]
 
+type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
+
 type shallow_class = {
   sc_mode: FileInfo.mode;
   sc_final: bool;
@@ -126,7 +128,7 @@ type shallow_class = {
   sc_extends: decl_ty list;
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;
-  sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  sc_xhp_enum_values: xhp_enum_values;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_req_class: decl_ty list;

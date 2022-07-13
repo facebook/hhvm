@@ -21,10 +21,9 @@ let diff_class_in_changed_file
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
     Shallow_class_diff.diff_class old_class new_class
-  | (Some _, None)
-  | (None, Some _)
-  | (None, None) ->
-    Major_change
+  | (None, None) -> Major_change MajorChange.Unknown
+  | (None, Some _) -> Major_change MajorChange.Added
+  | (Some _, None) -> Major_change MajorChange.Removed
 
 let compute_class_diffs
     (ctx : Provider_context.t)

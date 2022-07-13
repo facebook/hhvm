@@ -13,6 +13,64 @@ open Reordered_argument_collections
 open Shallow_decl_defs
 module SN = Naming_special_names
 
+module Parents = struct
+  type t = {
+    extends: Typing_defs.decl_ty list;
+    implements: Typing_defs.decl_ty list;
+    req_extends: Typing_defs.decl_ty list;
+    req_implements: Typing_defs.decl_ty list;
+    req_class: Typing_defs.decl_ty list;
+    uses: Typing_defs.decl_ty list;
+    xhp_attr_uses: Typing_defs.decl_ty list;
+  }
+  [@@deriving eq]
+
+  let of_shallow_class c =
+    let {
+      sc_extends;
+      sc_implements;
+      sc_req_extends;
+      sc_req_implements;
+      sc_uses;
+      sc_req_class;
+      sc_xhp_attr_uses;
+      sc_mode = _;
+      sc_final = _;
+      sc_abstract = _;
+      sc_is_xhp = _;
+      sc_internal = _;
+      sc_has_xhp_keyword = _;
+      sc_kind = _;
+      sc_module = _;
+      sc_name = _;
+      sc_tparams = _;
+      sc_where_constraints = _;
+      sc_xhp_enum_values = _;
+      sc_support_dynamic_type = _;
+      sc_consts = _;
+      sc_typeconsts = _;
+      sc_props = _;
+      sc_sprops = _;
+      sc_constructor = _;
+      sc_static_methods = _;
+      sc_methods = _;
+      sc_user_attributes = _;
+      sc_enum_type = _;
+      sc_docs_url = _;
+    } =
+      c
+    in
+    {
+      extends = sc_extends;
+      implements = sc_implements;
+      req_extends = sc_req_extends;
+      req_implements = sc_req_implements;
+      req_class = sc_req_class;
+      uses = sc_uses;
+      xhp_attr_uses = sc_xhp_attr_uses;
+    }
+end
+
 let merge_member_lists
     (get_name : 'member -> string) (l1 : 'member list) (l2 : 'member list) :
     ('member option * 'member option) SMap.t =
@@ -390,9 +448,150 @@ let normalize sc =
   |> remove_members_except_to_string
   |> Decl_pos_utils.NormalizeSig.shallow_class
 
+let type_name ty =
+  let (_, (_, name), tparams) = Decl_utils.unwrap_class_type ty in
+  (name, tparams)
+
+let diff_value_lists values1 values2 ~equal ~get_name_value ~diff =
+  if List.equal equal values1 values2 then
+    None
+  else
+    Some
+      (let values1 = List.map ~f:get_name_value values1 in
+       let values2 = List.map ~f:get_name_value values2 in
+       {
+         NamedItemsListChange.order_change =
+           not
+           @@ List.equal
+                String.equal
+                (List.map ~f:fst values1)
+                (List.map ~f:fst values2);
+         per_name_changes =
+           SMap.merge
+             (SMap.of_list values1)
+             (SMap.of_list values2)
+             ~f:(fun _ value1 value2 ->
+               match (value1, value2) with
+               | (None, None) -> None
+               | (None, Some _) -> Some ValueChange.Added
+               | (Some _, None) -> Some ValueChange.Removed
+               | (Some value1, Some value2) ->
+                 let open Option.Monad_infix in
+                 diff value1 value2 >>| fun change ->
+                 ValueChange.Modified change);
+       })
+
+let diff_of_equal equal x y =
+  if equal x y then
+    None
+  else
+    Some ()
+
+let diff_parent_lists =
+  diff_value_lists
+    ~equal:Typing_defs.ty_equal
+    ~get_name_value:type_name
+    ~diff:
+      (diff_value_lists
+         ~equal:Typing_defs.ty_equal
+         ~get_name_value:type_name
+         ~diff:(diff_of_equal Typing_defs.tyl_equal))
+
+let diff_parents (c1 : Parents.t) (c2 : Parents.t) : parent_changes option =
+  if Parents.equal c1 c2 then
+    None
+  else
+    Some
+      {
+        extends_changes =
+          diff_parent_lists c1.Parents.extends c2.Parents.extends;
+        implements_changes =
+          diff_parent_lists c1.Parents.implements c2.Parents.implements;
+        req_extends_changes =
+          diff_parent_lists c1.Parents.req_extends c2.Parents.req_extends;
+        req_implements_changes =
+          diff_parent_lists c1.Parents.req_implements c2.Parents.req_implements;
+        req_class_changes =
+          diff_parent_lists c1.Parents.req_class c2.Parents.req_class;
+        uses_changes = diff_parent_lists c1.Parents.uses c2.Parents.uses;
+        xhp_attr_changes =
+          diff_parent_lists c1.Parents.xhp_attr_uses c2.Parents.xhp_attr_uses;
+      }
+
+let diff_kinds kind1 kind2 =
+  if Ast_defs.equal_classish_kind kind1 kind2 then
+    None
+  else
+    Some { old_kind = kind1; new_kind = kind2 }
+
+let diff_bools b1 b2 =
+  match (b1, b2) with
+  | (true, true)
+  | (false, false) ->
+    None
+  | (false, true) -> Some Became
+  | (true, false) -> Some No_more
+
+let diff_options option1 option2 ~equal =
+  match (option1, option2) with
+  | (None, None) -> None
+  | (None, Some _) -> Some ValueChange.Added
+  | (Some _, None) -> Some ValueChange.Removed
+  | (Some value1, Some value2) ->
+    if equal value1 value2 then
+      None
+    else
+      Some (ValueChange.Modified ())
+
+let diff_modules = diff_options ~equal:Ast_defs.equal_id
+
+let diff_enum_types = diff_options ~equal:Typing_defs.equal_enum_type
+
+let user_attribute_name_value
+    { Typing_defs.ua_name = (_, name); ua_classname_params } =
+  (name, ua_classname_params)
+
+type string_list = string list [@@deriving eq]
+
+let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
+    class_shell_change =
+  {
+    parent_changes =
+      diff_parents (Parents.of_shallow_class c1) (Parents.of_shallow_class c2);
+    type_parameters_change =
+      diff_value_lists
+        c2.sc_tparams
+        c1.sc_tparams
+        ~equal:Typing_defs.equal_decl_tparam
+        ~get_name_value:(fun tparam -> (snd tparam.Typing_defs.tp_name, tparam))
+        ~diff:(diff_of_equal Typing_defs.equal_decl_tparam);
+    kind_change = diff_kinds c1.sc_kind c2.sc_kind;
+    final_change = diff_bools c1.sc_final c2.sc_final;
+    abstract_change = diff_bools c1.sc_abstract c2.sc_abstract;
+    is_xhp_change = diff_bools c1.sc_is_xhp c2.sc_is_xhp;
+    internal_change = diff_bools c1.sc_internal c2.sc_internal;
+    has_xhp_keyword_change =
+      diff_bools c1.sc_has_xhp_keyword c2.sc_has_xhp_keyword;
+    support_dynamic_type_change =
+      diff_bools c1.sc_support_dynamic_type c2.sc_support_dynamic_type;
+    module_change = diff_modules c1.sc_module c2.sc_module;
+    xhp_enum_values_change =
+      not @@ equal_xhp_enum_values c1.sc_xhp_enum_values c2.sc_xhp_enum_values;
+    user_attributes_changes =
+      diff_value_lists
+        c1.sc_user_attributes
+        c2.sc_user_attributes
+        ~equal:Typing_defs.equal_user_attribute
+        ~get_name_value:user_attribute_name_value
+        ~diff:(diff_of_equal equal_string_list);
+    enum_type_change = diff_enum_types c1.sc_enum_type c2.sc_enum_type;
+  }
+
 let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t =
-  if not (equal_shallow_class (normalize c1) (normalize c2)) then
+  let class_shell1 = normalize c1 and class_shell2 = normalize c2 in
+  if not (equal_shallow_class class_shell1 class_shell2) then
     Major_change
+      (MajorChange.Modified (diff_class_shells class_shell1 class_shell2))
   else
     let mro_inputs_equal = mro_inputs_equal c1 c2 in
     (* If the old and new classes were identical with positions normalized, but

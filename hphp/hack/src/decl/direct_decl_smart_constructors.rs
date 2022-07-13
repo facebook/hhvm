@@ -4075,6 +4075,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
         let uses = uses.into_bump_slice();
         let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
+        let xhp_enum_values = xhp_enum_values;
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
         let req_class = req_class.into_bump_slice();

@@ -1345,16 +1345,23 @@ fn assemble_body<'arena, 'a>(
     let mut decl_vars = Slice::default();
     let mut num_iters = 0;
     let mut coeff = hhbc::hhas_coeffects::HhasCoeffects::default();
+    let mut is_memoize_wrapper = false;
+    let mut is_memoize_wrapper_lsb = false;
     // For now we don't parse params, so will just have decl_vars (might need to move this later)
     token_iter.expect(Token::into_open_curly)?;
     // In body, before instructions, are 5 possible constructs:
     // only .declvars can be declared more than once
     while token_iter.peek_if(Token::is_decl) {
-        if token_iter.peek_if_str(Token::is_decl, ".doc")
-            || token_iter.peek_if_str(Token::is_decl, ".ismemoizewrapper")
-            || token_iter.peek_if_str(Token::is_decl, ".ismemoizewrapperlsb")
-        {
+        if token_iter.peek_if_str(Token::is_decl, ".doc") {
             todo!("Have yet to do: {}", token_iter.peek().unwrap())
+        } else if token_iter.peek_if_str(Token::is_decl, ".ismemoizewrapperlsb") {
+            token_iter.expect_is_str(Token::into_decl, ".ismemoizewrapperlsb")?;
+            token_iter.expect(Token::into_semicolon)?;
+            is_memoize_wrapper_lsb = true;
+        } else if token_iter.peek_if_str(Token::is_decl, ".ismemoizewrapper") {
+            token_iter.expect_is_str(Token::into_decl, ".ismemoizewrapper")?;
+            token_iter.expect(Token::into_semicolon)?;
+            is_memoize_wrapper = true;
         } else if token_iter.peek_if_str(Token::is_decl, ".numiters") {
             if num_iters > 0 {
                 bail!("Cannot have more than one .numiters per function body"); // Because only printed once in print.rs
@@ -1385,6 +1392,8 @@ fn assemble_body<'arena, 'a>(
         body_instrs: Slice::from_vec(alloc, instrs),
         decl_vars,
         num_iters,
+        is_memoize_wrapper,
+        is_memoize_wrapper_lsb,
         ..Default::default()
     };
     Ok((tr, coeff))
@@ -2029,6 +2038,13 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"CheckProp" => assemble_check_prop(alloc, &mut sl_lexer),
                     b"InitProp" => assemble_init_prop(alloc, &mut sl_lexer),
+                    b"VerifyImplicitContextState" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::VerifyImplicitContextState,
+                        "VerifyImplicitContextState",
+                    ),
+                    b"MemoGet" => assemble_memo_get(&mut sl_lexer),
+                    b"MemoSet" => assemble_memo_set(&mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2411,6 +2427,39 @@ fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc:
             res_op
         ),
     }
+}
+
+/// Ex:
+/// MemoGet L0 L:0+0
+fn assemble_memo_get<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoGet")?;
+    let lbl = assemble_label(token_iter, false)?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoGet(
+        lbl, lcl_range,
+    )))
+}
+
+/// Ex:
+/// MemoSet L:0+0
+fn assemble_memo_set<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoSet")?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoSet(lcl_range)))
+}
+
+/// Ex:
+/// MemoGet L0 L:0+0
+/// last item is a local range
+fn assemble_local_range(token_iter: &mut Lexer<'_>) -> Result<hhbc::LocalRange> {
+    token_iter.expect_is_str(Token::into_identifier, "L")?;
+    token_iter.expect(Token::into_colon)?;
+    let start = hhbc::Local {
+        idx: token_iter.expect_and_get_number()?,
+    };
+    //token_iter.expect(Token::into_plus)?; // Not sure if this exists yet
+    let len = token_iter.expect_and_get_number()?;
+    Ok(hhbc::LocalRange { start, len })
 }
 
 /// StackIndex : u32

@@ -102,6 +102,7 @@ fn assemble_from_toks<'arena>(
     let mut adatas = Vec::new();
     let mut func_refs = None;
     let mut class_refs = None;
+    let mut constant_refs = None;
     let mut fatal = None;
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
@@ -134,6 +135,16 @@ fn assemble_from_toks<'arena>(
                 ".class_refs",
                 assemble_class_name,
             )?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".constant_refs") {
+            if constant_refs.is_some() {
+                bail!("Constant refs defined multiple times in file");
+            }
+            constant_refs = Some(assemble_refs(
+                alloc,
+                token_iter,
+                ".constant_refs",
+                assemble_const_name,
+            )?);
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -152,6 +163,7 @@ fn assemble_from_toks<'arena>(
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
             functions: func_refs.unwrap_or_default(),
             classes: class_refs.unwrap_or_default(),
+            constants: constant_refs.unwrap_or_default(),
             ..Default::default()
         },
         constants: Default::default(),
@@ -2734,6 +2746,15 @@ fn assemble_const_name_from_str<'arena>(
     Ok(hhbc::ConstName::new(assemble_unescaped_unquoted_str(
         alloc, token_iter,
     )?))
+}
+
+fn assemble_const_name<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::ConstName<'arena>> {
+    Ok(hhbc::ConstName::new(
+        token_iter.expect_identifier_into_ffi_str(alloc)?,
+    ))
 }
 
 fn assemble_function_name_from_str<'arena>(

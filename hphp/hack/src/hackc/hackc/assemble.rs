@@ -158,7 +158,7 @@ fn assemble_from_toks<'arena>(
         fatal: fatal.into(),
     };
 
-    Ok((hcu, fp)) // If made it here, fp is Some
+    Ok((hcu, fp))
 }
 
 fn assemble_class<'arena>(
@@ -311,7 +311,7 @@ fn assemble_property<'arena>(
 ) -> Result<hhbc::hhas_property::HhasProperty<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".property")?;
     let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
-    // A doc comment is just a triple string literal : """{}""", escaper::escape_bstr(s.as_bstr)
+    // A doc comment is just a triple string literal : """{}"""
     let doc_comment = if token_iter.peek_if(Token::is_triple_str_literal) {
         Maybe::Just(assemble_unescaped_unquoted_triple_str(alloc, token_iter)?)
     } else {
@@ -338,7 +338,7 @@ fn assemble_property<'arena>(
 }
 
 /// Initial values are printed slightly differently from typed values:
-/// whlie a TV prints uninit as uninit, initial value is printed as uninit;
+/// while a TV prints uninit as "uninit", initial value is printed as "uninit;""
 /// for all other typed values, initial_value is printed nested in triple quotes.
 fn assemble_property_initial_value<'arena>(
     alloc: &'arena Bump,
@@ -1864,7 +1864,7 @@ fn assemble_iter_args(
         b"NK" => hhbc::Local::INVALID,
         b"K" => {
             token_iter.expect(Token::into_colon)?;
-            assemble_var_to_local(token_iter, decl_map)?
+            assemble_local(token_iter, decl_map)?
         }
         o => bail!("Invalid key_id given as iter args to IterArg: {:?}", o),
     };
@@ -1873,7 +1873,7 @@ fn assemble_iter_args(
     Ok(hhbc::IterArgs {
         iter_id: hhbc::IterId { idx },
         key_id,
-        val_id: assemble_var_to_local(token_iter, decl_map)?,
+        val_id: assemble_local(token_iter, decl_map)?,
     })
 }
 
@@ -1883,7 +1883,7 @@ fn assemble_is_type_l<'arena>(
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeL")?;
-    let lcl = assemble_var_to_local(token_iter, decl_map)?;
+    let lcl = assemble_local(token_iter, decl_map)?;
     let type_op = assemble_is_type_op(token_iter)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeL(lcl, type_op)))
 }
@@ -1960,7 +1960,7 @@ fn assemble_member_key<'arena>(
         b"EL" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::EL(
-                assemble_var_to_local(token_iter, decl_map)?,
+                assemble_local(token_iter, decl_map)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
@@ -1994,7 +1994,7 @@ fn assemble_member_key<'arena>(
         b"PL" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PL(
-                assemble_var_to_local(token_iter, decl_map)?,
+                assemble_local(token_iter, decl_map)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
@@ -2078,7 +2078,7 @@ fn assemble_base_gl<'arena>(
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseGL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseGL(
-        assemble_var_to_local(token_iter, decl_map)?,
+        assemble_local(token_iter, decl_map)?,
         assemble_mop_mode(token_iter)?,
     )))
 }
@@ -2101,7 +2101,7 @@ fn assemble_base_l<'arena>(
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseL(
-        assemble_var_to_local(token_iter, decl_map)?,
+        assemble_local(token_iter, decl_map)?,
         assemble_mop_mode(token_iter)?,
         assemble_readonly_op(token_iter)?,
     )))
@@ -2133,6 +2133,8 @@ fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp>
     Ok(sro)
 }
 
+/// Ex:
+/// CnsE "E_NOTICE"
 fn assemble_cns<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -2145,23 +2147,31 @@ fn assemble_cns<'arena>(
             assemble_const_name_from_str(alloc, token_iter)?,
             assemble_class_name_from_str(alloc, token_iter)?,
         ),
-        b"ClsCnsL" => hhbc::Opcode::ClsCnsL(assemble_var_to_local(token_iter, decl_map)?),
+        b"ClsCnsL" => hhbc::Opcode::ClsCnsL(assemble_local(token_iter, decl_map)?),
         cns => bail!("Unknown cns opcode: {:?}", cns),
     };
     Ok(hhbc::Instruct::Opcode(op))
 }
 
+/// Ex:
+/// SetL $value_from_func
+/// SetG
+/// SetS Any
+/// SetOpL $ret ConcatEqual
+/// SetOpS PlusEqual
+/// SetImplicitContextByValue
+/// UnsetL _4
 fn assemble_set_instruct<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let op = match token_iter.expect(Token::into_identifier)? {
-        b"SetL" => hhbc::Opcode::SetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"SetL" => hhbc::Opcode::SetL(assemble_local(token_iter, decl_map)?),
         b"SetG" => hhbc::Opcode::SetG,
         b"SetS" => hhbc::Opcode::SetS(assemble_readonly_op(token_iter)?),
         b"SetOpL" => hhbc::Opcode::SetOpL(
-            assemble_var_to_local(token_iter, decl_map)?,
+            assemble_local(token_iter, decl_map)?,
             assemble_set_op_op(token_iter)?,
         ),
         b"SetOpG" => hhbc::Opcode::SetOpG(assemble_set_op_op(token_iter)?),
@@ -2181,8 +2191,8 @@ fn assemble_set_instruct<'arena>(
             assemble_set_op_op(token_iter)?,
             assemble_member_key(alloc, token_iter, decl_map)?,
         ),
-        b"UnsetL" => hhbc::Opcode::UnsetL(assemble_var_to_local(token_iter, decl_map)?),
-        b"IsUnsetL" => hhbc::Opcode::IsUnsetL(assemble_var_to_local(token_iter, decl_map)?),
+        b"UnsetL" => hhbc::Opcode::UnsetL(assemble_local(token_iter, decl_map)?),
+        b"IsUnsetL" => hhbc::Opcode::IsUnsetL(assemble_local(token_iter, decl_map)?),
         b"UnsetG" => hhbc::Opcode::UnsetG,
         b"UnsetM" => hhbc::Opcode::UnsetM(
             assemble_stack_index(token_iter)?,
@@ -2229,6 +2239,9 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
     }
 }
 
+/// Ex:
+/// CUGetL $v
+/// CGetS Mutable
 fn assemble_cget<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
@@ -2236,10 +2249,10 @@ fn assemble_cget<'arena>(
     let cg = match token_iter.expect(Token::into_identifier)? {
         b"CGetCUNop" => hhbc::Opcode::CGetCUNop,
         b"UGetCUNop" => hhbc::Opcode::UGetCUNop,
-        b"CGetL" => hhbc::Opcode::CGetL(assemble_var_to_local(token_iter, decl_map)?),
-        b"CGetQuietL" => hhbc::Opcode::CGetQuietL(assemble_var_to_local(token_iter, decl_map)?),
-        b"CUGetL" => hhbc::Opcode::CUGetL(assemble_var_to_local(token_iter, decl_map)?),
-        b"CGetL2" => hhbc::Opcode::CGetL2(assemble_var_to_local(token_iter, decl_map)?),
+        b"CGetL" => hhbc::Opcode::CGetL(assemble_local(token_iter, decl_map)?),
+        b"CGetQuietL" => hhbc::Opcode::CGetQuietL(assemble_local(token_iter, decl_map)?),
+        b"CUGetL" => hhbc::Opcode::CUGetL(assemble_local(token_iter, decl_map)?),
+        b"CGetL2" => hhbc::Opcode::CGetL2(assemble_local(token_iter, decl_map)?),
         b"CGetG" => hhbc::Opcode::CGetG,
         b"CGetS" => hhbc::Opcode::CGetS(assemble_readonly_op(token_iter)?),
         b"ClassGetC" => hhbc::Opcode::ClassGetC,
@@ -2325,17 +2338,31 @@ fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'ar
     Ok(hhbc::Instruct::Opcode(op_con(lbl)))
 }
 
-/// Returns the local (u32 idx) a var corresponds to.
+/// Returns the local (u32 idx) a var or unnamed corresponds to.
 /// This information is based on the position of the var in parameters of a function/.declvars
-fn assemble_var_to_local(
+/// or, if an unnamed, just the idx referenced (_1 -> idx 1)
+/// $a -> idx where $a is stored in hcu body
+/// _3 -> 3
+fn assemble_local(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<&'_ [u8], u32>,
 ) -> Result<hhbc::Local> {
-    let lcl = token_iter.expect(Token::into_variable)?;
-    if let Some(idx) = decl_map.get(lcl) {
-        Ok(hhbc::Local { idx: *idx })
-    } else {
-        bail!("Unknown local var: {:?}", lcl);
+    match token_iter.next() {
+        Some(Token::Variable(v, _)) => {
+            if let Some(idx) = decl_map.get(v) {
+                Ok(hhbc::Local { idx: *idx })
+            } else {
+                bail!("Unknown local var: {:?}", v);
+            }
+        }
+        Some(Token::Identifier(i, _)) => {
+            debug_assert!(i[0] == b'_');
+            Ok(hhbc::Local {
+                idx: std::str::from_utf8(&i[1..i.len()])?.parse()?,
+            })
+        }
+        None => bail!("Expected local, found None"),
+        b => bail!("Unknown local: {}", b.unwrap()),
     }
 }
 
@@ -2357,7 +2384,7 @@ fn assemble_local_carrying_opcode_instr<'arena, F: FnOnce(hhbc::Local) -> hhbc::
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let lcl = assemble_var_to_local(token_iter, decl_map)?;
+    let lcl = assemble_local(token_iter, decl_map)?;
     Ok(hhbc::Instruct::Opcode(op_con(lcl)))
 }
 

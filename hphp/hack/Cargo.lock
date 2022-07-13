@@ -349,7 +349,7 @@ version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
- "clap 3.2.8",
+ "clap 3.2.10",
  "heck 0.4.0",
  "indexmap",
  "log",
@@ -397,9 +397,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.8"
+version = "3.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "190814073e85d238f31ff738fcb0bf6910cedeb73376c87cd69291028966fd83"
+checksum = "69c5a7f9997be616e47f0577ee38c91decb33392c5be4866494f34cdf329a9aa"
 dependencies = [
  "atty",
  "bitflags",
@@ -1233,7 +1233,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cbindgen",
- "clap 3.2.8",
+ "clap 3.2.10",
 ]
 
 [[package]]
@@ -1374,7 +1374,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 3.2.8",
+ "clap 3.2.10",
  "compile",
  "decl_provider",
  "direct_decl_parser",
@@ -1654,7 +1654,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 3.2.8",
+ "clap 3.2.10",
  "hdf",
  "hhvm_runtime_options",
 ]

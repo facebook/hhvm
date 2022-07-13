@@ -3550,18 +3550,19 @@ impl<'a> Lexer<'a> {
             .map_or_else(|| bail!("End of token stream sooner than expected"), f)
     }
 
-    /// Like `expect` in that bails if incorrect token passed, but dissimilarly does not return the `into` of the passed token
-    fn expect_is_str<F>(&mut self, f: F, s: &str) -> Result<()>
+    /// Like `expect` in that bails if incorrect token passed, and does return the `into` of the passed token
+    fn expect_is_str<F>(&mut self, f: F, s: &str) -> Result<&[u8]>
     where
         F: FnOnce(Token<'a>) -> Result<&[u8]>,
     {
         self.next().map_or_else(
             || bail!("End of token stream sooner than expected"),
             |t| {
-                if f(t)? != s.as_bytes() {
+                let tr = f(t)?;
+                if tr != s.as_bytes() {
                     bail!("Expected {} got {}", s, t)
                 } else {
-                    Ok(())
+                    Ok(tr)
                 }
             },
         )
@@ -3579,10 +3580,25 @@ impl<'a> Lexer<'a> {
     /// Similar to `expect` but instead of returning a Result that usually contains a slice of u8,
     /// applies f to the `from_utf8 str` of the top token, bailing if the top token is not a number.
     fn expect_and_get_number<T: FromStr>(&mut self) -> Result<T> {
-        let num = self.expect(Token::into_number)?;
-        FromStr::from_str(std::str::from_utf8(num)?).map_err(|_| {
-            anyhow!("Number-looking token in tokenizer that cannot be parsed into number")
-        }) // This std::str::from_utf8 will never bail; if it should bail, the above `expect` bails first.
+        let num = if self.peek_if(Token::is_dash) {
+            self.expect(Token::into_dash)? // -INF
+        } else if self.peek_if(Token::is_identifier) {
+            self.expect(Token::into_identifier)? // NAN, INF, etc will parse as float constants
+        } else {
+            self.expect(Token::into_number)?
+        };
+        // If num is a dash we expect an identifier to follow
+        if num == b"-" {
+            let mut num = num.to_vec();
+            num.extend_from_slice(self.expect(Token::into_identifier)?);
+            FromStr::from_str(std::str::from_utf8(&num)?).map_err(|_| {
+                anyhow!("Number-looking token in tokenizer that cannot be parsed into number")
+            })
+        } else {
+            FromStr::from_str(std::str::from_utf8(num)?).map_err(|_| {
+                anyhow!("Number-looking token in tokenizer that cannot be parsed into number")
+            }) // This std::str::from_utf8 will never bail; if it should bail, the above `expect` bails first.
+        }
     }
 
     /// Bails if lexer is not empty, message contains the next token

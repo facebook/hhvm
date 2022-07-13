@@ -36,9 +36,6 @@ jobs:
             fr_FR fr_FR.UTF-8 \
             tr_TR tr_TR.UTF-8 \
             da_DK da_DK.UTF-8
-      - name: Install Watchman (brew)
-        if: ${{ matrix.os == 'macos' }}
-        run: brew install watchman
       - name: Typecheck
         run: hh_client
       - name: Run tests

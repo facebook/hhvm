@@ -506,7 +506,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn get_extends(&mut self) -> TypeNameIndexSet {
-        let mut extends = TypeNameIndexSet::new();
+        let mut extends = TypeNameIndexSet::default();
         for extend in self.child.extends.iter() {
             self.add_class_parent_or_trait(Pass::Extends, &mut extends, extend)
         }
@@ -517,7 +517,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn get_xhp_attr_deps(&mut self) -> TypeNameIndexSet {
-        let mut xhp_attr_deps = TypeNameIndexSet::new();
+        let mut xhp_attr_deps = TypeNameIndexSet::default();
         for xhp_attr_use in self.child.xhp_attr_uses.iter() {
             self.add_class_parent_or_trait(Pass::Xhp, &mut xhp_attr_deps, xhp_attr_use)
         }
@@ -610,7 +610,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_reqs: TypeNameIndexMap<Vec<Ty<R>>> = TypeNameIndexMap::new();
+        let mut seen_reqs: TypeNameIndexMap<Vec<Ty<R>>> = TypeNameIndexMap::default();
         // Reverse to match the OCaml ordering for building the seen_reqs map
         // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();
@@ -643,7 +643,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         Box<[Requirement<R>]>,
     ) {
         let mut req_ancestors = vec![];
-        let mut req_ancestors_extends = TypeNameIndexSet::new();
+        let mut req_ancestors_extends = TypeNameIndexSet::default();
 
         for req_extend in self.child.req_extends.iter() {
             self.declared_class_req(&mut req_ancestors, &mut req_ancestors_extends, req_extend);

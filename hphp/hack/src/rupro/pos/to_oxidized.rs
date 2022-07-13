@@ -67,7 +67,7 @@ impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> 
     }
 }
 
-impl<'a, T: ToOxidized<'a, Output = &'a str>> ToOxidized<'a> for IndexSet<T> {
+impl<'a, T: ToOxidized<'a, Output = &'a str>, S> ToOxidized<'a> for IndexSet<T, S> {
     type Output = SSet<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -75,7 +75,9 @@ impl<'a, T: ToOxidized<'a, Output = &'a str>> ToOxidized<'a> for IndexSet<T> {
     }
 }
 
-impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> for IndexMap<K, V> {
+impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>, S> ToOxidized<'a>
+    for IndexMap<K, V, S>
+{
     type Output = SMap<'a, V::Output>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
@@ -87,7 +89,9 @@ impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> 
     }
 }
 
-impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>> ToOxidized<'a> for HashMap<K, V> {
+impl<'a, K: ToOxidized<'a, Output = &'a str>, V: ToOxidized<'a>, S> ToOxidized<'a>
+    for HashMap<K, V, S>
+{
     type Output = SMap<'a, V::Output>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {

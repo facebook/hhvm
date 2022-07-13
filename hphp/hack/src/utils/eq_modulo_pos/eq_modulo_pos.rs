@@ -180,8 +180,8 @@ impl_tuple! { (A, a1, a2) (B, b1, b2)  (C, c1, c2) }
 impl_tuple! { (A, a1, a2) (B, b1, b2)  (C, c1, c2)  (D, d1, d2) }
 
 macro_rules! impl_with_iter {
-    (<$($gen:ident),*> $ty:ty , $size:ident) => {
-        impl<$($gen: EqModuloPos,)*> EqModuloPos for $ty {
+    (<$($gen:ident),* $(,)?> <$($unbounded:ident),*> $ty:ty , $size:ident) => {
+        impl<$($gen: EqModuloPos,)* $($unbounded,)*> EqModuloPos for $ty {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
                 if self.$size() != rhs.$size() {
                     false
@@ -195,7 +195,7 @@ macro_rules! impl_with_iter {
             }
         }
 
-        impl<$($gen: EqModuloPosAndReason,)*> EqModuloPosAndReason for $ty {
+        impl<$($gen: EqModuloPosAndReason,)* $($unbounded,)*> EqModuloPosAndReason for $ty {
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 if self.$size() != rhs.$size() {
                     false
@@ -209,6 +209,9 @@ macro_rules! impl_with_iter {
             }
         }
     };
+    (<$($gen:ident),* $(,)?> $ty:ty , $size:ident) => {
+        impl_with_iter! { <$($gen,)*> <> $ty , $size }
+    }
 }
 
 impl_with_iter! { <T> Vec<T>, len }
@@ -227,15 +230,16 @@ impl_with_iter! {
 impl_with_iter! {
     <K, V> std::collections::BTreeMap<K, V>, len
 }
+
 impl_with_iter! {
-    <T> std::collections::HashSet<T>, len
+    <T> <S> std::collections::HashSet<T, S>, len
 }
 impl_with_iter! {
-    <K, V> std::collections::HashMap<K, V>, len
+    <K, V> <S> std::collections::HashMap<K, V, S>, len
 }
 impl_with_iter! {
-    <T> indexmap::IndexSet<T>, len
+    <T> <S> indexmap::IndexSet<T, S>, len
 }
 impl_with_iter! {
-    <K, V> indexmap::IndexMap<K, V>, len
+    <K, V> <S> indexmap::IndexMap<K, V, S>, len
 }

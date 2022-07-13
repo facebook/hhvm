@@ -183,14 +183,14 @@ fn assemble_class<'arena>(
     while token_iter.peek_if_str(Token::is_decl, ".requirement") {
         todo!()
     }
-    let constants = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".constant") {
-        todo!()
-    }
-    let type_constants = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".const") {
-        todo!()
-    }
+    // Both constants and type_constants start with .const
+    // the differences is that type constants are printed as
+    // .constant {} isType = """tv""" and constants are just .constant {} = """tv"""
+    let (constants, type_constants) = if token_iter.peek_if_str(Token::is_decl, ".const") {
+        assemble_constants(alloc, token_iter)?
+    } else {
+        (Vec::new(), Vec::new())
+    };
     let ctx_constants = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".ctx") {
         todo!()
@@ -225,6 +225,75 @@ fn assemble_class<'arena>(
         flags,
     };
     Ok(hhas_class)
+}
+
+/// Ex:
+/// .const MYCONST = """s:10:\"B::MYCONST\";""";
+/// .const TType isType isAbstract;
+fn assemble_constants<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<(
+    Vec<hhbc::hhas_constant::HhasConstant<'arena>>,
+    Vec<hhbc::hhas_type_const::HhasTypeConstant<'arena>>,
+)> {
+    let mut consts = Vec::new();
+    let mut type_consts = Vec::new();
+    while token_iter.peek_if_str(Token::is_decl, ".const") {
+        assemble_const_or_type_const(alloc, token_iter, &mut consts, &mut type_consts)?;
+    }
+    Ok((consts, type_consts))
+}
+
+fn assemble_const_or_type_const<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    consts: &mut Vec<hhbc::hhas_constant::HhasConstant<'arena>>,
+    type_consts: &mut Vec<hhbc::hhas_type_const::HhasTypeConstant<'arena>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".const")?;
+    let name = token_iter.expect_identifier_into_ffi_str(alloc)?;
+    if token_iter.next_if_str(Token::is_identifier, "isType") {
+        //type const
+        let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
+        let initializer = if token_iter.next_if(Token::is_equal) {
+            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
+            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
+            let tv = &tv[3..tv.len() - 3];
+            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
+            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
+            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+        } else {
+            Maybe::Nothing
+        };
+        type_consts.push(hhbc::hhas_type_const::HhasTypeConstant {
+            name,
+            initializer,
+            is_abstract,
+        });
+    } else {
+        //const
+        let name = hhbc::ConstName::new(name);
+        let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
+        token_iter.expect(Token::into_equal)?;
+        let value = if token_iter.next_if_str(Token::is_identifier, "uninit") {
+            Maybe::Just(hhbc::TypedValue::Uninit)
+        } else {
+            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
+            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
+            let tv = &tv[3..tv.len() - 3];
+            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
+            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
+            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+        };
+        consts.push(hhbc::hhas_constant::HhasConstant {
+            name,
+            value,
+            is_abstract,
+        });
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
 }
 
 fn assemble_method<'arena>(

@@ -194,6 +194,7 @@ const StaticString
   s_local_port("local_port"),
   s_certinfo("certinfo"),
   s_effective_method("effective_method"),
+  s_referer("referer"),
   s_request_header("request_header");
 
 Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int64_t opt /* = 0 */) {
@@ -307,6 +308,11 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int64_t opt /* = 0 */) {
 #if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
     if (curl_easy_getinfo(cp, CURLINFO_EFFECTIVE_METHOD, &s_code) == CURLE_OK) {
       ret.set(s_effective_method, String(s_code, CopyString));
+    }
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+    if (curl_easy_getinfo(cp, CURLINFO_REFERER, &s_code) == CURLE_OK) {
+      ret.set(s_referer, String(s_code, CopyString));
     }
 #endif
     String header = curl->getHeader();
@@ -1543,6 +1549,26 @@ struct CurlExtension final : Extension {
 
 #if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0 */
     HHVM_RC_INT_SAME(CURLOPT_AWS_SIGV4);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+    HHVM_RC_INT_SAME(CURLOPT_DOH_SSL_VERIFYHOST);
+    HHVM_RC_INT_SAME(CURLOPT_DOH_SSL_VERIFYPEER);
+    HHVM_RC_INT_SAME(CURLOPT_DOH_SSL_VERIFYSTATUS);
+
+    HHVM_RC_INT_SAME(CURLINFO_REFERER);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0 */
+    HHVM_RC_INT_SAME(CURLOPT_CAINFO_BLOB);
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_CAINFO_BLOB);
+
+    HHVM_RC_INT_SAME(CURLSSLOPT_AUTO_CLIENT_CERT);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    HHVM_RC_INT_SAME(CURLOPT_MAXLIFETIME_CONN);
+    HHVM_RC_INT_SAME(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256);
 #endif
 
 #if CURLOPT_FTPASCII != 0

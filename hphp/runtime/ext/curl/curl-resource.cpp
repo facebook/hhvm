@@ -546,6 +546,14 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
     case CURLOPT_HSTS_CTRL:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+    case CURLOPT_DOH_SSL_VERIFYHOST:
+    case CURLOPT_DOH_SSL_VERIFYPEER:
+    case CURLOPT_DOH_SSL_VERIFYSTATUS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_MAXLIFETIME_CONN:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -720,6 +728,9 @@ bool CurlResource::isStringOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0 */
     case CURLOPT_AWS_SIGV4:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256:
+#endif
       return true;
     default:
       return isStringFilePathOption(option);
@@ -817,18 +828,24 @@ bool CurlResource::setNullableStringOption(long option, const Variant& value) {
 }
 
 bool CurlResource::isBlobOption(long option) {
-#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
   switch (option) {
-  case CURLOPT_SSLCERT_BLOB:
-  case CURLOPT_SSLKEY_BLOB:
-  case CURLOPT_PROXY_SSLCERT_BLOB:
-  case CURLOPT_PROXY_SSLKEY_BLOB:
-  case CURLOPT_ISSUERCERT_BLOB:
-  case CURLOPT_PROXY_ISSUERCERT_BLOB:
-    return true;
-  }
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+    case CURLOPT_SSLCERT_BLOB:
+    case CURLOPT_SSLKEY_BLOB:
+    case CURLOPT_PROXY_SSLCERT_BLOB:
+    case CURLOPT_PROXY_SSLKEY_BLOB:
+    case CURLOPT_ISSUERCERT_BLOB:
+    case CURLOPT_PROXY_ISSUERCERT_BLOB:
+      return true;
 #endif
-  return false;
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0 */
+    case CURLOPT_CAINFO_BLOB:
+    case CURLOPT_PROXY_CAINFO_BLOB:
+      return true;
+#endif
+    default:
+      return false;
+  }
 }
 
 bool CurlResource::setBlobOption(long option, const String& value) {

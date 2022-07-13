@@ -27,12 +27,15 @@ use oxidized::parser_options::ParserOptions;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
+use std::path::PathBuf;
 use std::sync::Arc;
 use ty::decl::folded::FoldedClass;
 use ty::decl::{self};
 use ty::reason::BReason;
 
 pub struct HhServerProviderBackend {
+    path_ctx: Arc<RelativePathCtx>,
+    parser_options: ParserOptions,
     decl_parser: DeclParser<BReason>,
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
     file_provider: Arc<FileProviderWithChanges>,
@@ -46,19 +49,32 @@ pub struct HhServerProviderBackend {
     folded_decl_provider: Arc<LazyFoldedDeclProvider<BReason>>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct Config {
+    pub path_ctx: RelativePathCtx,
+    pub parser_options: ParserOptions,
+    pub db_path: Option<PathBuf>,
+}
+
 impl HhServerProviderBackend {
-    pub fn new(path_ctx: RelativePathCtx, popt: ParserOptions) -> Result<Self> {
+    pub fn new(config: Config) -> Result<Self> {
+        let Config {
+            path_ctx,
+            parser_options,
+            db_path,
+        } = config;
         let path_ctx = Arc::new(path_ctx);
         let file_store = Arc::new(ChangesStore::new(
             Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
         ));
         let file_provider = Arc::new(FileProviderWithChanges {
             delta_and_changes: Arc::clone(&file_store),
-            disk: DiskProvider::new(path_ctx),
+            disk: DiskProvider::new(Arc::clone(&path_ctx)),
         });
-        let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, popt);
+        let decl_parser =
+            DeclParser::with_options(Arc::clone(&file_provider) as _, parser_options.clone());
         let dependency_graph = Arc::new(depgraph_api::NoDepGraph::new());
-        let naming_table = Arc::new(NamingTable::new());
+        let naming_table = Arc::new(NamingTable::new(db_path)?);
 
         let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
         let shallow_decl_store = Arc::new(shallow_decl_changes_store.as_shallow_decl_store());
@@ -79,6 +95,8 @@ impl HhServerProviderBackend {
         ));
 
         Ok(Self {
+            path_ctx,
+            parser_options,
             file_store,
             file_provider,
             decl_parser,
@@ -89,6 +107,14 @@ impl HhServerProviderBackend {
             lazy_shallow_decl_provider,
             folded_classes_store,
         })
+    }
+
+    pub fn config(&self) -> Config {
+        Config {
+            path_ctx: (*self.path_ctx).clone(),
+            db_path: self.naming_table.db_path(),
+            parser_options: self.parser_options.clone(),
+        }
     }
 
     pub fn naming_table(&self) -> &NamingTable {

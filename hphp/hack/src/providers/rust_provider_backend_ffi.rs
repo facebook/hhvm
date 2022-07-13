@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hackrs_provider_backend::Config;
 use hackrs_provider_backend::FileType;
 use hackrs_provider_backend::HhServerProviderBackend;
 use ocamlrep::ptr::UnsafeOcamlPtr;
@@ -35,11 +36,30 @@ impl std::ops::Deref for BackendWrapper {
 
 impl ocamlrep_custom::CamlSerialize for BackendWrapper {
     ocamlrep_custom::caml_serialize_default_impls!();
+
+    fn serialize(&self) -> Vec<u8> {
+        let config: Config = self.0.config();
+        bincode::serialize(&config).unwrap()
+    }
+
+    fn deserialize(data: &[u8]) -> Self {
+        let config: Config = bincode::deserialize(data).unwrap();
+        Self(HhServerProviderBackend::new(config).unwrap())
+    }
 }
 
 type Backend = Custom<BackendWrapper>;
 
 ocaml_ffi! {
+    fn hh_rust_provider_backend_register_custom_types() {
+        use ocamlrep_custom::CamlSerialize;
+        // Safety: The OCaml runtime is currently interrupted by a call into
+        // this function, so it's safe to interact with it.
+        unsafe {
+            BackendWrapper::register();
+        }
+    }
+
     fn hh_rust_provider_backend_make(
         root: PathBuf,
         hhi_root: PathBuf,
@@ -52,7 +72,11 @@ ocaml_ffi! {
             tmp,
             ..Default::default()
         };
-        let backend = HhServerProviderBackend::new(path_ctx, opts).unwrap();
+        let backend = HhServerProviderBackend::new(Config {
+            path_ctx,
+            parser_options: opts,
+            db_path: None,
+        }).unwrap();
         Custom::from(BackendWrapper(backend))
     }
 }

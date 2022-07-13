@@ -20,8 +20,7 @@ fn setup(files: std::collections::BTreeMap<&str, &str>) -> (hh24_test::TestRepo,
     let repo = hh24_test::TestRepo::new(&files).unwrap();
     let db_path = repo.path().join("names.sql");
     hh24_test::create_naming_table(&db_path, &files).unwrap();
-    let naming_table = NamingTable::new();
-    naming_table.set_db_path(db_path).unwrap();
+    let naming_table = NamingTable::new(Some(db_path)).unwrap();
     (repo, naming_table)
 }
 

@@ -10,6 +10,11 @@ open Hh_prelude
 
 type t
 
+external register_custom_types : unit -> unit
+  = "hh_rust_provider_backend_register_custom_types"
+
+let () = register_custom_types ()
+
 external make_ffi :
   root:string -> hhi_root:string -> tmp:string -> ParserOptions.t -> t
   = "hh_rust_provider_backend_make"
@@ -268,28 +273,60 @@ module Decl = struct
         push_local_changes = noop;
       }
 
+  let did_set_decl_store = ref false
+
+  let set_decl_store t =
+    if not !did_set_decl_store then (
+      did_set_decl_store := true;
+      Decl_store.set (decl_store t)
+    )
+
   external direct_decl_parse_and_cache :
     t -> Relative_path.t -> string -> Direct_decl_parser.parsed_file_with_hashes
     = "hh_rust_provider_backend_direct_decl_parse_and_cache"
+
+  let direct_decl_parse_and_cache t =
+    set_decl_store t;
+    direct_decl_parse_and_cache t
 
   external add_shallow_decls :
     t -> (string * Shallow_decl_defs.decl) list -> unit
     = "hh_rust_provider_backend_add_shallow_decls"
 
-  let get_fun = Funs.get
+  let add_shallow_decls t =
+    set_decl_store t;
+    add_shallow_decls t
 
-  let get_shallow_class = ShallowClasses.get
+  let get_fun t =
+    set_decl_store t;
+    Funs.get t
 
-  let get_typedef = Typedefs.get
+  let get_shallow_class t =
+    set_decl_store t;
+    ShallowClasses.get t
 
-  let get_gconst = GConsts.get
+  let get_typedef t =
+    set_decl_store t;
+    Typedefs.get t
 
-  let get_module = Modules.get
+  let get_gconst t =
+    set_decl_store t;
+    GConsts.get t
 
-  let get_folded_class = FoldedClasses.get
+  let get_module t =
+    set_decl_store t;
+    Modules.get t
+
+  let get_folded_class t =
+    set_decl_store t;
+    FoldedClasses.get t
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"
+
+  let declare_folded_class t =
+    set_decl_store t;
+    declare_folded_class t
 end
 
 let make popt =
@@ -300,7 +337,7 @@ let make popt =
       ~tmp:Relative_path.(path_of_prefix Tmp)
       popt
   in
-  Decl_store.set (Decl.decl_store backend);
+  Decl.set_decl_store backend;
   backend
 
 let push_local_changes t =

@@ -17,6 +17,7 @@ use std::path::PathBuf;
 pub use oxidized::relative_path::Prefix;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct RelativePath {
     prefix: Prefix,
     suffix: BytesId,
@@ -147,6 +148,7 @@ impl fmt::Debug for RelativePath {
 }
 
 #[derive(Debug, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct RelativePathCtx {
     pub root: PathBuf,
     pub hhi: PathBuf,

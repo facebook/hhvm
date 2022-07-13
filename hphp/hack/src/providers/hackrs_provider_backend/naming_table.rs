@@ -35,9 +35,12 @@ pub struct NamingTable {
 }
 
 impl NamingTable {
-    pub fn new() -> Self {
+    pub fn new(db_path: Option<PathBuf>) -> Result<Self> {
         let db = Arc::new(MaybeNamingDb(Mutex::new(None)));
-        Self {
+        if let Some(db_path) = db_path {
+            db.set_db_path(db_path)?;
+        }
+        Ok(Self {
             types: ReverseNamingTable::new(Arc::new(TypeDb(Arc::clone(&db)))),
             funs: ReverseNamingTable::new(Arc::new(FunDb(Arc::clone(&db)))),
             consts: ChangesStore::new(Arc::new(DeltaStore::new(
@@ -49,7 +52,7 @@ impl NamingTable {
                 Arc::new(ModuleDb(Arc::clone(&db))),
             ))),
             db,
-        }
+        })
     }
 
     pub fn db_path(&self) -> Option<PathBuf> {

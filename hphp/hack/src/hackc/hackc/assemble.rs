@@ -166,7 +166,7 @@ fn assemble_class<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_class::HhasClass<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".class")?;
-    let upper_bounds = assemble_upper_bounds(token_iter)?;
+    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
     let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let name = assemble_class_name(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
@@ -302,7 +302,7 @@ fn assemble_method<'arena>(
 ) -> Result<hhbc::hhas_method::HhasMethod<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
-    let upper_bounds = assemble_upper_bounds(token_iter)?;
+    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = match token_iter.peek() {
@@ -773,7 +773,7 @@ fn assemble_function<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_function::HhasFunction<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".function")?;
-    let upper_bounds = assemble_upper_bounds(token_iter)?;
+    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
@@ -853,17 +853,45 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::hhas_pos::HhasSpan>
 }
 
 /// Ex: {(T as <"HH\\int" "HH\\int" upper_bound>)}
+/// {(id as type_info, type_info ... ), (id as type_info, type_info ...)*}
 fn assemble_upper_bounds<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, Pair<Str<'arena>, Slice<'arena, hhbc::hhas_type::HhasTypeInfo<'arena>>>>>
 {
     token_iter.expect(Token::into_open_curly)?;
-    // Pass over everything until the next close curly
+    let mut ubs = Vec::new();
     while !token_iter.peek_if(Token::is_close_curly) {
-        todo!(); // Don't know how to parse the inside of upper bounds yet
+        ubs.push(assemble_upper_bound(alloc, token_iter)?);
+        if !token_iter.peek_if(Token::is_close_curly) {
+            token_iter.expect(Token::into_comma)?;
+        }
     }
     token_iter.expect(Token::into_close_curly)?;
-    Ok(Default::default())
+    Ok(Slice::from_vec(alloc, ubs))
+}
+
+/// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
+fn assemble_upper_bound<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Pair<Str<'arena>, Slice<'arena, hhbc::hhas_type::HhasTypeInfo<'arena>>>> {
+    token_iter.expect(Token::into_open_paren)?;
+    let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
+    token_iter.expect_is_str(Token::into_identifier, "as")?;
+    let mut tis = Vec::new();
+    while !token_iter.peek_if(Token::is_close_paren) {
+        if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false)? {
+            tis.push(ti);
+        } else {
+            bail!("Unexpected \"N\" in upper bound type info");
+        }
+        if !token_iter.peek_if(Token::is_close_paren) {
+            token_iter.expect(Token::into_comma)?;
+        }
+    }
+    token_iter.expect(Token::into_close_paren)?;
+    Ok(Pair(id, Slice::from_vec(alloc, tis)))
 }
 
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs

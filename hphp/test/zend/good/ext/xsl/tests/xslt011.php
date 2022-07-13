@@ -7,7 +7,7 @@
 print "Test 11: php:function Support\n";
 $dom = new DOMDocument();
   $dom->load(dirname(__FILE__)."/xslt011.xsl");
-  $proc = new xsltprocessor;
+  $proc = new XSLTProcessor;
   $xsl = $proc->importStylesheet($dom);
 
   $xml = new DomDocument();
@@ -36,7 +36,7 @@ $dom = new DOMDocument();
     return  new foo();
   }
 
-  class aclass {
+  class aClass {
     static function aStaticFunction($id) {
         return $id;
     }

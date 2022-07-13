@@ -21,12 +21,12 @@ $HTTP_RAW_POST_DATA = <<<EOF
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SOAP-ENV:Body xmlns:ns1="http://linuxsrv.home/~dmitry/soap/">
-    <ns1:sum>
+    <ns1:Sum>
       <param0 SOAP-ENC:arrayType="xsd:int[2]" xsi:type="SOAP-ENC:Array">
         <val xsi:type="xsd:int">3</val>
         <val xsi:type="xsd:int">5</val>
       </param0>
-    </ns1:sum>
+    </ns1:Sum>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;

@@ -1,7 +1,7 @@
 <?hh
 function test_isset($str) {
   $xml = '<field Default="' . $str . '"/>';
-  $field = new SimpleXmlElement($xml);
+  $field = new SimpleXMLElement($xml);
   var_dump(isset($field));
   var_dump($field->offsetExists('Default') && $field->offsetGet('Default') !== null);
   var_dump($field->offsetExists('XXX') && $field->offsetGet('XXX') !== null);

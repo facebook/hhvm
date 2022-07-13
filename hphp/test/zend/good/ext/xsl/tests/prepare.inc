@@ -26,7 +26,7 @@ abstract final class XSLTPrepare {
 
   <<__Memoize>>
   public static function getProc() {
-    $proc = new xsltprocessor;
+    $proc = new XSLTProcessor;
     if(!$proc) {
       echo "Error while making xsltprocessor object\n";
       exit;

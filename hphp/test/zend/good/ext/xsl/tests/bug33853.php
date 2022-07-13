@@ -14,7 +14,7 @@ $inputdom = new DomDocument();
 $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
 <today></today>');
 
-$proc = new XsltProcessor();
+$proc = new XSLTProcessor();
 $proc->registerPHPFunctions();
 $xsl = $proc->importStylesheet($xsl);
 $newdom = $proc->transformToDoc($inputdom);

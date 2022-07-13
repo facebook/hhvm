@@ -554,6 +554,9 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
     case CURLOPT_MAXLIFETIME_CONN:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
+    case CURLOPT_MIME_OPTIONS:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif

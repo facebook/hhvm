@@ -28,6 +28,8 @@ const int CURLCLOSEPOLICY_SLOWEST = 0;
 
 const int CURLINFO_APPCONNECT_TIME = 0;
 const int CURLINFO_APPCONNECT_TIME_T = 0;
+const int CURLINFO_CAINFO = 0;
+const int CURLINFO_CAPATH = 0;
 const int CURLINFO_CERTINFO = 0;
 const int CURLINFO_CONDITION_UNMET = 0;
 const int CURLINFO_CONNECT_TIME = 0;
@@ -263,6 +265,7 @@ const int CURLOPT_MAXFILESIZE = 0;
 const int CURLOPT_MAXLIFETIME_CONN = 0;
 const int CURLOPT_MAX_RECV_SPEED_LARGE = 0;
 const int CURLOPT_MAX_SEND_SPEED_LARGE = 0;
+const int CURLOPT_MIME_OPTIONS = 0;
 const int CURLOPT_NETRC_FILE = 0;
 const int CURLOPT_NEW_DIRECTORY_PERMS = 0;
 const int CURLOPT_NEW_FILE_PERMS = 0;
@@ -593,6 +596,8 @@ const int CURLALTSVC_H3 = 0;
 
 const int CURLHSTS_ENABLE = 0;
 const int CURLHSTS_READONLYFILE = 0;
+
+const int CURLMIMEOPT_FORMESCAPE = 0;
 
 <<__PHPStdLib>>
 function curl_init($url = null)[leak_safe];

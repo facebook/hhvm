@@ -195,6 +195,8 @@ const StaticString
   s_certinfo("certinfo"),
   s_effective_method("effective_method"),
   s_referer("referer"),
+  s_cainfo("cainfo"),
+  s_capath("capath"),
   s_request_header("request_header");
 
 Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int64_t opt /* = 0 */) {
@@ -313,6 +315,14 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int64_t opt /* = 0 */) {
 #if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
     if (curl_easy_getinfo(cp, CURLINFO_REFERER, &s_code) == CURLE_OK) {
       ret.set(s_referer, String(s_code, CopyString));
+    }
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+    if (curl_easy_getinfo(cp, CURLINFO_CAPATH, &s_code) == CURLE_OK) {
+      ret.set(s_capath, String(s_code, CopyString));
+    }
+    if (curl_easy_getinfo(cp, CURLINFO_CAINFO, &s_code) == CURLE_OK) {
+      ret.set(s_cainfo, String(s_code, CopyString));
     }
 #endif
     String header = curl->getHeader();
@@ -1569,6 +1579,17 @@ struct CurlExtension final : Extension {
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
     HHVM_RC_INT_SAME(CURLOPT_MAXLIFETIME_CONN);
     HHVM_RC_INT_SAME(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
+    HHVM_RC_INT_SAME(CURLOPT_MIME_OPTIONS);
+
+    HHVM_RC_INT_SAME(CURLMIMEOPT_FORMESCAPE);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+    HHVM_RC_INT_SAME(CURLINFO_CAPATH);
+    HHVM_RC_INT_SAME(CURLINFO_CAINFO);
 #endif
 
 #if CURLOPT_FTPASCII != 0

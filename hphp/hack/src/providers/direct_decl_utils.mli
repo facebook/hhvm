@@ -18,6 +18,7 @@ val direct_decl_parse_and_cache :
   Direct_decl_parser.parsed_file_with_hashes option
 
 val direct_decl_parse :
+  ?ignore_file_content_caches:bool ->
   Provider_context.t ->
   Relative_path.t ->
   Direct_decl_parser.parsed_file_with_hashes option

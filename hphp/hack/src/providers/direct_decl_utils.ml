@@ -162,24 +162,30 @@ let cache_decls ctx file decls =
     failwith
       "Direct_decl_utils.cache_file_decls not implemented for Decl_service"
 
-let get_file_contents ctx filename =
-  match
-    Relative_path.Map.find_opt (Provider_context.get_entries ctx) filename
-  with
+let get_file_contents ~ignore_file_content_caches ctx filename =
+  let from_entries =
+    if ignore_file_content_caches then
+      None
+    else
+      Relative_path.Map.find_opt (Provider_context.get_entries ctx) filename
+  in
+  match from_entries with
   | Some entry ->
     let source_text = Ast_provider.compute_source_text ~entry in
     Some (Full_fidelity_source_text.text source_text)
   | None ->
-    let enable_disk_heap =
-      TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
+    let write_to_cache =
+      (not ignore_file_content_caches)
+      && TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
     in
     File_provider.get_contents
+      ~force_read_disk:ignore_file_content_caches
+      ~writeback_disk_contents_in_shmem_provider:write_to_cache
       filename
-      ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
 
-let direct_decl_parse ctx file =
+let direct_decl_parse ?(ignore_file_content_caches = false) ctx file =
   Counters.count Counters.Category.Get_decl @@ fun () ->
-  match get_file_contents ctx file with
+  match get_file_contents ~ignore_file_content_caches ctx file with
   | None -> None
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
@@ -231,7 +237,7 @@ let direct_decl_parse_and_cache ctx file =
   match Provider_context.get_backend ctx with
   | Provider_backend.Rust_provider_backend backend ->
     Counters.count Counters.Category.Get_decl @@ fun () ->
-    get_file_contents ctx file
+    get_file_contents ~ignore_file_content_caches:false ctx file
     |> Option.map ~f:(fun contents ->
            Rust_provider_backend.Decl.direct_decl_parse_and_cache
              backend

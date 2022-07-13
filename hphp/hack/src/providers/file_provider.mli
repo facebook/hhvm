@@ -18,6 +18,7 @@ val get : Relative_path.t -> file_type option
 val get_unsafe : Relative_path.t -> file_type
 
 val get_contents :
+  ?force_read_disk:bool ->
   writeback_disk_contents_in_shmem_provider:bool ->
   Relative_path.t ->
   string option

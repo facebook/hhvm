@@ -460,6 +460,15 @@ fn assemble_class_name<'arena>(
     ))
 }
 
+fn assemble_prop_name_from_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::PropName<'arena>> {
+    Ok(hhbc::PropName::new(assemble_unescaped_unquoted_str(
+        alloc, token_iter,
+    )?))
+}
+
 fn assemble_prop_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -2211,14 +2220,14 @@ fn assemble_member_key<'arena>(
         b"PT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PT(
-                assemble_prop_name(alloc, token_iter)?,
+                assemble_prop_name_from_str(alloc, token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }
         b"QT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::QT(
-                assemble_prop_name(alloc, token_iter)?,
+                assemble_prop_name_from_str(alloc, token_iter)?,
                 assemble_readonly_op(token_iter)?,
             ))
         }

@@ -2027,6 +2027,8 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::ChainFaults,
                         "ChainFaults",
                     ),
+                    b"CheckProp" => assemble_check_prop(alloc, &mut sl_lexer),
+                    b"InitProp" => assemble_init_prop(alloc, &mut sl_lexer),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2821,6 +2823,39 @@ fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::Collecti
         f => bail!("Expected a FatalOp, got: {:?}", f),
     };
     Ok(ct)
+}
+
+fn assemble_init_prop_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::InitPropOp> {
+    let ipo = match token_iter.expect(Token::into_identifier)? {
+        b"Static" => hhbc::InitPropOp::Static,
+        b"NonStatic" => hhbc::InitPropOp::NonStatic,
+        ipo => bail!("Expected a InitPropOp, got: {:?}", ipo),
+    };
+    Ok(ipo)
+}
+
+/// Ex:
+/// InitProp "nonScalarTraitProperty" NonStatic
+fn assemble_init_prop<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "InitProp")?;
+    let pn = assemble_prop_name_from_str(alloc, token_iter)?;
+    let ipo = assemble_init_prop_op(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::InitProp(pn, ipo)))
+}
+
+/// Ex:
+/// CheckProp "profilePicPrepared"
+fn assemble_check_prop<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "CheckProp")?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::CheckProp(
+        assemble_prop_name_from_str(alloc, token_iter)?,
+    )))
 }
 
 fn assemble_col_from_array<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {

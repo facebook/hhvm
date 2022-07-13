@@ -73,6 +73,10 @@ pub struct Opts {
     /// Print full error messages
     #[clap(short = 'l')]
     long_msg: bool,
+
+    /// Print all errors
+    #[clap(short = 'a')]
+    show_all: bool,
 }
 
 fn verify_assemble_file(
@@ -247,7 +251,7 @@ fn report_status(wall: Duration, count: usize, total: usize) {
     );
 }
 
-fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc) {
+fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc, show_all: bool) {
     if total >= 10 {
         let wall_per_sec = if !wall.is_zero() {
             ((count as f64) / wall.as_secs_f64()) as usize
@@ -266,6 +270,12 @@ fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc)
         println!("Failed to complete");
     }
 
+    let num_show = if show_all {
+        profile.error_histogram.len()
+    } else {
+        20
+    };
+
     // The # of files that failed are sum of error_histogram's values' usize field
     if !profile.error_histogram.is_empty() {
         println!("{}/{} files passed", total - profile.num_failed(), total);
@@ -274,12 +284,15 @@ fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc)
             .error_histogram
             .iter()
             .sorted_by(|a, b| a.1.0.cmp(&b.1.0).reverse())
-            .take(20)
+            .take(num_show)
         {
             println!("  {:3} ({}): {}", v.0, v.1.display(), k);
         }
         if profile.error_histogram.len() > 20 {
-            println!("  (and {} unreported)", profile.error_histogram.len() - 20);
+            println!(
+                "  (and {} unreported)",
+                profile.error_histogram.len() - num_show
+            );
         }
         println!();
     }
@@ -366,6 +379,7 @@ fn verify_files(
     num_threads: usize,
     compile_opts: &SingleFileOpts,
     long_msg: bool,
+    show_all: bool,
 ) {
     let total = files.len();
     let count = Arc::new(AtomicUsize::new(0));
@@ -405,7 +419,13 @@ fn verify_files(
     let duration = start.elapsed();
 
     status_handle.join().unwrap();
-    report_final(duration, count.load(Ordering::Acquire), total, profile);
+    report_final(
+        duration,
+        count.load(Ordering::Acquire),
+        total,
+        profile,
+        show_all,
+    );
 }
 
 pub fn run(opts: Opts) -> Result<(), anyhow::Error> {
@@ -442,6 +462,7 @@ pub fn run(opts: Opts) -> Result<(), anyhow::Error> {
         opts.num_threads,
         &opts.single_file_opts,
         opts.long_msg,
+        opts.show_all,
     );
 
     std::panic::set_hook(old_hook);

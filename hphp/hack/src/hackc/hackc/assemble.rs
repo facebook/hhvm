@@ -2269,7 +2269,8 @@ fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
         b"Res" => Ok(hhbc::IsTypeOp::Res),
         b"Scalar" => Ok(hhbc::IsTypeOp::Scalar),
         b"Keyset" => Ok(hhbc::IsTypeOp::Keyset),
-        b"Dict" => Ok(hhbc::IsTypeOp::Vec),
+        b"Dict" => Ok(hhbc::IsTypeOp::Dict),
+        b"Vec" => Ok(hhbc::IsTypeOp::Vec),
         b"ArrLike" => Ok(hhbc::IsTypeOp::ArrLike),
         b"ClsMeth" => Ok(hhbc::IsTypeOp::ClsMeth),
         b"Func" => Ok(hhbc::IsTypeOp::Func),
@@ -2393,7 +2394,7 @@ fn assemble_mop_mode(token_iter: &mut Lexer<'_>) -> Result<hhbc::MOpMode> {
         b"Warn" => Ok(hhbc::MOpMode::Warn),
         b"Define" => Ok(hhbc::MOpMode::Define),
         b"Unset" => Ok(hhbc::MOpMode::Unset),
-        b"Inout" => Ok(hhbc::MOpMode::InOut),
+        b"InOut" => Ok(hhbc::MOpMode::InOut),
         mop => bail!("Expected a MOpMode but got: {:?}", mop),
     }
 }
@@ -2506,7 +2507,7 @@ fn assemble_query_mop(token_iter: &mut Lexer<'_>) -> Result<hhbc::QueryMOp> {
         b"CGet" => Ok(hhbc::QueryMOp::CGet),
         b"CGetQuiet" => Ok(hhbc::QueryMOp::CGetQuiet),
         b"Isset" => Ok(hhbc::QueryMOp::Isset),
-        b"Inout" => Ok(hhbc::QueryMOp::InOut),
+        b"InOut" => Ok(hhbc::QueryMOp::InOut),
         q => bail!("Unexpected QueryMOp: {:?}", q),
     }
 }

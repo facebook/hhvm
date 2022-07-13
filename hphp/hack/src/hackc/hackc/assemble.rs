@@ -1012,11 +1012,7 @@ fn assemble_param<'arena, 'a>(
     let name = token_iter.expect(Token::into_variable)?;
     decl_map.insert(name, decl_map.len() as u32);
     let name = Str::new_slice(alloc, name);
-    let default_value = if token_iter.peek_if(Token::is_equal) {
-        todo!() // is type Maybe<Pair<Label, Str<'arena>>>
-    } else {
-        Maybe::Nothing
-    };
+    let default_value = assemble_default_value(alloc, token_iter)?;
     Ok(hhbc::hhas_param::HhasParam {
         name,
         is_variadic,
@@ -1026,6 +1022,24 @@ fn assemble_param<'arena, 'a>(
         type_info,
         default_value,
     })
+}
+
+/// Ex: $skip_top_libcore = DV13("""true""")
+/// Parsing after the variable name
+fn assemble_default_value<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Maybe<Pair<hhbc::Label, Str<'arena>>>> {
+    let tr = if token_iter.next_if(Token::is_equal) {
+        let lbl = assemble_label(token_iter, false)?; // false: not expecting colon
+        token_iter.expect(Token::into_open_paren)?;
+        let st = assemble_unquoted_triple_str(alloc, token_iter)?;
+        token_iter.expect(Token::into_close_paren)?;
+        Maybe::Just(Pair(lbl, st))
+    } else {
+        Maybe::Nothing
+    };
+    Ok(tr)
 }
 
 /// { (.doc ...)? (.ismemoizewrapper)? (.ismemoizewrapperlsb)? (.numiters)? (.declvars)? (instructions)* }
@@ -1734,10 +1748,20 @@ fn assemble_unescaped_unquoted_triple_str<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
     let st = escaper::unquote_slice(escaper::unquote_slice(escaper::unquote_slice(
-        token_iter.expect(Token::into_str_literal)?,
+        token_iter.expect(Token::into_triple_str_literal)?,
     )));
     let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
     Ok(Str::new_slice(alloc, &st))
+}
+
+fn assemble_unquoted_triple_str<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    let st = escaper::unquote_slice(escaper::unquote_slice(escaper::unquote_slice(
+        token_iter.expect(Token::into_triple_str_literal)?,
+    )));
+    Ok(Str::new_slice(alloc, st))
 }
 
 /// Ex:
@@ -2301,7 +2325,6 @@ fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc:
     if needs_colon {
         token_iter.expect(Token::into_colon)?;
     }
-    token_iter.expect_end()?;
     let label_reg = regex!(r"^((DV|L)[0-9]+)$");
     if label_reg.is_match(lcl) {
         if lcl[0] == b'D' {

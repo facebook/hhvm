@@ -7,6 +7,32 @@
  *
  *)
 
+(** Used by the Pessimised_shared_memory backend to decl-pessimise definitions
+  not already found in the decl heap on-the-fly. *)
+type pessimisation_info = {
+  pessimise_shallow_class:
+    Relative_path.t ->
+    name:string ->
+    Shallow_decl_defs.shallow_class ->
+    Shallow_decl_defs.shallow_class;
+  pessimise_fun:
+    Relative_path.t -> name:string -> Typing_defs.fun_elt -> Typing_defs.fun_elt;
+  pessimise_gconst:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.const_decl ->
+    Typing_defs.const_decl;
+  pessimise_typedef:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.typedef_type ->
+    Typing_defs.typedef_type;
+  store_pessimised_result: bool;
+      (** Indicates whether or not decl-based pessimiation results (as
+        determined by the functions above) should immediately be stored
+        in the corresponding heaps. *)
+}
+
 module Cache (Entry : Lfu_cache.Entry) : module type of Lfu_cache.Cache (Entry)
 
 module Decl_cache_entry : sig
@@ -179,6 +205,7 @@ type local_memory = {
 
 type t =
   | Shared_memory  (** Used by hh_server and hh_single_type_check *)
+  | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory  (** Used by serverless IDE *)
   | Decl_service of {
       decl: Decl_service_client.t;
@@ -193,6 +220,8 @@ val t_to_string : t -> string
 val set_analysis_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
+
+val set_pessimised_shared_memory_backend : pessimisation_info -> unit
 
 val set_rust_backend : ParserOptions.t -> unit
 
@@ -212,3 +241,9 @@ val set_decl_service_backend : Decl_service_client.t -> unit
 val get : unit -> t
 
 val supports_eviction : t -> bool
+
+val get_pessimised_shared_memory_backend_info : t -> pessimisation_info option
+
+val is_pessimised_shared_memory_backend : t -> bool
+
+val noop_pessimisation_info : pessimisation_info

@@ -27,6 +27,8 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
+let ( let* ) = Caml.Option.bind
+
 let err_not_found (file : Relative_path.t) (name : string) : 'a =
   let err_str =
     Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
@@ -125,6 +127,20 @@ let get_class
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
     end
+  | Provider_backend.Pessimised_shared_memory _ ->
+    (* No pessimisation needs to be done here directly. All pessimisation is
+     * done on the shallow classes within [Shallow_classes_provider] that the
+     * [Typing_classes_heap.Api.t] returned here is constructed from
+     * Crucially, we do not use the [Cache] here, which would contain
+     * outdated member types once we update its members during
+     * pessimisation. *)
+    begin
+      match
+        Typing_classes_heap.get ctx class_name declare_folded_class_in_file
+      with
+      | None -> None
+      | Some v -> Some (counter, v, Some ctx)
+    end
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
     begin
@@ -171,6 +187,30 @@ let get_fun
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_fun fun_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        let* original_ft =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
+        in
+        let ft =
+          info.Provider_backend.pessimise_fun
+            filename
+            ~name:fun_name
+            original_ft
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_fun) fun_name ft;
+        Some ft
+      | None -> None))
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
@@ -256,6 +296,30 @@ let get_typedef
           Decl_store.((get ()).add_typedef typedef_name tdecl);
           Some tdecl
       | None -> None))
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_typedef typedef_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_typedef_path ctx typedef_name with
+      | Some filename ->
+        let* original_typedef =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
+        in
+        let typedef =
+          info.Provider_backend.pessimise_typedef
+            filename
+            ~name:typedef_name
+            original_typedef
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_typedef) typedef_name typedef;
+        Some typedef
+      | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -299,6 +363,30 @@ let get_gconst
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_gconst gconst_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_const_path ctx gconst_name with
+      | Some filename ->
+        let* original_gconst =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
+        in
+        let gconst =
+          info.Provider_backend.pessimise_gconst
+            filename
+            ~name:gconst_name
+            original_gconst
+        in
+        (if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_gconst gconst_name gconst));
+        Some gconst
+      | None -> None))
   | Provider_backend.Shared_memory ->
     (match Decl_store.((get ()).get_gconst gconst_name) with
     | Some c -> Some c
@@ -352,6 +440,7 @@ let prepare_for_typecheck
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory
   | Provider_backend.Local_memory _ ->
     ()
@@ -399,6 +488,7 @@ let get_module
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     Option.first_some
       Decl_store.((get ()).get_module module_name)

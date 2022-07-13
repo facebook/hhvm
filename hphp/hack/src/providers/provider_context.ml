@@ -266,3 +266,12 @@ let reset_telemetry (t : t) : unit =
     Provider_backend.Folded_class_cache.reset_telemetry folded_class_cache;
     ()
   | _ -> ()
+
+let ctx_with_pessimisation_info_exn ctx info =
+  match ctx.backend with
+  | Provider_backend.Pessimised_shared_memory _ ->
+    { ctx with backend = Provider_backend.Pessimised_shared_memory info }
+  | _ ->
+    failwith
+      "This operation is only supported on contexts with a
+      Provider_backend.Pessimised_shared_memory backend."

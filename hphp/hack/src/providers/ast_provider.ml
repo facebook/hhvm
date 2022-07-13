@@ -214,7 +214,8 @@ let get_ast_with_error ?(full = false) ctx path =
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
   | ( _,
       ( Provider_backend.Analysis | Provider_backend.Rust_provider_backend _
-      | Provider_backend.Shared_memory ) ) ->
+      | Provider_backend.Shared_memory
+      | Provider_backend.Pessimised_shared_memory _ ) ) ->
     (* Note that we might be looking up the shared ParserHeap directly, *)
     (* or maybe into a local-change-stack due to quarantine. *)
     begin
@@ -336,6 +337,7 @@ let provide_ast_hint
   match Provider_backend.get () with
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
   | Provider_backend.Local_memory _

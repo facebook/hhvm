@@ -48,6 +48,7 @@ let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
 let add (ctx : Provider_context.t) (key : string) (value : Decl_defs.lin) : unit
     =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
@@ -62,6 +63,7 @@ let add (ctx : Provider_context.t) (key : string) (value : Decl_defs.lin) : unit
 
 let get (ctx : Provider_context.t) (key : string) : Decl_defs.lin option =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->

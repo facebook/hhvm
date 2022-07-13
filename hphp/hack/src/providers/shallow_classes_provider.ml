@@ -19,6 +19,11 @@ let class_naming_and_decl_DEPRECATED ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
   Shallow_decl.class_DEPRECATED ctx c
 
+let direct_decl_parse ctx filename name =
+  match Direct_decl_utils.direct_decl_parse ctx filename with
+  | None -> err_not_found filename name
+  | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
+
 let direct_decl_parse_and_cache ctx filename name =
   match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
   | None -> err_not_found filename name
@@ -54,6 +59,7 @@ let decl_DEPRECATED (ctx : Provider_context.t) (class_ : Nast.class_) :
   | Provider_backend.Rust_provider_backend _ ->
     failwith
       "Rust_provider_backend: Shallow_classes_provider.decl_DEPRECATED not supported"
+  | Provider_backend.Pessimised_shared_memory _ -> failwith "not supported"
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl_DEPRECATED ctx class_ in
     if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
@@ -72,6 +78,20 @@ let decl_DEPRECATED (ctx : Provider_context.t) (class_ : Nast.class_) :
     failwith "shallow class decl not implemented for Decl_service"
 
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
+  let find_in_direct_decl_parse ~fill_caches path =
+    let f =
+      if fill_caches then
+        direct_decl_parse_and_cache
+      else
+        direct_decl_parse
+    in
+    f ctx path name
+    |> List.find_map ~f:(function
+           | (n, Shallow_decl_defs.Class decl, _) when String.equal name n ->
+             Some decl
+           | _ -> None)
+  in
+
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis ->
     (match Shallow_classes_heap.Classes.get name with
@@ -79,6 +99,21 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
     | None -> failwith (Printf.sprintf "failed to get shallow class %S" name))
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_shallow_class backend name
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Shallow_classes_heap.Classes.get name with
+    | Some _ as decl_opt -> decl_opt
+    | None ->
+      (match Naming_provider.get_class_path ctx name with
+      | None -> None
+      | Some path ->
+        let ( let* ) = Caml.Option.bind in
+        let* original_sc = find_in_direct_decl_parse ~fill_caches:false path in
+        let sc =
+          info.Provider_backend.pessimise_shallow_class path ~name original_sc
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Shallow_classes_heap.Classes.add name sc;
+        Some sc))
   | Provider_backend.Shared_memory ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt
@@ -87,12 +122,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
       | None -> None
       | Some path ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx path name
-          |> List.find_map ~f:(function
-                 | (n, Shallow_decl_defs.Class decl, _) when String.equal name n
-                   ->
-                   Some decl
-                 | _ -> None)
+          find_in_direct_decl_parse ~fill_caches:true path
         else
           Some
             (match Ast_provider.find_class_in_file ctx path name with
@@ -114,12 +144,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
         | None -> None
         | Some path ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx path name
-            |> List.find_map ~f:(function
-                   | (n, Shallow_decl_defs.Class decl, _)
-                     when String.equal name n ->
-                     Some decl
-                   | _ -> None)
+            find_in_direct_decl_parse ~fill_caches:true path
           else
             Some
               (match Ast_provider.find_class_in_file ctx path name with
@@ -131,6 +156,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
 let get_member_filter (ctx : Provider_context.t) (name : string) :
     BloomFilter.t option =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.MemberFilters.get name
@@ -142,7 +168,9 @@ let get_member_filter (ctx : Provider_context.t) (name : string) :
 let get_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Analysis ->
+    failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.get_batch names
@@ -158,7 +186,9 @@ let get_old_batch
        string list -> Shallow_decl_defs.shallow_class option SMap.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Analysis ->
+    failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
@@ -191,7 +221,9 @@ let get_old_batch
 
 let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Analysis ->
+    failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.oldify_batch names;
@@ -203,7 +235,9 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Analysis ->
+    failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.remove_old_batch names;
@@ -215,6 +249,7 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
 
 let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
+  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
   | Provider_backend.Analysis
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Shared_memory ->

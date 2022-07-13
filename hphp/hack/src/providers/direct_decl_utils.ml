@@ -94,6 +94,10 @@ let cache_decls ctx file decls =
     |> Sequence.to_list
   in
   match Provider_context.get_backend ctx with
+  | Provider_backend.Pessimised_shared_memory _ ->
+    (* We must never perform caching here. Otherwise, we may overwrite earlier
+       pessimisation results with unpessimised types *)
+    failwith "invalid"
   | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
     List.iter decls ~f:(function

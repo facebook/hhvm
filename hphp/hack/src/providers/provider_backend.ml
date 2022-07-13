@@ -9,6 +9,27 @@
 
 open Hh_prelude
 
+type pessimisation_info = {
+  pessimise_shallow_class:
+    Relative_path.t ->
+    name:string ->
+    Shallow_decl_defs.shallow_class ->
+    Shallow_decl_defs.shallow_class;
+  pessimise_fun:
+    Relative_path.t -> name:string -> Typing_defs.fun_elt -> Typing_defs.fun_elt;
+  pessimise_gconst:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.const_decl ->
+    Typing_defs.const_decl;
+  pessimise_typedef:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.typedef_type ->
+    Typing_defs.typedef_type;
+  store_pessimised_result: bool;
+}
+
 module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
      conflict, we may put e.g. a function named 'foo' into the cache whose value is
@@ -200,6 +221,7 @@ type local_memory = {
 
 type t =
   | Shared_memory
+  | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory
   | Decl_service of {
       decl: Decl_service_client.t;
@@ -211,6 +233,7 @@ type t =
 let t_to_string (t : t) : string =
   match t with
   | Shared_memory -> "Shared_memory"
+  | Pessimised_shared_memory _ -> "Pessimised_shared_memory"
   | Local_memory _ -> "Local_memory"
   | Decl_service _ -> "Decl_service"
   | Rust_provider_backend _ -> "Rust_provider_backend"
@@ -222,6 +245,11 @@ let set_analysis_backend () : unit = backend_ref := Analysis
 
 let set_shared_memory_backend () : unit =
   backend_ref := Shared_memory;
+  Decl_store.set Decl_store.shared_memory_store;
+  ()
+
+let set_pessimised_shared_memory_backend info : unit =
+  backend_ref := Pessimised_shared_memory info;
   Decl_store.set Decl_store.shared_memory_store;
   ()
 
@@ -347,9 +375,28 @@ let get () : t = !backend_ref
 
 let supports_eviction (t : t) : bool =
   match t with
-  | Analysis -> false
+  | Pessimised_shared_memory _
+  | Analysis ->
+    false
   | Local_memory _
   | Decl_service _
   | Rust_provider_backend _
   | Shared_memory ->
     true
+
+let noop_pessimisation_info =
+  {
+    pessimise_shallow_class = (fun _path ~name:_ x -> x);
+    pessimise_fun = (fun _path ~name:_ x -> x);
+    pessimise_gconst = (fun _path ~name:_ x -> x);
+    pessimise_typedef = (fun _path ~name:_ x -> x);
+    store_pessimised_result = false;
+  }
+
+let is_pessimised_shared_memory_backend = function
+  | Pessimised_shared_memory _ -> true
+  | _ -> false
+
+let get_pessimised_shared_memory_backend_info = function
+  | Pessimised_shared_memory info -> Some info
+  | _ -> None

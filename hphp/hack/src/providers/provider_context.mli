@@ -215,3 +215,12 @@ val get_telemetry : t -> Telemetry.t
 
 (** This function resets the 'counters' associated with telemetry. *)
 val reset_telemetry : t -> unit
+
+(** Given a context that uses [Provider_backend.Pessimised_shared_memory] as
+its backend, return a context with the backend updated to use the given
+[pessimisation_info] instead. Due to the stateful nature of setting backends in
+general (see the Provider_backend.set_* functions), we make no attempt to
+support situations where the original backend isn't
+[Provider_backend.Pessimised_shared_memory] already and fail instead. *)
+val ctx_with_pessimisation_info_exn :
+  t -> Provider_backend.pessimisation_info -> t

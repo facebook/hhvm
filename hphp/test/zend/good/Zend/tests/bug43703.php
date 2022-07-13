@@ -10,7 +10,7 @@ abstract class Pointcut
 
 class Read extends Pointcut
 {
-    public function evaluate(Joinpoint $joinPoint)
+    public function evaluate(JoinPoint $joinPoint)
     {
     }
 }

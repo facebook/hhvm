@@ -180,12 +180,52 @@ pub struct Slice<'a, T> {
 unsafe impl<'a, T: Sync> Sync for Slice<'a, T> {}
 unsafe impl<'a, T: Send> Send for Slice<'a, T> {}
 
-// This would be so much better with a specialization for Slice<'a, u8> - but we
-// can't do that without min_specialization which is currently unstable.
-impl<'a, T: fmt::Debug> fmt::Debug for Slice<'a, T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl<'a, T: fmt::Debug> Slice<'a, T> {
+    fn generic_debug_fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Slice")?;
         f.debug_list().entries(self.as_ref().iter()).finish()
+    }
+}
+
+impl<'a, T: fmt::Debug> fmt::Debug for Slice<'a, T> {
+    #[cfg(UNSTABLE_DEBUG_SLICE)]
+    default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.generic_debug_fmt(f)
+    }
+
+    #[cfg(not(UNSTABLE_DEBUG_SLICE))]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.generic_debug_fmt(f)
+    }
+}
+
+#[cfg(UNSTABLE_DEBUG_SLICE)]
+impl<'a> fmt::Debug for Slice<'a, u8> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = String::new();
+        for &ch in self.as_ref() {
+            match ch {
+                b'\"' => {
+                    s.push('\\');
+                    s.push('\"');
+                }
+                b'\\' => {
+                    s.push('\\');
+                    s.push('\\');
+                }
+                ch => {
+                    if !ch.is_ascii_graphic() {
+                        s.push_str(&format!("\\{ch:03o}"));
+                    } else {
+                        s.push(ch as char);
+                    }
+                }
+            }
+        }
+
+        f.write_str("Str(b\"")?;
+        f.write_str(&s)?;
+        f.write_str("\")")
     }
 }
 

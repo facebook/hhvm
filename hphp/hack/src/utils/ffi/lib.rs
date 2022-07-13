@@ -12,6 +12,8 @@
 //! The types in this crate are C friendly substitutions for a
 //! handful of these types.
 
+#![cfg_attr(UNSTABLE_DEBUG_SLICE, feature(min_specialization))]
+
 pub mod ffi;
 
 pub use crate::ffi::BumpSliceMut;

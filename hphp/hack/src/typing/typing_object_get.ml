@@ -819,23 +819,14 @@ and obj_get_concrete_class_with_member_info
           Typing_error.Callback.(
             (with_side_effect ~eff unify_error [@alert "-deprecated"]))
         in
+        let ety = { et_type = member_ty; et_enforced } in
         let (env, coerce_ty_err_opt) =
           Typing_coercion.coerce_type
             p
             ur
             env
             ty
-            {
-              et_type =
-                (match et_enforced with
-                | Enforced
-                  when TypecheckerOptions.enable_sound_dynamic
-                         (Env.get_tcopt env)
-                       && Env.get_support_dynamic_type env ->
-                  Typing_utils.make_like env member_ty
-                | _ -> member_ty);
-              et_enforced;
-            }
+            (Typing_utils.make_like_if_enforced env ety)
             err
         in
         let coerce_ty_mismatch =

@@ -2089,7 +2089,7 @@ let rec bind_param
               Reason.URhint
               env
               ty2
-              ty1_enforced
+              (Typing_utils.make_like_if_enforced env ty1_enforced)
               Typing_error.Callback.parameter_default_value_wrong_type
           in
           Option.iter ty_err_opt ~f:Errors.add_typing_error;
@@ -7791,6 +7791,7 @@ and class_get_inner
             else
               (env, member_ty)
           in
+          let ety = { et_type = member_ty; et_enforced } in
           let (env, rval_err) =
             match coerce_from_ty with
             | None -> (env, None)
@@ -7801,17 +7802,7 @@ and class_get_inner
                   ur
                   env
                   ty
-                  {
-                    et_type =
-                      (match et_enforced with
-                      | Enforced
-                        when TypecheckerOptions.enable_sound_dynamic
-                               (Env.get_tcopt env)
-                             && Env.get_support_dynamic_type env ->
-                        Typing_utils.make_like env member_ty
-                      | _ -> member_ty);
-                    et_enforced;
-                  }
+                  (Typing_utils.make_like_if_enforced env ety)
                   Typing_error.Callback.unify_error
               in
               Option.iter ty_err_opt ~f:Errors.add_typing_error;

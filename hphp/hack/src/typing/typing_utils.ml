@@ -783,6 +783,14 @@ let make_like env ty =
     let r = get_reason ty in
     Typing_make_type.locl_like r ty
 
+let make_like_if_enforced env ety =
+  match ety.et_enforced with
+  | Enforced
+    when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+         && Env.get_support_dynamic_type env ->
+    { ety with et_type = make_like env ety.et_type }
+  | _ -> ety
+
 let rec is_capability ty =
   match get_node ty with
   | Tclass ((_, name), _, _)

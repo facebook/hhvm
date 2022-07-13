@@ -141,21 +141,16 @@ let make_return_type
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (* If return type t is enforced we permit values of type ~t to be returned *)
-      let et_type =
-        match et_enforced with
-        | Enforced
-          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-               && Env.get_support_dynamic_type env ->
-          Typing_utils.make_like env et_type
-        | _ -> et_type
+      let ety =
+        Typing_utils.make_like_if_enforced env { et_enforced; et_type }
       in
       let et_type =
         if wrap then
-          wrap_awaitable (get_pos et_type) et_type
+          wrap_awaitable (get_pos et_type) ety.et_type
         else
-          et_type
+          ety.et_type
       in
-      (env, { et_enforced; et_type })
+      (env, { ety with et_type })
     in
     (match (Env.get_fn_kind env, deref ty) with
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))

@@ -480,6 +480,14 @@ val make_supportdyn :
 val make_like :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
 
+(* Wrap ~ around a type if it is enforced. This is used for returns, property
+ * assignment, and default expression typing
+ *)
+val make_like_if_enforced :
+  Typing_env_types.env ->
+  Typing_defs.locl_possibly_enforced_ty ->
+  Typing_defs.locl_possibly_enforced_ty
+
 val is_capability : Typing_defs.locl_ty -> bool
 
 val is_capability_i : Typing_defs.internal_type -> bool

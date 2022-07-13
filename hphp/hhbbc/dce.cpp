@@ -1548,6 +1548,7 @@ void dce(Env& env, const bc::LazyClassFromClass&) {
   pushRemovableIfNoThrow(env);
 }
 void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ResolveClass&)     { pushRemovableIfNoThrow(env); }
 
 /*
  * Default implementation is conservative: assume we use all of our
@@ -1663,7 +1664,6 @@ void dce(Env& env, const bc::ResolveRClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ResolveClass& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetImplicitContextByValue& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }

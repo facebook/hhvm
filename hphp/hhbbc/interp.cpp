@@ -4224,6 +4224,7 @@ void in(ISS& env, const bc::ResolveClass& op) {
   // TODO (T61651936)
   auto cls = env.index.resolve_class(env.ctx, op.str1);
   if (cls && cls->resolved()) {
+    effect_free(env);
     push(env, clsExact(*cls));
   } else {
     // If the class is not resolved,

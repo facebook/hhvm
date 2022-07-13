@@ -6,8 +6,10 @@
 use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;
 use proc_macro2::Ident;
+use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::borrow::Cow;
 use syn::spanned::Spanned;
 use syn::Attribute;
 use syn::Data;
@@ -137,7 +139,7 @@ fn find_local_id_field<'a>(input: &'a DeriveInput, data: &'a DataStruct) -> Resu
 
     let field = if let Some(ident) = field.ident.as_ref() {
         Field {
-            kind: FieldKind::Named(ident),
+            kind: FieldKind::Named(Cow::Borrowed(ident)),
             ty: sty,
         }
     } else {
@@ -176,7 +178,7 @@ fn build_has_locals_struct(input: &DeriveInput, data: &DataStruct) -> Result<Tok
             quote!()
         }
         Field {
-            kind: FieldKind::Named(name),
+            kind: FieldKind::Named(ref name),
             ..
         } => quote!(self.#name),
         Field {
@@ -208,13 +210,17 @@ fn get_select_field<'a>(
         return Ok(Some(f));
     }
 
+    if let Some(f) = default_select_field.as_ref() {
+        return Ok(Some(f.clone()));
+    }
+
     let mut interesting_fields = InterestingFields::None;
     for (idx, field) in variant.fields.iter().enumerate() {
         let ty = SimpleType::from_type(&field.ty);
         if ty.is_based_on("LocalId") {
             let kind = if let Some(ident) = field.ident.as_ref() {
                 // Bar { .., lid: LocalId }
-                FieldKind::Named(ident)
+                FieldKind::Named(Cow::Borrowed(ident))
             } else {
                 // Bar(.., LocalId)
                 FieldKind::Numbered(idx)
@@ -225,10 +231,6 @@ fn get_select_field<'a>(
             // related to LocalId.
             interesting_fields.add(idx, field.ident.as_ref(), SimpleType::Unknown);
         }
-    }
-
-    if let Some(f) = default_select_field.as_ref() {
-        return Ok(Some(f.clone()));
     }
 
     // There are no explicit LocalId fields.
@@ -242,7 +244,7 @@ fn get_select_field<'a>(
             // If there's only a single field that might contain a buried
             // LocalId. If it doesn't then the caller needs to be explicit.
             match ident {
-                Some(ident) => (FieldKind::Named(ident), ty),
+                Some(ident) => (FieldKind::Named(Cow::Borrowed(ident)), ty),
                 None => (FieldKind::Numbered(idx), ty),
             }
         }
@@ -302,7 +304,7 @@ struct Field<'a> {
 
 #[derive(Clone, Debug)]
 enum FieldKind<'a> {
-    Named(&'a Ident),
+    Named(Cow<'a, Ident>),
     None,
     Numbered(usize),
 }
@@ -393,6 +395,15 @@ fn handle_has_locals_attr(attrs: &[Attribute]) -> Result<Option<Field<'_>>> {
                         NestedMeta::Lit(Lit::Int(i)) => {
                             return Ok(Some(Field {
                                 kind: FieldKind::Numbered(i.base10_parse()?),
+                                ty: SimpleType::Unknown,
+                            }));
+                        }
+                        NestedMeta::Lit(Lit::Str(n)) => {
+                            return Ok(Some(Field {
+                                kind: FieldKind::Named(Cow::Owned(Ident::new(
+                                    &n.value(),
+                                    Span::call_site(),
+                                ))),
                                 ty: SimpleType::Unknown,
                             }));
                         }

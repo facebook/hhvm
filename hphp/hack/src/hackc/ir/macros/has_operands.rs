@@ -6,9 +6,11 @@
 use crate::simple_type::SimpleType;
 use crate::util::InterestingFields;
 use proc_macro2::Ident;
+use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
+use std::borrow::Cow;
 use syn::spanned::Spanned;
 use syn::Attribute;
 use syn::Data;
@@ -123,13 +125,17 @@ fn get_select_field<'a>(
         return Ok(Some(f));
     }
 
+    if let Some(f) = default_select_field.as_ref() {
+        return Ok(Some(f.clone()));
+    }
+
     let mut interesting_fields = InterestingFields::None;
     for (idx, field) in variant.fields.iter().enumerate() {
         let ty = SimpleType::from_type(&field.ty);
         if ty.is_based_on("ValueId") {
             let kind = if let Some(ident) = field.ident.as_ref() {
                 // Bar { .., vid: ValueId }
-                FieldKind::Named(ident)
+                FieldKind::Named(Cow::Borrowed(ident))
             } else {
                 // Bar(.., ValueId)
                 FieldKind::Numbered(idx)
@@ -140,10 +146,6 @@ fn get_select_field<'a>(
             // related to ValueId.
             interesting_fields.add(idx, field.ident.as_ref(), SimpleType::Unknown);
         }
-    }
-
-    if let Some(f) = default_select_field.as_ref() {
-        return Ok(Some(f.clone()));
     }
 
     // There are no explicit ValueId fields.
@@ -157,7 +159,7 @@ fn get_select_field<'a>(
             // If there's only a single field that might contain a buried
             // ValueId. If it doesn't then the caller needs to be explicit.
             match ident {
-                Some(ident) => (FieldKind::Named(ident), ty),
+                Some(ident) => (FieldKind::Named(Cow::Borrowed(ident)), ty),
                 None => (FieldKind::Numbered(idx), ty),
             }
         }
@@ -226,7 +228,7 @@ struct Field<'a> {
 
 #[derive(Clone)]
 enum FieldKind<'a> {
-    Named(&'a Ident),
+    Named(Cow<'a, Ident>),
     None,
     Numbered(usize),
 }
@@ -311,6 +313,15 @@ fn handle_has_operands_attr(attrs: &[Attribute]) -> Result<Option<Field<'_>>> {
                         NestedMeta::Lit(Lit::Int(i)) => {
                             return Ok(Some(Field {
                                 kind: FieldKind::Numbered(i.base10_parse()?),
+                                ty: SimpleType::Unknown,
+                            }));
+                        }
+                        NestedMeta::Lit(Lit::Str(n)) => {
+                            return Ok(Some(Field {
+                                kind: FieldKind::Named(Cow::Owned(Ident::new(
+                                    &n.value(),
+                                    Span::call_site(),
+                                ))),
                                 ty: SimpleType::Unknown,
                             }));
                         }

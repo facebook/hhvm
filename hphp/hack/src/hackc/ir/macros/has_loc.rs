@@ -10,6 +10,7 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
+use std::borrow::Cow;
 use syn::spanned::Spanned;
 use syn::Attribute;
 use syn::Data;
@@ -125,13 +126,17 @@ fn get_select_field<'a>(
         return Ok(Some(f));
     }
 
+    if let Some(f) = default_select_field.as_ref() {
+        return Ok(Some(f.clone()));
+    }
+
     let mut interesting_fields = InterestingFields::None;
     for (idx, field) in variant.fields.iter().enumerate() {
         let ty = SimpleType::from_type(&field.ty);
         if ty.is_based_on("LocId") {
             let kind = if let Some(ident) = field.ident.as_ref() {
                 // Bar { .., loc: LocId }
-                FieldKind::Named(ident.clone())
+                FieldKind::Named(Cow::Borrowed(ident))
             } else {
                 // Bar(.., LocId)
                 FieldKind::Numbered(idx)
@@ -144,10 +149,6 @@ fn get_select_field<'a>(
         }
     }
 
-    if let Some(f) = default_select_field.as_ref() {
-        return Ok(Some(f.clone()));
-    }
-
     match interesting_fields {
         InterestingFields::None => {
             let kind = FieldKind::None;
@@ -157,9 +158,10 @@ fn get_select_field<'a>(
         InterestingFields::One(idx, ident, ty) => {
             // There's only a single field that could possibly contain a buried
             // LocId.
-            let kind = ident
-                .cloned()
-                .map_or_else(|| FieldKind::Numbered(idx), FieldKind::Named);
+            let kind = ident.map_or_else(
+                || FieldKind::Numbered(idx),
+                |id| FieldKind::Named(Cow::Borrowed(id)),
+            );
             Ok(Some(Field { kind, ty }))
         }
         InterestingFields::Many => Ok(None),
@@ -203,13 +205,13 @@ fn build_has_loc_enum(input: &DeriveInput, data: &DataEnum) -> Result<TokenStrea
 
 #[derive(Clone)]
 struct Field<'a> {
-    kind: FieldKind,
+    kind: FieldKind<'a>,
     ty: SimpleType<'a>,
 }
 
 #[derive(Clone)]
-enum FieldKind {
-    Named(Ident),
+enum FieldKind<'a> {
+    Named(Cow<'a, Ident>),
     None,
     Numbered(usize),
 }
@@ -282,7 +284,10 @@ fn handle_has_loc_attr(attrs: &[Attribute]) -> Result<Option<Field<'_>>> {
                         }
                         NestedMeta::Lit(Lit::Str(n)) => {
                             return Ok(Some(Field {
-                                kind: FieldKind::Named(Ident::new(&n.value(), Span::call_site())),
+                                kind: FieldKind::Named(Cow::Owned(Ident::new(
+                                    &n.value(),
+                                    Span::call_site(),
+                                ))),
                                 ty: SimpleType::Unknown,
                             }));
                         }

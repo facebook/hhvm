@@ -235,7 +235,7 @@ fn assemble_typedef<'arena>(
     let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let name = assemble_class_name(alloc, token_iter)?;
     token_iter.expect(Token::into_equal)?;
-    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, true)? {
+    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, false, true)? {
         // won't be any user_type
         let span = assemble_span(token_iter)?;
         //tv
@@ -408,7 +408,7 @@ fn assemble_method<'arena>(
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false)?,
+        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
         _ => Maybe::Nothing,
     };
     let name = assemble_method_name(alloc, token_iter)?;
@@ -478,7 +478,7 @@ fn assemble_property<'arena>(
     } else {
         Maybe::Nothing
     };
-    let type_info = if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false)? {
+    let type_info = if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
         ti
     } else {
         bail!("No type_info for class property")
@@ -718,7 +718,7 @@ fn assemble_enum_ty<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".enum_ty") {
-        let ti = assemble_type_info(alloc, token_iter, true)?;
+        let ti = assemble_type_info(alloc, token_iter, true, false)?;
         token_iter.expect(Token::into_semicolon)?;
         Ok(ti)
     } else {
@@ -970,7 +970,7 @@ fn assemble_function<'arena>(
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false)?,
+        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
         _ => Maybe::Nothing,
     };
     // Assemble_name
@@ -1070,7 +1070,7 @@ fn assemble_upper_bound<'arena>(
     token_iter.expect_is_str(Token::into_identifier, "as")?;
     let mut tis = Vec::new();
     while !token_iter.peek_if(Token::is_close_paren) {
-        if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false)? {
+        if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
             tis.push(ti);
         } else {
             bail!("Unexpected \"N\" in upper bound type info");
@@ -1206,13 +1206,16 @@ fn assemble_type_info<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     is_enum: bool,
+    is_typedef: bool, // If typedef, the user_type is also the name
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     token_iter.expect(Token::into_lt)?;
     let user_type = token_iter.expect(Token::into_str_literal)?;
     let user_type = escaper::unquote_slice(user_type);
     let user_type = escaper::unescape_literal_bytes_into_vec_bytes(user_type)?;
     let user_type = Maybe::Just(Str::new_slice(alloc, &user_type));
-    let type_cons_name = if is_enum || token_iter.next_if_str(Token::is_identifier, "N") {
+    let type_cons_name = if is_typedef {
+        user_type.clone()
+    } else if is_enum || token_iter.next_if_str(Token::is_identifier, "N") {
         Maybe::Nothing
     } else {
         Maybe::Just(Str::new_slice(
@@ -1291,7 +1294,7 @@ fn assemble_param<'arena, 'a>(
     let is_readonly = token_iter.next_if_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_if(Token::is_variadic);
     let type_info = if token_iter.peek_if(Token::is_lt) {
-        assemble_type_info(alloc, token_iter, false)? // Unlike user_attrs, consumes <> too
+        assemble_type_info(alloc, token_iter, false, false)? // Unlike user_attrs, consumes <> too
     } else {
         Maybe::Nothing
     };

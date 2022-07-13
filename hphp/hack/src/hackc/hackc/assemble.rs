@@ -1731,7 +1731,12 @@ fn assemble_instr<'arena, 'a>(
                         hhbc::Opcode::NewObjRD,
                         "NewObjRD",
                     ),
-                    b"NewObjS" => todo!(),
+                    b"NewObjS" => {
+                        sl_lexer.next();
+                        Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewObjS(
+                            assemble_special_class_ref(&mut sl_lexer)?,
+                        )))
+                    }
                     b"LockObj" => assemble_single_opcode_instr(
                         &mut sl_lexer,
                         || hhbc::Opcode::LockObj,
@@ -1927,6 +1932,42 @@ fn assemble_instr<'arena, 'a>(
                         &mut sl_lexer,
                         || hhbc::Opcode::IssetG,
                         "IssetG",
+                    ),
+                    b"IssetS" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::IssetS,
+                        "IssetS",
+                    ),
+                    b"NewPair" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::NewPair,
+                        "NewPair",
+                    ),
+                    b"Clone" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Clone, "Clone")
+                    }
+                    b"Idx" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Idx, "Idx")
+                    }
+                    b"YieldK" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::YieldK,
+                        "YieldK",
+                    ),
+                    b"ArrayUnmarkLegacy" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ArrayUnmarkLegacy,
+                        "ArrayUnmarkLegacy",
+                    ),
+                    b"ArrayMarkLegacy" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ArrayMarkLegacy,
+                        "ArrayMarkLegacy",
+                    ),
+                    b"AKExists" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::AKExists,
+                        "AKExists",
                     ),
                     _ => todo!("assembling instrs: {}", tok),
                 }

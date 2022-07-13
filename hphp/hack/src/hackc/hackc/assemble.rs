@@ -3751,13 +3751,13 @@ impl<'a> Lexer<'a> {
     pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
         // First create the regex that matches any token. Done this way for readability
         let v = [
-            r#"""".*?""""#,                                               // Triple str literal
-            "#.*",                                                        // Comment
+            r#"""".*?""""#,                                                 // Triple str literal
+            "#.*",                                                          // Comment
             r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, global. (?-u) turns off utf8 check
             r"(?-u)\$[_a-zA-Z0-9\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Var. See /home/almathaler/fbsource/fbcode/hphp/test/quick/reified-and-variadic.php's assembly for a var w/ a digit at front
             r#""((\\.)|[^\\"])*""#,                                 // Str literal
             r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",     // Number
-            r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\$#]|::)*", // Identifier
+            r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#]|::)*", // Identifier
             ";",
             "-",
             "=",

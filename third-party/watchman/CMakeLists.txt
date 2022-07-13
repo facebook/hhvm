@@ -5,8 +5,8 @@ include(HPHPFunctions)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   WATCHMAN_DOWNLOAD_ARGS
-  SOURCE_URL "https://github.com/facebook/watchman/archive/refs/tags/v2022.03.14.00.tar.gz"
-  SOURCE_HASH "SHA256=baa98fb0963f42140d4f5735b694284b4c0a23f35bd41412289f3df4e3bd4391"
+  SOURCE_URL "https://github.com/facebook/watchman/archive/refs/tags/v2022.07.04.00.tar.gz"
+  SOURCE_HASH "SHA256=33f7e8e3c005ba2e0b81f6552df256d69aab057fb4b26dcd122fb662914b4b21"
   # The tarball name is just the tag name, which can conflict in the cache
   FILENAME_PREFIX "watchman-"
 )

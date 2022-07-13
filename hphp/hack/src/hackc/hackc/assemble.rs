@@ -1631,6 +1631,12 @@ fn assemble_instr<'arena, 'a>(
                         assemble_fcall(alloc, &mut sl_lexer)
                     }
                     b"IncDecL" => assemble_incdecl_opcode(&mut sl_lexer, decl_map),
+                    b"IncDecG" => {
+                        assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecG, "IncDecG")
+                    }
+                    b"IncDecS" => {
+                        assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecS, "IncDecS")
+                    }
                     b"IsTypeStructC" => assemble_is_type_struct_c(&mut sl_lexer),
                     b"IsTypeC" => assemble_is_type_c(&mut sl_lexer),
                     b"IsTypeL" => assemble_is_type_l(&mut sl_lexer, decl_map),
@@ -2677,6 +2683,16 @@ fn assemble_incdecl_opcode<'arena>(
     }
 }
 
+/// IncDecS IncDecOp
+fn assemble_incdec_opcode<'arena, F: FnOnce(hhbc::IncDecOp) -> hhbc::Opcode<'arena>>(
+    token_iter: &mut Lexer<'_>,
+    op_con: F,
+    op_str: &str,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, op_str)?;
+    let ido = assemble_inc_dec_op(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(op_con(ido)))
+}
 /// Ex:
 /// NewStructDict <"sc" "l_o" "l_b_t">
 fn assemble_new_struct_dict<'arena>(

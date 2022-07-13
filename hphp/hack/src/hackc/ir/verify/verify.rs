@@ -388,6 +388,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             let expects_select = match *prev_instr {
                 Instr::Call(ref call) => call.num_rets >= 2,
                 Instr::Hhbc(Hhbc::ClassGetTS(..)) => true,
+                Instr::MemberOp(ref op) => op.num_values() >= 2,
                 _ => false,
             };
             if !expects_select {
@@ -448,6 +449,12 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
             }
             Instr::Hhbc(Hhbc::ClassGetTS(..)) => {
                 self.verify_selects(2, block, iid, iid_idx)?;
+            }
+            Instr::MemberOp(ref op) => {
+                let num_rets = op.num_values();
+                if num_rets > 1 {
+                    self.verify_selects(num_rets, block, iid, iid_idx)?;
+                }
             }
             Instr::Terminator(Terminator::CallAsync(_, targets)) => {
                 self.verify_block_args(iid, targets[0], 1)?;

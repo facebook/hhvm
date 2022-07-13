@@ -19,6 +19,7 @@ use core::class::TraitReqKind;
 use core::instr::BaseOp;
 use core::instr::ContCheckOp;
 use core::instr::FCallArgsFlags;
+use core::instr::FinalOp;
 use core::instr::HasLoc;
 use core::instr::Hhbc;
 use core::instr::IncDecOp;
@@ -26,10 +27,10 @@ use core::instr::IncludeKind;
 use core::instr::IsLogAsDynamicCallOp;
 use core::instr::MOpMode;
 use core::instr::MemberKey;
-use core::instr::MemberOp;
 use core::instr::OODeclExistsOp;
 use core::instr::QueryMOp;
 use core::instr::ReadonlyOp;
+use core::instr::SetRangeOp;
 use core::instr::Special;
 use core::instr::Ssa;
 use core::instr::SwitchKind;
@@ -1253,6 +1254,21 @@ pub(crate) fn print_instr(
     Ok(true)
 }
 
+fn print_inner_loc(
+    w: &mut dyn Write,
+    ctx: &mut FuncContext<'_, '_>,
+    func: &Func<'_>,
+    loc_id: LocId,
+) -> Result {
+    if ctx.cur_loc_id != loc_id {
+        ctx.cur_loc_id = loc_id;
+        if let Some(loc) = func.get_loc(loc_id) {
+            write!(w, "<srcloc {}> ", FmtLoc(loc))?;
+        }
+    }
+    Ok(())
+}
+
 fn print_loc(
     w: &mut dyn Write,
     ctx: &mut FuncContext<'_, '_>,
@@ -1274,50 +1290,53 @@ fn print_member_op(
     func: &Func<'_>,
     op: &instr::MemberOp,
 ) -> Result {
-    let (data, op_str) = match op {
-        MemberOp::IncDecM(data, _) => (data, "incdecm"),
-        MemberOp::QueryM(data, _) => (data, "querym"),
-        MemberOp::SetM(data) => (data, "setm"),
-        MemberOp::SetOpM(data, _) => (data, "setopm"),
-        MemberOp::UnsetM(data) => (data, "unsetm"),
+    let final_op_str = match op.final_op {
+        FinalOp::IncDecM { .. } => "incdecm",
+        FinalOp::QueryM { .. } => "querym",
+        FinalOp::SetM { .. } => "setm",
+        FinalOp::SetOpM { .. } => "setopm",
+        FinalOp::SetRangeM { .. } => "setrangem",
+        FinalOp::UnsetM { .. } => "unsetm",
     };
-
-    write!(w, "{} ", op_str)?;
+    write!(w, "{} ", final_op_str)?;
 
     let verbose = ctx.verbose;
-    let mut operands = data.operands.iter().copied();
-    let mut locals = data.locals.iter().copied();
+    let mut operands = op.operands.iter().copied();
+    let mut locals = op.locals.iter().copied();
 
-    match *op {
-        MemberOp::IncDecM(_, idop) => match idop {
+    match op.final_op {
+        FinalOp::IncDecM { inc_dec_op, .. } => match inc_dec_op {
             IncDecOp::PreInc | IncDecOp::PreIncO => write!(w, "++")?,
             IncDecOp::PreDec | IncDecOp::PreDecO => write!(w, "--")?,
             IncDecOp::PostInc | IncDecOp::PostDec | IncDecOp::PostIncO | IncDecOp::PostDecO => {}
             _ => unreachable!(),
         },
-        MemberOp::QueryM(..) | MemberOp::SetM(..) | MemberOp::SetOpM(..) | MemberOp::UnsetM(..) => {
-        }
+        FinalOp::QueryM { .. }
+        | FinalOp::SetM { .. }
+        | FinalOp::SetOpM { .. }
+        | FinalOp::SetRangeM { .. }
+        | FinalOp::UnsetM { .. } => {}
     }
 
-    match data.base_op {
-        BaseOp::BaseC(mode, _) => {
+    match op.base_op {
+        BaseOp::BaseC { mode, .. } => {
             if mode != MOpMode::None {
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
             let vid = operands.next().unwrap();
             write!(w, "{}", FmtVid(func, vid, verbose))?;
         }
-        BaseOp::BaseGC(mode, _) => {
+        BaseOp::BaseGC { mode, .. } => {
             if mode != MOpMode::None {
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
             let vid = operands.next().unwrap();
             write!(w, "global {}", FmtVid(func, vid, verbose))?;
         }
-        BaseOp::BaseH(_) => {
+        BaseOp::BaseH { .. } => {
             write!(w, "$this")?;
         }
-        BaseOp::BaseL(mode, readonly, _) => {
+        BaseOp::BaseL { mode, readonly, .. } => {
             if mode != MOpMode::None {
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
@@ -1327,7 +1346,7 @@ fn print_member_op(
             let lid = locals.next().unwrap();
             write!(w, "{}", FmtLid(lid, ctx.strings))?;
         }
-        BaseOp::BaseSC(mode, readonly, _) => {
+        BaseOp::BaseSC { mode, readonly, .. } => {
             if mode != MOpMode::None {
                 write!(w, "{} ", FmtMOpMode(mode))?;
             }
@@ -1345,30 +1364,80 @@ fn print_member_op(
         }
     }
 
-    for op in data.intermediate_ops.iter() {
-        print_loc(w, ctx, func, op.loc_id())?;
-        match *op {
-            instr::IntermediateOp::Dim(mode, ref key, readonly, _) => {
-                if mode != MOpMode::None {
-                    write!(w, " {} ", FmtMOpMode(mode))?;
-                }
-                if readonly != ReadonlyOp::Any {
-                    write!(w, " {} ", FmtReadonly(readonly))?;
-                }
-                print_member_key(w, ctx, &mut operands, &mut locals, func, key)?;
+    for op in op.intermediate_ops.iter() {
+        print_inner_loc(w, ctx, func, op.loc)?;
+
+        if op.mode != MOpMode::None {
+            write!(w, " {} ", FmtMOpMode(op.mode))?;
+        }
+        if op.readonly != ReadonlyOp::Any {
+            write!(w, " {} ", FmtReadonly(op.readonly))?;
+        }
+        print_member_key(w, ctx, &mut operands, &mut locals, func, &op.key)?;
+    }
+
+    match op.final_op {
+        FinalOp::IncDecM {
+            ref key,
+            readonly,
+            loc,
+            ..
+        }
+        | FinalOp::QueryM {
+            ref key,
+            readonly,
+            loc,
+            ..
+        }
+        | FinalOp::SetM {
+            ref key,
+            readonly,
+            loc,
+            ..
+        }
+        | FinalOp::SetOpM {
+            ref key,
+            readonly,
+            loc,
+            ..
+        }
+        | FinalOp::UnsetM {
+            ref key,
+            readonly,
+            loc,
+            ..
+        } => {
+            print_inner_loc(w, ctx, func, loc)?;
+            print_member_key(w, ctx, &mut operands, &mut locals, func, key)?;
+            if readonly != ReadonlyOp::Any {
+                write!(w, " {}", FmtReadonly(readonly))?;
             }
+        }
+        FinalOp::SetRangeM {
+            sz, set_range_op, ..
+        } => {
+            let s1 = operands.next().unwrap();
+            let s2 = operands.next().unwrap();
+            let s3 = operands.next().unwrap();
+            let set_range_op = match set_range_op {
+                SetRangeOp::Forward => "forward",
+                SetRangeOp::Reverse => "reverse",
+                _ => unreachable!(),
+            };
+            write!(
+                w,
+                " set {}, {}, {} size {} {}",
+                FmtVid(func, s1, verbose),
+                FmtVid(func, s2, verbose),
+                FmtVid(func, s3, verbose),
+                sz,
+                set_range_op
+            )?;
         }
     }
 
-    print_loc(w, ctx, func, data.final_loc)?;
-    print_member_key(w, ctx, &mut operands, &mut locals, func, &data.final_key)?;
-
-    if data.final_readonly != ReadonlyOp::Any {
-        write!(w, " {}", FmtReadonly(data.final_readonly))?;
-    }
-
-    match *op {
-        MemberOp::IncDecM(_, idop) => match idop {
+    match op.final_op {
+        FinalOp::IncDecM { inc_dec_op, .. } => match inc_dec_op {
             IncDecOp::PreInc | IncDecOp::PreDec => {}
             IncDecOp::PreIncO | IncDecOp::PreDecO => write!(w, " overflow")?,
             IncDecOp::PostInc => write!(w, "++")?,
@@ -1377,22 +1446,27 @@ fn print_member_op(
             IncDecOp::PostDecO => write!(w, "++ overflow")?,
             _ => unreachable!(),
         },
-        MemberOp::QueryM(_, qmop) => match qmop {
+        FinalOp::QueryM { query_m_op, .. } => match query_m_op {
             QueryMOp::CGet => {}
             QueryMOp::CGetQuiet => write!(w, "quiet ")?,
             QueryMOp::Isset => write!(w, "isset ")?,
             QueryMOp::InOut => write!(w, "inout ")?,
             _ => unreachable!(),
         },
-        MemberOp::SetM(..) => {
+        FinalOp::SetM { .. } => {
             let vid = operands.next().unwrap();
             write!(w, " = {}", FmtVid(func, vid, verbose))?;
         }
-        MemberOp::SetOpM(_, op) => {
+        FinalOp::SetOpM { set_op_op, .. } => {
             let vid = operands.next().unwrap();
-            write!(w, " {} {}", FmtSetOpOp(op), FmtVid(func, vid, verbose))?;
+            write!(
+                w,
+                " {} {}",
+                FmtSetOpOp(set_op_op),
+                FmtVid(func, vid, verbose)
+            )?;
         }
-        MemberOp::UnsetM(..) => {}
+        FinalOp::SetRangeM { .. } | FinalOp::UnsetM { .. } => {}
     }
 
     assert_eq!(operands.next(), None);

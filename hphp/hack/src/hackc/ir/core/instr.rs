@@ -35,6 +35,7 @@ pub use hhbc::ObjMethodOp;
 pub use hhbc::QueryMOp;
 pub use hhbc::ReadonlyOp;
 pub use hhbc::SetOpOp;
+pub use hhbc::SetRangeOp;
 pub use hhbc::SilenceOp;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;
@@ -549,59 +550,130 @@ impl CanThrow for Hhbc {
     }
 }
 
-#[derive(Debug, HasLoc)]
+#[derive(Debug, HasLoc, Clone)]
 pub enum BaseOp {
-    BaseC(MOpMode, LocId),
-    BaseGC(MOpMode, LocId),
-    BaseH(LocId),
-    BaseL(MOpMode, ReadonlyOp, LocId),
-    BaseSC(MOpMode, ReadonlyOp, LocId),
+    // Get base from value. Has output of base value.
+    BaseC {
+        mode: MOpMode,
+        loc: LocId,
+    },
+    // Get base from global name. Mutates global.
+    BaseGC {
+        mode: MOpMode,
+        loc: LocId,
+    },
+    // Get base from $this. Cannot mutate $this.
+    BaseH {
+        loc: LocId,
+    },
+    // Get base from local. Mutates local.
+    BaseL {
+        mode: MOpMode,
+        readonly: ReadonlyOp,
+        loc: LocId,
+    },
+    // Get base from static property. Mutates static property.
+    BaseSC {
+        mode: MOpMode,
+        readonly: ReadonlyOp,
+        loc: LocId,
+    },
 }
 
-#[derive(Debug, HasLoc)]
-pub enum IntermediateOp {
-    Dim(MOpMode, MemberKey, ReadonlyOp, LocId),
+#[derive(Debug, HasLoc, Clone)]
+pub struct IntermediateOp {
+    pub key: MemberKey,
+    pub mode: MOpMode,
+    pub readonly: ReadonlyOp,
+    pub loc: LocId,
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Debug, HasLoc, Clone)]
+pub enum FinalOp {
+    IncDecM {
+        key: MemberKey,
+        readonly: ReadonlyOp,
+        inc_dec_op: IncDecOp,
+        loc: LocId,
+    },
+    QueryM {
+        key: MemberKey,
+        readonly: ReadonlyOp,
+        query_m_op: QueryMOp,
+        loc: LocId,
+    },
+    SetM {
+        key: MemberKey,
+        readonly: ReadonlyOp,
+        loc: LocId,
+    },
+    SetRangeM {
+        sz: u32,
+        set_range_op: SetRangeOp,
+        loc: LocId,
+    },
+    SetOpM {
+        key: MemberKey,
+        readonly: ReadonlyOp,
+        set_op_op: SetOpOp,
+        loc: LocId,
+    },
+    UnsetM {
+        key: MemberKey,
+        readonly: ReadonlyOp,
+        loc: LocId,
+    },
+}
+
+impl FinalOp {
+    pub fn key(&self) -> Option<&MemberKey> {
+        match self {
+            FinalOp::IncDecM { key, .. }
+            | FinalOp::QueryM { key, .. }
+            | FinalOp::SetM { key, .. }
+            | FinalOp::SetOpM { key, .. }
+            | FinalOp::UnsetM { key, .. } => Some(key),
+            FinalOp::SetRangeM { .. } => None,
+        }
+    }
+}
+
+#[derive(Debug, HasLoc, HasLocals, HasOperands, Clone)]
 #[has_loc("base_op")]
-pub struct MemberOpData {
+pub struct MemberOp {
     pub operands: Box<[ValueId]>,
     pub locals: Box<[LocalId]>,
     pub base_op: BaseOp,
     pub intermediate_ops: Box<[IntermediateOp]>,
-    pub final_key: MemberKey,
-    pub final_readonly: ReadonlyOp,
-    pub final_loc: LocId,
-}
-
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
-pub enum MemberOp {
-    #[has_loc(0)]
-    #[has_operands(0)]
-    #[has_locals(0)]
-    IncDecM(MemberOpData, IncDecOp),
-    #[has_loc(0)]
-    #[has_operands(0)]
-    #[has_locals(0)]
-    QueryM(MemberOpData, QueryMOp),
-    SetM(MemberOpData),
-    #[has_loc(0)]
-    #[has_operands(0)]
-    #[has_locals(0)]
-    SetOpM(MemberOpData, SetOpOp),
-    UnsetM(MemberOpData),
+    pub final_op: FinalOp,
 }
 
 impl MemberOp {
-    pub fn data(&self) -> &MemberOpData {
-        match self {
-            MemberOp::IncDecM(data, _)
-            | MemberOp::QueryM(data, _)
-            | MemberOp::SetM(data)
-            | MemberOp::SetOpM(data, _)
-            | MemberOp::UnsetM(data) => data,
-        }
+    /// Return the number of values this MemberOp produces. This should match
+    /// the number of `Select` Instrs that follow this Instr.
+    pub fn num_values(&self) -> usize {
+        let (rets_from_final, write_op) = match self.final_op {
+            FinalOp::SetRangeM { .. } => (0, true),
+            FinalOp::UnsetM { .. } => (0, true),
+            FinalOp::IncDecM { .. } => (1, true),
+            FinalOp::QueryM { .. } => (1, false),
+            FinalOp::SetM { .. } => (1, true),
+            FinalOp::SetOpM { .. } => (1, true),
+        };
+
+        let base_key_is_element_access = self.intermediate_ops.get(0).map_or_else(
+            || self.final_op.key().map_or(true, |k| k.is_element_access()),
+            |dim| dim.key.is_element_access(),
+        );
+
+        let rets_from_base = match self.base_op {
+            BaseOp::BaseC { .. } => (base_key_is_element_access && write_op) as usize,
+            BaseOp::BaseGC { .. }
+            | BaseOp::BaseH { .. }
+            | BaseOp::BaseL { .. }
+            | BaseOp::BaseSC { .. } => 0,
+        };
+        rets_from_base + rets_from_final
     }
 }
 
@@ -811,17 +883,46 @@ pub enum SurpriseCheck {
     No,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MemberKey {
+    // cell from stack as index
+    //   $a[foo()]
     EC,
+    // immediate
+    //   $a[3]
     EI(i64),
+    // local (stored in locals array on MemberOp) as index
+    //   $a[$b]
     EL,
+    // literal string as index
+    //   $a["hello"]
     ET(UnitStringId),
+    // cell from stack as property
+    //   $a->(foo())
     PC,
+    // local (stored in locals array on MemberOp) as property
+    //   $a->($b)
     PL,
+    // literal string as property
+    //   $a->hello
     PT(PropId),
+    // nullsafe PT
+    //   $a?->hello
     QT(PropId),
+    // new element
+    //   $a[]
     W,
+}
+
+impl MemberKey {
+    pub fn is_element_access(&self) -> bool {
+        match self {
+            MemberKey::EC | MemberKey::EI(_) | MemberKey::EL | MemberKey::ET(_) | MemberKey::W => {
+                true
+            }
+            MemberKey::PC | MemberKey::PL | MemberKey::PT(_) | MemberKey::QT(_) => false,
+        }
+    }
 }
 
 // The ValueId param is laid out so that we can chop off the optional args and

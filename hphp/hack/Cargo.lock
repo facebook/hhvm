@@ -500,6 +500,8 @@ name = "compiler_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "arena_deserializer",
+ "bincode",
  "bumpalo",
  "compile",
  "cxx",
@@ -509,6 +511,7 @@ dependencies = [
  "facts_rust",
  "hhbc",
  "itertools 0.10.3",
+ "libc",
  "no_pos_hash",
  "ocamlrep",
  "options",
@@ -849,7 +852,6 @@ dependencies = [
  "arena_deserializer",
  "bincode",
  "bumpalo",
- "libc",
  "oxidized_by_ref",
  "thiserror",
 ]

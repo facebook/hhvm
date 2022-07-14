@@ -179,7 +179,6 @@ CompilerResult hackc_compile(
 
   NativeEnv const native_env{
     reinterpret_cast<uint64_t>(provider),
-    reinterpret_cast<uint64_t>(provider ? &hhvm_decl_provider_get_decl : nullptr),
     filename,
     aliased_namespaces,
     s_misc_config,

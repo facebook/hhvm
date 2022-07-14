@@ -210,8 +210,47 @@ module Backend = struct
     SQLitePersistence.close_db ()
 end
 
+let should_ignore fine_dependent dependency =
+  (* This is a sufficient, but not a necessary condition for being an hhi
+   * definition. However, the alternative would be to lookup the path for
+   * every defininition here. *)
+  let is_hh_def : type a. a Typing_deps.Dep.variant -> bool =
+   fun dep ->
+    let root = Typing_deps.Dep.extract_root_name dep in
+    Option.is_some @@ String.chop_prefix root ~prefix:"HH\\"
+  in
+  let has_useful_kind dep =
+    match Typing_deps.Dep.dep_kind_of_variant dep with
+    | Typing_deps.Dep.KFun
+    | Typing_deps.Dep.KMethod
+    | Typing_deps.Dep.KSMethod ->
+      (* Dependencies that we currently utilize *)
+      true
+    | Typing_deps.Dep.KGConst
+    | Typing_deps.Dep.KConst
+    | Typing_deps.Dep.KConstructor
+    | Typing_deps.Dep.KProp
+    | Typing_deps.Dep.KSProp ->
+      (* Dependencies that we may utilize at some point, but aren't at the
+       * moment *)
+      false
+    | Typing_deps.Dep.KType
+    | Typing_deps.Dep.KExtends
+    | Typing_deps.Dep.KAllMembers
+    | Typing_deps.Dep.KGConstName
+    | Typing_deps.Dep.KModule ->
+      (* Dependencies that we will most likely never utilize *)
+      false
+  in
+  Poly.(fine_dependent = dependency)
+  || is_hh_def fine_dependent
+  || is_hh_def dependency
+  || (not @@ has_useful_kind fine_dependent)
+  || (not @@ has_useful_kind dependency)
+
 let add_fine_dep mode fine_dependent dependency =
-  Backend.add mode fine_dependent dependency
+  if not @@ should_ignore fine_dependent dependency then
+    Backend.add mode fine_dependent dependency
 
 let add_coarse_dep mode coarse_dep =
   add_fine_dep mode (Typing_deps.Dep.dependency_of_variant coarse_dep)

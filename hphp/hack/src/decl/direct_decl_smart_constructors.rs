@@ -3070,7 +3070,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         &mut self,
         attributes: Self::Output,
         modifiers: Self::Output,
-        _module_kw_opt: Self::Output,
+        module_kw_opt: Self::Output,
         keyword: Self::Output,
         name: Self::Output,
         generic_params: Self::Output,
@@ -3111,11 +3111,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let internal = modifiers
             .iter()
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let is_module_newtype = module_kw_opt.is_ignored_token_with_kind(TokenKind::Module);
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
             vis: match keyword.token_kind() {
                 Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+                Some(TokenKind::Newtype) if is_module_newtype => {
+                    aast::TypedefVisibility::OpaqueModule
+                }
                 Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
                 _ => aast::TypedefVisibility::Transparent,
             },

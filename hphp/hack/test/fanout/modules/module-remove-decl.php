@@ -37,11 +37,11 @@ internal function foobar(): void {}
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 module A;
-
+module newtype Bar = Foo;
 internal newtype Foo = int;
 //// changed-c-use.php
 <?hh
 <<file: __EnableUnstableFeatures('modules')>>
 module A;
-
+module newtype Bar = Foo;
 internal newtype Foo = int;

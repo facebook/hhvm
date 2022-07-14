@@ -46,7 +46,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
         emitter,
         &tparams,
         typedef.kind.clone(),
-        typedef.vis.is_opaque(),
+        typedef.vis.is_opaque() || typedef.vis.is_opaque_module(),
     );
     let span = HhasSpan::from_pos(&typedef.span);
     let mut attrs = Attr::AttrNone;

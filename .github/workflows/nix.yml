@@ -78,3 +78,17 @@ jobs:
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+    - if: github.event_name != 'pull_request' && runner.os == 'Linux'
+      run: |
+        GPG_KEY_FILE="$(mktemp)" &&
+        aws kms decrypt \
+            --ciphertext-blob fileb://$HOME/github/packaging/aws/gpg-key.kms-ciphertext \
+            --query Plaintext \
+            --output text |
+        base64 --decode > "$GPG_KEY_FILE" &&
+        echo "GPG_KEY_FILE=$GPG_KEY_FILE" >> $GITHUB_ENV
+    - if: github.event_name != 'pull_request' && runner.os == 'Linux'
+      run: |
+        NEXUS_ADMIN_PASSWORD_FILE="$(mktemp)" &&
+        aws secretsmanager get-secret-value --secret-id nexus-admin-password-testing-3 --query SecretString --output text > "$NEXUS_ADMIN_PASSWORD_FILE" &&
+        echo "NEXUS_ADMIN_PASSWORD_FILE=$NEXUS_ADMIN_PASSWORD_FILE" >> $GITHUB_ENV

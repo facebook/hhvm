@@ -472,12 +472,13 @@ let add_fine_grained_member_dep
   let root = Some (Dep.Type (Cls.name dependent_class)) in
   let member =
     match dependent_member_kind with
-    | MemberKind.Method -> Some (Typing_fine_deps.Method dependen_member_name)
+    | MemberKind.Method ->
+      Some (Typing_pessimisation_deps.Method dependen_member_name)
     | MemberKind.Static_method ->
-      Some (Typing_fine_deps.SMethod dependen_member_name)
+      Some (Typing_pessimisation_deps.SMethod dependen_member_name)
     | _ -> None
   in
-  Typing_fine_deps.try_add_fine_dep
+  Typing_pessimisation_deps.try_add_fine_dep
     (Env.get_deps_mode env)
     root
     member

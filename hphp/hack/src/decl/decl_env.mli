@@ -9,7 +9,7 @@
 type env = {
   mode: FileInfo.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
-  droot_member: Typing_fine_deps.dependent_member option;
+  droot_member: Typing_pessimisation_deps.dependent_member option;
       (** The child/member of [droot] currently under consideration.
         * Used for fine-grained dependency tracking. *)
   ctx: Provider_context.t;

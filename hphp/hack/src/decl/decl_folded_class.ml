@@ -968,7 +968,7 @@ and class_decl
         TypecheckerOptions.record_fine_grained_dependencies
         @@ Provider_context.get_tcopt ctx
       then
-        Typing_fine_deps.add_coarse_dep
+        Typing_pessimisation_deps.add_coarse_dep
           (Provider_context.get_deps_mode ctx)
           (Dep.Type cls_name)
           (Dep.Type x)

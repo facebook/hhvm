@@ -14,7 +14,7 @@ module Dep = Typing_deps.Dep
 type env = {
   mode: FileInfo.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
-  droot_member: Typing_fine_deps.dependent_member option;
+  droot_member: Typing_pessimisation_deps.dependent_member option;
   ctx: Provider_context.t;
 }
 
@@ -43,7 +43,7 @@ let add_wclass env x =
     TypecheckerOptions.record_fine_grained_dependencies
     @@ Provider_context.get_tcopt env.ctx
   then
-    Typing_fine_deps.try_add_fine_dep
+    Typing_pessimisation_deps.try_add_fine_dep
       (deps_mode env)
       env.droot
       env.droot_member
@@ -60,8 +60,16 @@ let add_extends_dependency env x =
     TypecheckerOptions.record_fine_grained_dependencies
     @@ Provider_context.get_tcopt env.ctx
   then (
-    Typing_fine_deps.try_add_fine_dep deps_mode env.droot None (Dep.Extends x);
-    Typing_fine_deps.try_add_fine_dep deps_mode env.droot None (Dep.Type x)
+    Typing_pessimisation_deps.try_add_fine_dep
+      deps_mode
+      env.droot
+      None
+      (Dep.Extends x);
+    Typing_pessimisation_deps.try_add_fine_dep
+      deps_mode
+      env.droot
+      None
+      (Dep.Type x)
   );
   ()
 
@@ -96,7 +104,7 @@ let get_construct env class_ =
       TypecheckerOptions.record_fine_grained_dependencies
       @@ Provider_context.get_tcopt env.ctx
     then
-      Typing_fine_deps.try_add_fine_dep
+      Typing_pessimisation_deps.try_add_fine_dep
         (deps_mode env)
         env.droot
         env.droot_member

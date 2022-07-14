@@ -553,7 +553,7 @@ let set_fun_is_constructor env is_ctor =
 let add_fine_dep_if_enabled env dependency =
   let denv = env.decl_env in
   if TypecheckerOptions.record_fine_grained_dependencies @@ get_tcopt env then
-    Typing_fine_deps.try_add_fine_dep
+    Typing_pessimisation_deps.try_add_fine_dep
       (get_deps_mode env)
       denv.droot
       denv.droot_member
@@ -592,15 +592,15 @@ let make_depend_on_module env =
 let env_with_method_droot_member env m ~static =
   let child =
     if static then
-      Typing_fine_deps.SMethod m
+      Typing_pessimisation_deps.SMethod m
     else
-      Typing_fine_deps.Method m
+      Typing_pessimisation_deps.Method m
   in
   let decl_env = { env.decl_env with droot_member = Some child } in
   { env with decl_env }
 
 let env_with_constructor_droot_member env =
-  let member = Typing_fine_deps.Constructor in
+  let member = Typing_pessimisation_deps.Constructor in
   let decl_env = { env.decl_env with droot_member = Some member } in
   { env with decl_env }
 

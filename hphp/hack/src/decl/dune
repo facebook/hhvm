@@ -101,7 +101,8 @@
   procs_procs
   shallow_classes_provider
   shallow_decl_defs
-  typing_defs)
+  typing_defs
+  typing_pessimisation_deps)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -182,7 +183,7 @@
 (library
  (name decl_env)
  (modules decl_env)
- (libraries decl_defs decl_store provider_context typing_defs typing_deps)
+ (libraries decl_defs decl_store provider_context typing_defs typing_pessimisation_deps typing_deps)
  (preprocess
   (pps ppx_deriving.std)))
 

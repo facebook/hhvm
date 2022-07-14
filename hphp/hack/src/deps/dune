@@ -17,7 +17,7 @@
 (library
  (name typing_deps)
  (wrapped false)
- (modules typing_deps typing_deps_mode typing_fine_deps)
+ (modules typing_deps typing_deps_mode)
  (libraries
   collections
   decl_reference
@@ -36,13 +36,27 @@
  (preprocess
   (pps ppx_deriving.std)))
 
-(data_only_dirs cargo deps_rust)
-
 (library
  (name typing_deps_rust)
  (modules)
  (wrapped false)
  (foreign_archives deps_rust_ffi))
+
+(library
+ (name typing_pessimisation_deps)
+ (wrapped false)
+ (modules typing_pessimisation_deps)
+ (libraries
+  typing_deps
+  provider_context
+  relative_path
+  sqlite3
+  sqlite_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(data_only_dirs cargo deps_rust)
+
 
 (rule
  (targets libdeps_rust_ffi.a)

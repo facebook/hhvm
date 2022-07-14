@@ -482,7 +482,7 @@ let process_workitems
     Provider_context.get_tcopt ctx
     |> TypecheckerOptions.record_fine_grained_dependencies
   then
-    Typing_fine_deps.finalize (Provider_context.get_deps_mode ctx);
+    Typing_pessimisation_deps.finalize (Provider_context.get_deps_mode ctx);
 
   (* Gather up our various forms of telemetry... *)
   let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in

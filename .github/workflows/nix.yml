@@ -18,6 +18,7 @@ jobs:
         - ubuntu-latest
         - macos-latest
     runs-on: ${{matrix.os}}
+    continue-on-error: ${{ matrix.os == 'macos-latest' }}
     steps:
     - uses: actions/checkout@v2.4.0
     - uses: cachix/install-nix-action@v15

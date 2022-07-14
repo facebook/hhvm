@@ -51,7 +51,7 @@ pub fn split_critical_edges(func: &mut Func<'_>, rpo_sort: bool) {
         func.blocks
             .resize(num_blocks + work.len(), Block::default());
         for (loc, split_bid, old_target) in work.drain(..) {
-            let instr = Instr::jmp_no_surprise(old_target, loc);
+            let instr = Instr::jmp(old_target, loc);
             func.emit(split_bid, instr);
         }
         if rpo_sort {

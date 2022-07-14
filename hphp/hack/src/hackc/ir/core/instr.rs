@@ -142,14 +142,16 @@ pub enum Terminator {
     // argument which is the function's async value. The eager edge takes a
     // single argument which is the function's return value.
     CallAsync(Box<Call>, [BlockId; 2]),
+    #[has_operands(none)]
+    Enter(BlockId, LocId),
     Exit(ValueId, LocId),
     Fatal(ValueId, FatalOp, LocId),
     IterInit(IteratorArgs, ValueId),
     #[has_operands(none)]
     IterNext(IteratorArgs),
     #[has_operands(none)]
-    Jmp(BlockId, SurpriseCheck, LocId),
-    JmpArgs(BlockId, SurpriseCheck, Box<[ValueId]>, LocId),
+    Jmp(BlockId, LocId),
+    JmpArgs(BlockId, Box<[ValueId]>, LocId),
     JmpOp {
         cond: ValueId,
         pred: Predicate,
@@ -246,9 +248,9 @@ impl HasEdges for Terminator {
             | Terminator::ThrowAsTypeStructException(..)
             | Terminator::Unreachable => &[],
 
-            Terminator::Jmp(bid, _, _) | Terminator::JmpArgs(bid, _, _, _) => {
-                std::slice::from_ref(bid)
-            }
+            Terminator::Enter(bid, _)
+            | Terminator::Jmp(bid, _)
+            | Terminator::JmpArgs(bid, _, _) => std::slice::from_ref(bid),
 
             Terminator::MemoGet(get) => get.edges(),
             Terminator::MemoGetEager(get) => get.edges(),
@@ -274,9 +276,9 @@ impl HasEdges for Terminator {
             | Terminator::ThrowAsTypeStructException(..)
             | Terminator::Unreachable => &mut [],
 
-            Terminator::Jmp(bid, _, _) | Terminator::JmpArgs(bid, _, _, _) => {
-                std::slice::from_mut(bid)
-            }
+            Terminator::Enter(bid, _)
+            | Terminator::Jmp(bid, _)
+            | Terminator::JmpArgs(bid, _, _) => std::slice::from_mut(bid),
 
             Terminator::MemoGet(get) => get.edges_mut(),
             Terminator::MemoGetEager(get) => get.edges_mut(),
@@ -289,7 +291,8 @@ impl CanThrow for Terminator {
         match self {
             Terminator::CallAsync(call, _) => call.can_throw(),
 
-            Terminator::Exit(..)
+            Terminator::Enter(..)
+            | Terminator::Exit(..)
             | Terminator::Jmp(..)
             | Terminator::JmpArgs(..)
             | Terminator::MemoGet(..)
@@ -877,12 +880,6 @@ impl CanThrow for IncludeEval {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum SurpriseCheck {
-    Yes,
-    No,
-}
-
 #[derive(Debug, Clone)]
 pub enum MemberKey {
     // cell from stack as index
@@ -1117,11 +1114,7 @@ impl Instr {
     }
 
     pub fn jmp(bid: BlockId, loc: LocId) -> Instr {
-        Instr::Terminator(Terminator::Jmp(bid, SurpriseCheck::Yes, loc))
-    }
-
-    pub fn jmp_no_surprise(bid: BlockId, loc: LocId) -> Instr {
-        Instr::Terminator(Terminator::Jmp(bid, SurpriseCheck::No, loc))
+        Instr::Terminator(Terminator::Jmp(bid, loc))
     }
 
     pub fn jmp_op(

@@ -460,10 +460,10 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                 self.verify_block_args(iid, targets[0], 1)?;
                 self.verify_block_args(iid, targets[1], 1)?;
             }
-            Instr::Terminator(Terminator::Jmp(bid, _, _)) => {
+            Instr::Terminator(Terminator::Enter(bid, _) | Terminator::Jmp(bid, _)) => {
                 self.verify_block_args(iid, bid, 0)?;
             }
-            Instr::Terminator(Terminator::JmpArgs(bid, _, ref vids, _)) => {
+            Instr::Terminator(Terminator::JmpArgs(bid, ref vids, _)) => {
                 check!(
                     self,
                     !vids.is_empty(),

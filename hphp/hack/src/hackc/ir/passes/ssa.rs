@@ -360,11 +360,13 @@ impl<'a> TransformInstr for MakeSSA<'a> {
         match i {
             Instr::Terminator(Terminator::Jmp(..) | Terminator::JmpArgs(..)) => {
                 // Pass args for new Params, if any, to the target block.
-                let (target, args, sc, loc): (_, &[ValueId], _, _) = match i {
-                    Instr::Terminator(Terminator::JmpArgs(target, sc, ref args, loc)) => {
-                        (target, args, sc, loc)
+                let (target, args, loc): (_, &[ValueId], _) = match i {
+                    Instr::Terminator(Terminator::JmpArgs(target, ref args, loc)) => {
+                        (target, args, loc)
                     }
-                    Instr::Terminator(Terminator::Jmp(target, sc, loc)) => (target, &[], sc, loc),
+                    Instr::Terminator(
+                        Terminator::Enter(target, loc) | Terminator::Jmp(target, loc),
+                    ) => (target, &[], loc),
                     _ => unreachable!(),
                 };
 
@@ -380,7 +382,7 @@ impl<'a> TransformInstr for MakeSSA<'a> {
                     }
 
                     assert!(!args.is_empty());
-                    let t = Terminator::JmpArgs(target, sc, args.into(), loc);
+                    let t = Terminator::JmpArgs(target, args.into(), loc);
                     Instr::Terminator(t)
                 }
             }
@@ -612,13 +614,13 @@ mod test {
             _ => false,
         });
         assert!(match it.next() {
-            Some(Instr::Terminator(Terminator::JmpArgs(bid, _, values, _)))
+            Some(Instr::Terminator(Terminator::JmpArgs(bid, values, _)))
                 if bid.as_usize() == 3 && values.len() == 2 =>
                 true,
             _ => false,
         });
         assert!(match it.next() {
-            Some(Instr::Terminator(Terminator::JmpArgs(bid, _, values, _)))
+            Some(Instr::Terminator(Terminator::JmpArgs(bid, values, _)))
                 if bid.as_usize() == 3 && values.len() == 2 =>
                 true,
             _ => false,

@@ -106,7 +106,7 @@ fn forward_edge(
 
         let terminator = func.terminator(bid);
         let target = match *terminator {
-            Terminator::Jmp(target, _, _) => {
+            Terminator::Jmp(target, _) => {
                 if !block.params.is_empty() {
                     // The block takes params but the jump doesn't pass them
                     // along - it's not a simple forward.
@@ -115,7 +115,7 @@ fn forward_edge(
 
                 target
             }
-            Terminator::JmpArgs(target, _, ref args, _) => {
+            Terminator::JmpArgs(target, ref args, _) => {
                 if !params_eq(&block.params, args) {
                     // Our jump is passing a different set of args from what our
                     // block takes in.

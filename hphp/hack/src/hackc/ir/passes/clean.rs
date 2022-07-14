@@ -47,7 +47,7 @@ fn merge_simple_jumps(func: &mut Func<'_>) {
         loop {
             let terminator = func.get_terminator(bid);
             match terminator {
-                Some(Terminator::Jmp(target_bid, _, _)) => {
+                Some(Terminator::Jmp(target_bid, _)) => {
                     let target_bid = *target_bid;
                     if (func.block(bid).tcid == func.block(target_bid).tcid)
                         && (predecessors[&target_bid].len() == 1)
@@ -129,8 +129,8 @@ fn remove_common_args(func: &mut Func<'_>) {
                         for &pred in preds.iter() {
                             let terminator = func.terminator_mut(pred);
                             match *terminator {
-                                Terminator::JmpArgs(target, sc, _, loc) => {
-                                    *terminator = Terminator::Jmp(target, sc, loc);
+                                Terminator::JmpArgs(target, _, loc) => {
+                                    *terminator = Terminator::Jmp(target, loc);
                                 }
                                 _ => unreachable!(),
                             }
@@ -175,7 +175,7 @@ fn remove_common_args(func: &mut Func<'_>) {
                         for &pred in preds.iter() {
                             let terminator = func.terminator_mut(pred);
                             match terminator {
-                                Terminator::JmpArgs(_, _, old_values, _) => {
+                                Terminator::JmpArgs(_, old_values, _) => {
                                     let values = remove_multi(
                                         old_values.iter().copied(),
                                         remove.iter().copied(),

@@ -1628,6 +1628,7 @@ fn print_terminator(
     let verbose = ctx.verbose;
     match terminator {
         Terminator::CallAsync(call, targets) => print_call_async(w, ctx, func, call, targets)?,
+        Terminator::Enter(bid, _) => write!(w, "enter to {}", FmtBid(func, *bid, verbose),)?,
         Terminator::Exit(vid, _) => {
             write!(w, "exit {}", FmtVid(func, *vid, verbose))?;
         }
@@ -1661,17 +1662,11 @@ fn print_terminator(
                 FmtOptKeyValue(args.key_lid(), args.value_lid(), ctx.strings)
             )?;
         }
-        Terminator::Jmp(bid, check, _) => write!(
+        Terminator::Jmp(bid, _) => write!(w, "jmp to {}", FmtBid(func, *bid, verbose),)?,
+        Terminator::JmpArgs(bid, vids, _) => write!(
             w,
-            "jmp to {}{}",
+            "jmp to {} with ({})",
             FmtBid(func, *bid, verbose),
-            surprise_check(*check)
-        )?,
-        Terminator::JmpArgs(bid, check, vids, _) => write!(
-            w,
-            "jmp to {}{} with ({})",
-            FmtBid(func, *bid, verbose),
-            surprise_check(*check),
             FmtSep::comma(vids.iter(), |w, vid| FmtVid(func, *vid, verbose).fmt(w))
         )?,
         Terminator::JmpOp {
@@ -1848,11 +1843,4 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
     print_fatal(w, &unit.fatal)?;
 
     Ok(())
-}
-
-fn surprise_check(check: instr::SurpriseCheck) -> &'static str {
-    match check {
-        instr::SurpriseCheck::No => " no_surprise",
-        instr::SurpriseCheck::Yes => "",
-    }
 }

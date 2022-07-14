@@ -6,7 +6,7 @@ $dom = new DOMDocument();
   $proc = new XSLTProcessor;
   $xsl = $proc->importStylesheet($dom);
 
-  $xml = new DomDocument();
+  $xml = new DOMDocument();
   $xml->load(dirname(__FILE__)."/exslt.xml");
 
   print $proc->transformToXML($xml);

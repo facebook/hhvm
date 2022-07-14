@@ -10,7 +10,7 @@ $dom = new DOMDocument();
   $proc = new XSLTProcessor;
   $xsl = $proc->importStylesheet($dom);
 
-  $xml = new DomDocument();
+  $xml = new DOMDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
   $proc->registerPHPFunctions();
   print $proc->transformToXML($xml);

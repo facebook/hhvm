@@ -85,13 +85,13 @@ function test14() {
 
 function test15() {
   $doc = new DOMDocument();
-  $xpath = new DOMXpath($doc);
+  $xpath = new DOMXPath($doc);
   $xpath->evaluate("abc", new stdClass);
 }
 
 function test16() {
   $doc = new DOMDocument();
-  $xpath = new DOMXpath($doc);
+  $xpath = new DOMXPath($doc);
   $xpath->query("abc", new stdClass);
 }
 

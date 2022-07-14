@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dom = new DomDocument;
+$dom = new DOMDocument;
 $frag = $dom->createDocumentFragment();
 $frag->appendChild(new DOMElement('root'));
 $dom->appendChild($frag);

@@ -10,6 +10,8 @@ use crate::Attribute;
 use crate::Block;
 use crate::BlockId;
 use crate::BlockIdMap;
+use crate::ClassId;
+use crate::ClassIdMap;
 use crate::Coeffects;
 use crate::HasEdges;
 use crate::Instr;
@@ -158,15 +160,15 @@ pub struct Func<'a> {
     pub num_iters: usize,
     pub params: Vec<Param<'a>>,
     pub return_type: Type<'a>,
+    /// shadowed_tparams are the set of tparams on a method which shadow a
+    /// tparam on the containing class.
+    pub shadowed_tparams: Vec<ClassId>,
+    pub tparams: ClassIdMap<TParamBounds<'a>>,
 }
 
 impl<'a> Func<'a> {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
-
-    pub fn new() -> Self {
-        Self::default()
-    }
 
     pub fn alloc_literal(&mut self, literal: Literal<'a>) -> LiteralId {
         let lid = LiteralId::from_usize(self.literals.len());
@@ -398,4 +400,9 @@ pub struct Method<'a> {
     pub name: MethodName<'a>,
     pub span: HhasSpan,
     pub visibility: Visibility,
+}
+
+#[derive(Debug)]
+pub struct TParamBounds<'a> {
+    pub bounds: Vec<Type<'a>>,
 }

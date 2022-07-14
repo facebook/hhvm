@@ -415,6 +415,19 @@ impl Display for FmtLoc<'_> {
     }
 }
 
+pub struct FmtLocId<'a>(pub &'a Func<'a>, pub LocId);
+
+impl Display for FmtLocId<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtLocId(func, loc_id) = *self;
+        if let Some(loc) = func.locs.get(loc_id) {
+            FmtLoc(loc).fmt(f)
+        } else {
+            write!(f, "<unknown loc #{loc_id}>")
+        }
+    }
+}
+
 pub(crate) struct FmtMOpMode(pub MOpMode);
 
 impl Display for FmtMOpMode {
@@ -535,6 +548,59 @@ impl Display for FmtSpecialClsRef {
             _ => panic!("bad SpecialClsRef value"),
         };
         f.write_str(s)
+    }
+}
+
+pub(crate) struct FmtTParams<'a>(
+    pub(crate) &'a ClassIdMap<TParamBounds<'a>>,
+    pub &'a StringInterner<'a>,
+);
+
+impl Display for FmtTParams<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtTParams(map, strings) = self;
+        if map.is_empty() {
+            Ok(())
+        } else {
+            write!(
+                f,
+                "<{}>",
+                FmtSep::comma(map.iter(), |f, (name, bounds)| {
+                    FmtIdentifierId(name.id, strings).fmt(f)?;
+                    if !bounds.bounds.is_empty() {
+                        write!(f, ": ")?;
+                        let mut sep = "";
+                        for bound in bounds.bounds.iter() {
+                            write!(f, "{sep}{}", FmtType(bound))?;
+                            sep = " + ";
+                        }
+                    }
+                    Ok(())
+                })
+            )
+        }
+    }
+}
+
+pub(crate) struct FmtShadowedTParams<'a>(
+    pub(crate) &'a Vec<ClassId>,
+    pub(crate) &'a StringInterner<'a>,
+);
+
+impl Display for FmtShadowedTParams<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let FmtShadowedTParams(vec, strings) = *self;
+        if vec.is_empty() {
+            Ok(())
+        } else {
+            write!(
+                f,
+                "[{}]",
+                FmtSep::comma(vec.iter(), |f, name| {
+                    FmtIdentifierId(name.id, strings).fmt(f)
+                })
+            )
+        }
     }
 }
 

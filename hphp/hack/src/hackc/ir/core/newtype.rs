@@ -63,6 +63,8 @@ macro_rules! interned_hhbc_id {
 }
 
 interned_hhbc_id!(ClassId, ClassName);
+pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHasher<u32>>;
+
 interned_hhbc_id!(ConstId, ConstName);
 interned_hhbc_id!(FunctionId, FunctionName);
 interned_hhbc_id!(MethodId, MethodName);

@@ -454,12 +454,12 @@ mod test {
         let alloc = bumpalo::Bump::default();
         let mut strings = StringInterner::default();
         let mut func = FuncBuilder::build_func(|builder| {
-            // %0 = call("my_fn", [null, null, 42])
+            // %0 = call("my_fn", [42])
             // %1 = ret null
             let value = builder.emit_literal(Literal::Int(42));
             let null = builder.emit_literal(Literal::Null);
             let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
-            builder.emit(Instr::simple_call(id, &[null, null, value], loc));
+            builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default(), &strings).unwrap();
@@ -477,7 +477,7 @@ mod test {
             // %0 = declare
             // %1 = set(%0, 42)
             // %2 = get(%0)
-            // call("my_fn", [null, null, %2])
+            // call("my_fn", [%2])
             // ret null
             let var = VarId::from_usize(0);
             let value = builder.emit_literal(Literal::Int(42));
@@ -485,7 +485,7 @@ mod test {
             let null = builder.emit_literal(Literal::Null);
             let value = builder.emit(Instr::get_var(var));
             let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
-            builder.emit(Instr::simple_call(id, &[null, null, value], loc));
+            builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default(), &strings).unwrap();
@@ -499,9 +499,9 @@ mod test {
         let instr = it.next();
         assert!(matches!(instr, Some(Instr::Call(..))));
         let ops = instr.unwrap().operands();
-        assert_eq!(ops.len(), 3);
+        assert_eq!(ops.len(), 1);
         assert!(matches!(
-            ops[2].literal().map(|lit| func.literal(lit)),
+            ops[0].literal().map(|lit| func.literal(lit)),
             Some(Literal::Int(42))
         ));
 
@@ -535,7 +535,7 @@ mod test {
             //   %3 = get(%0)
             //   %4 = get(%1)
             //   %4 = get(%2)
-            //        call("my_fn", [null, null, %3, %4, %5])
+            //        call("my_fn", [%3, %4, %5])
             //        ret null
             let var0 = VarId::from_usize(0);
             let var1 = VarId::from_usize(1);
@@ -583,11 +583,7 @@ mod test {
             let value1 = builder.emit(Instr::get_var(var1));
             let value2 = builder.emit(Instr::get_var(var2));
             let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
-            builder.emit(Instr::simple_call(
-                id,
-                &[null, null, value0, value1, value2],
-                loc,
-            ));
+            builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
             builder.emit(Instr::ret(null, loc));
         });
         verify::verify_func(&func, &Default::default(), &strings).unwrap();
@@ -628,7 +624,7 @@ mod test {
             _ => false,
         });
         assert!(match it.next() {
-            Some(i @ Instr::Call(..)) if i.operands().len() == 5 => true,
+            Some(i @ Instr::Call(..)) if i.operands().len() == 3 => true,
             _ => false,
         });
         assert!(matches!(

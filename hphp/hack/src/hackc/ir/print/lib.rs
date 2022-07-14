@@ -11,6 +11,7 @@ pub use formatters::FmtBid;
 pub use formatters::FmtInstr;
 pub use formatters::FmtLid;
 pub use formatters::FmtLoc;
+pub use formatters::FmtLocId;
 pub use formatters::FmtRawBid;
 pub use formatters::FmtRawVid;
 pub use formatters::FmtVid;
@@ -20,10 +21,14 @@ pub use util::FmtOption;
 pub use util::FmtOptionOr;
 pub use util::FmtSep;
 
+use core::Func;
+use core::InstrId;
+use core::InstrIdSet;
+
 // This isn't used by the print crate but is useful for code that wants to print
 // a Func for debugging purposes.
 pub struct DisplayFunc<'a, 'b>(
-    pub &'b core::Func<'a>,
+    pub &'b Func<'a>,
     /* verbose */ pub bool,
     pub &'b core::string_intern::StringInterner<'a>,
 );
@@ -34,6 +39,28 @@ impl std::fmt::Display for DisplayFunc<'_, '_> {
         writeln!(w, "func {} {{", formatters::FmtFuncParams(func, strings))?;
         print::print_func_body(w, func, verbose, strings)?;
         writeln!(w, "}}")?;
+
+        if verbose {
+            let mut unused: InstrIdSet = (0..func.instrs.len()).map(InstrId::from_usize).collect();
+            for iid in func.body_iids() {
+                unused.remove(&iid);
+            }
+            for iid in func
+                .block_ids()
+                .flat_map(|bid| func.block(bid).params.iter().copied())
+            {
+                unused.remove(&iid);
+            }
+            if !unused.is_empty() {
+                let mut unused: Vec<InstrId> = unused.into_iter().collect();
+                unused.sort();
+
+                writeln!(w, "unowned:")?;
+                for iid in unused {
+                    writeln!(w, "  {iid}: {:?}", func.instrs[iid])?;
+                }
+            }
+        }
         writeln!(w)
     }
 }

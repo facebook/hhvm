@@ -390,16 +390,26 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
         writeln!(w, ";")?;
     }
 
-    if !coeffects.cc_param.is_empty() {
-        todo!();
+    for (idx, name) in &coeffects.cc_param {
+        writeln!(w, ".coeffects_cc_param {idx} {}", FmtQuotedStr(name))?;
     }
 
-    if !coeffects.cc_this.is_empty() {
-        todo!();
+    for cc_this in &coeffects.cc_this {
+        writeln!(
+            w,
+            ".coeffects_cc_this {}",
+            FmtSep::comma(cc_this.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
+        )?;
     }
 
-    for _co in &coeffects.cc_reified {
-        todo!();
+    for (is_class, idx, qn) in &coeffects.cc_reified {
+        writeln!(
+            w,
+            "  .coeffects_cc_reified {}{} {}",
+            if *is_class { "isClass" } else { "" },
+            idx,
+            FmtSep::new("", "::", "", qn.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
+        )?;
     }
 
     if coeffects.closure_parent_scope {
@@ -523,9 +533,11 @@ fn print_function(
 ) -> Result {
     writeln!(
         w,
-        "function {}{} {{",
-        FmtIdentifier(f.name.as_bytes()),
-        FmtFuncParams(&f.func, strings)
+        "function {name}{tparams}{params}{shadowed_tparams} {{",
+        name = FmtIdentifier(f.name.as_bytes()),
+        tparams = FmtTParams(&f.func.tparams, strings),
+        shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
+        params = FmtFuncParams(&f.func, strings)
     )?;
     print_coeffects(w, &f.coeffects)?;
     print_func_body(w, &f.func, verbose, strings)?;
@@ -1516,9 +1528,11 @@ fn print_method(
 ) -> Result {
     writeln!(
         w,
-        "method {clsid}::{method}{params} {vis} {{",
+        "method {clsid}::{method}{tparams}{params}{shadowed_tparams} {vis} {{",
         clsid = FmtIdentifierId(clsid.id, strings),
         method = FmtIdentifier(method.name.as_bytes()),
+        tparams = FmtTParams(&method.func.tparams, strings),
+        shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams, strings),
         params = FmtFuncParams(&method.func, strings),
         vis = FmtVisibility(method.visibility),
     )?;

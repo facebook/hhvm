@@ -83,7 +83,7 @@ jobs:
         set -o pipefail
         GPG_KEY_FILE="$(mktemp)" &&
         aws kms decrypt \
-            --ciphertext-blob fileb://$HOME/github/packaging/aws/gpg-key.kms-ciphertext \
+            --ciphertext-blob "fileb://$PWD/gpg-key.kms-ciphertext" \
             --query Plaintext \
             --output text |
         base64 --decode > "$GPG_KEY_FILE" &&

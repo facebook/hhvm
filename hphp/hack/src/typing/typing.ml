@@ -593,31 +593,68 @@ let as_expr env ty1 pe e =
   let expected_ty =
     ConstraintType (mk_constraint_type (Reason.Rforeach pe, Tcan_traverse ct))
   in
-  let (env, ty_err_opt) =
+  let (ty_actual, is_option) =
+    match get_node ty1 with
+    | Toption ty_actual -> (ty_actual, true)
+    | _ -> (ty1, false)
+  in
+  let (env, ty_err_opt1) =
     Type.sub_type_i
       pe
       Reason.URforeach
       env
-      (LoclType ty1)
+      (LoclType ty_actual)
       expected_ty
       Typing_error.Callback.unify_error
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  let ty_mismatch = mk_ty_mismatch_res ty1 expected_ty ty_err_opt in
-  let err_opt =
-    match ty_mismatch with
-    | Ok _ -> None
-    | Error (act, LoclType exp) -> Some (act, exp)
-    | Error (act, ConstraintType _) ->
-      Some (act, SubType.can_traverse_to_iface ct)
+  (* Handle the case where we have a nullable type where the inner type does
+     support `Tcan_traverse` *)
+  let (ty_mismatch_opt, ty_err_opt2) =
+    match ty_err_opt1 with
+    | None when is_option ->
+      let ty_str = lazy (Typing_print.full_strip_ns env ty1) in
+      let ty_ct = Typing_subtype.can_traverse_to_iface ct in
+      let ct_str = lazy (Typing_print.full_strip_ns env ty_ct) in
+      let reasons_opt =
+        Some
+          Lazy.(
+            ty_str >>= fun ty_str ->
+            map ct_str ~f:(fun ct_str ->
+                let msg = "Expected `" ^ ct_str ^ "` " in
+                Reason.to_string msg ct.ct_reason
+                @ [
+                    ( Pos_or_decl.of_raw_pos pe,
+                      Format.sprintf "But got `?%s`" ty_str );
+                  ]))
+      in
+      (* We actually failed so generate the error we should
+         have seen *)
+      let ty_err =
+        Typing_error.(
+          primary
+          @@ Primary.Unify_error { pos = pe; msg_opt = None; reasons_opt })
+      in
+      (Some (ty1, ty_actual), Some ty_err)
+    | Some _ ->
+      let ty_mismatch =
+        match mk_ty_mismatch_res ty1 expected_ty ty_err_opt1 with
+        | Ok _ -> None
+        | Error (act, LoclType exp) -> Some (act, exp)
+        | Error (act, ConstraintType _) ->
+          Some (act, SubType.can_traverse_to_iface ct)
+      in
+      (ty_mismatch, None)
+    | None -> (None, None)
   in
+  let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = Env.set_tyvar_variance_i env expected_ty in
   let tk =
     match ct.ct_key with
     | None -> MakeType.mixed Reason.Rnone
     | Some tk -> tk
   in
-  (Typing_solver.close_tyvars_and_solve env, tk, tv, err_opt)
+  (Typing_solver.close_tyvars_and_solve env, tk, tv, ty_mismatch_opt)
 
 (* These functions invoke special printing functions for Typing_env. They do not
  * appear in user code, but we still check top level function calls against their

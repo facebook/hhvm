@@ -421,7 +421,9 @@ let typedef_defn ctx source_text elem decl_id progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
-    | Opaque -> false
+    | Opaque
+    | OpaqueModule ->
+      false
   in
   let tparams =
     List.map

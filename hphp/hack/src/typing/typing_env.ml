@@ -604,6 +604,14 @@ let env_with_constructor_droot_member env =
   let decl_env = { env.decl_env with droot_member = Some member } in
   { env with decl_env }
 
+let set_module env m = { env with genv = { env.genv with this_module = m } }
+
+let get_module env = Option.map env.genv.this_module ~f:snd
+
+let set_internal env b = { env with genv = { env.genv with this_internal = b } }
+
+let get_internal env = env.genv.this_internal
+
 let get_typedef env x =
   let res =
     Decl_provider.get_typedef
@@ -623,13 +631,16 @@ let is_typedef env x =
   | _ -> false
 
 let is_typedef_visible env ?(expand_visible_newtype = true) td =
-  let { Typing_defs.td_vis; td_pos; _ } = td in
+  let { Typing_defs.td_vis; td_pos; td_module; _ } = td in
   match td_vis with
   | Aast.Opaque ->
     expand_visible_newtype
     && Relative_path.equal
          (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
          (get_file env)
+  | Aast.OpaqueModule ->
+    expand_visible_newtype
+    && Option.equal String.equal (get_module env) (Option.map td_module ~f:snd)
   | Aast.Transparent -> true
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
@@ -960,14 +971,6 @@ let set_fn_kind env fn_type =
   let genv = env.genv in
   let genv = { genv with fun_kind = fn_type } in
   { env with genv }
-
-let set_module env m = { env with genv = { env.genv with this_module = m } }
-
-let get_module env = Option.map env.genv.this_module ~f:snd
-
-let set_internal env b = { env with genv = { env.genv with this_internal = b } }
-
-let get_internal env = env.genv.this_internal
 
 let set_support_dynamic_type env b =
   { env with genv = { env.genv with this_support_dynamic_type = b } }

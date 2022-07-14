@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<59a153c855ab440abb144288231d63e7>>
+// @generated SignedSource<<f0bfabe86bc06356652901512ea1bb84>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -946,6 +946,9 @@ impl TypedefVisibility {
     pub fn mk_opaque() -> Self {
         TypedefVisibility::Opaque
     }
+    pub fn mk_opaque_module() -> Self {
+        TypedefVisibility::OpaqueModule
+    }
     pub fn is_transparent(&self) -> bool {
         match self {
             TypedefVisibility::Transparent => true,
@@ -955,6 +958,12 @@ impl TypedefVisibility {
     pub fn is_opaque(&self) -> bool {
         match self {
             TypedefVisibility::Opaque => true,
+            _ => false,
+        }
+    }
+    pub fn is_opaque_module(&self) -> bool {
+        match self {
+            TypedefVisibility::OpaqueModule => true,
             _ => false,
         }
     }

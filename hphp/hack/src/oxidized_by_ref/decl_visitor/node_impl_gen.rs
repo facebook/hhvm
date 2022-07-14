@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<afb6506b9039a742739205f4e8fe92cd>>
+// @generated SignedSource<<e386c44ddbc84f8675748159c2dd3dae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1163,6 +1163,7 @@ impl<'a> Node<'a> for TypedefVisibility {
         match self {
             TypedefVisibility::Transparent => {}
             TypedefVisibility::Opaque => {}
+            TypedefVisibility::OpaqueModule => {}
         }
     }
 }

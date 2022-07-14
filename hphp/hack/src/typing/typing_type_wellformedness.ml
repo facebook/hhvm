@@ -430,7 +430,9 @@ let typedef tenv t =
            * references.
            *)
           t.t_tparams
-        | Opaque -> []);
+        | Opaque
+        | OpaqueModule ->
+          []);
       tenv;
     }
   in

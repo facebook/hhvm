@@ -1340,7 +1340,9 @@ end = struct
 
     let pp_typedef_visiblity ppf = function
       | Aast_defs.Transparent -> Fmt.string ppf "type"
-      | Aast_defs.Opaque -> Fmt.string ppf "newtype"
+      | Aast_defs.Opaque
+      | Aast_defs.OpaqueModule ->
+        Fmt.string ppf "newtype"
 
     let pp_fixme ppf code = Fmt.pf ppf "/* HH_FIXME[%d] */@." code
 

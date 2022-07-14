@@ -188,6 +188,7 @@ and vc_kind =
 and typedef_visibility =
   | Transparent
   | Opaque
+  | OpaqueModule
 
 and enum_ = {
   e_base: hint;

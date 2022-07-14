@@ -11,5 +11,5 @@ function baz() { echo "baz\n"; return "baz"; }
 
 <<__EntryPoint>>
 function main() {
-  foo::{bar()}(baz());
+  Foo::{bar()}(baz());
 }

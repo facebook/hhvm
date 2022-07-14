@@ -81,7 +81,10 @@
                     --input-type dir \
                     --output-type ${outputType} \
                     --name ${pkgs.lib.strings.escapeShellArg pkg.pname} \
-                    --version ${pkgs.lib.strings.escapeShellArg pkg.version} \
+                    --version ${
+                      pkgs.lib.strings.escapeShellArg
+                        (builtins.replaceStrings ["-"] ["~"] pkg.version)
+                    } \
                     --description ${pkgs.lib.strings.escapeShellArg pkg.meta.description} \
                     --url ${pkgs.lib.strings.escapeShellArg pkg.meta.homepage} \
                     --maintainer ${pkgs.lib.strings.escapeShellArg (pkgs.lib.strings.concatStringsSep ", " (map ({name, email, ...}: "\"${name}\" <${email}>") pkg.meta.maintainers))} \

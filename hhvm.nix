@@ -178,15 +178,15 @@ stdenv.mkDerivation rec {
       "-Wno-error=unused-command-line-argument"
     ];
 
-  cmakeInitCache =
+  CMAKE_INIT_CACHE =
     let
       # Use writeTextDir instead of writeTextFile as a workaround of https://github.com/xtruder/nix-devcontainer/issues/9
       dir = writeTextDir "init-cache.cmake"
         ''
           set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
-          set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE STRING "The zoneinfo directory" FORCE)
+          set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE PATH "The zoneinfo directory" FORCE)
           set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
-          set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE STRING "The MySQL unix socket" FORCE)
+          set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE FILEPATH "The MySQL unix socket" FORCE)
           set(CARGO_EXECUTABLE "${rustNightly.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
           set(RUSTC_EXECUTABLE "${rustNightly.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
           ${
@@ -198,7 +198,7 @@ stdenv.mkDerivation rec {
     in
     dir + "/init-cache.cmake";
 
-  cmakeFlags = [ "-C" cmakeInitCache ];
+  cmakeFlags = [ "-C" CMAKE_INIT_CACHE ];
 
   prePatch = ''
     patchShebangs .

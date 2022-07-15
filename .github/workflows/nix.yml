@@ -79,7 +79,7 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
   upload-deb:
-    if: github.event_name == 'push' && github.ref_type	== 'tag'
+    if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
     needs: build-and-test
     steps:

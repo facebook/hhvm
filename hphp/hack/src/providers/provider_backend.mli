@@ -27,6 +27,9 @@ type pessimisation_info = {
     name:string ->
     Typing_defs.typedef_type ->
     Typing_defs.typedef_type;
+  allow_ast_caching: bool;
+      (** The [AST_provider] must not use any caches (neither for ASTs or
+        files) if this is unset *)
   store_pessimised_result: bool;
       (** Indicates whether or not decl-based pessimiation results (as
         determined by the functions above) should immediately be stored

@@ -41,8 +41,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <set>
 
 #include "hphp/util/hugetlb.h"
@@ -113,7 +112,7 @@ bool Process::IsUnderGDB() {
   auto const spaceIdx = std::min(cmdPiece.find(' '), cmdPiece.size() - 1);
   auto const binaryPiece = cmdPiece.subpiece(0, spaceIdx + 1);
 
-  boost::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
+  std::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
   return binaryPath.filename() == "gdb ";
 }
 
@@ -526,7 +525,7 @@ std::map<int, int> Process::RemapFDsPreExec(const std::map<int, int>& fds) {
   // If you close FDs while in this loop, they get removed from /proc/self/fd
   // and the iterator gets sad ("Bad file descriptor: /proc/self/fd")
   std::set<int> fds_to_close;
-  for (const auto& entry : boost::filesystem::directory_iterator(fd_dir)) {
+  for (const auto& entry : std::filesystem::directory_iterator(fd_dir)) {
     char* endptr = nullptr;
     auto filename = entry.path().filename();
     const char* filename_c = filename.c_str();

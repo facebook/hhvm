@@ -18,8 +18,6 @@
 #include <memory>
 #include <utility>
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-deque.h"

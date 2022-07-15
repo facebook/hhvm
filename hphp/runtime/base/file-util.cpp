@@ -18,8 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include <fstream>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <sys/types.h>
 
@@ -41,7 +40,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-namespace fs = boost::filesystem;
 
 bool FileUtil::mkdir(const std::string &path, int mode /* = 0777 */) {
   if (path.empty()) {
@@ -176,7 +174,7 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
     for (std::set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
       Logger::Info("sync: deleting %s", iter->c_str());
-      fs::remove_all(*iter);
+      std::filesystem::remove_all(*iter);
     }
   }
 

@@ -17,7 +17,6 @@
 #pragma once
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 
 #include <unordered_map>
 #include <algorithm>
@@ -187,7 +186,7 @@ struct RepoOptions {
   const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   const struct stat& stat() const { return m_stat; }
 
-  const boost::filesystem::path& dir() const { return m_repo; }
+  const std::filesystem::path& dir() const { return m_repo; }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -214,7 +213,7 @@ private:
   std::string m_path;
   struct stat m_stat;
 
-  boost::filesystem::path m_repo;
+  std::filesystem::path m_repo;
 
   folly::dynamic m_cachedDynamic;
 
@@ -254,7 +253,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static Optional<boost::filesystem::path> GetHomePath(
+  static Optional<std::filesystem::path> GetHomePath(
     const folly::StringPiece user);
 
   static std::string GetDefaultUser();
@@ -265,7 +264,7 @@ struct RuntimeOption {
    *
    * Return true on success and false on failure.
    */
-  static bool ReadPerUserSettings(const boost::filesystem::path& confFileName,
+  static bool ReadPerUserSettings(const std::filesystem::path& confFileName,
                                   IniSettingMap& ini, Hdf& config);
 
   static std::string getTraceOutputFile();

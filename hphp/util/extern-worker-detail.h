@@ -22,9 +22,9 @@
 #include "hphp/util/blob-encoder.h"
 
 #include <folly/String.h>
-#include <folly/portability/Filesystem.h>
 
 #include <chrono>
+#include <filesystem>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -122,8 +122,8 @@ template <typename F1, typename F2> auto time(const F1& f1, const F2& f2) {
 //////////////////////////////////////////////////////////////////////
 
 // Read/write to a file
-extern std::string readFile(const folly::fs::path&);
-extern void writeFile(const folly::fs::path&, const char*, size_t);
+extern std::string readFile(const std::filesystem::path&);
+extern void writeFile(const std::filesystem::path&, const char*, size_t);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -325,15 +325,15 @@ protected:
   explicit JobBase(const std::string& name);
   virtual ~JobBase() = default;
 
-  template <typename T> static T deserialize(const folly::fs::path&);
+  template <typename T> static T deserialize(const std::filesystem::path&);
   template <typename T> static void serialize(const T&,
                                               size_t,
-                                              const folly::fs::path&);
+                                              const std::filesystem::path&);
 
 private:
-  virtual void init(const folly::fs::path&) const = 0;
-  virtual void fini(const folly::fs::path&) const = 0;
-  virtual void run(const folly::fs::path&, const folly::fs::path&) const = 0;
+  virtual void init(const std::filesystem::path&) const = 0;
+  virtual void fini(const std::filesystem::path&) const = 0;
+  virtual void run(const std::filesystem::path&, const std::filesystem::path&) const = 0;
 
   std::string m_name;
 

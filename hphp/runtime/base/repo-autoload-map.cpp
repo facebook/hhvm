@@ -22,6 +22,8 @@
 
 TRACE_SET_MOD(repo_autoload);
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -99,7 +101,7 @@ static Optional<String> getPathFromSymbol(
 }
 
 template <typename Compare>
-static Optional<folly::fs::path> getPathFromSymbol(
+static Optional<fs::path> getPathFromSymbol(
     const RepoAutoloadMap::Map<Compare>& map,
     std::string_view name) {
   auto file = getPathFromSymbol(map, StrNR(makeStaticString(name)));
@@ -164,7 +166,7 @@ RepoAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
   auto typeFile = getTypeFile(typeName);
   if (typeFile) {
@@ -178,27 +180,27 @@ RepoAutoloadMap::getModuleFile(const String& moduleName) {
   return getPathFromSymbol(m_modules, moduleName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getTypeFile(std::string_view typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getFunctionFile(std::string_view funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getConstantFile(std::string_view constName) {
   return getPathFromSymbol(m_constants, constName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getTypeAliasFile(std::string_view typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 RepoAutoloadMap::getModuleFile(std::string_view moduleName) {
   return getPathFromSymbol(m_modules, moduleName);
 }

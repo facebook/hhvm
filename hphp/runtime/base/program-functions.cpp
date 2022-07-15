@@ -128,7 +128,6 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/filesystem.hpp>
 
 #ifndef FACEBOOK
 // Needed on libevent2
@@ -150,6 +149,7 @@
 
 #include <chrono>
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <map>
@@ -1352,8 +1352,8 @@ int execute_program(int argc, char **argv) {
       Logger::Error("Uncaught exception: (unknown)");
       throw;
     }
-    if (tempFile.length() && boost::filesystem::exists(tempFile)) {
-      boost::filesystem::remove(tempFile);
+    if (tempFile.length() && std::filesystem::exists(tempFile)) {
+      std::filesystem::remove(tempFile);
     }
   } catch (...) {
     if (HttpServer::Server ||
@@ -1782,7 +1782,7 @@ static int execute_program_impl(int argc, char** argv) {
     s_config_files = po.config;
     // Start with .hdf and .ini files
     for (auto& filename : s_config_files) {
-      if (boost::filesystem::exists(filename)) {
+      if (std::filesystem::exists(filename)) {
         Config::ParseConfigFile(filename, ini, config);
       } else {
         Logger::Warning(

@@ -81,7 +81,7 @@ std::string format_watchman_socket(
  * Discover who owns the given repo and return the Watchman socket
  * corresponding to that user.
  */
-Optional<std::string> find_user_socket(const folly::fs::path& repoRoot) {
+Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot) {
   auto def = [] (Optional<std::string_view> user) -> Optional<std::string> {
     FTRACE(3, "Using watchman.socket.default = {}.\n", RO::WatchmanDefaultSocket);
     if (RO::WatchmanDefaultSocket.empty()) return {};
@@ -140,7 +140,8 @@ folly::Singleton<WatchmanCache> s_watchmanClients;
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-std::shared_ptr<Watchman> get_watchman_client(const folly::fs::path& root) {
+std::shared_ptr<Watchman>
+get_watchman_client(const std::filesystem::path& root) {
   auto const cache = s_watchmanClients.try_get();
   always_assert(cache);
 

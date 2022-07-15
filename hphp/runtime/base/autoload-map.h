@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/assertions.h"
@@ -122,10 +122,10 @@ struct AutoloadMap {
   }
 
   /**
-   * This overload takes std::string_view and returns folly::fs::path
+   * This overload takes std::string_view and returns std::filesystem::path
    * to avoid request heap allocation.
    */
-  Optional<folly::fs::path> getFile(KindOf kind, std::string_view symbol) {
+  Optional<std::filesystem::path> getFile(KindOf kind, std::string_view symbol) {
     switch (kind) {
       case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
@@ -167,12 +167,12 @@ struct AutoloadMap {
   virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
   virtual Optional<String> getModuleFile(const String& moduleName) = 0;
 
-  virtual Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getTypeFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getFunctionFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getConstantFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getTypeAliasFile(std::string_view name) = 0;
-  virtual Optional<folly::fs::path> getModuleFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getFunctionFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getConstantFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) = 0;
+  virtual Optional<std::filesystem::path> getModuleFile(std::string_view name) = 0;
 
   /**
    * Map path to symbols

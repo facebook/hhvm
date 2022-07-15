@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <set>
@@ -78,13 +79,13 @@ struct Package {
 private:
 
   struct FileAndSize {
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
     size_t size;
   };
   using FileAndSizeVec = std::vector<FileAndSize>;
 
   struct ParseGroup {
-    std::vector<folly::fs::path> m_files;
+    std::vector<std::filesystem::path> m_files;
     size_t m_size{0};
   };
 

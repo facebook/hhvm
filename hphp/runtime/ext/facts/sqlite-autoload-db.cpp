@@ -18,6 +18,7 @@
 #include <chrono>
 #include <exception>
 #include <fcntl.h>
+#include <filesystem>
 #include <grp.h>
 #include <memory>
 #include <string>
@@ -28,7 +29,6 @@
 #include <utility>
 #include <vector>
 
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
 
@@ -40,6 +40,8 @@
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/thread-local.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 namespace Facts {
 
@@ -49,8 +51,7 @@ namespace {
  * Create the given file if it doesn't exist, setting its group ownership and
  * permissions along the way.
  */
-void createFileWithPerms(
-    const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
+void createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
   XLOGF(
       DBG1,
       "Creating {} with gid={} and perms={:04o}",
@@ -583,13 +584,9 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         // permissions.
         createFileWithPerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
         createFileWithPerms(
-            folly::fs::path{dbData.m_path} += "-shm",
-            dbData.m_gid,
-            dbData.m_perms);
+            fs::path{dbData.m_path} += "-shm", dbData.m_gid, dbData.m_perms);
         createFileWithPerms(
-            folly::fs::path{dbData.m_path} += "-wal",
-            dbData.m_gid,
-            dbData.m_perms);
+            fs::path{dbData.m_path} += "-wal", dbData.m_gid, dbData.m_perms);
         break;
     }
 
@@ -626,7 +623,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     m_txn = m_db.begin();
   }
 
-  void insertPath(const folly::fs::path& path) override {
+  void insertPath(const fs::path& path) override {
     assertx(path.is_relative());
     XLOGF(DBG9, "Registering path {} in the DB", path.native());
     auto query = m_txn.query(m_pathStmts.m_insert);
@@ -636,8 +633,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   void insertSha1Hex(
-      const folly::fs::path& path,
-      const Optional<std::string>& sha1hex) override {
+      const fs::path& path, const Optional<std::string>& sha1hex) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_sha1HexStmts.m_insert);
     query.bindString("@path", path.native());
@@ -650,7 +646,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  std::string getSha1Hex(const folly::fs::path& path) override {
+  std::string getSha1Hex(const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_sha1HexStmts.m_get);
     query.bindString("@path", path.native());
@@ -659,7 +655,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return std::string{query.getString(0)};
   }
 
-  void erasePath(const folly::fs::path& path) override {
+  void erasePath(const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_pathStmts.m_erase);
     query.bindString("@path", path.native());
@@ -669,7 +665,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
   void insertType(
       std::string_view type,
-      const folly::fs::path& path,
+      const fs::path& path,
       TypeKind kind,
       int flags) override {
     assertx(path.is_relative());
@@ -682,10 +678,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  std::vector<folly::fs::path> getTypePath(std::string_view type) override {
+  std::vector<fs::path> getTypePath(std::string_view type) override {
     auto query = m_txn.query(m_typeStmts.m_getTypePath);
     query.bindString("@type", type);
-    std::vector<folly::fs::path> results;
+    std::vector<fs::path> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
@@ -693,7 +689,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<std::string> getPathTypes(const folly::fs::path& path) override {
+  std::vector<std::string> getPathTypes(const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_typeStmts.m_getPathTypes);
     query.bindString("@path", path.native());
@@ -705,8 +701,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return types;
   }
 
-  KindAndFlags getKindAndFlags(
-      const std::string_view type, const folly::fs::path& path) override {
+  KindAndFlags
+  getKindAndFlags(const std::string_view type, const fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getKindAndFlags);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
@@ -719,7 +715,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   void insertBaseType(
-      const folly::fs::path& path,
+      const fs::path& path,
       const std::string_view derived,
       DeriveKind kind,
       const std::string_view base) override {
@@ -734,7 +730,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   std::vector<std::string> getBaseTypes(
-      const folly::fs::path& path,
+      const fs::path& path,
       const std::string_view derived,
       DeriveKind kind) override {
     assertx(path.is_relative());
@@ -760,13 +756,13 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     for (query.step(); query.row(); query.step()) {
       derivedTypes.push_back(
           {.m_symbol = std::string{query.getString(1)},
-           .m_path = folly::fs::path{std::string{query.getString(0)}}});
+           .m_path = fs::path{std::string{query.getString(0)}}});
     }
     return derivedTypes;
   }
 
   void insertTypeAttribute(
-      const folly::fs::path& path,
+      const fs::path& path,
       const std::string_view type,
       const std::string_view attributeName,
       Optional<int> attributePosition,
@@ -799,7 +795,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   void insertMethodAttribute(
-      const folly::fs::path& path,
+      const fs::path& path,
       std::string_view type,
       std::string_view method,
       std::string_view attributeName,
@@ -834,7 +830,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   void insertFileAttribute(
-      const folly::fs::path& path,
+      const fs::path& path,
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
@@ -865,7 +861,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   std::vector<std::string> getAttributesOfType(
-      const std::string_view type, const folly::fs::path& path) override {
+      const std::string_view type, const fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getTypeAttributes);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
@@ -880,7 +876,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   std::vector<std::string> getAttributesOfMethod(
       std::string_view type,
       std::string_view method,
-      const folly::fs::path& path) override {
+      const fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getMethodAttributes);
     query.bindString("@type", type);
     query.bindString("@method", method);
@@ -893,8 +889,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<std::string>
-  getAttributesOfFile(const folly::fs::path& path) override {
+  std::vector<std::string> getAttributesOfFile(const fs::path& path) override {
     auto query = m_txn.query(m_fileStmts.m_getFileAttributes);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
@@ -914,7 +909,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     for (query.step(); query.row(); query.step()) {
       results.push_back(SymbolPath{
           .m_symbol = std::string{query.getString(0)},
-          .m_path = folly::fs::path{std::string{query.getString(1)}}});
+          .m_path = fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
@@ -928,7 +923,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     for (query.step(); query.row(); query.step()) {
       results.push_back(SymbolPath{
           .m_symbol = std::string{query.getString(0)},
-          .m_path = folly::fs::path{std::string{query.getString(1)}}});
+          .m_path = fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
@@ -942,7 +937,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       results.push_back(MethodPath{
           .m_type = std::string{query.getString(0)},
           .m_method = std::string{query.getString(1)},
-          .m_path = folly::fs::path{std::string{query.getString(2)}}});
+          .m_path = fs::path{std::string{query.getString(2)}}});
     }
     return results;
   }
@@ -957,19 +952,19 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       results.push_back(MethodPath{
           .m_type = std::string{query.getString(0)},
           .m_method = std::string{query.getString(1)},
-          .m_path = folly::fs::path{std::string{query.getString(2)}}});
+          .m_path = fs::path{std::string{query.getString(2)}}});
     }
     return results;
   }
 
-  std::vector<folly::fs::path>
+  std::vector<fs::path>
   getFilesWithAttribute(const std::string_view attributeName) override {
     auto query = m_txn.query(m_fileStmts.m_getFilesWithAttribute);
     query.bindString("@attribute_name", attributeName);
-    std::vector<folly::fs::path> results;
+    std::vector<fs::path> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(folly::fs::path{std::string{query.getString(0)}});
+      results.push_back(fs::path{std::string{query.getString(0)}});
     }
     return results;
   }
@@ -1050,8 +1045,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return args;
   }
 
-  void insertFunction(
-      std::string_view function, const folly::fs::path& path) override {
+  void
+  insertFunction(std::string_view function, const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_functionStmts.m_insert);
     query.bindString("@function", function);
@@ -1060,20 +1055,18 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  std::vector<folly::fs::path>
-  getFunctionPath(std::string_view function) override {
+  std::vector<fs::path> getFunctionPath(std::string_view function) override {
     auto query = m_txn.query(m_functionStmts.m_getFunctionPath);
     query.bindString("@function", function);
     XLOGF(DBG9, "Running {}", query.sql());
-    std::vector<folly::fs::path> results;
+    std::vector<fs::path> results;
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
     }
     return results;
   }
 
-  std::vector<std::string>
-  getPathFunctions(const folly::fs::path& path) override {
+  std::vector<std::string> getPathFunctions(const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_functionStmts.m_getPathFunctions);
     query.bindString("@path", path.native());
@@ -1085,8 +1078,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return functions;
   }
 
-  void insertConstant(
-      std::string_view constant, const folly::fs::path& path) override {
+  void
+  insertConstant(std::string_view constant, const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_constantStmts.m_insert);
     query.bindString("@constant", constant);
@@ -1095,11 +1088,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  std::vector<folly::fs::path>
-  getConstantPath(std::string_view constant) override {
+  std::vector<fs::path> getConstantPath(std::string_view constant) override {
     auto query = m_txn.query(m_constantStmts.m_getConstantPath);
     query.bindString("@constant", constant);
-    std::vector<folly::fs::path> results;
+    std::vector<fs::path> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
@@ -1107,8 +1099,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<std::string>
-  getPathConstants(const folly::fs::path& path) override {
+  std::vector<std::string> getPathConstants(const fs::path& path) override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_constantStmts.m_getPathConstants);
     query.bindString("@path", path.native());

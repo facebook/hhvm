@@ -17,8 +17,6 @@
 
 #include <algorithm>
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/type-string.h"
@@ -82,10 +80,11 @@ FactsStore* getFactsForRequest() {
     map->ensureUpdated();
     return map;
   } catch (const std::exception& e) {
-    auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
-    Logger::Info(
-        "Failed to update native autoloader, not natively autoloading %s. %s\n",
-        repoRoot.generic().c_str(),
+    auto repoRoot =
+      std::filesystem::canonical(repoOptions->path()).parent_path();
+    Logger::FInfo(
+        "Failed to update native autoloader, not natively autoloading {}. {}\n",
+        repoRoot.native(),
         e.what());
   }
   return nullptr;

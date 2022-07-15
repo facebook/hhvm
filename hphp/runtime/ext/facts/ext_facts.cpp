@@ -15,6 +15,7 @@
 */
 
 #include <chrono>
+#include <filesystem>
 #include <functional>
 #include <iomanip>
 #include <mutex>
@@ -28,7 +29,6 @@
 #include <folly/Hash.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/executors/GlobalExecutor.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/io/async/EventBaseThread.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
@@ -71,6 +71,8 @@
 
 TRACE_SET_MOD(facts);
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 namespace Facts {
 namespace {
@@ -94,8 +96,8 @@ struct RepoOptionsParseExc : public std::runtime_error {
  * Get the directory containing the given RepoOptions file. We define this to
  * be the root of the repository we're autoloading.
  */
-folly::fs::path getRepoRoot(const RepoOptions& options) {
-  return folly::fs::canonical(folly::fs::path{options.path()}.parent_path());
+fs::path getRepoRoot(const RepoOptions& options) {
+  return fs::canonical(fs::path{options.path()}.parent_path());
 }
 
 std::string
@@ -110,7 +112,7 @@ getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
   return folly::to<std::string>(kSchemaVersion, '_', optsHash, '_', rootHash);
 }
 
-folly::fs::path getDBPath(const RepoOptions& repoOptions) {
+fs::path getDBPath(const RepoOptions& repoOptions) {
   always_assert(!RuntimeOption::AutoloadDBPath.empty());
   std::string pathTemplate{RuntimeOption::AutoloadDBPath};
 
@@ -134,12 +136,12 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
     }
   }
 
-  folly::fs::path dbPath = pathTemplate;
+  fs::path dbPath = pathTemplate;
   if (dbPath.is_relative()) {
     dbPath = root / dbPath;
   }
 
-  return folly::fs::system_complete(dbPath);
+  return fs::absolute(dbPath);
 }
 
 ::gid_t getGroup() {
@@ -173,13 +175,13 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
 }
 
 SQLiteKey getDBKey(
-    const folly::fs::path& root,
+    const fs::path& root,
     const folly::dynamic& queryExpr,
     const RepoOptions& repoOptions) {
   assertx(root.is_absolute());
 
-  auto trustedDBPath = [&]() -> folly::fs::path {
-    folly::fs::path trusted{repoOptions.flags().trustedDBPath()};
+  auto trustedDBPath = [&]() -> fs::path {
+    fs::path trusted{repoOptions.flags().trustedDBPath()};
     if (trusted.empty()) {
       return trusted;
     }
@@ -189,8 +191,8 @@ SQLiteKey getDBKey(
       trusted = root / trusted;
     }
     try {
-      return folly::fs::canonical(trusted);
-    } catch (const folly::fs::filesystem_error& e) {
+      return fs::canonical(trusted);
+    } catch (const fs::filesystem_error& e) {
       throw RepoOptionsParseExc{folly::sformat(
           "Error resolving Autoload.TrustedDBPath = {}: {}",
           trusted.native().c_str(),
@@ -294,7 +296,7 @@ struct WatchmanAutoloadMapKey {
            m_dbKey.m_writable == SQLite::OpenMode::ReadOnly;
   }
 
-  folly::fs::path m_root;
+  fs::path m_root;
   folly::dynamic m_queryExpr;
   std::vector<std::string> m_indexedMethodAttrs;
   SQLiteKey m_dbKey;
@@ -512,8 +514,8 @@ struct Facts final : Extension {
 
     for (auto const& repo : RuntimeOption::AutoloadExcludedRepos) {
       try {
-        m_data->m_excludedRepos.insert(folly::fs::canonical(repo).native());
-      } catch (const folly::fs::filesystem_error& e) {
+        m_data->m_excludedRepos.insert(fs::canonical(repo).native());
+      } catch (const fs::filesystem_error& e) {
         Logger::Info(
             "Could not disable native autoloader for %s: %s\n",
             repo.c_str(),
@@ -768,8 +770,8 @@ bool HHVM_FUNCTION(facts_enabled) {
 
 Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   // Turn rootStr into an absolute path.
-  auto root = [&]() -> Optional<folly::fs::path> {
-    folly::fs::path maybeRoot{rootStr.get()->slice()};
+  auto root = [&]() -> Optional<fs::path> {
+    fs::path maybeRoot{rootStr.toCppString()};
     if (maybeRoot.is_absolute()) {
       return maybeRoot;
     }
@@ -780,7 +782,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
     if (!requestOptions) {
       return std::nullopt;
     }
-    return folly::fs::path{requestOptions->path()}.parent_path() / maybeRoot;
+    return fs::path{requestOptions->path()}.parent_path() / maybeRoot;
   }();
   if (!root) {
     XLOG(ERR) << "Error resolving " << rootStr.slice();
@@ -959,7 +961,7 @@ Array HHVM_FUNCTION(
     const Array& alteredPathsAndHashesArr,
     const Variant& maybeRoot) {
   // Get the root of the repository
-  auto root = [&]() -> folly::fs::path {
+  auto root = [&]() -> fs::path {
     if (maybeRoot.isString()) {
       return {std::string{maybeRoot.toStrNR().get()->slice()}};
     }

@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <filesystem>
 #include <vector>
 
 #include <folly/Try.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
@@ -69,7 +69,8 @@ std::string facts_json_from_path(const PathAndOptionalHash& path);
  * (or a FactsExtractionExc in the case of an error).
  */
 std::vector<folly::Try<FileFacts>> facts_from_paths(
-    const folly::fs::path& root, const std::vector<PathAndOptionalHash>& paths);
+    const std::filesystem::path& root,
+    const std::vector<PathAndOptionalHash>& paths);
 
 } // namespace Facts
 } // namespace HPHP

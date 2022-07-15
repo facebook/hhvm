@@ -22,6 +22,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <fstream>
+
 namespace HPHP {
 
 TRACE_SET_MOD(unit_parse);
@@ -29,7 +31,7 @@ TRACE_SET_MOD(unit_parse);
 std::unique_ptr<HhvmDeclProvider>
 HhvmDeclProvider::create(AutoloadMap* map,
                          const RepoOptionsFlags& options,
-                         const folly::fs::path& repoRoot) {
+                         const std::filesystem::path& repoRoot) {
   if (!RuntimeOption::EvalEnableDecl) {
     return {nullptr};
   }
@@ -54,7 +56,7 @@ HhvmDeclProvider::HhvmDeclProvider(
     int32_t flags,
     std::string const& aliased_namespaces,
     AutoloadMap* map,
-    folly::fs::path const& repo
+    const std::filesystem::path& repo
 )
   : m_opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
   , m_map{map}
@@ -92,10 +94,8 @@ ExternalDeclProviderResult HhvmDeclProvider::getType(
     DeclResult decl_result = hackc_direct_decl_parse(*m_opts, filename, text);
     ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
-    auto norm_filename = filename;
-    if (folly::fs::starts_with(filename, m_repo)) {
-      norm_filename.erase(0, m_repo.size());
-    }
+    auto const norm_filename =
+      std::filesystem::relative(*filename_opt, m_repo);
 
     auto const hash = SHA1{string_sha1(text)};
     m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});

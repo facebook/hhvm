@@ -20,6 +20,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iomanip>
 #include <map>
 #include <ostream>
@@ -398,16 +399,19 @@ void Unit::logTearing(int64_t nsecs) {
   assertx(RO::EvalSampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
-  auto repoRoot = folly::fs::path(repoOptions->path()).parent_path();
+  auto repoRoot = std::filesystem::path(repoOptions->path()).parent_path();
 
   assertx(!isSystemLib());
   StructuredLogEntry ent;
 
   auto const tpath = [&] () -> std::string {
-    auto const orig = folly::fs::path(origFilepath()->data());
-    if (repoRoot.size() > orig.size() || repoRoot.empty()) return orig.native();
+    auto const orig = std::filesystem::path{origFilepath()->data()};
+    auto const origNative = orig.native();
+    if (repoRoot.native().size() > origNative.size() || repoRoot.empty()) {
+      return origNative;
+    }
     if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
-      return orig.native();
+      return origNative;
     }
     return orig.lexically_relative(repoRoot).native();
   }();

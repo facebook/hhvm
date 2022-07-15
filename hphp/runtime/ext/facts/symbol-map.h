@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -26,7 +27,6 @@
 #include <folly/Executor.h>
 #include <folly/SharedMutex.h>
 #include <folly/Synchronized.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 
@@ -55,8 +55,8 @@ namespace Facts {
 struct UpdateDBWorkItem {
   Clock m_since;
   Clock m_clock;
-  std::vector<folly::fs::path> m_alteredPaths;
-  std::vector<folly::fs::path> m_deletedPaths;
+  std::vector<std::filesystem::path> m_alteredPaths;
+  std::vector<std::filesystem::path> m_deletedPaths;
   std::vector<FileFacts> m_alteredPathFacts;
 };
 
@@ -73,7 +73,7 @@ struct UpdateDBWorkItem {
 struct SymbolMap {
 
   explicit SymbolMap(
-      folly::fs::path root,
+      std::filesystem::path root,
       AutoloadDB::Handle dbHandle,
       hphp_hash_set<std::string> indexedMethodAttributes = {});
   SymbolMap() = delete;
@@ -131,19 +131,19 @@ struct SymbolMap {
    * DB, and as such may throw SQLite exceptions.
    */
   std::vector<Symbol<SymKind::Type>> getFileTypes(Path path);
-  std::vector<Symbol<SymKind::Type>> getFileTypes(const folly::fs::path& path);
+  std::vector<Symbol<SymKind::Type>> getFileTypes(const std::filesystem::path&);
 
   std::vector<Symbol<SymKind::Function>> getFileFunctions(Path path);
   std::vector<Symbol<SymKind::Function>>
-  getFileFunctions(const folly::fs::path& path);
+  getFileFunctions(const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Constant>> getFileConstants(Path path);
   std::vector<Symbol<SymKind::Constant>>
-  getFileConstants(const folly::fs::path& path);
+  getFileConstants(const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
   std::vector<Symbol<SymKind::Type>>
-  getFileTypeAliases(const folly::fs::path& path);
+  getFileTypeAliases(const std::filesystem::path& path);
 
   /**
    * Return inheritance data about the given type
@@ -343,8 +343,8 @@ struct SymbolMap {
   void update(
       const Clock& since,
       const Clock& clock,
-      std::vector<folly::fs::path> alteredPaths,
-      std::vector<folly::fs::path> deletedPaths,
+      std::vector<std::filesystem::path> alteredPaths,
+      std::vector<std::filesystem::path> deletedPaths,
       std::vector<FileFacts> alteredPathFacts); // throws(SQLiteExc)
 
   /**
@@ -534,8 +534,8 @@ private:
   void updateDB(
       const Clock& since,
       const Clock& clock,
-      const std::vector<folly::fs::path>& alteredPaths,
-      const std::vector<folly::fs::path>& deletedPaths,
+      const std::vector<std::filesystem::path>& alteredPaths,
+      const std::vector<std::filesystem::path>& deletedPaths,
       const std::vector<FileFacts>& alteredPathFacts) const; // throws
 
   /**
@@ -543,7 +543,7 @@ private:
    */
   void updateDBPath(
       AutoloadDB& db,
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       const FileFacts& facts) const;
 
   /**
@@ -604,7 +604,7 @@ private:
 
   folly::Synchronized<Data, folly::SharedMutexWritePriority> m_syncedData;
 
-  const folly::fs::path m_root;
+  const std::filesystem::path m_root;
   const std::string m_schemaHash;
   AutoloadDB::Handle m_dbHandle;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;

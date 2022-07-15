@@ -18,12 +18,10 @@
 #include <string>
 #include <utility>
 #include <cstdlib>
-#include <iostream>
+#include <fstream>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -36,7 +34,7 @@
 
 namespace HPHP::HHBBC {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -49,7 +47,7 @@ void with_file(fs::path dir, const php::Unit* u, Operation op) {
   auto const file = dir / fs::path(u->filename->data());
   fs::create_directories(fs::path(file).remove_filename());
 
-  fs::ofstream out(file);
+  std::ofstream out(file);
   if (!out.is_open()) {
     throw std::runtime_error(std::string("failed to open file ") +
       file.string());

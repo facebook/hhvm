@@ -17,12 +17,10 @@
 #ifdef HHVM_TAINT
 
 #include <chrono>
+#include <filesystem>
 
 #include <folly/Singleton.h>
 #include <folly/json.h>
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/string_file.hpp>
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -50,7 +48,7 @@ InitFiniNode s_configurationInitialization(
 
       auto outputDirectory = RO::EvalTaintOutputDirectory;
       if (outputDirectory != "") {
-        boost::filesystem::create_directories(outputDirectory);
+        std::filesystem::create_directories(outputDirectory);
         configuration->outputDirectory = outputDirectory;
       }
     },
@@ -296,7 +294,7 @@ void Configuration::read(const std::string& path) {
   std::string contents;
 
   try {
-    boost::filesystem::load_string_file(path, contents);
+    std::filesystem::load_string_file(path, contents);
   } catch (std::exception& exception) {
     throw std::invalid_argument(
         "unable to read configuration at `" + path + "`: " + exception.what());

@@ -16,10 +16,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
-
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
@@ -68,7 +67,7 @@ struct Path {
   }
   explicit Path(const StringData& path) : Path{makeStringPtr(path)} {
   }
-  explicit Path(const folly::fs::path& path)
+  explicit Path(const std::filesystem::path& path)
       : Path{makeStringPtr(path.native())} {
     assertx(path.is_relative());
   }
@@ -95,8 +94,8 @@ struct Path {
     return m_path.slice();
   }
 
-  folly::fs::path native() const noexcept {
-    return folly::fs::path{std::string{slice()}};
+  std::filesystem::path native() const noexcept {
+    return std::filesystem::path{std::string{slice()}};
   }
 
   const StringData* get() const noexcept {

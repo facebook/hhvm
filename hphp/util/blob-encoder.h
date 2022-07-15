@@ -19,10 +19,10 @@
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/optional.h"
 
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/Varint.h>
 
+#include <filesystem>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
@@ -195,7 +195,7 @@ struct BlobEncoder {
     std::copy(s.data(), s.data() + sz, &m_blob[start]);
   }
 
-  void encode(const boost::filesystem::path& p) {
+  void encode(const std::filesystem::path& p) {
     encode(p.string());
   }
 
@@ -459,10 +459,10 @@ struct BlobDecoder {
     m_p += sz;
   }
 
-  void decode(boost::filesystem::path& p) {
+  void decode(std::filesystem::path& p) {
     std::string s;
     decode(s);
-    p = boost::filesystem::path(std::move(s));
+    p = std::filesystem::path(std::move(s));
   }
 
   size_t peekStdStringSize() {

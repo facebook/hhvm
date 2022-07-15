@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -25,7 +26,6 @@
 
 #include <folly/Function.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"
@@ -63,17 +63,17 @@ public:
 
   struct SymbolPath {
     std::string m_symbol;
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
   };
 
   struct MethodPath {
     std::string m_type;
     std::string m_method;
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
   };
 
   struct PathAndHash {
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
     std::string m_hash;
   };
 
@@ -90,23 +90,25 @@ public:
    */
   virtual void commit() = 0;
 
-  virtual void insertPath(const folly::fs::path& path) = 0;
-  virtual void erasePath(const folly::fs::path& path) = 0;
+  virtual void insertPath(const std::filesystem::path& path) = 0;
+  virtual void erasePath(const std::filesystem::path& path) = 0;
 
   // Hashes
   virtual void insertSha1Hex(
-      const folly::fs::path& path, const Optional<std::string>& sha1hex) = 0;
-  virtual std::string getSha1Hex(const folly::fs::path& path) = 0;
+      const std::filesystem::path& path,
+      const Optional<std::string>& sha1hex) = 0;
+  virtual std::string getSha1Hex(const std::filesystem::path& path) = 0;
 
   // Types
   virtual void insertType(
       std::string_view type,
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       TypeKind kind,
       TypeFlagMask flags) = 0;
-  virtual std::vector<folly::fs::path> getTypePath(std::string_view type) = 0;
+  virtual std::vector<std::filesystem::path>
+  getTypePath(std::string_view type) = 0;
   virtual std::vector<std::string>
-  getPathTypes(const folly::fs::path& path) = 0;
+  getPathTypes(const std::filesystem::path& path) = 0;
 
   /**
    * Return the kind of the given type defined at the given path.
@@ -114,16 +116,16 @@ public:
    * If the type is not defined in the given path, return TypeKind::Unknown.
    */
   virtual KindAndFlags
-  getKindAndFlags(std::string_view type, const folly::fs::path& path) = 0;
+  getKindAndFlags(std::string_view type, const std::filesystem::path& path) = 0;
 
   // Inheritance
   virtual void insertBaseType(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view derivedType,
       DeriveKind kind,
       std::string_view baseType) = 0;
   virtual std::vector<std::string> getBaseTypes(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view derivedType,
       DeriveKind kind) = 0;
 
@@ -139,14 +141,14 @@ public:
   // Attributes
 
   virtual void insertTypeAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view type,
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertMethodAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view type,
       std::string_view method,
       std::string_view attributeName,
@@ -154,21 +156,21 @@ public:
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertFileAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
-  virtual std::vector<std::string>
-  getAttributesOfType(std::string_view type, const folly::fs::path& path) = 0;
+  virtual std::vector<std::string> getAttributesOfType(
+      std::string_view type, const std::filesystem::path& path) = 0;
 
   virtual std::vector<std::string> getAttributesOfMethod(
       std::string_view type,
       std::string_view method,
-      const folly::fs::path& path) = 0;
+      const std::filesystem::path& path) = 0;
 
   virtual std::vector<std::string>
-  getAttributesOfFile(const folly::fs::path& path) = 0;
+  getAttributesOfFile(const std::filesystem::path& path) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       std::string_view type,
@@ -199,24 +201,24 @@ public:
   virtual std::vector<MethodPath>
   getMethodsWithAttribute(std::string_view attributeName) = 0;
 
-  virtual std::vector<folly::fs::path>
+  virtual std::vector<std::filesystem::path>
   getFilesWithAttribute(std::string_view attributeName) = 0;
 
   // Functions
-  virtual void
-  insertFunction(std::string_view function, const folly::fs::path& path) = 0;
-  virtual std::vector<folly::fs::path>
+  virtual void insertFunction(
+      std::string_view function, const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path>
   getFunctionPath(std::string_view function) = 0;
   virtual std::vector<std::string>
-  getPathFunctions(const folly::fs::path& path) = 0;
+  getPathFunctions(const std::filesystem::path& path) = 0;
 
   // Constants
-  virtual void
-  insertConstant(std::string_view constant, const folly::fs::path& path) = 0;
-  virtual std::vector<folly::fs::path>
+  virtual void insertConstant(
+      std::string_view constant, const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path>
   getConstantPath(std::string_view constant) = 0;
   virtual std::vector<std::string>
-  getPathConstants(const folly::fs::path& path) = 0;
+  getPathConstants(const std::filesystem::path& path) = 0;
 
   /**
    * Return a list of all paths defined in the given root, as absolute paths.

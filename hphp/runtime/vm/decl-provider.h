@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/util/hash-map.h"
 
-#include <folly/experimental/io/FsUtil.h>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string_view>
@@ -34,7 +34,7 @@ struct RepoOptionsFlags;
 
 struct HhvmDeclProvider: ::DeclProvider {
   HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
-                   AutoloadMap*, folly::fs::path const&);
+                   AutoloadMap*, const std::filesystem::path&);
   virtual ~HhvmDeclProvider() override = default;
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
@@ -44,7 +44,7 @@ struct HhvmDeclProvider: ::DeclProvider {
   static std::unique_ptr<HhvmDeclProvider> create(
     AutoloadMap*,
     const RepoOptionsFlags&,
-    const folly::fs::path&
+    const std::filesystem::path&
   );
 
   // Callback invoked by hackc's ExternalDeclProvider.
@@ -56,7 +56,7 @@ struct HhvmDeclProvider: ::DeclProvider {
   std::vector<DeclDep> getFlatDeps() const;
   std::vector<std::vector<DeclLoc>> getDeps() const;
 
-  const folly::fs::path& repoRoot() const { return m_repo; }
+  const std::filesystem::path& repoRoot() const { return m_repo; }
   AutoloadMap* map() const { return m_map; }
 
   // Was there a decl we were unable to resolve?
@@ -81,6 +81,6 @@ struct HhvmDeclProvider: ::DeclProvider {
   hphp_hash_map<DeclSym, DepInfo> m_deps;
 
   AutoloadMap* m_map;
-  folly::fs::path m_repo;
+  std::filesystem::path m_repo;
 };
 }

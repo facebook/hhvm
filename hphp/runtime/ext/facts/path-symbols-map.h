@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"

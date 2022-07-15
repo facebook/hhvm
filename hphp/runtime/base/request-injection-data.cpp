@@ -20,10 +20,10 @@
 #include <cinttypes>
 #include <string>
 #include <limits>
+#include <filesystem>
 
 #include <signal.h>
 
-#include <boost/filesystem.hpp>
 #include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 

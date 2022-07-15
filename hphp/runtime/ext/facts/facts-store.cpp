@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string_view>
@@ -23,7 +24,6 @@
 #include <folly/Synchronized.h>
 #include <folly/Unit.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 #include <folly/logging/xlog.h>
@@ -49,6 +49,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/sha1.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 namespace Facts {
 namespace {
@@ -57,26 +59,13 @@ namespace {
  * Return a path relative to `root` with the same canonical location as `p`. If
  * `p` does not exist within `root`, return `std::nullopt`.
  */
-Optional<folly::fs::path> resolvePathRelativeToRoot(
-    const folly::fs::path& path, const folly::fs::path& root) {
-  if (path.is_relative()) {
+Optional<fs::path>
+resolvePathRelativeToRoot(const fs::path& path, const fs::path& root) {
+  if (path.is_relative())
     return path;
-  }
-
-  if (folly::fs::starts_with(path, root)) {
-    return folly::fs::remove_prefix(path, root);
-  }
-
-  if (!folly::fs::exists(path)) {
-    return {};
-  }
-
-  auto canonicalPath = folly::fs::canonical(path);
-  if (folly::fs::starts_with(canonicalPath, root)) {
-    return folly::fs::remove_prefix(canonicalPath, root);
-  }
-
-  return std::nullopt;
+  if (!fs::exists(path))
+    return std::nullopt;
+  return fs::relative(path, root);
 }
 
 /**
@@ -362,9 +351,9 @@ std::string curthread() {
   return s.str();
 }
 
-std::vector<folly::fs::path>
+std::vector<fs::path>
 removeHashes(std::vector<PathAndOptionalHash>&& pathsWithHashes) {
-  std::vector<folly::fs::path> paths;
+  std::vector<fs::path> paths;
   paths.reserve(pathsWithHashes.size());
   for (auto&& pathAndHash : std::move(pathsWithHashes)) {
     paths.push_back(std::move(pathAndHash.m_path));
@@ -504,7 +493,7 @@ struct FactsStoreImpl final
       public std::enable_shared_from_this<FactsStoreImpl> {
 
   FactsStoreImpl(
-      folly::fs::path root,
+      fs::path root,
       AutoloadDB::Handle dbHandle,
       std::shared_ptr<Watcher> watcher,
       hphp_hash_set<std::string> indexedMethodAttributes)
@@ -514,7 +503,7 @@ struct FactsStoreImpl final
       , m_watcher{std::move(watcher)} {
   }
 
-  FactsStoreImpl(folly::fs::path root, AutoloadDB::Handle dbHandle)
+  FactsStoreImpl(fs::path root, AutoloadDB::Handle dbHandle)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
       , m_map{m_root, std::move(dbHandle)} {
@@ -576,8 +565,8 @@ struct FactsStoreImpl final
     return logPerformance(__func__, [&]() {
       auto allPaths = m_map.getAllPaths();
       auto ret = VecInit{allPaths.size()};
-      for (auto&& path : std::move(allPaths)) {
-        folly::fs::path p{path.get()->slice()};
+      for (auto const& path : std::move(allPaths)) {
+        fs::path p{path.get()->toCppString()};
         assertx(p.is_relative());
         ret.append(VarNR{String{(m_root / p).native()}}.tv());
       }
@@ -662,8 +651,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<folly::fs::path>
-  getTypeOrTypeAliasFile(std::string_view type) override {
+  Optional<fs::path> getTypeOrTypeAliasFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
@@ -675,7 +663,7 @@ struct FactsStoreImpl final
     return std::nullopt;
   }
 
-  Optional<folly::fs::path> getTypeFile(std::string_view type) override {
+  Optional<fs::path> getTypeFile(std::string_view type) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Type>(
           type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
@@ -684,7 +672,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<folly::fs::path> getFunctionFile(std::string_view func) override {
+  Optional<fs::path> getFunctionFile(std::string_view func) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Function>(
           func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
@@ -693,7 +681,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<folly::fs::path> getConstantFile(std::string_view name) override {
+  Optional<fs::path> getConstantFile(std::string_view name) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Constant>(
           name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
@@ -702,7 +690,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override {
+  Optional<fs::path> getTypeAliasFile(std::string_view name) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Type>(
           name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
@@ -711,7 +699,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<folly::fs::path> getModuleFile(std::string_view name) override {
+  Optional<fs::path> getModuleFile(std::string_view name) override {
     // TODO(T121190265)
     return std::nullopt;
   }
@@ -996,7 +984,7 @@ struct FactsStoreImpl final
             e.what());
         // Treat a parse error as if we had deleted the path
         deletedPaths.push_back(std::move(alteredPathsAndHashes.at(i).m_path));
-        alteredPathsAndHashes.at(i) = {folly::fs::path{}, {}};
+        alteredPathsAndHashes.at(i) = {fs::path{}, {}};
       }
     }
 
@@ -1058,7 +1046,7 @@ struct FactsStoreImpl final
    * update when Watchman gives us the full state of the world.
    */
 
-  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
   getFreshDelta(Watcher::Results&& result) const {
 
     auto allPaths = m_map.getAllPathsWithHashes();
@@ -1068,7 +1056,7 @@ struct FactsStoreImpl final
         allPaths.size());
 
     std::vector<PathAndOptionalHash> alteredPaths;
-    std::vector<folly::fs::path> deletedPaths;
+    std::vector<fs::path> deletedPaths;
     for (auto& pathData : std::move(result.m_files)) {
       assertx(pathData.m_exists);
 
@@ -1118,11 +1106,11 @@ struct FactsStoreImpl final
    * Calculate the paths which have changed since the last Watchman
    * update when Watchman gives us an incremental update.
    */
-  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
   getIncrementalDelta(Watcher::Results&& result) const {
 
     std::vector<PathAndOptionalHash> alteredPaths;
-    std::vector<folly::fs::path> deletedPaths;
+    std::vector<fs::path> deletedPaths;
     for (auto& pathData : result.m_files) {
       if (!pathData.m_exists) {
         deletedPaths.push_back(std::move(pathData.m_path));
@@ -1216,7 +1204,7 @@ struct FactsStoreImpl final
   folly::Synchronized<folly::FutureSplitter<folly::Unit>> m_updateFuture{
       folly::splitFuture(folly::makeFuture())};
   std::atomic<bool> m_closing{false};
-  folly::fs::path m_root;
+  fs::path m_root;
   SymbolMap m_map;
   std::shared_ptr<Watcher> m_watcher;
 
@@ -1231,7 +1219,7 @@ struct FactsStoreImpl final
         return lambda(m_map, Path{*path.get()});
       }
       auto resolvedPath =
-          resolvePathRelativeToRoot(folly::fs::path{path.slice()}, m_root);
+          resolvePathRelativeToRoot(fs::path{path.toCppString()}, m_root);
       if (!resolvedPath) {
         return {};
       }
@@ -1254,12 +1242,11 @@ struct FactsStoreImpl final
   }
 
   template <SymKind K, class T>
-  Optional<folly::fs::path> getSymbolFile(std::string_view symbol, T lambda) {
+  Optional<fs::path> getSymbolFile(std::string_view symbol, T lambda) {
     const StringData* fileStr = lambda(m_map, Symbol<K>{symbol}).get();
-    if (UNLIKELY(!fileStr)) {
-      return {};
-    }
-    folly::fs::path p{folly::fs::path{fileStr->slice()}};
+    if (UNLIKELY(!fileStr))
+      return std::nullopt;
+    fs::path p{fileStr->toCppString()};
     assertx(p.is_relative());
     return m_root / p;
   }
@@ -1373,7 +1360,7 @@ struct FactsStoreImpl final
 } // namespace
 
 std::shared_ptr<FactsStore> make_watcher_facts(
-    folly::fs::path root,
+    fs::path root,
     AutoloadDB::Handle dbHandle,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
@@ -1395,7 +1382,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 }
 
 std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, AutoloadDB::Handle dbHandle) {
+make_trusted_facts(fs::path root, AutoloadDB::Handle dbHandle) {
   return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbHandle));
 }
 

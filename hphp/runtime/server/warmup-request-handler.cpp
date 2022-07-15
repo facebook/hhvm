@@ -29,10 +29,11 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
-#include <boost/filesystem.hpp>
 #include <folly/Range.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
+
+#include <filesystem>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,12 +131,12 @@ runAfterDelay(const std::vector<std::string>& files,
     for (auto const& file : files) {
       if (m_noDuplicate && !deduped.insert(file).second) continue;
       try {
-        boost::filesystem::path p(file);
-        if (boost::filesystem::is_regular_file(p)) {
+        std::filesystem::path p(file);
+        if (std::filesystem::is_regular_file(p)) {
           enqueue(WarmupJob{file, ++seen[file]});
-        } else if (boost::filesystem::is_directory(p)) {
-          for (auto const& f : boost::filesystem::directory_iterator(p)) {
-            if (boost::filesystem::is_regular_file(f.path())) {
+        } else if (std::filesystem::is_directory(p)) {
+          for (auto const& f : std::filesystem::directory_iterator(p)) {
+            if (std::filesystem::is_regular_file(f.path())) {
               std::string subFile = f.path().native();
               // Only do it for .hdf files.
               if (subFile.size() < 5 ||

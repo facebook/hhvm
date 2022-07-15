@@ -17,6 +17,7 @@
 #include "hphp/compiler/package.h"
 
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -25,8 +26,6 @@
 #include <sys/types.h>
 #include <utility>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -53,8 +52,6 @@
 
 using namespace HPHP;
 using namespace extern_worker;
-
-namespace fs = boost::filesystem;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -899,7 +896,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
 
   try {
     // First build the inputs for the job
-    std::vector<folly::fs::path> paths;
+    std::vector<std::filesystem::path> paths;
     std::vector<FileMeta> metas;
     std::vector<coro::Task<Ref<RepoOptionsFlags>>> options;
 
@@ -946,8 +943,8 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
 
       Optional<std::string> targetPath;
       if (S_ISLNK(sb.st_mode)) {
-        auto const target = fs::canonical(fullPath);
-        targetPath.emplace(fs::relative(target, m_root).native());
+        auto const target = std::filesystem::canonical(fullPath);
+        targetPath.emplace(std::filesystem::relative(target, m_root).native());
       }
 
       // Most files will have the same RepoOptions, so we cache them

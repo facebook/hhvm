@@ -634,14 +634,20 @@ let check_multiple_concrete_definitions
                class_name = Cls.name class_;
              })
 
+let get_return_enforcement env ft =
+  match (get_ft_async ft, deref ft.ft_ret.et_type) with
+  | (true, (_, Tapply ((_, class_name), [inner_ty])))
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+    Typing_enforceability.get_enforcement env inner_ty
+  | _ -> Typing_enforceability.get_enforcement env ft.ft_ret.et_type
+
 let maybe_poison_ancestors env ft_parent ft_child class_ member_name member_kind
     =
   if
     TypecheckerOptions.like_casts (Provider_context.get_tcopt (Env.get_ctx env))
   then
     match
-      ( Typing_enforceability.get_enforcement env ft_parent.ft_ret.et_type,
-        Typing_enforceability.get_enforcement env ft_child.ft_ret.et_type )
+      (get_return_enforcement env ft_parent, get_return_enforcement env ft_child)
     with
     | (Enforced, Unenforced) ->
       Cls.all_ancestor_names class_

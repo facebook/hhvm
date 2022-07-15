@@ -28,7 +28,12 @@ type fine_dependent = Typing_deps.Dep.dependency Typing_deps.Dep.variant
   * [Typing_deps] *)
 let record_coarse_only = false
 
-type cache = (fine_dependent, dependency Hash_set.t) Hashtbl.t
+type cache_set_entry = {
+  dependency: dependency;
+  is_override: bool;
+}
+
+type cache = (fine_dependent, cache_set_entry Hash_set.t) Hashtbl.t
 
 module SQLitePersistence : sig
   val worker_file_name_glob : string
@@ -93,6 +98,7 @@ end = struct
     let create_dependencies_table =
       "CREATE TABLE IF NOT EXISTS dependencies(
            dependent_hash INTEGER NOT NULL,
+           is_override INTEGER NOT NULL,
            dependency_hash INTEGER NOT NULL
        );"
     in
@@ -126,15 +132,16 @@ end = struct
     in
     bind_and_exec stmt_cache stmt data
 
-  let write_dependency_edge stmt_cache dependent_hash dependency_hash =
+  let write_dependency_edge
+      stmt_cache is_override dependent_hash dependency_hash =
     let sql =
-      "INSERT INTO dependencies(dependent_hash, dependency_hash) VALUES (?, ?)"
+      "INSERT INTO dependencies(dependent_hash, is_override, dependency_hash) VALUES (?, ?, ?)"
     in
 
     let stmt = SU.StatementCache.make_stmt stmt_cache sql in
     let data =
       let open SU.Data_shorthands in
-      [int dependent_hash; int dependency_hash]
+      [int dependent_hash; bool is_override; int dependency_hash]
     in
     bind_and_exec stmt_cache stmt data
 
@@ -150,16 +157,16 @@ end = struct
 
     let hash_of_dep dep = Typing_deps.Dep.make dep |> Typing_deps.Dep.to_int in
 
-    let handle_dependency dependent_hash dependency =
+    let handle_dependency is_override dependent_hash dependency =
       let dependency_hash = hash_of_dep dependency in
-      write_dependency_edge db dependent_hash dependency_hash
+      write_dependency_edge db is_override dependent_hash dependency_hash
     in
-    let handle_dependent fine_dependent dependencies =
+    let handle_dependent fine_dependent dependency_entries =
       let dependent_hash = hash_of_dep fine_dependent in
       Hash_set.add all_nodes fine_dependent;
-      Hash_set.iter dependencies ~f:(fun dep ->
-          Hash_set.add all_nodes dep;
-          handle_dependency dependent_hash dep)
+      Hash_set.iter dependency_entries ~f:(fun { dependency; is_override } ->
+          Hash_set.add all_nodes dependency;
+          handle_dependency is_override dependent_hash dependency)
     in
     Hashtbl.iteri cache ~f:(fun ~key ~data -> handle_dependent key data);
     Hash_set.iter all_nodes ~f:(fun dep ->
@@ -193,14 +200,15 @@ module Backend = struct
     Hashtbl.clear cache;
     cache_used_size := 0
 
-  let add mode fine_dependent dependency =
+  let add ~is_override mode fine_dependent dependency =
     let cache = get_cache () in
     let inc_and_make () =
       cache_used_size := !cache_used_size + 1;
       make_set ()
     in
     let set = Hashtbl.find_or_add cache fine_dependent ~default:inc_and_make in
-    if Result.is_ok @@ Hash_set.strict_add set dependency then
+    let entry = { dependency; is_override } in
+    if Result.is_ok @@ Hash_set.strict_add set entry then
       cache_used_size := !cache_used_size + 1;
     if !cache_used_size >= cache_max_size then flush_cache mode;
     ()
@@ -250,10 +258,15 @@ let should_ignore fine_dependent dependency =
 
 let add_fine_dep mode fine_dependent dependency =
   if not @@ should_ignore fine_dependent dependency then
-    Backend.add mode fine_dependent dependency
+    Backend.add ~is_override:false mode fine_dependent dependency
 
 let add_coarse_dep mode coarse_dep =
   add_fine_dep mode (Typing_deps.Dep.dependency_of_variant coarse_dep)
+
+let dependency_variant_of_member class_name = function
+  | Constructor -> Typing_deps.Dep.Constructor class_name
+  | Method m -> Typing_deps.Dep.Method (class_name, m)
+  | SMethod m -> Typing_deps.Dep.SMethod (class_name, m)
 
 let fine_dependent_of_coarse_and_member :
     coarse_dependent -> dependent_member option -> fine_dependent =
@@ -266,9 +279,8 @@ let fine_dependent_of_coarse_and_member :
   in
   match (coarse, member) with
   | (root, None) -> Typing_deps.Dep.dependency_of_variant root
-  | (Typing_deps.Dep.Type t, Some Constructor) -> Typing_deps.Dep.Constructor t
-  | (Typing_deps.Dep.Type t, Some (Method m)) -> Typing_deps.Dep.Method (t, m)
-  | (Typing_deps.Dep.Type t, Some (SMethod m)) -> Typing_deps.Dep.SMethod (t, m)
+  | (Typing_deps.Dep.Type t, Some member) ->
+    dependency_variant_of_member t member
   | (_, Some _) ->
     failwith
       "Only types/classes can have members for the purposes of dependency tracking!"
@@ -286,5 +298,12 @@ let try_add_fine_dep mode coarse member dependency =
   | (Some root, member_opt) ->
     let dependent = fine_dependent_of_coarse_and_member root member_opt in
     add_fine_dep mode dependent dependency
+
+let add_override_dep mode ~child_name ~parent_name member =
+  let dependent = dependency_variant_of_member parent_name member in
+  let dependency = dependency_variant_of_member child_name member in
+
+  if not @@ should_ignore dependent dependency then
+    Backend.add ~is_override:true mode dependent dependency
 
 let finalize = Backend.finalize

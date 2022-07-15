@@ -467,25 +467,52 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
                 })
     | (_, _) -> ()
 
-let add_fine_grained_member_dep
-    env dependent_class dependen_member_name dependent_member_kind dependency =
-  let root = Some (Dep.Type (Cls.name dependent_class)) in
-  let member =
-    match dependent_member_kind with
+let add_pessimisation_dependency
+    env child_cls member_name member_kind parent_cls =
+  let result =
+    (* For the time being we only care about methods *)
+    match member_kind with
     | MemberKind.Method ->
-      Some (Typing_pessimisation_deps.Method dependen_member_name)
+      ( Cls.get_method child_cls member_name,
+        Cls.get_method parent_cls member_name,
+        Some (Typing_pessimisation_deps.Method member_name) )
     | MemberKind.Static_method ->
-      Some (Typing_pessimisation_deps.SMethod dependen_member_name)
-    | _ -> None
+      ( Cls.get_smethod child_cls member_name,
+        Cls.get_smethod parent_cls member_name,
+        Some (Typing_pessimisation_deps.SMethod member_name) )
+    | _ -> (None, None, None)
   in
-  Typing_pessimisation_deps.try_add_fine_dep
-    (Env.get_deps_mode env)
-    root
-    member
-    dependency
+  match result with
+  | (Some child_elt, Some parent_elt, Some member) ->
+    (* We resolve both the parent and child to their origin. This allows us
+     * to perform hierarchy poisioning for traits correctly: If a class C
+     * gets a definition of some method foo by using a trait D, then the
+     * following two conditions hold simultaneously:
+     * a) If a child of C pessimises foo, then D::foo must be pessimised.
+     * b) If the definition of foo in requires it to be pessimised, then
+     *    all users of C::foo must be aware of that. Further, if C::foo
+     *    overrides P::foo in some parent P of C, then this P::foo must be
+     *    poisoned.
+     *
+     *
+     * To resolve this, we effectively unify C:ffoo and D::foo in the
+     * (pessimisation) dependency graph:
+     * Elsewhere, we make sure that all users of C::foo point to D::foo
+     * instead.  Here, we make sure that we mark D::foo as overriding P::foo
+     * and any direct overrider of C::foo is marked as overriding D::foo
+     * instead. *)
+    let child_name = child_elt.Typing_defs.ce_origin in
+    let parent_name = parent_elt.Typing_defs.ce_origin in
+    Typing_pessimisation_deps.add_override_dep
+      (Env.get_deps_mode env)
+      member
+      ~child_name
+      ~parent_name
+  | _ -> ()
 
 let add_member_dep
-    env class_ (member_kind, member_name, member_origin, origin_pos) =
+    env class_ parent_class (member_kind, member_name, member_origin) =
+  let origin_pos = Cls.pos parent_class in
   if not (Pos_or_decl.is_hhi origin_pos) then (
     let dep =
       match member_kind with
@@ -495,15 +522,18 @@ let add_member_dep
       | MemberKind.Property -> Dep.Prop (member_origin, member_name)
       | MemberKind.Constructor _ -> Dep.Constructor member_origin
     in
-    Typing_deps.add_idep
-      (Env.get_deps_mode env)
-      (Dep.Type (Cls.name class_))
-      dep;
+    let class_name = Cls.name class_ in
+    Typing_deps.add_idep (Env.get_deps_mode env) (Dep.Type class_name) dep;
     if
       TypecheckerOptions.record_fine_grained_dependencies
       @@ Typing_env.get_tcopt env
     then
-      add_fine_grained_member_dep env class_ member_name member_kind dep
+      add_pessimisation_dependency
+        env
+        class_
+        member_name
+        member_kind
+        parent_class
   )
 
 let check_compatible_sound_dynamic_attributes
@@ -1105,7 +1135,8 @@ let check_class_against_parent_class_elt
   add_member_dep
     env
     class_
-    (member_kind, member_name, parent_class_elt.ce_origin, Cls.pos parent_class);
+    parent_class
+    (member_kind, member_name, parent_class_elt.ce_origin);
   match get_member member_kind class_ member_name with
   | Some class_elt ->
     if String.equal parent_class_elt.ce_origin class_elt.ce_origin then (

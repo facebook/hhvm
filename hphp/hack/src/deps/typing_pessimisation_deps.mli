@@ -32,6 +32,13 @@ val try_add_fine_dep :
   dependency ->
   unit
 
+val add_override_dep :
+  Typing_deps_mode.t ->
+  child_name:string ->
+  parent_name:string ->
+  dependent_member ->
+  unit
+
 (** Persists all currently cached dependencies to disk *)
 val finalize : Typing_deps_mode.t -> unit
 

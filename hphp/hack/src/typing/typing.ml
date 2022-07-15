@@ -2120,17 +2120,39 @@ let rec bind_param
         (* Otherwise we have an explicit type, and the default expression type
          * must be a subtype *)
         else
+          (* Under Sound Dynamic, if t is the declared type of the parameter, then we
+           * allow the default expression to have any type u such that u <: ~t.
+           * If t is enforced, then the parameter is assumed to have that type when checking the body,
+           *   because we know that enforcement will ensure this.
+           * If t is not enforced, then the parameter is assumed to have type u|t when checking the body,
+           * as though the default expression had been assigned conditionally to the parameter.
+           *)
+          let support_dynamic =
+            TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && Env.get_support_dynamic_type env
+          in
+          let like_ty1 =
+            if support_dynamic then
+              Typing_utils.make_like env ty1
+            else
+              ty1
+          in
           let (env, ty_err_opt) =
             Typing_coercion.coerce_type
               param.param_pos
               Reason.URhint
               env
               ty2
-              (Typing_utils.make_like_if_enforced env ty1_enforced)
+              { et_type = like_ty1; et_enforced = enforced }
               Typing_error.Callback.parameter_default_value_wrong_type
           in
           Option.iter ty_err_opt ~f:Errors.add_typing_error;
-          (env, ty1)
+          if support_dynamic then
+            match enforced with
+            | Enforced -> (env, ty1)
+            | _ -> Union.union env ty1 ty2
+          else
+            (env, ty1)
       in
       (env, Some te, ty1)
   in

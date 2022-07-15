@@ -53,8 +53,6 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
                                        const String& property);
 Array HHVM_FUNCTION(get_object_vars, const Object& object);
 
-void getMethodNames(Class* cls, Class* ctx, Array& result);
-
 Func* getFuncFromMethCallerFunc(const Func*);
 Func* getFuncFromMethCallerHelperClass(const ObjectData*);
 Func* getFuncFromDynMethCallerHelperClass(const ObjectData*);

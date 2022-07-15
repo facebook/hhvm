@@ -1,4 +1,4 @@
-\MyTestNamespace\ErasedGenericsClass, 0, true
-\MyTestNamespace\ReifiedGenericsClass, 0, true
-\ReifiedGenericsClass, 0, false
+type/0: \MyTestNamespace\ErasedGenericsClass, true
+type/0: \MyTestNamespace\ReifiedGenericsClass, true
+type/0: \ReifiedGenericsClass, false
 

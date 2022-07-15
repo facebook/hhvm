@@ -2570,20 +2570,20 @@ Array get_class_info(const String& name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
 
-      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
+      auto exactName = m->nameStr();
       auto info = Array::CreateDict();
       set_debugger_reflection_method_info(info, m, cls);
-      arr.set(lowerName, VarNR(info).tv());
+      arr.set(exactName, VarNR(info).tv());
     }
 
     for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
 
-      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
+      auto exactName = m->nameStr();
       auto info = Array::CreateDict();
       set_debugger_reflection_method_info(info, m, cls);
-      arr.set(lowerName, VarNR(info).tv());
+      arr.set(exactName, VarNR(info).tv());
     }
     ret.set(s_methods, VarNR(arr).tv());
   }

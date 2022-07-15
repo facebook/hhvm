@@ -124,8 +124,15 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         Ok(None)
     }
 
+    fn get_type_kind(&self, name: TypeName) -> Result<Option<KindOfType>> {
+        Ok(self
+            .naming_provider
+            .get_type_path_and_kind(name)?
+            .map(|(_path, kind)| kind))
+    }
+
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        if let Some((_path, kind)) = self.naming_provider.get_type_path_and_kind(name)? {
+        if let Some(kind) = self.get_type_kind(name)? {
             match kind {
                 KindOfType::TClass => Ok(self.get_class(name)?.map(|decl| TypeDecl::Class(decl))),
                 KindOfType::TTypedef => {
@@ -257,6 +264,16 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
 
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
         Ok(self.store.get_const(name)?)
+    }
+
+    fn get_type_kind(&self, name: TypeName) -> Result<Option<KindOfType>> {
+        if self.get_class(name)?.is_some() {
+            Ok(Some(KindOfType::TClass))
+        } else if self.get_typedef(name)?.is_some() {
+            Ok(Some(KindOfType::TTypedef))
+        } else {
+            Ok(None)
+        }
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {

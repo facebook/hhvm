@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
@@ -71,6 +72,9 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
 
     /// Fetch the declaration of the global constant with the given name.
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
+
+    /// Indicate whether the type with the given name is a typedef or class.
+    fn get_type_kind(&self, name: TypeName) -> Result<Option<KindOfType>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;

@@ -73,24 +73,6 @@ module Capabilities = struct
     (env, res)
 end
 
-let enforce_static_property_access =
-  enforce_local_capability
-    Capabilities.(mk readGlobals)
-    "Reading static properties"
-
-let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
-  let suggestion =
-    match msg with
-    | Some msg -> lazy [(Pos_or_decl.of_raw_pos op_pos, msg)]
-    | None -> lazy []
-  in
-  enforce_local_capability
-    Capabilities.(mk accessGlobals)
-    ~suggestion
-    "Creating mutable references to static properties"
-    op_pos
-    env
-
 let enforce_memoize_object pos env =
   (* Allow zoned_shallow/local policies to memoize objects,
      since those will convert to PolicyShardedMemoize after conversion to zoned *)
@@ -281,17 +263,6 @@ let rec check_assignment env (x, append_pos_opt, te_) =
   | Aast.Hole ((_, _, e), _, _, _) -> check_assignment env (x, append_pos_opt, e)
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
   | Aast.Binop (Eq _, te1, _) ->
-    let env =
-      match te1 with
-      | (_, _, Aast.Class_get _) ->
-        (* Assigning static properties requires specific caps *)
-        enforce_local_capability
-          Capabilities.(mk accessGlobals)
-          "Modifying static properties"
-          append_pos_opt
-          env
-      | _ -> env
-    in
     check_local_capability
       Capabilities.(mk writeProperty)
       (check_assignment_or_unset_target

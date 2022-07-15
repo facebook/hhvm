@@ -2950,7 +2950,6 @@ and expr
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?(valkind = `other)
     ?(check_defined = true)
     ?in_await
@@ -2976,7 +2975,6 @@ and expr
     raw_expr
       ~accept_using_var
       ~is_using_clause
-      ~in_readonly_expr
       ~valkind
       ~check_defined
       ?in_await
@@ -3008,7 +3006,6 @@ and expr_with_pure_coeffects
 and raw_expr
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?(expected : ExpectedTy.t option)
     ?lhs_of_null_coalesce
     ?(valkind = `other)
@@ -3022,7 +3019,6 @@ and raw_expr
   expr_
     ~accept_using_var
     ~is_using_clause
-    ~in_readonly_expr
     ?expected
     ?lhs_of_null_coalesce
     ?in_await
@@ -3131,7 +3127,6 @@ and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?lhs_of_null_coalesce
     ?in_await
     ~allow_awaitable
@@ -4421,8 +4416,7 @@ and expr_
       p
       (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
       ty
-  | Class_get
-      (((_, _, cid_) as cid), CGstring ((ppos, _) as mid), prop_or_method) ->
+  | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
@@ -4437,22 +4431,6 @@ and expr_
     in
     let (env, ty) =
       Env.FakeMembers.check_static_invalid env cid_ (snd mid) ty
-    in
-    let env =
-      Errors.try_if_no_errors
-        (fun () -> Typing_local_ops.enforce_static_property_access ppos env)
-        (fun env ->
-          let is_lvalue = is_lvalue valkind in
-          (* If it's an lvalue we throw an error in a separate check in check_assign *)
-          if in_readonly_expr || is_lvalue then
-            env
-          else
-            Typing_local_ops.enforce_mutable_static_variable
-              ppos
-              env
-              (* This msg only appears if we have access to ReadStaticVariables,
-                 since otherwise we would have errored in the first function *)
-              ~msg:"Please enclose the static in a readonly expression")
     in
     make_result
       env
@@ -4645,7 +4623,7 @@ and expr_
     make_result env p (Aast.Await te) ty
   | ReadonlyExpr e ->
     let env = Env.set_readonly env true in
-    let (env, te, rty) = expr ~is_using_clause ~in_readonly_expr:true env e in
+    let (env, te, rty) = expr ~is_using_clause env e in
     make_result env p (Aast.ReadonlyExpr te) rty
   | New ((_, pos, c), explicit_targs, el, unpacked_element, ()) ->
     let env = might_throw env in

@@ -551,6 +551,11 @@ struct Client {
     // Execs which fellback
     std::atomic<size_t> execFallbacks{0};
 
+    std::atomic<size_t> execCpuUsec{0};
+    std::atomic<size_t> execAllocatedCores{0};
+    std::atomic<size_t> execMaxUsedMem{0};
+    std::atomic<size_t> execReservedMem{0};
+
     // Execs in optimistic mode which succeeded
     std::atomic<size_t> optimisticExecs{0};
 

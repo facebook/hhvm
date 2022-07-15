@@ -826,7 +826,9 @@ bool process(const CompilerOptions &po) {
       "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
       "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded, {:,} fallback\n"
       "  Blobs: {:,} total, {:,} queried, {:,} uploaded, {:,} fallback\n"
-      "  {:,} downloads, {:,} throttles",
+      "  {:,} downloads, {:,} throttles\n"
+      "  Cpu: {:,} usec usage, {:,} allocated cores\n"
+      "  Mem: {:,} max used, {:,} reserved",
       package.getTotalFiles(),
       stats.execs.load(),
       stats.execCacheHits.load(),
@@ -842,7 +844,11 @@ bool process(const CompilerOptions &po) {
       stats.blobsUploaded.load(),
       stats.blobFallbacks.load(),
       stats.downloads.load(),
-      stats.throttles.load()
+      stats.throttles.load(),
+      stats.execCpuUsec.load(),
+      stats.execAllocatedCores.load(),
+      stats.execMaxUsedMem.load(),
+      stats.execReservedMem.load()
     );
     sample.setInt("total_parses", package.getTotalFiles());
 
@@ -878,6 +884,11 @@ bool process(const CompilerOptions &po) {
 
     sample.setInt("parse_total_loads", stats.downloads.load());
     sample.setInt("parse_throttles", stats.throttles.load());
+
+    sample.setInt("parse_exec_cpu_usec", stats.execCpuUsec.load());
+    sample.setInt("parse_exec_allocated_cores", stats.execAllocatedCores.load());
+    sample.setInt("parse_exec_max_used_mem", stats.execMaxUsedMem.load());
+    sample.setInt("parse_exec_reserved_mem", stats.execReservedMem.load());
 
     sample.setStr(
       "parse_fellback",

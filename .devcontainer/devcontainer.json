@@ -20,7 +20,7 @@
   "hostRequirements": {
     "cpus": 16,
     "memory": "64gb",
-    "storage": "200gb" 
+    "storage": "128gb" 
   },
  
   "containerEnv": {

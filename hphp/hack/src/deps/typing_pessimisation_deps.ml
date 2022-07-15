@@ -150,7 +150,7 @@ end = struct
     let all_nodes = Hash_set.Poly.create () in
     let data_of_dep dep =
       let open Typing_deps.Dep in
-      ( extract_root_name dep,
+      ( extract_root_name ~strip_namespace:false dep,
         extract_member_name dep,
         dep_kind_of_variant dep |> dep_kind_to_enum )
     in
@@ -224,7 +224,7 @@ let should_ignore fine_dependent dependency =
    * every defininition here. *)
   let is_hh_def : type a. a Typing_deps.Dep.variant -> bool =
    fun dep ->
-    let root = Typing_deps.Dep.extract_root_name dep in
+    let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false dep in
     Option.is_some @@ String.chop_prefix root ~prefix:"HH\\"
   in
   let has_useful_kind dep =

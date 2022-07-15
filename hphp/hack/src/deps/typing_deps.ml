@@ -199,7 +199,9 @@ module Dep = struct
     | Extends s -> Utils.strip_ns s
     | Module m -> m
 
-  let extract_root_name : type a. a variant -> string = function
+  let extract_root_name : type a. ?strip_namespace:bool -> a variant -> string =
+   fun ?(strip_namespace = true) variant ->
+    match variant with
     | GConst s
     | GConstName s
     | Constructor s
@@ -213,7 +215,10 @@ module Dep = struct
     | Method (s, _)
     | SMethod (s, _)
     | Const (s, _) ->
-      Utils.strip_ns s
+      if strip_namespace then
+        Utils.strip_ns s
+      else
+        s
 
   let extract_member_name : type a. a variant -> string option = function
     | GConst _

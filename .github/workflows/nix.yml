@@ -160,8 +160,7 @@ jobs:
         EOF
               ;;
             *)
-              echo "Unexpected HTTP status $GET_DISTRIBUTION_STATUS_CODE when
-              fetching http://nexus-prod-lb-384239604.us-west-2.elb.amazonaws.com/service/rest/v1/repositories/deb-$1"
+              echo "Unexpected HTTP status $GET_DISTRIBUTION_STATUS_CODE when fetching http://nexus-prod-lb-384239604.us-west-2.elb.amazonaws.com/service/rest/v1/repositories/deb-$1"
               ;;
           esac
           curl \

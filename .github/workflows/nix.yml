@@ -110,3 +110,63 @@ jobs:
         NEXUS_ADMIN_PASSWORD_FILE="$(mktemp)" &&
         aws secretsmanager get-secret-value --secret-id nexus-admin-password-testing-3 --query SecretString --output text > "$NEXUS_ADMIN_PASSWORD_FILE" &&
         echo "NEXUS_ADMIN_PASSWORD_FILE=$NEXUS_ADMIN_PASSWORD_FILE" >> $GITHUB_ENV
+    - name: Upload the deb package
+      run: |
+        set -e
+        GPG_KEY="$(cat "$GPG_KEY_FILE")"
+        ESCAPED_GPG_KEY=\""${GPG_KEY//$'\n'/'\n'}"\"
+        function upload () {
+          GET_DISTRIBUTION_STATUS_CODE="$(
+            curl \
+              -o /dev/null \
+              -s -w "%{http_code}" \
+              -X GET \
+              -u "admin:$(cat "$NEXUS_ADMIN_PASSWORD_FILE")" \
+              "http://nexus-testing-3-lb-1753098265.us-west-2.elb.amazonaws.com/service/rest/v1/repositories/deb-$1"
+          )"
+          case "$GET_DISTRIBUTION_STATUS_CODE" in
+            200)
+              echo "Skip distribution creation becuase it exists.";;
+            404)
+              curl \
+                --fail \
+                -X POST \
+                -u "admin:$(cat "$NEXUS_ADMIN_PASSWORD_FILE")" \
+                -H "Content-Type: application/json" \
+                --data-binary @- \
+                http://nexus-testing-3-lb-1753098265.us-west-2.elb.amazonaws.com/service/rest/v1/repositories/apt/hosted \
+                << EOF
+        {
+          "name": "deb-$1",
+          "online": true,
+          "storage": {
+            "blobStoreName": "default",
+            "strictContentTypeValidation": true,
+            "writePolicy": "allow_once"
+          },
+          "component": {
+            "proprietaryComponents": false
+          },
+          "apt": {
+            "distribution": "$1"
+          },
+          "aptSigning": {
+            "keypair": $ESCAPED_GPG_KEY
+          }
+        }
+        EOF
+              ;;
+            *)
+              echo "Unexpected HTTP status $GET_DISTRIBUTION_STATUS_CODE when
+              fetching http://nexus-testing-3-lb-1753098265.us-west-2.elb.amazonaws.com/service/rest/v1/repositories/deb-$1"
+              ;;
+          esac
+          curl \
+            --fail \
+            -X POST \
+            -u "admin:$(cat "$NEXUS_ADMIN_PASSWORD_FILE")" \
+            -H "Content-Type: multipart/form-data" \
+            --data-binary @bundle.deb \
+            "http://nexus-testing-3-lb-1753098265.us-west-2.elb.amazonaws.com/repository/deb-$1/"
+        }
+        upload nightly

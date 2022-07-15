@@ -98,6 +98,8 @@ val opt_ : ('a -> json) -> 'a option -> json
 
 val array_ : ('a -> json) -> 'a list -> json
 
+val string_map : ('a -> json) -> 'a SMap.t -> json
+
 (* Types and functions for monadic API for traversing a JSON object. *)
 
 type json_type =

@@ -216,6 +216,8 @@ stdenv.mkDerivation rec {
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen
     '';
 
+  enableParallelBuilding = false;
+
   meta = {
     description = "High-performance JIT compiler for PHP/Hack";
     platforms = [

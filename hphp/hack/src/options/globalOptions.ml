@@ -32,6 +32,7 @@ type t = {
   po_deregister_php_stdlib: bool;
   po_disallow_toplevel_requires: bool;
   po_allow_unstable_features: bool;
+  tco_log_large_fanouts_threshold: int option;
   tco_log_inference_constraints: bool;
   tco_language_feature_logging: bool;
   tco_timeout: int;
@@ -218,6 +219,7 @@ let default =
     po_disallow_toplevel_requires = false;
     po_deregister_php_stdlib = false;
     po_allow_unstable_features = false;
+    tco_log_large_fanouts_threshold = None;
     tco_log_inference_constraints = false;
     tco_language_feature_logging = false;
     tco_timeout = 0;
@@ -333,6 +335,7 @@ let default =
 let make
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
+    ?tco_log_large_fanouts_threshold
     ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
@@ -519,6 +522,7 @@ let make
     po_deregister_php_stdlib;
     po_disallow_toplevel_requires;
     po_allow_unstable_features;
+    tco_log_large_fanouts_threshold;
     tco_log_inference_constraints;
     tco_language_feature_logging;
     tco_timeout;
@@ -670,6 +674,11 @@ let so_naming_sqlite_path t = t.so_naming_sqlite_path
 let po_auto_namespace_map t = t.po_auto_namespace_map
 
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
+
+let log_fanout t ~fanout_cardinal =
+  match t.tco_log_large_fanouts_threshold with
+  | None -> false
+  | Some threshold -> Int.(fanout_cardinal >= threshold)
 
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 

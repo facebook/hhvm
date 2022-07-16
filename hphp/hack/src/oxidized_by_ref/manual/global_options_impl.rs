@@ -31,6 +31,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_deregister_php_stdlib: false,
     po_disallow_toplevel_requires: false,
     po_allow_unstable_features: false,
+    tco_log_large_fanouts_threshold: None,
     tco_log_inference_constraints: false,
     tco_language_feature_logging: false,
     tco_timeout: 0,
@@ -223,6 +224,7 @@ impl GlobalOptions<'_> {
         let po_deregister_php_stdlib = self.po_deregister_php_stdlib;
         let po_disallow_toplevel_requires = self.po_disallow_toplevel_requires;
         let po_allow_unstable_features = self.po_allow_unstable_features;
+        let tco_log_large_fanouts_threshold = self.tco_log_large_fanouts_threshold;
         let tco_log_inference_constraints = self.tco_log_inference_constraints;
         let tco_language_feature_logging = self.tco_language_feature_logging;
         let tco_timeout = self.tco_timeout;
@@ -441,6 +443,7 @@ impl GlobalOptions<'_> {
             po_deregister_php_stdlib,
             po_disallow_toplevel_requires,
             po_allow_unstable_features,
+            tco_log_large_fanouts_threshold,
             tco_log_inference_constraints,
             tco_language_feature_logging,
             tco_timeout,

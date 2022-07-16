@@ -63,6 +63,7 @@ type t = {
   po_disallow_toplevel_requires: bool;
   (* Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   po_allow_unstable_features: bool;
+  tco_log_large_fanouts_threshold: int option;
   (* Print types of size bigger than 1000 after performing a type union. *)
   tco_log_inference_constraints: bool;
   (*
@@ -333,6 +334,7 @@ type t = {
 val make :
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
+  ?tco_log_large_fanouts_threshold:int ->
   ?tco_log_inference_constraints:bool ->
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
@@ -506,6 +508,8 @@ val po_deregister_php_stdlib : t -> bool
 val po_disallow_toplevel_requires : t -> bool
 
 val po_codegen : t -> bool
+
+val log_fanout : t -> fanout_cardinal:int -> bool
 
 val tco_log_inference_constraints : t -> bool
 

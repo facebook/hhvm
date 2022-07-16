@@ -589,7 +589,7 @@ module Rage = struct
 end
 
 module Fanouts = struct
-  let log
+  let log_class
       ~class_name:_
       ~class_diff:_
       ~class_diff_category:_
@@ -597,5 +597,8 @@ module Fanouts = struct
       ~direct_references_cardinal:_
       ~descendants_cardinal:_
       ~children_cardinal:_ =
+    ()
+
+  let log ~changes_cardinal:_ ~fanout_cardinal:_ ~max_class_fanout_cardinal:_ =
     ()
 end

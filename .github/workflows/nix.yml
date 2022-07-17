@@ -10,6 +10,8 @@ permissions:
 
 jobs:
   build-and-test:
+    env:
+      NIX_STORE_DIR: /opt/hhvm/nix/store
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false

@@ -296,8 +296,12 @@ pub struct SrcLoc {
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub enum Pseudo<'arena> {
+    /// An internal representation of a break statement that is removed by the
+    /// try/finally rewriter.
     Break(isize),
     Comment(Str<'arena>),
+    /// An internal representation of a break statement that is removed by the
+    /// try/finally rewriter.
     Continue(isize),
     Label(Label),
     SrcLoc(SrcLoc),

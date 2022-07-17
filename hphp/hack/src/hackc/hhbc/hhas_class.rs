@@ -18,7 +18,7 @@ use ffi::Slice;
 use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum TraitReqKind {
     MustExtend,

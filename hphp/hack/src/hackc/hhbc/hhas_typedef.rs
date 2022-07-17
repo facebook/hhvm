@@ -11,7 +11,7 @@ use crate::ClassName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct HhasTypedef<'arena> {
     pub name: ClassName<'arena>,

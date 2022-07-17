@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use analysis;
-pub use core::*;
-pub use passes;
-pub use print;
-pub use print::print_unit;
-pub use verify;
+mod class;
+mod constant;
+mod context;
+mod convert;
+mod func;
+mod instrs;
+mod sequence;
+mod types;
 
-#[cfg(test)]
-pub use testutils;
+pub use convert::bc_to_ir;

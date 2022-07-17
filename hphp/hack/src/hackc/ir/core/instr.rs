@@ -1062,7 +1062,7 @@ pub enum CmpOp {
 }
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
-pub enum Ssa {
+pub enum Tmp {
     SetVar(VarId, ValueId), // var, value
     GetVar(VarId),          // var
 }
@@ -1083,7 +1083,7 @@ pub enum Special {
     // Used to build SSA.
     #[has_locals(none)]
     #[has_loc(none)]
-    Ssa(Ssa),
+    Tmp(Tmp),
     Tombstone,
 }
 
@@ -1153,11 +1153,11 @@ impl Instr {
     }
 
     pub fn set_var(var: VarId, value: ValueId) -> Instr {
-        Instr::Special(Special::Ssa(Ssa::SetVar(var, value)))
+        Instr::Special(Special::Tmp(Tmp::SetVar(var, value)))
     }
 
     pub fn get_var(var: VarId) -> Instr {
-        Instr::Special(Special::Ssa(Ssa::GetVar(var)))
+        Instr::Special(Special::Tmp(Tmp::GetVar(var)))
     }
 }
 

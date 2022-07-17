@@ -32,9 +32,9 @@ use core::instr::QueryMOp;
 use core::instr::ReadonlyOp;
 use core::instr::SetRangeOp;
 use core::instr::Special;
-use core::instr::Ssa;
 use core::instr::SwitchKind;
 use core::instr::Terminator;
+use core::instr::Tmp;
 use core::string_intern::StringInterner;
 use core::*;
 use itertools::Itertools;
@@ -1232,10 +1232,10 @@ pub(crate) fn print_instr(
         Instr::Special(Special::Copy(vid)) => {
             write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
-        Instr::Special(Special::Ssa(Ssa::GetVar(var))) => {
+        Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
             write!(w, "get_var &{}", var.as_usize())?;
         }
-        Instr::Special(Special::Ssa(Ssa::SetVar(var, value))) => {
+        Instr::Special(Special::Tmp(Tmp::SetVar(var, value))) => {
             write!(
                 w,
                 "set_var &{}, {}",

@@ -23,6 +23,9 @@ jobs:
     continue-on-error: ${{ matrix.os == 'macos-latest' }}
     steps:
     - uses: actions/checkout@v2.4.0
+    - run: sudo mkdir -p /opt/hhvm/nix/store
+    - run: sudo chgrp nixbld /opt/hhvm/nix/store
+    - run: sudo chmod 771 /opt/hhvm/nix/store
     - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |

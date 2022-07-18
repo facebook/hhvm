@@ -9,7 +9,7 @@ class B extends NumberFormatter {
 class C extends MessageFormatter {
         static $ARGS = varray["en_US", "foo"];
 }
-class D extends Spoofchecker {
+class D extends SpoofChecker {
         static $ARGS = varray[];
 }
 <<__EntryPoint>> function main(): void {

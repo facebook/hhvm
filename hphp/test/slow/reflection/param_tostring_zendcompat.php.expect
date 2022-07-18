@@ -8,7 +8,7 @@ dict(9) {
   [3]=>
   string(37) "Parameter #3 [ <required> HH\int $i ]"
   [4]=>
-  string(37) "Parameter #4 [ <required> Object $o ]"
+  string(39) "Parameter #4 [ <required> MyObject $o ]"
   [5]=>
   string(41) "Parameter #5 [ <required> HH\this $thiz ]"
   [6]=>
@@ -16,5 +16,5 @@ dict(9) {
   [7]=>
   string(58) "Parameter #7 [ <optional> HH\mixed or NULL $opt_m = NULL ]"
   [8]=>
-  string(56) "Parameter #8 [ <optional> Object or NULL $opt_o = NULL ]"
+  string(58) "Parameter #8 [ <optional> MyObject or NULL $opt_o = NULL ]"
 }

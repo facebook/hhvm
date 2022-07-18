@@ -31,6 +31,8 @@ let when_tast_check tast_env ~default f =
 let failwithpos pos msg =
   raise @@ Shape_analysis_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
 
+let failwith = failwithpos Pos.none
+
 let collect_analysis_targets :
     Provider_context.t -> Tast.program -> potential_targets =
   let reducer =
@@ -93,7 +95,7 @@ let dict_pos_of_hint hint_opt =
       pos
     | A.Happly ((_, id), [hint]) when String.equal id SN.Classes.cAwaitable ->
       go hint
-    | _ -> failwith "seeked position of unsuitable parameter hint"
+    | _ -> failwithpos pos "seeked position of unsuitable parameter hint"
   in
   match hint_opt with
   | Some hint -> go hint

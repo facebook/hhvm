@@ -58,7 +58,10 @@ type marker_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
   | Parameter
       (** A dict parameter to a function or method such as `function
-          f(dict<string,int> $d)` *)
+          f(dict<string,int> $d): void {...}` *)
+  | Return
+      (** A dict return of a function or method such as `function
+          f(): dict<string,int> {...}` *)
   | Argument
       (** A dict argument to a function or method such as `$d = dict[]; f($d)`
        *)
@@ -109,6 +112,7 @@ type decorated_constraint = {
 type env = {
   constraints: decorated_constraint list;  (** Append-only set of constraints *)
   lenv: lenv;  (** Local variable information *)
+  return: entity;  (** Entity for the return of a callable *)
   tast_env: Tast_env.env;
       (** TAST env associated with the definition being analysed *)
 }

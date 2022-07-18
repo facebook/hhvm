@@ -38,7 +38,8 @@ let of_results env results =
         begin
           match kind with
           | Allocation
-          | Parameter ->
+          | Parameter
+          | Return ->
             Some (of_marker env pos kind fields)
           | Argument -> None
         end

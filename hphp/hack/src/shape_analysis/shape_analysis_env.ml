@@ -111,8 +111,8 @@ module LEnv = struct
     Cont.Map.map_env refresh_cont [] lenv
 end
 
-let init tast_env constraints bindings =
-  { constraints; lenv = LEnv.init bindings; tast_env }
+let init tast_env constraints bindings ~return =
+  { constraints; lenv = LEnv.init bindings; return; tast_env }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }

@@ -20,6 +20,7 @@ val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
 val callable :
   Tast_env.t ->
   Tast.fun_param list ->
+  return:Tast.type_hint ->
   Tast.func_body ->
   decorated_constraint list
 

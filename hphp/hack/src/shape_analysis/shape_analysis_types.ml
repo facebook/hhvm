@@ -41,6 +41,7 @@ type shape_keys = T.locl_phase T.shape_field_type T.TShapeMap.t
 type marker_kind =
   | Allocation
   | Parameter
+  | Return
   | Argument
 [@@deriving show { with_path = false }]
 
@@ -70,6 +71,7 @@ type decorated_constraint = {
 type env = {
   constraints: decorated_constraint list;
   lenv: lenv;
+  return: entity;
   tast_env: Tast_env.t;
 }
 

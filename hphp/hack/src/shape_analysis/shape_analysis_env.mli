@@ -13,7 +13,12 @@ module LMap = Local_id.Map
 val fresh_var : unit -> entity_
 
 (** Initialise shape analysis environment *)
-val init : Tast_env.env -> decorated_constraint list -> entity LMap.t -> env
+val init :
+  Tast_env.env ->
+  decorated_constraint list ->
+  entity LMap.t ->
+  return:entity ->
+  env
 
 (** Record a shape analysis constraint *)
 val add_constraint : env -> decorated_constraint -> env

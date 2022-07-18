@@ -117,6 +117,7 @@ let subset_lookups subsets =
 
   dynamic_shape_result(A) :- marks(A), has_dynamic_key'(A).
 *)
+(* TODO(T125884349): Specially handle flows into return type hints *)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
   let { markers; static_accesses; dynamic_accesses; subsets; joins } =

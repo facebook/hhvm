@@ -332,22 +332,21 @@ let rec switch
   env
 
 and stmt (env : env) ((pos, stmt) : T.stmt) : env =
+  let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
   match stmt with
   | A.Expr e -> expr env e
+  | A.Return None -> env
   | A.Return (Some e) ->
     let (env, entity) = expr_ env e in
-    let add_dynamic_if_tast_check entity_ =
-      when_tast_check env.tast_env ~default:env @@ fun () ->
-      let decorated_constraint =
-        {
-          hack_pos = pos;
-          origin = __LINE__;
-          constraint_ = Has_dynamic_key entity_;
-        }
-      in
-      Env.add_constraint env decorated_constraint
-    in
-    Option.value_map entity ~default:env ~f:add_dynamic_if_tast_check
+    begin
+      match (entity, env.return) with
+      | (Some entity_, Some return_) ->
+        let constraint_ = Subsets (entity_, return_) in
+        let decorated_constraint = decorate ~origin:__LINE__ constraint_ in
+        let env = Env.add_constraint env decorated_constraint in
+        env
+      | _ -> env
+    end
   | A.If (cond, then_bl, else_bl) ->
     let parent_env = expr env cond in
     let base_env = Env.reset_constraints parent_env in
@@ -459,9 +458,11 @@ let init_params tast_env (params : T.fun_param list) :
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 
-let callable tast_env params body : decorated_constraint list =
+let callable tast_env params ~return body : decorated_constraint list =
   let (param_constraints, param_env) = init_params tast_env params in
-  let env = Env.init tast_env param_constraints param_env in
+  let (return_constraints, return) = decl_hint tast_env Return return in
+  let constraints = return_constraints @ param_constraints in
+  let env = Env.init tast_env constraints param_env ~return in
   let env = block env body.A.fb_ast in
   env.constraints
 
@@ -471,12 +472,13 @@ let program (ctx : Provider_context.t) (tast : Tast.program) :
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); f_params; _ } = fd.A.fd_fun in
-      [(id, callable tast_env f_params f_body)]
+      let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
+      [(id, callable tast_env f_params ~return:f_ret f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
-      let handle_method A.{ m_body; m_name = (_, method_name); m_params; _ } =
+      let handle_method
+          A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable tast_env m_params m_body)
+        (id, callable tast_env m_params ~return:m_ret m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"

@@ -14,6 +14,7 @@ val collect_analysis_targets :
 val callable :
   Tast_env.t ->
   Tast.fun_param list ->
+  return:Tast.type_hint ->
   Tast.func_body ->
   decorated_constraint list
 

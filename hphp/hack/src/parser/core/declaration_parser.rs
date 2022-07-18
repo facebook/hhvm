@@ -1722,7 +1722,7 @@ where
     fn parse_visibility_modifier_opt(&mut self) -> S::Output {
         let token_kind = self.peek_token_kind();
         match token_kind {
-            TokenKind::Public | TokenKind::Protected | TokenKind::Private => {
+            TokenKind::Public | TokenKind::Protected | TokenKind::Private | TokenKind::Internal => {
                 let token = self.next_token();
                 S!(make_token, self, token)
             }

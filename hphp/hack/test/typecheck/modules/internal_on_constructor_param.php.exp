@@ -1,0 +1,6 @@
+File "internal_on_constructor_param.php--file2.php", line 4, characters 8-9:
+Typing error (Typing[4112])
+  File "internal_on_constructor_param.php--file2.php", line 4, characters 12-12:
+  You cannot access internal members outside of a module
+  File "internal_on_constructor_param.php--file1.php", line 7, characters 14-16:
+  This member is internal

@@ -1833,7 +1833,9 @@ let make_class_member_standalone_check_env ctx class_ =
 
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
-  Env.get_class env name >>| fun cls -> { env; cls; class_ }
+  Env.get_class env name >>| fun cls ->
+  let env = check_class_type_parameters_add_constraints env class_ cls in
+  { env; cls; class_ }
 
 let method_def_standalone standalone_env method_name =
   let open Option in
@@ -1843,4 +1845,10 @@ let method_def_standalone standalone_env method_name =
   List.find standalone_env.class_.Aast.c_methods ~f:(fun m ->
       String.equal (snd m.Aast.m_name) method_name)
   >>= fun method_ ->
-  method_def ~is_disposable standalone_env.env standalone_env.cls method_
+  let env =
+    if method_.m_static then
+      Env.set_static standalone_env.env
+    else
+      standalone_env.env
+  in
+  method_def ~is_disposable env standalone_env.cls method_

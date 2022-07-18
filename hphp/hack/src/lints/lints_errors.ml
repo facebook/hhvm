@@ -441,3 +441,10 @@ let unconditional_recursion p =
     p
     ("This is a recursive function with no base case to terminate. This will result in a Stack Overflow error."
     ^ " Consider adding a base case.")
+
+let branches_return_same_value p =
+  Lints.add
+    Codes.branch_return_same_value
+    Lint_warning
+    p
+    "All of these statements are returning the same value. Consider keeping a single return statement outside of the branches."

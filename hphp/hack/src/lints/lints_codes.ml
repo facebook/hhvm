@@ -102,4 +102,6 @@ module Codes = struct
   let pointless_booleans_expression = 5644
 
   let unconditional_recursion = 5645
+
+  let branch_return_same_value = 5646
 end

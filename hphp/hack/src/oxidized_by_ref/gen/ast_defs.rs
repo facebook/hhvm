@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b359e0aa49d1f04cc7b8f399a6f89e41>>
+// @generated SignedSource<<9da41d36ecde8700876e9eac3f78545c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -152,30 +152,55 @@ pub use oxidized::ast_defs::FunKind;
 )]
 #[repr(C, u8)]
 pub enum Bop<'a> {
+    /// Addition: x + y
     Plus,
+    /// Subtraction: x - y
     Minus,
+    /// Multiplication: x * y
     Star,
+    /// Division: x / y
     Slash,
+    /// Value/coercing equality: x == y
     Eqeq,
+    /// Same-type-and-value equality: x === y
     Eqeqeq,
+    /// Exponent: x ** y
     Starstar,
+    /// Value inquality: x != y
     Diff,
+    /// Not-same-type-and-value-equality: x !== y
     Diff2,
+    /// Logical AND: x && y
     Ampamp,
+    /// Logical OR: x || y
     Barbar,
+    /// Less than: x < y
     Lt,
+    /// Less than or equal to: x <= y
     Lte,
+    /// Greater than: x > y
     Gt,
+    /// Greater than or equal to: x >= y
     Gte,
+    /// String concatenation: x . y
     Dot,
+    /// Bitwise AND: x & y
     Amp,
+    /// Bitwise OR: x | y
     Bar,
+    /// Bitwise left shift: x << y
     Ltlt,
+    /// Bitwise right shift: x >> y
     Gtgt,
+    /// Modulo: x % y
     Percent,
+    /// Bitwise XOR: x ^ y
     Xor,
+    /// Spaceship operator: x <=> y
     Cmp,
+    /// Coalesce: x ?? y
     QuestionQuestion,
+    /// =, +=, -=, ...
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Eq(Option<&'a Bop<'a>>),
 }

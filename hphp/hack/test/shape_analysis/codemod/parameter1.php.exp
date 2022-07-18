@@ -3,7 +3,8 @@
   [
     {
       "pos":{"path":"parameter1.php","line":3,"start":12,"end":29},
-      "kind":"Parameter"
+      "kind":"Parameter",
+      "type":"shape()"
     }
   ]
 ]

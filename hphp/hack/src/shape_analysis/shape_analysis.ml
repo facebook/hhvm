@@ -53,7 +53,8 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     Walker.program ctx tast |> SMap.iter process_callable
   | Codemod ->
     let process_callable constraints =
-      Solver.simplify empty_typing_env constraints |> Codemod.of_results
+      Solver.simplify empty_typing_env constraints
+      |> Codemod.of_results empty_typing_env
     in
     Walker.program ctx tast
     |> SMap.map process_callable

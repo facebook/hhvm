@@ -20,11 +20,18 @@ let of_pos pos =
       ("end", JSON.int_ ecol);
     ]
 
-let of_marker pos kind _fields =
+let of_marker env pos kind fields =
+  let shape_ty =
+    Typing_defs.(mk (Typing_reason.Rnone, Tshape (Closed_shape, fields)))
+  in
   JSON.JSON_Object
-    [("pos", of_pos pos); ("kind", JSON.string_ (show_marker_kind kind))]
+    [
+      ("pos", of_pos pos);
+      ("kind", JSON.string_ (show_marker_kind kind));
+      ("type", JSON.string_ (Typing_print.full env shape_ty));
+    ]
 
-let of_results results =
+let of_results env results =
   List.filter_map
     ~f:(function
       | Shape_like_dict (pos, kind, fields) ->
@@ -32,7 +39,7 @@ let of_results results =
           match kind with
           | Allocation
           | Parameter ->
-            Some (of_marker pos kind fields)
+            Some (of_marker env pos kind fields)
           | Argument -> None
         end
       | Dynamically_accessed_dict _ -> None)

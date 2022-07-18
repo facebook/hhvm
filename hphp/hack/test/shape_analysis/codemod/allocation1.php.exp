@@ -3,7 +3,8 @@
   [
     {
       "pos":{"path":"allocation1.php","line":4,"start":3,"end":30},
-      "kind":"Allocation"
+      "kind":"Allocation",
+      "type":"shape('a' => int, 'b' => bool)"
     }
   ]
 ]

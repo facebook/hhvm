@@ -8,4 +8,4 @@
 
 open Shape_analysis_types
 
-val of_results : shape_result list -> Hh_json.json
+val of_results : Typing_env_types.env -> shape_result list -> Hh_json.json

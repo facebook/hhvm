@@ -91,6 +91,18 @@ module LEnv = struct
       (constraints, Some cont)
     in
     Cont.Map.union_env [] lenv1 lenv2 ~combine
+
+  let refresh (lenv : t) : constraint_ list * t =
+    let refresh_local constraints _ = function
+      | Some entity_ ->
+        let var = fresh_var () in
+        (Subsets (entity_, var) :: constraints, Some var)
+      | None -> (constraints, None)
+    in
+    let refresh_cont constraints _ cont =
+      LMap.map_env refresh_local constraints cont
+    in
+    Cont.Map.map_env refresh_cont [] lenv
 end
 
 let init tast_env constraints bindings =
@@ -205,3 +217,7 @@ let loop_continuation cont_key ~env_before_iteration ~env_after_iteration =
     env_after_iteration with
     constraints = new_constraints @ env_after_iteration.constraints;
   }
+
+let refresh env =
+  let (redirection_constraints, lenv) = LEnv.refresh env.lenv in
+  { env with lenv; constraints = redirection_constraints @ env.constraints }

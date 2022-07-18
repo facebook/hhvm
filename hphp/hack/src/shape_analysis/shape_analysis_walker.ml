@@ -325,9 +325,9 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.While (cond, bl) ->
     Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
     let env = Env.save_and_merge_next_in_cont env Cont.Continue in
-    let env_before_iteration = env in
+    let env_before_iteration = Env.refresh env in
     let env_after_iteration =
-      let env = expr env cond in
+      let env = expr env_before_iteration cond in
       let env = block env bl in
       env
     in

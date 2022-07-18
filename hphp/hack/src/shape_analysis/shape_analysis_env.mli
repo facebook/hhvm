@@ -50,3 +50,5 @@ val loop_continuation :
   env_before_iteration:env ->
   env_after_iteration:env ->
   env
+
+val refresh : env -> env

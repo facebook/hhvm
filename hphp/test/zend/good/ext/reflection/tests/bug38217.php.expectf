@@ -1,4 +1,4 @@
-object(Object) (0) {
+object(Object0) (0) {
 }
 string(59) "Object1::__construct() expects exactly 1 parameter, 0 given"
 string(4) "test"

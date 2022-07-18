@@ -34,6 +34,14 @@ let show_constraint_ env =
   | Joins { left; right; join } ->
     show_entity left ^ " ∪ " ^ show_entity right ^ " = " ^ show_entity join
 
+let show_decorated_constraint ~verbosity env { hack_pos; origin; constraint_ } =
+  let line = Pos.line hack_pos in
+  let constraint_ = show_constraint_ env constraint_ in
+  if verbosity > 0 then
+    Format.asprintf "%4d: %4d: %s" line origin constraint_
+  else
+    Format.asprintf "%4d: %s" line constraint_
+
 let show_shape_result env = function
   | Shape_like_dict (pos, kind, keys_and_types) ->
     let show_ty = show_ty env in

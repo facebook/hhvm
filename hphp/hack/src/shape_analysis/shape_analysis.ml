@@ -18,8 +18,10 @@ module JSON = Hh_json
 exception Shape_analysis_exn = Shape_analysis_exn
 
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
+  let { mode; verbosity } = options in
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
-  match options.mode with
+  let strip_decorations { constraint_; _ } = constraint_ in
+  match mode with
   | FlagTargets ->
     let log_pos = Format.printf "%a\n" Pos.pp in
     let { expressions_to_modify; hints_to_modify } =
@@ -31,11 +33,11 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
     let print_function_constraints
-        (id : string) (constraints : constraint_ list) : unit =
+        (id : string) (constraints : decorated_constraint list) : unit =
       Format.printf "Constraints for %s:\n" id;
       constraints
-      |> List.map ~f:(show_constraint_ empty_typing_env)
-      |> List.sort ~compare:String.compare
+      |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+      |> List.map ~f:(show_decorated_constraint ~verbosity empty_typing_env)
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
@@ -50,13 +52,16 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     let process_callable id constraints =
       Solver.simplify empty_typing_env constraints |> print_callable_summary id
     in
-    Walker.program ctx tast |> SMap.iter process_callable
+    Walker.program ctx tast
+    |> SMap.map (List.map ~f:strip_decorations)
+    |> SMap.iter process_callable
   | Codemod ->
     let process_callable constraints =
       Solver.simplify empty_typing_env constraints
       |> Codemod.of_results empty_typing_env
     in
     Walker.program ctx tast
+    |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.map process_callable
     |> SMap.values
     |> JSON.array_ (fun json -> json)

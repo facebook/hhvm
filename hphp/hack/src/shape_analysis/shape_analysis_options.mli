@@ -8,4 +8,6 @@
 
 open Shape_analysis_types
 
-val parse : string -> options option
+val parse_mode : string -> mode option
+
+val mk : mode:mode -> verbosity:int -> options

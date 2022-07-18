@@ -1826,8 +1826,8 @@ let handle_mode
       ~memtrace
   | Shape_analysis mode ->
     let opts =
-      match Shape_analysis_options.parse mode with
-      | Some options -> options
+      match Shape_analysis_options.parse_mode mode with
+      | Some mode -> Shape_analysis_options.mk ~mode ~verbosity
       | None -> die "invalid shape analysis mode"
     in
     handle_constraint_mode

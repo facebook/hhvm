@@ -40,9 +40,11 @@ let log_events typing_env : log_event list -> unit =
   | _ -> Fn.const ()
 
 let compute_results tast_env id params body =
+  let strip_decorations { constraint_; _ } = constraint_ in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   try
     SA.callable tast_env params body
+    |> List.map ~f:strip_decorations
     |> SA.simplify typing_env
     |> List.filter ~f:SA.is_shape_like_dict
     |> List.map ~f:(fun shape_result -> Result { id; shape_result })

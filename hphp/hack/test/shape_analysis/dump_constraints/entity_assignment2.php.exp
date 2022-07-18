@@ -1,6 +1,6 @@
 === Shape analysis results for entity_assignment2.php
 Constraints for \f:
-Allocation at [4:8-14]
-SK ?1 : shape('a' => nothing)
-[4:8-14] ⊆ ?1
+   4: [4:8-14] ⊆ ?1
+   4: Allocation at [4:8-14]
+   7: SK ?1 : shape('a' => nothing)
 

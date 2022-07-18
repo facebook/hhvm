@@ -24,7 +24,10 @@ type mode =
   | Codemod
   | SolveConstraints [@deriving eq]
 
-type options = { mode: mode }
+type options = {
+  mode: mode;
+  verbosity: int;
+}
 
 type entity_ =
   | Literal of Pos.t
@@ -58,8 +61,14 @@ type shape_result =
 
 type lenv = entity LMap.t KMap.t
 
+type decorated_constraint = {
+  hack_pos: Pos.t;
+  origin: int;
+  constraint_: constraint_;
+}
+
 type env = {
-  constraints: constraint_ list;
+  constraints: decorated_constraint list;
   lenv: lenv;
   tast_env: Tast_env.t;
 }

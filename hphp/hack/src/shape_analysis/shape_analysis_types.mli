@@ -36,7 +36,14 @@ type mode =
       (** Globally solve the key constraints and report back `dict`s that can
           be `shape`s along with the `shape` keys *)
 
-type options = { mode: mode }
+type options = {
+  mode: mode;
+      (** The mode of oepration. See the `mode` type documentation for distinct
+          modes. *)
+  verbosity: int;
+      (** Controls how much debug information to output. 0 means no extra debug
+          information. Particularly, tests use 0. *)
+}
 
 type entity_ =
   | Literal of Pos.t
@@ -91,8 +98,16 @@ type shape_result =
     option`, so that we can avoid pattern matching in constraint extraction. *)
 type lenv = entity LMap.t KMap.t
 
+(** Dressing on top of constraints that are solely used to help debug constraints *)
+type decorated_constraint = {
+  hack_pos: Pos.t;  (** Hack source code position that led to the constraint *)
+  origin: int;
+      (** The origin of the constraint from Shape_analysis_walker.ml *)
+  constraint_: constraint_;  (** The constraint proper *)
+}
+
 type env = {
-  constraints: constraint_ list;  (** Append-only set of constraints *)
+  constraints: decorated_constraint list;  (** Append-only set of constraints *)
   lenv: lenv;  (** Local variable information *)
   tast_env: Tast_env.env;
       (** TAST env associated with the definition being analysed *)

@@ -13,10 +13,10 @@ module LMap = Local_id.Map
 val fresh_var : unit -> entity_
 
 (** Initialise shape analysis environment *)
-val init : Tast_env.env -> constraint_ list -> entity LMap.t -> env
+val init : Tast_env.env -> decorated_constraint list -> entity LMap.t -> env
 
 (** Record a shape analysis constraint *)
-val add_constraint : env -> constraint_ -> env
+val add_constraint : env -> decorated_constraint -> env
 
 (** Ignore all existing constraints. The intention of this is to prevent
     unnecessary duplication of constraints when multiple environments need to
@@ -31,24 +31,29 @@ val set_local : env -> Local_id.t -> entity -> env
 
 (** The first environment is the parent environment. The others are combined.
     This is useful in branching code. *)
-val union : env -> env -> env -> env
+val union : pos:Pos.t -> origin:int -> env -> env -> env -> env
 
 val stash_and_do : env -> Typing_continuations.t list -> (env -> env) -> env
 
-val update_next_from_conts : env -> Typing_continuations.t list -> env
+val update_next_from_conts :
+  pos:Pos.t -> origin:int -> env -> Typing_continuations.t list -> env
 
 val drop_cont : env -> Typing_continuations.t -> env
 
 val restore_conts_from : env -> from:lenv -> Typing_continuations.t list -> env
 
-val move_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+val move_and_merge_next_in_cont :
+  pos:Pos.t -> origin:int -> env -> Typing_continuations.t -> env
 
-val save_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+val save_and_merge_next_in_cont :
+  pos:Pos.t -> origin:int -> env -> Typing_continuations.t -> env
 
 val loop_continuation :
+  pos:Pos.t ->
+  origin:int ->
   Typing_continuations.t ->
   env_before_iteration:env ->
   env_after_iteration:env ->
   env
 
-val refresh : env -> env
+val refresh : pos:Pos.t -> origin:int -> env -> env

@@ -244,6 +244,27 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (* `is` expressions always evaluate to bools, so we discard the entity. *)
     let (env, _) = expr_ env e in
     (env, None)
+  | A.Unop
+      ( ( Ast_defs.Utild | Ast_defs.Unot | Ast_defs.Uplus | Ast_defs.Uminus
+        | Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr
+        | Ast_defs.Usilence ),
+        e1 ) ->
+    (* Adding support for unary operations *)
+    let (env, _) = expr_ env e1 in
+    (env, None)
+  | A.Binop
+      ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
+        | Ast_defs.Eqeq | Ast_defs.Eqeqeq | Ast_defs.Starstar | Ast_defs.Diff
+        | Ast_defs.Diff2 | Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.Lt
+        | Ast_defs.Lte | Ast_defs.Gt | Ast_defs.Gte | Ast_defs.Dot
+        | Ast_defs.Amp | Ast_defs.Bar | Ast_defs.Ltlt | Ast_defs.Gtgt
+        | Ast_defs.Percent | Ast_defs.Xor | Ast_defs.Cmp ),
+        e1,
+        e2 ) ->
+    (* Adding support for binary operations. Currently not covering "Ast_defs.Eq Some _" and "Ast_defs.QuestionQuestion"  *)
+    let (env, _) = expr_ env e1 in
+    let (env, _) = expr_ env e2 in
+    (env, None)
   | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst

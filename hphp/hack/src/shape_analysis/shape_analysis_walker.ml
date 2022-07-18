@@ -417,40 +417,45 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
+let decl_hint tast_env kind ((ty, hint) : T.type_hint) :
+    decorated_constraint list * entity =
+  if is_suitable_target_ty tast_env ty then
+    let hint_pos = dict_pos_of_hint hint in
+    let decorate ~origin constraint_ =
+      { hack_pos = hint_pos; origin; constraint_ }
+    in
+    let entity_ = Literal hint_pos in
+    let marker_constraint =
+      decorate ~origin:__LINE__ @@ Marks (kind, hint_pos)
+    in
+    let constraints = [marker_constraint] in
+    let constraints =
+      when_tast_check tast_env ~default:constraints @@ fun () ->
+      let invalidation_constraint =
+        decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
+      in
+      invalidation_constraint :: constraints
+    in
+    (constraints, Some entity_)
+  else
+    ([], None)
+
 let init_params tast_env (params : T.fun_param list) :
     decorated_constraint list * entity LMap.t =
-  let add_param (constraints, lmap) = function
-    | A.
-        {
-          param_pos;
-          param_name;
-          param_type_hint = (ty, hint);
-          param_is_variadic = false;
-          _;
-        } ->
-      let decorate ~origin constraint_ =
-        { hack_pos = param_pos; origin; constraint_ }
+  let add_param
+      (constraints, lmap)
+      A.{ param_name; param_type_hint; param_is_variadic; _ } =
+    if param_is_variadic then
+      (* TODO(T125878781): Handle variadic paramseters *)
+      (constraints, lmap)
+    else
+      let (new_constraints, entity) =
+        decl_hint tast_env Parameter param_type_hint
       in
-      if is_suitable_target_ty tast_env ty then
-        let param_lid = Local_id.make_unscoped param_name in
-        let hint_pos = dict_pos_of_hint hint in
-        let entity_ = Literal hint_pos in
-        let lmap = LMap.add param_lid (Some entity_) lmap in
-        let constraint_ =
-          decorate ~origin:__LINE__ @@ Marks (Parameter, hint_pos)
-        in
-        let constraints = constraint_ :: constraints in
-        let constraints =
-          when_tast_check tast_env ~default:constraints @@ fun () ->
-          let constraint_ =
-            decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
-          in
-          constraint_ :: constraints
-        in
-        (constraints, lmap)
-      else
-        (constraints, lmap)
-    | _ -> (constraints, lmap)
+      let param_lid = Local_id.make_unscoped param_name in
+      let lmap = LMap.add param_lid entity lmap in
+      let constraints = new_constraints @ constraints in
+      (constraints, lmap)
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/stacktrace-profiler.h"
 
 #include "hphp/runtime/base/apc-handle-defs.h"
@@ -41,7 +42,25 @@
 
 namespace HPHP {
 
+TRACE_SET_MOD(isame);
+
 //////////////////////////////////////////////////////////////////////
+
+bool isame_log(const StringData* input, const StringData* arg) {
+  FTRACE(1, "isame collision {} != {}\n", input->slice(), arg->slice());
+  auto const rate = RO::EvalIsameCollisionSampleRate;
+  if (StructuredLog::coinflip(rate)) {
+    StructuredLogEntry sample;
+    sample.force_init = true;
+    sample.setInt("sample_rate", rate);
+    sample.setStr("lhs", input->slice());
+    sample.setStr("rhs", arg->slice());
+    StackTrace st(StackTrace::Force{});
+    sample.setStackTrace("stack", st);
+    StructuredLog::log("hhvm_isame_collisions", sample);
+  }
+  return true;
+}
 
 NEVER_INLINE void raiseStringLengthExceededError(size_t len) {
   raise_error("String length exceeded: %zu > %u", len, StringData::MaxSize);

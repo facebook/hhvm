@@ -469,8 +469,16 @@ struct StringData final : MaybeCountable,
   /*
    * Case-insensitive exact string comparison.  (Numeric strings are
    * not treated specially.)
+   * DEPRECATED: use same_nocase() for case-insensitive strings that
+   * are not language symbols.
    */
   bool isame(const StringData* s) const;
+
+  /*
+   * Case-insensitive exact string comparison.  (Numeric strings are
+   * not treated specially.)
+   */
+  bool same_nocase(const StringData* s) const;
 
   /*
    * Implements comparison in the sense of php's operator < on

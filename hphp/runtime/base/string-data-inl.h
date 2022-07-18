@@ -164,9 +164,19 @@ inline bool StringData::same(const StringData* s) const {
   return wordsame(data(), s->data(), m_len);
 }
 
+bool isame_log(const StringData*, const StringData*);
+
 inline bool StringData::isame(const StringData* s) const {
   assertx(s);
-  if (this == s) return true;
+  if (this == s || same(s)) return true;
+  if (m_len != s->m_len || RO::EvalLogIsameCollisions >= 2) return false;
+  if (!bstrcaseeq(data(), s->data(), m_len)) return false;
+  return RO::EvalLogIsameCollisions != 1 || isame_log(this, s);
+}
+
+inline bool StringData::same_nocase(const StringData* s) const {
+  assertx(s);
+  if (this == s || same(s)) return true;
   if (m_len != s->m_len) return false;
   return bstrcaseeq(data(), s->data(), m_len);
 }
@@ -190,16 +200,17 @@ struct string_data_same {
   }
 };
 
-struct string_data_eq_same {
-  bool operator()(const StringData* a, const StringData* b) const {
-    return a == b || a->same(b);
-  }
-};
-
 struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assertx(s1 && s2);
     return s1->isame(s2);
+  }
+};
+
+struct string_data_same_nocase {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assertx(s1 && s2);
+    return s1->same_nocase(s2);
   }
 };
 

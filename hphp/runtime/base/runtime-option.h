@@ -785,6 +785,9 @@ struct RuntimeOption {
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
+  F(uint32_t, IsameCollisionSampleRate, 1)                              \
+  /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
+  F(uint32_t, LogIsameCollisions, 0)                                    \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

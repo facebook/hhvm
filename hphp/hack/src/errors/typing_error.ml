@@ -1207,7 +1207,7 @@ module Primary = struct
       and claim =
         lazy
           ( pos,
-            "This call is not allowed because its coeffects are incompatible with the context"
+            "This call is not allowed because its capabilities are incompatible with the context"
           )
       in
       (Error_code.CallCoeffects, claim, reasons, [])

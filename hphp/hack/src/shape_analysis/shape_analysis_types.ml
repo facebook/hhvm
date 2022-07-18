@@ -45,6 +45,13 @@ type marker_kind =
   | Argument
 [@@deriving show { with_path = false }]
 
+module Codemod = struct
+  type kind =
+    | Allocation
+    | Hint
+  [@@deriving show { with_path = false }]
+end
+
 type constraint_ =
   | Marks of marker_kind * Pos.t
   | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty

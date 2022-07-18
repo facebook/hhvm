@@ -67,6 +67,14 @@ type marker_kind =
        *)
 [@@deriving show]
 
+module Codemod : sig
+  type kind =
+    | Allocation  (** Codemod `dict[...]` syntax to `shape(...)` syntax. *)
+    | Hint
+        (** Codemod to change the `dict<key,ty>` hint to `shape(...)` hint. *)
+  [@@deriving show { with_path = false }]
+end
+
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
   | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty

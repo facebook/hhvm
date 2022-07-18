@@ -477,6 +477,7 @@ module Initialize = struct
     definitionProvider: bool;
     typeDefinitionProvider: bool;
     referencesProvider: bool;
+    callHierarchyProvider: bool;
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;
     (* ie. document outline *)
@@ -922,6 +923,24 @@ module FindReferences = struct
   }
 end
 
+module PrepareCallHierarchy = struct
+  type params
+
+  type result
+end
+
+module CallHierarchyIncomingCalls = struct
+  type params
+
+  type result
+end
+
+module CallHierarchyOutgoingCalls = struct
+  type params
+
+  type result
+end
+
 (* Document Highlights request, method="textDocument/documentHighlight" *)
 module DocumentHighlight = struct
   type params = TextDocumentPositionParams.t
@@ -1198,6 +1217,9 @@ type lsp_request =
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
+  | PrepareCallHierarchyRequest of PrepareCallHierarchy.params
+  | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
+  | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
   | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
@@ -1229,6 +1251,9 @@ type lsp_result =
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
+  | PrepareCallHierarchyResult of PrepareCallHierarchy.result
+  | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
+  | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
   | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result

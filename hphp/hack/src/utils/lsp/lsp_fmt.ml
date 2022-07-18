@@ -1228,6 +1228,12 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DocumentSymbol.textDocument.uri
   | RequestMessage (_, FindReferencesRequest p) ->
     Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, PrepareCallHierarchyRequest _) ->
+    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
+  | RequestMessage (_, CallHierarchyIncomingCallsRequest _) ->
+    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
+  | RequestMessage (_, CallHierarchyOutgoingCallsRequest _) ->
+    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
   | RequestMessage (_, ImplementationRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentHighlightRequest p) ->
@@ -1305,6 +1311,9 @@ let request_name_to_string (request : lsp_request) : string =
   | WorkspaceSymbolRequest _ -> "workspace/symbol"
   | DocumentSymbolRequest _ -> "textDocument/documentSymbol"
   | FindReferencesRequest _ -> "textDocument/references"
+  | PrepareCallHierarchyRequest _ -> "textDocument/prepareCallHierarchy"
+  | CallHierarchyIncomingCallsRequest _ -> "callHierarchy/incomingCalls"
+  | CallHierarchyOutgoingCallsRequest _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightRequest _ -> "textDocument/documentHighlight"
   | TypeCoverageRequestFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingRequest _ -> "textDocument/formatting"
@@ -1337,6 +1346,9 @@ let result_name_to_string (result : lsp_result) : string =
   | WorkspaceSymbolResult _ -> "workspace/symbol"
   | DocumentSymbolResult _ -> "textDocument/documentSymbol"
   | FindReferencesResult _ -> "textDocument/references"
+  | PrepareCallHierarchyResult _ -> "textDocument/prepareCallHierarchy"
+  | CallHierarchyIncomingCallsResult _ -> "callHierarchy/incomingCalls"
+  | CallHierarchyOutgoingCallsResult _ -> "callHierarchy/outgoingCalls"
   | DocumentHighlightResult _ -> "textDocument/documentHighlight"
   | TypeCoverageResultFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingResult _ -> "textDocument/formatting"
@@ -1499,6 +1511,9 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | WorkspaceSymbolRequest _
   | DocumentSymbolRequest _
   | FindReferencesRequest _
+  | PrepareCallHierarchyRequest _
+  | CallHierarchyIncomingCallsRequest _
+  | CallHierarchyOutgoingCallsRequest _
   | DocumentHighlightRequest _
   | TypeCoverageRequestFB _
   | DocumentFormattingRequest _
@@ -1569,6 +1584,9 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | WorkspaceSymbolRequest _
     | DocumentSymbolRequest _
     | FindReferencesRequest _
+    | PrepareCallHierarchyRequest _
+    | CallHierarchyIncomingCallsRequest _
+    | CallHierarchyOutgoingCallsRequest _
     | DocumentHighlightRequest _
     | TypeCoverageRequestFB _
     | DocumentFormattingRequest _
@@ -1610,6 +1628,12 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | WorkspaceSymbolResult r -> print_workspaceSymbol r
     | DocumentSymbolResult r -> print_documentSymbol r
     | FindReferencesResult r -> print_locations r
+    | PrepareCallHierarchyResult _ ->
+      JSON_String "Implement me!" (*Implement for CallHierarchy*)
+    | CallHierarchyIncomingCallsResult _ ->
+      JSON_String "Implement me!" (*Implement for CallHierarchy*)
+    | CallHierarchyOutgoingCallsResult _ ->
+      JSON_String "Implement me!" (*Implement for CallHierarchy*)
     | DocumentHighlightResult r -> print_documentHighlight r
     | TypeCoverageResultFB r -> print_typeCoverage r
     | DocumentFormattingResult r -> print_documentFormatting r

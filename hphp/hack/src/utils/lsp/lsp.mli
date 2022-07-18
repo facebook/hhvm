@@ -319,6 +319,7 @@ module Initialize : sig
     definitionProvider: bool;
     typeDefinitionProvider: bool;
     referencesProvider: bool;
+    callHierarchyProvider: bool;
     documentHighlightProvider: bool;
     documentSymbolProvider: bool;
     workspaceSymbolProvider: bool;
@@ -685,6 +686,24 @@ module FindReferences : sig
   }
 end
 
+module PrepareCallHierarchy : sig
+  type params
+
+  type result
+end
+
+module CallHierarchyIncomingCalls : sig
+  type params
+
+  type result
+end
+
+module CallHierarchyOutgoingCalls : sig
+  type params
+
+  type result
+end
+
 module DocumentHighlight : sig
   type params = TextDocumentPositionParams.t
 
@@ -925,6 +944,9 @@ type lsp_request =
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
+  | PrepareCallHierarchyRequest of PrepareCallHierarchy.params
+  | CallHierarchyIncomingCallsRequest of CallHierarchyIncomingCalls.params
+  | CallHierarchyOutgoingCallsRequest of CallHierarchyOutgoingCalls.params
   | DocumentHighlightRequest of DocumentHighlight.params
   | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
@@ -956,6 +978,9 @@ type lsp_result =
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
+  | PrepareCallHierarchyResult of PrepareCallHierarchy.result
+  | CallHierarchyIncomingCallsResult of CallHierarchyIncomingCalls.result
+  | CallHierarchyOutgoingCallsResult of CallHierarchyOutgoingCalls.result
   | DocumentHighlightResult of DocumentHighlight.result
   | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result

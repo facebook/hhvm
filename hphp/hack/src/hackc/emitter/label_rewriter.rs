@@ -183,9 +183,9 @@ where
             *targets = ffi::Slice::fill_iter(alloc, targets.into_iter().copied().map(f));
         }
         Instruct::Pseudo(
-            Pseudo::Break(..)
+            Pseudo::Break
             | Pseudo::Comment(..)
-            | Pseudo::Continue(..)
+            | Pseudo::Continue
             | Pseudo::SrcLoc(..)
             | Pseudo::TryCatchBegin
             | Pseudo::TryCatchEnd

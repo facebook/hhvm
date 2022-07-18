@@ -1567,7 +1567,7 @@ fn emit_break<'a, 'arena, 'decl>(
     pos: &Pos,
 ) -> InstrSeq<'arena> {
     use tfr::EmitBreakOrContinueFlags as Flags;
-    tfr::emit_break_or_continue(e, Flags::IS_BREAK, env, pos, 1)
+    tfr::emit_break_or_continue(e, Flags::IS_BREAK, env, pos)
 }
 
 fn emit_continue<'a, 'arena, 'decl>(
@@ -1576,7 +1576,7 @@ fn emit_continue<'a, 'arena, 'decl>(
     pos: &Pos,
 ) -> InstrSeq<'arena> {
     use tfr::EmitBreakOrContinueFlags as Flags;
-    tfr::emit_break_or_continue(e, Flags::empty(), env, pos, 1)
+    tfr::emit_break_or_continue(e, Flags::empty(), env, pos)
 }
 
 fn emit_await_assignment<'a, 'arena, 'decl>(

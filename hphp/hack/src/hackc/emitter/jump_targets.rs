@@ -30,7 +30,6 @@ pub enum Region {
 pub struct ResolvedTryFinally {
     pub target_label: Label,
     pub finally_label: Label,
-    pub adjusted_level: usize,
     pub iterators_to_release: Vec<IterId>,
 }
 
@@ -75,8 +74,8 @@ impl JumpTargets {
         })
     }
 
-    /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(&self, is_break: bool, mut level: usize) -> ResolvedJumpTarget {
+    /// Tries to find a target label for the given jump kind (break or continue)
+    pub fn get_target(&self, is_break: bool) -> ResolvedJumpTarget {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;
@@ -94,59 +93,47 @@ impl JumpTargets {
         //     }
         //  }
         for r in self.regions.iter().rev() {
-            match r {
+            match *r {
                 Region::Function | Region::Finally => return ResolvedJumpTarget::NotFound,
                 Region::Using(finally_label) | Region::TryFinally(finally_label) => {
                     // we need to jump out of try body in try/finally - in order to do this
                     // we should go through the finally block first
                     if skip_try_finally.is_none() {
-                        skip_try_finally = Some((finally_label, level, iters.clone()));
+                        skip_try_finally = Some((finally_label, iters.clone()));
                     }
                 }
                 Region::Switch(end_label) => {
-                    if level == 1 {
-                        label = Some(end_label);
-                        iters.extend_from_slice(&std::mem::take(&mut acc));
-                        break;
-                    } else {
-                        level -= 1;
-                    }
+                    label = Some(end_label);
+                    iters.append(&mut acc);
+                    break;
                 }
                 Region::Loop(LoopLabels {
                     label_break,
                     label_continue,
                     iterator,
                 }) => {
-                    if level == 1 {
-                        if is_break {
-                            add_iterator(iterator.clone(), &mut acc);
-                            label = Some(label_break);
-                            iters.extend_from_slice(&std::mem::take(&mut acc));
-                        } else {
-                            label = Some(label_continue);
-                            iters.extend_from_slice(&std::mem::take(&mut acc));
-                        };
-                        break;
+                    label = Some(if is_break {
+                        add_iterator(iterator, &mut acc);
+                        label_break
                     } else {
-                        add_iterator(iterator.clone(), &mut acc);
-                        level -= 1;
-                    }
+                        label_continue
+                    });
+                    iters.append(&mut acc);
+                    break;
                 }
             }
         }
-        if let Some((finally_label, level, iters)) = skip_try_finally {
-            if let Some(target_label) = label {
-                return ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
-                    target_label: target_label.clone(),
-                    finally_label: finally_label.clone(),
-                    adjusted_level: level,
-                    iterators_to_release: iters,
-                });
+        match (skip_try_finally, label) {
+            (Some((finally_label, iterators_to_release)), Some(target_label)) => {
+                ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
+                    target_label,
+                    finally_label,
+                    iterators_to_release,
+                })
             }
-        };
-        label.map_or(ResolvedJumpTarget::NotFound, |l| {
-            ResolvedJumpTarget::ResolvedRegular(l.clone(), iters)
-        })
+            (None, Some(l)) => ResolvedJumpTarget::ResolvedRegular(l, iters),
+            (_, None) => ResolvedJumpTarget::NotFound,
+        }
     }
 }
 

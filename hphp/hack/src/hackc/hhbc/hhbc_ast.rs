@@ -298,11 +298,11 @@ pub struct SrcLoc {
 pub enum Pseudo<'arena> {
     /// An internal representation of a break statement that is removed by the
     /// try/finally rewriter.
-    Break(isize),
+    Break,
     Comment(Str<'arena>),
-    /// An internal representation of a break statement that is removed by the
-    /// try/finally rewriter.
-    Continue(isize),
+    /// An internal representation of a continue statement that is removed by
+    /// the try/finally rewriter.
+    Continue,
     Label(Label),
     SrcLoc(SrcLoc),
     TryCatchBegin,
@@ -340,8 +340,8 @@ impl Instruct<'_> {
             // before adding items to this catch-all.
             Self::Pseudo(
                 Pseudo::TypedValue(_)
-                | Pseudo::Continue(_)
-                | Pseudo::Break(_)
+                | Pseudo::Continue
+                | Pseudo::Break
                 | Pseudo::Label(_)
                 | Pseudo::TryCatchBegin
                 | Pseudo::TryCatchMiddle
@@ -358,8 +358,8 @@ impl Instruct<'_> {
 
             Self::Pseudo(
                 Pseudo::TypedValue(_)
-                | Pseudo::Continue(_)
-                | Pseudo::Break(_)
+                | Pseudo::Continue
+                | Pseudo::Break
                 | Pseudo::Label(_)
                 | Pseudo::TryCatchBegin
                 | Pseudo::TryCatchMiddle
@@ -374,8 +374,8 @@ impl Instruct<'_> {
         match self {
             Self::Opcode(opcode) => opcode.variant_name(),
             Self::Pseudo(Pseudo::TypedValue(_)) => "TypedValue",
-            Self::Pseudo(Pseudo::Continue(_)) => "Continue",
-            Self::Pseudo(Pseudo::Break(_)) => "Break",
+            Self::Pseudo(Pseudo::Continue) => "Continue",
+            Self::Pseudo(Pseudo::Break) => "Break",
             Self::Pseudo(Pseudo::Label(_)) => "Label",
             Self::Pseudo(Pseudo::TryCatchBegin) => "TryCatchBegin",
             Self::Pseudo(Pseudo::TryCatchMiddle) => "TryCatchMiddle",

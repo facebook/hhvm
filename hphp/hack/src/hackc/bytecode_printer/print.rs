@@ -851,8 +851,8 @@ fn print_instructions<'a, 'b>(
     let mut ctx = ctx.clone();
     for instr in instrs {
         match instr {
-            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_)) => {
-                return Err(Error::fail("Cannot break/continue 1 level").into());
+            Instruct::Pseudo(Pseudo::Continue | Pseudo::Break) => {
+                return Err(Error::fail("Cannot break/continue").into());
             }
             Instruct::Pseudo(Pseudo::Comment(_)) => {
                 // indentation = 0
@@ -945,7 +945,7 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        Pseudo::Break(_) | Pseudo::Continue(_) => Err(Error::fail("invalid instruction").into()),
+        Pseudo::Break | Pseudo::Continue => Err(Error::fail("invalid instruction").into()),
     }
 }
 

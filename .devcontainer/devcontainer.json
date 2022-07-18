@@ -17,6 +17,10 @@
     "--security-opt", "label=disable"
   ],
 
+  "hostRequirements": {
+    "storage": "64gb" 
+  },
+ 
   "containerEnv": {
      // extensions to preload before other extensions
     "PRELOAD_EXTENSIONS": "arrterian.nix-env-selector"

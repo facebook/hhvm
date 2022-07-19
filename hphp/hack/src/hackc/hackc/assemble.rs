@@ -2069,7 +2069,12 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"MemoGet" => assemble_memo_get(&mut sl_lexer),
                     b"MemoSet" => assemble_memo_set(&mut sl_lexer),
+                    b"Switch" => assemble_switch(alloc, &mut sl_lexer),
                     b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
+                    b"Eval" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eval, "Eval")
+                    }
+
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2452,6 +2457,37 @@ fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc:
             res_op
         ),
     }
+}
+
+fn assemble_switch_kind(token_iter: &mut Lexer<'_>) -> Result<hhbc::SwitchKind> {
+    let sk = token_iter.expect(Token::into_identifier)?;
+    match sk {
+        b"Unbounded" => Ok(hhbc::SwitchKind::Unbounded),
+        b"Bounded" => Ok(hhbc::SwitchKind::Bounded),
+        sk => bail!("Unknown switch kind: {:?}", sk),
+    }
+}
+
+/// Switch(SwitchKind, i64, BumpSliceMut<'arena, Label>),
+/// Switch SwitchKind i64 < label* >
+fn assemble_switch<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Switch")?;
+    let sk = assemble_switch_kind(token_iter)?;
+    let int = token_iter.expect_and_get_number()?;
+    let mut labels = Vec::new();
+    token_iter.expect(Token::into_lt)?;
+    while !token_iter.peek_if(Token::is_gt) {
+        labels.push(assemble_label(token_iter, false)?)
+    }
+    token_iter.expect(Token::into_gt)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Switch(
+        sk,
+        int,
+        Slice::from_vec(alloc, labels),
+    )))
 }
 
 /// Ex:

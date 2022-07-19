@@ -359,6 +359,10 @@ std::pair<int, double> tvGetSize(
     FTRACE(3, " Skipping tv pointing to middle of HeapObj {}\n", cnt);
     return std::make_pair(size, sized);
   }
+  if (!cnt->checkCount()) {
+    FTRACE(3, " Skipping HeapObj with invalid count {}\n", cnt);
+    return std::make_pair(size, sized);
+  }
 
   auto add_array_size = [&](ArrayData* arr) {
     auto size_of_array_pair = sizeOfArray(

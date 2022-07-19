@@ -41,6 +41,29 @@ pub struct HhasCoeffects<'arena> {
 }
 
 impl<'arena> HhasCoeffects<'arena> {
+    pub fn new(
+        sc: Slice<'arena, Ctx>,
+        usc: Slice<'arena, Str<'arena>>,
+        fun_param: Slice<'arena, usize>,
+        cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
+        cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
+        cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+        closure_parent_scope: bool,
+        generator_this: bool,
+        caller: bool,
+    ) -> Self {
+        HhasCoeffects {
+            static_coeffects: sc,
+            unenforced_static_coeffects: usc,
+            fun_param,
+            cc_param,
+            cc_this,
+            cc_reified,
+            closure_parent_scope,
+            generator_this,
+            caller,
+        }
+    }
     pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> HhasCoeffects<'arena> {
         HhasCoeffects {
             static_coeffects: Slice::from_vec(alloc, scs),
@@ -285,6 +308,14 @@ impl<'arena> HhasCoeffects<'arena> {
         Self {
             static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
             unenforced_static_coeffects: Slice::empty(),
+            caller: true,
+            ..self.clone()
+        }
+    }
+
+    /// Does not erase any static_coeffects or unenforced_static_coeffects
+    pub fn untouch_with_caller(&self) -> Self {
+        Self {
             caller: true,
             ..self.clone()
         }

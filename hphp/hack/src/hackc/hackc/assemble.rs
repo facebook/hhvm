@@ -1395,11 +1395,8 @@ fn assemble_body<'arena, 'a>(
                 bail!("Cannot have more than one .declvars per function body");
             }
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
-        } else if token_iter.peek_if_str(Token::is_decl, ".coeffects_static") {
-            let mut scs = Vec::new();
-
-            assemble_static_coeffects(token_iter, &mut scs)?;
-            coeff = hhbc::hhas_coeffects::HhasCoeffects::from_static_coeffects(alloc, scs);
+        } else if token_iter.peek_if_str_starts(Token::is_decl, ".coeffects") {
+            coeff = assemble_coeffects(alloc, token_iter)?;
         } else {
             break;
         }
@@ -1423,18 +1420,143 @@ fn assemble_body<'arena, 'a>(
     Ok((tr, coeff))
 }
 
+/// Printed in this order (if exists)
+/// static and unenforced static coeffects (.coeffects_static ... );
+/// .coeffects_fun_param ..;
+/// .coeffects_cc_param ..;
+/// .coeffects_cc_this;
+/// .coeffects_cc_reified;
+/// .coeffects_closure_parent_scope;
+/// .coeffects_generator_this;
+/// .coeffects_caller;
+fn assemble_coeffects<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_coeffects::HhasCoeffects<'arena>> {
+    let mut scs = Vec::new();
+    let mut uscs = Vec::new();
+    let mut fun_param = Vec::new();
+    let mut cc_param = Vec::new();
+    let mut cc_this = Vec::new();
+    let mut cc_reified = Vec::new();
+    let mut closure_parent_scope = false;
+    let mut generator_this = false;
+    let mut caller = false;
+    while token_iter.peek_if_str_starts(Token::is_decl, ".coeffects") {
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_static") {
+            assemble_static_coeffects(alloc, token_iter, &mut scs, &mut uscs)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_fun_param") {
+            assemble_coeffects_fun_param(token_iter, &mut fun_param)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_param") {
+            assemble_coeffects_cc_param(alloc, token_iter, &mut cc_param)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_this") {
+            assemble_coeffects_cc_this(alloc, token_iter, &mut cc_this)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_reified") {
+            assemble_coeffects_cc_reified(alloc, token_iter, &mut cc_reified)?;
+        }
+        closure_parent_scope =
+            token_iter.next_if_str(Token::is_decl, ".coeffects_closure_parent_scope");
+        if closure_parent_scope {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+        generator_this = token_iter.next_if_str(Token::is_decl, ".coeffects_generator_this");
+        if generator_this {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+        caller = token_iter.next_if_str(Token::is_decl, ".coeffects_caller");
+        if caller {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+    }
+
+    Ok(hhbc::hhas_coeffects::HhasCoeffects::new(
+        Slice::from_vec(alloc, scs),
+        Slice::from_vec(alloc, uscs),
+        Slice::from_vec(alloc, fun_param),
+        Slice::from_vec(alloc, cc_param),
+        Slice::from_vec(alloc, cc_this),
+        Slice::from_vec(alloc, cc_reified),
+        closure_parent_scope,
+        generator_this,
+        caller,
+    ))
+}
+
 /// Ex: .coeffects_static pure
-fn assemble_static_coeffects<'arena>(token_iter: &mut Lexer<'_>, scs: &mut Vec<Ctx>) -> Result<()> {
+fn assemble_static_coeffects<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    scs: &mut Vec<Ctx>,
+    uscs: &mut Vec<Str<'arena>>,
+) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_static")?;
     while !token_iter.peek_if(Token::is_semicolon) {
         match token_iter.expect(Token::into_identifier)? {
             b"pure" => scs.push(Ctx::Pure),
             b"defaults" => scs.push(Ctx::Defaults),
-            d => bail!("Unknown static coeffect: {:?}", d),
+            b"rx" => scs.push(Ctx::Rx),
+            b"zoned" => scs.push(Ctx::Zoned),
+            b"write_props" => scs.push(Ctx::WriteProps),
+            b"rx_local" => scs.push(Ctx::RxLocal),
+            b"zoned_with" => scs.push(Ctx::ZonedWith),
+            b"zoned_local" => scs.push(Ctx::ZonedLocal),
+            b"zoned_shallow" => scs.push(Ctx::ZonedShallow),
+            b"leak_safe_local" => scs.push(Ctx::LeakSafeLocal),
+            b"leak_safe_shallow" => scs.push(Ctx::LeakSafeShallow),
+            b"leak_safe" => scs.push(Ctx::LeakSafe),
+            b"read_globals" => scs.push(Ctx::ReadGlobals),
+            b"globals" => scs.push(Ctx::Globals),
+            b"write_this_props" => scs.push(Ctx::WriteThisProps),
+            b"rx_shallow" => scs.push(Ctx::RxShallow),
+            d => uscs.push(Str::new_slice(alloc, d)), //If unknown Ctx, is a unenforce_static_coeffect (ex: output)
         }
     }
     token_iter.expect(Token::into_semicolon)?;
     Ok(())
+}
+
+fn assemble_coeffects_fun_param(
+    _token_iter: &mut Lexer<'_>,
+    _fun_param: &mut Vec<usize>,
+) -> Result<()> {
+    todo!()
+}
+
+/// Ex:
+/// .coeffects_cc_param 0 C 0 Cdebug;
+fn assemble_coeffects_cc_param<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    cc_param: &mut Vec<Pair<usize, Str<'arena>>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_param")?;
+    while !token_iter.peek_if(Token::is_semicolon) {
+        let num: usize = token_iter.expect_and_get_number()?;
+        let st = token_iter.expect_identifier_into_ffi_str(alloc)?;
+        cc_param.push(Pair(num, st));
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
+}
+
+fn assemble_coeffects_cc_this<'arena>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'_>,
+    _cc_param: &mut Vec<Slice<'arena, Str<'arena>>>,
+) -> Result<()> {
+    todo!()
+}
+
+fn assemble_coeffects_cc_reified<'arena>(
+    _alloc: &'arena Bump,
+    _token_iter: &mut Lexer<'_>,
+    _cc_param: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+) -> Result<()> {
+    todo!()
 }
 
 /// Expects .numiters #+;
@@ -3819,6 +3941,15 @@ impl<'a> Lexer<'a> {
         F: Fn(&Token<'a>) -> bool,
     {
         self.peek_if(|t| f(t) && t.as_bytes() == s.as_bytes())
+    }
+
+    /// Applies f to top of iterator. If true, checks if starts with passed &str and returns result. Else just false
+    /// Ex use: peek_if_str_starts(Token::is_decl, ".coeffects")
+    fn peek_if_str_starts<F>(&mut self, f: F, s: &str) -> bool
+    where
+        F: Fn(&Token<'a>) -> bool,
+    {
+        self.peek_if(|t| f(t) && t.as_bytes().starts_with(s.as_bytes()))
     }
 
     /// Applies f to top of iterator. If true, compares inner representation to passed &str and if true consumes. Else doesn't modify iterator and returns false.

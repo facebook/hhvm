@@ -5710,6 +5710,8 @@ TEST(Type, LoosenEmptiness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
+  auto const clsA = index.resolve_class(Context{}, s_A.get());
+
   auto const& all = allCases(index);
 
   for (auto const& t : all) {
@@ -5719,8 +5721,6 @@ TEST(Type, LoosenEmptiness) {
       EXPECT_FALSE(loosen_emptiness(t).subtypeAmong(BArrLikeE, BArrLike));
       EXPECT_FALSE(loosen_emptiness(t).subtypeAmong(BArrLikeN, BArrLike));
     }
-
-    EXPECT_EQ(t.hasData(), loosen_emptiness(t).hasData());
 
     if (!t.subtypeOf(BCell)) continue;
     auto const [arr, rest] = split_array_like(t);
@@ -5760,6 +5760,8 @@ TEST(Type, LoosenEmptiness) {
     { TSArrLikeN, TSArrLike },
     { TArrLikeE, TArrLike },
     { TArrLikeN, TArrLike },
+    { union_of(make_specialized_exact_object(BObj, *clsA), TSDictE),
+      union_of(TObj, TSDict) },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_emptiness(p.first)),

@@ -792,7 +792,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             self.decl_type_const(&mut type_consts, &mut consts, tc);
         }
 
-        if self.child.kind == ClassishKind::Cclass(Abstraction::Concrete) {
+        if self.child.kind == ClassishKind::Cclass(Abstraction::Concrete) || self.child.is_final {
             self.synthesize_const_defaults(&mut consts);
             self.synthesize_type_const_defaults(&mut type_consts, &mut consts);
         }

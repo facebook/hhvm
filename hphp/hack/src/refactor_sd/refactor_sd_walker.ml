@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Refactor_sd_types
+module Cont = Typing_continuations
 module A = Aast
 module T = Tast
 module Env = Refactor_sd_env
@@ -100,6 +101,23 @@ let rec stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
     let then_env = block upcasted_id base_env then_bl in
     let else_env = block upcasted_id base_env else_bl in
     Env.union parent_env then_env else_env
+  | A.Break -> Env.move_and_merge_next_in_cont env Cont.Break
+  | A.While (cond, bl) ->
+    Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
+    let env = Env.save_and_merge_next_in_cont env Cont.Continue in
+    let env_before_iteration = env in
+    let env_after_iteration =
+      let env = expr upcasted_id env cond in
+      let env = block upcasted_id env bl in
+      env
+    in
+    let env =
+      Env.loop_continuation Cont.Next ~env_before_iteration ~env_after_iteration
+    in
+    let env = Env.update_next_from_conts env [Cont.Continue; Cont.Next] in
+    let env = expr upcasted_id env cond in
+    let env = Env.update_next_from_conts env [Cont.Break; Cont.Next] in
+    env
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

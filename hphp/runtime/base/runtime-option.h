@@ -1464,8 +1464,6 @@ public:
 
   // Repo (hhvm bytecode repository) options
   static std::string RepoPath;
-  static int64_t RepoLocalReadaheadRate;
-  static bool RepoLocalReadaheadConcurrent;
   static bool RepoLitstrLazyLoad;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;

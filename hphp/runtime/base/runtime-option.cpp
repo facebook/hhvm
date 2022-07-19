@@ -1225,8 +1225,6 @@ bool RuntimeOption::RepoDebugInfo = true;
 bool RuntimeOption::RepoLitstrLazyLoad = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
-bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
-int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
@@ -1906,10 +1904,6 @@ void RuntimeOption::Load(
                  RepoLitstrLazyLoad);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
                  RepoAuthoritative);
-    Config::Bind(RepoLocalReadaheadRate, ini, config,
-                 "Repo.LocalReadaheadRate", 0);
-    Config::Bind(RepoLocalReadaheadConcurrent, ini, config,
-                 "Repo.LocalReadaheadConcurrent", false);
     Config::Bind(RepoBusyTimeoutMS, ini, config,
                  "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
 

@@ -1285,7 +1285,11 @@ fn assemble_type_info<'arena>(
     let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
     let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
     let type_cons_name = if tik == TypeInfoKind::TypeDef {
-        Maybe::Just(Str::new_slice(alloc, &first))
+        if first.is_empty() {
+            Maybe::Nothing
+        } else {
+            Maybe::Just(Str::new_slice(alloc, &first))
+        }
     } else if tik == TypeInfoKind::Enum || token_iter.next_if_str(Token::is_identifier, "N") {
         Maybe::Nothing
     } else {

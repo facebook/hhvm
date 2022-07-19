@@ -140,6 +140,7 @@ fn assemble_from_toks<'arena>(
     let mut type_constants = Vec::new(); // Should be empty
     let mut fatal = None;
     let mut file_attributes = Vec::new();
+    let mut module_use = Maybe::Nothing;
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
     while token_iter.peek().is_some() {
@@ -204,6 +205,8 @@ fn assemble_from_toks<'arena>(
             }
         } else if token_iter.peek_if_str(Token::is_decl, ".file_attributes") {
             assemble_file_attributes(alloc, token_iter, &mut file_attributes)?;
+        } else if token_iter.peek_if_str(Token::is_decl, ".module_use") {
+            module_use = Maybe::Just(assemble_module_use(alloc, token_iter)?);
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -218,7 +221,7 @@ fn assemble_from_toks<'arena>(
         typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
         file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
         modules: Default::default(),
-        module_use: Maybe::Nothing,
+        module_use,
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
             functions: func_refs.unwrap_or_default(),
             classes: class_refs.unwrap_or_default(),
@@ -231,6 +234,22 @@ fn assemble_from_toks<'arena>(
 
     Ok((hcu, fp))
 }
+
+/// Ex:
+/// .module_use "(module_use)";
+fn assemble_module_use<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".module_use")?;
+    let st = Str::new_slice(
+        alloc,
+        escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?),
+    );
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(st)
+}
+
 /// Ex:
 /// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
 fn assemble_file_attributes<'arena>(

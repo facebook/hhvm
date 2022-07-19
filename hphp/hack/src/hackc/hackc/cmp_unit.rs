@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
@@ -19,11 +20,13 @@ use hhbc::hhas_method::HhasMethod;
 use hhbc::hhas_module::HhasModule;
 use hhbc::hhas_param::HhasParam;
 use hhbc::hhas_pos::HhasPos;
+use hhbc::hhas_property::HhasProperty;
 use hhbc::hhas_symbol_refs::HhasSymbolRefs;
 use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::FatalOp;
 use hhbc::Instruct;
+use hhbc::TypedValue;
 use std::fmt;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -434,7 +437,7 @@ fn cmp_class(a: &HhasClass<'_>, b: &HhasClass<'_>) -> Result<()> {
         cmp_eq,
     )
     .qualified("enum_type")?;
-    cmp_map_t(a_properties, b_properties, cmp_eq).qualified("properties")?;
+    cmp_map_t(a_properties, b_properties, cmp_properties).qualified("properties")?;
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_map_t(a_type_constants, b_type_constants, cmp_eq).qualified("type_constants")?;
     cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_eq).qualified("ctx_constants")?;
@@ -450,6 +453,45 @@ fn cmp_class(a: &HhasClass<'_>, b: &HhasClass<'_>) -> Result<()> {
     cmp_map_t(a_methods, b_methods, cmp_method).qualified("methods")?;
 
     Ok(())
+}
+
+fn cmp_properties(a: &HhasProperty<'_>, b: &HhasProperty<'_>) -> Result<()> {
+    let HhasProperty {
+        name: a_name,
+        flags: a_flags,
+        attributes: a_attributes,
+        visibility: a_visibility,
+        initial_value: a_initial_value,
+        type_info: a_type_info,
+        doc_comment: a_doc_comment,
+    } = a;
+    let HhasProperty {
+        name: b_name,
+        flags: b_flags,
+        attributes: b_attributes,
+        visibility: b_visibility,
+        initial_value: b_initial_value,
+        type_info: b_type_info,
+        doc_comment: b_doc_comment,
+    } = b;
+    cmp_eq(a_name, b_name).qualified("name")?;
+    cmp_eq(a_flags, b_flags).qualified("flags")?;
+    cmp_eq(a_attributes, b_attributes).qualified("attributes")?;
+    cmp_eq(a_visibility, b_visibility).qualified("visibilitiy")?;
+    cmp_initial_value(a_initial_value, b_initial_value).qualified("initial value")?;
+    cmp_eq(a_type_info, b_type_info).qualified("type info")?;
+    cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
+    Ok(())
+}
+
+// T126391106: BCP/HCU is not consistent -- if there is no initial value the underlying
+// HCU may have Just(Null) or Nothing in that slot.
+fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Result<()> {
+    match (a, b) {
+        (Maybe::Nothing, Maybe::Just(TypedValue::Null))
+        | (Maybe::Just(TypedValue::Null), Maybe::Nothing) => Ok(()),
+        _ => cmp_eq(a, b),
+    }
 }
 
 fn cmp_constant(a: &HhasConstant<'_>, b: &HhasConstant<'_>) -> Result<()> {

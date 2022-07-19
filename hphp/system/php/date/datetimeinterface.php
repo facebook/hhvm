@@ -6,11 +6,11 @@
  */
 interface DateTimeInterface {
   public function diff(
-    /* DateTimeInterface */ $datetime2,
-    /* bool */ $absolute /*= false */
-  );
-  public function format(/* string */ $format);
-  public function getOffset();
-  public function getTimestamp()[];
-  public function getTimezone();
+    DateTimeInterface $datetime2,
+    bool $absolute = false,
+  ): mixed;
+  public function format(string $format): string;
+  public function getOffset(): mixed;
+  public function getTimestamp()[]: int;
+  public function getTimezone(): mixed;
 }

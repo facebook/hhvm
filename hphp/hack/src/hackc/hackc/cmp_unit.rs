@@ -262,6 +262,18 @@ where
     Ok(())
 }
 
+/// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
+/// T126391106: BCP drops information
+fn cmp_includes<'a, V, F>(a: &'a [V], b: &'a [V], f_eq: F) -> Result<()>
+where
+    F: Fn(&V, &V) -> Result<()>,
+{
+    for (i, (av, bv)) in a.iter().zip(b.iter()).enumerate() {
+        f_eq(av, bv).with_indexed(|| i.to_string())?;
+    }
+    Ok(())
+}
+
 fn cmp_attribute(a: &HhasAttribute<'_>, b: &HhasAttribute<'_>) -> Result<()> {
     let HhasAttribute {
         name: a_name,
@@ -609,7 +621,7 @@ fn cmp_module(a: &HhasModule<'_>, b: &HhasModule<'_>) -> Result<()> {
 
 /// Compares two include paths. a can be a relative path and b an aboslute path as long as
 /// a is the end of b
-fn cmp_includes(
+fn cmp_include(
     a: &hhbc::hhas_symbol_refs::IncludePath<'_>,
     b: &hhbc::hhas_symbol_refs::IncludePath<'_>,
 ) -> Result<()> {
@@ -648,7 +660,7 @@ fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()>
         classes: b_classes,
     } = b;
 
-    cmp_slice(a_includes, b_includes, cmp_includes).qualified("includes")?; // Change this to cmp_includes
+    cmp_includes(a_includes, b_includes, cmp_include).qualified("includes")?;
     cmp_slice(a_constants, b_constants, cmp_eq).qualified("constants")?;
     cmp_slice(a_functions, b_functions, cmp_eq).qualified("functions")?;
     cmp_slice(a_classes, b_classes, cmp_eq).qualified("classes")?;

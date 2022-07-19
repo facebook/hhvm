@@ -22,5 +22,6 @@ ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../pos/cargo/pos" }
+shallow_decl_provider = { path = "../../shallow_decl_provider/cargo/shallow_decl_provider" }
 structopt = "0.3.23"
 ty = { path = "../../ty/cargo/ty" }

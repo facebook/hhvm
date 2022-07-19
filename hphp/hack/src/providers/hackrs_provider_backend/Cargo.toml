@@ -27,6 +27,7 @@ oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../rupro/pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
+shallow_decl_provider = { path = "../../rupro/shallow_decl_provider/cargo/shallow_decl_provider" }
 ty = { path = "../../rupro/ty/cargo/ty" }
 
 [dev-dependencies]

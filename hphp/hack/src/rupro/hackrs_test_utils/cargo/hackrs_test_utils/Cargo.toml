@@ -25,5 +25,6 @@ oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 rayon = "1.2"
 serde = { version = "1.0.136", features = ["derive", "rc"] }
+shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 ty = { path = "../../../ty/cargo/ty" }
 zstd = "0.11.1+zstd.1.5.2"

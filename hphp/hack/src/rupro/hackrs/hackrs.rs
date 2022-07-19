@@ -13,7 +13,6 @@ pub mod folded_decl_provider;
 pub mod inference_env;
 pub mod naming;
 pub mod parsing_error;
-pub mod shallow_decl_provider;
 pub mod subtyping;
 pub mod tast;
 pub mod typaram_env;

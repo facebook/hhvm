@@ -21,5 +21,6 @@ itertools = "0.10.3"
 maplit = "1.0"
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 pos = { path = "../../../pos/cargo/pos" }
+shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 tempdir = "0.3"
 ty = { path = "../../../ty/cargo/ty" }

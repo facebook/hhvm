@@ -274,22 +274,8 @@ where
     Ok(())
 }
 
-fn cmp_attribute(a: &HhasAttribute<'_>, b: &HhasAttribute<'_>) -> Result<()> {
-    let HhasAttribute {
-        name: a_name,
-        arguments: a_arguments,
-    } = a;
-    let HhasAttribute {
-        name: b_name,
-        arguments: b_arguments,
-    } = b;
-    cmp_eq(a_name, b_name)?;
-    cmp_slice(a_arguments, b_arguments, cmp_eq).qualified("arguments")?;
-    Ok(())
-}
-
 fn cmp_attributes(a: &[HhasAttribute<'_>], b: &[HhasAttribute<'_>]) -> Result<()> {
-    cmp_slice(a, b, cmp_attribute)
+    cmp_set_t(a, b)
 }
 
 fn cmp_body(a: &HhasBody<'_>, b: &HhasBody<'_>) -> Result<()> {

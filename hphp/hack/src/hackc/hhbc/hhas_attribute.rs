@@ -21,7 +21,7 @@ use naming_special_names_rust as naming_special_names;
 ///   }
 /// ```
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub struct HhasAttribute<'arena> {
     pub name: Str<'arena>,

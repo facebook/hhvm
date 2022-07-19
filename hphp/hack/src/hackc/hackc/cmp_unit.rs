@@ -793,6 +793,35 @@ fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()>
     Ok(())
 }
 
+/// T126391106: BCP drops information -- &s TCF with nullable before printing.
+fn cmp_type_constraint_flags(
+    a: &hhvm_types_ffi::ffi::TypeConstraintFlags,
+    b: &hhvm_types_ffi::ffi::TypeConstraintFlags,
+) -> Result<()> {
+    use hhvm_types_ffi::ffi::TypeConstraintFlags;
+    let a_flags = *a & TypeConstraintFlags::Nullable;
+    let b_flags = *b & TypeConstraintFlags::Nullable;
+    cmp_eq(&a_flags, &b_flags).qualified("TypeConstraintFlags")?;
+    Ok(())
+}
+
+fn cmp_type_constraint(
+    a: &hhbc::hhas_type::Constraint<'_>,
+    b: &hhbc::hhas_type::Constraint<'_>,
+) -> Result<()> {
+    let hhbc::hhas_type::Constraint {
+        name: a_name,
+        flags: a_flags,
+    } = a;
+    let hhbc::hhas_type::Constraint {
+        name: b_name,
+        flags: b_flags,
+    } = b;
+    cmp_eq(a_name, b_name).qualified("constraints")?;
+    cmp_type_constraint_flags(a_flags, b_flags)?;
+    Ok(())
+}
+
 /// User_type isn't printed in typedef's typeinfo.
 fn cmp_typedef_typeinfo(a: &HhasTypeInfo<'_>, b: &HhasTypeInfo<'_>) -> Result<()> {
     let HhasTypeInfo {
@@ -803,7 +832,7 @@ fn cmp_typedef_typeinfo(a: &HhasTypeInfo<'_>, b: &HhasTypeInfo<'_>) -> Result<()
         user_type: _b_user_type,
         type_constraint: b_constraint,
     } = b;
-    cmp_eq(a_constraint, b_constraint).qualified("constraints")?;
+    cmp_type_constraint(a_constraint, b_constraint).qualified("constraints")?;
     Ok(())
 }
 

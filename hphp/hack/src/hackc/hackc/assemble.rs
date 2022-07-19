@@ -2074,6 +2074,17 @@ fn assemble_instr<'arena, 'a>(
                     b"Eval" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eval, "Eval")
                     }
+                    b"ThrowAsTypeStructException" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ThrowAsTypeStructException,
+                        "ThrowAsTypeStructException",
+                    ),
+                    b"AwaitAll" => assemble_await_all(&mut sl_lexer),
+                    b"WHResult" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::WHResult,
+                        "WHResult",
+                    ),
 
                     _ => todo!("assembling instrs: {}", tok),
                 }
@@ -2518,6 +2529,12 @@ fn assemble_sswitch<'arena>(
         targets: Slice::from_vec(alloc, targets),
         _0: hhbc::Dummy::DEFAULT,
     }))
+}
+
+fn assemble_await_all<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "AwaitAll")?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::AwaitAll(lcl_range)))
 }
 
 /// Ex:

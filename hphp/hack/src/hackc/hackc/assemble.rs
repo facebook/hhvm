@@ -2296,6 +2296,11 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::IsLateBoundCls,
                         "IsLateBoundCls",
                     ),
+                    b"FuncCred" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::FuncCred,
+                        "FuncCred",
+                    ),
 
                     _ => todo!("assembling instrs: {}", tok),
                 }

@@ -474,7 +474,7 @@ fn cmp_properties(a: &HhasProperty<'_>, b: &HhasProperty<'_>) -> Result<()> {
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
-    cmp_eq(a_attributes, b_attributes).qualified("attributes")?;
+    cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_visibility, b_visibility).qualified("visibilitiy")?;
     cmp_initial_value(a_initial_value, b_initial_value).qualified("initial value")?;
     cmp_eq(a_type_info, b_type_info).qualified("type info")?;

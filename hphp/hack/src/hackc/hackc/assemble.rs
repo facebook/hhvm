@@ -308,9 +308,9 @@ fn assemble_class<'arena>(
     } else {
         (Vec::new(), Vec::new())
     };
-    let ctx_constants = Vec::new();
+    let mut ctx_constants = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".ctx") {
-        todo!()
+        ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?);
     }
     let mut properties = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".property") {
@@ -342,6 +342,46 @@ fn assemble_class<'arena>(
         flags,
     };
     Ok(hhas_class)
+}
+
+fn is_enforced_static_coeffect(d: &&[u8]) -> bool {
+    match *d {
+        b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
+        | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
+        | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
+        _ => false,
+    }
+}
+
+/// Ex:
+/// .ctx C isAbstract;
+/// .ctx Clazy pure;
+/// .ctx Cdebug isAbstract;
+fn assemble_ctx_constant<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_coeffects::HhasCtxConstant<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".ctx")?;
+    let name = token_iter.expect_identifier_into_ffi_str(alloc)?;
+    let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
+    // .ctx has slice of recognized and unrecognized constants.
+    // Making an assumption that recognized ~~ static coeffects and
+    // unrecognized ~~ unenforced static coeffects
+    let mut tokens: Vec<&[u8]> = Vec::new();
+    while !token_iter.peek_if(Token::is_semicolon) {
+        tokens.push(token_iter.expect(Token::into_identifier)?);
+    }
+    let (r, u): (Vec<&[u8]>, Vec<&[u8]>) =
+        tokens.into_iter().partition(is_enforced_static_coeffect);
+    let r = r.iter().map(|s| Str::new_slice(alloc, s)).collect();
+    let u = u.iter().map(|s| Str::new_slice(alloc, s)).collect();
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(hhbc::hhas_coeffects::HhasCtxConstant {
+        name,
+        recognized: Slice::from_vec(alloc, r),
+        unrecognized: Slice::from_vec(alloc, u),
+        is_abstract,
+    })
 }
 
 /// Ex:

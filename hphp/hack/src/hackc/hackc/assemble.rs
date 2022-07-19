@@ -139,6 +139,7 @@ fn assemble_from_toks<'arena>(
     let mut constants = Vec::new();
     let mut type_constants = Vec::new(); // Should be empty
     let mut fatal = None;
+    let mut file_attributes = Vec::new();
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
     while token_iter.peek().is_some() {
@@ -201,6 +202,8 @@ fn assemble_from_toks<'arena>(
             if !type_constants.is_empty() {
                 bail!("Type constants defined outside of a class");
             }
+        } else if token_iter.peek_if_str(Token::is_decl, ".file_attributes") {
+            assemble_file_attributes(alloc, token_iter, &mut file_attributes)?;
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -213,7 +216,7 @@ fn assemble_from_toks<'arena>(
         functions: Slice::fill_iter(alloc, funcs.into_iter()),
         classes: Slice::fill_iter(alloc, classes.into_iter()),
         typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
-        file_attributes: Default::default(),
+        file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
         modules: Default::default(),
         module_use: Maybe::Nothing,
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
@@ -227,6 +230,22 @@ fn assemble_from_toks<'arena>(
     };
 
     Ok((hcu, fp))
+}
+/// Ex:
+/// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+fn assemble_file_attributes<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    file_attributes: &mut Vec<hhbc::hhas_attribute::HhasAttribute<'arena>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".file_attributes")?;
+    token_iter.expect(Token::into_open_bracket)?;
+    while !token_iter.peek_if(Token::is_close_bracket) {
+        file_attributes.push(assemble_user_attr(alloc, token_iter)?);
+    }
+    token_iter.expect(Token::into_close_bracket)?;
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
 }
 
 /// Ex:

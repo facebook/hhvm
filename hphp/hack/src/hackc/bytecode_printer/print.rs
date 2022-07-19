@@ -1138,6 +1138,7 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> 
     })
 }
 
+// T125888411: User type not printed
 fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
     angle(w, |w| {
         write_bytes!(

@@ -15,6 +15,7 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
 use options::Options;
 use oxidized::relative_path::RelativePath;
@@ -113,7 +114,9 @@ pub fn assemble_from_bytes<'arena>(
         print_tokens(s);
     }
     let mut lex = Lexer::from_slice(s, 1);
-    assemble_from_toks(alloc, &mut lex)
+    let unit = assemble_from_toks(alloc, &mut lex)?;
+    trace!("ASM UNIT: {unit:?}");
+    Ok(unit)
 }
 
 /// Assembles the HCU. Parses over the top level of the .hhas file
@@ -228,6 +231,7 @@ fn assemble_from_toks<'arena>(
 
 /// Ex:
 /// .alias ShapeKeyEscaping = <"HH\\darray"> (3,6) """D:2:{s:4:\"kind\";i:14;s:6:\"fields\";D:2:{s:11:\"Whomst'd've\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:1;}}s:25:\"Whomst\\u{0027}d\\u{0027}ve\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:4;}}}}""";
+/// Note that in BCP, TypeDef's typeinfo's user_type is not printed. What's between <> is the typeinfo's constraint's name.
 fn assemble_typedef<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -236,7 +240,7 @@ fn assemble_typedef<'arena>(
     let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let name = assemble_class_name(alloc, token_iter)?;
     token_iter.expect(Token::into_equal)?;
-    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, false, true)? {
+    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, TypeInfoKind::TypeDef)? {
         // won't be any user_type
         let span = assemble_span(token_iter)?;
         //tv
@@ -414,7 +418,9 @@ fn assemble_method<'arena>(
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
+        Some(Token::Lt(_)) => {
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        }
         _ => Maybe::Nothing,
     };
     let name = assemble_method_name(alloc, token_iter)?;
@@ -487,7 +493,9 @@ fn assemble_property<'arena>(
     } else {
         Maybe::Nothing
     };
-    let type_info = if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
+    let type_info = if let Maybe::Just(ti) =
+        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+    {
         ti
     } else {
         bail!("No type_info for class property")
@@ -732,7 +740,7 @@ fn assemble_enum_ty<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".enum_ty") {
-        let ti = assemble_type_info(alloc, token_iter, true, false)?;
+        let ti = assemble_type_info(alloc, token_iter, TypeInfoKind::Enum)?;
         token_iter.expect(Token::into_semicolon)?;
         Ok(ti)
     } else {
@@ -976,7 +984,9 @@ fn assemble_function<'arena>(
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
+        Some(Token::Lt(_)) => {
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        }
         _ => Maybe::Nothing,
     };
     // Assemble_name
@@ -1076,7 +1086,9 @@ fn assemble_upper_bound<'arena>(
     token_iter.expect_is_str(Token::into_identifier, "as")?;
     let mut tis = Vec::new();
     while !token_iter.peek_if(Token::is_close_paren) {
-        if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
+        if let Maybe::Just(ti) =
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        {
             tis.push(ti);
         } else {
             bail!("Unexpected \"N\" in upper bound type info");
@@ -1199,23 +1211,29 @@ fn assemble_user_attr_args<'arena>(
     }
 }
 
+#[derive(PartialEq)]
+pub enum TypeInfoKind {
+    TypeDef,
+    Enum,
+    NotEnumOrTypeDef,
+}
+
 /// Ex: <"HH\\void" N >
 /// < "user_type" "type_constraint.name" type_constraint.flags >
-/// if 'is_enum', no  name printed
+/// if 'is_enum', no  type_constraint name printed
+/// if 'is_typedef', no user_type name printed
+
 fn assemble_type_info<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    is_enum: bool,
-    is_typedef: bool, // If typedef, the user_type is also the name
+    tik: TypeInfoKind,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     token_iter.expect(Token::into_lt)?;
-    let user_type = token_iter.expect(Token::into_str_literal)?;
-    let user_type = escaper::unquote_slice(user_type);
-    let user_type = escaper::unescape_literal_bytes_into_vec_bytes(user_type)?;
-    let user_type = Maybe::Just(Str::new_slice(alloc, &user_type));
-    let type_cons_name = if is_typedef {
-        user_type.clone()
-    } else if is_enum || token_iter.next_if_str(Token::is_identifier, "N") {
+    let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+    let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
+    let type_cons_name = if tik == TypeInfoKind::TypeDef {
+        Maybe::Just(Str::new_slice(alloc, &first))
+    } else if tik == TypeInfoKind::Enum || token_iter.next_if_str(Token::is_identifier, "N") {
         Maybe::Nothing
     } else {
         Maybe::Just(Str::new_slice(
@@ -1224,6 +1242,11 @@ fn assemble_type_info<'arena>(
                 token_iter.expect(Token::into_str_literal)?,
             ))?,
         ))
+    };
+    let user_type = if !(tik == TypeInfoKind::TypeDef) {
+        Maybe::Just(Str::new_slice(alloc, &first))
+    } else {
+        Maybe::Nothing
     };
     let mut tcflags = hhvm_types_ffi::ffi::TypeConstraintFlags::NoFlags;
     while !token_iter.peek_if(Token::is_gt) {
@@ -1294,7 +1317,7 @@ fn assemble_param<'arena, 'a>(
     let is_readonly = token_iter.next_if_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_if(Token::is_variadic);
     let type_info = if token_iter.peek_if(Token::is_lt) {
-        assemble_type_info(alloc, token_iter, false, false)? // Unlike user_attrs, consumes <> too
+        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
     } else {
         Maybe::Nothing
     };

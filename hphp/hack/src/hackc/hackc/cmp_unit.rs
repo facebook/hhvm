@@ -20,6 +20,7 @@ use hhbc::hhas_module::HhasModule;
 use hhbc::hhas_param::HhasParam;
 use hhbc::hhas_pos::HhasPos;
 use hhbc::hhas_symbol_refs::HhasSymbolRefs;
+use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::FatalOp;
 use hhbc::Instruct;
@@ -612,6 +613,20 @@ fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()>
     Ok(())
 }
 
+/// User_type isn't printed in typedef's typeinfo.
+fn cmp_typedef_typeinfo(a: &HhasTypeInfo<'_>, b: &HhasTypeInfo<'_>) -> Result<()> {
+    let HhasTypeInfo {
+        user_type: _a_user_type,
+        type_constraint: a_constraint,
+    } = a;
+    let HhasTypeInfo {
+        user_type: _b_user_type,
+        type_constraint: b_constraint,
+    } = b;
+    cmp_eq(a_constraint, b_constraint).qualified("constraints")?;
+    Ok(())
+}
+
 fn cmp_typedef(a: &HhasTypedef<'_>, b: &HhasTypedef<'_>) -> Result<()> {
     let HhasTypedef {
         name: a_name,
@@ -632,7 +647,7 @@ fn cmp_typedef(a: &HhasTypedef<'_>, b: &HhasTypedef<'_>) -> Result<()> {
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
-    cmp_eq(a_type_info, b_type_info).qualified("type_info")?;
+    cmp_typedef_typeinfo(a_type_info, b_type_info).qualified("type_info")?;
     cmp_eq(a_type_structure, b_type_structure).qualified("type_structure")?;
     cmp_eq(a_span, b_span).qualified("span")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;

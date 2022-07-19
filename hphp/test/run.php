@@ -144,7 +144,7 @@ one of a few pre-defined suite names that this script knows about.
 
 If you work with hhvm a lot, you might consider a bash alias:
 
-   alias ht="path/to/hphp/test/run"
+   alias htest="path/to/hphp/test/run"
 
 Examples:
 

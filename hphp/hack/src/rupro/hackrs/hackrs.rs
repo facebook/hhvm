@@ -8,14 +8,12 @@
 pub mod todo;
 
 pub mod ast_provider;
-pub mod decl_parser;
 pub mod errors;
 pub mod folded_decl_provider;
 pub mod inference_env;
 pub mod naming;
 pub mod parsing_error;
 pub mod shallow_decl_provider;
-pub mod special_names;
 pub mod subtyping;
 pub mod tast;
 pub mod typaram_env;

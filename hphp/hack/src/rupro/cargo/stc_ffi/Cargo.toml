@@ -11,6 +11,7 @@ doctest = false
 
 [dependencies]
 datastore = { path = "../../datastore" }
+decl_parser = { path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { path = "../../file_provider/cargo/file_provider" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }

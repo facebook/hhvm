@@ -12,6 +12,7 @@ anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../rupro/datastore" }
+decl_parser = { path = "../../rupro/decl_parser/cargo/decl_parser" }
 depgraph_api = { path = "../../rupro/depgraph_api/cargo/depgraph_api" }
 deps_rust = { path = "../../deps/cargo/deps_rust" }
 file_provider = { path = "../../rupro/file_provider/cargo/file_provider" }

@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::naming::naming_elaborate_namespaces;
-use crate::special_names as sn;
 use im::HashSet;
 use oxidized::aast;
+use special_names as sn;
 
 #[derive(Clone, Debug, Default)]
 struct NamingEnv {

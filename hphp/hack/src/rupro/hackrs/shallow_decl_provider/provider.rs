@@ -7,7 +7,7 @@ use super::Error;
 use super::Result;
 use super::ShallowDeclStore;
 use super::TypeDecl;
-use crate::decl_parser::DeclParser;
+use decl_parser::DeclParser;
 use itertools::Itertools;
 use naming_provider::NamingProvider;
 use oxidized::naming_types::KindOfType;

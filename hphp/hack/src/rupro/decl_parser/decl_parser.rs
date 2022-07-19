@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::special_names;
 use arena_collections::list::List;
 use file_provider::FileProvider;
 use names::FileSummary;

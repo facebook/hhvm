@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::decl_parser::DeclParser;
+use decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hackrs::typing_decl_provider::TypingDeclProvider;

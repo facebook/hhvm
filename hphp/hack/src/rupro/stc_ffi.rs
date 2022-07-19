@@ -7,8 +7,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_parser::DeclParser;
 use hackrs::ast_provider::AstProvider;
-use hackrs::decl_parser::DeclParser;
 use hackrs::errors::HackError;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::EagerShallowDeclProvider;

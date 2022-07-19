@@ -6,7 +6,6 @@
 use super::inherit::Inherited;
 use super::Result;
 use super::Substitution;
-use crate::special_names as sn;
 use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
@@ -22,6 +21,7 @@ use pos::TypeConstNameIndexMap;
 use pos::TypeName;
 use pos::TypeNameIndexMap;
 use pos::TypeNameIndexSet;
+use special_names as sn;
 use std::sync::Arc;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;

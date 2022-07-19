@@ -6,7 +6,7 @@
 use crate::serde_store::StoreOpts;
 use crate::SerializingStore;
 use datastore::NonEvictingStore;
-use hackrs::decl_parser::DeclParser;
+use decl_parser::DeclParser;
 use hackrs::shallow_decl_provider::ShallowDeclStore;
 use indicatif::ParallelProgressIterator;
 use pos::RelativePath;

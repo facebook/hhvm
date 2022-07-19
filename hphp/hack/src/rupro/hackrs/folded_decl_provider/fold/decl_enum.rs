@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use super::DeclFolder;
-use crate::special_names as sn;
 use pos::ClassConstNameIndexMap;
 use pos::Positioned;
 use pos::TypeNameIndexMap;
+use special_names as sn;
 use ty::decl::folded::ClassConst;
 use ty::decl::Prim;
 use ty::decl::Ty;

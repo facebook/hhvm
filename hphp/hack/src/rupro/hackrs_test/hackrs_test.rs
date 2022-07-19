@@ -6,8 +6,8 @@
 
 use anyhow::Result;
 use datastore::NonEvictingStore;
+use decl_parser::DeclParser;
 use fbinit::FacebookInit;
-use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::shallow_decl_provider::LazyShallowDeclProvider;

@@ -11,6 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+decl_parser = { path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { path = "../../file_provider/cargo/file_provider" }
 find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../../hackrs/cargo/hackrs" }

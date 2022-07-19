@@ -208,6 +208,20 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_rhs) = expr_ env e2 in
     let env = assign pos __LINE__ env e1 entity_rhs ty_rhs in
     (env, None)
+  | A.Call ((_, _, A.Id (_, idx)), _targs, args, _unpacked)
+    when String.equal idx SN.FB.idx ->
+    (* Currently treating idx expressions with and without default value in the same way.
+       Essentially following the case for A.Array_get after extracting the right data. *)
+    begin
+      match args with
+      | [(_, base); (_, ix)]
+      | [(_, base); (_, ix); _] ->
+        let (env, entity_exp) = expr_ env base in
+        let (env, _entity_ix) = expr_ env ix in
+        let env = add_key_constraint pos __LINE__ env entity_exp (ix, ty) in
+        (env, None)
+      | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)
+    end
   | A.Call (_base, _targs, args, _unpacked) ->
     (* TODO: This is obviously incomplete. It just adds a constraint to each
        dict argument so that we know what shape type that reaches to the

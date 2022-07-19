@@ -26,6 +26,7 @@ use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::FatalOp;
 use hhbc::Instruct;
+use hhbc::Opcode;
 use hhbc::TypedValue;
 use std::fmt;
 
@@ -333,16 +334,156 @@ fn cmp_body(a: &HhasBody<'_>, b: &HhasBody<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result<()> {
-    if a != b {
-        bail!(
+/// This is unique because only a few FCAFlags are printed -- those specified in
+/// as-base-hhas.h.
+/// T126391106 -- BCP drops information
+fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Result<()> {
+    use hhbc::FCallArgsFlags;
+    let mut not_printed = FCallArgsFlags::SkipRepack;
+    not_printed.add(FCallArgsFlags::SkipCoeffectsCheck);
+    not_printed.add(FCallArgsFlags::ExplicitContext);
+    not_printed.add(FCallArgsFlags::HasInOut);
+    not_printed.add(FCallArgsFlags::EnforceInOut);
+    not_printed.add(FCallArgsFlags::EnforceReadonly);
+    not_printed.add(FCallArgsFlags::HasAsyncEagerOffset);
+    not_printed.add(FCallArgsFlags::NumArgsStart);
+    let mut a = a.clone();
+    let mut b = b.clone();
+    a.repr &= !(not_printed.repr);
+    b.repr &= !(not_printed.repr);
+    cmp_eq(&a, &b)?;
+    Ok(())
+}
+
+fn cmp_fcallargs(a: &hhbc::FCallArgs<'_>, b: &hhbc::FCallArgs<'_>) -> Result<()> {
+    let hhbc::FCallArgs {
+        flags: a_flags,
+        async_eager_target: a_aet,
+        num_args: a_num_args,
+        num_rets: a_num_rets,
+        inouts: a_inouts,
+        readonly: a_readonly,
+        context: a_context,
+    } = a;
+    let hhbc::FCallArgs {
+        flags: b_flags,
+        async_eager_target: b_aet,
+        num_args: b_num_args,
+        num_rets: b_num_rets,
+        inouts: b_inouts,
+        readonly: b_readonly,
+        context: b_context,
+    } = b;
+    cmp_fcallargflags(a_flags, b_flags).qualified("fcallargflags")?;
+    cmp_eq(a_aet, b_aet)?;
+    cmp_eq(a_num_args, b_num_args)?;
+    cmp_eq(a_num_rets, b_num_rets)?;
+    cmp_eq(a_inouts, b_inouts)?;
+    cmp_eq(a_readonly, b_readonly)?;
+    cmp_eq(a_context, b_context)?;
+    Ok(())
+}
+
+fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result<()> {
+    match (a, b) {
+        (hhbc::Opcode::FCallClsMethod(fa, a1, a2), hhbc::Opcode::FCallClsMethod(fb, b1, b2)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+        }
+        (hhbc::Opcode::FCallClsMethodD(fa, a1, a2), hhbc::Opcode::FCallClsMethodD(fb, b1, b2)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+        }
+        (hhbc::Opcode::FCallClsMethodS(fa, a1, a2), hhbc::Opcode::FCallClsMethodS(fb, b1, b2)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+        }
+        (hhbc::Opcode::FCallObjMethod(fa, a1, a2), hhbc::Opcode::FCallObjMethod(fb, b1, b2)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+        }
+        (
+            hhbc::Opcode::FCallClsMethodM(fa, a1, a2, a3),
+            hhbc::Opcode::FCallClsMethodM(fb, b1, b2, b3),
+        ) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+            cmp_eq(a3, b3)?;
+        }
+        (
+            hhbc::Opcode::FCallClsMethodSD(fa, a1, a2, a3),
+            hhbc::Opcode::FCallClsMethodSD(fb, b1, b2, b3),
+        ) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+            cmp_eq(a3, b3)?;
+        }
+        (
+            hhbc::Opcode::FCallObjMethodD(fa, a1, a2, a3),
+            hhbc::Opcode::FCallObjMethodD(fb, b1, b2, b3),
+        ) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+            cmp_eq(a2, b2)?;
+            cmp_eq(a3, b3)?;
+        }
+
+        (hhbc::Opcode::FCallCtor(fa, a1), hhbc::Opcode::FCallCtor(fb, b1)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+        }
+        (hhbc::Opcode::FCallFuncD(fa, a1), hhbc::Opcode::FCallFuncD(fb, b1)) => {
+            cmp_fcallargs(fa, fb)?;
+            cmp_eq(a1, b1)?;
+        }
+        (hhbc::Opcode::FCallFunc(fa), hhbc::Opcode::FCallFunc(fb)) => {
+            cmp_fcallargs(fa, fb)?;
+        }
+        _ => bail!(
             "Instruct mismatch: {} vs {}",
             a.variant_name(),
             b.variant_name()
-        );
-    }
-
+        ),
+    };
     Ok(())
+}
+
+fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result<()> {
+    if a == b {
+        return Ok(());
+    }
+    if let (Instruct::Opcode(a), Instruct::Opcode(b)) = (a, b) {
+        match a {
+            hhbc::Opcode::FCallClsMethod(..)
+            | hhbc::Opcode::FCallClsMethodM(..)
+            | hhbc::Opcode::FCallClsMethodD(..)
+            | hhbc::Opcode::FCallClsMethodS(..)
+            | hhbc::Opcode::FCallClsMethodSD(..)
+            | hhbc::Opcode::FCallCtor(..)
+            | hhbc::Opcode::FCallFunc(..)
+            | hhbc::Opcode::FCallFuncD(..)
+            | hhbc::Opcode::FCallObjMethod(..)
+            | hhbc::Opcode::FCallObjMethodD(..) => {
+                return cmp_fcall_instr(a, b);
+            }
+            _ => bail!(
+                "Instruct mismatch: {} vs {}",
+                a.variant_name(),
+                b.variant_name()
+            ),
+        }
+    }
+    bail!(
+        "Instruct mismatch: {} vs {}",
+        a.variant_name(),
+        b.variant_name()
+    )
 }
 
 fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
@@ -377,7 +518,6 @@ fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
         |Pair(_, a_text), Pair(_, b_text)| cmp_eq(a_text, b_text),
     )
     .qualified("default_value")?;
-
     Ok(())
 }
 

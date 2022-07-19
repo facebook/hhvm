@@ -2346,7 +2346,8 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
     let mut flags = hhbc::FCallArgsFlags::FCANone;
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
-        match token_iter.expect(Token::into_identifier)? {
+        let f = token_iter.expect(Token::into_identifier)?;
+        match f {
             b"Unpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
             b"Generics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),

@@ -1538,11 +1538,18 @@ fn assemble_static_coeffects<'arena>(
     Ok(())
 }
 
+/// Ex:
+/// .coeffects_fun_param 0;
 fn assemble_coeffects_fun_param(
-    _token_iter: &mut Lexer<'_>,
-    _fun_param: &mut Vec<usize>,
+    token_iter: &mut Lexer<'_>,
+    fun_param: &mut Vec<usize>,
 ) -> Result<()> {
-    todo!()
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_fun_param")?;
+    while !token_iter.peek_if(Token::is_semicolon) {
+        fun_param.push(token_iter.expect_and_get_number()?);
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
 }
 
 /// Ex:

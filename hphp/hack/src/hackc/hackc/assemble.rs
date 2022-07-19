@@ -447,11 +447,14 @@ fn assemble_const_or_type_const<'arena>(
         //const
         let name = hhbc::ConstName::new(name);
         let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
-        token_iter.expect(Token::into_equal)?;
-        let value = if token_iter.next_if_str(Token::is_identifier, "uninit") {
-            Maybe::Just(hhbc::TypedValue::Uninit)
+        let value = if token_iter.next_if(Token::is_equal) {
+            if token_iter.next_if_str(Token::is_identifier, "uninit") {
+                Maybe::Just(hhbc::TypedValue::Uninit)
+            } else {
+                Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
+            }
         } else {
-            Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
+            Maybe::Nothing
         };
         consts.push(hhbc::hhas_constant::HhasConstant {
             name,

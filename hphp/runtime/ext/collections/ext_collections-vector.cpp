@@ -486,14 +486,18 @@ void CollectionsExtension::initVector() {
 #undef BASE_ME
 
   // Vector specific
-  HHVM_NAMED_ME(HH\\Vector, clear,        &c_Vector::php_clear);
-  HHVM_NAMED_ME(HH\\Vector, pop,          &c_Vector::pop);
-  HHVM_NAMED_ME(HH\\Vector, reverse,      &c_Vector::reverse);
-  HHVM_NAMED_ME(HH\\Vector, shuffle,      &c_Vector::shuffle);
-  HHVM_NAMED_ME(HH\\Vector, removeKey,    &c_Vector::php_removeKey);
-  HHVM_NAMED_ME(HH\\Vector, reserve,      &c_Vector::php_reserve);
-  HHVM_NAMED_ME(HH\\Vector, resize,       &c_Vector::php_resize);
-  HHVM_NAMED_ME(HH\\Vector, splice,       &c_Vector::php_splice);
+  HHVM_NAMED_ME(HH\\Vector, pop,      &c_Vector::pop);
+  HHVM_NAMED_ME(HH\\Vector, reverse,  &c_Vector::reverse);
+  HHVM_NAMED_ME(HH\\Vector, shuffle,  &c_Vector::shuffle);
+  HHVM_NAMED_ME(HH\\Vector, reserve,  &c_Vector::php_reserve);
+  HHVM_NAMED_ME(HH\\Vector, resize,   &c_Vector::php_resize);
+  HHVM_NAMED_ME(HH\\Vector, splice,   &c_Vector::php_splice);
+
+  // Vector specific functions that return `$this` in userland. These mutate
+  // the underlying vector *then* return, with the mutation contained within
+  // a `void` C++ function.
+  HHVM_NAMED_ME(HH\\Vector, removeKeyNative,  &c_Vector::php_removeKey);
+  HHVM_NAMED_ME(HH\\Vector, clearNative,      &c_Vector::clear);
 
   Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Vector);
   Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmVector);

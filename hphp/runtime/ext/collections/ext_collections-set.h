@@ -283,26 +283,19 @@ struct c_Set : BaseSet {
   friend struct collections::CollectionsExtension;
 
   Object getImmutableCopy();
-  Object php_add(const Variant& val) {
+  void php_add(const Variant& val) {
     add(val);
-    return Object{this};
   }
-  Object php_addAll(const Variant& it) {
+  void php_addAll(const Variant& it) {
     addAll(it);
-    return Object{this};
   }
-  Object php_addAllKeysOf(const Variant& container) {
+  void php_addAllKeysOf(const Variant& container) {
     if (!container.isNull()) {
       auto const& containerCell = container_as_tv(container);
       addAllKeysOf(containerCell);
     }
-    return Object{this};
   }
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_remove(const Variant& key) {
+  void php_remove(const Variant& key) {
     auto const ktv = tvClassToString(*key.asTypedValue());
     DataType t = type(ktv);
     if (t == KindOfInt64) {
@@ -312,9 +305,8 @@ struct c_Set : BaseSet {
     } else {
       throwBadValueType();
     }
-    return Object{this};
   }
-  Object php_removeAll(const Variant& it) {
+  void php_removeAll(const Variant& it) {
     size_t sz;
     ArrayIter iter = getArrayIterHelper(it, sz);
     for (; iter; ++iter) {
@@ -328,7 +320,6 @@ struct c_Set : BaseSet {
         throwBadValueType();
       }
     }
-    return Object{this};
   }
   void php_reserve(int64_t cap) {
     if (UNLIKELY(cap < 0)) {

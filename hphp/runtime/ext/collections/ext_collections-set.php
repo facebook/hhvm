@@ -89,11 +89,16 @@ final class Set implements \MutableSet {
     return new \LazyKeyedIterableView($this);
   }
 
+  <<__Native>>
+  private function clearNative()[write_props]: void;
+
   /** Removes all values from the Set.
    * @return object
    */
-  <<__Native>>
-  public function clear()[write_props]: object;
+  public function clear()[write_props]: this {
+    $this->clearNative();
+    return $this;
+  }
 
   /** Returns true if the specified value is present in the Set, returns false
    * otherwise.
@@ -103,33 +108,52 @@ final class Set implements \MutableSet {
   <<__Native>>
   public readonly function contains(mixed $val)[]: bool;
 
+  <<__Native>>
+  private function removeNative(mixed $val)[write_props]: void;
+
   /** Removes the specified value from this Set.
    * @param mixed $val
    * @return object
    */
-  <<__Native>>
-  public function remove(mixed $val)[write_props]: object;
+  public function remove(mixed $val)[write_props]: this {
+    $this->removeNative($val);
+    return $this;
+  }
 
+  <<__Native>>
+  private function addNative(mixed $val)[write_props]: void;
   /** Adds the specified value to this Set.
    * @param mixed $val
    * @return object
    */
+  public function add(mixed $val)[write_props]: this {
+    $this->addNative($val);
+    return $this;
+  }
+
   <<__Native>>
-  public function add(mixed $val)[write_props]: object;
+  private function addAllNative(mixed $iterable)[write_props]: void;
 
   /** Adds the values produced by the specified Iterable to this Set.
    * @param mixed $iterable
    * @return object
    */
+  public function addAll(mixed $iterable)[write_props]: this {
+    $this->addAllNative($iterable);
+    return $this;
+  }
+
   <<__Native>>
-  public function addAll(mixed $iterable)[write_props]: object;
+  public function addAllKeysOfNative(mixed $container)[write_props]: void;
 
   /** Adds the keys of the specified KeyedContainer to this Set.
    * @param mixed $container
    * @return object
    */
-  <<__Native>>
-  public function addAllKeysOf(mixed $container)[write_props]: object;
+  public function addAllKeysOf(mixed $container)[write_props]: this {
+    $this->addAllKeysOfNative($container);
+    return $this;
+  }
 
   /** Instructs this Set to grow its capacity to accommodate the given number of
    * elements. The caller is expected to make the appropriate add/addAll calls
@@ -399,18 +423,24 @@ final class Set implements \MutableSet {
     return $this->lastValue();
   }
 
+  <<__Native>>
+  private function removeAllNative(mixed $iterable)[write_props]: void;
+
   /** @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function removeAll(mixed $iterable)[write_props]: object;
+  public function removeAll(mixed $iterable)[write_props]: this {
+    $this->removeAllNative($iterable);
+    return $this;
+  }
 
   /** @param mixed $iterable
    * @return object
    */
   public function difference(mixed $iterable) {
     // This isn't really a difference method, it lies
-    return $this->removeAll($iterable);
+    $this->removeAllNative($iterable);
+    return $this;
   }
 
   /** @return string

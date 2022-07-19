@@ -145,11 +145,16 @@ final class Vector implements \MutableVector {
     return $this;
   }
 
-  /** Removes all values from the Vector.
-   * @return object
-   */
   <<__Native>>
-  public function clear()[write_props]: object;
+  private function clearNative()[write_props]: void;
+
+  /** Removes all values from the Vector.
+   * @return this
+   */
+  public function clear()[write_props]: this {
+    $this->clearNative();
+    return $this;
+  }
 
   /** Returns true if the specified key is present in the Vector, returns false
    * otherwise.
@@ -182,13 +187,18 @@ final class Vector implements \MutableVector {
     return ($key >= 0) && ($key < $this->count());
   }
 
+  <<__Native>>
+  private function removeKeyNative(mixed $key)[write_props]: void;
+
   /** Removes the element with the specified key from this Vector and renumbers
    * the keys of all subsequent elements.
    * @param mixed $key
    * @return object
    */
-  <<__Native>>
-  public function removeKey(mixed $key)[write_props]: object;
+  public function removeKey(mixed $key)[write_props]: this {
+    $this->removeKeyNative($key);
+    return $this;
+  }
 
   /** @param mixed $value
    * @return object

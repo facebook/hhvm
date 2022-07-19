@@ -2149,11 +2149,6 @@ void in(ISS& env, const bc::ChainFaults&) {
 void in(ISS& env, const bc::NativeImpl&) {
   killLocals(env);
 
-  if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
-    auto const resCls = env.index.builtin_class(env.ctx.cls->name);
-    return doRet(env, objExact(resCls), true);
-  }
-
   if (env.ctx.func->isNative) {
     return doRet(env, native_function_return_type(env.ctx.func), true);
   }

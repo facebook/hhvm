@@ -23,59 +23,6 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_Vector("HH\\Vector");
-const StaticString s_Map("HH\\Map");
-const StaticString s_Set("HH\\Set");
-
-const StaticString s_add("add");
-const StaticString s_addAll("addAll");
-const StaticString s_append("append");
-const StaticString s_clear("clear");
-const StaticString s_remove("remove");
-const StaticString s_removeAll("removeAll");
-const StaticString s_removeKey("removeKey");
-const StaticString s_set("set");
-const StaticString s_setAll("setAll");
-
-//////////////////////////////////////////////////////////////////////
-
-bool is_collection_method_returning_this(const php::Class* cls,
-                                         const php::Func* func) {
-  if (!cls) return false;
-
-  if (cls->name->isame(s_Vector.get())) {
-    return
-      func->name->same(s_add.get()) ||
-      func->name->same(s_addAll.get()) ||
-      func->name->same(s_append.get()) ||
-      func->name->same(s_clear.get()) ||
-      func->name->same(s_removeKey.get()) ||
-      func->name->same(s_set.get()) ||
-      func->name->same(s_setAll.get());
-  }
-
-  if (cls->name->isame(s_Map.get())) {
-    return
-      func->name->same(s_add.get()) ||
-      func->name->same(s_addAll.get()) ||
-      func->name->same(s_clear.get()) ||
-      func->name->same(s_remove.get()) ||
-      func->name->same(s_set.get()) ||
-      func->name->same(s_setAll.get());
-  }
-
-  if (cls->name->isame(s_Set.get())) {
-    return
-      func->name->same(s_add.get()) ||
-      func->name->same(s_addAll.get()) ||
-      func->name->same(s_clear.get()) ||
-      func->name->same(s_remove.get()) ||
-      func->name->same(s_removeAll.get());
-  }
-
-  return false;
-}
-
 Type native_function_return_type(const php::Func* f) {
   assertx(f->isNative);
 

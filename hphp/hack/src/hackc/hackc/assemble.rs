@@ -240,12 +240,7 @@ fn assemble_typedef<'arena>(
         // won't be any user_type
         let span = assemble_span(token_iter)?;
         //tv
-        let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-        debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-        let tv = &tv[3..tv.len() - 3];
-        let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-        let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-        let type_structure = assemble_typed_value(alloc, &mut tv_lexer)?;
+        let type_structure = assemble_triple_quoted_typed_value(alloc, token_iter)?;
         token_iter.expect(Token::into_semicolon)?;
         Ok(hhbc::hhas_typedef::HhasTypedef {
             name,
@@ -376,12 +371,7 @@ fn assemble_const_or_type_const<'arena>(
         //type const
         let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
         let initializer = if token_iter.next_if(Token::is_equal) {
-            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-            let tv = &tv[3..tv.len() - 3];
-            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+            Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
         } else {
             Maybe::Nothing
         };
@@ -398,12 +388,7 @@ fn assemble_const_or_type_const<'arena>(
         let value = if token_iter.next_if_str(Token::is_identifier, "uninit") {
             Maybe::Just(hhbc::TypedValue::Uninit)
         } else {
-            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-            let tv = &tv[3..tv.len() - 3];
-            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+            Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
         };
         consts.push(hhbc::hhas_constant::HhasConstant {
             name,
@@ -805,15 +790,7 @@ fn assemble_adata<'arena>(
     let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
     token_iter.expect(Token::into_equal)?;
     // What's left here is tv
-    let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-    debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-    let tv = &tv[3..tv.len() - 3];
-    let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-    // Have to unescape tv -- for example, """D:1:{s:5:\"class\"; D:...""" causes error parsing \"class\"
-    let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-    // this so it's accurate again?
-    let value = assemble_typed_value(alloc, &mut tv_lexer)?;
-    tv_lexer.expect_end()?;
+    let value = assemble_triple_quoted_typed_value(alloc, token_iter)?;
     token_iter.expect(Token::into_semicolon)?;
     Ok(hhbc::hhas_adata::HhasAdata { id, value })
 }
@@ -1204,15 +1181,9 @@ fn assemble_user_attr<'arena>(
     ))?;
     let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
-    let (args, args_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-    debug_assert!(&args[0..3] == b"\"\"\"" && &args[args.len() - 3..args.len()] == b"\"\"\"");
-    let args = &args[3..args.len() - 3];
-    let mut args_lexer = Lexer::from_slice(args, args_line);
+    let arguments = assemble_user_attr_args(alloc, token_iter)?;
     token_iter.expect(Token::into_close_paren)?;
-    Ok(hhbc::hhas_attribute::HhasAttribute {
-        name,
-        arguments: assemble_user_attr_args(alloc, &mut args_lexer)?,
-    })
+    Ok(hhbc::hhas_attribute::HhasAttribute { name, arguments })
 }
 
 /// Printed as follows (print_attributes in bcp)
@@ -1221,7 +1192,7 @@ fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
-    if let hhbc::TypedValue::Vec(sl) = assemble_typed_value(alloc, token_iter)? {
+    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(alloc, token_iter)? {
         Ok(sl)
     } else {
         bail!("Malformed user_attr_args -- should be a vec")

@@ -2207,6 +2207,16 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::WHResult,
                         "WHResult",
                     ),
+                    b"AddNewElemC" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::AddNewElemC,
+                        "AddNewElemC",
+                    ),
+                    b"IsLateBoundCls" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::IsLateBoundCls,
+                        "IsLateBoundCls",
+                    ),
 
                     _ => todo!("assembling instrs: {}", tok),
                 }
@@ -2253,7 +2263,7 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
         match token_iter.expect(Token::into_identifier)? {
-            b"HasUnpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
+            b"Unpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
             b"Generics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),
             b"SkipRepack" => flags.add(hhbc::FCallArgsFlags::SkipRepack),

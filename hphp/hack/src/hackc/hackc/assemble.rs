@@ -1577,12 +1577,22 @@ fn assemble_coeffects_cc_this<'arena>(
     todo!()
 }
 
+/// .coeffects_cc_reified 0 C;
 fn assemble_coeffects_cc_reified<'arena>(
-    _alloc: &'arena Bump,
-    _token_iter: &mut Lexer<'_>,
-    _cc_param: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    cc_param: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
 ) -> Result<()> {
-    todo!()
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_reified")?;
+    let isc = token_iter.next_if_str(Token::is_identifier, "isClass");
+    let us = token_iter.expect_and_get_number()?;
+    let mut sl = Vec::new();
+    while !token_iter.peek_if(Token::is_semicolon) {
+        sl.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    cc_param.push(ffi::Triple(isc, us, Slice::from_vec(alloc, sl)));
+    Ok(())
 }
 
 /// Expects .numiters #+;

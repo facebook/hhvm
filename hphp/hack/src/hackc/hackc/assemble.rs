@@ -1056,7 +1056,7 @@ fn assemble_function<'arena>(
     let name = assemble_function_name(alloc, token_iter)?;
     let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
-    let flags = assemble_function_flags(token_iter)?;
+    let flags = assemble_function_flags(name, token_iter)?;
     let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
@@ -1078,7 +1078,10 @@ fn assemble_function<'arena>(
 }
 
 /// Have to parse flags which may or may not appear: isGenerator isAsync isPairGenerator
+/// Also, MEMOIZE_IMPL appears in the function name. Example:
+/// .function {} [ "__Memoize"("""v:1:{s:9:\"KeyedByIC\";}""") "__Reified"("""v:4:{i:1;i:0;i:0;i:0;}""")] (4,10) <"" N > memo$memoize_impl($a, $b)
 fn assemble_function_flags(
+    name: hhbc::FunctionName<'_>,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_function::HhasFunctionFlags> {
     let mut flag = hhbc::hhas_function::HhasFunctionFlags::empty();
@@ -1089,6 +1092,9 @@ fn assemble_function_flags(
             b"isGenerator" => flag |= hhbc::hhas_function::HhasFunctionFlags::GENERATOR,
             f => bail!("Unknown function flag: {:?}", f),
         }
+    }
+    if name.as_bstr().ends_with(b"$memoize_impl") {
+        flag |= hhbc::hhas_function::HhasFunctionFlags::MEMOIZE_IMPL;
     }
     Ok(flag)
 }

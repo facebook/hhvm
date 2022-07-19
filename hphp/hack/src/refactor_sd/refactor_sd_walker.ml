@@ -33,6 +33,14 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)
+  | A.Unop
+      ( ( Ast_defs.Utild | Ast_defs.Unot | Ast_defs.Uplus | Ast_defs.Uminus
+        | Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr
+        | Ast_defs.Usilence ),
+        e ) ->
+    (* unary operations won't return function pointrs, so we discard the entity. *)
+    let (env, _) = expr_ upcasted_id env e in
+    (env, None)
   | A.Binop (Ast_defs.Eq None, e1, ((_ty_rhs, _, _) as e2)) ->
     let (env, entity_rhs) = expr_ upcasted_id env e2 in
     let (_, pos, lval) = e1 in
@@ -41,6 +49,19 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | A.Lvar (_, lid) -> Env.set_local env lid entity_rhs
       | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
     in
+    (env, None)
+  | A.Binop
+      ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
+        | Ast_defs.Eqeq | Ast_defs.Eqeqeq | Ast_defs.Starstar | Ast_defs.Diff
+        | Ast_defs.Diff2 | Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.Lt
+        | Ast_defs.Lte | Ast_defs.Gt | Ast_defs.Gte | Ast_defs.Dot
+        | Ast_defs.Amp | Ast_defs.Bar | Ast_defs.Ltlt | Ast_defs.Gtgt
+        | Ast_defs.Percent | Ast_defs.Xor | Ast_defs.Cmp ),
+        e1,
+        ((_ty_rhs, _, _) as e2) ) ->
+    (* most binary operations won't return function pointers, so we discard the entity. *)
+    let (env, _) = expr_ upcasted_id env e1 in
+    let (env, _) = expr_ upcasted_id env e2 in
     (env, None)
   | A.Upcast (e, _) ->
     let (env, entity) = expr_ upcasted_id env e in

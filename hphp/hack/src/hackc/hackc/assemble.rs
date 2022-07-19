@@ -1576,7 +1576,7 @@ fn assemble_decl_vars<'arena, 'a>(
     token_iter.expect_is_str(Token::into_decl, ".declvars")?;
     let mut var_names = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
-        let var_nm = token_iter.expect(Token::into_variable)?;
+        let var_nm = token_iter.expect_var()?;
         decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
         var_names.push(Str::new_slice(alloc, var_nm));
     }
@@ -4032,6 +4032,21 @@ impl<'a> Lexer<'a> {
             FromStr::from_str(std::str::from_utf8(num)?).map_err(|_| {
                 anyhow!("Number-looking token in tokenizer that cannot be parsed into number")
             }) // This std::str::from_utf8 will never bail; if it should bail, the above `expect` bails first.
+        }
+    }
+
+    /// A var can be written in HHAS as $abc or "$abc". Only valid if a $ preceeds
+    fn expect_var(&mut self) -> Result<&'a [u8]> {
+        if self.peek_if(Token::is_str_literal) {
+            let s = self.expect(Token::into_str_literal)?;
+            if s.starts_with(b"\"$") {
+                // Remove the "" b/c that's not part of the var name
+                Ok(&s[1..s.len() - 1])
+            } else {
+                bail!("Var does not start with $: {:?}", s)
+            }
+        } else {
+            self.expect(Token::into_variable)
         }
     }
 

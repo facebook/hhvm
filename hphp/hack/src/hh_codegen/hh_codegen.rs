@@ -120,8 +120,8 @@ fn sign(file: &Path) -> Result<()> {
     }
 
     let mut digest = Md5::new();
-    digest.input(&contents);
-    let md5 = hex::encode(digest.result());
+    digest.update(&contents);
+    let md5 = hex::encode(digest.finalize());
 
     let new_contents =
         contents.replace(&expected, &format!("{} SignedSource<<{}>>", token_tag, md5));

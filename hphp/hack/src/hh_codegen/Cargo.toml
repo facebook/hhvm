@@ -11,7 +11,7 @@ path = "hh_codegen.rs"
 [dependencies]
 anyhow = "1.0.56"
 hex = "0.4.3"
-md-5 = "0.8"
+md-5 = "0.10"
 proc-macro2 = "1.0"
 quote = "1.0"
 structopt = "0.3.23"

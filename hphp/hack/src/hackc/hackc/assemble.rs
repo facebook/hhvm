@@ -874,132 +874,117 @@ fn assemble_triple_quoted_typed_value<'arena>(
     // Guaranteed st is encased by """ """
     let st = &st[3..st.len() - 3];
     let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
-    assemble_typed_value(alloc, &mut Lexer::from_slice(&st, line))
+    // TvLexer expects an unescaped string.
+    assemble_typed_value(alloc, &mut TvLexer::from_slice(&st, line))
 }
 
 /// tv can look like:
 /// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
 /// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
 fn assemble_typed_value<'arena>(
-    // can use this for arguments of user_attrs as well .v.
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    let tok = token_iter
-        .peek()
-        .ok_or_else(|| anyhow!("No typed value to parse"))?;
-    match tok.as_bytes() {
-        b"uninit" => {
-            token_iter.next();
-            Ok(hhbc::TypedValue::Uninit)
+    let tr = match token_iter
+        .next()
+        .ok_or_else(|| anyhow!("Expected a tv, got end of lexer. Line: {}", token_iter.line))?
+    {
+        TvToken::Uninit => hhbc::TypedValue::Uninit,
+        TvToken::Int(i) => hhbc::TypedValue::Int(i),
+        TvToken::Bool(b) => hhbc::TypedValue::Bool(b),
+        TvToken::Float(f) => hhbc::TypedValue::Float(f),
+        TvToken::LazyClass => todo!(),
+        TvToken::Null => hhbc::TypedValue::Null,
+        TvToken::OpenCurly => bail!("Expected a typed value, got {{. Line {}", token_iter.line),
+        TvToken::CloseCurly => {
+            bail!("Expected a typed value, got }}. Line {}", token_iter.line)
         }
-        b"N" => {
-            token_iter.expect_is_str(Token::into_identifier, "N")?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::Null)
-        }
-        b"s" => {
-            // String
-            token_iter.expect_is_str(Token::into_identifier, "s")?;
-            token_iter.expect(Token::into_colon)?;
-            token_iter.expect(Token::into_number)?;
-            token_iter.expect(Token::into_colon)?;
-            let st = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::string(Str::new_slice(alloc, st))) // Have to check escaping
-        }
-        b"l" => todo!(), // LazyClass
-        b"d" => {
-            // Float
-            token_iter.expect_is_str(Token::into_identifier, "d")?;
-            token_iter.expect(Token::into_colon)?;
-            let n = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::float(n))
-        }
-        b"i" => {
-            // Int
-            token_iter.expect_is_str(Token::into_identifier, "i")?;
-            token_iter.expect(Token::into_colon)?;
-            let num: i64 = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::Int(num))
-        }
-        b"b" => {
-            // Bool
-            token_iter.expect_is_str(Token::into_identifier, "b")?;
-            token_iter.expect(Token::into_colon)?;
-            let num = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            match num {
-                0 => Ok(hhbc::TypedValue::Bool(false)),
-                1 => Ok(hhbc::TypedValue::Bool(true)),
-                _ => bail!("Given bool adata specified as number other than 0 or 1"),
-            }
-        }
-        b"v" => assemble_tv_vec(alloc, token_iter), // Vec
-        b"k" => assemble_tv_keyset(alloc, token_iter), // Keyset
-        b"D" => assemble_tv_dict(alloc, token_iter), // Dict
-        _ => bail!("Unknown typed value passed to .adata: {}", tok),
+        TvToken::Semicolon => bail!("Expected a typed value, got ;. Line {}", token_iter.line),
+        TvToken::Error(s) => bail!(
+            "Expected a typed value, got Error: {:?}. Line {}",
+            s,
+            token_iter.line
+        ),
+        TvToken::S => assemble_tv_string(alloc, token_iter)?,
+        TvToken::Vec(u) => assemble_tv_vec(alloc, token_iter, u)?,
+        TvToken::Keyset(u) => assemble_tv_keyset(alloc, token_iter, u)?,
+        TvToken::Dict(u) => assemble_tv_dict(alloc, token_iter, u)?,
+        TvToken::String(_) => bail!(
+            "Free string literal in tv, expecting TV delimiter (i, d, b, etc). Line: {}",
+            token_iter.line
+        ),
+    };
+    if matches!(tr, hhbc::TypedValue::Int(_))
+        || matches!(tr, hhbc::TypedValue::Bool(_))
+        || matches!(tr, hhbc::TypedValue::Float(_))
+        || matches!(tr, hhbc::TypedValue::String(_))
+        || matches!(tr, hhbc::TypedValue::LazyClass(_))
+        || matches!(tr, hhbc::TypedValue::Null)
+    {
+        token_iter.expect(TvToken::into_semicolon)?;
     }
+    Ok(tr)
+}
+
+fn assemble_tv_string<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut TvLexer<'_>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    let s = token_iter.expect(TvToken::into_string)?;
+    Ok(hhbc::TypedValue::String(Str::new_slice(alloc, s)))
 }
 
 fn assemble_tv_vec<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "v")?;
     Ok(hhbc::TypedValue::Vec(assemble_tv_vec_or_key(
-        alloc, token_iter,
+        alloc, token_iter, len,
     )?))
 }
 
 fn assemble_tv_keyset<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "k")?;
     Ok(hhbc::TypedValue::Keyset(assemble_tv_vec_or_key(
-        alloc, token_iter,
+        alloc, token_iter, len,
     )?))
 }
 
 /// Builds whawt follows v or k in a TypedValue::Vec or TypedValue::KeySet
 fn assemble_tv_vec_or_key<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
-    token_iter.expect(Token::into_colon)?;
-    let ln: usize = token_iter.expect_and_get_number()?;
-    token_iter.expect(Token::into_colon)?;
-    token_iter.expect(Token::into_open_curly)?;
-    let mut vec = Vec::with_capacity(ln);
-    for _ in 0..ln {
+    token_iter.expect(TvToken::into_open_curly)?;
+    let mut vec = Vec::with_capacity(len);
+    for _ in 0..len {
         vec.push(assemble_typed_value(alloc, token_iter)?);
     }
-    token_iter.expect(Token::into_close_curly)?;
+    token_iter.expect(TvToken::into_close_curly)?;
     Ok(Slice::from_vec(alloc, vec))
 }
 
 /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
 fn assemble_tv_dict<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "D")?;
-    token_iter.expect(Token::into_colon)?;
-    let ln: usize = token_iter.expect_and_get_number()?; // Length is the # of pairs in the dict
-    token_iter.expect(Token::into_colon)?;
-    token_iter.expect(Token::into_open_curly)?;
+    token_iter.expect(TvToken::into_open_curly)?;
     let mut dict: Vec<Pair<hhbc::TypedValue<'arena>, hhbc::TypedValue<'arena>>> =
-        Vec::with_capacity(ln);
-    for _ in 0..ln {
+        Vec::with_capacity(len);
+    for _ in 0..len {
         dict.push(Pair::from((
             assemble_typed_value(alloc, token_iter)?,
             assemble_typed_value(alloc, token_iter)?,
         )));
     }
-    token_iter.expect(Token::into_close_curly)?;
+    token_iter.expect(TvToken::into_close_curly)?;
     Ok(hhbc::TypedValue::Dict(Slice::from_vec(alloc, dict)))
 }
 
@@ -3533,6 +3518,237 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
     )))
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum TvToken<'a> {
+    // The TvLexer will just hold a line number; TV is kept to a line
+    Uninit,
+    Int(i64),               // i:#
+    Bool(bool),             // b:(0|1)
+    Float(hhbc::FloatBits), // TV Float carries FloatBits, f64 impl from. d:#
+    S,                      //String marker. s:#:. Doesn't carry its length b/c lexer
+    // guarantees that the following token is a str literal of the appropriate length, else error
+    String(&'a [u8]), //Str literal. ".."
+    LazyClass,        //l:#L
+    Null,             //N
+    Vec(usize),       // Carries its length. v:#:
+    Keyset(usize),    // k:#:
+    Dict(usize),      // D:#:
+    Error(&'a [u8]),
+    OpenCurly,
+    CloseCurly,
+    Semicolon,
+}
+
+impl<'a> TvToken<'a> {
+    fn into_string(self) -> Result<&'a [u8]> {
+        match self {
+            TvToken::String(s) => Ok(s),
+            _ => bail!("Expected a String, got: {:?}", self),
+        }
+    }
+
+    fn into_open_curly(self) -> Result<()> {
+        match self {
+            TvToken::OpenCurly => Ok(()),
+            _ => bail!("Expected a OpenCurly, got: {:?}", self),
+        }
+    }
+    fn into_close_curly(self) -> Result<()> {
+        match self {
+            TvToken::CloseCurly => Ok(()),
+            _ => bail!("Expected a CloseCurly, got: {:?}", self),
+        }
+    }
+    fn into_semicolon(self) -> Result<()> {
+        match self {
+            TvToken::Semicolon => Ok(()),
+            _ => bail!("Expected a Semicolon, got: {:?}", self),
+        }
+    }
+}
+
+pub struct TvLexer<'a> {
+    pub line: usize, // A TV should all stay on one line.
+    pending: Option<TvToken<'a>>,
+    tokens: VecDeque<TvToken<'a>>,
+}
+
+impl<'a> Iterator for TvLexer<'a> {
+    type Item = TvToken<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.fill();
+        self.pending.take()
+    }
+}
+
+impl<'a> TvLexer<'a> {
+    fn fill(&mut self) {
+        if self.pending.is_none() {
+            self.pending = self.tokens.pop_front();
+        }
+    }
+
+    fn expect<T, F>(&mut self, f: F) -> Result<T>
+    where
+        F: FnOnce(TvToken<'a>) -> Result<T>,
+    {
+        self.next()
+            .map_or_else(|| bail!("End of token stream sooner than expected"), f)
+    }
+
+    /// Expects an unescaped source
+    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+        // First create the regex that matches any token. Done this way for readability
+        let v = [
+            "uninit",
+            "N",
+            ";",
+            r"d:[-+]?(NAN|INF|([0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?))", // Float
+            r"i:[-+]?[0-9]+([eE][-+]?[0-9]+\.?[0-9]*)?",                      // Int
+            "b:(0|1)",
+            r"D:\d+:",
+            r"v:\d+:",
+            r"\{",
+            r"\}",
+            ";",
+            r"k:\d+:",
+            r"s:\d+:",
+            r"l:\d+:",
+            // No regex for String -- that is manually parsed after s.
+        ];
+        let big_regex = format!("^(({}))", v.join(")|("));
+        let big_regex = Regex::new(&big_regex).unwrap();
+        let mut tokens = VecDeque::new();
+        let mut source = s;
+        while !source.is_empty() {
+            source = tv_build_tokens_helper(source, &mut tokens, &big_regex);
+        }
+        TvLexer {
+            line: start_line,
+            pending: None,
+            tokens,
+        }
+    }
+}
+
+fn tv_build_tokens_helper<'a>(
+    s: &'a [u8],
+    tokens: &mut VecDeque<TvToken<'a>>,
+    big_regex: &Regex,
+) -> &'a [u8] {
+    fn create_tok<'a>(
+        s: &'a [u8],
+        tokens: &mut VecDeque<TvToken<'a>>,
+        end: usize,
+    ) -> Result<(TvToken<'a>, usize)> {
+        let tr = match &s[0] {
+            // Implicit assumption: matched to the start (^), so we iter from the start
+            // No whitespace expected in tv
+            b';' => (TvToken::Semicolon, end), // Semicolon
+            b'{' => (TvToken::OpenCurly, end), // Opencurly
+            b'}' => (TvToken::CloseCurly, end),
+            b'N' => (TvToken::Null, end),
+            b'u' => (TvToken::Uninit, end),
+            b'd' => {
+                // we know the rest is utf8, because it matched \d+
+                let num = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("float TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("float TV not followed by a number"))?;
+                (TvToken::Float(hhbc::FloatBits(num)), end)
+            }
+            b'i' => {
+                let num = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("int TV not followed by valid utf8"))?
+                    .parse()
+                    .map_err(|_| anyhow!("int TV not followed by a number"))?;
+                (TvToken::Int(num), end)
+            }
+            b'b' => {
+                let b: &str = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("boolean TV not followed by valid utf8"))?;
+                let b: usize = b
+                    .parse()
+                    .map_err(|_| anyhow!("boolean TV not followed by a number"))?;
+                if b != 1 && b != 0 {
+                    (TvToken::Error(s), end)
+                } else {
+                    (TvToken::Bool(b == 1), end)
+                }
+            }
+            b'D' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Dict TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Dict TV not followed by a number"))?;
+                (TvToken::Dict(num), end)
+            }
+            b'v' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Vec TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Vec TV not followed by a number"))?;
+                (TvToken::Vec(num), end)
+            }
+            b'k' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Keyset TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Keyset TV not followed by a number"))?;
+                (TvToken::Keyset(num), end)
+            }
+            b's' => {
+                let num: &str = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("string TV not followed by valid utf8"))?;
+                let num: usize = num
+                    .parse()
+                    .map_err(|_| anyhow!("string TV not followed by a number"))?;
+                tokens.push_back(TvToken::S);
+                //parse the string
+                let st = &s[end + 1..end + num + 1]; // ""abc"" -> "abc"
+                (TvToken::String(st), end + num + 2)
+            }
+            b'l' => {
+                let num: &str = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("LazyClass TV not followed by valid utf8"))?;
+                let num: usize = num
+                    .parse()
+                    .map_err(|_| anyhow!("LazyClass TV not followed by a number"))?; // -1 for the ending :
+                tokens.push_back(TvToken::LazyClass);
+                //parse the string
+                let st = &s[end + 1..end + num + 1];
+                (TvToken::String(st), end + num + 2)
+            }
+            _ => bail!("Unknown tv: {:?}", s),
+        };
+        Ok(tr)
+    }
+    if let Some(mat) = big_regex.find(s) {
+        debug_assert!(mat.start() == 0);
+        let end = mat.end();
+        match create_tok(s, tokens, end) {
+            Err(_) => {
+                tokens.push_back(TvToken::Error(s));
+                &[]
+            }
+            Ok((tok, end)) => {
+                tokens.push_back(tok);
+                &s[end..]
+            }
+        }
+    } else {
+        // Couldn't tokenize the string, so add the rest of it as an error
+        tokens.push_back(TvToken::Error(s));
+        // Done advancing col and line cuz at end
+        &[]
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]

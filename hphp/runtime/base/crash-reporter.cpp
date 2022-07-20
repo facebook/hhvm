@@ -75,9 +75,10 @@ enum class CrashReportStage {
 
 static CrashReportStage s_crash_report_stage;
 
-// These ranges contain debug information in the core that can be exctraced
-// using the helper tool XXX.  They start at kDebugAddr and each start is page
-// size aligned.
+// These ranges contain debug information in the core that can be extracted
+// using the helper tool `hphp/tools/extract_from_core.sh`.  They start at
+// kDebugAddr and each start is page size aligned.  These static variables
+// should be kept in sync with that utility.
 static uintptr_t s_jitprof_start;
 static uintptr_t s_jitprof_end;
 static uintptr_t s_stacktrace_start;

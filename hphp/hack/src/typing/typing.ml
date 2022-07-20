@@ -7619,39 +7619,70 @@ and class_get_inner
         }
       in
       let get_smember_from_constraints env class_info =
+        (* Extract the upper bounds on this from where and require class constraints. *)
         let upper_bounds_from_where_constraints =
           Cls.upper_bounds_on_this_from_constraints class_info
         in
         let upper_bounds_from_require_class_constraints =
           List.map (Cls.all_ancestor_req_class_requirements class_info) ~f:snd
         in
-        let upper_bounds =
-          upper_bounds_from_where_constraints
-          @ upper_bounds_from_require_class_constraints
-        in
-        let ((env, ty_err_opt), upper_bounds) =
-          List.map_env_ty_err_opt
-            env
-            upper_bounds
-            ~f:(fun env up -> Phase.localize ~ety_env env up)
-            ~combine_ty_errs:Typing_error.multiple_opt
+        let (env, ty_err_opt, upper_bounds) =
+          let ((env, ty_err_opt), upper_bounds) =
+            List.map_env_ty_err_opt
+              env
+              (upper_bounds_from_where_constraints
+              @ upper_bounds_from_require_class_constraints)
+              ~f:(fun env up -> Phase.localize ~ety_env env up)
+              ~combine_ty_errs:Typing_error.multiple_opt
+          in
+          (* If class C uses a trait that require class C, then decls for class C
+           * include the require class C constraint.  This must be filtered out to avoid
+           * that resolving a static element on class C enters into an infinite recursion.
+           * Similarly, upper bounds on this equivalent via aliases to class C
+           * introduced via class-level where clauses, must be filtered out; this is done
+           * by localizing the bounds before comparing them with the current class name.
+           *)
+          let upper_bounds =
+            List.filter
+              ~f:(fun ty ->
+                match get_node ty with
+                | Tclass ((_, cn), _, _) ->
+                  String.( <> ) cn (Cls.name class_info)
+                | _ -> true)
+              upper_bounds
+          in
+          (env, ty_err_opt, upper_bounds)
         in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
-        let (env, inter_ty) =
-          Inter.intersect_list env (Reason.Rwitness p) upper_bounds
-        in
-        class_get_inner
-          ~is_method
-          ~is_const
-          ~this_ty
-          ~explicit_targs
-          ~incl_tc
-          ~coerce_from_ty
-          ~is_function_pointer
-          env
-          cid
-          inter_ty
-          (p, mid)
+        if List.is_empty upper_bounds then begin
+          (* there are no upper bounds, raise an error *)
+          Errors.add_typing_error
+          @@ TOG.smember_not_found
+               p
+               ~is_const
+               ~is_method
+               ~is_function_pointer
+               class_info
+               mid
+               Typing_error.Callback.unify_error;
+          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+        end else
+          (* since there are upper bounds on this, repeat the search on their intersection *)
+          let (env, inter_ty) =
+            Inter.intersect_list env (Reason.Rwitness p) upper_bounds
+          in
+          class_get_inner
+            ~is_method
+            ~is_const
+            ~this_ty
+            ~explicit_targs
+            ~incl_tc
+            ~coerce_from_ty
+            ~is_function_pointer
+            env
+            cid
+            inter_ty
+            (p, mid)
       in
       let try_get_smember_from_constraints env class_info =
         Errors.try_with_error
@@ -7682,19 +7713,7 @@ and class_get_inner
             | None -> Env.get_const env class_ mid
         in
         match const with
-        | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
-          try_get_smember_from_constraints env class_
-        | None ->
-          Errors.add_typing_error
-          @@ TOG.smember_not_found
-               p
-               ~is_const
-               ~is_method
-               ~is_function_pointer
-               class_
-               mid
-               Typing_error.Callback.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+        | None -> try_get_smember_from_constraints env class_
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let ((env, ty_err_opt), cc_locl_type) =
             Phase.localize ~ety_env env cc_type
@@ -7722,23 +7741,12 @@ and class_get_inner
           Env.get_static_member is_method env class_ mid
         in
         (match static_member_opt with
-        | None
-          when Cls.has_upper_bounds_on_this_from_constraints class_
-               || not
-                    (List.is_empty
-                       (Cls.all_ancestor_req_class_requirements class_)) ->
-          try_get_smember_from_constraints env class_
         | None ->
-          Errors.add_typing_error
-          @@ TOG.smember_not_found
-               p
-               ~is_const
-               ~is_method
-               ~is_function_pointer
-               class_
-               mid
-               Typing_error.Callback.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+          (* Before raising an error, check if the classish has upper bounds on this
+           * (via class-level where clauses or require class constraints); if yes, repeat
+           * the search on all the upper bounds, if not raise an error.
+           *)
+          try_get_smember_from_constraints env class_
         | Some
             ({
                ce_visibility = vis;

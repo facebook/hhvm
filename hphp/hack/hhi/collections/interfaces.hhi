@@ -27,7 +27,6 @@ interface ConstCollection<+Te> extends Countable, IPureStringishObject {
    *
    * @return - Returns the number of items in the collection
    */
-  <<__SupportDynamicType>>
   public readonly function count()[]: int;
   /**
    * Get access to the items in the collection. Can be empty.

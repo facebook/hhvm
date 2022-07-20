@@ -828,6 +828,20 @@ let parse_callItem (params : json option) : CallHierarchyItem.t =
   }
 
 (************************************************************************)
+let print_callItem (item : CallHierarchyItem.t) : json =
+  let open CallHierarchyItem in
+  let kindJSON = SymbolInformation.symbolKind_to_enum item.kind |> int_ in
+  Jprint.object_opt
+    [
+      ("name", Some (JSON_String item.name));
+      ("kind", Some kindJSON);
+      ("detail", Option.map item.detail ~f:string_);
+      ("uri", Some (JSON_String (string_of_uri item.uri)));
+      ("range", Some (print_range item.range));
+      ("selectionRange", Some (print_range item.selectionRange));
+    ]
+
+(************************************************************************)
 
 let parse_callHierarchyCalls (params : json option) :
     CallHierarchyCallsRequestParam.t =
@@ -835,6 +849,46 @@ let parse_callHierarchyCalls (params : json option) :
   let parsed_item = parse_callItem json_item in
   let open CallHierarchyCallsRequestParam in
   { item = parsed_item }
+
+(************************************************************************)
+
+let print_PrepareCallHierarchyResult (r : PrepareCallHierarchy.result) : json =
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_callItem list
+
+(************************************************************************)
+let print_CallHierarchyIncomingCallsResult
+    (r : CallHierarchyIncomingCalls.result) : json =
+  let open CallHierarchyIncomingCalls in
+  let print_CallHierarchyIncomingCall
+      (call : CallHierarchyIncomingCalls.callHierarchyIncomingCall) : json =
+    JSON_Object
+      [
+        ("from", print_callItem call.from);
+        ("fromRanges", array_ print_range call.fromRanges);
+      ]
+  in
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_CallHierarchyIncomingCall list
+
+(************************************************************************)
+
+let print_CallHierarchyOutgoingCallsResult
+    (r : CallHierarchyOutgoingCalls.result) : json =
+  let open CallHierarchyOutgoingCalls in
+  let print_CallHierarchyOutgoingCall
+      (call : CallHierarchyOutgoingCalls.callHierarchyOutgoingCall) : json =
+    JSON_Object
+      [
+        ("to", print_callItem call.call_to);
+        ("fromRanges", array_ print_range call.fromRanges);
+      ]
+  in
+  match r with
+  | None -> JSON_Null
+  | Some list -> array_ print_CallHierarchyOutgoingCall list
 
 (************************************************************************)
 
@@ -1260,10 +1314,10 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | RequestMessage (_, PrepareCallHierarchyRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
   (*Implement for CallHierarchy*)
-  | RequestMessage (_, CallHierarchyIncomingCallsRequest _) ->
-    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
-  | RequestMessage (_, CallHierarchyOutgoingCallsRequest _) ->
-    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
+  | RequestMessage (_, CallHierarchyIncomingCallsRequest p) ->
+    Some p.CallHierarchyCallsRequestParam.item.CallHierarchyItem.uri
+  | RequestMessage (_, CallHierarchyOutgoingCallsRequest p) ->
+    Some p.CallHierarchyCallsRequestParam.item.CallHierarchyItem.uri
   | RequestMessage (_, ImplementationRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentHighlightRequest p) ->
@@ -1664,12 +1718,11 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | WorkspaceSymbolResult r -> print_workspaceSymbol r
     | DocumentSymbolResult r -> print_documentSymbol r
     | FindReferencesResult r -> print_locations r
-    | PrepareCallHierarchyResult _ ->
-      JSON_String "Implement me!" (*Implement for CallHierarchy*)
-    | CallHierarchyIncomingCallsResult _ ->
-      JSON_String "Implement me!" (*Implement for CallHierarchy*)
-    | CallHierarchyOutgoingCallsResult _ ->
-      JSON_String "Implement me!" (*Implement for CallHierarchy*)
+    | PrepareCallHierarchyResult r -> print_PrepareCallHierarchyResult r
+    | CallHierarchyIncomingCallsResult r ->
+      print_CallHierarchyIncomingCallsResult r
+    | CallHierarchyOutgoingCallsResult r ->
+      print_CallHierarchyOutgoingCallsResult r
     | DocumentHighlightResult r -> print_documentHighlight r
     | TypeCoverageResultFB r -> print_typeCoverage r
     | DocumentFormattingResult r -> print_documentFormatting r

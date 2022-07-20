@@ -946,9 +946,6 @@ module PrepareCallHierarchy = struct
   type result = CallHierarchyItem.t list option
 end
 
-(*Temporarily turning off "unused field" warnings. These will be turned back on when things are implemented that use the fields.*)
-[@@@warning "-69"]
-
 module CallHierarchyIncomingCalls = struct
   type params = CallHierarchyCallsRequestParam.t
 
@@ -971,8 +968,6 @@ module CallHierarchyOutgoingCalls = struct
     fromRanges: range list;
   }
 end
-
-[@@@warning "+69"]
 
 (* Document Highlights request, method="textDocument/documentHighlight" *)
 module DocumentHighlight = struct

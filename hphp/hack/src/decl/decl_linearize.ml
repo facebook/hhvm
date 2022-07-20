@@ -266,7 +266,7 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
       ]
 
 let rec ancestor_linearization
-    (env : env) (should_concretize_defaults : bool) (ancestor : ancestor) :
+    (env : env) (child_class_concrete : bool) (ancestor : ancestor) :
     string * mro_element list =
   let { ty_pos; class_name = (use_pos, class_name); type_args; source } =
     ancestor
@@ -317,7 +317,7 @@ let rec ancestor_linearization
         in
         let passthrough_abstract_typeconst =
           is_set mro_passthrough_abstract_typeconst c.mro_flags
-          && not should_concretize_defaults
+          && not child_class_concrete
         in
         let via_req_class =
           is_set mro_via_req_class c.mro_flags
@@ -400,7 +400,7 @@ let rec ancestor_linearization
 and linearize (env : env) (c : shallow_class) : mro_element list =
   let hash = Caml.Hashtbl.create 32 in
   let rec unfold state acc =
-    match next_state env c hash state with
+    match next_state env c.sc_kind hash state with
     | Sequence.Step.Done -> List.rev acc
     | Sequence.Step.Skip state -> unfold state acc
     | Sequence.Step.Yield (mro, state) -> unfold state (mro :: acc)
@@ -409,12 +409,10 @@ and linearize (env : env) (c : shallow_class) : mro_element list =
 
 and next_state
     (env : env)
-    (child : shallow_class)
+    (child_classish_kind : Ast_defs.classish_kind)
     (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
     (state : state) : (Decl_defs.mro_element, state) Sequence.Step.t =
-  let should_concretize_defaults =
-    Ast_defs.is_c_normal child.sc_kind || child.sc_final
-  in
+  let child_class_concrete = Ast_defs.is_c_normal child_classish_kind in
   let add_emitted mro =
     let list =
       match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
@@ -447,14 +445,14 @@ and next_state
           |> set_bit mro_copy_private_members (Ast_defs.is_c_trait c.sc_kind)
           |> set_bit
                mro_passthrough_abstract_typeconst
-               (not Ast_defs.(is_c_normal c.sc_kind || c.sc_final));
+               (not Ast_defs.(is_c_normal c.sc_kind));
       }
     in
     let ancestors = get_ancestors c env.linearization_kind in
     yield child (Next_ancestor { ancestors; synths = [] })
   | Next_ancestor { ancestors = ancestor :: ancestors; synths } ->
     let name_and_lin =
-      ancestor_linearization env should_concretize_defaults ancestor
+      ancestor_linearization env child_class_concrete ancestor
     in
     Sequence.Step.Skip (Ancestor { ancestor = name_and_lin; ancestors; synths })
   | Ancestor { ancestor = (name, lin); ancestors; synths } ->
@@ -486,7 +484,7 @@ and next_state
           | Member_resolution ->
             if is_set mro_via_req_extends next.mro_flags then
               let synths =
-                match (next.mro_required_at, child.sc_kind) with
+                match (next.mro_required_at, child_classish_kind) with
                 (* Always aggregate synthesized ancestors for traits and
                    interfaces (necessary for typechecking) *)
                 | (_, Ast_defs.(Ctrait | Cinterface))

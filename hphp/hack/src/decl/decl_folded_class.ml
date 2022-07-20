@@ -814,7 +814,7 @@ and class_decl
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
-    if Ast_defs.is_c_normal c.sc_kind || c.sc_final then
+    if Ast_defs.is_c_normal c.sc_kind then
       let consts = SMap.map synthesize_const_defaults consts in
       SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else

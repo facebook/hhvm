@@ -464,6 +464,23 @@ let process_typedef_decl ctx path source_text elem (all_decls, progress) =
   in
   (all_decls @ [Build.build_typedef_decl_json_ref decl_id], prog)
 
+let process_module_decl ctx path source_text elem (all_decls, progress) =
+  let (pos, id) = elem.md_name in
+  let (decl_id, prog) =
+    process_decl_loc
+      Add_fact.module_decl
+      (Add_fact.module_defn ctx source_text)
+      Build.build_module_decl_json_ref
+      ~path
+      pos
+      (Some elem.md_span)
+      id
+      elem
+      None
+      progress
+  in
+  (all_decls @ [Build.build_module_decl_json_ref decl_id], prog)
+
 let process_typedef_xref symbol_name pos (xrefs, prog) =
   process_xref
     Add_fact.typedef_decl
@@ -527,6 +544,7 @@ let process_tast_decls ctx ~path tast source_text (decls, prog) =
       | Constant gd -> process_gconst_decl ctx path source_text gd acc
       | Fun fd -> process_func_decl ctx path source_text fd acc
       | Typedef td -> process_typedef_decl ctx path source_text td acc
+      | Module md -> process_module_decl ctx path source_text md acc
       | _ -> acc)
 
 let process_decls ctx prog File_info.{ path; tast; source_text; cst; _ } =

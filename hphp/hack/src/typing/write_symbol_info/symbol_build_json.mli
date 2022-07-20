@@ -29,6 +29,8 @@ val build_method_decl_nested : string -> string -> string -> Hh_json.json
 
 val build_type_json_nested : string -> Hh_json.json
 
+val build_module_membership_nested : Fact_id.t -> internal:bool -> Hh_json.json
+
 val build_attributes_json_nested :
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.user_attribute list ->
@@ -104,5 +106,7 @@ val build_property_decl_json_ref : Fact_id.t -> Hh_json.json
 val build_type_const_decl_json_ref : Fact_id.t -> Hh_json.json
 
 val build_typedef_decl_json_ref : Fact_id.t -> Hh_json.json
+
+val build_module_decl_json_ref : Fact_id.t -> Hh_json.json
 
 val build_method_occ_json_ref : Fact_id.t -> Hh_json.json

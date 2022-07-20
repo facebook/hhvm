@@ -504,19 +504,20 @@ SinkProfile::SinkProfile(SinkProfileKey key)
   assertx(s_profiling.load(std::memory_order_acquire));
 }
 
-SinkProfile::SinkProfile(SinkProfileKey key, SinkLayout layout)
+SinkProfile::SinkProfile(SinkProfileKey key, SinkLayouts layouts)
   : key(key)
-  , layout(layout)
+  , layouts(layouts)
 {
   assertx(!s_profiling.load(std::memory_order_acquire));
 }
 
-SinkLayout SinkProfile::getLayout() const {
-  return layout.load(std::memory_order_acquire);
+SinkLayouts SinkProfile::getLayouts() const {
+  return this->layouts.copy();
 }
 
-void SinkProfile::setLayout(SinkLayout layout) {
-  this->layout.store(layout, std::memory_order_release);
+void SinkProfile::setLayouts(SinkLayouts sls) {
+  assertx(sls.layouts.size() > 0);
+  this->layouts.swap(sls);
 }
 
 void SinkProfile::update(const ArrayData* ad) {
@@ -938,9 +939,13 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
                   sk.getSymbol(), sink.sampledCount,
                   sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
-    auto const sl = sink.profile->getLayout();
-    LOG_OR_RETURN(file, "  Selected Layout: {}\n", sl.layout.describe());
-    LOG_OR_RETURN(file, "  Guard: {}\n", sl.sideExit ? "side-exit" : "diamond");
+
+    auto const sls = sink.profile->getLayouts();
+    LOG_OR_RETURN(file, "  Selected Layouts (n={}):\n", sls.layouts.size());
+    for (auto const& sl : sls.layouts) {
+      LOG_OR_RETURN(file, "    Layout (coverage={}): {}\n", sl.coverage, sl.layout.describe());
+    }
+    LOG_OR_RETURN(file, "  Layout Guard: {}\n", sls.sideExit ? "side-exit" : "diamond");
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
@@ -1279,8 +1284,8 @@ void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
   always_assert(s_profileMap.insert({key, profile}).second);
 }
 
-void deserializeSink(SinkProfileKey key, SinkLayout sl) {
-  auto const profile = new SinkProfile(key, sl);
+void deserializeSink(SinkProfileKey key, SinkLayouts sls) {
+  auto const profile = new SinkProfile(key, sls);
   always_assert(s_sinkMap.insert({key, profile}).second);
 }
 

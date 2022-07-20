@@ -321,6 +321,11 @@ private:
 // The decision we make at each layout-sensitive sink.
 struct SinkLayout {
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
+  double coverage = 0.0;
+};
+
+struct SinkLayouts {
+  std::vector<SinkLayout> layouts;
   bool sideExit = true;
 };
 
@@ -353,13 +358,13 @@ struct SinkProfile {
     KeyOrderMap keyOrders;
   };
 
-  SinkLayout getLayout() const;
-  void setLayout(SinkLayout layout);
+  SinkLayouts getLayouts() const;
+  void setLayouts(SinkLayouts layouts);
 
   void update(const ArrayData* ad);
 
   explicit SinkProfile(SinkProfileKey key);
-  SinkProfile(SinkProfileKey key, SinkLayout layout);
+  SinkProfile(SinkProfileKey key, SinkLayouts layouts);
 
   void releaseData() { data.reset(); }
 
@@ -368,7 +373,7 @@ public:
   std::unique_ptr<SinkProfileData> data;
 
 private:
-  std::atomic<SinkLayout> layout = {};
+  folly::Synchronized<SinkLayouts> layouts = {};
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
@@ -396,7 +401,7 @@ void startExportProfiles();
 void eachSource(std::function<void(LoggingProfile& profile)> fn);
 void eachSink(std::function<void(SinkProfile& profile)> fn);
 void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout);
-void deserializeSink(SinkProfileKey key, SinkLayout layout);
+void deserializeSink(SinkProfileKey key, SinkLayouts layout);
 size_t countSources();
 size_t countSinks();
 

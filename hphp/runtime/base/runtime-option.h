@@ -1192,19 +1192,23 @@ struct RuntimeOption {
    *                                                                    \
    * We can generate code for a bespoke sink in three ways:             \
    *  1. We can do "top codegen" that handles any array layout.         \
-   *  2. We can specialize on a layout and fall back to top codegen.    \
-   *  3. We can specialize on a layout and side-exit on guard failure.  \
+   *  2. We can specialize layouts and fall back to top codegen.        \
+   *  3. We can specialize layouts and side-exit on guard failure.      \
    *                                                                    \
    * We use a couple heuristics to choose between these options. If we  \
    * see one layout that covers `SideExitThreshold` percent cases, and  \
    * we saw at most `SideExitMaxSources` sources reach this sink, with  \
    * at least `SideExitMinSampleCount` samples each, we'll side-exit.   \
    *                                                                    \
-   * Else, if one layout covers `SpecializationThreshold` percent, we   \
-   * will specialize and fall back to top codegen. Otherwise, we'll do  \
-   * top codegen. */                                                    \
+   * Else, if multiple layouts cover SpecializationThreshold and at at  \
+   * least one of them covers SpecializationMinThreshold we will        \
+   * specialize to both layouts and fall back to top codegen. If one    \
+   * layout covers `SpecializationThreshold` percent, we will           \
+   * specialize and fall back to top codegen. Otherwise, we'll do top   \
+   * codegen. */                                                        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
   F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
+  F(double, BespokeArraySinkSpecializationMinThreshold, 85.0)           \
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \

@@ -383,12 +383,30 @@ SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
 
 void write_sink_layout(ProfDataSerializer& ser, bespoke::SinkLayout sl) {
   write_raw(ser, sl.layout);
-  write_raw(ser, sl.sideExit);
+  write_raw(ser, sl.coverage);
+}
+
+void write_sink_layouts(ProfDataSerializer& ser, bespoke::SinkLayouts sls) {
+  write_raw(ser, safe_cast<size_t>(sls.layouts.size()));
+  for (auto const &sl : sls.layouts) {
+    write_sink_layout(ser, sl);
+  }
+  write_raw(ser, sls.sideExit);
 }
 
 bespoke::SinkLayout read_sink_layout(ProfDataDeserializer& des) {
   auto result = bespoke::SinkLayout{};
   result.layout = read_layout(des);
+  result.coverage = read_raw<double>(des);
+  return result;
+}
+
+bespoke::SinkLayouts read_sink_layouts(ProfDataDeserializer& des) {
+  auto result = bespoke::SinkLayouts{};
+  auto const layouts = read_raw<size_t>(des);
+  for (size_t i = 0; i < layouts; i++) {
+    result.layouts.push_back(read_sink_layout(des));
+  }
   read_raw(des, result.sideExit);
   return result;
 }
@@ -424,7 +442,7 @@ struct RuntimeStructSerde {
     auto const fieldSize = read_raw<size_t>(des);
 
     auto fields = RuntimeStruct::FieldKeys(fieldSize, nullptr);
-    for (int i = 0; i < fieldSize; i ++) {
+    for (int i = 0; i < fieldSize; i++) {
       auto const present = read_raw<bool>(des);
       if (present) fields[i] = read_string(des);
     }
@@ -474,7 +492,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   write_raw(ser, bespoke::countSinks());
   bespoke::eachSink([&](auto const& profile) {
     write_sink_key(ser, profile.key);
-    write_sink_layout(ser, profile.getLayout());
+    write_sink_layouts(ser, profile.getLayouts());
   });
 }
 
@@ -507,7 +525,7 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   for (auto i = 0; i < sinks; i++) {
     assertx(bespoke::countSinks() == i);
     auto const key = read_sink_key(des);
-    bespoke::deserializeSink(key, read_sink_layout(des));
+    bespoke::deserializeSink(key, read_sink_layouts(des));
     assertx(bespoke::countSinks() == i + 1);
   }
   bespoke::Layout::FinalizeHierarchy();

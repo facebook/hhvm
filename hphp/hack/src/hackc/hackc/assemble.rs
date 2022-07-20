@@ -17,6 +17,7 @@ use ffi::Slice;
 use ffi::Str;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
+use once_cell::sync::OnceCell;
 use options::Options;
 use oxidized::relative_path::RelativePath;
 use oxidized::relative_path::{self};
@@ -3628,9 +3629,7 @@ impl<'a> TvLexer<'a> {
             .map_or_else(|| bail!("End of token stream sooner than expected"), f)
     }
 
-    /// Expects an unescaped source
-    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
-        // First create the regex that matches any token. Done this way for readability
+    fn make_regex() -> Regex {
         let v = [
             "uninit",
             "N",
@@ -3649,7 +3648,19 @@ impl<'a> TvLexer<'a> {
             // No regex for String -- that is manually parsed after s.
         ];
         let big_regex = format!("^(({}))", v.join(")|("));
-        let big_regex = Regex::new(&big_regex).unwrap();
+        Regex::new(&big_regex).unwrap()
+    }
+
+    /// Expects an unescaped source
+    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+        // According to
+        // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
+        // directly observed) Regex keeps mutable internal state which needs to
+        // be synchronized - so using it from multiple threads will be a big
+        // performance regression.
+        static REGEX: OnceCell<Regex> = OnceCell::new();
+        let big_regex = REGEX.get_or_init(Self::make_regex).clone();
+
         let mut tokens = VecDeque::new();
         let mut source = s;
         while !source.is_empty() {
@@ -4400,8 +4411,9 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
-        // First create the regex that matches any token. Done this way for readability
+    fn make_regex() -> Regex {
+        // First create the regex that matches any token. Done this way for
+        // readability
         let v = [
             r#""""([^"\\]|\\.)*?""""#, // Triple str literal
             "#.*",                     // Comment
@@ -4428,7 +4440,18 @@ impl<'a> Lexer<'a> {
             r"[ \t\r\f]+",
         ];
         let big_regex = format!("^(({}))", v.join(")|("));
-        let big_regex = Regex::new(&big_regex).unwrap();
+        Regex::new(&big_regex).unwrap()
+    }
+
+    fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+        // According to
+        // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
+        // directly observed) Regex keeps mutable internal state which needs to
+        // be synchronized - so using it from multiple threads will be a big
+        // performance regression.
+        static REGEX: OnceCell<Regex> = OnceCell::new();
+        let big_regex = REGEX.get_or_init(Self::make_regex).clone();
+
         let mut cur_pos = Pos {
             line: start_line, // When we spawn a new lexer it doesn't start at line 1
             col: 1,

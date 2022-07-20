@@ -1,0 +1,10 @@
+=== Sound Dynamic analysis results for ternary.php
+Constraints for \f:
+
+Constraints for \g:
+
+Constraints for \h:
+Introduction at [11:9-12]
+Upcast at ?1
+[11:9-12] ⊆ ?1
+

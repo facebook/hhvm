@@ -22,12 +22,34 @@ let redirect (env : env) (entity_ : entity_) : env * entity_ =
   let env = Env.add_constraint env (Subset (entity_, var)) in
   (env, var)
 
+let assign
+    (_assignment_pos : Pos.t)
+    (env : env)
+    ((_, pos, lval) : T.expr)
+    (rhs : entity) : env =
+  match lval with
+  | A.Lvar (_, lid) -> Env.set_local env lid rhs
+  | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
+
+let join (env : env) (then_entity : entity) (else_entity : entity) =
+  (* Create a join point entity. It is pretty much Option.marge except that
+     that function doesn't allow threading state (`env`) through *)
+  match (then_entity, else_entity) with
+  | (Some then_entity_, Some else_entity_) ->
+    let var = Env.fresh_var () in
+    let env = Env.add_constraint env @@ Subset (then_entity_, var) in
+    let env = Env.add_constraint env @@ Subset (else_entity_, var) in
+    (env, Some var)
+  | (None, Some _) -> (env, else_entity)
+  | (_, _) -> (env, then_entity)
+
 let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     env * entity =
   match e with
   | A.Int _
   | A.Float _
   | A.String _
+  | A.Null
   | A.True
   | A.False ->
     (env, None)
@@ -42,14 +64,19 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     (* unary operations won't return function pointrs, so we discard the entity. *)
     let (env, _) = expr_ upcasted_id env e in
     (env, None)
-  | A.Binop (Ast_defs.Eq None, e1, ((_ty_rhs, _, _) as e2)) ->
+  | A.Binop (Ast_defs.Eq None, e1, e2) ->
     let (env, entity_rhs) = expr_ upcasted_id env e2 in
-    let (_, pos, lval) = e1 in
-    let env =
-      match lval with
-      | A.Lvar (_, lid) -> Env.set_local env lid entity_rhs
-      | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
-    in
+    let env = assign pos env e1 entity_rhs in
+    (env, None)
+  | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+    let (env, entity1) = expr_ upcasted_id env e1 in
+    let (env, entity2) = expr_ upcasted_id env e2 in
+    join env entity1 entity2
+  | A.Binop (Ast_defs.Eq (Some Ast_defs.QuestionQuestion), e1, e2) ->
+    let (env, entity1) = expr_ upcasted_id env e1 in
+    let (env, entity2) = expr_ upcasted_id env e2 in
+    let (env, entity_rhs) = join env entity1 entity2 in
+    let env = assign pos env e1 entity_rhs in
     (env, None)
   | A.Binop
       ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
@@ -59,7 +86,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
         | Ast_defs.Amp | Ast_defs.Bar | Ast_defs.Ltlt | Ast_defs.Gtgt
         | Ast_defs.Percent | Ast_defs.Xor | Ast_defs.Cmp ),
         e1,
-        ((_ty_rhs, _, _) as e2) ) ->
+        e2 ) ->
     (* most binary operations won't return function pointers, so we discard the entity. *)
     let (env, _) = expr_ upcasted_id env e1 in
     let (env, _) = expr_ upcasted_id env e2 in
@@ -81,6 +108,17 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       (env, Some var)
     else
       (env, None)
+  | A.Eif (cond, Some then_expr, else_expr) ->
+    let (parent_env, _cond_entity) = expr_ upcasted_id env cond in
+    let base_env = Env.reset_constraints parent_env in
+    let (then_env, then_entity) = expr_ upcasted_id base_env then_expr in
+    let (else_env, else_entity) = expr_ upcasted_id base_env else_expr in
+    let env = Env.union parent_env then_env else_env in
+    join env then_entity else_entity
+  | A.Eif (cond, None, else_expr) ->
+    let (env, cond_entity) = expr_ upcasted_id env cond in
+    let (env, else_entity) = expr_ upcasted_id env else_expr in
+    join env cond_entity else_entity
   | A.Await e -> expr_ upcasted_id env e
   | A.As (e, _ty, _) -> expr_ upcasted_id env e
   | A.Is (e, _ty) ->

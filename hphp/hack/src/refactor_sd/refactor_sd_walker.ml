@@ -130,7 +130,33 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
 let expr (upcasted_id : string) (env : env) (e : T.expr) : env =
   expr_ upcasted_id env e |> fst
 
-let rec stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
+let rec switch
+    (upcasted_id : string)
+    (parent_locals : lenv)
+    (env : env)
+    (cases : ('ex, 'en) A.case list)
+    (dfl : ('ex, 'en) A.default_case option) : env =
+  let initialize_next_cont env =
+    let env = Env.restore_conts_from env ~from:parent_locals [Cont.Next] in
+    let env = Env.update_next_from_conts env [Cont.Next; Cont.Fallthrough] in
+    Env.drop_cont env Cont.Fallthrough
+  in
+  let handle_case env (e, b) =
+    let env = initialize_next_cont env in
+    let env = expr upcasted_id env e in
+    block upcasted_id env b
+  in
+  let handle_default_case env dfl =
+    dfl
+    |> Option.fold ~init:env ~f:(fun env (_, b) ->
+           let env = initialize_next_cont env in
+           block upcasted_id env b)
+  in
+  let env = List.fold ~init:env ~f:handle_case cases in
+  let env = handle_default_case env dfl in
+  env
+
+and stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e -> expr upcasted_id env e
   | A.If (cond, then_bl, else_bl) ->
@@ -139,6 +165,17 @@ let rec stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
     let then_env = block upcasted_id base_env then_bl in
     let else_env = block upcasted_id base_env else_bl in
     Env.union parent_env then_env else_env
+  | A.Switch (cond, cases, dfl) ->
+    let env = expr upcasted_id env cond in
+    (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
+     * See the note in
+     * http://php.net/manual/en/control-structures.continue.php *)
+    Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
+    let parent_locals = env.lenv in
+    let env = switch upcasted_id parent_locals env cases dfl in
+    Env.update_next_from_conts env [Cont.Continue; Cont.Break; Cont.Next]
+  | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
+  | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue
   | A.Break -> Env.move_and_merge_next_in_cont env Cont.Break
   | A.While (cond, bl) ->
     Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->

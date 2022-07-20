@@ -1,0 +1,12 @@
+=== Sound Dynamic analysis results for switch.php
+Summary for \d:
+Upcast exists at [64:3-20]
+Summary for \e:
+No upcast
+Summary for \f:
+No upcast
+Summary for \g:
+No upcast
+Summary for \h:
+Upcast exists at [18:7-25]
+Upcast exists at [23:3-20]

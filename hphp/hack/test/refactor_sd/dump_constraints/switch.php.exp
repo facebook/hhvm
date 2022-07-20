@@ -1,0 +1,22 @@
+=== Sound Dynamic analysis results for switch.php
+Constraints for \d:
+Introduction at [58:12-15]
+Upcast at ?4
+[58:12-15] ⊆ ?4
+
+Constraints for \e:
+Introduction at [27:8-11]
+[27:8-11] ⊆ ?3
+
+Constraints for \f:
+
+Constraints for \g:
+
+Constraints for \h:
+Introduction at [15:12-15]
+Introduction at [18:7-10]
+Upcast at ?1
+Upcast at ?2
+[15:12-15] ⊆ ?1
+[18:7-10] ⊆ ?2
+

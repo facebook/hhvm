@@ -1067,18 +1067,22 @@ pub enum Tmp {
     GetVar(VarId),          // var
 }
 
+/// Instructions used during ir_to_bc.
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+pub enum IrToBc {
+    PopC,
+    PopL(LocalId),
+    PushL(LocalId),
+    PushLiteral(ValueId),
+    PushUninit,
+    UnsetL(LocalId),
+}
+
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
     Copy(ValueId),
+    IrToBc(IrToBc),
     Param,
-    // Used during ir_to_bc - not in normal IR.
-    PopC,
-    // Used during ir_to_bc - not in normal IR.
-    PopL(LocalId),
-    // Used during ir_to_bc - not in normal IR.
-    PushL(LocalId),
-    // Used during ir_to_bc - not in normal IR.
-    PushLiteral(ValueId),
     Select(ValueId, u32),
     // Used to build SSA.
     #[has_locals(none)]

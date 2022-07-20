@@ -42,8 +42,8 @@ pub struct HhasCoeffects<'arena> {
 
 impl<'arena> HhasCoeffects<'arena> {
     pub fn new(
-        sc: Slice<'arena, Ctx>,
-        usc: Slice<'arena, Str<'arena>>,
+        static_coeffects: Slice<'arena, Ctx>,
+        unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
         fun_param: Slice<'arena, usize>,
         cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
         cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
@@ -52,9 +52,9 @@ impl<'arena> HhasCoeffects<'arena> {
         generator_this: bool,
         caller: bool,
     ) -> Self {
-        HhasCoeffects {
-            static_coeffects: sc,
-            unenforced_static_coeffects: usc,
+        Self {
+            static_coeffects,
+            unenforced_static_coeffects,
             fun_param,
             cc_param,
             cc_this,
@@ -64,6 +64,7 @@ impl<'arena> HhasCoeffects<'arena> {
             caller,
         }
     }
+
     pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> HhasCoeffects<'arena> {
         HhasCoeffects {
             static_coeffects: Slice::from_vec(alloc, scs),
@@ -71,6 +72,7 @@ impl<'arena> HhasCoeffects<'arena> {
             ..Default::default()
         }
     }
+
     fn from_type_static(hint: &Hint) -> Option<Ctx> {
         let Hint(_, h) = hint;
         match &**h {

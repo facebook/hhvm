@@ -11,6 +11,7 @@ use analysis::Predecessors;
 use core::instr::HasEdges;
 use core::instr::HasOperands;
 use core::instr::Hhbc;
+use core::instr::IrToBc;
 use core::instr::Special;
 use core::instr::Terminator;
 use core::string_intern::StringInterner;
@@ -489,7 +490,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     iid
                 ));
             }
-            Instr::Special(Special::PushLiteral(vid)) => {
+            Instr::Special(Special::IrToBc(IrToBc::PushLiteral(vid))) => {
                 check!(
                     self,
                     vid.is_literal(),

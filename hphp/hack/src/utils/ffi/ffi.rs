@@ -94,6 +94,24 @@ impl<U> Maybe<U> {
         }
     }
 
+    pub fn map_or_else<T, D, F>(self, default: D, f: F) -> T
+    where
+        F: FnOnce(U) -> T,
+        D: FnOnce() -> T,
+    {
+        match self {
+            Just(t) => f(t),
+            Nothing => default(),
+        }
+    }
+
+    pub fn unwrap(self) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => panic!("Expected Just(_)"),
+        }
+    }
+
     pub fn unwrap_or(self, default: U) -> U {
         match self {
             Just(t) => t,

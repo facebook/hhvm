@@ -91,6 +91,8 @@ constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
 constexpr uint32_t k86linitSlot = 0x80000002u;
 
+Optional<std::string> s_deserializedFile{};
+
 enum class SeenType : uint8_t {
   Class,
   TypeAlias,
@@ -1872,6 +1874,7 @@ std::string serializeOptProfData(const std::string& filename) {
 std::string deserializeProfData(const std::string& filename,
                                 int numWorkers,
                                 bool rds) {
+  s_deserializedFile = filename;
   try {
     if (!rds) ProfData::setTriedDeserialization();
 
@@ -2014,6 +2017,10 @@ bool tryDeserializePartialProfData(const std::string& filename,
 bool serializeOptProfEnabled() {
   return RuntimeOption::EvalJitSerializeOptProfSeconds  > 0 ||
          RuntimeOption::EvalJitSerializeOptProfRequests > 0;
+}
+
+Optional<std::string> getFilenameDeserialized() {
+  return s_deserializedFile;
 }
 
 //////////////////////////////////////////////////////////////////////

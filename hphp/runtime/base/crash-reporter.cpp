@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
@@ -74,9 +75,13 @@ enum class CrashReportStage {
 
 static CrashReportStage s_crash_report_stage;
 
-// size of the mapping in the core starting from kDebugAddr, currently
-// containing JitSerDes file when applicable.
-static size_t s_debugSize;
+// These ranges contain debug information in the core that can be exctraced
+// using the helper tool XXX.  They start at kDebugAddr and each start is page
+// size aligned.
+static uintptr_t s_jitprof_start;
+static uintptr_t s_jitprof_end;
+static uintptr_t s_stacktrace_start;
+static uintptr_t s_stacktrace_end;
 
 static const char* s_newBlacklist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
@@ -274,25 +279,39 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         jit::tc::dump(true);
       }
       // fall through
-    case CrashReportStage::DumpProfileData:
+    case CrashReportStage::DumpProfileData: {
       s_crash_report_stage = CrashReportStage::SendEmail;
-      if (isJitDeserializing()) {
-        // Copy JitSerdesFile to fixed address (the debug range), so that they
-        // get included in the coredump.
-        auto file = fopen(RO::EvalJitSerdesFile.c_str(), "r");
+      auto frontier = kDebugAddr;
+      auto const mapFileIn = [&frontier](const std::string& filename,
+                                         uintptr_t& start,
+                                         uintptr_t& end) {
+
+        auto file = fopen(filename.c_str(), "r");
+        size_t size = 0;
+        start = end = frontier;
         if (file) {
           fseek(file, 0, SEEK_END);
-          s_debugSize = ftell(file);
+          size = ftell(file);
+          end = start + size;
           fseek(file, 0, SEEK_SET);
-          if (s_debugSize > 0) {
-            mmap(reinterpret_cast<void*>(kDebugAddr),
-                 s_debugSize, PROT_READ | PROT_WRITE,
+          if (size > 0) {
+            mmap(reinterpret_cast<void*>(start),
+                 size, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-            fread(reinterpret_cast<void*>(kDebugAddr), 1, s_debugSize, file);
+            fread(reinterpret_cast<void*>(start), 1, size, file);
           }
           fclose(file);
         }
+        frontier = (end + s_pageSize - 1) & -s_pageSize;
+      };
+      if (auto const serdesFile = jit::getFilenameDeserialized()) {
+        // Copy JitSerdesFile to fixed address (the debug range), so that they
+        // get included in the coredump.
+        mapFileIn(*serdesFile, s_jitprof_start, s_jitprof_end);
       }
+      auto const& stacktraceFile = RuntimeOption::StackTraceFilename;
+      mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
+    }
       // fall through
     case CrashReportStage::SendEmail:
       s_crash_report_stage = CrashReportStage::Log;

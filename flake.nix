@@ -19,6 +19,11 @@
             overlays = [
               nixpkgs-mozilla.overlays.rust
             ];
+            config.permittedInsecurePackages = [
+              # It's OK to depend on libdwarf 20210528, because we did not call
+              # the particular vulnerable function in libdwarf
+              "libdwarf-20210528"
+            ];
           };
         in
         rec {

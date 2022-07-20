@@ -1178,7 +1178,9 @@ let fun_type_of_id env x tal el =
       Option.iter ~f:Errors.add_typing_error ty_err_opt2;
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
-          ~should_wrap:fe_support_dynamic_type
+          ~should_wrap:
+            (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && fe_support_dynamic_type)
           (Typing_reason.localize (get_reason fe_type))
           ft
       in

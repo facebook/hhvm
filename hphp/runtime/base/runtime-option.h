@@ -1051,8 +1051,6 @@ struct RuntimeOption {
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \
-  F(uint32_t, Num1GPagesForSlabs,      0)                               \
-  F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(uint32_t, Num1GPagesForReqHeap,    0)                               \
   F(uint32_t, Num2MPagesForReqHeap,    0)                               \
   F(uint32_t, NumReservedSlabs,        0)                               \

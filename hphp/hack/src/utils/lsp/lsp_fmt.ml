@@ -809,6 +809,35 @@ let parse_findReferences (params : json option) : FindReferences.params =
 
 (************************************************************************)
 
+let parse_callItem (params : json option) : CallHierarchyItem.t =
+  let rangeObj = Jget.obj_exn params "range" in
+  let selectionRangeObj = Jget.obj_exn params "selectionRange" in
+  let open CallHierarchyItem in
+  {
+    name = Jget.string_exn params "name";
+    kind =
+      (match
+         Jget.int_exn params "kind" |> SymbolInformation.symbolKind_of_enum
+       with
+      | None -> raise (Jget.Parse "invalid symbol kind")
+      | Some s -> s);
+    detail = Jget.string_opt params "detail";
+    uri = Jget.string_exn params "uri" |> uri_of_string;
+    range = parse_range_exn rangeObj;
+    selectionRange = parse_range_exn selectionRangeObj;
+  }
+
+(************************************************************************)
+
+let parse_callHierarchyCalls (params : json option) :
+    CallHierarchyCallsRequestParam.t =
+  let json_item = Jget.obj_opt params "item" in
+  let parsed_item = parse_callItem json_item in
+  let open CallHierarchyCallsRequestParam in
+  { item = parsed_item }
+
+(************************************************************************)
+
 let parse_documentHighlight (params : json option) : DocumentHighlight.params =
   parse_textDocumentPositionParams params
 
@@ -1228,8 +1257,9 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DocumentSymbol.textDocument.uri
   | RequestMessage (_, FindReferencesRequest p) ->
     Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
-  | RequestMessage (_, PrepareCallHierarchyRequest _) ->
-    Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
+  | RequestMessage (_, PrepareCallHierarchyRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  (*Implement for CallHierarchy*)
   | RequestMessage (_, CallHierarchyIncomingCallsRequest _) ->
     Some (Lsp.DocumentUri "Implement me!") (*Implement for CallHierarchy*)
   | RequestMessage (_, CallHierarchyOutgoingCallsRequest _) ->
@@ -1437,6 +1467,12 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     DocumentSymbolRequest (parse_documentSymbol params)
   | "textDocument/references" ->
     FindReferencesRequest (parse_findReferences params)
+  | "textDocument/prepareCallHierarchy" ->
+    PrepareCallHierarchyRequest (parse_textDocumentPositionParams params)
+  | "callHierarchy/incomingCalls" ->
+    CallHierarchyIncomingCallsRequest (parse_callHierarchyCalls params)
+  | "callHierarchy/outgoingCalls" ->
+    CallHierarchyOutgoingCallsRequest (parse_callHierarchyCalls params)
   | "textDocument/rename" -> RenameRequest (parse_documentRename params)
   | "textDocument/documentHighlight" ->
     DocumentHighlightRequest (parse_documentHighlight params)

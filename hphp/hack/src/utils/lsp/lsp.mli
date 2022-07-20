@@ -171,6 +171,21 @@ module SymbolInformation : sig
   }
 end
 
+module CallHierarchyItem : sig
+  type t = {
+    name: string;
+    kind: SymbolInformation.symbolKind;
+    detail: string option;
+    uri: documentUri;
+    range: range;
+    selectionRange: range;
+  }
+end
+
+module CallHierarchyCallsRequestParam : sig
+  type t = { item: CallHierarchyItem.t }
+end
+
 module MessageType : sig
   type t =
     | ErrorMessage [@value 1]
@@ -687,21 +702,32 @@ module FindReferences : sig
 end
 
 module PrepareCallHierarchy : sig
-  type params
+  type params = TextDocumentPositionParams.t
 
-  type result
+  type result = CallHierarchyItem.t list option
 end
 
 module CallHierarchyIncomingCalls : sig
-  type params
+  type params = CallHierarchyCallsRequestParam.t
 
-  type result
+  type result = callHierarchyIncomingCall list option
+
+  and callHierarchyIncomingCall = {
+    from: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
 end
 
 module CallHierarchyOutgoingCalls : sig
-  type params
+  type params = CallHierarchyCallsRequestParam.t
 
-  type result
+  type result = callHierarchyOutgoingCall list option
+
+  and callHierarchyOutgoingCall = {
+    (* The name should just be "to", but "to" is a reserved keyword in OCaml*)
+    call_to: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
 end
 
 module DocumentHighlight : sig

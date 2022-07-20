@@ -258,6 +258,23 @@ module SymbolInformation = struct
   }
 end
 
+(* Represents an item in the Call Hieararchy *)
+module CallHierarchyItem = struct
+  type t = {
+    name: string;
+    kind: SymbolInformation.symbolKind;
+    detail: string option;
+    uri: documentUri;
+    range: range;
+    selectionRange: range;
+  }
+end
+
+(*Represents a parameter for a CallHierarchyIncomingCallsRequest or CallHierarchyOutgoingCallsRequest *)
+module CallHierarchyCallsRequestParam = struct
+  type t = { item: CallHierarchyItem.t }
+end
+
 (* For showing messages (not diagnostics) in the user interface. *)
 module MessageType = struct
   type t =
@@ -924,22 +941,38 @@ module FindReferences = struct
 end
 
 module PrepareCallHierarchy = struct
-  type params
+  type params = TextDocumentPositionParams.t
 
-  type result
+  type result = CallHierarchyItem.t list option
 end
 
-module CallHierarchyIncomingCalls = struct
-  type params
+(*Temporarily turning off "unused field" warnings. These will be turned back on when things are implemented that use the fields.*)
+[@@@warning "-69"]
 
-  type result
+module CallHierarchyIncomingCalls = struct
+  type params = CallHierarchyCallsRequestParam.t
+
+  type result = callHierarchyIncomingCall list option
+
+  and callHierarchyIncomingCall = {
+    from: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
 end
 
 module CallHierarchyOutgoingCalls = struct
-  type params
+  type params = CallHierarchyCallsRequestParam.t
 
-  type result
+  type result = callHierarchyOutgoingCall list option
+
+  and callHierarchyOutgoingCall = {
+    (* The name should just be "to", but "to" is a reserved keyword in OCaml*)
+    call_to: CallHierarchyItem.t;
+    fromRanges: range list;
+  }
 end
+
+[@@@warning "+69"]
 
 (* Document Highlights request, method="textDocument/documentHighlight" *)
 module DocumentHighlight = struct

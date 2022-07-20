@@ -10,6 +10,30 @@ let progress_and_actionRequired_counter = ref 0
 (* Conversions                                                          *)
 (************************************************************************)
 
+let sym_occ_kind_to_lsp_sym_info_kind (sym_occ_kind : SymbolOccurrence.kind) :
+    Lsp.SymbolInformation.symbolKind =
+  let open Lsp.SymbolInformation in
+  let open SymbolOccurrence in
+  match sym_occ_kind with
+  | Class _ -> Class
+  | BuiltInType _ -> Class
+  | Function -> Function
+  | Method _ -> Method
+  | LocalVar -> Variable
+  | TypeVar -> TypeParameter
+  | Property _ -> Property
+  | XhpLiteralAttr _ -> Property
+  | ClassConst _ -> TypeParameter
+  | Typeconst _ -> TypeParameter
+  | GConst -> Constant
+  | Attribute _ -> Class
+  | EnumClassLabel _ -> EnumMember
+  | Keyword _ -> Null
+  | PureFunctionContext -> Null
+  | BestEffortArgument _ -> Null
+  | HhFixme -> Null
+  | Module -> Module
+
 let url_scheme_regex = Str.regexp "^\\([a-zA-Z][a-zA-Z0-9+.-]+\\):"
 
 (* this requires schemes with 2+ characters, so "c:\path" isn't considered a scheme *)

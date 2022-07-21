@@ -360,7 +360,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt conn = connect args in
       let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
-    | MODE_REFACTOR_CHECK_SOUND_DYNAMIC (ref_mode, name) ->
+    | MODE_REFACTOR_SOUND_DYNAMIC (ref_mode, name) ->
       let conn () = connect args in
       let%lwt result =
         ClientRefactor.go_sound_dynamic conn args ref_mode name

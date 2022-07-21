@@ -111,4 +111,4 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         sudo mkdir /mnt/test-universal-packages
-        s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages
+        sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages

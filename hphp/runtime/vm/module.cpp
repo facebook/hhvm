@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
 
@@ -75,11 +76,17 @@ void Module::def(Module* m) {
   link.initWith(m);
 }
 
-bool will_call_raise_module_boundary_violation(const Func* callee,
-                                               const StringData* callerModule) {
+template <typename Sym, typename Ctx>
+bool will_symbol_raise_module_boundary_violation(const Sym* symbol,
+                                                 const Ctx* context) {
+  assertx(symbol && context);
   return RO::EvalEnforceModules &&
-         callee->isInternal() &&
-         callerModule != callee->moduleName();
+         symbol->isInternal() &&
+         context->moduleName() != symbol->moduleName();
 }
+
+template bool will_symbol_raise_module_boundary_violation(const Func*, const Func*);
+template bool will_symbol_raise_module_boundary_violation(const Func*, const MethodLookupCallContext*);
+template bool will_symbol_raise_module_boundary_violation(const Class*, const Func*);
 
 } // namespace HPHP

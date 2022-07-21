@@ -3544,7 +3544,7 @@ namespace {
 
 void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
   auto const caller = vmfp()->func();
-  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
   }
 }

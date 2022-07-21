@@ -884,9 +884,9 @@ Func* Func::load(const StringData* name) {
 namespace {
 void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
   if (!RO::EvalEnforceModules || !callee || !caller) return;
-  auto const moduleName = caller->unit()->moduleName();
-  if (!will_call_raise_module_boundary_violation(callee, moduleName)) return;
-  raiseModuleBoundaryViolation(nullptr, callee, moduleName);
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
+    raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
+  }
 }
 } // namespace
 

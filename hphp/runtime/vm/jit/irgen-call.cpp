@@ -226,7 +226,7 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
 
 void emitModuleBoundaryCheckKnown(IRGS& env, const Func* callee) {
   auto const caller = curFunc(env);
-  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
       auto const data = OptClassAndFuncData { curClass(env), caller };
       gen(env, RaiseModuleBoundaryViolation, data, cns(env, callee));
   }

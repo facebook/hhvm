@@ -141,15 +141,7 @@ let rec assign
     begin
       match entity with
       | Some entity_ ->
-        let current_assignment = Literal pos in
-        let decorated_constraint =
-          {
-            hack_pos = pos;
-            origin;
-            constraint_ = Subsets (entity_, current_assignment);
-          }
-        in
-        let env = Env.add_constraint env decorated_constraint in
+        let (env, current_assignment) = redirect ~pos ~origin env entity_ in
         let env =
           add_key_constraint
             pos

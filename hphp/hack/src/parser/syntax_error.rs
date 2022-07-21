@@ -1009,6 +1009,13 @@ pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
     ))
 }
 
+pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "This {} requires the defaults context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible",
+        kind
+    ))
+}
+
 pub fn lambda_effect_polymorphic(kind: &str) -> Error {
     Cow::Owned(format!("{} cannot have a polymorphic context", kind))
 }

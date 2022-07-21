@@ -20,4 +20,7 @@ abstract class Bar implements IMemoizeParam  {
 function bar(Foo $x)[zoned_local]: void {} // ok
 
 <<__Memoize>>
+function baz(Foo $z)[zoned]: void {} // still bad
+
+<<__Memoize>>
 function bat(Bar $a)[$a::CFoo] : void {}

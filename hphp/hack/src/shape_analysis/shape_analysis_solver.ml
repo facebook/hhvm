@@ -85,37 +85,55 @@ let subset_lookups subsets =
   in
   (collect subset_map, collect superset_map)
 
-(* The following program roughly summarises the solver.
+(* The following program roughly summarises the solver in Datalog.
+
+  Variables with single letters E and F and their variants with primes all
+  range over entities.
+
+  Comma (,) is used for conjunction semi-colon (;) is used for disjunction.
+  Comma has higher precedence (binds tighter) than semi-colon.
+
+  p :- q1, ..., qn
+
+  means if q1 to qn holds, so does p.
+
+  If the predicate name is `p_suffix`, the `suffix` conveys a property:
+    `t` means transitively closed
+    `r` means reflexively closed
+    `u` means upwards closed by propagating through subsets
+    `d` means downwards closed by propagating through subsets
 
   // Reflexive closure
-  subset'(A,A) :-
-    subset(A,_); subset(_,A);
-    union(A,_,_); union(_,A,_); union(_,_,A);
-    has_static_key(A,_,_);
-    has_dynamic_key(A,_,_).
+  subsets_tr(E,E) :-
+    subsets(E,_); subsets(_,E);
+    joins(E,_,_); joins(_,E,_); joins(_,_,E);
+    has_static_key(E,_,_);
+    has_dynamic_key(E,_,_).
   // Transitive closure closure
-  subset'(A,B) :- subset(A,B); union(A,_,B); union(_,A,B).
-  subset'(A,C) :- subset(A,B), subset'(B,C).
+  subsets_tr(E,F) :- subsets(E,F); joins(E,_,F); joins(_,E,F).
+  subsets_tr(E,F) :- subsets(E,F), subsets_re(E,F).
 
-  has_static_key'(Entity, Key, Ty) :- has_static_key(Entity, Key, Ty).
-  has_static_key'(B, Key, Ty) :- has_static_key(A, Key, Ty), subset'(A,B).
+  has_static_key_u(E, Key, Ty) :- has_static_key(E, Key, Ty).
+  has_static_key_u(F, Key, Ty) :- has_static_key(E, Key, Ty), subsets_tr(E,F).
 
-  has_dynamic_key'(Entity) :- has_dynamic_key(Entity).
-  has_dynamic_key'(Entity') :-
-    has_dynamic_key(Entity),
-    (subset'(Entity,Entity'); subset'(Entity',Entity)).
+  // Close dynamic key access in both directions to later invalidate all
+  // results that touch it.
+  has_dynamic_key_ud(E) :- has_dynamic_key(E).
+  has_dynamic_key_ud(F) :- has_dynamic_key(E), (subset_tr(E,F); subsets_tr(F,E)).
 
-  // Has optional key constraint only exists within the solver. When there is a
-  // join but we cannot see a key appearing in both incoming branches, we mark
-  // the key as optional.
-  has_optional_key'(Entity') :-
-    has_optional_key(Entity),
-    subset'(Entity, Entity').
+  // Has optional key constraint only exists within the solver and is not (yet)
+  // added directly by the walker.
+  has_optional_key(E,Key) :-
+    (joins(E,F,Join); joins(F,E,Join)),
+    has_static_key_u(E,Key),
+    not has_static_key_u(F,Key).
+  has_optional_key_u(E,Key) :- has_optional_key(E,Key), subset_tr(E,F).
 
-  static_shape_result(A) :- marks(A), not has_dynamic_key'(A).
-  static_shape_result_key(A,K,Ty) :- has_static_key'(A,K,Ty)
+  static_shape_result(E) :- marks(E), not has_dynamic_key_ud(E).
+  static_shape_result_key(E,Key,Ty) :- has_static_key_u(E,Key,Ty).
+  static_shape_result_key_optional(E,Key) :- has_optional_key_u(E,Key).
 
-  dynamic_shape_result(A) :- marks(A), has_dynamic_key'(A).
+  dynamic_shape_result(E) :- marks(E), has_dynamic_key_ud(E).
 *)
 (* TODO(T125884349): Specially handle flows into return type hints *)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :

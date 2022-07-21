@@ -9,6 +9,7 @@ function f(): void {}
 function h(): void {
   $b = true;
   $c = false;
+  $x = g<>;
   if ($b) {
     if ($c) {
       $x = g<>;
@@ -22,5 +23,5 @@ function h(): void {
       (f<> upcast dynamic)();
     }
   }
-  ($b upcast dynamic)();
+  ($x upcast dynamic)();
 }

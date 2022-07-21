@@ -1,10 +1,6 @@
 on:
   schedule:
     - cron: "42 15 * * *"
-
-  # temporarily trigger this workflow for testing
-  push:
-
 jobs:
   nix-flake-update:
     runs-on: ubuntu-latest

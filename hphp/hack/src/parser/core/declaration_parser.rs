@@ -202,7 +202,7 @@ where
                     let use_token = self.assert_token(TokenKind::Use);
                     let enum_name_list = self.parse_special_type_list();
                     let semi = self.require_semicolon();
-                    Some(S!(make_enum_use, self, use_token, enum_name_list, semi))
+                    Some(self.sc_mut().make_enum_use(use_token, enum_name_list, semi))
                 }
                 _ => None,
             },
@@ -252,9 +252,7 @@ where
         let use_clauses = self.parse_enum_use_list_opt();
         let enumerators = self.parse_enumerator_list_opt();
         let right_brace = self.require_right_brace();
-        S!(
-            make_enum_declaration,
-            self,
+        self.sc_mut().make_enum_declaration(
             attrs,
             modifiers,
             enum_,
@@ -286,9 +284,7 @@ where
         let left_brace = self.require_left_brace();
         let enumerators = self.parse_enum_class_enumerator_list_opt();
         let right_brace = self.require_right_brace();
-        S!(
-            make_enum_class_declaration,
-            self,
+        self.sc_mut().make_enum_class_declaration(
             attrs,
             modifiers,
             enum_kw,
@@ -300,7 +296,7 @@ where
             classish_extends_list,
             left_brace,
             enumerators,
-            right_brace
+            right_brace,
         )
     }
 
@@ -352,7 +348,7 @@ where
         match self.peek_token_kind() {
             TokenKind::Semicolon => {
                 let token = self.fetch_token();
-                S!(make_namespace_empty_body, self, token)
+                self.sc_mut().make_namespace_empty_body(token)
             }
             TokenKind::LeftBrace => {
                 let left = self.fetch_token();
@@ -361,17 +357,21 @@ where
                     TokenKind::RightBrace,
                 );
                 let right = self.require_right_brace();
-                S!(make_namespace_body, self, left, body, right)
+                self.sc_mut().make_namespace_body(left, body, right)
             }
             _ => {
                 // ERROR RECOVERY: return an inert namespace (one with all of its
                 // components 'missing'), and recover--without advancing the parser--
                 // back to the level that the namespace was declared in.
                 self.with_error(Errors::error1038);
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                let missing3 = S!(make_missing, self, self.pos());
-                S!(make_namespace_body, self, missing1, missing2, missing3)
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing3 = self.sc_mut().make_missing(pos);
+                self.sc_mut()
+                    .make_namespace_body(missing1, missing2, missing3)
             }
         }
     }
@@ -388,13 +388,14 @@ where
         let token = parser.next_token();
         match token.kind() {
             TokenKind::Backslash => {
-                let missing = S!(make_missing, parser, parser.pos());
-                let backslash = S!(make_token, parser, token);
+                let pos = parser.pos();
+                let missing = parser.sc_mut().make_missing(pos);
+                let backslash = parser.sc_mut().make_token(token);
                 let (_name, is_backslash) = parser.scan_qualified_name_extended(missing, backslash);
                 is_backslash || parser.peek_token_kind() == TokenKind::LeftBrace
             }
             TokenKind::Name => {
-                let token = S!(make_token, parser, token);
+                let token = parser.sc_mut().make_token(token);
                 let token_ref = &token as *const _;
                 let (name, is_backslash) = parser.scan_remaining_qualified_name_extended(token);
                 // Here we rely on the implementation details of
@@ -418,9 +419,12 @@ where
         match token.kind() {
             TokenKind::Type | TokenKind::Namespace | TokenKind::Function | TokenKind::Const => {
                 self.continue_from(parser1);
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -436,16 +440,8 @@ where
                 x.parse_namespace_use_clause()
             });
         let semi = self.require_semicolon();
-        S!(
-            make_namespace_group_use_declaration,
-            self,
-            use_token,
-            use_kind,
-            prefix,
-            left,
-            clauses,
-            right,
-            semi,
+        self.sc_mut().make_namespace_group_use_declaration(
+            use_token, use_kind, prefix, left, clauses, right, semi,
         )
     }
 
@@ -462,22 +458,18 @@ where
         let name = self.require_qualified_name();
         let (as_token, alias) = if self.peek_token_kind() == TokenKind::As {
             let as_token = self.next_token();
-            let as_token = S!(make_token, self, as_token);
+            let as_token = self.sc_mut().make_token(as_token);
             let alias = self.require_xhp_class_name_or_name();
             (as_token, alias)
         } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         };
-        S!(
-            make_namespace_use_clause,
-            self,
-            use_kind,
-            name,
-            as_token,
-            alias
-        )
+        self.sc_mut()
+            .make_namespace_use_clause(use_kind, name, as_token, alias)
     }
 
     fn parse_namespace_use_declaration(&mut self) -> S::Output {
@@ -521,14 +513,8 @@ where
                 |x: &mut Self| x.parse_namespace_use_clause(),
             );
             let semi = self.require_semicolon();
-            S!(
-                make_namespace_use_declaration,
-                self,
-                use_token,
-                use_kind,
-                clauses,
-                semi
-            )
+            self.sc_mut()
+                .make_namespace_use_declaration(use_token, use_kind, clauses, semi)
         }
     }
 
@@ -545,14 +531,18 @@ where
         let name = match self.peek_token_kind() {
             TokenKind::Name => {
                 let token = self.next_token();
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 self.scan_remaining_qualified_name(token)
             }
-            TokenKind::LeftBrace => S!(make_missing, self, self.pos()),
+            TokenKind::LeftBrace => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
             TokenKind::Semicolon => {
                 // ERROR RECOVERY Plainly the name is missing.
                 self.with_error(Errors::error1004);
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
             _ =>
             // TODO: Death to PHPisms; keywords as namespace names
@@ -560,14 +550,11 @@ where
                 self.require_name_allow_non_reserved()
             }
         };
-        let header = S!(
-            make_namespace_declaration_header,
-            self,
-            namespace_token,
-            name
-        );
+        let header = self
+            .sc_mut()
+            .make_namespace_declaration_header(namespace_token, name);
         let body = self.parse_namespace_body();
-        S!(make_namespace_declaration, self, header, body)
+        self.sc_mut().make_namespace_declaration(header, body)
     }
 
     pub fn parse_classish_declaration(&mut self, attribute_spec: S::Output) -> S::Output {
@@ -597,9 +584,7 @@ where
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
         let classish_where_clause = self.parse_classish_where_clause_opt();
         let body = self.parse_classish_body();
-        S!(
-            make_classish_declaration,
-            self,
+        self.sc_mut().make_classish_declaration(
             attribute_spec,
             modifiers,
             xhp,
@@ -619,18 +604,21 @@ where
         if self.peek_token_kind() == TokenKind::Where {
             self.parse_where_clause()
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
     fn parse_classish_implements_opt(&mut self) -> (S::Output, S::Output) {
         if self.peek_token_kind() != TokenKind::Implements {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         } else {
             let implements_token = self.next_token();
-            let implements_token = S!(make_token, self, implements_token);
+            let implements_token = self.sc_mut().make_token(implements_token);
             let implements_list = self.parse_special_type_list();
             (implements_token, implements_list)
         }
@@ -652,10 +640,13 @@ where
                 | TokenKind::Public => {
                     // TODO(T25649779)
                     let token = self.next_token();
-                    let token = S!(make_token, self, token);
+                    let token = self.sc_mut().make_token(token);
                     acc.push(token);
                 }
-                _ => return S!(make_list, self, acc, self.pos()),
+                _ => {
+                    let pos = self.pos();
+                    return self.sc_mut().make_list(acc, pos);
+                }
             }
         }
     }
@@ -667,7 +658,7 @@ where
         match token_kind {
             TokenKind::Class | TokenKind::Trait | TokenKind::Interface => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             // Spellcheck case
             TokenKind::Name if Self::is_misspelled_from(&spellcheck_tokens, token_str) => {
@@ -675,11 +666,13 @@ where
                 let suggested_kind = Self::suggested_kind_from(&spellcheck_tokens, token_str)
                     .unwrap_or(TokenKind::Name);
                 self.skip_and_log_misspelled_token(suggested_kind);
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
             _ => {
                 self.with_error(Errors::error1035);
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
         }
     }
@@ -694,9 +687,10 @@ where
                 // not every type is legal here.
                 self.continue_from(parser1);
                 self.with_error(Errors::error1007);
-                let comma = S!(make_token, self, token);
-                let missing = S!(make_missing, self, self.pos());
-                let list_item = S!(make_list_item, self, missing, comma);
+                let comma = self.sc_mut().make_token(token);
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let list_item = self.sc_mut().make_list_item(missing, comma);
                 (list_item, false)
             }
             TokenKind::Backslash
@@ -707,7 +701,7 @@ where
                     .parse_type_specifier(false /* allow_var */, true /* allow_attr */);
                 let comma = self.optional_token(TokenKind::Comma);
                 let is_missing = comma.is_missing();
-                let list_item = S!(make_list_item, self, item, comma);
+                let list_item = self.sc_mut().make_list_item(item, comma);
                 (list_item, is_missing)
             }
             TokenKind::Enum | TokenKind::Shape if self.env.hhvm_compat_mode => {
@@ -715,16 +709,18 @@ where
                 let item = self.parse_simple_type_or_type_constant();
                 let comma = self.optional_token(TokenKind::Comma);
                 let is_missing = comma.is_missing();
-                let list_item = S!(make_list_item, self, item, comma);
+                let list_item = self.sc_mut().make_list_item(item, comma);
                 (list_item, is_missing)
             }
             _ => {
                 // ERROR RECOVERY: We are expecting a type; give an error as above.
                 // Don't eat the offending token.
                 self.with_error(Errors::error1007);
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                let list_item = S!(make_list_item, self, missing1, missing2);
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
+                let list_item = self.sc_mut().make_list_item(missing1, missing2);
                 (list_item, true)
             }
         }
@@ -757,18 +753,21 @@ where
                 break;
             }
         }
-        S!(make_list, self, items, self.pos())
+        let pos = self.pos();
+        self.sc_mut().make_list(items, pos)
     }
 
     fn parse_extends_opt(&mut self) -> (S::Output, S::Output) {
         let token_kind = self.peek_token_kind();
         if token_kind != TokenKind::Extends {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         } else {
             let token = self.next_token();
-            let extends_token = S!(make_token, self, token);
+            let extends_token = self.sc_mut().make_token(token);
             let extends_list = self.parse_special_type_list();
             (extends_token, extends_list)
         }
@@ -778,13 +777,8 @@ where
         let left_brace_token = self.require_left_brace();
         let classish_element_list = self.parse_classish_element_list_opt();
         let right_brace_token = self.require_right_brace();
-        S!(
-            make_classish_body,
-            self,
-            left_brace_token,
-            classish_element_list,
-            right_brace_token
-        )
+        self.sc_mut()
+            .make_classish_body(left_brace_token, classish_element_list, right_brace_token)
     }
 
     fn parse_classish_element_list_opt(&mut self) -> S::Output {
@@ -815,13 +809,8 @@ where
         // in allowing a comma before the close paren. Consider allowing it.
         let (left, exprs, right) =
             self.parse_parenthesized_comma_list(|x: &mut Self| x.parse_xhp_children_expression());
-        S!(
-            make_xhp_children_parenthesized_list,
-            self,
-            left,
-            exprs,
-            right
-        )
+        self.sc_mut()
+            .make_xhp_children_parenthesized_list(left, exprs, right)
     }
 
     fn parse_xhp_children_term(&mut self) -> S::Output {
@@ -842,7 +831,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_children_name_or_other();
         let kind = token.kind();
-        let name = S!(make_token, parser1, token);
+        let name = parser1.sc_mut().make_token(token);
         match kind {
             TokenKind::Name => {
                 self.continue_from(parser1);
@@ -869,8 +858,8 @@ where
         match token_kind {
             TokenKind::Star | TokenKind::Plus | TokenKind::Question => {
                 let token = self.next_token();
-                let token = S!(make_token, self, token);
-                S!(make_postfix_unary_expression, self, term, token)
+                let token = self.sc_mut().make_token(token);
+                self.sc_mut().make_postfix_unary_expression(term, token)
             }
             _ => term,
         }
@@ -881,9 +870,9 @@ where
         match token_kind {
             TokenKind::Bar => {
                 let token = self.next_token();
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 let right = self.parse_xhp_children_term();
-                let result = S!(make_binary_expression, self, left, token, right);
+                let result = self.sc_mut().make_binary_expression(left, token, right);
                 self.parse_xhp_children_bar(result)
             }
             _ => left,
@@ -915,18 +904,19 @@ where
         let expr = match token_kind {
             TokenKind::Empty => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             _ => self.parse_xhp_children_expression(),
         };
         let semi = self.require_semicolon();
-        S!(make_xhp_children_declaration, self, children, expr, semi)
+        self.sc_mut()
+            .make_xhp_children_declaration(children, expr, semi)
     }
 
     fn parse_xhp_category(&mut self) -> S::Output {
         let token = self.next_xhp_category_name();
         let token_kind = token.kind();
-        let category = S!(make_token, self, token);
+        let category = self.sc_mut().make_token(token);
         match token_kind {
             TokenKind::XHPCategoryName => category,
             _ => {
@@ -940,20 +930,14 @@ where
         let like_token = if self.peek_token_kind() == TokenKind::Tilde {
             self.assert_token(TokenKind::Tilde)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let enum_token = self.assert_token(TokenKind::Enum);
         let (left_brace, values, right_brace) =
             self.parse_braced_comma_list_opt_allow_trailing(|x: &mut Self| x.parse_expression());
-        S!(
-            make_xhp_enum_type,
-            self,
-            like_token,
-            enum_token,
-            left_brace,
-            values,
-            right_brace
-        )
+        self.sc_mut()
+            .make_xhp_enum_type(like_token, enum_token, left_brace, values, right_brace)
     }
 
     fn parse_xhp_type_specifier(&mut self) -> S::Output {
@@ -998,17 +982,19 @@ where
             let at = self.assert_token(TokenKind::At);
             let req_kind = self.next_token();
             let kind = req_kind.kind();
-            let req = S!(make_token, self, req_kind);
+            let req = self.sc_mut().make_token(req_kind);
             match kind {
-                TokenKind::Required => S!(make_xhp_required, self, at, req),
-                TokenKind::Lateinit => S!(make_xhp_lateinit, self, at, req),
+                TokenKind::Required => self.sc_mut().make_xhp_required(at, req),
+                TokenKind::Lateinit => self.sc_mut().make_xhp_lateinit(at, req),
                 _ => {
                     self.with_error(Errors::error1051);
-                    S!(make_missing, self, self.pos())
+                    let pos = self.pos();
+                    self.sc_mut().make_missing(pos)
                 }
             }
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
@@ -1018,7 +1004,7 @@ where
         let name = self.require_xhp_name();
         let init = self.parse_simple_initializer_opt();
         let req = self.parse_xhp_required_opt();
-        S!(make_xhp_class_attribute, self, ty, name, init, req)
+        self.sc_mut().make_xhp_class_attribute(ty, name, init, req)
     }
 
     fn parse_xhp_category_declaration(&mut self) -> S::Output {
@@ -1036,7 +1022,8 @@ where
             |x: &mut Self| x.parse_xhp_category(),
         );
         let semi = self.require_semicolon();
-        S!(make_xhp_category_declaration, self, category, items, semi)
+        self.sc_mut()
+            .make_xhp_category_declaration(category, items, semi)
     }
 
     fn parse_xhp_class_attribute(&mut self) -> S::Output {
@@ -1055,8 +1042,9 @@ where
             match parser1.peek_token_kind() {
                 TokenKind::Comma | TokenKind::Semicolon => {
                     self.continue_from(parser1);
-                    let type_specifier = S!(make_simple_type_specifier, self, class_name);
-                    S!(make_xhp_simple_class_attribute, self, type_specifier)
+                    let type_specifier = self.sc_mut().make_simple_type_specifier(class_name);
+                    self.sc_mut()
+                        .make_xhp_simple_class_attribute(type_specifier)
                 }
                 _ => self.parse_xhp_class_attribute_typed(),
             }
@@ -1085,13 +1073,8 @@ where
                 x.parse_xhp_class_attribute()
             });
         let semi = self.require_semicolon();
-        S!(
-            make_xhp_class_attribute_declaration,
-            self,
-            attr_token,
-            attrs,
-            semi
-        )
+        self.sc_mut()
+            .make_xhp_class_attribute_declaration(attr_token, attrs, semi)
     }
 
     fn parse_qualified_name_type(&mut self) -> S::Output {
@@ -1130,11 +1113,12 @@ where
         let req_kind = match token_kind {
             TokenKind::Implements | TokenKind::Extends | TokenKind::Class => {
                 let req_kind_token = self.next_token();
-                S!(make_token, self, req_kind_token)
+                self.sc_mut().make_token(req_kind_token)
             }
             _ => {
                 self.with_error(Errors::error1045);
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
         };
         let name = if self.is_next_xhp_class_name() {
@@ -1143,7 +1127,7 @@ where
             self.parse_qualified_name_type()
         };
         let semi = self.require_semicolon();
-        S!(make_require_clause, self, req, req_kind, name, semi)
+        self.sc_mut().make_require_clause(req, req_kind, name, semi)
     }
 
     fn parse_methodish_or_property(&mut self, attribute_spec: S::Output) -> S::Output {
@@ -1203,7 +1187,8 @@ where
         let trait_name_list =
             self.parse_trait_name_list(|x| x == TokenKind::Semicolon || x == TokenKind::LeftBrace);
         let semi = self.require_semicolon();
-        S!(make_trait_use, self, use_token, trait_name_list, semi)
+        self.sc_mut()
+            .make_trait_use(use_token, trait_name_list, semi)
     }
 
     fn parse_property_declaration(
@@ -1223,7 +1208,10 @@ where
         // The type specifier is optional in non-strict mode and required in
         // strict mode. We give an error in a later pass.
         let prop_type = match self.peek_token_kind() {
-            TokenKind::Variable => S!(make_missing, self, self.pos()),
+            TokenKind::Variable => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
             _ => self.parse_type_specifier(false /* allow_var */, false /* allow_attr */),
         };
         let decls =
@@ -1231,15 +1219,8 @@ where
                 x.parse_property_declarator()
             });
         let semi = self.require_semicolon();
-        S!(
-            make_property_declaration,
-            self,
-            attribute_spec,
-            modifiers,
-            prop_type,
-            decls,
-            semi
-        )
+        self.sc_mut()
+            .make_property_declaration(attribute_spec, modifiers, prop_type, decls, semi)
     }
 
     fn parse_property_declarator(&mut self) -> S::Output {
@@ -1250,7 +1231,7 @@ where
         //   =  expression
         let name = self.require_variable();
         let simple_init = self.parse_simple_initializer_opt();
-        S!(make_property_declarator, self, name, simple_init)
+        self.sc_mut().make_property_declarator(name, simple_init)
     }
 
     fn is_type_in_const(&self) -> bool {
@@ -1280,7 +1261,8 @@ where
         let type_spec = if self.is_type_in_const() {
             self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
 
         let const_list =
@@ -1288,16 +1270,8 @@ where
                 x.parse_constant_declarator()
             });
         let semi = self.require_semicolon();
-        S!(
-            make_const_declaration,
-            self,
-            attributes,
-            modifiers,
-            const_,
-            type_spec,
-            const_list,
-            semi
-        )
+        self.sc_mut()
+            .make_const_declaration(attributes, modifiers, const_, type_spec, const_list, semi)
     }
 
     fn parse_constant_declarator(&mut self) -> S::Output {
@@ -1314,7 +1288,8 @@ where
         self.sc_mut().begin_constant_declarator();
         let const_name = self.require_name_allow_all_keywords();
         let initializer_ = self.parse_simple_initializer_opt();
-        S!(make_constant_declarator, self, const_name, initializer_)
+        self.sc_mut()
+            .make_constant_declarator(const_name, initializer_)
     }
 
     // SPEC:
@@ -1355,9 +1330,7 @@ where
         let type_constraints = self.parse_type_constraints(true);
         let (equal_token, type_specifier) = self.parse_equal_type();
         let semicolon = self.require_semicolon();
-        S!(
-            make_type_const_declaration,
-            self,
+        self.sc_mut().make_type_const_declaration(
             attributes,
             modifiers,
             const_,
@@ -1387,8 +1360,10 @@ where
                 .parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
             (equal_token, type_spec)
         } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         }
     }
@@ -1416,9 +1391,7 @@ where
         });
         let (equal, ctx_list) = self.parse_equal_contexts();
         let semicolon = self.require_semicolon();
-        S!(
-            make_context_const_declaration,
-            self,
+        self.sc_mut().make_context_const_declaration(
             modifiers,
             const_,
             ctx_keyword,
@@ -1437,8 +1410,10 @@ where
             let ctx_list = self.with_type_parser(|p| p.parse_contexts());
             (equal, ctx_list)
         } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         }
     }
@@ -1467,9 +1442,7 @@ where
                     p.parse_list_until_none(|p| p.parse_type_constraint_opt(true))
                 });
                 let (equal_token, type_specifier) = self.parse_equal_type();
-                S!(
-                    make_type_in_refinement,
-                    self,
+                self.sc_mut().make_type_in_refinement(
                     keyword,
                     name,
                     type_params,
@@ -1485,9 +1458,7 @@ where
                     p.parse_list_until_none(|p| p.parse_context_constraint_opt())
                 });
                 let (equal_token, ctx_list) = self.parse_equal_contexts();
-                S!(
-                    make_ctx_in_refinement,
-                    self,
+                self.sc_mut().make_ctx_in_refinement(
                     keyword,
                     name,
                     type_params,
@@ -1496,7 +1467,10 @@ where
                     ctx_list,
                 )
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1529,9 +1503,11 @@ where
                 self.parse_double_angled_comma_list_allow_trailing(|x: &mut Self| {
                     x.parse_old_attribute()
                 });
-            S!(make_old_attribute_specification, self, left, items, right)
+            self.sc_mut()
+                .make_old_attribute_specification(left, items, right)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
@@ -1546,17 +1522,11 @@ where
                 |x: &mut Self| x.parse_old_attribute(),
             );
             let right = self.require_token(TokenKind::GreaterThanGreaterThan, Errors::error1029);
-            S!(
-                make_file_attribute_specification,
-                self,
-                left,
-                keyword,
-                colon,
-                items,
-                right
-            )
+            self.sc_mut()
+                .make_file_attribute_specification(left, keyword, colon, items, right)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
@@ -1564,9 +1534,10 @@ where
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Readonly {
             let token = self.next_token();
-            return S!(make_token, self, token);
+            return self.sc_mut().make_token(token);
         } else {
-            return S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            return self.sc_mut().make_missing(pos);
         }
     }
 
@@ -1574,7 +1545,7 @@ where
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Colon {
             let token = self.next_token();
-            let colon_token = S!(make_token, self, token);
+            let colon_token = self.sc_mut().make_token(token);
             let readonly_opt = self.parse_return_readonly_opt();
             // if no readonly keyword return type must exist
             // else return type is optional
@@ -1585,9 +1556,12 @@ where
             };
             (colon_token, readonly_opt, return_type)
         } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            let missing3 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing3 = self.sc_mut().make_missing(pos);
             (missing1, missing2, missing3)
         }
     }
@@ -1632,11 +1606,14 @@ where
                 if next_kind == TokenKind::Variable {
                     self.parse_parameter_declaration()
                 } else {
-                    let missing1 = S!(make_missing, parser1, self.pos());
-                    let missing2 = S!(make_missing, parser1, self.pos());
+                    let pos = self.pos();
+                    let missing1 = parser1.sc_mut().make_missing(pos);
+                    let pos = self.pos();
+                    let missing2 = parser1.sc_mut().make_missing(pos);
                     self.continue_from(parser1);
-                    let token = S!(make_token, self, token);
-                    S!(make_variadic_parameter, self, missing1, missing2, token)
+                    let token = self.sc_mut().make_token(token);
+                    self.sc_mut()
+                        .make_variadic_parameter(missing1, missing2, token)
                 }
             }
             _ => self.parse_parameter_declaration(),
@@ -1674,23 +1651,24 @@ where
         let readonly = self.parse_readonly_opt();
         let token = self.peek_token();
         let type_specifier = match token.kind() {
-            TokenKind::Variable | TokenKind::DotDotDot => S!(make_missing, self, self.pos()),
+            TokenKind::Variable | TokenKind::DotDotDot => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
             _ => {
                 self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ false)
             }
         };
         let name = self.parse_decorated_variable_opt();
         let default = self.parse_simple_initializer_opt();
-        S!(
-            make_parameter_declaration,
-            self,
+        self.sc_mut().make_parameter_declaration(
             attrs,
             visibility,
             callconv,
             readonly,
             type_specifier,
             name,
-            default
+            default,
         )
     }
 
@@ -1716,7 +1694,7 @@ where
             TokenKind::DotDotDot => self.parse_decorated_variable(),
             _ => self.require_variable(),
         };
-        S!(make_decorated_expression, self, decorator, variable)
+        self.sc_mut().make_decorated_expression(decorator, variable)
     }
 
     fn parse_visibility_modifier_opt(&mut self) -> S::Output {
@@ -1724,9 +1702,12 @@ where
         match token_kind {
             TokenKind::Public | TokenKind::Protected | TokenKind::Private | TokenKind::Internal => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1742,9 +1723,12 @@ where
         match token_kind {
             TokenKind::Inout => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1760,9 +1744,12 @@ where
         match token_kind {
             TokenKind::Readonly => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1778,11 +1765,14 @@ where
             TokenKind::Equal => {
                 let token = self.next_token();
                 // TODO: Detect if expression is not const
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 let default_value = self.parse_expression();
-                S!(make_simple_initializer, self, token, default_value)
+                self.sc_mut().make_simple_initializer(token, default_value)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1791,13 +1781,8 @@ where
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish =*/ false);
         let body = self.parse_compound_statement();
-        S!(
-            make_function_declaration,
-            self,
-            attribute_specification,
-            header,
-            body
-        )
+        self.sc_mut()
+            .make_function_declaration(attribute_specification, header, body)
     }
 
     fn parse_constraint_operator(&mut self) -> S::Output {
@@ -1811,13 +1796,14 @@ where
         match token_kind {
             TokenKind::Equal | TokenKind::As | TokenKind::Super => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             _ =>
             // ERROR RECOVERY: don't eat the offending token.
             // TODO: Give parse error
             {
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
         }
     }
@@ -1832,7 +1818,7 @@ where
         let op = self.parse_constraint_operator();
         let right =
             self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
-        S!(make_where_constraint, self, left, op, right)
+        self.sc_mut().make_where_constraint(left, op, right)
     }
 
     fn parse_where_constraint_list_item(&mut self) -> Option<S::Output> {
@@ -1841,7 +1827,7 @@ where
             _ => {
                 let where_constraint = self.parse_where_constraint();
                 let comma = self.optional_token(TokenKind::Comma);
-                let result = S!(make_list_item, self, where_constraint, comma);
+                let result = self.sc_mut().make_list_item(where_constraint, comma);
                 Some(result)
             }
         }
@@ -1859,12 +1845,13 @@ where
         let keyword = self.assert_token(TokenKind::Where);
         let constraints =
             self.parse_list_until_none(|x: &mut Self| x.parse_where_constraint_list_item());
-        S!(make_where_clause, self, keyword, constraints)
+        self.sc_mut().make_where_clause(keyword, constraints)
     }
 
     fn parse_where_clause_opt(&mut self) -> S::Output {
         if self.peek_token_kind() != TokenKind::Where {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         } else {
             self.parse_where_clause()
         }
@@ -1894,9 +1881,7 @@ where
         let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
         let (colon_token, readonly_opt, return_type) = self.parse_return_type_hint_opt();
         let where_clause = self.parse_where_clause_opt();
-        S!(
-            make_function_declaration_header,
-            self,
+        self.sc_mut().make_function_declaration_header(
             modifiers,
             function_token,
             label,
@@ -1916,23 +1901,24 @@ where
     fn parse_function_label_opt(&mut self, is_methodish: bool) -> S::Output {
         let report_error = |x: &mut Self, token: Token<S>| {
             x.with_error(Errors::error1044);
-            let token = S!(make_token, x, token);
-            S!(make_error, x, token)
+            let token = x.sc_mut().make_token(token);
+            x.sc_mut().make_error(token)
         };
         let token_kind = self.peek_token_kind();
         match token_kind {
             TokenKind::Name | TokenKind::Construct => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             TokenKind::LeftParen => {
                 // It turns out, it was just a verbose lambda; YOLO PHP
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
             TokenKind::Isset | TokenKind::Unset | TokenKind::Empty => {
                 // We need to parse those as names as they are defined in hhi
                 let token = self.next_token_as_name();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             _ => {
                 let token = if is_methodish {
@@ -1941,7 +1927,7 @@ where
                     self.next_token_non_reserved_as_name()
                 };
                 if token.kind() == TokenKind::Name {
-                    S!(make_token, self, token)
+                    self.sc_mut().make_token(token)
                 } else {
                     // ERROR RECOVERY: Eat the offending token.
                     report_error(self, token)
@@ -1960,7 +1946,10 @@ where
                 self.parse_new_attribute_specification_opt()
             }
             TokenKind::LessThanLessThan => self.parse_old_attribute_specification_opt(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -1969,7 +1958,7 @@ where
             |p: &mut Self| p.parse_new_attribute(),
             |p: &Self| p.peek_token_kind() == TokenKind::At,
         );
-        S!(make_attribute_specification, self, attributes)
+        self.sc_mut().make_attribute_specification(attributes)
     }
 
     fn parse_new_attribute(&mut self) -> S::Output {
@@ -1981,10 +1970,11 @@ where
             }),
             _ => {
                 self.with_error(Errors::expected_user_attribute);
-                S!(make_missing, self, self.pos())
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
         };
-        S!(make_attribute, self, at, constructor_call)
+        self.sc_mut().make_attribute(at, constructor_call)
     }
 
     // Parses modifiers and passes them into the parse methods for the
@@ -2042,29 +2032,18 @@ where
         match token_kind {
             TokenKind::LeftBrace => {
                 let body = self.parse_compound_statement();
-                let missing = S!(make_missing, self, self.pos());
-                S!(
-                    make_methodish_declaration,
-                    self,
-                    attribute_spec,
-                    header,
-                    body,
-                    missing
-                )
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                self.sc_mut()
+                    .make_methodish_declaration(attribute_spec, header, body, missing)
             }
             TokenKind::Semicolon => {
                 let pos = self.pos();
                 let token = self.next_token();
-                let missing = S!(make_missing, self, pos);
-                let semicolon = S!(make_token, self, token);
-                S!(
-                    make_methodish_declaration,
-                    self,
-                    attribute_spec,
-                    header,
-                    missing,
-                    semicolon
-                )
+                let missing = self.sc_mut().make_missing(pos);
+                let semicolon = self.sc_mut().make_token(token);
+                self.sc_mut()
+                    .make_methodish_declaration(attribute_spec, header, missing, semicolon)
             }
             TokenKind::Equal => {
                 let equal = self.assert_token(TokenKind::Equal);
@@ -2074,22 +2053,16 @@ where
                     &[TokenKind::Name, TokenKind::Construct],
                     Errors::error1004,
                 );
-                let name = S!(
-                    make_scope_resolution_expression,
-                    self,
-                    qualifier,
-                    cc_token,
-                    name
-                );
+                let name = self
+                    .sc_mut()
+                    .make_scope_resolution_expression(qualifier, cc_token, name);
                 let semi = self.require_semicolon();
-                S!(
-                    make_methodish_trait_resolution,
-                    self,
+                self.sc_mut().make_methodish_trait_resolution(
                     attribute_spec,
                     header,
                     equal,
                     name,
-                    semi
+                    semi,
                 )
             }
             _ => {
@@ -2099,17 +2072,11 @@ where
                 let pos = self.pos();
                 let token = self.next_token();
                 self.with_error(Errors::error1041);
-                let token = S!(make_token, self, token);
-                let error = S!(make_error, self, token);
-                let missing = S!(make_missing, self, pos);
-                S!(
-                    make_methodish_declaration,
-                    self,
-                    attribute_spec,
-                    header,
-                    error,
-                    missing
-                )
+                let token = self.sc_mut().make_token(token);
+                let error = self.sc_mut().make_error(token);
+                let missing = self.sc_mut().make_missing(pos);
+                self.sc_mut()
+                    .make_methodish_declaration(attribute_spec, header, error, missing)
             }
         }
     }
@@ -2128,13 +2095,14 @@ where
                 | TokenKind::Final
                 | TokenKind::Readonly => {
                     let token = self.next_token();
-                    let item = S!(make_token, self, token);
+                    let item = self.sc_mut().make_token(token);
                     items.push(item)
                 }
                 _ => break,
             }
         }
-        S!(make_list, self, items, self.pos())
+        let pos = self.pos();
+        self.sc_mut().make_list(items, pos)
     }
 
     fn parse_toplevel_with_attributes_or_visibility(&mut self) -> S::Output {
@@ -2142,7 +2110,10 @@ where
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
             TokenKind::At | TokenKind::LessThanLessThan => self.parse_attribute_specification_opt(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         };
 
         // Check for internal keyword; if internal, we want to track that info and look at the token after to determine
@@ -2162,7 +2133,8 @@ where
                 let modifiers = if has_visibility {
                     self.parse_modifiers()
                 } else {
-                    S!(make_missing, self, self.pos())
+                    let pos = self.pos();
+                    self.sc_mut().make_missing(pos)
                 };
                 self.parse_enum_or_enum_class_declaration(attribute_specification, modifiers)
             }
@@ -2208,8 +2180,8 @@ where
                 // from the tree.
                 let token = self.next_token();
                 self.with_error(Errors::error1057(self.token_text(&token)));
-                let token = S!(make_token, self, token);
-                S!(make_error, self, token)
+                let token = self.sc_mut().make_token(token);
+                self.sc_mut().make_error(token)
             }
         }
     }
@@ -2292,17 +2264,24 @@ where
                 // with a visibility modifier, but PHP does not have this requirement.
                 // We accept the lack of a modifier here, and produce an error in
                 // a later pass.
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
                 self.parse_methodish(missing1, missing2)
             }
-            kind if self.expects(kind) => S!(make_missing, self, self.pos()),
+            kind if self.expects(kind) => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
             _ => {
                 // If this is a property declaration which is missing its visibility
                 // modifier, accept it here, but emit an error in a later pass.
                 let mut parser1 = self.clone();
-                let missing1 = S!(make_missing, parser1, self.pos());
-                let missing2 = S!(make_missing, parser1, self.pos());
+                let pos = self.pos();
+                let missing1 = parser1.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = parser1.sc_mut().make_missing(pos);
                 let property = parser1.parse_property_declaration(missing1, missing2);
                 if self.errors.len() == parser1.errors.len() {
                     self.continue_from(parser1);
@@ -2311,7 +2290,7 @@ where
                     // TODO ERROR RECOVERY could be improved here.
                     let token = self.fetch_token();
                     self.with_error(Errors::error1033);
-                    S!(make_error, self, token)
+                    self.sc_mut().make_error(token)
                     // Parser does not detect the error where non-static instance variables
                     // or methods are within abstract final classes in its first pass, but
                     // instead detects it in its second pass.
@@ -2322,8 +2301,10 @@ where
 
     fn parse_type_constraint_opt(&mut self, allow_super: bool) -> S::Output {
         self.with_type_parser(|p: &mut TypeParser<'a, S>| {
-            p.parse_type_constraint_opt(allow_super)
-                .unwrap_or_else(|| S!(make_missing, p, p.pos()))
+            p.parse_type_constraint_opt(allow_super).unwrap_or_else(|| {
+                let pos = p.pos();
+                p.sc_mut().make_missing(pos)
+            })
         })
     }
 
@@ -2345,7 +2326,8 @@ where
         let module_kw_opt = if module_newtype {
             self.assert_token(TokenKind::Module)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let token = self.fetch_token();
         // Not `require_name` but `require_name_allow_non_reserved`, because the parser
@@ -2359,9 +2341,7 @@ where
         let equal = self.require_equal();
         let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let semi = self.require_semicolon();
-        S!(
-            make_alias_declaration,
-            self,
+        self.sc_mut().make_alias_declaration(
             attr,
             modifiers,
             module_kw_opt,
@@ -2371,7 +2351,7 @@ where
             constr,
             equal,
             ty,
-            semi
+            semi,
         )
     }
 
@@ -2381,7 +2361,8 @@ where
         //   newctx name type-constraint-opt = type-specifier  ;
         let token = self.fetch_token();
         let name = self.require_name();
-        let generic = S!(make_missing, self, self.pos());
+        let pos = self.pos();
+        let generic = self.sc_mut().make_missing(pos);
         let constr = self
             .with_type_parser(|p| p.parse_list_until_none(|p| p.parse_context_constraint_opt()));
         let (equal, ty) = if self.peek_token_kind() == TokenKind::Equal {
@@ -2389,23 +2370,15 @@ where
             let ty = self.with_type_parser(|p| p.parse_contexts());
             (equal, ty)
         } else {
-            let equal = S!(make_missing, self, self.pos());
-            let ty = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let equal = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let ty = self.sc_mut().make_missing(pos);
             (equal, ty)
         };
         let semi = self.require_semicolon();
-        S!(
-            make_context_alias_declaration,
-            self,
-            attr,
-            token,
-            name,
-            generic,
-            constr,
-            equal,
-            ty,
-            semi
-        )
+        self.sc_mut()
+            .make_context_alias_declaration(attr, token, name, generic, constr, equal, ty, semi)
     }
 
     fn parse_enumerator(&mut self) -> S::Output {
@@ -2425,7 +2398,7 @@ where
         let equal = self.require_equal();
         let value = self.parse_expression();
         let semicolon = self.require_semicolon();
-        S!(make_enumerator, self, name, equal, value, semicolon)
+        self.sc_mut().make_enumerator(name, equal, value, semicolon)
     }
 
     fn parse_enum_class_enumerator(&mut self) -> S::Output {
@@ -2442,15 +2415,8 @@ where
         let name = self.require_name_allow_all_keywords();
         let initializer_ = self.parse_simple_initializer_opt();
         let semicolon = self.require_semicolon();
-        S!(
-            make_enum_class_enumerator,
-            self,
-            modifiers,
-            ty,
-            name,
-            initializer_,
-            semicolon
-        )
+        self.sc_mut()
+            .make_enum_class_enumerator(modifiers, ty, name, initializer_, semicolon)
     }
 
     fn parse_inclusion_directive(&mut self) -> S::Output {
@@ -2479,7 +2445,7 @@ where
         //   require_once include-filename
         let expr = self.parse_expression();
         let semi = self.require_semicolon();
-        S!(make_inclusion_directive, self, expr, semi)
+        self.sc_mut().make_inclusion_directive(expr, semi)
     }
 
     fn parse_module_declaration(&mut self, attrs: S::Output) -> S::Output {
@@ -2491,29 +2457,16 @@ where
         let name = self.require_name();
         let lb = self.require_left_brace();
         let rb = self.require_right_brace();
-        S!(
-            make_module_declaration,
-            self,
-            attrs,
-            new_kw,
-            module_kw,
-            name,
-            lb,
-            rb
-        )
+        self.sc_mut()
+            .make_module_declaration(attrs, new_kw, module_kw, name, lb, rb)
     }
 
     fn parse_module_membership_declaration(&mut self) -> S::Output {
         let module_kw = self.assert_token(TokenKind::Module);
         let name = self.require_name();
         let semicolon = self.require_semicolon();
-        S!(
-            make_module_membership_declaration,
-            self,
-            module_kw,
-            name,
-            semicolon
-        )
+        self.sc_mut()
+            .make_module_membership_declaration(module_kw, name, semicolon)
     }
 
     fn parse_declaration(&mut self) -> S::Output {
@@ -2531,16 +2484,20 @@ where
                     kind == TokenKind::Name || kind == TokenKind::Classname
                 } =>
             {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_type_alias_declaration(missing, false)
             }
             TokenKind::Newctx => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_ctx_alias_declaration(missing)
             }
             TokenKind::Enum => {
-                let missing_attr = S!(make_missing, self, self.pos());
-                let missing_mod = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing_attr = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing_mod = self.sc_mut().make_missing(pos);
                 self.parse_enum_or_enum_class_declaration(missing_attr, missing_mod)
             }
             // The keyword namespace before a name should be parsed as
@@ -2554,11 +2511,13 @@ where
             TokenKind::Namespace => self.parse_namespace_declaration(),
             TokenKind::Use => self.parse_namespace_use_declaration(),
             TokenKind::Trait | TokenKind::Interface | TokenKind::Class => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_classish_declaration(missing)
             }
             TokenKind::Abstract | TokenKind::Final | TokenKind::XHP => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_classish_declaration(missing)
             }
             TokenKind::Async | TokenKind::Function => {
@@ -2581,20 +2540,24 @@ where
             },
             // TODO figure out what global const differs from class const
             TokenKind::Const => {
-                let missing1 = S!(make_missing, parser1, self.pos());
-                let missing2 = S!(make_missing, parser1, self.pos());
+                let pos = self.pos();
+                let missing1 = parser1.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = parser1.sc_mut().make_missing(pos);
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 self.parse_const_declaration(missing1, missing2, token)
             }
             TokenKind::Module if parser1.peek_token_kind() == TokenKind::Newtype => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_type_alias_declaration(missing, true)
             }
             TokenKind::Module => self.parse_module_membership_declaration(),
             // If we see new as a token, it's a module definition
             TokenKind::New if parser1.peek_token_kind() == TokenKind::Module => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
                 self.parse_module_declaration(missing)
             }
             // TODO: What if it's not a legal statement? Do we still make progress here?
@@ -2616,16 +2579,17 @@ where
             match token_kind {
                 TokenKind::EndOfFile => {
                     let token = self.next_token();
-                    let token = S!(make_token, self, token);
-                    let end_of_file = S!(make_end_of_file, self, token);
+                    let token = self.sc_mut().make_token(token);
+                    let end_of_file = self.sc_mut().make_end_of_file(token);
                     declarations.push(end_of_file);
                     break;
                 }
                 _ => declarations.push(self.parse_declaration()),
             }
         }
-        let declarations = S!(make_list, self, declarations, self.pos());
-        let result = S!(make_script, self, declarations);
+        let pos = self.pos();
+        let declarations = self.sc_mut().make_list(declarations, pos);
+        let result = self.sc_mut().make_script(declarations);
         assert_eq!(self.peek_token_kind(), TokenKind::EndOfFile);
         result
     }

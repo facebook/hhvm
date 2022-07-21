@@ -110,5 +110,5 @@ jobs:
     - name: Upload the deb package
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
-        mkdir /mnt/test-universal-packages
+        sudo mkdir /mnt/test-universal-packages
         s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages

@@ -15,5 +15,5 @@ function h(): void {
     default:
       $x = f<>;
   }
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }

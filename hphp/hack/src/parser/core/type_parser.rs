@@ -168,8 +168,8 @@ where
         let type_spec = match token.kind() {
             | TokenKind::Var if allow_var => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                S!(make_simple_type_specifier, self, token)
+                let token = self.sc_mut().make_token(token);
+                self.sc_mut().make_simple_type_specifier(token)
             }
             | TokenKind::This => self.parse_simple_type_or_type_constant(),
             | TokenKind::SelfToken => self.parse_type_constant(),
@@ -198,8 +198,8 @@ where
             }
             | TokenKind::Backslash => {
                 self.continue_from(parser1);
-                let missing = S!(make_missing, self, self.pos());
-                let token = S!(make_token, self, token);
+                let pos = self.pos(); let missing = self.sc_mut().make_missing(pos);
+                let token = self.sc_mut().make_token(token);
                 let name = self.scan_qualified_name(missing, token);
                 self.parse_remaining_simple_type_or_type_constant_or_generic(name)
             }
@@ -221,7 +221,7 @@ where
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
-                S!(make_missing, self, self.pos())
+                let pos = self.pos(); self.sc_mut().make_missing(pos)
             }
         };
         match self.peek_token_kind() {
@@ -238,8 +238,8 @@ where
         if result.is_missing() {
             self.with_error_on_whole_token(Errors::error1007);
             let token = self.next_xhp_class_name_or_other_token();
-            let token = S!(make_token, self, token);
-            S!(make_error, self, token)
+            let token = self.sc_mut().make_token(token);
+            self.sc_mut().make_error(token)
         } else {
             result
         }
@@ -274,19 +274,18 @@ where
                         if tk != TokenKind::RightBrace {
                             x.with_error(Errors::expected_refinement_member);
                         }
-                        S!(make_missing, x, x.pos())
+                        let pos = x.pos();
+                        x.sc_mut().make_missing(pos)
                     }
                 },
             );
         let right_brace = self.require_right_brace();
-        let refinement = S!(
-            make_type_refinement,
-            self,
+        let refinement = self.sc_mut().make_type_refinement(
             type_spec,
             keyword,
             left_brace,
             members,
-            right_brace
+            right_brace,
         );
         if self.peek_token_kind() == TokenKind::With {
             self.with_error(Errors::cannot_chain_type_refinements);
@@ -307,8 +306,8 @@ where
         let separator = self.fetch_token();
         let right = self.next_token_as_name();
         if right.kind() == TokenKind::Name {
-            let right = S!(make_token, self, right);
-            let syntax = S!(make_type_constant, self, left, separator, right);
+            let right = self.sc_mut().make_token(right);
+            let syntax = self.sc_mut().make_type_constant(left, separator, right);
             let token = self.peek_token();
             if token.kind() == TokenKind::ColonColon {
                 self.parse_remaining_type_constant(syntax)
@@ -320,14 +319,15 @@ where
             // that is not a name belongs to the next thing to be
             // parsed; treat the name as missing.
             self.with_error(Errors::error1004);
-            let missing = S!(make_missing, self, self.pos());
-            S!(make_type_constant, self, left, separator, missing)
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+            self.sc_mut().make_type_constant(left, separator, missing)
         }
     }
 
     fn parse_remaining_generic(&mut self, name: S::Output) -> S::Output {
         let (arguments, _) = self.parse_generic_type_argument_list();
-        S!(make_generic_type_specifier, self, name, arguments)
+        self.sc_mut().make_generic_type_specifier(name, arguments)
     }
 
     pub fn parse_simple_type_or_type_constant(&mut self) -> S::Output {
@@ -347,7 +347,7 @@ where
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
             _ => {
                 self.with_error(Errors::error1047);
-                S!(make_error, self, name)
+                self.sc_mut().make_error(name)
             }
         }
     }
@@ -356,7 +356,7 @@ where
         let token = self.peek_token();
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
-            _ => S!(make_simple_type_specifier, self, name),
+            _ => self.sc_mut().make_simple_type_specifier(name),
         }
     }
 
@@ -382,7 +382,7 @@ where
     fn parse_remaining_simple_type_or_generic(&mut self, name: S::Output) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => self.parse_remaining_generic(name),
-            _ => S!(make_simple_type_specifier, self, name),
+            _ => self.sc_mut().make_simple_type_specifier(name),
         }
     }
 
@@ -405,10 +405,11 @@ where
         match token.kind() {
             TokenKind::As | TokenKind::Super => {
                 self.continue_from(parser1);
-                let constraint_token = S!(make_token, self, token);
+                let constraint_token = self.sc_mut().make_token(token);
                 let matched_type = self.parse_type_specifier(false, true);
-                let type_constraint =
-                    S!(make_type_constraint, self, constraint_token, matched_type);
+                let type_constraint = self
+                    .sc_mut()
+                    .make_type_constraint(constraint_token, matched_type);
                 Some(type_constraint)
             }
             _ => None,
@@ -418,7 +419,10 @@ where
     fn parse_variance_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Plus | TokenKind::Minus => self.fetch_token(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -445,22 +449,23 @@ where
         let param_params = self.parse_generic_type_parameter_list_opt();
         let constraints =
             self.parse_list_until_none(|x: &mut Self| x.parse_generic_type_constraint_opt());
-        S!(
-            make_type_parameter,
-            self,
+        self.sc_mut().make_type_parameter(
             attributes,
             reified,
             variance,
             type_name,
             param_params,
-            constraints
+            constraints,
         )
     }
 
     pub fn parse_generic_type_parameter_list_opt(&mut self) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => self.parse_generic_type_parameter_list(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -482,7 +487,7 @@ where
         );
 
         let right = self.require_right_angle();
-        S!(make_type_parameters, self, left, params, right)
+        self.sc_mut().make_type_parameters(left, params, right)
     }
 
     fn parse_type_list(&mut self, close_kind: TokenKind) -> S::Output {
@@ -512,9 +517,12 @@ where
         match self.peek_token_kind() {
             TokenKind::Inout => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -530,9 +538,12 @@ where
         match self.peek_token_kind() {
             TokenKind::Readonly => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -572,11 +583,14 @@ where
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::DotDotDot => {
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
                 let token = self.next_token();
-                let token = S!(make_token, self, token);
-                S!(make_variadic_parameter, self, missing1, missing2, token)
+                let token = self.sc_mut().make_token(token);
+                self.sc_mut()
+                    .make_variadic_parameter(missing1, missing2, token)
             }
             _ => {
                 let callconv = self.parse_call_convention_opt();
@@ -585,16 +599,12 @@ where
                 match self.peek_token_kind() {
                     TokenKind::DotDotDot => {
                         let token = self.next_token();
-                        let token = S!(make_token, self, token);
-                        S!(make_variadic_parameter, self, callconv, ts, token)
+                        let token = self.sc_mut().make_token(token);
+                        self.sc_mut().make_variadic_parameter(callconv, ts, token)
                     }
-                    _ => S!(
-                        make_closure_parameter_type_specifier,
-                        self,
-                        callconv,
-                        readonly,
-                        ts
-                    ),
+                    _ => self
+                        .sc_mut()
+                        .make_closure_parameter_type_specifier(callconv, readonly, ts),
                 }
             }
         }
@@ -603,9 +613,10 @@ where
     fn parse_optionally_reified_type(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Reify {
             let token = self.next_token();
-            let reified_kw = S!(make_token, self, token);
+            let reified_kw = self.sc_mut().make_token(token);
             let type_argument = self.parse_type_specifier(false, true);
-            S!(make_reified_type_argument, self, reified_kw, type_argument)
+            self.sc_mut()
+                .make_reified_type_argument(reified_kw, type_argument)
         } else {
             self.parse_type_specifier(false, true)
         }
@@ -639,7 +650,9 @@ where
         match self.peek_token_kind() {
             TokenKind::GreaterThan => {
                 let close_angle = self.assert_token(TokenKind::GreaterThan);
-                let result = S!(make_type_arguments, self, open_angle, args, close_angle);
+                let result = self
+                    .sc_mut()
+                    .make_type_arguments(open_angle, args, close_angle);
                 (result, no_arg_is_missing)
             }
             _ => {
@@ -647,8 +660,9 @@ where
                 // missing > or ,.  TokenKind::Assume that it is the > that is missing and
                 // try to parse whatever is coming after the type.
                 self.with_error(Errors::error1014);
-                let missing = S!(make_missing, self, self.pos());
-                let result = S!(make_type_arguments, self, open_angle, args, missing);
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let result = self.sc_mut().make_type_arguments(open_angle, args, missing);
                 (result, no_arg_is_missing)
             }
         }
@@ -658,7 +672,7 @@ where
         // darray<type, type>
         let array_token = self.assert_token(TokenKind::Darray);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, array_token)
+            self.sc_mut().make_simple_type_specifier(array_token)
         } else {
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let key_type = self.parse_type_specifier(false, true);
@@ -666,9 +680,7 @@ where
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.require_right_angle();
-            S!(
-                make_darray_type_specifier,
-                self,
+            self.sc_mut().make_darray_type_specifier(
                 array_token,
                 left_angle,
                 key_type,
@@ -684,15 +696,13 @@ where
         // varray<type>
         let array_token = self.assert_token(TokenKind::Varray);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, array_token)
+            self.sc_mut().make_simple_type_specifier(array_token)
         } else {
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.require_right_angle();
-            S!(
-                make_varray_type_specifier,
-                self,
+            self.sc_mut().make_varray_type_specifier(
                 array_token,
                 left_angle,
                 value_type,
@@ -711,21 +721,14 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Vec);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             let left = self.assert_left_angle_in_type_list_with_possible_attribute();
             let t = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
-            S!(
-                make_vector_type_specifier,
-                self,
-                keyword,
-                left,
-                t,
-                optional_comma,
-                right
-            )
+            self.sc_mut()
+                .make_vector_type_specifier(keyword, left, t, optional_comma, right)
         }
     }
 
@@ -738,21 +741,14 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Keyset);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             let left = self.assert_left_angle_in_type_list_with_possible_attribute();
             let t = self.parse_type_specifier(false, true);
             let comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
-            S!(
-                make_keyset_type_specifier,
-                self,
-                keyword,
-                left,
-                t,
-                comma,
-                right
-            )
+            self.sc_mut()
+                .make_keyset_type_specifier(keyword, left, t, comma, right)
         }
     }
 
@@ -770,29 +766,18 @@ where
         let right_angle = parser1.next_token();
         if right_angle.kind() == TokenKind::GreaterThan {
             self.continue_from(parser1);
-            let token = S!(make_token, self, right_angle);
-            S!(
-                make_tuple_type_explicit_specifier,
-                self,
-                keyword,
-                left_angle,
-                args,
-                token
-            )
+            let token = self.sc_mut().make_token(right_angle);
+            self.sc_mut()
+                .make_tuple_type_explicit_specifier(keyword, left_angle, args, token)
         } else {
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing > or ,.  TokenKind::Assume that it is the > that is missing and
             // try to parse whatever is coming after the type.
             self.with_error(Errors::error1022);
-            let right_angle = S!(make_missing, self, self.pos());
-            S!(
-                make_tuple_type_explicit_specifier,
-                self,
-                keyword,
-                left_angle,
-                args,
-                right_angle
-            )
+            let pos = self.pos();
+            let right_angle = self.sc_mut().make_missing(pos);
+            self.sc_mut()
+                .make_tuple_type_explicit_specifier(keyword, left_angle, args, right_angle)
         }
     }
 
@@ -811,7 +796,7 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Dict);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             // TODO: This allows "noreturn" as a type argument. Should we
             // disallow that at parse time?
@@ -822,14 +807,8 @@ where
                 |x: &mut Self| x.parse_return_type(),
             );
             let right = self.require_right_angle();
-            S!(
-                make_dictionary_type_specifier,
-                self,
-                keyword,
-                left,
-                arguments,
-                right
-            )
+            self.sc_mut()
+                .make_dictionary_type_specifier(keyword, left, arguments, right)
         }
     }
 
@@ -854,21 +833,23 @@ where
                                 x.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
                                     p.parse_simple_variable()
                                 });
-                            S!(make_function_ctx_type_specifier, x, ctx, var)
+                            x.sc_mut().make_function_ctx_type_specifier(ctx, var)
                         }
                         TokenKind::Variable => {
                             /* Keeping this isolated from the type constant parsing code for now */
                             let var = x.assert_token(TokenKind::Variable);
                             let colcol = x.require_coloncolon();
                             let name = x.require_name();
-                            S!(make_type_constant, x, var, colcol, name)
+                            x.sc_mut().make_type_constant(var, colcol, name)
                         }
                         _ => x.parse_type_specifier(false, false),
                     }
                 });
-            S!(make_contexts, self, left_bracket, types, right_bracket)
+            self.sc_mut()
+                .make_contexts(left_bracket, types, right_bracket)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
@@ -895,9 +876,10 @@ where
         let fnc = self.fetch_token();
         let ilp = self.require_left_paren();
         let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
-            let missing = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
             let token = self.next_token();
-            let token = S!(make_token, self, token);
+            let token = self.sc_mut().make_token(token);
             (missing, token)
         } else {
             // TODO add second pass checking to ensure ellipsis is the last arg
@@ -910,21 +892,8 @@ where
         let readonly = self.parse_readonly_opt();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
-        S!(
-            make_closure_type_specifier,
-            self,
-            olp,
-            ro,
-            fnc,
-            ilp,
-            pts,
-            irp,
-            ctxs,
-            col,
-            readonly,
-            ret,
-            orp
-        )
+        self.sc_mut()
+            .make_closure_type_specifier(olp, ro, fnc, ilp, pts, irp, ctxs, col, readonly, ret, orp)
     }
 
     fn parse_tuple_or_union_or_intersection_type_specifier(&mut self) -> S::Output {
@@ -961,25 +930,27 @@ where
 
         if self.peek_token_kind() == TokenKind::RightParen {
             let right_paren = self.next_token();
-            let token = S!(make_token, self, right_paren);
+            let token = self.sc_mut().make_token(right_paren);
             match separator_kind {
-                TokenKind::Bar => S!(make_union_type_specifier, self, left_paren, args, token),
-                TokenKind::Ampersand => S!(
-                    make_intersection_type_specifier,
-                    self,
-                    left_paren,
-                    args,
-                    token
-                ),
-                _ => S!(make_tuple_type_specifier, self, left_paren, args, token),
+                TokenKind::Bar => self
+                    .sc_mut()
+                    .make_union_type_specifier(left_paren, args, token),
+                TokenKind::Ampersand => self
+                    .sc_mut()
+                    .make_intersection_type_specifier(left_paren, args, token),
+                _ => self
+                    .sc_mut()
+                    .make_tuple_type_specifier(left_paren, args, token),
             }
         } else {
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing ) or ,.  Assume that it is the ) that is missing and
             // try to parse whatever is coming after the type.
             self.with_error(Errors::error1022);
-            let missing = S!(make_missing, self, self.pos());
-            S!(make_tuple_type_specifier, self, left_paren, args, missing)
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+            self.sc_mut()
+                .make_tuple_type_specifier(left_paren, args, missing)
         }
     }
 
@@ -995,7 +966,8 @@ where
         // underlying type.
         let question = self.assert_token(TokenKind::Question);
         let nullable_type = self.parse_type_specifier(false, true);
-        S!(make_nullable_type_specifier, self, question, nullable_type)
+        self.sc_mut()
+            .make_nullable_type_specifier(question, nullable_type)
     }
 
     fn parse_like_type_specifier(&mut self) -> S::Output {
@@ -1007,7 +979,7 @@ where
         // underlying type.
         let tilde = self.assert_token(TokenKind::Tilde);
         let like_type = self.parse_type_specifier(false, true);
-        S!(make_like_type_specifier, self, tilde, like_type)
+        self.sc_mut().make_like_type_specifier(tilde, like_type)
     }
 
     fn parse_soft_type_specifier(&mut self) -> S::Output {
@@ -1022,7 +994,7 @@ where
         // Note that it is legal for trivia to come between the @ and the type.
         let soft_at = self.assert_token(TokenKind::At);
         let soft_type = self.parse_type_specifier(false, true);
-        S!(make_soft_type_specifier, self, soft_at, soft_type)
+        self.sc_mut().make_soft_type_specifier(soft_at, soft_type)
     }
 
     fn parse_attributized_specifier(&mut self) -> S::Output {
@@ -1033,12 +1005,8 @@ where
             x.parse_attribute_specification_opt()
         });
         let attributized_type = self.parse_type_specifier(false, true);
-        S!(
-            make_attributized_specifier,
-            self,
-            attribute_spec_opt,
-            attributized_type
-        )
+        self.sc_mut()
+            .make_attributized_specifier(attribute_spec_opt, attributized_type)
     }
 
     fn parse_classname_type_specifier(&mut self) -> S::Output {
@@ -1062,9 +1030,7 @@ where
                 let classname_type = self.parse_type_specifier(false, true);
                 let optional_comma = self.optional_token(TokenKind::Comma);
                 let right_angle = self.require_right_angle();
-                S!(
-                    make_classname_type_specifier,
-                    self,
+                self.sc_mut().make_classname_type_specifier(
                     classname,
                     left_angle,
                     classname_type,
@@ -1073,18 +1039,16 @@ where
                 )
             }
             _ => {
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                let missing3 = S!(make_missing, self, self.pos());
-                let missing4 = S!(make_missing, self, self.pos());
-                S!(
-                    make_classname_type_specifier,
-                    self,
-                    classname,
-                    missing1,
-                    missing2,
-                    missing3,
-                    missing4
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing3 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing4 = self.sc_mut().make_missing(pos);
+                self.sc_mut().make_classname_type_specifier(
+                    classname, missing1, missing2, missing3, missing4,
                 )
             }
         }
@@ -1108,19 +1072,14 @@ where
         let question = if self.peek_token_kind() == TokenKind::Question {
             self.assert_token(TokenKind::Question)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let name = self.parse_expression();
         let arrow = self.require_arrow();
         let field_type = self.parse_type_specifier(false, true);
-        S!(
-            make_field_specifier,
-            self,
-            question,
-            name,
-            arrow,
-            field_type
-        )
+        self.sc_mut()
+            .make_field_specifier(question, name, arrow, field_type)
     }
 
     fn parse_shape_specifier(&mut self) -> S::Output {
@@ -1147,18 +1106,12 @@ where
         let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
             self.assert_token(TokenKind::DotDotDot)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let rparen = self.require_right_paren();
-        S!(
-            make_shape_type_specifier,
-            self,
-            shape,
-            lparen,
-            fields,
-            ellipsis,
-            rparen
-        )
+        self.sc_mut()
+            .make_shape_type_specifier(shape, lparen, fields, ellipsis, rparen)
     }
 
     pub(crate) fn parse_type_constraint_opt(&mut self, allow_super: bool) -> Option<S::Output> {
@@ -1169,9 +1122,9 @@ where
         // TODO: What about = ?
         let make = |x: &mut Self| {
             let constraint = x.next_token();
-            let constraint = S!(make_token, x, constraint);
+            let constraint = x.sc_mut().make_token(constraint);
             let constraint_type = x.parse_type_specifier(false, true);
-            Some(S!(make_type_constraint, x, constraint, constraint_type))
+            Some(x.sc_mut().make_type_constraint(constraint, constraint_type))
         };
         let token = self.peek_token_kind();
         match token {
@@ -1189,14 +1142,12 @@ where
         match self.peek_token_kind() {
             TokenKind::As | TokenKind::Super => {
                 let constraint_token = self.next_token();
-                let constraint_token = S!(make_token, self, constraint_token);
+                let constraint_token = self.sc_mut().make_token(constraint_token);
                 let constraint_ctx = self.parse_contexts();
-                Some(S!(
-                    make_context_constraint,
-                    self,
-                    constraint_token,
-                    constraint_ctx
-                ))
+                Some(
+                    self.sc_mut()
+                        .make_context_constraint(constraint_token, constraint_ctx),
+                )
             }
             _ => None,
         }
@@ -1205,7 +1156,7 @@ where
     pub fn parse_return_type(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Noreturn {
             let token = self.next_token();
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
             self.parse_type_specifier(false, true)
         }
@@ -1215,7 +1166,7 @@ where
     pub fn parse_return_type_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Noreturn {
             let token = self.next_token();
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
             self.parse_type_specifier_opt(false, true)
         }

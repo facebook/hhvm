@@ -7,7 +7,7 @@ function f(): void {}
 function g(): void {}
 
 function h(): void {
-  $x = Null;
+  $x = null;
   $x ??= f<>;
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }

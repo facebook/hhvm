@@ -8,6 +8,6 @@ function g(): void {}
 
 function h(): void {
   $x = g<>;
-  g<> upcast dynamic;
-  $x upcast dynamic;
+  (g<> upcast dynamic)();
+  ($x upcast dynamic)();
 }

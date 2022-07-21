@@ -21,7 +21,24 @@ fn setup(files: std::collections::BTreeMap<&str, &str>) -> (hh24_test::TestRepo,
     let db_path = repo.path().join("names.sql");
     hh24_test::create_naming_table(&db_path, &files).unwrap();
     let naming_table = NamingTable::new(Some(db_path)).unwrap();
+    shm_init();
     (repo, naming_table)
+}
+
+fn shm_init() {
+    let mem_heap_size = 2 * 1024 * 1024 * 1024;
+    let mmap_ptr = unsafe {
+        libc::mmap(
+            std::ptr::null_mut(),
+            mem_heap_size,
+            libc::PROT_READ | libc::PROT_WRITE,
+            libc::MAP_SHARED | libc::MAP_ANONYMOUS,
+            -1,
+            0,
+        )
+    };
+    assert_ne!(mmap_ptr, libc::MAP_FAILED);
+    shmffi::shmffi_init(mmap_ptr, mem_heap_size, (mem_heap_size / 2) as isize);
 }
 
 fn make_dep_from_typename(typename: &str) -> deps_rust::Dep {

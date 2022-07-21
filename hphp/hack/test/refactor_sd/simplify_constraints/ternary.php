@@ -8,5 +8,5 @@ function g(): void {}
 
 function h(): void {
   $b = true;
-  ($b ? f<> : g<>) upcast dynamic;
+  (($b ? f<> : g<>) upcast dynamic)();
 }

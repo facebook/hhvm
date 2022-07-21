@@ -5,5 +5,5 @@ function f(): void {}
 
 function h(): void {
   $x = f<>;
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }

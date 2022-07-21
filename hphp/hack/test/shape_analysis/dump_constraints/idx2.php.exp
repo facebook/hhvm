@@ -1,0 +1,17 @@
+=== Shape analysis results for idx2.php
+Constraints for \idx_ife:
+   3: Parameter at [3:18-37]
+   4: [3:18-37] ∪ [3:18-37] = ?1
+   5: SK [3:18-37] : shape('a' => mixed)
+   6: OK [3:18-37] : b
+   6: SK [3:18-37] : shape('b' => mixed)
+   7: SK [3:18-37] : shape('c1' => mixed)
+   8: OK [3:18-37] : d1
+   8: SK [3:18-37] : shape('d1' => mixed)
+  10: SK [3:18-37] : shape('a' => mixed)
+  11: OK [3:18-37] : b
+  11: SK [3:18-37] : shape('b' => mixed)
+  12: SK [3:18-37] : shape('c2' => mixed)
+  13: OK [3:18-37] : d2
+  13: SK [3:18-37] : shape('d2' => mixed)
+

@@ -21,6 +21,9 @@ type range_replace = {
 
 val progress_and_actionRequired_counter : int ref
 
+val sym_occ_kind_to_lsp_sym_info_kind :
+  SymbolOccurrence.kind -> Lsp.SymbolInformation.symbolKind
+
 val url_scheme_regex : Str.regexp
 
 val lsp_uri_to_path : Lsp.documentUri -> string

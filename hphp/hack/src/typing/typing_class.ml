@@ -1835,7 +1835,7 @@ let make_class_member_standalone_check_env ctx class_ =
   let open Option in
   Env.get_class env name >>| fun cls ->
   let env = check_class_type_parameters_add_constraints env class_ cls in
-  { env; cls; class_ }
+  (env, { env; cls; class_ })
 
 let method_def_standalone standalone_env method_name =
   let open Option in

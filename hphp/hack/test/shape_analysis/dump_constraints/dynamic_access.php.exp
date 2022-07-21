@@ -1,6 +1,5 @@
 === Shape analysis results for dynamic_access.php
 Constraints for \f:
-   5: [5:3-9] ⊆ ?1
    5: Allocation at [5:3-9]
-   5: DK ?1 : dyn
+   5: DK [5:3-9] : dyn
 

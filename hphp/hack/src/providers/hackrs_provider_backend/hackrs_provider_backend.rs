@@ -10,7 +10,6 @@ mod test_naming_table;
 
 use anyhow::Result;
 use datastore::ChangesStore;
-use datastore::NonEvictingStore;
 use datastore::Store;
 use decl_parser::DeclParser;
 use file_provider::DiskProvider;
@@ -27,6 +26,7 @@ use pos::TypeName;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
+use shm_store::ShmStore;
 use std::path::PathBuf;
 use std::sync::Arc;
 use ty::decl::folded::FoldedClass;
@@ -64,9 +64,11 @@ impl HhServerProviderBackend {
             db_path,
         } = config;
         let path_ctx = Arc::new(path_ctx);
-        let file_store = Arc::new(ChangesStore::new(
-            Arc::new(NonEvictingStore::new()), // TODO: make this sharedmem
-        ));
+        let file_store = Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+            "File",
+            shm_store::Evictability::NonEvictable,
+            shm_store::Compression::default(),
+        ))));
         let file_provider = Arc::new(FileProviderWithChanges {
             delta_and_changes: Arc::clone(&file_store),
             disk: DiskProvider::new(Arc::clone(&path_ctx)),
@@ -85,7 +87,11 @@ impl HhServerProviderBackend {
             decl_parser.clone(),
         ));
 
-        let folded_classes_store = Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new())));
+        let folded_classes_store = Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+            "FoldedClasses",
+            shm_store::Evictability::Evictable,
+            shm_store::Compression::default(),
+        ))));
 
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
             Arc::new(Default::default()), // TODO: remove?
@@ -193,18 +199,57 @@ pub struct ShallowStoreWithChanges {
 
 impl ShallowStoreWithChanges {
     pub fn new() -> Self {
-        // TODO: all these NonEvictingStores should be sharedmem
         Self {
-            classes: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            typedefs: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            funs: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            consts: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            modules: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            properties: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            static_properties: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            methods: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            static_methods: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
-            constructors: Arc::new(ChangesStore::new(Arc::new(NonEvictingStore::new()))),
+            classes: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Classes",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            typedefs: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Typedefs",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            funs: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Funs",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            consts: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Consts",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            modules: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Modules",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            properties: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Properties",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            static_properties: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "StaticProperties",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            methods: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Methods",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            static_methods: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "StaticMethods",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
+            constructors: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+                "Constructors",
+                shm_store::Evictability::Evictable,
+                shm_store::Compression::default(),
+            )))),
         }
     }
 
@@ -251,6 +296,7 @@ impl ShallowStoreWithChanges {
 }
 
 #[derive(Clone, Debug, ToOcamlRep, FromOcamlRep)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum FileType {
     Disk(bstr::BString),
     Ide(bstr::BString),

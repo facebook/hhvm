@@ -7,5 +7,5 @@ function f(): void {}
 function g(): void {}
 
 function h(): void {
-  (false ?: f<>) upcast dynamic;
+  ((false ?: f<>) upcast dynamic)();
 }

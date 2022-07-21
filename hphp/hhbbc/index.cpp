@@ -2613,10 +2613,8 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
     for (auto const& c : t->traitConsts)    addTraitConst(c);
   }
 
-  if ((cinfo->cls->attrs & AttrFinal)
-      || !(cinfo->cls->attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
-    // If we are in a concrete or abstract final class,
-    // concretize the defaults of inherited abstract constants
+  if (!(cinfo->cls->attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
+    // If we are in a concrete class, concretize the defaults of inherited abstract constants
     auto const cls = const_cast<php::Class*>(cinfo->cls);
     for (auto t : cinfo->clsConstants) {
       auto const& cns = *t.second;

@@ -1,0 +1,8 @@
+=== Shape analysis results for idx.php
+Constraints for \idx_with_and_without_opt:
+   3: Parameter at [3:35-54]
+   4: OK [3:35-54] : x
+   4: SK [3:35-54] : shape('x' => mixed)
+   5: OK [3:35-54] : y
+   5: SK [3:35-54] : shape('y' => mixed)
+

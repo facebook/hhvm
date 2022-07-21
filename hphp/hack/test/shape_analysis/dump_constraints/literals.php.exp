@@ -1,12 +1,10 @@
 === Shape analysis results for literals.php
 Constraints for \darray_constraints:
-   8: [8:3-36] ⊆ ?2
    8: SK [8:3-36] : shape('c' => string)
    8: SK [8:3-36] : shape('a' => int)
    8: Allocation at [8:3-36]
 
 Constraints for \dict_constraints:
-   4: [4:3-31] ⊆ ?1
    4: SK [4:3-31] : shape('b' => bool)
    4: SK [4:3-31] : shape('a' => int)
    4: Allocation at [4:3-31]

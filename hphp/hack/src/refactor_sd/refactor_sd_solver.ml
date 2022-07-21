@@ -13,9 +13,11 @@ type constraints = {
   introductions: Pos.t list;
   subsets: (entity_ * entity_) list;
   upcasts: (entity_ * Pos.t) list;
+  calleds: Pos.t list;
 }
 
-let constraints_init = { introductions = []; subsets = []; upcasts = [] }
+let constraints_init =
+  { introductions = []; subsets = []; upcasts = []; calleds = [] }
 
 let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
   let immediate_consequence (x, y) set =
@@ -46,6 +48,27 @@ let find_pointers (introductions : Pos.t list) (set : PointsToSet.t) :
   in
   List.fold introductions ~init:PointsToSet.empty ~f:check_if_pointer
 
+let find_calls (introductions : Pos.t list) (set : PointsToSet.t) :
+    PointsToSet.t =
+  let check_if_called (called_set : PointsToSet.t) (called_pos : Pos.t) =
+    let was_called ((_, sup) : entity_ * entity_) =
+      match sup with
+      | Literal pos -> Pos.compare called_pos pos = 0
+      | _ -> false
+    in
+    let new_set = PointsToSet.filter was_called set in
+    PointsToSet.union new_set called_set
+  in
+  List.fold introductions ~init:PointsToSet.empty ~f:check_if_called
+
+let remove_duplicates
+    (positions : Pos.t list) ((_entity, pos) : entity_ * Pos.t) =
+  if List.mem positions pos ~equal:(fun pos1 pos2 -> Pos.compare pos1 pos2 = 0)
+  then
+    positions
+  else
+    pos :: positions
+
 let partition_constraint constraints = function
   | Introduction pos ->
     { constraints with introductions = pos :: constraints.introductions }
@@ -53,6 +76,7 @@ let partition_constraint constraints = function
     { constraints with subsets = (sub, sup) :: constraints.subsets }
   | Upcast (entity, pos) ->
     { constraints with upcasts = (entity, pos) :: constraints.upcasts }
+  | Called pos -> { constraints with calleds = pos :: constraints.calleds }
 
 let subset_lookups subsets =
   let update entity entity' =
@@ -80,7 +104,7 @@ let subset_lookups subsets =
 
 let simplify (_env : Typing_env_types.env) (constraints : constraint_ list) :
     refactor_sd_result list =
-  let { introductions; upcasts; subsets } =
+  let { introductions; upcasts; subsets; calleds } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
@@ -88,16 +112,28 @@ let simplify (_env : Typing_env_types.env) (constraints : constraint_ list) :
     List.map ~f:(fun pos -> Literal pos) introductions
     @ List.map ~f:(fun (e, _pos) -> e) upcasts
     @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
+    @ List.map ~f:(fun pos -> Literal pos) calleds
     |> List.map ~f:(fun e -> (e, e))
   in
   let subsets = subsets_reflexive @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
-  let subsets = subsets |> find_pointers introductions in
-  let (collect_subsets, _collect_supersets) = subset_lookups subsets in
-  let upcasts = upcasts |> List.concat_map ~f:collect_subsets in
+  (* Limit upcasts to functions of interest *)
+  let subsets_pointers = subsets |> find_pointers introductions in
+  let (collect_subsets_to_pointers, _collect_supersets_to_pointers) =
+    subset_lookups subsets_pointers
+  in
+  let upcasts = upcasts |> List.concat_map ~f:collect_subsets_to_pointers in
+  (* Limit upcasts to functions that are later called *)
+  let subsets_calls = subsets |> find_calls calleds in
+  let (_collect_subsets_to_calls, collect_supersets_to_calls) =
+    subset_lookups subsets_calls
+  in
+  let upcasts = upcasts |> List.concat_map ~f:collect_supersets_to_calls in
+  (* Remove duplicates. Duplicates occur when reassigning variables or using a mutable collection. *)
+  let upcast_pos = upcasts |> List.fold ~init:[] ~f:remove_duplicates in
   (* Convert to individual upcast results *)
   let exists_upcast_results : refactor_sd_result list =
-    upcasts |> List.map ~f:(fun (_entity, pos) -> Exists_Upcast pos)
+    upcast_pos |> List.map ~f:(fun pos -> Exists_Upcast pos)
   in
   if List.is_empty exists_upcast_results then
     [No_Upcast]

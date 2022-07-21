@@ -5418,10 +5418,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 p_enum_use(elt, env)?;
             }
 
+            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+            let docs_url = p_docs_url(&user_attributes, env);
+
             Ok(vec![ast::Def::mk_class(ast::Class_ {
                 annotation: (),
                 mode: env.file_mode(),
-                user_attributes: p_user_attributes(&c.attribute_spec, env)?,
+                user_attributes,
                 file_attributes: vec![],
                 final_: false,
                 kind: ast::ClassishKind::Cenum,
@@ -5453,7 +5456,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
-                docs_url: None,
+                docs_url,
             })])
         }
 
@@ -5466,6 +5469,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 params: vec![],
             };
             user_attributes.push(enum_class_attribute);
+
+            let docs_url = p_docs_url(&user_attributes, env);
+
             // During lowering we store the base type as is. It will be updated during
             // the naming phase
             let base_type = p_hint(&c.base, env)?;
@@ -5527,7 +5533,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
-                docs_url: None,
+                docs_url,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

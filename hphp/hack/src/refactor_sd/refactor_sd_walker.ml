@@ -13,6 +13,7 @@ module A = Aast
 module T = Tast
 module Env = Refactor_sd_env
 module Utils = Aast_names_utils
+module SN = Naming_special_names
 
 let failwithpos pos msg =
   raise @@ Refactor_sd_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
@@ -22,13 +23,41 @@ let redirect (env : env) (entity_ : entity_) : env * entity_ =
   let env = Env.add_constraint env (Subset (entity_, var)) in
   (env, var)
 
-let assign
-    (_assignment_pos : Pos.t)
-    (env : env)
-    ((_, pos, lval) : T.expr)
-    (rhs : entity) : env =
+let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
+  | A.Array_get ((vc_type, _, A.Lvar (_, lid)), _) ->
+    let entity = Env.get_local env lid in
+    let (_, ty) = Tast_env.expand_type env.tast_env vc_type in
+    let (_, ty_) = Typing_defs_core.deref ty in
+    begin
+      match (entity, ty_) with
+      | (Some entity_, Typing_defs_core.Tclass ((_, x), _, _))
+        when String.equal x SN.Collections.cVec ->
+        (* Handle copy-on-write by creating a variable indirection *)
+        let (env, var) = redirect env entity_ in
+        let env =
+          match rhs with
+          | Some rhs -> Env.add_constraint env (Subset (rhs, var))
+          | _ -> env
+        in
+        Env.set_local env lid (Some var)
+      | (Some entity_, Typing_defs_core.Tclass ((_, x), _, _))
+        when String.equal x SN.Collections.cVector ->
+        let env =
+          match rhs with
+          | Some rhs -> Env.add_constraint env (Subset (rhs, entity_))
+          | _ -> env
+        in
+        Env.set_local env lid (Some entity_)
+      | (Some _, _) ->
+        failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
+      | (None, _) ->
+        (* We might end up here as a result of deadcode, such as a dictionary
+           assignment after an unconditional break in a loop. In this
+           situation, it is not meaningful to report a candidate. *)
+        env
+    end
   | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
 
 let join (env : env) (then_entity : entity) (else_entity : entity) =
@@ -66,7 +95,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     (env, None)
   | A.Binop (Ast_defs.Eq None, e1, e2) ->
     let (env, entity_rhs) = expr_ upcasted_id env e2 in
-    let env = assign pos env e1 entity_rhs in
+    let env = assign env e1 entity_rhs in
     (env, None)
   | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, entity1) = expr_ upcasted_id env e1 in
@@ -76,7 +105,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, entity1) = expr_ upcasted_id env e1 in
     let (env, entity2) = expr_ upcasted_id env e2 in
     let (env, entity_rhs) = join env entity1 entity2 in
-    let env = assign pos env e1 entity_rhs in
+    let env = assign env e1 entity_rhs in
     (env, None)
   | A.Binop
       ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
@@ -91,11 +120,43 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, _) = expr_ upcasted_id env e1 in
     let (env, _) = expr_ upcasted_id env e2 in
     (env, None)
+  | A.ValCollection (vc_kind, _, expr_list) ->
+    begin
+      match vc_kind with
+      | A.Vector
+      | A.Vec ->
+        let var = Env.fresh_var () in
+        let handle_init (env : env) (e_inner : T.expr) =
+          let (env, entity_rhs) = expr_ upcasted_id env e_inner in
+          match entity_rhs with
+          | Some entity_rhs_ ->
+            Env.add_constraint env (Subset (entity_rhs_, var))
+          | _ -> env
+        in
+        let env = List.fold ~init:env ~f:handle_init expr_list in
+        (env, Some var)
+      | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+    end
+  | A.Array_get (((_, _, A.Lvar (_, _lid)) as base), Some ix) ->
+    let (env, entity_exp) = expr_ upcasted_id env base in
+    let (env, _entity_ix) = expr_ upcasted_id env ix in
+    (env, entity_exp)
   | A.Upcast (e, _) ->
     let (env, entity) = expr_ upcasted_id env e in
     let env =
       match entity with
       | Some entity -> Env.add_constraint env (Upcast (entity, pos))
+      | None -> env
+    in
+    (env, entity)
+  | A.Call (e, _targs, _args, _unpacked) ->
+    let (env, entity) = expr_ upcasted_id tast_env env e in
+    let env =
+      match entity with
+      | Some entity ->
+        let location = Literal pos in
+        let env = Env.add_constraint env (Subset (entity, location)) in
+        Env.add_constraint env (Called pos)
       | None -> env
     in
     (env, None)

@@ -4,5 +4,5 @@
 function f(): void {}
 
 function h(): void {
-    $x = false && (f<> upcast dynamic is nonnull);
+    $x = false && ((f<> upcast dynamic)() is nonnull);
 }

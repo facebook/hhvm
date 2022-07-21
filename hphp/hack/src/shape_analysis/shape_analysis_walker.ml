@@ -184,10 +184,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       env
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
-
-    (* Handle copy-on-write by creating a variable indirection *)
-    let (env, var) = redirect ~pos ~origin:__LINE__ env entity_ in
-    (env, Some var)
+    (env, entity)
   | A.Array_get (base, Some ix) ->
     let (env, entity_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in

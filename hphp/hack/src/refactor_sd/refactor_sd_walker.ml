@@ -148,8 +148,18 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | Some entity -> Env.add_constraint env (Upcast (entity, pos))
       | None -> env
     in
+    (env, entity)
+  | A.Call (e, _targs, _args, _unpacked) ->
+    let (env, entity) = expr_ upcasted_id tast_env env e in
+    let env =
+      match entity with
+      | Some entity ->
+        let location = Literal pos in
+        let env = Env.add_constraint env (Subset (entity, location)) in
+        Env.add_constraint env (Called pos)
+      | None -> env
+    in
     (env, None)
-  | A.Call (e, _targs, _args, _unpacked) -> expr_ upcasted_id tast_env env e
   | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
     if String.equal upcasted_id id then
       let entity_ = Literal pos in

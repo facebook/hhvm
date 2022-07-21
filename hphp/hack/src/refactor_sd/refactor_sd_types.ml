@@ -30,6 +30,7 @@ type constraint_ =
   | Introduction of Pos.t
   | Upcast of entity_ * Pos.t
   | Subset of entity_ * entity_
+  | Called of Pos.t
 
 type refactor_sd_result =
   | Exists_Upcast of Pos.t

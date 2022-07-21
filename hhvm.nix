@@ -80,10 +80,8 @@ let
         .*
       ''
       (builtins.readFile ./hphp/runtime/version.h);
-  makePName = major: minor: patch: suffix:
-    if suffix == "-dev" then "hhvm_nightly" else "hhvm";
   makeVersion = major: minor: patch: suffix:
-    if suffix == "-dev" then "${major}.${minor}.${patch}-${lastModifiedDate}" else "${major}.${minor}.${patch}";
+    if suffix == "-dev" then "${major}.${minor}.${patch}-dev${lastModifiedDate}" else "${major}.${minor}.${patch}";
   rustNightly = rustChannelOf {
     sha256 = "TpJKRroEs7V2BTo2GFPJlEScYVArFY2MnGpYTxbnSo8=";
     date = "2022-02-24";
@@ -91,7 +89,7 @@ let
   };
 in
 stdenv.mkDerivation rec {
-  pname = builtins.foldl' lib.trivial.id makePName versionParts;
+  pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
   nativeBuildInputs =

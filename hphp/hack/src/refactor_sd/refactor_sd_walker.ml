@@ -13,6 +13,7 @@ module A = Aast
 module T = Tast
 module Env = Refactor_sd_env
 module Utils = Aast_names_utils
+module SN = Naming_special_names
 
 let failwithpos pos msg =
   raise @@ Refactor_sd_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
@@ -25,11 +26,15 @@ let redirect (env : env) (entity_ : entity_) : env * entity_ =
 let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
-  | A.Array_get ((_vc_type, _, A.Lvar (_, lid)), _) ->
+  | A.Array_get ((vc_type, _, A.Lvar (_, lid)), _) ->
     let entity = Env.get_local env lid in
+    let (_, ty) = Tast_env.expand_type env.tast_env vc_type in
+    let (_, ty_) = Typing_defs_core.deref ty in
     begin
-      match entity with
-      | Some entity_ ->
+      match (entity, ty_) with
+      | (Some entity_, Typing_defs_core.Tclass ((_, x), _, _))
+        when String.equal x SN.Collections.cVec ->
+        (* Handle copy-on-write by creating a variable indirection *)
         let (env, var) = redirect env entity_ in
         let env =
           match rhs with
@@ -37,7 +42,17 @@ let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
           | _ -> env
         in
         Env.set_local env lid (Some var)
-      | None ->
+      | (Some entity_, Typing_defs_core.Tclass ((_, x), _, _))
+        when String.equal x SN.Collections.cVector ->
+        let env =
+          match rhs with
+          | Some rhs -> Env.add_constraint env (Subset (rhs, entity_))
+          | _ -> env
+        in
+        Env.set_local env lid (Some entity_)
+      | (Some _, _) ->
+        failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
+      | (None, _) ->
         (* We might end up here as a result of deadcode, such as a dictionary
            assignment after an unconditional break in a loop. In this
            situation, it is not meaningful to report a candidate. *)
@@ -108,6 +123,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
   | A.ValCollection (vc_kind, _, expr_list) ->
     begin
       match vc_kind with
+      | A.Vector
       | A.Vec ->
         let var = Env.fresh_var () in
         let handle_init (env : env) (e_inner : T.expr) =

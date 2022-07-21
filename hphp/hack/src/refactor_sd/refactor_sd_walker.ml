@@ -150,7 +150,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     in
     (env, entity)
   | A.Call (e, _targs, _args, _unpacked) ->
-    let (env, entity) = expr_ upcasted_id tast_env env e in
+    let (env, entity) = expr_ upcasted_id env e in
     let env =
       match entity with
       | Some entity ->

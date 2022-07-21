@@ -2707,7 +2707,7 @@ void Class::setConstants() {
     }
 
     // Concretize inherited abstract type constants with defaults
-    if (isNormalClass(this) && (!isAbstract(this) || isFinal(this))) {
+    if (isNormalClass(this) && !isAbstract(this)) {
       if (cns.isAbstract() && cns.val.is_init()) {
         cns.concretize();
       }

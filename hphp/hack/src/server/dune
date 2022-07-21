@@ -266,6 +266,7 @@
   methodJumps
   saveStateService
   serverDepsOutBatch
+  serverDepsUtil
   serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch

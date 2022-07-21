@@ -82,6 +82,9 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
   | A.True
   | A.False ->
     (env, None)
+  | A.Id _ ->
+    (* Until interprocedural analaysis has been implemented, this is all incomplete. *)
+    (env, None)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)
@@ -149,8 +152,14 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | None -> env
     in
     (env, entity)
-  | A.Call (e, _targs, _args, _unpacked) ->
-    let (env, entity) = expr_ upcasted_id tast_env env e in
+  | A.Call (e, _targs, args, _unpacked) ->
+    (* Until interprocedural analaysis has been implemented, this is all incomplete. *)
+    let (env, entity) = expr_ upcasted_id env e in
+    let handle_args env (_, arg) =
+      let (env, _) = expr_ upcasted_id env arg in
+      env
+    in
+    let env = List.fold ~init:env args ~f:handle_args in
     let env =
       match entity with
       | Some entity ->
@@ -220,6 +229,10 @@ let rec switch
 and stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e -> expr upcasted_id env e
+  | A.Return None -> env
+  | A.Return (Some e) ->
+    let (env, _expr) = expr_ upcasted_id env e in
+    env
   | A.If (cond, then_bl, else_bl) ->
     let parent_env = expr upcasted_id env cond in
     let base_env = Env.reset_constraints parent_env in

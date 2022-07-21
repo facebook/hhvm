@@ -291,7 +291,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       // First fill the request local cache for this call.
       auto const func = lookup(cls, name, callCtx);
       if (RO::EvalEnforceModules == 1 &&
-          will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+          will_symbol_raise_module_boundary_violation(func, &callCtx)) {
         // If we raised a warning, do not cache/smash the func
         return func;
       }
@@ -322,7 +322,7 @@ handleStaticCall(const Class* cls, const StringData* name,
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
     auto const func = lookup(cls, name, callCtx);
     if (RO::EvalEnforceModules == 1 &&
-        will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+        will_symbol_raise_module_boundary_violation(func, &callCtx)) {
       // If we raised a warning, do not cache the func
       return func;
     }
@@ -385,7 +385,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       if (UNLIKELY(cand->isStaticInPrologue())) {
         throw_has_this_need_static(cand);
       }
-      if (will_call_raise_module_boundary_violation(cand, callCtx.moduleName())) {
+      if (will_symbol_raise_module_boundary_violation(cand, &callCtx)) {
         raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
         return cand;
       }
@@ -405,7 +405,7 @@ handleStaticCall(const Class* cls, const StringData* name,
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == oldFunc->baseCls())) {
       assertx(!cand->isStaticInPrologue());
-      if (will_call_raise_module_boundary_violation(cand, callCtx.moduleName())) {
+      if (will_symbol_raise_module_boundary_violation(cand, &callCtx)) {
         raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
         return cand;
       }
@@ -416,7 +416,7 @@ handleStaticCall(const Class* cls, const StringData* name,
 
   auto const func = lookup(cls, name, callCtx);
   if (RO::EvalEnforceModules == 1 &&
-      will_call_raise_module_boundary_violation(func, callCtx.moduleName())) {
+      will_symbol_raise_module_boundary_violation(func, &callCtx)) {
     // If we raised a warning, do not cache the func
     return func;
   }

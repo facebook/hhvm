@@ -3415,6 +3415,32 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     }
 }
 
+fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                naming_special_names_rust::coeffects::is_any_zoned_or_defaults(id)
+            }
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
+fn has_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                id == naming_special_names_rust::coeffects::DEFAULTS
+            }
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
 // For polymorphic context with form `ctx $f`
 // require that `(function (ts)[_]: t) $f` exists
 // rewrite as `(function (ts)[ctx $f]: t) $f`
@@ -5059,12 +5085,24 @@ fn p_namespace_use_clause<'a>(
     }
 }
 
+fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
+    naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1)
+        && (match flavor {
+            Some(flavor) => u
+                .params
+                .iter()
+                .any(|p| matches!(p, Expr(_, _, ast::Expr_::String(s)) if s == flavor)),
+            None => u.params.is_empty(),
+        })
+}
+
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
     kind: &str,
     env: &mut Env<'a>,
 ) {
+    // functions with dependent contexts cannot be memoized
     if has_polymorphic_context(env, contexts) {
         if let Some(u) = user_attributes
             .iter()
@@ -5077,17 +5115,43 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    if env.is_typechecker() {
-        if let Some(u) = user_attributes.iter().find(|u| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
-        }) {
-            if !has_any_policied_context(contexts) {
-                raise_parsing_error_pos(
-                    &u.name.0,
-                    env,
-                    &syntax_error::policy_sharded_memoized_without_policied(kind),
-                )
-            }
+    // memoized functions with zoned or zoned_with must be #KeyedByIC
+    if has_any_policied_context(contexts) {
+        if let Some(u) = user_attributes
+            .iter()
+            .find(|u| is_memoize_attribute_with_flavor(u, None))
+        {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::effect_policied_memoized(kind),
+            )
+        }
+    }
+    // #KeyedByIC can only be used on functions with defaults or zoned*
+    if let Some(u) = user_attributes
+        .iter()
+        .find(|u| is_memoize_attribute_with_flavor(u, Some("KeyedByIC")))
+    {
+        if !has_any_policied_or_defaults_context(contexts) {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::policy_sharded_memoized_without_policied(kind),
+            )
+        }
+    }
+    // #(Soft)?MakeICInaccessible can only be used on functions with defaults
+    if let Some(u) = user_attributes.iter().find(|u| {
+        is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
+            || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
+    }) {
+        if !has_defaults_context(contexts) {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::memoize_make_ic_inaccessible_without_defaults(kind),
+            )
         }
     }
 }

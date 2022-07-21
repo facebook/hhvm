@@ -4526,6 +4526,9 @@ void Class::getMethodNames(const Class* cls, const Class* ctx, Array& out) {
   }
 }
 
+const StringData* Class::moduleName() const {
+  return preClass()->unit()->moduleName();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Trait method import.

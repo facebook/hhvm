@@ -22,13 +22,27 @@ let redirect (env : env) (entity_ : entity_) : env * entity_ =
   let env = Env.add_constraint env (Subset (entity_, var)) in
   (env, var)
 
-let assign
-    (_assignment_pos : Pos.t)
-    (env : env)
-    ((_, pos, lval) : T.expr)
-    (rhs : entity) : env =
+let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
+  | A.Array_get ((_vc_type, _, A.Lvar (_, lid)), _) ->
+    let entity = Env.get_local env lid in
+    begin
+      match entity with
+      | Some entity_ ->
+        let (env, var) = redirect env entity_ in
+        let env =
+          match rhs with
+          | Some rhs -> Env.add_constraint env (Subset (rhs, var))
+          | _ -> env
+        in
+        Env.set_local env lid (Some var)
+      | None ->
+        (* We might end up here as a result of deadcode, such as a dictionary
+           assignment after an unconditional break in a loop. In this
+           situation, it is not meaningful to report a candidate. *)
+        env
+    end
   | _ -> failwithpos pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
 
 let join (env : env) (then_entity : entity) (else_entity : entity) =
@@ -66,7 +80,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     (env, None)
   | A.Binop (Ast_defs.Eq None, e1, e2) ->
     let (env, entity_rhs) = expr_ upcasted_id env e2 in
-    let env = assign pos env e1 entity_rhs in
+    let env = assign env e1 entity_rhs in
     (env, None)
   | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, entity1) = expr_ upcasted_id env e1 in
@@ -76,7 +90,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, entity1) = expr_ upcasted_id env e1 in
     let (env, entity2) = expr_ upcasted_id env e2 in
     let (env, entity_rhs) = join env entity1 entity2 in
-    let env = assign pos env e1 entity_rhs in
+    let env = assign env e1 entity_rhs in
     (env, None)
   | A.Binop
       ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
@@ -91,6 +105,18 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, _) = expr_ upcasted_id env e1 in
     let (env, _) = expr_ upcasted_id env e2 in
     (env, None)
+  | A.ValCollection (vc_kind, _, _expr_list) ->
+    begin
+      match vc_kind with
+      | A.Vec ->
+        let var = Env.fresh_var () in
+        (env, Some var)
+      | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+    end
+  | A.Array_get (((_, _, A.Lvar (_, _lid)) as base), Some ix) ->
+    let (env, entity_exp) = expr_ upcasted_id env base in
+    let (env, _entity_ix) = expr_ upcasted_id env ix in
+    (env, entity_exp)
   | A.Upcast (e, _) ->
     let (env, entity) = expr_ upcasted_id env e in
     let env =

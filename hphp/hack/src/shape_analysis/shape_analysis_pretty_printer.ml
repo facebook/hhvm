@@ -29,6 +29,11 @@ let show_constraint_ env =
     in
     let shape = mk_shape field_map in
     Format.asprintf "SK %s : %s" (show_entity entity) (show_ty shape)
+  | Has_optional_key (entity, key) ->
+    Format.asprintf
+      "OK %s : %s"
+      (show_entity entity)
+      (Typing_utils.get_printable_shape_field_name key)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
   | Joins { left; right; join } ->

@@ -14,6 +14,7 @@ module Logic = Shape_analysis_logic
 type constraints = {
   markers: (marker_kind * Pos.t) list;
   static_accesses: (entity_ * T.TShapeMap.key * Typing_defs.locl_ty) list;
+  optional_accesses: (entity_ * T.TShapeMap.key) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
   joins: (entity_ * entity_ * entity_) list;
@@ -23,6 +24,7 @@ let constraints_init =
   {
     markers = [];
     static_accesses = [];
+    optional_accesses = [];
     dynamic_accesses = [];
     subsets = [];
     joins = [];
@@ -51,6 +53,11 @@ let partition_constraint constraints = function
     {
       constraints with
       static_accesses = (entity, key, ty) :: constraints.static_accesses;
+    }
+  | Has_optional_key (entity, key) ->
+    {
+      constraints with
+      optional_accesses = (entity, key) :: constraints.optional_accesses;
     }
   | Has_dynamic_key entity ->
     {
@@ -138,7 +145,14 @@ let subset_lookups subsets =
 (* TODO(T125884349): Specially handle flows into return type hints *)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let { markers; static_accesses; dynamic_accesses; subsets; joins } =
+  let {
+    markers;
+    static_accesses;
+    optional_accesses;
+    dynamic_accesses;
+    subsets;
+    joins;
+  } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
@@ -184,8 +198,9 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
       |> T.TShapeSet.elements
       |> List.map ~f:(fun optional_key -> (join, optional_key))
     in
-    List.concat_map ~f:add_optional_key joins
+    List.append (List.concat_map ~f:add_optional_key joins) optional_accesses
   in
+
   let optional_keys_upwards_closed =
     List.concat_map
       ~f:(fun (entity, key) ->

@@ -80,6 +80,8 @@ type constraint_ =
   | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
       (** Records a static key an entity is accessed with along with the Hack
           type of that key *)
+  | Has_optional_key of entity_ * T.TShapeMap.key
+      (** Records an optional static key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
   | Subsets of entity_ * entity_

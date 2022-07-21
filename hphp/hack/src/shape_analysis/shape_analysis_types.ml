@@ -55,6 +55,7 @@ end
 type constraint_ =
   | Marks of marker_kind * Pos.t
   | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
+  | Has_optional_key of entity_ * T.TShapeMap.key
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_
   | Joins of {

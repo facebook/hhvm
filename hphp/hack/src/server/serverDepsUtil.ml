@@ -44,3 +44,16 @@ let body_symbols
         (not (phys_equal o occ)) && Pos.contains span_pos o.pos
       in
       List.filter declarations ~f:pos_filter)
+
+let get_def_setup (acc_ctx_in : Provider_context.t) (file : string) =
+  let path = Relative_path.create_detect_prefix file in
+  let (acc_ctx_out, entry) =
+    Provider_context.add_entry_if_missing ~ctx:acc_ctx_in ~path
+  in
+  let ast =
+    Ast_provider.compute_ast
+      ~popt:(Provider_context.get_popt acc_ctx_out)
+      ~entry
+  in
+  let get_def = ServerSymbolDefinition.go acc_ctx_out (Some ast) in
+  (acc_ctx_out, entry, ast, get_def)

@@ -43,22 +43,13 @@ let go
     ServerCommandTypes.Find_refs.result_or_retry list =
   let deps_in_of_location acc_ctx_in (file, line, column) :
       Provider_context.t * ServerCommandTypes.Find_refs.result_or_retry list =
-    let path = Relative_path.create_detect_prefix file in
-    let (acc_ctx_out, entry) =
-      Provider_context.add_entry_if_missing ~ctx:acc_ctx_in ~path
-    in
-    let ast =
-      Ast_provider.compute_ast
-        ~popt:(Provider_context.get_popt acc_ctx_out)
-        ~entry
-    in
+    let (acc_ctx_out, entry, _, get_def) = get_def_setup acc_ctx_in file in
     (*Other files can only depend on things declared in this one*)
     let declarations =
       IdentifySymbolService.all_symbols_ctx ~ctx:acc_ctx_out ~entry
       |> List.filter ~f:(fun s -> s.SymbolOccurrence.is_declaration)
     in
     let target_symbols = List.filter declarations ~f:(is_target line column) in
-    let get_def = ServerSymbolDefinition.go acc_ctx_out (Some ast) in
     let deps =
       List.concat_map
         target_symbols

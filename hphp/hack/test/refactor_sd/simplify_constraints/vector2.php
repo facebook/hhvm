@@ -11,6 +11,6 @@ function h(): void {
   $v[] = g<>;
   $w = $v;
   $w[] = f<>;
-  $v[0] upcast dynamic; // Report
-  $w[0] upcast dynamic; // Report
+  ($v[0] upcast dynamic)(); // Report
+  ($w[0] upcast dynamic)(); // Report
 }

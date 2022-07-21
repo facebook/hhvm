@@ -10,7 +10,7 @@ function g(): void {
   while (true) {
     if ($index == 9) {
       $index = $b;
-      $index upcast dynamic;
+      ($index upcast dynamic)();
       break;
     }
     $index++;

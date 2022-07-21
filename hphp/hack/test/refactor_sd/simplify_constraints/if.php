@@ -8,9 +8,9 @@ function f(): void {}
 
 function h(): void {
   if (true) {
-    f<> upcast dynamic;
+    (f<> upcast dynamic)();
   } else {
-    g<> upcast dynamic;
+    (g<> upcast dynamic)();
   }
 
   if (true) {
@@ -18,5 +18,5 @@ function h(): void {
   } else {
     $b = f<>;
   }
-  $b upcast dynamic;
+  ($b upcast dynamic)();
 }

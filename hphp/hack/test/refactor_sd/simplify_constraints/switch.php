@@ -15,12 +15,12 @@ function h(): void {
       $x = f<>;
       break;
     case 1:
-      f<> upcast dynamic;
+      (f<> upcast dynamic)();
       break;
     default:
-      g<> upcast dynamic;
+      (g<> upcast dynamic)();
   }
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }
 
 function e(): void {
@@ -39,7 +39,7 @@ function e(): void {
     default:
       $x = g<>;
   }
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }
 
 function d(): void {
@@ -61,5 +61,5 @@ function d(): void {
       break;
     default:
   }
-  $x upcast dynamic;
+  ($x upcast dynamic)();
 }

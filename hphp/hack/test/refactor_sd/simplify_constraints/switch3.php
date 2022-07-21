@@ -14,7 +14,7 @@ function h(): void {
       $x = f<>;
       // FALLTHROUGH
     case 1:
-      $x upcast dynamic;
+      ($x upcast dynamic)();
   }
 }
 
@@ -26,6 +26,6 @@ function e(): void {
       $x = f<>;
       break;
     case 1:
-      $x upcast dynamic;
+      ($x upcast dynamic)();
   }
 }

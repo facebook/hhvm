@@ -149,6 +149,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | None -> env
     in
     (env, None)
+  | A.Call (e, _targs, _args, _unpacked) -> expr_ upcasted_id tast_env env e
   | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
     if String.equal upcasted_id id then
       let entity_ = Literal pos in

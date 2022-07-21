@@ -10,5 +10,5 @@ function h(): void {
   $v = Vector{};
   $v[] = f<>;
   $v[] = g<>;
-  $v[0] upcast dynamic;
+  ($v[0] upcast dynamic)();
 }

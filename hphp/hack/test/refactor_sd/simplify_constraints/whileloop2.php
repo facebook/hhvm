@@ -8,7 +8,7 @@ function h(): void {
   $index = 1;
   while ($index < 10) {
     if ($index == 9) {
-      $b upcast dynamic;
+      ($b upcast dynamic)();
     }
     $index++;
   }

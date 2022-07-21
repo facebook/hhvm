@@ -13,14 +13,14 @@ function h(): void {
     if ($c) {
       $x = g<>;
     } else {
-      f<> upcast dynamic;
+      (f<> upcast dynamic)();
     }
   } else {
     if ($c) {
       $x = f<>;
     } else {
-      f<> upcast dynamic;
+      (f<> upcast dynamic)();
     }
   }
-  $b upcast dynamic;
+  ($b upcast dynamic)();
 }

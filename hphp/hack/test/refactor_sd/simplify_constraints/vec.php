@@ -10,5 +10,5 @@ function h(): void {
   $v = vec[];
   $v[] = f<>;
   $v[] = g<>;
-  $v[0] upcast dynamic;
+  ($v[0] upcast dynamic)();
 }

@@ -4,5 +4,5 @@
 function f(): void {}
 
 function h(): void {
-  f<> upcast dynamic;
+  (f<> upcast dynamic)();
 }

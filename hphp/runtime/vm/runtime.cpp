@@ -421,32 +421,62 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
   raise_warning(errMsg);
 }
 
-void raiseModuleBoundaryViolation(const Class* cls,
+namespace {
+
+void moduleBoundaryViolationImpl(
+  std::string symbol,
+  const StringData* symbolModule,
+  const StringData* fromModule
+) {
+  assertx(RO::EvalEnforceModules);
+  // Internal symbols must always have a module
+  assertx(symbolModule != nullptr);
+  assertx(symbolModule != fromModule);
+  assertx(!symbol.empty());
+
+  auto const errMsg = folly::sformat(
+    "Accessing internal {} in module {} from {} is not allowed",
+    symbol,
+    symbolModule,
+    fromModule
+      ? folly::sformat("module {}", fromModule)
+      : "outside of a module"
+  );
+  if (RO::EvalEnforceModules > 1) {
+    SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
+  }
+  raise_warning(errMsg);
+}
+
+} // namespace
+
+void raiseModuleBoundaryViolation(const Class* ctx,
                                   const Func* callee,
                                   const StringData* callerModule) {
+  if (!RO::EvalEnforceModules) return;
+
   assertx(callee);
-  assertx(IMPLIES(callee->isMethod(), cls));
+  assertx(IMPLIES(callee->isMethod(), ctx));
   assertx(callee->isInternal());
-  // Internal functions must always have a module
-  assertx(callee->moduleName());
-  assertx(callee->moduleName() != callerModule);
-  auto const errMsg = [&] {
-    auto const calleeName = cls
-      ? folly::sformat("method {}::{}", cls->name(), callee->name())
-      : folly::sformat("function {}", callee->name());
-    return folly::sformat(
-      "Accessing internal {} in module {} from {} is not allowed",
-      calleeName,
-      callee->moduleName(),
-      callerModule
-        ? folly::sformat("module {}", callerModule)
-        : "outside of a module");
-  };
-  if (RO::EvalEnforceModules == 1) {
-    raise_warning(errMsg());
-  } else if (RO::EvalEnforceModules > 1) {
-    SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg());
-  }
+  return moduleBoundaryViolationImpl(
+    ctx ? folly::sformat("method {}::{}", ctx->name(), callee->name())
+        : folly::sformat("function {}", callee->name()),
+    callee->moduleName(),
+    callerModule
+  );
+}
+
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const StringData* callerModule) {
+  if (!RO::EvalEnforceModules) return;
+
+  assertx(cls);
+  assertx(cls->isInternal());
+  return moduleBoundaryViolationImpl(
+    folly::sformat("class {}", cls->name()),
+    cls->moduleName(),
+    callerModule
+  );
 }
 
 void raiseImplicitContextStateInvalidException(const Func* func) {

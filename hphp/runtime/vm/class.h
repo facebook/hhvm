@@ -641,6 +641,11 @@ public:
   bool isInternal() const;
 
   /*
+   * What module does this function belong to?
+   */
+  const StringData* moduleName() const;
+
+  /*
    * Is this class allowed to be constructed dynamically?
    */
   bool isDynamicallyConstructible() const;

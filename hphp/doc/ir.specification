@@ -2248,10 +2248,11 @@ To string conversions:
   Raises a warning to indicate a violation for the input S0 to coeffect rule
   FunParam uses polymorphic coeffect rules.
 
-| RaiseModuleBoundaryViolation<ctx, caller>, ND, S(Func), NF
+| RaiseModuleBoundaryViolation<ctx, caller>, ND, S(Func,Cls), NF
 
   Raises a warning to indicate a module boundary violation resulting from caller
-  attempting to call the the callee in S0 in context `ctx`.
+  attempting to either call, if S0 is Func, or create a pointer to the callee in
+  S0 in context `ctx`.
 
 | RaiseImplicitContextStateInvalidException<func>, ND, NA, NF
 

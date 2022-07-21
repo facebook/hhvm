@@ -364,6 +364,7 @@ fn only_void_return(lfun_body: &[ast::Stmt]) -> bool {
 
 struct NestedSpliceCheck {
     has_nested_splice: Option<Pos>,
+    has_nested_expression_tree: Option<Pos>,
 }
 
 impl<'ast> Visitor<'ast> for NestedSpliceCheck {
@@ -380,7 +381,12 @@ impl<'ast> Visitor<'ast> for NestedSpliceCheck {
             ETSplice(_) => {
                 self.has_nested_splice = Some(e.1.clone());
             }
-            _ if self.has_nested_splice.is_none() => e.recurse(env, self)?,
+            ExpressionTree(_) => {
+                self.has_nested_expression_tree = Some(e.1.clone());
+            }
+            _ if self.has_nested_splice.is_none() && self.has_nested_expression_tree.is_none() => {
+                e.recurse(env, self)?
+            }
             _ => {}
         }
         Ok(())
@@ -388,15 +394,19 @@ impl<'ast> Visitor<'ast> for NestedSpliceCheck {
 }
 
 /// Assumes that the Expr is the expression within a splice.
-/// If the expression has a splice contained within, then we have
-/// nested splices and this will raise an error
+/// If the expression has an Expression Tree contained within or a splice, then
+/// we have nested expression trees or splices and this should raise an error.
 fn check_nested_splice(e: &ast::Expr) -> Result<(), (Pos, String)> {
     let mut checker = NestedSpliceCheck {
         has_nested_splice: None,
+        has_nested_expression_tree: None,
     };
     visit(&mut checker, &mut (), e).unwrap();
     if let Some(p) = checker.has_nested_splice {
         return Err((p, "Splice syntax `${...}` cannot be nested.".into()));
+    }
+    if let Some(p) = checker.has_nested_expression_tree {
+        return Err((p, "Expression trees may not be nested. Consider assigning to a local variable and splicing the local variable in.".into()));
     }
     Ok(())
 }

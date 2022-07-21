@@ -105,11 +105,19 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     let (env, _) = expr_ upcasted_id env e1 in
     let (env, _) = expr_ upcasted_id env e2 in
     (env, None)
-  | A.ValCollection (vc_kind, _, _expr_list) ->
+  | A.ValCollection (vc_kind, _, expr_list) ->
     begin
       match vc_kind with
       | A.Vec ->
         let var = Env.fresh_var () in
+        let handle_init (env : env) (e_inner : T.expr) =
+          let (env, entity_rhs) = expr_ upcasted_id env e_inner in
+          match entity_rhs with
+          | Some entity_rhs_ ->
+            Env.add_constraint env (Subset (entity_rhs_, var))
+          | _ -> env
+        in
+        let env = List.fold ~init:env ~f:handle_init expr_list in
         (env, Some var)
       | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
     end

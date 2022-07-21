@@ -557,7 +557,16 @@ let parse_options () =
         Arg.Set shallow_class_decl,
         " Look up class members lazily from shallow declarations" );
       ( "--rust-provider-backend",
-        Arg.Set rust_provider_backend,
+        Arg.Unit
+          (fun () ->
+            rust_provider_backend := true;
+            sharedmem_config :=
+              SharedMem.
+                {
+                  default_config with
+                  shm_use_sharded_hashtbl = true;
+                  shm_cache_size = 2 * 1024 * 1024 * 1024;
+                }),
         " Use the Rust implementation of Provider_backend (including decl-folding)"
       );
       ( "--skip-hierarchy-checks",

@@ -4489,9 +4489,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => None,
         }));
         let mut user_attributes = bump::Vec::with_capacity_in(attributes.len(), self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4559,8 +4568,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint,
                 includes,
             })),
-            // Currently ignoring <<__Docs()>> on enum declarations.
-            docs_url: None,
+            docs_url,
         });
         self.add_class(key, cls);
 
@@ -4678,9 +4686,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let includes = &extends[1..];
 
         let mut user_attributes = bump::Vec::with_capacity_in(attributes.len() + 1, self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4732,8 +4749,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint: None,
                 includes,
             })),
-            // Currently ignoring <<__Docs()>> on enum class declarations.
-            docs_url: None,
+            docs_url,
         });
         self.add_class(name.1, cls);
 

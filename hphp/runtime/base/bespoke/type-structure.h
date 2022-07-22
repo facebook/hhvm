@@ -40,12 +40,46 @@
  *  8-byte m_alias field
  *  8-byte m_typevars field
  *  8-byte m_typevar_types field
+ *  { additional fields }
  *
  */
 
 namespace HPHP::bespoke {
 
 using Kind = HPHP::TypeStructure::Kind;
+
+#define TYPE_STRUCTURE_KINDS                \
+  X(void, TypeStructure)                    \
+  X(int, TypeStructure)                     \
+  X(bool, TypeStructure)                    \
+  X(float, TypeStructure)                   \
+  X(string, TypeStructure)                  \
+  X(num, TypeStructure)                     \
+  X(arraykey, TypeStructure)                \
+  X(noreturn, TypeStructure)                \
+  X(mixed, TypeStructure)                   \
+  X(nonnull, TypeStructure)                 \
+  X(null, TypeStructure)                    \
+  X(nothing, TypeStructure)                 \
+  X(dynamic, TypeStructure)
+
+#define TYPE_STRUCTURE_CHILDREN_KINDS       \
+  X(shape,            TSShape)              \
+  X(tuple,            TSTuple)              \
+  X(fun,              TSFun)                \
+  X(typevar,          TSTypevar)            \
+  X(class,            TSWithClassishTypes)  \
+  X(interface,        TSWithClassishTypes)  \
+  X(enum,             TSWithClassishTypes)  \
+  X(trait,            TSWithClassishTypes)  \
+  X(dict,             TSWithGenericTypes)   \
+  X(vec,              TSWithGenericTypes)   \
+  X(keyset,           TSWithGenericTypes)   \
+  X(vec_or_dict,      TSWithGenericTypes)   \
+  X(darray,           TSWithGenericTypes)   \
+  X(varray,           TSWithGenericTypes)   \
+  X(varray_or_darray, TSWithGenericTypes)   \
+  X(any_array,        TSWithGenericTypes)
 
 /*
  * This macro describes some properties for each field in TypeStructure.
@@ -54,6 +88,7 @@ using Kind = HPHP::TypeStructure::Kind;
  *   - FieldString : static string name of the field
  *   - DataType : DataType for the field as a TypedValue
  */
+
 #define TYPE_STRUCTURE_FIELDS                                \
   X(nullable,           nullable,             KindOfBoolean) \
   X(soft,               soft,                 KindOfBoolean) \
@@ -63,12 +98,71 @@ using Kind = HPHP::TypeStructure::Kind;
   X(kind,               kind,                 KindOfInt64)   \
   X(alias,              alias,                KindOfString)  \
   X(typevars,           typevars,             KindOfString)  \
-  X(typevarTypes,       typevar_types,        KindOfVec)
+  X(typevarTypes,       typevar_types,        KindOfDict)
+
+/*
+ * The following _FIELDS macros describe properties for each field belonging
+ * specifically to a TypeStructure child struct
+ *
+ *  X(Field, Type, DataType)
+ *   - Field : "m_Field" is the name of the field in the struct
+ *   - Type : type of the field
+ *   - DataType : DataType for the field as a TypedValue
+ */
+
+#define TSSHAPE_FIELDS(X)                                         \
+  X(fields,                 ArrayData*,   KindOfDict)             \
+  X(allows_unknown_fields,  bool,         KindOfBoolean)
+
+#define TSTUPLE_FIELDS(X)                                         \
+  X(elem_types,             ArrayData*,   KindOfVec)     \
+
+#define TSFUN_FIELDS(X)                                           \
+  X(param_types,            ArrayData*,   KindOfVec)       \
+  X(return_type,            ArrayData*,   KindOfDict)      \
+  X(variadic_type,          ArrayData*,   KindOfDict)      \
+
+#define TSTYPEVAR_FIELDS(X)                                       \
+  X(name,                   StringData*,  KindOfString)
+
+#define TSCLASSISH_FIELDS(X)                                                  \
+  X(generic_types,          ArrayData*,   KindOfVec)     \
+  X(classname,              StringData*,  KindOfString)  \
+  X(exact,                  bool,         KindOfBoolean)
+
+#define TSGENERIC_FIELDS(X)                                                   \
+  X(generic_types,          ArrayData*,   KindOfVec)      \
+
+#define TYPE_STRUCTURE_CHILDREN_FIELDS                    \
+  TSSHAPE_FIELDS(X)                                       \
+  TSTUPLE_FIELDS(X)                                       \
+  TSFUN_FIELDS(X)                                         \
+  TSTYPEVAR_FIELDS(X)                                     \
+  TSCLASSISH_FIELDS(X)                                    \
+  TSGENERIC_FIELDS(X)
+
+#define TSCHILDREN_METHODS(T)                                           \
+  void incRefFields();                                                  \
+  void decRefFields();                                                  \
+  bool containsField(const StringData* k) const;                        \
+  bool checkInvariants() const;                                         \
+  void moveFieldsToVanilla(ArrayData* ad) const;                        \
+  static TypedValue tsNvGetStr(const T* tad, const StringData* k);      \
+  static TypedValue tsGetPosKey(const T* tad, ssize_t pos);             \
+  static TypedValue tsGetPosVal(const T* tad, ssize_t pos);             \
+  static void scan(const T* tad, type_scan::Scanner& scanner);          \
+  static void initializeFields(T* tad);                                 \
+  static bool setField(T* tad, StringData* k, TypedValue v);            \
+  static void convertToUncounted(T* tad, const MakeUncountedEnv& env);  \
+  static void releaseUncounted(T* tad);
 
 //////////////////////////////////////////////////////////////////////////////
 
 struct TypeStructureLayout;
 
+/*
+ * TypeStructure should only contain the kinds specified in TYPE_STRUCTURE_KINDS
+ */
 struct TypeStructure : BespokeArray {
   static LayoutIndex GetLayoutIndex();
   static void InitializeLayouts();
@@ -109,6 +203,7 @@ struct TypeStructure : BespokeArray {
   static DataType getKindOfField(const StringData* key);
   static size_t getFieldOffset(const StringData* key);
   static uint8_t getBitOffset(const StringData* key);
+  static bool isGeneralField(const StringData* key);
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(TypeStructure)
@@ -139,37 +234,28 @@ private:
   void setBitField(TypedValue v, BitFieldOffsets offset);
   bool containsField(const StringData* k) const;
 
+  static TypedValue tsNvGetStr(const TypeStructure* tad, const StringData* k);
+
   StringData* m_alias;
   StringData* m_typevars;
   ArrayData* m_typevar_types;
 };
 
-struct TSVoid : TypeStructure {};
-struct TSInt : TypeStructure {};
-struct TSBool : TypeStructure {};
-struct TSFloat : TypeStructure {};
-struct TSString : TypeStructure {};
-struct TSNum : TypeStructure {};
-struct TSArraykey : TypeStructure {};
-struct TSNoreturn : TypeStructure {};
-struct TSMixed : TypeStructure {};
-struct TSNonnull : TypeStructure {};
-struct TSNull : TypeStructure {};
-struct TSNothing : TypeStructure {};
-struct TSDynamic : TypeStructure {};
-
 struct TSShape : TypeStructure {
+  TSCHILDREN_METHODS(TSShape)
 private:
-  bool m_allows_unknown_fields;
   ArrayData* m_fields;
+  bool m_allows_unknown_fields;
 };
 
 struct TSTuple : TypeStructure {
+  TSCHILDREN_METHODS(TSTuple)
 private:
   ArrayData* m_elem_types;
 };
 
 struct TSFun : TypeStructure {
+  TSCHILDREN_METHODS(TSFun)
 private:
   ArrayData* m_param_types;
   ArrayData* m_return_type;
@@ -177,32 +263,32 @@ private:
 };
 
 struct TSTypevar : TypeStructure {
+  TSCHILDREN_METHODS(TSTypevar)
 private:
   StringData* m_name;
 };
 
+/*
+ * TSWithClassishTypes should only contain the kinds as specified
+ * in TYPE_STRUCTURE_CHILDREN_KINDS
+ */
 struct TSWithClassishTypes : TypeStructure {
+  TSCHILDREN_METHODS(TSWithClassishTypes)
 private:
+  ArrayData* m_generic_types;
   StringData* m_classname;
   bool m_exact;
 };
-struct TSClass : TSWithClassishTypes {};
-struct TSInterface : TSWithClassishTypes {};
-struct TSEnum : TSWithClassishTypes {};
-struct TSTrait : TSWithClassishTypes {};
 
+/*
+ * TSWithGenericTypes should only contain the kinds as specified
+ * in TYPE_STRUCTURE_CHILDREN_KINDS
+ */
 struct TSWithGenericTypes : TypeStructure {
+  TSCHILDREN_METHODS(TSWithGenericTypes)
 private:
   ArrayData* m_generic_types;
 };
-struct TSDict : TSWithGenericTypes {};
-struct TSVec : TSWithGenericTypes {};
-struct TSKeyset : TSWithGenericTypes {};
-struct TSVecOrDict : TSWithGenericTypes {};
-struct TSDarray : TSWithGenericTypes {};
-struct TSVarray : TSWithGenericTypes {};
-struct TSVarrayOrDarray : TSWithGenericTypes {};
-struct TSAnyArray : TSWithGenericTypes {};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -218,7 +304,5 @@ struct TypeStructureLayout : ConcreteLayout {
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
 };
-
-// todo: layouts for specific TStructs
 
 }

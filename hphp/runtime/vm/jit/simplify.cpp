@@ -3409,6 +3409,10 @@ SSATmp* simplifyLdTypeStructureVal(State& env, const IRInstruction* inst) {
   }
 
   if (key->hasConstVal(TStr)) {
+    // TODO: don't simplify if field is not in base TypeStructure struct
+    // since children structs cannot handle offset calculation yet
+    if (!bespoke::TypeStructure::isGeneralField(key->strVal())) return nullptr;
+
     auto const dt = bespoke::TypeStructure::getKindOfField(key->strVal());
 
     if (dt == KindOfUninit) {

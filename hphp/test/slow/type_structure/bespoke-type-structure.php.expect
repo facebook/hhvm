@@ -1,4 +1,20 @@
 int(14)
+dict(0) {
+}
+int(14)
+dict(2) {
+  ["a"]=>
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+  ["b"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+string(25) "no unknown fields allowed"
 int(2)
 string(15) "is not nullable"
 int(9)
@@ -15,3 +31,22 @@ dict(1) {
   }
 }
 int(1)
+int(15)
+string(3) "Foo"
+vec(1) {
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}
+int(27)
+vec(2) {
+  dict(1) {
+    ["kind"]=>
+    int(4)
+  }
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}

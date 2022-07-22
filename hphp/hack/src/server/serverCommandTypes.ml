@@ -427,6 +427,9 @@ type _ t =
   | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | CONCATENATE_ALL : string list -> string t
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
+  | PREPARE_CALL_HIERARCHY :
+      labelled_file * int * int
+      -> Lsp.PrepareCallHierarchy.result t
   | BIGCODE : string -> string t
   | PAUSE : bool -> unit t
   | GLOBAL_INFERENCE :

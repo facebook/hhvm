@@ -21,9 +21,6 @@ type range_replace = {
 
 val progress_and_actionRequired_counter : int ref
 
-val sym_occ_kind_to_lsp_sym_info_kind :
-  SymbolOccurrence.kind -> Lsp.SymbolInformation.symbolKind
-
 val url_scheme_regex : Str.regexp
 
 val lsp_uri_to_path : Lsp.documentUri -> string
@@ -49,6 +46,16 @@ val get_char_from_lsp_position : string -> Lsp.position -> char
 
 val apply_changes_unsafe :
   string -> Lsp.DidChange.textDocumentContentChangeEvent list -> string
+
+val sym_occ_kind_to_lsp_sym_info_kind :
+  SymbolOccurrence.kind -> Lsp.SymbolInformation.symbolKind
+
+val pos_to_lsp_range : 'a Pos.pos -> Lsp.range
+
+val symbol_to_lsp_call_item :
+  Relative_path.t SymbolOccurrence.t ->
+  Relative_path.t SymbolDefinition.t option ->
+  Lsp.CallHierarchyItem.t
 
 val pos_compare : Lsp.position -> Lsp.position -> int
 

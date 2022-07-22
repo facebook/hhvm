@@ -116,5 +116,5 @@ jobs:
         EOF
         sudo chmod 600 /etc/passwd-s3fs
         sudo mkdir /mnt/test-universal-packages
-        sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f -o endpoint=us-west-2
+        sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f -o endpoint=us-west-2 -ouid="$UID"
         echo 'Hello, World!' > /mnt/test-universal-packages/hello

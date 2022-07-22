@@ -2520,14 +2520,6 @@ fn assemble_unescaped_unquoted_str<'arena>(
     Ok(Str::new_slice(alloc, &st))
 }
 
-fn assemble_unquoted_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Str<'arena>> {
-    let st = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-    Ok(Str::new_slice(alloc, st))
-}
-
 fn assemble_unescaped_unquoted_triple_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -3358,7 +3350,7 @@ fn assemble_new_struct_dict<'arena>(
     token_iter.expect(Token::into_lt)?;
     let mut d = Vec::new();
     while !token_iter.peek_if(Token::is_gt) {
-        d.push(assemble_unquoted_str(alloc, token_iter)?);
+        d.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
     }
     token_iter.expect(Token::into_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewStructDict(

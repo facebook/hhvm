@@ -97,6 +97,8 @@ jobs:
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
     - run: sudo -i nix profile install nixpkgs#s3fs
+    - run: sudo apt install fuse-utils
+    - run: sudo wget --output-document=/usr/bin/goofys https://github.com/kahing/goofys/releases/latest/download/goofys
     - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true
@@ -120,11 +122,8 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -e
-        sudo tee /etc/passwd-s3fs <<EOF
-        $AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY
-        EOF
-        sudo chmod 600 /etc/passwd-s3fs
         sudo mkdir /mnt/test-universal-packages
-        AWSSESSIONTOKEN=$AWS_SESSION_TOKEN sudo -i s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f -o iam_role=arn:aws:iam::223121549624:role/hhvm-github-actions -o use_session_token -o allow_other -o "uid=$UID" -o endpoint=us-west-2
-        sudo chown "$USER" /mnt/test-universal-packages/
-        echo 'Hello, World!' > /mnt/test-universal-packages/hello
+        sudo goofys hhvm-downloads:/test-universal-packages /mnt/test-universal-packages
+        sudo tee /mnt/test-universal-packages/hello <<EOF
+        Hello, World!
+        EOF

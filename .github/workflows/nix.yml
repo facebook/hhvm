@@ -99,6 +99,7 @@ jobs:
     # Install s3fs from nix instead of apt because the s3fs version in
     # ubuntu-latest is too old to support AWS role
     - run: nix profile install nixpkgs#s3fs
+    - run: sudo apt-get install reprepro
     - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true
@@ -119,15 +120,11 @@ jobs:
         gpg --import
     - name: Mount Apt Repository
       run: |
-        set -e
-        
-        HHVM_DOWNLOAD="$(mktemp --directory)"
-        
+        HHVM_DOWNLOAD="$(mktemp --directory)" &&        
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
-        s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD"
-
+        s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &
         echo "REPREPRO_BASE_DIR=$HHVM_DOWNLOAD/universal" >> $GITHUB_ENV
     - name: Initiate Apt Repository
       run: |
@@ -136,11 +133,8 @@ jobs:
         touch "$REPREPRO_BASE_DIR/conf/distributions"
     - name: Create nightly suite
       run: |
-        set -e
-        if reprepro --list-max 1 list nightly
+        if [[ ! -d "$REPREPRO_BASE_DIR/dists/nightly" ]]
         then
-          echo 'Do not create nightly suite because it is preexisting'
-        else
           (
             echo ''
             echo 'Origin: HHVM'
@@ -151,7 +145,7 @@ jobs:
             echo 'Components: main'
             echo 'Description: Apt suite for HHVM nightly'
             echo 'SignWith: D386EB94'
-          ) >> "$REPREPRO_BASE_DIR/conf/distributions"
+          ) >> "$REPREPRO_BASE_DIR/conf/distributions" &&
           reprepro export nightly
         fi
     - run: reprepro includedeb nightly bundle.deb

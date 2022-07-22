@@ -227,6 +227,17 @@ let should_ignore fine_dependent dependency =
     let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false dep in
     Option.is_some @@ String.chop_prefix root ~prefix:"HH\\"
   in
+
+  (* Checks that this is the function call created by [Naming.invalid_expr_],
+   * which doesn't provide a nicer way for checking this. Note the missing
+   * toplevel \ *)
+  let is_invalid_expr_sentinel_fun dep =
+    match Typing_deps.Dep.dep_kind_of_variant dep with
+    | Typing_deps.Dep.KFun ->
+      let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false dep in
+      String.(root = "invalid_expr")
+    | _ -> false
+  in
   let has_useful_kind dep =
     match Typing_deps.Dep.dep_kind_of_variant dep with
     | Typing_deps.Dep.KFun
@@ -255,6 +266,8 @@ let should_ignore fine_dependent dependency =
   || is_hh_def dependency
   || (not @@ has_useful_kind fine_dependent)
   || (not @@ has_useful_kind dependency)
+  || is_invalid_expr_sentinel_fun fine_dependent
+  || is_invalid_expr_sentinel_fun dependency
 
 let add_fine_dep mode fine_dependent dependency =
   if not @@ should_ignore fine_dependent dependency then

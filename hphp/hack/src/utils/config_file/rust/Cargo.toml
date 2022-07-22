@@ -9,7 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
-lazy_static = "1.0"
+lazy_static = "1.4"
 regex = "1.5.4"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 sha-1 = "0.10"

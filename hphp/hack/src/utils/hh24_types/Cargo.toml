@@ -10,7 +10,7 @@ path = "hh24_types.rs"
 [dependencies]
 anyhow = "1.0.56"
 depgraph = { path = "../../depgraph/cargo/depgraph" }
-derive_more = "0.99.3"
+derive_more = "0.99.17"
 hh_hash = { path = "../hh_hash" }
 nohash-hasher = "0.2"
 oxidized_by_ref = { path = "../../oxidized_by_ref" }

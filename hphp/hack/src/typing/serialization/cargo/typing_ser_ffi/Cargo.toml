@@ -14,7 +14,7 @@ crate-type = ["lib", "staticlib"]
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 framing = { path = "../../framing" }
-lazy_static = "1.0"
+lazy_static = "1.4"
 lz4 = "1.23.1"
 ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }

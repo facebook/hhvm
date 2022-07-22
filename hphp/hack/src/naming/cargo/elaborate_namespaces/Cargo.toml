@@ -9,7 +9,7 @@ path = "../../elaborate_namespaces_visitor.rs"
 
 [dependencies]
 core_utils_rust = { path = "../../../utils/core" }
-lazy_static = "1.0"
+lazy_static = "1.4"
 namespaces_rust = { path = "../../../parser/cargo/namespaces" }
 naming_special_names_rust = { path = "../.." }
 ocamlrep = { path = "../../../ocamlrep" }

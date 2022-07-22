@@ -14,7 +14,7 @@ escaper = { path = "../../utils/escaper" }
 hash = { path = "../../utils/hash" }
 html_entities = { path = "../../utils/html_entities" }
 itertools = "0.10.3"
-lazy_static = "1.0"
+lazy_static = "1.4"
 lint_rust = { path = "../../utils/lint" }
 naming_special_names_rust = { path = "../../naming" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }

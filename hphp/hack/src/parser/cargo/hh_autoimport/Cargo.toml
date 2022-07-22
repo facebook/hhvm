@@ -8,4 +8,4 @@ edition = "2021"
 path = "../../hh_autoimport.rs"
 
 [dependencies]
-lazy_static = "1.0"
+lazy_static = "1.4"

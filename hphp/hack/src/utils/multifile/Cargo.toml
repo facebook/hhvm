@@ -9,7 +9,7 @@ path = "../multifile.rs"
 
 [dependencies]
 anyhow = "1.0.56"
-lazy_static = "1.0"
+lazy_static = "1.4"
 regex = "1.5.4"
 
 [dev-dependencies]

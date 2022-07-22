@@ -1,0 +1,22 @@
+on:
+  schedule:
+    - cron: "42 15 * * *"
+jobs:
+  nix-flake-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            extra-experimental-features = nix-command flakes
+            extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+            extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+            extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+      - run: nix flake update
+      - uses: peter-evans/create-pull-request@v4
+        with:
+          branch: nix-flake-update/${{github.ref_name}}
+          title: Update flake lock file
+          commit-message: Update flake lock file

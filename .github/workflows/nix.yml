@@ -119,12 +119,13 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -e
-        sudo mkdir /mnt/hhvm-downloads
-        sudo chown "$USER" /mnt/hhvm-downloads
+        HHVM_DOWNLOAD="$(mktemp)"
+        mkdir "$HHVM_DOWNLOAD"
+        sudo chown "$USER" "$HHVM_DOWNLOAD"
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
-        s3fs -f -o use_session_token hhvm-downloads /mnt/hhvm-downloads &
-        mkdir -p /mnt/hhvm-downloads/test-universal-packages
-        echo 'Hello, World!' > /mnt/hhvm-downloads/test-universal-packages/hello
+        s3fs -f -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &
+        mkdir -p "$HHVM_DOWNLOAD/test-universal-packages"
+        echo 'Hello, World!' > "$HHVM_DOWNLOAD/test-universal-packages/hello"
 

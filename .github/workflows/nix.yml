@@ -96,10 +96,7 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
-    - run: sudo -i nix profile install nixpkgs#s3fs
-    - run: sudo apt-get install -y reprepro fuse
-    - run: sudo wget --output-document=/usr/bin/goofys https://github.com/kahing/goofys/releases/latest/download/goofys
-    - run: sudo chmod +x /usr/bin/goofys
+    - run: nix profile install nixpkgs#s3fs
     - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true
@@ -125,7 +122,7 @@ jobs:
         set -e
         sudo mkdir /mnt/hhvm-downloads
         sudo chown "$USER" /mnt/hhvm-downloads
-        goofys -f hhvm-downloads /mnt/hhvm-downloads
+        s3fs -o use_session_token hhvm-downloads /mnt/hhvm-downloads
         mkdir -p /mnt/hhvm-downloads/test-universal-packages
         echo 'Hello, World!' > /mnt/hhvm-downloads/test-universal-packages/hello
 

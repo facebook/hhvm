@@ -85,12 +85,21 @@ jobs:
     container:
       image: nixos/nix
     steps:
-    - run: nix-env -iA nixos.s3fs
     - uses: actions/checkout@v3
     - name: Download the bundle.deb from build-and-test job
       uses: actions/download-artifact@v2
       with:
         name: bundle.deb
+    - uses: cachix/install-nix-action@v15
+      with:
+        extra_nix_config: |
+          extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-experimental-features = nix-command flakes
+          extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+    - run: nix profile install nixpkgs.s3fs
+    - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials

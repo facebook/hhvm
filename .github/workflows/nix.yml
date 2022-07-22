@@ -109,13 +109,12 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -o pipefail
-        GPG_KEY_FILE="$(mktemp)" &&
         aws kms decrypt \
             --ciphertext-blob "fileb://$PWD/gpg-key.kms-ciphertext" \
             --query Plaintext \
             --output text |
-        base64 --decode > "$GPG_KEY_FILE" &&
-        echo "GPG_KEY_FILE=$GPG_KEY_FILE" >> $GITHUB_ENV
+        base64 --decode |
+        gpg --import
     - name: Upload the deb package
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |

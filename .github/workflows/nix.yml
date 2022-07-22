@@ -120,6 +120,7 @@ jobs:
       run: |
         set -e
         HHVM_DOWNLOAD="$(mktemp --directory)"
+        ls -a "$HHVM_DOWNLOAD"
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \

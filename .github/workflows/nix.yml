@@ -115,7 +115,7 @@ jobs:
             --output text |
         base64 --decode |
         gpg --import
-    - name: Mount hhvm-downloads:universal
+    - name: Mount Apt Repository
       run: |
         set -e
         
@@ -126,11 +126,30 @@ jobs:
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
         s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD"
 
-        UNIVERSAL="$HHVM_DOWNLOAD/universal"
-
-        mkdir -p "$UNIVERSAL"
-
-        echo "UNIVERSAL=$UNIVERSAL" >> $GITHUB_ENV
-    - working-directory: ${{env.UNIVERSAL}}
+        echo "REPREPRO_BASE_DIR=$HHVM_DOWNLOAD/universal" >> $GITHUB_ENV
+    - name: Initiate Apt Repository
       run: |
-        ls 
+        set -e
+        mkdir -p "$REPREPRO_BASE_DIR/conf"
+        touch "$REPREPRO_BASE_DIR/conf/distributions"
+    - name: Create nightly suite
+      run: |
+        set -e
+        if reprepro --list-max 1 list nightly
+        then
+          echo 'Don't create nightly suite because it is preexisting'
+        else
+          (
+            echo ''
+            echo 'Origin: HHVM'
+            echo 'Label: HHVM'
+            echo 'Codename: nightly'
+            echo 'Suite: nightly'
+            echo 'Architectures: amd64'
+            echo 'Components: main'
+            echo 'Description: Apt suite for HHVM nightly'
+            echo 'SignWith: D386EB94'
+          ) >> "$REPREPRO_BASE_DIR/conf/distributions"
+          reprepro export nightly
+        fi
+    - run: reprepro includedeb nightly bundle.deb

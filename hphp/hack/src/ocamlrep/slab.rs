@@ -59,7 +59,15 @@ const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
 //   - A magic number, written only after the value tree is allocated. The
 //     presence of the magic number indicates that this is a valid Slab.
 //
-// Example (for the value `Some "a"`, rebased to address 0x00):
+// Example:
+//
+// Recall that memory is byte addressable. On a 64-bit architecture, two "words"
+// that are adjacent to each other have 8 bytes between them. So, if the
+// `value` p is the memory address x then, the next word pointed to by p + 1 is
+// the address x + 8.
+//
+// `Some "a"` rebased to to address 0x00
+// =====================================
 //
 // | address | value                         | comment                      |
 // | ------- | ----------------------------- | ---------------------------- |
@@ -69,7 +77,7 @@ const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
 // | 0x18    | Header { size: 1, tag: 0 }    | Some's tag is 0              |
 // | 0x20    | 0x30                          | pointer (base ptr + 6 words) |
 // | 0x28    | Header { size: 1, tag: 252 }, | STRING_TAG = 252             |
-// | 0x30    | 0x0600000000000061,           | "a" (0x06 = padding byte)    |
+// | 0x30    | 0x0600000000000061,           | "a" (0x06=num padding bytes) |
 type Slab<'a> = [OpaqueValue<'a>];
 
 // Private convenience methods for Slab (it's a bit easier to define them as

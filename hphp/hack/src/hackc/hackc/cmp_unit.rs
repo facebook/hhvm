@@ -265,12 +265,15 @@ where
 
 /// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
 /// T126391106: BCP drops information
-fn cmp_includes<'a, V, F>(a: &'a [V], b: &'a [V], f_eq: F) -> Result<()>
-where
-    F: Fn(&V, &V) -> Result<()>,
-{
-    for (i, (av, bv)) in a.iter().zip(b.iter()).enumerate() {
-        f_eq(av, bv).with_indexed(|| i.to_string())?;
+/// T126543346: Difficult to verify IncludeRootRelative
+fn cmp_includes(
+    a: &Slice<'_, hhbc::hhas_symbol_refs::IncludePath<'_>>,
+    b: &Slice<'_, hhbc::hhas_symbol_refs::IncludePath<'_>>,
+) -> Result<()> {
+    for bv in b.iter() {
+        if !a.iter().any(|av| cmp_include(av, bv).is_ok()) {
+            bail!("{:?} has no matching includes", bv);
+        }
     }
     Ok(())
 }
@@ -766,6 +769,10 @@ fn cmp_include(
                     bail!("Mismatch {:?} vs {:?}", a, b)
                 }
             }
+            (
+                hhbc::hhas_symbol_refs::IncludePath::IncludeRootRelative(_, _),
+                hhbc::hhas_symbol_refs::IncludePath::Absolute(_),
+            ) => Ok(()),
             _ => bail!("Mismatch {:?} vs {:?}", a, b),
         }
     } else {
@@ -787,7 +794,7 @@ fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()>
         classes: b_classes,
     } = b;
 
-    cmp_includes(a_includes, b_includes, cmp_include).qualified("includes")?;
+    cmp_includes(a_includes, b_includes).qualified("includes")?;
     cmp_slice(a_constants, b_constants, cmp_eq).qualified("constants")?;
     cmp_slice(a_functions, b_functions, cmp_eq).qualified("functions")?;
     cmp_slice(a_classes, b_classes, cmp_eq).qualified("classes")?;

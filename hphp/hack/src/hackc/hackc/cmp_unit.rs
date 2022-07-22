@@ -510,7 +510,8 @@ fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
     cmp_eq(a_is_variadic, b_is_variadic).qualified("is_variadic")?;
     cmp_eq(a_is_inout, b_is_inout).qualified("is_inout")?;
     cmp_eq(a_is_readonly, b_is_readonly).qualified("is_readonly")?;
-    cmp_eq(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
+    // T126391106 -- BCP sorts attributes of parameters before printing.
+    cmp_attributes(a_user_attributes, b_user_attributes).qualified("user_attributes")?;
     cmp_eq(a_type_info, b_type_info).qualified("type_info")?;
     cmp_option(
         a_default_value.as_ref().into_option(),

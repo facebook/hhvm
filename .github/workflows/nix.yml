@@ -96,7 +96,7 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
-    - run: nix profile install nixpkgs#s3fs
+    - run: sudo nix profile install nixpkgs#s3fs
     - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true

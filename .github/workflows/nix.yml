@@ -119,8 +119,7 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -e
-        HHVM_DOWNLOAD="$(mktemp)"
-        mkdir "$HHVM_DOWNLOAD"
+        HHVM_DOWNLOAD="$(mktemp --directory)"
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \

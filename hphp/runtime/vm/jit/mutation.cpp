@@ -875,12 +875,12 @@ bool retypeDests(IRInstruction* inst, const IRUnit* /*unit*/) {
  *   target was earlier in RPO we have to schedule another loop to start at or
  *   earlier than that target block.
  */
-bool reflowTypes(IRUnit& unit) {
+void reflowTypes(IRUnit& unit) {
   using RPOId = uint32_t;
   auto const rpoBlocks = rpoSortCfg(unit);
   auto const ids = numberBlocks(unit, rpoBlocks);
-  auto const endRPOId = safe_cast<RPOId>(rpoBlocks.size());
 
+  RPOId firstUnstable = 0;
   for (auto const block : rpoBlocks) {
     auto const inst = &block->front();
     if (inst->is(DefLabel)) {
@@ -890,39 +890,18 @@ bool reflowTypes(IRUnit& unit) {
     }
   }
 
-  RPOId firstUnstable = 0;
-  RPOId firstBottom = endRPOId;
-  while (firstUnstable < endRPOId) {
-    auto nextFirstUnstable = endRPOId;
-    if (firstBottom >= firstUnstable) firstBottom = endRPOId;
+  while (firstUnstable < rpoBlocks.size()) {
+    auto nextFirstUnstable = safe_cast<RPOId>(rpoBlocks.size());
     FTRACE(5, "reflowTypes: starting iteration at {}/{})\n",
-           firstUnstable, endRPOId);
-    for (auto id = firstUnstable; id < endRPOId; ++id) {
+           firstUnstable, rpoBlocks.size());
+    for (auto id = firstUnstable; id < rpoBlocks.size(); ++id) {
       auto const block = rpoBlocks[id];
-      FTRACE(5, "reflowTypes: visiting block {} "
-                "(rpo: {}, firstUnstable: {}, firstBottom: {})\n",
-             block->id(), ids[block], nextFirstUnstable, firstBottom);
+      FTRACE(5, "reflowTypes: visiting block {} (rpo: {}, firstUnstable: {})\n",
+             block->id(), ids[block], nextFirstUnstable);
 
       for (auto& inst : *block) {
-        if (!inst.is(DefLabel)) retypeDests(&inst, &unit);
-
-        // If this instruction reachable, but its next block unreachable it is
-        // okay for it to def a Bottom tmp.  It would be better for such
-        // instructions to have a better simplification option to an always
-        // taken variant, but not necessarily all throwing operations have such
-        // an alternate representation.
-        auto const unreachableNext = inst.next() && inst.taken()
-                                     && inst.next()->isUnreachable()
-                                     && !inst.taken()->isUnreachable();
-        if (unreachableNext) continue;
-
-        for (auto const dst : inst.dsts()) {
-          if (dst->type() == TBottom) {
-            FTRACE(5, "reflowTypes: found bottom dst {} (at rpo: {})\n",
-                   dst->toString(), id);
-            firstBottom = std::min(firstBottom, id);
-          }
-        }
+        if (inst.is(DefLabel)) continue;
+        retypeDests(&inst, &unit);
       }
 
       auto const jmp = &block->back();
@@ -948,7 +927,6 @@ bool reflowTypes(IRUnit& unit) {
     }
     firstUnstable = nextFirstUnstable;
   }
-  return firstBottom != endRPOId;
 }
 
 void insertNegativeAssertTypes(IRUnit& unit, const BlockList& blocks) {

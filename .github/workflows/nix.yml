@@ -82,8 +82,10 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
     needs: build-and-test
+    container:
+      image: nixos/nix
     steps:
-    - run: sudo apt-get install s3fs
+    - run: nix-env -iA nixos.s3fs
     - uses: actions/checkout@v3
     - name: Download the bundle.deb from build-and-test job
       uses: actions/download-artifact@v2

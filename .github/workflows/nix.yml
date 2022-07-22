@@ -110,8 +110,8 @@ jobs:
     - name: Upload the deb package
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
-        sudo mkdir /mnt/test-universal-packages
-        export AWSACCESSKEYID="$AWS_ACCESS_KEY_ID"
-        export AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY"
-        export AWSSESSIONTOKEN="$AWS_SESSION_TOKEN"
+        sudo mkdir /mnt/test-universal-packages &&
+        AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
+        AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
+        AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
         sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f

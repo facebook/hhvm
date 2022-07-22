@@ -3104,6 +3104,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
+
         let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
@@ -3115,6 +3116,21 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         } else {
             &[][..]
         };
+
+        let mut docs_url = None;
+        for attribute in attributes.iter() {
+            match attribute {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
         let internal = modifiers
             .iter()
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
@@ -3136,7 +3152,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             is_ctx: false,
             attributes: user_attributes,
             internal,
-            docs_url: None,
+            docs_url,
         });
 
         self.add_typedef(name, typedef);

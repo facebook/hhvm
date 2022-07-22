@@ -194,17 +194,28 @@
           }
         },
         "module_membership_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"foo",
-            "offset":57,
-            "leading_width":0,
-            "width":3,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"foo",
+                    "offset":57,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":3
+                  }
+                }
+              }
+            ]
           }
         },
         "module_membership_declaration_semicolon":{
@@ -256,17 +267,28 @@
           }
         },
         "module_membership_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"Foo",
-            "offset":77,
-            "leading_width":0,
-            "width":3,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
-            "line_number":4
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"Foo",
+                    "offset":77,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
+                    "line_number":4
+                  }
+                }
+              }
+            ]
           }
         }
       },

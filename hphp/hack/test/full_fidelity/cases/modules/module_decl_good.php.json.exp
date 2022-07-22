@@ -208,17 +208,28 @@
           }
         },
         "module_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"Foobar",
-            "offset":63,
-            "leading_width":0,
-            "width":6,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
-            "line_number":5
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"Foobar",
+                    "offset":63,
+                    "leading_width":0,
+                    "width":6,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
+                    "line_number":5
+                  }
+                }
+              }
+            ]
           }
         },
         "module_declaration_left_brace":{
@@ -281,17 +292,28 @@
           }
         },
         "module_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"BiNgBaZ",
-            "offset":87,
-            "leading_width":0,
-            "width":7,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
-            "line_number":9
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"BiNgBaZ",
+                    "offset":87,
+                    "leading_width":0,
+                    "width":7,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
+                    "line_number":9
+                  }
+                }
+              }
+            ]
           }
         },
         "module_declaration_left_brace":{
@@ -559,17 +581,28 @@
           }
         },
         "module_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"Lol_Attributes",
-            "offset":151,
-            "leading_width":0,
-            "width":14,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
-            "line_number":13
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"Lol_Attributes",
+                    "offset":151,
+                    "leading_width":0,
+                    "width":14,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
+                    "line_number":13
+                  }
+                }
+              }
+            ]
           }
         },
         "module_declaration_left_brace":{

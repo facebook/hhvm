@@ -194,17 +194,28 @@
           }
         },
         "module_membership_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"foo",
-            "offset":57,
-            "leading_width":0,
-            "width":3,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"foo",
+                    "offset":57,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":3
+                  }
+                }
+              }
+            ]
           }
         },
         "module_membership_declaration_semicolon":{
@@ -239,20 +250,31 @@
           }
         },
         "module_membership_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"Foo",
-            "offset":69,
-            "leading_width":5,
-            "width":3,
-            "trailing_width":1,
-            "leading":[
-              {"kind":"extra_token_error","text":"type","offset":69,"width":4},
-              {"kind":"whitespace","text":" ","offset":73,"width":1}
-            ],
-            "trailing":[{"kind":"whitespace","text":" ","offset":77,"width":1}],
-            "line_number":4
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"Foo",
+                    "offset":69,
+                    "leading_width":5,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[
+                      {"kind":"extra_token_error","text":"type","offset":69,"width":4},
+                      {"kind":"whitespace","text":" ","offset":73,"width":1}
+                    ],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":77,"width":1}],
+                    "line_number":4
+                  }
+                }
+              }
+            ]
           }
         }
       },

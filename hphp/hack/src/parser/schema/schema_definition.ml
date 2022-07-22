@@ -2379,9 +2379,7 @@ let schema : schema_node list =
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("new_keyword", Token);
           ("module_keyword", Token);
-          ("name", Token)
-          (* TODO(T108206307) This might need its own node in the future, to
-           * represent module names *);
+          ("name", Aggregate Name);
           ("left_brace", Token);
           ("right_brace", Token);
         ];
@@ -2394,7 +2392,11 @@ let schema : schema_node list =
       prefix = "module_membership_declaration";
       aggregates = [TopLevelDeclaration];
       fields =
-        [("module_keyword", Token); ("name", Token); ("semicolon", Token)];
+        [
+          ("module_keyword", Token);
+          ("name", Aggregate Name);
+          ("semicolon", Token);
+        ];
     };
   ]
 

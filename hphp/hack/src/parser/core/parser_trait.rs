@@ -615,6 +615,31 @@ where
         }
     }
 
+    fn require_qualified_module_name(&mut self) -> S::Output {
+        let mut parts = vec![];
+
+        loop {
+            let name = self.require_token(TokenKind::Name, Errors::error1004);
+
+            if name.is_missing() {
+                break;
+            }
+
+            let dot = self.optional_token(TokenKind::Dot);
+            let dot_is_missing = dot.is_missing();
+
+            parts.push(self.sc_mut().make_list_item(name, dot));
+
+            if dot_is_missing {
+                break;
+            }
+        }
+
+        let pos = self.pos();
+        let list_node = self.sc_mut().make_list(parts, pos);
+        self.sc_mut().make_qualified_name(list_node)
+    }
+
     fn require_name(&mut self) -> S::Output {
         self.require_token(TokenKind::Name, Errors::error1004)
     }

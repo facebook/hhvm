@@ -2451,10 +2451,8 @@ where
     fn parse_module_declaration(&mut self, attrs: S::Output) -> S::Output {
         let new_kw = self.assert_token(TokenKind::New);
         let module_kw = self.assert_token(TokenKind::Module);
-        // TODO(T108206307) This will probably change if we have a different syntax
-        // for module names.
 
-        let name = self.require_name();
+        let name = self.require_qualified_module_name();
         let lb = self.require_left_brace();
         let rb = self.require_right_brace();
         self.sc_mut()
@@ -2463,7 +2461,7 @@ where
 
     fn parse_module_membership_declaration(&mut self) -> S::Output {
         let module_kw = self.assert_token(TokenKind::Module);
-        let name = self.require_name();
+        let name = self.require_qualified_module_name();
         let semicolon = self.require_semicolon();
         self.sc_mut()
             .make_module_membership_declaration(module_kw, name, semicolon)

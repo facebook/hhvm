@@ -170,6 +170,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
+        Id(pos, self.qualified_name_string_from_parts(parts, pos))
+    }
+
+    fn qualified_name_string_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> &'a str {
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
         let mut len = 0;
@@ -190,8 +194,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         // qualified name in the original source text instead of copying it.
         let source_len = pos.end_offset() - pos.start_offset();
         if source_len == len {
-            let qualified_name: &'a str = self.str_from_utf8(self.source_text_at_pos(pos));
-            return Id(pos, qualified_name);
+            return self.str_from_utf8(self.source_text_at_pos(pos));
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
         let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
@@ -199,11 +202,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
-                &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
+                &Node::ListItem(&(Node::Name(&(name, _)), Node::Token(qualifier))) => {
                     qualified_name.push_str(name);
-                    qualified_name.push_str("\\");
+                    match qualifier.kind() {
+                        TokenKind::Dot => qualified_name.push_str("."),
+                        TokenKind::Backslash => qualified_name.push_str("\\"),
+                        _ => {}
+                    }
                 }
-                &Node::ListItem(&(Node::Token(t), _backslash))
+                &Node::ListItem(&(Node::Token(t), _qualifier))
                     if t.kind() == TokenKind::Namespace =>
                 {
                     qualified_name.push_str("namespace\\");
@@ -213,7 +220,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         }
         debug_assert_eq!(len, qualified_name.len());
         debug_assert_eq!(len, qualified_name.capacity());
-        Id(pos, qualified_name.into_bump_str())
+        qualified_name.into_bump_str()
     }
 
     /// If the given node is an identifier, XHP name, or qualified name,
@@ -5751,9 +5758,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _right_brace: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::Name(&(name, mdt_pos)) => {
+            Node::QualifiedName(&(parts, mdt_pos)) => {
                 let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
-                self.add_module(name, module);
+                self.add_module(
+                    self.qualified_name_string_from_parts(parts, mdt_pos),
+                    module,
+                );
             }
             _ => {}
         }
@@ -5767,9 +5777,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _semicolon: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::Name(&(name, pos)) => {
+            Node::QualifiedName(&(parts, pos)) => {
                 if self.module.is_none() {
-                    self.module = Some(oxidized_by_ref::ast::Id(pos, name));
+                    self.module = Some(oxidized_by_ref::ast::Id(
+                        pos,
+                        self.qualified_name_string_from_parts(parts, pos),
+                    ));
                 }
             }
             _ => {}

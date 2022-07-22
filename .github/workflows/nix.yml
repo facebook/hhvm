@@ -124,7 +124,7 @@ jobs:
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
-        s3fs -f -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &
+        s3fs -f -o nonempty -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &
         mkdir -p "$HHVM_DOWNLOAD/test-universal-packages"
         echo 'Hello, World!' > "$HHVM_DOWNLOAD/test-universal-packages/hello2"
 

@@ -116,6 +116,6 @@ jobs:
         EOF
         sudo chmod 600 /etc/passwd-s3fs
         sudo mkdir /mnt/test-universal-packages
-        AWSSESSIONTOKEN=$AWS_SESSION_TOKEN sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f -o use_session_token -o "uid=$UID" -o endpoint=us-west-2
+        AWSSESSIONTOKEN=$AWS_SESSION_TOKEN sudo s3fs hhvm-downloads:/test-universal-packages /mnt/test-universal-packages -f -o "uid=$UID" -o endpoint=us-west-2
         sudo chown "$USER" /mnt/test-universal-packages/
         echo 'Hello, World!' > /mnt/test-universal-packages/hello

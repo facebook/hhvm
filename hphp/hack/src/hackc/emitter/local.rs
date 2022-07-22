@@ -4,13 +4,20 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc::Local;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct LocalGen {
     pub counter: Counter,
     pub dedicated: Dedicated,
 }
 
 impl LocalGen {
+    pub fn new() -> Self {
+        Self {
+            counter: Counter::new(),
+            dedicated: Dedicated::default(),
+        }
+    }
+
     pub fn get_unnamed(&mut self) -> Local {
         self.counter.next_unnamed(&self.dedicated)
     }
@@ -70,7 +77,7 @@ impl LocalGen {
     pub fn reset(&mut self, next: Local) {
         *self = Self {
             counter: Counter { next },
-            ..Default::default()
+            dedicated: Dedicated::default(),
         }
     }
 }
@@ -111,12 +118,16 @@ pub struct Dedicated {
     pub temp_map: TempMap,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Counter {
     pub next: Local,
 }
 
 impl Counter {
+    fn new() -> Self {
+        Self { next: Local::ZERO }
+    }
+
     fn next_unnamed(&mut self, dedicated: &Dedicated) -> Local {
         loop {
             let curr = self.next;

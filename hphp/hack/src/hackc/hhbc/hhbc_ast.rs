@@ -17,7 +17,7 @@ pub type RepoAuthType<'arena> = Str<'arena>;
 pub type StackIndex = u32;
 pub type ClassNum = u32;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
 pub struct Dummy(bool);
 
@@ -27,7 +27,7 @@ impl Dummy {
 
 /// HHBC encodes bytecode offsets as i32 (HPHP::Offset) so u32
 /// is plenty of range for label ids.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(transparent)]
 pub struct Label(pub u32);
 
@@ -39,6 +39,11 @@ impl std::fmt::Display for Label {
 
 impl Label {
     pub const INVALID: Label = Label(u32::MAX);
+    pub const ZERO: Label = Label(0);
+
+    pub fn is_valid(&self) -> bool {
+        self.0 != u32::MAX
+    }
 }
 
 pub type NumParams = u32;
@@ -124,7 +129,7 @@ impl<'arena> FCallArgs<'arena> {
 /// Local variable numbers are ultimately encoded as IVA, limited to u32.
 /// Locals with idx < num_params + num_decl_vars are considered named,
 /// higher numbered locals are considered unnamed.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub struct Local {
     /// 0-based index into HHBC stack frame locals.
@@ -139,6 +144,7 @@ impl std::fmt::Display for Local {
 
 impl Local {
     pub const INVALID: Self = Self { idx: u32::MAX };
+    pub const ZERO: Self = Self { idx: 0 };
 
     pub fn new(x: usize) -> Self {
         Self { idx: x as u32 }
@@ -157,7 +163,7 @@ impl Local {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[repr(C)]
 pub struct IterId {
     /// 0-based index into HHBC stack frame iterators
@@ -176,6 +182,16 @@ pub struct IterArgs {
     pub iter_id: IterId,
     pub key_id: Local,
     pub val_id: Local,
+}
+
+impl std::default::Default for IterArgs {
+    fn default() -> Self {
+        Self {
+            iter_id: Default::default(),
+            key_id: Local::INVALID,
+            val_id: Local::INVALID,
+        }
+    }
 }
 
 /// Conventionally this is "A_" followed by an integer
@@ -275,11 +291,31 @@ impl From<Visibility> for hhvm_types_ffi::Attr {
 /// A Contiguous range of locals. The canonical (default) empty
 /// range is {0, 0}. This is normally only used for unnamed locals
 /// but nothing prevents arbitrary ranges.
-#[derive(Clone, Copy, Debug, Default, Hash, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 #[repr(C)]
 pub struct LocalRange {
     pub start: Local,
     pub len: u32,
+}
+
+impl LocalRange {
+    pub const EMPTY: LocalRange = LocalRange {
+        start: Local::INVALID,
+        len: 0,
+    };
+
+    pub fn from_local(local: Local) -> LocalRange {
+        LocalRange {
+            start: local,
+            len: 1,
+        }
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = Local> {
+        let start = self.start.as_usize();
+        let end = start + self.len as usize;
+        (start..end).map(Local::from_usize)
+    }
 }
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq, Default)]

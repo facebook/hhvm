@@ -36,7 +36,7 @@ fn create_label_ref_map<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Label>, HashMap<u32, Label>) {
-    let mut label_gen = LabelGen::default();
+    let mut label_gen = LabelGen::new();
     let mut used = HashSet::default();
     let mut offset_to_label = HashMap::default();
 

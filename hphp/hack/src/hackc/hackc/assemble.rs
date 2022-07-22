@@ -1720,7 +1720,7 @@ fn assemble_instr<'arena, 'a>(
     decl_map: &mut HashMap<Vec<u8>, u32>,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$");
+    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
     if let Some(mut sl_lexer) = token_iter.fetch_until_newline() {
         if sl_lexer.peek_if(Token::is_decl) {
             // Not all pseudos are decls, but all instruction decls are pseudos
@@ -3395,7 +3395,7 @@ fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc:
     if needs_colon {
         token_iter.expect(Token::into_colon)?;
     }
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$");
+    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
     if label_reg.is_match(lcl) {
         if lcl[0] == b'D' {
             lcl = &lcl[2..];

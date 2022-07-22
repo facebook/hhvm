@@ -36,28 +36,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Package {
-  Package(const std::string& root, bool parseOnDemand);
+  Package(const std::string& root,
+          bool parseOnDemand,
+          coro::TicketExecutor& executor,
+          extern_worker::Client& client);
 
   using Callback = std::function<void(std::unique_ptr<UnitEmitter>)>;
 
   bool parse(const Callback&);
 
-  // Optionally return a running thread clearing the package state
-  // (which can take a long time). If std::nullopt is returned, the
-  // state is already cleared.
-  Optional<std::thread> asyncClear();
-
-  const extern_worker::Client::Stats& stats() const {
-    return m_async->m_client.getStats();
-  }
   size_t getTotalFiles() const { return m_total.load(); }
-
-  const std::string& externWorkerImpl() const {
-    return m_async->m_client.implName();
-  }
-  bool externWorkerFellback() const {
-    return m_async->m_client.fellback();
-  }
 
   Optional<std::chrono::microseconds> parsingInputsTime() const {
     return m_parsingInputs;
@@ -129,19 +117,10 @@ private:
     std::string, std::string
   > m_discoveredStaticFiles;
 
-  struct AsyncState {
-    AsyncState();
-
-    static extern_worker::Options makeOptions();
-
-    coro::TicketExecutor m_executor;
-    extern_worker::Client m_client;
-
-    coro::AsyncValue<extern_worker::Ref<Config>> m_config;
-
-    extern_worker::RefCache<SHA1, RepoOptionsFlags> m_repoOptions;
-  };
-  std::unique_ptr<AsyncState> m_async;
+  coro::TicketExecutor& m_executor;
+  extern_worker::Client& m_client;
+  coro::AsyncValue<extern_worker::Ref<Config>> m_config;
+  extern_worker::RefCache<SHA1, RepoOptionsFlags> m_repoOptions;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2351,7 +2351,13 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::FuncCred,
                         "FuncCred",
                     ),
-
+                    b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
+                    b"MemoSetEager" => assemble_memo_set_eager(&mut sl_lexer),
+                    b"RetCSuspended" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::RetCSuspended,
+                        "RetCSuspended",
+                    ),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2794,6 +2800,31 @@ fn assemble_await_all<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instru
     token_iter.expect_is_str(Token::into_identifier, "AwaitAll")?;
     let lcl_range = assemble_local_range(token_iter)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::AwaitAll(lcl_range)))
+}
+
+/// Ex:
+/// MemoGetEager L0 L1 l:0+0
+fn assemble_memo_get_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoGetEager")?;
+    let lbl_slice = [
+        assemble_label(token_iter, false)?,
+        assemble_label(token_iter, false)?,
+    ];
+    let dum = hhbc::Dummy::DEFAULT;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoGetEager(
+        lbl_slice, dum, lcl_range,
+    )))
+}
+
+/// Ex:
+/// MemoSetEager L:0+0
+fn assemble_memo_set_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoSetEager")?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoSetEager(
+        lcl_range,
+    )))
 }
 
 /// Ex:

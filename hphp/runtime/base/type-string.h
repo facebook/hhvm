@@ -333,8 +333,6 @@ public:
    * Type conversions
    */
   bool   toBoolean() const { return m_str ? m_str->toBoolean() : false;}
-  char   toByte   () const { return m_str ? m_str->toByte   () : 0;}
-  short  toInt16  () const { return m_str ? m_str->toInt16  () : 0;}
   int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}

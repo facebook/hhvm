@@ -5364,17 +5364,20 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     raise_parsing_error(node, env, &syntax_error::invalid_reified)
                 }
             }
+            let user_attributes = itertools::concat(
+                c.attribute_spec
+                    .syntax_node_to_list_skip_separator()
+                    .map(|attr| p_user_attribute(attr, env))
+                    .collect::<Result<Vec<Vec<_>>, _>>()?,
+            );
+            let docs_url = p_docs_url(&user_attributes, env);
+
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
                 tparams,
                 constraint: map_optional(&c.constraint, env, p_tconstraint)?.map(|x| x.1),
-                user_attributes: itertools::concat(
-                    c.attribute_spec
-                        .syntax_node_to_list_skip_separator()
-                        .map(|attr| p_user_attribute(attr, env))
-                        .collect::<Result<Vec<Vec<_>>, _>>()?,
-                ),
+                user_attributes,
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
@@ -5390,6 +5393,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 is_ctx: false,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
+                docs_url,
             })])
         }
         ContextAliasDeclaration(c) => {
@@ -5447,6 +5451,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 // TODO(T116039119): Populate value with presence of internal attribute
                 internal: false,
                 module: None,
+                docs_url: None,
             })])
         }
         EnumDeclaration(c) => {

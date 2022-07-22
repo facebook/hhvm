@@ -72,7 +72,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [10:1-40]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None });
+       t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([11:6-13], "\\SubIBox"); t_tparams = []; 
        t_constraint = None;
@@ -92,7 +92,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [11:1-44]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None });
+       t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([12:6-14], "\\SubISBox"); t_tparams = []; 
        t_constraint = None;
@@ -115,7 +115,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [12:1-55]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None });
+       t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-13], "\\SupIBox"); t_tparams = []; 
        t_constraint = None;
@@ -135,7 +135,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [13:1-47]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None });
+       t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([14:6-14], "\\SupISBox"); t_tparams = []; 
        t_constraint = None;
@@ -158,7 +158,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [14:1-61]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None });
+       t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([16:6-15], "\\SubSupBox"); t_tparams = []; 
        t_constraint = None;
@@ -181,5 +181,5 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [16:1-56]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None })
+       t_module = None; t_docs_url = None })
   ]

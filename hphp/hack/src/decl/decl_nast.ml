@@ -149,6 +149,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_internal = td_internal;
     (* We'll consume this in the next diff *)
     t_module = td_module;
+    t_docs_url = td_docs_url;
   } =
     tdef
   in
@@ -173,6 +174,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     td_is_ctx;
     td_attributes;
     td_internal;
+    td_docs_url;
   }
 
 let typedef_naming_and_decl_DEPRECATED

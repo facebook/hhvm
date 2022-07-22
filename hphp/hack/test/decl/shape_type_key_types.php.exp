@@ -24,7 +24,8 @@
                    [(Rhint ([6:25-26]), (Tapply (([6:25-26], "\\C"), [])))])))
                } }
            )));
-       td_is_ctx = false; td_attributes = []; td_internal = false }))
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }))
   ]
 
 They matched!

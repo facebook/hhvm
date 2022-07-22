@@ -8,7 +8,8 @@
          ];
        td_constraint = None;
        td_type = (Rhint ([3:26-27]), (Tgeneric ("T", [])));
-       td_is_ctx = false; td_attributes = []; td_internal = false }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\:Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;

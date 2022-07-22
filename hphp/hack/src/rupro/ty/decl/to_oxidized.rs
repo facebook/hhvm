@@ -772,6 +772,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
             is_ctx: *is_ctx,
             attributes: attributes.to_oxidized(arena),
             internal: *internal,
+            docs_url: None,
         })
     }
 }

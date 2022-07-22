@@ -8,7 +8,8 @@
            [(Rhint ([5:27-35]), (Tprim Tarraykey));
              (Rhint ([5:37-42]), Tmixed)]
            )));
-       td_is_ctx = false; td_attributes = []; td_internal = false }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\make_dict",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -80,7 +81,8 @@
         td_type =
         (Rhint ([16:17-31]),
          (Tapply (([16:17-31], "\\HH\\Lib\\Dict\\MixedDict"), [])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }))
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }))
   ]
 
 They matched!

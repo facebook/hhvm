@@ -405,7 +405,7 @@ module UserAttributes = struct
             } );
           ( uaDocs,
             {
-              contexts = [cls; enum; enumcls];
+              contexts = [cls; enum; enumcls; typealias];
               autocomplete = true;
               doc = "Shows the linked URL when hovering over this type.";
             } );

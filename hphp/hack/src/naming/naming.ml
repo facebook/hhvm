@@ -2413,6 +2413,7 @@ let typedef ctx tdef =
       file_attributes ctx tdef.Aast.t_mode tdef.Aast.t_file_attributes;
     t_internal = tdef.Aast.t_internal;
     t_module = tdef.Aast.t_module;
+    t_docs_url = tdef.Aast.t_docs_url;
   }
 
 (**************************************************************************)

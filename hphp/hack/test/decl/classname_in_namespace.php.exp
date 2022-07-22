@@ -6,7 +6,8 @@
        (Rhint ([4:12-24]),
         (Tapply (([4:12-21], "\\HH\\classname"),
            [(Rhint ([4:22-23]), (Tapply (([4:22-23], "\\C"), [])))])));
-       td_is_ctx = false; td_attributes = []; td_internal = false }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\B",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:8-9]; td_vis = Transparent;
@@ -15,7 +16,8 @@
         (Rhint ([5:12-25]),
          (Tapply (([5:12-22], "\\classname"),
             [(Rhint ([5:23-24]), (Tapply (([5:23-24], "\\C"), [])))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\NS\\A",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [8:10-11];
@@ -24,7 +26,8 @@
         (Rhint ([8:14-26]),
          (Tapply (([8:14-23], "\\HH\\classname"),
             [(Rhint ([8:24-25]), (Tapply (([8:24-25], "\\NS\\C"), [])))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\NS\\B",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [9:10-11];
@@ -33,7 +36,8 @@
         (Rhint ([9:14-27]),
          (Tapply (([9:14-24], "\\classname"),
             [(Rhint ([9:25-26]), (Tapply (([9:25-26], "\\NS\\C"), [])))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }))
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }))
   ]
 
 They matched!

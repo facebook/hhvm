@@ -3136,6 +3136,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             is_ctx: false,
             attributes: user_attributes,
             internal,
+            docs_url: None,
         });
 
         self.add_typedef(name, typedef);
@@ -3203,6 +3204,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             is_ctx: true,
             attributes: user_attributes,
             internal: false,
+            docs_url: None,
         });
 
         self.add_typedef(name, typedef);

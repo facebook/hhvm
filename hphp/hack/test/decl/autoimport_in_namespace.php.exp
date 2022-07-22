@@ -6,7 +6,8 @@
        (Rhint ([4:12-28]),
         (Tapply (([4:12-23], "\\HH\\Traversable"),
            [(Rhint ([4:24-27]), (Tprim Tint))])));
-       td_is_ctx = false; td_attributes = []; td_internal = false }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\B",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:8-9]; td_vis = Transparent;
@@ -15,7 +16,8 @@
         (Rhint ([5:12-29]),
          (Tapply (([5:12-24], "\\Traversable"),
             [(Rhint ([5:25-28]), (Tprim Tint))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\NS\\A",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [8:10-11];
@@ -24,7 +26,8 @@
         (Rhint ([8:14-30]),
          (Tapply (([8:14-25], "\\HH\\Traversable"),
             [(Rhint ([8:26-29]), (Tprim Tint))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\NS\\B",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [9:10-11];
@@ -33,7 +36,8 @@
         (Rhint ([9:14-31]),
          (Tapply (([9:14-26], "\\Traversable"),
             [(Rhint ([9:27-30]), (Tprim Tint))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }))
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }))
   ]
 
 They matched!

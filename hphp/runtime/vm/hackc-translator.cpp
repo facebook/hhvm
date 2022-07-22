@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/disas.h"

@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {
 
@@ -29,7 +28,7 @@ void checkSize(TypedValue tv, uint64_t& available) {
   };
 
   if (isArrayLikeType(type(tv))) {
-    update(allocSize(val(tv).parr));
+    update(val(tv).parr->heapSize());
 
     IterateKV(val(tv).parr, [&] (TypedValue k, TypedValue v) {
       if (isStringType(type(k))) {

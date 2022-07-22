@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"

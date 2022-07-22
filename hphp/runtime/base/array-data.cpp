@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -247,8 +246,8 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   ad->m_aux16 &= ~kSampledArray;
   assertx(ad->isStatic());
 
-  // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
-  MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+  // TODO(T68458896): heapSize rounds up to size class, which we shouldn't do.
+  MemoryStats::LogAlloc(AllocKind::StaticArray, ad->heapSize());
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(ad);
   }

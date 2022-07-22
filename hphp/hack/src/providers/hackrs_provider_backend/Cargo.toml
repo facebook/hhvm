@@ -28,9 +28,12 @@ parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../rupro/pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 shallow_decl_provider = { path = "../../rupro/shallow_decl_provider/cargo/shallow_decl_provider" }
+shm_store = { path = "../../shmffi/cargo/shm_store" }
 ty = { path = "../../rupro/ty/cargo/ty" }
 
 [dev-dependencies]
 hh24_test = { path = "../../facebook/utils/cargo/hh24_test" }
+libc = "0.2.121"
 maplit = "1.0"
 rpds = "0.11.0"
+shmffi = { path = "../../shmffi/cargo/shmffi" }

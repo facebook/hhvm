@@ -142,6 +142,7 @@ fn assemble_from_toks<'arena>(
     let mut fatal = None;
     let mut file_attributes = Vec::new();
     let mut module_use = Maybe::Nothing;
+    let mut modules = Vec::new();
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
     while token_iter.peek().is_some() {
@@ -208,6 +209,8 @@ fn assemble_from_toks<'arena>(
             assemble_file_attributes(alloc, token_iter, &mut file_attributes)?;
         } else if token_iter.peek_if_str(Token::is_decl, ".module_use") {
             module_use = Maybe::Just(assemble_module_use(alloc, token_iter)?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".module") {
+            modules.push(assemble_module(alloc, token_iter)?);
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -221,7 +224,7 @@ fn assemble_from_toks<'arena>(
         classes: Slice::fill_iter(alloc, classes.into_iter()),
         typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
         file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
-        modules: Default::default(),
+        modules: Slice::from_vec(alloc, modules),
         module_use,
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
             functions: func_refs.unwrap_or_default(),
@@ -234,6 +237,29 @@ fn assemble_from_toks<'arena>(
     };
 
     Ok((hcu, fp))
+}
+
+/// Ex:
+/// .module m0 (64, 64) {
+///}
+fn assemble_module<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_module::HhasModule<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".module")?;
+    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    if attr != hhvm_types_ffi::ffi::Attr::AttrNone {
+        bail!("Unexpected HHVM attrs in module definition");
+    }
+    let name = assemble_class_name(alloc, token_iter)?;
+    let span = assemble_span(token_iter)?;
+    token_iter.expect(Token::into_open_curly)?;
+    token_iter.expect(Token::into_close_curly)?;
+    Ok(hhbc::hhas_module::HhasModule {
+        attributes,
+        name,
+        span,
+    })
 }
 
 /// Ex:

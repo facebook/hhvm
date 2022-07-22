@@ -158,13 +158,16 @@ pub trait Reason:
                 OR::Rinstantiate(&(r1, sym, r2)) => {
                     RI::Rinstantiate(r1.into(), TypeName(Symbol::new(sym)), r2.into())
                 }
-                OR::Rtypeconst(&(r1, pos_id, sym, r2)) => {
-                    RI::Rtypeconst(r1.into(), pos_id.into(), Symbol::new(sym.0), r2.into())
-                }
+                OR::Rtypeconst(&(r1, pos_id, sym, r2)) => RI::Rtypeconst(
+                    r1.into(),
+                    pos_id.into(),
+                    Symbol::new(sym.0.unwrap()),
+                    r2.into(),
+                ),
                 OR::RtypeAccess(&(r, list)) => RI::RtypeAccess(
                     r.into(),
                     list.iter()
-                        .map(|(&r, s)| (r.into(), Symbol::new(s.0)))
+                        .map(|(&r, s)| (r.into(), Symbol::new(s.0.unwrap())))
                         .collect(),
                 ),
                 OR::RexprDepType(&(r, pos, edt_reason)) => {
@@ -511,7 +514,7 @@ impl<'a> ToOxidized<'a> for BReason {
             RI::Rtypeconst(r1, pos_id, sym, r2) => OR::Rtypeconst(arena.alloc((
                 r1.to_oxidized(arena),
                 pos_id.to_oxidized(arena),
-                &*arena.alloc(oxidized_by_ref::lazy::Lazy(sym.to_oxidized(arena))),
+                &*arena.alloc(oxidized_by_ref::lazy::Lazy(Some(sym.to_oxidized(arena)))),
                 r2.to_oxidized(arena),
             ))),
             RI::RtypeAccess(r, list) => OR::RtypeAccess(arena.alloc((
@@ -519,7 +522,7 @@ impl<'a> ToOxidized<'a> for BReason {
                 &*arena.alloc_slice_fill_iter(list.iter().map(|(r, s)| {
                     (
                         &*arena.alloc(r.to_oxidized(arena)),
-                        &*arena.alloc(oxidized_by_ref::lazy::Lazy(s.to_oxidized(arena))),
+                        &*arena.alloc(oxidized_by_ref::lazy::Lazy(Some(s.to_oxidized(arena)))),
                     )
                 })),
             ))),

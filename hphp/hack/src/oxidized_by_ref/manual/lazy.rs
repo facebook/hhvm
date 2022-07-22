@@ -27,7 +27,7 @@ use serde::Serialize;
     Serialize
 )]
 #[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
-pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] pub T);
+pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] pub Option<T>);
 
 arena_deserializer::impl_deserialize_in_arena!(Lazy<T>);
 
@@ -44,7 +44,7 @@ impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
 
 impl<T: FromOcamlRep> FromOcamlRep for Lazy<T> {
     fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        unimplemented!()
+        Ok(Self(None))
     }
 }
 
@@ -53,6 +53,6 @@ impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for Lazy<T> {
         _value: ocamlrep::Value<'_>,
         _alloc: &'a bumpalo::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
-        unimplemented!()
+        Ok(Self(None))
     }
 }

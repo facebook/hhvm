@@ -694,14 +694,16 @@ fn assemble_prop_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::PropName<'arena>> {
-    let nm = if token_iter.peek_if_str(Token::is_number, "86") {
-        // Only properties that can start with #s start with
-        // 86 and are compiler added ones
-        let under86 = token_iter.expect(Token::into_number)?;
+    // Only properties that can start with #s start with 0 or
+    // 86 and are compiler added ones
+    let nm = if token_iter.peek_if_str(Token::is_number, "86")
+        || token_iter.peek_if_str(Token::is_number, "0")
+    {
+        let num_prefix = token_iter.expect(Token::into_number)?;
         let name = token_iter.expect(Token::into_identifier)?;
-        let mut under86 = under86.to_vec();
-        under86.extend_from_slice(name);
-        Str::new_slice(alloc, &under86)
+        let mut num_prefix = num_prefix.to_vec();
+        num_prefix.extend_from_slice(name);
+        Str::new_slice(alloc, &num_prefix)
     } else {
         token_iter.expect_identifier_into_ffi_str(alloc)?
     };

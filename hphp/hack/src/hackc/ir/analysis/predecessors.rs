@@ -117,12 +117,11 @@ pub fn compute_num_predecessors(func: &Func<'_>, flags: PredecessorFlags) -> IdV
     for bid in func.block_ids() {
         for &target in func.edges(bid) {
             counts[target] += 1;
-
-            if note_catch {
-                let dst = func.catch_target(bid);
-                if dst != BlockId::NONE {
-                    counts[dst] += 1;
-                }
+        }
+        if note_catch {
+            let dst = func.catch_target(bid);
+            if dst != BlockId::NONE {
+                counts[dst] += 1;
             }
         }
     }

@@ -805,6 +805,20 @@ fn cmp_type_constraint_flags(
     Ok(())
 }
 
+// T126391106: BCP doesn't disambiguate a constraint name of Just("") and Nothing
+fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result<()> {
+    match (a, b) {
+        (Maybe::Nothing, Maybe::Just(s)) | (Maybe::Just(s), Maybe::Nothing) => {
+            if s.as_bstr() == "" {
+                Ok(())
+            } else {
+                bail!("Constraint name mismatch: {:?} vs {:?}", a, b)
+            }
+        }
+        (a, b) => cmp_eq(a, b),
+    }
+}
+
 fn cmp_type_constraint(
     a: &hhbc::hhas_type::Constraint<'_>,
     b: &hhbc::hhas_type::Constraint<'_>,
@@ -817,7 +831,7 @@ fn cmp_type_constraint(
         name: b_name,
         flags: b_flags,
     } = b;
-    cmp_eq(a_name, b_name).qualified("constraints")?;
+    cmp_type_constraint_name(a_name, b_name).qualified("constraints")?;
     cmp_type_constraint_flags(a_flags, b_flags)?;
     Ok(())
 }

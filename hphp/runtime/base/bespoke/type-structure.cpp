@@ -100,7 +100,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
 
   auto const tad = static_cast<TypeStructure*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
-    sizeIndex(kind), legacy ? ArrayData::kLegacyArray : 0);
+    index, legacy ? ArrayData::kLegacyArray : 0);
   tad->initHeader_16(HeaderKind::BespokeDict,
     Static ? StaticValue : OneReference, aux);
 
@@ -108,8 +108,9 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   tad->m_size = 0;
 
   tad->m_layout_index = GetLayoutIndex();
+  tad->m_kind = uint8_t(kind);
+  tad->m_extra_hi8 = TypeStructure::kFieldsByte;
   tad->m_extra_lo8 = 0;
-  tad->m_extra_hi8 = 0;
   tad->m_alias = nullptr;
   tad->m_typevars = nullptr;
   tad->m_typevar_types = nullptr;
@@ -117,6 +118,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   switch (kind) {
 #define X(Name, Type) \
   case Kind::T_##Name: \
+    tad->m_extra_hi8 = Type::kFieldsByte; \
     Type::initializeFields(reinterpret_cast<Type*>(tad)); \
     break;
 TYPE_STRUCTURE_CHILDREN_KINDS
@@ -125,7 +127,6 @@ TYPE_STRUCTURE_CHILDREN_KINDS
       break;
   }
 
-  assertx(tad->checkInvariants());
   return tad;
 }
 
@@ -153,7 +154,7 @@ void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
 bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
   if (s_kind.same(k)) {
     assertx(tvIsInt(v));
-    tad->m_extra_hi8 = safe_cast<uint8_t>(val(v).num);
+    tad->m_kind = safe_cast<uint8_t>(val(v).num);
   } else if (s_nullable.same(k)) {
     tad->setBitField(v, kNullableOffset);
   } else if (s_soft.same(k)) {
@@ -218,7 +219,9 @@ bool TypeStructure::checkInvariants() const {
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
 #define X(Name, Type) \
-  case Kind::T_##Name: return true;
+  case Kind::T_##Name: \
+    assertx(fieldsByte() == TypeStructure::kFieldsByte); \
+    return true;
 TYPE_STRUCTURE_KINDS
 #undef X
     default:
@@ -228,6 +231,8 @@ TYPE_STRUCTURE_KINDS
 
 bool TypeStructure::isValidTypeStructure(ArrayData* ad) {
   if (!ad->isVanillaDict() || !ad->exists(s_kind)) return false;
+  auto const kind =
+    static_cast<Kind>(Variant::wrap(ad->get(s_kind)).toInt64Val());
 
   // check that the key exists and that the type matches
   auto fields = 0;
@@ -239,13 +244,21 @@ bool TypeStructure::isValidTypeStructure(ArrayData* ad) {
 TYPE_STRUCTURE_FIELDS
 #undef X
 
-#define X(Field, Type, KindOfType)                                    \
-  if (ad->exists(s_##Field) &&                                        \
-      equivDataTypes(ad->get(s_##Field).type(), KindOfType)) {        \
-    fields++;                                                         \
-  }
-TYPE_STRUCTURE_CHILDREN_FIELDS
+  switch (kind) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    fields += Type::countFields(ad); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    break;
+TYPE_STRUCTURE_KINDS
+#undef X
+  default: \
+    return false;
+  }
 
   // all elements in ad must exist in type structure
   return fields == ad->size();
@@ -368,13 +381,19 @@ TYPE_STRUCTURE_CHILDREN_KINDS
   }
 }
 
-DataType TypeStructure::getKindOfField(const StringData* k) {
+std::pair<DataType, uint8_t> TypeStructure::getFieldPair(const StringData* k) {
+  // fields in base TypeStructure always exist and are represented by offset 0
 #define X(Field, FieldString, KindOfType) \
-  if (s_##FieldString.same(k)) return KindOfType;
+  if (s_##FieldString.same(k)) return {KindOfType, 0};
   TYPE_STRUCTURE_FIELDS
 #undef X
-  // TODO: add child struct fields for offset calc
-  return KindOfUninit;
+
+#define X(Field, Type, KindOfType, Struct, FieldsByteOffset) \
+  if (s_##Field.same(k)) return {KindOfType, FieldsByteOffset};
+  TYPE_STRUCTURE_CHILDREN_FIELDS
+#undef X
+
+  return {KindOfUninit, 0};
 }
 
 size_t TypeStructure::getFieldOffset(const StringData* key) {
@@ -397,25 +416,22 @@ size_t TypeStructure::getFieldOffset(const StringData* key) {
   } else if (s_typevar_types.same(key)) {
     return offsetof(TypeStructure, m_typevar_types);
   }
-  // TODO: add child struct fields for offset calc
+
+#define X(Field, Type, KindOfType, Struct, ...) \
+  if (s_##Field.same(key)) return Struct::getFieldOffset(key);
+    TYPE_STRUCTURE_CHILDREN_FIELDS
+#undef X
   always_assert(false);
 }
 
-uint8_t TypeStructure::getBitOffset(const StringData* key) {
+uint8_t TypeStructure::getBooleanBitOffset(const StringData* key) {
   if (s_nullable.same(key)) return kNullableOffset;
   if (s_soft.same(key)) return kSoftOffset;
   if (s_like.same(key)) return kLikeOffset;
   if (s_opaque.same(key)) return kOpaqueOffset;
   if (s_optional_shape_field.same(key)) return kOptionalShapeFieldOffset;
-  always_assert(false);
-}
-
-bool TypeStructure::isGeneralField(const StringData* key) {
-#define X(Field, FieldString, KindOfType) \
-  if (s_##FieldString.same(key)) return true;
-  TYPE_STRUCTURE_FIELDS
-#undef X
-  return false;
+  // otherwise the boolean field does not require an offset
+  return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -423,7 +439,7 @@ bool TypeStructure::isGeneralField(const StringData* key) {
 
 namespace {
 
-TypedValue make_tv_safe(int8_t val) {
+TypedValue make_tv_safe(uint8_t val) {
   return make_tv<KindOfInt64>(val);
 }
 TypedValue make_tv_safe(bool val) {
@@ -795,6 +811,15 @@ void decRefField<ArrayData*>(ArrayData* field) {
 #define INC_REF_FIELD(Field, Type, ...) incRefField<Type>(m_##Field);
 #define DEC_REF_FIELD(Field, Type, ...) decRefField<Type>(m_##Field);
 
+#define GET_FIELD_OFFSET(Field, Type, KindOfType, Struct, ...)              \
+  if (s_##Field.same(k)) return offsetof(Struct, m_##Field);
+
+#define COUNT_FIELDS(Field, Type, KindOfType, ...)              \
+  if (ad->exists(s_##Field) &&                                  \
+      equivDataTypes(ad->get(s_##Field).type(), KindOfType)) {  \
+    fields++;                                                         \
+  }
+
 #define O(ChildStruct, FieldsMacro)                                         \
 TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) { \
   FieldsMacro(MAKE_TV_FIELD)                                                \
@@ -832,6 +857,15 @@ void ChildStruct::decRefFields() {                                          \
 bool ChildStruct::containsField(const StringData* k) const {                \
   FieldsMacro(CONTAINS_FIELD)                                               \
   return false;                                                             \
+}                                                                           \
+size_t ChildStruct::getFieldOffset(const StringData* k) {                   \
+  FieldsMacro(GET_FIELD_OFFSET)                                             \
+  return -1;                                                                \
+}                                                                           \
+int ChildStruct::countFields(const ArrayData* ad) {                         \
+  auto fields = 0;                                                          \
+  FieldsMacro(COUNT_FIELDS)                                                 \
+  return fields;                                                            \
 }
 
 O(TSShape, TSSHAPE_FIELDS)
@@ -856,29 +890,39 @@ O(TSWithGenericTypes, TSGENERIC_FIELDS)
 #undef DEC_REF_FIELD
 
 bool TSShape::checkInvariants() const {
+  assertx(typeKind() == Kind::T_shape);
+  assertx(fieldsByte() == TSShape::kFieldsByte);
   assertx(m_fields == nullptr || m_fields->kindIsValid());
   return true;
 }
 bool TSTuple::checkInvariants() const {
+  assertx(typeKind() == Kind::T_tuple);
+  assertx(fieldsByte() == TSTuple::kFieldsByte);
   assertx(m_elem_types && m_elem_types->kindIsValid());
   return true;
 }
 bool TSFun::checkInvariants() const {
+  assertx(typeKind() == Kind::T_fun);
+  assertx(fieldsByte() == TSFun::kFieldsByte);
   assertx(m_return_type && m_return_type->kindIsValid());
   assertx(m_param_types == nullptr || m_param_types->kindIsValid());
   assertx(m_variadic_type == nullptr || m_variadic_type->kindIsValid());
   return true;
 }
 bool TSTypevar::checkInvariants() const {
+  assertx(typeKind() == Kind::T_typevar);
+  assertx(fieldsByte() == TSTypevar::kFieldsByte);
   assertx(m_name && m_name->kindIsValid());
   return true;
 }
 bool TSWithClassishTypes::checkInvariants() const {
+  assertx(fieldsByte() == TSWithClassishTypes::kFieldsByte);
   assertx(m_generic_types == nullptr || m_generic_types->kindIsValid());
   assertx(m_classname && m_classname->kindIsValid());
   return true;
 }
 bool TSWithGenericTypes::checkInvariants() const {
+  assertx(fieldsByte() == TSWithGenericTypes::kFieldsByte);
   assertx(m_generic_types && m_generic_types->kindIsValid());
   return true;
 }
@@ -975,7 +1019,7 @@ ArrayLayout TypeStructureLayout::setType(Type key, Type val) const {
 std::pair<Type, bool> TypeStructureLayout::elemType(Type key) const {
   if (key <= TInt) return {TBottom, false};
   if (key.hasConstVal(TStr)) {
-    auto const dt = bespoke::TypeStructure::getKindOfField(key.strVal());
+    auto const dt = bespoke::TypeStructure::getFieldPair(key.strVal()).first;
     if (dt == KindOfBoolean) return {TBool, false};
     // 'kind' field should always be present
     if (dt == KindOfInt64) return {TInt, true};

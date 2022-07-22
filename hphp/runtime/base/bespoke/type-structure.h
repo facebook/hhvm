@@ -35,8 +35,9 @@
  *           1-byte size index
  *      4-byte m_size field
  *      1-byte m_extra_lo8 field for boolean fields
- *      1-byte m_extra_hi8 field for kind
+ *      1-byte m_extra_hi8 field for the fields byte
  *      2-byte bespoke::LayoutIndex (only high byte is used)
+ *  1-byte m_kind field
  *  8-byte m_alias field
  *  8-byte m_typevars field
  *  8-byte m_typevar_types field
@@ -108,30 +109,32 @@ using Kind = HPHP::TypeStructure::Kind;
  *   - Field : "m_Field" is the name of the field in the struct
  *   - Type : type of the field
  *   - DataType : DataType for the field as a TypedValue
+ *   - Struct : child struct the field belongs to
+ *   - FieldsByteffset : the offset that indicates the field group in kFieldsByte
  */
 
-#define TSSHAPE_FIELDS(X)                                         \
-  X(fields,                 ArrayData*,   KindOfDict)             \
-  X(allows_unknown_fields,  bool,         KindOfBoolean)
+#define TSSHAPE_FIELDS(X)                                                   \
+  X(fields,                 ArrayData*,   KindOfDict,     TSShape, 1)       \
+  X(allows_unknown_fields,  bool,         KindOfBoolean,  TSShape, 1)
 
-#define TSTUPLE_FIELDS(X)                                         \
-  X(elem_types,             ArrayData*,   KindOfVec)     \
+#define TSTUPLE_FIELDS(X)                                                   \
+  X(elem_types,             ArrayData*,   KindOfVec,      TSTuple, 2)       \
 
-#define TSFUN_FIELDS(X)                                           \
-  X(param_types,            ArrayData*,   KindOfVec)       \
-  X(return_type,            ArrayData*,   KindOfDict)      \
-  X(variadic_type,          ArrayData*,   KindOfDict)      \
+#define TSFUN_FIELDS(X)                                                     \
+  X(param_types,            ArrayData*,   KindOfVec,      TSFun, 3)         \
+  X(return_type,            ArrayData*,   KindOfDict,     TSFun, 3)         \
+  X(variadic_type,          ArrayData*,   KindOfDict,     TSFun, 3)         \
 
-#define TSTYPEVAR_FIELDS(X)                                       \
-  X(name,                   StringData*,  KindOfString)
+#define TSTYPEVAR_FIELDS(X)                                                 \
+  X(name,             StringData*,  KindOfString,   TSTypevar, 4)
 
-#define TSCLASSISH_FIELDS(X)                                                  \
-  X(generic_types,          ArrayData*,   KindOfVec)     \
-  X(classname,              StringData*,  KindOfString)  \
-  X(exact,                  bool,         KindOfBoolean)
+#define TSGENERIC_FIELDS(X)                                                 \
+  X(generic_types,    ArrayData*,   KindOfVec,      TSWithGenericTypes, 5)  \
 
-#define TSGENERIC_FIELDS(X)                                                   \
-  X(generic_types,          ArrayData*,   KindOfVec)      \
+#define TSCLASSISH_FIELDS(X)                                                \
+  X(generic_types,    ArrayData*,   KindOfVec,      TSWithClassishTypes, 5) \
+  X(classname,        StringData*,  KindOfString,   TSWithClassishTypes, 6) \
+  X(exact,            bool,         KindOfBoolean,  TSWithClassishTypes, 6)
 
 #define TYPE_STRUCTURE_CHILDREN_FIELDS                    \
   TSSHAPE_FIELDS(X)                                       \
@@ -154,7 +157,30 @@ using Kind = HPHP::TypeStructure::Kind;
   static void initializeFields(T* tad);                                 \
   static bool setField(T* tad, StringData* k, TypedValue v);            \
   static void convertToUncounted(T* tad, const MakeUncountedEnv& env);  \
-  static void releaseUncounted(T* tad);
+  static void releaseUncounted(T* tad);                                 \
+  static size_t getFieldOffset(const StringData* k);                    \
+  static int countFields(const ArrayData* ad);
+
+/*
+ * The FieldsByte dictates the specific fields that should exist on each
+ * bespoke type struct. Each bit is set iff the field(s) at that offset could
+ * exist in the struct. The bit that represents each field is defined in
+ * the _FIELDS macros as an offset, and these are generally separated according
+ * to the different child structs.
+ *
+ * Fields in the base TypeStructure always exist and are represented by the offset 0.
+ *
+ * Child structs generally contain distinct fields. The only exception is the
+ * field generic_types, which can exist for both TSWithClassishTypes and
+ * TSWithGenericTypes, so the bit is set for both.
+ */
+constexpr uint8_t kTypeStructureFieldsByte    = 0b00000001;
+constexpr uint8_t kTSShapeFieldsByte          = 0b00000011;
+constexpr uint8_t kTSTupleFieldsByte          = 0b00000101;
+constexpr uint8_t kTSFunFieldsByte            = 0b00001001;
+constexpr uint8_t kTSTypevarFieldsByte        = 0b00010001;
+constexpr uint8_t kTSGenericTypesFieldsByte   = 0b00100001;
+constexpr uint8_t kTSClassishTypesFieldsByte  = 0b01100001;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -189,21 +215,24 @@ struct TypeStructure : BespokeArray {
     kOptionalShapeFieldOffset = 4
   };
 
+  static constexpr uint8_t kFieldsByte = kTypeStructureFieldsByte;
+
   static constexpr size_t kindOffset() {
     static_assert(folly::kIsLittleEndian);
-    return offsetof(TypeStructure, m_extra_hi8);
+    return offsetof(TypeStructure, m_kind);
   }
   static constexpr size_t bitFieldOffset() {
     return offsetof(TypeStructure, m_extra_lo8);
   }
-  static constexpr size_t childOffset() {
-    return sizeof(TypeStructure);
+  static constexpr size_t fieldsByteOffset() {
+    return offsetof(TypeStructure, m_extra_hi8);
   }
 
-  static DataType getKindOfField(const StringData* key);
+  // returns the datatype of key and the bit offset for key in kFieldsByte
+  static std::pair<DataType, uint8_t> getFieldPair(const StringData* key);
+
   static size_t getFieldOffset(const StringData* key);
-  static uint8_t getBitOffset(const StringData* key);
-  static bool isGeneralField(const StringData* key);
+  static uint8_t getBooleanBitOffset(const StringData* key);
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(TypeStructure)
@@ -212,30 +241,30 @@ struct TypeStructure : BespokeArray {
   static bool setField(TypeStructure* tad, StringData* k, TypedValue v);
 
   bool nullable() const { return m_extra_lo8 & (1 << kNullableOffset); }
-  bool soft() const { return m_extra_lo8 & (1 << kSoftOffset); }
-  bool like() const { return m_extra_lo8 & (1 << kLikeOffset); }
-  bool opaque() const { return m_extra_lo8 & (1 << kOpaqueOffset); }
+  bool soft() const     { return m_extra_lo8 & (1 << kSoftOffset); }
+  bool like() const     { return m_extra_lo8 & (1 << kLikeOffset); }
+  bool opaque() const   { return m_extra_lo8 & (1 << kOpaqueOffset); }
   bool optionalShapeField() const {
     return m_extra_lo8 & (1 << kOptionalShapeFieldOffset);
   }
-  int8_t kind() const { return m_extra_hi8; }
+  uint8_t kind() const { return m_kind; }
   StringData* alias() const { return m_alias; }
   StringData* typevars() const { return m_typevars; }
   ArrayData* typevarTypes() const { return m_typevar_types; }
+  uint8_t fieldsByte() const { return m_extra_hi8; }
 
 private:
   static size_t sizeIndex(Kind);
   void incRefFields();
   void decRefFields();
 
-  void clearBitField(BitFieldOffsets offset) {
-    m_extra_lo8 &= ~(1 << offset);
-  }
+  void clearBitField(BitFieldOffsets offset) { m_extra_lo8 &= ~(1 << offset); }
   void setBitField(TypedValue v, BitFieldOffsets offset);
   bool containsField(const StringData* k) const;
 
   static TypedValue tsNvGetStr(const TypeStructure* tad, const StringData* k);
 
+  uint8_t m_kind;
   StringData* m_alias;
   StringData* m_typevars;
   ArrayData* m_typevar_types;
@@ -243,6 +272,7 @@ private:
 
 struct TSShape : TypeStructure {
   TSCHILDREN_METHODS(TSShape)
+  static constexpr uint8_t kFieldsByte = kTSShapeFieldsByte;
 private:
   ArrayData* m_fields;
   bool m_allows_unknown_fields;
@@ -250,12 +280,14 @@ private:
 
 struct TSTuple : TypeStructure {
   TSCHILDREN_METHODS(TSTuple)
+  static constexpr uint8_t kFieldsByte = kTSTupleFieldsByte;
 private:
   ArrayData* m_elem_types;
 };
 
 struct TSFun : TypeStructure {
   TSCHILDREN_METHODS(TSFun)
+  static constexpr uint8_t kFieldsByte = kTSFunFieldsByte;
 private:
   ArrayData* m_param_types;
   ArrayData* m_return_type;
@@ -264,20 +296,9 @@ private:
 
 struct TSTypevar : TypeStructure {
   TSCHILDREN_METHODS(TSTypevar)
+  static constexpr uint8_t kFieldsByte = kTSTypevarFieldsByte;
 private:
   StringData* m_name;
-};
-
-/*
- * TSWithClassishTypes should only contain the kinds as specified
- * in TYPE_STRUCTURE_CHILDREN_KINDS
- */
-struct TSWithClassishTypes : TypeStructure {
-  TSCHILDREN_METHODS(TSWithClassishTypes)
-private:
-  ArrayData* m_generic_types;
-  StringData* m_classname;
-  bool m_exact;
 };
 
 /*
@@ -286,10 +307,23 @@ private:
  */
 struct TSWithGenericTypes : TypeStructure {
   TSCHILDREN_METHODS(TSWithGenericTypes)
+  static constexpr uint8_t kFieldsByte = kTSGenericTypesFieldsByte;
 private:
   ArrayData* m_generic_types;
 };
 
+/*
+ * TSWithClassishTypes should only contain the kinds as specified
+ * in TYPE_STRUCTURE_CHILDREN_KINDS
+ */
+struct TSWithClassishTypes : TypeStructure {
+  TSCHILDREN_METHODS(TSWithClassishTypes)
+  static constexpr uint8_t kFieldsByte = kTSClassishTypesFieldsByte;
+private:
+  ArrayData* m_generic_types;
+  StringData* m_classname;
+  bool m_exact;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Layouts

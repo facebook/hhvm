@@ -24,11 +24,12 @@ function main(): void {
   $ts = type_structure($foo, 'FooShape');
   var_dump($ts['kind']);
   var_dump($ts['fields']);
-  var_dump($ts['allows_unknown_fields'] ?? 'no unknown fields allowed');
+  var_dump($ts['allows_unknown_fields'] ?? 'field exists but is false');
+  var_dump($ts['classname'] ?? 'correct field name but not on this kind');
 
   $ts = type_structure($foo, 'FooBool');
   var_dump($ts['kind']);
-  var_dump($ts['nullable'] ?? 'is not nullable');
+  var_dump($ts['nullable'] ?? 'field exists but is false');
 
   $ts = type_structure($foo, 'FooMixed');
   var_dump($ts['kind']);

@@ -14,9 +14,10 @@ dict(2) {
     int(1)
   }
 }
-string(25) "no unknown fields allowed"
+string(25) "field exists but is false"
+string(39) "correct field name but not on this kind"
 int(2)
-string(15) "is not nullable"
+string(25) "field exists but is false"
 int(9)
 bool(true)
 string(6) "FooInt"

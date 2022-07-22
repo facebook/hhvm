@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-bespoke.h"
 
+#include <hphp/util/assertions.h>
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
@@ -520,24 +521,50 @@ void cgLdTypeStructureValCns(IRLS &env, const IRInstruction *inst) {
   assertx(!key->empty());
 
   auto& v = vmain(env);
-  auto const dst = dstLoc(env, inst, 0);
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const fieldSF = v.makeReg();
 
-  auto const dt = bespoke::TypeStructure::getKindOfField(key);
   auto const offset = bespoke::TypeStructure::getFieldOffset(key);
+  auto const fieldPair = bespoke::TypeStructure::getFieldPair(key);
+  auto const dt = fieldPair.first;
+  assertx(!isNullType(dt));
 
+  auto const fieldsByteOffset = bespoke::TypeStructure::fieldsByteOffset();
+  auto const fieldBitOffset = fieldPair.second;
+  assertx(0 <= fieldBitOffset && fieldBitOffset < 8);
+  auto const fieldBitMask = static_cast<uint8_t>(1 << fieldBitOffset);
+  v << testbim{fieldBitMask, rarr[fieldsByteOffset], fieldSF};
 
-  if (dt == KindOfBoolean) {
-    // TODO: add different load for boolean fields that aren't stored in
-    // ArrayData header after adding children type structs
-    auto const bitOffset = bespoke::TypeStructure::getBitOffset(key);
-    auto const sf = v.makeReg();
-    v << testbim{static_cast<uint8_t>(1 << bitOffset), rarr[offset], sf};
-    v << setcc{CC_NE, sf, dst.reg(0)};
-  } else if (dt == KindOfInt64) {
-    v << loadzbq{rarr[offset], dst.reg(0)};
-  } else if (isArrayLikeType(dt) || isStringType(dt)) {
-    v << load{rarr[offset], dst.reg(0)};
-  }
+  // load value at offset if the field exists on this kind of type structure
+  // otherwise load falsy values
+  cond(
+    v, CC_NE, fieldSF, dst,
+    [&] (Vout& v) {
+      auto value = v.makeReg();
+      if (dt == KindOfBoolean) {
+        auto const sf = v.makeReg();
+        auto const bitOffset = bespoke::TypeStructure::getBooleanBitOffset(key);
+        v << testbim{static_cast<uint8_t>(1 << bitOffset), rarr[offset], sf};
+        v << setcc{CC_NE, sf, value};
+      } else if (dt == KindOfInt64) {
+        v << loadzbq{rarr[offset], value};
+      } else if (isArrayLikeType(dt) || isStringType(dt)) {
+        v << load{rarr[offset], value};
+      } else {
+        always_assert(false);
+      }
+      return value;
+    },
+    [&] (Vout& v) {
+      if (dt == KindOfBoolean) {
+        return v.cns(false);
+      } else if (dt == KindOfInt64) {
+        return v.cns(0);
+      }
+      assertx(isArrayLikeType(dt) || isStringType(dt));
+      return v.cns(nullptr);
+    }
+  );
 }
 
 #undef CALL_TARGET

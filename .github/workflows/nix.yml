@@ -139,7 +139,7 @@ jobs:
         set -e
         if reprepro --list-max 1 list nightly
         then
-          echo 'Don't create nightly suite because it is preexisting'
+          echo 'Do not create nightly suite because it is preexisting'
         else
           (
             echo ''

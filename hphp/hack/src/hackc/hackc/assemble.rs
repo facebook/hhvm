@@ -1265,7 +1265,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"persistent" => Attr::AttrPersistent,
         b"private" => Attr::AttrPrivate,
         b"protected" => Attr::AttrProtected,
-        b"provenance_skip_frame" => Attr::AttrProvenanceSkipFrame,
+        b"prov_skip_frame" => Attr::AttrProvenanceSkipFrame,
         b"public" => Attr::AttrPublic,
         b"readonly" => Attr::AttrIsReadonly,
         b"readonly_return" => Attr::AttrReadonlyReturn,

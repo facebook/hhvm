@@ -185,8 +185,8 @@ impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::hhas_type::HhasTypeInfo<'_>>
 
 fn cmp_eq<Ta, Tb>(a: &Ta, b: &Tb) -> Result<()>
 where
-    Ta: PartialEq<Tb> + fmt::Debug,
-    Tb: fmt::Debug,
+    Ta: ?Sized + PartialEq<Tb> + fmt::Debug,
+    Tb: ?Sized + fmt::Debug,
 {
     if a != b {
         bail!("Mismatch {:?} vs {:?}", a, b);
@@ -668,6 +668,68 @@ fn cmp_fatal(
     Ok(())
 }
 
+fn is_pure(sc: &[naming_special_names_rust::coeffects::Ctx], usc: &[Str<'_>]) -> bool {
+    (sc.len() == 1
+        && sc.contains(&naming_special_names_rust::coeffects::Ctx::Pure)
+        && usc.is_empty())
+        || (sc.is_empty() && usc.len() == 1 && usc.iter().all(|usc| usc.as_bstr() == "pure"))
+}
+
+fn cmp_static_coeffects(
+    a_sc: &[naming_special_names_rust::coeffects::Ctx],
+    a_usc: &[Str<'_>],
+    b_sc: &[naming_special_names_rust::coeffects::Ctx],
+    b_usc: &[Str<'_>],
+) -> Result<()> {
+    // T126548142 -- odd "pure" behavior
+    if is_pure(a_sc, a_usc) && is_pure(b_sc, b_usc) {
+        Ok(())
+    } else {
+        cmp_eq(a_sc, b_sc).qualified("Static coeffecients")?;
+        cmp_eq(a_usc, b_usc).qualified("Unenforced static coeffecients")?;
+        Ok(())
+    }
+}
+
+fn cmp_coeffects(
+    a: &hhbc::hhas_coeffects::HhasCoeffects<'_>,
+    b: &hhbc::hhas_coeffects::HhasCoeffects<'_>,
+) -> Result<()> {
+    let hhbc::hhas_coeffects::HhasCoeffects {
+        static_coeffects: a_sc,
+        unenforced_static_coeffects: a_usc,
+        fun_param: a_fp,
+        cc_param: a_cp,
+        cc_this: a_ct,
+        cc_reified: a_cr,
+        closure_parent_scope: a_cps,
+        generator_this: a_gt,
+        caller: a_c,
+    } = a;
+
+    let hhbc::hhas_coeffects::HhasCoeffects {
+        static_coeffects: b_sc,
+        unenforced_static_coeffects: b_usc,
+        fun_param: b_fp,
+        cc_param: b_cp,
+        cc_this: b_ct,
+        cc_reified: b_cr,
+        closure_parent_scope: b_cps,
+        generator_this: b_gt,
+        caller: b_c,
+    } = b;
+
+    cmp_static_coeffects(a_sc, a_usc, b_sc, b_usc)?;
+    cmp_eq(a_fp, b_fp)?;
+    cmp_eq(a_cp, b_cp)?;
+    cmp_eq(a_ct, b_ct)?;
+    cmp_eq(a_cr, b_cr)?;
+    cmp_eq(&a_cps, &b_cps)?;
+    cmp_eq(&a_gt, &b_gt)?;
+    cmp_eq(&a_c, &b_c)?;
+    Ok(())
+}
+
 fn cmp_function(a: &HhasFunction<'_>, b: &HhasFunction<'_>) -> Result<()> {
     let HhasFunction {
         attributes: a_attributes,
@@ -692,7 +754,7 @@ fn cmp_function(a: &HhasFunction<'_>, b: &HhasFunction<'_>) -> Result<()> {
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_body(a_body, b_body).qualified("body")?;
     cmp_eq(a_span, b_span).qualified("span")?;
-    cmp_eq(a_coeffects, b_coeffects).qualified("coeffects")?;
+    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
 
@@ -725,7 +787,7 @@ fn cmp_method(a: &HhasMethod<'_>, b: &HhasMethod<'_>) -> Result<()> {
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_body(a_body, b_body).qualified("body")?;
     cmp_eq(a_span, b_span).qualified("span")?;
-    cmp_eq(a_coeffects, b_coeffects).qualified("coeffects")?;
+    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())

@@ -29,15 +29,15 @@ pub struct HhasCtxConstant<'arena> {
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasCoeffects<'arena> {
-    static_coeffects: Slice<'arena, Ctx>,
-    unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
-    fun_param: Slice<'arena, usize>,
-    cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
-    cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
-    cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
-    closure_parent_scope: bool,
-    generator_this: bool,
-    caller: bool,
+    pub static_coeffects: Slice<'arena, Ctx>,
+    pub unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
+    pub fun_param: Slice<'arena, usize>,
+    pub cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
+    pub cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
+    pub cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    pub closure_parent_scope: bool,
+    pub generator_this: bool,
+    pub caller: bool,
 }
 
 impl<'arena> HhasCoeffects<'arena> {

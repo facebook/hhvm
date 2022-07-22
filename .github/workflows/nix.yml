@@ -123,9 +123,9 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -e
-        sudo mkdir /mnt/test-universal-packages
-        chown "$USER" /mnt/test-universal-packages
-        goofys hhvm-downloads:/test-universal-packages /mnt/test-universal-packages
-        sudo tee /mnt/test-universal-packages/hello <<EOF
-        Hello, World!
-        EOF
+        sudo mkdir /mnt/hhvm-downloads
+        sudo chown "$USER" /mnt/hhvm-downloads
+        goofys -f hhvm-downloads /mnt/hhvm-downloads
+        mkdir -p /mnt/hhvm-downloads/test-universal-packages
+        echo 'Hello, World!' > /mnt/hhvm-downloads/test-universal-packages/hello
+

@@ -1409,7 +1409,7 @@ String string_escape_shell_arg(const char *str) {
 }
 
 String string_escape_shell_cmd(const char *str) {
-  register int x, y, l;
+  int x, y, l;
   char *cmd;
   char *p = nullptr;
 

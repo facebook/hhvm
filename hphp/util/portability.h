@@ -171,15 +171,15 @@
 // will fail "pretty spectacularly".
 # define DECLARE_FRAME_POINTER(fp) \
   always_assert(false);            \
-  register ActRec* fp = nullptr;
+  ActRec* fp = nullptr;
 
 #elif defined(__AARCH64EL__)
 
 # if defined(__clang__)
-# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) \
+# define DECLARE_FRAME_POINTER(fp) ActRec* fp = (ActRec*) \
   __builtin_frame_address(0)
 #else
-# define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29")
+# define DECLARE_FRAME_POINTER(fp) ActRec* fp asm("x29")
 #endif
 
 #elif defined(__powerpc64__)

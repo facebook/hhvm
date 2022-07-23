@@ -131,8 +131,8 @@ hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
 
 #define tiger_compress(passes, str, state)                              \
   {                                                                     \
-    register uint64_t a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7; \
-    uint64_t aa, bb, cc;                                           \
+    uint64_t a, b, c, tmpa, x0, x1, x2, x3, x4, x5, x6, x7;             \
+    uint64_t aa, bb, cc;                                                \
     int pass_no;                                                        \
                                                                         \
     a = state[0];                                                       \

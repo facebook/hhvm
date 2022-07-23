@@ -1,8 +1,8 @@
 === Shape analysis results for while3.php
 Summary for \f:
-[4:8-23] [Allocation]:
-  shape('a' => int)
+[4:8-25] [Allocation]:
+  shape('a' => bool)
 [7:10-26] [Allocation]:
   shape('b' => string)
-[10:11-13] [Argument]:
-  shape(?'a' => int, 'b' => string, 'c' => bool)
+[9:11-13] [Argument]:
+  shape(?'a' => bool, ?'b' => string)

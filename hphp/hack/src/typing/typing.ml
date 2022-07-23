@@ -277,19 +277,23 @@ let expr_any env p e =
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
 let unbound_name env (pos, name) e =
-  let class_exists =
-    let ctx = Env.get_ctx env in
-    let decl = Decl_provider.get_class ctx name in
-    match decl with
-    | None -> false
-    | Some dc -> Ast_defs.is_c_class (Cls.kind dc)
-  in
-  match Env.get_mode env with
-  | FileInfo.Mstrict ->
-    Errors.add_typing_error
-      Typing_error.(primary @@ Primary.Unbound_name { pos; name; class_exists });
-    expr_error env (Reason.Rwitness pos) e
-  | FileInfo.Mhhi -> expr_any env pos e
+  if env.in_support_dynamic_type_method_check then
+    expr_any env pos e
+  else
+    let class_exists =
+      let ctx = Env.get_ctx env in
+      let decl = Decl_provider.get_class ctx name in
+      match decl with
+      | None -> false
+      | Some dc -> Ast_defs.is_c_class (Cls.kind dc)
+    in
+    match Env.get_mode env with
+    | FileInfo.Mstrict ->
+      Errors.add_typing_error
+        Typing_error.(
+          primary @@ Primary.Unbound_name { pos; name; class_exists });
+      expr_error env (Reason.Rwitness pos) e
+    | FileInfo.Mhhi -> expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
 let get_value_collection_inst env ty =
@@ -1174,7 +1178,9 @@ let fun_type_of_id env x tal el =
       Option.iter ~f:Errors.add_typing_error ty_err_opt2;
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
-          ~should_wrap:fe_support_dynamic_type
+          ~should_wrap:
+            (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && fe_support_dynamic_type)
           (Typing_reason.localize (get_reason fe_type))
           ft
       in
@@ -2120,17 +2126,39 @@ let rec bind_param
         (* Otherwise we have an explicit type, and the default expression type
          * must be a subtype *)
         else
+          (* Under Sound Dynamic, if t is the declared type of the parameter, then we
+           * allow the default expression to have any type u such that u <: ~t.
+           * If t is enforced, then the parameter is assumed to have that type when checking the body,
+           *   because we know that enforcement will ensure this.
+           * If t is not enforced, then the parameter is assumed to have type u|t when checking the body,
+           * as though the default expression had been assigned conditionally to the parameter.
+           *)
+          let support_dynamic =
+            TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && Env.get_support_dynamic_type env
+          in
+          let like_ty1 =
+            if support_dynamic then
+              Typing_utils.make_like env ty1
+            else
+              ty1
+          in
           let (env, ty_err_opt) =
             Typing_coercion.coerce_type
               param.param_pos
               Reason.URhint
               env
               ty2
-              (Typing_utils.make_like_if_enforced env ty1_enforced)
+              { et_type = like_ty1; et_enforced = enforced }
               Typing_error.Callback.parameter_default_value_wrong_type
           in
           Option.iter ty_err_opt ~f:Errors.add_typing_error;
-          (env, ty1)
+          if support_dynamic then
+            match enforced with
+            | Enforced -> (env, ty1)
+            | _ -> Union.union env ty1 ty2
+          else
+            (env, ty1)
       in
       (env, Some te, ty1)
   in
@@ -2928,7 +2956,6 @@ and expr
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?(valkind = `other)
     ?(check_defined = true)
     ?in_await
@@ -2954,7 +2981,6 @@ and expr
     raw_expr
       ~accept_using_var
       ~is_using_clause
-      ~in_readonly_expr
       ~valkind
       ~check_defined
       ?in_await
@@ -2986,7 +3012,6 @@ and expr_with_pure_coeffects
 and raw_expr
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?(expected : ExpectedTy.t option)
     ?lhs_of_null_coalesce
     ?(valkind = `other)
@@ -3000,7 +3025,6 @@ and raw_expr
   expr_
     ~accept_using_var
     ~is_using_clause
-    ~in_readonly_expr
     ?expected
     ?lhs_of_null_coalesce
     ?in_await
@@ -3109,7 +3133,6 @@ and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(in_readonly_expr = false)
     ?lhs_of_null_coalesce
     ?in_await
     ~allow_awaitable
@@ -4399,8 +4422,7 @@ and expr_
       p
       (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
       ty
-  | Class_get
-      (((_, _, cid_) as cid), CGstring ((ppos, _) as mid), prop_or_method) ->
+  | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
@@ -4415,22 +4437,6 @@ and expr_
     in
     let (env, ty) =
       Env.FakeMembers.check_static_invalid env cid_ (snd mid) ty
-    in
-    let env =
-      Errors.try_if_no_errors
-        (fun () -> Typing_local_ops.enforce_static_property_access ppos env)
-        (fun env ->
-          let is_lvalue = is_lvalue valkind in
-          (* If it's an lvalue we throw an error in a separate check in check_assign *)
-          if in_readonly_expr || is_lvalue then
-            env
-          else
-            Typing_local_ops.enforce_mutable_static_variable
-              ppos
-              env
-              (* This msg only appears if we have access to ReadStaticVariables,
-                 since otherwise we would have errored in the first function *)
-              ~msg:"Please enclose the static in a readonly expression")
     in
     make_result
       env
@@ -4623,7 +4629,7 @@ and expr_
     make_result env p (Aast.Await te) ty
   | ReadonlyExpr e ->
     let env = Env.set_readonly env true in
-    let (env, te, rty) = expr ~is_using_clause ~in_readonly_expr:true env e in
+    let (env, te, rty) = expr ~is_using_clause env e in
     make_result env p (Aast.ReadonlyExpr te) rty
   | New ((_, pos, c), explicit_targs, el, unpacked_element, ()) ->
     let env = might_throw env in
@@ -7613,39 +7619,70 @@ and class_get_inner
         }
       in
       let get_smember_from_constraints env class_info =
+        (* Extract the upper bounds on this from where and require class constraints. *)
         let upper_bounds_from_where_constraints =
           Cls.upper_bounds_on_this_from_constraints class_info
         in
         let upper_bounds_from_require_class_constraints =
           List.map (Cls.all_ancestor_req_class_requirements class_info) ~f:snd
         in
-        let upper_bounds =
-          upper_bounds_from_where_constraints
-          @ upper_bounds_from_require_class_constraints
-        in
-        let ((env, ty_err_opt), upper_bounds) =
-          List.map_env_ty_err_opt
-            env
-            upper_bounds
-            ~f:(fun env up -> Phase.localize ~ety_env env up)
-            ~combine_ty_errs:Typing_error.multiple_opt
+        let (env, ty_err_opt, upper_bounds) =
+          let ((env, ty_err_opt), upper_bounds) =
+            List.map_env_ty_err_opt
+              env
+              (upper_bounds_from_where_constraints
+              @ upper_bounds_from_require_class_constraints)
+              ~f:(fun env up -> Phase.localize ~ety_env env up)
+              ~combine_ty_errs:Typing_error.multiple_opt
+          in
+          (* If class C uses a trait that require class C, then decls for class C
+           * include the require class C constraint.  This must be filtered out to avoid
+           * that resolving a static element on class C enters into an infinite recursion.
+           * Similarly, upper bounds on this equivalent via aliases to class C
+           * introduced via class-level where clauses, must be filtered out; this is done
+           * by localizing the bounds before comparing them with the current class name.
+           *)
+          let upper_bounds =
+            List.filter
+              ~f:(fun ty ->
+                match get_node ty with
+                | Tclass ((_, cn), _, _) ->
+                  String.( <> ) cn (Cls.name class_info)
+                | _ -> true)
+              upper_bounds
+          in
+          (env, ty_err_opt, upper_bounds)
         in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
-        let (env, inter_ty) =
-          Inter.intersect_list env (Reason.Rwitness p) upper_bounds
-        in
-        class_get_inner
-          ~is_method
-          ~is_const
-          ~this_ty
-          ~explicit_targs
-          ~incl_tc
-          ~coerce_from_ty
-          ~is_function_pointer
-          env
-          cid
-          inter_ty
-          (p, mid)
+        if List.is_empty upper_bounds then begin
+          (* there are no upper bounds, raise an error *)
+          Errors.add_typing_error
+          @@ TOG.smember_not_found
+               p
+               ~is_const
+               ~is_method
+               ~is_function_pointer
+               class_info
+               mid
+               Typing_error.Callback.unify_error;
+          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+        end else
+          (* since there are upper bounds on this, repeat the search on their intersection *)
+          let (env, inter_ty) =
+            Inter.intersect_list env (Reason.Rwitness p) upper_bounds
+          in
+          class_get_inner
+            ~is_method
+            ~is_const
+            ~this_ty
+            ~explicit_targs
+            ~incl_tc
+            ~coerce_from_ty
+            ~is_function_pointer
+            env
+            cid
+            inter_ty
+            (p, mid)
       in
       let try_get_smember_from_constraints env class_info =
         Errors.try_with_error
@@ -7676,19 +7713,7 @@ and class_get_inner
             | None -> Env.get_const env class_ mid
         in
         match const with
-        | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
-          try_get_smember_from_constraints env class_
-        | None ->
-          Errors.add_typing_error
-          @@ TOG.smember_not_found
-               p
-               ~is_const
-               ~is_method
-               ~is_function_pointer
-               class_
-               mid
-               Typing_error.Callback.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+        | None -> try_get_smember_from_constraints env class_
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let ((env, ty_err_opt), cc_locl_type) =
             Phase.localize ~ety_env env cc_type
@@ -7716,23 +7741,12 @@ and class_get_inner
           Env.get_static_member is_method env class_ mid
         in
         (match static_member_opt with
-        | None
-          when Cls.has_upper_bounds_on_this_from_constraints class_
-               || not
-                    (List.is_empty
-                       (Cls.all_ancestor_req_class_requirements class_)) ->
-          try_get_smember_from_constraints env class_
         | None ->
-          Errors.add_typing_error
-          @@ TOG.smember_not_found
-               p
-               ~is_const
-               ~is_method
-               ~is_function_pointer
-               class_
-               mid
-               Typing_error.Callback.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
+          (* Before raising an error, check if the classish has upper bounds on this
+           * (via class-level where clauses or require class constraints); if yes, repeat
+           * the search on all the upper bounds, if not raise an error.
+           *)
+          try_get_smember_from_constraints env class_
         | Some
             ({
                ce_visibility = vis;

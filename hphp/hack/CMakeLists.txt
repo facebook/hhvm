@@ -264,7 +264,11 @@ function(build_cxx_bridge NAME)
   set(GENERATED_CXXBRIDGE "${FFI_BRIDGE_BIN}/cxxbridge")
 
   add_custom_command(
-      OUTPUT ${RUST_PART_CXX}
+      OUTPUT
+        ${RUST_PART_CXX}
+        ${RUST_PART_HEADER}
+        ${RUST_PART_LIB}
+        ${GENERATED_CXXBRIDGE}
       COMMAND
         ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
@@ -276,13 +280,28 @@ function(build_cxx_bridge NAME)
   )
   add_custom_target(
     "${NAME}_cxx"
-    DEPENDS ${RUST_PART_CXX}
+    DEPENDS ${RUST_PART_LIB}
   )
-
   add_library("${NAME}" STATIC ${RUST_PART_CXX} ${CXX_BRIDGE_EXTRA_SRCS} )
-  add_dependencies("${NAME}" rustc cargo "${NAME}_cxx")
   add_dependencies(hack_rust_ffi_bridge_targets "${NAME}")
-  target_link_libraries("${NAME}" PUBLIC ${RUST_PART_LIB} ${CXX_BRIDGE_LINK_LIBS})
+  add_library("${NAME}_rust_part" STATIC IMPORTED)
+  add_dependencies("${NAME}_rust_part" "${NAME}_cxx")
+
+  # Intentionally create link-time cyclic dependency between ${NAME}_rust_part
+  # and ${NAME} so that CMake will automatically construct the link line so
+  # that the linker will scan through involved static libraries multiple times.
+  set_target_properties(
+    "${NAME}_rust_part"
+    PROPERTIES
+    IMPORTED_LOCATION ${RUST_PART_LIB}
+    IMPORTED_LINK_DEPENDENT_LIBRARIES "${NAME}"
+  )
+  target_link_libraries(
+    "${NAME}"
+    PUBLIC
+      "${NAME}_rust_part"
+      ${CXX_BRIDGE_LINK_LIBS}
+  )
   # `-iquote` is like `-I` (or target_include_directories()`), except:
   # - it takes precedence over `-I`
   # - it only applies to `#include "foo"`, not `#include <foo>`
@@ -290,8 +309,16 @@ function(build_cxx_bridge NAME)
   target_compile_options("${NAME}" PRIVATE "-iquote" "${GENERATED_CXXBRIDGE}")
 endfunction()
 
-build_cxx_bridge(parser_ffi DIR "src/parser/ffi_bridge")
-build_cxx_bridge(compiler_ffi DIR "src/hackc/ffi_bridge" LINK_LIBS hdf)
+build_cxx_bridge(
+  parser_ffi
+  DIR "src/parser/ffi_bridge"
+)
+build_cxx_bridge(
+  compiler_ffi
+  DIR "src/hackc/ffi_bridge"
+  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
+  LINK_LIBS hdf
+)
 build_cxx_bridge(
   hdf
   DIR "src/utils/hdf"

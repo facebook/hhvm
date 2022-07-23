@@ -40,8 +40,9 @@ type constraint_ =
   | Upcast of entity_ * Pos.t
       (** Records existance and position of upcast dynamic *)
   | Subset of entity_ * entity_
-      (** Records that the first keys of the first entity are all present in
-          the second. *)
+      (** Records that the first entity is assigned to the second *)
+  | Called of Pos.t
+      (** Records that the entity_ was a function pointer that was called *)
 
 (** Relationship with shape_analysis: shape_result *)
 type refactor_sd_result =

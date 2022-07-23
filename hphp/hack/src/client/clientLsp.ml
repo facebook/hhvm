@@ -3557,6 +3557,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           definitionProvider = true;
           typeDefinitionProvider = true;
           referencesProvider = true;
+          callHierarchyProvider = true;
           documentHighlightProvider = true;
           documentSymbolProvider = true;
           workspaceSymbolProvider = true;

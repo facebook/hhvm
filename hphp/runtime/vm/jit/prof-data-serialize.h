@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/optional.h"
+
 #include <string>
 
 namespace HPHP {
@@ -267,6 +269,9 @@ bool tryDeserializePartialProfData(const std::string& filename,
 // Return whether or not serialization of profile data for optimized code is
 // enabled.
 bool serializeOptProfEnabled();
+
+// Get the name of the file deserialized if any.
+Optional<std::string> getFilenameDeserialized();
 
 //////////////////////////////////////////////////////////////////////
 } }

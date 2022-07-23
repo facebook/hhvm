@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
 #include "hphp/util/optional.h"
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <watchman/cppclient/WatchmanClient.h>
 
@@ -39,7 +39,7 @@ public:
    * Return the Watchman singleton for the chosen root.
    */
   static std::shared_ptr<Watchman>
-  get(const folly::fs::path& path, const Optional<std::string>& sockPath);
+  get(const std::filesystem::path& path, const Optional<std::string>& sockPath);
 
   /**
    * Return information about the altered and deleted paths matching

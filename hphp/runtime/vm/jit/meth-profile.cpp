@@ -35,7 +35,7 @@ void MethProfile::reportMeth(const Class* cls, const Func* meth,
   auto const checkModule = [&](const Func* f) {
     return RO::EvalEnforceModules == 1 &&
            callerFunc &&
-           will_call_raise_module_boundary_violation(f, callerFunc->moduleName());
+           will_symbol_raise_module_boundary_violation(f, callerFunc);
   };
 
   auto val = methValue();

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<30e561f4665ce11cc087fb2b94571bf9>>
+// @generated SignedSource<<54c8c37f63cf568582e8be86e50f9b91>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2025,7 +2025,8 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
         self.emit_id.accept(c, v)?;
         self.is_ctx.accept(c, v)?;
         self.internal.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.docs_url.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for TypedefVisibility {

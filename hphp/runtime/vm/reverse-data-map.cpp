@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/reverse-data-map.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/class.h"
@@ -119,7 +118,7 @@ void deregister(Kind /*kind*/, const void* meta) {
 bool contains(const ArrayData* arr, const void* addr) {
   auto const start = reinterpret_cast<const char*>(arr);
   if (addr < start) return false;
-  size_t heapSize = allocSize(arr);
+  size_t heapSize = arr->heapSize();
   return addr < start + heapSize;
 }
 

@@ -102,6 +102,10 @@ pub struct ValueId {
 impl ValueId {
     const NONE: i32 = i32::MIN;
 
+    pub fn raw(self) -> i32 {
+        self.raw
+    }
+
     pub fn from_instr(idx: InstrId) -> Self {
         assert!(idx != InstrId::NONE);
         let InstrId(idx) = idx;

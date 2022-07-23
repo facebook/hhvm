@@ -20,7 +20,6 @@
 
 #include <folly/dynamic.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
 
@@ -197,7 +196,7 @@ void setExtractorFactory(ExtractorFactory factory) {
 }
 
 std::vector<folly::Try<FileFacts>> facts_from_paths(
-    const folly::fs::path& root,
+    const std::filesystem::path& root,
     const std::vector<PathAndOptionalHash>& pathsAndHashes) {
 
   folly::CPUThreadPoolExecutor exec{

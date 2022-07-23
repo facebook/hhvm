@@ -446,14 +446,14 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         instr::verify_implicit_context_state(),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::memo_get_eager(notfound, suspended_get, LocalRange::default()),
+                instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),
                 instr::ret_c(),
                 instr::label(suspended_get),
                 instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
-                instr::memo_get(notfound, LocalRange::default()),
+                instr::memo_get(notfound, LocalRange::EMPTY),
                 instr::ret_c(),
             ])
         },
@@ -474,12 +474,12 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
             );
             instr::f_call_obj_method_d(fcall_args, renamed_method_id)
         },
-        instr::memo_set(LocalRange::default()),
+        instr::memo_set(LocalRange::EMPTY),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memo_set_eager(LocalRange::default()),
+                instr::memo_set_eager(LocalRange::EMPTY),
                 instr::ret_c(),
             ])
         } else {

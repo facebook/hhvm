@@ -1,0 +1,11 @@
+=== Sound Dynamic analysis results for vector3.php
+Constraints for \f:
+
+Constraints for \g:
+
+Constraints for \h:
+?2 ⊆ ?1
+Introduction at [10:15-18]
+Upcast at ?1
+[10:15-18] ⊆ ?2
+

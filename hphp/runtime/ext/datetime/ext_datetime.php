@@ -74,7 +74,12 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public static function getLastErrors()[read_globals]: darray;
+  public static function getLastErrors()[read_globals]: shape(
+    'warning_count' => int,
+    'warnings' => dict<int, string>,
+    'error_count' => int,
+    'errors' => dict<int, string>
+  );
 
   /**
    * Returns the timezone offset.
@@ -201,13 +206,13 @@ class DateTime implements DateTimeInterface {
   public function sub(DateInterval $interval)[write_props]: mixed;
 
   <<__Native>>
-  public function __sleep()[write_props]: varray;
+  public function __sleep()[write_props]: varray<string>;
 
   <<__Native>>
   public function __wakeup()[]: void;
 
   <<__Native>>
-  public function __debugInfo()[]: darray;
+  public function __debugInfo()[]: darray<string, mixed>;
 
 }
 
@@ -232,7 +237,12 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  public function getLocation()[]: darray;
+  public function getLocation()[]: shape(
+    'country_code' => string,
+    'latitude' => float,
+    'longitude' => float,
+    'comments' => string,
+  );
 
   /**
    * Returns the name of the timezone.
@@ -267,12 +277,19 @@ class DateTimeZone {
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
                           int $timestamp_end = PHP_INT_MAX)[]: mixed;
 
+
+  const type TAbbrev = shape(
+    'dst' => bool,
+    'offset' => float,
+    'timezone_id' => ?string,
+  );
   /**
    * @return array - Returns array on success or FALSE on failure.
    *
    */
   <<__Native>>
-  public static function listAbbreviations()[]: darray;
+  public static function listAbbreviations(
+  )[]: dict<string, vec<this::TAbbrev>>;
 
   /**
    * @param int $what - One of DateTimeZone class constants.
@@ -287,7 +304,7 @@ class DateTimeZone {
                                   string $country = "")[]: mixed;
 
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo(): darray<string, mixed>;
 }
 
 /**
@@ -406,7 +423,12 @@ function date_default_timezone_get(): string;
 <<__Native>>
 function date_default_timezone_set(string $name): bool;
 
-function date_get_last_errors(): darray {
+function date_get_last_errors()[read_globals]: shape(
+  'warning_count' => int,
+  'warnings' => dict<int, string>,
+  'error_count' => int,
+  'errors' => dict<int, string>
+) {
   return DateTime::getLastErrors();
 }
 
@@ -422,7 +444,7 @@ function date_interval_format(DateInterval $interval,
 function date_isodate_set(DateTime $datetime,
                           int $year,
                           int $week,
-                          int $day = 1): void {
+                          int $day = 1): DateTime {
   return $datetime->setISODate($year, $week, $day);
 }
 
@@ -451,12 +473,19 @@ function date_sub(DateTime $datetime, DateInterval $interval): mixed {
  * @param int $ts - Timestamp.
  * @param float $latitude - Latitude in degrees.
  * @param float $longitude - Longitude in degrees.
- *
- * @return array - Returns array on success or FALSE on failure.
- *
  */
 <<__Native>>
-function date_sun_info(int $ts, float $latitude, float $longitude): darray;
+function date_sun_info(int $ts, float $latitude, float $longitude): shape(
+  'sunrise' => mixed,
+  'sunset' => mixed,
+  'transit' => int,
+  'civil_twilight_begin' => mixed,
+  'civil_twilight_end' => mixed,
+  'nautical_twilight_begin' => mixed,
+  'nautical_twilight_end' => mixed,
+  'astronomical_twilight_begin' => mixed,
+  'astronomical_twilight_end' => mixed,
+);
 
 /**
  * date_sunrise() returns the sunrise time for a given day (specified as a
@@ -556,7 +585,19 @@ function date(string $format, ?int $timestamp = null): mixed;
  *
  */
 <<__Native>>
-function getdate(?int $timestamp = null): darray;
+function getdate(?int $timestamp = null): shape(
+  'seconds' => int,
+  'minutes' => int,
+  'hours' => int,
+  'mday' => int,
+  'wday' => int,
+  'mon' => int,
+  'year' => int,
+  'yday' => int,
+  'weekday' => string,
+  'month' => string,
+  ...
+);
 
 /**
  * This is an interface to gettimeofday(2). It returns an associative array
@@ -682,7 +723,7 @@ function idate(string $format, ?int $timestamp = null): mixed;
  */
 <<__Native>>
 function localtime(?int $timestamp = null,
-                   bool $is_associative = false): varray_or_darray;
+                   bool $is_associative = false): varray_or_darray<mixed>;
 
 /**
  * microtime() returns the current Unix timestamp with microseconds. This
@@ -799,7 +840,8 @@ function strtotime(string $input, ?int $timestamp = null)[leak_safe]: mixed;
 <<__Native>>
 function time()[leak_safe]: int;
 
-function timezone_abbreviations_list(): darray {
+function timezone_abbreviations_list(
+): ?dict<string, vec<DateTimeZone::TAbbrev>> {
   return DateTimeZone::listAbbreviations();
 }
 
@@ -816,7 +858,12 @@ function timezone_identifiers_list(int $what = 2047,
   return DateTimeZone::listIdentifiers($what, $country);
 }
 
-function timezone_location_get(DateTimeZone $timezone): darray {
+function timezone_location_get(DateTimeZone $timezone): ?shape(
+  'country_code' => string,
+  'latitude' => float,
+  'longitude' => float,
+  'comments' => string,
+) {
   return $timezone->getLocation();
 }
 
@@ -853,7 +900,7 @@ function timezone_open(string $timezone): mixed {
   catch (Exception $e) {
     $msg = str_replace("DateTimeZone::__construct", "timezone_open",
                        $e->getMessage());
-    trigger_error($msg, E_WARNING);
+    trigger_error(HH\FIXME\UNSAFE_CAST<mixed, string>($msg), E_WARNING);
     return false;
   }
 }

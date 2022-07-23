@@ -262,7 +262,7 @@ static xmlExternalEntityLoader s_default_entity_loader = nullptr;
 static std::unordered_set<
   const StringData*,
   string_data_hash,
-  string_data_isame
+  string_data_same_nocase
 > s_ext_entity_whitelist;
 
 static bool allow_ext_entity_protocol(const String& protocol) {

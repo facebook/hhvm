@@ -9,9 +9,9 @@ class Foo {
  }
 }
 <<__EntryPoint>> function main(): void {
-foo::test();
+Foo::test();
 new Foo;
-foo::test();
+Foo::test();
 
 /**
  * function_add_ref() makes a clone of static variables for inherited functions, so $i in Bar::test gets initial value 1

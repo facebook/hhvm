@@ -25,9 +25,9 @@
 #include <exception>
 #include <utility>
 #include <vector>
+#include <filesystem>
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
@@ -57,8 +57,6 @@
 namespace HPHP::HHBBC {
 
 namespace {
-
-namespace fs = boost::filesystem;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -422,7 +420,7 @@ void print_repo_bytecode_stats() {
 int main(int argc, char** argv) try {
   parse_options(argc, argv);
 
-  if (!print_bytecode_stats_and_exit && fs::exists(output_repo)) {
+  if (!print_bytecode_stats_and_exit && std::filesystem::exists(output_repo)) {
     std::cout << "output repo already exists; removing it\n";
     if (unlink(output_repo.c_str())) {
       std::cerr << "failed to unlink output repo: "
@@ -430,7 +428,7 @@ int main(int argc, char** argv) try {
       return 1;
     }
   }
-  if (!fs::exists(input_repo)) {
+  if (!std::filesystem::exists(input_repo)) {
     std::cerr << "input repo `" << input_repo << "' not found\n";
     return 1;
   }

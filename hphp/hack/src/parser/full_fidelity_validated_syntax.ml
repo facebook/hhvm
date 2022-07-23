@@ -6551,7 +6551,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_token x.module_declaration_right_brace;
           module_declaration_left_brace =
             validate_token x.module_declaration_left_brace;
-          module_declaration_name = validate_token x.module_declaration_name;
+          module_declaration_name =
+            validate_name_aggregate x.module_declaration_name;
           module_declaration_module_keyword =
             validate_token x.module_declaration_module_keyword;
           module_declaration_new_keyword =
@@ -6577,7 +6578,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_token x.module_declaration_new_keyword;
             module_declaration_module_keyword =
               invalidate_token x.module_declaration_module_keyword;
-            module_declaration_name = invalidate_token x.module_declaration_name;
+            module_declaration_name =
+              invalidate_name_aggregate x.module_declaration_name;
             module_declaration_left_brace =
               invalidate_token x.module_declaration_left_brace;
             module_declaration_right_brace =
@@ -6594,7 +6596,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           module_membership_declaration_semicolon =
             validate_token x.module_membership_declaration_semicolon;
           module_membership_declaration_name =
-            validate_token x.module_membership_declaration_name;
+            validate_name_aggregate x.module_membership_declaration_name;
           module_membership_declaration_module_keyword =
             validate_token x.module_membership_declaration_module_keyword;
         } )
@@ -6610,7 +6612,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             module_membership_declaration_module_keyword =
               invalidate_token x.module_membership_declaration_module_keyword;
             module_membership_declaration_name =
-              invalidate_token x.module_membership_declaration_name;
+              invalidate_name_aggregate x.module_membership_declaration_name;
             module_membership_declaration_semicolon =
               invalidate_token x.module_membership_declaration_semicolon;
           };

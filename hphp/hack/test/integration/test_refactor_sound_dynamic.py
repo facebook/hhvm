@@ -42,7 +42,7 @@ enable_sound_dynamic_type = true
 
         self.test_driver.check_cmd(
             expected_output=expected_output,
-            options=["--refactor-check-sound-dynamic", command_type, element_name],
+            options=["--refactor-sound-dynamic", command_type, element_name],
         )
 
     def test_no_sd(self) -> None:

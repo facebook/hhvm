@@ -420,6 +420,8 @@ type t = {
   attempt_fix_credentials: bool;
       (** Indicates whether we attempt to fix the credentials if they're broken *)
   log_categories: string list;
+  log_large_fanouts_threshold: int option;
+      (** If a fanout is greater than this value, log stats about that fanout. *)
   experiments: string list;
       (** the list of experiments from the experiments config *)
   experiments_config_meta: string;  (** a free-form diagnostic string *)
@@ -618,6 +620,7 @@ let default =
     min_log_level = Hh_logger.Level.Info;
     attempt_fix_credentials = false;
     log_categories = [];
+    log_large_fanouts_threshold = None;
     experiments = [];
     experiments_config_meta = "";
     force_remote_type_check = false;
@@ -834,6 +837,9 @@ let load_ fn ~silent ~current_version overrides =
 
   let log_categories =
     string_list "log_categories" ~default:default.log_categories config
+  in
+  let log_large_fanouts_threshold =
+    int_opt "log_large_fanouts_threshold" config
   in
   let min_log_level =
     match
@@ -1493,6 +1499,7 @@ let load_ fn ~silent ~current_version overrides =
     min_log_level;
     attempt_fix_credentials;
     log_categories;
+    log_large_fanouts_threshold;
     experiments;
     experiments_config_meta;
     use_saved_state;

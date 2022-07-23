@@ -6,7 +6,6 @@
 use super::inherit::Inherited;
 use super::Result;
 use super::Substitution;
-use crate::special_names as sn;
 use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
@@ -22,6 +21,7 @@ use pos::TypeConstNameIndexMap;
 use pos::TypeName;
 use pos::TypeNameIndexMap;
 use pos::TypeNameIndexSet;
+use special_names as sn;
 use std::sync::Arc;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
@@ -766,7 +766,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             mut constructor,
             mut consts,
             mut type_consts,
-        } = Inherited::make(self.child, self.parents, self.dependency_registrar)?;
+        } = Inherited::make(
+            self.opts,
+            self.child,
+            self.parents,
+            self.dependency_registrar,
+        )?;
 
         for sp in self.child.props.iter() {
             self.decl_prop(&mut props, sp);

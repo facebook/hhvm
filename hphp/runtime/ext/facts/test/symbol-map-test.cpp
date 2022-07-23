@@ -15,6 +15,7 @@
 */
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -53,6 +54,8 @@ using ::testing::UnorderedElementsAre;
  * string_data_ptr.cpp, which implements this class in terms of
  * HPHP::StringData for production use.
  */
+
+namespace fs = std::filesystem;
 
 namespace HPHP {
 
@@ -257,8 +260,8 @@ void update(
     SymbolMap& m,
     std::string_view since,
     std::string_view clock,
-    std::vector<folly::fs::path> alteredPaths,
-    std::vector<folly::fs::path> deletedPaths,
+    std::vector<fs::path> alteredPaths,
+    std::vector<fs::path> deletedPaths,
     std::vector<FileFacts> facts) {
   for (auto& ff : facts) {
     ff.m_sha1hex = getSha1Hex(ff);
@@ -304,7 +307,9 @@ protected:
             [dbPath]() -> AutoloadDB& {
               return SQLiteAutoloadDB::getThreadLocal(
                   SQLiteKey::readWriteCreate(
-                      dbPath, static_cast<::gid_t>(-1), 0644));
+                      fs::path{dbPath.native()},
+                      static_cast<::gid_t>(-1),
+                      0644));
             },
             std::move(indexedMethodAttributes)),
         std::move(exec)});
@@ -331,7 +336,7 @@ TEST_F(SymbolMapTest, addPaths) {
       .m_constants = {"SOME_CONSTANT"}};
 
   // Define symbols in path
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
   update(m, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
@@ -374,7 +379,7 @@ TEST_F(SymbolMapTest, addPaths) {
       m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0), "SomeClass");
 
   // Define duplicate symbols in path2
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   update(m, "1:2:3", "1:2:4", {path2}, {}, {ff});
@@ -410,8 +415,8 @@ TEST_F(SymbolMapTest, duplicateSymbols) {
       .m_functions = {"some_fn"},
       .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
   update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
 
@@ -439,7 +444,7 @@ TEST_F(SymbolMapTest, DBFill) {
       .m_functions = {"some_fn"},
       .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
 
@@ -500,7 +505,7 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
   FileFacts ff{
       .m_types = {{.m_name = "HTTPDNSURL", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HTTPDNSURL");
@@ -539,8 +544,8 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
   FileFacts ff2{
       .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -574,7 +579,7 @@ TEST_F(SymbolMapTest, MaintainCorrectCase) {
       .m_functions = {{"CamelCasedFunction"}},
       .m_constants = {{"CamelCasedConstant"}}};
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   update(m1, "", "1:2:3", {path}, {}, {ff});
   m1.waitForDBUpdate();
 
@@ -601,8 +606,8 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
 
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   update(m1, "", "1:2:3", {path1, path2}, {}, {ff, ff});
@@ -631,7 +636,7 @@ TEST_F(SymbolMapTest, getAllSymbols) {
       .m_functions = {"SomeFunction"},
       .m_constants = {"SOME_CONSTANT"}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m, "", "1", {p}, {}, {ff});
 
@@ -659,8 +664,8 @@ TEST_F(SymbolMapTest, getAllSymbols) {
 TEST_F(SymbolMapTest, CopiedFile) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path path1 = {"some/path.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
@@ -694,7 +699,7 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   auto& m2 = make("/var/www", m_exec);
   auto& m3 = make("/var/www", m_exec);
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
@@ -716,7 +721,7 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
   update(m, "", "1:2:3", {}, {}, {});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   // since token is "4:5:6" but needs to be "1:2:3". It's not, so
@@ -729,8 +734,8 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
 TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
   auto& m = make("/var/www");
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
@@ -776,7 +781,7 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
 TEST_F(SymbolMapTest, GetKind) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path p = {"some/path1.php"};
+  fs::path p = {"some/path1.php"};
 
   FileFacts ff{
       .m_types = {
@@ -819,7 +824,7 @@ TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
            .m_kind = TypeKind::Trait,
            .m_flags = kTypeFlagAbstractBit | kTypeFlagFinalBit}}};
 
-  folly::fs::path p = {"some/path1.php"};
+  fs::path p = {"some/path1.php"};
 
   auto& m1 = make("/var/www");
   update(m1, "", "1:2:3", {p}, {}, {ff});
@@ -850,8 +855,8 @@ TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
 TEST_F(SymbolMapTest, OverwriteKind) {
   auto& m1 = make("/var/www");
 
-  folly::fs::path p1 = {"some/path1.php"};
-  folly::fs::path p2 = {"some/path2.php"};
+  fs::path p1 = {"some/path1.php"};
+  fs::path p2 = {"some/path2.php"};
   ASSERT_NE(p1.native(), p2.native());
 
   FileFacts ff1{.m_types = {{.m_name = "Foo", .m_kind = TypeKind::Class}}};
@@ -877,7 +882,7 @@ TEST_F(SymbolMapTest, OverwriteKind) {
 TEST_F(SymbolMapTest, DeriveKinds) {
   auto& m1 = make("/var/www1");
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   FileFacts ff{
       .m_types = {
           TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
@@ -914,7 +919,7 @@ TEST_F(SymbolMapTest, DeriveKinds) {
 TEST_F(SymbolMapTest, MultipleRoots) {
   auto& m1 = make("/var/www1");
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
@@ -937,7 +942,7 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  folly::fs::path path = {"some/path.php"};
+  fs::path path = {"some/path.php"};
 
   FileFacts ff{.m_functions = {"some_fn"}};
 
@@ -971,7 +976,7 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
            .m_baseTypes = {"BaseClass"}},
           {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = "some/path1.php";
+  fs::path path = "some/path1.php";
   update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(
@@ -1000,9 +1005,9 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
   FileFacts ff2{
       .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = "some/path1.php";
-  folly::fs::path path2 = "some/path2.php";
-  folly::fs::path path3 = "some/path3.php";
+  fs::path path1 = "some/path1.php";
+  fs::path path2 = "some/path2.php";
+  fs::path path3 = "some/path3.php";
   ASSERT_NE(path1, path2);
   ASSERT_NE(path1, path3);
   ASSERT_NE(path2, path3);
@@ -1035,8 +1040,8 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
            .m_baseTypes = {"BaseClass"}},
           {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
   // The repo looks like this at timestamps "1:2:3" and "1:2:4":
@@ -1106,7 +1111,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
           {.m_name = "C1",
            .m_kind = TypeKind::Class,
            .m_attributes = {{.m_name = "A1"}}}}};
-  folly::fs::path p1{"p1.php"};
+  fs::path p1{"p1.php"};
 
   update(m, "", "1", {p1}, {}, {ffWithAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), ElementsAre("A1"));
@@ -1114,7 +1119,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
 
   FileFacts ffEmpty{};
   FileFacts ffNoAttr{.m_types = {{.m_name = "C1", .m_kind = TypeKind::Class}}};
-  folly::fs::path p2{"p2.php"};
+  fs::path p2{"p2.php"};
 
   update(m, "1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
@@ -1128,7 +1133,7 @@ TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
 
   FileFacts emptyFF{};
 
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
 
   update(m, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
@@ -1144,9 +1149,9 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 
   FileFacts emptyFF{};
 
-  folly::fs::path path1 = {"some/path1.php"};
-  folly::fs::path path2 = {"some/path2.php"};
-  folly::fs::path path3 = {"some/path3.php"};
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+  fs::path path3 = {"some/path3.php"};
 
   // Initialize m2 as dependent on the DB
   update(m1, "", "1:2:3", {path1}, {}, {ff});
@@ -1166,7 +1171,7 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
 
 TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   auto& m1 = make("/var/www", m_exec);
-  folly::fs::path p = "foo.php";
+  fs::path p = "foo.php";
   FileFacts ffTypeAliasWithAttr{
       .m_types = {
           {.m_name = "SomeClass",
@@ -1213,10 +1218,10 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   FileFacts ffBaseClass{
       .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path pSomeClass1 = "src/SomeClass1.php";
-  folly::fs::path pSomeClass2 = "src/SomeClass2.php";
+  fs::path pSomeClass1 = "src/SomeClass1.php";
+  fs::path pSomeClass2 = "src/SomeClass2.php";
   ASSERT_NE(pSomeClass1, pSomeClass2);
-  folly::fs::path pBaseClass = "src/BaseClass.php";
+  fs::path pBaseClass = "src/BaseClass.php";
   ASSERT_NE(pBaseClass, pSomeClass1);
   ASSERT_NE(pBaseClass, pSomeClass2);
 
@@ -1275,7 +1280,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
 
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path1 = {"some/path1.php"};
+  fs::path path1 = {"some/path1.php"};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   waitForDB(m1, m_exec);
@@ -1308,9 +1313,9 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   FileFacts ff3{
       .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Interface}}};
 
-  folly::fs::path p1 = "some/path1.php";
-  folly::fs::path p2 = "some/path2.php";
-  folly::fs::path p3 = "some/path3.php";
+  fs::path p1 = "some/path1.php";
+  fs::path p2 = "some/path2.php";
+  fs::path p3 = "some/path3.php";
 
   update(m1, "", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
   waitForDB(m1, m_exec);
@@ -1352,10 +1357,10 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
   FileFacts ff4{
       .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p1 = "some/path1.php";
-  folly::fs::path p2 = "some/path2.php";
-  folly::fs::path p3 = "some/path3.php";
-  folly::fs::path p4 = "some/path4.php";
+  fs::path p1 = "some/path1.php";
+  fs::path p2 = "some/path2.php";
+  fs::path p3 = "some/path3.php";
+  fs::path p4 = "some/path4.php";
 
   // Define both "baseclass" and "BaseClass"
   update(m1, "", "1", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
@@ -1392,7 +1397,7 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
            .m_baseTypes = {"BaseClass"}},
           {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p1 = "some/path1.php";
+  fs::path p1 = "some/path1.php";
 
   update(m, "", "1", {p1}, {}, {ff1});
   EXPECT_EQ(m.getTypeFile("SomeClass").slice(), p1.native());
@@ -1429,7 +1434,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
           {.m_name = "SomeClass", .m_kind = TypeKind::Class},
           {.m_name = "OtherClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path path = {"some/path1.php"};
+  fs::path path = {"some/path1.php"};
 
   auto testMap = [&path](auto& map) {
     // getTypeFile() and getFileTypes() both fill in-memory maps from the DB.
@@ -1456,7 +1461,7 @@ TEST_F(SymbolMapTest, ErasePathStoredInDB) {
 
   FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
@@ -1489,7 +1494,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
               .m_kind = TypeKind::TypeAlias,
               .m_attributes = {{.m_name = "Foo", .m_args = {42, "a"}}}}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   auto testMap = [&p](auto& map) {
     EXPECT_EQ(map.getTypeFile("SomeClass"), p.native());
@@ -1541,7 +1546,7 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
                        .m_attributes = {{.m_name = "A1", .m_args = {2}}},
                    }}},
       }};
-  folly::fs::path p1{"some/path1.php"};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
@@ -1581,7 +1586,7 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
                   .m_name = "m1",
                   .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
           }}}};
-  folly::fs::path p1{"some/path1.php"};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   {
@@ -1630,7 +1635,7 @@ TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
                   .m_name = "m1",
                   .m_attributes = {{.m_name = "A1"}, {.m_name = "A2"}}},
           }}}};
-  folly::fs::path p1{"some/path1.php"};
+  fs::path p1{"some/path1.php"};
 
   auto check = [&](SymbolMap& m) {
     auto attrs = m.getAttributesOfMethod("C1", "m1");
@@ -1662,7 +1667,7 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
       .m_attributes = {
           Attribute{.m_name = "A1", .m_args = {1}},
           Attribute{.m_name = "A2", .m_args = {}}}};
-  folly::fs::path p1{"some/path1.php"};
+  fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
@@ -1716,7 +1721,7 @@ TEST_F(SymbolMapTest, TransitiveSubtypes) {
               .m_kind = TypeKind::Trait,
               .m_requireImplements = {"I1"}}}};
 
-  folly::fs::path p = {"some/path.php"};
+  fs::path p = {"some/path.php"};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
 
@@ -1747,13 +1752,13 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
     return folly::sformat("Class{}", i);
   };
 
-  auto makePath = [](size_t i) -> folly::fs::path {
+  auto makePath = [](size_t i) -> fs::path {
     return folly::sformat("some/path{}.php", i);
   };
 
   size_t const numSymbols = 100;
 
-  std::vector<folly::fs::path> paths;
+  std::vector<fs::path> paths;
   std::vector<FileFacts> facts;
   for (auto i = 0; i < numSymbols; ++i) {
     FileFacts ff;

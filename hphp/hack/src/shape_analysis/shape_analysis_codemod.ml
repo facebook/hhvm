@@ -20,21 +20,31 @@ let of_pos pos =
       ("end", JSON.int_ ecol);
     ]
 
-let of_marker pos kind _fields =
+let of_marker env pos fields kind =
+  let shape_ty =
+    Typing_defs.(mk (Typing_reason.Rnone, Tshape (Closed_shape, fields)))
+  in
   JSON.JSON_Object
-    [("pos", of_pos pos); ("kind", JSON.string_ (show_marker_kind kind))]
+    [
+      ("pos", of_pos pos);
+      ("kind", JSON.string_ (Codemod.show_kind kind));
+      ("type", JSON.string_ (Typing_print.full env shape_ty));
+    ]
 
-let of_results results =
+let codemod_kind_of_marker_kind = function
+  | Allocation -> Some Codemod.Allocation
+  | Parameter
+  | Return ->
+    Some Codemod.Hint
+  | Argument -> None
+
+let of_results env results =
   List.filter_map
     ~f:(function
       | Shape_like_dict (pos, kind, fields) ->
-        begin
-          match kind with
-          | Allocation
-          | Parameter ->
-            Some (of_marker pos kind fields)
-          | Argument -> None
-        end
+        Option.map
+          ~f:(of_marker env pos fields)
+          (codemod_kind_of_marker_kind kind)
       | Dynamically_accessed_dict _ -> None)
     results
   |> JSON.array_ (fun x -> x)

@@ -641,6 +641,11 @@ public:
   bool isInternal() const;
 
   /*
+   * What module does this function belong to?
+   */
+  const StringData* moduleName() const;
+
+  /*
    * Is this class allowed to be constructed dynamically?
    */
   bool isDynamicallyConstructible() const;
@@ -1999,7 +2004,6 @@ bool isEnum(const Class* cls);
 bool isEnumClass(const Class* cls);
 bool isAnyEnum(const Class* cls);
 bool isAbstract(const Class* cls);
-bool isFinal(const Class* cls);
 bool isNormalClass(const Class* cls);
 
 /*

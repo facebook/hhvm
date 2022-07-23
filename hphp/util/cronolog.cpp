@@ -16,7 +16,7 @@
 #include "hphp/util/cronolog.h"
 #include "hphp/util/user-info.h"
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #ifndef _MSC_VER
 #include <pwd.h>
@@ -36,7 +36,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-namespace fs = boost::filesystem;
 
 /* Open a new log file: determine the start of the current
  * period, generate the log file name from the fileTemplate,
@@ -94,7 +93,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
         stat_buf.st_dev != stat_buf2.st_dev) {
 
       /* Create a relative symlink to logs under linkname's directory */
-      std::string dir = fs::path(linkname).parent_path().native();
+      std::string dir = std::filesystem::path(linkname).parent_path().native();
       if (dir != "/") {
         dir.append("/");
       }

@@ -16,10 +16,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <sys/types.h>
-
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/util/sqlite-wrapper.h"
 
@@ -32,10 +31,10 @@ namespace Facts {
  */
 struct SQLiteKey {
 
-  static SQLiteKey readOnly(folly::fs::path path);
-  static SQLiteKey readWrite(folly::fs::path path);
+  static SQLiteKey readOnly(std::filesystem::path path);
+  static SQLiteKey readWrite(std::filesystem::path path);
   static SQLiteKey
-  readWriteCreate(folly::fs::path path, ::gid_t gid, ::mode_t perms);
+  readWriteCreate(std::filesystem::path path, ::gid_t gid, ::mode_t perms);
 
   bool operator==(const SQLiteKey& rhs) const noexcept;
 
@@ -49,7 +48,7 @@ struct SQLiteKey {
    */
   size_t hash() const;
 
-  folly::fs::path m_path;
+  std::filesystem::path m_path;
   SQLite::OpenMode m_writable;
   ::gid_t m_gid;
   ::mode_t m_perms;
@@ -57,7 +56,7 @@ struct SQLiteKey {
 private:
   SQLiteKey() = delete;
   SQLiteKey(
-      folly::fs::path path,
+      std::filesystem::path path,
       SQLite::OpenMode writable,
       ::gid_t gid,
       ::mode_t perms);

@@ -372,8 +372,8 @@
 -        [{ Typing_defs_core.ua_name = ([45:3-4], "\\T");
 -           ua_classname_params = [] }
 -          ];
--        td_internal = false }));
-+        td_attributes = []; td_internal = false }));
+-        td_internal = false; td_docs_url = None }));
++        td_attributes = []; td_internal = false; td_docs_url = None }));
    ("\\Ecc",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

@@ -151,27 +151,56 @@ let descendants_cardinal mode class_name : int =
 let children_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
 
-let log_fanout
-    ~ctx ((class_name : string), (diff : ClassDiff.t)) (fanout : AffectedDeps.t)
-    : unit =
-  let fanout_cardinal = DepSet.cardinal fanout.AffectedDeps.needs_recheck in
-  if fanout_cardinal >= 100_000 then
-    let mode = Provider_context.get_deps_mode ctx in
-    HackEventLogger.Fanouts.log
-      ~class_name
-      ~class_diff:(ClassDiff.show diff)
-      ~fanout_cardinal
-      ~class_diff_category:(ClassDiff.to_category_json diff)
-      ~direct_references_cardinal:(direct_references_cardinal mode class_name)
-      ~descendants_cardinal:(descendants_cardinal mode class_name)
-      ~children_cardinal:(children_cardinal mode class_name)
+let get_fanout_cardinal (fanout : AffectedDeps.t) : int =
+  DepSet.cardinal fanout.AffectedDeps.needs_recheck
 
-let add_fanout ~ctx acc diff =
+module Log = struct
+  let do_log ctx ~fanout_cardinal =
+    GlobalOptions.log_fanout ~fanout_cardinal @@ Provider_context.get_tcopt ctx
+
+  let log_class_fanout
+      ctx
+      ((class_name : string), (diff : ClassDiff.t))
+      (fanout : AffectedDeps.t) : unit =
+    let fanout_cardinal = get_fanout_cardinal fanout in
+    if do_log ~fanout_cardinal ctx then
+      let mode = Provider_context.get_deps_mode ctx in
+      HackEventLogger.Fanouts.log_class
+        ~class_name
+        ~class_diff:(ClassDiff.show diff)
+        ~fanout_cardinal
+        ~class_diff_category:(ClassDiff.to_category_json diff)
+        ~direct_references_cardinal:(direct_references_cardinal mode class_name)
+        ~descendants_cardinal:(descendants_cardinal mode class_name)
+        ~children_cardinal:(children_cardinal mode class_name)
+
+  let log_fanout
+      ctx
+      (changes : _ list)
+      (fanout : AffectedDeps.t)
+      ~max_class_fanout_cardinal : unit =
+    let fanout_cardinal = get_fanout_cardinal fanout in
+    if do_log ~fanout_cardinal ctx then
+      HackEventLogger.Fanouts.log
+        ~changes_cardinal:(List.length changes)
+        ~max_class_fanout_cardinal
+        ~fanout_cardinal
+end
+
+let add_fanout ~ctx (fanout_acc, max_class_fanout_cardinal) diff =
   let fanout = get_fanout ~ctx diff in
-  log_fanout ~ctx diff fanout;
-  AffectedDeps.union acc fanout
+  Log.log_class_fanout ctx diff fanout;
+  let fanout_acc = AffectedDeps.union fanout_acc fanout in
+  let max_class_fanout_cardinal =
+    Int.max max_class_fanout_cardinal (get_fanout_cardinal fanout)
+  in
+  (fanout_acc, max_class_fanout_cardinal)
 
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
     AffectedDeps.t =
-  List.fold changes ~init:(AffectedDeps.empty ()) ~f:(add_fanout ~ctx)
+  let (fanout, max_class_fanout_cardinal) =
+    List.fold changes ~init:(AffectedDeps.empty (), 0) ~f:(add_fanout ~ctx)
+  in
+  Log.log_fanout ctx changes fanout ~max_class_fanout_cardinal;
+  fanout

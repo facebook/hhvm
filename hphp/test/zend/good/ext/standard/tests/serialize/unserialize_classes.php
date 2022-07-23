@@ -10,6 +10,6 @@ var_dump(unserialize($s));
 var_dump(unserialize($s, darray["allowed_classes" => false]));
 var_dump(unserialize($s, darray["allowed_classes" => true]));
 var_dump(unserialize($s, darray["allowed_classes" => varray["bar"]]));
-var_dump(unserialize($s, darray["allowed_classes" => varray["FOO"]]));
-var_dump(unserialize($s, darray["allowed_classes" => varray["bar", "foO"]]));
+var_dump(unserialize($s, darray["allowed_classes" => varray["foo"]]));
+var_dump(unserialize($s, darray["allowed_classes" => varray["bar", "foo"]]));
 }

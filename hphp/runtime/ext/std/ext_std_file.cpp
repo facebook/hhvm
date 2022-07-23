@@ -71,10 +71,11 @@
 #endif
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
+
+#include <filesystem>
 #include <vector>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   auto f = dyn_cast_or_null<File>(handle);              \
@@ -119,8 +120,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST(dest, func, path)                     \
-  boost::system::error_code ec;                           \
+#define CHECK_FS(dest, func, path)                        \
+  std::error_code ec;                                     \
   dest = func(path.toCppString(), ec);                    \
   if (ec) {                                               \
     raise_warning(                                        \
@@ -131,8 +132,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST_SILENT(dest, func, path)              \
-  boost::system::error_code ec;                           \
+#define CHECK_FS_SILENT(dest, func, path)                 \
+  std::error_code ec;                                     \
   dest = func(path.toCppString(), ec);                    \
   if (ec) {                                               \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
@@ -141,8 +142,8 @@ namespace fs = boost::filesystem;
     return false;                                         \
   }                                                       \
 
-#define CHECK_BOOST_ASSIGN(func, path, arg)               \
-  boost::system::error_code ec;                           \
+#define CHECK_FS_ASSIGN(func, path, arg)                  \
+  std::error_code ec;                                     \
   func(path.toCppString(), arg, ec);                      \
   if (ec) {                                               \
     raise_warning(                                        \
@@ -1381,7 +1382,7 @@ Variant HHVM_FUNCTION(disk_free_space,
   CHECK_PATH(directory, 1);
   fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_BOOST(sb, fs::space, translated);
+  CHECK_FS(sb, fs::space, translated);
   return (double)sb.free;
 }
 
@@ -1396,7 +1397,7 @@ Variant HHVM_FUNCTION(disk_total_space,
   CHECK_PATH(directory, 1);
   fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_BOOST(sb, fs::space, translated);
+  CHECK_FS(sb, fs::space, translated);
   return (double)sb.capacity;
 }
 
@@ -1603,7 +1604,7 @@ bool HHVM_FUNCTION(touch,
   }
 
 #ifdef _MSC_VER
-  CHECK_BOOST_ASSIGN(fs::last_write_time, translated, mtime);
+  CHECK_FS_ASSIGN(fs::last_write_time, translated, mtime);
   // Windows doesn't have an access time to set.
 #else
   if (mtime == 0 && atime == 0) {
@@ -1696,8 +1697,8 @@ bool HHVM_FUNCTION(link,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_BOOST_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
-                     File::TranslatePath(link).toCppString());
+  CHECK_FS_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
+                  File::TranslatePath(link).toCppString());
   return true;
 }
 
@@ -1707,12 +1708,12 @@ bool HHVM_FUNCTION(symlink,
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
   if (HHVM_FN(is_dir)(target)) {
-    CHECK_BOOST_ASSIGN(fs::create_directory_symlink,
-                       File::TranslatePathKeepRelative(target),
+    CHECK_FS_ASSIGN(fs::create_directory_symlink,
+                    File::TranslatePathKeepRelative(target),
                        File::TranslatePath(link).toCppString());
   } else {
-    CHECK_BOOST_ASSIGN(fs::create_symlink,
-                       File::TranslatePathKeepRelative(target),
+    CHECK_FS_ASSIGN(fs::create_symlink,
+                    File::TranslatePathKeepRelative(target),
                        File::TranslatePath(link).toCppString());
   }
   return true;

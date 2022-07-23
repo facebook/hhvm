@@ -27,9 +27,21 @@ let filter_class_and_constructor results =
   else
     results |> List.map ~f:snd
 
+let docs_url_markdown name url : string =
+  Printf.sprintf
+    "See the [documentation for %s](%s)."
+    (Markdown_lite.md_codify (Utils.strip_ns name))
+    url
+
+let typedef_docs_url ctx name : string option =
+  let qualified_name = "\\" ^ name in
+  Option.(
+    Decl_provider.get_typedef ctx qualified_name >>= fun decl ->
+    decl.Typing_defs.td_docs_url >>| fun url -> docs_url_markdown name url)
+
 (* If [classish_name] (or any of its parents) has a documentation URL,
-   return the name and URL of the closest type. *)
-let first_docs_url ctx classish_name : (string * string) option =
+   return the docs of the closest type. *)
+let classish_docs_url ctx classish_name : string option =
   let docs_url name =
     match Decl_provider.get_class ctx name with
     | Some decl -> Decl_provider.Class.get_docs_url decl
@@ -44,8 +56,28 @@ let first_docs_url ctx classish_name : (string * string) option =
   in
   List.find_map (qualified_name :: ancestors) ~f:(fun ancestor ->
       match docs_url ancestor with
-      | Some url -> Some (ancestor, url)
+      | Some url -> Some (docs_url_markdown ancestor url)
       | None -> None)
+
+let docs_url ctx def : string option =
+  let open SymbolDefinition in
+  match def.kind with
+  | Class
+  | Enum
+  | Interface
+  | Trait ->
+    classish_docs_url ctx def.name
+  | Typedef -> typedef_docs_url ctx def.name
+  | Function
+  | Method
+  | Property
+  | Const
+  | LocalVar
+  | TypeVar
+  | Param
+  | Typeconst
+  | Module ->
+    None
 
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
@@ -61,17 +93,7 @@ let make_hover_doc_block ctx entry occurrence def_opt =
         ~base_class_name
       |> Option.to_list
     in
-    let docs_url_addendum =
-      match first_docs_url ctx def.SymbolDefinition.name with
-      | Some (ancestor_name, url) ->
-        [
-          Printf.sprintf
-            "See the [documentation for %s](%s)."
-            (Markdown_lite.md_codify (Utils.strip_ns ancestor_name))
-            url;
-        ]
-      | None -> []
-    in
+    let docs_url_addendum = Option.to_list (docs_url ctx def) in
     doc_block_hover @ docs_url_addendum
   | None
   | Some _ ->

@@ -26,10 +26,8 @@
 #include <folly/Conv.h>
 #include <folly/container/Foreach.h>
 #include <folly/gen/Base.h>
-#include <folly/portability/Filesystem.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <tuple>
 #include <type_traits>
 
@@ -45,7 +43,7 @@ Job<C>::Job() : detail::JobBase{C::name()} {}
 // expects, then invoke the function with those types.
 
 template <typename C>
-void Job<C>::init(const folly::fs::path& root) const {
+void Job<C>::init(const std::filesystem::path& root) const {
   using namespace detail;
   using Args = typename Params<decltype(C::init)>::type;
 
@@ -68,7 +66,7 @@ void Job<C>::init(const folly::fs::path& root) const {
 }
 
 template <typename C>
-void Job<C>::fini(const folly::fs::path& outputRoot) const {
+void Job<C>::fini(const std::filesystem::path& outputRoot) const {
   using namespace detail;
 
   using Ret = typename Return<decltype(C::fini)>::type;
@@ -76,15 +74,15 @@ void Job<C>::fini(const folly::fs::path& outputRoot) const {
     C::fini();
   } else {
     auto const output = outputRoot / "fini";
-    folly::fs::create_directory(output, outputRoot);
+    std::filesystem::create_directory(output, outputRoot);
     auto const v = C::fini();
     time("writing fini outputs", [&] { return serialize(v, 0, output); });
   }
 }
 
 template <typename C>
-void Job<C>::run(const folly::fs::path& inputRoot,
-                 const folly::fs::path& outputRoot) const {
+void Job<C>::run(const std::filesystem::path& inputRoot,
+                 const std::filesystem::path& outputRoot) const {
   using namespace detail;
 
   // For each expected input, load the file, and deserialize it into
@@ -125,7 +123,7 @@ namespace detail {
 // Given a file path, load the contents of the file, deserialize them
 // into the type T, and return it.
 template <typename T>
-T JobBase::deserialize(const folly::fs::path& path) {
+T JobBase::deserialize(const std::filesystem::path& path) {
   using namespace detail;
   if constexpr (std::is_same<T, std::string>::value) {
     // A std::string is always stored as itself (this lets us store
@@ -140,7 +138,7 @@ T JobBase::deserialize(const folly::fs::path& path) {
     for (size_t i = 0;; ++i) {
       auto const valPath = path / folly::to<std::string>(i);
       // A break in the numbering means the end of the vector.
-      if (!folly::fs::exists(valPath)) break;
+      if (!std::filesystem::exists(valPath)) break;
       out.vals.emplace_back(deserialize<typename T::Type>(valPath));
     }
     return out;
@@ -150,7 +148,7 @@ T JobBase::deserialize(const folly::fs::path& path) {
     // Opt<T> is like T, except the file may not exist (so is nullopt
     // otherwise).
     T out;
-    if (folly::fs::exists(path)) {
+    if (std::filesystem::exists(path)) {
       out.val.emplace(deserialize<typename T::Type>(path));
     }
     return out;
@@ -170,7 +168,7 @@ T JobBase::deserialize(const folly::fs::path& path) {
 template <typename T>
 void JobBase::serialize(const T& v,
                         size_t idx,
-                        const folly::fs::path& root) {
+                        const std::filesystem::path& root) {
   using namespace detail;
   if constexpr (std::is_same<T, std::string>::value) {
     // std::string isn't serialized, but written as itself as
@@ -182,7 +180,7 @@ void JobBase::serialize(const T& v,
     static_assert(!IsMarker<typename T::Type>::value,
                   "Special markers cannot be nested");
     auto const path = root / folly::to<std::string>(idx);
-    folly::fs::create_directory(path, root);
+    std::filesystem::create_directory(path, root);
     for (size_t i = 0; i < v.vals.size(); ++i) {
       serialize(v.vals[i], i, path);
     }

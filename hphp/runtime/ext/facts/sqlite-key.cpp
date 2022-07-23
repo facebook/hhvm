@@ -18,7 +18,6 @@
 #include <utility>
 
 #include <folly/Format.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/hash/Hash.h>
 #include <folly/logging/xlog.h>
 
@@ -26,10 +25,12 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/sqlite-wrapper.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 namespace Facts {
 
-SQLiteKey SQLiteKey::readOnly(folly::fs::path path) {
+SQLiteKey SQLiteKey::readOnly(fs::path path) {
   return {
       std::move(path),
       SQLite::OpenMode::ReadOnly,
@@ -37,7 +38,7 @@ SQLiteKey SQLiteKey::readOnly(folly::fs::path path) {
       static_cast<::mode_t>(0)};
 }
 
-SQLiteKey SQLiteKey::readWrite(folly::fs::path path) {
+SQLiteKey SQLiteKey::readWrite(fs::path path) {
   return {
       std::move(path),
       SQLite::OpenMode::ReadWrite,
@@ -46,7 +47,7 @@ SQLiteKey SQLiteKey::readWrite(folly::fs::path path) {
 }
 
 SQLiteKey
-SQLiteKey::readWriteCreate(folly::fs::path path, ::gid_t gid, ::mode_t perms) {
+SQLiteKey::readWriteCreate(fs::path path, ::gid_t gid, ::mode_t perms) {
   return {std::move(path), SQLite::OpenMode::ReadWriteCreate, gid, perms};
 }
 
@@ -68,10 +69,7 @@ size_t SQLiteKey::hash() const {
 }
 
 SQLiteKey::SQLiteKey(
-    folly::fs::path path,
-    SQLite::OpenMode writable,
-    ::gid_t gid,
-    ::mode_t perms)
+    fs::path path, SQLite::OpenMode writable, ::gid_t gid, ::mode_t perms)
     : m_path{std::move(path)}
     , m_writable{writable}
     , m_gid{gid}

@@ -108,15 +108,22 @@ final class Map implements \MutableMap {
   <<__Native>>
   public function get(mixed $key)[]: mixed;
 
+  <<__Native>>
+  private function setNative(mixed $key, mixed $value)[write_props]: void;
+
   /** Stores a value into the Map with the specified key, overwriting any
    * previous value that was associated with the key.
    * @param mixed $key
    * @param mixed $value
    * @return object
    */
-  <<__Native>>
-  public function set(mixed $key,
-                      mixed $value)[write_props]: object;
+  public function set(
+    mixed $key,
+    mixed $value,
+  )[write_props]: this {
+    $this->setNative($key, $value);
+    return $this;
+  }
 
   /** Stores each value produced by the specified KeyedIterable into the Map
    * using its corresponding key, overwriting any previous value that was
@@ -133,11 +140,16 @@ final class Map implements \MutableMap {
     return $this;
   }
 
+  <<__Native>>
+  private function clearNative()[write_props]: void;
+
   /** Removes all key/value pairs from the Map.
    * @return object
    */
-  <<__Native>>
-  public function clear()[write_props]: object;
+  public function clear()[write_props]: this {
+    $this->clearNative();
+    return $this;
+  }
 
   /** Returns true if the specified key is present in the Map, false otherwise.
    * @param mixed $key
@@ -153,35 +165,50 @@ final class Map implements \MutableMap {
   <<__Native>>
   public readonly function containsKey(mixed $key)[]: bool;
 
+  <<__Native>>
+  private function removeKeyNative(mixed $key)[]: void;
+
   /** Removes the specified key from this Map.
    * @param mixed $key
    * @return object
    */
-  public function remove(mixed $key)[] {
-    return $this->removeKey($key);
+  public function remove(mixed $key)[]: this {
+    $this->removeKeyNative($key);
+    return $this;
   }
 
   /** Removes the specified key from this Map.
    * @param mixed $key
    * @return object
    */
-  <<__Native>>
-  public function removeKey(mixed $key)[]: object;
+  public function removeKey(mixed $key)[]: this {
+    $this->removeKeyNative($key);
+    return $this;
+  }
+
+  <<__Native>> private function addNative(mixed $val)[write_props]: void;
+  <<__Native>> private function addAllNative(
+    mixed $iterable,
+  )[write_props]: void;
 
   /** Adds the specified key/value Pair to this Map. If an element with the same
    * key is already present, an exception is thrown.
    * @param mixed $val
    * @return object
    */
-  <<__Native>>
-  public function add(mixed $val)[write_props]: object;
+  public function add(mixed $val)[write_props]: this {
+    $this->addNative($val);
+    return $this;
+  }
 
   /** Adds the key/value Pairs produced by the specified Iterable to this Map.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function addAll(mixed $iterable)[write_props]: object;
+  public function addAll(mixed $iterable)[write_props]: this {
+    $this->addAllNative($iterable);
+    return $this;
+  }
 
   /** Instructs this Map to grow its capacity to accommodate the given number of
    * elements. The caller is expected to make the appropriate
@@ -355,7 +382,7 @@ final class Map implements \MutableMap {
   public function retain(mixed $callback): \HH\Map {
     foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
-        $this->removeKey($k);
+        $this->removeKeyNative($k);
       }
     }
     return $this;
@@ -369,7 +396,7 @@ final class Map implements \MutableMap {
   public function retainWithKey(mixed $callback): \HH\Map {
     foreach (dict($this) as $k => $v) {
       if (!$callback($k, $v)) {
-        $this->removeKey($k);
+        $this->removeKeyNative($k);
       }
     }
     return $this;

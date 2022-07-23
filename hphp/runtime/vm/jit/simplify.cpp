@@ -324,10 +324,8 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
                                            const IRInstruction* inst) {
   if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
   auto const callee = inst->src(0)->funcVal();
-  auto const callerModule = inst->extra<FuncData>()->func->moduleName();
-  auto const result =
-    will_call_raise_module_boundary_violation(callee, callerModule);
-  return cns(env, result);
+  auto const caller = inst->extra<FuncData>()->func;
+  return cns(env, will_symbol_raise_module_boundary_violation(callee, caller));
 }
 
 
@@ -3411,7 +3409,7 @@ SSATmp* simplifyLdTypeStructureVal(State& env, const IRInstruction* inst) {
   }
 
   if (key->hasConstVal(TStr)) {
-    auto const dt = bespoke::TypeStructure::getKindOfField(key->strVal());
+    auto const dt = bespoke::TypeStructure::getFieldPair(key->strVal()).first;
 
     if (dt == KindOfUninit) {
       gen(env, Jmp, inst->taken());

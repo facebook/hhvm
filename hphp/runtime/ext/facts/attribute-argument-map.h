@@ -7,7 +7,6 @@
 #include <vector>
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/hash/Hash.h>
 
 #include "hphp/runtime/ext/facts/symbol-types.h"

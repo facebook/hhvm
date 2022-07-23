@@ -80,6 +80,68 @@ let apply_changes_unsafe
   | Ok r -> r
   | Error (e, _stack) -> failwith e
 
+let sym_occ_kind_to_lsp_sym_info_kind (sym_occ_kind : SymbolOccurrence.kind) :
+    Lsp.SymbolInformation.symbolKind =
+  let open Lsp.SymbolInformation in
+  let open SymbolOccurrence in
+  match sym_occ_kind with
+  | Class _ -> Class
+  | BuiltInType _ -> Class
+  | Function -> Function
+  | Method _ -> Method
+  | LocalVar -> Variable
+  | TypeVar -> TypeParameter
+  | Property _ -> Property
+  | XhpLiteralAttr _ -> Property
+  | ClassConst _ -> TypeParameter
+  | Typeconst _ -> TypeParameter
+  | GConst -> Constant
+  | Attribute _ -> Class
+  | EnumClassLabel _ -> EnumMember
+  | Keyword _ -> Null
+  | PureFunctionContext -> Null
+  | BestEffortArgument _ -> Null
+  | HhFixme -> Null
+  | Module -> Module
+
+let pos_to_lsp_range (p : 'a Pos.pos) : range =
+  let (line_start, line_end, character_start, character_end) =
+    Pos.info_pos_extended p
+  in
+  let (start_position : position) =
+    { line = line_start; character = character_start }
+  in
+  let (end_position : position) =
+    { line = line_end; character = character_end }
+  in
+  { start = start_position; end_ = end_position }
+
+let symbol_to_lsp_call_item
+    (sym_occ : Relative_path.t SymbolOccurrence.t)
+    (sym_def_opt : Relative_path.t SymbolDefinition.t option) :
+    CallHierarchyItem.t =
+  let open CallHierarchyItem in
+  let open SymbolOccurrence in
+  let (selectionRange_, range_) =
+    match sym_def_opt with
+    | None ->
+      let sym_range = pos_to_lsp_range sym_occ.pos in
+      (sym_range, sym_range)
+    | Some sym_def ->
+      ( pos_to_lsp_range sym_def.SymbolDefinition.pos,
+        pos_to_lsp_range sym_def.SymbolDefinition.span )
+  in
+  let filename_ = Pos.to_absolute sym_occ.pos |> Pos.filename in
+  let uri_ = path_to_lsp_uri filename_ ~default_path:"www" in
+  {
+    name = sym_occ.name;
+    kind = sym_occ_kind_to_lsp_sym_info_kind sym_occ.type_;
+    detail = Some ("is declaration: " ^ string_of_bool sym_occ.is_declaration);
+    uri = uri_;
+    range = range_;
+    selectionRange = selectionRange_;
+  }
+
 (************************************************************************)
 (* Range calculations                                                   *)
 (************************************************************************)

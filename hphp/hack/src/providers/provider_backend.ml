@@ -27,6 +27,7 @@ type pessimisation_info = {
     name:string ->
     Typing_defs.typedef_type ->
     Typing_defs.typedef_type;
+  allow_ast_caching: bool;
   store_pessimised_result: bool;
 }
 
@@ -390,6 +391,7 @@ let noop_pessimisation_info =
     pessimise_fun = (fun _path ~name:_ x -> x);
     pessimise_gconst = (fun _path ~name:_ x -> x);
     pessimise_typedef = (fun _path ~name:_ x -> x);
+    allow_ast_caching = false;
     store_pessimised_result = false;
   }
 

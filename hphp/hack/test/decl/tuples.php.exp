@@ -7,7 +7,8 @@
         (Ttuple
            [(Rhint ([3:20-25]), (Tprim Tfloat));
              (Rhint ([3:27-32]), (Tprim Tfloat))]));
-       td_is_ctx = false; td_attributes = []; td_internal = false }));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\takes_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

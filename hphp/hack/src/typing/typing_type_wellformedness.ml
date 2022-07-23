@@ -384,6 +384,7 @@ let typedef tenv t =
     t_file_attributes = _;
     t_internal = _;
     t_module = _;
+    t_docs_url = _;
   } =
     t
   in

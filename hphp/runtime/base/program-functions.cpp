@@ -128,7 +128,6 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/filesystem.hpp>
 
 #ifndef FACEBOOK
 // Needed on libevent2
@@ -150,6 +149,7 @@
 
 #include <chrono>
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <map>
@@ -1064,37 +1064,6 @@ static void init_repo_file() {
   RepoFile::init(RO::RepoPath);
 }
 
-/* Reads a file into the OS page cache, with rate limiting. */
-static bool readahead_rate(const char* path, int64_t mbPerSec) {
-  int ret = open(path, O_RDONLY);
-  if (ret < 0) return false;
-  const int fd = ret;
-  SCOPE_EXIT { close(fd); };
-
-  constexpr size_t kReadaheadBytes = 1 << 20;
-  std::unique_ptr<char[]> buf(new char[kReadaheadBytes]);
-  int64_t total = 0;
-  auto startTime = std::chrono::steady_clock::now();
-  do {
-    ret = read(fd, buf.get(), kReadaheadBytes);
-    if (ret > 0) {
-      total += ret;
-      // Unit math: bytes / (MB / seconds) = microseconds
-      auto endTime = startTime + std::chrono::microseconds(total / mbPerSec);
-      auto sleepT = endTime - std::chrono::steady_clock::now();
-      // Don't sleep too frequently.
-      if (sleepT >= std::chrono::seconds(1)) {
-        Logger::Info(folly::sformat(
-          "readahead sleeping {}ms after total {}b",
-          std::chrono::duration_cast<std::chrono::milliseconds>(sleepT).count(),
-          total));
-        /* sleep override */ std::this_thread::sleep_for(sleepT);
-      }
-    }
-  } while (ret > 0);
-  return ret == 0;
-}
-
 static int start_server(const std::string &username, int xhprof) {
   if (!registrationComplete) {
     folly::SingletonVault::singleton()->registrationComplete();
@@ -1178,55 +1147,6 @@ static int start_server(const std::string &username, int xhprof) {
     HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
   }
 
-  std::unique_ptr<std::thread> readaheadThread;
-
-  if (RO::RepoAuthoritative &&
-      RO::RepoLocalReadaheadRate > 0 &&
-      !RO::RepoPath.empty()) {
-    HttpServer::CheckMemAndWait();
-    readaheadThread = std::make_unique<std::thread>([&] {
-        assertx(RuntimeOption::ServerExecutionMode());
-        BootStats::Block timer("Readahead Repo", true);
-        auto path = RuntimeOption::RepoPath.c_str();
-        Logger::Info("readahead %s", path);
-#ifdef __linux__
-        // glibc doesn't have a wrapper for ioprio_set(), so we need to use
-        // syscall().  The constants here are consistent with the kernel source.
-        // See http://lxr.free-electrons.com/source/include/linux/ioprio.h
-        auto constexpr IOPRIO_CLASS_SHIFT = 13;
-        enum {
-          IOPRIO_CLASS_NONE,
-          IOPRIO_CLASS_RT,
-          IOPRIO_CLASS_BE,
-          IOPRIO_CLASS_IDLE,
-        };
-        // Set to lowest IO priority.
-        constexpr int ioprio = (IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT);
-
-        // ioprio_set() is available starting kernel 2.6.13
-        KernelVersion version;
-        if (version.m_major > 2 ||
-            (version.m_major == 2 &&
-             (version.m_minor > 6 ||
-              (version.m_minor == 6 && version.m_release >= 13)))) {
-          syscall(SYS_ioprio_set,
-                  1 /* IOPRIO_WHO_PROCESS, in fact, it is this thread */,
-                  0 /* current thread */,
-                  ioprio);
-        }
-#endif
-        const auto mbPerSec = RuntimeOption::RepoLocalReadaheadRate;
-        if (!readahead_rate(path, mbPerSec)) {
-          Logger::Error("readahead failed: %s", strerror(errno));
-        }
-      });
-    if (!RuntimeOption::RepoLocalReadaheadConcurrent) {
-      // TODO(10152762): Run this concurrently with non-disk warmup.
-      readaheadThread->join();
-      readaheadThread.reset();
-    }
-  }
-
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     BootStats::Block timer("concurrentWaitForEnd", true);
     InitFiniNode::WarmupConcurrentWaitForEnd();
@@ -1252,10 +1172,6 @@ static int start_server(const std::string &username, int xhprof) {
     BootStats::mark("enable_numa");
   }
   HttpServer::CheckMemAndWait(true); // Final wait
-  if (readaheadThread.get()) {
-    readaheadThread->join();
-    readaheadThread.reset();
-  }
 
   if (!RuntimeOption::EvalUnixServerPath.empty()) {
     start_cli_server();
@@ -1268,20 +1184,11 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
 #ifdef USE_JEMALLOC
-  // Eventually, we are going to remove options Eval.Num1GPagesForSlabs and
-  // Eval.Num2MPagesForSlabs, and use the ForReqHeap spec together with
-  // Eval.NumReservedSlabs. For now, we keep the old options working.
   auto const reqHeapSpec = PageSpec{
-    std::max(RuntimeOption::EvalNum1GPagesForReqHeap,
-             RuntimeOption::EvalNum1GPagesForSlabs),
-    std::max(RuntimeOption::EvalNum2MPagesForReqHeap,
-             RuntimeOption::EvalNum2MPagesForSlabs)
+    RuntimeOption::EvalNum1GPagesForReqHeap,
+    RuntimeOption::EvalNum2MPagesForReqHeap
   };
-  auto const nSlabs =
-    std::max(RuntimeOption::EvalNumReservedSlabs,
-             RuntimeOption::EvalNum2MPagesForSlabs +
-             512 * RuntimeOption::EvalNum1GPagesForSlabs);
-  setup_local_arenas(reqHeapSpec, nSlabs);
+  setup_local_arenas(reqHeapSpec, RuntimeOption::EvalNumReservedSlabs);
 #endif
 
   HttpServer::Server->runOrExitProcess();
@@ -1352,8 +1259,8 @@ int execute_program(int argc, char **argv) {
       Logger::Error("Uncaught exception: (unknown)");
       throw;
     }
-    if (tempFile.length() && boost::filesystem::exists(tempFile)) {
-      boost::filesystem::remove(tempFile);
+    if (tempFile.length() && std::filesystem::exists(tempFile)) {
+      std::filesystem::remove(tempFile);
     }
   } catch (...) {
     if (HttpServer::Server ||
@@ -1782,7 +1689,7 @@ static int execute_program_impl(int argc, char** argv) {
     s_config_files = po.config;
     // Start with .hdf and .ini files
     for (auto& filename : s_config_files) {
-      if (boost::filesystem::exists(filename)) {
+      if (std::filesystem::exists(filename)) {
         Config::ParseConfigFile(filename, ini, config);
       } else {
         Logger::Warning(

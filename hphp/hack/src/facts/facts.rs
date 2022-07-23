@@ -221,8 +221,8 @@ impl Flag {
 
 pub fn sha1(text: &[u8]) -> String {
     let mut digest = sha1::Sha1::new();
-    digest.input(text);
-    hex::encode(digest.result())
+    digest.update(text);
+    hex::encode(digest.finalize())
 }
 
 // implementation details

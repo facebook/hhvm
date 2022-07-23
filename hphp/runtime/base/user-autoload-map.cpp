@@ -21,6 +21,8 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/assertions.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -151,7 +153,7 @@ UserAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getFileFromMap(m_typeAliasFile, HHVM_FN(strtolower)(typeAliasName));
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
   auto typeFile = getTypeFile(typeName);
   if (typeFile) {
@@ -165,27 +167,27 @@ UserAutoloadMap::getModuleFile(const String& moduleName) {
   return getFileFromMap(m_moduleFile, moduleName);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getTypeFile(std::string_view typeName) {
   return getPathFromMap(m_typeFile, HHVM_FN(strtolower)(String(typeName)));
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getFunctionFile(std::string_view funcName) {
   return getPathFromMap(m_functionFile, HHVM_FN(strtolower)(String(funcName)));
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getConstantFile(std::string_view constName) {
   return getPathFromMap(m_constantFile, String(constName));
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getTypeAliasFile(std::string_view alias) {
   return getPathFromMap(m_typeAliasFile, HHVM_FN(strtolower)(String(alias)));
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getModuleFile(std::string_view moduleName) {
   return getPathFromMap(m_moduleFile, String(moduleName));
 }
@@ -252,7 +254,7 @@ UserAutoloadMap::getFileFromMap(const Array& map, const String& key) const {
   return std::move(path);
 }
 
-Optional<folly::fs::path>
+Optional<fs::path>
 UserAutoloadMap::getPathFromMap(const Array& map, const String& key) const {
   auto file = getFileFromMap(map, key);
   if (!file) return {};

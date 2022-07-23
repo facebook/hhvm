@@ -11,4 +11,4 @@ path = "../hh_config.rs"
 bstr = { version = "0.2", features = ["serde1"] }
 oxidized = { path = "../../../oxidized" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-sha-1 = "0.8"
+sha-1 = "0.10"

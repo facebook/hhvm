@@ -162,7 +162,17 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &[aast::UserAttribute<(), ()>]) 
 
 bitflags! {
     pub struct ContextFlags: u16 {
-        const IN_METHODISH = 1 << 0;
+        /// Hack, very roughly, has three contexts in which you can see an
+        /// expression:
+        /// - Expression Trees
+        /// - Initializer positions
+        /// - Everything else
+        /// There are other rules that handle expr trees and initializer
+        /// positions, so we really care about all the other contexts. This is
+        /// mostly inside function bodies, but also includes the right-hand-side
+        /// of an enum class initializer, which can contain function calls and
+        /// other complex expressions.
+        const IN_COMPLEX_EXPRESSION_CONTEXT = 1 << 0;
         const IS_TYPECHECKER = 1 << 1;
         const IS_CONSTRUCTOR_OR_CLONE = 1 << 2;
         const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
@@ -187,7 +197,7 @@ impl Context {
 
     fn from_context(&self) -> Self {
         let mut c = Context::new();
-        c.set_in_methodish(self.in_methodish());
+        c.set_in_complex_expression_context(self.in_complex_expression_context());
         c.set_is_constructor_or_clone(self.is_constructor_or_clone());
         c.set_ignore_coeffect_local_errors(self.ignore_coeffect_local_errors());
         c.set_is_typechecker(self.is_typechecker());
@@ -197,8 +207,9 @@ impl Context {
         c
     }
 
-    fn in_methodish(&self) -> bool {
-        self.bitflags.contains(ContextFlags::IN_METHODISH)
+    fn in_complex_expression_context(&self) -> bool {
+        self.bitflags
+            .contains(ContextFlags::IN_COMPLEX_EXPRESSION_CONTEXT)
     }
 
     fn is_constructor_or_clone(&self) -> bool {
@@ -235,8 +246,11 @@ impl Context {
         self.bitflags.contains(ContextFlags::HAS_ACCESS_GLOBALS)
     }
 
-    fn set_in_methodish(&mut self, in_methodish: bool) {
-        self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
+    fn set_in_complex_expression_context(&mut self, in_complex_expression_context: bool) {
+        self.bitflags.set(
+            ContextFlags::IN_COMPLEX_EXPRESSION_CONTEXT,
+            in_complex_expression_context,
+        );
     }
 
     fn set_is_constructor_or_clone(&mut self, is_constructor_or_clone: bool) {
@@ -359,9 +373,24 @@ impl<'ast> Visitor<'ast> for Checker {
         self
     }
 
+    fn visit_class_(&mut self, c: &mut Context, cls: &aast::Class_<(), ()>) -> Result<(), ()> {
+        let mut new_context = Context::from_context(c);
+        if cls.enum_.is_some() {
+            // If we're in an enum class, we need to ensure that the following
+            // is illegal:
+            //
+            //   enum class Foo: _ {
+            //     _ BAR = Baz::$bing;
+            //   }
+            //
+            new_context.set_in_complex_expression_context(true);
+        }
+        cls.recurse(&mut new_context, self)
+    }
+
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_in_methodish(true);
+        new_context.set_in_complex_expression_context(true);
         new_context.set_is_constructor_or_clone(is_constructor_or_clone(&m.name));
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
@@ -389,7 +418,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_in_methodish(true);
+        new_context.set_in_complex_expression_context(true);
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &f.user_attributes,
         ));
@@ -419,7 +448,10 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        if c.in_methodish() && !c.ignore_coeffect_local_errors() && !c.has_defaults() {
+        if c.in_complex_expression_context()
+            && !c.ignore_coeffect_local_errors()
+            && !c.has_defaults()
+        {
             if !c.has_write_props() {
                 self.do_write_props_check(p);
                 if !c.has_write_this_props() {

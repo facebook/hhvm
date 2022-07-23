@@ -7,6 +7,3 @@ disallow_fun_and_cls_meth_pseudo_funcs = true
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 disable_xhp_element_mangling = false
-
-allowed_files_for_module_declarations = modules.php, modules_ns.php
-

@@ -81,6 +81,14 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name server_call_hierarchy)
+ (wrapped false)
+ (modules serverPrepareCallHierarchy serverCallHierarchyIncomingCalls serverCallHierarchyOugoingCalls)
+ (libraries provider_context server_find_refs server_services lsp)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name server_go_to)
  (wrapped false)
  (modules serverGoToDefinition serverGoToImpl)
@@ -266,6 +274,7 @@
   methodJumps
   saveStateService
   serverDepsOutBatch
+  serverDepsUtil
   serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch
@@ -570,6 +579,7 @@
     server
     server_env_build
     server_global_inference
+    server_call_hierarchy
     server_go_to
     server_highlight_refs
     server_search

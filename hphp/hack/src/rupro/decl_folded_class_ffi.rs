@@ -2,7 +2,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::decl_parser::DeclParser;
+use decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::serde_store::Compression;
 use hackrs_test_utils::serde_store::StoreOpts;

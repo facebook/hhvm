@@ -49,7 +49,7 @@ struct WatchData {
 class WatchmanImpl final : public Watchman,
                            public std::enable_shared_from_this<WatchmanImpl> {
 public:
-  WatchmanImpl(folly::fs::path path, Optional<std::string> sockPath)
+  WatchmanImpl(std::filesystem::path path, Optional<std::string> sockPath)
       : m_path{std::move(path)}, m_sockPath{std::move(sockPath)} {
   }
 
@@ -246,7 +246,7 @@ private:
 
   folly::IOThreadPoolExecutor m_exec{1};
 
-  const folly::fs::path m_path;
+  const std::filesystem::path m_path;
   const Optional<std::string> m_sockPath;
 
   struct Data {
@@ -264,7 +264,7 @@ private:
 Watchman::~Watchman() = default;
 
 std::shared_ptr<Watchman> Watchman::get(
-    const folly::fs::path& path, const Optional<std::string>& sockPath) {
+    const std::filesystem::path& path, const Optional<std::string>& sockPath) {
   assertx(path.is_absolute());
   auto watchman = std::make_shared<WatchmanImpl>(path, sockPath);
   watchman->reconnect();

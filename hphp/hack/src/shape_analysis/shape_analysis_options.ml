@@ -8,10 +8,12 @@
 
 open Shape_analysis_types
 
-let parse = function
-  | "flag" -> Some { mode = FlagTargets }
-  | "dump" -> Some { mode = DumpConstraints }
-  | "simplify" -> Some { mode = SimplifyConstraints }
-  | "codemod" -> Some { mode = Codemod }
-  | "solve" -> Some { mode = SolveConstraints }
+let parse_mode = function
+  | "flag" -> Some FlagTargets
+  | "dump" -> Some DumpConstraints
+  | "simplify" -> Some SimplifyConstraints
+  | "codemod" -> Some Codemod
+  | "solve" -> Some SolveConstraints
   | _ -> None
+
+let mk ~mode ~verbosity = { mode; verbosity }

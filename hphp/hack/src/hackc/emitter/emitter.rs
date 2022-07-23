@@ -77,8 +77,8 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             decl_provider,
             alloc,
 
-            label_gen: Default::default(),
-            local_gen: Default::default(),
+            label_gen: LabelGen::new(),
+            local_gen: LocalGen::new(),
             iterator: Default::default(),
             named_locals: Default::default(),
 

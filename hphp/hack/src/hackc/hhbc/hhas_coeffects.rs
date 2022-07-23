@@ -29,18 +29,42 @@ pub struct HhasCtxConstant<'arena> {
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct HhasCoeffects<'arena> {
-    static_coeffects: Slice<'arena, Ctx>,
-    unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
-    fun_param: Slice<'arena, usize>,
-    cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
-    cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
-    cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
-    closure_parent_scope: bool,
-    generator_this: bool,
-    caller: bool,
+    pub static_coeffects: Slice<'arena, Ctx>,
+    pub unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
+    pub fun_param: Slice<'arena, usize>,
+    pub cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
+    pub cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
+    pub cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    pub closure_parent_scope: bool,
+    pub generator_this: bool,
+    pub caller: bool,
 }
 
 impl<'arena> HhasCoeffects<'arena> {
+    pub fn new(
+        static_coeffects: Slice<'arena, Ctx>,
+        unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
+        fun_param: Slice<'arena, usize>,
+        cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
+        cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
+        cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+        closure_parent_scope: bool,
+        generator_this: bool,
+        caller: bool,
+    ) -> Self {
+        Self {
+            static_coeffects,
+            unenforced_static_coeffects,
+            fun_param,
+            cc_param,
+            cc_this,
+            cc_reified,
+            closure_parent_scope,
+            generator_this,
+            caller,
+        }
+    }
+
     pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> HhasCoeffects<'arena> {
         HhasCoeffects {
             static_coeffects: Slice::from_vec(alloc, scs),
@@ -48,6 +72,7 @@ impl<'arena> HhasCoeffects<'arena> {
             ..Default::default()
         }
     }
+
     fn from_type_static(hint: &Hint) -> Option<Ctx> {
         let Hint(_, h) = hint;
         match &**h {
@@ -285,6 +310,14 @@ impl<'arena> HhasCoeffects<'arena> {
         Self {
             static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
             unenforced_static_coeffects: Slice::empty(),
+            caller: true,
+            ..self.clone()
+        }
+    }
+
+    /// Does not erase any static_coeffects or unenforced_static_coeffects
+    pub fn untouch_with_caller(&self) -> Self {
+        Self {
             caller: true,
             ..self.clone()
         }

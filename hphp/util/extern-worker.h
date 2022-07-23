@@ -20,8 +20,7 @@
 #include "hphp/util/optional.h"
 #include "hphp/util/trace.h"
 
-#include <folly/portability/Filesystem.h>
-
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -161,9 +160,10 @@ struct Job : public detail::JobBase {
   using ExecT   = typename detail::ExecRet<C>::type;
 
 private:
-  void init(const folly::fs::path&) const override;
-  void fini(const folly::fs::path&) const override;
-  void run(const folly::fs::path&, const folly::fs::path&) const override;
+  void init(const std::filesystem::path&) const override;
+  void fini(const std::filesystem::path&) const override;
+  void run(const std::filesystem::path&,
+           const std::filesystem::path&) const override;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -270,7 +270,7 @@ private:
 using IdVec = std::vector<RefId>;
 // A "blob" is a string containing some arbitrary binary data
 using BlobVec = std::vector<std::string>;
-using PathVec = std::vector<folly::fs::path>;
+using PathVec = std::vector<std::filesystem::path>;
 
 // These are used to describe inputs in a generic way to
 // Client::Impl. An input can be a RefId, an optional RefId, or a
@@ -302,7 +302,7 @@ struct Options {
 
   // The implementation may need to store data on disk (subprocess for
   // example). Location where to store such things.
-  Options& setWorkingDir(folly::fs::path dir) {
+  Options& setWorkingDir(std::filesystem::path dir) {
     m_workingDir = std::move(dir);
     return *this;
   }
@@ -391,7 +391,7 @@ struct Options {
   }
 
   UseSubprocess m_useSubprocess{UseSubprocess::Fallback};
-  folly::fs::path m_workingDir{folly::fs::temp_directory_path()};
+  std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
   std::chrono::milliseconds m_throttleBaseWait{0};
@@ -468,11 +468,11 @@ struct Client {
   // contents of the file. Optimistic mode (if supported) won't ever
   // actually store anything. It will just generate the Refs and
   // assume the data is already stored.
-  coro::Task<Ref<std::string>> storeFile(folly::fs::path,
+  coro::Task<Ref<std::string>> storeFile(std::filesystem::path,
                                          bool optimistic = false);
 
   coro::Task<std::vector<Ref<std::string>>>
-  storeFile(std::vector<folly::fs::path>,
+  storeFile(std::vector<std::filesystem::path>,
             bool optimistic = false);
 
   // Storing blobs. These take various different permutations of data,
@@ -550,6 +550,11 @@ struct Client {
     std::atomic<size_t> execCacheHits{0};
     // Execs which fellback
     std::atomic<size_t> execFallbacks{0};
+
+    std::atomic<size_t> execCpuUsec{0};
+    std::atomic<size_t> execAllocatedCores{0};
+    std::atomic<size_t> execMaxUsedMem{0};
+    std::atomic<size_t> execReservedMem{0};
 
     // Execs in optimistic mode which succeeded
     std::atomic<size_t> optimisticExecs{0};

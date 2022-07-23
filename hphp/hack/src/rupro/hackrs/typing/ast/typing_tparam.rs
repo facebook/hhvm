@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::special_names;
 use crate::tast;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;

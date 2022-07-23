@@ -20,10 +20,10 @@
 
 #include "hphp/util/sha1.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/String.h>
 #include <folly/synchronization/AtomicNotification.h>
 
@@ -124,9 +124,8 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptionsFlags&);
 
-
 Optional<SHA1> getHashForFile(const std::string& path,
-                              const folly::fs::path& root);
+                              const std::filesystem::path& root);
 
 /*
  * Return the number of php files that are currently loaded in this process.
@@ -257,7 +256,7 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(const char* path,
                          Stream::Wrapper* wrapper,
                          const RepoOptionsFlags& options,
-                         boost::filesystem::path repoRoot,
+                         std::filesystem::path repoRoot,
                          size_t fileLength,
                          bool forceEager);
 
@@ -267,7 +266,7 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(SHA1 sha,
                          folly::StringPiece contents,
                          const RepoOptionsFlags& options,
-                         boost::filesystem::path repoRoot);
+                         std::filesystem::path repoRoot);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
   LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
@@ -278,7 +277,7 @@ struct LazyUnitContentsLoader {
   const RepoOptionsFlags& options() const { return m_options; }
   size_t fileLength() const { return m_file_length; }
 
-  const boost::filesystem::path& repoRoot() const { return m_repo; }
+  const std::filesystem::path& repoRoot() const { return m_repo; }
 
   // Did we actually perform the load?
   bool didLoad() const { return m_loaded; }
@@ -313,7 +312,7 @@ private:
   SHA1 m_file_hash;
   size_t m_file_length;
 
-  boost::filesystem::path m_repo;
+  std::filesystem::path m_repo;
 
   // Points to either m_contents (if loaded from file), or some
   // external string (if provided in ctor).

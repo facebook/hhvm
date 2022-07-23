@@ -2577,14 +2577,14 @@ struct
     module_declaration_attribute_spec: attribute_specification option value;
     module_declaration_new_keyword: Token.t value;
     module_declaration_module_keyword: Token.t value;
-    module_declaration_name: Token.t value;
+    module_declaration_name: name_aggregate value;
     module_declaration_left_brace: Token.t value;
     module_declaration_right_brace: Token.t value;
   }
 
   and module_membership_declaration = {
     module_membership_declaration_module_keyword: Token.t value;
-    module_membership_declaration_name: Token.t value;
+    module_membership_declaration_name: name_aggregate value;
     module_membership_declaration_semicolon: Token.t value;
   }
   [@@deriving show]

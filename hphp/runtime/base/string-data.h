@@ -436,8 +436,6 @@ struct StringData final : MaybeCountable,
    * Type conversion functions.
    */
   bool toBoolean() const;
-  char toByte(int base = 10) const { return toInt64(base); }
-  short toInt16(int base = 10) const { return toInt64(base); }
   int toInt32(int base = 10) const { return toInt64(base); }
   int64_t toInt64(int base = 10) const;
   double toDouble() const;
@@ -469,8 +467,16 @@ struct StringData final : MaybeCountable,
   /*
    * Case-insensitive exact string comparison.  (Numeric strings are
    * not treated specially.)
+   * DEPRECATED: use same_nocase() for case-insensitive strings that
+   * are not language symbols.
    */
   bool isame(const StringData* s) const;
+
+  /*
+   * Case-insensitive exact string comparison.  (Numeric strings are
+   * not treated specially.)
+   */
+  bool same_nocase(const StringData* s) const;
 
   /*
    * Implements comparison in the sense of php's operator < on

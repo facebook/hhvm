@@ -131,6 +131,7 @@ type typedef_type = {
   td_is_ctx: bool;
   td_attributes: user_attribute list;
   td_internal: bool;
+  td_docs_url: string option;
 }
 [@@deriving show]
 

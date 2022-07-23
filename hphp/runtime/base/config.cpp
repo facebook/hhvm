@@ -16,13 +16,13 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -157,12 +157,12 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
     }
     std::string file = line.substr(start + 1, end - start - 1);
     const std::string logger_file = file;
-    boost::filesystem::path p(file);
+    std::filesystem::path p(file);
     if (!p.is_absolute()) {
-      boost::filesystem::path opath(original_ini_filename);
+      std::filesystem::path opath(original_ini_filename);
       p = opath.parent_path()/p;
     }
-    if (boost::filesystem::exists(p)) {
+    if (std::filesystem::exists(p)) {
       std::ifstream ifs(p.string());
       const std::string contents((std::istreambuf_iterator<char>(ifs)),
                                  std::istreambuf_iterator<char>());

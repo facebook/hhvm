@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 #include <vector>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -93,12 +93,12 @@ struct UserAutoloadMap final : AutoloadMap {
   Optional<String> getTypeAliasFile(const String& typeAliasName) override;
   Optional<String> getModuleFile(const String& moduleName) override;
 
-  Optional<folly::fs::path> getTypeOrTypeAliasFile(std::string_view name) override;
-  Optional<folly::fs::path> getTypeFile(std::string_view name) override;
-  Optional<folly::fs::path> getFunctionFile(std::string_view name) override;
-  Optional<folly::fs::path> getConstantFile(std::string_view name) override;
-  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override;
-  Optional<folly::fs::path> getModuleFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeFile(std::string_view name) override;
+  Optional<std::filesystem::path> getFunctionFile(std::string_view name) override;
+  Optional<std::filesystem::path> getConstantFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getModuleFile(std::string_view name) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;
@@ -115,7 +115,7 @@ struct UserAutoloadMap final : AutoloadMap {
 
  private:
   Optional<String> getFileFromMap(const Array& map, const String& key) const;
-  Optional<folly::fs::path> getPathFromMap(const Array&, const String&) const;
+  Optional<std::filesystem::path> getPathFromMap(const Array&, const String&) const;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -121,7 +121,7 @@ module Dep : sig
 
   val extract_name : 'a variant -> string
 
-  val extract_root_name : 'a variant -> string
+  val extract_root_name : ?strip_namespace:bool -> 'a variant -> string
 
   val extract_member_name : 'a variant -> string option
 

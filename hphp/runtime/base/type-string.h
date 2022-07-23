@@ -333,8 +333,6 @@ public:
    * Type conversions
    */
   bool   toBoolean() const { return m_str ? m_str->toBoolean() : false;}
-  char   toByte   () const { return m_str ? m_str->toByte   () : 0;}
-  short  toInt16  () const { return m_str ? m_str->toInt16  () : 0;}
   int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
@@ -379,28 +377,6 @@ public:
   int compare(const String& v2) const;
 
   /**
-   * Offset
-   */
-  String rval(bool    key) const { return rvalImpl(key ? 1 : 0);}
-  String rval(char    key) const { return rvalImpl(key);}
-  String rval(short   key) const { return rvalImpl(key);}
-  String rval(int     key) const { return rvalImpl(key);}
-  String rval(int64_t key) const { return rvalImpl(key);}
-  String rval(double  key) const { return rvalImpl((int64_t)key);}
-  String rval(const char* key) const {
-    return rvalImpl(String(key).toInt32());
-  }
-  String rval(const StringData *key) const {
-    not_reached();
-    return rvalImpl(key ? key->toInt32() : 0);
-  }
-  String rval(const String& key) const { return rvalImpl(key.toInt32());}
-
-  String rval(const Array& key) const = delete;
-  String rval(const Object& key) const = delete;
-  String rval(const Variant& key) const = delete;
-
-  /**
    * Returns one character at specified position.
    */
   char charAt(int pos) const;
@@ -440,13 +416,6 @@ public:
   }
 
  private:
-  String rvalImpl(int key) const {
-    if (m_str) {
-      return String{m_str->getChar(key)};
-    }
-    return String();
-  }
-
   static void compileTimeAssertions() {
     static_assert(sizeof(String) == sizeof(req::ptr<StringData>), "");
   }

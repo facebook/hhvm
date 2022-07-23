@@ -23,6 +23,8 @@
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/assertions.h"
 
+namespace fs = std::filesystem;
+
 namespace HPHP {
 
 struct StringData;
@@ -107,7 +109,7 @@ getAllSymbolsFromDB(AutoloadDB& db) {
 } // namespace
 
 SymbolMap::SymbolMap(
-    folly::fs::path root,
+    fs::path root,
     AutoloadDB::Handle dbHandle,
     hphp_hash_set<std::string> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
@@ -207,7 +209,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(Path path) {
 }
 
 std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypes(const folly::fs::path& path) {
+SymbolMap::getFileTypes(const fs::path& path) {
   return getFileTypes(Path{path});
 }
 
@@ -220,7 +222,7 @@ std::vector<Symbol<SymKind::Function>> SymbolMap::getFileFunctions(Path path) {
 }
 
 std::vector<Symbol<SymKind::Function>>
-SymbolMap::getFileFunctions(const folly::fs::path& path) {
+SymbolMap::getFileFunctions(const fs::path& path) {
   return getFileFunctions(Path{path});
 }
 
@@ -233,7 +235,7 @@ std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(Path path) {
 }
 
 std::vector<Symbol<SymKind::Constant>>
-SymbolMap::getFileConstants(const folly::fs::path& path) {
+SymbolMap::getFileConstants(const fs::path& path) {
   return getFileConstants(Path{path});
 }
 
@@ -253,7 +255,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
 }
 
 std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypeAliases(const folly::fs::path& path) {
+SymbolMap::getFileTypeAliases(const fs::path& path) {
   return getFileTypeAliases(Path{path});
 }
 
@@ -329,7 +331,7 @@ SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
       },
       [&](AutoloadDB& db) -> std::vector<SubtypeQuery> {
         auto const symbolStrs = db.getBaseTypes(
-            folly::fs::path{std::string{derivedTypePath.slice()}},
+            fs::path{std::string{derivedTypePath.slice()}},
             derivedType.slice(),
             kind);
         std::vector<SubtypeQuery> symbols;
@@ -660,9 +662,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
       },
       [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
         auto const attrStrs = db.getAttributesOfMethod(
-            type.slice(),
-            method.slice(),
-            folly::fs::path{std::string{path.slice()}});
+            type.slice(), method.slice(), fs::path{std::string{path.slice()}});
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -975,7 +975,7 @@ SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
       },
       [&](AutoloadDB& db) {
         return db.getKindAndFlags(
-            type.slice(), folly::fs::path{std::string{path.slice()}});
+            type.slice(), fs::path{std::string{path.slice()}});
       },
       [&](Data& data, AutoloadDB::KindAndFlags kindAndFlags)
           -> std::pair<TypeKind, TypeFlagMask> {
@@ -1000,8 +1000,8 @@ Optional<SHA1> SymbolMap::getSha1Hash(Path path) const {
 void SymbolMap::update(
     const Clock& since,
     const Clock& clock,
-    std::vector<folly::fs::path> alteredPaths,
-    std::vector<folly::fs::path> deletedPaths,
+    std::vector<fs::path> alteredPaths,
+    std::vector<fs::path> deletedPaths,
     std::vector<FileFacts> alteredPathFacts) {
   ++m_updatesInFlight;
   SCOPE_EXIT {
@@ -1181,8 +1181,8 @@ hphp_hash_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
 void SymbolMap::updateDB(
     const Clock& since,
     const Clock& clock,
-    const std::vector<folly::fs::path>& alteredPaths,
-    const std::vector<folly::fs::path>& deletedPaths,
+    const std::vector<fs::path>& alteredPaths,
+    const std::vector<fs::path>& deletedPaths,
     const std::vector<FileFacts>& alteredPathFacts) const {
   assertx(alteredPaths.size() == alteredPathFacts.size());
 
@@ -1225,7 +1225,7 @@ void SymbolMap::updateDB(
 }
 
 void SymbolMap::updateDBPath(
-    AutoloadDB& db, const folly::fs::path& path, const FileFacts& facts) const {
+    AutoloadDB& db, const fs::path& path, const FileFacts& facts) const {
   assertx(path.is_relative());
 
   // Bail out early if the hex in memory is identical to the hex in the DB
@@ -1399,7 +1399,7 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
         }
       },
       [&](AutoloadDB& db) {
-        auto pathStrs = [&]() -> std::vector<folly::fs::path> {
+        auto pathStrs = [&]() -> std::vector<fs::path> {
           switch (k) {
             case SymKind::Type:
               return db.getTypePath(symbol.slice());
@@ -1445,7 +1445,7 @@ SymbolMap::getPathSymbols(Path path) {
       },
       [&](AutoloadDB& db) {
         auto symbolStrs =
-            [&](const folly::fs::path& path) -> std::vector<std::string> {
+            [&](const fs::path& path) -> std::vector<std::string> {
           assertx(path.is_relative());
           switch (k) {
             case SymKind::Type:
@@ -1455,7 +1455,7 @@ SymbolMap::getPathSymbols(Path path) {
             case SymKind::Constant:
               return db.getPathConstants(path);
           }
-        }(folly::fs::path{std::string{path.slice()}});
+        }(fs::path{std::string{path.slice()}});
 
         Symbols symbols;
         symbols.reserve(symbolStrs.size());

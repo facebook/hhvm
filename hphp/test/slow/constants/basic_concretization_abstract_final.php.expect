@@ -1,4 +1,0 @@
-AFinal::X is concrete: true
-AFinal::T is concrete: true
-AAbstract::X is concrete: false
-AAbstract::T is concrete: false

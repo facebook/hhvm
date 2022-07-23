@@ -16,4 +16,4 @@
  **
  *
  */
-pub const VERSION: &str = "2022-07-08-0000";
+pub const VERSION: &str = "2022-07-20-0000";

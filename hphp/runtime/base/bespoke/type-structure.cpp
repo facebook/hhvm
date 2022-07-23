@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/bespoke/type-structure.h"
 
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -44,9 +43,16 @@ const TypeStructure* TypeStructure::As(const ArrayData* ad) {
 namespace {
 
 size_t getSizeOfTypeStruct(Kind kind) {
-  // TODO: return different sizes for children structs
-  return sizeof(TypeStructure);
+  switch (kind) {
+#define X(Field, Type) \
+    case Kind::T_##Field: return sizeof(Type);
+TYPE_STRUCTURE_KINDS
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default: return 0;
+  }
 }
+
 void moveFieldToVanilla(ArrayData* vad, StringData* key, TypedValue tv) {
   auto const type = tv.m_type;
   if (type == KindOfUninit || (type == KindOfBoolean && !val(tv).num)) {
@@ -94,7 +100,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
 
   auto const tad = static_cast<TypeStructure*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
-    sizeIndex(kind), legacy ? ArrayData::kLegacyArray : 0);
+    index, legacy ? ArrayData::kLegacyArray : 0);
   tad->initHeader_16(HeaderKind::BespokeDict,
     Static ? StaticValue : OneReference, aux);
 
@@ -102,13 +108,25 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   tad->m_size = 0;
 
   tad->m_layout_index = GetLayoutIndex();
+  tad->m_kind = uint8_t(kind);
+  tad->m_extra_hi8 = TypeStructure::kFieldsByte;
   tad->m_extra_lo8 = 0;
-  tad->m_extra_hi8 = 0;
   tad->m_alias = nullptr;
   tad->m_typevars = nullptr;
   tad->m_typevar_types = nullptr;
 
-  assertx(tad->checkInvariants());
+  switch (kind) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    tad->m_extra_hi8 = Type::kFieldsByte; \
+    Type::initializeFields(reinterpret_cast<Type*>(tad)); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
+
   return tad;
 }
 
@@ -136,7 +154,7 @@ void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
 bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
   if (s_kind.same(k)) {
     assertx(tvIsInt(v));
-    tad->m_extra_hi8 = safe_cast<uint8_t>(val(v).num);
+    tad->m_kind = safe_cast<uint8_t>(val(v).num);
   } else if (s_nullable.same(k)) {
     tad->setBitField(v, kNullableOffset);
   } else if (s_soft.same(k)) {
@@ -168,9 +186,20 @@ TypeStructure* TypeStructure::MakeFromVanilla(ArrayData* ad) {
     ? MakeReserve<true>(ad->isLegacyArray(), kind)
     : MakeReserve<false>(ad->isLegacyArray(), kind);
 
-  auto const size = setFields<TypeStructure>(result, ad);
-  assertx(ad->size() == size);
+  auto size = setFields<TypeStructure>(result, ad);
 
+  switch (kind) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    size += setFields<Type>(reinterpret_cast<Type*>(result), ad); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
+
+  assertx(ad->size() == size);
   result->m_size = size;
 
   assertx(result->checkInvariants());
@@ -182,11 +211,28 @@ bool TypeStructure::checkInvariants() const {
   assertx(m_alias == nullptr || m_alias->kindIsValid());
   assertx(m_typevars == nullptr || m_typevars->kindIsValid());
   assertx(m_typevar_types == nullptr || m_typevar_types->kindIsValid());
-  return true;
+
+  switch (typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    return reinterpret_cast<const Type*>(this)->checkInvariants();
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    assertx(fieldsByte() == TypeStructure::kFieldsByte); \
+    return true;
+TYPE_STRUCTURE_KINDS
+#undef X
+    default:
+      return false;
+  }
 }
 
 bool TypeStructure::isValidTypeStructure(ArrayData* ad) {
   if (!ad->isVanillaDict() || !ad->exists(s_kind)) return false;
+  auto const kind =
+    static_cast<Kind>(Variant::wrap(ad->get(s_kind)).toInt64Val());
 
   // check that the key exists and that the type matches
   auto fields = 0;
@@ -197,6 +243,22 @@ bool TypeStructure::isValidTypeStructure(ArrayData* ad) {
   }
 TYPE_STRUCTURE_FIELDS
 #undef X
+
+  switch (kind) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    fields += Type::countFields(ad); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    break;
+TYPE_STRUCTURE_KINDS
+#undef X
+  default: \
+    return false;
+  }
 
   // all elements in ad must exist in type structure
   return fields == ad->size();
@@ -210,13 +272,25 @@ ArrayData* TypeStructure::escalateWithCapacity(
   auto ad = VanillaDict::MakeReserveDict(capacity);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
+  // move base TypeStructure fields
 #define X(Field, FieldString, KindOfType) {                           \
   auto const key = s_##FieldString.get();                             \
-  auto const tv = TypeStructure::NvGetStr(this, key);                 \
+  auto const tv = TypeStructure::tsNvGetStr(this, key);               \
   moveFieldToVanilla(ad, key, tv);                                    \
 }
 TYPE_STRUCTURE_FIELDS
 #undef X
+
+  // move any remaining children fields
+  switch (typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    reinterpret_cast<const Type*>(this)->moveFieldsToVanilla(ad); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default: break;
+  }
 
   assertx(isValidTypeStructure(ad));
   return ad;
@@ -243,18 +317,51 @@ void TypeStructure::Scan(
   scanner.scan(tad->m_alias);
   scanner.scan(tad->m_typevars);
   scanner.scan(tad->m_typevar_types);
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    Type::scan(reinterpret_cast<const Type*>(tad), scanner); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
 }
 
 void TypeStructure::incRefFields() {
   if (m_alias) m_alias->incRefCount();
   if (m_typevars) m_typevars->incRefCount();
   if (m_typevar_types) m_typevar_types->incRefCount();
+
+  switch (typeKind()) {
+#define X(Name, Type) \
+    case Kind::T_##Name: \
+      reinterpret_cast<Type*>(this)->incRefFields(); \
+      break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
 }
 
 void TypeStructure::decRefFields() {
   if (m_alias) m_alias->decRefAndRelease();
   if (m_typevars) m_typevars->decRefAndRelease();
   if (m_typevar_types) m_typevar_types->decRefAndRelease();
+
+  switch (typeKind()) {
+#define X(Name, Type) \
+    case Kind::T_##Name: \
+      reinterpret_cast<Type*>(this)->decRefFields(); \
+      break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
 }
 
 bool TypeStructure::containsField(const StringData* k) const {
@@ -262,15 +369,31 @@ bool TypeStructure::containsField(const StringData* k) const {
   if (s_##FieldString.same(k)) return true;
 TYPE_STRUCTURE_FIELDS
 #undef X
-  return false;
+
+  switch (typeKind()) {
+#define X(Name, Type) \
+    case Kind::T_##Name: \
+      return reinterpret_cast<const Type*>(this)->containsField(k); \
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      return false;
+  }
 }
 
-DataType TypeStructure::getKindOfField(const StringData* k) {
+std::pair<DataType, uint8_t> TypeStructure::getFieldPair(const StringData* k) {
+  // fields in base TypeStructure always exist and are represented by offset 0
 #define X(Field, FieldString, KindOfType) \
-  if (s_##FieldString.same(k)) return KindOfType;
+  if (s_##FieldString.same(k)) return {KindOfType, 0};
   TYPE_STRUCTURE_FIELDS
 #undef X
-  return KindOfUninit;
+
+#define X(Field, Type, KindOfType, Struct, FieldsByteOffset) \
+  if (s_##Field.same(k)) return {KindOfType, FieldsByteOffset};
+  TYPE_STRUCTURE_CHILDREN_FIELDS
+#undef X
+
+  return {KindOfUninit, 0};
 }
 
 size_t TypeStructure::getFieldOffset(const StringData* key) {
@@ -293,16 +416,22 @@ size_t TypeStructure::getFieldOffset(const StringData* key) {
   } else if (s_typevar_types.same(key)) {
     return offsetof(TypeStructure, m_typevar_types);
   }
+
+#define X(Field, Type, KindOfType, Struct, ...) \
+  if (s_##Field.same(key)) return Struct::getFieldOffset(key);
+    TYPE_STRUCTURE_CHILDREN_FIELDS
+#undef X
   always_assert(false);
 }
 
-uint8_t TypeStructure::getBitOffset(const StringData* key) {
+uint8_t TypeStructure::getBooleanBitOffset(const StringData* key) {
   if (s_nullable.same(key)) return kNullableOffset;
   if (s_soft.same(key)) return kSoftOffset;
   if (s_like.same(key)) return kLikeOffset;
   if (s_opaque.same(key)) return kOpaqueOffset;
   if (s_optional_shape_field.same(key)) return kOptionalShapeFieldOffset;
-  always_assert(false);
+  // otherwise the boolean field does not require an offset
+  return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -310,7 +439,7 @@ uint8_t TypeStructure::getBitOffset(const StringData* key) {
 
 namespace {
 
-TypedValue make_tv_safe(int8_t val) {
+TypedValue make_tv_safe(uint8_t val) {
   return make_tv<KindOfInt64>(val);
 }
 TypedValue make_tv_safe(bool val) {
@@ -348,12 +477,34 @@ void TypeStructure::ConvertToUncounted(
   if (tad->m_alias) MakeUncountedString(tad->m_alias, env);
   if (tad->m_typevars) MakeUncountedString(tad->m_typevars, env);
   if (tad->m_typevar_types) MakeUncountedArray(tad->m_typevar_types, env);
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    Type::convertToUncounted(reinterpret_cast<Type*>(tad), env); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
 }
 
 void TypeStructure::ReleaseUncounted(TypeStructure* tad) {
   if (tad->m_alias) DecRefUncountedString(tad->m_alias);
   if (tad->m_typevars) DecRefUncountedString(tad->m_typevars);
   if (tad->m_typevar_types) DecRefUncountedArray(tad->m_typevar_types);
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    Type::releaseUncounted(reinterpret_cast<Type*>(tad)); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
 }
 
 void TypeStructure::Release(TypeStructure* tad) {
@@ -378,6 +529,22 @@ TypedValue TypeStructure::NvGetInt(const TypeStructure*, int64_t) {
 
 TypedValue TypeStructure::NvGetStr(
     const TypeStructure* tad, const StringData* k) {
+  auto const tv = TypeStructure::tsNvGetStr(tad, k);
+  if (tv.is_init()) return tv;
+
+  // at this point, either k exists in a children struct or does not exist at all
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: return Type::tsNvGetStr(reinterpret_cast<const Type*>(tad), k);
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default: break;
+  }
+  return make_tv<KindOfUninit>();
+}
+
+TypedValue TypeStructure::tsNvGetStr(
+    const TypeStructure* tad, const StringData* k) {
 #define X(Field, FieldString, KindOfType)                             \
   if (s_##FieldString.same(k)) {                                      \
     return make_tv_safe(tad->Field());                                \
@@ -394,6 +561,16 @@ TypedValue TypeStructure::GetPosKey(const TypeStructure* tad, ssize_t pos) {
   }
 TYPE_STRUCTURE_FIELDS
 #undef X
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+    case Kind::T_##Name: \
+      return Type::tsGetPosKey(reinterpret_cast<const Type*>(tad), pos);
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default: break;
+  }
+
   return make_tv<KindOfUninit>();
 }
 
@@ -404,6 +581,16 @@ TypedValue TypeStructure::GetPosVal(const TypeStructure* tad, ssize_t pos) {
   }
 TYPE_STRUCTURE_FIELDS
 #undef X
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+    case Kind::T_##Name: \
+      return Type::tsGetPosVal(reinterpret_cast<const Type*>(tad), pos);
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default: break;
+  }
+
   return make_tv<KindOfUninit>();
 }
 
@@ -522,6 +709,281 @@ ArrayData* TypeStructure::SetLegacyArray(
   tad->setLegacyArrayInPlace(legacy);
   return tad;
 }
+//////////////////////////////////////////////////////////////////////////////
+// specific TypeStructures
+
+namespace {
+
+template<class T> void tsMakeUncounted(T t, const MakeUncountedEnv& env) {}
+template<>
+void tsMakeUncounted<StringData*>(StringData* field, const MakeUncountedEnv& env) {
+  if (field) MakeUncountedString(field, env);
+}
+template<>
+void tsMakeUncounted<ArrayData*>(ArrayData* field, const MakeUncountedEnv& env) {
+  if (field) MakeUncountedArray(field, env);
+}
+
+template<class T> void tsDecRefUncounted(T t) {}
+template<>
+void tsDecRefUncounted<StringData*>(StringData* field) {
+  if (field) DecRefUncountedString(field);
+}
+template<>
+void tsDecRefUncounted<ArrayData*>(ArrayData* field) {
+  if (field) DecRefUncountedArray(field);
+}
+
+template<class T> void initializeField(T t) {}
+template<>
+void initializeField<bool&>(bool& field) {
+  field = 0;
+}
+template<>
+void initializeField<StringData*&>(StringData*& field) {
+  field = nullptr;
+}
+template<>
+void initializeField<ArrayData*&>(ArrayData*& field) {
+  field = nullptr;
+}
+
+template<class T> void scanField(T t, type_scan::Scanner& scanner) {}
+template<>
+void scanField<StringData*>(StringData* field, type_scan::Scanner& scanner) {
+  scanner.scan(field);
+}
+template<>
+void scanField<ArrayData*>(ArrayData* field, type_scan::Scanner& scanner) {
+  scanner.scan(field);
+}
+
+template<class T> void incRefField(T t) {}
+template<>
+void incRefField<StringData*>(StringData* field) {
+  if (field) field->incRefCount();
+}
+template<>
+void incRefField<ArrayData*>(ArrayData* field) {
+  if (field) field->incRefCount();
+}
+
+template<class T> void decRefField(T t) {}
+template<>
+void decRefField<StringData*>(StringData* field) {
+  if (field) field->decRefCount();
+}
+template<>
+void decRefField<ArrayData*>(ArrayData* field) {
+  if (field) field->decRefCount();
+}
+
+}
+
+#define MAKE_TV_FIELD(Field, ...)                                           \
+  if (s_##Field.same(k)) return make_tv_safe(tad->m_##Field);
+
+#define GET_POS_KEY(Field, ...)                                             \
+  if (tad->m_##Field && pos-- == 0) {                                       \
+    return make_tv<KindOfPersistentString>(s_##Field.get());                \
+  }
+
+#define GET_POS_VAL(Field, ...)                                             \
+  if (tad->m_##Field && pos-- == 0) {                                       \
+    return make_tv_safe(tad->m_##Field);                                    \
+  }
+
+#define MOVE_FIELD_TO_VANILLA(Field, Type, KindOfType, ...) {               \
+  auto const tv = make_tv_safe(m_##Field);                                  \
+  moveFieldToVanilla(ad, s_##Field.get(), tv);                              \
+}
+#define CONTAINS_FIELD(Field, Type, ...)                                    \
+  if (s_##Field.same(k)) return true;
+
+#define CONVERT_TO_UNCOUNTED(Field, Type, ...)                              \
+  tsMakeUncounted<Type>(tad->m_##Field, env);
+
+#define RELEASE_UNCOUNTED(Field, Type, ...)                                 \
+  tsDecRefUncounted<Type>(tad->m_##Field);
+
+#define INITIALIZE_FIELD(Field, Type, ...) initializeField<Type&>(tad->m_##Field);
+#define SCAN_FIELD(Field, Type, ...) scanField<Type>(tad->m_##Field, scanner);
+#define INC_REF_FIELD(Field, Type, ...) incRefField<Type>(m_##Field);
+#define DEC_REF_FIELD(Field, Type, ...) decRefField<Type>(m_##Field);
+
+#define GET_FIELD_OFFSET(Field, Type, KindOfType, Struct, ...)              \
+  if (s_##Field.same(k)) return offsetof(Struct, m_##Field);
+
+#define COUNT_FIELDS(Field, Type, KindOfType, ...)              \
+  if (ad->exists(s_##Field) &&                                  \
+      equivDataTypes(ad->get(s_##Field).type(), KindOfType)) {  \
+    fields++;                                                         \
+  }
+
+#define O(ChildStruct, FieldsMacro)                                         \
+TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) { \
+  FieldsMacro(MAKE_TV_FIELD)                                                \
+  return make_tv<KindOfUninit>();                                           \
+}                                                                           \
+TypedValue ChildStruct::tsGetPosKey(const ChildStruct* tad, ssize_t pos) {  \
+  FieldsMacro(GET_POS_KEY)                                                  \
+  return make_tv<KindOfUninit>();                                           \
+}                                                                           \
+TypedValue ChildStruct::tsGetPosVal(const ChildStruct* tad, ssize_t pos) {  \
+  FieldsMacro(GET_POS_VAL)                                                  \
+  return make_tv<KindOfUninit>();                                           \
+}                                                                           \
+void ChildStruct::moveFieldsToVanilla(ArrayData* ad) const {                \
+  FieldsMacro(MOVE_FIELD_TO_VANILLA)                                        \
+}                                                                           \
+void ChildStruct::convertToUncounted(ChildStruct* tad, const MakeUncountedEnv& env) { \
+  FieldsMacro(CONVERT_TO_UNCOUNTED)                                         \
+}                                                                           \
+void ChildStruct::releaseUncounted(ChildStruct* tad) {                      \
+  FieldsMacro(RELEASE_UNCOUNTED)                                            \
+}                                                                           \
+void ChildStruct::initializeFields(ChildStruct* tad) {                      \
+  FieldsMacro(INITIALIZE_FIELD)                                             \
+}                                                                           \
+void ChildStruct::scan(const ChildStruct* tad, type_scan::Scanner& scanner) { \
+  FieldsMacro(SCAN_FIELD)                                                   \
+}                                                                           \
+void ChildStruct::incRefFields() {                                          \
+  FieldsMacro(INC_REF_FIELD)                                                \
+}                                                                           \
+void ChildStruct::decRefFields() {                                          \
+  FieldsMacro(DEC_REF_FIELD)                                                \
+}                                                                           \
+bool ChildStruct::containsField(const StringData* k) const {                \
+  FieldsMacro(CONTAINS_FIELD)                                               \
+  return false;                                                             \
+}                                                                           \
+size_t ChildStruct::getFieldOffset(const StringData* k) {                   \
+  FieldsMacro(GET_FIELD_OFFSET)                                             \
+  return -1;                                                                \
+}                                                                           \
+int ChildStruct::countFields(const ArrayData* ad) {                         \
+  auto fields = 0;                                                          \
+  FieldsMacro(COUNT_FIELDS)                                                 \
+  return fields;                                                            \
+}
+
+O(TSShape, TSSHAPE_FIELDS)
+O(TSTuple, TSTUPLE_FIELDS)
+O(TSFun, TSFUN_FIELDS)
+O(TSTypevar, TSTYPEVAR_FIELDS)
+O(TSWithClassishTypes, TSCLASSISH_FIELDS)
+O(TSWithGenericTypes, TSGENERIC_FIELDS)
+
+#undef O
+
+#undef MAKE_TV_FIELD
+#undef GET_POS_KEY
+#undef GET_POS_VAL
+#undef MOVE_FIELD_TO_VANILLA
+#undef CONTAINS_FIELD
+#undef CONVERT_TO_UNCOUNTED
+#undef RELEASE_UNCOUNTED
+#undef INITIALIZE_FIELD
+#undef SCAN_FIELD
+#undef INC_REF_FIELD
+#undef DEC_REF_FIELD
+
+bool TSShape::checkInvariants() const {
+  assertx(typeKind() == Kind::T_shape);
+  assertx(fieldsByte() == TSShape::kFieldsByte);
+  assertx(m_fields == nullptr || m_fields->kindIsValid());
+  return true;
+}
+bool TSTuple::checkInvariants() const {
+  assertx(typeKind() == Kind::T_tuple);
+  assertx(fieldsByte() == TSTuple::kFieldsByte);
+  assertx(m_elem_types && m_elem_types->kindIsValid());
+  return true;
+}
+bool TSFun::checkInvariants() const {
+  assertx(typeKind() == Kind::T_fun);
+  assertx(fieldsByte() == TSFun::kFieldsByte);
+  assertx(m_return_type && m_return_type->kindIsValid());
+  assertx(m_param_types == nullptr || m_param_types->kindIsValid());
+  assertx(m_variadic_type == nullptr || m_variadic_type->kindIsValid());
+  return true;
+}
+bool TSTypevar::checkInvariants() const {
+  assertx(typeKind() == Kind::T_typevar);
+  assertx(fieldsByte() == TSTypevar::kFieldsByte);
+  assertx(m_name && m_name->kindIsValid());
+  return true;
+}
+bool TSWithClassishTypes::checkInvariants() const {
+  assertx(fieldsByte() == TSWithClassishTypes::kFieldsByte);
+  assertx(m_generic_types == nullptr || m_generic_types->kindIsValid());
+  assertx(m_classname && m_classname->kindIsValid());
+  return true;
+}
+bool TSWithGenericTypes::checkInvariants() const {
+  assertx(fieldsByte() == TSWithGenericTypes::kFieldsByte);
+  assertx(m_generic_types && m_generic_types->kindIsValid());
+  return true;
+}
+
+bool TSShape::setField(TSShape* tad, StringData* k, TypedValue v) {
+  if (s_fields.same(k)) {
+    setArrayField(tad->m_fields, v);
+  } else if (s_allows_unknown_fields.same(k)) {
+    assertx(tvIsBool(v));
+    tad->m_allows_unknown_fields = val(v).num;
+  } else {
+    return false;
+  }
+  return true;
+}
+bool TSTuple::setField(TSTuple* tad, StringData* k, TypedValue v) {
+  if (s_elem_types.same(k)) {
+    setArrayField(tad->m_elem_types, v);
+    return true;
+  }
+  return false;
+}
+bool TSFun::setField(TSFun* tad, StringData* k, TypedValue v) {
+  if (s_param_types.same(k)) {
+    setArrayField(tad->m_param_types, v);
+  } else if (s_return_type.same(k)) {
+    setArrayField(tad->m_return_type, v);
+  } else if (s_variadic_type.same(k)) {
+    setArrayField(tad->m_variadic_type, v);
+  } else {
+    return false;
+  }
+  return true;
+}
+bool TSTypevar::setField(TSTypevar* tad, StringData* k, TypedValue v) {
+  if (s_name.same(k)) {
+    setStringField(tad->m_name, v);
+    return true;
+  }
+  return false;
+}
+bool TSWithClassishTypes::setField(TSWithClassishTypes* tad, StringData* k, TypedValue v) {
+  if (s_generic_types.same(k)) {
+    setArrayField(tad->m_generic_types, v);
+  } else if (s_classname.same(k)) {
+    setStringField(tad->m_classname, v);
+  } else if (s_exact.same(k)) {
+    assertx(tvIsBool(v));
+    tad->m_exact = val(v).num;
+  } else {
+    return false;
+  }
+  return true;
+}
+bool TSWithGenericTypes::setField(TSWithGenericTypes* tad, StringData* k, TypedValue v) {
+  if (s_generic_types.same(k)) {
+    setArrayField(tad->m_generic_types, v);
+    return true;
+  }
+  return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // TypeStructureLayout
@@ -557,7 +1019,7 @@ ArrayLayout TypeStructureLayout::setType(Type key, Type val) const {
 std::pair<Type, bool> TypeStructureLayout::elemType(Type key) const {
   if (key <= TInt) return {TBottom, false};
   if (key.hasConstVal(TStr)) {
-    auto const dt = bespoke::TypeStructure::getKindOfField(key.strVal());
+    auto const dt = bespoke::TypeStructure::getFieldPair(key.strVal()).first;
     if (dt == KindOfBoolean) return {TBool, false};
     // 'kind' field should always be present
     if (dt == KindOfInt64) return {TInt, true};

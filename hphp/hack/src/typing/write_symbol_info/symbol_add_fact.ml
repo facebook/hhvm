@@ -46,6 +46,18 @@ let parent_decls ctx decls pred prog =
       let ref = Build_json.build_id_json decl_id in
       (ref :: decl_refs, prog))
 
+let module_decl name progress =
+  let json = JSON_Object [("name", Build_json.build_name_json_nested name)] in
+  Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json progress
+
+let module_field module_ internal progress =
+  match module_ with
+  | None -> ([], progress)
+  | Some (_pos, module_name) ->
+    let (decl_id, progress) = module_decl module_name progress in
+    ( [("module_", Build_json.build_module_membership_nested decl_id ~internal)],
+      progress )
+
 let container_defn ctx source_text clss decl_id member_decls prog =
   let prog = namespace_decl_opt clss.c_namespace prog in
   let tparams =
@@ -53,16 +65,18 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       clss.c_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (mf, prog) = module_field clss.c_module clss.c_internal prog in
   let common_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("members", JSON_Array member_decls);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          clss.c_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ("members", JSON_Array member_decls);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            clss.c_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
   (* TODO T112092175: export require class requirements to Facts *)
   let (req_extends_hints, req_implements_hints, _) =
@@ -339,20 +353,22 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
     parent_decls ctx enum_data.e_includes Predicate.(Hack EnumDeclaration) prog
   in
   let is_enum_class = Aast.is_enum_class enm in
+  let (mf, prog) = module_field enm.c_module enm.c_internal prog in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json enum_id);
-      ( "enumBase",
-        Build_json.build_type_json_nested
-          (Util.get_type_from_hint ctx enum_data.e_base) );
-      ("enumerators", JSON_Array enumerators);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          enm.c_user_attributes );
-      ("includes", JSON_Array includes);
-      ("isEnumClass", JSON_Bool is_enum_class);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json enum_id);
+        ( "enumBase",
+          Build_json.build_type_json_nested
+            (Util.get_type_from_hint ctx enum_data.e_base) );
+        ("enumerators", JSON_Array enumerators);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            enm.c_user_attributes );
+        ("includes", JSON_Array includes);
+        ("isEnumClass", JSON_Bool is_enum_class);
+      ]
   in
   let json_fields =
     match enum_data.e_constraint with
@@ -389,28 +405,45 @@ let func_defn ctx source_text fd decl_id progress =
       elem.f_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ( "signature",
-        Build_json.build_signature_json
-          ctx
-          source_text
-          elem.f_params
-          elem.f_ctxs
-          elem.f_ret );
-      ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          elem.f_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ( "signature",
+          Build_json.build_signature_json
+            ctx
+            source_text
+            elem.f_params
+            elem.f_ctxs
+            elem.f_ret );
+        ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            elem.f_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
   Fact_acc.add_fact
     Predicate.(Hack FunctionDefinition)
     (JSON_Object json_fields)
     prog
+
+let module_defn _ctx source_text elem decl_id progress =
+  let json_fields =
+    [
+      ("declaration", Build_json.build_id_json decl_id);
+      ( "attributes",
+        Build_json.build_attributes_json_nested
+          source_text
+          elem.md_user_attributes );
+    ]
+  in
+  Fact_acc.add_fact
+    Predicate.(Hack ModuleDefinition)
+    (JSON_Object json_fields)
+    progress
 
 let typedef_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
@@ -430,16 +463,18 @@ let typedef_defn ctx source_text elem decl_id progress =
       elem.t_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (mf, prog) = module_field elem.t_module elem.t_internal prog in
   let json_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("isTransparent", JSON_Bool is_transparent);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          elem.t_user_attributes );
-      ("typeParams", JSON_Array tparams);
-    ]
+    mf
+    @ [
+        ("declaration", Build_json.build_id_json decl_id);
+        ("isTransparent", JSON_Bool is_transparent);
+        ( "attributes",
+          Build_json.build_attributes_json_nested
+            source_text
+            elem.t_user_attributes );
+        ("typeParams", JSON_Array tparams);
+      ]
   in
   Fact_acc.add_fact
     Predicate.(Hack TypedefDefinition)

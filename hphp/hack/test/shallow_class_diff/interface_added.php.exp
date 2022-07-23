@@ -1,6 +1,7 @@
 C: (Major_change
       (Modified
-         { parent_changes =
+         { classish_kind = (Cclass Concrete);
+           parent_changes =
            (Some { extends_changes = None;
                    implements_changes =
                    (Some { per_name_changes = { "\\I" -> Added };

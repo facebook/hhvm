@@ -578,7 +578,7 @@ Type structDictReturn(const IRInstruction* inst) {
 Type typeStructElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdTypeStructureValCns));
   auto const key = inst->extra<KeyedData>()->key;
-  auto const dt = bespoke::TypeStructure::getKindOfField(key);
+  auto const dt = bespoke::TypeStructure::getFieldPair(key).first;
   if (dt == KindOfBoolean) return TBool;
   if (dt == KindOfInt64) return TInt;
   if (dt == KindOfVec) return TVec|TNullptr;

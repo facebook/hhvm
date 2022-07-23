@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47475db39c74d793be28e5a2c9df1ac1>>
+// @generated SignedSource<<4bded07f512f4e18ed9def2c84bd6301>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2025,7 +2025,8 @@ impl<P: Params> Node<P> for Typedef<P::Ex, P::En> {
         self.emit_id.accept(c, v)?;
         self.is_ctx.accept(c, v)?;
         self.internal.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.docs_url.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for TypedefVisibility {

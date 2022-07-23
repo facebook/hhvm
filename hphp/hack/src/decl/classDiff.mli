@@ -57,11 +57,7 @@ type parent_changes = {
 }
 
 module KindChange : sig
-  type t = {
-    old_kind: Ast_defs.classish_kind;
-    new_kind: Ast_defs.classish_kind;
-  }
-  [@@deriving eq, show]
+  type t = { new_kind: Ast_defs.classish_kind } [@@deriving eq, show]
 end
 
 module BoolChange : sig
@@ -71,7 +67,23 @@ module BoolChange : sig
   [@@deriving eq, show]
 end
 
+module ValueDiff : sig
+  type 'value t = {
+    old_value: 'value;
+    new_value: 'value;
+  }
+  [@@deriving eq, show]
+end
+
+type enum_type_change = {
+  base_change: Typing_defs.decl_ty ValueDiff.t option;
+  constraint_change: Typing_defs.decl_ty ValueDiff.t ValueChange.t option;
+  includes_change: unit NamedItemsListChange.t NamedItemsListChange.t option;
+}
+[@@deriving eq, show]
+
 type class_shell_change = {
+  classish_kind: Ast_defs.classish_kind;
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
   kind_change: KindChange.t option;
@@ -84,7 +96,7 @@ type class_shell_change = {
   module_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes: unit NamedItemsListChange.t option;
-  enum_type_change: unit ValueChange.t option;
+  enum_type_change: enum_type_change ValueChange.t option;
 }
 [@@deriving eq, show]
 

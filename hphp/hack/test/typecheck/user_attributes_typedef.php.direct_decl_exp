@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,417 +1,386 @@
+@@ -1,417 +1,389 @@
  [("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -339,8 +339,8 @@
 -          { Typing_defs_core.ua_name = ([20:3-6], "\\Foo");
 -            ua_classname_params = [] }
 -          ];
--        td_internal = false }));
-+        td_attributes = []; td_internal = false }));
+-        td_internal = false; td_docs_url = None }));
++        td_attributes = []; td_internal = false; td_docs_url = None }));
    ("\\T2",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [24:6-8];
@@ -352,8 +352,9 @@
 -        [{ Typing_defs_core.ua_name = ([23:3-18], "\\SingleAttribute");
 -           ua_classname_params = [] }
 -          ];
--        td_internal = false }));
-+        td_is_ctx = false; td_attributes = []; td_internal = false }));
+-        td_internal = false; td_docs_url = None }));
++        td_is_ctx = false; td_attributes = []; td_internal = false;
++        td_docs_url = None }));
    ("\\T3",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [27:9-11]; td_vis = Opaque;
@@ -365,8 +366,8 @@
 -           ([26:3-30], "\\SingleAttributeWithOneParam");
 -           ua_classname_params = [] }
 -          ];
--        td_internal = false }));
-+        td_attributes = []; td_internal = false }));
+-        td_internal = false; td_docs_url = None }));
++        td_attributes = []; td_internal = false; td_docs_url = None }));
    ("\\T4",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [30:6-8];
@@ -381,8 +382,9 @@
 -           ([29:3-31], "\\SingleAttributeWithTwoParams");
 -           ua_classname_params = [] }
 -          ];
--        td_internal = false }));
-+        td_is_ctx = false; td_attributes = []; td_internal = false }));
+-        td_internal = false; td_docs_url = None }));
++        td_is_ctx = false; td_attributes = []; td_internal = false;
++        td_docs_url = None }));
    ("\\T5",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [33:6-8];
@@ -420,6 +422,7 @@
 -          { Typing_defs_core.ua_name = ([32:3-11], "\\Multiple");
 -            ua_classname_params = [] }
 -          ];
--        td_internal = false }))
-+        td_is_ctx = false; td_attributes = []; td_internal = false }))
+-        td_internal = false; td_docs_url = None }))
++        td_is_ctx = false; td_attributes = []; td_internal = false;
++        td_docs_url = None }))
    ]

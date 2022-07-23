@@ -892,6 +892,16 @@ pub mod coeffects {
         ZONED_SET.contains(x)
     }
 
+    pub fn is_any_zoned_or_defaults(x: &str) -> bool {
+        lazy_static! {
+            static ref ZONED_SET: HashSet<&'static str> =
+                vec![ZONED, ZONED_WITH, ZONED_LOCAL, ZONED_SHALLOW, DEFAULTS]
+                    .into_iter()
+                    .collect();
+        }
+        ZONED_SET.contains(x)
+    }
+
     #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
     #[repr(C)]
     pub enum Ctx {
@@ -1107,6 +1117,7 @@ pub mod unstable_features {
     pub const READONLY: &str = "readonly";
     pub const EXPRESSION_TREES: &str = "expression_trees";
     pub const MODULES: &str = "modules";
+    pub const MODULE_REFERENCES: &str = "module_references";
 }
 
 pub mod regex {

@@ -13,6 +13,7 @@ from hphp.hack.src.hh_codesynthesis.agentGenerator import ClingoContext
 
 class GenerateLogicRulesTest(unittest.TestCase):
     def test_depth_less_than_nodes(self) -> None:
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(number_of_nodes=12, min_depth=3)
         exp = [
             'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6",'
@@ -26,6 +27,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
         # In this case, the graph has no way to satisfy the min_depth requirement.
         # The user, or the higher level wrapper should make sure given proper
         # parameters. Otherwise, we will create the following output.
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(number_of_nodes=3, min_depth=5)
         with self.assertRaises(
             expected_exception=RuntimeError, msg="Received unreasonable parameters."
@@ -33,6 +35,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
             agentGenerator.generate_logic_rules(solving_context)
 
     def test_depth_equals_to_nodes(self) -> None:
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(number_of_nodes=7, min_depth=7)
         exp = [
             'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5",'
@@ -47,6 +50,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
         self.assertListEqual(exp, agentGenerator.generate_logic_rules(solving_context))
 
     def test_degree_distribution(self) -> None:
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(
             number_of_nodes=12, degree_distribution=[1, 3, 5]
         )
@@ -60,6 +64,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
         self.assertListEqual(exp, agentGenerator.generate_logic_rules(solving_context))
 
     def test_sum_of_degrees_greater_than_nodes(self) -> None:
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(
             number_of_nodes=12, degree_distribution=[3, 5, 7]
         )
@@ -69,6 +74,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
             agentGenerator.generate_logic_rules(solving_context)
 
     def test_hack_code_gen(self) -> None:
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(
             number_of_nodes=12,
             min_depth=3,
@@ -90,6 +96,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
 
     def test_unsatisfiable_parameters(self) -> None:
         # Given 5 nodes, but asking for 3 classes + 4 interfaces with
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `ClingoContext`.
         solving_context = ClingoContext(
             number_of_nodes=5, min_classes=3, min_interfaces=4
         )
@@ -284,6 +291,7 @@ Type HH\Contexts\Unsafe\globals -> Type A"""
 class DoReasoningTest(unittest.TestCase):
     def test_clingo_exception(self) -> None:
         deps = ["rule_without_period(symbol1, symbol2)"]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="parsing failed"):
             agentGenerator.do_reasoning(additional_programs=deps, generator=raw_codegen)
@@ -304,6 +312,7 @@ class DoReasoningTest(unittest.TestCase):
             'extends_to("T", "A").',
             'symbols("A";"B";"I";"T").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -312,6 +321,7 @@ class DoReasoningTest(unittest.TestCase):
         # This one covered the 'has_method_with_parameter'.
         exp = ['class("B")', 'has_method_with_parameter("C","B")', 'interface("C")']
         rules = ['type("B", "C").', 'symbols("B"; "C").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -328,6 +338,7 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_in_method("C","B","foo")',
         ]
         rules = ['method("B", "foo", "C").', 'symbols("B"; "C").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -343,6 +354,7 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_static_method("C","B","foo")',
         ]
         rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B"; "C").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -358,6 +370,7 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_static_method("C","B","foo")',
         ]
         rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B").funcs("C").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -366,6 +379,7 @@ class DoReasoningTest(unittest.TestCase):
         # This one covered the unsatifiable part, that we can't find an answer.
         # Here we are forcing symbol("B") to get interface("B").
         rules = ['static_method("A", "foo", "B").', 'interface("B").symbols("A"; "B").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
             agentGenerator.do_reasoning(
@@ -387,6 +401,7 @@ class DoReasoningTest(unittest.TestCase):
             'type("B", "C").',
             'symbols("B"; "C").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -400,6 +415,7 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_function("A","Fn")',
         ]
         rules = ['invoked_by("Fn", "A").', 'symbols("A"; "B").', 'funcs("Fn").']
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -418,6 +434,7 @@ class DoReasoningTest(unittest.TestCase):
             'symbols("A"; "B").',
             'funcs("FnA"; "FnB").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -432,6 +449,7 @@ class DoReasoningTest(unittest.TestCase):
             'symbols("A"; "B").',
             'funcs("Fn").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
             agentGenerator.do_reasoning(
@@ -455,6 +473,7 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").'
             'extends_to("A","B").'
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -476,6 +495,7 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").'
             'extends_to("A","B").'
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -495,6 +515,7 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").',
             'extends_to("A","B").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -514,6 +535,7 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").',
             'extends_to("A","B").',
         ]
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -539,6 +561,7 @@ Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B
 """
+        # pyre-fixme[16]: Module `agentGenerator` has no attribute `CodeGenerator`.
         raw_codegen = agentGenerator.CodeGenerator()
         additional_programs = agentGenerator.extract_logic_rules(deps.split("\n"))
         agentGenerator.do_reasoning(

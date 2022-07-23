@@ -1,6 +1,6 @@
 <?hh
 
-class Object {
+class Object0 {
 	public function __construct() {
 	}
 }
@@ -13,7 +13,7 @@ class Object1 {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  $class= new ReflectionClass('Object');
+  $class= new ReflectionClass('Object0');
   var_dump($class->newInstanceArgs());
 
   $class= new ReflectionClass('Object1');

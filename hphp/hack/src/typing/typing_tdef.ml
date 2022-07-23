@@ -34,6 +34,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     td_is_ctx = _;
     td_attributes = _;
     td_internal = _;
+    td_docs_url = _;
   } =
     td
   in

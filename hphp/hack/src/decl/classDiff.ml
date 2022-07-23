@@ -257,7 +257,16 @@ module ValueChange = struct
     | Modified of 'change
   [@@deriving eq, show { with_path = false }]
 
-  let to_json x = Hh_json.string_ @@ show (fun _ _ -> ()) x
+  let to_json change_to_json = function
+    | Added -> Hh_json.string_ "Added"
+    | Removed -> Hh_json.string_ "Removed"
+    | Modified change ->
+      Hh_json.JSON_Object [("Modified", change_to_json change)]
+
+  let map ~f = function
+    | Added -> Added
+    | Removed -> Removed
+    | Modified x -> Modified (f x)
 end
 
 module NamedItemsListChange = struct
@@ -281,22 +290,15 @@ type parent_changes = {
 }
 [@@deriving eq, show { with_path = false }]
 
+let classish_kind_to_json kind =
+  Hh_json.string_ @@ Ast_defs.show_classish_kind kind
+
 module KindChange = struct
-  type t = {
-    old_kind: Ast_defs.classish_kind;
-    new_kind: Ast_defs.classish_kind;
-  }
+  type t = { new_kind: Ast_defs.classish_kind }
   [@@deriving eq, show { with_path = false }]
 
-  let classish_kind_to_json kind =
-    Hh_json.string_ @@ Ast_defs.show_classish_kind kind
-
-  let to_json { old_kind; new_kind } =
-    Hh_json.JSON_Object
-      [
-        ("old_kind", classish_kind_to_json old_kind);
-        ("new_kind", classish_kind_to_json new_kind);
-      ]
+  let to_json { new_kind } =
+    Hh_json.JSON_Object [("new_kind", classish_kind_to_json new_kind)]
 end
 
 module BoolChange = struct
@@ -308,7 +310,23 @@ module BoolChange = struct
   let to_json x = Hh_json.string_ @@ show x
 end
 
+module ValueDiff = struct
+  type 'value t = {
+    old_value: 'value;
+    new_value: 'value;
+  }
+  [@@deriving eq, show { with_path = false }]
+end
+
+type enum_type_change = {
+  base_change: Typing_defs.decl_ty ValueDiff.t option;
+  constraint_change: Typing_defs.decl_ty ValueDiff.t ValueChange.t option;
+  includes_change: unit NamedItemsListChange.t NamedItemsListChange.t option;
+}
+[@@deriving eq, show { with_path = false }]
+
 type class_shell_change = {
+  classish_kind: Ast_defs.classish_kind;
   parent_changes: parent_changes option;
   type_parameters_change: unit NamedItemsListChange.t option;
   kind_change: KindChange.t option;
@@ -321,7 +339,7 @@ type class_shell_change = {
   module_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes: unit NamedItemsListChange.t option;
-  enum_type_change: unit ValueChange.t option;
+  enum_type_change: enum_type_change ValueChange.t option;
 }
 [@@deriving eq, show { with_path = false }]
 
@@ -450,7 +468,45 @@ module ClassShellChangeCategory = struct
         ]
   end
 
+  let unit_to_json () = Hh_json.JSON_Null
+
+  module EnumTypeChangeCategory = struct
+    type t = {
+      has_base_change: bool;
+      constraint_change_category: unit ValueChange.t option;
+      includes_change_category: ListChange.t option;
+    }
+
+    let of_enum_type_change (change : enum_type_change) : t =
+      let { base_change; constraint_change; includes_change } = change in
+      {
+        has_base_change = Option.is_some base_change;
+        constraint_change_category =
+          Option.map (ValueChange.map ~f:(fun _ -> ())) constraint_change;
+        includes_change_category =
+          Option.map ListChange.of_list_change_map includes_change;
+      }
+
+    let to_json
+        {
+          has_base_change;
+          constraint_change_category;
+          includes_change_category;
+        } =
+      Hh_json.JSON_Object
+        [
+          ("has_base_change", Hh_json.bool_ has_base_change);
+          ( "constraint_change_category",
+            Hh_json.opt_
+              (ValueChange.to_json unit_to_json)
+              constraint_change_category );
+          ( "includes_change_category",
+            Hh_json.opt_ ListChange.to_json includes_change_category );
+        ]
+  end
+
   type t = {
+    classish_kind: Ast_defs.classish_kind;
     parent_changes_category: ParentsChangeCategory.t option;
     type_parameters_change_category: ListChange.t option;
     kind_change_category: KindChange.t option;
@@ -463,26 +519,29 @@ module ClassShellChangeCategory = struct
     module_change_category: unit ValueChange.t option;
     xhp_enum_values_change_category: bool;
     user_attributes_changes_category: ListChange.t option;
-    enum_type_change_category: unit ValueChange.t option;
+    enum_type_change_category: EnumTypeChangeCategory.t ValueChange.t option;
   }
 
   let of_class_shell_change
-      {
-        parent_changes;
-        type_parameters_change;
-        kind_change;
-        final_change;
-        abstract_change;
-        is_xhp_change;
-        internal_change;
-        has_xhp_keyword_change;
-        support_dynamic_type_change;
-        module_change;
-        xhp_enum_values_change;
-        user_attributes_changes;
-        enum_type_change;
-      } =
+      ({
+         classish_kind;
+         parent_changes;
+         type_parameters_change;
+         kind_change;
+         final_change;
+         abstract_change;
+         is_xhp_change;
+         internal_change;
+         has_xhp_keyword_change;
+         support_dynamic_type_change;
+         module_change;
+         xhp_enum_values_change;
+         user_attributes_changes;
+         enum_type_change;
+       } :
+        class_shell_change) =
     {
+      classish_kind;
       parent_changes_category =
         Option.map ParentsChangeCategory.of_parents_change parent_changes;
       type_parameters_change_category =
@@ -498,11 +557,15 @@ module ClassShellChangeCategory = struct
       xhp_enum_values_change_category = xhp_enum_values_change;
       user_attributes_changes_category =
         Option.map ListChange.of_list_change_map user_attributes_changes;
-      enum_type_change_category = enum_type_change;
+      enum_type_change_category =
+        Option.map
+          (ValueChange.map ~f:EnumTypeChangeCategory.of_enum_type_change)
+          enum_type_change;
     }
 
   let to_json
       {
+        classish_kind;
         parent_changes_category;
         type_parameters_change_category;
         kind_change_category;
@@ -520,6 +583,7 @@ module ClassShellChangeCategory = struct
     let open Hh_json in
     JSON_Object
       [
+        ("classish_kind", classish_kind_to_json classish_kind);
         ( "parent_changes",
           Hh_json.opt_ ParentsChangeCategory.to_json parent_changes_category );
         ( "type_parameters_change",
@@ -537,12 +601,15 @@ module ClassShellChangeCategory = struct
           Hh_json.opt_ BoolChange.to_json support_dynamic_type_change_category
         );
         ( "module_change",
-          Hh_json.opt_ ValueChange.to_json module_change_category );
+          Hh_json.opt_ (ValueChange.to_json unit_to_json) module_change_category
+        );
         ("xhp_enum_values_change", Hh_json.bool_ xhp_enum_values_change_category);
         ( "user_attributes_changes",
           Hh_json.opt_ ListChange.to_json user_attributes_changes_category );
         ( "enum_type_change",
-          Hh_json.opt_ ValueChange.to_json enum_type_change_category );
+          Hh_json.opt_
+            (ValueChange.to_json EnumTypeChangeCategory.to_json)
+            enum_type_change_category );
       ]
 end
 

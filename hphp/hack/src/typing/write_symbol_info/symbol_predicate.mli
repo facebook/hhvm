@@ -39,6 +39,8 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | ModuleDeclaration
+  | ModuleDefinition
   | FileCall
 
 type src = FileLines

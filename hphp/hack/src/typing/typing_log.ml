@@ -763,8 +763,8 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
       ] );
   (env, result_ty)
 
-let log_pessimise_ env kind pos name =
-  log_with_level env "pessimise" ~level:1 @@ fun () ->
+let log_pessimise_ ?(level = 1) env kind pos name =
+  log_with_level env "pessimise" ~level @@ fun () ->
   let p = Pos_or_decl.unsafe_to_raw_pos pos in
   let (file, line) =
     let p = Pos.to_absolute p in
@@ -794,8 +794,8 @@ let log_pessimise_param env ~is_promoted_property pos mode param_name =
       (Pos_or_decl.of_raw_pos pos)
       param_name
 
-let log_pessimise_return env pos =
-  log_pessimise_ env "ret" (Pos_or_decl.of_raw_pos pos) ""
+let log_pessimise_return ?level env pos =
+  log_pessimise_ ?level env "ret" (Pos_or_decl.of_raw_pos pos) ""
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging env.genv.tcopt then

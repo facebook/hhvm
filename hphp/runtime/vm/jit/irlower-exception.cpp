@@ -219,14 +219,22 @@ void cgRaiseCoeffectsCallViolation(IRLS& env, const IRInstruction* inst) {
 
 void cgRaiseModuleBoundaryViolation(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<OptClassAndFuncData>();
-  auto const args =
-    argGroup(env, inst)
-      .imm(data->cls)
-      .ssa(0)
-      .imm(data->func->moduleName());
-  cgCallHelper(vmain(env), env,
-               CallSpec::direct(raiseModuleBoundaryViolation),
-               kVoidDest, SyncOptions::Sync, args);
+  auto const [target, args] = [&]() -> std::pair<CallSpec, ArgGroup> {
+    if (inst->src(0)->isA(TFunc)) {
+      using Fn = void(*)(const Class*, const Func* callee, const StringData*);
+      return {
+        CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation)),
+        argGroup(env, inst).imm(data->cls).ssa(0).imm(data->func->moduleName())
+      };
+    };
+    assertx(inst->src(0)->isA(TCls));
+    using Fn = void(*)(const Class*, const StringData*);
+    return {
+      CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation)),
+      argGroup(env, inst).ssa(0).imm(data->func->moduleName())
+    };
+  }();
+  cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

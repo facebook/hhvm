@@ -25,7 +25,6 @@ use oxidized::pos::Pos;
 use std::collections::BTreeMap;
 
 type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
-type Level = usize;
 
 pub(super) struct JumpInstructions<'a, 'arena>(LabelMap<'a, 'arena>);
 impl<'a, 'arena> JumpInstructions<'a, 'arena> {
@@ -38,9 +37,9 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         instr_seq: &'a InstrSeq<'arena>,
         jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
-        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> jt::StateId {
+        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool) -> jt::StateId {
             use jt::ResolvedJumpTarget;
-            match jt_gen.jump_targets().get_target_for_level(is_break, level) {
+            match jt_gen.jump_targets().get_target(is_break) {
                 ResolvedJumpTarget::ResolvedRegular(target_label, _)
                 | ResolvedJumpTarget::ResolvedTryFinally(jt::ResolvedTryFinally {
                     target_label,
@@ -51,11 +50,11 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
             match *instr {
-                Instruct::Pseudo(Pseudo::Break(level)) => {
-                    acc.insert(get_label_id(jt_gen, true, level as Level), instr);
+                Instruct::Pseudo(Pseudo::Break) => {
+                    acc.insert(get_label_id(jt_gen, true), instr);
                 }
-                Instruct::Pseudo(Pseudo::Continue(level)) => {
-                    acc.insert(get_label_id(jt_gen, false, level as Level), instr);
+                Instruct::Pseudo(Pseudo::Continue) => {
+                    acc.insert(get_label_id(jt_gen, false), instr);
                 }
                 Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
@@ -72,7 +71,7 @@ pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'ar
     is.retain(|instr| {
         !matches!(
             instr,
-            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_))
+            Instruct::Pseudo(Pseudo::Continue | Pseudo::Break)
                 | Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_))
         )
     });
@@ -209,18 +208,15 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
     flags: EmitBreakOrContinueFlags,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    level: Level,
 ) -> InstrSeq<'arena> {
     let alloc = env.arena;
     let jt_gen = &mut env.jump_targets_gen;
     let in_finally_epilogue = flags.contains(EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE);
     let is_break = flags.contains(EmitBreakOrContinueFlags::IS_BREAK);
-    match jt_gen.jump_targets().get_target_for_level(is_break, level) {
-        jt::ResolvedJumpTarget::NotFound => {
-            emit_fatal::emit_fatal_for_break_continue(alloc, pos, level)
-        }
+    match jt_gen.jump_targets().get_target(is_break) {
+        jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(alloc, pos),
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
-            let preamble = if in_finally_epilogue && level == 1 {
+            let preamble = if in_finally_epilogue {
                 instr::unset_l(e.local_gen_mut().get_label().clone())
             } else {
                 instr::empty()
@@ -235,7 +231,6 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
             target_label,
             finally_label,
             iterators_to_release,
-            adjusted_level,
         }) => {
             let preamble = if !in_finally_epilogue {
                 let label_id = jt_gen.get_id_for_label(target_label.clone());
@@ -243,7 +238,6 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
             } else {
                 instr::empty()
             };
-            let adjusted_level = adjusted_level as isize;
             InstrSeq::gather(vec![
                 preamble,
                 emit_jump_to_label(finally_label, iterators_to_release),
@@ -251,9 +245,9 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
                 // emit break/continue instr as an indicator for try/finally rewriter
                 // to generate finally epilogue - try/finally rewriter will remove it.
                 if is_break {
-                    instr::break_(adjusted_level)
+                    instr::break_()
                 } else {
-                    instr::continue_(adjusted_level)
+                    instr::continue_()
                 },
             ])
         }
@@ -280,19 +274,17 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
             Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
                 emit_return(e, true, env)
             }
-            Instruct::Pseudo(Pseudo::Break(level)) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Break) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
-                level as Level,
             )),
-            Instruct::Pseudo(Pseudo::Continue(level)) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Continue) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
-                level as Level,
             )),
             _ => fail(),
         }

@@ -29,7 +29,10 @@
 
 #include <boost/filesystem.hpp>
 
+#include <filesystem>
 #include <mutex>
+
+namespace fs = std::filesystem;
 
 namespace HPHP::extern_worker {
 
@@ -95,7 +98,7 @@ namespace detail {
 
 // Wrappers around the folly functions with error handling
 
-std::string readFile(const folly::fs::path& path) {
+std::string readFile(const fs::path& path) {
   std::string s;
   if (!folly::readFile(path.c_str(), s)) {
     throw Error{
@@ -108,7 +111,7 @@ std::string readFile(const folly::fs::path& path) {
   return s;
 }
 
-void writeFile(const folly::fs::path& path,
+void writeFile(const fs::path& path,
                const char* ptr, size_t size) {
   if (!folly::writeFile(Adaptor{ptr, size}, path.c_str())) {
     throw Error{
@@ -202,9 +205,9 @@ int main(int argc, char** argv) {
     }
 
     std::string name{argv[2]};
-    folly::fs::path configPath{argv[3]};
-    folly::fs::path outputPath{argv[4]};
-    folly::fs::path inputPath{argv[5]};
+    fs::path configPath{argv[3]};
+    fs::path outputPath{argv[4]};
+    fs::path inputPath{argv[5]};
 
     FTRACE(2, "extern worker run(\"{}\", {}, {}, {})\n",
            name, configPath.native(), outputPath.native(),
@@ -222,7 +225,7 @@ int main(int argc, char** argv) {
     }();
 
     // We insist on a clean output directory.
-    if (!folly::fs::create_directory(outputPath)) {
+    if (!fs::create_directory(outputPath)) {
       throw Error{
         folly::sformat("Output directory {} already exists", outputPath.native())
       };
@@ -234,12 +237,12 @@ int main(int argc, char** argv) {
         // Then execute run() for each given set of inputs.
       for (size_t i = 0;; ++i) {
         auto const thisInput = inputPath / folly::to<std::string>(i);
-        if (!folly::fs::exists(thisInput)) break;
+        if (!fs::exists(thisInput)) break;
 
         auto const thisOutput = outputPath / folly::to<std::string>(i);
         FTRACE(4, "executing #{} ({} -> {})\n",
                i, thisInput.native(), thisOutput.native());
-        folly::fs::create_directory(thisOutput, outputPath);
+        fs::create_directory(thisOutput, outputPath);
 
         time(
           [&]{ return folly::sformat("run {}", i); },
@@ -305,20 +308,20 @@ struct SubprocessImpl : public Client::Impl {
        const folly::Range<const OutputType*>*) override;
 
 private:
-  folly::fs::path newBlob();
-  folly::fs::path newExec();
-  static folly::fs::path newRoot(const Options&);
+  fs::path newBlob();
+  fs::path newExec();
+  static fs::path newRoot(const Options&);
 
   void doSubprocess(const RequestId&,
                     const std::string&,
-                    const folly::fs::path&,
-                    const folly::fs::path&,
-                    const folly::fs::path&,
-                    const folly::fs::path&);
+                    const fs::path&,
+                    const fs::path&,
+                    const fs::path&,
+                    const fs::path&);
 
   Options m_options;
 
-  folly::fs::path m_root;
+  fs::path m_root;
   // SubprocessImpl doesn't need the m_size portion of RefId. So we
   // store an unique integer in it to help verify that the RefId came
   // from this implementation instance.
@@ -341,8 +344,8 @@ SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
          m_root.native());
   Logger::FInfo("Using subprocess extern-worker at {}", m_root.native());
 
-  folly::fs::create_directory(m_root / "blobs");
-  folly::fs::create_directory(m_root / "execs");
+  fs::create_directory(m_root / "blobs");
+  fs::create_directory(m_root / "execs");
 }
 
 SubprocessImpl::~SubprocessImpl() {
@@ -358,7 +361,7 @@ SubprocessImpl::~SubprocessImpl() {
       "subprocess cleanup",
       [&] {
         std::error_code ec; // Suppress exceptions
-        return folly::fs::remove_all(m_root, ec);
+        return fs::remove_all(m_root, ec);
       }
     );
     auto const elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -377,33 +380,33 @@ SubprocessImpl::~SubprocessImpl() {
 // above in the description of the directory layout. It's true that
 // blobs and execs use numerically increasing names, but I shard them
 // into directories of 10000 each, to keep their sizes reasonable.
-folly::fs::path SubprocessImpl::newBlob() {
+fs::path SubprocessImpl::newBlob() {
   auto const id = m_nextBlob++;
   auto const blobRoot = m_root / "blobs";
   auto const mid = blobRoot / folly::sformat("{:05}", id / 10000);
-  folly::fs::create_directory(mid, blobRoot);
+  fs::create_directory(mid, blobRoot);
   return mid / folly::sformat("{:04}", id % 10000);
 }
 
-folly::fs::path SubprocessImpl::newExec() {
+fs::path SubprocessImpl::newExec() {
   auto const id = m_nextExec++;
   auto const execRoot = m_root / "execs";
   auto const mid = execRoot / folly::sformat("{:05}", id / 10000);
-  folly::fs::create_directory(mid, execRoot);
+  fs::create_directory(mid, execRoot);
   auto const full = mid / folly::sformat("{:04}", id % 10000);
-  folly::fs::create_directory(full, mid);
+  fs::create_directory(full, mid);
   return full;
 }
 
 // Ensure we always have an unique root under the working directory.
-folly::fs::path SubprocessImpl::newRoot(const Options& opts) {
+fs::path SubprocessImpl::newRoot(const Options& opts) {
   auto const base = opts.m_workingDir / "hphp-extern-worker";
-  folly::fs::create_directories(base);
-  auto const full = base /  boost::filesystem::unique_path(
+  fs::create_directories(base);
+  auto const full = base / boost::filesystem::unique_path(
     "%%%%-%%%%-%%%%-%%%%-%%%%-%%%%"
   ).native();
-  folly::fs::create_directory(full, base);
-  return folly::fs::canonical(full);
+  fs::create_directory(full, base);
+  return fs::canonical(full);
 }
 
 coro::Task<BlobVec> SubprocessImpl::load(const RequestId& requestId,
@@ -437,8 +440,8 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
   // then use their paths.
   auto out =
     ((from(paths)
-      | mapped([&] (const folly::fs::path& p) {
-          return RefId{folly::fs::canonical(p).native(), m_marker};
+      | mapped([&] (const fs::path& p) {
+          return RefId{fs::canonical(p).native(), m_marker};
         })
     ) +
     (from(blobs)
@@ -447,7 +450,7 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
          FTRACE(4, "{} writing size {} blob to {}\n",
                 requestId.tracePrefix(), b.size(), path.native());
          writeFile(path, b.data(), b.size());
-         return RefId{folly::fs::canonical(path).native(), m_marker};
+         return RefId{fs::canonical(path).native(), m_marker};
        })
     ))
     | as<std::vector>();
@@ -473,15 +476,15 @@ SubprocessImpl::exec(const RequestId& requestId,
   // Set up the directory structure that the worker expects:
 
   auto const symlink = [&] (const RefId& id,
-                            const folly::fs::path& path) {
+                            const fs::path& path) {
     assertx(id.m_size == m_marker);
-    folly::fs::create_symlink(id.m_id, path);
+    fs::create_symlink(id.m_id, path);
     FTRACE(4, "{} symlinked {} to {}\n",
            requestId.tracePrefix(), id.m_id, path.native());
   };
 
   auto const prepare = [&] (const RefValVec& params,
-                            const folly::fs::path& parent) {
+                            const fs::path& parent) {
     for (size_t paramIdx = 0; paramIdx < params.size(); ++paramIdx) {
       auto const& p = params[paramIdx];
       auto const path = parent / folly::to<std::string>(paramIdx);
@@ -493,7 +496,7 @@ SubprocessImpl::exec(const RequestId& requestId,
           symlink(*id, path);
         },
         [&] (const IdVec& ids) {
-          folly::fs::create_directory(path, parent);
+          fs::create_directory(path, parent);
           for (size_t vecIdx = 0; vecIdx < ids.size(); ++vecIdx) {
             symlink(ids[vecIdx], path / folly::to<std::string>(vecIdx));
           }
@@ -502,7 +505,7 @@ SubprocessImpl::exec(const RequestId& requestId,
     }
   };
 
-  folly::fs::create_directory(configPath, execPath);
+  fs::create_directory(configPath, execPath);
   prepare(config, configPath);
 
   // Each set of inputs should always have the same size.
@@ -513,10 +516,10 @@ SubprocessImpl::exec(const RequestId& requestId,
     }
   }
 
-  folly::fs::create_directory(inputsPath, execPath);
+  fs::create_directory(inputsPath, execPath);
   for (size_t i = 0; i < inputs.size(); ++i) {
     auto const path = inputsPath / folly::to<std::string>(i);
-    folly::fs::create_directory(path, inputsPath);
+    fs::create_directory(path, inputsPath);
     prepare(inputs[i], path);
   }
 
@@ -533,21 +536,21 @@ SubprocessImpl::exec(const RequestId& requestId,
   // Make RefIds corresponding to the outputs.
 
   auto const makeOutput =
-    [&] (OutputType type, folly::fs::path path) -> RefVal {
+    [&] (OutputType type, fs::path path) -> RefVal {
     switch (type) {
       case OutputType::Val:
-        assertx(folly::fs::exists(path));
+        assertx(fs::exists(path));
         return RefId{std::move(path), m_marker};
       case OutputType::Opt:
-        if (!folly::fs::exists(path)) return std::nullopt;
+        if (!fs::exists(path)) return std::nullopt;
         return make_optional(RefId{std::move(path), m_marker});
       case OutputType::Vec: {
-        assertx(folly::fs::exists(path));
+        assertx(fs::exists(path));
         IdVec vec;
         size_t i = 0;
         while (true) {
           auto valPath = path / folly::to<std::string>(i);
-          if (!folly::fs::exists(valPath)) break;
+          if (!fs::exists(valPath)) break;
           vec.emplace_back(valPath.native(), m_marker);
           ++i;
         }
@@ -558,7 +561,7 @@ SubprocessImpl::exec(const RequestId& requestId,
   };
 
   auto const makeOutputs =
-    [&] (const folly::fs::path& path,
+    [&] (const fs::path& path,
          const folly::Range<const OutputType*>& outputTypes) {
     RefValVec vec;
     vec.reserve(outputTypes.size());
@@ -596,10 +599,10 @@ SubprocessImpl::exec(const RequestId& requestId,
 
 void SubprocessImpl::doSubprocess(const RequestId& requestId,
                                   const std::string& command,
-                                  const folly::fs::path& execPath,
-                                  const folly::fs::path& configPath,
-                                  const folly::fs::path& inputPath,
-                                  const folly::fs::path& outputPath) {
+                                  const fs::path& execPath,
+                                  const fs::path& configPath,
+                                  const fs::path& inputPath,
+                                  const fs::path& outputPath) {
   std::vector<std::string> args{
     current_executable_path(),
     s_option,
@@ -612,7 +615,7 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
   // Propagate the TRACE option in the environment. We'll copy the
   // trace output into this process' trace output.
   std::vector<std::string> env;
-  Optional<folly::fs::path> traceFile;
+  Optional<fs::path> traceFile;
   if (auto const trace = getenv("TRACE")) {
     traceFile = execPath / "trace.log";
     env.emplace_back(folly::sformat("TRACE={}", trace));
@@ -656,7 +659,7 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
 
   // Do this before checking the return code. If the process failed,
   // we want to capture anything it logged before throwing.
-  if (traceFile && folly::fs::exists(*traceFile)) {
+  if (traceFile && fs::exists(*traceFile)) {
     auto const contents = readFile(*traceFile);
     if (!contents.empty()) {
       Trace::ftraceRelease(
@@ -732,7 +735,7 @@ std::unique_ptr<Client::Impl> Client::makeFallbackImpl() {
   return std::make_unique<SubprocessImpl>(m_options, *this);
 }
 
-coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
+coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
                                                bool optimistic) {
   RequestId requestId{"store file"};
 
@@ -765,7 +768,7 @@ coro::Task<Ref<std::string>> Client::storeFile(folly::fs::path path,
 }
 
 coro::Task<std::vector<Ref<std::string>>>
-Client::storeFile(std::vector<folly::fs::path> paths,
+Client::storeFile(std::vector<fs::path> paths,
                   bool optimistic) {
   RequestId requestId{"store files"};
 

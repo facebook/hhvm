@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
@@ -33,7 +33,7 @@ namespace Facts {
  * accordingly updates the DB that `dbHandle` returns.
  */
 std::shared_ptr<FactsStore> make_watcher_facts(
-    folly::fs::path root,
+    std::filesystem::path root,
     AutoloadDB::Handle dbHandle,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
@@ -44,7 +44,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
  * modifies it.
  */
 std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, AutoloadDB::Handle dbHandle);
+make_trusted_facts(std::filesystem::path root, AutoloadDB::Handle dbHandle);
 
 } // namespace Facts
 } // namespace HPHP

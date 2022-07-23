@@ -10,6 +10,8 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 anyhow = "1.0.56"
+arena_deserializer = { path = "../../utils/arena_deserializer" }
+bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../compile/cargo/compile" }
 cxx = "1.0.64"
@@ -18,6 +20,7 @@ direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
 hhbc = { path = "../hhbc/cargo/hhbc" }
 itertools = "0.10.3"
+libc = "0.2.121"
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../compile/cargo/options" }

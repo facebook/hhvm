@@ -460,7 +460,7 @@ bool isChanged(const struct stat* old_st, const struct stat* new_st) {
 
 Optional<SHA1> getHashForFile(const std::string& path,
                               Stream::Wrapper* wrapper,
-                              const folly::fs::path& root) {
+                              const std::filesystem::path& root) {
   if (RO::EvalUseEdenFS) {
     if (auto const h = getHashFromEden(path.data(), wrapper)) return SHA1{*h};
   }
@@ -1486,7 +1486,7 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
 }
 
 Optional<SHA1> getHashForFile(const std::string& path,
-                              const folly::fs::path& root) {
+                              const std::filesystem::path& root) {
   auto wrapper = Stream::getWrapperFromURI(String{root.string()});
   return getHashForFile(path, wrapper, root);
 }
@@ -2327,7 +2327,7 @@ void shutdownUnitPrefetcher() {
 LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
                                                Stream::Wrapper* wrapper,
                                                const RepoOptionsFlags& options,
-                                               boost::filesystem::path repoRoot,
+                                               std::filesystem::path repoRoot,
                                                size_t fileLength,
                                                bool forceEager)
   : m_path{path}
@@ -2360,7 +2360,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
 LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
                                                folly::StringPiece contents,
                                                const RepoOptionsFlags& options,
-                                               boost::filesystem::path repoRoot)
+                                               std::filesystem::path repoRoot)
   : m_path{nullptr}
   , m_wrapper{nullptr}
   , m_options{options}

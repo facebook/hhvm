@@ -8,7 +8,7 @@ edition = "2021"
 path = "../find_utils.rs"
 
 [dependencies]
-lazy_static = "1.0"
+lazy_static = "1.4"
 regex = "1.5.4"
 
 [dev-dependencies]

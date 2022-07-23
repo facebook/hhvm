@@ -33,6 +33,7 @@ impl Default for GlobalOptions {
             po_deregister_php_stdlib: false,
             po_disallow_toplevel_requires: false,
             po_allow_unstable_features: false,
+            tco_log_large_fanouts_threshold: None,
             tco_log_inference_constraints: false,
             tco_language_feature_logging: false,
             tco_timeout: 0,

@@ -1,0 +1,6 @@
+=== Shape analysis results for idx.php
+Summary for \idx_with_and_without_opt:
+[3:35-54] [Parameter]:
+  shape(?'x' => mixed, ?'y' => mixed)
+[6:13-15] [Argument]:
+  shape(?'x' => mixed, ?'y' => mixed)

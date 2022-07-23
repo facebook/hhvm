@@ -43,6 +43,8 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
+  | ModuleDeclaration
+  | ModuleDefinition
   | FileCall
 [@@deriving ord]
 
@@ -95,6 +97,8 @@ let hack_to_string = function
   | TypeConstDefinition -> "TypeConstDefinition"
   | TypedefDeclaration -> "TypedefDeclaration"
   | TypedefDefinition -> "TypedefDefinition"
+  | ModuleDeclaration -> "ModuleDeclaration"
+  | ModuleDefinition -> "ModuleDefinition"
   | FileCall -> "FileCall"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
@@ -106,6 +110,7 @@ let ordered_all =
     Hack NamespaceDeclaration;
     Hack GlobalConstDeclaration;
     Hack TypedefDeclaration;
+    Hack ModuleDeclaration;
     Hack InterfaceDeclaration;
     Hack TraitDeclaration;
     Hack ClassDeclaration;
@@ -121,6 +126,7 @@ let ordered_all =
     Hack DeclarationComment;
     Hack GlobalConstDefinition;
     Hack TypedefDefinition;
+    Hack ModuleDefinition;
     Hack InterfaceDefinition;
     Hack TraitDefinition;
     Hack ClassDefinition;
@@ -182,7 +188,8 @@ let should_cache = function
   | Hack PropertyDeclaration
   | Hack TraitDeclaration
   | Hack TypeConstDeclaration
-  | Hack TypedefDeclaration ->
+  | Hack TypedefDeclaration
+  | Hack ModuleDeclaration ->
     true
   | _ -> false
 

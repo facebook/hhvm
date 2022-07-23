@@ -15,3 +15,4 @@ const int E_USER_ERROR = 0;
 const int E_USER_NOTICE = 0;
 const int E_ALL = 0;
 const int E_WARNING = 0;
+const int E_ERROR = 0;

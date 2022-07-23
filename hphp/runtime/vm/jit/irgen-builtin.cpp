@@ -1700,58 +1700,6 @@ void emitNativeImpl(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-const StaticString s_add("add");
-const StaticString s_addAll("addAll");
-const StaticString s_append("append");
-const StaticString s_clear("clear");
-const StaticString s_remove("remove");
-const StaticString s_removeAll("removeAll");
-const StaticString s_removeKey("removeKey");
-const StaticString s_set("set");
-const StaticString s_setAll("setAll");
-
-// List of known collection methods that always return $this (ignoring
-// parameter coercion failure issues).
-bool collectionMethodReturnsThis(const Func* callee) {
-  auto const cls = callee->implCls();
-
-  if (cls == c_Vector::classof()) {
-    return
-      callee->name() == s_add.get() ||
-      callee->name() == s_addAll.get() ||
-      callee->name() == s_append.get() ||
-      callee->name() == s_clear.get() ||
-      callee->name() == s_removeKey.get() ||
-      callee->name() == s_set.get() ||
-      callee->name() == s_setAll.get();
-  }
-
-  if (cls == c_Map::classof()) {
-    return
-      callee->name() == s_add.get() ||
-      callee->name() == s_addAll.get() ||
-      callee->name() == s_clear.get() ||
-      callee->name() == s_remove.get() ||
-      callee->name() == s_set.get() ||
-      callee->name() == s_setAll.get();
-  }
-
-  if (cls == c_Set::classof()) {
-    return
-      callee->name() == s_add.get() ||
-      callee->name() == s_addAll.get() ||
-      callee->name() == s_clear.get() ||
-      callee->name() == s_remove.get() ||
-      callee->name() == s_removeAll.get();
-  }
-
-  return false;
-}
-
-}
-
 Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isCPPBuiltin());
   assertx(builtin->isInOut(i));
@@ -1816,12 +1764,6 @@ Type builtinReturnType(const Func* builtin) {
   // code-gen when lowering the builtin call to vasm and must be no more general
   // than the HNI declaration (if present).
   auto type = [&]{
-    // If this is a collection method which returns $this, use that fact to
-    // infer the exact returning type. Otherwise try to use HNI declaration.
-    if (collectionMethodReturnsThis(builtin)) {
-      assertx(builtin->returnTypeConstraint().asSystemlibType() == KindOfObject);
-      return Type::ExactObj(builtin->implCls());
-    }
     if (auto const hniType = builtin->returnTypeConstraint().asSystemlibType()) {
       return Type{*hniType};
     }

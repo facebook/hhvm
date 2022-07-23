@@ -129,10 +129,6 @@ public:
   /**
    * Type conversions
    */
-  bool    toBoolean() const { return m_obj ? m_obj->toBoolean() : false; }
-  char    toByte   () const { return toInt64(); }
-  int16_t toInt16  () const { return toInt64(); }
-  int32_t toInt32  () const { return toInt64(); }
   int64_t toInt64  () const { return m_obj ? m_obj->toInt64() : 0; }
   double  toDouble () const { return m_obj ? m_obj->toDouble() : 0; }
   String  toString () const;

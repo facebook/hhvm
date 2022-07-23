@@ -64,9 +64,10 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/filesystem.hpp>
 
 #include <exception>
+#include <filesystem>
+#include <fstream>
 
 #include <folly/portability/SysStat.h>
 
@@ -718,6 +719,40 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+extern_worker::Options makeExternWorkerOptions() {
+  using namespace extern_worker;
+  Options options;
+  options
+    .setUseCase(Option::ExternWorkerUseCase)
+    .setUseSubprocess(Option::ExternWorkerForceSubprocess
+                      ? Options::UseSubprocess::Always
+                      : Options::UseSubprocess::Fallback)
+    .setCacheExecs(Option::ExternWorkerUseExecCache)
+    .setCleanup(Option::ExternWorkerCleanup)
+    .setUseEdenFS(RO::EvalUseEdenFS)
+    .setUseRichClient(Option::ExternWorkerUseRichClient)
+    .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
+    .setUseP2P(Option::ExternWorkerUseP2P)
+    .setVerboseLogging(Option::ExternWorkerVerboseLogging);
+  if (Option::ExternWorkerTimeoutSecs > 0) {
+    options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
+  }
+  if (!Option::ExternWorkerWorkingDir.empty()) {
+    options.setWorkingDir(Option::ExternWorkerWorkingDir);
+  }
+  if (Option::ExternWorkerThrottleRetries >= 0) {
+    options.setThrottleRetries(Option::ExternWorkerThrottleRetries);
+  }
+  if (Option::ExternWorkerThrottleBaseWaitMSecs >= 0) {
+    options.setThrottleBaseWait(
+      std::chrono::milliseconds{Option::ExternWorkerThrottleBaseWaitMSecs}
+    );
+  }
+  return options;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool process(const CompilerOptions &po) {
 #ifndef _MSC_VER
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
@@ -762,8 +797,22 @@ bool process(const CompilerOptions &po) {
   auto const outputFile = po.outputDir + "/hhvm.hhbc";
   unlink(outputFile.c_str());
 
-  Package package{po.inputDir, po.parseOnDemand};
-  sample.setStr("extern_worker_impl", package.externWorkerImpl());
+  coro::TicketExecutor executor{
+    "HPHPcWorker",
+    0,
+    size_t(Option::ParserThreadCount <= 0 ? 1 : Option::ParserThreadCount),
+    [] {
+      hphp_thread_init();
+      g_context.getCheck();
+    },
+    [] { hphp_thread_exit(); },
+    std::chrono::minutes{15}
+  };
+  extern_worker::Client client{executor.sticky(), makeExternWorkerOptions()};
+
+  sample.setStr("extern_worker_impl", client.implName());
+
+  Package package{po.inputDir, po.parseOnDemand, executor, client};
 
   HHBBC::php::ProgramPtr program;
   if (RO::EvalUseHHBBC) program = HHBBC::make_program();
@@ -820,13 +869,15 @@ bool process(const CompilerOptions &po) {
     }
     if (!package.parse(onUE)) return false;
 
-    auto const& stats = package.stats();
+    auto const& stats = client.getStats();
     Logger::FInfo(
       "{:,} files parsed\n"
       "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
       "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded, {:,} fallback\n"
       "  Blobs: {:,} total, {:,} queried, {:,} uploaded, {:,} fallback\n"
-      "  {:,} downloads, {:,} throttles",
+      "  {:,} downloads, {:,} throttles\n"
+      "  Cpu: {:,} usec usage, {:,} allocated cores\n"
+      "  Mem: {:,} max used, {:,} reserved",
       package.getTotalFiles(),
       stats.execs.load(),
       stats.execCacheHits.load(),
@@ -842,7 +893,11 @@ bool process(const CompilerOptions &po) {
       stats.blobsUploaded.load(),
       stats.blobFallbacks.load(),
       stats.downloads.load(),
-      stats.throttles.load()
+      stats.throttles.load(),
+      stats.execCpuUsec.load(),
+      stats.execAllocatedCores.load(),
+      stats.execMaxUsedMem.load(),
+      stats.execReservedMem.load()
     );
     sample.setInt("total_parses", package.getTotalFiles());
 
@@ -879,17 +934,16 @@ bool process(const CompilerOptions &po) {
     sample.setInt("parse_total_loads", stats.downloads.load());
     sample.setInt("parse_throttles", stats.throttles.load());
 
+    sample.setInt("parse_exec_cpu_usec", stats.execCpuUsec.load());
+    sample.setInt("parse_exec_allocated_cores", stats.execAllocatedCores.load());
+    sample.setInt("parse_exec_max_used_mem", stats.execMaxUsedMem.load());
+    sample.setInt("parse_exec_reserved_mem", stats.execReservedMem.load());
+
     sample.setStr(
       "parse_fellback",
-      package.externWorkerFellback() ? "true" : "false"
+      client.fellback() ? "true" : "false"
     );
   }
-
-  // Start asynchronously destroying the package state, since it may
-  // take a long time. We'll do it in the background while the rest of
-  // the compile pipeline runs.
-  auto clearer = package.asyncClear();
-  SCOPE_EXIT { if (clearer) clearer->join(); };
 
   std::thread fileCache{
     [&] {

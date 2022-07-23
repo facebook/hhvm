@@ -16,14 +16,13 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
-#include "hphp/hack/src/hackc/decl_provider/decl_provider.h"
+#include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/util/hash-map.h"
 
-#include <folly/experimental/io/FsUtil.h>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string_view>
@@ -33,9 +32,10 @@ namespace HPHP {
 
 struct RepoOptionsFlags;
 
-struct HhvmDeclProvider {
+struct HhvmDeclProvider: ::DeclProvider {
   HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
-                   AutoloadMap*, folly::fs::path const&);
+                   AutoloadMap*, const std::filesystem::path&);
+  virtual ~HhvmDeclProvider() override = default;
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
@@ -44,20 +44,19 @@ struct HhvmDeclProvider {
   static std::unique_ptr<HhvmDeclProvider> create(
     AutoloadMap*,
     const RepoOptionsFlags&,
-    const folly::fs::path&
+    const std::filesystem::path&
   );
 
   // Callback invoked by hackc's ExternalDeclProvider.
-  DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind,
-                             std::string_view symbol,
-                             uint64_t depth);
+  ExternalDeclProviderResult
+  getType(std::string_view symbol, uint64_t depth) noexcept override;
 
   // Get a list of observed dependencies from the decl provider, which may
   // optionally be indexed by the depth of the dependency
   std::vector<DeclDep> getFlatDeps() const;
   std::vector<std::vector<DeclLoc>> getDeps() const;
 
-  const folly::fs::path& repoRoot() const { return m_repo; }
+  const std::filesystem::path& repoRoot() const { return m_repo; }
   AutoloadMap* map() const { return m_map; }
 
   // Was there a decl we were unable to resolve?
@@ -82,12 +81,6 @@ struct HhvmDeclProvider {
   hphp_hash_map<DeclSym, DepInfo> m_deps;
 
   AutoloadMap* m_map;
-  folly::fs::path m_repo;
+  std::filesystem::path m_repo;
 };
-
-extern "C" {
-  DeclProviderResult hhvm_decl_provider_get_decl(
-      void* provider, int kind, char const* symbol, size_t len, uint64_t depth
-  );
-}
 }

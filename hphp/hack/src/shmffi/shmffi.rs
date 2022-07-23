@@ -17,9 +17,9 @@ use shmrs::segment::ShmemTableSegmentRef;
 use std::alloc::Layout;
 use std::convert::TryInto;
 
-static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
+pub static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
 
-fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
+pub fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
     f(SEGMENT.get().unwrap())
 }
 

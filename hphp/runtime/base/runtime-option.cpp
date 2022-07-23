@@ -68,13 +68,14 @@
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
-#include <sstream>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
@@ -404,8 +405,8 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
   auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
     return boost::starts_with(
-      boost::filesystem::path{p2},
-      boost::filesystem::path{p1}.parent_path()
+      std::filesystem::path{p2},
+      std::filesystem::path{p1}.parent_path()
     );
   };
 
@@ -595,7 +596,7 @@ AUTOLOADFLAGS();
   filterNamespaces();
   calcCacheKey();
   calcDynamic();
-  if (!m_path.empty()) m_repo = folly::fs::path(m_path).parent_path();
+  if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -1132,31 +1133,30 @@ static inline bool layoutPrologueSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 
-Optional<folly::fs::path> RuntimeOption::GetHomePath(
-  const folly::StringPiece user) {
+Optional<std::filesystem::path> RuntimeOption::GetHomePath(
+    const folly::StringPiece user) {
+  namespace fs = std::filesystem;
 
-  auto homePath = folly::fs::path{RuntimeOption::SandboxHome}
-    / folly::fs::path{user};
-  if (folly::fs::is_directory(homePath)) {
-    return {std::move(homePath)};
+  auto homePath = fs::path{RO::SandboxHome} / fs::path{std::string{user}};
+  if (fs::is_directory(homePath)) {
+    return make_optional(std::move(homePath));
   }
 
   if (!RuntimeOption::SandboxFallback.empty()) {
-    homePath = folly::fs::path{RuntimeOption::SandboxFallback}
-      / folly::fs::path{user};
-    if (folly::fs::is_directory(homePath)) {
-      return {std::move(homePath)};
+    homePath = fs::path{RO::SandboxFallback} / fs::path{std::string{user}};
+    if (fs::is_directory(homePath)) {
+      return make_optional(std::move(homePath));
     }
   }
 
-  return {};
+  return std::nullopt;
 }
 
 std::string RuntimeOption::GetDefaultUser() {
   if (SandboxDefaultUserFile.empty()) return {};
 
-  folly::fs::path file{SandboxDefaultUserFile};
-  if (!folly::fs::is_regular_file(file)) return {};
+  std::filesystem::path file{RO::SandboxDefaultUserFile};
+  if (!std::filesystem::is_regular_file(file)) return {};
 
   std::string user;
   if (!folly::readFile(file.c_str(), user) || user.empty()) return {};
@@ -1164,7 +1164,7 @@ std::string RuntimeOption::GetDefaultUser() {
   return user;
 }
 
-bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
+bool RuntimeOption::ReadPerUserSettings(const std::filesystem::path& confFileName,
                                         IniSettingMap& ini, Hdf& config) {
   try {
     Config::ParseConfigFile(confFileName.native(), ini, config, false);
@@ -1225,8 +1225,6 @@ bool RuntimeOption::RepoDebugInfo = true;
 bool RuntimeOption::RepoLitstrLazyLoad = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
-bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
-int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
@@ -1906,10 +1904,6 @@ void RuntimeOption::Load(
                  RepoLitstrLazyLoad);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
                  RepoAuthoritative);
-    Config::Bind(RepoLocalReadaheadRate, ini, config,
-                 "Repo.LocalReadaheadRate", 0);
-    Config::Bind(RepoLocalReadaheadConcurrent, ini, config,
-                 "Repo.LocalReadaheadConcurrent", false);
     Config::Bind(RepoBusyTimeoutMS, ini, config,
                  "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
 

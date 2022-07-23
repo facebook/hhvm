@@ -251,15 +251,15 @@ void Collector::exactEnqueue(const void* p) {
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
-  constexpr uintptr_t M{7}; // word size - 1
-  auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
-  auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-  cscanned_ += uintptr_t(e) - uintptr_t(s);
-  for (; s < e; s++) {
+  if (len < sizeof(uintptr_t)) return;
+  cscanned_ += len - sizeof(uintptr_t) + 1;
+  auto s = (char*)start;
+  auto const e = s + len - sizeof(uintptr_t);
+  for (; s <= e; ++s) {
     checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
-      (void*)(uintptr_t(*s) & (-1ULL >> 16))
+      (void*)(*(uintptr_t*)s & (-1ULL >> 16))
     );
   }
 }

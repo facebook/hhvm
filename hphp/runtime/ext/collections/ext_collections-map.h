@@ -260,19 +260,13 @@ struct c_Map : BaseMap {
   Object getImmutableCopy();
  protected:
   friend struct collections::CollectionsExtension;
-  Object php_add(const Variant& pair) {
+  void php_add(const Variant& pair) {
     add(pair);
-    return Object{this};
   }
-  Object php_addAll(const Variant& it) {
+  void php_addAll(const Variant& it) {
     addAllPairs(it);
-    return Object{this};
   }
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_removeKey(const Variant& key) {
+  void php_removeKey(const Variant& key) {
     auto const ktv = tvClassToString(*key.asTypedValue());
     DataType t = type(ktv);
     if (t == KindOfInt64) {
@@ -282,7 +276,6 @@ struct c_Map : BaseMap {
     } else {
       throwBadKeyType();
     }
-    return Object{this};
   }
   void php_reserve(int64_t cap) {
     if (cap < 0) {
@@ -292,9 +285,8 @@ struct c_Map : BaseMap {
     }
     reserve(cap);
   }
-  Object php_set(const Variant& key, const Variant& value) {
+  void php_set(const Variant& key, const Variant& value) {
     set(key, value);
-    return Object{this};
   }
   Object php_setAll(const Variant& it) {
     setAll(it);

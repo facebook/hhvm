@@ -17,6 +17,7 @@
 #include "hphp/compiler/package.h"
 
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -25,8 +26,6 @@
 #include <sys/types.h>
 #include <utility>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -53,8 +52,6 @@
 
 using namespace HPHP;
 using namespace extern_worker;
-
-namespace fs = boost::filesystem;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -111,82 +108,24 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Package::AsyncState::AsyncState()
-  : m_executor{
-      "HPHPcWorker",
-      0,
-      size_t(Option::ParserThreadCount <= 0 ? 1 : Option::ParserThreadCount),
-      [] {
-        hphp_thread_init();
-        g_context.getCheck();
-      },
-      [] { hphp_thread_exit(); },
-      std::chrono::minutes{15}
-    }
-  , m_client{m_executor.sticky(), makeOptions()}
-  , m_config{
-      [this] { return m_client.store(Config::make()); },
-      m_executor.sticky()
-    }
-  , m_repoOptions{m_client}
-{
-}
-
-Options Package::AsyncState::makeOptions() {
-  Options options;
-  options
-    .setUseCase(Option::ExternWorkerUseCase)
-    .setUseSubprocess(Option::ExternWorkerForceSubprocess
-                        ? Options::UseSubprocess::Always
-                        : Options::UseSubprocess::Fallback)
-    .setCacheExecs(Option::ExternWorkerUseExecCache)
-    .setCleanup(Option::ExternWorkerCleanup)
-    .setUseEdenFS(RuntimeOption::EvalUseEdenFS)
-    .setUseRichClient(Option::ExternWorkerUseRichClient)
-    .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
-    .setUseP2P(Option::ExternWorkerUseP2P)
-    .setVerboseLogging(Option::ExternWorkerVerboseLogging);
-  if (Option::ExternWorkerTimeoutSecs > 0) {
-    options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
-  }
-  if (!Option::ExternWorkerWorkingDir.empty()) {
-    options.setWorkingDir(Option::ExternWorkerWorkingDir);
-  }
-  if (Option::ExternWorkerThrottleRetries >= 0) {
-    options.setThrottleRetries(Option::ExternWorkerThrottleRetries);
-  }
-  if (Option::ExternWorkerThrottleBaseWaitMSecs >= 0) {
-    options.setThrottleBaseWait(
-      std::chrono::milliseconds{Option::ExternWorkerThrottleBaseWaitMSecs}
-    );
-  }
-  return options;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-Package::Package(const std::string& root, bool parseOnDemand)
+Package::Package(const std::string& root,
+                 bool parseOnDemand,
+                 coro::TicketExecutor& executor,
+                 extern_worker::Client& client)
   : m_root{root}
   , m_parseFailed{false}
   , m_parseOnDemand{parseOnDemand}
   , m_total{0}
   , m_callback{nullptr}
   , m_fileCache{std::make_shared<FileCache>()}
-  , m_async{std::make_unique<AsyncState>()}
+  , m_executor{executor}
+  , m_client{client}
+  , m_config{
+      [this] { return m_client.store(Config::make()); },
+      m_executor.sticky()
+    }
+  , m_repoOptions{client}
 {
-}
-
-Optional<std::thread> Package::asyncClear() {
-  if (!m_async) return std::nullopt;
-  if (!Option::ParserAsyncCleanup) {
-    // If we don't want to cleanup asynchronously, do so now.
-    m_async.reset();
-    return std::nullopt;
-  }
-  // All the thread does is reset the unique_ptr to run the dtor.
-  return std::thread{
-    [a = std::move(m_async)] () mutable { a.reset(); }
-  };
 }
 
 void Package::addInputList(const std::string& listFileName) {
@@ -768,7 +707,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroups(ParseGroups groups) {
   for (auto& group : groups) {
     tasks.emplace_back(
       parseGroup(std::move(group))
-        .scheduleOn(m_async->m_executor.sticky())
+        .scheduleOn(m_executor.sticky())
     );
   }
 
@@ -857,7 +796,7 @@ void Package::parseAll() {
 
       HPHP_CORO_RETURN_VOID;
     }
-  ).scheduleOn(m_async->m_executor.sticky());
+  ).scheduleOn(m_executor.sticky());
   coro::wait(std::move(work));
 }
 
@@ -867,8 +806,8 @@ bool Package::parse(const Callback& callback) {
 
   Logger::FInfo(
     "parsing using {} threads using {}{}",
-    m_async->m_executor.numThreads(),
-    m_async->m_client.implName(),
+    m_executor.numThreads(),
+    m_client.implName(),
     coro::using_coros ? "" : " (coros disabled!)"
   );
 
@@ -899,7 +838,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
 
   try {
     // First build the inputs for the job
-    std::vector<folly::fs::path> paths;
+    std::vector<std::filesystem::path> paths;
     std::vector<FileMeta> metas;
     std::vector<coro::Task<Ref<RepoOptionsFlags>>> options;
 
@@ -946,14 +885,14 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
 
       Optional<std::string> targetPath;
       if (S_ISLNK(sb.st_mode)) {
-        auto const target = fs::canonical(fullPath);
-        targetPath.emplace(fs::relative(target, m_root).native());
+        auto const target = std::filesystem::canonical(fullPath);
+        targetPath.emplace(std::filesystem::relative(target, m_root).native());
       }
 
       // Most files will have the same RepoOptions, so we cache them
       auto const& repoOptions = RepoOptions::forFile(fullPath.data()).flags();
       options.emplace_back(
-        m_async->m_repoOptions.get(
+        m_repoOptions.get(
           repoOptions.cacheKeySha1(),
           repoOptions,
           HPHP_CORO_CURRENT_EXECUTOR
@@ -987,17 +926,17 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
       auto [fileRefs, metasRef, optionRefs, configRef] =
         HPHP_CORO_AWAIT(
           coro::collect(
-            m_async->m_client.storeFile(
+            m_client.storeFile(
               paths,
               opportunistic
             ),
             opportunistic
-              ? m_async->m_client.storeOptimistically(metas)
-              : m_async->m_client.store(metas),
+              ? m_client.storeOptimistically(metas)
+              : m_client.store(metas),
             // If we already called doStore, then options will be
             // empty here (but storedOptions will be set).
             coro::collectRange(std::move(options)),
-            *m_async->m_config
+            *m_config
           )
         );
 
@@ -1035,7 +974,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     auto const doExec = [&] (auto inputs,
                              bool opportunistic) -> coro::Task<ExecT> {
       auto out = HPHP_CORO_AWAIT(
-        m_async->m_client.exec(
+        m_client.exec(
           g_parseJob,
           std::make_tuple(
             *std::get<0>(inputs),
@@ -1051,7 +990,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
     auto outputRefs = HPHP_CORO_AWAIT(coro::invoke(
       [&] () -> coro::Task<ExecT> {
         if (Option::ParserOptimisticStore &&
-            m_async->m_client.supportsOptimistic()) {
+            m_client.supportsOptimistic()) {
           // Try optimistic mode first. We won't actually store
           // anything, just generate the Refs. If something isn't
           // actually present in the workers, the execution will throw
@@ -1071,10 +1010,10 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(ParseGroup group) {
 
     // Load the outputs
     auto [wrappers, parseMetas] = HPHP_CORO_AWAIT(coro::collect(
-      m_async->m_client.load(
+      m_client.load(
         std::get<0>(std::move(outputRefs))
       ),
-      m_async->m_client.load(
+      m_client.load(
         std::get<1>(std::move(outputRefs))
       )
     ));

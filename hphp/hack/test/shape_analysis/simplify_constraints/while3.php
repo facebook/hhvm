@@ -1,11 +1,10 @@
 <?hh
 
 function f(): void {
-  $d = dict['a' => 42];
+  $d = dict['a' => true];
   $b = false;
   while ($b) {
     $d = dict['b' => 'h'];
   }
-  $d['c'] = true;
   inspect($d);
 }

@@ -194,17 +194,28 @@
           }
         },
         "module_membership_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"foo",
-            "offset":59,
-            "leading_width":1,
-            "width":3,
-            "trailing_width":0,
-            "leading":[{"kind":"extra_token_error","text":":","offset":59,"width":1}],
-            "trailing":[],
-            "line_number":5
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"foo",
+                    "offset":59,
+                    "leading_width":1,
+                    "width":3,
+                    "trailing_width":0,
+                    "leading":[{"kind":"extra_token_error","text":":","offset":59,"width":1}],
+                    "trailing":[],
+                    "line_number":5
+                  }
+                }
+              }
+            ]
           }
         },
         "module_membership_declaration_semicolon":{

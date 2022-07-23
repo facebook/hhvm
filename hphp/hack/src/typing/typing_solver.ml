@@ -636,8 +636,11 @@ let solve_all_unsolved_tyvars_gi env =
  *    vec<C> <: #1
  * will be solved by
  *    #1 := vec<#2>  where C <: #2
+ * The optional `default` parameter is used to solve a type variable
+ * if `widen_concrete_type` does not produce a result.
  *)
-let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
+let expand_type_and_solve
+    env ?default ?(freshen = true) ~description_of_expected p ty =
   (* TODO: rather than writing to a ref cell from inside the `on_tyvar`
      function, modify `simplify_unions` to return the accumulated result
      from this function, if it is provided *)
@@ -657,24 +660,34 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
   let (env', ety) = Env.expand_type env' ety in
   match (!vars_solved_to_nothing, get_node ety) with
   | (_ :: _, Tunion []) ->
-    let env =
-      List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-          let ty_err =
-            Typing_error.(
-              primary
-              @@ Primary.Unknown_type
-                   {
-                     expected = description_of_expected;
-                     pos = p;
-                     reason = lazy (Reason.to_string "It is unknown" r);
-                   })
-          in
-          ty_errs := ty_err :: !ty_errs;
-          Env.set_tyvar_eager_solve_fail env v)
-    in
-    let ty_err_opt = Typing_error.multiple_opt !ty_errs in
-    ( (env, ty_err_opt),
-      TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
+    begin
+      match default with
+      | Some default_ty ->
+        let res =
+          Typing_utils.sub_type env ety default_ty
+          @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+        in
+        (res, default_ty)
+      | None ->
+        let env =
+          List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
+              let ty_err =
+                Typing_error.(
+                  primary
+                  @@ Primary.Unknown_type
+                       {
+                         expected = description_of_expected;
+                         pos = p;
+                         reason = lazy (Reason.to_string "It is unknown" r);
+                       })
+              in
+              ty_errs := ty_err :: !ty_errs;
+              Env.set_tyvar_eager_solve_fail env v)
+        in
+        let ty_err_opt = Typing_error.multiple_opt !ty_errs in
+        ( (env, ty_err_opt),
+          TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)) )
+    end
   | _ ->
     let ty_err_opt = Typing_error.multiple_opt !ty_errs in
     ((env', ty_err_opt), ety)

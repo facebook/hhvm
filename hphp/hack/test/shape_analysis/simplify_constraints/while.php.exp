@@ -5,4 +5,4 @@ Summary for \f:
 [8:13-15] [Argument]:
   shape('a' => int, 'b' => string)
 [10:11-13] [Argument]:
-  shape('a' => int, 'b' => string)
+  shape('a' => int, ?'b' => string)

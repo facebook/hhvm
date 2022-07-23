@@ -92,6 +92,7 @@ enum UnstableFeatures {
     Ifc,
     Readonly,
     Modules,
+    ModuleReferences,
     ClassConstDefault,
     TypeConstMultipleBounds,
     TypeConstSuperBound,
@@ -115,6 +116,7 @@ impl UnstableFeatures {
             UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Preview,
+            UnstableFeatures::ModuleReferences => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::TypeConstMultipleBounds => Unstable,
@@ -5225,7 +5227,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.type_refinement_errors(node);
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
-            ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
+            ModuleDeclaration(x) => {
+                self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                if let QualifiedName(x) = &x.name.children {
+                    if let SyntaxList(x) = &x.parts.children {
+                        if x.len() > 1 {
+                            self.check_can_use_feature(node, &UnstableFeatures::ModuleReferences);
+                        }
+                    }
+                }
+            }
             ModuleMembershipDeclaration(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Modules);
                 self.in_module = true;

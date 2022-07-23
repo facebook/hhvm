@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 
+#include <hphp/runtime/vm/jit/ssa-tmp.h>
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
@@ -1330,12 +1331,15 @@ Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 // emitting a check if necessary to refine the array's type to that layout.
 jit::ArrayLayout guardToLayout(
     IRGS& env, const NormalizedInstruction& ni, Location loc,
-    Type type, std::function<void(IRGS&)> emitVanilla) {
+    Type type, std::function<void(IRGS&)> emitVanilla,
+    const bespoke::SinkLayouts& sinkLayouts) {
+  assertx(sinkLayouts.layouts.size() == 1);
+
   auto const kind = env.context.kind;
   assertx(!env.irb->guardFailBlock());
   if (kind != TransKind::Optimize) return type.arrSpec().layout();
 
-  auto const sl = bespoke::layoutForSink(env.profTransIDs, ni.source);
+  auto const sl = sinkLayouts.layouts[0];
   auto const target = TArrLike.narrowToLayout(sl.layout);
   if (type <= target || !type.maybe(target)) {
     // If the type test would be trivial (either always taken or never taken),
@@ -1343,7 +1347,7 @@ jit::ArrayLayout guardToLayout(
     return type.arrSpec().layout();
   }
 
-  if (sl.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+  if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
     checkType(env, loc, target, curSrcKey(env));
     return sl.layout;
   }
@@ -1372,7 +1376,7 @@ jit::ArrayLayout guardToLayout(
       }
 
       // Side exit or do codegen as needed. Use emitVanilla if we have it.
-      if (sl.sideExit) {
+      if (sinkLayouts.sideExit) {
         assertx(RO::EvalBespokeEscalationSampleRate);
         auto const arr = loadLocation(env, loc);
         gen(env, LogGuardFailure, target, arr);
@@ -1392,6 +1396,101 @@ jit::ArrayLayout guardToLayout(
     }
   );
   return sl.layout;
+}
+
+// In optimized translations, use the layouts passed in to guard and emit
+// translations. Each layout will be checked to refine the array's type and
+// translation will be emitted accordingly.
+void guardToMultipleLayoutsAndEmit(
+    IRGS& env, const NormalizedInstruction& ni, Location loc,
+    Type type, std::function<void(IRGS&)> emitVanilla,
+    const bespoke::SinkLayouts& sinkLayouts) {
+  assertx(sinkLayouts.layouts.size() > 1);
+  assertx(!env.irb->guardFailBlock());
+
+  auto const emitTranslation = [&](const bool vanilla){
+    vanilla && emitVanilla ?
+      emitVanilla(env) :
+      translateDispatchBespoke(env, ni);
+  };
+
+  auto const kind = env.context.kind;
+  if (kind != TransKind::Optimize) {
+    emitTranslation(type.arrSpec().layout().vanilla());
+    return;
+  }
+
+  for (auto const& sl: sinkLayouts.layouts) {
+    auto target = TArrLike.narrowToLayout(sl.layout);
+    if (type <= target || !type.maybe(target)) {
+      // If the type test would be trivial (either always taken or never taken),
+      // skip it and just emit code that works for the current layout.
+      emitTranslation(type.arrSpec().layout().vanilla());
+      return;
+    }
+
+    if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+      checkType(env, loc, target, curSrcKey(env));
+      emitTranslation(sl.layout.vanilla());
+      return;
+    }
+  }
+
+  auto const vanilla = TArrLike.narrowToLayout(ArrayLayout::Vanilla());
+  auto const bespoke = TArrLike.narrowToLayout(ArrayLayout::Bespoke());
+
+  // Generic fallback for taken branch.
+  auto const fallback = [&](const jit::Type& target){
+    hint(env, Block::Hint::Unlikely);
+    IRUnit::Hinter hinter(env.irb->unit(), Block::Hint::Unlikely);
+
+    // If the type check was for "vanilla" or "bespoke", we know we have
+    // the other kind in the taken branch, so assert that information.
+    if (target == vanilla) {
+      assertTypeLocation(env, loc, bespoke);
+    } else if (target == bespoke) {
+      assertTypeLocation(env, loc, vanilla);
+    }
+
+    // Side exit or do codegen as needed. Use emitVanilla if we have it.
+    if (sinkLayouts.sideExit) {
+      assertx(RO::EvalBespokeEscalationSampleRate);
+      auto const arr = loadLocation(env, loc);
+      gen(env, LogGuardFailure, target, arr);
+      gen(env, Jmp, makeExit(env, curSrcKey(env)));
+    } else {
+      emitTranslation(target == bespoke);
+      auto const next = getBlock(env, nextSrcKey(env));
+      gen(env, Jmp, next);
+    }
+  };
+
+  // Check each layout, otherwise fallback
+  MultiCond mc{env};
+  Type target;
+  for (auto const& sl : sinkLayouts.layouts) {
+    target = TArrLike.narrowToLayout(sl.layout);
+
+    mc.ifThen(
+      [&](Block* taken) {
+        env.irb->setGuardFailBlock(taken);
+        checkType(env, loc, target, curSrcKey(env));
+        env.irb->resetGuardFailBlock();
+        // Dead-code, but needed to satisfy MultiCond
+        return cns(env, staticEmptyString());
+      },
+      [&](SSATmp* /* unused */) {
+        emitTranslation(target == vanilla);
+        // Dead-code, but needed to satisfy MultiCond
+        return cns(env, staticEmptyString());
+      });
+  }
+
+  mc.elseDo([&]{
+    fallback(target);
+    // Dead-code, but needed to satisfy MultiCond
+    return cns(env, staticEmptyString());
+  });
 }
 
 void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
@@ -1760,11 +1859,18 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 
   emitLogArrayReach(env, loc, sk);
 
+  auto const sinkLayouts = bespoke::layoutsForSink(env.profTransIDs, ni.source);
+
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
   } else if (isFCall(sk.op()) || sk.op() == OpUnsetM) {
-    guardToLayout(env, ni, loc, type, nullptr);
-    translateDispatchBespoke(env, ni);
+    assertx(sinkLayouts.layouts.size() > 0);
+    if (sinkLayouts.layouts.size() == 1) {
+      guardToLayout(env, ni, loc, type, nullptr, sinkLayouts);
+      translateDispatchBespoke(env, ni);
+    } else {
+      guardToMultipleLayoutsAndEmit(env, ni, loc, type, nullptr, sinkLayouts);
+    }
   } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
     // array-likes on one side and bespoke array-likes on the other.
@@ -1776,11 +1882,17 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
   } else {
     // In an optimized or live translation, we guard to a specialized layout
     // and then emit either vanilla or bespoke code.
-    auto const layout = guardToLayout(env, ni, loc, type, emitVanilla);
-    if (layout.vanilla()) {
-      emitVanilla(env);
+    assertx(sinkLayouts.layouts.size() > 0);
+    if (sinkLayouts.layouts.size() == 1) {
+      auto const layout =
+        guardToLayout(env, ni, loc, type, emitVanilla, sinkLayouts);
+      if (layout.vanilla()) {
+        emitVanilla(env);
+      } else {
+        translateDispatchBespoke(env, ni);
+      }
     } else {
-      translateDispatchBespoke(env, ni);
+      guardToMultipleLayoutsAndEmit(env, ni, loc, type, emitVanilla, sinkLayouts);
     }
   }
 }

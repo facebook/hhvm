@@ -2707,7 +2707,7 @@ void Class::setConstants() {
     }
 
     // Concretize inherited abstract type constants with defaults
-    if (isNormalClass(this) && (!isAbstract(this) || isFinal(this))) {
+    if (isNormalClass(this) && !isAbstract(this)) {
       if (cns.isAbstract() && cns.val.is_init()) {
         cns.concretize();
       }
@@ -4471,12 +4471,10 @@ void Class::setReleaseData() {
   m_sizeIdx = MemoryManager::size2Index(size);
 }
 
-void Class::getMethodNames(const Class* cls,
-                           const Class* ctx,
-                           Array& out) {
+void Class::getMethodNames(const Class* cls, const Class* ctx, Array& out) {
 
   // The order of these methods is so that the first ones win on
-  // case insensitive name conflicts.
+  // name conflicts.
 
   auto const numMethods = cls->numMethods();
 
@@ -4484,10 +4482,9 @@ void Class::getMethodNames(const Class* cls,
     auto const meth = cls->getMethod(i);
     auto const declCls = meth->cls();
     auto addMeth = [&]() {
-      auto const methName = Variant(meth->name(), Variant::PersistentStrInit{});
-      auto const lowerName = f_strtolower(methName.toString());
-      if (!out.exists(lowerName)) {
-        out.set(lowerName, methName);
+      if (!out.exists(meth->nameStr())) {
+        auto const methName = Variant(meth->name(), Variant::PersistentStrInit{});
+        out.set(meth->nameStr(), methName);
       }
     };
 
@@ -4529,6 +4526,9 @@ void Class::getMethodNames(const Class* cls,
   }
 }
 
+const StringData* Class::moduleName() const {
+  return preClass()->unit()->moduleName();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Trait method import.

@@ -39,10 +39,12 @@ let log_events typing_env : log_event list -> unit =
   | Some 2 -> Shape_analysis_scuba.log_events_remotely typing_env
   | _ -> Fn.const ()
 
-let compute_results tast_env id params body =
+let compute_results tast_env id params return body =
+  let strip_decorations { constraint_; _ } = constraint_ in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   try
-    SA.callable tast_env params body
+    SA.callable tast_env params ~return body
+    |> List.map ~f:strip_decorations
     |> SA.simplify typing_env
     |> List.filter ~f:SA.is_shape_like_dict
     |> List.map ~f:(fun shape_result -> Result { id; shape_result })
@@ -64,17 +66,18 @@ let handler =
     method! at_class_ tast_env A.{ c_methods; c_name = (_, class_name); _ } =
       let typing_env = Tast_env.tast_env_as_typing_env tast_env in
       let collect_method_events
-          A.{ m_body; m_name = (_, method_name); m_params; _ } =
+          A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
-        compute_results tast_env id m_params m_body
+        compute_results tast_env id m_params m_ret m_body
       in
       if should_not_skip tast_env then
         List.concat_map ~f:collect_method_events c_methods
         |> log_events typing_env
 
     method! at_fun_def tast_env fd =
-      let A.{ f_body; f_name = (_, id); f_params; _ } = fd.A.fd_fun in
+      let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
       if should_not_skip tast_env then
         let typing_env = Tast_env.tast_env_as_typing_env tast_env in
-        compute_results tast_env id f_params f_body |> log_events typing_env
+        compute_results tast_env id f_params f_ret f_body
+        |> log_events typing_env
   end

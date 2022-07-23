@@ -471,6 +471,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let (ctx, entry) = single_ctx env path file_input in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
+  | PREPARE_CALL_HIERARCHY (labelled_file, line, column) ->
+    let (path, file_input) =
+      ServerCommandTypesUtils.extract_labelled_file labelled_file
+    in
+    let (ctx, entry) = single_ctx env path file_input in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        ( env,
+          ServerPrepareCallHierarchy.go_quarantined ~ctx ~entry ~line ~column ))
   | BIGCODE path ->
     let (ctx, entry) = single_ctx_path env path in
     let result = ServerBigCode.go_ctx ~ctx ~entry in

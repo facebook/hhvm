@@ -8,7 +8,7 @@ function main($z) {
     require_once('persistent.inc');
   }
 
-  var_dump(z());
+  var_dump(Z());
 }
 
 

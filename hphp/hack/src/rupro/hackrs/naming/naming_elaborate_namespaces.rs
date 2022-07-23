@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::special_names as sn;
 use im::HashSet;
 use oxidized::aast::*;
 use oxidized::aast_visitor::Params;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast;
 use oxidized::ast_defs::*;
+use special_names as sn;
 use utils::core::ns;
 
 struct ElaborateNamespacesVisitor<'node> {

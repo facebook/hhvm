@@ -21,7 +21,7 @@ use ty::reason::BReason;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
-use hackrs::decl_parser::DeclParser;
+use decl_parser::DeclParser;
 use hackrs::folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
 use hackrs_test_utils::serde_store::Compression;

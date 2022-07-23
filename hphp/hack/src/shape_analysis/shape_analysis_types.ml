@@ -24,7 +24,10 @@ type mode =
   | Codemod
   | SolveConstraints [@deriving eq]
 
-type options = { mode: mode }
+type options = {
+  mode: mode;
+  verbosity: int;
+}
 
 type entity_ =
   | Literal of Pos.t
@@ -38,12 +41,21 @@ type shape_keys = T.locl_phase T.shape_field_type T.TShapeMap.t
 type marker_kind =
   | Allocation
   | Parameter
+  | Return
   | Argument
 [@@deriving show { with_path = false }]
+
+module Codemod = struct
+  type kind =
+    | Allocation
+    | Hint
+  [@@deriving show { with_path = false }]
+end
 
 type constraint_ =
   | Marks of marker_kind * Pos.t
   | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
+  | Has_optional_key of entity_ * T.TShapeMap.key
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_
   | Joins of {
@@ -58,9 +70,16 @@ type shape_result =
 
 type lenv = entity LMap.t KMap.t
 
+type decorated_constraint = {
+  hack_pos: Pos.t;
+  origin: int;
+  constraint_: constraint_;
+}
+
 type env = {
-  constraints: constraint_ list;
+  constraints: decorated_constraint list;
   lenv: lenv;
+  return: entity;
   tast_env: Tast_env.t;
 }
 

@@ -65,10 +65,13 @@ struct Module {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Will the call raise a module boundary violation?
+ * Will the use of symbol raise a module boundary violation?
  */
-bool will_call_raise_module_boundary_violation(const Func* callee,
-                                               const StringData* callerModule);
+template <typename Sym, typename Ctx>
+bool will_symbol_raise_module_boundary_violation(
+  const Sym* symbol,
+  const Ctx* context
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

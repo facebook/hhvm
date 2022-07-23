@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/container-functions.h"
 
 TRACE_SET_MOD(heapreport);

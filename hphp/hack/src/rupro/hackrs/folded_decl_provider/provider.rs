@@ -8,12 +8,11 @@ use super::DeclName;
 use super::Error;
 use super::Result;
 use super::TypeDecl;
-use crate::shallow_decl_provider::ShallowDeclProvider;
-use crate::shallow_decl_provider::{self};
 use datastore::Store;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
 use oxidized::global_options::GlobalOptions;
+use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
@@ -22,6 +21,7 @@ use pos::PropName;
 use pos::TypeName;
 use pos::TypeNameIndexMap;
 use pos::TypeNameIndexSet;
+use shallow_decl_provider::ShallowDeclProvider;
 use std::sync::Arc;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
@@ -75,12 +75,14 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
     }
 
     fn get_type(&self, _dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        match self.shallow_decl_provider.get_type(name)? {
+        match self.shallow_decl_provider.get_type_kind(name)? {
             None => Ok(None),
-            Some(shallow_decl_provider::TypeDecl::Typedef(decl)) => {
-                Ok(Some(TypeDecl::Typedef(decl)))
-            }
-            Some(shallow_decl_provider::TypeDecl::Class(..)) => {
+            Some(KindOfType::TTypedef) => Ok(Some(TypeDecl::Typedef(
+                self.shallow_decl_provider.get_typedef(name)?.expect(
+                    "got None after get_type_kind indicated a typedef with this name exists",
+                ),
+            ))),
+            Some(KindOfType::TClass) => {
                 let mut stack = Default::default();
                 Ok(self
                     .get_folded_class_impl(&mut stack, name)?

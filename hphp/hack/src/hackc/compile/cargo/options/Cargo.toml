@@ -14,7 +14,7 @@ bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 fnv = "1.0"
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
-lazy_static = "1.0"
+lazy_static = "1.4"
 lru = "0.7.0"
 options_serde = { path = "../options_serde" }
 oxidized = { path = "../../../../oxidized" }

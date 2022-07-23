@@ -10,4 +10,7 @@ open Shape_analysis_types
 
 val show_constraint_ : Typing_env_types.env -> constraint_ -> string
 
+val show_decorated_constraint :
+  verbosity:int -> Typing_env_types.env -> decorated_constraint -> string
+
 val show_shape_result : Typing_env_types.env -> shape_result -> string

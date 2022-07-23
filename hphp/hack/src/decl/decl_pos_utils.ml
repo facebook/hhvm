@@ -308,6 +308,7 @@ struct
       td_is_ctx = tdef.td_is_ctx;
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;
       td_internal = tdef.td_internal;
+      td_docs_url = tdef.td_docs_url;
     }
 
   and shallow_class sc =

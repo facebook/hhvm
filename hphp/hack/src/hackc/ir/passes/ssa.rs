@@ -5,8 +5,8 @@ use analysis::PredecessorFlags;
 use analysis::Predecessors;
 use core::func_builder::TransformInstr;
 use core::instr::Special;
-use core::instr::Ssa;
 use core::instr::Terminator;
+use core::instr::Tmp;
 use core::newtype::VarIdMap;
 use core::BlockId;
 use core::Func;
@@ -187,10 +187,10 @@ impl<'a> MakeSSA<'a> {
 
             for &iid in &func.blocks[bid].iids {
                 match func.instrs[iid] {
-                    Instr::Special(Special::Ssa(Ssa::GetVar(var))) => {
+                    Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
                         note_live(&mut dataflow_stack, info, bid, iid, var)
                     }
-                    Instr::Special(Special::Ssa(Ssa::SetVar(var, value))) => {
+                    Instr::Special(Special::Tmp(Tmp::SetVar(var, value))) => {
                         info.exit_value.insert(var, value);
 
                         // See which values are ever assigned to this variable.
@@ -386,11 +386,11 @@ impl<'a> TransformInstr for MakeSSA<'a> {
                     Instr::Terminator(t)
                 }
             }
-            Instr::Special(Special::Ssa(Ssa::SetVar(var, value))) => {
+            Instr::Special(Special::Tmp(Tmp::SetVar(var, value))) => {
                 self.block_info[bid].entry_value.insert(var, value);
                 Instr::tombstone()
             }
-            Instr::Special(Special::Ssa(Ssa::GetVar(var))) => {
+            Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
                 let value = self.block_info[bid].entry_value[&var];
                 Instr::copy(value)
             }
@@ -425,7 +425,7 @@ fn note_live(
 pub(crate) fn is_ssa(func: &Func<'_>) -> bool {
     !func
         .body_instrs()
-        .any(|i| matches!(i, Instr::Special(Special::Ssa(..))))
+        .any(|i| matches!(i, Instr::Special(Special::Tmp(..))))
 }
 
 pub fn run(func: &mut Func<'_>, strings: &StringInterner<'_>) -> bool {

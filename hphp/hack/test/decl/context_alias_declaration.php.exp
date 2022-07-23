@@ -5,7 +5,8 @@
        td_constraint = (Some (Rhint ([4:13-15]), (Tintersection [])));
        td_type =
        (Rhint ([4:8-9]), (Tapply (([4:8-9], "\\HH\\Contexts\\defaults"), [])));
-       td_is_ctx = true; td_attributes = []; td_internal = false }));
+       td_is_ctx = true; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
   ("\\Y",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:8-9]; td_vis = Opaque;
@@ -16,7 +17,8 @@
          (Tintersection
             [(Rhint ([5:19-27]),
               (Tapply (([5:19-27], "\\HH\\Contexts\\defaults"), [])))]));
-        td_is_ctx = true; td_attributes = []; td_internal = false }))
+        td_is_ctx = true; td_attributes = []; td_internal = false;
+        td_docs_url = None }))
   ]
 
 They matched!

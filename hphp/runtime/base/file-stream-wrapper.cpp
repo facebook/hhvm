@@ -25,8 +25,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
-#include <boost/filesystem/operations.hpp>
-
+#include <filesystem>
 #include <memory>
 
 #include <folly/portability/Stdlib.h>

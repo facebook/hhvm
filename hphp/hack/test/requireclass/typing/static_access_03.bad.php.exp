@@ -1,0 +1,6 @@
+File "static_access_03.bad.php", line 13, characters 36-38:
+No static method `bar` in `C` (Typing[4090])
+  File "static_access_03.bad.php", line 13, characters 19-21:
+  Did you mean instance method `foo` instead?
+  File "static_access_03.bad.php", line 10, characters 13-13:
+  Declaration of `C` is here

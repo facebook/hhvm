@@ -12,6 +12,11 @@ val collect_analysis_targets :
   Provider_context.t -> Tast.program -> potential_targets
 
 val callable :
-  Tast_env.t -> Tast.fun_param list -> Tast.func_body -> constraint_ list
+  Tast_env.t ->
+  Tast.fun_param list ->
+  return:Tast.type_hint ->
+  Tast.func_body ->
+  decorated_constraint list
 
-val program : Provider_context.t -> Tast.program -> constraint_ list SMap.t
+val program :
+  Provider_context.t -> Tast.program -> decorated_constraint list SMap.t

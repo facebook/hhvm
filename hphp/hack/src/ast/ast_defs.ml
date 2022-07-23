@@ -83,42 +83,42 @@ and fun_kind =
   | FAsyncGenerator
 
 and bop =
-  | Plus
-  | Minus
-  | Star
-  | Slash
-  | Eqeq
-  | Eqeqeq
-  | Starstar
-  | Diff
-  | Diff2
-  | Ampamp
-  | Barbar
-  | Lt
-  | Lte
-  | Gt
-  | Gte
-  | Dot
-  | Amp
-  | Bar
-  | Ltlt
-  | Gtgt
-  | Percent
-  | Xor
-  | Cmp
-  | QuestionQuestion
-  | Eq of bop option
+  | Plus  (** Addition: x + y *)
+  | Minus  (** Subtraction: x - y  *)
+  | Star  (** Multiplication: x * y *)
+  | Slash  (** Division: x / y *)
+  | Eqeq  (** Value/coercing equality: x == y *)
+  | Eqeqeq  (** Same-type-and-value equality: x === y *)
+  | Starstar  (** Exponent: x ** y *)
+  | Diff  (** Value inquality: x != y *)
+  | Diff2  (** Not-same-type-and-value-equality: x !== y *)
+  | Ampamp  (** Logical AND: x && y *)
+  | Barbar  (** Logical OR: x || y *)
+  | Lt  (** Less than: x < y *)
+  | Lte  (** Less than or equal to: x <= y *)
+  | Gt  (** Greater than: x > y *)
+  | Gte  (** Greater than or equal to: x >= y *)
+  | Dot  (** String concatenation: x . y *)
+  | Amp  (** Bitwise AND: x & y *)
+  | Bar  (** Bitwise OR: x | y *)
+  | Ltlt  (** Bitwise left shift: x << y *)
+  | Gtgt  (** Bitwise right shift: x >> y *)
+  | Percent  (** Modulo: x % y *)
+  | Xor  (** Bitwise XOR: x ^ y *)
+  | Cmp  (** Spaceship operator: x <=> y *)
+  | QuestionQuestion  (** Coalesce: x ?? y *)
+  | Eq of bop option  (** =, +=, -=, ... *)
 
 and uop =
-  | Utild
-  | Unot
-  | Uplus
-  | Uminus
-  | Uincr
-  | Udecr
-  | Upincr
-  | Updecr
-  | Usilence
+  | Utild  (** Bitwise negation: ~x *)
+  | Unot  (** Logical not: !b *)
+  | Uplus  (** Unary plus: +x *)
+  | Uminus  (** Unary minus: -x *)
+  | Uincr  (** Unary increment: ++i  *)
+  | Udecr  (** Unary decrement: --i *)
+  | Upincr  (** Unary postfix increment: i++ *)
+  | Updecr  (** Unary postfix decrement: i-- *)
+  | Usilence  (** Error control/Silence (ignore) expections: @e *)
 
 and visibility =
   | Private [@visitors.name "visibility_Private"]

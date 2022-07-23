@@ -197,12 +197,28 @@ let compute_file_info
 
 let get_ast_with_error ?(full = false) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->
+  let parse_from_disk_no_caching ~apply_file_filter =
+    let absolute_path = Relative_path.to_absolute path in
+    if (not apply_file_filter) || FindUtils.file_filter absolute_path then
+      let contents = Sys_utils.cat absolute_path in
+      let source_text = Full_fidelity_source_text.make path contents in
+      let (err, { Parser_return.ast; _ }) =
+        parse (Provider_context.get_popt ctx) ~full ~source_text
+      in
+      (err, ast)
+    else
+      (Errors.empty, [])
+  in
+
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
   match (entry_opt, Provider_context.get_backend ctx) with
+  | (_, Provider_backend.Pessimised_shared_memory info)
+    when not info.Provider_backend.allow_ast_caching ->
+    parse_from_disk_no_caching ~apply_file_filter:true
   | (Some entry, _) ->
     (* See documentation on `entry` for its invariants.
        The compute_ast function will use the cached (full) AST if present,
@@ -237,12 +253,7 @@ let get_ast_with_error ?(full = false) ctx path =
   | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
-    let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-    let source_text = Full_fidelity_source_text.make path contents in
-    let (err, { Parser_return.ast; _ }) =
-      parse (Provider_context.get_popt ctx) ~full ~source_text
-    in
-    (err, ast)
+    parse_from_disk_no_caching ~apply_file_filter:false
   | (_, Provider_backend.Decl_service _) ->
     (* Decl service based checks are supposed to cache ASTs inside Provider_context.entries. *)
     (* This entries cache supports IDE scenarios of files locally modified in editor, which *)

@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -79,7 +79,7 @@ struct Breakpoint {
   const int m_line;
   const int m_column;
   const std::string m_path;
-  const boost::filesystem::path m_filePath;
+  const std::filesystem::path m_filePath;
   const std::string m_function;
 
   std::string m_functionFullName;
@@ -193,7 +193,7 @@ struct BreakpointManager {
 
   static bool bpMatchesPath(
     const Breakpoint* bp,
-    const boost::filesystem::path& unitPath
+    const std::filesystem::path& unitPath
   );
 
 private:
@@ -261,4 +261,3 @@ private:
 
 }
 }
-

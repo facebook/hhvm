@@ -120,18 +120,6 @@ public:
   /**
    * Type conversions
    */
-  bool toBoolean() const {
-    return m_res ? m_res->data()->o_toBoolean() : false;
-  }
-  char toByte() const {
-    return m_res ? m_res->data()->o_toInt64() : 0;
-  }
-  short toInt16() const {
-    return m_res ? m_res->data()->o_toInt64() : 0;
-  }
-  int toInt32() const {
-    return m_res ? m_res->data()->o_toInt64() : 0;
-  }
   int64_t toInt64() const {
     return m_res ? m_res->data()->o_toInt64() : 0;
   }

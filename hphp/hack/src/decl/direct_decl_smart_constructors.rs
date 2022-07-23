@@ -170,6 +170,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
+        Id(pos, self.qualified_name_string_from_parts(parts, pos))
+    }
+
+    fn qualified_name_string_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> &'a str {
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
         let mut len = 0;
@@ -190,8 +194,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         // qualified name in the original source text instead of copying it.
         let source_len = pos.end_offset() - pos.start_offset();
         if source_len == len {
-            let qualified_name: &'a str = self.str_from_utf8(self.source_text_at_pos(pos));
-            return Id(pos, qualified_name);
+            return self.str_from_utf8(self.source_text_at_pos(pos));
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
         let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
@@ -199,11 +202,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
-                &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
+                &Node::ListItem(&(Node::Name(&(name, _)), Node::Token(qualifier))) => {
                     qualified_name.push_str(name);
-                    qualified_name.push_str("\\");
+                    match qualifier.kind() {
+                        TokenKind::Dot => qualified_name.push_str("."),
+                        TokenKind::Backslash => qualified_name.push_str("\\"),
+                        _ => {}
+                    }
                 }
-                &Node::ListItem(&(Node::Token(t), _backslash))
+                &Node::ListItem(&(Node::Token(t), _qualifier))
                     if t.kind() == TokenKind::Namespace =>
                 {
                     qualified_name.push_str("namespace\\");
@@ -213,7 +220,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         }
         debug_assert_eq!(len, qualified_name.len());
         debug_assert_eq!(len, qualified_name.capacity());
-        Id(pos, qualified_name.into_bump_str())
+        qualified_name.into_bump_str()
     }
 
     /// If the given node is an identifier, XHP name, or qualified name,
@@ -3097,6 +3104,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
+
         let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
@@ -3108,6 +3116,21 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         } else {
             &[][..]
         };
+
+        let mut docs_url = None;
+        for attribute in attributes.iter() {
+            match attribute {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
         let internal = modifiers
             .iter()
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
@@ -3129,6 +3152,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             is_ctx: false,
             attributes: user_attributes,
             internal,
+            docs_url,
         });
 
         self.add_typedef(name, typedef);
@@ -3196,6 +3220,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             is_ctx: true,
             attributes: user_attributes,
             internal: false,
+            docs_url: None,
         });
 
         self.add_typedef(name, typedef);
@@ -4489,9 +4514,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => None,
         }));
         let mut user_attributes = bump::Vec::with_capacity_in(attributes.len(), self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4559,8 +4593,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint,
                 includes,
             })),
-            // Currently ignoring <<__Docs()>> on enum declarations.
-            docs_url: None,
+            docs_url,
         });
         self.add_class(key, cls);
 
@@ -4678,9 +4711,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let includes = &extends[1..];
 
         let mut user_attributes = bump::Vec::with_capacity_in(attributes.len() + 1, self.arena);
+        let mut docs_url = None;
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+
+                    user_attributes.push(self.user_attribute_to_decl(attr));
+                }
                 _ => {}
             }
         }
@@ -4732,8 +4774,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 constraint: None,
                 includes,
             })),
-            // Currently ignoring <<__Docs()>> on enum class declarations.
-            docs_url: None,
+            docs_url,
         });
         self.add_class(name.1, cls);
 
@@ -5735,9 +5776,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _right_brace: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::Name(&(name, mdt_pos)) => {
+            Node::QualifiedName(&(parts, mdt_pos)) => {
                 let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
-                self.add_module(name, module);
+                self.add_module(
+                    self.qualified_name_string_from_parts(parts, mdt_pos),
+                    module,
+                );
             }
             _ => {}
         }
@@ -5751,9 +5795,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _semicolon: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::Name(&(name, pos)) => {
+            Node::QualifiedName(&(parts, pos)) => {
                 if self.module.is_none() {
-                    self.module = Some(oxidized_by_ref::ast::Id(pos, name));
+                    self.module = Some(oxidized_by_ref::ast::Id(
+                        pos,
+                        self.qualified_name_string_from_parts(parts, pos),
+                    ));
                 }
             }
             _ => {}

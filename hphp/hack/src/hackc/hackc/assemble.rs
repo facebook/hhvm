@@ -15,7 +15,9 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
+use once_cell::sync::OnceCell;
 use options::Options;
 use oxidized::relative_path::RelativePath;
 use oxidized::relative_path::{self};
@@ -113,7 +115,9 @@ pub fn assemble_from_bytes<'arena>(
         print_tokens(s);
     }
     let mut lex = Lexer::from_slice(s, 1);
-    assemble_from_toks(alloc, &mut lex)
+    let unit = assemble_from_toks(alloc, &mut lex)?;
+    trace!("ASM UNIT: {unit:?}");
+    Ok(unit)
 }
 
 /// Assembles the HCU. Parses over the top level of the .hhas file
@@ -136,6 +140,9 @@ fn assemble_from_toks<'arena>(
     let mut constants = Vec::new();
     let mut type_constants = Vec::new(); // Should be empty
     let mut fatal = None;
+    let mut file_attributes = Vec::new();
+    let mut module_use = Maybe::Nothing;
+    let mut modules = Vec::new();
     // First non-comment token should be the filepath
     let fp = assemble_filepath(token_iter)?;
     while token_iter.peek().is_some() {
@@ -198,6 +205,12 @@ fn assemble_from_toks<'arena>(
             if !type_constants.is_empty() {
                 bail!("Type constants defined outside of a class");
             }
+        } else if token_iter.peek_if_str(Token::is_decl, ".file_attributes") {
+            assemble_file_attributes(alloc, token_iter, &mut file_attributes)?;
+        } else if token_iter.peek_if_str(Token::is_decl, ".module_use") {
+            module_use = Maybe::Just(assemble_module_use(alloc, token_iter)?);
+        } else if token_iter.peek_if_str(Token::is_decl, ".module") {
+            modules.push(assemble_module(alloc, token_iter)?);
         } else {
             bail!(
                 "Unknown top level identifier: {}",
@@ -210,9 +223,9 @@ fn assemble_from_toks<'arena>(
         functions: Slice::fill_iter(alloc, funcs.into_iter()),
         classes: Slice::fill_iter(alloc, classes.into_iter()),
         typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
-        file_attributes: Default::default(),
-        modules: Default::default(),
-        module_use: Maybe::Nothing,
+        file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
+        modules: Slice::from_vec(alloc, modules),
+        module_use,
         symbol_refs: hhbc::hhas_symbol_refs::HhasSymbolRefs {
             functions: func_refs.unwrap_or_default(),
             classes: class_refs.unwrap_or_default(),
@@ -227,7 +240,63 @@ fn assemble_from_toks<'arena>(
 }
 
 /// Ex:
+/// .module m0 (64, 64) {
+///}
+fn assemble_module<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_module::HhasModule<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".module")?;
+    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    if attr != hhvm_types_ffi::ffi::Attr::AttrNone {
+        bail!("Unexpected HHVM attrs in module definition");
+    }
+    let name = assemble_class_name(alloc, token_iter)?;
+    let span = assemble_span(token_iter)?;
+    token_iter.expect(Token::into_open_curly)?;
+    token_iter.expect(Token::into_close_curly)?;
+    Ok(hhbc::hhas_module::HhasModule {
+        attributes,
+        name,
+        span,
+    })
+}
+
+/// Ex:
+/// .module_use "(module_use)";
+fn assemble_module_use<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<Str<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".module_use")?;
+    let st = Str::new_slice(
+        alloc,
+        escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?),
+    );
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(st)
+}
+
+/// Ex:
+/// .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+fn assemble_file_attributes<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    file_attributes: &mut Vec<hhbc::hhas_attribute::HhasAttribute<'arena>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".file_attributes")?;
+    token_iter.expect(Token::into_open_bracket)?;
+    while !token_iter.peek_if(Token::is_close_bracket) {
+        file_attributes.push(assemble_user_attr(alloc, token_iter)?);
+    }
+    token_iter.expect(Token::into_close_bracket)?;
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
+}
+
+/// Ex:
 /// .alias ShapeKeyEscaping = <"HH\\darray"> (3,6) """D:2:{s:4:\"kind\";i:14;s:6:\"fields\";D:2:{s:11:\"Whomst'd've\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:1;}}s:25:\"Whomst\\u{0027}d\\u{0027}ve\";D:1:{s:5:\"value\";D:1:{s:4:\"kind\";i:4;}}}}""";
+/// Note that in BCP, TypeDef's typeinfo's user_type is not printed. What's between <> is the typeinfo's constraint's name.
 fn assemble_typedef<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -236,16 +305,11 @@ fn assemble_typedef<'arena>(
     let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let name = assemble_class_name(alloc, token_iter)?;
     token_iter.expect(Token::into_equal)?;
-    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, false, true)? {
+    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, TypeInfoKind::TypeDef)? {
         // won't be any user_type
         let span = assemble_span(token_iter)?;
         //tv
-        let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-        debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-        let tv = &tv[3..tv.len() - 3];
-        let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-        let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-        let type_structure = assemble_typed_value(alloc, &mut tv_lexer)?;
+        let type_structure = assemble_triple_quoted_typed_value(alloc, token_iter)?;
         token_iter.expect(Token::into_semicolon)?;
         Ok(hhbc::hhas_typedef::HhasTypedef {
             name,
@@ -290,9 +354,9 @@ fn assemble_class<'arena>(
     } else {
         (Vec::new(), Vec::new())
     };
-    let ctx_constants = Vec::new();
+    let mut ctx_constants = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".ctx") {
-        todo!()
+        ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?);
     }
     let mut properties = Vec::new();
     while token_iter.peek_if_str(Token::is_decl, ".property") {
@@ -324,6 +388,46 @@ fn assemble_class<'arena>(
         flags,
     };
     Ok(hhas_class)
+}
+
+fn is_enforced_static_coeffect(d: &&[u8]) -> bool {
+    match *d {
+        b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
+        | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
+        | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
+        _ => false,
+    }
+}
+
+/// Ex:
+/// .ctx C isAbstract;
+/// .ctx Clazy pure;
+/// .ctx Cdebug isAbstract;
+fn assemble_ctx_constant<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_coeffects::HhasCtxConstant<'arena>> {
+    token_iter.expect_is_str(Token::into_decl, ".ctx")?;
+    let name = token_iter.expect_identifier_into_ffi_str(alloc)?;
+    let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
+    // .ctx has slice of recognized and unrecognized constants.
+    // Making an assumption that recognized ~~ static coeffects and
+    // unrecognized ~~ unenforced static coeffects
+    let mut tokens: Vec<&[u8]> = Vec::new();
+    while !token_iter.peek_if(Token::is_semicolon) {
+        tokens.push(token_iter.expect(Token::into_identifier)?);
+    }
+    let (r, u): (Vec<&[u8]>, Vec<&[u8]>) =
+        tokens.into_iter().partition(is_enforced_static_coeffect);
+    let r = r.iter().map(|s| Str::new_slice(alloc, s)).collect();
+    let u = u.iter().map(|s| Str::new_slice(alloc, s)).collect();
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(hhbc::hhas_coeffects::HhasCtxConstant {
+        name,
+        recognized: Slice::from_vec(alloc, r),
+        unrecognized: Slice::from_vec(alloc, u),
+        is_abstract,
+    })
 }
 
 /// Ex:
@@ -376,12 +480,7 @@ fn assemble_const_or_type_const<'arena>(
         //type const
         let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
         let initializer = if token_iter.next_if(Token::is_equal) {
-            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-            let tv = &tv[3..tv.len() - 3];
-            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+            Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
         } else {
             Maybe::Nothing
         };
@@ -394,16 +493,14 @@ fn assemble_const_or_type_const<'arena>(
         //const
         let name = hhbc::ConstName::new(name);
         let is_abstract = token_iter.next_if_str(Token::is_identifier, "isAbstract");
-        token_iter.expect(Token::into_equal)?;
-        let value = if token_iter.next_if_str(Token::is_identifier, "uninit") {
-            Maybe::Just(hhbc::TypedValue::Uninit)
+        let value = if token_iter.next_if(Token::is_equal) {
+            if token_iter.next_if_str(Token::is_identifier, "uninit") {
+                Maybe::Just(hhbc::TypedValue::Uninit)
+            } else {
+                Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
+            }
         } else {
-            let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-            debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-            let tv = &tv[3..tv.len() - 3];
-            let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-            let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-            Maybe::Just(assemble_typed_value(alloc, &mut tv_lexer)?)
+            Maybe::Nothing
         };
         consts.push(hhbc::hhas_constant::HhasConstant {
             name,
@@ -429,11 +526,13 @@ fn assemble_method<'arena>(
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
+        Some(Token::Lt(_)) => {
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        }
         _ => Maybe::Nothing,
     };
     let name = assemble_method_name(alloc, token_iter)?;
-    let mut decl_map: HashMap<&[u8], u32> = HashMap::new();
+    let mut decl_map: HashMap<Vec<u8>, u32> = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
@@ -502,7 +601,9 @@ fn assemble_property<'arena>(
     } else {
         Maybe::Nothing
     };
-    let type_info = if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
+    let type_info = if let Maybe::Just(ti) =
+        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+    {
         ti
     } else {
         bail!("No type_info for class property")
@@ -593,14 +694,16 @@ fn assemble_prop_name<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::PropName<'arena>> {
-    let nm = if token_iter.peek_if_str(Token::is_number, "86") {
-        // Only properties that can start with #s start with
-        // 86 and are compiler added ones
-        let under86 = token_iter.expect(Token::into_number)?;
+    // Only properties that can start with #s start with 0 or
+    // 86 and are compiler added ones
+    let nm = if token_iter.peek_if_str(Token::is_number, "86")
+        || token_iter.peek_if_str(Token::is_number, "0")
+    {
+        let num_prefix = token_iter.expect(Token::into_number)?;
         let name = token_iter.expect(Token::into_identifier)?;
-        let mut under86 = under86.to_vec();
-        under86.extend_from_slice(name);
-        Str::new_slice(alloc, &under86)
+        let mut num_prefix = num_prefix.to_vec();
+        num_prefix.extend_from_slice(name);
+        Str::new_slice(alloc, &num_prefix)
     } else {
         token_iter.expect_identifier_into_ffi_str(alloc)?
     };
@@ -747,7 +850,7 @@ fn assemble_enum_ty<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     if token_iter.next_if_str(Token::is_decl, ".enum_ty") {
-        let ti = assemble_type_info(alloc, token_iter, true, false)?;
+        let ti = assemble_type_info(alloc, token_iter, TypeInfoKind::Enum)?;
         token_iter.expect(Token::into_semicolon)?;
         Ok(ti)
     } else {
@@ -805,15 +908,7 @@ fn assemble_adata<'arena>(
     let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
     token_iter.expect(Token::into_equal)?;
     // What's left here is tv
-    let (tv, tv_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-    debug_assert!(&tv[0..3] == b"\"\"\"" && &tv[tv.len() - 3..tv.len()] == b"\"\"\"");
-    let tv = &tv[3..tv.len() - 3];
-    let tv = &escaper::unescape_literal_bytes_into_vec_bytes(tv)?;
-    // Have to unescape tv -- for example, """D:1:{s:5:\"class\"; D:...""" causes error parsing \"class\"
-    let mut tv_lexer = Lexer::from_slice(tv, tv_line);
-    // this so it's accurate again?
-    let value = assemble_typed_value(alloc, &mut tv_lexer)?;
-    tv_lexer.expect_end()?;
+    let value = assemble_triple_quoted_typed_value(alloc, token_iter)?;
     token_iter.expect(Token::into_semicolon)?;
     Ok(hhbc::hhas_adata::HhasAdata { id, value })
 }
@@ -827,132 +922,117 @@ fn assemble_triple_quoted_typed_value<'arena>(
     // Guaranteed st is encased by """ """
     let st = &st[3..st.len() - 3];
     let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
-    assemble_typed_value(alloc, &mut Lexer::from_slice(&st, line))
+    // TvLexer expects an unescaped string.
+    assemble_typed_value(alloc, &mut TvLexer::from_slice(&st, line))
 }
 
 /// tv can look like:
 /// uninit | N; | s:s.len():"(escaped s)"; | l:s.len():"(escaped s)"; | d:#; | i:#; | b:0; | b:1; | D:dict.len():{((tv1);(tv2);)*}
 /// | v:vec.len():{(tv;)*} | k:keyset.len():{(tv;)*}
 fn assemble_typed_value<'arena>(
-    // can use this for arguments of user_attrs as well .v.
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    let tok = token_iter
-        .peek()
-        .ok_or_else(|| anyhow!("No typed value to parse"))?;
-    match tok.as_bytes() {
-        b"uninit" => {
-            token_iter.next();
-            Ok(hhbc::TypedValue::Uninit)
+    let tr = match token_iter
+        .next()
+        .ok_or_else(|| anyhow!("Expected a tv, got end of lexer. Line: {}", token_iter.line))?
+    {
+        TvToken::Uninit => hhbc::TypedValue::Uninit,
+        TvToken::Int(i) => hhbc::TypedValue::Int(i),
+        TvToken::Bool(b) => hhbc::TypedValue::Bool(b),
+        TvToken::Float(f) => hhbc::TypedValue::Float(f),
+        TvToken::LazyClass => todo!(),
+        TvToken::Null => hhbc::TypedValue::Null,
+        TvToken::OpenCurly => bail!("Expected a typed value, got {{. Line {}", token_iter.line),
+        TvToken::CloseCurly => {
+            bail!("Expected a typed value, got }}. Line {}", token_iter.line)
         }
-        b"N" => {
-            token_iter.expect_is_str(Token::into_identifier, "N")?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::Null)
-        }
-        b"s" => {
-            // String
-            token_iter.expect_is_str(Token::into_identifier, "s")?;
-            token_iter.expect(Token::into_colon)?;
-            token_iter.expect(Token::into_number)?;
-            token_iter.expect(Token::into_colon)?;
-            let st = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::string(Str::new_slice(alloc, st))) // Have to check escaping
-        }
-        b"l" => todo!(), // LazyClass
-        b"d" => {
-            // Float
-            token_iter.expect_is_str(Token::into_identifier, "d")?;
-            token_iter.expect(Token::into_colon)?;
-            let n = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::float(n))
-        }
-        b"i" => {
-            // Int
-            token_iter.expect_is_str(Token::into_identifier, "i")?;
-            token_iter.expect(Token::into_colon)?;
-            let num: i64 = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            Ok(hhbc::TypedValue::Int(num))
-        }
-        b"b" => {
-            // Bool
-            token_iter.expect_is_str(Token::into_identifier, "b")?;
-            token_iter.expect(Token::into_colon)?;
-            let num = token_iter.expect_and_get_number()?;
-            token_iter.expect(Token::into_semicolon)?;
-            match num {
-                0 => Ok(hhbc::TypedValue::Bool(false)),
-                1 => Ok(hhbc::TypedValue::Bool(true)),
-                _ => bail!("Given bool adata specified as number other than 0 or 1"),
-            }
-        }
-        b"v" => assemble_tv_vec(alloc, token_iter), // Vec
-        b"k" => assemble_tv_keyset(alloc, token_iter), // Keyset
-        b"D" => assemble_tv_dict(alloc, token_iter), // Dict
-        _ => bail!("Unknown typed value passed to .adata: {}", tok),
+        TvToken::Semicolon => bail!("Expected a typed value, got ;. Line {}", token_iter.line),
+        TvToken::Error(s) => bail!(
+            "Expected a typed value, got Error: {:?}. Line {}",
+            s,
+            token_iter.line
+        ),
+        TvToken::S => assemble_tv_string(alloc, token_iter)?,
+        TvToken::Vec(u) => assemble_tv_vec(alloc, token_iter, u)?,
+        TvToken::Keyset(u) => assemble_tv_keyset(alloc, token_iter, u)?,
+        TvToken::Dict(u) => assemble_tv_dict(alloc, token_iter, u)?,
+        TvToken::String(_) => bail!(
+            "Free string literal in tv, expecting TV delimiter (i, d, b, etc). Line: {}",
+            token_iter.line
+        ),
+    };
+    if matches!(tr, hhbc::TypedValue::Int(_))
+        || matches!(tr, hhbc::TypedValue::Bool(_))
+        || matches!(tr, hhbc::TypedValue::Float(_))
+        || matches!(tr, hhbc::TypedValue::String(_))
+        || matches!(tr, hhbc::TypedValue::LazyClass(_))
+        || matches!(tr, hhbc::TypedValue::Null)
+    {
+        token_iter.expect(TvToken::into_semicolon)?;
     }
+    Ok(tr)
+}
+
+fn assemble_tv_string<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut TvLexer<'_>,
+) -> Result<hhbc::TypedValue<'arena>> {
+    let s = token_iter.expect(TvToken::into_string)?;
+    Ok(hhbc::TypedValue::String(Str::new_slice(alloc, s)))
 }
 
 fn assemble_tv_vec<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "v")?;
     Ok(hhbc::TypedValue::Vec(assemble_tv_vec_or_key(
-        alloc, token_iter,
+        alloc, token_iter, len,
     )?))
 }
 
 fn assemble_tv_keyset<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "k")?;
     Ok(hhbc::TypedValue::Keyset(assemble_tv_vec_or_key(
-        alloc, token_iter,
+        alloc, token_iter, len,
     )?))
 }
 
 /// Builds whawt follows v or k in a TypedValue::Vec or TypedValue::KeySet
 fn assemble_tv_vec_or_key<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
-    token_iter.expect(Token::into_colon)?;
-    let ln: usize = token_iter.expect_and_get_number()?;
-    token_iter.expect(Token::into_colon)?;
-    token_iter.expect(Token::into_open_curly)?;
-    let mut vec = Vec::with_capacity(ln);
-    for _ in 0..ln {
+    token_iter.expect(TvToken::into_open_curly)?;
+    let mut vec = Vec::with_capacity(len);
+    for _ in 0..len {
         vec.push(assemble_typed_value(alloc, token_iter)?);
     }
-    token_iter.expect(Token::into_close_curly)?;
+    token_iter.expect(TvToken::into_close_curly)?;
     Ok(Slice::from_vec(alloc, vec))
 }
 
 /// D:(D.len):{p1_0; p1_1; ...; pD.len_0; pD.len_1}
 fn assemble_tv_dict<'arena>(
     alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
+    token_iter: &mut TvLexer<'_>,
+    len: usize,
 ) -> Result<hhbc::TypedValue<'arena>> {
-    token_iter.expect_is_str(Token::into_identifier, "D")?;
-    token_iter.expect(Token::into_colon)?;
-    let ln: usize = token_iter.expect_and_get_number()?; // Length is the # of pairs in the dict
-    token_iter.expect(Token::into_colon)?;
-    token_iter.expect(Token::into_open_curly)?;
+    token_iter.expect(TvToken::into_open_curly)?;
     let mut dict: Vec<Pair<hhbc::TypedValue<'arena>, hhbc::TypedValue<'arena>>> =
-        Vec::with_capacity(ln);
-    for _ in 0..ln {
+        Vec::with_capacity(len);
+    for _ in 0..len {
         dict.push(Pair::from((
             assemble_typed_value(alloc, token_iter)?,
             assemble_typed_value(alloc, token_iter)?,
         )));
     }
-    token_iter.expect(Token::into_close_curly)?;
+    token_iter.expect(TvToken::into_close_curly)?;
     Ok(hhbc::TypedValue::Dict(Slice::from_vec(alloc, dict)))
 }
 
@@ -999,15 +1079,17 @@ fn assemble_function<'arena>(
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
     let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => assemble_type_info(alloc, token_iter, false, false)?,
+        Some(Token::Lt(_)) => {
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        }
         _ => Maybe::Nothing,
     };
     // Assemble_name
 
     let name = assemble_function_name(alloc, token_iter)?;
-    let mut decl_map: HashMap<&[u8], u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
+    let mut decl_map: HashMap<Vec<u8>, u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
-    let flags = assemble_function_flags(token_iter)?;
+    let flags = assemble_function_flags(name, token_iter)?;
     let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
     // Fill partial_body in with params, return_type_info, and bd_upper_bounds
     let body = hhbc::hhas_body::HhasBody {
@@ -1029,7 +1111,10 @@ fn assemble_function<'arena>(
 }
 
 /// Have to parse flags which may or may not appear: isGenerator isAsync isPairGenerator
+/// Also, MEMOIZE_IMPL appears in the function name. Example:
+/// .function {} [ "__Memoize"("""v:1:{s:9:\"KeyedByIC\";}""") "__Reified"("""v:4:{i:1;i:0;i:0;i:0;}""")] (4,10) <"" N > memo$memoize_impl($a, $b)
 fn assemble_function_flags(
+    name: hhbc::FunctionName<'_>,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::hhas_function::HhasFunctionFlags> {
     let mut flag = hhbc::hhas_function::HhasFunctionFlags::empty();
@@ -1040,6 +1125,9 @@ fn assemble_function_flags(
             b"isGenerator" => flag |= hhbc::hhas_function::HhasFunctionFlags::GENERATOR,
             f => bail!("Unknown function flag: {:?}", f),
         }
+    }
+    if name.as_bstr().ends_with(b"$memoize_impl") {
+        flag |= hhbc::hhas_function::HhasFunctionFlags::MEMOIZE_IMPL;
     }
     Ok(flag)
 }
@@ -1099,7 +1187,9 @@ fn assemble_upper_bound<'arena>(
     token_iter.expect_is_str(Token::into_identifier, "as")?;
     let mut tis = Vec::new();
     while !token_iter.peek_if(Token::is_close_paren) {
-        if let Maybe::Just(ti) = assemble_type_info(alloc, token_iter, false, false)? {
+        if let Maybe::Just(ti) =
+            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
+        {
             tis.push(ti);
         } else {
             bail!("Unexpected \"N\" in upper bound type info");
@@ -1143,51 +1233,51 @@ fn assemble_special_and_user_attrs<'arena>(
 fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi::Attr> {
     use hhvm_types_ffi::ffi::Attr;
     let flag = match token_iter.expect(Token::into_identifier)? {
-        b"none" => Attr::AttrNone,
-        b"forbid_dynamic_props" => Attr::AttrForbidDynamicProps,
-        b"deep_init" => Attr::AttrDeepInit,
-        b"public" => Attr::AttrPublic,
-        b"protected" => Attr::AttrProtected,
-        b"private" => Attr::AttrPrivate,
-        b"enum" => Attr::AttrEnum,
-        b"sys_initial_val" => Attr::AttrSystemInitialValue,
-        b"no_implicit_nullable" => Attr::AttrNoImplicitNullable,
-        b"static" => Attr::AttrStatic,
         b"abstract" => Attr::AttrAbstract,
-        b"final" => Attr::AttrFinal,
-        b"interface" => Attr::AttrInterface,
-        b"lsb" => Attr::AttrLSB,
-        b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
-        b"trait" => Attr::AttrTrait,
-        b"no_injection" => Attr::AttrNoInjection,
-        b"initial_satisifes_tc" => Attr::AttrInitialSatisfiesTC,
-        b"unique" => Attr::AttrUnique,
         b"bad_redeclare" => Attr::AttrNoBadRedeclare,
-        b"interceptable" => Attr::AttrInterceptable,
-        b"sealed" => Attr::AttrSealed,
-        b"late_init" => Attr::AttrLateInit,
-        b"no_expand_trait" => Attr::AttrNoExpandTrait,
-        b"no_override" => Attr::AttrNoOverride,
-        b"is_readonly" => Attr::AttrIsReadonly,
-        b"readonly_this" => Attr::AttrReadonlyThis,
-        b"readonly_return" => Attr::AttrReadonlyReturn,
-        b"internal" => Attr::AttrInternal,
-        b"persistent" => Attr::AttrPersistent,
+        b"builtin" => Attr::AttrBuiltin,
+        b"deep_init" => Attr::AttrDeepInit,
         b"dyn_callable" => Attr::AttrDynamicallyCallable,
         b"dyn_constructible" => Attr::AttrDynamicallyConstructible,
-        b"builtin" => Attr::AttrBuiltin,
-        b"is_const" => Attr::AttrIsConst,
-        b"noreifiedinit" => Attr::AttrNoReifiedInit,
-        b"is_meth_caller" => Attr::AttrIsMethCaller,
-        b"is_closure_class" => Attr::AttrIsClosureClass,
+        b"enum" => Attr::AttrEnum,
+        b"enum_class" => Attr::AttrEnumClass,
+        b"final" => Attr::AttrFinal,
         b"has_closure_coeffects_prop" => Attr::AttrHasClosureCoeffectsProp,
         b"has_coeffect_rules" => Attr::AttrHasCoeffectRules,
+        b"initial_satisifes_tc" => Attr::AttrInitialSatisfiesTC,
+        b"interceptable" => Attr::AttrInterceptable,
+        b"interface" => Attr::AttrInterface,
+        b"internal" => Attr::AttrInternal,
+        b"is_closure_class" => Attr::AttrIsClosureClass,
+        b"is_const" => Attr::AttrIsConst,
         b"is_foldable" => Attr::AttrIsFoldable,
+        b"is_meth_caller" => Attr::AttrIsMethCaller,
+        b"late_init" => Attr::AttrLateInit,
+        b"lsb" => Attr::AttrLSB,
+        b"none" => Attr::AttrNone,
+        b"noreifiedinit" => Attr::AttrNoReifiedInit,
+        b"no_dynamic_props" => Attr::AttrForbidDynamicProps,
+        b"no_expand_trait" => Attr::AttrNoExpandTrait,
         b"no_fcall_builtin" => Attr::AttrNoFCallBuiltin,
-        b"variadic_param" => Attr::AttrVariadicParam,
-        b"provenance_skip_frame" => Attr::AttrProvenanceSkipFrame,
-        b"enum_class" => Attr::AttrEnumClass,
+        b"no_implicit_nullable" => Attr::AttrNoImplicitNullable,
+        b"no_injection" => Attr::AttrNoInjection,
+        b"no_override" => Attr::AttrNoOverride,
+        b"persistent" => Attr::AttrPersistent,
+        b"private" => Attr::AttrPrivate,
+        b"protected" => Attr::AttrProtected,
+        b"prov_skip_frame" => Attr::AttrProvenanceSkipFrame,
+        b"public" => Attr::AttrPublic,
+        b"readonly" => Attr::AttrIsReadonly,
+        b"readonly_return" => Attr::AttrReadonlyReturn,
+        b"readonly_this" => Attr::AttrReadonlyThis,
+        b"sealed" => Attr::AttrSealed,
+        b"static" => Attr::AttrStatic,
+        b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
+        b"sys_initial_val" => Attr::AttrSystemInitialValue,
+        b"trait" => Attr::AttrTrait,
+        b"unique" => Attr::AttrUnique,
         b"unused_max_attr" => Attr::AttrUnusedMaxAttr,
+        b"variadic_param" => Attr::AttrVariadicParam,
         o => bail!("Unknown attr: {:?}", o),
     };
     Ok(flag)
@@ -1204,15 +1294,9 @@ fn assemble_user_attr<'arena>(
     ))?;
     let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
-    let (args, args_line) = token_iter.expect(Token::into_triple_str_literal_and_line)?;
-    debug_assert!(&args[0..3] == b"\"\"\"" && &args[args.len() - 3..args.len()] == b"\"\"\"");
-    let args = &args[3..args.len() - 3];
-    let mut args_lexer = Lexer::from_slice(args, args_line);
+    let arguments = assemble_user_attr_args(alloc, token_iter)?;
     token_iter.expect(Token::into_close_paren)?;
-    Ok(hhbc::hhas_attribute::HhasAttribute {
-        name,
-        arguments: assemble_user_attr_args(alloc, &mut args_lexer)?,
-    })
+    Ok(hhbc::hhas_attribute::HhasAttribute { name, arguments })
 }
 
 /// Printed as follows (print_attributes in bcp)
@@ -1221,30 +1305,40 @@ fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
-    if let hhbc::TypedValue::Vec(sl) = assemble_typed_value(alloc, token_iter)? {
+    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(alloc, token_iter)? {
         Ok(sl)
     } else {
         bail!("Malformed user_attr_args -- should be a vec")
     }
 }
 
+#[derive(PartialEq)]
+pub enum TypeInfoKind {
+    TypeDef,
+    Enum,
+    NotEnumOrTypeDef,
+}
+
 /// Ex: <"HH\\void" N >
 /// < "user_type" "type_constraint.name" type_constraint.flags >
-/// if 'is_enum', no  name printed
+/// if 'is_enum', no  type_constraint name printed
+/// if 'is_typedef', no user_type name printed
+
 fn assemble_type_info<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    is_enum: bool,
-    is_typedef: bool, // If typedef, the user_type is also the name
+    tik: TypeInfoKind,
 ) -> Result<Maybe<hhbc::hhas_type::HhasTypeInfo<'arena>>> {
     token_iter.expect(Token::into_lt)?;
-    let user_type = token_iter.expect(Token::into_str_literal)?;
-    let user_type = escaper::unquote_slice(user_type);
-    let user_type = escaper::unescape_literal_bytes_into_vec_bytes(user_type)?;
-    let user_type = Maybe::Just(Str::new_slice(alloc, &user_type));
-    let type_cons_name = if is_typedef {
-        user_type.clone()
-    } else if is_enum || token_iter.next_if_str(Token::is_identifier, "N") {
+    let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+    let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
+    let type_cons_name = if tik == TypeInfoKind::TypeDef {
+        if first.is_empty() {
+            Maybe::Nothing
+        } else {
+            Maybe::Just(Str::new_slice(alloc, &first))
+        }
+    } else if tik == TypeInfoKind::Enum || token_iter.next_if_str(Token::is_identifier, "N") {
         Maybe::Nothing
     } else {
         Maybe::Just(Str::new_slice(
@@ -1253,6 +1347,11 @@ fn assemble_type_info<'arena>(
                 token_iter.expect(Token::into_str_literal)?,
             ))?,
         ))
+    };
+    let user_type = if !(tik == TypeInfoKind::TypeDef) {
+        Maybe::Just(Str::new_slice(alloc, &first))
+    } else {
+        Maybe::Nothing
     };
     let mut tcflags = hhvm_types_ffi::ffi::TypeConstraintFlags::NoFlags;
     while !token_iter.peek_if(Token::is_gt) {
@@ -1288,7 +1387,7 @@ fn assemble_type_constraint(
 fn assemble_params<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
-    decl_map: &mut HashMap<&'a [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
 ) -> Result<Slice<'arena, hhbc::hhas_param::HhasParam<'arena>>> {
     token_iter.expect(Token::into_open_paren)?;
     let mut params = Vec::new();
@@ -1306,7 +1405,7 @@ fn assemble_params<'arena, 'a>(
 fn assemble_param<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
-    decl_map: &mut HashMap<&'a [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::hhas_param::HhasParam<'arena>> {
     let mut ua_vec = Vec::new();
     let user_attributes = {
@@ -1323,12 +1422,12 @@ fn assemble_param<'arena, 'a>(
     let is_readonly = token_iter.next_if_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_if(Token::is_variadic);
     let type_info = if token_iter.peek_if(Token::is_lt) {
-        assemble_type_info(alloc, token_iter, false, false)? // Unlike user_attrs, consumes <> too
+        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
     } else {
         Maybe::Nothing
     };
     let name = token_iter.expect(Token::into_variable)?;
-    decl_map.insert(name, decl_map.len() as u32);
+    decl_map.insert(name.to_vec(), decl_map.len() as u32);
     let name = Str::new_slice(alloc, name);
     let default_value = assemble_default_value(alloc, token_iter)?;
     Ok(hhbc::hhas_param::HhasParam {
@@ -1364,7 +1463,7 @@ fn assemble_default_value<'arena>(
 fn assemble_body<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
-    decl_map: &mut HashMap<&'a [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
 ) -> Result<(
     hhbc::hhas_body::HhasBody<'arena>,
     hhbc::hhas_coeffects::HhasCoeffects<'arena>,
@@ -1401,11 +1500,8 @@ fn assemble_body<'arena, 'a>(
                 bail!("Cannot have more than one .declvars per function body");
             }
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
-        } else if token_iter.peek_if_str(Token::is_decl, ".coeffects_static") {
-            let mut scs = Vec::new();
-
-            assemble_static_coeffects(token_iter, &mut scs)?;
-            coeff = hhbc::hhas_coeffects::HhasCoeffects::from_static_coeffects(alloc, scs);
+        } else if token_iter.peek_if_str_starts(Token::is_decl, ".coeffects") {
+            coeff = assemble_coeffects(alloc, token_iter)?;
         } else {
             break;
         }
@@ -1429,17 +1525,168 @@ fn assemble_body<'arena, 'a>(
     Ok((tr, coeff))
 }
 
+/// Printed in this order (if exists)
+/// static and unenforced static coeffects (.coeffects_static ... );
+/// .coeffects_fun_param ..;
+/// .coeffects_cc_param ..;
+/// .coeffects_cc_this;
+/// .coeffects_cc_reified;
+/// .coeffects_closure_parent_scope;
+/// .coeffects_generator_this;
+/// .coeffects_caller;
+fn assemble_coeffects<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::hhas_coeffects::HhasCoeffects<'arena>> {
+    let mut scs = Vec::new();
+    let mut uscs = Vec::new();
+    let mut fun_param = Vec::new();
+    let mut cc_param = Vec::new();
+    let mut cc_this = Vec::new();
+    let mut cc_reified = Vec::new();
+    let mut closure_parent_scope = false;
+    let mut generator_this = false;
+    let mut caller = false;
+    while token_iter.peek_if_str_starts(Token::is_decl, ".coeffects") {
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_static") {
+            assemble_static_coeffects(alloc, token_iter, &mut scs, &mut uscs)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_fun_param") {
+            assemble_coeffects_fun_param(token_iter, &mut fun_param)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_param") {
+            assemble_coeffects_cc_param(alloc, token_iter, &mut cc_param)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_this") {
+            assemble_coeffects_cc_this(alloc, token_iter, &mut cc_this)?;
+        }
+        if token_iter.peek_if_str(Token::is_decl, ".coeffects_cc_reified") {
+            assemble_coeffects_cc_reified(alloc, token_iter, &mut cc_reified)?;
+        }
+        closure_parent_scope =
+            token_iter.next_if_str(Token::is_decl, ".coeffects_closure_parent_scope");
+        if closure_parent_scope {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+        generator_this = token_iter.next_if_str(Token::is_decl, ".coeffects_generator_this");
+        if generator_this {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+        caller = token_iter.next_if_str(Token::is_decl, ".coeffects_caller");
+        if caller {
+            token_iter.expect(Token::into_semicolon)?;
+        }
+    }
+
+    Ok(hhbc::hhas_coeffects::HhasCoeffects::new(
+        Slice::from_vec(alloc, scs),
+        Slice::from_vec(alloc, uscs),
+        Slice::from_vec(alloc, fun_param),
+        Slice::from_vec(alloc, cc_param),
+        Slice::from_vec(alloc, cc_this),
+        Slice::from_vec(alloc, cc_reified),
+        closure_parent_scope,
+        generator_this,
+        caller,
+    ))
+}
+
 /// Ex: .coeffects_static pure
-fn assemble_static_coeffects<'arena>(token_iter: &mut Lexer<'_>, scs: &mut Vec<Ctx>) -> Result<()> {
+fn assemble_static_coeffects<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    scs: &mut Vec<Ctx>,
+    uscs: &mut Vec<Str<'arena>>,
+) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_static")?;
     while !token_iter.peek_if(Token::is_semicolon) {
         match token_iter.expect(Token::into_identifier)? {
             b"pure" => scs.push(Ctx::Pure),
             b"defaults" => scs.push(Ctx::Defaults),
-            d => bail!("Unknown static coeffect: {:?}", d),
+            b"rx" => scs.push(Ctx::Rx),
+            b"zoned" => scs.push(Ctx::Zoned),
+            b"write_props" => scs.push(Ctx::WriteProps),
+            b"rx_local" => scs.push(Ctx::RxLocal),
+            b"zoned_with" => scs.push(Ctx::ZonedWith),
+            b"zoned_local" => scs.push(Ctx::ZonedLocal),
+            b"zoned_shallow" => scs.push(Ctx::ZonedShallow),
+            b"leak_safe_local" => scs.push(Ctx::LeakSafeLocal),
+            b"leak_safe_shallow" => scs.push(Ctx::LeakSafeShallow),
+            b"leak_safe" => scs.push(Ctx::LeakSafe),
+            b"read_globals" => scs.push(Ctx::ReadGlobals),
+            b"globals" => scs.push(Ctx::Globals),
+            b"write_this_props" => scs.push(Ctx::WriteThisProps),
+            b"rx_shallow" => scs.push(Ctx::RxShallow),
+            d => uscs.push(Str::new_slice(alloc, d)), //If unknown Ctx, is a unenforce_static_coeffect (ex: output)
         }
     }
     token_iter.expect(Token::into_semicolon)?;
+    Ok(())
+}
+
+/// Ex:
+/// .coeffects_fun_param 0;
+fn assemble_coeffects_fun_param(
+    token_iter: &mut Lexer<'_>,
+    fun_param: &mut Vec<usize>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_fun_param")?;
+    while !token_iter.peek_if(Token::is_semicolon) {
+        fun_param.push(token_iter.expect_and_get_number()?);
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
+}
+
+/// Ex:
+/// .coeffects_cc_param 0 C 0 Cdebug;
+fn assemble_coeffects_cc_param<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    cc_param: &mut Vec<Pair<usize, Str<'arena>>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_param")?;
+    while !token_iter.peek_if(Token::is_semicolon) {
+        let num: usize = token_iter.expect_and_get_number()?;
+        let st = token_iter.expect_identifier_into_ffi_str(alloc)?;
+        cc_param.push(Pair(num, st));
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    Ok(())
+}
+
+/// Ex:
+/// .coeffects_cc_this Cdebug;
+fn assemble_coeffects_cc_this<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    cc_this: &mut Vec<Slice<'arena, Str<'arena>>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_this")?;
+    let mut params = Vec::new();
+    while !token_iter.peek_if(Token::is_semicolon) {
+        params.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    cc_this.push(Slice::from_vec(alloc, params));
+    Ok(())
+}
+
+/// .coeffects_cc_reified 0 C;
+fn assemble_coeffects_cc_reified<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    cc_reified: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+) -> Result<()> {
+    token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_reified")?;
+    let isc = token_iter.next_if_str(Token::is_identifier, "isClass");
+    let us = token_iter.expect_and_get_number()?;
+    let mut sl = Vec::new();
+    while !token_iter.peek_if(Token::is_semicolon) {
+        sl.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+    }
+    token_iter.expect(Token::into_semicolon)?;
+    cc_reified.push(ffi::Triple(isc, us, Slice::from_vec(alloc, sl)));
     Ok(())
 }
 
@@ -1455,14 +1702,14 @@ fn assemble_numiters(token_iter: &mut Lexer<'_>) -> Result<usize> {
 fn assemble_decl_vars<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'a>,
-    decl_map: &mut HashMap<&'a [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
 ) -> Result<Slice<'arena, Str<'arena>>> {
     token_iter.expect_is_str(Token::into_decl, ".declvars")?;
     let mut var_names = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
-        let var_nm = token_iter.expect(Token::into_variable)?;
+        let var_nm = token_iter.expect_var()?;
+        var_names.push(Str::new_slice(alloc, &var_nm[..]));
         decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
-        var_names.push(Str::new_slice(alloc, var_nm));
     }
     token_iter.expect(Token::into_semicolon)?;
     Ok(Slice::from_vec(alloc, var_names))
@@ -1472,10 +1719,10 @@ fn assemble_decl_vars<'arena, 'a>(
 fn assemble_instr<'arena, 'a>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<&'a [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$");
+    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
     if let Some(mut sl_lexer) = token_iter.fetch_until_newline() {
         if sl_lexer.peek_if(Token::is_decl) {
             // Not all pseudos are decls, but all instruction decls are pseudos
@@ -2075,7 +2322,44 @@ fn assemble_instr<'arena, 'a>(
                     ),
                     b"MemoGet" => assemble_memo_get(&mut sl_lexer),
                     b"MemoSet" => assemble_memo_set(&mut sl_lexer),
+                    b"Switch" => assemble_switch(alloc, &mut sl_lexer),
                     b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
+                    b"Eval" => {
+                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eval, "Eval")
+                    }
+                    b"ThrowAsTypeStructException" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::ThrowAsTypeStructException,
+                        "ThrowAsTypeStructException",
+                    ),
+                    b"AwaitAll" => assemble_await_all(&mut sl_lexer),
+                    b"WHResult" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::WHResult,
+                        "WHResult",
+                    ),
+                    b"AddNewElemC" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::AddNewElemC,
+                        "AddNewElemC",
+                    ),
+                    b"IsLateBoundCls" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::IsLateBoundCls,
+                        "IsLateBoundCls",
+                    ),
+                    b"FuncCred" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::FuncCred,
+                        "FuncCred",
+                    ),
+                    b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
+                    b"MemoSetEager" => assemble_memo_set_eager(&mut sl_lexer),
+                    b"RetCSuspended" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::RetCSuspended,
+                        "RetCSuspended",
+                    ),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {
@@ -2120,8 +2404,9 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
     let mut flags = hhbc::FCallArgsFlags::FCANone;
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
-        match token_iter.expect(Token::into_identifier)? {
-            b"HasUnpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
+        let f = token_iter.expect(Token::into_identifier)?;
+        match f {
+            b"Unpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
             b"Generics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),
             b"SkipRepack" => flags.add(hhbc::FCallArgsFlags::SkipRepack),
@@ -2241,14 +2526,6 @@ fn assemble_unescaped_unquoted_str<'arena>(
         token_iter.expect(Token::into_str_literal)?,
     ))?;
     Ok(Str::new_slice(alloc, &st))
-}
-
-fn assemble_unquoted_str<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<Str<'arena>> {
-    let st = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-    Ok(Str::new_slice(alloc, st))
 }
 
 fn assemble_unescaped_unquoted_triple_str<'arena>(
@@ -2390,7 +2667,7 @@ fn assemble_iter_init_iter_next<
     F: FnOnce(hhbc::IterArgs, hhbc::Label) -> hhbc::Opcode<'arena>,
 >(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
     op_con: F,
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2404,7 +2681,7 @@ fn assemble_iter_init_iter_next<
 /// Ex: 0 NK V:$v
 fn assemble_iter_args(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::IterArgs> {
     let idx: u32 = token_iter.expect_and_get_number()?;
     let key_id: hhbc::Local = match token_iter.expect(Token::into_identifier)? {
@@ -2427,7 +2704,7 @@ fn assemble_iter_args(
 /// Ex: IsTypeL $a Obj
 fn assemble_is_type_l<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeL")?;
     let lcl = assemble_local(token_iter, decl_map)?;
@@ -2460,6 +2737,37 @@ fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc:
     }
 }
 
+fn assemble_switch_kind(token_iter: &mut Lexer<'_>) -> Result<hhbc::SwitchKind> {
+    let sk = token_iter.expect(Token::into_identifier)?;
+    match sk {
+        b"Unbounded" => Ok(hhbc::SwitchKind::Unbounded),
+        b"Bounded" => Ok(hhbc::SwitchKind::Bounded),
+        sk => bail!("Unknown switch kind: {:?}", sk),
+    }
+}
+
+/// Switch(SwitchKind, i64, BumpSliceMut<'arena, Label>),
+/// Switch SwitchKind i64 < label* >
+fn assemble_switch<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "Switch")?;
+    let sk = assemble_switch_kind(token_iter)?;
+    let int = token_iter.expect_and_get_number()?;
+    let mut labels = Vec::new();
+    token_iter.expect(Token::into_lt)?;
+    while !token_iter.peek_if(Token::is_gt) {
+        labels.push(assemble_label(token_iter, false)?)
+    }
+    token_iter.expect(Token::into_gt)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Switch(
+        sk,
+        int,
+        Slice::from_vec(alloc, labels),
+    )))
+}
+
 /// Ex:
 /// SSwitch <"ARRAY7":L0 "ARRAY8":L1 "ARRAY9":L2 -:L3>
 fn assemble_sswitch<'arena>(
@@ -2488,6 +2796,37 @@ fn assemble_sswitch<'arena>(
         targets: Slice::from_vec(alloc, targets),
         _0: hhbc::Dummy::DEFAULT,
     }))
+}
+
+fn assemble_await_all<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "AwaitAll")?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::AwaitAll(lcl_range)))
+}
+
+/// Ex:
+/// MemoGetEager L0 L1 l:0+0
+fn assemble_memo_get_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoGetEager")?;
+    let lbl_slice = [
+        assemble_label(token_iter, false)?,
+        assemble_label(token_iter, false)?,
+    ];
+    let dum = hhbc::Dummy::DEFAULT;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoGetEager(
+        lbl_slice, dum, lcl_range,
+    )))
+}
+
+/// Ex:
+/// MemoSetEager L:0+0
+fn assemble_memo_set_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "MemoSetEager")?;
+    let lcl_range = assemble_local_range(token_iter)?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoSetEager(
+        lcl_range,
+    )))
 }
 
 /// Ex:
@@ -2557,7 +2896,7 @@ fn assemble_readonly_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ReadonlyOp> 
 fn assemble_member_key<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::MemberKey<'arena>> {
     match token_iter.expect(Token::into_identifier)? {
         b"EC" => {
@@ -2633,7 +2972,7 @@ fn assemble_member_key<'arena>(
 fn assemble_dim<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Dim")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Dim(
@@ -2657,7 +2996,7 @@ fn assemble_query_mop(token_iter: &mut Lexer<'_>) -> Result<hhbc::QueryMOp> {
 fn assemble_query_m<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "QueryM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::QueryM(
@@ -2671,7 +3010,7 @@ fn assemble_query_m<'arena>(
 fn assemble_inc_dec_m<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecM(
@@ -2684,7 +3023,7 @@ fn assemble_inc_dec_m<'arena>(
 /// BaseGL $var MOpMode
 fn assemble_base_gl<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseGL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseGL(
@@ -2707,7 +3046,7 @@ fn assemble_base_sc<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct
 /// BaseL $var MOpMode ReadOnlyOp
 fn assemble_base_l<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseL(
@@ -2748,7 +3087,7 @@ fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp>
 fn assemble_cns<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let op = match token_iter.expect(Token::into_identifier)? {
         b"CnsE" => hhbc::Opcode::CnsE(assemble_const_name_from_str(alloc, token_iter)?),
@@ -2774,7 +3113,7 @@ fn assemble_cns<'arena>(
 fn assemble_set_instruct<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let op = match token_iter.expect(Token::into_identifier)? {
         b"SetL" => hhbc::Opcode::SetL(assemble_local(token_iter, decl_map)?),
@@ -2862,7 +3201,7 @@ fn assemble_silence_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SilenceOp> {
 /// Silence _2 End
 fn assemble_silence<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<&'_ [u8], u32>,
+    decl_map: &mut HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Silence")?;
     let lcl = assemble_local(token_iter, decl_map)?;
@@ -2987,7 +3326,7 @@ fn assemble_new_col<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct
 /// CGetS Mutable
 fn assemble_cget<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let cg = match token_iter.expect(Token::into_identifier)? {
         b"CGetCUNop" => hhbc::Opcode::CGetCUNop,
@@ -3008,7 +3347,7 @@ fn assemble_cget<'arena>(
 /// IncDecL $var IncDecOp
 fn assemble_incdecl_opcode<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecL")?;
     let lcl = token_iter.expect(Token::into_variable)?;
@@ -3044,7 +3383,7 @@ fn assemble_new_struct_dict<'arena>(
     token_iter.expect(Token::into_lt)?;
     let mut d = Vec::new();
     while !token_iter.peek_if(Token::is_gt) {
-        d.push(assemble_unquoted_str(alloc, token_iter)?);
+        d.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
     }
     token_iter.expect(Token::into_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewStructDict(
@@ -3058,7 +3397,7 @@ fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc:
     if needs_colon {
         token_iter.expect(Token::into_colon)?;
     }
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$");
+    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
     if label_reg.is_match(lcl) {
         if lcl[0] == b'D' {
             lcl = &lcl[2..];
@@ -3150,7 +3489,7 @@ fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'ar
 /// _3 -> 3
 fn assemble_local(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Local> {
     match token_iter.next() {
         Some(Token::Variable(v, p)) => {
@@ -3184,7 +3523,7 @@ fn assemble_retm_opcode_instr<'arena>(
 /// Assembles one of CGetL/Push/SetL/etc...
 fn assemble_local_carrying_opcode_instr<'arena, F: FnOnce(hhbc::Local) -> hhbc::Opcode<'arena>>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<&'_ [u8], u32>,
+    decl_map: &HashMap<Vec<u8>, u32>,
     op_con: F,
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -3260,6 +3599,247 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
     )))
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum TvToken<'a> {
+    // The TvLexer will just hold a line number; TV is kept to a line
+    Uninit,
+    Int(i64),               // i:#
+    Bool(bool),             // b:(0|1)
+    Float(hhbc::FloatBits), // TV Float carries FloatBits, f64 impl from. d:#
+    S,                      //String marker. s:#:. Doesn't carry its length b/c lexer
+    // guarantees that the following token is a str literal of the appropriate length, else error
+    String(&'a [u8]), //Str literal. ".."
+    LazyClass,        //l:#L
+    Null,             //N
+    Vec(usize),       // Carries its length. v:#:
+    Keyset(usize),    // k:#:
+    Dict(usize),      // D:#:
+    Error(&'a [u8]),
+    OpenCurly,
+    CloseCurly,
+    Semicolon,
+}
+
+impl<'a> TvToken<'a> {
+    fn into_string(self) -> Result<&'a [u8]> {
+        match self {
+            TvToken::String(s) => Ok(s),
+            _ => bail!("Expected a String, got: {:?}", self),
+        }
+    }
+
+    fn into_open_curly(self) -> Result<()> {
+        match self {
+            TvToken::OpenCurly => Ok(()),
+            _ => bail!("Expected a OpenCurly, got: {:?}", self),
+        }
+    }
+    fn into_close_curly(self) -> Result<()> {
+        match self {
+            TvToken::CloseCurly => Ok(()),
+            _ => bail!("Expected a CloseCurly, got: {:?}", self),
+        }
+    }
+    fn into_semicolon(self) -> Result<()> {
+        match self {
+            TvToken::Semicolon => Ok(()),
+            _ => bail!("Expected a Semicolon, got: {:?}", self),
+        }
+    }
+}
+
+pub struct TvLexer<'a> {
+    pub line: usize, // A TV should all stay on one line.
+    pending: Option<TvToken<'a>>,
+    tokens: VecDeque<TvToken<'a>>,
+}
+
+impl<'a> Iterator for TvLexer<'a> {
+    type Item = TvToken<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.fill();
+        self.pending.take()
+    }
+}
+
+impl<'a> TvLexer<'a> {
+    fn fill(&mut self) {
+        if self.pending.is_none() {
+            self.pending = self.tokens.pop_front();
+        }
+    }
+
+    fn expect<T, F>(&mut self, f: F) -> Result<T>
+    where
+        F: FnOnce(TvToken<'a>) -> Result<T>,
+    {
+        self.next()
+            .map_or_else(|| bail!("End of token stream sooner than expected"), f)
+    }
+
+    fn make_regex() -> Regex {
+        let v = [
+            "uninit",
+            "N",
+            ";",
+            r"d:[-+]?(NAN|INF|([0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?))", // Float
+            r"i:[-+]?[0-9]+([eE][-+]?[0-9]+\.?[0-9]*)?",                      // Int
+            "b:(0|1)",
+            r"D:\d+:",
+            r"v:\d+:",
+            r"\{",
+            r"\}",
+            ";",
+            r"k:\d+:",
+            r"s:\d+:",
+            r"l:\d+:",
+            // No regex for String -- that is manually parsed after s.
+        ];
+        let big_regex = format!("^(({}))", v.join(")|("));
+        Regex::new(&big_regex).unwrap()
+    }
+
+    /// Expects an unescaped source
+    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+        // According to
+        // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
+        // directly observed) Regex keeps mutable internal state which needs to
+        // be synchronized - so using it from multiple threads will be a big
+        // performance regression.
+        static REGEX: OnceCell<Regex> = OnceCell::new();
+        let big_regex = REGEX.get_or_init(Self::make_regex).clone();
+
+        let mut tokens = VecDeque::new();
+        let mut source = s;
+        while !source.is_empty() {
+            source = tv_build_tokens_helper(source, &mut tokens, &big_regex);
+        }
+        TvLexer {
+            line: start_line,
+            pending: None,
+            tokens,
+        }
+    }
+}
+
+fn tv_build_tokens_helper<'a>(
+    s: &'a [u8],
+    tokens: &mut VecDeque<TvToken<'a>>,
+    big_regex: &Regex,
+) -> &'a [u8] {
+    fn create_tok<'a>(
+        s: &'a [u8],
+        tokens: &mut VecDeque<TvToken<'a>>,
+        end: usize,
+    ) -> Result<(TvToken<'a>, usize)> {
+        let tr = match &s[0] {
+            // Implicit assumption: matched to the start (^), so we iter from the start
+            // No whitespace expected in tv
+            b';' => (TvToken::Semicolon, end), // Semicolon
+            b'{' => (TvToken::OpenCurly, end), // Opencurly
+            b'}' => (TvToken::CloseCurly, end),
+            b'N' => (TvToken::Null, end),
+            b'u' => (TvToken::Uninit, end),
+            b'd' => {
+                // we know the rest is utf8, because it matched \d+
+                let num = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("float TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("float TV not followed by a number"))?;
+                (TvToken::Float(hhbc::FloatBits(num)), end)
+            }
+            b'i' => {
+                let num = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("int TV not followed by valid utf8"))?
+                    .parse()
+                    .map_err(|_| anyhow!("int TV not followed by a number"))?;
+                (TvToken::Int(num), end)
+            }
+            b'b' => {
+                let b: &str = std::str::from_utf8(&s[2..end])
+                    .map_err(|_| anyhow!("boolean TV not followed by valid utf8"))?;
+                let b: usize = b
+                    .parse()
+                    .map_err(|_| anyhow!("boolean TV not followed by a number"))?;
+                if b != 1 && b != 0 {
+                    (TvToken::Error(s), end)
+                } else {
+                    (TvToken::Bool(b == 1), end)
+                }
+            }
+            b'D' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Dict TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Dict TV not followed by a number"))?;
+                (TvToken::Dict(num), end)
+            }
+            b'v' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Vec TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Vec TV not followed by a number"))?;
+                (TvToken::Vec(num), end)
+            }
+            b'k' => {
+                let num = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("Keyset TV not followed by valid utf8"))?;
+                let num = num
+                    .parse()
+                    .map_err(|_| anyhow!("Keyset TV not followed by a number"))?;
+                (TvToken::Keyset(num), end)
+            }
+            b's' => {
+                let num: &str = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("string TV not followed by valid utf8"))?;
+                let num: usize = num
+                    .parse()
+                    .map_err(|_| anyhow!("string TV not followed by a number"))?;
+                tokens.push_back(TvToken::S);
+                //parse the string
+                let st = &s[end + 1..end + num + 1]; // ""abc"" -> "abc"
+                (TvToken::String(st), end + num + 2)
+            }
+            b'l' => {
+                let num: &str = std::str::from_utf8(&s[2..end - 1])
+                    .map_err(|_| anyhow!("LazyClass TV not followed by valid utf8"))?;
+                let num: usize = num
+                    .parse()
+                    .map_err(|_| anyhow!("LazyClass TV not followed by a number"))?; // -1 for the ending :
+                tokens.push_back(TvToken::LazyClass);
+                //parse the string
+                let st = &s[end + 1..end + num + 1];
+                (TvToken::String(st), end + num + 2)
+            }
+            _ => bail!("Unknown tv: {:?}", s),
+        };
+        Ok(tr)
+    }
+    if let Some(mat) = big_regex.find(s) {
+        debug_assert!(mat.start() == 0);
+        let end = mat.end();
+        match create_tok(s, tokens, end) {
+            Err(_) => {
+                tokens.push_back(TvToken::Error(s));
+                &[]
+            }
+            Ok((tok, end)) => {
+                tokens.push_back(tok);
+                &s[end..]
+            }
+        }
+    } else {
+        // Couldn't tokenize the string, so add the rest of it as an error
+        tokens.push_back(TvToken::Error(s));
+        // Done advancing col and line cuz at end
+        &[]
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -3774,6 +4354,15 @@ impl<'a> Lexer<'a> {
         self.peek_if(|t| f(t) && t.as_bytes() == s.as_bytes())
     }
 
+    /// Applies f to top of iterator. If true, checks if starts with passed &str and returns result. Else just false
+    /// Ex use: peek_if_str_starts(Token::is_decl, ".coeffects")
+    fn peek_if_str_starts<F>(&mut self, f: F, s: &str) -> bool
+    where
+        F: Fn(&Token<'a>) -> bool,
+    {
+        self.peek_if(|t| f(t) && t.as_bytes().starts_with(s.as_bytes()))
+    }
+
     /// Applies f to top of iterator. If true, compares inner representation to passed &str and if true consumes. Else doesn't modify iterator and returns false.
     fn next_if_str<F>(&mut self, f: F, s: &str) -> bool
     where
@@ -3847,6 +4436,24 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// A var can be written in HHAS as $abc or "$abc". Only valid if a $ preceeds
+    fn expect_var(&mut self) -> Result<Vec<u8>> {
+        if self.peek_if(Token::is_str_literal) {
+            let s = self.expect(Token::into_str_literal)?;
+            if s.starts_with(b"\"$") {
+                // Remove the "" b/c that's not part of the var name
+                // also unescape ("$\340\260" etc is literal bytes)
+                let s = escaper::unquote_slice(s);
+                let s = escaper::unescape_literal_bytes_into_vec_bytes(s)?;
+                Ok(s)
+            } else {
+                bail!("Var does not start with $: {:?}", s)
+            }
+        } else {
+            Ok(self.expect(Token::into_variable)?.to_vec())
+        }
+    }
+
     /// Bails if lexer is not empty, message contains the next token
     fn expect_end(&mut self) -> Result<()> {
         if !self.is_empty() {
@@ -3858,13 +4465,14 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    pub fn from_slice(s: &'a [u8], start_line: usize) -> Self {
-        // First create the regex that matches any token. Done this way for readability
+    fn make_regex() -> Regex {
+        // First create the regex that matches any token. Done this way for
+        // readability
         let v = [
             r#""""([^"\\]|\\.)*?""""#, // Triple str literal
             "#.*",                     // Comment
             r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, global. (?-u) turns off utf8 check
-            r"(?-u)\$[_a-zA-Z0-9\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Var. See /home/almathaler/fbsource/fbcode/hphp/test/quick/reified-and-variadic.php's assembly for a var w/ a digit at front
+            r"(?-u)\$[_a-zA-Z0-9$\x80-\xff][_/a-zA-Z0-9$\x80-\xff]*", // Var.
             r#""((\\.)|[^\\"])*""#,                                 // Str literal
             r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",     // Number
             r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#\-]|::)*", // Identifier
@@ -3886,7 +4494,18 @@ impl<'a> Lexer<'a> {
             r"[ \t\r\f]+",
         ];
         let big_regex = format!("^(({}))", v.join(")|("));
-        let big_regex = Regex::new(&big_regex).unwrap();
+        Regex::new(&big_regex).unwrap()
+    }
+
+    fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+        // According to
+        // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
+        // directly observed) Regex keeps mutable internal state which needs to
+        // be synchronized - so using it from multiple threads will be a big
+        // performance regression.
+        static REGEX: OnceCell<Regex> = OnceCell::new();
+        let big_regex = REGEX.get_or_init(Self::make_regex).clone();
+
         let mut cur_pos = Pos {
             line: start_line, // When we spawn a new lexer it doesn't start at line 1
             col: 1,

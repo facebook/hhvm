@@ -7,20 +7,21 @@
 // Module containing conversion methods between the Rust Facts and
 // Rust/C++ shared Facts (in the compile_ffi module)
 mod compiler_ffi_impl;
+pub mod external_decl_provider;
 
 use anyhow::Result;
 use compile::EnvFlags;
 use cxx::CxxString;
-use decl_provider::external::ExternalDeclProvider;
-use decl_provider::external::ProviderFunc;
 use decl_provider::DeclProvider;
+use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::hackc_unit;
-use oxidized::decl_parser_options;
-use oxidized::file_info::NameType;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use parser_core_types::source_text::SourceText;
+use std::ffi::c_void;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
@@ -29,11 +30,8 @@ use std::path::PathBuf;
 #[cxx::bridge]
 pub mod compile_ffi {
     struct NativeEnv {
-        /// Pointer to decl_provider opaque state, cast to usize. 0 means null.
+        /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
         decl_provider: usize,
-
-        /// Pointer to decl_provider ProviderFunc, cast to usize. 0 means null.
-        decl_getter: usize,
 
         filepath: String,
         aliased_namespaces: String,
@@ -54,7 +52,7 @@ pub mod compile_ffi {
     pub struct DeclResult {
         hash: u64,
         serialized: Vec<u8>,
-        decls: Box<Decls>,
+        decls: Box<DeclsHolder>,
         has_errors: bool,
     }
 
@@ -128,7 +126,7 @@ pub mod compile_ffi {
     }
 
     extern "Rust" {
-        type Decls;
+        type DeclsHolder;
         type DeclParserOptions;
         type HackCUnitWrapper;
 
@@ -163,12 +161,8 @@ pub mod compile_ffi {
             text: &CxxString,
         ) -> DeclResult;
 
-        /// Return true if this symbol is in the given Decls.
-        fn hackc_decl_exists(
-            decls: &Decls,
-            kind: i32, /* HPHP::AutoloadMap::KindOf */
-            symbol: &str,
-        ) -> bool;
+        /// Return true if this type (class or alias) is in the given Decls.
+        fn hackc_type_exists(result: &DeclResult, symbol: &str) -> bool;
 
         /// For testing: return true if deserializing produces the expected Decls.
         fn hackc_verify_deserialization(result: &DeclResult) -> bool;
@@ -186,18 +180,16 @@ pub mod compile_ffi {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Opaque to C++.
+// Opaque to C++, so we don't need repr(C).
 
-#[repr(C)]
-pub struct Decls {
-    arena: bumpalo::Bump,
-    decls: direct_decl_parser::Decls<'static>,
+pub struct DeclsHolder {
+    _arena: bumpalo::Bump,
+    decls: Decls<'static>,
     attributes: &'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>],
 }
 
-#[repr(C)]
-pub struct DeclParserOptions(decl_parser_options::DeclParserOptions);
-#[repr(C)]
+pub struct DeclParserOptions(direct_decl_parser::DeclParserOptions);
+
 pub struct HackCUnitWrapper(hackc_unit::HackCUnit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -255,16 +247,10 @@ fn hackc_compile_from_text_cpp_ffi(
     let alloc = bumpalo::Bump::new();
     let decl_allocator = bumpalo::Bump::new();
 
-    let decl_provider = if env.decl_getter != 0 {
-        let decl_getter_ptr = env.decl_getter as *const ();
-        let hhvm_provider_ptr = env.decl_provider as *const ();
-        let c_decl_getter_fn =
-            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-        let c_hhvm_provider_ptr =
-            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+    let decl_provider = if env.decl_provider != 0 {
+        let provider = env.decl_provider as *const c_void;
         Some(ExternalDeclProvider {
-            provider: c_decl_getter_fn,
-            data: c_hhvm_provider_ptr,
+            provider,
             arena: &decl_allocator,
         })
     } else {
@@ -285,19 +271,9 @@ fn hackc_compile_from_text_cpp_ffi(
     Ok(output)
 }
 
-fn hackc_decl_exists(
-    decls: &Decls,
-    kind: i32, /* HPHP::AutoloadMap::KindOf */
-    symbol: &str,
-) -> bool {
-    let kind = match kind {
-        0 => NameType::Class,
-        1 => NameType::Fun,
-        2 => NameType::Const,
-        3 => NameType::Typedef,
-        _ => panic!("Requested kind of decl is not an available option"),
-    };
-    decls.decls.get(kind, symbol) != None
+fn hackc_type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
+    // TODO T123158488: fix case insensitive lookups
+    result.decls.decls.types().any(|(sym, _)| sym == symbol)
 }
 
 pub fn hackc_create_direct_decl_parse_options(
@@ -310,7 +286,7 @@ pub fn hackc_create_direct_decl_parse_options(
         Some(m) => Vec::from_iter(m.iter().map(|(k, v)| (k.to_owned(), v.to_owned()))),
         None => Vec::new(),
     };
-    Box::new(DeclParserOptions(decl_parser_options::DeclParserOptions {
+    Box::new(DeclParserOptions(direct_decl_parser::DeclParserOptions {
         auto_namespace_map,
         disable_xhp_element_mangling: ((1 << 0) & flags) != 0,
         interpret_soft_types_as_like_types: ((1 << 1) & flags) != 0,
@@ -333,16 +309,16 @@ pub fn hackc_direct_decl_parse(
     let arena = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
-    let parsed_file: direct_decl_parser::ParsedFile<'static> =
+    let parsed_file: ParsedFile<'static> =
         direct_decl_parser::parse_decls_without_reference_text(&opts.0, filename, text, alloc);
 
     compile_ffi::DeclResult {
         hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
         serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
-        decls: Box::new(Decls {
+        decls: Box::new(DeclsHolder {
             decls: parsed_file.decls,
             attributes: parsed_file.file_attributes,
-            arena,
+            _arena: arena,
         }),
         has_errors: parsed_file.has_first_pass_parse_errors,
     }
@@ -368,16 +344,10 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     );
 
     let decl_allocator = bumpalo::Bump::new();
-    let decl_provider = if env.decl_getter != 0 {
-        let decl_getter_ptr = env.decl_getter as *const ();
-        let hhvm_provider_ptr = env.decl_provider as *const ();
-        let c_decl_getter_fn =
-            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-        let c_hhvm_provider_ptr =
-            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+    let decl_provider = if env.decl_provider != 0 {
+        let provider = env.decl_provider as *const c_void;
         Some(ExternalDeclProvider {
-            provider: c_decl_getter_fn,
-            data: c_hhvm_provider_ptr,
+            provider,
             arena: &decl_allocator,
         })
     } else {

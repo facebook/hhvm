@@ -17,7 +17,6 @@
 #pragma once
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 
 #include <unordered_map>
 #include <algorithm>
@@ -187,7 +186,7 @@ struct RepoOptions {
   const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   const struct stat& stat() const { return m_stat; }
 
-  const boost::filesystem::path& dir() const { return m_repo; }
+  const std::filesystem::path& dir() const { return m_repo; }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -214,7 +213,7 @@ private:
   std::string m_path;
   struct stat m_stat;
 
-  boost::filesystem::path m_repo;
+  std::filesystem::path m_repo;
 
   folly::dynamic m_cachedDynamic;
 
@@ -254,7 +253,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static Optional<boost::filesystem::path> GetHomePath(
+  static Optional<std::filesystem::path> GetHomePath(
     const folly::StringPiece user);
 
   static std::string GetDefaultUser();
@@ -265,7 +264,7 @@ struct RuntimeOption {
    *
    * Return true on success and false on failure.
    */
-  static bool ReadPerUserSettings(const boost::filesystem::path& confFileName,
+  static bool ReadPerUserSettings(const std::filesystem::path& confFileName,
                                   IniSettingMap& ini, Hdf& config);
 
   static std::string getTraceOutputFile();
@@ -786,6 +785,9 @@ struct RuntimeOption {
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
+  F(uint32_t, IsameCollisionSampleRate, 1)                              \
+  /* 0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive */ \
+  F(uint32_t, LogIsameCollisions, 0)                                    \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.
@@ -1049,8 +1051,6 @@ struct RuntimeOption {
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \
-  F(uint32_t, Num1GPagesForSlabs,      0)                               \
-  F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(uint32_t, Num1GPagesForReqHeap,    0)                               \
   F(uint32_t, Num2MPagesForReqHeap,    0)                               \
   F(uint32_t, NumReservedSlabs,        0)                               \
@@ -1190,19 +1190,23 @@ struct RuntimeOption {
    *                                                                    \
    * We can generate code for a bespoke sink in three ways:             \
    *  1. We can do "top codegen" that handles any array layout.         \
-   *  2. We can specialize on a layout and fall back to top codegen.    \
-   *  3. We can specialize on a layout and side-exit on guard failure.  \
+   *  2. We can specialize layouts and fall back to top codegen.        \
+   *  3. We can specialize layouts and side-exit on guard failure.      \
    *                                                                    \
    * We use a couple heuristics to choose between these options. If we  \
    * see one layout that covers `SideExitThreshold` percent cases, and  \
    * we saw at most `SideExitMaxSources` sources reach this sink, with  \
    * at least `SideExitMinSampleCount` samples each, we'll side-exit.   \
    *                                                                    \
-   * Else, if one layout covers `SpecializationThreshold` percent, we   \
-   * will specialize and fall back to top codegen. Otherwise, we'll do  \
-   * top codegen. */                                                    \
+   * Else, if multiple layouts cover SpecializationThreshold and at at  \
+   * least one of them covers SpecializationMinThreshold we will        \
+   * specialize to both layouts and fall back to top codegen. If one    \
+   * layout covers `SpecializationThreshold` percent, we will           \
+   * specialize and fall back to top codegen. Otherwise, we'll do top   \
+   * codegen. */                                                        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
   F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
+  F(double, BespokeArraySinkSpecializationMinThreshold, 85.0)           \
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
@@ -1462,8 +1466,6 @@ public:
 
   // Repo (hhvm bytecode repository) options
   static std::string RepoPath;
-  static int64_t RepoLocalReadaheadRate;
-  static bool RepoLocalReadaheadConcurrent;
   static bool RepoLitstrLazyLoad;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;

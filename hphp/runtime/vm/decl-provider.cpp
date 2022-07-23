@@ -22,6 +22,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <fstream>
+
 namespace HPHP {
 
 TRACE_SET_MOD(unit_parse);
@@ -29,7 +31,7 @@ TRACE_SET_MOD(unit_parse);
 std::unique_ptr<HhvmDeclProvider>
 HhvmDeclProvider::create(AutoloadMap* map,
                          const RepoOptionsFlags& options,
-                         const folly::fs::path& repoRoot) {
+                         const std::filesystem::path& repoRoot) {
   if (!RuntimeOption::EvalEnableDecl) {
     return {nullptr};
   }
@@ -54,19 +56,20 @@ HhvmDeclProvider::HhvmDeclProvider(
     int32_t flags,
     std::string const& aliased_namespaces,
     AutoloadMap* map,
-    folly::fs::path const& repo
+    const std::filesystem::path& repo
 )
   : m_opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
   , m_map{map}
   , m_repo{repo}
 {}
 
-// Called by hackc, potentially on a different thread.
-DeclProviderResult HhvmDeclProvider::getDecl(
-  AutoloadMap::KindOf kind,
+// Called by hackc.
+ExternalDeclProviderResult HhvmDeclProvider::getType(
   std::string_view symbol,
   uint64_t depth
-) {
+) noexcept {
+  auto const kind = AutoloadMap::KindOf::TypeOrTypeAlias;
+
   // TODO(T110866581): symbol should be normalized by hackc
   std::string_view sym(normalizeNS(symbol));
   ITRACE(3, "DP lookup {}\n", sym);
@@ -79,7 +82,7 @@ DeclProviderResult HhvmDeclProvider::getDecl(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return DeclProviderResult::from_decls(result->second);
+      return ExternalDeclProviderResult::from_decls(result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -91,10 +94,8 @@ DeclProviderResult HhvmDeclProvider::getDecl(
     DeclResult decl_result = hackc_direct_decl_parse(*m_opts, filename, text);
     ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
-    auto norm_filename = filename;
-    if (folly::fs::starts_with(filename, m_repo)) {
-      norm_filename.erase(0, m_repo.size());
-    }
+    auto const norm_filename =
+      std::filesystem::relative(*filename_opt, m_repo);
 
     auto const hash = SHA1{string_sha1(text)};
     m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});
@@ -102,11 +103,11 @@ DeclProviderResult HhvmDeclProvider::getDecl(
     // Insert decl_result into the cache, return DeclResult::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return DeclProviderResult::from_decls(it->second);
+    return ExternalDeclProviderResult::from_decls(it->second);
   }
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
   m_sawMissing = true;
-  return DeclProviderResult::missing();
+  return ExternalDeclProviderResult::missing();
 }
 
 std::vector<DeclDep> HhvmDeclProvider::getFlatDeps() const {
@@ -150,25 +151,4 @@ std::vector<std::vector<DeclLoc>> HhvmDeclProvider::getDeps() const {
 
   return ret;
 }
-
-extern "C" {
-
-DeclProviderResult hhvm_decl_provider_get_decl(
-    void* provider, int symbol_kind, char const* symbol, size_t len,
-    uint64_t depth
-) {
-  try {
-    // Unsafe: if `symbol_kind` is out of range the result of this cast is UB.
-    HPHP::AutoloadMap::KindOf kind {
-      static_cast<HPHP::AutoloadMap::KindOf>(symbol_kind)
-    };
-    return ((HhvmDeclProvider*)provider)->getDecl(
-        kind, std::string_view(symbol, len), depth
-    );
-  } catch(...) {
-    not_reached();
-  }
-}
-
-} //extern "C"
 }//namespace HPHP

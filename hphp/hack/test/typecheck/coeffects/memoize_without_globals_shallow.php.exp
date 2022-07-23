@@ -1,2 +1,4 @@
 File "memoize_without_globals_shallow.php", line 22, characters 3-11:
+This function can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has zoned context (Parsing[1002])
+File "memoize_without_globals_shallow.php", line 25, characters 3-11:
 This function cannot be memoized because it has a polymorphic context (Parsing[1002])

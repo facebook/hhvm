@@ -3415,6 +3415,32 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     }
 }
 
+fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                naming_special_names_rust::coeffects::is_any_zoned_or_defaults(id)
+            }
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
+fn has_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+        return context_hints.iter().any(|hint| match &*hint.1 {
+            ast::Hint_::Happly(ast::Id(_, id), _) => {
+                id == naming_special_names_rust::coeffects::DEFAULTS
+            }
+            _ => false,
+        });
+    } else {
+        true
+    }
+}
+
 // For polymorphic context with form `ctx $f`
 // require that `(function (ts)[_]: t) $f` exists
 // rewrite as `(function (ts)[ctx $f]: t) $f`
@@ -5059,12 +5085,24 @@ fn p_namespace_use_clause<'a>(
     }
 }
 
+fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
+    naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1)
+        && (match flavor {
+            Some(flavor) => u
+                .params
+                .iter()
+                .any(|p| matches!(p, Expr(_, _, ast::Expr_::String(s)) if s == flavor)),
+            None => u.params.is_empty(),
+        })
+}
+
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
     kind: &str,
     env: &mut Env<'a>,
 ) {
+    // functions with dependent contexts cannot be memoized
     if has_polymorphic_context(env, contexts) {
         if let Some(u) = user_attributes
             .iter()
@@ -5077,17 +5115,43 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    if env.is_typechecker() {
-        if let Some(u) = user_attributes.iter().find(|u| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
-        }) {
-            if !has_any_policied_context(contexts) {
-                raise_parsing_error_pos(
-                    &u.name.0,
-                    env,
-                    &syntax_error::policy_sharded_memoized_without_policied(kind),
-                )
-            }
+    // memoized functions with zoned or zoned_with must be #KeyedByIC
+    if has_any_policied_context(contexts) {
+        if let Some(u) = user_attributes
+            .iter()
+            .find(|u| is_memoize_attribute_with_flavor(u, None))
+        {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::effect_policied_memoized(kind),
+            )
+        }
+    }
+    // #KeyedByIC can only be used on functions with defaults or zoned*
+    if let Some(u) = user_attributes
+        .iter()
+        .find(|u| is_memoize_attribute_with_flavor(u, Some("KeyedByIC")))
+    {
+        if !has_any_policied_or_defaults_context(contexts) {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::policy_sharded_memoized_without_policied(kind),
+            )
+        }
+    }
+    // #(Soft)?MakeICInaccessible can only be used on functions with defaults
+    if let Some(u) = user_attributes.iter().find(|u| {
+        is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
+            || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
+    }) {
+        if !has_defaults_context(contexts) {
+            raise_parsing_error_pos(
+                &u.name.0,
+                env,
+                &syntax_error::memoize_make_ic_inaccessible_without_defaults(kind),
+            )
         }
     }
 }
@@ -5300,17 +5364,20 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     raise_parsing_error(node, env, &syntax_error::invalid_reified)
                 }
             }
+            let user_attributes = itertools::concat(
+                c.attribute_spec
+                    .syntax_node_to_list_skip_separator()
+                    .map(|attr| p_user_attribute(attr, env))
+                    .collect::<Result<Vec<Vec<_>>, _>>()?,
+            );
+            let docs_url = p_docs_url(&user_attributes, env);
+
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
                 tparams,
                 constraint: map_optional(&c.constraint, env, p_tconstraint)?.map(|x| x.1),
-                user_attributes: itertools::concat(
-                    c.attribute_spec
-                        .syntax_node_to_list_skip_separator()
-                        .map(|attr| p_user_attribute(attr, env))
-                        .collect::<Result<Vec<Vec<_>>, _>>()?,
-                ),
+                user_attributes,
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
@@ -5326,6 +5393,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 is_ctx: false,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
+                docs_url,
             })])
         }
         ContextAliasDeclaration(c) => {
@@ -5383,6 +5451,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 // TODO(T116039119): Populate value with presence of internal attribute
                 internal: false,
                 module: None,
+                docs_url: None,
             })])
         }
         EnumDeclaration(c) => {
@@ -5418,10 +5487,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 p_enum_use(elt, env)?;
             }
 
+            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+            let docs_url = p_docs_url(&user_attributes, env);
+
             Ok(vec![ast::Def::mk_class(ast::Class_ {
                 annotation: (),
                 mode: env.file_mode(),
-                user_attributes: p_user_attributes(&c.attribute_spec, env)?,
+                user_attributes,
                 file_attributes: vec![],
                 final_: false,
                 kind: ast::ClassishKind::Cenum,
@@ -5453,7 +5525,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
-                docs_url: None,
+                docs_url,
             })])
         }
 
@@ -5466,6 +5538,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 params: vec![],
             };
             user_attributes.push(enum_class_attribute);
+
+            let docs_url = p_docs_url(&user_attributes, env);
+
             // During lowering we store the base type as is. It will be updated during
             // the naming phase
             let base_type = p_hint(&c.base, env)?;
@@ -5527,7 +5602,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 emit_id: None,
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
-                docs_url: None,
+                docs_url,
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {

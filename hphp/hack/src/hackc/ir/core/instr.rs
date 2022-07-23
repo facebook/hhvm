@@ -1062,28 +1062,32 @@ pub enum CmpOp {
 }
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
-pub enum Ssa {
+pub enum Tmp {
     SetVar(VarId, ValueId), // var, value
     GetVar(VarId),          // var
+}
+
+/// Instructions used during ir_to_bc.
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+pub enum IrToBc {
+    PopC,
+    PopL(LocalId),
+    PushL(LocalId),
+    PushLiteral(ValueId),
+    PushUninit,
+    UnsetL(LocalId),
 }
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
     Copy(ValueId),
+    IrToBc(IrToBc),
     Param,
-    // Used during ir_to_bc - not in normal IR.
-    PopC,
-    // Used during ir_to_bc - not in normal IR.
-    PopL(LocalId),
-    // Used during ir_to_bc - not in normal IR.
-    PushL(LocalId),
-    // Used during ir_to_bc - not in normal IR.
-    PushLiteral(ValueId),
     Select(ValueId, u32),
     // Used to build SSA.
     #[has_locals(none)]
     #[has_loc(none)]
-    Ssa(Ssa),
+    Tmp(Tmp),
     Tombstone,
 }
 
@@ -1153,11 +1157,11 @@ impl Instr {
     }
 
     pub fn set_var(var: VarId, value: ValueId) -> Instr {
-        Instr::Special(Special::Ssa(Ssa::SetVar(var, value)))
+        Instr::Special(Special::Tmp(Tmp::SetVar(var, value)))
     }
 
     pub fn get_var(var: VarId) -> Instr {
-        Instr::Special(Special::Ssa(Ssa::GetVar(var)))
+        Instr::Special(Special::Tmp(Tmp::GetVar(var)))
     }
 }
 

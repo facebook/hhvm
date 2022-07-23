@@ -88,6 +88,12 @@ let build_signature_json_nested parameters ctxs return_type_name =
   in
   JSON_Object [("key", JSON_Object fields)]
 
+let build_module_membership_nested decl_id ~internal =
+  let fields =
+    [("declaration", build_id_json decl_id); ("internal", JSON_Bool internal)]
+  in
+  JSON_Object fields
+
 let build_attributes_json_nested source_text attrs =
   let attributes =
     List.map attrs ~f:(fun attr ->
@@ -383,6 +389,9 @@ let build_type_const_decl_json_ref fact_id =
 
 let build_typedef_decl_json_ref fact_id =
   JSON_Object [("typedef_", build_id_json fact_id)]
+
+let build_module_decl_json_ref fact_id =
+  JSON_Object [("module", build_id_json fact_id)]
 
 let build_method_occ_json_ref fact_id =
   JSON_Object [("method", build_id_json fact_id)]

@@ -8,7 +8,7 @@ edition = "2021"
 path = "html_entities.rs"
 
 [dependencies]
-lazy_static = "1.0"
+lazy_static = "1.4"
 ocaml_helper = { path = "../ocaml_helper" }
 regex = "1.5.4"
 

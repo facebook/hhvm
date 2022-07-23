@@ -160,6 +160,7 @@ namespace Trace {
       TM(intercept)     \
       TM(interpOne)     \
       TM(irlower)       \
+      TM(isame)         \
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \

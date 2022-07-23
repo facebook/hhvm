@@ -16,14 +16,13 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 
 #include "hphp/runtime/base/watchman.h"
 
-#include <folly/experimental/io/FsUtil.h>
-
 namespace HPHP {
 
-std::shared_ptr<Watchman> get_watchman_client(const folly::fs::path& root);
+std::shared_ptr<Watchman> get_watchman_client(const std::filesystem::path&);
 
 }

@@ -1031,6 +1031,7 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_file_attributes = _;
     t_internal = _;
     t_module = _;
+    t_docs_url = _;
   } =
     typedef
   in

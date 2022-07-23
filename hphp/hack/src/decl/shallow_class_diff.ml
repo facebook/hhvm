@@ -487,7 +487,7 @@ let diff_of_equal equal x y =
   else
     Some ()
 
-let diff_parent_lists =
+let diff_type_lists =
   diff_value_lists
     ~equal:Typing_defs.ty_equal
     ~get_name_value:type_name
@@ -503,26 +503,25 @@ let diff_parents (c1 : Parents.t) (c2 : Parents.t) : parent_changes option =
   else
     Some
       {
-        extends_changes =
-          diff_parent_lists c1.Parents.extends c2.Parents.extends;
+        extends_changes = diff_type_lists c1.Parents.extends c2.Parents.extends;
         implements_changes =
-          diff_parent_lists c1.Parents.implements c2.Parents.implements;
+          diff_type_lists c1.Parents.implements c2.Parents.implements;
         req_extends_changes =
-          diff_parent_lists c1.Parents.req_extends c2.Parents.req_extends;
+          diff_type_lists c1.Parents.req_extends c2.Parents.req_extends;
         req_implements_changes =
-          diff_parent_lists c1.Parents.req_implements c2.Parents.req_implements;
+          diff_type_lists c1.Parents.req_implements c2.Parents.req_implements;
         req_class_changes =
-          diff_parent_lists c1.Parents.req_class c2.Parents.req_class;
-        uses_changes = diff_parent_lists c1.Parents.uses c2.Parents.uses;
+          diff_type_lists c1.Parents.req_class c2.Parents.req_class;
+        uses_changes = diff_type_lists c1.Parents.uses c2.Parents.uses;
         xhp_attr_changes =
-          diff_parent_lists c1.Parents.xhp_attr_uses c2.Parents.xhp_attr_uses;
+          diff_type_lists c1.Parents.xhp_attr_uses c2.Parents.xhp_attr_uses;
       }
 
 let diff_kinds kind1 kind2 =
   if Ast_defs.equal_classish_kind kind1 kind2 then
     None
   else
-    Some { KindChange.old_kind = kind1; new_kind = kind2 }
+    Some { KindChange.new_kind = kind2 }
 
 let diff_bools b1 b2 =
   match (b1, b2) with
@@ -532,20 +531,60 @@ let diff_bools b1 b2 =
   | (false, true) -> Some BoolChange.Became
   | (true, false) -> Some BoolChange.No_more
 
-let diff_options option1 option2 ~equal =
+let diff_options option1 option2 ~diff =
   match (option1, option2) with
   | (None, None) -> None
   | (None, Some _) -> Some ValueChange.Added
   | (Some _, None) -> Some ValueChange.Removed
   | (Some value1, Some value2) ->
-    if equal value1 value2 then
-      None
-    else
-      Some (ValueChange.Modified ())
+    (match diff value1 value2 with
+    | None -> None
+    | Some diff -> Some (ValueChange.Modified diff))
 
-let diff_modules = diff_options ~equal:Ast_defs.equal_id
+let diff_modules = diff_options ~diff:(diff_of_equal Ast_defs.equal_id)
 
-let diff_enum_types = diff_options ~equal:Typing_defs.equal_enum_type
+let diff
+    (type value)
+    ~(equal : value -> value -> bool)
+    (old_value : value)
+    (new_value : value) : value ValueDiff.t option =
+  if equal old_value new_value then
+    None
+  else
+    Some { ValueDiff.old_value; new_value }
+
+let diff_types = diff ~equal:Typing_defs.ty_equal
+
+let diff_enum_types
+    (enum_type1 : Typing_defs.enum_type) (enum_type2 : Typing_defs.enum_type) :
+    enum_type_change option =
+  if Typing_defs.equal_enum_type enum_type1 enum_type2 then
+    None
+  else
+    Option.some
+    @@
+    let {
+      Typing_defs.te_base = base1;
+      te_constraint = constraint1;
+      te_includes = includes1;
+    } =
+      enum_type1
+    in
+    let {
+      Typing_defs.te_base = base2;
+      te_constraint = constraint2;
+      te_includes = includes2;
+    } =
+      enum_type2
+    in
+
+    {
+      base_change = diff_types base1 base2;
+      constraint_change = diff_options ~diff:diff_types constraint1 constraint2;
+      includes_change = diff_type_lists includes1 includes2;
+    }
+
+let diff_enum_type_options = diff_options ~diff:diff_enum_types
 
 let user_attribute_name_value
     { Typing_defs.ua_name = (_, name); ua_classname_params } =
@@ -556,6 +595,7 @@ type string_list = string list [@@deriving eq]
 let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     class_shell_change =
   {
+    classish_kind = c1.sc_kind;
     parent_changes =
       diff_parents (Parents.of_shallow_class c1) (Parents.of_shallow_class c2);
     type_parameters_change =
@@ -584,7 +624,7 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
         ~equal:Typing_defs.equal_user_attribute
         ~get_name_value:user_attribute_name_value
         ~diff:(diff_of_equal equal_string_list);
-    enum_type_change = diff_enum_types c1.sc_enum_type c2.sc_enum_type;
+    enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 
 let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t =

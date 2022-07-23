@@ -24,8 +24,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cinttypes>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
@@ -3545,7 +3544,7 @@ namespace {
 
 void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
   auto const caller = vmfp()->func();
-  if (will_call_raise_module_boundary_violation(callee, caller->moduleName())) {
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
   }
 }
@@ -4409,10 +4408,10 @@ OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
         path.data());
 
   auto curUnitFilePath = [&] {
-    namespace fs = boost::filesystem;
-    fs::path currentUnit(vmfp()->func()->unit()->filepath()->data());
-    fs::path currentDir(currentUnit.branch_path());
-    return currentDir.string();
+    std::filesystem::path currentUnit(
+      vmfp()->func()->unit()->filepath()->data()
+    );
+    return currentUnit.parent_path().string();
   };
 
   auto const unit = [&] {

@@ -551,8 +551,34 @@ let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
 let add_fine_dep_if_enabled env dependency =
+  let ( let* ) = Caml.Option.bind in
+  let ctx = get_ctx env in
+  (* We resolve the dependency to its origin. See
+   * [Typing_extends.add_pessimisation_dependency] for details. *)
+  let dependency_on_origin () =
+    match dependency with
+    | Typing_deps.Dep.Method (class_name, method_name) ->
+      let origin_name =
+        let* cls = Decl_provider.get_class ctx class_name in
+        let* elt = Cls.get_method cls method_name in
+        Some elt.Typing_defs.ce_origin
+      in
+      let origin_name = Option.value origin_name ~default:class_name in
+      Typing_deps.Dep.Method (origin_name, method_name)
+    | Typing_deps.Dep.SMethod (class_name, method_name) ->
+      let origin_name =
+        let* cls = Decl_provider.get_class ctx class_name in
+        let* elt = Cls.get_smethod cls method_name in
+        Some elt.Typing_defs.ce_origin
+      in
+      let origin_name = Option.value origin_name ~default:class_name in
+      Typing_deps.Dep.SMethod (origin_name, method_name)
+    | _ -> dependency
+  in
+
   let denv = env.decl_env in
   if TypecheckerOptions.record_fine_grained_dependencies @@ get_tcopt env then
+    let dependency = dependency_on_origin () in
     Typing_pessimisation_deps.try_add_fine_dep
       (get_deps_mode env)
       denv.droot

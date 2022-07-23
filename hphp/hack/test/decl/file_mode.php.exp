@@ -35,7 +35,7 @@
       { Typing_defs.td_module = None; td_pos = [7:6-19];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([7:22-28]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MY_PARTIAL_CONST",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [9:1-10:53];

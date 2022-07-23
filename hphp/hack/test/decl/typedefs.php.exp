@@ -3,7 +3,7 @@
      { Typing_defs.td_module = None; td_pos = [7:8-16]; td_vis = Transparent;
        td_tparams = []; td_constraint = None;
        td_type = (Rhint ([7:19-25]), (Tprim Tstring)); td_is_ctx = false;
-       td_attributes = []; td_internal = false }));
+       td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyArray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [10:6-13];
@@ -12,7 +12,8 @@
         (Rhint ([10:16-32]),
          (Tvec_or_dict (Rvec_or_dict_key ([10:16-32]), (Tprim Tarraykey)),
             (Rhint ([10:16-32]), Tany)));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyArray1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [11:6-14];
@@ -27,7 +28,8 @@
         (Rhint ([11:20-29]),
          (Tapply (([11:20-26], "\\HH\\vec"),
             [(Rhint ([11:27-28]), (Tgeneric ("T", [])))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyArray2",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [12:6-14];
@@ -49,7 +51,8 @@
             [(Rhint ([12:32-34]), (Tgeneric ("TK", [])));
               (Rhint ([12:36-38]), (Tgeneric ("TV", [])))]
             )));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyDarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [13:6-14];
@@ -71,7 +74,8 @@
             [(Rhint ([13:32-34]), (Tgeneric ("TK", [])));
               (Rhint ([13:36-38]), (Tgeneric ("TV", [])))]
             )));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyVarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [14:6-14];
@@ -86,7 +90,8 @@
         (Rhint ([14:20-29]),
          (Tapply (([14:20-26], "\\HH\\vec"),
             [(Rhint ([14:27-28]), (Tgeneric ("T", [])))])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyVarrayOrDarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [15:6-22];
@@ -106,67 +111,68 @@
         (Rhint ([15:33-57]),
          (Tvec_or_dict (Rhint ([15:50-52]), (Tgeneric ("TK", []))),
             (Rhint ([15:54-56]), (Tgeneric ("TV", [])))));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyString",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [16:6-14];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([16:17-23]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyInt",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [17:6-11];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([17:14-17]), (Tprim Tint)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyFloat",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [18:6-13];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([18:16-21]), (Tprim Tfloat)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyNum",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [19:6-11];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([19:14-17]), (Tprim Tnum)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyBool",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [20:6-12];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([20:15-19]), (Tprim Tbool)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyMixed",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [21:6-13];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([21:16-21]), Tmixed); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyNothing",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [22:6-15];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([22:18-25]), (Tunion [])); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyNonnull",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [23:6-15];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([23:18-25]), Tnonnull); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyDynamic",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [24:6-15];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([24:18-25]), Tdynamic); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyArrayKey",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [25:6-16];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type = (Rhint ([25:19-27]), (Tprim Tarraykey)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [27:6-22];
@@ -174,20 +180,21 @@
         td_type =
         (Rhint ([27:25-46]),
          (Tapply (([27:25-46], "\\MyNamespace\\MyString"), [])));
-        td_is_ctx = false; td_attributes = []; td_internal = false }));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }));
   ("\\MyNewtype",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [29:9-18]; td_vis = Opaque;
         td_tparams = [];
         td_constraint = (Some (Rhint ([29:22-25]), (Tprim Tnum)));
         td_type = (Rhint ([29:28-31]), (Tprim Tint)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }));
+        td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\MyNewtypeWithoutConstraint",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [30:9-35]; td_vis = Opaque;
         td_tparams = []; td_constraint = None;
         td_type = (Rhint ([30:38-41]), (Tprim Tint)); td_is_ctx = false;
-        td_attributes = []; td_internal = false }))
+        td_attributes = []; td_internal = false; td_docs_url = None }))
   ]
 
 They matched!

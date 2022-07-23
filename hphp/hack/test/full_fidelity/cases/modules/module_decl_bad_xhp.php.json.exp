@@ -208,17 +208,28 @@
           }
         },
         "module_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"lol",
-            "offset":64,
-            "leading_width":1,
-            "width":3,
-            "trailing_width":1,
-            "leading":[{"kind":"extra_token_error","text":":","offset":64,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
-            "line_number":5
+          "kind":"qualified_name",
+          "qualified_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"lol",
+                    "offset":64,
+                    "leading_width":1,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[{"kind":"extra_token_error","text":":","offset":64,"width":1}],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
+                    "line_number":5
+                  }
+                }
+              }
+            ]
           }
         },
         "module_declaration_left_brace":{

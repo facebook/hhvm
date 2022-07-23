@@ -592,6 +592,9 @@ let opt_ (to_json : 'a -> json) (x : 'a option) : json =
 
 let array_ (f : 'a -> json) (xs : 'a list) : json = JSON_Array (List.map ~f xs)
 
+let string_map (to_json : 'a -> json) (map : 'a SMap.t) : json =
+  JSON_Object (SMap.bindings map |> List.map ~f:(fun (k, v) -> (k, to_json v)))
+
 let get_object_exn = function
   | JSON_Object o -> o
   | _ -> assert false

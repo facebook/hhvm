@@ -25,13 +25,6 @@ struct Type;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Hardcoded information about builtin functions. Right now this just
- * encodes the behavior of collection methods that return $this.
- */
-bool is_collection_method_returning_this(const php::Class* cls,
-                                         const php::Func* func);
-
-/*
  * Given an HNI function, figure out the real return type.
  */
 Type native_function_return_type(const php::Func* func);

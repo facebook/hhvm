@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use crate::special_names;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;

@@ -7,11 +7,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_parser::DeclParser;
 use hackrs::ast_provider::AstProvider;
-use hackrs::decl_parser::DeclParser;
 use hackrs::errors::HackError;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
-use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::tast::TastExpander;
 use hackrs::tast::{self};
 use hackrs::typing_check_utils::TypingCheckUtils;
@@ -22,6 +21,7 @@ use oxidized::global_options::GlobalOptions;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use shallow_decl_provider::EagerShallowDeclProvider;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;

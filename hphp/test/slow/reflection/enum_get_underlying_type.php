@@ -4,7 +4,7 @@ enum Foo: int {
   BAR = 42;
 }
 
-enum BAR: int as arraykey {
+enum Bar: int as arraykey {
   FOO = 42;
 }
 
@@ -18,7 +18,7 @@ enum WithT: t {
   FOO = 42;
 }
 
-class FOOBAR extends HH\BuiltinEnum<string> {
+class FooBar extends HH\BuiltinEnum<string> {
   const BAZ = '42';
 }
 

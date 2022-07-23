@@ -105,6 +105,7 @@ class virtual type_validator =
             td_is_ctx = _;
             td_attributes = _;
             td_internal = _;
+            td_docs_url = _;
           } =
             td
           in

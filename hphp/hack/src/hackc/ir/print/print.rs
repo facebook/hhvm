@@ -24,6 +24,7 @@ use core::instr::HasLoc;
 use core::instr::Hhbc;
 use core::instr::IncDecOp;
 use core::instr::IncludeKind;
+use core::instr::IrToBc;
 use core::instr::IsLogAsDynamicCallOp;
 use core::instr::MOpMode;
 use core::instr::MemberKey;
@@ -32,9 +33,9 @@ use core::instr::QueryMOp;
 use core::instr::ReadonlyOp;
 use core::instr::SetRangeOp;
 use core::instr::Special;
-use core::instr::Ssa;
 use core::instr::SwitchKind;
 use core::instr::Terminator;
+use core::instr::Tmp;
 use core::string_intern::StringInterner;
 use core::*;
 use itertools::Itertools;
@@ -1232,10 +1233,13 @@ pub(crate) fn print_instr(
         Instr::Special(Special::Copy(vid)) => {
             write!(w, "copy {}", FmtVid(func, *vid, ctx.verbose))?;
         }
-        Instr::Special(Special::Ssa(Ssa::GetVar(var))) => {
+        Instr::Special(Special::IrToBc(ir_to_bc)) => {
+            print_ir_to_bc(w, ctx, func, ir_to_bc)?;
+        }
+        Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
             write!(w, "get_var &{}", var.as_usize())?;
         }
-        Instr::Special(Special::Ssa(Ssa::SetVar(var, value))) => {
+        Instr::Special(Special::Tmp(Tmp::SetVar(var, value))) => {
             write!(
                 w,
                 "set_var &{}, {}",
@@ -1244,16 +1248,6 @@ pub(crate) fn print_instr(
             )?;
         }
         Instr::Special(Special::Param) => write!(w, "param")?,
-        Instr::Special(Special::PopC) => write!(w, "popc")?,
-        Instr::Special(Special::PopL(lid)) => {
-            write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?
-        }
-        Instr::Special(Special::PushL(lid)) => {
-            write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
-        }
-        Instr::Special(Special::PushLiteral(vid)) => {
-            write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?
-        }
         Instr::Special(Special::Select(vid, index)) => write!(
             w,
             "select {} from {}",
@@ -1264,6 +1258,27 @@ pub(crate) fn print_instr(
         Instr::Terminator(t) => print_terminator(w, ctx, func, iid, t)?,
     }
     Ok(true)
+}
+
+pub(crate) fn print_ir_to_bc(
+    w: &mut dyn Write,
+    ctx: &mut FuncContext<'_, '_>,
+    func: &Func<'_>,
+    ir_to_bc: &IrToBc,
+) -> std::result::Result<(), Error> {
+    match ir_to_bc {
+        IrToBc::PopC => write!(w, "popc")?,
+        IrToBc::PopL(lid) => write!(w, "pop_local {}", FmtLid(*lid, ctx.strings),)?,
+        IrToBc::PushL(lid) => {
+            write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
+        }
+        IrToBc::PushLiteral(vid) => write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?,
+        IrToBc::PushUninit => write!(w, "push_uninit")?,
+        IrToBc::UnsetL(lid) => {
+            write!(w, "unset_local {}", FmtLid(*lid, ctx.strings))?;
+        }
+    }
+    Ok(())
 }
 
 fn print_inner_loc(

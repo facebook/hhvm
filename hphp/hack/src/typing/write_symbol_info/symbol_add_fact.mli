@@ -124,6 +124,16 @@ val typedef_defn :
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
+val module_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+
+val module_defn :
+  Provider_context.t ->
+  Full_fidelity_source_text.t ->
+  ('a, 'b) Aast.module_def ->
+  Fact_id.t ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
+
 val gconst_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val gconst_defn :

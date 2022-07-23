@@ -21,11 +21,17 @@
 #include <folly/init/Init.h>
 #include <folly/executors/GlobalExecutor.h>
 
+#include <filesystem>
+
+#include <boost/filesystem.hpp>
+
 #include <gtest/gtest.h>
 
 namespace HPHP {
 
 using namespace extern_worker;
+
+namespace fs = std::filesystem;
 
 namespace {
 
@@ -239,15 +245,15 @@ TEST(ExternWorker, Blobs) {
 }
 
 TEST(ExternWorker, Files) {
-  auto const tmpDir = folly::fs::temp_directory_path();
+  auto const tmpDir = fs::temp_directory_path();
   auto const base = tmpDir / "hphp-extern-worker-test";
   auto const root =
     base / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%").native();
 
-  folly::fs::create_directory(base, tmpDir);
-  folly::fs::create_directory(root, base);
+  fs::create_directory(base, tmpDir);
+  fs::create_directory(root, base);
 
-  auto const makeString = [] (folly::fs::path p) {
+  auto const makeString = [] (fs::path p) {
     return folly::sformat("This file is called: \"{}\"", p.native());
   };
   auto const makeFile = [&] {
@@ -268,7 +274,7 @@ TEST(ExternWorker, Files) {
   auto const p1 = makeFile();
   auto const p2 = makeFile();
   auto const p3 = makeFile();
-  std::vector<folly::fs::path> ps;
+  std::vector<fs::path> ps;
   for (size_t i = 0; i < 5; ++i) ps.emplace_back(makeFile());
 
   Ref<std::string> r1 = coro::wait(client.storeFile(p1));
@@ -303,7 +309,7 @@ TEST(ExternWorker, Files) {
     EXPECT_EQ(strs[i], makeString(ps[i]));
   }
 
-  folly::fs::remove_all(root);
+  fs::remove_all(root);
 }
 
 namespace {
@@ -960,15 +966,15 @@ TEST(ExternWorker, Fallback) {
   auto [str7, int3] = std::move(tuples[1]);
   auto [str8, int4] = std::move(tuples[2]);
 
-  auto const tmpDir = folly::fs::temp_directory_path();
+  auto const tmpDir = fs::temp_directory_path();
   auto const base = tmpDir / "hphp-extern-worker-test";
   auto const root =
     base / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%").native();
 
-  folly::fs::create_directory(base, tmpDir);
-  folly::fs::create_directory(root, base);
+  fs::create_directory(base, tmpDir);
+  fs::create_directory(root, base);
 
-  auto const makeString = [] (folly::fs::path p) {
+  auto const makeString = [] (fs::path p) {
     return folly::sformat("This file is called: \"{}\"", p.native());
   };
   auto const makeFile = [&] {
@@ -984,7 +990,7 @@ TEST(ExternWorker, Fallback) {
 
   auto str9 = coro::wait(client.storeFile(file1));
   auto strs2 = coro::wait(
-    client.storeFile(std::vector<folly::fs::path>{file2, file3})
+    client.storeFile(std::vector<fs::path>{file2, file3})
   );
   ASSERT_EQ(strs2.size(), 2);
   auto str10 = std::move(strs2[0]);
@@ -1007,7 +1013,7 @@ TEST(ExternWorker, Fallback) {
   auto const file5 = makeFile();
 
   auto strs3 = coro::wait(
-    client.storeFile(std::vector<folly::fs::path>{file4, file5})
+    client.storeFile(std::vector<fs::path>{file4, file5})
   );
   ASSERT_EQ(strs3.size(), 2);
   auto str15 = std::move(strs3[0]);

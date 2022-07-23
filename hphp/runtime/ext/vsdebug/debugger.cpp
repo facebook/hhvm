@@ -25,7 +25,7 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -1675,7 +1675,7 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
   if (bp->m_type != BreakpointType::Source ||
       !BreakpointManager::bpMatchesPath(
         bp,
-        boost::filesystem::path(unitFilePath))) {
+        std::filesystem::path(unitFilePath))) {
 
     return false;
   }
@@ -2246,7 +2246,7 @@ std::string Debugger::getStopReasonForBp(
 ) {
   std::string description("Breakpoint " + std::to_string(bp->m_id));
   if (!path.empty()) {
-    auto const name = boost::filesystem::path(path).filename().string();
+    auto const name = std::filesystem::path(path).filename().string();
     description += " (";
     description += name;
     description += ":";

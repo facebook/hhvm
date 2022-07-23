@@ -666,6 +666,11 @@ fn print_expr(
                 w.write_all(ecl.1.as_bytes())
             }
         },
+        Expr_::ReadonlyExpr(expr) => {
+            w.write_all(b"readonly(")?;
+            print_expr(ctx, w, env, expr)?;
+            w.write_all(b")")
+        }
         Expr_::Dollardollar(_)
         | Expr_::ExpressionTree(_)
         | Expr_::FunId(_)
@@ -675,7 +680,6 @@ fn print_expr(
         | Expr_::MethodCaller(_)
         | Expr_::MethodId(_)
         | Expr_::Pair(_)
-        | Expr_::ReadonlyExpr(_)
         | Expr_::SmethodId(_)
         | Expr_::This
         | Expr_::Upcast(_)

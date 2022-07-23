@@ -5027,7 +5027,13 @@ Type loosen_values(Type a) {
 
 Type loosen_emptiness(Type t) {
   auto const check = [&] (trep a, trep b) {
-    if (t.couldBe(a)) t.m_bits |= b;
+    if (t.couldBe(a)) {
+      if (t.hasData() && kSupportBits & b & ~t.bits()) {
+        t.destroyData();
+        t.m_dataTag = DataTag::None;
+      }
+      t.m_bits |= b;
+    }
   };
   check(BSVec,    BSVec);
   check(BCVec,    BVec);
@@ -5035,6 +5041,8 @@ Type loosen_emptiness(Type t) {
   check(BCDict,   BDict);
   check(BSKeyset, BSKeyset);
   check(BCKeyset, BKeyset);
+
+  assertx(t.checkInvariants());
   return t;
 }
 

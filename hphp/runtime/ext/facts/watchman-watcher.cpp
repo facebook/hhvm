@@ -22,7 +22,6 @@
 
 #include <folly/Try.h>
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
 #include <folly/memory/not_null.h>
@@ -88,7 +87,7 @@ parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
   if (resultFiles && resultFiles->isArray()) {
     alteredPaths.reserve(resultFiles->size());
     for (auto const& pathData : std::move(*resultFiles)) {
-      folly::fs::path path{pathData.at("name").asString()};
+      std::filesystem::path path{pathData.at("name").asString()};
       std::string hash;
       assertx(path.is_relative());
       if (LIKELY(pathData.at("exists").asBool())) {

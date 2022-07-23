@@ -34,7 +34,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("{0}")]
-    Shallow(#[from] crate::shallow_decl_provider::Error),
+    Shallow(#[from] shallow_decl_provider::Error),
 
     #[error("{0}")]
     Dependency(#[from] depgraph_api::Error),

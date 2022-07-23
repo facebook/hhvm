@@ -118,6 +118,22 @@ val parse_completion : Hh_json.json option -> Lsp.Completion.params
 
 val print_completion : Lsp.Completion.result -> Hh_json.json
 
+val parse_callItem : Hh_json.json option -> Lsp.CallHierarchyItem.t
+
+val print_callItem : Lsp.CallHierarchyItem.t -> Hh_json.json
+
+val parse_callHierarchyCalls :
+  Hh_json.json option -> Lsp.CallHierarchyCallsRequestParam.t
+
+val print_PrepareCallHierarchyResult :
+  Lsp.PrepareCallHierarchy.result -> Hh_json.json
+
+val print_CallHierarchyIncomingCallsResult :
+  Lsp.CallHierarchyIncomingCalls.result -> Hh_json.json
+
+val print_CallHierarchyOutgoingCallsResult :
+  Lsp.CallHierarchyOutgoingCalls.result -> Hh_json.json
+
 val parse_willSaveWaitUntil :
   Hh_json.json option -> Lsp.WillSaveWaitUntil.params
 

@@ -443,12 +443,12 @@ pub mod instr {
     }
 
     // Special constructors for Pseudo
-    pub fn break_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::Break(level)))
+    pub fn break_<'a>() -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::Break))
     }
 
-    pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::Continue(level)))
+    pub fn continue_<'a>() -> InstrSeq<'a> {
+        instr(Instruct::Pseudo(Pseudo::Continue))
     }
 
     pub fn label<'a>(label: Label) -> InstrSeq<'a> {

@@ -353,6 +353,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (prepare_iset config "codes_not_raised_partial" ISet.empty)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
       ~tco_experimental_features:(config_experimental_tc_features config)
+      ?tco_log_large_fanouts_threshold:local_config.log_large_fanouts_threshold
       ~tco_log_inference_constraints:
         (ServerArgs.log_inference_constraints options)
       ~tco_migration_flags:(config_tc_migration_flags config)

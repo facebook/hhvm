@@ -25,7 +25,7 @@ function test_core(WatchmanInstance $wminst): void {
   $sock = $wminst->getFullSockName();
   // Test one-shot
   print("Testing one-shot\n");
-  $version = HH\asio\join(HH\watchman_query(
+  $version = HH\Asio\join(HH\watchman_query(
     vec['version', dict['optional' => vec['relative_root']]],
     $sock,
   ));
@@ -46,12 +46,12 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'callback_files',
     $sock,
-  ) |> HH\asio\join($$);
+  ) |> HH\Asio\join($$);
   print("Subscribed\n");
   waitFor(TEST_FILE_GOT_FRESH, $wminst);
   waitFor(TEST_FILE_GOT_UPDATE, $wminst);
   print("Unsubscribing\n");
-  $str = HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  $str = HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
   print("PASS\n");
   print("Confirming subscription no longer exists\n");
   if (HH\watchman_check_sub(SUB_NAME)) {
@@ -70,7 +70,7 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'tmpCB',
     $sock,
-  ) |> HH\asio\join($$);
+  ) |> HH\Asio\join($$);
   file_put_contents($tmpcode, '<?hh function tmpCB($_, $_, $_, $_, $_){asdf}');
   file_put_contents($wminst->getRepoRoot().'/blah.php', 'X');
   sleep(2);
@@ -87,7 +87,7 @@ function test_core(WatchmanInstance $wminst): void {
   } else {
     print("FAIL\n");
   }
-  HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
 
   print("Test delete subscription callback\n");
   $tmpcode = tempnam(sys_get_temp_dir(), 'cd2');
@@ -100,7 +100,7 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'tmpCB1',
     $sock,
-  ) |> HH\asio\join($$);
+  ) |> HH\Asio\join($$);
   unlink($tmpcode);
   file_put_contents($wminst->getRepoRoot().'/blah.php', 'X');
   sleep(2);
@@ -116,7 +116,7 @@ function test_core(WatchmanInstance $wminst): void {
   } else {
     print("FAIL\n");
   }
-  HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
 
   print("Stress test\n");
   apc_store('stress_counter', 0);
@@ -182,14 +182,14 @@ function test_core(WatchmanInstance $wminst): void {
   }
   try {
     if ($last_subscribe) {
-      HH\asio\join($last_subscribe);
+      HH\Asio\join($last_subscribe);
     }
     if ($last_unsubscribe) {
-      HH\asio\join($last_unsubscribe);
+      HH\Asio\join($last_unsubscribe);
     }
   } catch(Exception $_) { }
   if (HH\watchman_check_sub(SUB_NAME)) {
-    HH\asio\join(HH\watchman_unsubscribe(SUB_NAME));
+    HH\Asio\join(HH\watchman_unsubscribe(SUB_NAME));
   }
   $hit_c = __hhvm_intrinsics\apc_fetch_no_check('stress_counter');
   if (!$subscribe_c || !$unsubscribe_c || !$touch_c || !$hit_c) {
@@ -210,24 +210,24 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'callback_sync',
     $sock,
-  ) |> HH\asio\join($$);
+  ) |> HH\Asio\join($$);
   print("Subscribed, sleeping for 1 second...\n");
   sleep(1);
   print("Sync expecting timeout after 100ms...\n");
-  $synced = HH\watchman_sync_sub(SUB_NAME, 100) |> HH\asio\join($$);
+  $synced = HH\watchman_sync_sub(SUB_NAME, 100) |> HH\Asio\join($$);
   if ($synced) {
     print("FAIL\n");
   } else {
     print("PASS\n");
   }
   print("Sync expecting no timeout...\n");
-  if (HH\asio\join(HH\watchman_sync_sub(SUB_NAME, 10000))) {
+  if (HH\Asio\join(HH\watchman_sync_sub(SUB_NAME, 10000))) {
     print("PASS\n");
   } else {
     print("FAIL\n");
   }
   print("Unsubscribing\n");
-  $str = HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  $str = HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
 
   print("Check catching exception raised in a subscription callback\n");
   HH\watchman_subscribe(
@@ -236,7 +236,7 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'callback_exception',
     $sock,
-  )|> HH\asio\join($$);
+  )|> HH\Asio\join($$);
   sleep(2);
   $saw_exception = false;
   try {
@@ -250,7 +250,7 @@ function test_core(WatchmanInstance $wminst): void {
   } else {
     print("FAIL\n");
   }
-  HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
 
   // Check we can unsubscribe while a callback is in progress. The easiest way
   // synthesize this event is to unsubscribe in a callback itself.
@@ -261,7 +261,7 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'callback_unsubscribe',
     $sock,
-  )|> HH\asio\join($$);
+  )|> HH\Asio\join($$);
   HH\watchman_unsubscribe(SUB_NAME);
   sleep(3);
   if (HH\watchman_check_sub(SUB_NAME)) {
@@ -281,7 +281,7 @@ function test_core(WatchmanInstance $wminst): void {
       ],
       "garbage",
     )
-      |> HH\asio\join($$);
+      |> HH\Asio\join($$);
   } catch(Exception $e) {
     print('Got exception: '.$e->getMessage()."\n");
     $saw_exception = true;
@@ -301,7 +301,7 @@ function test_core(WatchmanInstance $wminst): void {
     SUB_NAME,
     'callback_broken',
     $sock,
-  ) |> HH\asio\join($$);
+  ) |> HH\Asio\join($$);
   $wminst->terminateProcess();
   file_put_contents('should_be_ignored', 'xyz');
   $wait = 0;
@@ -314,7 +314,7 @@ function test_core(WatchmanInstance $wminst): void {
   } else {
     print("PASS (connection error)\n");
   }
-  HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
+  HH\watchman_unsubscribe(SUB_NAME) |> HH\Asio\join($$);
 }
 <<__EntryPoint>>
 function entrypoint_ext_watchman(): void {

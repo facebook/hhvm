@@ -429,17 +429,13 @@ struct c_Vector : BaseVector {
     return intSz;
   }
 
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_removeKey(const Variant& key) {
+  void php_removeKey(const Variant& key) {
     if (UNLIKELY(!key.isInteger())) {
       throwBadKeyType();
     }
     removeKey(key.toInt64());
-    return Object{this};
   }
+
   void php_reserve(const Variant& sz) {
     return reserve(checkRequestedSize(sz));
   }

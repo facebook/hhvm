@@ -972,6 +972,7 @@ and ('ex, 'en) typedef = {
   t_is_ctx: bool;
   t_internal: bool;
   t_module: sid option;
+  t_docs_url: string option;
 }
 
 and ('ex, 'en) gconst = {

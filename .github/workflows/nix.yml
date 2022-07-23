@@ -123,7 +123,7 @@ jobs:
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
-        s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &
+        s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &&
         echo "REPREPRO_BASE_DIR=$HHVM_DOWNLOAD/universal" >> $GITHUB_ENV
     - name: Initiate Apt Repository
       run: |

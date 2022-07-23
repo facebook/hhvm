@@ -650,7 +650,7 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
     bool crypto_strong = false;
-    auto const iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
+    auto const iv_len = (int)HHVM_FN(openssl_cipher_iv_length)(cipher).toInt64();
     auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(
       iv_len, crypto_strong
     ).toString();

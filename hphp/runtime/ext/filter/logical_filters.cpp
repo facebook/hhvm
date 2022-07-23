@@ -379,7 +379,7 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED
@@ -482,7 +482,7 @@ Variant php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED

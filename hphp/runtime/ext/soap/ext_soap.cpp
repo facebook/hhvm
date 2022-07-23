@@ -2462,8 +2462,8 @@ void HHVM_METHOD(SoapClient, __construct,
     if (wsdl.isNull()) {
       /* Fetching non-WSDL mode options */
       data->m_uri   = options[s_uri].toString();
-      data->m_style = options[s_style].toInt32(); // SOAP_RPC || SOAP_DOCUMENT
-      data->m_use   = options[s_use].toInt32(); // SOAP_LITERAL || SOAP_ENCODED
+      data->m_style = (int)options[s_style].toInt64(); // SOAP_RPC || SOAP_DOCUMENT
+      data->m_use   = (int)options[s_use].toInt64(); // SOAP_LITERAL || SOAP_ENCODED
 
       if (data->m_uri.empty()) {
         throw SoapException("'uri' option is required in nonWSDL mode");
@@ -2485,15 +2485,15 @@ void HHVM_METHOD(SoapClient, __construct,
     }
 
     if (options.exists(s_soap_version)) {
-      data->m_soap_version = options[s_soap_version].toInt32();
+      data->m_soap_version = (int)options[s_soap_version].toInt64();
     }
 
     data->m_login = options[s_login].toString();
     data->m_password = options[s_password].toString();
-    data->m_authentication = options[s_authentication].toInt32();
+    data->m_authentication = (int)options[s_authentication].toInt64();
 
     data->m_proxy_host = options[s_proxy_host].toString();
-    data->m_proxy_port = options[s_proxy_port].toInt32();
+    data->m_proxy_port = (int)options[s_proxy_port].toInt64();
     data->m_proxy_login = options[s_proxy_login].toString();
     data->m_proxy_password = options[s_proxy_password].toString();
 
@@ -2506,7 +2506,7 @@ void HHVM_METHOD(SoapClient, __construct,
       data->m_exceptions = options[s_exceptions].toBoolean();
     }
     if (options.exists(s_compression)) {
-      data->m_compression = options[s_compression].toInt32();
+      data->m_compression = (int)options[s_compression].toInt64();
     }
 
     String encoding = options[s_encoding].toString();
@@ -2519,8 +2519,8 @@ void HHVM_METHOD(SoapClient, __construct,
       s_soap_data->register_encoding(data->m_encoding);
     }
     data->m_client_classmap = options[s_classmap].toArray();
-    data->m_features = options[s_features].toInt32();
-    data->m_ssl_method = options[s_ssl_method].toInt32();
+    data->m_features = (int)options[s_features].toInt64();
+    data->m_ssl_method = (int)options[s_ssl_method].toInt64();
     data->m_connection_timeout = options[s_connection_timeout].toInt64();
     data->m_user_agent = options[s_user_agent].toString();
 

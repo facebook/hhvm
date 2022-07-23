@@ -1100,7 +1100,7 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
   if (start < 0 || length < 0) {
     // Get number of code points assuming we substitute invalid sequences.
     Variant utf8StrlenResult = HHVM_FN(fb_utf8_strlen)(str);
-    int32_t sourceNumCodePoints = utf8StrlenResult.toInt32();
+    auto sourceNumCodePoints = (int)utf8StrlenResult.toInt64();
 
     if (start < 0) {
       // Negative means first character is start'th code point from end.

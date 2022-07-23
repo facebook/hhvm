@@ -1402,7 +1402,7 @@ TypedValue HHVM_FUNCTION(range,
 
 static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   auto callback = static_cast<const Variant*>(data);
-  return vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt32();
+  return (int)vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt64();
 }
 
 #define COMMA ,

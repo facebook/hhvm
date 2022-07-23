@@ -809,10 +809,10 @@ HHVM_METHOD(AsyncMysqlConnectionPool, __construct, const Array& options) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   am::PoolOptions pool_options;
   if (options.exists(s_per_key_connection_limit)) {
-    pool_options.setPerKeyLimit(options[s_per_key_connection_limit].toInt32());
+    pool_options.setPerKeyLimit((int)options[s_per_key_connection_limit].toInt64());
   }
   if (options.exists(s_pool_connection_limit)) {
-    pool_options.setPoolLimit(options[s_pool_connection_limit].toInt32());
+    pool_options.setPoolLimit((int)options[s_pool_connection_limit].toInt64());
   }
   if (options.exists(s_idle_timeout_micros)) {
     pool_options.setIdleTimeout(

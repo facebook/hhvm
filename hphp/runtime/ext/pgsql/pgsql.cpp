@@ -335,7 +335,7 @@ void PGSQLResult::sweep() {
 int PGSQLResult::getFieldNumber(const Variant& field) {
   int n;
   if (field.isNumeric(true)) {
-    n = field.toInt32();
+    n = (int)field.toInt64();
   } else if (field.isString()){
     n = m_res.fieldNumber(field.asCStrRef().data());
   } else {
@@ -780,7 +780,7 @@ static Variant HHVM_FUNCTION(pg_port, const Resource& connection) {
 
   String ret = pgsql->m_port;
   if (ret.isNumeric()) {
-    return ret.toInt32();
+    return (int)ret.toInt64();
   } else {
     return ret;
   }
@@ -1343,7 +1343,7 @@ static Variant HHVM_FUNCTION(pg_fetch_array,
     }
     res->m_current_row++;
   } else {
-    r = row.toInt32();
+    r = (int)row.toInt64();
   }
 
   if (r < 0 || r >= res->getNumRows()) {

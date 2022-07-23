@@ -629,7 +629,7 @@ static void CopyPathInfo(Array& server,
     Variant port = server[s_SERVER_PORT];
     always_assert(port.isInteger() || port.isString());
     if (port.isInteger()) {
-      serverPort = folly::to<std::string>(port.toInt32());
+      serverPort = folly::to<std::string>((int)port.toInt64());
     } else {
       serverPort = port.toString().data();
     }

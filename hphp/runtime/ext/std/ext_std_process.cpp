@@ -563,7 +563,7 @@ static bool pre_proc_open(const Array& descriptorspec,
       raise_warning("descriptor spec must be an integer indexed array");
       break;
     }
-    item.index = index.toInt32();
+    item.index = (int)index.toInt64();
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {

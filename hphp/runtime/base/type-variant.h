@@ -933,7 +933,6 @@ struct Variant : private TypedValue {
   }
   char toByte() const { return (char)toInt64();}
   short toInt16(int base = 10) const { return (short)toInt64(base);}
-  int toInt32(int base = 10) const { return (int)toInt64(base);}
   int64_t toInt64() const {
     if (isNullType(m_type)) return 0;
     if (hasNumData(m_type)) return m_data.num;

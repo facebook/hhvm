@@ -436,7 +436,6 @@ struct StringData final : MaybeCountable,
    * Type conversion functions.
    */
   bool toBoolean() const;
-  int toInt32(int base = 10) const { return toInt64(base); }
   int64_t toInt64(int base = 10) const;
   double toDouble() const;
   DataType toNumeric(int64_t& lval, double& dval) const;

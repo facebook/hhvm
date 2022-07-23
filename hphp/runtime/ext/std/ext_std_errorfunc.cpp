@@ -261,7 +261,7 @@ int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
   auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
-    id.setErrorReportingLevel(level.toInt32());
+    id.setErrorReportingLevel((int)level.toInt64());
   }
   return oldErrorReportingLevel;
 }

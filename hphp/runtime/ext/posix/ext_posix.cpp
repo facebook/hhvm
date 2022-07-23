@@ -414,7 +414,7 @@ static int php_posix_get_fd(const Variant& fd) {
     }
     nfd = f->fd();
   } else {
-    nfd = fd.toInt32();
+    nfd = (int)fd.toInt64();
   }
   return nfd;
 }

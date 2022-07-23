@@ -122,7 +122,7 @@ bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int64_t option, const Varian
 bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
-    if (!curl->setOption(iter.first().toInt32(), iter.second())) {
+    if (!curl->setOption((int)iter.first().toInt64(), iter.second())) {
       return false;
     }
   }

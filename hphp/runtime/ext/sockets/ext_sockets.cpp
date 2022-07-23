@@ -857,8 +857,8 @@ bool HHVM_FUNCTION(socket_set_option,
         return false;
       }
 
-      lv.l_onoff = (unsigned short)value[s_l_onoff].toInt32();
-      lv.l_linger = (unsigned short)value[s_l_linger].toInt32();
+      lv.l_onoff = (unsigned short)value[s_l_onoff].toInt64();
+      lv.l_linger = (unsigned short)value[s_l_linger].toInt64();
       optlen = sizeof(lv);
       opt_ptr = &lv;
     }
@@ -877,8 +877,8 @@ bool HHVM_FUNCTION(socket_set_option,
         return false;
       }
 
-      tv.tv_sec = value[s_sec].toInt32();
-      tv.tv_usec = value[s_usec].toInt32();
+      tv.tv_sec = (int)value[s_sec].toInt64();
+      tv.tv_usec = (int)value[s_usec].toInt64();
       if (tv.tv_usec >= 1000000) {
         tv.tv_sec += tv.tv_usec / 1000000;
         tv.tv_usec %= 1000000;
@@ -894,7 +894,7 @@ bool HHVM_FUNCTION(socket_set_option,
     break;
 
   default:
-    ov = optval.toInt32();
+    ov = (int)optval.toInt64();
     optlen = sizeof(ov);
     opt_ptr = &ov;
     break;
@@ -1034,7 +1034,7 @@ Variant HHVM_FUNCTION(socket_select,
   IOStatusHelper io("socket_select");
   int timeout_ms = -1;
   if (!vtv_sec.isNull()) {
-    timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
+    timeout_ms = ((int)vtv_sec.toInt64()) * 1000 + tv_usec / 1000;
   }
 
   /* slight hack to support buffered data; if there is data sitting in the

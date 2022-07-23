@@ -75,7 +75,7 @@ TEST(String, Manipulations) {
 TEST(String, Conversions) {
   EXPECT_TRUE(!String().toBoolean());
   EXPECT_TRUE(String("123").toBoolean());
-  EXPECT_TRUE(String("1234567890").toInt32() == 1234567890);
+  EXPECT_TRUE((int)String("1234567890").toInt64() == 1234567890);
   EXPECT_TRUE(String("123456789012345678").toInt64() == 123456789012345678LL);
   EXPECT_TRUE(String("123.45").toDouble() == 123.45);
 }

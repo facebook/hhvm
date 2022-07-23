@@ -1544,7 +1544,7 @@ static Variant php_mb_numericentity_exec(const String& str,
       iconvmap = (int*)req::malloc_noptrs(mapsize * sizeof(int));
       int *mapelm = iconvmap;
       for (ArrayIter iter(convs); iter; ++iter) {
-        *mapelm++ = iter.second().toInt32();
+        *mapelm++ = (int)iter.second().toInt64();
       }
     }
   }
@@ -2690,11 +2690,11 @@ Variant HHVM_FUNCTION(mb_strrpos,
       }
     }
     if (str_flg) {
-      noffset = offset.toInt32();
+      noffset = (int)offset.toInt64();
       enc_name = encoding.data();
     }
   } else {
-    noffset = offset.toInt32();
+    noffset = (int)offset.toInt64();
   }
 
   if (enc_name != nullptr && *enc_name) {

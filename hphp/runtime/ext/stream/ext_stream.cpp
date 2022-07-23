@@ -809,9 +809,9 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
   if (!same(retval, false) && retval.toInt64() >= 0) {
     auto sock = cast<Socket>(socket);
     if (sock->getType() == AF_INET6) {
-      address = "[" + host.toString() + "]:" + port.toInt32();
+      address = "[" + host.toString() + "]:" + (int)port.toInt64();
     } else {
-      address = host.toString() + ":" + port.toInt32();
+      address = host.toString() + ":" + (int)port.toInt64();
     }
     return ret.toString(); // watch out, "ret", not "retval"
   }

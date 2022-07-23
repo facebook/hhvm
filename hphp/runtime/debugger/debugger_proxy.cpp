@@ -57,7 +57,7 @@ DebuggerProxy::DebuggerProxy(req::ptr<Socket> socket, bool local)
     if (getClientConnectionInfo(address, port)) {
       clientDetails = folly::stringPrintf("From %s:%d",
                                           address.toString().data(),
-                                          port.toInt32());
+                                          (int)port.toInt64());
     } else {
       clientDetails = "Failed to get client connection details";
     }

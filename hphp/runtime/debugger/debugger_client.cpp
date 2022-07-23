@@ -2143,7 +2143,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   const Array& frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
     String file = frame[s_file].toString();
-    int line = frame[s_line].toInt32();
+    auto line = (int)frame[s_line].toInt64();
     if (!file.empty() && line) {
       if (m_frame == 0) {
         m_listFile.clear();
@@ -2193,7 +2193,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
         func.data() ? func.data() : "",
         args.data() ? args.data() : "");
   if (!frame[s_file].isNull()) {
-    int line = (int)frame[s_line].toInt32();
+    auto line = (int)frame[s_line].toInt64();
     auto fileLineInfo =
       folly::stringPrintf(" %s  at %s",
                           String("           ").substr(0, sindex.size()).data(),

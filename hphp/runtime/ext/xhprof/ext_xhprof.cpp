@@ -71,8 +71,8 @@ void HHVM_FUNCTION(xhprof_enable, int64_t flags/* = 0 */,
     s_profiler_factory->start(ProfilerKind::Memo, flags);
   } else if (flags & External) {
     for (ArrayIter iter(args); iter; ++iter) {
-      if (iter.first().toInt32() == 0) {
-         flags = iter.second().toInt32();
+      if ((int)iter.first().toInt64() == 0) {
+         flags = (int)iter.second().toInt64();
       }
     }
     s_profiler_factory->start(ProfilerKind::External, flags);

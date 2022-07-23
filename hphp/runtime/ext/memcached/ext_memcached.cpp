@@ -1119,7 +1119,7 @@ bool HHVM_METHOD(Memcached, setOption, int64_t option, const Variant& value) {
 
   case q_Memcached$$OPT_SERIALIZER:
     {
-      int iValue = value.toInt32(10);
+      auto iValue = (int)value.toInt64();
       switch (iValue) {
       case q_Memcached$$SERIALIZER_PHP:
       case q_Memcached$$SERIALIZER_JSON:

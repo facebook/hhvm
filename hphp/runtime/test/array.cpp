@@ -60,7 +60,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr[0].toInt32() == 0);
+  EXPECT_TRUE((int)arr[0].toInt64() == 0);
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());

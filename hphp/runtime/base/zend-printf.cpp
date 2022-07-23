@@ -457,7 +457,7 @@ String string_printf(const char *format, int len, const Array& args) {
       break;
 
     case 'c':
-      result.append(tmp.toByte());
+      result.append((char)tmp.toInt64());
       break;
 
     case 'o':

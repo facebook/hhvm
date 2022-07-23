@@ -931,7 +931,6 @@ struct Variant : private TypedValue {
     if (hasNumData(m_type)) return m_data.num;
     return toBooleanHelper();
   }
-  char toByte() const { return (char)toInt64();}
   int64_t toInt64() const {
     if (isNullType(m_type)) return 0;
     if (hasNumData(m_type)) return m_data.num;

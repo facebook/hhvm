@@ -517,7 +517,7 @@ void binary_serialize_internal(int8_t thrift_typeID,
       transport.writeI8(value.toBoolean() ? 1 : 0);
       return;
     case T_BYTE:
-      transport.writeI8(value.toByte());
+      transport.writeI8((char)value.toInt64());
       return;
     case T_I16:
       transport.writeI16((short)value.toInt64());

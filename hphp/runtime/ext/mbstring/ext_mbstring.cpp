@@ -3566,7 +3566,7 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
     spattern = pattern.toString();
   } else {
     /* FIXME: this code is not multibyte aware! */
-    pat_buf[0] = pattern.toByte();
+    pat_buf[0] = (char)pattern.toInt64();
     pat_buf[1] = '\0';
     spattern = String(pat_buf, 1, CopyString);
   }

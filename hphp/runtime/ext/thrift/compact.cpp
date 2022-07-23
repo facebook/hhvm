@@ -390,7 +390,7 @@ struct CompactWriter {
           break;
 
         case T_BYTE:
-          writeUByte(value.toByte());
+          writeUByte((char)value.toInt64());
           break;
 
         case T_I16:

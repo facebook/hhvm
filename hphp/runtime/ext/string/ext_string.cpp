@@ -1263,7 +1263,7 @@ TypedValue HHVM_FUNCTION(strpos,
     }
     pos = haystack.find(n, offset);
   } else {
-    pos = haystack.find(needle.toByte(), offset);
+    pos = haystack.find((char)needle.toInt64(), offset);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1281,7 +1281,7 @@ TypedValue HHVM_FUNCTION(stripos,
   if (needle.isString()) {
     pos = haystack.find(needle.toString(), offset, false);
   } else {
-    pos = haystack.find(needle.toByte(), offset, false);
+    pos = haystack.find((char)needle.toInt64(), offset, false);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1321,7 +1321,7 @@ TypedValue HHVM_FUNCTION(strrchr,
   if (needle.isString() && needle.toString().size() > 0) {
     pos = haystack.rfind(needle.toString().data()[0], false);
   } else {
-    pos = haystack.rfind(needle.toByte(), false);
+    pos = haystack.rfind((char)needle.toInt64(), false);
   }
   if (pos < 0) return make_tv<KindOfBoolean>(false);
   return tvReturn(haystack.substr(pos));
@@ -1338,7 +1338,7 @@ TypedValue HHVM_FUNCTION(strrpos,
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset);
   } else {
-    pos = haystack.rfind(needle.toByte(), offset);
+    pos = haystack.rfind((char)needle.toInt64(), offset);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1355,7 +1355,7 @@ TypedValue HHVM_FUNCTION(strripos,
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset, false);
   } else {
-    pos = haystack.rfind(needle.toByte(), offset, false);
+    pos = haystack.rfind((char)needle.toInt64(), offset, false);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);

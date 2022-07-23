@@ -313,9 +313,8 @@ public:
   /*
    * Type conversions.
    */
-  bool toBoolean() const { return m_arr && !m_arr->empty(); }
-  int64_t toInt64() const { return toBoolean() ? 1 : 0; }
-  double toDouble() const { return toBoolean() ? 1.0 : 0.0; }
+  int64_t toInt64() const { return empty() ? 0 : 1; }
+  double toDouble() const { return empty() ? 0.0 : 1.0; }
   String toString() const;
 
   /*

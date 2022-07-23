@@ -289,7 +289,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
       raise_error("Unknown quote style: %d", (int)quoteStyle);
   }
 
-  if (quoteStyle != QuoteStyle::FBUtf8Only && extra.toBoolean()) {
+  if (quoteStyle != QuoteStyle::FBUtf8Only && !extra.empty()) {
     tmp = *am;
     am = &tmp;
     for (ArrayIter iter(extra); iter; ++iter) {

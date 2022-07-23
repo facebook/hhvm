@@ -159,7 +159,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
     }
     Array fieldSpec = specIt.second().toArray();
     auto field = FieldSpec::compile(fieldSpec, true);
-    field.fieldNum = specIt.first().toInt16();
+    field.fieldNum = (short)specIt.first().toInt64();
 
     // Determine if we can safely skip the type check when deserializing.
     field.noTypeCheck = [&] {

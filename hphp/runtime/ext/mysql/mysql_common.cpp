@@ -170,7 +170,7 @@ int MySQL::GetDefaultPort() {
     } else {
       Variant ret = HHVM_FN(getservbyname)("mysql", "tcp");
       if (!same(ret, false)) {
-        s_default_port = ret.toInt16();
+        s_default_port = (short)ret.toInt64();
       }
     }
   }

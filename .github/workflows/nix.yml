@@ -100,7 +100,6 @@ jobs:
     # ubuntu-latest is too old to support AWS role
     - run: nix profile install nixpkgs#s3fs
     - run: sudo apt-get install reprepro
-    - run: dpkg --info bundle.deb
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials

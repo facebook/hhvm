@@ -114,6 +114,16 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
     let should_emit_implicit_context = hhas_attribute::is_keyed_by_ic_memoize(attributes.iter());
+    let is_make_ic_inaccessible_memoize =
+        hhas_attribute::is_make_ic_inaccessible_memoize(attributes.iter());
+    let is_soft_make_ic_inaccessible_memoize =
+        hhas_attribute::is_soft_make_ic_inaccessible_memoize(attributes.iter());
+    let should_make_ic_inaccessible =
+        if is_make_ic_inaccessible_memoize || is_soft_make_ic_inaccessible_memoize {
+            Some(is_soft_make_ic_inaccessible_memoize)
+        } else {
+            None
+        };
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
@@ -126,6 +136,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         f.fun_kind.is_fasync(),
         is_reified,
         should_emit_implicit_context,
+        should_make_ic_inaccessible,
     )?;
     let coeffects = HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
     let body = make_wrapper_body(
@@ -163,10 +174,18 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let (fun, decl_vars) = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context
     {
-        make_memoize_function_no_params_code(e, env, deprecation_info, renamed_id, is_async)
+        make_memoize_function_no_params_code(
+            e,
+            env,
+            deprecation_info,
+            renamed_id,
+            is_async,
+            should_make_ic_inaccessible,
+        )
     } else {
         make_memoize_function_with_params_code(
             e,
@@ -179,6 +198,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
             is_async,
             is_reified,
             should_emit_implicit_context,
+            should_make_ic_inaccessible,
         )
     }?;
     Ok((emit_pos_then(pos, fun), decl_vars))
@@ -195,6 +215,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = e.alloc;
     let param_count = hhas_params.len();
@@ -259,6 +280,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         start: first_unnamed_local,
         len: key_count.try_into().unwrap(),
     };
+    let ic_stash_local = Local::new(first_unnamed_idx + (key_count) as usize);
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
@@ -282,7 +304,13 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         instr::null_uninit(),
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
-        instr::f_call_func_d(fcall_args, renamed_id),
+        emit_memoize_helpers::with_possible_ic(
+            alloc,
+            e.label_gen_mut(),
+            ic_stash_local,
+            instr::f_call_func_d(fcall_args, renamed_id),
+            should_make_ic_inaccessible,
+        ),
         instr::memo_set(local_range),
         if is_async {
             InstrSeq::gather(vec![
@@ -305,6 +333,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     deprecation_info: Option<&[TypedValue<'arena>]>,
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
+    should_make_ic_inaccessible: Option<bool>,
 ) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
     let alloc = e.alloc;
     let notfound = e.label_gen_mut().next_regular();
@@ -321,6 +350,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         if is_async { Some(eager_set) } else { None },
         None,
     );
+    let ic_stash_local = Local::new(0);
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
         instr::verify_implicit_context_state(),
@@ -340,7 +370,13 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
         instr::label(notfound),
         instr::null_uninit(),
         instr::null_uninit(),
-        instr::f_call_func_d(fcall_args, renamed_id),
+        emit_memoize_helpers::with_possible_ic(
+            alloc,
+            e.label_gen_mut(),
+            ic_stash_local,
+            instr::f_call_func_d(fcall_args, renamed_id),
+            should_make_ic_inaccessible,
+        ),
         instr::memo_set(LocalRange::EMPTY),
         if is_async {
             InstrSeq::gather(vec![

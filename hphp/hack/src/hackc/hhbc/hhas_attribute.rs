@@ -63,14 +63,28 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[HhasAttribute<'arena>]>) ->
     })
 }
 
-pub fn is_keyed_by_ic_memoize<'arena>(attrs: impl AsRef<[HhasAttribute<'arena>]>) -> bool {
+fn is_memoize_with<'arena>(attrs: impl AsRef<[HhasAttribute<'arena>]>, arg: &str) -> bool {
     attrs.as_ref().iter().any(|attr| {
         ua::is_memoized_regular(attr.name.unsafe_as_str())
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0.unsafe_as_str() == "KeyedByIC",
+                TypedValue::String(s0) => s0.unsafe_as_str() == arg,
                 _ => false,
             })
     })
+}
+
+pub fn is_keyed_by_ic_memoize<'arena>(attrs: impl AsRef<[HhasAttribute<'arena>]>) -> bool {
+    is_memoize_with(attrs, "KeyedByIC")
+}
+
+pub fn is_make_ic_inaccessible_memoize<'arena>(attrs: impl AsRef<[HhasAttribute<'arena>]>) -> bool {
+    is_memoize_with(attrs, "MakeICInaccessible")
+}
+
+pub fn is_soft_make_ic_inaccessible_memoize<'arena>(
+    attrs: impl AsRef<[HhasAttribute<'arena>]>,
+) -> bool {
+    is_memoize_with(attrs, "SoftMakeICInaccessible")
 }
 
 fn is_foldable<'arena>(attr: &HhasAttribute<'arena>) -> bool {

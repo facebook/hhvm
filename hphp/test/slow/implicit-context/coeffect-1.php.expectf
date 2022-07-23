@@ -1,6 +1,5 @@
+Warning: Call to IntContext::set() requires [zoned_with] coeffects but main() provided [defaults] in %s on line 20
 Setting context to 5
-
-Warning: Call to addFive() requires [zoned_with] coeffects but HH\ImplicitContext::runWith() provided [zoned] in %s on line 7
 int(10)
 Setting context to 5
 int(10)

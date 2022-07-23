@@ -202,7 +202,9 @@ const StaticString
   s_DynamicallyCallable("__DynamicallyCallable"),
   s_Memoize("__Memoize"),
   s_MemoizeLSB("__MemoizeLSB"),
-  s_KeyedByIC("KeyedByIC");
+  s_KeyedByIC("KeyedByIC"),
+  s_MakeICInaccessible("MakeICInaccessible"),
+  s_SoftMakeICInaccessible("SoftMakeICInaccessible");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -298,7 +300,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
-    ex->m_allFlags.m_isKeyedByImplicitContextMemoize = false;
+    ex->m_allFlags.m_memoizeICTypeBit0 = false;
+    ex->m_allFlags.m_memoizeICTypeBit1 = false;
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
@@ -356,18 +359,29 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
 
   if (isMemoizeWrapper || isMemoizeWrapperLSB) {
-    auto const hasKeyedByIC = [&] (TypedValue tv) {
+    auto const getICType = [&] (TypedValue tv) {
       assertx(tvIsVec(tv));
-      bool found = false;
+      auto type = Func::MemoizeICType::NoIC;
       IterateV(tv.m_data.parr, [&](TypedValue elem) {
-        found |= tvIsString(elem) && elem.m_data.pstr->same(s_KeyedByIC.get());
+          if (tvIsString(elem)) {
+            if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
+                type = Func::MemoizeICType::KeyedByIC;
+            } else if (elem.m_data.pstr->same(s_MakeICInaccessible.get())) {
+                type = Func::MemoizeICType::MakeICInaccessible;
+            } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
+                type = Func::MemoizeICType::SoftMakeICInaccessible;
+            }
+          }
       });
-      return found;
+      return type;
     };
     auto const attrName = isMemoizeWrapperLSB ? s_MemoizeLSB : s_Memoize;
     auto const it = userAttributes.find(attrName.get());
-    f->shared()->m_allFlags.m_isKeyedByImplicitContextMemoize =
-      it != userAttributes.end() && hasKeyedByIC(it->second);
+    if (it != userAttributes.end()) {
+      auto const ic_type = getICType(it->second);
+      f->shared()->m_allFlags.m_memoizeICTypeBit0 = ic_type & 1;
+      f->shared()->m_allFlags.m_memoizeICTypeBit1 = (ic_type >> 1) & 1;
+    }
   }
 
   for (auto const& name : staticCoeffects) {

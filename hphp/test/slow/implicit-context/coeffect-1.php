@@ -2,7 +2,7 @@
 
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
-  public static function set(int $context, (function (): int) $f)[zoned] {
+  public static function set(int $context, (function (): int) $f)[zoned, ctx $f] {
     echo 'Setting context to ' . $context . "\n";
     return parent::runWith($context, $f);
   }

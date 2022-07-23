@@ -91,7 +91,7 @@ void raiseModuleBoundaryViolation(const Class* ctx,
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const StringData* callerModule);
 
-void raiseImplicitContextStateInvalidException(const Func* func);
+void raiseImplicitContextStateInvalidDispatch(const Func*);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

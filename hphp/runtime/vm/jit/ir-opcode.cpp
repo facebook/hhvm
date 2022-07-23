@@ -384,7 +384,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
-  case RaiseImplicitContextStateInvalidException:
+  case RaiseImplicitContextStateInvalid:
   case RaiseModuleBoundaryViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:

@@ -70,7 +70,7 @@ static ZendINIGlobals s_zend_ini;
 
 static void zend_ini_escape_string(std::string &lval, char *str, int len,
                                    char quote_type) {
-  register char *s, *t;
+  char *s, *t;
   char *end;
 
   lval = std::string(str, len);

@@ -444,8 +444,8 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 
   if (cinfo.out_color_space == JCS_CMYK) {
     for (i = 0; i < cinfo.output_height; i++) {
-      register JSAMPROW currow = row;
-      register int *tpix = im->tpixels[i];
+      JSAMPROW currow = row;
+      int *tpix = im->tpixels[i];
       nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
       if (nrows != 1) {
         php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
@@ -457,8 +457,8 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
     }
   } else {
     for (i = 0; i < cinfo.output_height; i++) {
-      register JSAMPROW currow = row;
-      register int *tpix = im->tpixels[i];
+      JSAMPROW currow = row;
+      int *tpix = im->tpixels[i];
       nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
       if (nrows != 1) {
         php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);

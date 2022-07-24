@@ -394,15 +394,15 @@ struct Options {
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
-  std::chrono::milliseconds m_throttleBaseWait{0};
-  size_t m_throttleRetries{0};
+  std::chrono::milliseconds m_throttleBaseWait{25};
+  size_t m_throttleRetries{7};
   bool m_verboseLogging{false};
   bool m_cacheExecs{true};
   bool m_useEdenFS{true};
   bool m_cleanup{true};
   bool m_useRichClient{true};
-  bool m_useZippyRichClient{true};
-  bool m_useP2P{true};
+  bool m_useZippyRichClient{false};
+  bool m_useP2P{false};
   std::string m_useCase;
 };
 

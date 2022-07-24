@@ -23,6 +23,9 @@
 #include <thread>
 #include <vector>
 
+#include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/unit-cache.h"
+
 #include "hphp/util/coro.h"
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/file-cache.h"
@@ -41,10 +44,6 @@ struct Package {
           coro::TicketExecutor& executor,
           extern_worker::Client& client);
 
-  using Callback = std::function<void(std::unique_ptr<UnitEmitter>)>;
-
-  bool parse(const Callback&);
-
   size_t getTotalFiles() const { return m_total.load(); }
 
   Optional<std::chrono::microseconds> parsingInputsTime() const {
@@ -62,8 +61,133 @@ struct Package {
 
   std::shared_ptr<FileCache> getFileCache();
 
-  struct Config;
+  // Configuration for parse workers. This should contain any runtime
+  // options which can affect HackC (or the interface to it).
+  struct Config {
+    Config() = default;
 
+    static Config make() {
+      Config c;
+      #define R(Opt) c.Opt = RO::Opt;
+      UNITCACHEFLAGS()
+        #undef R
+        c.EvalAbortBuildOnCompilerError = RO::EvalAbortBuildOnCompilerError;
+      c.EvalAbortBuildOnVerifyError = RO::EvalAbortBuildOnVerifyError;
+      c.IncludeRoots = RO::IncludeRoots;
+      c.coeffects = CoeffectsConfig::exportForParse();
+      return c;
+    }
+
+    void apply() const {
+      #define R(Opt) RO::Opt = Opt;
+      UNITCACHEFLAGS()
+        #undef R
+        RO::EvalAbortBuildOnCompilerError = EvalAbortBuildOnCompilerError;
+      RO::EvalAbortBuildOnVerifyError = EvalAbortBuildOnVerifyError;
+      RO::IncludeRoots = IncludeRoots;
+      CoeffectsConfig::importForParse(coeffects);
+    }
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      #define R(Opt) sd(Opt);
+      UNITCACHEFLAGS()
+        #undef R
+        sd(EvalAbortBuildOnCompilerError)
+        (EvalAbortBuildOnVerifyError)
+        (IncludeRoots)
+        (coeffects);
+    }
+
+  private:
+    #define R(Opt) decltype(RuntimeOption::Opt) Opt;
+    UNITCACHEFLAGS()
+    #undef R
+    bool EvalAbortBuildOnCompilerError;
+    bool EvalAbortBuildOnVerifyError;
+    decltype(RO::IncludeRoots) IncludeRoots;
+    CoeffectsConfig coeffects;
+  };
+
+  // Metadata for a parse job. Just filename things that we need to
+  // resolve when we have the whole source tree available.
+  struct FileMeta {
+    FileMeta() = default;
+    FileMeta(std::string f, Optional<std::string> o)
+      : m_filename{std::move(f)}, m_targetPath{std::move(o)} {}
+
+    // The (relative) filename of the file
+    std::string m_filename;
+    // If the file is a symlink, what its target is
+    Optional<std::string> m_targetPath;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_filename)
+        (m_targetPath);
+    }
+  };
+
+  // Metadata obtained during parsing. Mainly symbol refs used to
+  // drive on-demand parsing.
+  struct ParseMeta {
+    // Symbols present in the unit. This will be used to find new files
+    // for parse on-demand.
+    SymbolRefs m_symbol_refs;
+    // If not empty, parsing resulted in an ICE and configuration
+    // indicated that this should be fatal.
+    std::string m_abort;
+
+    struct Definitions {
+      std::vector<const StringData*> m_classes;
+      std::vector<const StringData*> m_enums;
+      std::vector<const StringData*> m_funcs;
+      std::vector<const StringData*> m_methCallers;
+      std::vector<const StringData*> m_typeAliases;
+      std::vector<const StringData*> m_constants;
+      std::vector<const StringData*> m_modules;
+
+      template <typename SerDe> void serde(SerDe& sd) {
+        sd(m_classes)
+          (m_enums)
+          (m_funcs)
+          (m_methCallers)
+          (m_typeAliases)
+          (m_constants)
+          (m_modules);
+      }
+    };
+    Definitions m_definitions;
+    const StringData* m_filepath{nullptr};
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_symbol_refs)
+        (m_abort)
+        (m_definitions)
+        (m_filepath);
+    }
+  };
+
+  using UEVec = std::vector<std::unique_ptr<UnitEmitter>>;
+  using FileMetaVec = std::vector<FileMeta>;
+  using ParseMetaVec = std::vector<ParseMeta>;
+  using FileData = std::tuple<extern_worker::Ref<std::string>,
+                              extern_worker::Ref<RepoOptionsFlags>>;
+
+  using LocalCallback = std::function<coro::Task<void>(UEVec)>;
+  using Callback = std::function<coro::Task<ParseMetaVec>(
+    const extern_worker::Ref<Config>&,
+    extern_worker::Ref<FileMetaVec>,
+    std::vector<FileData>,
+    bool
+  )>;
+
+  coro::Task<bool> parse(const Callback&, const LocalCallback&);
+
+  // These are meant to be called from extern-worker Jobs to perform
+  // the actual parsing.
+  static void parseInit(const Config&, FileMetaVec);
+  static ParseMetaVec parseFini();
+  static UnitEmitterSerdeWrapper parseRun(const std::string&,
+                                          const RepoOptionsFlags&);
 private:
 
   struct FileAndSize {
@@ -84,7 +208,7 @@ private:
     FileAndSizeVec m_ungrouped;
   };
 
-  void parseAll();
+  coro::Task<void> parseAll();
 
   coro::Task<GroupResult> groupDirectories(std::string);
   void groupFiles(ParseGroups&, FileAndSizeVec);

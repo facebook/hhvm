@@ -18,11 +18,28 @@
 #include <string>
 #include <utility>
 
-#include "hphp/hhbbc/hhbbc.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 
+enum class Op : uint8_t;
+
 namespace HHBBC {
+
+//////////////////////////////////////////////////////////////////////
+
+struct OpHash {
+  size_t operator()(HPHP::Op op) const {
+    return hash_int64(static_cast<uint64_t>(op));
+  }
+};
+
+// Map case-insensitive class name => Set<case-sensitive method name>
+using MethodMap = hphp_fast_string_imap<hphp_fast_string_set>;
+using OpcodeSet = hphp_fast_set<HPHP::Op,OpHash>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -41,12 +58,6 @@ struct Options {
    * that use particular bytecodes.
    */
   OpcodeSet TraceBytecodes;
-
-  /*
-   * If non-empty, dump jemalloc memory profiles at key points during
-   * the build, using this as a prefix.
-   */
-  std::string profileMemory;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -82,12 +93,6 @@ struct Options {
    * Limit public static property refinement for the same reason.
    */
   uint32_t publicSPropRefineLimit = 8;
-
-  /*
-   * Whether to produce extended stats information.  (Takes extra
-   * time.)
-   */
-  bool extendedStats = false;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -210,6 +215,19 @@ struct Options {
    */
   Optional<std::string> SourceRootForFileBC;
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Flags below this line do not affect HHBBC in a way that matters
+  // to its extern-worker jobs. Therefore they are not
+  // serialized. Adding unnecessary things to the serialization can
+  // cause unnecessary cache misses.
+  //////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Whether to produce extended stats information.  (Takes extra
+   * time.)
+   */
+  bool extendedStats = false;
+
   /*
    * The filepath where to save the stats file.  If the path is empty, then we
    * save the stats file to a temporary file.
@@ -217,9 +235,56 @@ struct Options {
   std::string stats_file;
 
   /*
+   * If non-empty, dump jemalloc memory profiles at key points during
+   * the build, using this as a prefix.
+   */
+  std::string profileMemory;
+
+  /*
    * Run a test of HHBBC memory compression (e.g. bytecode compression).
    */
   bool TestCompression;
+
+  /*
+   * Extern-worker config
+   */
+  std::string ExternWorkerUseCase;
+  std::string ExternWorkerWorkingDir;
+  bool ExternWorkerForceSubprocess = false;
+  bool ExternWorkerUseExecCache = true;
+  bool ExternWorkerCleanup = true;
+  bool ExternWorkerUseRichClient = true;
+  bool ExternWorkerUseZippyRichClient = false;
+  bool ExternWorkerUseP2P = false;
+  bool ExternWorkerVerboseLogging = false;
+  bool ExternWorkerAsyncCleanup = true;
+  int ExternWorkerTimeoutSecs = 0;
+  int ExternWorkerThrottleRetries = -1;
+  int ExternWorkerThrottleBaseWaitMSecs = -1;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(TraceFunctions)
+      (TraceBytecodes)
+      (analyzeFuncWideningLimit)
+      (analyzeClassWideningLimit)
+      (returnTypeRefineLimit)
+      (publicSPropRefineLimit)
+      (NoOptimizations)
+      (ContextSensitiveInterp)
+      (RemoveDeadBlocks)
+      (ConstantProp)
+      (ConstantFoldBuiltins)
+      (LocalDCE)
+      (GlobalDCE)
+      (RemoveUnusedLocalNames)
+      (CompactLocalSlots)
+      (InsertAssertions)
+      (InsertStackAssertions)
+      (FilterAssertions)
+      (StrengthReduce)
+      (FuncFamilies)
+      (AnalyzePublicStatics);
+  }
 };
 extern Options options;
 

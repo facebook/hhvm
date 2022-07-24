@@ -54,7 +54,11 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/logger.h"
 
-namespace HPHP::HHBBC {
+namespace HPHP {
+
+using namespace extern_worker;
+
+namespace HHBBC {
 
 namespace {
 
@@ -62,14 +66,11 @@ namespace {
 
 std::string output_repo;
 std::string input_repo;
-std::string hack_compiler_extract_path;
 bool logging = true;
-bool print_bytecode_stats_and_exit = false;
-
 
 //////////////////////////////////////////////////////////////////////
 
-template<class SinglePassReadableRange>
+template<typename SinglePassReadableRange>
 MethodMap make_method_map(SinglePassReadableRange& range) {
   auto ret = MethodMap{};
   for (auto& str : range) {
@@ -84,7 +85,7 @@ MethodMap make_method_map(SinglePassReadableRange& range) {
   return ret;
 }
 
-template<class SinglePassReadableRange>
+template<typename SinglePassReadableRange>
 OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs) {
   if (bcs.empty()) return {};
   hphp_fast_map<std::string,Op> bcmap;
@@ -107,7 +108,6 @@ void parse_options(int argc, char** argv) {
   auto const defaultFinalThreadCount =
     std::max<long>(defaultThreadCount - 1, 1);
 
-  std::vector<std::string> interceptable_fns;
   std::vector<std::string> trace_fns;
   std::vector<std::string> trace_bcs;
   bool no_logging = false;
@@ -166,7 +166,6 @@ void parse_options(int argc, char** argv) {
     ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ("public-sprop-refine-limit", po::value(&options.publicSPropRefineLimit))
-    ("bytecode-stats",       po::bool_switch(&print_bytecode_stats_and_exit))
     ("test-compression",     po::bool_switch(&options.TestCompression))
     ;
 
@@ -189,8 +188,25 @@ void parse_options(int argc, char** argv) {
     ("analyze-public-statics",    po::value(&options.AnalyzePublicStatics))
     ;
 
+  po::options_description eflags("Extern-Worker Flags");
+  eflags.add_options()
+    ("extern-worker-use-case",                 po::value(&options.ExternWorkerUseCase))
+    ("extern-worker-working-dir",              po::value(&options.ExternWorkerWorkingDir))
+    ("extern-worker-timeout-secs",             po::value(&options.ExternWorkerTimeoutSecs))
+    ("extern-worker-throttle-retries",         po::value(&options.ExternWorkerThrottleRetries))
+    ("extern-worker-throttle-base-wait-msecs", po::value(&options.ExternWorkerThrottleBaseWaitMSecs))
+    ("extern-worker-force-subprocess",         po::value(&options.ExternWorkerForceSubprocess))
+    ("extern-worker-use-exec-cache",           po::value(&options.ExternWorkerUseExecCache))
+    ("extern-worker-cleanup",                  po::value(&options.ExternWorkerCleanup))
+    ("extern-worker-use-rich-client",          po::value(&options.ExternWorkerUseRichClient))
+    ("extern-worker-use-zippy-rich-client",    po::value(&options.ExternWorkerUseZippyRichClient))
+    ("extern-worker-use-p2p",                  po::value(&options.ExternWorkerUseP2P))
+    ("extern-worker-verbose-logging",          po::value(&options.ExternWorkerVerboseLogging))
+    ("extern-worker-async-cleanup",            po::value(&options.ExternWorkerAsyncCleanup))
+    ;
+
   po::options_description all;
-  all.add(basic).add(extended).add(oflags);
+  all.add(basic).add(extended).add(oflags).add(eflags);
 
   po::positional_options_description pd;
   pd.add("input", 1);
@@ -260,25 +276,6 @@ UNUSED void validate_options() {
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename F> void load_input(F&& fun) {
-  trace_time timer("load units");
-
-  SCOPE_EXIT { RepoFile::destroy(); };
-
-  auto const units = RepoFile::enumerateUnits();
-  auto const size = units.size();
-  fun(size, nullptr);
-  parallel::for_each(
-    units,
-    [&] (const StringData* path) {
-      fun(
-        size,
-        RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false)
-      );
-    }
-  );
-}
-
 RepoGlobalData get_global_data() {
   auto const now = std::chrono::high_resolution_clock::now();
   auto const nanos =
@@ -342,85 +339,303 @@ RepoGlobalData get_global_data() {
   return gd;
 }
 
-void compile_repo() {
-  auto program = make_program();
+//////////////////////////////////////////////////////////////////////
 
-  load_input(
-    [&] (size_t size, std::unique_ptr<UnitEmitter> ue) {
-      if (!ue) {
-        if (logging) {
-          std::cout << folly::format("{} units\n", size);
-        }
-        return;
-      }
-      add_unit_to_program(ue.get(), *program);
+// Receives UnitEmitters and turns them into WholeProgramInput Key and
+// Values. This "loads" them locally and uploads them into an
+// extern_worker::Client in the way that whole_program expects.
+struct LoadRepoJob {
+  using W = WholeProgramInput;
+
+  static std::string name() { return "hhbbc-load-repo"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static std::vector<W::Key> fini() {
+    process_exit();
+    return std::move(s_keys);
+  }
+  static Variadic<W::Value> run(UnitEmitterSerdeWrapper wrapper) {
+    std::vector<W::Value> values;
+    for (auto& [key, value] : W::make(std::move(wrapper.m_ue))) {
+      s_keys.emplace_back(std::move(key));
+      values.emplace_back(std::move(value));
     }
+    return Variadic<W::Value>{std::move(values)};
+  }
+
+  static std::vector<W::Key> s_keys;
+};
+std::vector<WholeProgramInput::Key> LoadRepoJob::s_keys;
+Job<LoadRepoJob> s_loadRepoJob;
+
+// Load all UnitEmitters from the RepoFile and convert them into what
+// whole_program expects as input.
+WholeProgramInput load_repo(coro::TicketExecutor& executor,
+                            Client& client) {
+  trace_time timer("load repo");
+
+  SCOPE_EXIT { RepoFile::destroy(); };
+  RepoFile::loadGlobalTables(false);
+  auto const units = RepoFile::enumerateUnits();
+  if (logging) std::cout << folly::format("{} units\n", units.size());
+
+  // Start this as early as possible
+  coro::AsyncValue<Ref<Config>> config{
+    [&client] () {
+      return client.store(Config::get(RepoFile::globalData()));
+    },
+    executor.sticky()
+  };
+
+  // Shard the emitters using consistent hashing of their path.
+  constexpr size_t kLoadGroupSize = 500;
+  auto const numBuckets = (units.size() + kLoadGroupSize - 1) / kLoadGroupSize;
+
+  std::vector<std::vector<const StringData*>> groups;
+  groups.resize(numBuckets);
+
+  for (auto const unit : units) {
+    auto const idx = consistent_hash(unit->hash(), numBuckets);
+    assertx(idx < numBuckets);
+    groups[idx].emplace_back(unit);
+  }
+
+  // Maintain deterministic ordering within each group
+  for (auto& group : groups) {
+    std::sort(
+      group.begin(),
+      group.end(),
+      [] (const StringData* a, const StringData* b) {
+        return strcmp(a->data(), b->data()) < 0;
+      }
+    );
+  }
+
+  WholeProgramInput inputs;
+
+  auto const load =
+    [&] (std::vector<const StringData*> units) -> coro::Task<void> {
+
+    // Load the UnitEmitters from disk (deferring this until here cuts
+    // down on the number of UnitEmitters we have to keep in memory at
+    // once).
+    std::vector<UnitEmitterSerdeWrapper> ues;
+    ues.reserve(units.size());
+    for (auto const unit : units) {
+      ues.emplace_back(
+        RepoFile::loadUnitEmitter(unit, unit, Native::s_noNativeFuncs, false)
+      );
+    }
+
+    // Store them (and the config we'll use).
+    auto [refs, configRef] = HPHP_CORO_AWAIT(coro::collect(
+      client.storeMulti(std::move(ues)),
+      config.getCopy()
+    ));
+
+    std::vector<std::tuple<Ref<UnitEmitterSerdeWrapper>>> tuplized;
+    tuplized.reserve(refs.size());
+    for (auto& r : refs) tuplized.emplace_back(std::move(r));
+
+    // Run the job and get refs to the keys and values.
+    auto [valueRefs, keyRefs] = HPHP_CORO_AWAIT(
+      client.exec(
+        s_loadRepoJob,
+        std::move(configRef),
+        std::move(tuplized)
+      )
+    );
+
+    // We need the keys locally, so load them. Values can stay as
+    // Refs.
+    auto keys = HPHP_CORO_AWAIT(client.load(std::move(keyRefs)));
+
+    auto const numKeys = keys.size();
+    size_t keyIdx = 0;
+    for (auto& v : valueRefs) {
+      for (auto& r : v) {
+        always_assert(keyIdx < numKeys);
+        inputs.add(std::move(keys[keyIdx]), std::move(r));
+        ++keyIdx;
+      }
+    }
+    always_assert(keyIdx == numKeys);
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  std::vector<coro::TaskWithExecutor<void>> tasks;
+  for (auto& group : groups) {
+    if (group.empty()) continue;
+    tasks.emplace_back(load(std::move(group)).scheduleOn(executor.sticky()));
+  }
+  coro::wait(coro::collectRange(std::move(tasks)));
+  return inputs;
+}
+
+extern_worker::Options make_extern_worker_options() {
+  extern_worker::Options opts;
+  opts
+    .setUseCase(options.ExternWorkerUseCase)
+    .setUseSubprocess(options.ExternWorkerForceSubprocess
+                      ? extern_worker::Options::UseSubprocess::Always
+                      : extern_worker::Options::UseSubprocess::Fallback)
+    .setCacheExecs(options.ExternWorkerUseExecCache)
+    .setCleanup(options.ExternWorkerCleanup)
+    .setUseRichClient(options.ExternWorkerUseRichClient)
+    .setUseZippyRichClient(options.ExternWorkerUseZippyRichClient)
+    .setUseP2P(options.ExternWorkerUseP2P)
+    .setVerboseLogging(options.ExternWorkerVerboseLogging);
+  if (options.ExternWorkerTimeoutSecs > 0) {
+    opts.setTimeout(std::chrono::seconds{options.ExternWorkerTimeoutSecs});
+  }
+  if (!options.ExternWorkerWorkingDir.empty()) {
+    opts.setWorkingDir(options.ExternWorkerWorkingDir);
+  }
+  if (options.ExternWorkerThrottleRetries >= 0) {
+    opts.setThrottleRetries(options.ExternWorkerThrottleRetries);
+  }
+  if (options.ExternWorkerThrottleBaseWaitMSecs >= 0) {
+    opts.setThrottleBaseWait(
+      std::chrono::milliseconds{options.ExternWorkerThrottleBaseWaitMSecs}
+    );
+  }
+  return opts;
+}
+
+void compile_repo() {
+  auto executor = std::make_unique<coro::TicketExecutor>(
+    "HHBBCWorker",
+    0,
+    parallel::num_threads,
+    [] {
+      hphp_thread_init();
+      hphp_session_init(Treadmill::SessionKind::HHBBC);
+    },
+    [] {
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+    },
+    std::chrono::minutes{15}
   );
+  auto client = std::make_unique<Client>(
+    executor->sticky(),
+    make_extern_worker_options()
+  );
+
+  auto inputs = load_repo(*executor, *client);
 
   RepoAutoloadMapBuilder autoload;
   RepoFileBuilder repo{output_repo};
   std::mutex repoLock;
 
-  auto const onUE = [&] (std::unique_ptr<UnitEmitter> ue) {
+  auto const emit = [&] (std::unique_ptr<UnitEmitter> ue) {
     autoload.addUnit(*ue);
     RepoFileBuilder::EncodedUE encoded{*ue};
-    {
-      std::scoped_lock<std::mutex> _{repoLock};
-      repo.add(encoded);
-    }
+    std::scoped_lock<std::mutex> _{repoLock};
+    repo.add(encoded);
   };
 
-  HphpSession session{Treadmill::SessionKind::CompileRepo};
-  whole_program(std::move(program), onUE);
+  std::thread asyncDispose;
+  SCOPE_EXIT { if (asyncDispose.joinable()) asyncDispose.join(); };
+  auto const dispose = [&] (std::unique_ptr<coro::TicketExecutor> e,
+                            std::unique_ptr<Client> c) {
+    if (!options.ExternWorkerAsyncCleanup) {
+      // If we don't want to cleanup asynchronously, do so now.
+      c.reset();
+      e.reset();
+      return;
+    }
+    // All the thread does is reset the unique_ptr to run the dtor.
+    asyncDispose = std::thread{
+      [e = std::move(e), c = std::move(c)] () mutable {
+        c.reset();
+        e.reset();
+      }
+    };
+  };
+
+  HphpSession session{Treadmill::SessionKind::HHBBC};
+  whole_program(
+    std::move(inputs),
+    std::move(executor),
+    std::move(client),
+    emit,
+    dispose
+  );
 
   trace_time timer{"finalizing repo"};
   repo.finish(get_global_data(), autoload);
-}
-
-void print_repo_bytecode_stats() {
-  std::array<std::atomic<uint64_t>,Op_count> op_counts{};
-
-  load_input(
-    [&] (size_t, std::unique_ptr<UnitEmitter> ue) {
-      if (!ue) return;
-
-      auto countInstrs = [&](const FuncEmitter& fe) {
-        auto pc = fe.bc();
-        auto const end = pc + fe.bcPos();
-        for (; pc < end; pc += instrLen(pc)) {
-          auto &opc = op_counts[static_cast<uint16_t>(peek_op(pc))];
-          opc.fetch_add(1, std::memory_order_relaxed);
-        }
-      };
-
-      for (auto& fe : ue->fevec()) {
-        countInstrs(*fe.get());
-      }
-      for (Id i = 0; i < ue->numPreClasses(); i++) {
-        for (auto fe : ue->pce(i)->methods()) {
-          countInstrs(*fe);
-        }
-      }
-    }
-  );
-
-  for (auto i = uint32_t{}; i < op_counts.size(); ++i) {
-    std::cout << folly::format(
-      "{: <20} {}\n",
-      opcodeToName(static_cast<Op>(i)),
-      op_counts[i].load(std::memory_order_relaxed)
-    );
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
+void process_init(const Options& o,
+                  const RepoGlobalData& gd,
+                  bool fullInit) {
+  rds::local::init();
+  SCOPE_FAIL { rds::local::fini(); };
+
+  Hdf config;
+  IniSetting::Map ini = IniSetting::Map::object;
+
+  // We need to write correct coeffects before we load
+  for (auto const& [name, value] : gd.EvalCoeffectEnforcementLevels) {
+    config["Eval"]["CoeffectEnforcementLevels"][name] = value;
+  }
+
+  RO::Load(ini, config);
+  RO::RepoAuthoritative                     = false;
+  RO::EvalJit                               = false;
+  RO::EvalLowStaticArrays                   = false;
+  RO::RepoDebugInfo                         = false;
+  Logger::LogLevel                          = Logger::LogError;
+
+  // Load RepoGlobalData first because hphp_process_init can read
+  // RuntimeOptions.
+  gd.load(false);
+
+  register_process_init(!fullInit);
+  hphp_process_init(!fullInit);
+  SCOPE_FAIL { hphp_process_exit(); };
+
+  options = o;
+  // Now that process state is set up, we can safely do a full load of
+  // RepoGlobalData.
+  gd.load();
+
+  // When running hhbbc, these options are loaded from GD, and will
+  // override CLI. When running hhvm, these options are not loaded
+  // from GD, but read from CLI. NB: These are only needed if
+  // RepoGlobalData::load() does not currently write them which is
+  // called in hphp_process_init().
+  RO::EvalForbidDynamicCallsToFunc        = gd.ForbidDynamicCallsToFunc;
+  RO::EvalForbidDynamicCallsToClsMeth     = gd.ForbidDynamicCallsToClsMeth;
+  RO::EvalForbidDynamicCallsToInstMeth    = gd.ForbidDynamicCallsToInstMeth;
+  RO::EvalForbidDynamicConstructs         = gd.ForbidDynamicConstructs;
+  RO::EvalForbidDynamicCallsWithAttr      = gd.ForbidDynamicCallsWithAttr;
+  RO::EvalLogKnownMethodsAsDynamicCalls   = gd.LogKnownMethodsAsDynamicCalls;
+  RO::EvalNoticeOnBuiltinDynamicCalls     = gd.NoticeOnBuiltinDynamicCalls;
+  RO::EvalHackArrCompatSerializeNotices   = gd.HackArrCompatSerializeNotices;
+  RO::EvalIsVecNotices                    = gd.IsVecNotices;
+  RO::EvalEnforceGenericsUB               = gd.HardGenericsUB ? 2 : 1;
+
+  options.SourceRootForFileBC             = gd.SourceRootForFileBC;
+}
+
+void process_exit() {
+  hphp_process_exit();
+  rds::local::fini();
+}
+
 int main(int argc, char** argv) try {
   parse_options(argc, argv);
 
-  if (!print_bytecode_stats_and_exit && std::filesystem::exists(output_repo)) {
+  if (std::filesystem::exists(output_repo)) {
     std::cout << "output repo already exists; removing it\n";
     if (unlink(output_repo.c_str())) {
       std::cerr << "failed to unlink output repo: "
@@ -437,7 +652,6 @@ int main(int argc, char** argv) try {
 
   auto const& gd = RepoFile::globalData();
   gd.load(false);
-  options.SourceRootForFileBC = gd.SourceRootForFileBC;
   if (gd.InitialNamedEntityTableSize) {
     RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
   }
@@ -445,50 +659,12 @@ int main(int argc, char** argv) try {
     RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;
   }
 
-  rds::local::init();
-  SCOPE_EXIT { rds::local::fini(); };
+  process_init(options, gd, true);
+  SCOPE_EXIT { process_exit(); };
 
+  Logger::LogLevel = logging ? Logger::LogInfo : Logger::LogError;
   Logger::Escape = false;
   Logger::AlwaysEscapeLog = false;
-
-  Hdf config;
-  IniSetting::Map ini = IniSetting::Map::object;
-
-  // We need to write correct coeffects before we load
-  for (auto const& [name, value] : gd.EvalCoeffectEnforcementLevels) {
-    config["Eval"]["CoeffectEnforcementLevels"][name] = value;
-  }
-
-  RO::Load(ini, config);
-  RO::RepoAuthoritative                     = true;
-  RO::EvalJit                               = false;
-  RO::EvalLowStaticArrays                   = false;
-  RO::RepoDebugInfo                         = false;
-
-  register_process_init();
-
-  hphp_process_init();
-  SCOPE_EXIT { hphp_process_exit(); };
-
-  // When running hhbbc, these options are loaded from GD, and will override CLI.
-  // When running hhvm, these options are not loaded from GD, but read from CLI.
-  // NB: These are only needed if RepoGlobalData::load() does not currently write
-  // them which is called in hphp_process_init().
-  RO::EvalForbidDynamicCallsToFunc              = gd.ForbidDynamicCallsToFunc;
-  RO::EvalForbidDynamicCallsToClsMeth           = gd.ForbidDynamicCallsToClsMeth;
-  RO::EvalForbidDynamicCallsToInstMeth          = gd.ForbidDynamicCallsToInstMeth;
-  RO::EvalForbidDynamicConstructs               = gd.ForbidDynamicConstructs;
-  RO::EvalForbidDynamicCallsWithAttr            = gd.ForbidDynamicCallsWithAttr;
-  RO::EvalLogKnownMethodsAsDynamicCalls         = gd.LogKnownMethodsAsDynamicCalls;
-  RO::EvalNoticeOnBuiltinDynamicCalls           = gd.NoticeOnBuiltinDynamicCalls;
-  RO::EvalHackArrCompatSerializeNotices         = gd.HackArrCompatSerializeNotices;
-  RO::EvalIsVecNotices                          = gd.IsVecNotices;
-  RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
-
-  if (print_bytecode_stats_and_exit) {
-    print_repo_bytecode_stats();
-    return 0;
-  }
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();
@@ -502,4 +678,4 @@ catch (std::exception& e) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
+}}

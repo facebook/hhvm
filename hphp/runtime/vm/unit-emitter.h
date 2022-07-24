@@ -357,6 +357,20 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// UnitEmitter's serde implementation does not serialize all of the
+// UnitEmitter's data (it is sometimes stored elsewhere). This is a
+// wrapper around a UnitEmitter allowing for complete stand-alone
+// serializating and deserializing.
+struct UnitEmitterSerdeWrapper {
+  UnitEmitterSerdeWrapper() = default;
+  /* implicit */ UnitEmitterSerdeWrapper(std::unique_ptr<UnitEmitter> ue)
+      : m_ue{std::move(ue)} {}
+  std::unique_ptr<UnitEmitter> m_ue;
+  template <typename SerDe> void serde(SerDe& sd);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::unique_ptr<UnitEmitter> createFatalUnit(
   const StringData* filename,
   const SHA1& sha1,

@@ -19,7 +19,9 @@
 #endif
 
 #include "hphp/runtime/base/file-util.h"
+
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,4 +94,39 @@ inline bool UnitEmitter::isASystemLib() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template <typename SerDe>
+void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
+  if constexpr (SerDe::deserializing) {
+    assertx(!m_ue);
+
+    bool present;
+    sd(present);
+    if (present) {
+      SHA1 sha1;
+      const StringData* filepath;
+      sd(sha1);
+      sd(filepath);
+
+      auto ue = std::make_unique<UnitEmitter>(
+        sha1, SHA1{}, Native::s_noNativeFuncs
+      );
+      ue->m_filepath = makeStaticString(filepath);
+      ue->serde(sd, false);
+      m_ue = std::move(ue);
+    }
+  } else {
+    if (m_ue) {
+      sd(true);
+      sd(m_ue->sha1());
+      sd(m_ue->m_filepath);
+      m_ue->serde(sd, false);
+    } else {
+      sd(false);
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

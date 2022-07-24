@@ -21,6 +21,8 @@
 
 #include <folly/sorted_vector_types.h>
 #include <folly/Varint.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 
 #include <filesystem>
 #include <set>
@@ -252,6 +254,26 @@ struct BlobEncoder {
     encodeOrderedContainer(set);
   }
 
+  template<typename T, typename H, typename E, typename A>
+  void encode(const folly::F14NodeSet<T, H, E, A>& set) {
+    encodeUnorderedSet(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void encode(const folly::F14VectorSet<T, H, E, A>& set) {
+    encodeUnorderedSet(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void encode(const folly::F14ValueSet<T, H, E, A>& set) {
+    encodeUnorderedSet(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void encode(const folly::F14FastSet<T, H, E, A>& set) {
+    encodeUnorderedSet(set);
+  }
+
   template<typename K, typename V,
            typename C, typename A,
            typename G, typename C2>
@@ -266,7 +288,27 @@ struct BlobEncoder {
 
   template<typename K, typename V, typename H, typename E, typename A>
   void encode(const std::unordered_map<K, V, H, E, A>& map) {
-    encodeUnorderedContainer(map);
+    encodeUnorderedMap(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void encode(const folly::F14NodeMap<K, V, H, E, A>& map) {
+    encodeUnorderedMap(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void encode(const folly::F14VectorMap<K, V, H, E, A>& map) {
+    encodeUnorderedMap(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void encode(const folly::F14ValueMap<K, V, H, E, A>& map) {
+    encodeUnorderedMap(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void encode(const folly::F14FastMap<K, V, H, E, A>& map) {
+    encodeUnorderedMap(map);
   }
 
   template<class T, class... F>
@@ -325,7 +367,7 @@ private:
   // Unordered containers need to be sorted first, to ensure
   // deterministic output.
   template<typename Cont>
-  void encodeUnorderedContainer(const Cont& cont) {
+  void encodeUnorderedMap(const Cont& cont) {
     if (cont.size() >= 0xffffffffu) {
       throw std::runtime_error("maximum size exceeded in BlobEncoder");
     }
@@ -341,6 +383,21 @@ private:
       assertx(it != cont.end());
       encode(*it);
     }
+  }
+
+  template<typename Cont>
+  void encodeUnorderedSet(const Cont& cont) {
+    if (cont.size() >= 0xffffffffu) {
+      throw std::runtime_error("maximum size exceeded in BlobEncoder");
+    }
+
+    std::vector<typename Cont::key_type> keys;
+    keys.reserve(cont.size());
+    for (auto const& e : cont) keys.emplace_back(e);
+    std::sort(keys.begin(), keys.end());
+
+    encode(uint32_t(keys.size()));
+    for (auto const& k : keys) encode(k);
   }
 
   std::vector<char> m_blob;
@@ -546,6 +603,26 @@ struct BlobDecoder {
     decodeSetContainer(set);
   }
 
+  template<typename T, typename H, typename E, typename A>
+  void decode(folly::F14NodeSet<T, H, E, A>& set) {
+    decodeSetContainer(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void decode(folly::F14VectorSet<T, H, E, A>& set) {
+    decodeSetContainer(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void decode(folly::F14ValueSet<T, H, E, A>& set) {
+    decodeSetContainer(set);
+  }
+
+  template<typename T, typename H, typename E, typename A>
+  void decode(folly::F14FastSet<T, H, E, A>& set) {
+    decodeSetContainer(set);
+  }
+
   template<typename K, typename V,
            typename C, typename A,
            typename G, typename C2>
@@ -560,6 +637,26 @@ struct BlobDecoder {
 
   template<typename K, typename V, typename H, typename E, typename A>
   void decode(std::unordered_map<K, V, H, E, A>& map) {
+    decodeMapContainer(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void decode(folly::F14NodeMap<K, V, H, E, A>& map) {
+    decodeMapContainer(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void decode(folly::F14VectorMap<K, V, H, E, A>& map) {
+    decodeMapContainer(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void decode(folly::F14ValueMap<K, V, H, E, A>& map) {
+    decodeMapContainer(map);
+  }
+
+  template<typename K, typename V, typename H, typename E, typename A>
+  void decode(folly::F14FastMap<K, V, H, E, A>& map) {
     decodeMapContainer(map);
   }
 

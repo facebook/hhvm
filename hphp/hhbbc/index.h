@@ -29,9 +29,12 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
+#include "hphp/util/tiny-vector.h"
 #include "hphp/util/tribool.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
+
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -682,7 +685,7 @@ struct Index {
    * Throw away data structures that won't be needed after the emit
    * stage.
    */
-  void cleanup_post_emit(php::ProgramPtr program);
+  void cleanup_post_emit(std::unique_ptr<php::Program> program);
 
   /*
    * Find all the closures created inside the context of a given

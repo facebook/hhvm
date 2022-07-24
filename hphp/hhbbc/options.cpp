@@ -20,10 +20,15 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
+#include "hphp/runtime/vm/repo-global-data.h"
+
+#include "hphp/hhbbc/hhbbc.h"
+
 #include "hphp/util/address-range.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::HHBBC {
@@ -129,6 +134,18 @@ void summarize_memory(StructuredLogEntry* sample) {
     sample->setInt("max_lowmem", lowMb << 20);
     sample->setInt("max_sstr", sstrMb << 20);
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Config Config::get(RepoGlobalData gd) {
+  Config c;
+  c.o = options;
+  c.o.SourceRootForFileBC = gd.SourceRootForFileBC;
+  c.gd = std::move(gd);
+  // Keep things deterministic
+  c.gd.Signature = 0;
+  return c;
 }
 
 //////////////////////////////////////////////////////////////////////

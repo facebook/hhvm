@@ -8626,7 +8626,7 @@ void Index::cleanup_for_final() {
   CLEAR(m_data->dependencyMap);
 }
 
-void Index::cleanup_post_emit(php::ProgramPtr program) {
+void Index::cleanup_post_emit(std::unique_ptr<php::Program> program) {
   trace_time _{"cleanup post emit"};
   {
     trace_time t{"reset allClassInfos"};
@@ -8645,6 +8645,7 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   {
     trace_time t{"reset program"};
     parallel::for_each(program->units, [] (auto& u) { u.reset(); });
+    program.reset();
   }
   std::vector<std::function<void()>> clearers;
   #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));

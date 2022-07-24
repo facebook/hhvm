@@ -20,7 +20,9 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+
 #include "hphp/runtime/vm/preclass-emitter.h"
 
 namespace HPHP::HHBBC {

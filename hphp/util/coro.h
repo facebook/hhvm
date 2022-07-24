@@ -183,6 +183,9 @@ template <typename T> struct AsyncValue {
   }
 
   ~AsyncValue() {
+    // NB: It might seem useful here to access the m_try after
+    // waiting, to ensure that any exception is rethrown. However, we
+    // can't throw from a dtor anyways, so its pointless to check.
     folly::coro::blockingWait(m_scope.joinAsync());
   }
 

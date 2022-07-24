@@ -71,13 +71,13 @@ int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
 bool Option::ExternWorkerUseRichClient = true;
-bool Option::ExternWorkerUseZippyRichClient = true;
-bool Option::ExternWorkerUseP2P = true;
+bool Option::ExternWorkerUseZippyRichClient = false;
+bool Option::ExternWorkerUseP2P = false;
 bool Option::ExternWorkerVerboseLogging = false;
 std::string Option::ExternWorkerWorkingDir;
 
-int Option::ExternWorkerThrottleRetries = 7;
-int Option::ExternWorkerThrottleBaseWaitMSecs = 25;
+int Option::ExternWorkerThrottleRetries = -1;
+int Option::ExternWorkerThrottleBaseWaitMSecs = -1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file

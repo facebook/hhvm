@@ -1184,6 +1184,7 @@ function hhbbc_cmd(
     '--no-cores',
     '--parallel-num-threads=' . ($options->repo_threads ?? 1),
     '--parallel-final-threads=' . ($options->repo_threads ?? 1),
+    '--extern-worker-working-dir=' . Status::getTestTmpPath($test, 'work'),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test_repo/hhvm.hhbbc\" \"$test_repo/hhvm.hhbc\"",
   ]);

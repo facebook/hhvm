@@ -21,6 +21,10 @@
 #include <boost/variant.hpp>
 #include <memory>
 
+#include "hphp/hhbbc/options.h"
+
+#include "hphp/runtime/vm/repo-global-data.h"
+
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/match.h"
@@ -184,6 +188,13 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+// Set up the process state (either for the main process or for
+// extern-worker Jobs). If "full" is true, systemlib will be parsed
+// and initialized.
+void process_init(const Options&, const RepoGlobalData&, bool full);
+// Undo process_init().
+void process_exit();
 
 }}
 

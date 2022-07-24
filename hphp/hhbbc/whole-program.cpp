@@ -21,11 +21,12 @@
 #include <memory>
 #include <set>
 
+#include <folly/AtomicLinkedList.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
-#include "hphp/util/struct-log.h"
 
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/class-util.h"
@@ -42,7 +43,14 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP::HHBBC {
+#include "hphp/util/extern-worker.h"
+#include "hphp/util/struct-log.h"
+
+namespace HPHP {
+
+using namespace extern_worker;
+
+namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
@@ -483,34 +491,141 @@ void final_pass(Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-namespace php {
+// Right now Key is nothing, and Value is the UnitEmitter.
 
-void ProgramPtr::clear() { delete m_program; }
+struct WholeProgramInput::Key::Impl {};
+struct WholeProgramInput::Value::Impl {
+  UnitEmitterSerdeWrapper ue;
+};
+struct WholeProgramInput::Impl {
+  folly::AtomicLinkedList<Ref<Value>> values;
+};
+
+WholeProgramInput::WholeProgramInput() : m_impl{new Impl} {}
+
+void WholeProgramInput::add(Key, extern_worker::Ref<Value> v) {
+  assertx(m_impl);
+  m_impl->values.insertHead(std::move(v));
+}
+
+std::vector<std::pair<WholeProgramInput::Key, WholeProgramInput::Value>>
+WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
+  assertx(ue);
+  Key key;
+  Value value;
+  value.m_impl.reset(new Value::Impl);
+  value.m_impl->ue = std::move(ue);
+  std::vector<std::pair<Key, Value>> out;
+  out.emplace_back(std::move(key), std::move(value));
+  return out;
+}
+
+void WholeProgramInput::Key::serde(BlobEncoder&) const {}
+void WholeProgramInput::Key::serde(BlobDecoder&) {}
+
+void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
+  assertx(m_impl);
+  sd(m_impl->ue);
+}
+void WholeProgramInput::Value::serde(BlobDecoder& sd) {
+  m_impl.reset(new Impl);
+  sd(m_impl->ue);
+}
+
+void WholeProgramInput::Key::Deleter::operator()(Impl* i) const {
+  delete i;
+}
+void WholeProgramInput::Value::Deleter::operator()(Impl* i) const {
+  delete i;
+}
+void WholeProgramInput::Deleter::operator()(Impl* i) const {
+  delete i;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// Construct a php::Program from a WholeProgramInput. Right now this
+// is just loading the Values and calling parse_unit() on their
+// UnitEmitters. This is the limit of extern-worker support at the
+// moment.
+std::unique_ptr<php::Program> make_program(
+    WholeProgramInput input,
+    std::unique_ptr<coro::TicketExecutor> executor,
+    std::unique_ptr<Client> client,
+    const DisposeCallback& dispose) {
+  trace_time tracer("materialize inputs");
+
+  // For speed, split up the unit loading into chunks.
+  constexpr size_t kLoadChunkSize = 500;
+
+  using V = WholeProgramInput::Value;
+  std::vector<std::vector<Ref<V>>> chunked;
+  std::vector<Ref<V>> current;
+  input.m_impl->values.sweep(
+    [&] (Ref<V>&& v) {
+      current.emplace_back(std::move(v));
+      if (current.size() >= kLoadChunkSize) {
+        chunked.emplace_back(std::move(current));
+      }
+    }
+  );
+  if (!current.empty()) chunked.emplace_back(std::move(current));
+
+  auto program = std::make_unique<php::Program>();
+
+  auto const loadAndParse = [&] (std::vector<Ref<V>> r) -> coro::Task<void> {
+    auto const values = HPHP_CORO_AWAIT(client->load(std::move(r)));
+    for (auto const& v : values) {
+      assertx(v.m_impl->ue.m_ue);
+      parse_unit(*program, v.m_impl->ue.m_ue.get());
+    }
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  std::vector<coro::TaskWithExecutor<void>> tasks;
+  tasks.reserve(chunked.size());
+  for (auto& c : chunked) {
+    tasks.emplace_back(
+      loadAndParse(std::move(c)).scheduleOn(executor->sticky())
+    );
+  }
+  coro::wait(coro::collectRange(std::move(tasks)));
+
+  // Done with any extern-worker stuff at this point (for now).
+  dispose(std::move(executor), std::move(client));
+  return program;
+}
 
 }
 
-php::ProgramPtr make_program() {
-  return php::ProgramPtr{ new php::Program };
-}
+//////////////////////////////////////////////////////////////////////
 
-void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
-  parse_unit(program, ue);
-}
-
-void whole_program(php::ProgramPtr program,
-                   const UnitEmitterCallback& callback,
+void whole_program(WholeProgramInput inputs,
+                   std::unique_ptr<coro::TicketExecutor> executor,
+                   std::unique_ptr<Client> client,
+                   const EmitCallback& callback,
+                   const DisposeCallback& dispose,
                    Optional<StructuredLogEntry> sample,
                    int num_threads) {
   trace_time tracer("whole program");
-
-  if (options.TestCompression || RO::EvalHHBBCTestCompression) {
-    php::testCompression(*program);
-  }
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
     // Leave a thread free for cleanup
     parallel::final_threads = (num_threads > 1) ? (num_threads - 1) : 1;
+  }
+
+  auto program = make_program(
+    std::move(inputs),
+    std::move(executor),
+    std::move(client),
+    dispose
+  );
+
+  if (options.TestCompression || RO::EvalHHBBCTestCompression) {
+    php::testCompression(*program);
   }
 
   state_after("parse", *program);
@@ -587,4 +702,4 @@ void whole_program(php::ProgramPtr program,
 
 //////////////////////////////////////////////////////////////////////
 
-}
+}}

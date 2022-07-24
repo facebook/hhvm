@@ -15,102 +15,99 @@
 */
 #pragma once
 
-#include <atomic>
-#include <deque>
-#include <future>
 #include <vector>
 #include <memory>
 #include <string>
 #include <utility>
 
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/hhbbc/options.h"
 
-#include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/repo-autoload-map-builder.h"
-#include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/util/hash-map.h"
-#include "hphp/util/hash-set.h"
-#include "hphp/util/hash.h"
-#include "hphp/util/lock.h"
+#include "hphp/util/coro.h"
+#include "hphp/util/extern-worker.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/synchronizable.h"
 
 namespace HPHP {
-
-enum class Op : uint8_t;
-struct OpHash {
-  size_t operator()(Op op) const {
-    return hash_int64(static_cast<uint64_t>(op));
-  }
-};
-
 namespace HHBBC {
 
-// Map case-insensitive class name => Set<case-sensitive method name>
-using MethodMap = hphp_fast_string_imap<hphp_fast_string_set>;
-using OpcodeSet = hphp_fast_set<Op,OpHash>;
-
-//////////////////////////////////////////////////////////////////////
-
 /*
- * This is the public API to this subsystem.
+ * This is the public API to HHBBC.
  */
 
 //////////////////////////////////////////////////////////////////////
 
-namespace php {
-struct Program;
-// basically a unique_ptr<Program>, but we want to be able to use it on a
-// forward declared Program
-struct ProgramPtr {
-  ProgramPtr() = default;
-  explicit ProgramPtr(Program* program) : m_program{program} {}
-  ~ProgramPtr() { if (m_program) clear(); }
-  ProgramPtr(ProgramPtr&& o) : m_program{o.m_program} {
-    o.m_program = nullptr;
+// Config which affects HHBBC. Any extern-worker which invokes HHBBC
+// needs to initialize these.
+struct Config {
+  Options o;
+  RepoGlobalData gd;
+  static Config get(RepoGlobalData);
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(o)(gd);
   }
-  ProgramPtr& operator=(ProgramPtr&& o) {
-    std::swap(m_program, o.m_program);
-    return *this;
-  }
-  Program* get() const { return m_program; }
-  Program& operator*() const { return *m_program; }
-  Program* operator->() const { return m_program; }
-private:
-  void clear();
-  Program* m_program{};
 };
-}
-
-// Create a method map for the options structure from a SinglePassReadableRange
-// containing a list of Class::methodName strings.
-template<class SinglePassReadableRange>
-MethodMap make_method_map(SinglePassReadableRange&);
-
-template<class SinglePassReadableRange>
-OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Create a php::Program, and wrap it in a ProgramPtr.
- */
-php::ProgramPtr make_program();
+// The "input" to whole_program. Encapsulates key/value
+// pairs. UnitEmitters must be turned into Key/Value pairs first (by
+// calling make). Then the Key and an extern_worker::Ref of the Value
+// must be stored in the WholeProgramInput. The implementation of Key,
+// Value, and WholeProgramInput are hidden to avoid leaking HHBBC
+// internals.
+struct WholeProgramInput {
+  struct Key {
+    void serde(BlobEncoder&) const;
+    void serde(BlobDecoder&);
 
-/*
- * Add the given unit to the program. May be called asynchronously.
- */
-void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
+    struct Impl;
+    struct Deleter { void operator()(Impl*) const; };
+    std::unique_ptr<Impl, Deleter> m_impl;
+  };
+  struct Value {
+    void serde(BlobEncoder&) const;
+    void serde(BlobDecoder&);
+
+    struct Impl;
+    struct Deleter { void operator()(Impl*) const; };
+    std::unique_ptr<Impl, Deleter> m_impl;
+  };
+
+  WholeProgramInput();
+
+  void add(Key, extern_worker::Ref<Value>);
+
+  static std::vector<std::pair<Key, Value>> make(std::unique_ptr<UnitEmitter>);
+
+  struct Impl;
+  struct Deleter { void operator()(Impl*) const; };
+  std::unique_ptr<Impl, Deleter> m_impl;
+};
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Perform whole-program optimization on a set of UnitEmitters.
  */
-using UnitEmitterCallback = std::function<void(std::unique_ptr<UnitEmitter>)>;
 
-void whole_program(php::ProgramPtr program,
-                   const UnitEmitterCallback& callback,
+// Called when an UnitEmitter is ready to be written to the repo.
+using EmitCallback = std::function<void(std::unique_ptr<UnitEmitter>)>;
+
+// When HHBBC is done with the executor and client (given in
+// whole_program), they will be passed into this callback. This
+// enables the caller to destroy the client asynchronously (since it
+// can be slow) while HHBBC still runs.
+using DisposeCallback =
+  std::function<void(std::unique_ptr<coro::TicketExecutor>,
+                     std::unique_ptr<extern_worker::Client>)>;
+
+void whole_program(WholeProgramInput inputs,
+                   std::unique_ptr<coro::TicketExecutor> executor,
+                   std::unique_ptr<extern_worker::Client> client,
+                   const EmitCallback& callback,
+                   const DisposeCallback& dispose,
                    Optional<StructuredLogEntry> sample = std::nullopt,
                    int num_threads = 0);
 

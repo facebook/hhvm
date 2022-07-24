@@ -423,8 +423,8 @@ void add_test_unit(php::Program& program) {
   parse_unit(program, ue.get());
 }
 
-php::ProgramPtr make_test_program() {
-  auto program = make_program();
+std::unique_ptr<php::Program> make_test_program() {
+  auto program = std::make_unique<php::Program>();
   add_test_unit(*program);
   return program;
 }

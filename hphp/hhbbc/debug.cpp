@@ -44,7 +44,12 @@ const StaticString s_invoke("__invoke");
 
 template<class Operation>
 void with_file(fs::path dir, const php::Unit* u, Operation op) {
-  auto const file = dir / fs::path(u->filename->data());
+  // Paths for systemlib units start with /, which gets interpreted as
+  // an absolute path, so strip it.
+  auto filename = u->filename->data();
+  if (filename[0] == '/') ++filename;
+
+  auto const file = dir / fs::path(filename);
   fs::create_directories(fs::path(file).remove_filename());
 
   std::ofstream out(file);

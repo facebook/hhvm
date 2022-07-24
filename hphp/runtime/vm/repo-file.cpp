@@ -642,7 +642,7 @@ const RepoGlobalData& RepoFile::globalData() {
   return s_repoFileData->globalData;
 }
 
-void RepoFile::loadGlobalTables() {
+void RepoFile::loadGlobalTables(bool loadAutoloadMap) {
   assertx(s_repoFileData);
   assertx(!s_repoFileData->loadedUnitEmitterIndices.load());
 
@@ -721,7 +721,7 @@ void RepoFile::loadGlobalTables() {
   }
 
   // Repo autoload map
-  {
+  if (loadAutoloadMap) {
     auto blob = loadBlob(
       data.fd,
       data.autoloadMapOffset,

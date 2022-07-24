@@ -149,7 +149,7 @@ struct RepoFile {
    * querying functions are called. It can only be called once, and
    * cannot be called concurrently.
    */
-  static void loadGlobalTables();
+  static void loadGlobalTables(bool loadAutoloadMap = true);
 
   /*
    * Query functions:

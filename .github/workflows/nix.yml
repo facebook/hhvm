@@ -119,7 +119,7 @@ jobs:
         gpg --import
     - name: Mount Apt Repository
       run: |
-        HHVM_DOWNLOAD="$(mktemp --directory)" &&        
+        HHVM_DOWNLOAD="$(mktemp --directory)" &&
         AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
         AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
         AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \

@@ -868,6 +868,10 @@ impl<'ast> VisitorMut<'ast> for Checker {
                         let var_name = local_id::get_name(&lid.1).to_string();
                         let rhs_rty = rty_expr(context, &i.1);
                         context.add_local(&var_name, rhs_rty);
+                        // Remove once typechecker change is landed
+                        if self.is_typechecker {
+                            i.recurse(context, self.object())?;
+                        }
                     }
                 }
                 block.recurse(context, self.object())

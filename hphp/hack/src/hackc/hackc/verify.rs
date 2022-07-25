@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::compile::SingleFileOpts;
 use crate::regex;
+use anyhow::ensure;
 use clap::Parser;
 use compile::Profile;
 use itertools::Itertools;
@@ -251,7 +252,7 @@ fn report_status(wall: Duration, count: usize, total: usize) {
     );
 }
 
-fn report_final(wall: Duration, count: usize, total: usize, profile: ProfileAcc, show_all: bool) {
+fn report_final(wall: Duration, count: usize, total: usize, profile: &ProfileAcc, show_all: bool) {
     if total >= 10 {
         let wall_per_sec = if !wall.is_zero() {
             ((count as f64) / wall.as_secs_f64()) as usize
@@ -380,7 +381,7 @@ fn verify_files(
     compile_opts: &SingleFileOpts,
     long_msg: bool,
     show_all: bool,
-) {
+) -> anyhow::Result<()> {
     let total = files.len();
     let count = Arc::new(AtomicUsize::new(0));
     let finished = Arc::new(AtomicBool::new(false));
@@ -419,16 +420,24 @@ fn verify_files(
     let duration = start.elapsed();
 
     status_handle.join().unwrap();
+
     report_final(
         duration,
         count.load(Ordering::Acquire),
         total,
-        profile,
+        &profile,
         show_all,
     );
+
+    ensure!(
+        profile.passed,
+        "{} files failed to verify",
+        profile.num_failed()
+    );
+    Ok(())
 }
 
-pub fn run(opts: Opts) -> Result<(), anyhow::Error> {
+pub fn run(opts: Opts) -> anyhow::Result<()> {
     eprint!("Collecting files...");
     info!("Collecting files");
     let files = {
@@ -463,7 +472,7 @@ pub fn run(opts: Opts) -> Result<(), anyhow::Error> {
         &opts.single_file_opts,
         opts.long_msg,
         opts.show_all,
-    );
+    )?;
 
     std::panic::set_hook(old_hook);
 

@@ -126,15 +126,21 @@ let subset_lookups subsets =
   // Close dynamic key access in both directions to later invalidate all
   // results that touch it.
   has_dynamic_key_ud(E) :- has_dynamic_key(E).
-  has_dynamic_key_ud(F) :- has_dynamic_key(E), (subset_tr(E,F); subsets_tr(F,E)).
+  has_dynamic_key_ud(F) :- has_dynamic_key(E), (subsets_tr(E,F); subsets_tr(F,E)).
 
-  // Has optional key constraint only exists within the solver and is not (yet)
-  // added directly by the walker.
-  has_optional_key(E,Key) :-
+  // We conclude that a key is optional either we explicitly observed it in the
+  // source code, for example, through the use of `idx` or due to control flow
+  // making the key exist in one branch of execution but not another.
+  //
+  // TODO(T125888579): Note that this treatment is imprecise as we can later
+  // observe the key to be definitely in place, but it would still be marked as
+  // optional.
+  has_optional_key_base(E,Key) :- has_optional_key(E,Key).
+  has_optional_key_base(E,Key) :-
     (joins(E,F,Join); joins(F,E,Join)),
     has_static_key_u(E,Key),
     not has_static_key_u(F,Key).
-  has_optional_key_u(E,Key) :- has_optional_key(E,Key), subset_tr(E,F).
+  has_optional_key_u(F,Key) :- has_optional_key_base(E,Key), subsets_tr(E,F).
 
   static_shape_result(E) :- marks(E), not has_dynamic_key_ud(E).
   static_shape_result_key(E,Key,Ty) :- has_static_key_u(E,Key,Ty).

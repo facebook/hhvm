@@ -1990,6 +1990,12 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
                  CallEffects e, PreAdder add_node) {
+  // We have to block all incref motion through a PHP call, by observing at the
+  // max.  This is fundamentally required because the callee can side-exit or
+  // throw an exception without a catch trace, so everything needs to be
+  // balanced.
+  observe_all(env, state, add_node);
+
   // The call can affect any unsupported_refs
   kill_unsupported_refs(state);
 

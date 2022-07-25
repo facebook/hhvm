@@ -40,8 +40,6 @@ SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
 Type builtinReturnType(const Func* builtin);
 Type builtinOutType(const Func* builtin, uint32_t i);
 
-void verifyImplicitContextState(IRGS&, const Func*);
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

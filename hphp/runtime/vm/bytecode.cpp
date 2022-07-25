@@ -5159,28 +5159,14 @@ OPTBLD_INLINE void iopVerifyImplicitContextState() {
   auto const func = vmfp()->func();
   assertx(!func->hasCoeffectRules());
   assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-
-  switch (func->memoizeICType()) {
-    case Func::MemoizeICType::NoIC:
-      if (vmfp()->providedCoeffectsForCall(false).canCall(
-          RuntimeCoeffects::leak_safe_shallow())) {
-        // We are in a memoized that can call [defaults] code or any escape
-        if (UNLIKELY(*ImplicitContext::activeCtx != nullptr)) {
-          raiseImplicitContextStateInvalidDispatch(func);
-        }
-      }
-      return;
-    case Func::MemoizeICType::SoftMakeICInaccessible:
-      if (*ImplicitContext::activeCtx) {
-        raiseImplicitContextStateInvalidDispatch(func);
-      }
-      return;
-    case Func::MemoizeICType::KeyedByIC:
-    case Func::MemoizeICType::MakeICInaccessible:
-      return;
+  if (!func->isKeyedByImplicitContextMemoize() &&
+      vmfp()->providedCoeffectsForCall(false).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    if (UNLIKELY(*ImplicitContext::activeCtx != nullptr)) {
+      raiseImplicitContextStateInvalidException(func);
+    }
   }
-
-  not_reached();
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

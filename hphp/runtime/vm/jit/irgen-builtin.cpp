@@ -2479,52 +2479,27 @@ void emitSetImplicitContextByValue(IRGS& env) {
   push(env, prev_ctx);
 }
 
-void verifyImplicitContextState(IRGS& env, const Func* func) {
+void emitVerifyImplicitContextState(IRGS& env) {
+  auto const func = curFunc(env);
   assertx(!func->hasCoeffectRules());
   assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
-
-  switch (func->memoizeICType()) {
-    case Func::MemoizeICType::NoIC:
-      if (providedCoeffectsKnownStatically(env).canCall(
-          RuntimeCoeffects::leak_safe_shallow())) {
-        // We are in a memoized that can call [defaults] code or any escape
-        ifThen(
-          env,
-          [&] (Block* taken) {
-            auto const ctx = gen(env, LdImplicitContext);
-            gen(env, CheckType, TInitNull, taken, ctx);
-          },
-          [&] {
-            hint(env, Block::Hint::Unlikely);
-            gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
-            return cns(env, TBottom);
-          }
-        );
+  if (!func->isKeyedByImplicitContextMemoize() &&
+      providedCoeffectsKnownStatically(env).canCall(
+        RuntimeCoeffects::leak_safe_shallow())) {
+    // We are in a memoized that can call [defaults] code or any escape
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const ctx = gen(env, LdImplicitContext);
+        gen(env, CheckType, TInitNull, taken, ctx);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseImplicitContextStateInvalidException, FuncData { func });
+        return cns(env, TBottom);
       }
-      return;
-    case Func::MemoizeICType::SoftMakeICInaccessible:
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          auto const ctx = gen(env, LdImplicitContext);
-          gen(env, CheckType, TInitNull, taken, ctx);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          gen(env, RaiseImplicitContextStateInvalid, FuncData { func });
-        }
-      );
-      return;
-    case Func::MemoizeICType::KeyedByIC:
-    case Func::MemoizeICType::MakeICInaccessible:
-      return;
+    );
   }
-
-  not_reached();
-}
-
-void emitVerifyImplicitContextState(IRGS& env) {
-  verifyImplicitContextState(env, curFunc(env));
 }
 
 //////////////////////////////////////////////////////////////////////

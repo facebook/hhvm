@@ -533,7 +533,7 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
   case RaiseModuleBoundaryViolation:
-  case RaiseImplicitContextStateInvalid:
+  case RaiseImplicitContextStateInvalidException:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:

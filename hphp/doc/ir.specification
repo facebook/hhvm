@@ -2254,7 +2254,7 @@ To string conversions:
   attempting to either call, if S0 is Func, or create a pointer to the callee in
   S0 in context `ctx`.
 
-| RaiseImplicitContextStateInvalid<func>, ND, NA, NF
+| RaiseImplicitContextStateInvalidException<func>, ND, NA, NF
 
   Raises a warning or throws an exception for invalid, soft implicit context
   or cleared states.

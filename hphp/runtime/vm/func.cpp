@@ -721,8 +721,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_returnByValue = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
-  m_allFlags.m_memoizeICTypeBit0 = false;
-  m_allFlags.m_memoizeICTypeBit1 = false;
+  m_allFlags.m_isKeyedByImplicitContextMemoize = false;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;

@@ -484,7 +484,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 //////////////////////////////////////////////////////////////////////
 
 bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass) {
-  if (!callee->isMemoizeWrapper() || !callee->isNoICMemoize()) {
+  if (!callee->isMemoizeWrapper() || callee->isKeyedByImplicitContextMemoize()) {
     return false;
   }
   if (callee->userAttributes().count(LowStringPtr(s_attr_Deprecated.get()))) {
@@ -600,7 +600,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     }
 
     if (hasRdsCache) {
-      verifyImplicitContextState(env, callee);
       auto const link =
         constParamCacheLink(env, callee, objOrClass, asyncEagerReturn);
       assertx(link.isNormal());

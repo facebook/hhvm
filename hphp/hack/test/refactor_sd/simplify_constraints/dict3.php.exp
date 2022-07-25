@@ -1,0 +1,8 @@
+=== Sound Dynamic analysis results for dict3.php
+Summary for \f:
+No upcast
+Summary for \g:
+No upcast
+Summary for \h:
+Upcast exists at [16:4-26]
+Upcast exists at [12:4-26]

@@ -16,17 +16,14 @@ final class StrFormatTest extends HackTest {
 
   public static function provideFormat(): varray<mixed> {
     return varray[
-      tuple(
-        Str\format('No format specifiers'),
-        'No format specifiers',
-      ),
+      tuple(Str\format('No format specifiers'), 'No format specifiers'),
       tuple(
         Str\format('A single %s', 'string specifier'),
         'A single string specifier',
       ),
       tuple(
-        Str\format("Width modifiers: %5s %'=5s", 'abc', 'abc'),
-        'Width modifiers:   abc ==abc',
+        Str\format("Width modifiers: %5s %'=5s %'X-6s", 'abc', 'abc', 'abc'),
+        'Width modifiers:   abc ==abc abcXXX',
       ),
       tuple(
         Str\format(
@@ -42,18 +39,12 @@ final class StrFormatTest extends HackTest {
         Str\format('Base specifiers: %b %o %x %X', 15, 15, 15, 15),
         'Base specifiers: 1111 17 f F',
       ),
-      tuple(
-        Str\format('Percent specifier: %%'),
-        'Percent specifier: %',
-      ),
+      tuple(Str\format('Percent specifier: %%'), 'Percent specifier: %'),
     ];
   }
 
   <<DataProvider('provideFormat')>>
-  public function testFormat(
-    string $actual,
-    string $expected,
-  ): void {
+  public function testFormat(string $actual, string $expected): void {
     try {
       \setlocale(\LC_ALL, 'fr_FR');
       expect($actual)->toEqual($expected);

@@ -55,7 +55,12 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
   | Tclass ((_, className), _, []) ->
     let ( >>= ) = Option.( >>= ) in
     let ce_type =
-      (Env.get_class env className >>= fun c -> Env.get_member true env c fname)
+      let lookup_def c =
+        Option.first_some
+          (Env.get_member true env c fname)
+          (Env.get_member true env c "format_wild")
+      in
+      Env.get_class env className >>= lookup_def
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->

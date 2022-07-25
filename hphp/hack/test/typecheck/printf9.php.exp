@@ -1,0 +1,4 @@
+File "printf9.php", line 34, characters 5-9:
+Invalid format string `%=s` in `"%=s"` (Typing[4038])
+  File "printf9.php", line 20, characters 34-34:
+  You can add a new format specifier by adding `format_eof()` to `X`

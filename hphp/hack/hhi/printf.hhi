@@ -64,6 +64,9 @@ interface PlainSprintf {
   // %% takes no arguments
   public function format_0x25()[]: string;
 
+  // %'(char)
+  public function format_0x27()[]: SprintfQuote;
+
   // Modifiers that don't change the type
   public function format_l()[]: PlainSprintf;
   public function format_0x20()[]: PlainSprintf; // ' '
@@ -80,12 +83,10 @@ interface PlainSprintf {
   public function format_0x37()[]: PlainSprintf;
   public function format_0x38()[]: PlainSprintf;
   public function format_0x39()[]: PlainSprintf; // '9'
-  public function format_0x27()[]: SprintfQuote;
 }
 
-// This should really be a wildcard. It's only used once.
 interface SprintfQuote {
-  public function format_0x3d()[]: PlainSprintf;
+  public function format_wild()[]: PlainSprintf;
 }
 
 /**

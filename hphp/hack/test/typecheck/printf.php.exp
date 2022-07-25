@@ -1,8 +1,6 @@
-File "printf.php", line 24, characters 10-10:
-Was expecting a return type hint (Typing[4030])
-File "printf.php", line 27, characters 16-18:
+File "printf.php", line 32, characters 16-18:
 Invalid argument (Typing[4110])
-File "printf.php", line 27, characters 5-13:
-Expected `string` because of the `%s` format specifier
-File "printf.php", line 27, characters 16-18:
-But got `float`
+  File "printf.php", line 32, characters 5-13:
+  Expected `string` because of the `%s` format specifier
+  File "printf.php", line 32, characters 16-18:
+  But got `float`

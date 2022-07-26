@@ -792,19 +792,20 @@ let get_static_member is_method env class_ mid =
   in
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
     make_depend_on_class env (Cls.name class_);
+    let dep x =
+      if is_method then
+        Dep.SMethod (x, mid)
+      else
+        Dep.SProp (x, mid)
+    in
     let add_dep x =
-      let dep =
-        if is_method then
-          Dep.SMethod (x, mid)
-        else
-          Dep.SProp (x, mid)
-      in
       Option.iter env.decl_env.droot ~f:(fun root ->
-          Typing_deps.add_idep (get_deps_mode env) root dep);
-      add_fine_dep_if_enabled env dep
+          Typing_deps.add_idep (get_deps_mode env) root (dep x))
     in
     add_dep (Cls.name class_);
-    Option.iter ce_opt ~f:(fun ce -> add_dep ce.ce_origin)
+    Option.iter ce_opt ~f:(fun ce ->
+        add_dep ce.ce_origin;
+        add_fine_dep_if_enabled env (dep ce.ce_origin))
   end;
 
   ce_opt

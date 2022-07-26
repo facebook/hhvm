@@ -1591,10 +1591,9 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "hex",
- "md-5",
  "proc-macro2",
  "quote",
+ "signed_source",
  "structopt",
  "syn",
  "synstructure",
@@ -3085,6 +3084,18 @@ dependencies = [
  "owning_ref",
  "rand",
  "static_assertions",
+]
+
+[[package]]
+name = "signed_source"
+version = "0.0.0"
+dependencies = [
+ "bstr",
+ "hex",
+ "md-5",
+ "once_cell",
+ "regex",
+ "thiserror",
 ]
 
 [[package]]

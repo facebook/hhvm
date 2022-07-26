@@ -10,12 +10,9 @@ mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
 
-use anyhow::anyhow;
+use anyhow::Context;
 use anyhow::Result;
 use common::*;
-use md5::Digest;
-use md5::Md5;
-use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -108,24 +105,8 @@ fn format(formatter: Option<&str>, file: &Path) -> Result<()> {
 }
 
 fn sign(file: &Path) -> Result<()> {
-    // avoid putting the obvious literal in this source file, as that makes the
-    // file as generated
-    let token_tag = format!("@{}", "generated");
-    let token = "<<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>";
-    let expected = format!("{} {}", token_tag, token);
-
-    let contents = fs::read_to_string(file).expect("signing failed: could not read file");
-    if !contents.contains(&expected) {
-        return Err(anyhow!("signing failed: input does not contain marker"));
-    }
-
-    let mut digest = Md5::new();
-    digest.update(&contents);
-    let md5 = hex::encode(digest.finalize());
-
-    let new_contents =
-        contents.replace(&expected, &format!("{} SignedSource<<{}>>", token_tag, md5));
-    fs::write(file, new_contents)?;
-
+    let contents = std::fs::read(file).context("Failed to read file for signing")?;
+    let new_contents = signed_source::sign_file(&contents)?;
+    std::fs::write(file, new_contents).context("Failed to write signed file")?;
     Ok(())
 }

@@ -54,14 +54,16 @@ pub fn insert_header(s: &str, command: &str) -> Result<String> {
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.
 //
-// @{} <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+// {}
 //
 // To regenerate this file, run:
 //   {}
 
 {}
 ",
-        "generated", command, s
+        signed_source::SIGNING_TOKEN,
+        command,
+        s
     )?;
     Ok(content)
 }

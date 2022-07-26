@@ -181,6 +181,7 @@ final class AsyncMysqlClient {
                                             = dict[],
                                       ): Awaitable<(
                                           AsyncMysqlConnectResult,
+                                          /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
                                           Vector<AsyncMysqlQueryResult>
                                       )>;
 }
@@ -326,7 +327,9 @@ class AsyncMysqlConnectionPool {
     AsyncMysqlConnectionOptions $conn_opts,
     string $extra_key = "",
     dict<string, string> $query_attributes = dict[],
-  ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)>;
+  ):
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)>;
 }
 
 /**
@@ -422,7 +425,7 @@ final class AsyncMysqlConnection {
   <<__Native>>
   public function queryf(
     string $pattern,
-    ...$args
+    mixed ...$args
   ): Awaitable<AsyncMysqlQueryResult>;
   <<__Native>>
   public function queryAsync(
@@ -457,7 +460,9 @@ final class AsyncMysqlConnection {
   public function multiQuery(AnyArray<arraykey, mixed> $queries,
                       int $timeout_micros = -1,
                       dict<string, string> $query_attributes = dict[],
-                      ): Awaitable<Vector<AsyncMysqlQueryResult>>;
+                      ):
+                      /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+                      Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
    * Escape a string to be safe to include in a raw query.
@@ -642,6 +647,7 @@ final class AsyncMysqlConnection {
    *           by MySQL.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertSan(): Vector<string>;
 
   /**
@@ -656,6 +662,7 @@ final class AsyncMysqlConnection {
    *           by MySQL.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertExtensions(): Vector<string>;
 
   /**
@@ -970,6 +977,7 @@ abstract class AsyncMysqlResult {
    *           from the server certificate presented by MySQL.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertSan(): Vector<string>;
 
   /**
@@ -983,6 +991,7 @@ abstract class AsyncMysqlResult {
    *           values from the server certificate presented by MySQL.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertExtensions(): Vector<string>;
 
   /**
@@ -1201,6 +1210,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
    *           produced by a successful query statement.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSuccessfulResults(): Vector<AsyncMysqlQueryResult>;
 }
 
@@ -1327,6 +1337,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function mapRows(): Vector<Map<string, ?string>>;
 
   /**
@@ -1345,6 +1356,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function vectorRows(): Vector<KeyedContainer<int, ?string>>;
 
   /**
@@ -1360,6 +1372,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function mapRowsTyped():  Vector<Map<string, mixed>>;
 
   <<__Native>>
@@ -1378,6 +1391,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>>;
 
   /**
@@ -1398,6 +1412,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           of which represent the full result of the query.
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function rowBlocks(): Vector<AsyncMysqlRowBlock>;
 
   /**
@@ -1426,6 +1441,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - A Map<string, string> of the response attributes from MySQL
    */
   <<__Native>>
+  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function responseAttributes(): Map<string, string>;
 }
 
@@ -1447,7 +1463,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlock")>>
-final class AsyncMysqlRowBlock implements IteratorAggregate, Countable {
+final class AsyncMysqlRowBlock implements IteratorAggregate<mixed>, Countable {
   /**
    * @internal
    */
@@ -1580,7 +1596,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate, Countable {
    * @return - The number of rows in the current row block.
    */
   <<__Native>>
-  public function count(): int;
+  public function count()[]: int;
 
   /**
    * Get the iterator for the rows in the block.
@@ -1613,7 +1629,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate, Countable {
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlockIterator")>>
-final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator {
+final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator<string, AsyncMysqlRow> {
 
   /**
    * @internal
@@ -1764,7 +1780,7 @@ final class AsyncMysqlRow implements MysqlRow {
    * @return - The number of columns in the current row.
    */
   <<__Native>>
-  public function count(): int;
+  public function count()[]: int;
 
   /**
    * Get the iterator over the fields in the current row.
@@ -1785,7 +1801,7 @@ final class AsyncMysqlRow implements MysqlRow {
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowIterator")>>
-final class AsyncMysqlRowIterator implements HH\KeyedIterator {
+final class AsyncMysqlRowIterator implements HH\KeyedIterator<string, string> {
   /**
    * @internal
    */
@@ -1849,12 +1865,12 @@ namespace HH\Lib\SQL {
       $this->args = $args;
     }
 
-    <<__Native,NoDoc>>
+    <<__Native, \NoDoc>>
     public function toString__FOR_DEBUGGING_ONLY(
       \AsyncMysqlConnection $conn,
     ): string;
 
-    <<__Native,NoDoc>>
+    <<__Native, \NoDoc>>
     public function toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): string;
   }
 }

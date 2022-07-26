@@ -51,10 +51,13 @@ class AsyncMysqlException extends Exception {
    *                  information for the failed operation.
    */
   public function __construct(AsyncMysqlErrorResult $result) {
+    parent::__construct();
+
     $this->result = $result;
 
     $this->message =
       'Error executing AsyncMysql operation: '.$result->failureType();
+
     if  ($this->mysqlErrorCode() > 0) {
       $this->message = $this->message.' (mysql error: '.$this->mysqlErrorCode().
         ': '.$this->mysqlErrorString().')';

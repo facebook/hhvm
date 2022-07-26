@@ -41,6 +41,6 @@ namespace {
  * annotated functions from having documentation generated for them. This is
  * generally because said functions are implementation details of some kind.
  */
-final class NoDoc implements \HH\FunctionAttribute {}
+final class NoDoc implements \HH\FunctionAttribute, HH\MethodAttribute {}
 
 }

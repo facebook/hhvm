@@ -189,8 +189,6 @@ impl LocalInfo {
             | Opcode::NewKeysetArray(..)
             | Opcode::NewObj
             | Opcode::NewObjD(..)
-            | Opcode::NewObjR
-            | Opcode::NewObjRD(..)
             | Opcode::NewObjS(..)
             | Opcode::NewPair
             | Opcode::NewStructDict(..)

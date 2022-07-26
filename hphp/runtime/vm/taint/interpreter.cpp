@@ -1095,17 +1095,9 @@ void iopNewObj() {
   iopUnhandled("NewObj");
 }
 
-void iopNewObjR() {
-  iopUnhandled("NewObjR");
-}
-
 void iopNewObjD(Id /* id */) {
   iopPreamble("NewObjD");
   State::instance->stack.push(nullptr);
-}
-
-void iopNewObjRD(Id /* id */) {
-  iopUnhandled("NewObjRD");
 }
 
 void iopNewObjS(SpecialClsRef /* ref */) {

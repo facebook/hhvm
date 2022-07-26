@@ -195,11 +195,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void setWeakRefed() { setAttribute(IsWeakRefed); }
 
+  void setReifiedGenerics(Class*, ArrayData*);
+
  private:
   template <bool Unlocked, typename Init>
   static ObjectData* newInstanceImpl(Class*, Init);
-
-  void setReifiedGenerics(Class*, ArrayData*);
 
 
   /*
@@ -217,9 +217,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     uint8_t flags;
   };
   static Alloc allocMemoInit(Class* cls);
-
-  template <bool Unlocked>
-  static ObjectData* newInstanceSlow(Class*);
  public:
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will

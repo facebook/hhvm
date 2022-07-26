@@ -550,11 +550,6 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 let clsid = clsid.to_hhbc(self.alloc, self.strings);
                 Opcode::NewObjD(clsid)
             }
-            Hhbc::NewObjR(_, _) => Opcode::NewObjR,
-            Hhbc::NewObjRD(_, clsid, _) => {
-                let clsid = clsid.to_hhbc(self.alloc, self.strings);
-                Opcode::NewObjRD(clsid)
-            }
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
             Hhbc::NewPair(..) => Opcode::NewPair,
             Hhbc::NewStructDict(ref keys, _, _) => {

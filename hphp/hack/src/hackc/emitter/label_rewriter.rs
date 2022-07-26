@@ -319,8 +319,6 @@ where
             | Opcode::NewDictArray(..)
             | Opcode::NewKeysetArray(..)
             | Opcode::NewObjD(..)
-            | Opcode::NewObjRD(..)
-            | Opcode::NewObjR
             | Opcode::NewObjS(..)
             | Opcode::NewObj
             | Opcode::NewPair

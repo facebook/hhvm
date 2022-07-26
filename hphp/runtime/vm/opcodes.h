@@ -179,9 +179,7 @@ namespace HPHP {
   O(ResolveClass,    ONE(SA),          NOV,             ONE(CV),    NF) \
   O(LazyClass,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \

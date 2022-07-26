@@ -117,61 +117,8 @@ ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
 }
 
 template <bool Unlocked>
-NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
-  assertx(cls);
-  if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
-                AttrEnumClass))) {
-    raiseAbstractClassError(cls);
-  }
-  if (cls->hasReifiedGenerics()) {
-    checkClassReifiedGenericsSoft(cls);
-  }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(
-    cls,
-    [&](void* mem, uint8_t sizeFlag) {
-      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
-      return new (NotNull{}, mem) ObjectData(cls, flags);
-    }
-  );
-  if (UNLIKELY(cls->needsInitThrowable())) {
-    // may incref obj
-    throwable_init(obj);
-    assertx(obj->checkCount());
-  }
-  if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
-  }
-  return obj;
-}
-
-template <bool Unlocked>
 inline ObjectData* ObjectData::newInstance(Class* cls) {
   assertx(cls);
-  if (UNLIKELY(cls->hasReifiedGenerics() ||
-               cls->needsInitThrowable() ||
-               cls->hasReifiedParent())) {
-    return newInstanceSlow<Unlocked>(cls);
-  }
-  if (UNLIKELY(cls->attrs() &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
-                AttrEnumClass))) {
-    raiseAbstractClassError(cls);
-  }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(
-    cls,
-    [&](void* mem, uint8_t sizeFlag) {
-      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
-      return new (NotNull{}, mem) ObjectData(cls, flags);
-    }
-  );
-  return obj;
-}
-
-template <bool Unlocked>
-inline ObjectData* ObjectData::newInstanceReified(Class* cls,
-                                                  ArrayData* reifiedTypes) {
-  assertx(cls);
   if (UNLIKELY(cls->attrs() &
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum |
                 AttrEnumClass))) {
@@ -188,13 +135,6 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     // may incref obj
     throwable_init(obj);
     assertx(obj->checkCount());
-  }
-  if (cls->hasReifiedGenerics()) {
-    obj->setReifiedGenerics(cls, reifiedTypes);
-    return obj;
-  }
-  if (cls->hasReifiedParent()) {
-    obj->setReifiedGenerics(cls, ArrayData::CreateVec());
   }
   return obj;
 }

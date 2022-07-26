@@ -479,6 +479,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         ( env,
           ServerPrepareCallHierarchy.go_quarantined ~ctx ~entry ~line ~column ))
+  | CALL_HIERARCHY_INCOMING_CALLS call_item ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let result =
+      ServerCallHierarchyIncomingCalls.go call_item ~ctx ~genv ~env
+    in
+    (env, result)
   | BIGCODE path ->
     let (ctx, entry) = single_ctx_path env path in
     let result = ServerBigCode.go_ctx ~ctx ~entry in

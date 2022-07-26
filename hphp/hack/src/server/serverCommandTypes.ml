@@ -430,6 +430,9 @@ type _ t =
   | PREPARE_CALL_HIERARCHY :
       labelled_file * int * int
       -> Lsp.PrepareCallHierarchy.result t
+  | CALL_HIERARCHY_INCOMING_CALLS :
+      Lsp.CallHierarchyItem.t
+      -> Lsp.CallHierarchyIncomingCalls.result Done_or_retry.t list t
   | BIGCODE : string -> string t
   | PAUSE : bool -> unit t
   | GLOBAL_INFERENCE :

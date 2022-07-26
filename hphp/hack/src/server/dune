@@ -84,7 +84,7 @@
  (name server_call_hierarchy)
  (wrapped false)
  (modules serverPrepareCallHierarchy serverCallHierarchyIncomingCalls serverCallHierarchyOugoingCalls serverCallHierarchyUtils)
- (libraries provider_context server_find_refs server_services lsp)
+ (libraries provider_context server_find_refs server_services lsp server_command_types)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

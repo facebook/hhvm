@@ -1240,18 +1240,8 @@ Object HHVM_FUNCTION(set_special_implicit_context,
   auto const prev_context =
     prev_obj ? Native::data<ImplicitContext>(prev_obj) : nullptr;
 
-  auto const type = [&] {
-    switch (type_enum) {
-      case 0:
-        return ImplicitContext::State::Inaccessible;
-      case 1:
-        return ImplicitContext::State::SoftInaccessible;
-      case 2:
-        return ImplicitContext::State::SoftSet;
-    }
-    always_assert(false && "Invalid enum value, keep in sync with ext_hh.php");
-  }();
-
+  auto const type = static_cast<ImplicitContext::State>(type_enum);
+  assertx(type != ImplicitContext::State::Value);
   if (type == ImplicitContext::State::SoftSet &&
       prev_context &&
       (prev_context->m_state == ImplicitContext::State::Value ||
@@ -1581,6 +1571,14 @@ static struct HHExtension final : Extension {
 
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
                   HHVM_FN(enter_zoned_with));
+
+#define X(hacknm, cppnm) HHVM_RC_INT(HH\\MEMOIZE_IC_TYPE_##hacknm, \
+  static_cast<int64_t>(ImplicitContext::State::cppnm))
+    X(VALUE, Value)
+    X(INACCESSIBLE, Inaccessible)
+    X(SOFT_INACCESSIBLE, SoftInaccessible)
+    X(SOFT_SET, SoftSet)
+#undef X
 
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(is_dynamically_callable_inst_method);

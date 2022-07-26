@@ -88,10 +88,18 @@ pub fn get_implicit_context_memo_key<'arena>(
 }
 
 fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
+    let cns_id = hhbc::ConstName::from_raw_string(
+        alloc,
+        if soft {
+            "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE"
+        } else {
+            "HH\\MEMOIZE_IC_TYPE_INACCESSIBLE"
+        },
+    );
     InstrSeq::gather(vec![
         instr::null_uninit(),
         instr::null_uninit(),
-        instr::int(if soft { 1 } else { 0 }),
+        instr::cns_e(cns_id),
         instr::f_call_func_d(
             FCallArgs::new(
                 FCallArgsFlags::default(),

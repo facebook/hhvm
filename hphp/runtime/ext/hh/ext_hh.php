@@ -344,7 +344,7 @@ async function soft_run_with_async<Tout>(
   string $key,
 )[zoned]: Awaitable<Tout> {
   $prev = _Private\set_special_implicit_context(
-    _Private\SpecialImplicitContextType::SoftSet,
+    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
     $key
   );
   try {
@@ -362,7 +362,7 @@ function soft_run_with<Tout>(
   string $key,
 )[zoned, ctx $f]: Tout {
   $prev = _Private\set_special_implicit_context(
-    _Private\SpecialImplicitContextType::SoftSet,
+    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
     $key
   );
   try {
@@ -394,16 +394,6 @@ function set_implicit_context(
   string $key,
   mixed $context,
 )[zoned]: object /* ImplicitContextData */;
-
-/*
- * Types of non value based implicit contexts
- * Keep in sync with set_special_implicit_context implementation in ext_hh.cpp
- */
-enum SpecialImplicitContextType : int {
-  Inaccessible = 0;
-  SoftInaccessible = 1;
-  SoftSet = 2;
-}
 
 /**
  * Sets implicit context to one of the non value based special types.

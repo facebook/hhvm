@@ -30,11 +30,11 @@ struct ImplicitContext {
 // Members
 ////////////////////////////////////////////////////////////////////////////
 
-enum class State {
+enum class State : uint8_t {
   Value,
   Inaccessible,
-  SoftSet,
   SoftInaccessible,
+  SoftSet,
 };
 
 // Current state of IC

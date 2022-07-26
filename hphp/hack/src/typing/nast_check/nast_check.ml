@@ -33,6 +33,16 @@ let visitor ctx =
     ]
   in
   let handlers =
+    if
+      TypecheckerOptions.record_fine_grained_dependencies
+        (Provider_context.get_tcopt ctx)
+    then
+      Pessimisation_node_recording.handler :: handlers
+    else
+      handlers
+  in
+
+  let handlers =
     if TypecheckerOptions.skip_tast_checks (Provider_context.get_tcopt ctx) then
       []
     else

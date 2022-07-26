@@ -200,7 +200,7 @@ module Backend = struct
     Hashtbl.clear cache;
     cache_used_size := 0
 
-  let add ~is_override mode fine_dependent dependency =
+  let add_dependency_edge ~is_override mode fine_dependent dependency =
     let cache = get_cache () in
     let inc_and_make () =
       cache_used_size := !cache_used_size + 1;
@@ -213,33 +213,38 @@ module Backend = struct
     if !cache_used_size >= cache_max_size then flush_cache mode;
     ()
 
+  let add_node mode node =
+    let cache = get_cache () in
+    let inc_and_make () =
+      cache_used_size := !cache_used_size + 1;
+      make_set ()
+    in
+    Hashtbl.find_or_add cache node ~default:inc_and_make |> ignore;
+    if !cache_used_size >= cache_max_size then flush_cache mode
+
   let finalize mode =
     flush_cache mode;
     SQLitePersistence.close_db ()
 end
 
-let should_ignore fine_dependent dependency =
+let should_ignore_node node =
+  let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false node in
+  let kind = Typing_deps.Dep.dep_kind_of_variant node in
   (* This is a sufficient, but not a necessary condition for being an hhi
    * definition. However, the alternative would be to lookup the path for
    * every defininition here. *)
-  let is_hh_def : type a. a Typing_deps.Dep.variant -> bool =
-   fun dep ->
-    let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false dep in
-    Option.is_some @@ String.chop_prefix root ~prefix:"HH\\"
-  in
+  let is_hh_def = Option.is_some @@ String.chop_prefix root ~prefix:"HH\\" in
 
   (* Checks that this is the function call created by [Naming.invalid_expr_],
    * which doesn't provide a nicer way for checking this. Note the missing
    * toplevel \ *)
-  let is_invalid_expr_sentinel_fun dep =
-    match Typing_deps.Dep.dep_kind_of_variant dep with
-    | Typing_deps.Dep.KFun ->
-      let root = Typing_deps.Dep.extract_root_name ~strip_namespace:false dep in
-      String.(root = "invalid_expr")
+  let is_invalid_expr_sentinel_fun =
+    match kind with
+    | Typing_deps.Dep.KFun -> String.(root = "invalid_expr")
     | _ -> false
   in
-  let has_useful_kind dep =
-    match Typing_deps.Dep.dep_kind_of_variant dep with
+  let has_useful_kind =
+    match kind with
     | Typing_deps.Dep.KFun
     | Typing_deps.Dep.KMethod
     | Typing_deps.Dep.KSMethod ->
@@ -261,17 +266,20 @@ let should_ignore fine_dependent dependency =
       (* Dependencies that we will most likely never utilize *)
       false
   in
+  is_hh_def || (not @@ has_useful_kind) || is_invalid_expr_sentinel_fun
+
+let should_ignore_edge fine_dependent dependency =
   Poly.(fine_dependent = dependency)
-  || is_hh_def fine_dependent
-  || is_hh_def dependency
-  || (not @@ has_useful_kind fine_dependent)
-  || (not @@ has_useful_kind dependency)
-  || is_invalid_expr_sentinel_fun fine_dependent
-  || is_invalid_expr_sentinel_fun dependency
+  || should_ignore_node fine_dependent
+  || should_ignore_node dependency
 
 let add_fine_dep mode fine_dependent dependency =
-  if not @@ should_ignore fine_dependent dependency then
-    Backend.add ~is_override:false mode fine_dependent dependency
+  if not @@ should_ignore_edge fine_dependent dependency then
+    Backend.add_dependency_edge
+      ~is_override:false
+      mode
+      fine_dependent
+      dependency
 
 let add_coarse_dep mode coarse_dep =
   add_fine_dep mode (Typing_deps.Dep.dependency_of_variant coarse_dep)
@@ -316,7 +324,11 @@ let add_override_dep mode ~child_name ~parent_name member =
   let dependent = dependency_variant_of_member parent_name member in
   let dependency = dependency_variant_of_member child_name member in
 
-  if not @@ should_ignore dependent dependency then
-    Backend.add ~is_override:true mode dependent dependency
+  if not @@ should_ignore_edge dependent dependency then
+    Backend.add_dependency_edge ~is_override:true mode dependent dependency
+
+let add_node mode coarse member =
+  let node = fine_dependent_of_coarse_and_member coarse member in
+  if not @@ should_ignore_node node then Backend.add_node mode node
 
 let finalize = Backend.finalize

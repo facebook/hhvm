@@ -39,6 +39,12 @@ val add_override_dep :
   dependent_member ->
   unit
 
+(** Informs the pessimisation dependency graph about the existence of a node.
+  This allows ensuring that certain nodes are added to the the graph even if
+  they may not have any incoming or outgoing edges. *)
+val add_node :
+  Typing_deps_mode.t -> coarse_dependent -> dependent_member option -> unit
+
 (** Persists all currently cached dependencies to disk *)
 val finalize : Typing_deps_mode.t -> unit
 

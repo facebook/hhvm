@@ -1,0 +1,2 @@
+File "do_while_finally.php", line 8, characters 7-8:
+Variable `$a` is undefined, or not always defined. (Naming[2050])

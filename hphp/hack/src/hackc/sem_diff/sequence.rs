@@ -329,6 +329,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::BreakTraceHint
             | Opcode::CheckProp(..)
             | Opcode::CheckClsReifiedGenericMismatch
+            | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
             | Opcode::ClassGetC
             | Opcode::ClassGetTS

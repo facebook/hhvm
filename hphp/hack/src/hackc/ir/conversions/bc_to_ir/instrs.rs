@@ -978,6 +978,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::ChainFaults => simple!(Hhbc::ChainFaults),
         Opcode::CheckProp => simple!(Hhbc::CheckProp),
         Opcode::CheckClsReifiedGenericMismatch => simple!(Hhbc::CheckClsReifiedGenericMismatch),
+        Opcode::CheckClsRGSoft => simple!(Hhbc::CheckClsRGSoft),
         Opcode::CheckThis => simple!(Hhbc::CheckThis),
         Opcode::ClassGetC => simple!(Hhbc::ClassGetC),
         Opcode::ClassHasReifiedGenerics => simple!(Hhbc::ClassHasReifiedGenerics),

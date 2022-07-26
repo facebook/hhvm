@@ -96,6 +96,7 @@ impl LocalInfo {
             | Opcode::ChainFaults
             | Opcode::CheckProp(..)
             | Opcode::CheckClsReifiedGenericMismatch
+            | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
             | Opcode::ClassGetC
             | Opcode::ClassGetTS

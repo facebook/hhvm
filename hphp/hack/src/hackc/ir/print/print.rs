@@ -663,6 +663,9 @@ fn print_hhbc(
                 FmtVid(func, vid, verbose)
             )?;
         }
+        Hhbc::CheckClsRGSoft(vid, _) => {
+            write!(w, "check_cls_rg_soft {}", FmtVid(func, vid, verbose))?;
+        }
         Hhbc::CheckProp(prop, _) => {
             write!(w, "check_prop {}", FmtIdentifierId(prop.id, ctx.strings))?
         }

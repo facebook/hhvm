@@ -2996,6 +2996,14 @@ HasReifiedParent [C:Class|LazyClass] -> [C:Bool]
   resulting boolean onto the stack. Throws a fatal error if $1 is not a class.
   or lazy class.
 
+CheckClsRGSoft [C:Class|LazyClass] -> []
+
+  Raises a warning if every reified generic in class $1 is soft.
+  Otherwise, raises a fatal error. This bytecode should only be emitted
+  when a class which expects reified generics is being instantiated without
+  any reified generics given (thus guarded by a ClassHasReifiedGenerics bytecode).
+  Throws a fatal error if $1 is not a class or lazy class.
+
 NativeImpl    []  ->  []
 
   Native implementation. This instruction invokes the native implementation

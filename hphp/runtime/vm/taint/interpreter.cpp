@@ -1632,6 +1632,10 @@ void iopHasReifiedParent() {
   iopUnhandled("HasReifiedParent")
 }
 
+void iopCheckClsRGSoft() {
+  iopUnhandled("CheckClsRGSoft");
+}
+
 void iopNativeImpl(PC& /* pc */) {
   iopPreamble("NativeImpl");
 

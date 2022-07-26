@@ -428,6 +428,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::CastString(..) => Opcode::CastString,
             Hhbc::CastVec(..) => Opcode::CastVec,
             Hhbc::CheckClsReifiedGenericMismatch(..) => Opcode::CheckClsReifiedGenericMismatch,
+            Hhbc::CheckClsRGSoft(..) => Opcode::CheckClsRGSoft,
             Hhbc::ChainFaults(..) => Opcode::ChainFaults,
             Hhbc::CheckProp(prop, _) => {
                 let prop = prop.to_hhbc(self.alloc, self.strings);

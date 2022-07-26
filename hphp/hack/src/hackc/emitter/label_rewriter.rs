@@ -233,6 +233,7 @@ where
             | Opcode::CastVec
             | Opcode::ChainFaults
             | Opcode::CheckClsReifiedGenericMismatch
+            | Opcode::CheckClsRGSoft
             | Opcode::CheckProp(..)
             | Opcode::CheckThis
             | Opcode::ClassGetC

@@ -1581,6 +1581,9 @@ void dce(Env& env, const bc::ChainFaults& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CheckClsReifiedGenericMismatch& op) {
   no_dce(env, op);
 }
+void dce(Env& env, const bc::CheckClsRGSoft& op) {
+  no_dce(env, op);
+}
 void dce(Env& env, const bc::CheckThis& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Clone& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCns& op) { no_dce(env, op); }

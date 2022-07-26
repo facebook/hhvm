@@ -429,6 +429,7 @@ pub enum Hhbc {
     CastVec(ValueId, LocId),
     ChainFaults([ValueId; 2], LocId),
     CheckClsReifiedGenericMismatch(ValueId, LocId),
+    CheckClsRGSoft(ValueId, LocId),
     CheckProp(PropId, LocId),
     CheckThis(LocId),
     ClassGetC(ValueId, LocId),

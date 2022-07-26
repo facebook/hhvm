@@ -1706,6 +1706,19 @@ OPTBLD_INLINE void iopHasReifiedParent() {
   vmStack().replaceC<KindOfBoolean>(class_->hasReifiedParent());
 }
 
+OPTBLD_INLINE void iopCheckClsRGSoft() {
+  auto const class_ = [&] {
+    auto const cls = vmStack().topC();
+    if (LIKELY(tvIsClass(cls))) return cls->m_data.pclass;
+    if (tvIsLazyClass(cls)) return Class::load(cls->m_data.plazyclass.name());
+    raise_error("CheckClsRGSoft called on non-class object");
+  }();
+
+  assertx(class_->hasReifiedGenerics());
+  checkClassReifiedGenericsSoft(class_);
+  vmStack().popC();
+}
+
 OPTBLD_INLINE void iopPrint() {
   TypedValue* c1 = vmStack().topC();
   g_context->write(tvAsVariant(*c1).toString());

@@ -558,6 +558,14 @@ void emitHasReifiedParent(IRGS& env) {
   push(env, result);
 }
 
+void emitCheckClsRGSoft(IRGS& env) {
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  gen(env, CheckClsRGSoft, cls);
+  popDecRef(env, DecRefProfileId::Default);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

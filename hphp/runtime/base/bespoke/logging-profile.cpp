@@ -471,30 +471,6 @@ std::vector<const StringData*> LoggingProfile::knownStructKeys() const {
   return ret;
 }
 
-bool LoggingProfile::shouldUseBespokeTypeStructure() {
-  if (key.locationType != LocationType::TypeConstant &&
-      key.locationType != LocationType::TypeAlias) {
-    return false;
-  }
-
-  // check for correct keys and values types
-  auto const vad = data->staticSampledArray;
-  if (vad == nullptr || !TypeStructure::isValidTypeStructure(vad)) return false;
-
-  // check that no operations could have modified the array
-  for (auto const& eventAndCount : data->events) {
-    auto const event = EventKey(eventAndCount.first);
-    if (!arrayOpIsRead(event.getOp()) &&
-        event.getOp() != ArrayOp::ConstructStr &&
-        event.getOp() != ArrayOp::ConstructInt &&
-        event.getOp() != ArrayOp::APCInitStr &&
-        event.getOp() != ArrayOp::APCInitStr) {
-      return false;
-    }
-  }
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 SinkProfile::SinkProfile(SinkProfileKey key)
@@ -531,6 +507,12 @@ void SinkProfile::update(const ArrayData* ad) {
   const LoggingArray* lad = nullptr;
   if (!ad->isVanilla()) {
     auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
+    // Update count of bespoke type structures before bailing out
+    if (index == TypeStructure::GetLayoutIndex()) {
+      data->typeStructureCount++;
+      data->sampledCount++;
+      return;
+    }
     if (index != LoggingArray::GetLayoutIndex()) return;
     lad = LoggingArray::As(ad);
   }

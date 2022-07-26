@@ -691,20 +691,6 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 //////////////////////////////////////////////////////////////////////////////
 // Generic dispatch
 
-void setTypeStructureLayoutForSources() {
-  eachSource([&](auto& profile) {
-    if (RO::EvalEmitBespokeTypeStructures && profile.shouldUseBespokeTypeStructure()) {
-      auto const vad = profile.data->staticSampledArray;
-      if (vad == nullptr) return;
-      auto const tad = TypeStructure::MakeFromVanilla(vad);
-      if (tad == nullptr) return;
-      auto const idx = tad->layoutIndex();
-      profile.setStaticBespokeArray(tad);
-      profile.setLayout(ArrayLayout(idx));
-    }
-  });
-}
-
 ArrayLayout selectSourceLayout(
     LoggingProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
@@ -778,6 +764,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
 
   auto const sampled = load(profile.data->sampledCount);
   auto const unsampled = load(profile.data->unsampledCount);
+  auto const type_structures = load(profile.data->typeStructureCount);
   if (!sampled) {
     return unsampled ? std::vector<DAL>({DAL{ArrayLayout::Vanilla(), 1.0}})
                      : std::vector<DAL>({DAL{ArrayLayout::Top(), 1.0}});
@@ -786,8 +773,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
   uint64_t is_struct = 0;
-  uint64_t is_type_structure = 0;
-  uint64_t total = 0;
+  uint64_t total = type_structures;
 
   std::unordered_map<const bespoke::Layout*, uint64_t> structs;
 
@@ -801,13 +787,12 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     } else if (layout.is_struct()) {
       is_struct += count;
       structs[layout.bespokeLayout()] += count;
-    } else if (layout.is_type_structure()) {
-      is_type_structure += count;
     }
     total += count;
   }
 
   auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 
   if (!total) {
@@ -819,7 +804,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
   auto const p_is_struct = p_sampled * is_struct / total;
-  auto const p_is_type_structure = p_sampled * is_type_structure / total;
+  auto const p_is_type_structures = p_sampled * type_structures / total;
 
   // Handle vanilla layouts
   if (p_vanilla >= p_cutoff) {
@@ -882,8 +867,8 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     }
   }
 
-  if (p_is_type_structure >= p_cutoff) {
-    return {{ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structure}};
+  if (p_is_type_structures >= p_cutoff) {
+    return {{ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structures}};
   }
 
   // Handle struct layouts
@@ -1058,10 +1043,6 @@ void selectBespokeLayouts() {
 
   setLoggingEnabled(false);
 
-  // need to set type structure layouts first so that relevant type structure
-  // sources and sinks can be excluded in the struct analysis
-  setTypeStructureLayoutForSources();
-
   auto const sar = []{
     if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
@@ -1069,11 +1050,7 @@ void selectBespokeLayouts() {
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
-  eachSource([&](auto& x) {
-    if (x.getStaticBespokeArray() == nullptr) {
-      x.setLayout(selectSourceLayout(x, sar));
-    }
-  });
+  eachSource([&](auto& x) { x.setLayout(selectSourceLayout(x, sar)); });
   eachSink([&](auto& x) { x.setLayouts(selectSinkLayouts(x, sar)); });
   Layout::FinalizeHierarchy();
   startExportProfiles();

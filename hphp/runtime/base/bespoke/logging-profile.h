@@ -296,8 +296,6 @@ struct LoggingProfile {
   BespokeArray* getStaticBespokeArray() const;
   void setStaticBespokeArray(BespokeArray* array);
 
-  bool shouldUseBespokeTypeStructure();
-
   jit::ArrayLayout getLayout() const;
   void setLayout(jit::ArrayLayout layout);
 
@@ -352,6 +350,7 @@ struct SinkProfile {
     std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
     std::atomic<uint64_t> valCounts[kNumValTypes] = {};
 
+    std::atomic<uint64_t> typeStructureCount = 0;
     std::atomic<uint64_t> sampledCount = 0;
     std::atomic<uint64_t> unsampledCount = 0;
     SourceMap sources;

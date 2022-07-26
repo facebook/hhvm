@@ -945,13 +945,48 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
   return func->attrs() & AttrReadonlyReturn;
 }
 
+const StaticString
+  s_systemlib_create_opaque_value("__SystemLib\\create_opaque_value"),
+  s_KeyedByIC("KeyedByIC"),
+  s_MakeICInaccessible("MakeICInaccessible"),
+  s_SoftMakeICInaccessible("SoftMakeICInaccessible");
+
 ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
   auto userAttrs = func->userAttributes();
 
   DictInit ai(userAttrs.size());
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(StrNR(it->first).asString(), it->second);
+    if (!func->isMemoizeWrapper() ||
+        func->memoizeICType() == Func::MemoizeICType::NoIC) {
+      ai.set(StrNR(it->first).asString(), it->second);
+    } else {
+      assertx(tvIsVec(it->second));
+      auto const ad = it->second.m_data.parr;
+      VecInit args(ad->size());
+      IterateV(ad, [&] (TypedValue tv) {
+        if (!tvIsString(tv)) {
+          args.append(tv);
+        } else {
+          auto const sd = tv.m_data.pstr;
+          if (sd->same(s_KeyedByIC.get()) ||
+              sd->same(s_MakeICInaccessible.get()) ||
+              sd->same(s_SoftMakeICInaccessible.get())) {
+            auto const func = Func::load(s_systemlib_create_opaque_value.get());
+            assertx(func);
+            VecInit v(2);
+            // From ext_hh.php: __SystemLib\OpaqueValueId::EnumClassLabel
+            v.append(make_tv<KindOfInt64>(0));
+            v.append(tv);
+            args.append(g_context->invokeFunc(
+              func, v.toArray(), nullptr, nullptr,
+              RuntimeCoeffects::pure(), false /* dynamic */
+            ));
+          }
+        }
+      });
+      ai.set(StrNR(it->first).asString(), args.toArray());
+    }
   }
   return ai.toArray();
 }

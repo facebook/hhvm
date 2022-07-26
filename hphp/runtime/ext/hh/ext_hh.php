@@ -469,6 +469,15 @@ abstract class ImplicitContext {
 }
 
 /**
+ * Options for memoization to be used with dynamically enforced implicit context
+ */
+enum class MemoizeOption: string {
+  string KeyedByIC = 'KeyedByIC';
+  string MakeICInaccessible = 'MakeICInaccessible';
+  string SoftMakeICInaccessible = 'SoftMakeICInaccessible';
+}
+
+/**
  * Return a vector of lines known to be executable in $file. WARNING: there is
  * no guarantee that these lines will be seen when running code-coverage mode.
  * This API is purely a heuristic/best effort approximation of executable lines.

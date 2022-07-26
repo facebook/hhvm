@@ -1,0 +1,12 @@
+resource(4) of type (OpaqueValue)
+string(9) "KeyedByIC"
+resource(4) of type (OpaqueValue)
+string(9) "KeyedByIC"
+resource(5) of type (OpaqueValue)
+string(18) "MakeICInaccessible"
+resource(5) of type (OpaqueValue)
+string(18) "MakeICInaccessible"
+resource(6) of type (OpaqueValue)
+string(22) "SoftMakeICInaccessible"
+resource(6) of type (OpaqueValue)
+string(22) "SoftMakeICInaccessible"

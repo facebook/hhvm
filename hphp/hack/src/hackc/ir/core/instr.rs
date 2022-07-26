@@ -462,6 +462,7 @@ pub enum Hhbc {
     },
     CreateCont(LocId),
     Div([ValueId; 2], LocId),
+    GetClsRGProp(ValueId, LocId),
     GetMemoKeyL(LocalId, LocId),
     HasReifiedParent(ValueId, LocId),
     Idx([ValueId; 3], LocId),

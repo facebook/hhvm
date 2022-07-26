@@ -273,6 +273,7 @@ where
             | Opcode::Fatal(..)
             | Opcode::File
             | Opcode::FuncCred
+            | Opcode::GetClsRGProp
             | Opcode::GetMemoKeyL(..)
             | Opcode::Gte
             | Opcode::Gt

@@ -751,6 +751,11 @@ To string conversions:
 
   Set D to true iff S0 is a reified class.
 
+| GetClsRGProp, D(Vec), S(Cls) S(Obj), PRc
+
+  Get the reified generics property for object S1, using the
+  index of this property as stored in class S0.
+
 | HasReifiedParent, D(Bool), S(Cls), NF
 
   Set D to true iff S0 has a reified parent.

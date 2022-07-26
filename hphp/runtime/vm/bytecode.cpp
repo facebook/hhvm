@@ -1630,6 +1630,12 @@ ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
   return ArrNR(arr);
 }
 
+inline void checkThis(ActRec* fp) {
+  if (!fp->func()->cls() || !fp->hasThis()) {
+    raise_error(Strings::FATAL_NULL_THIS);
+  }
+}
+
 } // namespace
 
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
@@ -1694,6 +1700,18 @@ OPTBLD_INLINE void iopClassHasReifiedGenerics() {
     raise_error("ClassHasReified generics called on non-class object");
   }();
   vmStack().replaceC<KindOfBoolean>(class_->hasReifiedGenerics());
+}
+
+OPTBLD_INLINE void iopGetClsRGProp() {
+  checkThis(vmfp());
+  ObjectData* this_ = vmfp()->getThis();
+  auto const cls = [&] {
+    auto const cls = vmStack().topC();
+    if (LIKELY(tvIsClass(cls))) return cls->m_data.pclass;
+    if (tvIsLazyClass(cls)) return Class::load(cls->m_data.plazyclass.name());
+    raise_error("GetClsRGProp called on non-class object");
+  }();
+  vmStack().replaceC<KindOfVec>(getClsReifiedGenericsProp(cls, this_));
 }
 
 OPTBLD_INLINE void iopHasReifiedParent() {
@@ -2702,12 +2720,6 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
 }
 
 namespace {
-
-inline void checkThis(ActRec* fp) {
-  if (!fp->func()->cls() || !fp->hasThis()) {
-    raise_error(Strings::FATAL_NULL_THIS);
-  }
-}
 
 OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
   auto const fp = vmfp();
@@ -4283,7 +4295,7 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
     raise_error(Strings::NEW_STATIC_ON_REIFIED_CLASS, cls->name()->data());
   }
   auto const reified_generics = cls->hasReifiedGenerics()
-    ? getClsReifiedGenericsProp(cls, vmfp()) : nullptr;
+    ? getClsReifiedGenericsProp(cls, vmfp()->getThis()) : nullptr;
   auto this_ = newObjImpl(cls, reified_generics);
   vmStack().pushObjectNoRc(this_);
 }

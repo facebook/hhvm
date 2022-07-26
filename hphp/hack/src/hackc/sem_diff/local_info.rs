@@ -145,6 +145,7 @@ impl LocalInfo {
             | Opcode::Fatal(..)
             | Opcode::File
             | Opcode::FuncCred
+            | Opcode::GetClsRGProp
             | Opcode::Gt
             | Opcode::Gte
             | Opcode::HasReifiedParent

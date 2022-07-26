@@ -65,11 +65,6 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   return tv.m_data.parr;
 }
 
-ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
-  auto const this_ = ar->getThis();
-  return getClsReifiedGenericsProp(cls, this_);
-}
-
 ReifiedGenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   size_t len = 0, cur = 0, numReified = 0;

@@ -42,7 +42,6 @@ ArrayData* addToReifiedGenericsTable(const StringData* mangledName,
 // Returns the value on the property that holds reified generics
 // If the cls does not have any reified generics, then returns nullptr
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
-ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
 // Returns a ReifiedGenericsInfo that contains number of reified generics
 // and a list of TypeParamInfo which specifies whether each generic is

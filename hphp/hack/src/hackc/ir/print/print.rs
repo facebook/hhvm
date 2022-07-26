@@ -775,6 +775,9 @@ fn print_hhbc(
             )?;
         }
         Hhbc::CreateCont(_) => write!(w, "create_cont")?,
+        Hhbc::GetClsRGProp(vid, _) => {
+            write!(w, "get_class_rg_prop {}", FmtVid(func, vid, verbose))?
+        }
         Hhbc::GetMemoKeyL(lid, _) => {
             write!(w, "get_memo_key {}", FmtLid(lid, ctx.strings))?;
         }

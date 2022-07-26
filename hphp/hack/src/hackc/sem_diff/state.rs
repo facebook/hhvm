@@ -1411,6 +1411,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::FCallObjMethod(..)
             | Opcode::FCallObjMethodD(..)
             | Opcode::Fatal(..)
+            | Opcode::GetClsRGProp
             | Opcode::GetMemoKeyL(..)
             | Opcode::Gt
             | Opcode::Gte
@@ -1600,6 +1601,7 @@ fn clean_opcode<'arena, 'a>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::False
         | Opcode::File
         | Opcode::FuncCred
+        | Opcode::GetClsRGProp
         | Opcode::Gt
         | Opcode::Gte
         | Opcode::HasReifiedParent

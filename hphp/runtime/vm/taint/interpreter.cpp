@@ -1628,6 +1628,10 @@ void iopClassHasReifiedGenerics() {
   iopUnhandled("ClassHasReifiedGenerics")
 }
 
+void iopGetClsRGProp() {
+  iopUnhandled("GetClsRGProp");
+}
+
 void iopHasReifiedParent() {
   iopUnhandled("HasReifiedParent")
 }

@@ -1010,6 +1010,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::False => simple!(Literal::Bool, false),
         Opcode::File => simple!(Literal::File),
         Opcode::FuncCred => simple!(Literal::FuncCred),
+        Opcode::GetClsRGProp => simple!(Hhbc::GetClsRGProp),
         Opcode::GetMemoKeyL => simple!(Hhbc::GetMemoKeyL),
         Opcode::Gt => simple!(Hhbc::CmpOp, CmpOp::Gt),
         Opcode::Gte => simple!(Hhbc::CmpOp, CmpOp::Gte),

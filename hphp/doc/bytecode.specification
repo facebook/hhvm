@@ -2990,6 +2990,13 @@ ClassHasReifiedGenerics [C:Class|LazyClass] -> [C:Bool]
   resulting boolean onto the stack. Throws a fatal error if $1 is not a class
   or lazy class.
 
+GetClsRGProp [C:Class|LazyClass] -> [C:Vec|Null]
+
+  Gets the reified generics property for current instance, using the index of this
+  property as stored in class $1. Raises a fatal error if the current instance
+  is null or $1 is not a class or lazy class. Returns null if the current
+  instance or $1 doesn't have reified generics.
+
 HasReifiedParent [C:Class|LazyClass] -> [C:Bool]
 
   Checks if the parent of the class in $1 has reified generics and pushes the

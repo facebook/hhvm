@@ -232,6 +232,7 @@ namespace HPHP {
   O(RecordReifiedGeneric, NA,          ONE(CV),         ONE(CV),    NF) \
   O(CheckClsReifiedGenericMismatch, NA, ONE(CV),        NOV,        NF) \
   O(ClassHasReifiedGenerics, NA,       ONE(CV),         ONE(CV),    NF) \
+  O(GetClsRGProp,    NA,               ONE(CV),         ONE(CV),    NF) \
   O(HasReifiedParent, NA,              ONE(CV),         ONE(CV),    NF) \
   O(CheckClsRGSoft,  NA,               ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \

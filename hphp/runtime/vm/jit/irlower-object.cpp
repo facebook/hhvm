@@ -303,6 +303,8 @@ void cgHasReifiedParent(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
+IMPL_OPCODE_CALL(GetClsRGProp)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

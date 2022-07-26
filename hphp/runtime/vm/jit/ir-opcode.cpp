@@ -310,6 +310,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrLike:
   case EqObj:
   case GetMemoKey:
+  case GetClsRGProp:
   case GtArrLike:
   case GteArrLike:
   case GteObj:

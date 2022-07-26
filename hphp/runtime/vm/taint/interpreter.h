@@ -261,6 +261,7 @@ void iopParentCls();
 void iopLateBoundCls();
 void iopRecordReifiedGeneric();
 void iopClassHasReifiedGenerics();
+void iopGetClsRGProp();
 void iopCheckClsReifiedGenericMismatch();
 void iopHasReifiedParent();
 void iopCheckClsRGSoft();

@@ -1350,6 +1350,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::RecordReifiedGeneric:
     case Op::CheckClsReifiedGenericMismatch:
     case Op::ClassHasReifiedGenerics:
+    case Op::GetClsRGProp:
     case Op::HasReifiedParent:
     case Op::CheckClsRGSoft:
     case Op::CreateCl:

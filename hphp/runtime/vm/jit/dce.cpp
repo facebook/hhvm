@@ -737,6 +737,7 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictTypeBoundCheck:
   case LdCoeffectFunParamNaive:
   case DeserializeLazyProp:
+  case GetClsRGProp:
     return false;
 
   case IsTypeStruct:

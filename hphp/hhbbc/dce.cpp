@@ -1612,6 +1612,7 @@ void dce(Env& env, const bc::FCallFuncD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::GetMemoKeyL& op) { no_dce(env, op); }
+void dce(Env& env, const bc::GetClsRGProp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Incl& op) { no_dce(env, op); }

@@ -3098,6 +3098,27 @@ void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
   push(env, t);
 }
 
+void in(ISS& env, const bc::GetClsRGProp& op) {
+  // TODO(T121050961) Optimize for lazy classes too
+  auto const cls = popC(env);
+  if (!thisAvailable(env) || !cls.couldBe(BCls | BLazyCls)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+  if (!cls.subtypeOf(BCls) ||
+      !is_specialized_cls(cls) ||
+      !dcls_of(cls).isExact()) {
+    push(env, TVec);
+    return;
+  }
+  auto const &dcls = dcls_of(cls);
+  if (!dcls.cls().couldHaveReifiedGenerics()) {
+    push(env, TInitNull);
+    return;
+  }
+  push(env, TVec);
+}
+
 void in(ISS& env, const bc::HasReifiedParent& op) {
   // TODO(T121050961) Optimize for lazy classes too
   auto const cls = popC(env);

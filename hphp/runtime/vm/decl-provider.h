@@ -50,6 +50,12 @@ struct HhvmDeclProvider: ::DeclProvider {
   // Callback invoked by hackc's ExternalDeclProvider.
   ExternalDeclProviderResult
   getType(std::string_view symbol, uint64_t depth) noexcept override;
+  ExternalDeclProviderResult
+  getFunc(std::string_view symbol) noexcept override;
+  ExternalDeclProviderResult
+  getConst(std::string_view symbol) noexcept override;
+  ExternalDeclProviderResult
+  getModule(std::string_view symbol) noexcept override;
 
   // Get a list of observed dependencies from the decl provider, which may
   // optionally be indexed by the depth of the dependency
@@ -63,6 +69,12 @@ struct HhvmDeclProvider: ::DeclProvider {
   bool sawMissing() const { return m_sawMissing; }
 
  private:
+  ExternalDeclProviderResult getDecls(
+      std::string_view symbol,
+      uint64_t depth,
+      AutoloadMap::KindOf
+  ) noexcept;
+
   struct DepInfo {
     std::string file;
     uint64_t depth;

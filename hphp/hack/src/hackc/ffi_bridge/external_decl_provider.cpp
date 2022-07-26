@@ -6,14 +6,40 @@
 
 #include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
 
+// These stubs perform C++ virtual method dispatch on behalf of
+// hackc/decl_provider/external.rs
 extern "C" {
-// Called from hackc/decl_provider/external.rs
-ExternalDeclProviderResult provide_type_or_alias(
+
+ExternalDeclProviderResult provide_type(
     const void* provider,
     const char* symbol,
     size_t symbol_len,
     uint64_t depth) noexcept {
   return ((DeclProvider*)provider)
       ->getType(std::string_view(symbol, symbol_len), depth);
+}
+
+ExternalDeclProviderResult provide_func(
+    const void* provider,
+    const char* symbol,
+    size_t symbol_len) noexcept {
+  return ((DeclProvider*)provider)
+      ->getFunc(std::string_view(symbol, symbol_len));
+}
+
+ExternalDeclProviderResult provide_const(
+    const void* provider,
+    const char* symbol,
+    size_t symbol_len) noexcept {
+  return ((DeclProvider*)provider)
+      ->getConst(std::string_view(symbol, symbol_len));
+}
+
+ExternalDeclProviderResult provide_module(
+    const void* provider,
+    const char* symbol,
+    size_t symbol_len) noexcept {
+  return ((DeclProvider*)provider)
+      ->getModule(std::string_view(symbol, symbol_len));
 }
 }

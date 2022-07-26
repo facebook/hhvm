@@ -6,7 +6,10 @@
 use bincode::Options;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
+use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::FunDecl;
+use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use thiserror::Error;
 
@@ -73,6 +76,10 @@ pub trait DeclProvider<'a>: std::fmt::Debug {
     /// * `depth` - a hint to the provider about the number of layers of decl
     ///             request traversed to arrive at this request
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>>;
+
+    fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>>;
+    fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>>;
+    fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>>;
 }
 
 pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
@@ -90,15 +97,41 @@ pub fn deserialize_decls<'a>(
     Decls::deserialize(de)
 }
 
-pub fn find_type_decl<'a>(decls: &Decls<'a>, symbol: &str) -> Result<TypeDecl<'a>> {
-    // TODO T123158488: fix case insensitive lookups
+pub fn find_type_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<TypeDecl<'a>> {
     decls
         .types()
-        .find_map(|(sym, decl)| match decl {
-            Decl::Class(c) if sym == symbol => Some(TypeDecl::Class(c)),
-            Decl::Typedef(c) if sym == symbol => Some(TypeDecl::Typedef(c)),
+        .find_map(|(name, decl)| match decl {
+            Decl::Class(c) if needle.eq_ignore_ascii_case(name) => Some(TypeDecl::Class(c)),
+            Decl::Typedef(c) if needle.eq_ignore_ascii_case(name) => Some(TypeDecl::Typedef(c)),
             Decl::Class(_) | Decl::Typedef(_) => None,
             Decl::Fun(_) | Decl::Const(_) | Decl::Module(_) => unreachable!(),
         })
+        .ok_or(Error::NotFound)
+}
+
+pub fn find_func_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a FunDecl<'a>> {
+    decls
+        .funs()
+        .find_map(|(name, decl)| {
+            if needle.eq_ignore_ascii_case(name) {
+                Some(decl)
+            } else {
+                None
+            }
+        })
+        .ok_or(Error::NotFound)
+}
+
+pub fn find_const_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a ConstDecl<'a>> {
+    decls
+        .consts()
+        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
+        .ok_or(Error::NotFound)
+}
+
+pub fn find_module_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a ModuleDecl<'a>> {
+    decls
+        .modules()
+        .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
         .ok_or(Error::NotFound)
 }

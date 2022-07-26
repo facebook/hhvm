@@ -64,12 +64,37 @@ HhvmDeclProvider::HhvmDeclProvider(
 {}
 
 // Called by hackc.
+
 ExternalDeclProviderResult HhvmDeclProvider::getType(
   std::string_view symbol,
   uint64_t depth
 ) noexcept {
-  auto const kind = AutoloadMap::KindOf::TypeOrTypeAlias;
+  return getDecls(symbol, depth, AutoloadMap::KindOf::TypeOrTypeAlias);
+}
 
+ExternalDeclProviderResult HhvmDeclProvider::getFunc(
+  std::string_view symbol
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Function);
+}
+
+ExternalDeclProviderResult HhvmDeclProvider::getConst(
+  std::string_view symbol
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Constant);
+}
+
+ExternalDeclProviderResult HhvmDeclProvider::getModule(
+  std::string_view symbol
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Module);
+}
+
+ExternalDeclProviderResult HhvmDeclProvider::getDecls(
+  std::string_view symbol,
+  uint64_t depth,
+  AutoloadMap::KindOf kind
+) noexcept {
   // TODO(T110866581): symbol should be normalized by hackc
   std::string_view sym(normalizeNS(symbol));
   ITRACE(3, "DP lookup {}\n", sym);

@@ -55,9 +55,24 @@ struct ExternalDeclProviderResult {
 struct DeclProvider {
   virtual ~DeclProvider() = default;
 
-  // Look up a type (class, typedef, etc) by name, and return all
-  // of the decls in the file that defines the type.
+  // Look up a type (class, type alias, etc) by name, and return all of the
+  // decls in the file that defines it.
   virtual ExternalDeclProviderResult getType(
       std::string_view symbol,
       uint64_t depth) noexcept = 0;
+
+  // Look up a top level function by name, and return all of the decls in the
+  // file that defines it.
+  virtual ExternalDeclProviderResult getFunc(
+      std::string_view symbol) noexcept = 0;
+
+  // Look up a top level constant by name, and return all of the decls in the
+  // file that defines it.
+  virtual ExternalDeclProviderResult getConst(
+      std::string_view symbol) noexcept = 0;
+
+  // Look up a module by name, and return all of the decls in the file that
+  // defines it.
+  virtual ExternalDeclProviderResult getModule(
+      std::string_view symbol) noexcept = 0;
 };

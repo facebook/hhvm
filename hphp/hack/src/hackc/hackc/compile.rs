@@ -15,16 +15,17 @@ use decl_provider::DeclProvider;
 use decl_provider::Error;
 use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
-use direct_decl_parser::{self};
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::shallow_decl_defs::ConstDecl;
+use oxidized_by_ref::shallow_decl_defs::FunDecl;
+use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use std::cell::RefCell;
 use std::fs::File;
-use std::fs::{self};
 use std::io::stdout;
 use std::io::Write;
 use std::path::Path;
@@ -85,7 +86,7 @@ pub fn run(opts: &mut Opts) -> Result<()> {
 /// If an error occurs then continue to process as much as possible,
 /// returning the first error that occured.
 fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
-    let content = fs::read(f)?;
+    let content = std::fs::read(f)?;
     let files = multifile::to_files(f, content)?;
 
     // Collect a Vec so we process all files - not just up to the first
@@ -159,7 +160,7 @@ pub(crate) fn process_single_file(
 pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
-        let source_text = fs::read(&path)?;
+        let source_text = std::fs::read(&path)?;
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, None)?;
         w.write_all(&hhas)?;
@@ -196,7 +197,7 @@ pub(crate) fn daemon(hackc_opts: &mut crate::Opts) -> Result<()> {
 pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
-        let source_text = fs::read(&path)?;
+        let source_text = std::fs::read(&path)?;
 
         // Parse decls
         let decl_opts = hackc_opts.decl_opts();
@@ -215,6 +216,9 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
                 true => DeclsHolder::Ser(decl_provider::serialize_decls(&parsed_file.decls)?),
             },
             type_requests: Default::default(),
+            func_requests: Default::default(),
+            const_requests: Default::default(),
+            module_requests: Default::default(),
         };
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, Some(&provider))?;
@@ -255,22 +259,53 @@ struct SingleDeclProvider<'a> {
     arena: &'a bumpalo::Bump,
     decls: DeclsHolder<'a>,
     type_requests: RefCell<Vec<Access>>,
+    func_requests: RefCell<Vec<Access>>,
+    const_requests: RefCell<Vec<Access>>,
+    module_requests: RefCell<Vec<Access>>,
 }
 
 impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>, Error> {
-        let decl = match &self.decls {
-            DeclsHolder::ByRef(decls) => decl_provider::find_type_decl(decls, symbol),
-            DeclsHolder::Ser(data) => decl_provider::find_type_decl(
-                &decl_provider::deserialize_decls(self.arena, data)?,
-                symbol,
-            ),
-        };
-        self.type_requests.borrow_mut().push(Access {
+        let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
+        Self::record_access(&self.type_requests, symbol, depth, decl.is_ok());
+        decl
+    }
+
+    fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>, Error> {
+        let decl = self.find_decl(|decls| decl_provider::find_func_decl(decls, symbol));
+        Self::record_access(&self.func_requests, symbol, 0, decl.is_ok());
+        decl
+    }
+
+    fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>, Error> {
+        let decl = self.find_decl(|decls| decl_provider::find_const_decl(decls, symbol));
+        Self::record_access(&self.const_requests, symbol, 0, decl.is_ok());
+        decl
+    }
+
+    fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>, Error> {
+        let decl = self.find_decl(|decls| decl_provider::find_module_decl(decls, symbol));
+        Self::record_access(&self.module_requests, symbol, 0, decl.is_ok());
+        decl
+    }
+}
+
+impl<'a> SingleDeclProvider<'a> {
+    fn find_decl<T>(
+        &self,
+        mut find: impl FnMut(&Decls<'a>) -> Result<T, Error>,
+    ) -> Result<T, Error> {
+        match &self.decls {
+            DeclsHolder::ByRef(decls) => find(decls),
+            DeclsHolder::Ser(data) => find(&decl_provider::deserialize_decls(self.arena, data)?),
+        }
+    }
+
+    fn record_access(log: &RefCell<Vec<Access>>, symbol: &str, depth: u64, found: bool) {
+        log.borrow_mut().push(Access {
             symbol: symbol.into(),
             depth,
-            found: decl.is_ok(),
+            found,
         });
-        decl
     }
 }

@@ -1150,8 +1150,8 @@ void set_implicit_context_blame(ImplicitContext* context,
     blameFromSoftSet.push_back(cur_blame);
   }
 
-  context->m_blameFromSoftInaccessible = blameFromSoftInaccessible;
-  context->m_blameFromSoftSet = blameFromSoftSet;
+  context->m_blameFromSoftInaccessible = std::move(blameFromSoftInaccessible);
+  context->m_blameFromSoftSet = std::move(blameFromSoftSet);
 }
 
 } // namespace

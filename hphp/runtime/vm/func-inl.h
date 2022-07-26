@@ -560,10 +560,7 @@ inline bool Func::isMemoizeWrapperLSB() const {
 
 inline Func::MemoizeICType Func::memoizeICType() const {
   assertx(isMemoizeWrapper());
-  return static_cast<MemoizeICType>(
-    shared()->m_allFlags.m_memoizeICTypeBit0 |
-    (shared()->m_allFlags.m_memoizeICTypeBit1 << 1)
-  );
+  return shared()->m_allFlags.m_memoizeICType;
 }
 
 inline bool Func::isNoICMemoize() const {

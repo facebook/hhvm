@@ -706,8 +706,10 @@ public:
 
   /*
    * What kind of memoized function is this?
+   * NB: MemoizeICType must be a unsigned char in order to enable
+   * struct bit packing.
    */
-  enum MemoizeICType {
+  enum MemoizeICType : unsigned char {
     NoIC = 0,
     KeyedByIC = 1,
     MakeICInaccessible = 2,
@@ -1341,8 +1343,7 @@ private:
         bool m_returnByValue : true; // only for builtins
         bool m_isMemoizeWrapper : true;
         bool m_isMemoizeWrapperLSB : true;
-        bool m_memoizeICTypeBit0 : true;
-        bool m_memoizeICTypeBit1 : true;
+        MemoizeICType m_memoizeICType : 2;
         bool m_isPhpLeafFn : true;
         bool m_hasReifiedGenerics : true;
         bool m_hasParamsWithMultiUBs : true;

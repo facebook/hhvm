@@ -1531,10 +1531,10 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         auto const resolved = resolvedTypeCnsGet(typeCns);
         if (resolved != nullptr) {
           assertx(resolved->isDictType());
-
           auto tv = make_persistent_array_like_tv(resolved);
-          bespoke::profileArrLikeClsCns(this, &tv, clsCnsInd);
-
+          if (resolved->isVanilla()) {
+            bespoke::profileArrLikeClsCns(this, &tv, clsCnsInd);
+          }
           return tv;
         }
         break;

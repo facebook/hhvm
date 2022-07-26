@@ -159,7 +159,8 @@ using Kind = HPHP::TypeStructure::Kind;
   static void convertToUncounted(T* tad, const MakeUncountedEnv& env);  \
   static void releaseUncounted(T* tad);                                 \
   static size_t getFieldOffset(const StringData* k);                    \
-  static int countFields(const ArrayData* ad);
+  static int countFields(const ArrayData* ad);                          \
+  static void onSetEvalScalar(T* tad);
 
 /*
  * The FieldsByte dictates the specific fields that should exist on each
@@ -190,21 +191,29 @@ struct TypeStructureLayout;
  * TypeStructure should only contain the kinds specified in TYPE_STRUCTURE_KINDS
  */
 struct TypeStructure : BespokeArray {
-  static LayoutIndex GetLayoutIndex();
   static void InitializeLayouts();
+  static LayoutIndex GetLayoutIndex();
+  static bool isBespokeTypeStructure(const ArrayData* ad);
 
-  static bool isValidTypeStructure(ArrayData* ad);
-  static TypeStructure* MakeFromVanilla(ArrayData* ad);
+  // returns whether an array that is not a bespoke type structure can be
+  // converted into the bespoke version
+  static bool isValidTypeStructure(const ArrayData* ad);
+
+  static TypeStructure* MakeFromVanilla(ArrayData* ad, bool forceNonStatic = false);
+  static TypeStructure* MakeFromVanillaStatic(ArrayData* ad);
   static const TypeStructure* As(const ArrayData* ad);
   static TypeStructure* As(ArrayData* ad);
+  static void OnSetEvalScalar(TypeStructure* tad);
+  static ArrayData* CopyStatic(const TypeStructure* tad);
 
   template<bool Static>
   static TypeStructure* MakeReserve(
     bool legacy, HPHP::TypeStructure::Kind kind);
+  template<bool Static>
+  TypeStructure* copy() const;
 
   bool checkInvariants() const;
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
-  TypeStructure* copy() const;
   Kind typeKind() const { return static_cast<Kind>(kind()); }
 
   enum BitFieldOffsets : uint8_t {

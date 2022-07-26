@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -96,6 +97,9 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
     if (arr->isDictType()) {
+      if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+        return VariableSerializer::ArrayKind::BespokeTypeStructure;
+      }
       return VariableSerializer::ArrayKind::Dict;
     } else if (arr->isVecType()) {
       return VariableSerializer::ArrayKind::Vec;
@@ -144,7 +148,12 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   }
 
-  if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isDictType()) {
+    if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+      return VariableSerializer::ArrayKind::BespokeTypeStructure;
+    }
+    return VariableSerializer::ArrayKind::Dict;
+  }
   if (arr->isVecType())  return VariableSerializer::ArrayKind::Vec;
   assertx(arr->isKeysetType());
   return VariableSerializer::ArrayKind::Keyset;
@@ -859,6 +868,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("Dict\n");
         break;
       case ArrayKind::Vec:
@@ -902,6 +912,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("dict [\n");
         break;
       case ArrayKind::Vec:
@@ -950,6 +961,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       auto const header = [&]() {
         switch (kind) {
           case ArrayKind::Dict:
+          case ArrayKind::BespokeTypeStructure:
             return "dict";
           case ArrayKind::Vec:
             return "vec";
@@ -1028,6 +1040,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::DArray:
         m_buf->append("Y:");
+        break;
+      case ArrayKind::BespokeTypeStructure:
+        m_buf->append(m_type == Type::Internal ? "T:" : "D:");
         break;
       }
       m_buf->append(size);
@@ -1342,6 +1357,7 @@ void VariableSerializer::writeArrayFooter(
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append(']');
         break;
       case ArrayKind::PHP:

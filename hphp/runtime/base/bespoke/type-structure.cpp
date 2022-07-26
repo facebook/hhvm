@@ -85,6 +85,10 @@ LayoutIndex TypeStructure::GetLayoutIndex() {
   return LayoutIndex{uint16_t(kTypeStructureLayoutByte << 8)};
 }
 
+bool TypeStructure::isBespokeTypeStructure(const ArrayData* ad) {
+  return !ad->isVanilla() && asBespoke(ad)->layoutIndex() == GetLayoutIndex();
+}
+
 void TypeStructure::InitializeLayouts() {
   new TypeStructureLayout();
 }
@@ -177,12 +181,13 @@ bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
   return true;
 }
 
-TypeStructure* TypeStructure::MakeFromVanilla(ArrayData* ad) {
+TypeStructure* TypeStructure::MakeFromVanilla(
+    ArrayData* ad, bool forceNonStatic) {
   if (!ad->isVanillaDict() || !ad->exists(s_kind)) return nullptr;
   auto const kind =
     static_cast<Kind>(Variant::wrap(ad->get(s_kind)).toInt64Val());
 
-  auto const result = ad->isStatic()
+  auto const result = (!forceNonStatic && ad->isStatic())
     ? MakeReserve<true>(ad->isLegacyArray(), kind)
     : MakeReserve<false>(ad->isLegacyArray(), kind);
 
@@ -204,6 +209,17 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
   assertx(result->checkInvariants());
   return result;
+}
+
+TypeStructure* TypeStructure::MakeFromVanillaStatic(ArrayData* ad) {
+  // must create a non-static bespoke array first so that GetScalarArray won't
+  // short-circuit on isStatic and will dedup properly
+  ArrayData* ts = MakeFromVanilla(ad, true);
+  if (ts) {
+    GetScalarArray(&ts);
+    return As(ts);
+  }
+  return nullptr;
 }
 
 bool TypeStructure::checkInvariants() const {
@@ -229,7 +245,7 @@ TYPE_STRUCTURE_KINDS
   }
 }
 
-bool TypeStructure::isValidTypeStructure(ArrayData* ad) {
+bool TypeStructure::isValidTypeStructure(const ArrayData* ad) {
   if (!ad->isVanillaDict() || !ad->exists(s_kind)) return false;
   auto const kind =
     static_cast<Kind>(Variant::wrap(ad->get(s_kind)).toInt64Val());
@@ -296,21 +312,29 @@ TYPE_STRUCTURE_CHILDREN_KINDS
   return ad;
 }
 
+template <bool Static>
 TypeStructure* TypeStructure::copy() const {
   auto const sizeIdx = sizeIndex(typeKind());
-  auto const mem = tl_heap->objMallocIndex(sizeIdx);
   auto const heapSize = MemoryManager::sizeIndex2Size(sizeIdx);
+  auto const mem = [&]{
+    if (!Static) return tl_heap->objMallocIndex(sizeIdx);
+    return RO::EvalLowStaticArrays ? low_malloc(heapSize) : uncounted_malloc(heapSize);
+  }();
   auto const ad = static_cast<TypeStructure*>(mem);
 
   assertx(heapSize % 16 == 0);
   memcpy16_inline(ad, this, heapSize);
 
   auto const aux = packSizeIndexAndAuxBits(sizeIdx, auxBits());
-  ad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
-  ad->incRefFields();
+  ad->initHeader_16(HeaderKind::BespokeDict, Static ? StaticValue : OneReference, aux);
+  if (!Static) ad->incRefFields();
 
   return ad;
 }
+
+// explicitly declare to use in runtime tests
+template TypeStructure* TypeStructure::copy<true>() const;
+template TypeStructure* TypeStructure::copy<false>() const;
 
 void TypeStructure::Scan(
     const TypeStructure* tad, type_scan::Scanner& scanner) {
@@ -519,8 +543,42 @@ bool TypeStructure::IsVectorData(const TypeStructure*) {
   return false;
 }
 
+void TypeStructure::OnSetEvalScalar(TypeStructure* tad) {
+  if (tad->m_alias && !tad->m_alias->isStatic()) {
+    auto field = tad->m_alias;
+    tad->m_alias = makeStaticString(field);
+    decRefStr(field);
+  }
+  if (tad->m_typevars && !tad->m_typevars->isStatic()) {
+    auto field = tad->m_typevars;
+    tad->m_typevars = makeStaticString(field);
+    decRefStr(field);
+  }
+  if (tad->m_typevar_types && !tad->m_typevar_types->isStatic()) {
+    auto arr = Array(tad->m_typevar_types);
+    arr.setEvalScalar();
+    decRefArr(tad->m_typevar_types);
+    tad->m_typevar_types = arr.get();
+  }
+
+  switch (tad->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    Type::onSetEvalScalar(reinterpret_cast<Type*>(tad)); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
+}
+
 ArrayData* TypeStructure::Copy(const TypeStructure* tad) {
-  return tad->copy();
+  return tad->copy<false>();
+}
+
+ArrayData* TypeStructure::CopyStatic(const TypeStructure* tad) {
+  return tad->copy<true>();
 }
 
 TypedValue TypeStructure::NvGetInt(const TypeStructure*, int64_t) {
@@ -556,7 +614,7 @@ TYPE_STRUCTURE_FIELDS
 
 TypedValue TypeStructure::GetPosKey(const TypeStructure* tad, ssize_t pos) {
 #define X(Field, FieldString, KindOfType)                             \
-  if (tad->Field() && pos-- == 0) {                                   \
+  if ((isIntType(KindOfType) || tad->Field()) && pos-- == 0) {        \
     return make_tv<KindOfPersistentString>(s_##FieldString.get());    \
   }
 TYPE_STRUCTURE_FIELDS
@@ -576,7 +634,7 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
 TypedValue TypeStructure::GetPosVal(const TypeStructure* tad, ssize_t pos) {
 #define X(Field, FieldString, KindOfType)                             \
-  if (tad->Field() && pos-- == 0) {                                   \
+  if ((isIntType(KindOfType) || tad->Field()) && pos-- == 0) {        \
     return make_tv_safe(tad->Field());                                \
   }
 TYPE_STRUCTURE_FIELDS
@@ -705,7 +763,7 @@ ArrayData* TypeStructure::PostSort(TypeStructure*, ArrayData* vad) {
 
 ArrayData* TypeStructure::SetLegacyArray(
     TypeStructure* tadIn, bool copy, bool legacy) {
-  auto const tad = copy ? tadIn->copy() : tadIn;
+  auto const tad = copy ? tadIn->copy<false>() : tadIn;
   tad->setLegacyArrayInPlace(legacy);
   return tad;
 }
@@ -778,6 +836,25 @@ void decRefField<ArrayData*>(ArrayData* field) {
   if (field) field->decRefCount();
 }
 
+template<class T> void setEvalScalar(T t) {}
+template<>
+void setEvalScalar(StringData*& field) {
+  if (field && !field->isStatic()) {
+    auto staticField = field;
+    field = makeStaticString(staticField);
+    decRefStr(field);
+  }
+}
+template<>
+void setEvalScalar(ArrayData*& field) {
+  if (field && !field->isStatic()) {
+    auto arr = Array(field);
+    arr.setEvalScalar();
+    decRefArr(field);
+    field = arr.get();
+  }
+}
+
 }
 
 #define MAKE_TV_FIELD(Field, ...)                                           \
@@ -819,6 +896,9 @@ void decRefField<ArrayData*>(ArrayData* field) {
       equivDataTypes(ad->get(s_##Field).type(), KindOfType)) {  \
     fields++;                                                         \
   }
+
+#define SET_EVAL_SCALAR(Field, Type, KindOfType, ...) \
+  setEvalScalar<Type&>(tad->m_##Field);
 
 #define O(ChildStruct, FieldsMacro)                                         \
 TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) { \
@@ -866,6 +946,9 @@ int ChildStruct::countFields(const ArrayData* ad) {                         \
   auto fields = 0;                                                          \
   FieldsMacro(COUNT_FIELDS)                                                 \
   return fields;                                                            \
+}                                                                           \
+void ChildStruct::onSetEvalScalar(ChildStruct* tad) {                       \
+  FieldsMacro(SET_EVAL_SCALAR)                                              \
 }
 
 O(TSShape, TSSHAPE_FIELDS)
@@ -888,6 +971,7 @@ O(TSWithGenericTypes, TSGENERIC_FIELDS)
 #undef SCAN_FIELD
 #undef INC_REF_FIELD
 #undef DEC_REF_FIELD
+#undef SET_EVAL_SCALAR
 
 bool TSShape::checkInvariants() const {
   assertx(typeKind() == Kind::T_shape);
@@ -923,7 +1007,7 @@ bool TSWithClassishTypes::checkInvariants() const {
 }
 bool TSWithGenericTypes::checkInvariants() const {
   assertx(fieldsByte() == TSWithGenericTypes::kFieldsByte);
-  assertx(m_generic_types && m_generic_types->kindIsValid());
+  assertx(m_generic_types == nullptr || m_generic_types->kindIsValid());
   return true;
 }
 

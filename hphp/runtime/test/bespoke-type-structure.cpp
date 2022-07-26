@@ -148,7 +148,7 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(isArrayLikeType(vadFields.m_type));
     EXPECT_TRUE(same_arrays(vadFields.val().parr, field.get()));
 
-    bespoke::TypeStructure* ts2 = ts->copy();
+    bespoke::TypeStructure* ts2 = ts->copy<false>();
     EXPECT_TRUE(ts2->typeKind() == Kind::T_shape);
   }
   {
@@ -175,7 +175,7 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(isArrayLikeType(vadFields.m_type));
     EXPECT_TRUE(same_arrays(vadFields.val().parr, elemTypes.get()));
 
-    bespoke::TypeStructure* ts2 = ts->copy();
+    bespoke::TypeStructure* ts2 = ts->copy<false>();
     EXPECT_TRUE(ts2->typeKind() == Kind::T_tuple);
   }
 
@@ -199,7 +199,7 @@ TEST(BespokeTypeStructure, Methods) {
   EXPECT_TRUE(isStringType(vadAlias.m_type));
   EXPECT_TRUE(val(vadAlias).pstr->same(t));
 
-  bespoke::TypeStructure* ts2 = ts->copy();
+  auto const ts2 = ts->copy<false>();
   EXPECT_TRUE(ts2->typeKind() == TypeStructure::Kind::T_int);
   EXPECT_TRUE(ts2->nullable());
   EXPECT_TRUE(ts2->soft());

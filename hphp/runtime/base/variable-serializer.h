@@ -130,7 +130,7 @@ struct VariableSerializer {
   // can distinguish between all 3 possible array states (unmarked varray,
   // unmarked vec, marked varray/vec). Now corresponds to marked vec/dict.
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
-                         MarkedVArray, MarkedDArray };
+                         MarkedVArray, MarkedDArray, BespokeTypeStructure };
 
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());

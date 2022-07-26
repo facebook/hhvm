@@ -36,6 +36,7 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 

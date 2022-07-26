@@ -167,6 +167,9 @@ struct RepoGlobalData {
    */
   bool DiamondTraitMethods = false;
 
+  /* Whether bespoke type structures should be used */
+  bool EmitBespokeTypeStructures = false;
+
   /*
    * If set, const fold the File and Dir bytecodes, using this as the
    * SourceRoot.
@@ -218,6 +221,7 @@ struct RepoGlobalData {
       (DiamondTraitMethods)
       (EvalCoeffectEnforcementLevels)
       (SourceRootForFileBC)
+      (EmitBespokeTypeStructures)
       ;
   }
 };

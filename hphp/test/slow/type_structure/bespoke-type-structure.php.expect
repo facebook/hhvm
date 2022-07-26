@@ -51,3 +51,6 @@ vec(2) {
     int(2)
   }
 }
+int(2)
+int(1)
+bool(true)

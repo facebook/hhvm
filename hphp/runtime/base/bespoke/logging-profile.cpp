@@ -1153,6 +1153,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
     assertx(it->second->key == key);
     return it->second;
   }
+  auto const ad = getStaticArray(key);
+  if (ad && !ad->isVanilla()) return nullptr;
 
   // Hold the read mutex while we're constructing the new profile so that we
   // cannot stop profiling until this mutation is complete.
@@ -1160,7 +1162,6 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<LoggingProfile>(key);
-  auto const ad = getStaticArray(key);
   if (ad) {
     profile->data->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
     profile->data->staticSampledArray = ad->makeSampledStaticArray();

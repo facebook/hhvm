@@ -35,6 +35,7 @@
 #include <folly/sorted_vector_types.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -945,14 +946,32 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     }
   }
 
+  auto const getTypeStructureConst = [&] (const PreClassEmitter::Const& cconst) {
+    auto const val = cconst.valOption();
+    if (!RO::EvalEmitBespokeTypeStructures ||
+        !val.has_value() ||
+        !isArrayLikeType(val->type())) {
+      return val;
+    }
+    auto const ad = val->val().parr;
+    if (!bespoke::TypeStructure::isValidTypeStructure(ad)) return val;
+
+    auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad);
+    return make_optional(make_tv<KindOfPersistentDict>(ts));
+  };
+
   auto& constMap = pce.constMap();
   for (size_t idx = 0; idx < constMap.size(); ++idx) {
     auto& cconst = constMap[idx];
+    auto const cconstValue = (cconst.kind() == ConstModifiers::Kind::Type)
+      ? getTypeStructureConst(cconst)
+      : cconst.valOption();
+
     ret->constants.push_back(
       php::Const {
         cconst.name(),
         ret.get(),
-        cconst.valOption(),
+        cconstValue,
         cconst.coeffects(),
         nullptr,
         cconst.kind(),
@@ -1078,6 +1097,14 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
                                                  const TypeAliasEmitter& te) {
   FTRACE(2, "  type alias: {}\n", te.name()->data());
 
+  auto ts = te.typeStructure();
+  if (RO::EvalEmitBespokeTypeStructures) {
+    if (!ts.isNull() && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
+      auto const newTs = bespoke::TypeStructure::MakeFromVanillaStatic(ts.get());
+      ts = ArrNR{newTs};
+    }
+  }
+
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     unit,
     php::SrcInfo { te.getLocation() },
@@ -1087,7 +1114,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
     te.type(),
     te.nullable(),
     te.userAttributes(),
-    te.typeStructure(),
+    ts,
     Array{}
   });
 }

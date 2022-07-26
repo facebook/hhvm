@@ -1,5 +1,9 @@
 <?hh
 
+class Bar {
+  const type BarBool = bool;
+}
+
 class Foo<TType> {
   const type FooEmptyShape = shape();
   const type FooShape = shape('a' => bool, 'b' => int);
@@ -8,6 +12,7 @@ class Foo<TType> {
 }
 
 newtype FooInt = int;
+newtype FooString = string;
 newtype FooTypevar<F> = F;
 newtype FooTypevarTypes = FooTypevar<int>;
 newtype FooClass = Foo<bool>;
@@ -53,4 +58,11 @@ function main(): void {
   $ts = type_structure(__hhvm_intrinsics\launder_value('FooAny'), null);
   var_dump($ts['kind']);
   var_dump($ts['generic_types']);
+
+  $ts = type_structure('Bar', 'BarBool');
+  var_dump($ts['kind']);
+  $ts = type_structure('FooInt', null);
+  var_dump($ts['kind']);
+  $ts = type_structure('FooString', null);
+  var_dump($ts['opaque']);
 }

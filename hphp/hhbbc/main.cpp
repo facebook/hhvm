@@ -330,6 +330,7 @@ RepoGlobalData get_global_data() {
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.SourceRootForFileBC = options.SourceRootForFileBC;
+  gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

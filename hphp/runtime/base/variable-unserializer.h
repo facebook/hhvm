@@ -184,6 +184,7 @@ private:
   Array unserializeKeyset();
   Array unserializeVArray();
   Array unserializeDArray();
+  Array unserializeBespokeTypeStructure();
   folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
                                             char delimiter1 = '"');
   String unserializeString(char delimiter0 = '"', char delimiter1 = '"');

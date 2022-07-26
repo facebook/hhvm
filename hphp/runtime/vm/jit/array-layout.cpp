@@ -222,6 +222,8 @@ std::string ArrayLayout::describe() const {
 
 ArrayData* ArrayLayout::apply(ArrayData* ad) const {
   assertx(ad->isStatic());
+
+  if (bespoke::TypeStructure::isBespokeTypeStructure(ad)) return ad;
   assertx(ad->isVanilla());
 
   auto const result = [&]() -> ArrayData* {

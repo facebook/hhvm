@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
@@ -916,6 +917,14 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_tv<KindOfKeyset>(a.detach()), self);
     }
     return; // array has '}' terminating
+  case 'T': // BespokeTypeStructure
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeBespokeTypeStructure();
+      tvMove(make_array_like_tv(a.detach()), self);
+    }
+    return; // array has '}' terminating
   case 'L':
     {
       int64_t id = readInt();
@@ -1504,6 +1513,14 @@ Array VariableUnserializer::unserializeKeyset() {
   return init.toArray();
 }
 
+Array VariableUnserializer::unserializeBespokeTypeStructure() {
+  assertx(RO::EvalEmitBespokeTypeStructures);
+
+  auto arr = unserializeDict();
+  auto const ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
+  if (ts) arr.reset(ts);
+  return arr;
+}
 
 folly::StringPiece
 VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {

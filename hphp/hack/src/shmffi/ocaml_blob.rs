@@ -118,8 +118,8 @@ impl HeapValue {
         } else {
             let mut data: Vec<u8> = Vec::with_capacity(self.header.uncompressed_size());
             let uncompressed_size = liblz4::LZ4_decompress_safe(
-                self.data.as_ptr() as *const i8,
-                data.as_mut_ptr() as *mut i8,
+                self.data.as_ptr() as *const libc::c_char,
+                data.as_mut_ptr() as *mut libc::c_char,
                 self.header.buffer_size().try_into().unwrap(),
                 self.header.uncompressed_size().try_into().unwrap(),
             );
@@ -231,8 +231,8 @@ impl<'a> SerializedValue<'a> {
                 let mut compressed_data =
                     Vec::with_capacity(max_compression_size.try_into().unwrap());
                 let compressed_size = liblz4::LZ4_compress_default(
-                    buf.ptr as *const i8,
-                    compressed_data.as_mut_ptr() as *mut i8,
+                    buf.ptr as *const libc::c_char,
+                    compressed_data.as_mut_ptr() as *mut libc::c_char,
                     uncompressed_size,
                     max_compression_size,
                 );

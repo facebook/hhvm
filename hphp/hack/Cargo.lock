@@ -1436,6 +1436,7 @@ dependencies = [
  "once_cell",
  "options",
  "oxidized",
+ "oxidized_by_ref",
  "panic-message",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -2195,6 +2196,7 @@ checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 name = "ocaml_blob"
 version = "0.0.0"
 dependencies = [
+ "libc",
  "lz4",
  "ocamlrep",
  "rand",

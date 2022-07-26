@@ -84,6 +84,11 @@ jobs:
     needs: build-and-test
     steps:
     - uses: actions/checkout@v3
+    - name: Assume the AWS role
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        aws-region: us-west-2
     - name: Download the bundle.deb from build-and-test job
       uses: actions/download-artifact@v2
       with:
@@ -100,15 +105,7 @@ jobs:
     # ubuntu-latest is too old to support AWS role
     - run: nix profile install nixpkgs#s3fs
     - run: sudo apt-get install reprepro
-    - name: Assume the AWS role
-      continue-on-error: true
-      id: configure-aws-credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
-        aws-region: us-west-2
     - name: Decrypt the GPG key
-      if: steps.configure-aws-credentials.outcome == 'success'
       run: |
         set -o pipefail
         aws kms decrypt \

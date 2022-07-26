@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
 use std::fmt::Display;
-use std::fmt::{self};
 use std::path::Path;
 use std::path::PathBuf;
 

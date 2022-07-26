@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::context::Context;
+use crate::write;
 use crate::write::Error;
-use crate::write::{self};
 use bstr::BString;
 use bstr::ByteSlice;
 use core_utils_rust::add_ns;
@@ -26,8 +26,8 @@ use hhbc_string_utils::types;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use oxidized::ast;
+use oxidized::ast_defs;
 use oxidized::ast_defs::ParamKind;
-use oxidized::ast_defs::{self};
 use oxidized::local_id;
 use regex::Regex;
 use std::borrow::Cow;

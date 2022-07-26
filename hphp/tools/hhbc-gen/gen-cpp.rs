@@ -9,8 +9,8 @@ use hhbc_gen::Inputs;
 use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
+use std::fmt;
 use std::fmt::Display;
-use std::fmt::{self};
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]

@@ -25,6 +25,7 @@ use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use std::cell::RefCell;
+use std::fs;
 use std::fs::File;
 use std::io::stdout;
 use std::io::Write;

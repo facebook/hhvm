@@ -7,8 +7,8 @@ use bitflags::bitflags;
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 
+use crate::xhp_attribute;
 use crate::xhp_attribute::XhpAttribute;
-use crate::xhp_attribute::{self};
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 

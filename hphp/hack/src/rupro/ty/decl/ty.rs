@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::reason;
 use crate::reason::Reason;
-use crate::reason::{self};
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Hc;
@@ -34,11 +34,11 @@ pub use oxidized::typing_defs_core::ConsistentKind;
 pub use oxidized::typing_defs_core::Enforcement;
 pub use oxidized::typing_defs_core::ParamMode;
 pub use oxidized::typing_defs_core::ShapeKind;
+pub use oxidized::typing_defs_flags;
 pub use oxidized::typing_defs_flags::ClassEltFlags;
 pub use oxidized::typing_defs_flags::ClassEltFlagsArgs;
 pub use oxidized::typing_defs_flags::FunParamFlags;
 pub use oxidized::typing_defs_flags::FunTypeFlags;
-pub use oxidized::typing_defs_flags::{self};
 pub use oxidized::xhp_attribute::Tag;
 pub use oxidized::xhp_attribute::XhpAttribute;
 

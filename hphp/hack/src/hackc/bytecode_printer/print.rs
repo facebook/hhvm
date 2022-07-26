@@ -5,6 +5,7 @@
 
 use crate::coeffects;
 use crate::context::Context;
+use crate::write;
 use crate::write::angle;
 use crate::write::braces;
 use crate::write::concat;
@@ -22,7 +23,6 @@ use crate::write::square;
 use crate::write::triple_quotes;
 use crate::write::wrap_by;
 use crate::write::Error;
-use crate::write::{self};
 use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Pair;
@@ -69,9 +69,9 @@ use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
 use oxidized::ast_defs;
 use std::borrow::Cow;
+use std::io;
 use std::io::Result;
 use std::io::Write;
-use std::io::{self};
 use std::write;
 use write_bytes::write_bytes;
 

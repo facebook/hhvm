@@ -15,8 +15,8 @@ use serde::Serialize;
 use structopt::StructOpt;
 use walkdir::WalkDir;
 
+use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
-use oxidized::relative_path::{self};
 use oxidized_by_ref::direct_decl_parser::Decls;
 
 #[derive(StructOpt, Clone, Debug)]

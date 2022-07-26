@@ -15,8 +15,8 @@
 
 use std::cell::RefCell;
 use std::collections::HashSet;
+use std::fmt;
 use std::fmt::Debug;
-use std::fmt::{self};
 use std::mem;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;

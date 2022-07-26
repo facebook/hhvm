@@ -6,8 +6,8 @@
 
 use crate::compact_trivia::CompactTrivia;
 use crate::compact_trivia::TriviaKinds;
+use crate::syntax_by_ref::positioned_trivia;
 use crate::syntax_by_ref::positioned_trivia::PositionedTrivia;
-use crate::syntax_by_ref::positioned_trivia::{self};
 use crate::trivia_factory::SimpleTriviaFactoryImpl;
 use bumpalo::Bump;
 

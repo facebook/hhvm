@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::HashMap;
+use std::fmt;
 use std::fmt::Debug;
-use std::fmt::{self};
 use std::marker::PhantomData;
 use std::ops::Index;
 

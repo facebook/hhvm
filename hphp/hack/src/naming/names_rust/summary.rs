@@ -6,8 +6,8 @@
 use hh24_types::DeclHash;
 use hh24_types::FileDeclsHash;
 use hh24_types::ToplevelSymbolHash;
+use oxidized::file_info;
 use oxidized::file_info::NameType;
-use oxidized::file_info::{self};
 use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 

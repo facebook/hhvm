@@ -1,10 +1,10 @@
 use crate::body::Body;
 use crate::instr_ptr::InstrPtr;
 use crate::local_info::LocalInfo;
+use crate::node;
 use crate::node::Input;
 use crate::node::Node;
 use crate::node::NodeInstr;
-use crate::node::{self};
 use crate::sequence::Sequence;
 use crate::value::Value;
 use crate::value::ValueBuilder;

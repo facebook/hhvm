@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::convert;
 use crate::convert::HackCUnitBuilder;
-use crate::convert::{self};
 use crate::emitter;
 use crate::pusher;
 use ffi::Pair;

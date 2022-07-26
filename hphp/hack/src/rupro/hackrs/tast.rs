@@ -13,8 +13,8 @@ use oxidized::aast_visitor::Params;
 use oxidized::aast_visitor::VisitorMut;
 use pos::ToOxidized;
 use std::marker::PhantomData;
+use ty::local;
 use ty::local::Ty;
-use ty::local::{self};
 use ty::reason::Reason;
 
 #[derive(Clone, Debug)]

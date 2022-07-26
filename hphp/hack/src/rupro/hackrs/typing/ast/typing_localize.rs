@@ -13,10 +13,10 @@ use pos::Positioned;
 use pos::SymbolMap;
 use pos::TypeName;
 use ty::decl;
+use ty::local;
 use ty::local::Exact;
 use ty::local::FunParam;
 use ty::local::FunType;
-use ty::local::{self};
 use ty::reason::Reason;
 
 /// Localization environment, controlling localization.

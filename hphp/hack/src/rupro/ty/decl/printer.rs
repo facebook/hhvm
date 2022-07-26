@@ -6,9 +6,9 @@
 use super::ty::*;
 use crate::reason::Reason;
 use std::collections::BTreeMap;
+use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::fmt::{self};
 
 // This module provides a `Display` impl for `Ty` which uses Hack-like
 // syntax. The `Debug` impl for `Ty` uses this `Display` impl to make debug

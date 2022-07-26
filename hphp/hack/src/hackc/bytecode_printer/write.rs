@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::cell::Cell;
 use std::fmt::Debug;
+use std::io;
 use std::io::Result;
 use std::io::Write;
-use std::io::{self};
 use thiserror::Error;
 use write_bytes::BytesFormatter;
 use write_bytes::DisplayBytes;

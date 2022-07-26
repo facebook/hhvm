@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub use crate::decl;
 pub use crate::decl::ty::Exact;
 pub use crate::decl::ty::Prim;
 use crate::decl::UserAttribute;
-pub use crate::decl::{self};
 use crate::local::tyvar::Tyvar;
 use crate::reason::Reason;
 use crate::visitor::Visitor;

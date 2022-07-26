@@ -11,8 +11,8 @@ use oxidized::aast_defs;
 use oxidized::ast_defs;
 use pos::Symbol;
 use ty::decl;
+use ty::local;
 use ty::local::Variance;
-use ty::local::{self};
 use ty::reason::Reason;
 
 impl<R: Reason> Infer<R> for oxidized::aast::Tparam<(), ()> {

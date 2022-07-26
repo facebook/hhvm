@@ -29,8 +29,8 @@ use shallow_decl_provider::ShallowDeclStore;
 use shm_store::ShmStore;
 use std::path::PathBuf;
 use std::sync::Arc;
+use ty::decl;
 use ty::decl::folded::FoldedClass;
-use ty::decl::{self};
 use ty::reason::BReason;
 
 pub struct HhServerProviderBackend {

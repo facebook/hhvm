@@ -12,8 +12,8 @@ use pos::ConstName;
 use pos::FunName;
 use pos::RelativePath;
 use pos::TypeName;
+use std::fmt;
 use std::fmt::Debug;
-use std::fmt::{self};
 use std::path::Path;
 
 /// An abstraction over the global symbol table. Should be used by

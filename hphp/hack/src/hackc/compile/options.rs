@@ -587,10 +587,10 @@ impl Options {
     }
 }
 
+use serde::de;
 use serde::de::Deserializer;
 use serde::de::MapAccess;
 use serde::de::Visitor;
-use serde::de::{self};
 use serde::ser::SerializeMap;
 use serde::Serializer;
 

@@ -4,8 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::lexer;
 use crate::lexer::Lexer;
-use crate::lexer::{self};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::NodeType;
 use crate::smart_constructors::SmartConstructors;

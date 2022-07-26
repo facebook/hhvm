@@ -374,6 +374,8 @@ ServiceData::ExportedCounter* s_unitCompileFileLoads =
   ServiceData::createCounter("vm.unit-compile-file-loads");
 ServiceData::ExportedCounter* s_unitEdenInconsistencies =
   ServiceData::createCounter("vm.unit-eden-inconsistencies");
+ServiceData::ExportedCounter* s_unitReuseBytecode =
+  ServiceData::createCounter("vm.unit-reuse-bytecode");
 
 }
 
@@ -737,9 +739,11 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
     // If orig is provided, check if the given Unit has the same bcSha1
     // as it.
     auto const sameBC = [&] (Unit* unit) {
-      return
+      auto const reuse =
         orig && orig->cu.unit && unit &&
         unit->bcSha1() == orig->cu.unit->bcSha1();
+      if (reuse) s_unitReuseBytecode->increment();
+      return reuse;
     };
 
     auto const makeCachedFilePtr = [&] (Unit* unit) {

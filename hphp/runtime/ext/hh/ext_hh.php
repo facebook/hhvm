@@ -329,6 +329,51 @@ function clear_all_coverage_data(): void {
   }
 }
 
+namespace ImplicitContext {
+
+/**
+ * Returns blame associated with the current implicit context
+ * Return value[0]: Blame from soft make ic inaccessible
+ * Return value[1]: Blame from soft ic runWith
+ */
+<<__Native>>
+function get_implicit_context_blame()[zoned]: (vec<string>, vec<string>);
+
+async function soft_run_with_async<Tout>(
+  (function (): Awaitable<Tout>) $f,
+  string $key,
+)[zoned]: Awaitable<Tout> {
+  $prev = _Private\set_special_implicit_context(
+    _Private\SpecialImplicitContextType::SoftSet,
+    $key
+  );
+  try {
+    $result = $f();
+  } finally {
+    _Private\set_implicit_context_by_value($prev);
+  }
+  // Needs to be awaited here so that context dependency is established
+  // between parent/child functions
+  return await $result;
+}
+
+function soft_run_with<Tout>(
+  (function (): Tout) $f,
+  string $key,
+)[zoned, ctx $f]: Tout {
+  $prev = _Private\set_special_implicit_context(
+    _Private\SpecialImplicitContextType::SoftSet,
+    $key
+  );
+  try {
+    return $f();
+  } finally {
+    _Private\set_implicit_context_by_value($prev);
+  }
+}
+
+} // namespace ImplicitContext
+
 namespace ImplicitContext\_Private {
 
 <<__NativeData("ImplicitContext")>>
@@ -351,20 +396,43 @@ function set_implicit_context(
 )[zoned]: object /* ImplicitContextData */;
 
 /*
+ * Types of non value based implicit contexts
+ * Keep in sync with set_special_implicit_context implementation in ext_hh.cpp
+ */
+enum SpecialImplicitContextType : int {
+  Inaccessible = 0;
+  SoftInaccessible = 1;
+  SoftSet = 2;
+}
+
+/**
+ * Sets implicit context to one of the non value based special types.
+ * The type value is of SpecialImplicitContextType.
+ * If $memo_key is provided, it is used for keying the memoization key,
+ * otherwise name of the caller is used.
+ * Returns the previous implicit context.
+ */
+<<__Native>>
+function set_special_implicit_context(
+  int $type /* SpecialImplicitContextType */,
+  ?string $memo_key = null,
+)[zoned]: object /* ImplicitContextData */;
+
+/*
  * Returns the currently implicit context hash or emptry string if
  * no implicit context is set
  */
 <<__Native>>
 function get_implicit_context_memo_key()[zoned]: string;
 
-} // namespace ImplicitContext\_Private
+} // namespace ImplicitContext_Private
 
 abstract class ImplicitContext {
   abstract const type T as nonnull;
 
   protected static async function runWithAsync<Tout>(
     this::T $context,
-    (function (): Awaitable<Tout>) $f
+    (function (): Awaitable<Tout>) $f,
   )[zoned]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
@@ -382,8 +450,8 @@ abstract class ImplicitContext {
 
   protected static function runWith<Tout>(
     this::T $context,
-    (function (): Tout) $f
-  )[zoned]: Tout {
+    (function (): Tout) $f,
+  )[zoned, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,

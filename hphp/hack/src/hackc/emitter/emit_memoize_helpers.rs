@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use env::LabelGen;
 use error::Error;
 use error::Result;
 use ffi::Slice;
@@ -13,6 +14,7 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::aast::FunParam;
 use oxidized::pos::Pos;
+use scope::create_try_catch;
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
@@ -83,4 +85,55 @@ pub fn get_implicit_context_memo_key<'arena>(
         instr::set_l(local),
         instr::pop_c(),
     ])
+}
+
+fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
+    InstrSeq::gather(vec![
+        instr::null_uninit(),
+        instr::null_uninit(),
+        instr::int(if soft { 1 } else { 0 }),
+        instr::f_call_func_d(
+            FCallArgs::new(
+                FCallArgsFlags::default(),
+                1,
+                1,
+                Slice::empty(),
+                Slice::empty(),
+                None,
+                None,
+            ),
+            hhbc::FunctionName::from_raw_string(
+                alloc,
+                "HH\\ImplicitContext\\_Private\\set_special_implicit_context",
+            ),
+        ),
+        instr::set_l(local),
+        instr::pop_c(),
+    ])
+}
+
+fn ic_restore<'arena>(local: Local) -> InstrSeq<'arena> {
+    InstrSeq::gather(vec![
+        instr::c_get_l(local),
+        instr::set_implicit_context_by_value(),
+        instr::pop_c(),
+    ])
+}
+
+pub fn with_possible_ic<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    label_gen: &mut LabelGen,
+    local: Local,
+    instrs: InstrSeq<'arena>,
+    should_make_ic_inaccessible: Option<bool>,
+) -> InstrSeq<'arena> {
+    if let Some(soft) = should_make_ic_inaccessible {
+        InstrSeq::gather(vec![
+            ic_set(alloc, local, soft),
+            create_try_catch(label_gen, None, false, instrs, ic_restore(local)),
+            ic_restore(local),
+        ])
+    } else {
+        instrs
+    }
 }

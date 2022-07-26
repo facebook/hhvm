@@ -1092,21 +1092,101 @@ void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
   u->clearCoverage();
 }
 
-TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
-  auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return make_tv<KindOfNull>();
-  auto const context = Native::data<ImplicitContext>(obj);
-  auto const it = context->m_map.find(key.get());
-  if (it == context->m_map.end()) return make_tv<KindOfNull>();
-  auto const result = it->second.first;
-  if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
-  return result;
-}
+namespace {
 
 Class* s_ImplicitContextDataClass = nullptr;
 const StaticString
   s_ImplicitContext("ImplicitContext"),
-  s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData");
+  s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
+  s_ICInaccessibleMemoKey("%Inaccessible%"),
+  s_ICSoftInaccessibleMemoKey("%SoftInaccessible%"),
+  s_ICSoftSetMemoKey("%SoftSet%");
+
+Object create_new_IC() {
+  assertx(s_ImplicitContextDataClass);
+  auto obj = Object{s_ImplicitContextDataClass};
+  // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
+  // suspend/resume routine, we should properly refcount the data but that is
+  // expensive. Leak and let the GC take care of it.
+  obj.get()->incRefCount();
+  return obj;
+}
+
+void set_implicit_context_blame(ImplicitContext* context,
+                                const StringData* memo_key) {
+  auto const state = context->m_state;
+  assertx(IMPLIES(state == ImplicitContext::State::SoftSet, memo_key));
+  assertx(IMPLIES(state != ImplicitContext::State::SoftSet, !memo_key));
+
+  if (state == ImplicitContext::State::Value ||
+      state == ImplicitContext::State::Inaccessible) {
+    // We do not currently need blame here
+    return;
+  }
+  assertx(state == ImplicitContext::State::SoftInaccessible ||
+          state == ImplicitContext::State::SoftSet);
+
+  req::vector<const StringData*> blameFromSoftInaccessible;
+  req::vector<const StringData*> blameFromSoftSet;
+
+  if (auto const obj = *ImplicitContext::activeCtx) {
+    auto const prev = Native::data<ImplicitContext>(obj);
+    blameFromSoftInaccessible = prev->m_blameFromSoftInaccessible;
+    blameFromSoftSet = prev->m_blameFromSoftSet;
+  }
+
+  auto const cur_blame = [&] {
+    if (memo_key) return memo_key;
+    VMRegAnchor _;
+    return fromCaller(
+      [] (const BTFrame& frm) { return frm.func()->fullName(); }
+    );
+  }();
+
+  if (state == ImplicitContext::State::SoftInaccessible) {
+    blameFromSoftInaccessible.push_back(cur_blame);
+  } else {
+    assertx(state == ImplicitContext::State::SoftSet);
+    blameFromSoftSet.push_back(cur_blame);
+  }
+
+  context->m_blameFromSoftInaccessible = blameFromSoftInaccessible;
+  context->m_blameFromSoftSet = blameFromSoftSet;
+}
+
+} // namespace
+
+TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return make_tv<KindOfNull>();
+  auto const context = Native::data<ImplicitContext>(obj);
+
+  switch (context->m_state) {
+    case ImplicitContext::State::Value: {
+      auto const it = context->m_map.find(key.get());
+      if (it == context->m_map.end()) return make_tv<KindOfNull>();
+      auto const result = it->second.first;
+      if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
+      return result;
+    }
+    case ImplicitContext::State::Inaccessible:
+      throw_implicit_context_exception("Implicit context is set to inaccessible");
+    case ImplicitContext::State::SoftInaccessible:
+      raise_implicit_context_warning("Implicit context is set to soft inaccessible");
+      // fallthru
+    case ImplicitContext::State::SoftSet:
+      return make_tv<KindOfNull>();
+  }
+  not_reached();
+}
+
+String HHVM_FUNCTION(get_implicit_context_memo_key) {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return empty_string();
+  auto const context = Native::data<ImplicitContext>(obj);
+  assertx(context->m_memokey);
+  return String{context->m_memokey};
+}
 
 Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
                                            TypedValue data) {
@@ -1120,15 +1200,11 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   }
   auto const prev = *ImplicitContext::activeCtx;
 
-  assertx(s_ImplicitContextDataClass);
-  auto obj = Object{s_ImplicitContextDataClass};
+  auto obj = create_new_IC();
   auto const context = Native::data<ImplicitContext>(obj.get());
 
-  // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
-  // suspend/resume routine, we should properly refcount the data but that is
-  // expensive. Leak and let the GC take care of it.
-  obj.get()->incRefCount();
-
+  context->m_state = ImplicitContext::State::Value;
+  set_implicit_context_blame(context, nullptr);
   if (prev) context->m_map = Native::data<ImplicitContext>(prev)->m_map;
   // Leak `data`, `key` and `memokey` to the end of the request
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
@@ -1157,12 +1233,93 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   return ImplicitContext::setByValue(std::move(obj));
 }
 
-String HHVM_FUNCTION(get_implicit_context_memo_key) {
+Object HHVM_FUNCTION(set_special_implicit_context,
+                     int64_t type_enum,
+                     const Variant& memo_key /* = null_string */) {
+  auto const prev_obj = *ImplicitContext::activeCtx;
+  auto const prev_context =
+    prev_obj ? Native::data<ImplicitContext>(prev_obj) : nullptr;
+
+  auto const type = [&] {
+    switch (type_enum) {
+      case 0:
+        return ImplicitContext::State::Inaccessible;
+      case 1:
+        return ImplicitContext::State::SoftInaccessible;
+      case 2:
+        return ImplicitContext::State::SoftSet;
+    }
+    always_assert(false && "Invalid enum value, keep in sync with ext_hh.php");
+  }();
+
+  if (type == ImplicitContext::State::SoftSet &&
+      prev_context &&
+      (prev_context->m_state == ImplicitContext::State::Value ||
+       prev_context->m_state == ImplicitContext::State::Inaccessible)) {
+    // If we are moving from Value or Inaccessible to SoftSet, remain
+    // in previous configuration
+    return Object{prev_obj};
+  }
+
+  auto obj = create_new_IC();
+  auto const context = Native::data<ImplicitContext>(obj.get());
+  context->m_state = type;
+  auto const key = [&] () -> StringData* {
+    if (memo_key.isNull()) return nullptr;
+    auto const sd = memo_key.toString().get();
+    // Leak the memo_key until the end of the request
+    sd->incRefCount();
+    return sd;
+  }();
+  set_implicit_context_blame(context, key);
+  if (type == ImplicitContext::State::SoftSet &&
+      prev_context &&
+      prev_context->m_state == ImplicitContext::State::SoftInaccessible) {
+    // If we are moving from SoftInaccessible to SoftSet, remain in
+    // SoftInaccessible
+    // This must happen after setting the blame as blame setting uses the state
+    context->m_state = ImplicitContext::State::SoftInaccessible;
+  }
+  context->m_memokey = [&] {
+    if (type == ImplicitContext::State::Inaccessible) {
+      return s_ICInaccessibleMemoKey.get();
+    }
+    StringBuffer sb;
+    sb.append(type == ImplicitContext::State::SoftSet
+                ? s_ICSoftSetMemoKey.get() : s_ICSoftInaccessibleMemoKey.get());
+    for (auto const& s : context->m_blameFromSoftInaccessible) {
+      serialize_memoize_string_data(sb, s);
+    }
+    sb.append('%'); // separator
+    for (auto const& s : context->m_blameFromSoftSet) {
+      serialize_memoize_string_data(sb, s);
+    }
+    return sb.detach().detach();
+  }();
+  return ImplicitContext::setByValue(std::move(obj));
+}
+
+Array HHVM_FUNCTION(get_implicit_context_blame) {
   auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return empty_string();
+  if (!obj) return empty_vec_array();
   auto const context = Native::data<ImplicitContext>(obj);
-  assertx(context->m_memokey);
-  return String{context->m_memokey};
+
+  VecInit ret(2);
+  {
+    VecInit inaccessible(context->m_blameFromSoftInaccessible.size());
+    for (auto const& s : context->m_blameFromSoftInaccessible) {
+      inaccessible.append(String{const_cast<StringData*>(s)});
+    }
+    ret.append(inaccessible.toArray());
+  }
+  {
+    VecInit set(context->m_blameFromSoftSet.size());
+    for (auto const& s : context->m_blameFromSoftSet) {
+      set.append(String{const_cast<StringData*>(s)});
+    }
+    ret.append(set.toArray());
+  }
+  return ret.toArray();
 }
 
 namespace {
@@ -1415,8 +1572,12 @@ static struct HHExtension final : Extension {
                   HHVM_FN(get_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
                   HHVM_FN(set_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_special_implicit_context,
+                  HHVM_FN(set_special_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\get_implicit_context_blame,
+                  HHVM_FN(get_implicit_context_blame));
 
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
                   HHVM_FN(enter_zoned_with));

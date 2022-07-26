@@ -764,6 +764,10 @@ void throw_implicit_context_exception(std::string s) {
   SystemLib::throwInvalidOperationExceptionObject(s);
 }
 
+void raise_implicit_context_warning(std::string s) {
+  raise_warning(s);
+}
+
 void throw_iterator_not_valid() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Iterator is not valid");

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -25,7 +26,19 @@ namespace HPHP {
 
 struct ImplicitContext {
 
-static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+////////////////////////////////////////////////////////////////////////////
+// Members
+////////////////////////////////////////////////////////////////////////////
+
+enum class State {
+  Value,
+  Inaccessible,
+  SoftSet,
+  SoftInaccessible,
+};
+
+// Current state of IC
+State m_state;
 
 // Combination of the instance keys
 StringData* m_memokey;
@@ -34,7 +47,25 @@ StringData* m_memokey;
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
 
+// Blame of when an event happened resulting in state transition
+req::vector<const StringData*> m_blameFromSoftInaccessible;
+req::vector<const StringData*> m_blameFromSoftSet;
+
+////////////////////////////////////////////////////////////////////////////
+// Statics
+////////////////////////////////////////////////////////////////////////////
+
+static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
+
 static Object setByValue(Object&&);
+
+static std::string stateToString(State);
+
+static bool isStateSoft(State);
+
+////////////////////////////////////////////////////////////////////////////
+// RAII wrappers
+////////////////////////////////////////////////////////////////////////////
 
 /*
  * RAII wrapper for saving implicit context

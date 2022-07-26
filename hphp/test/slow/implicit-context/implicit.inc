@@ -24,7 +24,7 @@ abstract final class IntContext extends HH\ImplicitContext {
 
 trait ClassContextDefs {
   const type T = Base;
-  public static function start(Base $context, (function (): int) $f)[zoned] {
+  public static function start(Base $context, (function (): int) $f)[zoned, ctx $f] {
     return parent::runWith($context, $f);
   }
   public static function getContext()[zoned]: Base {

@@ -1,0 +1,33 @@
+  Before: C
+memo_normal failed with: memo_normal is a [defaults] memoized function, but it is called with a value state implicit context
+  After: C
+------------------------
+  Before: C
+=E3=0CClassContext=E8=E3=07=E9=E3=04KEYC
+memo_keyed passed
+  After: C
+------------------------
+  Before: C
+%Inaccessible%
+memo_ic_inaccessible passed
+  After: C
+------------------------
+  Before: C
+memo_soft_ic_inaccessible failed with: memo_soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a value state implicit context
+  After: C
+------------------------
+
+Warning: memo_normal is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line 7
+%SoftSet%%=E3=08SOFT_KEY
+memo_normal passed
+------------------------
+%SoftSet%%=E3=08SOFT_KEY
+memo_keyed passed
+------------------------
+memo_ic_inaccessible passed
+------------------------
+
+Warning: memo_soft_ic_inaccessible is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 25
+%SoftInaccessible%=E3=19memo_soft_ic_inaccessible%=E3=08SOFT_KEY
+memo_soft_ic_inaccessible passed
+------------------------

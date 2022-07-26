@@ -1,0 +1,72 @@
+>>>>> from null
+  Before: Expected nonnull, got null
+
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+Hash: %SoftInaccessible%=E3=09memoNoArg%
+memoNoArg passed
+  After: Expected nonnull, got null
+------------------------
+  Before: Expected nonnull, got null
+
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+Hash: %SoftInaccessible%=E3=0BmemoWithArg%
+memoWithArg passed
+  After: Expected nonnull, got null
+------------------------
+>>>>> from value
+  Before: C
+memoNoArg failed with: memoNoArg is a soft IC inaccessible memoized function, but it is called with a value state implicit context
+  After: C
+------------------------
+  Before: C
+memoWithArg failed with: memoWithArg is a soft IC inaccessible memoized function, but it is called with a value state implicit context
+  After: C
+------------------------
+>>>>> from inaccessible
+  Before: Implicit context is set to inaccessible
+memoNoArg failed with: memoNoArg is a soft IC inaccessible memoized function, but it is called with an inaccessible state implicit context
+  After: Implicit context is set to inaccessible
+------------------------
+  Before: Implicit context is set to inaccessible
+memoWithArg failed with: memoWithArg is a soft IC inaccessible memoized function, but it is called with an inaccessible state implicit context
+  After: Implicit context is set to inaccessible
+------------------------
+>>>>> from soft inaccessible
+  Before: 
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+
+Warning: memoNoArg is a soft IC inaccessible memoized function, but it is called with a soft inaccessible state implicit context in %s on line 27
+memoNoArg passed
+  After: 
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+------------------------
+  Before: 
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+
+Warning: memoWithArg is a soft IC inaccessible memoized function, but it is called with a soft inaccessible state implicit context in %s on line 35
+memoWithArg passed
+  After: 
+Warning: Implicit context is set to soft inaccessible in %s on line 31
+Expected nonnull, got null
+------------------------
+>>>>> from soft run with
+  Before: Expected nonnull, got null
+
+Warning: memoNoArg is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 27
+memoNoArg passed
+  After: Expected nonnull, got null
+------------------------
+  Before: Expected nonnull, got null
+
+Warning: memoWithArg is a soft IC inaccessible memoized function, but it is called with a soft set state implicit context in %s on line 35
+memoWithArg passed
+  After: Expected nonnull, got null
+------------------------
+>>>>> final report
+No arg ran: 1 times
+With arg ran: 1 times

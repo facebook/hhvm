@@ -101,10 +101,8 @@ pub enum KwSet {
 }
 
 macro_rules! as_case_insensitive_keyword {
-    ($size:tt, $size_type:ty $(, $keyword:tt)+) => {
+    ($size:tt $(, $keyword:tt)+) => {
         fn as_case_insensitive_keyword(&self, text: &str) -> Option<(&'static str, bool)> {
-            use heapless::consts::*;
-
             // - The $size should be greater than or equal to the each length of keyword
             // - The $size should be equal to at least one of the length of a keyword
             // Therefore, $size is equal to the length of the longest keyword.
@@ -121,7 +119,7 @@ macro_rules! as_case_insensitive_keyword {
             if text.len() > $size {
                 None
             } else {
-                let mut t: heapless::String<$size_type> = text.into();
+                let mut t: heapless::String<$size> = text.into();
                 let t: &mut str = t.as_mut_str();
                 t.make_ascii_lowercase();
                 let has_upper = t != text;
@@ -2015,7 +2013,6 @@ where
 
     as_case_insensitive_keyword!(
         12,
-        U12,
         "abstract",
         "as",
         "bool",

@@ -6,12 +6,12 @@
 use crate::compile::SingleFileOpts;
 use crate::profile;
 use crate::profile::DurationEx;
+use crate::profile::MaxValue;
 use crate::profile::StatusTicker;
 use crate::profile::Timing;
 use anyhow::bail;
 use anyhow::Result;
 use clap::Parser;
-use compile::Profile;
 use log::info;
 use multifile_rust as multifile;
 use rayon::prelude::*;
@@ -50,14 +50,14 @@ fn process_one_file(
     writer: &SyncWrite,
     f: &Path,
     compile_opts: &SingleFileOpts,
-    profile: &mut Profile,
+    profile: &mut compile::Profile,
 ) -> Result<()> {
     let content = fs::read(f)?;
     let files = multifile::to_files(f, content)?;
     for (f, content) in files {
         let f = f.as_ref();
         let result = std::panic::catch_unwind(|| {
-            let mut profile1 = Profile::default();
+            let mut profile1 = compile::Profile::default();
             let result = crate::compile::process_single_file(
                 &compile_opts,
                 f.into(),
@@ -94,17 +94,12 @@ fn process_one_file(
 
 #[derive(Default)]
 struct ProfileAcc {
-    sum: Profile,
-    max_parse: Profile,
-    max_parse_file: PathBuf,
-    max_lower: Profile,
-    max_lower_file: PathBuf,
-    max_error: Profile,
-    max_error_file: PathBuf,
-    max_rewrite: Profile,
-    max_rewrite_file: PathBuf,
-    max_emitter: Profile,
-    max_emitter_file: PathBuf,
+    codegen_bytes: i64,
+    max_parse: MaxValue<i64>,
+    max_lower: MaxValue<i64>,
+    max_error: MaxValue<i64>,
+    max_rewrite: MaxValue<i64>,
+    max_emitter: MaxValue<i64>,
     total_t: Timing,
     parsing_t: Timing,
     codegen_t: Timing,
@@ -113,32 +108,21 @@ struct ProfileAcc {
 
 impl ProfileAcc {
     fn fold(mut self, other: Self) -> Self {
-        self.sum += other.sum;
-        if other.max_parse.parse_peak > self.max_parse.parse_peak {
-            self.max_parse = other.max_parse;
-            self.max_parse_file = other.max_parse_file;
-        }
-        if other.max_lower.lower_peak > self.max_lower.lower_peak {
-            self.max_lower = other.max_lower;
-            self.max_lower_file = other.max_lower_file;
-        }
-        if other.max_error.error_peak > self.max_error.error_peak {
-            self.max_error = other.max_error;
-            self.max_error_file = other.max_error_file;
-        }
-        if other.max_rewrite.rewrite_peak > self.max_rewrite.rewrite_peak {
-            self.max_rewrite = other.max_rewrite;
-            self.max_rewrite_file = other.max_rewrite_file;
-        }
-        if other.max_emitter.emitter_peak > self.max_emitter.emitter_peak {
-            self.max_emitter = other.max_emitter;
-            self.max_emitter_file = other.max_emitter_file;
-        }
-        self.total_t += other.total_t;
-        self.parsing_t += other.parsing_t;
-        self.codegen_t += other.codegen_t;
-        self.printing_t += other.printing_t;
+        self.fold_with(other);
         self
+    }
+
+    fn fold_with(&mut self, other: Self) {
+        self.codegen_bytes += other.codegen_bytes;
+        self.max_parse.fold_with(other.max_parse);
+        self.max_lower.fold_with(other.max_lower);
+        self.max_error.fold_with(other.max_error);
+        self.max_rewrite.fold_with(other.max_rewrite);
+        self.max_emitter.fold_with(other.max_emitter);
+        self.total_t.fold_with(other.total_t);
+        self.parsing_t.fold_with(other.parsing_t);
+        self.codegen_t.fold_with(other.codegen_t);
+        self.printing_t.fold_with(other.printing_t);
     }
 
     fn from_compile<'a>(profile: compile::Profile, path: impl Into<Cow<'a, Path>>) -> Self {
@@ -153,21 +137,16 @@ impl ProfileAcc {
             codegen_t,
             parsing_t,
             printing_t,
-            sum: profile.clone(),
-            max_parse: profile.clone(),
-            max_parse_file: path.to_path_buf(),
-            max_lower: profile.clone(),
-            max_lower_file: path.to_path_buf(),
-            max_error: profile.clone(),
-            max_error_file: path.to_path_buf(),
-            max_rewrite: profile.clone(),
-            max_rewrite_file: path.to_path_buf(),
-            max_emitter: profile,
-            max_emitter_file: path.into_owned(),
+            codegen_bytes: profile.codegen_bytes,
+            max_parse: MaxValue::new(profile.parse_peak, path.to_path_buf()),
+            max_lower: MaxValue::new(profile.lower_peak, path.to_path_buf()),
+            max_error: MaxValue::new(profile.error_peak, path.to_path_buf()),
+            max_rewrite: MaxValue::new(profile.rewrite_peak, path.to_path_buf()),
+            max_emitter: MaxValue::new(profile.emitter_peak, path.into_owned()),
         }
     }
 
-    fn report_final(&self, wall: Duration, count: usize, total: usize) {
+    fn report_final(&self, wall: Duration, count: usize, total: usize) -> std::io::Result<()> {
         if total >= 10 {
             let wall_per_sec = if !wall.is_zero() {
                 ((count as f64) / wall.as_secs_f64()) as usize
@@ -177,42 +156,23 @@ impl ProfileAcc {
 
             // Done, print final stats.
             eprintln!(
-                "\rProcessed {count} in {wall} ({wall_per_sec}/s) cpu={cpu:.3}s arenas={arenas:.3}MiB  ",
+                "\rProcessed {count} in {wall} ({wall_per_sec}/s) arenas={arenas:.3}MiB  ",
                 wall = wall.display(),
-                cpu = self.sum.total_sec(),
-                arenas = self.sum.codegen_bytes as f64 / (1024 * 1024) as f64,
+                arenas = self.codegen_bytes as f64 / (1024 * 1024) as f64,
             );
         }
 
-        profile::report_stat("", "total time", &self.total_t);
-        profile::report_stat("  ", "parsing time", &self.parsing_t);
-        profile::report_stat("  ", "codegen time", &self.codegen_t);
-        profile::report_stat("  ", "printing time", &self.printing_t);
-        eprintln!(
-            "parser stack peak {} in {}",
-            self.max_parse.parse_peak,
-            self.max_parse_file.display()
-        );
-        eprintln!(
-            "lowerer stack peak {} in {}",
-            self.max_lower.lower_peak,
-            self.max_lower_file.display()
-        );
-        eprintln!(
-            "check_error stack peak {} in {}",
-            self.max_error.error_peak,
-            self.max_error_file.display()
-        );
-        eprintln!(
-            "rewrite stack peak {} in {}",
-            self.max_rewrite.rewrite_peak,
-            self.max_rewrite_file.display()
-        );
-        eprint!(
-            "emitter stack peak {} in {}",
-            self.max_emitter.emitter_peak,
-            self.max_emitter_file.display()
-        );
+        let mut w = std::io::stderr();
+        profile::report_stat(&mut w, "", "total time", &self.total_t)?;
+        profile::report_stat(&mut w, "  ", "parsing time", &self.parsing_t)?;
+        profile::report_stat(&mut w, "  ", "codegen time", &self.codegen_t)?;
+        profile::report_stat(&mut w, "  ", "printing time", &self.printing_t)?;
+        self.max_parse.report(&mut w, "parser stack peak")?;
+        self.max_lower.report(&mut w, "lowerer stack peak")?;
+        self.max_error.report(&mut w, "check_error stack peak")?;
+        self.max_rewrite.report(&mut w, "rewrite stack peak")?;
+        self.max_emitter.report(&mut w, "emitter stack peak")?;
+        Ok(())
     }
 }
 
@@ -228,7 +188,7 @@ fn crc_files(
     let status_ticker = StatusTicker::new(total);
 
     let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
-        let mut profile = Profile::default();
+        let mut profile = compile::Profile::default();
         status_ticker.start_file(f);
         let file_passed = process_one_file(writer, f.as_path(), compile_opts, &mut profile).is_ok();
         if !file_passed {
@@ -250,7 +210,7 @@ fn crc_files(
 
     let (count, duration) = status_ticker.finish();
 
-    profile.report_final(duration, count, total);
+    profile.report_final(duration, count, total)?;
     eprintln!();
 
     if !passed.load(Ordering::Acquire) {

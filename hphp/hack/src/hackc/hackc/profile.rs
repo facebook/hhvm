@@ -55,20 +55,8 @@ impl Timing {
     fn worst(&self) -> Option<&Path> {
         self.worst.as_ref().map(|(_, path)| path.as_path())
     }
-}
 
-impl std::default::Default for Timing {
-    fn default() -> Self {
-        Self {
-            total: Duration::from_secs(0),
-            histogram: hdrhistogram::Histogram::new(3).unwrap(),
-            worst: None,
-        }
-    }
-}
-
-impl std::ops::AddAssign for Timing {
-    fn add_assign(&mut self, rhs: Self) {
+    pub(crate) fn fold_with(&mut self, rhs: Self) {
         self.total += rhs.total;
         self.histogram.add(rhs.histogram).unwrap();
         self.worst = match (self.worst.take(), rhs.worst) {
@@ -82,6 +70,16 @@ impl std::ops::AddAssign for Timing {
                     Some(rhs)
                 }
             }
+        };
+    }
+}
+
+impl std::default::Default for Timing {
+    fn default() -> Self {
+        Self {
+            total: Duration::from_secs(0),
+            histogram: hdrhistogram::Histogram::new(3).unwrap(),
+            worst: None,
         }
     }
 }
@@ -127,26 +125,34 @@ pub(crate) fn to_hms(time: usize) -> String {
     }
 }
 
-pub(crate) fn report_stat(indent: &str, what: &str, timing: &Timing) {
+pub(crate) fn report_stat(
+    w: &mut impl std::io::Write,
+    indent: &str,
+    what: &str,
+    timing: &Timing,
+) -> std::io::Result<()> {
     if timing.is_empty() {
-        return;
+        return Ok(());
     }
 
-    eprint!(
+    write!(
+        w,
         "{}{}: total: {}, avg: {}",
         indent,
         what,
         timing.total.display(),
         timing.mean().display()
-    );
-    eprint!(", P50: {}", timing.value_at_percentile(50.0).display());
-    eprint!(", P90: {}", timing.value_at_percentile(90.0).display());
-    eprint!(", P99: {}", timing.value_at_percentile(99.0).display());
-    eprintln!(", max: {}", timing.max().display());
+    )?;
+    write!(w, ", P50: {}", timing.value_at_percentile(50.0).display())?;
+    write!(w, ", P90: {}", timing.value_at_percentile(90.0).display())?;
+    write!(w, ", P99: {}", timing.value_at_percentile(99.0).display())?;
+    writeln!(w, ", max: {}", timing.max().display())?;
 
     if let Some(worst) = timing.worst() {
         eprintln!("{}  (max in {})", indent, worst.display());
     }
+
+    Ok(())
 }
 
 struct StatusSharedData {
@@ -261,5 +267,62 @@ impl StatusTicker {
         let mut shared = self.shared.lock().unwrap();
         shared.count += 1;
         shared.processing.remove(path);
+    }
+}
+
+pub(crate) enum MaxValue<T: Ord> {
+    Unset,
+    Set(T, PathBuf),
+}
+
+impl<T: Ord> std::default::Default for MaxValue<T> {
+    fn default() -> Self {
+        Self::Unset
+    }
+}
+
+impl<T: Ord> MaxValue<T> {
+    pub(crate) fn new<'s>(value: T, file: impl Into<Cow<'s, Path>>) -> Self {
+        Self::Set(value, file.into().to_path_buf())
+    }
+
+    pub(crate) fn fold_with(&mut self, other: Self) {
+        match (self, other) {
+            (_, Self::Unset) => {}
+            (lhs @ Self::Unset, value) => {
+                *lhs = value;
+            }
+            (Self::Set(a, file_a), Self::Set(b, file_b)) => {
+                if *a < b {
+                    *a = b;
+                    *file_a = file_b;
+                }
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_set(&self) -> bool {
+        matches!(self, Self::Set(..))
+    }
+
+    pub(crate) fn value(&self) -> &T {
+        match self {
+            Self::Unset => panic!("unset value"),
+            Self::Set(value, _) => value,
+        }
+    }
+
+    pub(crate) fn file(&self) -> &Path {
+        match self {
+            Self::Unset => panic!("unset value"),
+            Self::Set(_, file) => file,
+        }
+    }
+}
+
+impl<T: Ord + Display> MaxValue<T> {
+    pub(crate) fn report(&self, w: &mut impl std::io::Write, why: &str) -> std::io::Result<()> {
+        writeln!(w, "{} {} (in {})", why, self.value(), self.file().display())
     }
 }

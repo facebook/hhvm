@@ -1,2 +1,2 @@
 File "noreturn_typedef.php", line 4, characters 15-22:
-The `noreturn` typehint can only be used to describe a function return type (Naming[2063])
+You can only use the `noreturn` type as the return type of a function or method (Naming[2063])

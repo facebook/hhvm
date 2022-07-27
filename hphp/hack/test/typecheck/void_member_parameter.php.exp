@@ -1,4 +1,4 @@
 File "void_member_parameter.php", line 13, characters 21-24:
-The `void` typehint can only be used to describe a function return type (Naming[2063])
+You can only use the `void` type as the return type of a function or method (Naming[2063])
 File "void_member_parameter.php", line 13, characters 19-19:
 Was expecting a return type hint (Typing[4030])

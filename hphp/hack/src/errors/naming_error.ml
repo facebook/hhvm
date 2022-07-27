@@ -920,7 +920,7 @@ let return_only_typehint pos kind =
     Error_code.(to_enum ReturnOnlyTypehint)
     ( pos,
       Format.sprintf
-        "The %s typehint can only be used to describe a function return type"
+        "You can only use the %s type as the return type of a function or method"
         kstr )
     []
 

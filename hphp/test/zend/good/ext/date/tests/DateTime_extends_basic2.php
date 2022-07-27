@@ -2,7 +2,7 @@
 
 class DateTimeExt extends DateTime
 {
-	public function __construct ($date = null, DateTimeZone  $dtz = null)
+	public function __construct ($date = null, ?DateTimeZone  $dtz = null)
     {
         if($dtz === null)
         {

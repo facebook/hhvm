@@ -8,7 +8,7 @@ class Test
         var_dump($ar);
     }
 
-    static function f2(varray $ar = NULL)
+    static function f2(?varray $ar = NULL)
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);

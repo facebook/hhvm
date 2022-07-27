@@ -275,7 +275,7 @@ class UConverter implements IDisposable {
   public static function transcode(string $str,
                                    string $toEncoding,
                                    string $fromEncoding,
-                                   darray $options = null): ?string {
+                                   ?darray $options = null): ?string {
     $cnv = new UConverter($toEncoding, $fromEncoding);
     if ((isset($options['from_subst']) &&
          !$cnv->setSourceSubstChars($options['from_subst'])) ||

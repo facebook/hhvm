@@ -22,7 +22,7 @@ function date_timestamp_get(DateTimeInterface $datetime) {
 
 function date_create_immutable(
   string $time = 'now',
-  DateTimeZone $timezone = NULL
+  ?DateTimeZone $timezone = NULL
 ) {
   try {
     return new DateTimeImmutable($time, $timezone);

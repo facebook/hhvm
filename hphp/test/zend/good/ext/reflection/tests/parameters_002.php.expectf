@@ -112,7 +112,7 @@ isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(false)
-getClass: stdClass
+getClass: NULL
 getDeclaringClass: test
 isArray: bool(false)
 allowsNull: bool(true)

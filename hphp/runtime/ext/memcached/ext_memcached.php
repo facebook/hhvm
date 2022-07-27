@@ -339,7 +339,7 @@ class Memcached {
    *   Memcached::RES_NOTFOUND if the key does not exist.
    */
   public function get(mixed $key,
-                      ?mixed $cache_cb = null): mixed {
+                      mixed $cache_cb = null): mixed {
     return $this->getByKey('', $key, $cache_cb);
   }
 

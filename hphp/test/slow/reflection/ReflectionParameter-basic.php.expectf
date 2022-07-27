@@ -163,7 +163,7 @@ getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   dict(3) {
     ["name"]=>
-    string(8) "callable"
+    string(9) "?callable"
     ["nullable"]=>
     bool(true)
     ["builtin"]=>
@@ -172,9 +172,9 @@ getType: object(ReflectionType) (1) {
 }
 type isBuiltin: bool(true)
 type allowsNull: bool(true)
-type hint: string(8) "callable"
+type hint: string(9) "?callable"
 isArray: bool(false)
-isCallable: bool(true)
+isCallable: bool(false)
 isOptional: bool(true)
 isVariadic: bool(false)
 allowsNull: bool(true)
@@ -194,7 +194,7 @@ getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   dict(3) {
     ["name"]=>
-    string(11) "HH\resource"
+    string(12) "?HH\resource"
     ["nullable"]=>
     bool(true)
     ["builtin"]=>
@@ -203,7 +203,7 @@ getType: object(ReflectionType) (1) {
 }
 type isBuiltin: bool(true)
 type allowsNull: bool(true)
-type hint: string(11) "HH\resource"
+type hint: string(12) "?HH\resource"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(true)

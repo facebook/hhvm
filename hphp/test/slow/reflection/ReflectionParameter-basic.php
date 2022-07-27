@@ -1,6 +1,6 @@
 <?hh
 function foo(string $a, int $b, float $c, bool $d, inout Exception $e,
-             callable $f = null, resource $g = null, $noType = 'whatever') {}
+             ?callable $f = null, ?resource $g = null, $noType = 'whatever') {}
 
 
 <<__EntryPoint>>

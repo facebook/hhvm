@@ -106,10 +106,6 @@ fn from_ast<'a, 'arena, 'decl>(
     if param.is_variadic {
         tparams.push("array");
     };
-    let nullable = param
-        .expr
-        .as_ref()
-        .map_or(false, |a::Expr(_, _, e)| e.is_null());
     let type_info = {
         let param_type_hint = if param.is_variadic {
             Some(Hint(
@@ -131,7 +127,7 @@ fn from_ast<'a, 'arena, 'decl>(
                 emitter.alloc,
                 &Kind::Param,
                 false,
-                nullable,
+                false, /* meaning only set nullable based on given hint */
                 &tparams[..],
                 &h,
             )?)
@@ -140,12 +136,9 @@ fn from_ast<'a, 'arena, 'decl>(
         }
     };
     // Do the type check for default value type and hint type
-    if !nullable {
-        if let Some(err_msg) =
-            default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
-        {
-            return Err(Error::fatal_parse(&param.pos, err_msg));
-        }
+    if let Some(err_msg) = default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
+    {
+        return Err(Error::fatal_parse(&param.pos, err_msg));
     }
     aast_visitor::visit(
         &mut ResolverVisitor {

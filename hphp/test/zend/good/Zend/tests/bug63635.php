@@ -3,7 +3,7 @@ class Node {
     public $parent = NULL;
     public $childs = varray[];
 
-    function __construct(Node $parent=NULL) {
+    function __construct(?Node $parent=NULL) {
         if ($parent) {
             $parent->childs[] = $this;
         }

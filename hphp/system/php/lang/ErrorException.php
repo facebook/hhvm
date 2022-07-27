@@ -27,7 +27,7 @@ class ErrorException extends Exception {
    *                     chaining.
    */
   public function __construct($message = "", $code = 0, $severity = 0,
-                              $filename = null, $lineno = null, Exception $previous = null)[] {
+                              $filename = null, $lineno = null, ?Exception $previous = null)[] {
     parent::__construct($message, $code, $previous);
     $this->severity = $severity;
     if ($filename !== null) {

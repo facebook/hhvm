@@ -9,7 +9,7 @@ namespace foo {
 
   <<__EntryPoint>>
   function main() {
-    $x = function (\bar $x = NULL) {
+    $x = function (?\bar $x = NULL) {
       \var_dump($x);
     };
 

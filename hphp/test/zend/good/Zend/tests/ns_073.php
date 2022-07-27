@@ -2,7 +2,7 @@
 
 namespace foo;
 <<__EntryPoint>> function main(): void {
-$x = function (\stdClass $x = NULL) {
+$x = function (?\stdClass $x = NULL) {
     \var_dump($x);
 };
 

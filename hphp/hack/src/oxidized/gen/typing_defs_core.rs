@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c779c4e267033a8e85997b6cb5e5e26f>>
+// @generated SignedSource<<c10a72d0a23d17a1f52f891ee4eb0cbb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -197,7 +197,7 @@ pub type TByteString = String;
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub TByteString);
+pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 
 #[derive(
     Clone,

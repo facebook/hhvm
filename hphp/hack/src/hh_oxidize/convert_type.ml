@@ -119,6 +119,8 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
     rust_ref (lifetime "a") (rust_simple_type "str")
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
     rust_type "bstr::BString" [] []
+  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_box ->
+    rust_type "bstr::BString" [] []
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
     rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
   | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->

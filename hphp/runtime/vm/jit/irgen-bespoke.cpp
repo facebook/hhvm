@@ -1994,7 +1994,8 @@ void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
   present->append(jmp);
 
   auto const val = inst->dst();
-  if (val->type().maybe(TUninit)) {
+  auto const origType = val->type();
+  if (origType.maybe(TUninit)) {
     notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
   } else {
     notPresent->append(unit.gen(Unreachable, inst->bcctx(), ASSERT_REASON));
@@ -2003,7 +2004,7 @@ void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
   auto const defLabel = unit.defLabel(1, join, inst->bcctx());
   val->setInstruction(defLabel);
   defLabel->setDst(val, 0);
-  val->setType(elemType.first);
+  val->setType(origType);
 
   auto iter = block->iteratorTo(inst);
   ++iter;

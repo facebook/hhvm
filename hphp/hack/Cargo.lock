@@ -1449,6 +1449,7 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
+ "bc_to_ir",
  "bstr",
  "bumpalo",
  "byte-unit",
@@ -1466,6 +1467,7 @@ dependencies = [
  "hhbc",
  "hhvm_options",
  "hhvm_types_ffi",
+ "ir_to_bc",
  "itertools 0.10.3",
  "jwalk",
  "log",
@@ -1481,6 +1483,7 @@ dependencies = [
  "positioned_by_ref_parser",
  "positioned_full_trivia_parser",
  "positioned_parser",
+ "profile_rust",
  "rayon",
  "regex",
  "serde_json",

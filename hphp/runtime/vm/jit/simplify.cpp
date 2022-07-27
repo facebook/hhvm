@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -4278,64 +4279,91 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
 
 void simplifyPass(IRUnit& unit) {
   Timer timer{Timer::optimize_simplify, unit.logEntry().get_pointer()};
+  PassTracer tracer{&unit, Trace::simplify, "simplify"};
 
-  auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
+  do {
+    auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
 
-  {
-    jit::stack<Block*> worklist;
-    worklist.push(unit.entry());
-    while (!worklist.empty()) {
-      auto const block = worklist.top();
-      worklist.pop();
-
-      if (reachable.test(block->id())) continue;
-      reachable.set(block->id());
-
-      if (!block->isUnreachable()) {
-        for (auto& inst : *block) simplifyInPlace(unit, &inst);
+    auto const unreachableTypes = [&] (IRInstruction* inst) {
+      for (auto const src : inst->srcs()) {
+        if (src->type() == TBottom) return true;
       }
-
-      if (auto const b = block->next()) {
-        if (!b->isUnreachable()) worklist.push(b);
+      for (auto const dst : inst->dsts()) {
+        if (dst->type() == TBottom) {
+          if (inst->isBlockEnd()) {
+            assertx(inst->nextEdge());
+            inst->setNext(unreachableBlock(unit, inst->bcctx()));
+            return false;
+          }
+          return true;
+        }
       }
-      if (auto const b = block->taken()) {
-        if (!b->isUnreachable()) worklist.push(b);
+      return false;
+    };
+
+    auto const markUnreachable = [&] (Block* block) {
+      // Any code that's postdominated by Unreachable is also unreachable, so
+      // erase everything else in this block.
+      if (block->back().hasDst()) block->back().setDst(nullptr);
+      unit.replace(&block->back(), Unreachable, ASSERT_REASON);
+      for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
+        auto toErase = it;
+        ++it;
+        block->erase(toErase);
+      }
+      reachable.reset(block->id());
+    };
+
+    {
+      jit::stack<Block*> worklist;
+      worklist.push(unit.entry());
+      while (!worklist.empty()) {
+        auto const block = worklist.top();
+        worklist.pop();
+
+        if (reachable.test(block->id())) continue;
+        if (block->isUnreachable()) continue;
+        reachable.set(block->id());
+
+        for (auto& inst : *block) {
+          if (unreachableTypes(&inst)) {
+            markUnreachable(block);
+            break;
+          }
+          simplifyInPlace(unit, &inst);
+        }
+
+        if (!reachable.test(block->id())) continue;
+        if (auto const b = block->next()) {
+          if (!b->isUnreachable()) worklist.push(b);
+        }
+        if (auto const b = block->taken()) {
+          if (!b->isUnreachable()) worklist.push(b);
+        }
       }
     }
-  }
 
-  auto const markUnreachable = [&] (Block* block) {
-    // Any code that's postdominated by Unreachable is also unreachable, so
-    // erase everything else in this block.
-    if (block->back().hasDst()) block->back().setDst(nullptr);
-    unit.replace(&block->back(), Unreachable, ASSERT_REASON);
-    for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
-      auto toErase = it;
-      ++it;
-      block->erase(toErase);
+    // We may have introduced new unreachable blocks.
+    if (unit.numBlocks() > reachable.size()) reachable.resize(unit.numBlocks());
+
+    auto const poBlocks = poSortCfg(unit);
+    // Collapse unreachable blocks
+    std::deque<Block*> workQ(poBlocks.cbegin(), poBlocks.cend());
+    while (!workQ.empty()) {
+      auto const block = workQ.front();
+      workQ.pop_front();
+      if (!reachable.test(block->id())) continue;
+
+      auto& inst = block->back();
+      if (inst.hasEdges() &&
+          (!inst.next() || !reachable.test(inst.next()->id())) &&
+          (!inst.taken() || !reachable.test(inst.taken()->id()))) {
+        auto const& preds = block->preds();
+        for (auto const& pred : preds) workQ.push_back(pred.from());
+        markUnreachable(block);
+      }
     }
-  };
-
-  // We may have introduced new unreachable blocks.
-  if (unit.numBlocks() > reachable.size()) reachable.resize(unit.numBlocks());
-
-  auto const poBlocks = poSortCfg(unit);
-  // Collapse unreachable blocks
-  std::deque<Block*> workQ(poBlocks.cbegin(), poBlocks.cend());
-  while (!workQ.empty()) {
-    auto const block = workQ.front();
-    workQ.pop_front();
-    if (!reachable.test(block->id())) continue;
-
-    auto& inst = block->back();
-    if (inst.hasEdges() &&
-        (!inst.next() || !reachable.test(inst.next()->id())) &&
-        (!inst.taken() || !reachable.test(inst.taken()->id()))) {
-      auto const& preds = block->preds();
-      for (auto const& pred : preds) workQ.push_back(pred.from());
-      markUnreachable(block);
-    }
-  }
+  } while (reflowTypes(unit));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

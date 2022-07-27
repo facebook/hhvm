@@ -4,12 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::compile::SingleFileOpts;
+use crate::profile;
 use crate::profile::DurationEx;
 use crate::profile::StatusTicker;
+use crate::profile::Timing;
 use crate::regex;
 use anyhow::ensure;
 use clap::Parser;
-use compile::Profile;
 use itertools::Itertools;
 use log::info;
 use multifile_rust as multifile;
@@ -36,6 +37,8 @@ enum VerifyError {
     AssembleError(String),
     #[error("compile error {0}")]
     CompileError(String),
+    #[error("i/o error: {0}")]
+    IoError(String),
     #[error("multifile error: {0}")]
     MultifileError(String),
     #[error("panic {0}")]
@@ -46,6 +49,12 @@ enum VerifyError {
     ReadError(String),
     #[error("units mismatch: {0}")]
     UnitMismatchError(crate::cmp_unit::CmpError),
+}
+
+impl From<std::io::Error> for VerifyError {
+    fn from(err: std::io::Error) -> Self {
+        VerifyError::IoError(err.to_string())
+    }
 }
 
 type Result<T, E = VerifyError> = std::result::Result<T, E>;
@@ -88,31 +97,54 @@ struct AssembleOpts {
 }
 
 impl AssembleOpts {
-    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut Profile) -> Result<()> {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         let pre_alloc = bumpalo::Bump::default();
+        let mut compile_profile = compile::Profile::default();
         let (env, pre_unit) = compile_php_file(
             &pre_alloc,
             path,
             content,
             &self.common.single_file_opts,
-            profile,
+            &mut compile_profile,
         )?;
 
         let mut output: Vec<u8> = Vec::new();
-        let mut profile = compile::Profile::default();
-        compile::unit_to_string(&env, &mut output, &pre_unit, &mut profile)
+        let mut print_profile = compile::Profile::default();
+        compile::unit_to_string(&env, &mut output, &pre_unit, &mut print_profile)
             .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
         let post_alloc = bumpalo::Bump::default();
-        let (post_unit, _) = crate::assemble::assemble_from_bytes(
-            &post_alloc,
-            &output,
-            /* print tokens */ false,
-        )
-        .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
+        let (asm_result, assemble_t) = Timing::time(path, || {
+            crate::assemble::assemble_from_bytes(
+                &post_alloc,
+                &output,
+                /* print tokens */ false,
+            )
+        });
+        let (post_unit, _) = asm_result
+            .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
 
-        crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
-            .map_err(VerifyError::UnitMismatchError)
+        let (result, verify_t) = Timing::time(path, || {
+            crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
+        });
+
+        let total_t = compile_profile.codegen_t
+            + compile_profile.parsing_t
+            + print_profile.printing_t
+            + assemble_t.as_secs_f64()
+            + verify_t.as_secs_f64();
+
+        profile.fold_with(ProfileAcc {
+            total_t: Timing::from_secs_f64(total_t, path),
+            codegen_t: Timing::from_secs_f64(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_secs_f64(compile_profile.parsing_t, path),
+            printing_t: Timing::from_secs_f64(print_profile.printing_t, path),
+            assemble_t,
+            verify_t,
+            ..Default::default()
+        });
+
+        result.map_err(VerifyError::UnitMismatchError)
     }
 }
 
@@ -134,7 +166,7 @@ impl Mode {
         }
     }
 
-    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut Profile) -> Result<()> {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         match self {
             Mode::Assemble(opts) => opts.verify_file(path, content, profile),
         }
@@ -152,7 +184,7 @@ fn compile_php_file<'a, 'arena>(
     path: &'a Path,
     content: Vec<u8>,
     single_file_opts: &'a SingleFileOpts,
-    profile: &mut Profile,
+    profile: &mut compile::Profile,
 ) -> Result<(compile::NativeEnv<'a>, hhbc::hackc_unit::HackCUnit<'arena>)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
@@ -168,12 +200,12 @@ fn truncate_pos_err(err_str: String) -> String {
     pos_reg.replace(err_str.as_str(), "Pos {...}").to_string()
 }
 
-fn with_catch_panics<F>(profile: &mut Profile, long_msg: bool, action: F) -> Result<()>
+fn with_catch_panics<F>(profile: &mut ProfileAcc, long_msg: bool, action: F) -> Result<()>
 where
-    F: FnOnce(&mut Profile) -> Result<()> + std::panic::UnwindSafe,
+    F: FnOnce(&mut ProfileAcc) -> Result<()> + std::panic::UnwindSafe,
 {
     let result = std::panic::catch_unwind(|| {
-        let mut inner_profile = Profile::default();
+        let mut inner_profile = ProfileAcc::default();
         let ok = action(&mut inner_profile);
         (ok, inner_profile)
     });
@@ -203,6 +235,12 @@ where
 struct ProfileAcc {
     passed: bool,
     error_histogram: HashMap<VerifyError, (usize, PathBuf)>,
+    assemble_t: Timing,
+    codegen_t: Timing,
+    parsing_t: Timing,
+    printing_t: Timing,
+    total_t: Timing,
+    verify_t: Timing,
 }
 
 impl std::default::Default for ProfileAcc {
@@ -210,12 +248,18 @@ impl std::default::Default for ProfileAcc {
         Self {
             passed: true,
             error_histogram: Default::default(),
+            assemble_t: Default::default(),
+            codegen_t: Default::default(),
+            parsing_t: Default::default(),
+            printing_t: Default::default(),
+            total_t: Default::default(),
+            verify_t: Default::default(),
         }
     }
 }
 
 impl ProfileAcc {
-    fn fold(mut self, other: Self) -> Self {
+    fn fold_with(&mut self, other: Self) {
         self.passed = self.passed && other.passed;
         for (err, (n, example)) in other.error_histogram {
             self.error_histogram
@@ -223,10 +267,26 @@ impl ProfileAcc {
                 .or_insert_with(|| (0, example))
                 .0 += n;
         }
+        self.assemble_t.fold_with(other.assemble_t);
+        self.codegen_t.fold_with(other.codegen_t);
+        self.parsing_t.fold_with(other.parsing_t);
+        self.printing_t.fold_with(other.printing_t);
+        self.total_t.fold_with(other.total_t);
+        self.verify_t.fold_with(other.verify_t);
+    }
+
+    fn fold(mut self, other: Self) -> Self {
+        self.fold_with(other);
         self
     }
 
-    fn report_final(&self, wall: Duration, count: usize, total: usize, show_all: bool) {
+    fn report_final(
+        &self,
+        wall: Duration,
+        count: usize,
+        total: usize,
+        show_all: bool,
+    ) -> Result<()> {
         if total >= 10 {
             let wall_per_sec = if !wall.is_zero() {
                 ((count as f64) / wall.as_secs_f64()) as usize
@@ -271,6 +331,16 @@ impl ProfileAcc {
             }
             println!();
         }
+
+        let mut w = std::io::stdout();
+        profile::report_stat(&mut w, "", "total time", &self.total_t)?;
+        profile::report_stat(&mut w, "  ", "parsing time", &self.parsing_t)?;
+        profile::report_stat(&mut w, "  ", "codegen time", &self.codegen_t)?;
+        profile::report_stat(&mut w, "  ", "printing time", &self.printing_t)?;
+        profile::report_stat(&mut w, "  ", "assemble time", &self.assemble_t)?;
+        profile::report_stat(&mut w, "  ", "verify time", &self.verify_t)?;
+
+        Ok(())
     }
 
     fn record_error(mut self, err: VerifyError, f: &Path) -> Self {
@@ -290,7 +360,7 @@ impl ProfileAcc {
 }
 
 fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
-    let acc = ProfileAcc::default();
+    let mut acc = ProfileAcc::default();
 
     let content = match fs::read(path) {
         Ok(content) => content,
@@ -307,14 +377,15 @@ fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
     };
 
     for (path, content) in files {
-        let mut file_profile = Profile::default();
+        let mut file_profile = ProfileAcc::default();
         let result = if mode.common().panic_fuse {
             mode.verify_file(&path, content, &mut file_profile)
         } else {
-            with_catch_panics(&mut file_profile, mode.common().long_msg, |profile| {
-                mode.verify_file(&path, content, profile)
+            with_catch_panics(&mut file_profile, mode.common().long_msg, |file_profile| {
+                mode.verify_file(&path, content, file_profile)
             })
         };
+        acc = acc.fold(file_profile);
         if let Err(err) = result {
             return acc.record_error(err, &path);
         }
@@ -349,7 +420,7 @@ fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
 
     let (count, duration) = status_ticker.finish();
 
-    profile.report_final(duration, count, total, mode.common().show_all);
+    profile.report_final(duration, count, total, mode.common().show_all)?;
 
     ensure!(
         profile.passed,

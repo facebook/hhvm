@@ -22,6 +22,14 @@ pub(crate) struct Timing {
 }
 
 impl Timing {
+    pub(crate) fn time<'a, T>(
+        path: impl Into<Cow<'a, Path>>,
+        f: impl FnOnce() -> T,
+    ) -> (T, Timing) {
+        let (r, t) = profile_rust::time(f);
+        (r, Timing::from_duration(t, path))
+    }
+
     pub(crate) fn from_duration<'a>(time: Duration, path: impl Into<Cow<'a, Path>>) -> Self {
         let mut histogram = hdrhistogram::Histogram::new(3).unwrap();
         histogram.record(time.as_micros() as u64).unwrap();
@@ -30,6 +38,10 @@ impl Timing {
             histogram,
             worst: Some((time, path.into().into_owned())),
         }
+    }
+
+    pub(crate) fn as_secs_f64(&self) -> f64 {
+        self.total.as_secs_f64()
     }
 
     pub(crate) fn from_secs_f64<'a>(t: f64, path: impl Into<Cow<'a, Path>>) -> Self {
@@ -299,11 +311,6 @@ impl<T: Ord> MaxValue<T> {
                 }
             }
         }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn is_set(&self) -> bool {
-        matches!(self, Self::Set(..))
     }
 
     pub(crate) fn value(&self) -> &T {

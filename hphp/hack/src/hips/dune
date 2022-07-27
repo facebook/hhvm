@@ -1,0 +1,12 @@
+(library
+ (name hips)
+ (wrapped false)
+ (flags
+  (:standard -linkall))
+ (modules
+  hips_solver
+  hips_types)
+ (libraries
+  core_kernel
+  ast)
+)

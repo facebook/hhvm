@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hash::HashMap;
 use std::borrow::Cow;
 use std::fmt;
 use std::fmt::Display;
@@ -151,12 +152,15 @@ pub(crate) fn report_stat(indent: &str, what: &str, timing: &Timing) {
 struct StatusSharedData {
     count: usize,
     finished: bool,
+    last_long_run_check: Instant,
+    // start time for each active file
+    processing: HashMap<PathBuf, Instant>,
     start: Instant,
     total: usize,
 }
 
 impl StatusSharedData {
-    fn report_status(&self) {
+    fn report_status(&mut self) {
         let wall = self.start.elapsed();
         let count = self.count;
 
@@ -181,6 +185,20 @@ impl StatusSharedData {
             total = self.total,
             wall = wall.display(),
         );
+
+        if self.last_long_run_check.elapsed().as_secs() > 10 {
+            let mut lead = "\nWARNING: Long-running files:\n";
+
+            for (name, start) in self.processing.iter_mut() {
+                let elapsed = start.elapsed();
+                if elapsed.as_secs() > 10 {
+                    eprintln!("{lead}    {} ({})", name.display(), elapsed.display());
+                    lead = "";
+                }
+            }
+
+            self.last_long_run_check = Instant::now();
+        }
     }
 }
 
@@ -194,6 +212,8 @@ impl StatusTicker {
         let shared = Arc::new(Mutex::new(StatusSharedData {
             count: 0,
             finished: false,
+            last_long_run_check: Instant::now(),
+            processing: Default::default(),
             start: Instant::now(),
             total,
         }));
@@ -208,7 +228,7 @@ impl StatusTicker {
 
         std::thread::spawn(move || {
             loop {
-                let shared = shared.lock().unwrap();
+                let mut shared = shared.lock().unwrap();
                 if shared.finished {
                     break;
                 }
@@ -232,10 +252,14 @@ impl StatusTicker {
         (count, duration)
     }
 
-    pub(crate) fn start_file(&self, _path: &Path) {}
+    pub(crate) fn start_file(&self, path: &Path) {
+        let mut shared = self.shared.lock().unwrap();
+        shared.processing.insert(path.to_path_buf(), Instant::now());
+    }
 
-    pub(crate) fn finish_file(&self, _path: &Path) {
+    pub(crate) fn finish_file(&self, path: &Path) {
         let mut shared = self.shared.lock().unwrap();
         shared.count += 1;
+        shared.processing.remove(path);
     }
 }

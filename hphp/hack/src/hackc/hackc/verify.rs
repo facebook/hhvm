@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::compile::SingleFileOpts;
+use crate::profile::DurationEx;
+use crate::profile::StatusTicker;
 use crate::regex;
 use anyhow::ensure;
 use clap::Parser;
@@ -18,15 +20,9 @@ use rayon::prelude::*;
 use regex::Regex;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt;
-use std::fmt::Display;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
-use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 use thiserror::Error;
@@ -203,152 +199,6 @@ where
     }
 }
 
-struct Timing {
-    total: Duration,
-    histogram: hdrhistogram::Histogram<u64>,
-    worst: Option<(Duration, PathBuf)>,
-}
-
-impl std::default::Default for Timing {
-    fn default() -> Self {
-        Self {
-            total: Duration::from_secs(0),
-            histogram: hdrhistogram::Histogram::new(3).unwrap(),
-            worst: None,
-        }
-    }
-}
-
-impl std::ops::AddAssign for Timing {
-    fn add_assign(&mut self, rhs: Self) {
-        self.total += rhs.total;
-        self.histogram.add(rhs.histogram).unwrap();
-        self.worst = match (self.worst.take(), rhs.worst) {
-            (None, None) => None,
-            (lhs @ Some(_), None) => lhs,
-            (None, rhs @ Some(_)) => rhs,
-            (Some(lhs), Some(rhs)) => {
-                if lhs.0 > rhs.0 {
-                    Some(lhs)
-                } else {
-                    Some(rhs)
-                }
-            }
-        }
-    }
-}
-
-trait DurationEx {
-    fn display(&self) -> DurationDisplay;
-}
-
-impl DurationEx for Duration {
-    fn display(&self) -> DurationDisplay {
-        DurationDisplay(*self)
-    }
-}
-
-struct DurationDisplay(Duration);
-
-impl Display for DurationDisplay {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.0 > Duration::from_secs(2) {
-            write!(f, "{:.3}s", self.0.as_secs_f64())
-        } else if self.0 > Duration::from_millis(2) {
-            write!(f, "{:.3}ms", (self.0.as_micros() as f64) / 1_000.0)
-        } else {
-            write!(f, "{}us", self.0.as_micros())
-        }
-    }
-}
-
-fn to_hms(time: usize) -> String {
-    if time >= 5400 {
-        // > 90m
-        format!(
-            "{:02}h:{:02}m:{:02}s",
-            time / 3600,
-            (time % 3600) / 60,
-            time % 60
-        )
-    } else if time > 90 {
-        // > 90s
-        format!("{:02}m:{:02}s", time / 60, time % 60)
-    } else {
-        format!("{}s", time)
-    }
-}
-
-fn report_status(wall: Duration, count: usize, total: usize) {
-    if total < 10 {
-        return;
-    }
-
-    let wall_per_sec = if !wall.is_zero() {
-        ((count as f64) / wall.as_secs_f64()) as usize
-    } else {
-        0
-    };
-
-    let remaining = if wall_per_sec > 0 {
-        let left = (total - count) / wall_per_sec;
-        format!(", {} remaining", to_hms(left))
-    } else {
-        "".into()
-    };
-    eprint!(
-        "\rProcessed {count} / {total} in {:.3} ({wall_per_sec}/s{remaining})            ",
-        wall.display(),
-    );
-}
-
-fn report_final(wall: Duration, count: usize, total: usize, profile: &ProfileAcc, show_all: bool) {
-    if total >= 10 {
-        let wall_per_sec = if !wall.is_zero() {
-            ((count as f64) / wall.as_secs_f64()) as usize
-        } else {
-            0
-        };
-        eprintln!(
-            "\rProcessed {count} files in {wall} ({wall_per_sec}/s)",
-            wall = wall.display(),
-        );
-    }
-
-    if profile.passed {
-        println!("All files passed.");
-    } else {
-        println!("Failed to complete");
-    }
-
-    let num_show = if show_all {
-        profile.error_histogram.len()
-    } else {
-        20
-    };
-
-    // The # of files that failed are sum of error_histogram's values' usize field
-    if !profile.error_histogram.is_empty() {
-        println!("{}/{} files passed", total - profile.num_failed(), total);
-        println!("Failure histogram:");
-        for (k, v) in profile
-            .error_histogram
-            .iter()
-            .sorted_by(|a, b| a.1.0.cmp(&b.1.0).reverse())
-            .take(num_show)
-        {
-            println!("  {:3} ({}): {}", v.0, v.1.display(), k);
-        }
-        if profile.error_histogram.len() > 20 {
-            println!(
-                "  (and {} unreported)",
-                profile.error_histogram.len() - num_show
-            );
-        }
-        println!();
-    }
-}
-
 struct ProfileAcc {
     passed: bool,
     error_histogram: HashMap<VerifyError, (usize, PathBuf)>,
@@ -373,6 +223,53 @@ impl ProfileAcc {
                 .0 += n;
         }
         self
+    }
+
+    fn report_final(&self, wall: Duration, count: usize, total: usize, show_all: bool) {
+        if total >= 10 {
+            let wall_per_sec = if !wall.is_zero() {
+                ((count as f64) / wall.as_secs_f64()) as usize
+            } else {
+                0
+            };
+            eprintln!(
+                "\rProcessed {count} files in {wall} ({wall_per_sec}/s)",
+                wall = wall.display(),
+            );
+        }
+
+        if self.passed {
+            println!("All files passed.");
+        } else {
+            println!("Failed to complete");
+        }
+
+        let num_show = if show_all {
+            self.error_histogram.len()
+        } else {
+            20
+        };
+
+        // The # of files that failed are sum of error_histogram's values' usize field
+        if !self.error_histogram.is_empty() {
+            println!("{}/{} files passed", total - self.num_failed(), total);
+            println!("Failure histogram:");
+            for (k, v) in self
+                .error_histogram
+                .iter()
+                .sorted_by(|a, b| a.1.0.cmp(&b.1.0).reverse())
+                .take(num_show)
+            {
+                println!("  {:3} ({}): {}", v.0, v.1.display(), k);
+            }
+            if self.error_histogram.len() > 20 {
+                println!(
+                    "  (and {} unreported)",
+                    self.error_histogram.len() - num_show
+                );
+            }
+            println!();
+        }
     }
 
     fn record_error(mut self, err: VerifyError, f: &Path) -> Self {
@@ -427,24 +324,13 @@ fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
 
 fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
     let total = files.len();
-    let count = Arc::new(AtomicUsize::new(0));
-    let finished = Arc::new(AtomicBool::new(false));
-    let start = Instant::now();
 
-    let status_handle = {
-        let count = count.clone();
-        let finished = finished.clone();
-        std::thread::spawn(move || {
-            while !finished.load(Ordering::Acquire) {
-                report_status(start.elapsed(), count.load(Ordering::Acquire), total);
-                std::thread::sleep(Duration::from_millis(1000));
-            }
-        })
-    };
+    let status_ticker = StatusTicker::new(total);
 
     let verify_one_file_ = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
+        status_ticker.start_file(f);
         let profile = verify_one_file(f, mode);
-        count.fetch_add(1, Ordering::Release);
+        status_ticker.finish_file(f);
         acc.fold(profile)
     };
 
@@ -460,18 +346,9 @@ fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
             .reduce(ProfileAcc::default, ProfileAcc::fold)
     };
 
-    finished.store(true, Ordering::Release);
-    let duration = start.elapsed();
+    let (count, duration) = status_ticker.finish();
 
-    status_handle.join().unwrap();
-
-    report_final(
-        duration,
-        count.load(Ordering::Acquire),
-        total,
-        &profile,
-        mode.common().show_all,
-    );
+    profile.report_final(duration, count, total, mode.common().show_all);
 
     ensure!(
         profile.passed,

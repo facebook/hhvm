@@ -8,6 +8,7 @@ mod crc;
 mod expr_trees;
 mod facts;
 mod parse;
+mod profile;
 mod util;
 mod verify;
 

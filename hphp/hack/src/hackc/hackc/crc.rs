@@ -4,6 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::compile::SingleFileOpts;
+use crate::profile;
+use crate::profile::DurationEx;
+use crate::profile::StatusTicker;
+use crate::profile::Timing;
 use anyhow::bail;
 use anyhow::Result;
 use clap::Parser;
@@ -12,8 +16,6 @@ use log::info;
 use multifile_rust as multifile;
 use rayon::prelude::*;
 use std::borrow::Cow;
-use std::fmt;
-use std::fmt::Display;
 use std::fs;
 use std::hash::Hash;
 use std::hash::Hasher;
@@ -21,7 +23,6 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
-use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -91,200 +92,6 @@ fn process_one_file(
     Ok(())
 }
 
-struct Timing {
-    total: Duration,
-    histogram: hdrhistogram::Histogram<u64>,
-    worst: Option<(Duration, PathBuf)>,
-}
-
-impl Timing {
-    fn from_duration<'a>(time: Duration, path: impl Into<Cow<'a, Path>>) -> Self {
-        let mut histogram = hdrhistogram::Histogram::new(3).unwrap();
-        histogram.record(time.as_micros() as u64).unwrap();
-        Timing {
-            total: time,
-            histogram,
-            worst: Some((time, path.into().into_owned())),
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.histogram.is_empty()
-    }
-
-    fn mean(&self) -> Duration {
-        Duration::from_micros(self.histogram.mean() as u64)
-    }
-
-    fn max(&self) -> Duration {
-        Duration::from_micros(self.histogram.max())
-    }
-
-    fn value_at_percentile(&self, q: f64) -> Duration {
-        Duration::from_micros(self.histogram.value_at_percentile(q))
-    }
-
-    fn worst(&self) -> Option<&Path> {
-        self.worst.as_ref().map(|(_, path)| path.as_path())
-    }
-}
-
-impl std::default::Default for Timing {
-    fn default() -> Self {
-        Self {
-            total: Duration::from_secs(0),
-            histogram: hdrhistogram::Histogram::new(3).unwrap(),
-            worst: None,
-        }
-    }
-}
-
-impl std::ops::AddAssign for Timing {
-    fn add_assign(&mut self, rhs: Self) {
-        self.total += rhs.total;
-        self.histogram.add(rhs.histogram).unwrap();
-        self.worst = match (self.worst.take(), rhs.worst) {
-            (None, None) => None,
-            (lhs @ Some(_), None) => lhs,
-            (None, rhs @ Some(_)) => rhs,
-            (Some(lhs), Some(rhs)) => {
-                if lhs.0 > rhs.0 {
-                    Some(lhs)
-                } else {
-                    Some(rhs)
-                }
-            }
-        }
-    }
-}
-
-trait DurationEx {
-    fn display(&self) -> DurationDisplay;
-}
-
-impl DurationEx for Duration {
-    fn display(&self) -> DurationDisplay {
-        DurationDisplay(*self)
-    }
-}
-
-struct DurationDisplay(Duration);
-
-impl Display for DurationDisplay {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.0 > Duration::from_secs(2) {
-            write!(f, "{:.3}s", self.0.as_secs_f64())
-        } else if self.0 > Duration::from_millis(2) {
-            write!(f, "{:.3}ms", (self.0.as_micros() as f64) / 1_000.0)
-        } else {
-            write!(f, "{}us", self.0.as_micros())
-        }
-    }
-}
-
-fn to_hms(time: usize) -> String {
-    if time >= 5400 {
-        // > 90m
-        format!(
-            "{:02}h:{:02}m:{:02}s",
-            time / 3600,
-            (time % 3600) / 60,
-            time % 60
-        )
-    } else if time > 90 {
-        // > 90s
-        format!("{:02}m:{:02}s", time / 60, time % 60)
-    } else {
-        format!("{}s", time)
-    }
-}
-
-fn report_stat(indent: &str, what: &str, timing: &Timing) {
-    if timing.is_empty() {
-        return;
-    }
-
-    eprint!(
-        "{}{}: total: {}, avg: {}",
-        indent,
-        what,
-        timing.total.display(),
-        timing.mean().display()
-    );
-    eprint!(", P50: {}", timing.value_at_percentile(50.0).display());
-    eprint!(", P90: {}", timing.value_at_percentile(90.0).display());
-    eprint!(", P99: {}", timing.value_at_percentile(99.0).display());
-    eprintln!(", max: {}", timing.max().display());
-
-    if let Some(worst) = timing.worst() {
-        eprintln!("{}  (max in {})", indent, worst.display());
-    }
-}
-
-fn report(wall: Duration, count: usize, profile: Option<ProfileAcc>, total: usize) {
-    let wall_per_sec = if !wall.is_zero() {
-        ((count as f64) / wall.as_secs_f64()) as usize
-    } else {
-        0
-    };
-
-    if let Some(profile) = profile {
-        // Done, print final stats.
-        eprintln!(
-            "\rProcessed {} in {} ({}/s) cpu={:.3}s arenas={:.3}MiB  ",
-            count,
-            wall.display(),
-            wall_per_sec,
-            profile.sum.total_sec(),
-            profile.sum.codegen_bytes as f64 / (1024 * 1024) as f64,
-        );
-        report_stat("", "total time", &profile.total_t);
-        report_stat("  ", "parsing time", &profile.parsing_t);
-        report_stat("  ", "codegen time", &profile.codegen_t);
-        report_stat("  ", "printing time", &profile.printing_t);
-        eprintln!(
-            "parser stack peak {} in {}",
-            profile.max_parse.parse_peak,
-            profile.max_parse_file.display()
-        );
-        eprintln!(
-            "lowerer stack peak {} in {}",
-            profile.max_lower.lower_peak,
-            profile.max_lower_file.display()
-        );
-        eprintln!(
-            "check_error stack peak {} in {}",
-            profile.max_error.error_peak,
-            profile.max_error_file.display()
-        );
-        eprintln!(
-            "rewrite stack peak {} in {}",
-            profile.max_rewrite.rewrite_peak,
-            profile.max_rewrite_file.display()
-        );
-        eprint!(
-            "emitter stack peak {} in {}",
-            profile.max_emitter.emitter_peak,
-            profile.max_emitter_file.display()
-        );
-    } else {
-        let remaining = if wall_per_sec > 0 {
-            let left = (total - count) / wall_per_sec;
-            format!(", {} remaining", to_hms(left))
-        } else {
-            "".into()
-        };
-        eprint!(
-            "\rProcessed {} / {} in {:.3}s ({}/s{})            ",
-            count,
-            total,
-            wall.display(),
-            wall_per_sec,
-            remaining,
-        );
-    }
-}
-
 #[derive(Default)]
 struct ProfileAcc {
     sum: Profile,
@@ -333,6 +140,80 @@ impl ProfileAcc {
         self.printing_t += other.printing_t;
         self
     }
+
+    fn from_compile<'a>(profile: compile::Profile, path: impl Into<Cow<'a, Path>>) -> Self {
+        let path = path.into();
+        let total_t = profile.codegen_t + profile.parsing_t + profile.printing_t;
+        let total_t = Timing::from_secs_f64(total_t, path.clone());
+        let codegen_t = Timing::from_secs_f64(profile.codegen_t, path.clone());
+        let parsing_t = Timing::from_secs_f64(profile.parsing_t, path.clone());
+        let printing_t = Timing::from_secs_f64(profile.printing_t, path.clone());
+        ProfileAcc {
+            total_t,
+            codegen_t,
+            parsing_t,
+            printing_t,
+            sum: profile.clone(),
+            max_parse: profile.clone(),
+            max_parse_file: path.to_path_buf(),
+            max_lower: profile.clone(),
+            max_lower_file: path.to_path_buf(),
+            max_error: profile.clone(),
+            max_error_file: path.to_path_buf(),
+            max_rewrite: profile.clone(),
+            max_rewrite_file: path.to_path_buf(),
+            max_emitter: profile,
+            max_emitter_file: path.into_owned(),
+        }
+    }
+
+    fn report_final(&self, wall: Duration, count: usize, total: usize) {
+        if total >= 10 {
+            let wall_per_sec = if !wall.is_zero() {
+                ((count as f64) / wall.as_secs_f64()) as usize
+            } else {
+                0
+            };
+
+            // Done, print final stats.
+            eprintln!(
+                "\rProcessed {count} in {wall} ({wall_per_sec}/s) cpu={cpu:.3}s arenas={arenas:.3}MiB  ",
+                wall = wall.display(),
+                cpu = self.sum.total_sec(),
+                arenas = self.sum.codegen_bytes as f64 / (1024 * 1024) as f64,
+            );
+        }
+
+        profile::report_stat("", "total time", &self.total_t);
+        profile::report_stat("  ", "parsing time", &self.parsing_t);
+        profile::report_stat("  ", "codegen time", &self.codegen_t);
+        profile::report_stat("  ", "printing time", &self.printing_t);
+        eprintln!(
+            "parser stack peak {} in {}",
+            self.max_parse.parse_peak,
+            self.max_parse_file.display()
+        );
+        eprintln!(
+            "lowerer stack peak {} in {}",
+            self.max_lower.lower_peak,
+            self.max_lower_file.display()
+        );
+        eprintln!(
+            "check_error stack peak {} in {}",
+            self.max_error.error_peak,
+            self.max_error_file.display()
+        );
+        eprintln!(
+            "rewrite stack peak {} in {}",
+            self.max_rewrite.rewrite_peak,
+            self.max_rewrite_file.display()
+        );
+        eprint!(
+            "emitter stack peak {} in {}",
+            self.max_emitter.emitter_peak,
+            self.max_emitter_file.display()
+        );
+    }
 }
 
 fn crc_files(
@@ -342,51 +223,19 @@ fn crc_files(
     compile_opts: &SingleFileOpts,
 ) -> Result<()> {
     let total = files.len();
-    let count = Arc::new(AtomicUsize::new(0));
-    let finished = Arc::new(AtomicBool::new(false));
-    let start = Instant::now();
     let passed = Arc::new(AtomicBool::new(true));
 
-    let status_handle = {
-        let count = count.clone();
-        let finished = finished.clone();
-        std::thread::spawn(move || {
-            while !finished.load(Ordering::Acquire) {
-                report(start.elapsed(), count.load(Ordering::Acquire), None, total);
-                std::thread::sleep(Duration::from_millis(1000));
-            }
-        })
-    };
+    let status_ticker = StatusTicker::new(total);
 
     let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
         let mut profile = Profile::default();
+        status_ticker.start_file(f);
         let file_passed = process_one_file(writer, f.as_path(), compile_opts, &mut profile).is_ok();
         if !file_passed {
             passed.store(false, Ordering::Release);
         }
-        count.fetch_add(1, Ordering::Release);
-        let total_t = profile.codegen_t + profile.parsing_t + profile.printing_t;
-        let total_t = Timing::from_duration(Duration::from_secs_f64(total_t), f);
-        let codegen_t = Timing::from_duration(Duration::from_secs_f64(profile.codegen_t), f);
-        let parsing_t = Timing::from_duration(Duration::from_secs_f64(profile.parsing_t), f);
-        let printing_t = Timing::from_duration(Duration::from_secs_f64(profile.printing_t), f);
-        acc.fold(ProfileAcc {
-            total_t,
-            codegen_t,
-            parsing_t,
-            printing_t,
-            sum: profile.clone(),
-            max_parse: profile.clone(),
-            max_parse_file: f.clone(),
-            max_lower: profile.clone(),
-            max_lower_file: f.clone(),
-            max_error: profile.clone(),
-            max_error_file: f.clone(),
-            max_rewrite: profile.clone(),
-            max_rewrite_file: f.clone(),
-            max_emitter: profile,
-            max_emitter_file: f.clone(),
-        })
+        status_ticker.finish_file(f);
+        acc.fold(ProfileAcc::from_compile(profile, f))
     };
 
     let profile = if num_threads == 1 {
@@ -399,16 +248,9 @@ fn crc_files(
             .reduce(ProfileAcc::default, |x, y| x.fold(y))
     };
 
-    finished.store(true, Ordering::Release);
-    let duration = start.elapsed();
+    let (count, duration) = status_ticker.finish();
 
-    status_handle.join().unwrap();
-    report(
-        duration,
-        count.load(Ordering::Acquire),
-        Some(profile),
-        total,
-    );
+    profile.report_final(duration, count, total);
     eprintln!();
 
     if !passed.load(Ordering::Acquire) {

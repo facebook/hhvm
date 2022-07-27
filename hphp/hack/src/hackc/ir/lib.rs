@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub use analysis;
-pub use core::*;
+pub use ir_core::*;
 pub use passes;
 pub use print;
 pub use print::print_unit;

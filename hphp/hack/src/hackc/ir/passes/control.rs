@@ -5,13 +5,13 @@
 
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
-use core::instr::HasEdges;
-use core::instr::Terminator;
-use core::BlockId;
-use core::BlockIdMap;
-use core::Func;
-use core::InstrId;
-use core::ValueId;
+use ir_core::instr::HasEdges;
+use ir_core::instr::Terminator;
+use ir_core::BlockId;
+use ir_core::BlockIdMap;
+use ir_core::Func;
+use ir_core::InstrId;
+use ir_core::ValueId;
 use newtype::IdVec;
 
 /// Attempt to merge simple blocks together. Returns true if the Func was

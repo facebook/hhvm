@@ -1,11 +1,11 @@
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
-use core::instr::HasEdges;
-use core::instr::HasLoc;
-use core::Block;
-use core::BlockId;
-use core::Func;
-use core::Instr;
+use ir_core::instr::HasEdges;
+use ir_core::instr::HasLoc;
+use ir_core::Block;
+use ir_core::BlockId;
+use ir_core::Func;
+use ir_core::Instr;
 
 /// Find and split critical edges. Assumes there are no unreachable blocks,
 /// which is the case after rpo_sort().

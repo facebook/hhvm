@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use analysis::rpo::compute_rpo;
-use core::BlockId;
-use core::Func;
+use ir_core::BlockId;
+use ir_core::Func;
 use newtype::HasNone;
 use newtype::IdVec;
 
@@ -135,10 +135,10 @@ fn block_order_matches<'a>(func: &Func<'a>, order: &[BlockId]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::Block;
-    use core::BlockId;
     use hash::HashMap;
     use hash::HashSet;
+    use ir_core::Block;
+    use ir_core::BlockId;
     use rand::seq::SliceRandom;
     use rand::thread_rng;
     use rand::Rng;

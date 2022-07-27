@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use core::BlockId;
-use core::Func;
+use ir_core::BlockId;
+use ir_core::Func;
 use newtype::IdVec;
 
 /// Compute the Block post-order for a Func. In the returned Vec a BlockId will

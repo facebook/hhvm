@@ -2,14 +2,14 @@
 
 //! This module contains shared functions for use by tests.
 
-use core::instr;
-use core::literal::Literal;
-use core::BlockId;
-use core::Func;
-use core::FuncBuilder;
-use core::Instr;
-use core::LocId;
 use hash::HashMap;
+use ir_core::instr;
+use ir_core::literal::Literal;
+use ir_core::BlockId;
+use ir_core::Func;
+use ir_core::FuncBuilder;
+use ir_core::Instr;
+use ir_core::LocId;
 
 /// Given a simple string-based CFG description, create a Func that matches it.
 ///

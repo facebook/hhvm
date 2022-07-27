@@ -803,7 +803,7 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
     }
 }
 
-#[macros::bc_to_ir]
+#[b2i_macros::bc_to_ir]
 fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> bool {
     use instr::Hhbc;
     use ir::Literal;

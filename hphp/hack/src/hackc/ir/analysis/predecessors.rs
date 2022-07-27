@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use core::BlockId;
-use core::BlockIdMap;
-use core::BlockIdSet;
-use core::Func;
+use ir_core::BlockId;
+use ir_core::BlockIdMap;
+use ir_core::BlockIdSet;
+use ir_core::Func;
 use newtype::IdVec;
 
 pub type Predecessors = BlockIdMap<BlockIdSet>;

@@ -7,14 +7,14 @@
 
 use crate::PredecessorCatchMode;
 use crate::PredecessorFlags;
-use core::instr::HasOperands;
-use core::BlockId;
-use core::BlockIdMap;
-use core::BlockIdSet;
-use core::Func;
-use core::InstrId;
-use core::InstrIdSet;
-use core::ValueId;
+use ir_core::instr::HasOperands;
+use ir_core::BlockId;
+use ir_core::BlockIdMap;
+use ir_core::BlockIdSet;
+use ir_core::Func;
+use ir_core::InstrId;
+use ir_core::InstrIdSet;
+use ir_core::ValueId;
 use itertools::Itertools;
 use newtype::IdVec;
 use std::collections::VecDeque;

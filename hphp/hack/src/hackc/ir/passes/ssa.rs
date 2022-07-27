@@ -3,19 +3,19 @@ use analysis::compute_predecessor_blocks;
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
-use core::func_builder::TransformInstr;
-use core::instr::Special;
-use core::instr::Terminator;
-use core::instr::Tmp;
-use core::newtype::VarIdMap;
-use core::BlockId;
-use core::Func;
-use core::FuncBuilder;
-use core::Instr;
-use core::InstrId;
-use core::StringInterner;
-use core::ValueId;
-use core::VarId;
+use ir_core::func_builder::TransformInstr;
+use ir_core::instr::Special;
+use ir_core::instr::Terminator;
+use ir_core::instr::Tmp;
+use ir_core::newtype::VarIdMap;
+use ir_core::BlockId;
+use ir_core::Func;
+use ir_core::FuncBuilder;
+use ir_core::Instr;
+use ir_core::InstrId;
+use ir_core::StringInterner;
+use ir_core::ValueId;
+use ir_core::VarId;
 use itertools::Itertools;
 use newtype::IdVec;
 use std::collections::hash_map::Entry;
@@ -441,14 +441,14 @@ pub fn run(func: &mut Func<'_>, strings: &StringInterner<'_>) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
-    use core::instr::HasOperands;
-    use core::instr::Predicate;
-    use core::instr::Terminator;
-    use core::FuncBuilder;
-    use core::FunctionId;
-    use core::Literal;
-    use core::LocId;
-    use core::StringInterner;
+    use ir_core::instr::HasOperands;
+    use ir_core::instr::Predicate;
+    use ir_core::instr::Terminator;
+    use ir_core::FuncBuilder;
+    use ir_core::FunctionId;
+    use ir_core::Literal;
+    use ir_core::LocId;
+    use ir_core::StringInterner;
 
     #[test]
     fn already_ssa() {

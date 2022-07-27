@@ -5,7 +5,6 @@
 
 use lz4::liblz4;
 use shmrs::chashmap::CMapValue;
-use std::convert::TryInto;
 use std::ptr::NonNull;
 
 extern "C" {

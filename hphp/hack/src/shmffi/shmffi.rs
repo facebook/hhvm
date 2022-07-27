@@ -15,7 +15,6 @@ use shmrs::chashmap::NUM_SHARDS;
 use shmrs::segment::ShmemTableSegment;
 use shmrs::segment::ShmemTableSegmentRef;
 use std::alloc::Layout;
-use std::convert::TryInto;
 
 pub static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
 

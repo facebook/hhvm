@@ -13,7 +13,6 @@ use itertools::Either::Right;
 use std::fmt::Debug;
 use std::iter::empty;
 use std::iter::once;
-use std::marker::Sized;
 
 pub use crate::syntax_generated::*;
 pub use crate::syntax_type::*;

@@ -7,8 +7,6 @@ use anyhow::Result;
 use bstr::BString;
 use pos::RelativePath;
 use std::fmt::Debug;
-use std::marker::Send;
-use std::marker::Sync;
 
 mod provider;
 pub use provider::DiskProvider;

@@ -7,7 +7,6 @@ use crate::aast::*;
 use crate::ast_defs;
 use crate::pos::Pos;
 use std::borrow::Cow;
-use std::boxed::Box;
 
 impl<Ex, En> Program<Ex, En> {
     pub fn as_slice(&self) -> &[Def<Ex, En>] {

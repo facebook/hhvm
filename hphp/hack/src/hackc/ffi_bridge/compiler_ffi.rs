@@ -135,6 +135,7 @@ pub mod compile_ffi {
             is_evaled: bool,
             for_debugger_eval: bool,
             disable_toplevel_elaboration: bool,
+            enable_ir: bool,
         ) -> u8;
 
         /// Compile Hack source code to a HackCUnit or an error.
@@ -199,6 +200,7 @@ fn make_env_flags(
     is_evaled: bool,
     for_debugger_eval: bool,
     disable_toplevel_elaboration: bool,
+    enable_ir: bool,
 ) -> u8 {
     let mut flags = EnvFlags::empty();
     if is_systemlib {
@@ -212,6 +214,9 @@ fn make_env_flags(
     }
     if disable_toplevel_elaboration {
         flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
+    }
+    if enable_ir {
+        flags |= EnvFlags::ENABLE_IR;
     }
     flags.bits()
 }

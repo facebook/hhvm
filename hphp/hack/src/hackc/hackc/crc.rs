@@ -44,15 +44,16 @@ pub struct Opts {
     paths: Vec<PathBuf>,
 }
 
-fn process_one_file(writer: &SyncWrite, f: &Path, profile: &mut Profile) -> Result<()> {
+fn process_one_file(
+    writer: &SyncWrite,
+    f: &Path,
+    compile_opts: &SingleFileOpts,
+    profile: &mut Profile,
+) -> Result<()> {
     let content = fs::read(f)?;
     let files = multifile::to_files(f, content)?;
     for (f, content) in files {
         let f = f.as_ref();
-        let compile_opts = SingleFileOpts {
-            disable_toplevel_elaboration: false,
-            verbosity: 0,
-        };
         let result = std::panic::catch_unwind(|| {
             let mut profile1 = Profile::default();
             let result = crate::compile::process_single_file(
@@ -325,7 +326,12 @@ impl ProfileAcc {
     }
 }
 
-fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Result<()> {
+fn crc_files(
+    writer: &SyncWrite,
+    files: &[PathBuf],
+    num_threads: usize,
+    compile_opts: &SingleFileOpts,
+) -> Result<()> {
     let total = files.len();
     let count = Arc::new(AtomicUsize::new(0));
     let finished = Arc::new(AtomicBool::new(false));
@@ -344,7 +350,7 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
 
     let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> Result<ProfileAcc> {
         let mut profile = Profile::default();
-        process_one_file(writer, f.as_path(), &mut profile)?;
+        process_one_file(writer, f.as_path(), compile_opts, &mut profile)?;
         count.fetch_add(1, Ordering::Release);
         let total_t = profile.codegen_t + profile.parsing_t + profile.printing_t;
         let total_t = Timing::from_duration(Duration::from_secs_f64(total_t), f);
@@ -409,7 +415,7 @@ pub fn run(opts: Opts) -> Result<()> {
         files
     };
 
-    crc_files(&writer, &files, opts.num_threads)?;
+    crc_files(&writer, &files, opts.num_threads, &opts.single_file_opts)?;
 
     Ok(())
 }

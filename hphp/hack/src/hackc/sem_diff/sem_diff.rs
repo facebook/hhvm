@@ -29,7 +29,7 @@ use hhbc::FatalOp;
 ///   have the same COW behavior (if a datatype would have been mutated in-place
 ///   in a_unit it should be mutated in-place in b_unit).
 ///
-///   3. An exception thrown from an instruction will ne handled the same way
+///   3. An exception thrown from an instruction will be handled the same way
 ///
 /// In general most of the HackCUnit is compared using Eq - although structs are
 /// destructured so an error can report where the difference occurred.

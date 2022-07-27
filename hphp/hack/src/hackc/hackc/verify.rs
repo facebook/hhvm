@@ -95,7 +95,8 @@ fn verify_assemble_file(
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
 
     let mut output: Vec<u8> = Vec::new();
-    compile::unit_to_string(&env, &mut output, &pre_unit)
+    let mut profile = compile::Profile::default();
+    compile::unit_to_string(&env, &mut output, &pre_unit, &mut profile)
         .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
     let (post_unit, _) =

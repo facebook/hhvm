@@ -174,7 +174,8 @@ CompilerResult hackc_compile(
     isSystemLib,                    // is_systemlib
     false,                          // is_evaled
     forDebuggerEval,                // for_debugger_eval
-    false                           // disable_toplevel_elaboration
+    false,                          // disable_toplevel_elaboration
+    false                           // enable_ir
   );
 
   NativeEnv const native_env{

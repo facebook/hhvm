@@ -39,6 +39,7 @@ use oxidized::relative_path::RelativePath;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::ErrorType;
+use std::fmt;
 use thiserror::Error;
 
 /// Common input needed for compilation.
@@ -76,6 +77,8 @@ bitflags! {
         const FOR_DEBUGGER_EVAL = 1 << 2;
         const UNUSED_PLACEHOLDER = 1 << 3;
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
+        const DUMP_IR = 1 << 5;
+        const ENABLE_IR = 1 << 6;
     }
 }
 
@@ -429,17 +432,14 @@ pub fn from_text<'decl>(
     profile: &mut Profile,
 ) -> Result<()> {
     let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
-    let unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
-    let opts = emitter.into_options();
-    let (print_result, printing_t) = time(|| {
-        bytecode_printer::print_unit(
-            &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
-            writer,
-            &unit,
-        )
-    });
-    print_result?;
-    profile.printing_t = printing_t;
+    let mut unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
+
+    if native_env.flags.contains(EnvFlags::ENABLE_IR) {
+        let ir = bc_to_ir::bc_to_ir(&unit);
+        unit = ir_to_bc::ir_to_bc(alloc, ir);
+    }
+
+    unit_to_string(native_env, writer, &unit, profile)?;
     profile.codegen_bytes = alloc.allocated_bytes() as i64;
     Ok(())
 }
@@ -482,20 +482,39 @@ pub fn unit_from_text<'arena, 'decl>(
     emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)
 }
 
-pub fn unit_to_string<W: std::io::Write>(
+pub fn unit_to_string(
     native_env: &NativeEnv<'_>,
-    writer: &mut W,
+    writer: &mut dyn std::io::Write,
     program: &HackCUnit<'_>,
+    profile: &mut Profile,
 ) -> Result<()> {
-    let opts = NativeEnv::to_options(native_env);
-    let (print_result, _) = time(|| {
-        bytecode_printer::print_unit(
-            &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
-            writer,
-            program,
-        )
-    });
-    print_result.map_err(|e| anyhow!("{}", e))
+    if native_env.flags.contains(EnvFlags::DUMP_IR) {
+        let ir = bc_to_ir::bc_to_ir(program);
+        struct FmtFromIo<'a>(&'a mut dyn std::io::Write);
+        impl fmt::Write for FmtFromIo<'_> {
+            fn write_str(&mut self, s: &str) -> fmt::Result {
+                self.0.write_all(s.as_bytes()).map_err(|_| fmt::Error)
+            }
+        }
+        let print_result;
+        (print_result, profile.printing_t) = time(|| {
+            let verbose = false;
+            ir::print_unit(&mut FmtFromIo(writer), &ir, verbose)
+        });
+        print_result?;
+    } else {
+        let print_result;
+        (print_result, profile.printing_t) = time(|| {
+            let opts = NativeEnv::to_options(native_env);
+            bytecode_printer::print_unit(
+                &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
+                writer,
+                program,
+            )
+        });
+        print_result?;
+    }
+    Ok(())
 }
 
 fn emit_unit_from_ast<'arena, 'decl>(

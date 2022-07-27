@@ -71,6 +71,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "analysis"
+version = "0.0.0"
+dependencies = [
+ "ir_core",
+ "itertools 0.10.3",
+ "newtype",
+ "print",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -194,6 +204,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
+name = "b2i_macros"
+version = "0.0.0"
+dependencies = [
+ "hhbc-gen",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "bare-metal"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -215,6 +235,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b25d992356d2eb0ed82172f5248873db5560c4721f564b13cb5193bda5e668e"
 dependencies = [
  "byteorder",
+]
+
+[[package]]
+name = "bc_to_ir"
+version = "0.0.0"
+dependencies = [
+ "b2i_macros",
+ "ffi",
+ "hash",
+ "hhbc",
+ "hhvm_hhbc_defs_ffi",
+ "hhvm_types_ffi",
+ "ir",
+ "lazy_static",
+ "log",
+ "newtype",
 ]
 
 [[package]]
@@ -480,6 +516,7 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
+ "bc_to_ir",
  "bitflags",
  "bumpalo",
  "bytecode_printer",
@@ -490,6 +527,8 @@ dependencies = [
  "error",
  "hhbc",
  "hhvm_options",
+ "ir",
+ "ir_to_bc",
  "ocamlrep",
  "options",
  "oxidized",
@@ -1784,6 +1823,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "ir"
+version = "0.0.0"
+dependencies = [
+ "analysis",
+ "ir_core",
+ "passes",
+ "print",
+ "testutils",
+ "verify",
+]
+
+[[package]]
+name = "ir_core"
+version = "0.0.0"
+dependencies = [
+ "bstr",
+ "bumpalo",
+ "ffi",
+ "hash",
+ "hhbc",
+ "hhvm_types_ffi",
+ "indexmap",
+ "macros",
+ "naming_special_names_rust",
+ "newtype",
+ "smallvec",
+ "static_assertions",
+]
+
+[[package]]
+name = "ir_to_bc"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "ffi",
+ "hash",
+ "hhbc",
+ "hhvm_types_ffi",
+ "instruction_sequence",
+ "ir",
+ "itertools 0.10.3",
+ "lazy_static",
+ "log",
+ "smallvec",
+]
+
+[[package]]
 name = "itertools"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1992,6 +2078,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "macros"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2116,6 +2211,13 @@ name = "nb"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "546c37ac5d9e56f55e73b677106873d9d9f5190605e41a856503623648488cae"
+
+[[package]]
+name = "newtype"
+version = "0.0.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "nix"
@@ -2468,6 +2570,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "passes"
+version = "0.0.0"
+dependencies = [
+ "analysis",
+ "bumpalo",
+ "hash",
+ "ir_core",
+ "itertools 0.10.3",
+ "log",
+ "newtype",
+ "print",
+ "rand",
+ "testutils",
+ "verify",
+]
+
+[[package]]
 name = "pkg-config"
 version = "0.3.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2549,6 +2668,15 @@ dependencies = [
  "ctor",
  "diff",
  "output_vt100",
+]
+
+[[package]]
+name = "print"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "ir_core",
+ "itertools 0.10.3",
 ]
 
 [[package]]
@@ -3103,6 +3231,9 @@ name = "smallvec"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "smart_constructors"
@@ -3299,6 +3430,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "testutils"
+version = "0.0.0"
+dependencies = [
+ "hash",
+ "ir_core",
+]
+
+[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3482,6 +3621,17 @@ name = "vec_map"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
+
+[[package]]
+name = "verify"
+version = "0.0.0"
+dependencies = [
+ "analysis",
+ "anyhow",
+ "ir_core",
+ "itertools 0.10.3",
+ "print",
+]
 
 [[package]]
 name = "verify_parser"

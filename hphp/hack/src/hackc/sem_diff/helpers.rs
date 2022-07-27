@@ -113,11 +113,11 @@ where
         f_eq(&path.index_str(k), a_hash[k], b_hash[k])?;
     }
 
-    for k in &a_keys - &b_keys {
+    if let Some(k) = (&a_keys - &b_keys).into_iter().next() {
         bail!("In {} lhs has key {} but rhs does not", path, k.to_string());
     }
 
-    for k in &b_keys - &a_keys {
+    if let Some(k) = (&b_keys - &a_keys).into_iter().next() {
         bail!("In {} rhs has key {} but lhs does not", path, k.to_string());
     }
 
@@ -132,11 +132,11 @@ where
     let a_keys: HashSet<&T> = a.iter().collect();
     let b_keys: HashSet<&T> = b.iter().collect();
 
-    for k in &a_keys - &b_keys {
+    if let Some(k) = (&a_keys - &b_keys).into_iter().next() {
         bail!("In {} lhs has value {:?} but rhs does not", path, k);
     }
 
-    for k in &b_keys - &a_keys {
+    if let Some(k) = (&b_keys - &a_keys).into_iter().next() {
         bail!("In {} rhs has value {:?} but lhs does not", path, k);
     }
 

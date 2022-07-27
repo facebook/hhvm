@@ -10,6 +10,7 @@ path = "../../compile.rs"
 [dependencies]
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0.56"
+bc_to_ir = { path = "../../../ir/conversions/bc_to_ir" }
 bitflags = "1.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
@@ -20,6 +21,8 @@ env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhvm_options = { path = "../../../../utils/hhvm_options" }
+ir = { path = "../../../ir" }
+ir_to_bc = { path = "../../../ir/conversions/ir_to_bc" }
 ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../../oxidized" }

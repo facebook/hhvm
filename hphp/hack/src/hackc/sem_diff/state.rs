@@ -1537,7 +1537,7 @@ fn clean_member_key<'a>(key: &MemberKey<'a>) -> MemberKey<'a> {
     }
 }
 
-fn clean_opcode<'arena, 'a>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
+fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
     match *opcode {
         Opcode::ClsCnsL(_) => Opcode::ClsCnsL(Local::INVALID),
         Opcode::IsTypeL(_, op) => Opcode::IsTypeL(Local::INVALID, op),

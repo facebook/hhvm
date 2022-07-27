@@ -49,6 +49,8 @@ enum VerifyError {
     ReadError(String),
     #[error("units mismatch: {0}")]
     UnitMismatchError(crate::cmp_unit::CmpError),
+    #[error("semantic units mismatch: {0}")]
+    SemanticUnitMismatchError(String),
 }
 
 impl From<std::io::Error> for VerifyError {
@@ -149,26 +151,73 @@ impl AssembleOpts {
 }
 
 #[derive(Clone, Parser, Debug)]
+struct IrOpts {
+    #[clap(flatten)]
+    common: CommonOpts,
+}
+
+impl IrOpts {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
+        let pre_alloc = bumpalo::Bump::default();
+        let mut compile_profile = compile::Profile::default();
+        let (_env, pre_unit) = compile_php_file(
+            &pre_alloc,
+            path,
+            content,
+            &self.common.single_file_opts,
+            &mut compile_profile,
+        )?;
+
+        let post_alloc = bumpalo::Bump::default();
+        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit));
+        let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(&post_alloc, ir));
+
+        let (result, verify_t) =
+            Timing::time(path, || sem_diff::sem_diff_unit(&pre_unit, &post_unit));
+
+        let total_t = compile_profile.codegen_t
+            + compile_profile.parsing_t
+            + bc_to_ir_t.as_secs_f64()
+            + ir_to_bc_t.as_secs_f64()
+            + verify_t.as_secs_f64();
+
+        profile.fold_with(ProfileAcc {
+            total_t: Timing::from_secs_f64(total_t, path),
+            codegen_t: Timing::from_secs_f64(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_secs_f64(compile_profile.parsing_t, path),
+            bc_to_ir_t,
+            ir_to_bc_t,
+            verify_t,
+            ..Default::default()
+        });
+
+        result.map_err(|err| VerifyError::SemanticUnitMismatchError(err.to_string()))
+    }
+}
+
+#[derive(Clone, Parser, Debug)]
 enum Mode {
     Assemble(AssembleOpts),
+    Ir(IrOpts),
 }
 
 impl Mode {
     fn common(&self) -> &CommonOpts {
         match self {
-            Mode::Assemble(AssembleOpts { common, .. }) => common,
+            Mode::Assemble(AssembleOpts { common, .. }) | Mode::Ir(IrOpts { common, .. }) => common,
         }
     }
 
     fn common_mut(&mut self) -> &mut CommonOpts {
         match self {
-            Mode::Assemble(AssembleOpts { common, .. }) => common,
+            Mode::Assemble(AssembleOpts { common, .. }) | Mode::Ir(IrOpts { common, .. }) => common,
         }
     }
 
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         match self {
             Mode::Assemble(opts) => opts.verify_file(path, content, profile),
+            Mode::Ir(opts) => opts.verify_file(path, content, profile),
         }
     }
 }
@@ -236,7 +285,9 @@ struct ProfileAcc {
     passed: bool,
     error_histogram: HashMap<VerifyError, (usize, PathBuf)>,
     assemble_t: Timing,
+    bc_to_ir_t: Timing,
     codegen_t: Timing,
+    ir_to_bc_t: Timing,
     parsing_t: Timing,
     printing_t: Timing,
     total_t: Timing,
@@ -249,7 +300,9 @@ impl std::default::Default for ProfileAcc {
             passed: true,
             error_histogram: Default::default(),
             assemble_t: Default::default(),
+            bc_to_ir_t: Default::default(),
             codegen_t: Default::default(),
+            ir_to_bc_t: Default::default(),
             parsing_t: Default::default(),
             printing_t: Default::default(),
             total_t: Default::default(),
@@ -268,7 +321,9 @@ impl ProfileAcc {
                 .0 += n;
         }
         self.assemble_t.fold_with(other.assemble_t);
+        self.bc_to_ir_t.fold_with(other.bc_to_ir_t);
         self.codegen_t.fold_with(other.codegen_t);
+        self.ir_to_bc_t.fold_with(other.ir_to_bc_t);
         self.parsing_t.fold_with(other.parsing_t);
         self.printing_t.fold_with(other.printing_t);
         self.total_t.fold_with(other.total_t);
@@ -338,6 +393,8 @@ impl ProfileAcc {
         profile::report_stat(&mut w, "  ", "codegen time", &self.codegen_t)?;
         profile::report_stat(&mut w, "  ", "printing time", &self.printing_t)?;
         profile::report_stat(&mut w, "  ", "assemble time", &self.assemble_t)?;
+        profile::report_stat(&mut w, "  ", "bc_to_ir time", &self.bc_to_ir_t)?;
+        profile::report_stat(&mut w, "  ", "ir_to_bc time", &self.ir_to_bc_t)?;
         profile::report_stat(&mut w, "  ", "verify time", &self.verify_t)?;
 
         Ok(())

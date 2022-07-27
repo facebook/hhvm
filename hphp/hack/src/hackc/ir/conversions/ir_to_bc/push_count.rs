@@ -149,6 +149,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::Pow(..)
             | Hhbc::Print(..)
             | Hhbc::RecordReifiedGeneric(..)
+            | Hhbc::ResolveClass(..)
             | Hhbc::ResolveClsMethod(..)
             | Hhbc::ResolveClsMethodD(..)
             | Hhbc::ResolveClsMethodS(..)

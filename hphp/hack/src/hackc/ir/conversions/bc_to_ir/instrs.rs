@@ -1073,7 +1073,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::PushL => simple!(Hhbc::ConsumeL),
         Opcode::RaiseClassStringConversionWarning => todo!(),
         Opcode::RecordReifiedGeneric => simple!(Hhbc::RecordReifiedGeneric),
-        Opcode::ResolveClass => todo!(),
+        Opcode::ResolveClass => simple!(Hhbc::ResolveClass),
         Opcode::ResolveClsMethod => simple!(Hhbc::ResolveClsMethod),
         Opcode::ResolveClsMethodD => simple!(Hhbc::ResolveClsMethodD),
         Opcode::ResolveClsMethodS => simple!(Hhbc::ResolveClsMethodS),

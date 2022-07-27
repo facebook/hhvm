@@ -567,6 +567,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::Pow(..) => Opcode::Pow,
             Hhbc::Print(..) => Opcode::Print,
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
+            Hhbc::ResolveClass(clsid, _) => {
+                let class = clsid.to_hhbc(self.alloc, self.strings);
+                Opcode::ResolveClass(class)
+            }
             Hhbc::ResolveClsMethod(_, method, _) => {
                 let method = method.to_hhbc(self.alloc, self.strings);
                 Opcode::ResolveClsMethod(method)

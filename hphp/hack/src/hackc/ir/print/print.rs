@@ -965,6 +965,11 @@ fn print_hhbc(
             "record_reified_generic {}",
             FmtVid(func, vid, ctx.verbose)
         )?,
+        Hhbc::ResolveClass(clsid, _) => write!(
+            w,
+            "resolve_class {}",
+            FmtIdentifierId(clsid.id, ctx.strings)
+        )?,
         Hhbc::ResolveClsMethod(vid, method, _) => {
             write!(
                 w,

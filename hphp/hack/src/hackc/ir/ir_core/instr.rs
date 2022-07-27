@@ -505,6 +505,7 @@ pub enum Hhbc {
     Pow([ValueId; 2], LocId),
     Print(ValueId, LocId),
     RecordReifiedGeneric(ValueId, LocId),
+    ResolveClass(ClassId, LocId),
     ResolveClsMethod(ValueId, MethodId, LocId),
     ResolveClsMethodD(ClassId, MethodId, LocId),
     #[has_locals(none)]

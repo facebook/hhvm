@@ -220,8 +220,12 @@ struct HotCache {
   struct EqualityTester {
     bool operator()(const char* a, const StringData* b) const {
       // AtomicHashArray magic keys are < 0; valid pointers are > 0 and aligned.
+#if !FOLLY_SANITIZE
       return reinterpret_cast<intptr_t>(a) > 0 &&
         wordsame(a, b->data(), b->size() + 1);
+#else
+      return reinterpret_cast<intptr_t>(a) > 0 && !strcmp(a, b->data());
+#endif
     }
   };
   struct Hasher {

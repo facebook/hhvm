@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::AastParser;
-use aast_parser::{self};
 use bumpalo::Bump;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;

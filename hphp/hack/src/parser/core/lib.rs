@@ -5,12 +5,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod lexer;
+pub use operator;
 pub use operator::*;
-pub use operator::{self};
 pub mod parser;
 
+pub use smart_constructors;
 pub use smart_constructors::*;
-pub use smart_constructors::{self};
 
 pub mod parser_trait;
 

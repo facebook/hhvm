@@ -36,7 +36,6 @@ use emit_module::emit_modules_from_program;
 use emit_typedef::emit_typedefs_from_program;
 use env::emitter::Emitter;
 use env::Env;
-use env::{self};
 use error::Error;
 use error::ErrorKind;
 use error::Result;

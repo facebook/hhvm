@@ -11,7 +11,6 @@ use pos::PropName;
 use pos::TypeName;
 use std::fmt::Debug;
 use typing_deps_hash::DepType;
-use typing_deps_hash::{self};
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

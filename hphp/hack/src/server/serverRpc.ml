@@ -485,6 +485,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerCallHierarchyIncomingCalls.go call_item ~ctx ~genv ~env
     in
     (env, result)
+  | CALL_HIERARCHY_OUTGOING_CALLS call_item ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let result = ServerCallHierarchyOutgoingCalls.go call_item ~ctx in
+    (env, result)
   | BIGCODE path ->
     let (ctx, entry) = single_ctx_path env path in
     let result = ServerBigCode.go_ctx ~ctx ~entry in

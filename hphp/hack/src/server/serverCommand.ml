@@ -96,6 +96,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | GO_TO_DEFINITION _ -> false
   | PREPARE_CALL_HIERARCHY _ -> false
   | CALL_HIERARCHY_INCOMING_CALLS _ -> true
+  | CALL_HIERARCHY_OUTGOING_CALLS _ -> false
   | BIGCODE _ -> false
   | PAUSE true -> false
   (* when you unpause, then it will catch up *)

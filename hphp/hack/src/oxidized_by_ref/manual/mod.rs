@@ -25,6 +25,7 @@ pub mod prop_flags;
 pub mod relative_path;
 pub mod s_map;
 pub mod s_set;
+pub mod shallow_decl_defs_impl;
 pub mod shape_map;
 pub mod symbol_name;
 pub mod t_shape_map;

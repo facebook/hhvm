@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::compile::SingleFileOpts;
+use anyhow::bail;
 use anyhow::Result;
 use clap::Parser;
 use compile::Profile;
@@ -66,19 +67,27 @@ fn process_one_file(
         });
         match result {
             Ok((Err(e), profile1)) => {
+                // No panic - but called function failed.
                 *profile += profile1;
-                writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?
+                writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?;
+                bail!("failed");
             }
             Ok((Ok(output), profile1)) => {
+                // No panic and called function succeeded.
                 *profile += profile1;
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);
                 let crc = hasher.finish();
                 writeln!(writer.lock().unwrap(), "{}: {:016x}", f.display(), crc)?;
             }
-            Err(_) => writeln!(writer.lock().unwrap(), "{}: panic", f.display())?,
+            Err(_) => {
+                // Called function panic'd.
+                writeln!(writer.lock().unwrap(), "{}: panic", f.display())?;
+                bail!("panic");
+            }
         }
     }
+
     Ok(())
 }
 
@@ -336,6 +345,7 @@ fn crc_files(
     let count = Arc::new(AtomicUsize::new(0));
     let finished = Arc::new(AtomicBool::new(false));
     let start = Instant::now();
+    let passed = Arc::new(AtomicBool::new(true));
 
     let status_handle = {
         let count = count.clone();
@@ -348,16 +358,19 @@ fn crc_files(
         })
     };
 
-    let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> Result<ProfileAcc> {
+    let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
         let mut profile = Profile::default();
-        process_one_file(writer, f.as_path(), compile_opts, &mut profile)?;
+        let file_passed = process_one_file(writer, f.as_path(), compile_opts, &mut profile).is_ok();
+        if !file_passed {
+            passed.store(false, Ordering::Release);
+        }
         count.fetch_add(1, Ordering::Release);
         let total_t = profile.codegen_t + profile.parsing_t + profile.printing_t;
         let total_t = Timing::from_duration(Duration::from_secs_f64(total_t), f);
         let codegen_t = Timing::from_duration(Duration::from_secs_f64(profile.codegen_t), f);
         let parsing_t = Timing::from_duration(Duration::from_secs_f64(profile.parsing_t), f);
         let printing_t = Timing::from_duration(Duration::from_secs_f64(profile.printing_t), f);
-        Ok(acc.fold(ProfileAcc {
+        acc.fold(ProfileAcc {
             total_t,
             codegen_t,
             parsing_t,
@@ -373,19 +386,17 @@ fn crc_files(
             max_rewrite_file: f.clone(),
             max_emitter: profile,
             max_emitter_file: f.clone(),
-        }))
+        })
     };
 
     let profile = if num_threads == 1 {
-        files
-            .iter()
-            .try_fold(ProfileAcc::default(), count_one_file)?
+        files.iter().fold(ProfileAcc::default(), count_one_file)
     } else {
         files
             .par_iter()
             .with_max_len(1)
-            .try_fold(ProfileAcc::default, count_one_file)
-            .try_reduce(ProfileAcc::default, |x, y| Ok(x.fold(y)))?
+            .fold(ProfileAcc::default, count_one_file)
+            .reduce(ProfileAcc::default, |x, y| x.fold(y))
     };
 
     finished.store(true, Ordering::Release);
@@ -399,6 +410,10 @@ fn crc_files(
         total,
     );
     eprintln!();
+
+    if !passed.load(Ordering::Acquire) {
+        bail!("Failed to complete");
+    }
 
     Ok(())
 }

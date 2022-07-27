@@ -57,16 +57,8 @@ thread_local! {
     pub static PANIC_MSG: RefCell<Option<String>> = RefCell::new(None);
 }
 
-#[derive(Parser, Clone, Debug)]
-pub struct Opts {
-    #[allow(dead_code)]
-    #[clap(flatten)]
-    single_file_opts: SingleFileOpts,
-
-    /// Number of parallel worker threads. By default, or if set to 0, use num-cpu threads.
-    #[clap(long, default_value = "0")]
-    num_threads: usize,
-
+#[derive(Clone, Parser, Debug)]
+struct CommonOpts {
     /// The input Hack files or directories to process.
     #[clap(name = "PATH")]
     paths: Vec<PathBuf>,
@@ -75,38 +67,102 @@ pub struct Opts {
     #[clap(short = 'l')]
     long_msg: bool,
 
+    #[allow(dead_code)]
+    #[clap(flatten)]
+    single_file_opts: SingleFileOpts,
+
+    /// Number of parallel worker threads. By default, or if set to 0, use num-cpu threads.
+    #[clap(long, default_value = "0")]
+    num_threads: usize,
+
+    /// If true then panics will abort the process instead of being caught.
+    #[clap(long)]
+    panic_fuse: bool,
+
     /// Print all errors
     #[clap(short = 'a')]
     show_all: bool,
 }
 
-fn verify_assemble_file(
-    path: &Path,
-    content: Vec<u8>,
-    compile_opts: &SingleFileOpts,
-    profile: &mut Profile,
-) -> Result<()> {
-    let alloc = bumpalo::Bump::default();
+#[derive(Clone, Parser, Debug)]
+struct AssembleOpts {
+    #[clap(flatten)]
+    common: CommonOpts,
+}
 
+impl AssembleOpts {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut Profile) -> Result<()> {
+        let pre_alloc = bumpalo::Bump::default();
+        let (env, pre_unit) = compile_php_file(
+            &pre_alloc,
+            path,
+            content,
+            &self.common.single_file_opts,
+            profile,
+        )?;
+
+        let mut output: Vec<u8> = Vec::new();
+        let mut profile = compile::Profile::default();
+        compile::unit_to_string(&env, &mut output, &pre_unit, &mut profile)
+            .map_err(|err| VerifyError::PrintError(err.to_string()))?;
+
+        let post_alloc = bumpalo::Bump::default();
+        let (post_unit, _) = crate::assemble::assemble_from_bytes(
+            &post_alloc,
+            &output,
+            /* print tokens */ false,
+        )
+        .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
+
+        crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
+            .map_err(VerifyError::UnitMismatchError)
+    }
+}
+
+#[derive(Clone, Parser, Debug)]
+enum Mode {
+    Assemble(AssembleOpts),
+}
+
+impl Mode {
+    fn common(&self) -> &CommonOpts {
+        match self {
+            Mode::Assemble(AssembleOpts { common, .. }) => common,
+        }
+    }
+
+    fn common_mut(&mut self) -> &mut CommonOpts {
+        match self {
+            Mode::Assemble(AssembleOpts { common, .. }) => common,
+        }
+    }
+
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut Profile) -> Result<()> {
+        match self {
+            Mode::Assemble(opts) => opts.verify_file(path, content, profile),
+        }
+    }
+}
+
+#[derive(Parser, Clone, Debug)]
+pub struct Opts {
+    #[clap(subcommand)]
+    mode: Mode,
+}
+
+fn compile_php_file<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    path: &'a Path,
+    content: Vec<u8>,
+    single_file_opts: &'a SingleFileOpts,
+    profile: &mut Profile,
+) -> Result<(compile::NativeEnv<'a>, hhbc::hackc_unit::HackCUnit<'arena>)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
-    let env = crate::compile::native_env(filepath, compile_opts);
-    let pre_unit = compile::unit_from_text(&alloc, source_text, &env, None, profile)
+    let env = crate::compile::native_env(filepath, single_file_opts);
+    let unit = compile::unit_from_text(alloc, source_text, &env, None, profile)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
-
-    let mut output: Vec<u8> = Vec::new();
-    let mut profile = compile::Profile::default();
-    compile::unit_to_string(&env, &mut output, &pre_unit, &mut profile)
-        .map_err(|err| VerifyError::PrintError(err.to_string()))?;
-
-    let (post_unit, _) =
-        crate::assemble::assemble_from_bytes(&alloc, &output, false) // Don't print tokens
-            .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
-
-    crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
-        .map_err(VerifyError::UnitMismatchError)?;
-
-    Ok(())
+    Ok((env, unit))
 }
 
 /// Truncates "Pos { line: 5, col: 2}" to "Pos ...", because in verify tool this isn't important
@@ -115,20 +171,13 @@ fn truncate_pos_err(err_str: String) -> String {
     pos_reg.replace(err_str.as_str(), "Pos {...}").to_string()
 }
 
-fn catch_panics<F>(
-    path: &Path,
-    content: Vec<u8>,
-    compile_opts: &SingleFileOpts,
-    profile: &mut Profile,
-    action: F,
-    long_msg: bool,
-) -> Result<()>
+fn with_catch_panics<F>(profile: &mut Profile, long_msg: bool, action: F) -> Result<()>
 where
-    F: FnOnce(&Path, Vec<u8>, &SingleFileOpts, &mut Profile) -> Result<()> + std::panic::UnwindSafe,
+    F: FnOnce(&mut Profile) -> Result<()> + std::panic::UnwindSafe,
 {
     let result = std::panic::catch_unwind(|| {
         let mut inner_profile = Profile::default();
-        let ok = action(path, content, compile_opts, &mut inner_profile);
+        let ok = action(&mut inner_profile);
         (ok, inner_profile)
     });
     match result {
@@ -342,7 +391,7 @@ impl ProfileAcc {
     }
 }
 
-fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts, long_msg: bool) -> ProfileAcc {
+fn verify_one_file(path: &Path, mode: &Mode) -> ProfileAcc {
     let acc = ProfileAcc::default();
 
     let content = match fs::read(path) {
@@ -360,14 +409,14 @@ fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts, long_msg: bool) -
     };
 
     for (path, content) in files {
-        let result = catch_panics(
-            &path,
-            content,
-            compile_opts,
-            &mut Default::default(),
-            verify_assemble_file,
-            long_msg,
-        );
+        let mut file_profile = Profile::default();
+        let result = if mode.common().panic_fuse {
+            mode.verify_file(&path, content, &mut file_profile)
+        } else {
+            with_catch_panics(&mut file_profile, mode.common().long_msg, |profile| {
+                mode.verify_file(&path, content, profile)
+            })
+        };
         if let Err(err) = result {
             return acc.record_error(err, &path);
         }
@@ -376,13 +425,7 @@ fn verify_one_file(path: &Path, compile_opts: &SingleFileOpts, long_msg: bool) -
     acc
 }
 
-fn verify_files(
-    files: &[PathBuf],
-    num_threads: usize,
-    compile_opts: &SingleFileOpts,
-    long_msg: bool,
-    show_all: bool,
-) -> anyhow::Result<()> {
+fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
     let total = files.len();
     let count = Arc::new(AtomicUsize::new(0));
     let finished = Arc::new(AtomicBool::new(false));
@@ -399,21 +442,21 @@ fn verify_files(
         })
     };
 
-    let verify_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
+    let verify_one_file_ = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
+        let profile = verify_one_file(f, mode);
         count.fetch_add(1, Ordering::Release);
-
-        let profile = verify_one_file(f, compile_opts, long_msg);
         acc.fold(profile)
     };
 
     println!("Files: {}", files.len());
 
-    let profile = if num_threads == 1 {
-        files.iter().fold(ProfileAcc::default(), verify_one_file)
+    let profile = if mode.common().num_threads == 1 {
+        files.iter().fold(ProfileAcc::default(), verify_one_file_)
     } else {
         files
             .par_iter()
-            .fold(ProfileAcc::default, verify_one_file)
+            .with_max_len(1)
+            .fold(ProfileAcc::default, verify_one_file_)
             .reduce(ProfileAcc::default, ProfileAcc::fold)
     };
 
@@ -427,7 +470,7 @@ fn verify_files(
         count.load(Ordering::Acquire),
         total,
         &profile,
-        show_all,
+        mode.common().show_all,
     );
 
     ensure!(
@@ -438,44 +481,51 @@ fn verify_files(
     Ok(())
 }
 
-pub fn run(opts: Opts) -> anyhow::Result<()> {
+pub fn run(mut opts: Opts) -> anyhow::Result<()> {
     eprint!("Collecting files...");
     info!("Collecting files");
     let files = {
         let start = Instant::now();
-        let files = crate::util::collect_files(&opts.paths, None, opts.num_threads)?;
+        let files = crate::util::collect_files(
+            &opts.mode.common().paths,
+            None,
+            opts.mode.common().num_threads,
+        )?;
         let duration = start.elapsed();
         info!("{} files found in {}", files.len(), duration.display());
         files
     };
     eprint!("\r");
 
-    let old_hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(|info| {
-        let msg = panic_message::panic_info_message(info);
-        let msg = if let Some(loc) = info.location() {
-            let mut file = loc.file().to_string();
-            if file.len() > 20 {
-                file.replace_range(0..file.len() - 17, "...");
-            }
-            format!("{}@{}: {}", file, loc.line(), msg)
-        } else {
-            format!("<unknown>: {}", msg)
-        };
-        PANIC_MSG.with(|tls| {
-            *tls.borrow_mut() = Some(msg);
-        });
-    }));
+    if files.len() == 1 {
+        opts.mode.common_mut().panic_fuse = true;
+    }
 
-    verify_files(
-        &files,
-        opts.num_threads,
-        &opts.single_file_opts,
-        opts.long_msg,
-        opts.show_all,
-    )?;
+    let mut old_hook = None;
+    if !opts.mode.common().panic_fuse {
+        old_hook = Some(std::panic::take_hook());
+        std::panic::set_hook(Box::new(|info| {
+            let msg = panic_message::panic_info_message(info);
+            let msg = if let Some(loc) = info.location() {
+                let mut file = loc.file().to_string();
+                if file.len() > 20 {
+                    file.replace_range(0..file.len() - 17, "...");
+                }
+                format!("{}@{}: {}", file, loc.line(), msg)
+            } else {
+                format!("<unknown>: {}", msg)
+            };
+            PANIC_MSG.with(|tls| {
+                *tls.borrow_mut() = Some(msg);
+            });
+        }));
+    }
 
-    std::panic::set_hook(old_hook);
+    verify_files(&files, &opts.mode)?;
+
+    if let Some(old_hook) = old_hook {
+        std::panic::set_hook(old_hook);
+    }
 
     Ok(())
 }

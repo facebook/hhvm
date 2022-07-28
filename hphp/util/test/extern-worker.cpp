@@ -279,21 +279,21 @@ TEST(ExternWorker, Files) {
 
   Ref<std::string> r1 = coro::wait(client.storeFile(p1));
   EXPECT_EQ(client.getStats().files.load(), 1);
-  EXPECT_EQ(client.getStats().filesUploaded.load(), 1);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
 
   std::tuple<Ref<std::string>, Ref<std::string>> t1 = coro::wait(coro::collect(
     client.storeFile(p2),
     client.storeFile(p3)
   ));
   EXPECT_EQ(client.getStats().files.load(), 3);
-  EXPECT_EQ(client.getStats().filesUploaded.load(), 3);
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
   Ref<std::string> r2 = std::get<0>(t1);
   Ref<std::string> r3 = std::get<1>(t1);
 
   std::vector<Ref<std::string>> refs = coro::wait(client.storeFile(ps));
   EXPECT_EQ(refs.size(), ps.size());
   EXPECT_EQ(client.getStats().files.load(), 3 + ps.size());
-  EXPECT_EQ(client.getStats().filesUploaded.load(), 3 + ps.size());
+  EXPECT_EQ(client.getStats().filesUploaded.load(), 0);
 
   std::string s1 = coro::wait(client.load(r1));
   EXPECT_EQ(s1, makeString(p1));

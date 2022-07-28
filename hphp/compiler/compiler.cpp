@@ -1098,11 +1098,11 @@ bool process(const CompilerOptions &po) {
     Logger::FInfo(
       "{:,} files parsed\n"
       "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
-      "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded, {:,} fallback\n"
-      "  Blobs: {:,} total, {:,} queried, {:,} uploaded, {:,} fallback\n"
-      "  {:,} downloads, {:,} throttles\n"
+      "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
+      "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
       "  Cpu: {:,} usec usage, {:,} allocated cores\n"
-      "  Mem: {:,} max used, {:,} reserved",
+      "  Mem: {:,} max used, {:,} reserved\n"
+      "  {:,} downloads ({:,} bytes), {:,} throttles",
       package->getTotalFiles(),
       stats.execs.load(),
       stats.execCacheHits.load(),
@@ -1112,17 +1112,20 @@ bool process(const CompilerOptions &po) {
       stats.filesRead.load(),
       stats.filesQueried.load(),
       stats.filesUploaded.load(),
+      stats.fileBytesUploaded.load(),
       stats.fileFallbacks.load(),
       stats.blobs.load(),
       stats.blobsQueried.load(),
       stats.blobsUploaded.load(),
+      stats.blobBytesUploaded.load(),
       stats.blobFallbacks.load(),
-      stats.downloads.load(),
-      stats.throttles.load(),
       stats.execCpuUsec.load(),
       stats.execAllocatedCores.load(),
       stats.execMaxUsedMem.load(),
-      stats.execReservedMem.load()
+      stats.execReservedMem.load(),
+      stats.downloads.load(),
+      stats.bytesDownloaded.load(),
+      stats.throttles.load()
     );
     sample.setInt("total_parses", package->getTotalFiles());
 
@@ -1149,14 +1152,17 @@ bool process(const CompilerOptions &po) {
     sample.setInt("parse_file_reads", stats.filesRead.load());
     sample.setInt("parse_file_queries", stats.filesQueried.load());
     sample.setInt("parse_file_stores", stats.filesUploaded.load());
+    sample.setInt("parse_file_stores_bytes", stats.fileBytesUploaded.load());
     sample.setInt("parse_file_fallbacks", stats.fileFallbacks.load());
 
     sample.setInt("parse_total_blobs", stats.blobs.load());
     sample.setInt("parse_blob_queries", stats.blobsQueried.load());
     sample.setInt("parse_blob_stores", stats.blobsUploaded.load());
+    sample.setInt("parse_blob_stores_bytes", stats.blobBytesUploaded.load());
     sample.setInt("parse_blob_fallbacks", stats.blobFallbacks.load());
 
     sample.setInt("parse_total_loads", stats.downloads.load());
+    sample.setInt("parse_total_loads_bytes", stats.bytesDownloaded.load());
     sample.setInt("parse_throttles", stats.throttles.load());
 
     sample.setInt("parse_exec_cpu_usec", stats.execCpuUsec.load());

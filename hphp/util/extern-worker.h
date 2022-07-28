@@ -537,12 +537,17 @@ struct Client {
     std::atomic<size_t> filesUploaded{0};
     std::atomic<size_t> blobsUploaded{0};
 
+    // Number of bytes for files or blobs actually uploaded.
+    std::atomic<size_t> fileBytesUploaded{0};
+    std::atomic<size_t> blobBytesUploaded{0};
+
     // Number of times we fell back when uploading a file or blob.
     std::atomic<size_t> fileFallbacks{0};
     std::atomic<size_t> blobFallbacks{0};
 
-    // Number of blobs downloaded (because of a load call).
+    // Number of blobs/bytes downloaded (because of a load call).
     std::atomic<size_t> downloads{0};
+    std::atomic<size_t> bytesDownloaded{0};
 
     // Total number of execs attempted (per input).
     std::atomic<size_t> execs{0};

@@ -431,10 +431,11 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
                                         PathVec paths,
                                         BlobVec blobs,
                                         bool) {
-  // SubprocessImpl always "uploads" the data (there's no caching of
-  // any kind).
-  stats().filesUploaded += paths.size();
+  // SubprocessImpl never "uploads" files because it uses symlinks. It
+  // must write blobs to disk, however (which we classify as an
+  // upload).
   stats().blobsUploaded += blobs.size();
+  for (auto& b : blobs) stats().blobBytesUploaded += b.size();
 
   // Create RefIds from the given paths, then write the blobs to disk,
   // then use their paths.

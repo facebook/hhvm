@@ -383,6 +383,7 @@ coro::Task<T> Client::load(Ref<T> r) {
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
   ++m_stats.downloads;
+  m_stats.bytesDownloaded += result[0].size();
   HPHP_CORO_RETURN(unblobify<T>(std::move(result[0])));
 }
 
@@ -478,6 +479,7 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
 
       FTRACE(4, "{} blob #{} is {} bytes\n",
              requestId.tracePrefix(), idx, blob.size());
+      m_stats.bytesDownloaded += blob.size();
       // Turn it into the value.
       return unblobify<typename decltype(tag)::Type>(std::move(blob));
     }
@@ -551,6 +553,7 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
     }();
     FTRACE(4, "{} blob #{} is {} bytes\n",
            requestId.tracePrefix(), out.size(), blob.size());
+    m_stats.bytesDownloaded += blob.size();
     out.emplace_back(unblobify<T>(std::move(blob)));
   }
   assertx(out.size() == rs.size());
@@ -659,6 +662,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 
           FTRACE(4, "{} blob #{} is {} bytes\n",
                  requestId.tracePrefix(), idx, blob.size());
+          m_stats.bytesDownloaded += blob.size();
           return unblobify<typename decltype(tag)::Type>(std::move(blob));
         }
       )

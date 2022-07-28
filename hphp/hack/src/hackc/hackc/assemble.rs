@@ -2352,6 +2352,16 @@ fn assemble_instr<'arena, 'a>(
                         || hhbc::Opcode::RetCSuspended,
                         "RetCSuspended",
                     ),
+                    b"CheckClsRGSoft" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::CheckClsRGSoft,
+                        "CheckClsRGSoft",
+                    ),
+                    b"GetClsRGProp" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::GetClsRGProp,
+                        "GetClsRGProp",
+                    ),
                     _ => todo!("assembling instrs: {}", tok),
                 }
             } else {

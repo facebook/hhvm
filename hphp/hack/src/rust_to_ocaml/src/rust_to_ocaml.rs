@@ -9,34 +9,32 @@ use anyhow::Result;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+#[derive(Debug, clap::Parser)]
 struct Opts {
     /// The Hack source file to convert.
-    #[structopt(value_name("FILEPATH"))]
+    #[clap(value_name("FILEPATH"))]
     filename: PathBuf,
 
     /// The OCaml source file to generate.
-    #[structopt(value_name("FILEPATH"))]
+    #[clap(value_name("OUTPATH"))]
     out_path: Option<PathBuf>,
 
     /// Command to regenerate the output. This text will be included in generated file headers.
-    #[structopt(long)]
+    #[clap(long)]
     regen_cmd: Option<String>,
 
     /// Do not add copyright header and generated tag (for tests).
-    #[structopt(long)]
+    #[clap(long)]
     no_header: bool,
 
     /// Path to an OCaml formatter binary which will be used on the generated output.
-    #[structopt(long)]
+    #[clap(long)]
     formatter: Option<String>,
 }
 
 fn main() -> Result<()> {
-    let opts = Opts::from_args();
+    let opts = <Opts as clap::Parser>::from_args();
 
     let src = std::fs::read_to_string(&opts.filename)?;
     let file = syn::parse_file(&src)?;

@@ -10,7 +10,7 @@ path = "../src/rust_to_ocaml.rs"
 
 [dependencies]
 anyhow = "1.0.56"
+clap = { version = "3.2.10", features = ["derive", "regex", "unicode", "wrap_help"] }
 convert_case = "0.4.0"
 signed_source = { path = "../../utils/rust/signed_source" }
-structopt = "0.3.23"
 syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

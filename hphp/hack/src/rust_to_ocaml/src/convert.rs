@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::ir::Def;
+use crate::ir::File;
+use crate::ir::TypeRef;
 use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Context;
@@ -10,7 +13,15 @@ use anyhow::Result;
 use convert_case::Case;
 use convert_case::Casing;
 
-pub fn convert_item(item: &syn::Item) -> Result<Option<String>> {
+pub fn convert_file(file: &syn::File) -> Result<String> {
+    let defs = (file.items.iter())
+        .filter_map(|item| convert_item(item).transpose())
+        .collect::<Result<_>>()?;
+    let file = File { defs };
+    Ok(file.to_string())
+}
+
+fn convert_item(item: &syn::Item) -> Result<Option<(String, Def)>> {
     use syn::Item;
     match item {
         Item::Type(item) => {
@@ -32,23 +43,23 @@ pub fn convert_item(item: &syn::Item) -> Result<Option<String>> {
     }
 }
 
-fn convert_item_type(item: &syn::ItemType) -> Result<String> {
+fn convert_item_type(item: &syn::ItemType) -> Result<(String, Def)> {
     let name = item.ident.to_string().to_case(Case::Snake);
     let ty = convert_type(&item.ty)?;
-    Ok(format!("type {} = {}\n", name, ty))
+    Ok((name, Def::Alias { ty }))
 }
 
-fn convert_item_struct(item: &syn::ItemStruct) -> Result<String> {
+fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
     let name = item.ident.to_string().to_case(Case::Snake);
-    Ok(format!("type {}\n", name))
+    Ok((name, Def::Type))
 }
 
-fn convert_item_enum(item: &syn::ItemEnum) -> Result<String> {
+fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
     let name = item.ident.to_string().to_case(Case::Snake);
-    Ok(format!("type {}\n", name))
+    Ok((name, Def::Type))
 }
 
-fn convert_type(ty: &syn::Type) -> Result<String> {
+fn convert_type(ty: &syn::Type) -> Result<TypeRef> {
     use syn::Type;
     match ty {
         Type::Path(ty) => convert_type_path(ty),
@@ -56,26 +67,30 @@ fn convert_type(ty: &syn::Type) -> Result<String> {
     }
 }
 
-fn convert_type_path(ty: &syn::TypePath) -> Result<String> {
+fn convert_type_path(ty: &syn::TypePath) -> Result<TypeRef> {
     ensure!(ty.qself.is_none(), "Qualified self in paths not supported");
     let last_seg = ty.path.segments.last().unwrap();
     if ty.path.segments.len() == 1 && last_seg.arguments.is_empty() {
         match last_seg.ident.to_string().as_str() {
             "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
-            | "isize" | "usize" => return Ok("int".to_owned()),
+            | "isize" | "usize" => return Ok(TypeRef::simple("int")),
             _ => {}
         }
     }
-    Ok((ty.path.segments.iter())
-        .map(|seg| {
-            ensure!(seg.arguments.is_empty(), "Type args in paths not supported");
-            let ident = seg.ident.to_string();
-            if std::ptr::eq(seg, last_seg) {
-                Ok(ident.to_case(Case::Snake))
-            } else {
-                Ok(ident.to_case(Case::UpperCamel))
-            }
-        })
-        .collect::<Result<Vec<_>>>()?
-        .join("."))
+    Ok(TypeRef {
+        idents: ty
+            .path
+            .segments
+            .iter()
+            .map(|seg| {
+                ensure!(seg.arguments.is_empty(), "Type args in paths not supported");
+                let ident = seg.ident.to_string();
+                if std::ptr::eq(seg, last_seg) {
+                    Ok(ident.to_case(Case::Snake))
+                } else {
+                    Ok(ident.to_case(Case::UpperCamel))
+                }
+            })
+            .collect::<Result<Vec<_>>>()?,
+    })
 }

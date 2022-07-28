@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod convert;
+mod ir;
 
 use anyhow::Result;
 use std::io::Write;
@@ -38,7 +39,7 @@ fn main() -> Result<()> {
 
     let src = std::fs::read_to_string(&opts.filename)?;
     let file = syn::parse_file(&src)?;
-    let mut ocaml_src = generate_ocaml_src(&file)?;
+    let mut ocaml_src = convert::convert_file(&file)?;
 
     if !opts.no_header {
         ocaml_src = attach_header(opts.regen_cmd.as_deref(), &ocaml_src);
@@ -56,13 +57,6 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-fn generate_ocaml_src(file: &syn::File) -> Result<String> {
-    let toplevel_defs = (file.items.iter())
-        .filter_map(|item| convert::convert_item(item).transpose())
-        .collect::<Result<Vec<String>>>()?;
-    Ok(toplevel_defs.join("\n"))
 }
 
 fn attach_header(regen_cmd: Option<&str>, contents: &str) -> String {

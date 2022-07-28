@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<947d954c033625307dec65a4fb266868>>
+// @generated SignedSource<<b393273a6d44cd2359fe97182daa793a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,6 +33,7 @@ pub type Fixmes = i_map::IMap<i_map::IMap<pos::Pos>>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sc")]
 #[repr(C)]
 pub struct ScouredComments {
     pub comments: Vec<(pos::Pos, prim_defs::Comment)>,

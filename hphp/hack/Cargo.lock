@@ -2464,6 +2464,7 @@ dependencies = [
  "ocamlrep_derive",
  "pretty_assertions",
  "rusqlite",
+ "rust_to_ocaml_attr",
  "serde",
  "static_assertions",
 ]
@@ -2487,6 +2488,7 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "pretty_assertions",
+ "rust_to_ocaml_attr",
  "serde",
  "serde_json",
 ]
@@ -3066,6 +3068,10 @@ dependencies = [
  "positioned_by_ref_parser",
  "to_ocaml_impl",
 ]
+
+[[package]]
+name = "rust_to_ocaml_attr"
+version = "0.0.0"
 
 [[package]]
 name = "rustc-hash"

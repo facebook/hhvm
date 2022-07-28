@@ -15,7 +15,28 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-pub use qux::*;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(prefix = "a")]
+#[repr(C)]
+pub struct A {
+    pub foo: isize,
+    pub bar: isize,
+}
 
 #[derive(
     Clone,
@@ -33,10 +54,10 @@ pub use qux::*;
     Serialize,
     ToOcamlRep,
 )]
-#[rust_to_ocaml(prefix = "x")]
-#[repr(C)]
-pub struct X {
-    pub bar: foo::bar::Bar,
-    pub baz: foo::baz::BazList,
-    pub qux: qux_crate::qux::QuxList,
+#[repr(C, u8)]
+pub enum B {
+    #[rust_to_ocaml(prefix = "x")]
+    X { foo: isize, bar: isize },
+    #[rust_to_ocaml(prefix = "y")]
+    Y { foo: isize, bar: isize },
 }

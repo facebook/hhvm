@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d0c9c3228717ce551590bdcab487565d>>
+// @generated SignedSource<<5c4e5386612e667e533495319a11b348>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -292,6 +292,7 @@ pub use oxidized::aast::EnvAnnot;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "us")]
 #[repr(C)]
 pub struct UsingStmt<'a, Ex, En> {
     pub is_block_scoped: bool,
@@ -534,6 +535,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunctionPtrId<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "et")]
 #[repr(C)]
 pub struct ExpressionTree<'a, Ex, En> {
     /// The hint before the backtick, so Foo in this example.
@@ -1316,6 +1318,7 @@ arena_deserializer::impl_deserialize_in_arena!(Afield<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "xs")]
 #[repr(C)]
 pub struct XhpSimple<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1375,6 +1378,7 @@ pub use oxidized::aast::IsVariadic;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "param")]
 #[repr(C)]
 pub struct FunParam<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena")]
@@ -1416,6 +1420,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "f")]
 #[repr(C)]
 pub struct Fun_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1553,6 +1558,7 @@ pub type TypeHint_<'a> = Option<&'a Hint<'a>>;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "ua")]
 #[repr(C)]
 pub struct UserAttribute<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1581,6 +1587,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "fa")]
 #[repr(C)]
 pub struct FileAttribute<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1608,6 +1615,7 @@ arena_deserializer::impl_deserialize_in_arena!(FileAttribute<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "tp")]
 #[repr(C)]
 pub struct Tparam<'a, Ex, En> {
     pub variance: oxidized::ast_defs::Variance,
@@ -1645,6 +1653,7 @@ pub use oxidized::aast::EmitId;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "c")]
 #[repr(C)]
 pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1795,6 +1804,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstKind<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "cc")]
 #[repr(C)]
 pub struct ClassConst<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1827,6 +1837,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena, Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "c_atc")]
 #[repr(C)]
 pub struct ClassAbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1903,6 +1914,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeconst<'arena>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "c_tconst")]
 #[repr(C)]
 pub struct ClassTypeconstDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1934,6 +1946,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeconstDef<'arena, Ex, En>
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "xai")]
 #[repr(C)]
 pub struct XhpAttrInfo<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1962,6 +1975,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttrInfo<'arena>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "cv")]
 #[repr(C)]
 pub struct ClassVar<'a, Ex, En> {
     pub final_: bool,
@@ -2005,6 +2019,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassVar<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "m")]
 #[repr(C)]
 pub struct Method_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2064,6 +2079,7 @@ pub type Nsenv<'a> = namespace_env::Env<'a>;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "t")]
 #[repr(C)]
 pub struct Typedef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena")]
@@ -2114,6 +2130,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typedef<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "cst")]
 #[repr(C)]
 pub struct Gconst<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena")]
@@ -2151,6 +2168,7 @@ arena_deserializer::impl_deserialize_in_arena!(Gconst<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "fd")]
 #[repr(C)]
 pub struct FunDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2184,6 +2202,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(prefix = "md")]
 #[repr(C)]
 pub struct ModuleDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena")]

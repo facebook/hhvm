@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5dc75b2deb593ef70fb33420b9fe9e6e>>
+// @generated SignedSource<<d1a29324a636bfc355081812fbb651fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -190,6 +190,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "hfparam")]
 #[repr(C)]
 pub struct HfParamInfo {
     pub kind: ast_defs::ParamKind,
@@ -212,6 +213,7 @@ pub struct HfParamInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "hf")]
 #[repr(C)]
 pub struct HintFun {
     pub is_readonly: Option<ast_defs::ReadonlyKind>,
@@ -380,6 +382,7 @@ pub enum TypeRefinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "tr")]
 #[repr(C)]
 pub struct TypeRefinementBounds {
     pub lower: Vec<Hint>,
@@ -402,6 +405,7 @@ pub struct TypeRefinementBounds {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sfi")]
 #[repr(C)]
 pub struct ShapeFieldInfo {
     pub optional: bool,
@@ -425,6 +429,7 @@ pub struct ShapeFieldInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "nsi")]
 #[repr(C)]
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
@@ -531,6 +536,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "e")]
 #[repr(C)]
 pub struct Enum_ {
     pub base: Hint,

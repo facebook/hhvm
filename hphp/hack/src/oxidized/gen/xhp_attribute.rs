@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<242c5ba2ff45d6d58fee1f24c6fa8d3e>>
+// @generated SignedSource<<c21dcaaff541cda916b01671a978815f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -65,6 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tag);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "xa")]
 #[repr(C)]
 pub struct XhpAttribute {
     pub tag: Option<Tag>,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebd7a3a41cd7ff39793f2466615cbcad>>
+// @generated SignedSource<<7f06e6e0ef90e092004aebbe6bf9cb86>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -75,6 +75,7 @@ pub use oxidized::file_info::Names;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sn")]
 #[repr(C)]
 pub struct SavedNames<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

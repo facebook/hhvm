@@ -405,19 +405,26 @@ let record_label_declaration
     name
     (rust_type_to_string ty)
 
-let declare_record_arguments ?(pub = false) labels =
+let find_record_label_prefix labels =
   let prefix =
     labels |> List.map ~f:(fun ld -> ld.pld_name.txt) |> common_prefix_of_list
   in
   (* Only remove a common prefix up to the last underscore (if a record has
      fields x_bar and x_baz, we want to remove x_, not x_ba). *)
-  let prefix =
-    let idx = ref (String.length prefix) in
-    while !idx > 0 && Char.(prefix.[!idx - 1] <> '_') do
-      idx := !idx - 1
-    done;
-    String.sub prefix ~pos:0 ~len:!idx
-  in
+  let idx = ref (String.length prefix) in
+  while !idx > 0 && Char.(prefix.[!idx - 1] <> '_') do
+    idx := !idx - 1
+  done;
+  String.sub prefix ~pos:0 ~len:!idx
+
+let record_prefix_attr prefix =
+  if String.is_empty prefix then
+    ""
+  else
+    let prefix = String.rstrip prefix ~drop:(Char.equal '_') in
+    sprintf "#[rust_to_ocaml(prefix = \"%s\")]\n" prefix
+
+let declare_record_arguments ?(pub = false) ~prefix labels =
   labels
   |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
   |> sprintf "{\n%s}"
@@ -495,7 +502,14 @@ let variant_constructor_declaration ?(box_fields = false) cd =
         map_and_concat ~sep:"," ~f:rust_type_to_string tys |> sprintf "(%s)")
       value
   | Pcstr_record labels ->
-    sprintf "%s%s%s%s,\n" doc name (declare_record_arguments labels) value
+    let prefix = find_record_label_prefix labels in
+    sprintf
+      "%s%s%s%s%s,\n"
+      doc
+      (record_prefix_attr prefix)
+      name
+      (declare_record_arguments labels ~prefix)
+      value
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
@@ -546,7 +560,7 @@ let type_declaration name td =
       sprintf "#[serde(bound(deserialize = \"%s\" ))]" bounds
   in
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
-  let attrs_and_vis ~enum_kind ~force_derive_copy =
+  let attrs_and_vis ?(additional_attrs = "") enum_kind ~force_derive_copy =
     if
       force_derive_copy
       && Configuration.is_known (Configuration.copy_type name) false
@@ -592,7 +606,7 @@ let type_declaration name td =
       | Sum_type { num_variants } when num_variants <= 256 -> "\n#[repr(C, u8)]"
       | _ -> "\n#[repr(C)]"
     in
-    doc ^ derive_attr ^ serde_attr ^ repr ^ "\npub"
+    doc ^ derive_attr ^ serde_attr ^ additional_attrs ^ repr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
     if is_by_ref () || force_derive_copy || String.equal name "EmitId" then
@@ -692,7 +706,7 @@ let type_declaration name td =
         else if should_be_newtype name then
           sprintf
             "%s struct %s (%s pub %s);%s\n%s"
-            (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
+            (attrs_and_vis Not_an_enum ~force_derive_copy:false)
             (rust_type name lifetime tparams |> rust_type_to_string)
             (rust_de_field_attr [ty])
             (rust_type_to_string ty)
@@ -730,7 +744,7 @@ let type_declaration name td =
         in
         sprintf
           "%s struct %s %s;%s\n%s"
-          (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
+          (attrs_and_vis Not_an_enum ~force_derive_copy:false)
           (rust_type name lifetime tparams |> rust_type_to_string)
           ty
           (implements ~force_derive_copy:false)
@@ -770,17 +784,21 @@ let type_declaration name td =
     in
     sprintf
       "%s enum %s {\n%s}%s\n%s"
-      (attrs_and_vis ~enum_kind ~force_derive_copy)
+      (attrs_and_vis enum_kind ~force_derive_copy)
       (rust_type name lifetime tparams |> rust_type_to_string)
       ctors
       (implements ~force_derive_copy)
       (deserialize_in_arena_macro ~force_derive_copy)
   (* Record types. *)
   | (Ptype_record labels, None) ->
-    let labels = declare_record_arguments labels ~pub:true in
+    let prefix = find_record_label_prefix labels in
+    let labels = declare_record_arguments labels ~pub:true ~prefix in
     sprintf
       "%s struct %s %s%s\n%s"
-      (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
+      (attrs_and_vis
+         Not_an_enum
+         ~force_derive_copy:false
+         ~additional_attrs:(record_prefix_attr prefix))
       (rust_type name lifetime tparams |> rust_type_to_string)
       labels
       (implements ~force_derive_copy:false)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2852874fdc944b9260fab6cbe48e03c>>
+// @generated SignedSource<<6c31a94df82812f0d33281d5cc350082>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "has")]
 #[repr(C)]
 pub struct FunTastInfo {
     pub implicit_return: bool,

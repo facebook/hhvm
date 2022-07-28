@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f0c94debe46c0412faff28a3a8f2bdf4>>
+// @generated SignedSource<<6c23c95d95a2acb10769bdf1b254ef40>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -117,6 +117,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstRef<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "cd")]
 #[repr(C)]
 pub struct ConstDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -143,6 +144,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstDecl<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ce")]
 #[repr(C)]
 pub struct ClassElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -178,6 +180,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassElt<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "fe")]
 #[repr(C)]
 pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -214,6 +217,7 @@ pub use oxidized::typing_defs::ClassConstKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "cc")]
 #[repr(C)]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
@@ -310,6 +314,7 @@ arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "atc")]
 #[repr(C)]
 pub struct AbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -362,6 +367,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConcreteTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "patc")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -415,6 +421,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ttc")]
 #[repr(C)]
 pub struct TypeconstType<'a> {
     pub synthesized: bool,
@@ -468,6 +475,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeconstType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "te")]
 #[repr(C)]
 pub struct EnumType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -496,6 +504,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "td")]
 #[repr(C)]
 pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26c5db6a145090c648bf4a05b5a654e3>>
+// @generated SignedSource<<da2a8f6b9e876d18cf6c39b1370c3714>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -34,6 +34,7 @@ pub type Fixmes<'a> = i_map::IMap<'a, i_map::IMap<'a, &'a pos::Pos<'a>>>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sc")]
 #[repr(C)]
 pub struct ScouredComments<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

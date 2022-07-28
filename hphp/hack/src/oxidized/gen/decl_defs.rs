@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<caa9258778c5583d21f1a0fd984f7c08>>
+// @generated SignedSource<<d6865f87b22ad418e0f58295b1726c56>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,6 +69,7 @@ pub use typing_defs::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sc")]
 #[repr(C)]
 pub struct SubstContext {
     pub subst: s_map::SMap<Ty>,
@@ -183,6 +184,7 @@ pub enum DeclError {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "dc")]
 #[repr(C)]
 pub struct DeclClassType {
     pub need_init: bool,
@@ -242,6 +244,7 @@ pub struct DeclClassType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "elt")]
 #[repr(C)]
 pub struct Element {
     pub flags: typing_defs_flags::class_elt::ClassElt,

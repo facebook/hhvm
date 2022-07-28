@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4269a46991cb96a75c3b04d8380ff277>>
+// @generated SignedSource<<44f1e198b4e55be51d151caf2c767288>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -241,6 +241,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "us")]
 #[repr(C)]
 pub struct UsingStmt<Ex, En> {
     pub is_block_scoped: bool,
@@ -426,6 +427,7 @@ pub enum FunctionPtrId<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "et")]
 #[repr(C)]
 pub struct ExpressionTree<Ex, En> {
     /// The hint before the backtick, so Foo in this example.
@@ -1023,6 +1025,7 @@ pub enum Afield<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "xs")]
 #[repr(C)]
 pub struct XhpSimple<Ex, En> {
     pub name: Pstring,
@@ -1066,6 +1069,7 @@ pub type IsVariadic = bool;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "param")]
 #[repr(C)]
 pub struct FunParam<Ex, En> {
     pub annotation: Ex,
@@ -1094,6 +1098,7 @@ pub struct FunParam<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "f")]
 #[repr(C)]
 pub struct Fun_<Ex, En> {
     pub span: Pos,
@@ -1196,6 +1201,7 @@ pub type TypeHint_ = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ua")]
 #[repr(C)]
 pub struct UserAttribute<Ex, En> {
     pub name: Sid,
@@ -1217,6 +1223,7 @@ pub struct UserAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "fa")]
 #[repr(C)]
 pub struct FileAttribute<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1237,6 +1244,7 @@ pub struct FileAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "tp")]
 #[repr(C)]
 pub struct Tparam<Ex, En> {
     pub variance: ast_defs::Variance,
@@ -1309,6 +1317,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "c")]
 #[repr(C)]
 pub struct Class_<Ex, En> {
     pub span: Pos,
@@ -1438,6 +1447,7 @@ pub enum ClassConstKind<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "cc")]
 #[repr(C)]
 pub struct ClassConst<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1462,6 +1472,7 @@ pub struct ClassConst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "c_atc")]
 #[repr(C)]
 pub struct ClassAbstractTypeconst {
     pub as_constraint: Option<Hint>,
@@ -1522,6 +1533,7 @@ pub enum ClassTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "c_tconst")]
 #[repr(C)]
 pub struct ClassTypeconstDef<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1546,6 +1558,7 @@ pub struct ClassTypeconstDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "xai")]
 #[repr(C)]
 pub struct XhpAttrInfo {
     pub like: Option<Pos>,
@@ -1567,6 +1580,7 @@ pub struct XhpAttrInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "cv")]
 #[repr(C)]
 pub struct ClassVar<Ex, En> {
     pub final_: bool,
@@ -1598,6 +1612,7 @@ pub struct ClassVar<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "m")]
 #[repr(C)]
 pub struct Method_<Ex, En> {
     pub span: Pos,
@@ -1640,6 +1655,7 @@ pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "t")]
 #[repr(C)]
 pub struct Typedef<Ex, En> {
     pub annotation: En,
@@ -1674,6 +1690,7 @@ pub struct Typedef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "cst")]
 #[repr(C)]
 pub struct Gconst<Ex, En> {
     pub annotation: En,
@@ -1700,6 +1717,7 @@ pub struct Gconst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "fd")]
 #[repr(C)]
 pub struct FunDef<Ex, En> {
     pub namespace: Nsenv,
@@ -1724,6 +1742,7 @@ pub struct FunDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "md")]
 #[repr(C)]
 pub struct ModuleDef<Ex, En> {
     pub annotation: En,

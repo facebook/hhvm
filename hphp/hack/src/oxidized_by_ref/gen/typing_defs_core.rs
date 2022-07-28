@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<01c0138a686a44288d066579219363d1>>
+// @generated SignedSource<<3e83f0f18d917cb1b6903e40e2ff4bf2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -216,6 +216,7 @@ arena_deserializer::impl_deserialize_in_arena!(DependentType);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ua")]
 #[repr(C)]
 pub struct UserAttribute<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -242,6 +243,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "tp")]
 #[repr(C)]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
@@ -357,6 +359,7 @@ arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "sft")]
 #[repr(C)]
 pub struct ShapeFieldType<'a> {
     pub optional: bool,
@@ -648,6 +651,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "tr")]
 #[repr(C)]
 pub struct ClassTypeRefinementBounds<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -728,6 +732,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ft")]
 #[repr(C)]
 pub struct FunType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -764,6 +769,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "et")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
@@ -790,6 +796,7 @@ arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "fp")]
 #[repr(C)]
 pub struct FunParam<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -821,6 +828,7 @@ pub use oxidized::typing_defs_core::DestructureKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "d")]
 #[repr(C)]
 pub struct Destructure<'a> {
     /// This represents the standard parameters of a function or the fields in a list
@@ -863,6 +871,7 @@ arena_deserializer::impl_deserialize_in_arena!(Destructure<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "hm")]
 #[repr(C)]
 pub struct HasMember<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -896,6 +905,7 @@ arena_deserializer::impl_deserialize_in_arena!(HasMember<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ci")]
 #[repr(C)]
 pub struct CanIndex<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -928,6 +938,7 @@ arena_deserializer::impl_deserialize_in_arena!(CanIndex<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(prefix = "ct")]
 #[repr(C)]
 pub struct CanTraverse<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

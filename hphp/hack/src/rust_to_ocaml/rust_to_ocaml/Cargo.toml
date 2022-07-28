@@ -6,11 +6,11 @@ edition = "2021"
 
 [[bin]]
 name = "rust_to_ocaml"
-path = "rust_to_ocaml.rs"
+path = "../src/rust_to_ocaml.rs"
 
 [dependencies]
 anyhow = "1.0.56"
 convert_case = "0.4.0"
-signed_source = { path = "../utils/rust" }
+signed_source = { path = "../../utils/rust/signed_source" }
 structopt = "0.3.23"
 syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

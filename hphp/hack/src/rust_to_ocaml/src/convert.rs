@@ -59,6 +59,13 @@ fn convert_type(ty: &syn::Type) -> Result<String> {
 fn convert_type_path(ty: &syn::TypePath) -> Result<String> {
     ensure!(ty.qself.is_none(), "Qualified self in paths not supported");
     let last_seg = ty.path.segments.last().unwrap();
+    if ty.path.segments.len() == 1 && last_seg.arguments.is_empty() {
+        match last_seg.ident.to_string().as_str() {
+            "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
+            | "isize" | "usize" => return Ok("int".to_owned()),
+            _ => {}
+        }
+    }
     Ok((ty.path.segments.iter())
         .map(|seg| {
             ensure!(seg.arguments.is_empty(), "Type args in paths not supported");

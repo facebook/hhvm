@@ -2073,6 +2073,18 @@ let rpc_with_retry server_conn ref_unblocked_time ~desc command =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       rpc server_conn ref_unblocked_time ~desc command)
 
+let rpc_with_retry_list
+    (server_conn : server_conn)
+    (ref_unblocked_time : float ref)
+    ~(desc : string)
+    (cmd : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t) :
+    'a list Lwt.t =
+  let call_here s =
+    ServerCommandTypes.Done_or_retry.call ~f:(fun () -> Lwt.return s)
+  in
+  let%lwt job_list = rpc server_conn ref_unblocked_time ~desc cmd in
+  List.map job_list ~f:call_here |> Lwt.all
+
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
 let ide_rpc
     (ide_service : ClientIdeService.t ref)
@@ -2428,6 +2440,46 @@ let do_definition_local
         SymbolOccurrence.is_xhp_literal_attr occurence)
   in
   Lwt.return (locations, has_xhp_attribute)
+
+let do_prepareCallHierarchy
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : PrepareCallHierarchy.params) : PrepareCallHierarchy.result Lwt.t =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command =
+    ServerCommandTypes.(
+      PREPARE_CALL_HIERARCHY (LabelledFileName file, line, column))
+  in
+  rpc conn ref_unblocked_time ~desc:"prepare-call-hierarchy" command
+
+let do_callHierarchyIncoming
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : CallHierarchyIncomingCalls.params) :
+    CallHierarchyIncomingCalls.result Lwt.t =
+  let command =
+    ServerCommandTypes.(
+      CALL_HIERARCHY_INCOMING_CALLS params.CallHierarchyCallsRequestParam.item)
+  in
+  let%lwt result_split =
+    rpc_with_retry_list
+      conn
+      ref_unblocked_time
+      ~desc:"call-hierarchy-incoming-calls"
+      command
+  in
+  Lwt.return (Some (List.concat result_split))
+
+let do_callHierarchyOutgoing
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : CallHierarchyOutgoingCalls.params) :
+    CallHierarchyOutgoingCalls.result Lwt.t =
+  let command =
+    ServerCommandTypes.(
+      CALL_HIERARCHY_OUTGOING_CALLS params.CallHierarchyCallsRequestParam.item)
+  in
+  rpc conn ref_unblocked_time ~desc:"call-hierarchy-outgoing-calls" command
 
 let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
 
@@ -4555,6 +4607,63 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry }
+    (*textDocument/prepareCallHierarchy request*)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, PrepareCallHierarchyRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_prepareCallHierarchy menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (PrepareCallHierarchyResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
+    (* callHierarchy/incomingCalls request *)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, CallHierarchyIncomingCallsRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_callHierarchyIncoming menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (CallHierarchyIncomingCallsResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
+    (* callHierarchy/outgoingCalls request *)
+    | ( Main_loop menv,
+        _,
+        RequestMessage (id, CallHierarchyOutgoingCallsRequest params) ) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_callHierarchyOutgoing menv.conn ref_unblocked_time params
+      in
+      let result_count_ =
+        match result with
+        | None -> 1
+        | Some s -> List.length s
+      in
+      respond_jsonrpc
+        ~powered_by:Hh_server
+        id
+        (CallHierarchyOutgoingCallsResult result);
+      Lwt.return_some
+        { result_count = result_count_; result_extra_telemetry = None }
     (* textDocument/completion request *)
     | (Main_loop menv, _, RequestMessage (id, CompletionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

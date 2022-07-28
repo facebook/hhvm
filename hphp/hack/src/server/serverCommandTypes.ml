@@ -432,7 +432,10 @@ type _ t =
       -> Lsp.PrepareCallHierarchy.result t
   | CALL_HIERARCHY_INCOMING_CALLS :
       Lsp.CallHierarchyItem.t
-      -> Lsp.CallHierarchyIncomingCalls.result Done_or_retry.t list t
+      -> Lsp.CallHierarchyIncomingCalls.callHierarchyIncomingCall list
+         Done_or_retry.t
+         list
+         t
   | CALL_HIERARCHY_OUTGOING_CALLS :
       Lsp.CallHierarchyItem.t
       -> Lsp.CallHierarchyOutgoingCalls.result t

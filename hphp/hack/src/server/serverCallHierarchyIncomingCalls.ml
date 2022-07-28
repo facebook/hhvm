@@ -93,19 +93,20 @@ let string_pos_to_enclosing_rel_occs
 let ref_result_to_incoming_call_result
     (ctx : Provider_context.t)
     (ref_result : ServerCommandTypes.Find_refs.result) :
-    Lsp.CallHierarchyIncomingCalls.result =
+    Lsp.CallHierarchyIncomingCalls.callHierarchyIncomingCall list =
   let grouped_by_file = group_refs_by_file ref_result in
   let incoming_calls =
     List.concat_map (file_refs_to_incoming_calls ctx) grouped_by_file
   in
-  Some incoming_calls
+  incoming_calls
 
 let go
     (item : Lsp.CallHierarchyItem.t)
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env) :
-    Lsp.CallHierarchyIncomingCalls.result ServerCommandTypes.Done_or_retry.t
+    Lsp.CallHierarchyIncomingCalls.callHierarchyIncomingCall list
+    ServerCommandTypes.Done_or_retry.t
     list =
   let file = Lsp_helpers.lsp_uri_to_path item.Lsp.CallHierarchyItem.uri in
   let (ctx, entry, _, get_def) = ServerDepsUtil.get_def_setup ctx file in

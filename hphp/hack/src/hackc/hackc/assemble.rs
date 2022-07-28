@@ -193,9 +193,12 @@ fn assemble_from_toks<'arena>(
                 token_iter,
                 ".includes",
                 |alloc, t| {
-                    Ok(hhbc::hhas_symbol_refs::IncludePath::Absolute(
-                        t.expect_identifier_into_ffi_str(alloc)?,
-                    ))
+                    let path_str = if t.peek_if(Token::is_decl) {
+                        t.expect_decl_into_ffi_str(alloc)?
+                    } else {
+                        t.expect_identifier_into_ffi_str(alloc)?
+                    };
+                    Ok(hhbc::hhas_symbol_refs::IncludePath::Absolute(path_str))
                 },
             )?)
         } else if token_iter.peek_if_str(Token::is_decl, ".alias") {
@@ -4401,6 +4404,12 @@ impl<'a> Lexer<'a> {
         Ok(Str::new_slice(alloc, st))
     }
 
+    /// Similar to `expect_and_get_number` but puts decl into a Str<'arena>
+    fn expect_decl_into_ffi_str<'arena>(&mut self, alloc: &'arena Bump) -> Result<Str<'arena>> {
+        let st = self.expect(Token::into_decl)?;
+        Ok(Str::new_slice(alloc, st))
+    }
+
     /// Similar to `expect` but instead of returning a Result that usually contains a slice of u8,
     /// applies f to the `from_utf8 str` of the top token, bailing if the top token is not a number.
     fn expect_and_get_number<T: FromStr>(&mut self) -> Result<T> {
@@ -4460,10 +4469,10 @@ impl<'a> Lexer<'a> {
         let v = [
             r#""""([^"\\]|\\.)*?""""#, // Triple str literal
             "#.*",                     // Comment
-            r"(?-u)[\.@][_a-zA-Z\x80-\xff][_/a-zA-Z0-9\x80-\xff]*", // Decl, global. (?-u) turns off utf8 check
-            r"(?-u)\$[_a-zA-Z0-9$\x80-\xff][_/a-zA-Z0-9$\x80-\xff]*", // Var.
-            r#""((\\.)|[^\\"])*""#,                                 // Str literal
-            r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",     // Number
+            r"(?-u)[\.@][_a-z/A-Z\x80-\xff][_/a-zA-Z/0-9\x80-\xff\-\.]*", // Decl, global. (?-u) turns off utf8 check
+            r"(?-u)\$[_a-zA-Z0-9$\x80-\xff][_/a-zA-Z0-9$\x80-\xff]*",     // Var.
+            r#""((\\.)|[^\\"])*""#,                                       // Str literal
+            r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",           // Number
             r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#\-]|::)*", // Identifier
             ";",
             "-",

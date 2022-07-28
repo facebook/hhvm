@@ -283,7 +283,10 @@ struct Options {
       (FilterAssertions)
       (StrengthReduce)
       (FuncFamilies)
-      (AnalyzePublicStatics);
+      (AnalyzePublicStatics)
+      (HardPrivatePropInference)
+      (FlattenTraits)
+      (SourceRootForFileBC);
   }
 };
 extern Options options;

@@ -336,6 +336,7 @@ RepoGlobalData get_global_data() {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
     gd.ConstantFunctions.emplace_back(elm.first, s.toCppString());
   }
+  std::sort(gd.ConstantFunctions.begin(), gd.ConstantFunctions.end());
 
   return gd;
 }

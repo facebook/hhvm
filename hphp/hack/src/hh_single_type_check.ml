@@ -51,6 +51,7 @@ type mode =
   | Dump_inheritance
   | Errors
   | Lint
+  | Lint_json
   | Dump_deps
   | Dump_dep_hashes
   | Identify_symbol of int * int
@@ -422,6 +423,7 @@ let parse_options () =
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted> Error formatting style" );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
+      ("--json", Arg.Unit (set_mode Lint_json), " Produce json lint output");
       ( "--no-builtins",
         Arg.Set no_builtins,
         " Don't use builtins (e.g. ConstSet); implied by --root" );
@@ -1985,6 +1987,27 @@ let handle_mode
       exit 2
     ) else
       Printf.printf "No lint errors\n"
+  | Lint_json ->
+    let json_errors =
+      Relative_path.Map.fold
+        files_contents
+        ~init:[]
+        ~f:(fun fn content json_errors ->
+          json_errors
+          @ fst (Lints_core.do_ (fun () -> Linting_main.lint ctx fn content)))
+    in
+    let json_errors =
+      List.sort
+        ~compare:
+          begin
+            fun x y ->
+            Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
+          end
+        json_errors
+    in
+    let json_errors = List.map ~f:Lints_core.to_absolute json_errors in
+    ServerLintTypes.output_json ~pretty:true stdout json_errors;
+    exit 2
   | Dump_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);

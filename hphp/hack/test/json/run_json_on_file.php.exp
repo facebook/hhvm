@@ -1,0 +1,17 @@
+{
+  "errors":[
+    {
+      "descr":"Consider changing this statement to ($x) instead",
+      "severity":"advice",
+      "path":"run_json_on_file.php",
+      "line":5,
+      "start":7,
+      "end":16,
+      "code":5643,
+      "bypass_changed_lines":false,
+      "original":"",
+      "replacement":""
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

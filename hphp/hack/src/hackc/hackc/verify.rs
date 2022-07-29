@@ -197,6 +197,7 @@ impl IrOpts {
 
 #[derive(Clone, Parser, Debug)]
 enum Mode {
+    /// Compile files and save the resulting HHAS and interior HackCUnit. Assemble the HHAS files and save the resulting HCU. Compare HCUs.
     Assemble(AssembleOpts),
     Ir(IrOpts),
 }

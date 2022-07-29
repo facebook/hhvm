@@ -78,7 +78,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(InitialStaticStringTableSize);
   SHOW(CheckPropTypeHints);
   SHOW(HardGenericsUB);
-  SHOW(HardPrivatePropInference);
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);

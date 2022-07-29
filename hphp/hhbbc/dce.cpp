@@ -2450,7 +2450,6 @@ optimize_dce(VisitContext& visit, BlockId bid, const State& stateIn,
 void remove_unused_local_names(
     php::WideFunc& func,
     const std::bitset<kMaxTrackedLocals>& usedLocalNames) {
-  if (!options.RemoveUnusedLocalNames) return;
   /*
    * Closures currently rely on name information being available.
    */
@@ -2603,7 +2602,6 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
 
 void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
                   LocalRemappingIndex&& remappingIndex) {
-  if (!options.CompactLocalSlots) return;
   /*
    * Remapping locals in closures requires checking which ones
    * are captured variables so we can remove the relevant properties,

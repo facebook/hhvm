@@ -267,8 +267,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
   // Offset of the last emitted bytecode.
   Offset lastOff { 0 };
 
-  bool traceBc = false;
-
   SCOPE_ASSERT_DETAIL("emit") {
     std::string ret;
     for (auto bid : func.blockRange()) {
@@ -334,8 +332,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(func, inst),
            show(srcLoc(*func, inst.srcLoc)));
-
-    if (options.TraceBytecodes.count(inst.op)) traceBc = true;
 
     auto const emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
@@ -679,12 +675,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       FTRACE(4, "      fallthrough: {}\n", fallthrough);
     }
     FTRACE(2, "      block {} end: {}\n", bid, info.past);
-  }
-
-  if (traceBc) {
-    FTRACE(0, "TraceBytecode (emit): {}::{} in {}\n",
-           func->cls ? func->cls->name->data() : "",
-           func->name, func->unit->filename);
   }
 
   return ret;

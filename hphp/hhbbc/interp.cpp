@@ -3669,7 +3669,6 @@ bool fcallTryFold(
   }
 
   assertx(!fca.hasUnpack() && !fca.hasGenerics() && fca.numRets() == 1);
-  assertx(options.ConstantFoldBuiltins);
 
   auto const finish = [&] (Type ty) {
     auto const v = tv(ty);
@@ -5724,7 +5723,7 @@ void interpStep(ISS& env, const Bytecode& bc) {
   if (env.flags.reduced) return;
 
   auto const_prop = [&] {
-    if (!options.ConstantProp || !env.flags.canConstProp) return false;
+    if (!env.flags.canConstProp) return false;
 
     auto const numPushed   = bc.numPush();
     TinyVector<TypedValue> cells;
@@ -5875,42 +5874,40 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   auto target = orig;
   auto pops = 0;
 
-  if (options.RemoveDeadBlocks) {
-    State temp{env.state, State::Compact{}};
-    while (true) {
-      auto const& func = env.ctx.func;
-      auto const targetBlk = func.blocks()[target].get();
-      if (!targetBlk->multiPred) break;
-      auto const ok = [&] {
+  State temp{env.state, State::Compact{}};
+  while (true) {
+    auto const& func = env.ctx.func;
+    auto const targetBlk = func.blocks()[target].get();
+    if (!targetBlk->multiPred) break;
+    auto const ok = [&] {
         switch (targetBlk->hhbcs.back().op) {
           case Op::JmpZ:
           case Op::JmpNZ:
           case Op::SSwitch:
           case Op::Switch:
-          return true;
+            return true;
           default:
-          return false;
+            return false;
         }
       }();
 
-      if (!ok) break;
+    if (!ok) break;
 
-      Interp interp {
-        env.index, env.ctx, env.collect, target, targetBlk, temp
-      };
+    Interp interp {
+      env.index, env.ctx, env.collect, target, targetBlk, temp
+    };
 
-      auto const old_size = temp.stack.size();
-      auto const new_target = speculate(interp);
-      if (new_target == NoBlockId) break;
+    auto const old_size = temp.stack.size();
+    auto const new_target = speculate(interp);
+    if (new_target == NoBlockId) break;
 
-      const ssize_t delta = old_size - temp.stack.size();
-      assertx(delta >= 0);
-      if (delta && endsInControlFlow) break;
+    const ssize_t delta = old_size - temp.stack.size();
+    assertx(delta >= 0);
+    if (delta && endsInControlFlow) break;
 
-      pops += delta;
-      target = new_target;
-      temp.stack.compact();
-    }
+    pops += delta;
+    target = new_target;
+    temp.stack.compact();
   }
 
   if (endsInControlFlow && updateTaken) {

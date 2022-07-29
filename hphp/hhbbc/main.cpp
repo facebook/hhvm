@@ -85,21 +85,6 @@ MethodMap make_method_map(SinglePassReadableRange& range) {
   return ret;
 }
 
-template<typename SinglePassReadableRange>
-OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs) {
-  if (bcs.empty()) return {};
-  hphp_fast_map<std::string,Op> bcmap;
-  for (auto i = 0; i < Op_count; i++) {
-    auto const op = static_cast<Op>(i);
-    bcmap[opcodeToName(op)] = op;
-  }
-  OpcodeSet oset;
-  for (auto& n : bcs) {
-    if (bcmap.count(n)) oset.insert(bcmap[n]);
-  }
-  return oset;
-}
-
 void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
@@ -125,9 +110,6 @@ void parse_options(int argc, char** argv) {
     ("stats-file",
       po::value(&options.stats_file)->default_value(""),
       "stats file path")
-    ("no-optimizations",
-      po::bool_switch(&options.NoOptimizations),
-      "turn off all optimizations")
     ("no-logging",
       po::bool_switch(&no_logging),
       "turn off logging")
@@ -172,20 +154,6 @@ void parse_options(int argc, char** argv) {
   po::options_description oflags("Optimization Flags");
   oflags.add_options()
     ("context-sensitive-interp",  po::value(&options.ContextSensitiveInterp))
-    ("remove-dead-blocks",        po::value(&options.RemoveDeadBlocks))
-    ("constant-prop",             po::value(&options.ConstantProp))
-    ("constant-fold-builtins",    po::value(&options.ConstantFoldBuiltins))
-    ("local-dce",                 po::value(&options.LocalDCE))
-    ("global-dce",                po::value(&options.GlobalDCE))
-    ("remove-unused-local-names", po::value(&options.RemoveUnusedLocalNames))
-    ("compact-local-slots",       po::value(&options.CompactLocalSlots))
-    ("insert-assertions",         po::value(&options.InsertAssertions))
-    ("insert-stack-assertions",   po::value(&options.InsertStackAssertions))
-    ("filter-assertions",         po::value(&options.FilterAssertions))
-    ("strength-reduce",           po::value(&options.StrengthReduce))
-    ("func-families",             po::value(&options.FuncFamilies))
-    ("hard-private-prop",         po::value(&options.HardPrivatePropInference))
-    ("analyze-public-statics",    po::value(&options.AnalyzePublicStatics))
     ;
 
   po::options_description eflags("Extern-Worker Flags");
@@ -244,10 +212,7 @@ void parse_options(int argc, char** argv) {
     setrlimit(RLIMIT_CORE, &rl);
   }
 
-  if (!options.ConstantProp) options.ConstantFoldBuiltins = false;
-
   options.TraceFunctions = make_method_map(trace_fns);
-  options.TraceBytecodes = make_bytecode_map(trace_bcs);
 
   if (!options.profileMemory.empty()) {
     mallctlWrite("prof.active", true);
@@ -260,16 +225,6 @@ void parse_options(int argc, char** argv) {
 UNUSED void validate_options() {
   if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
     std::cerr << "Invalid parallelism configuration.\n";
-    std::exit(1);
-  }
-
-  if (options.RemoveUnusedLocalNames && !options.GlobalDCE) {
-    std::cerr << "-fremove-unused-local-names requires -fglobal-dce\n";
-    std::exit(1);
-  }
-
-  if (options.CompactLocalSlots && !options.GlobalDCE) {
-    std::cerr << "-fcompact-local-slots requires -fglobal-dce\n";
     std::exit(1);
   }
 }
@@ -287,7 +242,6 @@ RepoGlobalData get_global_data() {
   gd.Signature                   = nanos.count();
   gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
-  gd.HardPrivatePropInference    = options.HardPrivatePropInference;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;

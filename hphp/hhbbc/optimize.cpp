@@ -115,12 +115,10 @@ Optional<Bytecode> makeAssert(ArgType arg, Type t) {
   if (t.subtypeOf(BBottom)) return std::nullopt;
   auto const rat = make_repo_type(t);
   using T = RepoAuthType::Tag;
-  if (options.FilterAssertions) {
-    // Cell and InitCell don't add any useful information, so leave them
-    // out entirely.
-    if (rat == RepoAuthType{T::Cell})     return std::nullopt;
-    if (rat == RepoAuthType{T::InitCell}) return std::nullopt;
-  }
+  // Cell and InitCell don't add any useful information, so leave them
+  // out entirely.
+  if (rat == RepoAuthType{T::Cell})     return std::nullopt;
+  if (rat == RepoAuthType{T::InitCell}) return std::nullopt;
   return Bytecode { TyBC { arg, rat } };
 }
 
@@ -135,18 +133,14 @@ void insert_assertions_step(const php::Func& func,
 
   for (LocalId i = 0; i < state.locals.size(); ++i) {
     if (func.locals[i].killed) continue;
-    if (options.FilterAssertions) {
-      // Do not emit assertions for untracked locals.
-      if (i >= mayReadLocalSet.size()) break;
-      if (!mayReadLocalSet.test(i)) continue;
-    }
+    // Do not emit assertions for untracked locals.
+    if (i >= mayReadLocalSet.size()) break;
+    if (!mayReadLocalSet.test(i)) continue;
     if (ignoresReadLocal(bcode, i)) continue;
     auto const realT = state.locals[i];
     auto const op = makeAssert<bc::AssertRATL>(i, realT);
     if (op) gen(*op);
   }
-
-  if (!options.InsertStackAssertions) return;
 
   assertx(obviousStackOutputs.size() == state.stack.size());
 
@@ -157,9 +151,7 @@ void insert_assertions_step(const php::Func& func,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
-      return;
-    }
+    if (!realT.strictSubtypeOf(flav)) return;
 
     auto const op =
       makeAssert<bc::AssertRATStk>(
@@ -716,27 +708,23 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
      */
     remove_unreachable_blocks(ainfo, func);
 
-    if (options.LocalDCE) {
-      visit_blocks("local DCE", *visit, local_dce);
-    }
-    if (options.GlobalDCE) {
-      split_critical_edges(index, ainfo, func);
-      if (global_dce(index, ainfo, func)) again = true;
-      if (control_flow_opts(ainfo, func)) again = true;
-      assertx(check(*func));
-      /*
-       * Global DCE can change types of locals across blocks.  See
-       * dce.cpp for an explanation.
-       *
-       * We need to perform a final type analysis before we do
-       * anything else.
-       */
-      auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-      ainfo = analyze_func(index, ctx, CollectionOpts{});
-      update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
-      collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
-      visit.emplace(index, ainfo, *collect, func);
-    }
+    visit_blocks("local DCE", *visit, local_dce);
+    split_critical_edges(index, ainfo, func);
+    if (global_dce(index, ainfo, func)) again = true;
+    if (control_flow_opts(ainfo, func)) again = true;
+    assertx(check(*func));
+    /*
+     * Global DCE can change types of locals across blocks.  See
+     * dce.cpp for an explanation.
+     *
+     * We need to perform a final type analysis before we do
+     * anything else.
+     */
+    auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
+    ainfo = analyze_func(index, ctx, CollectionOpts{});
+    update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
+    collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+    visit.emplace(index, ainfo, *collect, func);
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
@@ -760,9 +748,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
     }
   }
 
-  if (options.InsertAssertions) {
-    visit_blocks("insert assertions", *visit, insert_assertions);
-  }
+  visit_blocks("insert assertions", *visit, insert_assertions);
 
   // NOTE: We shouldn't duplicate blocks that are shared between two Funcs
   // in this loop. We shrink BytecodeVec at the time we parse the function,

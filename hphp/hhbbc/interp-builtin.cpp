@@ -581,11 +581,6 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
     return false;
   }
 
-  // We rely on strength reduction to convert builtins, but if we do
-  // the analysis on the assumption that builtins will be created, but
-  // don't actually create them, all sorts of things can go wrong.
-  if (!options.StrengthReduce) return false;
-
   // Do not allow for inout arguments, unpack and variadic arguments
   if (func->hasInOutArgs ||
       fca.enforceInOut() ||

@@ -192,18 +192,6 @@ std::vector<WorkItem> initial_work(const php::Program& program,
   }
 
   for (auto& u : program.units) {
-    /*
-     * If we're not doing private property inference, schedule only
-     * function-at-a-time work items.
-     */
-    if (!options.HardPrivatePropInference) {
-      all_unit_contexts(u.get(), [&] (Context&& c) {
-          ret.emplace_back(WorkType::Func, std::move(c));
-        }
-      );
-      continue;
-    }
-
     for (auto& c : u->classes) {
       if (c->closureContextCls) {
         // For class-at-a-time analysis, closures that are associated
@@ -242,7 +230,6 @@ WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
     case DependencyContextType::Class: {
       auto const cls = (const php::Class*)d.ptr();
       assertx(mode != AnalyzeMode::ConstPass &&
-              options.HardPrivatePropInference &&
               !is_used_trait(*cls));
       return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
     }
@@ -253,7 +240,6 @@ WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
         func->cls->closureContextCls : func->cls;
       assertx(!cls ||
               mode == AnalyzeMode::ConstPass ||
-              !options.HardPrivatePropInference ||
               is_used_trait(*cls));
       return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
     }
@@ -350,7 +336,7 @@ void analyze_iteratively(Index& index, php::Program& program,
       index.refine_constants(fa, deps);
       update_bytecode(func, std::move(fa.blockUpdates));
 
-      if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+      if (mode == AnalyzeMode::NormalPass) {
         index.record_public_static_mutations(
           *func,
           std::move(fa.publicSPropMutations)
@@ -420,7 +406,7 @@ void analyze_iteratively(Index& index, php::Program& program,
 
     auto& deps = deps_vec[0];
 
-    if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+    if (mode == AnalyzeMode::NormalPass) {
       index.refine_public_statics(deps);
     }
 
@@ -684,38 +670,26 @@ void whole_program(WholeProgramInput inputs,
     callback(std::move(ue));
   };
 
-  if (!options.NoOptimizations) {
-    auto cleanup_pre_analysis = std::thread([&] { index.cleanup_pre_analysis(); });
-    assertx(check(*program));
-    prop_type_hint_pass(index, *program);
-    index.rewrite_default_initial_values(*program);
-    index.use_class_dependencies(false);
-    analyze_iteratively(index, *program, AnalyzeMode::ConstPass);
-    // Defer preresolve type-structures and initializing public static
-    // property types until after the constant pass, to try to get
-    // better initial values.
-    index.preresolve_type_structures(*program);
-    index.init_public_static_prop_types();
-    index.preinit_bad_initial_prop_values();
-    index.use_class_dependencies(options.HardPrivatePropInference);
-    analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
-    auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
-    index.join_iface_vtable_thread();
-    parallel::num_threads = parallel::final_threads;
-    final_pass(index, *program, stats, emitUnit);
-    cleanup_pre_analysis.join();
-    cleanup_for_final.join();
-  } else {
-    debug_dump_program(index, *program);
-    index.join_iface_vtable_thread();
-    parallel::for_each(
-      program->units,
-      [&] (const std::unique_ptr<php::Unit>& unit) {
-        collect_stats(stats, index, unit.get());
-        emitUnit(*unit);
-      }
-    );
-  }
+  auto cleanup_pre_analysis = std::thread([&] { index.cleanup_pre_analysis(); });
+  assertx(check(*program));
+  prop_type_hint_pass(index, *program);
+  index.rewrite_default_initial_values(*program);
+  index.use_class_dependencies(false);
+  analyze_iteratively(index, *program, AnalyzeMode::ConstPass);
+  // Defer preresolve type-structures and initializing public static
+  // property types until after the constant pass, to try to get
+  // better initial values.
+  index.preresolve_type_structures(*program);
+  index.init_public_static_prop_types();
+  index.preinit_bad_initial_prop_values();
+  index.use_class_dependencies(true);
+  analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
+  auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });
+  index.join_iface_vtable_thread();
+  parallel::num_threads = parallel::final_threads;
+  final_pass(index, *program, stats, emitUnit);
+  cleanup_pre_analysis.join();
+  cleanup_for_final.join();
 
   print_stats(stats);
 

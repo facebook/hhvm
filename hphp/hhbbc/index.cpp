@@ -3744,8 +3744,7 @@ void preresolve(const php::Program* program,
   if (resolved) {
     updates.updateDeps.emplace_back(resolved);
 
-    if (options.FlattenTraits &&
-        !(type->attrs & AttrNoExpandTrait) &&
+    if (!(type->attrs & AttrNoExpandTrait) &&
         !type->usedTraitNames.empty() &&
         index.classes.count(type->name) == 1) {
       Trace::Indent indent;
@@ -6400,18 +6399,16 @@ res::Func Index::resolve_method(Context ctx,
                                 Type clsType,
                                 SString name) const {
   auto const general = [&] {
-    if (options.FuncFamilies) {
-      // Even if we can't resolve to a FuncFamily from the class, we
-      // can still perhaps use a (less percise) func family derived
-      // from just the method name.
-      auto const singleMethIt = m_data->singleMethodFamilies.find(name);
-      if (singleMethIt != m_data->singleMethodFamilies.end()) {
-        return res::Func { res::Func::MethodOrMissing{ singleMethIt->second }};
-      }
-      auto const methIt = m_data->methodFamilies.find(name);
-      if (methIt != m_data->methodFamilies.end()) {
-        return res::Func { methIt->second };
-      }
+    // Even if we can't resolve to a FuncFamily from the class, we
+    // can still perhaps use a (less percise) func family derived
+    // from just the method name.
+    auto const singleMethIt = m_data->singleMethodFamilies.find(name);
+    if (singleMethIt != m_data->singleMethodFamilies.end()) {
+      return res::Func { res::Func::MethodOrMissing{ singleMethIt->second }};
+    }
+    auto const methIt = m_data->methodFamilies.find(name);
+    if (methIt != m_data->methodFamilies.end()) {
+      return res::Func { methIt->second };
     }
     return res::Func { res::Func::MethodName { name } };
   };
@@ -6425,7 +6422,6 @@ res::Func Index::resolve_method(Context ctx,
     // method families are guaranteed to all be public so we can do
     // this lookup as a last gasp before resorting to general().
     auto const find_extra_method = [&] {
-      if (!options.FuncFamilies) return general();
       auto singleMethIt = cinfo->singleMethodFamilies.find(name);
       if (singleMethIt != cinfo->singleMethodFamilies.end()) {
         return res::Func { singleMethIt->second };
@@ -6514,7 +6510,6 @@ res::Func Index::resolve_method(Context ctx,
     if (methIt->second.attrs & AttrNoOverride) {
       return resolve();
     }
-    if (!options.FuncFamilies) return general();
 
     auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
     if (singleFamIt != cinfo->singleMethodFamilies.end()) {
@@ -6615,8 +6610,6 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
     create_func_info(*m_data, ctor->second.func);
     return res::Func { ctor };
   }
-
-  if (!options.FuncFamilies) return std::nullopt;
 
   auto const singleFamIt = cinfo->singleMethodFamilies.find(s_construct.get());
   if (singleFamIt != cinfo->singleMethodFamilies.end()) {

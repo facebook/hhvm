@@ -411,7 +411,6 @@ RepoGlobalData getGlobalData() {
   auto gd                        = RepoGlobalData{};
   gd.Signature                   = nanos.count();
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
-  gd.HardPrivatePropInference    = true;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;

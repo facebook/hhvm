@@ -565,7 +565,6 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
 
   unserializePropertyValue(t, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
-  if (!RepoFile::globalData().HardPrivatePropInference) return;
 
   /*
    * We assume for performance reasons in repo authoriative mode that
@@ -1046,9 +1045,7 @@ void VariableUnserializer::unserializeVariant(
 
           Variant serializedNativeData = init_null();
           bool hasSerializedNativeData = false;
-          bool checkRepoAuthType =
-            RuntimeOption::RepoAuthoritative &&
-            RepoFile::globalData().HardPrivatePropInference;
+          bool checkRepoAuthType = RO::RepoAuthoritative;
           Class* objCls = obj->getVMClass();
           // Try fast case.
           if (remainingProps >= objCls->numDeclProperties() -

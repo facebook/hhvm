@@ -87,8 +87,6 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
     }
   }
 
-  if (!options.RemoveDeadBlocks) return;
-
   auto reachable = [&](BlockId id) {
     if (id == NoBlockId) return false;
     auto const& state = ainfo.bdata[id].stateIn;

@@ -87,6 +87,9 @@ fn convert_type_path(ty: &syn::TypePath) -> Result<TypeRef> {
     ensure!(ty.qself.is_none(), "Qualified self in paths not supported");
     let last_seg = ty.path.segments.last().unwrap();
     if ty.path.segments.len() == 1 && last_seg.arguments.is_empty() {
+        // The impls of ToOcamlRep and FromOcamlRep for integer types do checked
+        // conversions, so we'll fail at runtime if our int value doesn't fit
+        // into OCaml's integer width.
         match last_seg.ident.to_string().as_str() {
             "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
             | "isize" | "usize" => return Ok(TypeRef::simple("int")),

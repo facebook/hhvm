@@ -51,7 +51,23 @@ fn convert_item_type(item: &syn::ItemType) -> Result<(String, Def)> {
 
 fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
     let name = item.ident.to_string().to_case(Case::Snake);
-    Ok((name, Def::Type))
+    let attrs = attr_parser::Container::from_ast(&item.to_owned().into());
+    match &item.fields {
+        syn::Fields::Named(fields) => {
+            let fields = (fields.named.iter())
+                .map(|field| {
+                    let mut name = field.ident.as_ref().unwrap().to_string();
+                    if let Some(prefix) = attrs.prefix.as_deref() {
+                        name = format!("{}_{}", prefix, name);
+                    };
+                    let ty = convert_type(&field.ty)?;
+                    Ok((name, ty))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            Ok((name, Def::Record { fields }))
+        }
+        _ => todo!(),
+    }
 }
 
 fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {

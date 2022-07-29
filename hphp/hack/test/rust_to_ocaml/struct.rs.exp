@@ -1,0 +1,14 @@
+type my_struct = {
+  foo: int;
+  bar: int;
+}
+
+type struct_a = {
+  a_foo: int;
+  a_bar: int;
+}
+
+type struct_b = {
+  b_foo: int;
+  b_bar: int;
+}

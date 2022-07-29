@@ -14,6 +14,13 @@ impl std::fmt::Display for File {
             match def {
                 Def::Alias { ty } => write!(f, "type {name} = {ty}\n")?,
                 Def::Type => write!(f, "type {name}\n")?,
+                Def::Record { fields } => {
+                    write!(f, "type {name} = {{\n")?;
+                    for (field_name, ty) in fields {
+                        write!(f, "  {field_name}: {ty};\n")?;
+                    }
+                    write!(f, "}}\n")?;
+                }
             }
         }
         Ok(())
@@ -22,6 +29,7 @@ impl std::fmt::Display for File {
 
 pub enum Def {
     Alias { ty: TypeRef },
+    Record { fields: Vec<(String, TypeRef)> },
     Type,
 }
 

@@ -12,7 +12,7 @@ pub mod ffi {
     // This is not a real definition. Cxx just adds static asserts on each of these enum variants
     // that they match the definition in attr.h.
     #[repr(u32)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Serialize)]
     pub enum Attr {
         AttrNone = 0x0,
         AttrForbidDynamicProps = 0x1,
@@ -62,7 +62,7 @@ pub mod ffi {
     }
 
     #[repr(u32)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Serialize)]
     enum AttrContext {
         Class = 0x1,
         Func = 0x2,
@@ -75,7 +75,7 @@ pub mod ffi {
     }
 
     #[repr(u16)]
-    #[derive(Debug, Copy, Clone, Hash)]
+    #[derive(Debug, Copy, Clone, Hash, Serialize)]
     enum TypeConstraintFlags {
         NoFlags = 0x0,
         Nullable = 0x1,

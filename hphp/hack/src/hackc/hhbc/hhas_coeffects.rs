@@ -16,8 +16,9 @@ use oxidized::aast as a;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::ast_defs::Id;
+use serde::Serialize;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasCtxConstant<'arena> {
     pub name: Str<'arena>,
@@ -26,7 +27,7 @@ pub struct HhasCtxConstant<'arena> {
     pub is_abstract: bool,
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasCoeffects<'arena> {
     pub static_coeffects: Slice<'arena, Ctx>,

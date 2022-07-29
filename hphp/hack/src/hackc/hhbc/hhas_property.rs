@@ -12,8 +12,9 @@ use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasProperty<'arena> {
     pub name: PropName<'arena>,

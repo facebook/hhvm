@@ -17,8 +17,9 @@ use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
 use ffi::Triple;
+use serde::Serialize;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 #[repr(C)]
 pub struct HackCUnit<'arena> {
     pub adata: Slice<'arena, HhasAdata<'arena>>,

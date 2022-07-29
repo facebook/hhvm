@@ -10,6 +10,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.64"
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 
 [build-dependencies]
 cxx-build = "1.0.64"

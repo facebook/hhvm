@@ -27,6 +27,7 @@ options = { path = "../compile/cargo/options" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
+sha-1 = "0.10"
 
 [build-dependencies]
 cxx-build = "1.0.64"

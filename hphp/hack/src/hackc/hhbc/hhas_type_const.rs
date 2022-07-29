@@ -6,8 +6,9 @@
 use crate::typed_value::TypedValue;
 use ffi::Maybe;
 use ffi::Str;
+use serde::Serialize;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasTypeConstant<'arena> {
     pub name: Str<'arena>,

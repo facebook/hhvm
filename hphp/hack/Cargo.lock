@@ -563,6 +563,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "sha-1",
 ]
 
 [[package]]
@@ -1321,6 +1322,7 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
+ "serde",
  "write_bytes",
 ]
 
@@ -1699,6 +1701,7 @@ dependencies = [
  "hhvm_types_ffi",
  "naming_special_names_rust",
  "oxidized",
+ "serde",
  "write_bytes",
 ]
 
@@ -1730,6 +1733,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "serde",
 ]
 
 [[package]]
@@ -1759,6 +1763,7 @@ dependencies = [
  "cxx",
  "cxx-build",
  "oxidized",
+ "serde",
 ]
 
 [[package]]
@@ -2197,6 +2202,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "lazy_static",
+ "serde",
  "write_bytes",
 ]
 

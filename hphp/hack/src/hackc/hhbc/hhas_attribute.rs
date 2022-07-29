@@ -8,6 +8,7 @@ use ffi::Slice;
 use ffi::Str;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
+use serde::Serialize;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:
@@ -21,7 +22,7 @@ use naming_special_names_rust as naming_special_names;
 ///   }
 /// ```
 
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize)]
 #[repr(C)]
 pub struct HhasAttribute<'arena> {
     pub name: Str<'arena>,

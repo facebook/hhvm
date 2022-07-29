@@ -5,6 +5,7 @@
 
 use crate::typed_value::TypedValue;
 use ffi::Str;
+use serde::Serialize;
 
 pub const VARRAY_PREFIX: &str = "y";
 pub const DARRAY_PREFIX: &str = "Y";
@@ -12,7 +13,7 @@ pub const VEC_PREFIX: &str = "v";
 pub const DICT_PREFIX: &str = "D";
 pub const KEYSET_PREFIX: &str = "k";
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasAdata<'arena> {
     pub id: Str<'arena>,

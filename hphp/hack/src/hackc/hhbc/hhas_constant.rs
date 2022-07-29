@@ -10,8 +10,9 @@
 use crate::typed_value::TypedValue;
 use crate::ConstName;
 use ffi::Maybe;
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct HhasConstant<'arena> {
     pub name: ConstName<'arena>,

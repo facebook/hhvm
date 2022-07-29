@@ -10,8 +10,9 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use serde::Serialize;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 #[repr(C)]
 pub struct HhasBody<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().

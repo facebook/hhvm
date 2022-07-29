@@ -31,8 +31,8 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const hackc::hhbc::HackCUnit& unit,
   const char* filename,
 	const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
-  const std::string& hhasString
+  const SHA1& bcSha1,
+  const Native::FuncTable& nativeFuncs
 );
 
 }

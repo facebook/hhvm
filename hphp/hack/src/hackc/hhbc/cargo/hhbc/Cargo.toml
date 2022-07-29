@@ -19,4 +19,5 @@ hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 write_bytes = { path = "../../../../utils/write_bytes/write_bytes" }

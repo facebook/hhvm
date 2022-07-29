@@ -10,8 +10,9 @@ use crate::typed_value::TypedValue;
 use crate::ClassName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 #[repr(C)]
 pub struct HhasTypedef<'arena> {
     pub name: ClassName<'arena>,

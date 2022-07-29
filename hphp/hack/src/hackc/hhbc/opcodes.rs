@@ -46,9 +46,10 @@ use crate::TypeStructResolveOp;
 use emit_opcodes_macro::Targets;
 use ffi::Slice;
 use ffi::Str;
+use serde::Serialize;
 
 #[emit_opcodes_macro::emit_opcodes]
-#[derive(Clone, Debug, Targets, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Targets, Hash, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub enum Opcode<'arena> {
     // This is filled in by the emit_opcodes macro.  It can be printed using the

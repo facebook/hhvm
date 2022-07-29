@@ -10,6 +10,7 @@
 use bstr::BStr;
 use bstr::ByteSlice;
 use ffi::Str;
+use serde::Serialize;
 
 macro_rules! impl_id {
     ($type: ident) => {
@@ -85,7 +86,7 @@ macro_rules! impl_add_suffix {
     };
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct ClassName<'arena>(Str<'arena>);
 
@@ -120,7 +121,7 @@ impl<'arena> ClassName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct PropName<'arena>(Str<'arena>);
 
@@ -133,7 +134,7 @@ impl<'arena> PropName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct MethodName<'arena>(Str<'arena>);
 
@@ -154,7 +155,7 @@ impl<'arena> MethodName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct FunctionName<'arena>(Str<'arena>);
 
@@ -167,7 +168,7 @@ impl<'arena> FunctionName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct ConstName<'arena>(Str<'arena>);
 

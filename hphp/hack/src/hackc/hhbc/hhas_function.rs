@@ -11,10 +11,11 @@ use crate::hhas_pos::HhasSpan;
 use crate::FunctionName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
 
 use bitflags::bitflags;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
@@ -28,6 +29,7 @@ pub struct HhasFunction<'arena> {
 }
 
 bitflags! {
+    #[derive(Serialize)]
     #[repr(C)]
     pub struct HhasFunctionFlags: u8 {
         const ASYNC =          1 << 0;

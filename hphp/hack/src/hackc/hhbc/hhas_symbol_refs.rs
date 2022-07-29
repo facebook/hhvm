@@ -8,6 +8,7 @@ use crate::FunctionName;
 use bstr::BString;
 use ffi::Slice;
 use ffi::Str;
+use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -18,7 +19,7 @@ use std::os::unix::ffi::OsStrExt;
 /// encounter in the course of emitting bytecode for an AST. We split
 /// them into these four categories for the sake of HHVM, which has
 /// a dedicated lookup function corresponding to each.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, Serialize)]
 #[repr(C)]
 pub struct HhasSymbolRefs<'arena> {
     pub includes: Slice<'arena, IncludePath<'arena>>,
@@ -30,7 +31,7 @@ pub struct HhasSymbolRefs<'arena> {
 /// NOTE(hrust): order matters (hhbc_hhas write includes in sorted order)
 pub type IncludePathSet<'arena> = BTreeSet<IncludePath<'arena>>;
 
-#[derive(Clone, Debug, Eq)]
+#[derive(Clone, Debug, Eq, Serialize)]
 #[repr(C)]
 pub enum IncludePath<'arena> {
     Absolute(Str<'arena>),                         // /foo/bar/baz.php

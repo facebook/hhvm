@@ -44,6 +44,17 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
 
   SHA1() : q{} {}
 
+  explicit SHA1(const std::array<uint8_t, 20>& sha1) {
+    for (auto i = 0; i < kQNumWords; i++) {
+      uint32_t u =
+        (sha1[i*4] << 24) +
+        (sha1[i*4+1] << 16) +
+        (sha1[i*4+2] << 8) +
+         sha1[i*4+3];
+      q.at(i) = u;
+    }
+  }
+
   /**
    * Build from a SHA1 hexadecimal string
    */

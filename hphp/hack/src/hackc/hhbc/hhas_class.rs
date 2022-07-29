@@ -17,8 +17,9 @@ use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub enum TraitReqKind {
     MustExtend,
@@ -26,7 +27,7 @@ pub enum TraitReqKind {
     MustBeClass,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct HhasClass<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,

@@ -7,8 +7,9 @@ use crate::hhas_attribute::HhasAttribute;
 use crate::hhas_pos::HhasSpan;
 use crate::ClassName;
 use ffi::Slice;
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct HhasModule<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,

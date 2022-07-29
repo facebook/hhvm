@@ -12,8 +12,9 @@ use ffi::Maybe::*;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use serde::Serialize;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasParam<'arena> {
     pub name: Str<'arena>,

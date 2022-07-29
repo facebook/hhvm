@@ -841,6 +841,7 @@ pub mod readonly {
 
 pub mod coeffects {
     use lazy_static::lazy_static;
+    use serde::Serialize;
     use std::collections::HashSet;
     use std::fmt;
 
@@ -902,7 +903,7 @@ pub mod coeffects {
         ZONED_SET.contains(x)
     }
 
-    #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
+    #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone, Serialize)]
     #[repr(C)]
     pub enum Ctx {
         Defaults,

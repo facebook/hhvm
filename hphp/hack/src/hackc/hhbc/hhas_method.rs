@@ -11,10 +11,11 @@ use crate::hhbc_ast::Visibility;
 use crate::MethodName;
 use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
 
 use bitflags::bitflags;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct HhasMethod<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
@@ -28,6 +29,7 @@ pub struct HhasMethod<'arena> {
 }
 
 bitflags! {
+    #[derive(Serialize)]
     #[repr(C)]
     pub struct HhasMethodFlags: u16 {
         const IS_ASYNC = 1 << 0;

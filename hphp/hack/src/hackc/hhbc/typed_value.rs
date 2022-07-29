@@ -6,12 +6,13 @@
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
+use serde::Serialize;
 
 /// Raw IEEE floating point bits. We use this rather than f64 so that the default
 /// hash/equality have the right interning behavior: -0.0 != 0.0, NaN == NaN.
 /// If we ever implement Ord/PartialOrd, we'd need to base it on the raw bits
 /// (u64), not floating point partial order.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize)]
 #[repr(transparent)]
 pub struct FloatBits(pub f64);
 
@@ -50,7 +51,7 @@ impl From<f64> for FloatBits {
 /// can be used for optimization on ASTs, or on bytecode, or (in
 /// future) on a compiler intermediate language. HHVM takes a similar
 /// approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 #[repr(C)]
 pub enum TypedValue<'arena> {
     /// Used for fields that are initialized in the 86pinit method

@@ -7,16 +7,17 @@ use ffi::Maybe;
 use ffi::Maybe::Just;
 use ffi::Str;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
+use serde::Serialize;
 
 /// Type info has additional optional user type
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct HhasTypeInfo<'arena> {
     pub user_type: Maybe<Str<'arena>>,
     pub type_constraint: Constraint<'arena>,
 }
 
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Constraint<'arena> {
     pub name: Maybe<Str<'arena>>,

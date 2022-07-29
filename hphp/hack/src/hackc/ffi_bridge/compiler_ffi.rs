@@ -21,6 +21,8 @@ use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use parser_core_types::source_text::SourceText;
+use sha1::Digest;
+use sha1::Sha1;
 use std::ffi::c_void;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
@@ -162,6 +164,8 @@ pub mod compile_ffi {
             text: &CxxString,
         ) -> DeclResult;
 
+        fn hash_unit(unit: &HackCUnitWrapper) -> [u8; 20];
+
         /// Return true if this type (class or alias) is in the given Decls.
         fn hackc_type_exists(result: &DeclResult, symbol: &str) -> bool;
 
@@ -237,6 +241,13 @@ impl compile_ffi::NativeEnv {
             flags: compile::EnvFlags::from_bits(env.flags)?,
         })
     }
+}
+
+fn hash_unit(unit: &HackCUnitWrapper) -> [u8; 20] {
+    let mut hasher = Sha1::new();
+    let slice: &[u8] = &bincode::serialize(&unit.0).unwrap();
+    hasher.update(slice);
+    hasher.finalize().into()
 }
 
 fn hackc_compile_from_text_cpp_ffi(

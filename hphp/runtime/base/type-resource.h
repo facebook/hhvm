@@ -151,8 +151,6 @@ private:
   }
 
   static void compileTimeAssertions();
-
-  const char* classname_cstr() const;
 };
 
 extern const Resource null_resource;

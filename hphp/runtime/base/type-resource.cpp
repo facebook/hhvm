@@ -36,10 +36,6 @@ Array Resource::toArray() const {
   return m_res ? m_res->data()->o_toArray() : Array();
 }
 
-const char* Resource::classname_cstr() const {
-  return m_res->data()->o_getClassName().c_str();
-}
-
 void Resource::compileTimeAssertions() {
   static_assert(sizeof(Resource) == sizeof(req::ptr<ResourceHdr>), "");
 }

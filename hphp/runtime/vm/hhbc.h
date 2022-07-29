@@ -89,6 +89,20 @@ struct IterArgs {
   int32_t keyId;
   int32_t valId;
   Flags flags;
+
+  template <typename SerDe> static IterArgs makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    int32_t iterId;
+    int32_t keyId;
+    int32_t valId;
+    Flags flags;
+    sd(iterId)(keyId)(valId)(flags);
+    return IterArgs{flags, iterId, keyId, valId};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(iterId)(keyId)(valId)(flags);
+  }
 };
 
 // Arguments to FCall opcodes.
@@ -142,6 +156,20 @@ struct FCallArgsBase {
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
+
+  template <typename SerDe> static FCallArgsBase makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    uint32_t numArgs;
+    uint32_t numRets;
+    Flags flags;
+    sd(numArgs)(numRets)(flags);
+    return FCallArgsBase{flags, numArgs, numRets};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(numArgs)(numRets)(flags);
+  }
 };
 
 struct FCallArgs : FCallArgsBase {

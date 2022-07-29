@@ -79,6 +79,9 @@ struct RuntimeCoeffects {
   // This operator is equivalent to & of [coeffectA & coeffectB]
   RuntimeCoeffects& operator|=(const RuntimeCoeffects);
 
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(m_data);
+  }
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
   storage_t m_data;

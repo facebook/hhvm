@@ -2763,7 +2763,7 @@ and stmt_ env pos st =
     failwith
       "Unexpected nodes in AST. These nodes should have been removed in naming."
 
-and finally_cont fb env ctx =
+and finally_w_cont fb env ctx =
   (* The only locals in scope are the ones from the current continuation *)
   let env = Env.env_with_locals env @@ CMap.singleton C.Next ctx in
   let (env, _tfb) = block env fb in
@@ -2775,36 +2775,43 @@ and finally env fb =
     let env = LEnv.update_next_from_conts env [C.Next; C.Finally] in
     (env, [])
   | _ ->
-    let parent_locals = LEnv.get_all_locals env in
-    (* First typecheck the finally block against all continuations merged
-       * together.
-       * During this phase, record errors found in the finally block, but discard
-       * the resulting environment. *)
-    let all_conts = Env.all_continuations env in
-    let env = LEnv.update_next_from_conts env all_conts in
+    let initial_locals = LEnv.get_all_locals env in
+    (* First typecheck the finally block against all relevant continuations merged
+     * together. The relevant continuations are those corresponding to statements
+     * which will cause control flow to jump to the finally block, e.g. `break`.
+     * During this phase, record errors found in the finally block, but discard
+     * the resulting environment. *)
+    let env =
+      LEnv.update_next_from_conts
+        env
+        Typing_per_cont_env.continuations_for_finally
+    in
     let (env, tfb) = block env fb in
-    let env = LEnv.restore_conts_from env parent_locals all_conts in
+    let env = Env.env_with_locals env initial_locals in
     (* Second, typecheck the finally block once against each continuation. This
-       * helps be more clever about what each continuation will be after the
-       * finally block.
-       * We don't want to record errors during this phase, because certain types
-       * of errors will fire wrongly. For example, if $x is nullable in some
-       * continuations but not in others, then we must use `?->` on $x, but an
-       * error will fire when typechecking the finally block againts continuations
-       * where $x is non-null. *)
-    let finally_cont env _key = finally_cont fb env in
+     * helps be more clever about what each continuation will be after the
+     * finally block.
+     * We don't want to record errors during this phase, because certain types
+     * of errors will fire wrongly. For example, if $x is nullable in some
+     * continuations but not in others, then we must use `?->` on $x, but an
+     * error will fire when typechecking the finally block againts continuations
+     * where $x is non-null. *)
+    let finally_w_cont env _key = finally_w_cont fb env in
     let (env, locals_map) =
-      Errors.ignore_ (fun () -> CMap.map_env finally_cont env parent_locals)
+      Errors.ignore_ (fun () -> CMap.map_env finally_w_cont env initial_locals)
     in
     let union env _key = LEnv.union_contextopts env in
-    let (env, locals) = Try.finally_merge union env locals_map all_conts in
+    let (env, locals) = Try.finally_merge union env locals_map in
     (Env.env_with_locals env locals, tfb)
 
 and try_catch env tb cl fb =
   let parent_locals = LEnv.get_all_locals env in
-  let env =
-    LEnv.drop_conts env [C.Break; C.Continue; C.Exit; C.Catch; C.Finally]
-  in
+  (* If any `break`, `continue`, `exit`, etc. happens directly inside the `try`
+   * block, they will cause control flow to go to the `finally` block first.
+   * I.o.w. the `finally` block is typechecked with the corresponding continuations.
+   * Therefore we need to stash the corresponding pre-existing continuations
+   * so that we don't typecheck the finally block with those. *)
+  let env = LEnv.drop_conts env Typing_per_cont_env.continuations_for_finally in
   let (env, (ttb, tcb)) =
     Env.in_try env (fun env ->
         let (env, ttb) = block env tb in
@@ -2823,7 +2830,7 @@ and try_catch env tb cl fb =
     LEnv.restore_and_merge_conts_from
       env
       parent_locals
-      [C.Break; C.Continue; C.Exit; C.Catch; C.Finally]
+      Typing_per_cont_env.continuations_for_finally
   in
   (env, ttb, tcb, tfb)
 

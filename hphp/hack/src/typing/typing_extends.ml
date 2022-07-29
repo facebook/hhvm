@@ -1719,12 +1719,24 @@ let check_trait_diamonds
        || MemberKind.is_property member_kind)
   then
     (* Let's search for a diamond. *)
-    match
-      ParentClassEltSet.find_first_opt
+    (* We want to find an existing element with the same origin,
+     * i.o.w, find a diamond.
+     * Set.find_first_opt only works for 'monotonic' `f` which is
+     * not the case for the equality test, and Set.find_opt
+     * uses the polymorphic equaliy: we only want to test for origin.
+     * Set doesn't provide a `find with condition` function so we
+     * do it by filter + choose.
+     *
+     * This works in a deterministic way because the set we are working
+     * with has the invariant that each element have a unique origin.
+     *)
+    let candidates =
+      ParentClassEltSet.filter
         (fun { ParentClassElt.class_elt = prev_class_elt; _ } ->
           String.equal class_elt.ce_origin prev_class_elt.ce_origin)
         elts
-    with
+    in
+    match ParentClassEltSet.choose_opt candidates with
     | None -> ((default_parent_class_elt (), elts), None)
     | Some
         ({

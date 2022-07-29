@@ -691,11 +691,24 @@ void handleKA(TranslationState& ts, const hhbc::MemberKey& mkey) {
   encode_member_key(mkey_, *ts.fe);
 }
 
+inline bool operator==(const hhbc::Local& a, const hhbc::Local& b) {
+  return a.idx == b.idx;
+}
+
+inline bool operator==(const hhbc::LocalRange& a, const hhbc::LocalRange& b) {
+  return a.start == b.start && a.len == b.len;
+}
+
 void handleLAR(TranslationState& ts, const hhbc::LocalRange& lar) {
-  auto const firstLoc = lar.start.idx;
-  auto const len = lar.len;
-  auto const lar_ = HPHP::LocalRange{firstLoc, len};
-  ts.trackMaxUnnamed(firstLoc + len - 1);
+  auto const lar_ = [&]() {
+    if (lar == LocalRange_EMPTY) {
+      return HPHP::LocalRange{0, 0};
+    }
+    auto const firstLoc = lar.start.idx;
+    auto const len = lar.len;
+    ts.trackMaxUnnamed(firstLoc + len - 1);
+    return HPHP::LocalRange{firstLoc, len};
+  }();
   encodeLocalRange(*ts.fe, lar_);
 }
 

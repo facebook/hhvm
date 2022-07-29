@@ -31,7 +31,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
-#[rust_to_ocaml(prefix = "a")]
+#[rust_to_ocaml(prefix = "a_")]
 #[repr(C)]
 pub struct A {
     pub foo: isize,
@@ -56,8 +56,8 @@ pub struct A {
 )]
 #[repr(C, u8)]
 pub enum B {
-    #[rust_to_ocaml(prefix = "x")]
+    #[rust_to_ocaml(prefix = "x_")]
     X { foo: isize, bar: isize },
-    #[rust_to_ocaml(prefix = "y")]
+    #[rust_to_ocaml(prefix = "y_")]
     Y { foo: isize, bar: isize },
 }

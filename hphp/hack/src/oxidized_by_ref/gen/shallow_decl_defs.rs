@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1da650aa2bc4a8a4e2f4b6bbc2000a83>>
+// @generated SignedSource<<a8317e23dcfc1405517244585a32ddb8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub use typing_defs::ConstDecl;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "scc")]
+#[rust_to_ocaml(prefix = "scc_")]
 #[repr(C)]
 pub struct ShallowClassConst<'a> {
     pub abstract_: oxidized::typing_defs::ClassConstKind,
@@ -77,7 +77,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowClassConst<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "stc")]
+#[rust_to_ocaml(prefix = "stc_")]
 #[repr(C)]
 pub struct ShallowTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -109,7 +109,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sp")]
+#[rust_to_ocaml(prefix = "sp_")]
 #[repr(C)]
 pub struct ShallowProp<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -139,7 +139,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowProp<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sm")]
+#[rust_to_ocaml(prefix = "sm_")]
 #[repr(C)]
 pub struct ShallowMethod<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -174,7 +174,7 @@ pub type XhpEnumValues<'a> = s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sc")]
+#[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,

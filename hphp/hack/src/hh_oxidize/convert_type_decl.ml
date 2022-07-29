@@ -421,7 +421,6 @@ let record_prefix_attr prefix =
   if String.is_empty prefix then
     ""
   else
-    let prefix = String.rstrip prefix ~drop:(Char.equal '_') in
     sprintf "#[rust_to_ocaml(prefix = \"%s\")]\n" prefix
 
 let declare_record_arguments ?(pub = false) ~prefix labels =

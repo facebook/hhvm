@@ -33,7 +33,7 @@ pub use qux::*;
     Serialize,
     ToOcamlRep,
 )]
-#[rust_to_ocaml(prefix = "x")]
+#[rust_to_ocaml(prefix = "x_")]
 #[repr(C)]
 pub struct X {
     pub bar: foo::bar::Bar,

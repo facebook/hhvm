@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35bed6ac215523d92627febe62e93f8a>>
+// @generated SignedSource<<47b1b5549ebc7dec8214cc422d640faf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -107,7 +107,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "cd")]
+#[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl {
     pub pos: pos_or_decl::PosOrDecl,
@@ -130,7 +130,7 @@ pub struct ConstDecl {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ce")]
+#[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
 pub struct ClassElt {
     pub visibility: CeVisibility,
@@ -159,7 +159,7 @@ pub struct ClassElt {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "fe")]
+#[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt {
     pub deprecated: Option<String>,
@@ -212,7 +212,7 @@ pub enum ClassConstKind {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "cc")]
+#[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst {
     pub synthesized: bool,
@@ -294,7 +294,7 @@ pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "atc")]
+#[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst {
     pub as_constraint: Option<Ty>,
@@ -339,7 +339,7 @@ pub struct ConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "patc")]
+#[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst {
     pub constraint: Ty,
@@ -384,7 +384,7 @@ pub enum Typeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ttc")]
+#[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType {
     pub synthesized: bool,
@@ -431,7 +431,7 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "te")]
+#[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType {
     pub base: Ty,
@@ -455,7 +455,7 @@ pub struct EnumType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "td")]
+#[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType {
     pub module: Option<ast_defs::Id>,

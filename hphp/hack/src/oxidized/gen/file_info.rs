@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae59c1cb6151c5ebfb351dab6cf00d0e>>
+// @generated SignedSource<<f1801804e1c7731ee713364e71c9a16c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -117,7 +117,7 @@ pub enum Pos {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "n")]
+#[rust_to_ocaml(prefix = "n_")]
 #[repr(C)]
 pub struct Names {
     pub funs: s_set::SSet,
@@ -142,7 +142,7 @@ pub struct Names {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sn")]
+#[rust_to_ocaml(prefix = "sn_")]
 #[repr(C)]
 pub struct SavedNames {
     pub funs: s_set::SSet,

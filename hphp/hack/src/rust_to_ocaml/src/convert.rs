@@ -58,7 +58,7 @@ fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
                 .map(|field| {
                     let mut name = field.ident.as_ref().unwrap().to_string();
                     if let Some(prefix) = attrs.prefix.as_deref() {
-                        name = format!("{}_{}", prefix, name);
+                        name = format!("{}{}", prefix, name);
                     };
                     let ty = convert_type(&field.ty)?;
                     Ok((name, ty))

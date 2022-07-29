@@ -3,13 +3,13 @@ pub struct MyStruct {
     pub bar: isize,
 }
 
-#[rust_to_ocaml(prefix = "a")]
+#[rust_to_ocaml(prefix = "a_")]
 pub struct StructA {
     pub foo: isize,
     pub bar: isize,
 }
 
-#[rust_to_ocaml(prefix = "b")]
+#[rust_to_ocaml(prefix = "b_")]
 pub struct StructB {
     pub foo: isize,
     pub bar: isize,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44f1e198b4e55be51d151caf2c767288>>
+// @generated SignedSource<<1b0297f1394584713e71c2b6bc50f6cd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -241,7 +241,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "us")]
+#[rust_to_ocaml(prefix = "us_")]
 #[repr(C)]
 pub struct UsingStmt<Ex, En> {
     pub is_block_scoped: bool,
@@ -427,7 +427,7 @@ pub enum FunctionPtrId<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "et")]
+#[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct ExpressionTree<Ex, En> {
     /// The hint before the backtick, so Foo in this example.
@@ -1025,7 +1025,7 @@ pub enum Afield<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "xs")]
+#[rust_to_ocaml(prefix = "xs_")]
 #[repr(C)]
 pub struct XhpSimple<Ex, En> {
     pub name: Pstring,
@@ -1069,7 +1069,7 @@ pub type IsVariadic = bool;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "param")]
+#[rust_to_ocaml(prefix = "param_")]
 #[repr(C)]
 pub struct FunParam<Ex, En> {
     pub annotation: Ex,
@@ -1098,7 +1098,7 @@ pub struct FunParam<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "f")]
+#[rust_to_ocaml(prefix = "f_")]
 #[repr(C)]
 pub struct Fun_<Ex, En> {
     pub span: Pos,
@@ -1201,7 +1201,7 @@ pub type TypeHint_ = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ua")]
+#[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute<Ex, En> {
     pub name: Sid,
@@ -1223,7 +1223,7 @@ pub struct UserAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "fa")]
+#[rust_to_ocaml(prefix = "fa_")]
 #[repr(C)]
 pub struct FileAttribute<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1244,7 +1244,7 @@ pub struct FileAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "tp")]
+#[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam<Ex, En> {
     pub variance: ast_defs::Variance,
@@ -1317,7 +1317,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "c")]
+#[rust_to_ocaml(prefix = "c_")]
 #[repr(C)]
 pub struct Class_<Ex, En> {
     pub span: Pos,
@@ -1447,7 +1447,7 @@ pub enum ClassConstKind<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "cc")]
+#[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1472,7 +1472,7 @@ pub struct ClassConst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "c_atc")]
+#[rust_to_ocaml(prefix = "c_atc_")]
 #[repr(C)]
 pub struct ClassAbstractTypeconst {
     pub as_constraint: Option<Hint>,
@@ -1533,7 +1533,7 @@ pub enum ClassTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "c_tconst")]
+#[rust_to_ocaml(prefix = "c_tconst_")]
 #[repr(C)]
 pub struct ClassTypeconstDef<Ex, En> {
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
@@ -1558,7 +1558,7 @@ pub struct ClassTypeconstDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "xai")]
+#[rust_to_ocaml(prefix = "xai_")]
 #[repr(C)]
 pub struct XhpAttrInfo {
     pub like: Option<Pos>,
@@ -1580,7 +1580,7 @@ pub struct XhpAttrInfo {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "cv")]
+#[rust_to_ocaml(prefix = "cv_")]
 #[repr(C)]
 pub struct ClassVar<Ex, En> {
     pub final_: bool,
@@ -1612,7 +1612,7 @@ pub struct ClassVar<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "m")]
+#[rust_to_ocaml(prefix = "m_")]
 #[repr(C)]
 pub struct Method_<Ex, En> {
     pub span: Pos,
@@ -1655,7 +1655,7 @@ pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "t")]
+#[rust_to_ocaml(prefix = "t_")]
 #[repr(C)]
 pub struct Typedef<Ex, En> {
     pub annotation: En,
@@ -1690,7 +1690,7 @@ pub struct Typedef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "cst")]
+#[rust_to_ocaml(prefix = "cst_")]
 #[repr(C)]
 pub struct Gconst<Ex, En> {
     pub annotation: En,
@@ -1717,7 +1717,7 @@ pub struct Gconst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "fd")]
+#[rust_to_ocaml(prefix = "fd_")]
 #[repr(C)]
 pub struct FunDef<Ex, En> {
     pub namespace: Nsenv,
@@ -1742,7 +1742,7 @@ pub struct FunDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "md")]
+#[rust_to_ocaml(prefix = "md_")]
 #[repr(C)]
 pub struct ModuleDef<Ex, En> {
     pub annotation: En,

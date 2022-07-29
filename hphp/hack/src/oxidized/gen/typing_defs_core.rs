@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f4d57d2de8fb3d8ae2c216e8f06fcb67>>
+// @generated SignedSource<<3cfdf79d2df4b7c476052fd21d2587d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -321,7 +321,7 @@ pub enum DependentType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ua")]
+#[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute {
     pub name: PosId,
@@ -344,7 +344,7 @@ pub struct UserAttribute {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "tp")]
+#[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam {
     pub variance: ast_defs::Variance,
@@ -466,7 +466,7 @@ pub enum NegType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sft")]
+#[rust_to_ocaml(prefix = "sft_")]
 #[repr(C)]
 pub struct ShapeFieldType {
     pub optional: bool,
@@ -711,7 +711,7 @@ pub enum ClassTypeRefinement {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "tr")]
+#[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
 pub struct ClassTypeRefinementBounds {
     pub lower: Vec<Ty>,
@@ -780,7 +780,7 @@ pub struct FunImplicitParams {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ft")]
+#[rust_to_ocaml(prefix = "ft_")]
 #[repr(C)]
 pub struct FunType {
     pub tparams: Vec<Tparam>,
@@ -809,7 +809,7 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "et")]
+#[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy {
     /// True if consumer of this type enforces it at runtime
@@ -833,7 +833,7 @@ pub struct PossiblyEnforcedTy {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "fp")]
+#[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam {
     pub pos: pos_or_decl::PosOrDecl,
@@ -882,7 +882,7 @@ arena_deserializer::impl_deserialize_in_arena!(DestructureKind);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "d")]
+#[rust_to_ocaml(prefix = "d_")]
 #[repr(C)]
 pub struct Destructure {
     /// This represents the standard parameters of a function or the fields in a list
@@ -920,7 +920,7 @@ pub struct Destructure {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "hm")]
+#[rust_to_ocaml(prefix = "hm_")]
 #[repr(C)]
 pub struct HasMember {
     pub name: nast::Sid,
@@ -948,7 +948,7 @@ pub struct HasMember {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ci")]
+#[rust_to_ocaml(prefix = "ci_")]
 #[repr(C)]
 pub struct CanIndex {
     pub key: Ty,
@@ -974,7 +974,7 @@ pub struct CanIndex {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "ct")]
+#[rust_to_ocaml(prefix = "ct_")]
 #[repr(C)]
 pub struct CanTraverse {
     pub key: Option<Ty>,

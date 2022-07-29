@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5048f25df97189c08653d0bab6d304ba>>
+// @generated SignedSource<<d6b957e5f202a536f90c754b0ecc0c65>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,7 +68,7 @@ pub use typing_defs::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "sc")]
+#[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct SubstContext<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -141,7 +141,7 @@ arena_deserializer::impl_deserialize_in_arena!(DeclError<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "dc")]
+#[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
@@ -228,7 +228,7 @@ arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(prefix = "elt")]
+#[rust_to_ocaml(prefix = "elt_")]
 #[repr(C)]
 pub struct Element<'a> {
     pub flags: typing_defs_flags::class_elt::ClassElt,

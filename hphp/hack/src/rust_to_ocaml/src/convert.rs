@@ -5,7 +5,10 @@
 
 use crate::ir;
 use crate::ir::Def;
+use crate::ir::FieldName;
 use crate::ir::File;
+use crate::ir::TypeName;
+use crate::ir::VariantName;
 use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Context;
@@ -21,7 +24,7 @@ pub fn convert_file(file: &syn::File) -> Result<String> {
     Ok(file.to_string())
 }
 
-fn convert_item(item: &syn::Item) -> Result<Option<(String, Def)>> {
+fn convert_item(item: &syn::Item) -> Result<Option<(TypeName, Def)>> {
     use syn::Item;
     match item {
         Item::Type(item) => {
@@ -43,23 +46,20 @@ fn convert_item(item: &syn::Item) -> Result<Option<(String, Def)>> {
     }
 }
 
-fn convert_item_type(item: &syn::ItemType) -> Result<(String, Def)> {
-    let name = item.ident.to_string().to_case(Case::Snake);
+fn convert_item_type(item: &syn::ItemType) -> Result<(TypeName, Def)> {
+    let name = TypeName(item.ident.to_string().to_case(Case::Snake));
     let ty = convert_type(&item.ty)?;
     Ok((name, Def::Alias { ty }))
 }
 
-fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
-    let name = item.ident.to_string().to_case(Case::Snake);
+fn convert_item_struct(item: &syn::ItemStruct) -> Result<(TypeName, Def)> {
+    let name = TypeName(item.ident.to_string().to_case(Case::Snake));
     let attrs = attr_parser::Container::from_ast(&item.to_owned().into());
     match &item.fields {
         syn::Fields::Named(fields) => {
             let fields = (fields.named.iter())
                 .map(|field| {
-                    let mut name = field.ident.as_ref().unwrap().to_string();
-                    if let Some(prefix) = attrs.prefix.as_deref() {
-                        name = format!("{}{}", prefix, name);
-                    };
+                    let name = field_name(field.ident.as_ref(), attrs.prefix.as_deref());
                     let ty = convert_type(&field.ty)?;
                     Ok((name, ty))
                 })
@@ -70,17 +70,14 @@ fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
     }
 }
 
-fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
-    let name = item.ident.to_string().to_case(Case::Snake);
+fn convert_item_enum(item: &syn::ItemEnum) -> Result<(TypeName, Def)> {
+    let name = TypeName(item.ident.to_string().to_case(Case::Snake));
     let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
     let variants = item
         .variants
         .iter()
         .map(|variant| {
-            let mut name = variant.ident.to_string();
-            if let Some(prefix) = container_attrs.prefix.as_deref() {
-                name = format!("{}{}", prefix, name);
-            };
+            let name = variant_name(&variant.ident, container_attrs.prefix.as_deref());
             let variant_attrs = attr_parser::Variant::from_ast(variant);
             let fields = match &variant.fields {
                 syn::Fields::Unit => None,
@@ -92,10 +89,8 @@ fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
                 syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
                     (fields.named.iter())
                         .map(|field| {
-                            let mut name = field.ident.as_ref().unwrap().to_string();
-                            if let Some(prefix) = variant_attrs.prefix.as_deref() {
-                                name = format!("{}{}", prefix, name);
-                            };
+                            let name =
+                                field_name(field.ident.as_ref(), variant_attrs.prefix.as_deref());
                             let ty = convert_type(&field.ty)?;
                             Ok((name, ty))
                         })
@@ -106,6 +101,14 @@ fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
         })
         .collect::<Result<Vec<_>>>()?;
     Ok((name, Def::Variant { variants }))
+}
+
+fn field_name(ident: Option<&syn::Ident>, prefix: Option<&str>) -> FieldName {
+    FieldName(format!("{}{}", prefix.unwrap_or_default(), ident.unwrap()))
+}
+
+fn variant_name(ident: &syn::Ident, prefix: Option<&str>) -> VariantName {
+    VariantName(format!("{}{}", prefix.unwrap_or_default(), ident))
 }
 
 fn convert_type(ty: &syn::Type) -> Result<ir::Type> {

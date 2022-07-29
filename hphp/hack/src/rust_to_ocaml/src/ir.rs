@@ -2,32 +2,33 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use derive_more::Display;
 use hash::IndexMap;
 
 pub struct File {
-    pub defs: IndexMap<String, Def>,
+    pub defs: IndexMap<TypeName, Def>,
 }
 
 impl std::fmt::Display for File {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (name, def) in self.defs.iter() {
             match def {
-                Def::Alias { ty } => write!(f, "type {name} = {ty}\n")?,
+                Def::Alias { ty } => writeln!(f, "type {name} = {ty}")?,
                 Def::Record { fields } => {
-                    write!(f, "type {name} = {{\n")?;
+                    writeln!(f, "type {name} = {{")?;
                     for (field_name, ty) in fields {
-                        write!(f, "  {field_name}: {ty};\n")?;
+                        writeln!(f, "  {field_name}: {ty};")?;
                     }
-                    write!(f, "}}\n")?;
+                    writeln!(f, "}}")?;
                 }
                 Def::Variant { variants } => {
-                    write!(f, "type {name} =\n")?;
+                    writeln!(f, "type {name} =")?;
                     for (variant_name, fields) in variants {
                         write!(f, "  | {variant_name}")?;
                         if let Some(fields) = fields {
                             write!(f, " of {fields}")?;
                         }
-                        write!(f, "\n")?;
+                        writeln!(f)?;
                     }
                 }
             }
@@ -41,16 +42,16 @@ pub enum Def {
         ty: Type,
     },
     Record {
-        fields: Vec<(String, Type)>,
+        fields: Vec<(FieldName, Type)>,
     },
     Variant {
-        variants: Vec<(String, Option<VariantFields>)>,
+        variants: Vec<(VariantName, Option<VariantFields>)>,
     },
 }
 
 pub enum VariantFields {
     Unnamed(Vec<Type>),
-    Named(Vec<(String, Type)>),
+    Named(Vec<(FieldName, Type)>),
 }
 
 impl std::fmt::Display for VariantFields {
@@ -66,9 +67,9 @@ impl std::fmt::Display for VariantFields {
                 Ok(())
             }
             Self::Named(fields) => {
-                write!(f, "{{\n")?;
+                writeln!(f, "{{")?;
                 for (name, ty) in fields {
-                    write!(f, "    {name}: {ty};\n")?;
+                    writeln!(f, "    {name}: {ty};")?;
                 }
                 write!(f, "}}")
             }
@@ -123,3 +124,12 @@ impl std::fmt::Display for TypeTuple {
         Ok(())
     }
 }
+
+#[derive(Clone, Hash, PartialEq, Eq, Display)]
+pub struct TypeName(pub String);
+
+#[derive(Clone, Hash, PartialEq, Eq, Display)]
+pub struct FieldName(pub String);
+
+#[derive(Clone, Hash, PartialEq, Eq, Display)]
+pub struct VariantName(pub String);

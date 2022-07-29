@@ -702,7 +702,7 @@ let next
     | Some w -> List.length w
     | None -> 1
   in
-  let return_bucket_job kind ~current_bucket ~remaining_jobs =
+  let return_bucket_job (kind : progress_kind) ~current_bucket ~remaining_jobs =
     (* Update our shared mutable state, because hey: it's not like we're
        writing OCaml or anything. *)
     workitems_to_process := remaining_jobs;
@@ -723,11 +723,11 @@ let next
     let delegate_job =
       if should_run_hulk_v2 then (
         (*
-        This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
-        or in other words the local typechecker is done with its work. We'll try and download all the remote
-        worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
-        remote worker and have the local worker "steal" the work.
-       *)
+          This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
+          or in other words the local typechecker is done with its work. We'll try and download all the remote
+          worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
+          remote worker and have the local worker "steal" the work.
+        *)
         let remote_workitems_to_process_length =
           List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
               acc + BigList.length payload.payload)
@@ -944,7 +944,8 @@ let process_in_parallel
   in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
-  let job (typing_result : typing_result) (progress : job_progress) =
+  let job (typing_result : typing_result) (progress : job_progress) :
+      string * typing_result * job_progress =
     let worker_id = Option.value ~default:"main" (Hh_logger.get_id ()) in
     let (typing_result, computation_progress) =
       match progress.kind with

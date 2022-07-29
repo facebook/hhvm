@@ -86,6 +86,30 @@ let call workers ~job ~merge ~neutral ~next =
   let merge (_worker_id, a) b = merge a b in
   Call.call workers ~job ~merge ~neutral ~next
 
+let call_stateless :
+    worker list ->
+    job:('acc -> 'input -> 'output) ->
+    merge:('output -> 'acc -> 'acc) ->
+    neutral:'acc ->
+    next:('inputs -> ('input * 'inputs) option) ->
+    inputs:'inputs ->
+    'acc =
+ fun workers ~job ~merge ~neutral ~next ~inputs ->
+  let inputs_ref = ref (Some inputs) in
+  let next () =
+    match !inputs_ref with
+    | None -> Bucket.Done
+    | Some inputs ->
+      (match next inputs with
+      | None ->
+        inputs_ref := None;
+        Bucket.Done
+      | Some (input, inputs) ->
+        inputs_ref := Some inputs;
+        Bucket.Job input)
+  in
+  call (Some workers) ~job ~merge ~neutral ~next
+
 (* If we ever want this in MultiWorkerLwt then move this into CallFunctor *)
 let call_with_interrupt
     ?on_cancelled workers ~job ~merge ~neutral ~next ~interrupt =

@@ -54,11 +54,20 @@ val next :
 (* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
 val call :
   worker list option ->
-  job:('c -> 'a -> 'b) ->
-  merge:('b -> 'c -> 'c) ->
-  neutral:'c ->
-  next:'a Hh_bucket.next ->
-  'c
+  job:('acc -> 'input -> 'output) ->
+  merge:('output -> 'acc -> 'acc) ->
+  neutral:'acc ->
+  next:'input Hh_bucket.next ->
+  'acc
+
+val call_stateless :
+  worker list ->
+  job:('acc -> 'input -> 'output) ->
+  merge:('output -> 'acc -> 'acc) ->
+  neutral:'acc ->
+  next:('inputs -> ('input * 'inputs) option) ->
+  inputs:'inputs ->
+  'acc
 
 type call_wrapper = {
   f:

@@ -16,10 +16,8 @@
 
 #include "hphp/runtime/base/type-resource.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
-
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

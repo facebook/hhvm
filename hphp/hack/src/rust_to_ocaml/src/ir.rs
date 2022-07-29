@@ -28,9 +28,23 @@ impl std::fmt::Display for File {
 }
 
 pub enum Def {
-    Alias { ty: TypePath },
-    Record { fields: Vec<(String, TypePath)> },
+    Alias { ty: Type },
+    Record { fields: Vec<(String, Type)> },
     Type,
+}
+
+pub enum Type {
+    Path(TypePath),
+    Tuple(TypeTuple),
+}
+
+impl std::fmt::Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Type::Path(ty) => ty.fmt(f),
+            Type::Tuple(ty) => ty.fmt(f),
+        }
+    }
 }
 
 pub struct TypePath {
@@ -48,5 +62,21 @@ impl TypePath {
 impl std::fmt::Display for TypePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.idents.join("."))
+    }
+}
+
+pub struct TypeTuple {
+    pub elems: Vec<Type>,
+}
+
+impl std::fmt::Display for TypeTuple {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut elems = self.elems.iter();
+        let elem = elems.next().expect("empty TypeTuple");
+        write!(f, "{elem}")?;
+        for elem in elems {
+            write!(f, " * {elem}")?;
+        }
+        Ok(())
     }
 }

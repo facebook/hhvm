@@ -28,16 +28,16 @@ impl std::fmt::Display for File {
 }
 
 pub enum Def {
-    Alias { ty: TypeRef },
-    Record { fields: Vec<(String, TypeRef)> },
+    Alias { ty: TypePath },
+    Record { fields: Vec<(String, TypePath)> },
     Type,
 }
 
-pub struct TypeRef {
+pub struct TypePath {
     pub idents: Vec<String>,
 }
 
-impl TypeRef {
+impl TypePath {
     pub fn simple(id: impl Into<String>) -> Self {
         Self {
             idents: vec![id.into()],
@@ -45,7 +45,7 @@ impl TypeRef {
     }
 }
 
-impl std::fmt::Display for TypeRef {
+impl std::fmt::Display for TypePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.idents.join("."))
     }

@@ -5,7 +5,7 @@
 
 use crate::ir::Def;
 use crate::ir::File;
-use crate::ir::TypeRef;
+use crate::ir::TypePath;
 use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Context;
@@ -75,7 +75,7 @@ fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
     Ok((name, Def::Type))
 }
 
-fn convert_type(ty: &syn::Type) -> Result<TypeRef> {
+fn convert_type(ty: &syn::Type) -> Result<TypePath> {
     use syn::Type;
     match ty {
         Type::Path(ty) => convert_type_path(ty),
@@ -83,7 +83,7 @@ fn convert_type(ty: &syn::Type) -> Result<TypeRef> {
     }
 }
 
-fn convert_type_path(ty: &syn::TypePath) -> Result<TypeRef> {
+fn convert_type_path(ty: &syn::TypePath) -> Result<TypePath> {
     ensure!(ty.qself.is_none(), "Qualified self in paths not supported");
     let last_seg = ty.path.segments.last().unwrap();
     if ty.path.segments.len() == 1 && last_seg.arguments.is_empty() {
@@ -92,11 +92,11 @@ fn convert_type_path(ty: &syn::TypePath) -> Result<TypeRef> {
         // into OCaml's integer width.
         match last_seg.ident.to_string().as_str() {
             "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
-            | "isize" | "usize" => return Ok(TypeRef::simple("int")),
+            | "isize" | "usize" => return Ok(TypePath::simple("int")),
             _ => {}
         }
     }
-    Ok(TypeRef {
+    Ok(TypePath {
         idents: ty
             .path
             .segments

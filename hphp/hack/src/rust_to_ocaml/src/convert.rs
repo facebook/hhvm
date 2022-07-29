@@ -72,7 +72,40 @@ fn convert_item_struct(item: &syn::ItemStruct) -> Result<(String, Def)> {
 
 fn convert_item_enum(item: &syn::ItemEnum) -> Result<(String, Def)> {
     let name = item.ident.to_string().to_case(Case::Snake);
-    Ok((name, Def::Type))
+    let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
+    let variants = item
+        .variants
+        .iter()
+        .map(|variant| {
+            let mut name = variant.ident.to_string();
+            if let Some(prefix) = container_attrs.prefix.as_deref() {
+                name = format!("{}{}", prefix, name);
+            };
+            let variant_attrs = attr_parser::Variant::from_ast(variant);
+            let fields = match &variant.fields {
+                syn::Fields::Unit => None,
+                syn::Fields::Unnamed(fields) => Some(ir::VariantFields::Unnamed(
+                    (fields.unnamed.iter())
+                        .map(|field| convert_type(&field.ty))
+                        .collect::<Result<_>>()?,
+                )),
+                syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
+                    (fields.named.iter())
+                        .map(|field| {
+                            let mut name = field.ident.as_ref().unwrap().to_string();
+                            if let Some(prefix) = variant_attrs.prefix.as_deref() {
+                                name = format!("{}{}", prefix, name);
+                            };
+                            let ty = convert_type(&field.ty)?;
+                            Ok((name, ty))
+                        })
+                        .collect::<Result<_>>()?,
+                )),
+            };
+            Ok((name, fields))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok((name, Def::Variant { variants }))
 }
 
 fn convert_type(ty: &syn::Type) -> Result<ir::Type> {

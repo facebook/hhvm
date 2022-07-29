@@ -54,6 +54,49 @@ impl Container {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct Variant {
+    pub prefix: Option<String>,
+}
+
+impl Variant {
+    pub fn from_ast(variant: &syn::Variant) -> Self {
+        let mut prefix = None;
+
+        for meta_item in variant
+            .attrs
+            .iter()
+            .flat_map(get_rust_to_ocaml_meta_items)
+            .flatten()
+        {
+            match &meta_item {
+                // Parse `#[rust_to_ocaml(prefix = "foo")]`
+                Meta(NameValue(m)) if m.path.is_ident(PREFIX) => {
+                    if let Ok(s) = get_lit_str(PREFIX, &m.lit) {
+                        prefix = Some(s.value());
+                    }
+                }
+                Meta(_meta_item) => {
+                    // let path = meta_item
+                    //     .path()
+                    //     .into_token_stream()
+                    //     .to_string()
+                    //     .replace(' ', "");
+                    // cx.error_spanned_by(
+                    //     meta_item.path(),
+                    //     format!("unknown rust_to_ocaml variant attribute `{}`", path),
+                    // );
+                }
+                Lit(_lit) => {
+                    // cx.error_spanned_by(lit, "unexpected literal in rust_to_ocaml variant attribute");
+                }
+            }
+        }
+
+        Self { prefix }
+    }
+}
+
 fn get_rust_to_ocaml_meta_items(attr: &syn::Attribute) -> Result<Vec<syn::NestedMeta>, ()> {
     if !attr.path.is_ident(RUST_TO_OCAML) {
         return Ok(vec![]);

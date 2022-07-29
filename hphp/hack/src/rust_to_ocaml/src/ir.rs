@@ -13,13 +13,22 @@ impl std::fmt::Display for File {
         for (name, def) in self.defs.iter() {
             match def {
                 Def::Alias { ty } => write!(f, "type {name} = {ty}\n")?,
-                Def::Type => write!(f, "type {name}\n")?,
                 Def::Record { fields } => {
                     write!(f, "type {name} = {{\n")?;
                     for (field_name, ty) in fields {
                         write!(f, "  {field_name}: {ty};\n")?;
                     }
                     write!(f, "}}\n")?;
+                }
+                Def::Variant { variants } => {
+                    write!(f, "type {name} =\n")?;
+                    for (variant_name, fields) in variants {
+                        write!(f, "  | {variant_name}")?;
+                        if let Some(fields) = fields {
+                            write!(f, " of {fields}")?;
+                        }
+                        write!(f, "\n")?;
+                    }
                 }
             }
         }
@@ -28,9 +37,43 @@ impl std::fmt::Display for File {
 }
 
 pub enum Def {
-    Alias { ty: Type },
-    Record { fields: Vec<(String, Type)> },
-    Type,
+    Alias {
+        ty: Type,
+    },
+    Record {
+        fields: Vec<(String, Type)>,
+    },
+    Variant {
+        variants: Vec<(String, Option<VariantFields>)>,
+    },
+}
+
+pub enum VariantFields {
+    Unnamed(Vec<Type>),
+    Named(Vec<(String, Type)>),
+}
+
+impl std::fmt::Display for VariantFields {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unnamed(fields) => {
+                let mut iter = fields.iter();
+                let ty = iter.next().expect("empty VariantFields::Unnamed");
+                ty.fmt(f)?;
+                for ty in iter {
+                    write!(f, " * {ty}")?;
+                }
+                Ok(())
+            }
+            Self::Named(fields) => {
+                write!(f, "{{\n")?;
+                for (name, ty) in fields {
+                    write!(f, "    {name}: {ty};\n")?;
+                }
+                write!(f, "}}")
+            }
+        }
+    }
 }
 
 pub enum Type {

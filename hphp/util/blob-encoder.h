@@ -134,8 +134,6 @@ struct BlobEncoder {
    * Currently the most basic encoder/decode only works for integral
    * types.  (We don't want this to accidentally get used for things
    * like pointers or aggregates.)
-   *
-   * Floating point support could be added later if we need it ...
    */
    template<class T>
    typename std::enable_if<
@@ -186,6 +184,10 @@ struct BlobEncoder {
 
   void encode(bool b) {
     encode(b ? 1 : 0);
+  }
+
+  void encode(double d) {
+    writeRaw(reinterpret_cast<const char*>(&d), sizeof(double));
   }
 
   void encode(const std::string& s) {
@@ -244,9 +246,9 @@ struct BlobEncoder {
     encodeOrderedContainer(vec);
   }
 
-  template<typename T, typename A>
-  void encode(const CompactVector<T, A>& vec) {
-    encodeOrderedContainer(vec);
+  template<typename T, typename A, typename... Extra>
+  void encode(const CompactVector<T, A>& vec, Extra... extra) {
+    encodeOrderedContainer(vec, extra...);
   }
 
   template<typename K, typename C, typename A>
@@ -317,6 +319,20 @@ struct BlobEncoder {
     return *this;
   }
 
+  // Encode a type which has a conversion to nullptr, skipping the
+  // encoding if it is nullptr. This is mainly meant for smart pointer
+  // types where the pointer may not be set.
+  template <typename T>
+  BlobEncoder& nullable(const T& t) {
+    if (t) {
+      (*this)(true);
+      (*this)(t);
+    } else {
+      (*this)(false);
+    }
+    return *this;
+  }
+
   /*
    * Record the size of the data emitted during f(), which
    * BlobDecoder::skipSize or BlobDecoder::peekSize can later read.
@@ -355,13 +371,13 @@ struct BlobEncoder {
   std::vector<char>&& take() { return std::move(m_blob); }
 
 private:
-  template<typename Cont>
-  void encodeOrderedContainer(const Cont& cont) {
+  template<typename Cont, typename... Extra>
+  void encodeOrderedContainer(const Cont& cont, Extra... extra) {
     if (cont.size() >= 0xffffffffu) {
       throw std::runtime_error("maximum size exceeded in BlobEncoder");
     }
     encode(uint32_t(cont.size()));
-    for (auto const& e : cont) encode(e);
+    for (auto const& e : cont) encode(e, extra...);
   }
 
   // Unordered containers need to be sorted first, to ensure
@@ -508,6 +524,12 @@ struct BlobDecoder {
     std::is_pointer<T>::value
   >::type decode(T&, F...) = delete;
 
+  void decode(double& d) {
+    assertx(remaining() >= sizeof(double));
+    std::memcpy(&d, data(), sizeof(double));
+    advance(sizeof(double));
+  }
+
   void decode(std::string& s) {
     uint32_t sz;
     decode(sz);
@@ -586,16 +608,19 @@ struct BlobDecoder {
       prev = deltaDecode(prev, delta);
       vec.push_back(prev);
     }
+    vec.shrink_to_fit();
   }
 
   template<typename T, typename A>
   void decode(std::vector<T, A>& vec) {
     decodeVecContainer(vec);
+    vec.shrink_to_fit();
   }
 
-  template<typename T, typename A>
-  void decode(CompactVector<T, A>& vec) {
-    decodeVecContainer(vec);
+  template<typename T, typename A, typename... Extra>
+  void decode(CompactVector<T, A>& vec, Extra... extra) {
+    decodeVecContainer(vec, extra...);
+    vec.shrink_to_fit();
   }
 
   template<typename K, typename C, typename A>
@@ -663,6 +688,20 @@ struct BlobDecoder {
   template<class T, class... F>
   BlobDecoder& operator()(T& t, F... lambdas) {
     decode(t, lambdas...);
+    return *this;
+  }
+
+  // Decode a type encoded by BlobEncoder::nullable. If the value was
+  // not encoded, it will be set to nullptr.
+  template <typename T>
+  BlobDecoder& nullable(T& t) {
+    bool present;
+    (*this)(present);
+    if (present) {
+      (*this)(t);
+    } else {
+      t = nullptr;
+    }
     return *this;
   }
 
@@ -767,6 +806,7 @@ private:
     cont.clear();
     uint32_t size;
     decode(size);
+    cont.reserve(size);
     for (uint32_t i = 0; i < size; ++i) {
       typename Cont::value_type val;
       decode(val);
@@ -774,14 +814,15 @@ private:
     }
   }
 
-  template<typename Cont>
-  void decodeVecContainer(Cont& cont) {
+  template<typename Cont, typename... Extra>
+  void decodeVecContainer(Cont& cont, Extra... extra) {
     cont.clear();
     uint32_t size;
     decode(size);
+    cont.reserve(size);
     for (uint32_t i = 0; i < size; ++i) {
       typename Cont::value_type val;
-      decode(val);
+      decode(val, extra...);
       cont.emplace_back(std::move(val));
     }
   }

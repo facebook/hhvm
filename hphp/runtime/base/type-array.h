@@ -445,8 +445,15 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
 
-  void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      const ArrayData* ad;
+      sd(ad);
+      m_arr = Ptr::attach(const_cast<ArrayData*>(ad));
+    } else {
+      sd(const_cast<const ArrayData*>(m_arr.get()));
+    }
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

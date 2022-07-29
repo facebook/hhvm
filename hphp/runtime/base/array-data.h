@@ -806,6 +806,14 @@ extern const ArrayFunctions g_array_funcs;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<>
+struct BlobEncoderHelper<const ArrayData*> {
+  static void serde(BlobEncoder&, const ArrayData*);
+  static void serde(BlobDecoder&, const ArrayData*&);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #include "hphp/runtime/base/array-data-inl.h"

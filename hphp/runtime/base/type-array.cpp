@@ -781,25 +781,4 @@ int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Array::serde(BlobEncoder& encoder) const {
-  if (isNull()) {
-    encoder(make_tv<KindOfUninit>());
-    return;
-  }
-  encoder(make_array_like_tv(get()));
-}
-
-void Array::serde(BlobDecoder& decoder) {
-  TypedValue tv;
-  decoder(tv);
-  if (tv.m_type == KindOfUninit) {
-    m_arr.reset();
-    return;
-  }
-  assertx(tvIsArrayLike(tv));
-  assertx(tv.m_data.parr->isStatic());
-  m_arr = Ptr::attach(tv.m_data.parr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

@@ -987,4 +987,29 @@ ArrayData* ArrayData::toKeyset(bool copy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
+                                                const ArrayData* ad) {
+  if (!ad) {
+    encoder(make_tv<KindOfUninit>());
+    return;
+  }
+  assertx(ad->isStatic());
+  encoder(make_array_like_tv(const_cast<ArrayData*>(ad)));
+}
+
+void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
+                                                const ArrayData*& ad) {
+  TypedValue tv;
+  decoder(tv);
+  if (tv.m_type == KindOfUninit) {
+    ad = nullptr;
+    return;
+  }
+  assertx(tvIsArrayLike(tv));
+  assertx(tv.m_data.parr->isStatic());
+  ad = tv.m_data.parr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

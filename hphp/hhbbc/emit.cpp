@@ -972,7 +972,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::WideFunc& func,
 void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
                       php::WideFunc& wf, const EmitBcInfo& info) {
   auto const& func = *wf;
-  if (info.containsCalls) fe.containsCalls = true;;
+  if (info.containsCalls) fe.containsCalls = true;
 
   emit_locals_and_params(fe, func, info);
   emit_ehent_tree(fe, wf, info);
@@ -1264,20 +1264,25 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   assertx(check(unit));
 
-  auto ue = std::make_unique<UnitEmitter>(unit.sha1,
+  static std::atomic<uint64_t> nextUnitId{0};
+  auto unitSn = nextUnitId++;
+
+  auto ue = std::make_unique<UnitEmitter>(SHA1 { unitSn },
                                           SHA1{},
                                           Native::s_noNativeFuncs);
   FTRACE(1, "  unit {}\n", unit.filename->data());
-  ue->m_sn = unit.sn;
+  ue->m_sn = unitSn;
   ue->m_filepath = unit.filename;
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
   ue->m_moduleName = unit.moduleName;
 
   if (unit.fatalInfo) {
+    // We should have dealt with verifier failures long ago.
+    assertx(unit.fatalInfo->fatalLoc.has_value());
     ue->m_fatalUnit = true;
     ue->m_fatalOp = unit.fatalInfo->fatalOp;
-    ue->m_fatalLoc = unit.fatalInfo->fatalLoc;
+    ue->m_fatalLoc = *unit.fatalInfo->fatalLoc;
     ue->m_fatalMsg = unit.fatalInfo->fatalMsg;
   }
 

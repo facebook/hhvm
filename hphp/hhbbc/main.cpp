@@ -390,15 +390,24 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
     executor.sticky()
   };
 
-  // Shard the emitters using consistent hashing of their path.
+  // Shard the emitters using consistent hashing of their path. Force
+  // all systemlib units into the first bucket (and nothing else in
+  // there).
   constexpr size_t kLoadGroupSize = 500;
-  auto const numBuckets = (units.size() + kLoadGroupSize - 1) / kLoadGroupSize;
+  auto const numBuckets = std::max<size_t>(
+    (units.size() + kLoadGroupSize - 1) / kLoadGroupSize,
+    2
+  );
 
   std::vector<std::vector<const StringData*>> groups;
   groups.resize(numBuckets);
 
   for (auto const unit : units) {
-    auto const idx = consistent_hash(unit->hash(), numBuckets);
+    if (FileUtil::isSystemName(unit->slice())) {
+      groups[0].emplace_back(unit);
+      continue;
+    }
+    auto const idx = consistent_hash(unit->hash(), numBuckets - 1) + 1;
     assertx(idx < numBuckets);
     groups[idx].emplace_back(unit);
   }
@@ -414,10 +423,12 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
     );
   }
 
-  WholeProgramInput inputs;
+  using WPI = WholeProgramInput;
+  WPI inputs;
 
-  auto const load =
-    [&] (std::vector<const StringData*> units) -> coro::Task<void> {
+  auto const load = [&] (size_t bucketIdx,
+                         std::vector<const StringData*> units)
+    -> coro::Task<void> {
 
     // Load the UnitEmitters from disk (deferring this until here cuts
     // down on the number of UnitEmitters we have to keep in memory at
@@ -425,9 +436,33 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
     std::vector<UnitEmitterSerdeWrapper> ues;
     ues.reserve(units.size());
     for (auto const unit : units) {
+      assertx((bucketIdx == 0) == FileUtil::isSystemName(unit->slice()));
       ues.emplace_back(
         RepoFile::loadUnitEmitter(unit, unit, Native::s_noNativeFuncs, false)
       );
+    }
+
+    // Process the first bucket locally. Systemlib units need full
+    // process init and we don't currently do that in extern-worker
+    // jobs.
+    if (bucketIdx == 0) {
+      std::vector<WPI::Key> keys;
+      std::vector<WPI::Value> values;
+      for (auto& ue : ues) {
+        assertx(FileUtil::isSystemName(ue.m_ue->m_filepath->slice()));
+        for (auto& [key, value] : WPI::make(std::move(ue.m_ue))) {
+          keys.emplace_back(std::move(key));
+          values.emplace_back(std::move(value));
+        }
+      }
+      if (keys.empty()) HPHP_CORO_RETURN_VOID;
+      auto valueRefs = HPHP_CORO_AWAIT(client.storeMulti(std::move(values)));
+      auto const numKeys = keys.size();
+      assertx(valueRefs.size() == numKeys);
+      for (size_t i = 0; i < numKeys; ++i) {
+        inputs.add(std::move(keys[i]), std::move(valueRefs[i]));
+      }
+      HPHP_CORO_RETURN_VOID;
     }
 
     // Store them (and the config we'll use).
@@ -468,9 +503,10 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
   };
 
   std::vector<coro::TaskWithExecutor<void>> tasks;
-  for (auto& group : groups) {
+  for (size_t i = 0; i < groups.size(); ++i) {
+    auto& group = groups[i];
     if (group.empty()) continue;
-    tasks.emplace_back(load(std::move(group)).scheduleOn(executor.sticky()));
+    tasks.emplace_back(load(i, std::move(group)).scheduleOn(executor.sticky()));
   }
   coro::wait(coro::collectRange(std::move(tasks)));
   return inputs;

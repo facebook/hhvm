@@ -54,6 +54,8 @@ const std::array<OutputType, 1> Client::s_optOutputType{OutputType::Opt};
 
 ImplHook g_impl_hook{nullptr};
 
+thread_local bool g_in_job{false};
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -230,6 +232,9 @@ int main(int argc, char** argv) {
         folly::sformat("Output directory {} already exists", outputPath.native())
       };
     }
+
+    g_in_job = true;
+    SCOPE_EXIT { g_in_job = false; };
 
     // First do any global initialization.
     time("init", [&] { worker->init(configPath); });

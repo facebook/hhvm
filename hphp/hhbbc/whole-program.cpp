@@ -153,11 +153,26 @@ void all_unit_contexts(const php::Unit* u, F&& fun) {
 }
 
 std::vector<Context> const_pass_contexts(const php::Program& program) {
+  /*
+   * Set of functions that should be processed in the constant
+   * propagation pass.
+   *
+   * Must include every function with a DefCns for correctness; cinit,
+   * pinit and sinit functions are added to improve overall
+   * performance.
+   */
   std::vector<Context> ret;
-  ret.reserve(program.constInits.size());
-  for (auto func : program.constInits) {
-    assertx(func);
-    ret.push_back(Context { func->unit, func, func->cls });
+  for (auto const& u : program.units) {
+    for (auto const& c : u->classes) {
+      for (auto const& m : c->methods) {
+        if (m->name == s_86cinit.get() ||
+            m->name == s_86pinit.get() ||
+            m->name == s_86sinit.get() ||
+            m->name == s_86linit.get()) {
+          ret.emplace_back(Context { u.get(), m.get(), c.get() });
+        }
+      }
+    }
   }
   return ret;
 }
@@ -495,7 +510,7 @@ void final_pass(Index& index,
 
 struct WholeProgramInput::Key::Impl {};
 struct WholeProgramInput::Value::Impl {
-  UnitEmitterSerdeWrapper ue;
+  std::unique_ptr<php::Unit> unit;
 };
 struct WholeProgramInput::Impl {
   folly::AtomicLinkedList<Ref<Value>> values;
@@ -514,7 +529,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   Key key;
   Value value;
   value.m_impl.reset(new Value::Impl);
-  value.m_impl->ue = std::move(ue);
+  value.m_impl->unit = parse_unit(*ue);
   std::vector<std::pair<Key, Value>> out;
   out.emplace_back(std::move(key), std::move(value));
   return out;
@@ -525,11 +540,11 @@ void WholeProgramInput::Key::serde(BlobDecoder&) {}
 
 void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
   assertx(m_impl);
-  sd(m_impl->ue);
+  sd(m_impl->unit);
 }
 void WholeProgramInput::Value::serde(BlobDecoder& sd) {
   m_impl.reset(new Impl);
-  sd(m_impl->ue);
+  sd(m_impl->unit);
 }
 
 void WholeProgramInput::Key::Deleter::operator()(Impl* i) const {
@@ -547,9 +562,8 @@ void WholeProgramInput::Deleter::operator()(Impl* i) const {
 namespace {
 
 // Construct a php::Program from a WholeProgramInput. Right now this
-// is just loading the Values and calling parse_unit() on their
-// UnitEmitters. This is the limit of extern-worker support at the
-// moment.
+// is just loading the Values and adding them to a php::Program. The
+// units have already been constructed in extern-worker jobs.
 std::unique_ptr<php::Program> make_program(
     WholeProgramInput input,
     std::unique_ptr<coro::TicketExecutor> executor,
@@ -574,12 +588,36 @@ std::unique_ptr<php::Program> make_program(
   if (!current.empty()) chunked.emplace_back(std::move(current));
 
   auto program = std::make_unique<php::Program>();
-
   auto const loadAndParse = [&] (std::vector<Ref<V>> r) -> coro::Task<void> {
     auto const values = HPHP_CORO_AWAIT(client->load(std::move(r)));
-    for (auto const& v : values) {
-      assertx(v.m_impl->ue.m_ue);
-      parse_unit(*program, v.m_impl->ue.m_ue.get());
+
+    // Add every parsed unit into the Program.
+    for (auto& v : values) {
+      // Check for any unit which failed the verifier. This causes us
+      // to exit immediately with an error.
+      if (auto const& fi = v.m_impl->unit->fatalInfo) {
+        if (!fi->fatalLoc) {
+          fprintf(stderr, "%s", fi->fatalMsg.c_str());
+          _Exit(1);
+        }
+      }
+
+      // Assign unique ids to each function:
+      for (auto& f : v.m_impl->unit->funcs) {
+        f->idx = program->nextFuncId++;
+      }
+      for (auto& c : v.m_impl->unit->classes) {
+        for (auto& m : c->methods) {
+          m->idx = program->nextFuncId++;
+        }
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> _{program->lock};
+      for (auto& v : values) {
+        program->units.emplace_back(std::move(v.m_impl->unit));
+      }
     }
     HPHP_CORO_RETURN_VOID;
   };

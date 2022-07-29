@@ -378,24 +378,20 @@ struct FCallArgsLong : FCallArgsBase {
 struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {}
+    : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr,
+                NoBlockId, nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             std::unique_ptr<uint8_t[]> readonlyArgs,
             BlockId asyncEagerTarget,
-            LSString context) {
-    raw = 0;
-    l.emplace(flags, numArgs, numRets,
-              std::move(inoutArgs), std::move(readonlyArgs),
-              asyncEagerTarget, context);
-  }
+            LSString context)
+    : l{flags, numArgs, numRets,
+        std::move(inoutArgs), std::move(readonlyArgs),
+        asyncEagerTarget, context} {}
+  FCallArgs(const FCallArgs&) = default;
+  FCallArgs(FCallArgs&&) = default;
+
   FCallArgs(const FCallArgsLong& o) : l{o} {}
-  FCallArgs(const FCallArgs& o) : l{} {
-    l = o.l;
-  }
-  ~FCallArgs() {
-    l.~copy_ptr();
-  }
 
   bool enforceInOut() const {
     return l->enforceInOut();
@@ -532,11 +528,7 @@ struct FCallArgs {
 
 private:
   explicit FCallArgs(copy_ptr<FCallArgsLong> l) : l{std::move(l)} {}
-
-  union {
-    copy_ptr<FCallArgsLong> l;
-    uint64_t                raw;
-  };
+  copy_ptr<FCallArgsLong> l;
 };
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {

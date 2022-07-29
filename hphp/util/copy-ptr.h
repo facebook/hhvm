@@ -71,10 +71,11 @@ struct copy_ptr {
     m_p = nullptr;
   }
 
-  template <typename... Args> void emplace(Args&&... args) {
+  template <typename... Args> T* emplace(Args&&... args) {
     auto const save = m_p;
     construct(save, std::forward<Args>(args)...);
     dec_ref(save);
+    return m_p;
   }
 
   friend bool
@@ -141,4 +142,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

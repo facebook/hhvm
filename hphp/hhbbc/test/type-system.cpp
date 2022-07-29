@@ -414,13 +414,19 @@ void add_test_unit(php::Program& program) {
       RetC
     }
   )";
-  std::unique_ptr<UnitEmitter> ue(assemble_string(
+  std::unique_ptr<UnitEmitter> ue{assemble_string(
     hhas.c_str(), hhas.size(),
     "ignore.php",
     SHA1("1234543212345432123454321234543212345432"),
     Native::s_noNativeFuncs
-  ));
-  parse_unit(program, ue.get());
+  )};
+
+  auto unit = parse_unit(*ue);
+  for (auto& f : unit->funcs) f->idx = program.nextFuncId++;
+  for (auto& c : unit->classes) {
+    for (auto& m : c->methods) m->idx = program.nextFuncId++;
+  }
+  program.units.emplace_back(std::move(unit));
 }
 
 std::unique_ptr<php::Program> make_test_program() {

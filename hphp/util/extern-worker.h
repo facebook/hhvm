@@ -674,6 +674,9 @@ private:
   friend struct Client;
 };
 
+// If true, we're running inside a job.
+extern thread_local bool g_in_job;
+
 // Hook for providing an implementation. An implementation can set
 // g_impl_hook to a function which optionally creates a Client::Impl.
 using ImplHook =

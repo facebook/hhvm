@@ -15,13 +15,23 @@
 */
 #pragma once
 
-#include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/representation.h"
+#include "hphp/runtime/base/typed-value.h"
 
-namespace HPHP::HHBBC {
+#include "hphp/hhbbc/misc.h"
+
+namespace HPHP {
+
+struct UserAttributeMap;
+
+namespace HHBBC {
 
 namespace res { struct Class; }
-namespace php { struct Class; }
+namespace php {
+struct Class;
+struct Func;
+struct Prop;
+}
+struct Index;
 struct Type;
 
 //////////////////////////////////////////////////////////////////////
@@ -102,4 +112,4 @@ Type loosen_this_prop_for_serialization(const php::Class& ctx,
 
 //////////////////////////////////////////////////////////////////////
 
-}
+}}

@@ -105,6 +105,7 @@ HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
+HPHP::extern_worker::g_in_job
 
 # Native Facts is not request-scoped.
 HPHP::Facts::(anonymous namespace)::t_adb

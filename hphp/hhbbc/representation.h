@@ -39,10 +39,12 @@
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/bc.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/src-loc.h"
 
-namespace HPHP::HHBBC::php {
+namespace HPHP {
+namespace HHBBC::php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -56,6 +58,8 @@ struct WideFunc;
 struct SrcInfo {
   LineRange loc;
   LSString docComment;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -104,6 +108,8 @@ struct Block {
       bool dead: 1;
     };
   };
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -127,8 +133,11 @@ struct Block {
  * exists to get the EHEnts right.
  */
 
-struct CatchRegion { BlockId catchEntry;
-                     Id iterId; };
+struct CatchRegion {
+  BlockId catchEntry;
+  Id iterId;
+  template <typename SerDe> void serde(SerDe&);
+};
 
 struct ExnNode {
   ExnNodeId idx;
@@ -136,6 +145,7 @@ struct ExnNode {
   CompactVector<ExnNodeId> children;
   ExnNodeId parent;
   CatchRegion region;
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -206,6 +216,8 @@ struct Param {
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*
@@ -218,6 +230,8 @@ struct Local {
   uint32_t killed     : 1;
   uint32_t nameId     : 31;
   uint32_t unusedName : 1;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 using BlockVec = CompactVector<copy_ptr<Block>>;
@@ -331,7 +345,7 @@ struct Func : FuncBase {
   Unit* originalUnit{};
 
   /*
-   * The refernece of the trait where the method was originally defined.
+   * The reference of the trait where the method was originally defined.
    * This is used to detected if a method is imported multiple
    * times via different use-chains as the pair (name, originalClass)
    * uniquely identifies a method.
@@ -413,6 +427,9 @@ struct Func : FuncBase {
    */
   UserAttributeMap userAttributes;
 
+  template <typename SerDe> void serde(SerDe&,
+                                       Unit* parentUnit,
+                                       Class* parentClass);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -438,6 +455,8 @@ struct Prop {
    * property should not have an initial value (i.e. not even null).
    */
   TypedValue val;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*
@@ -466,6 +485,8 @@ struct Const {
   Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
+
+  template <typename SerDe> void serde(SerDe&, Class* parentClass);
 };
 
 /*
@@ -577,25 +598,28 @@ struct Class : ClassBase {
    * sampled at a user defined rate.
    */
   bool sampleDynamicConstruct : 1;
+
+  template <typename SerDe> void serde(SerDe&, Unit* parentUnit);
 };
 
 struct Constant {
-  Unit* unit;
   LSString name;
   TypedValue val;
   Attr attrs;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct Module {
-  Unit* unit;
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;
   UserAttributeMap userAttributes;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct TypeAlias {
-  Unit* unit;
   SrcInfo srcInfo;
   LSString name;
   LSString value;
@@ -605,6 +629,8 @@ struct TypeAlias {
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
   Array resolvedTypeStructure;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -613,17 +639,18 @@ struct TypeAlias {
  * Information regarding a runtime/parse error in a unit
  */
 struct FatalInfo {
-  Location::Range fatalLoc;
+  // If fatalLoc is missing, this represents a verifier failure
+  Optional<Location::Range> fatalLoc;
   FatalOp fatalOp;
   std::string fatalMsg;
+
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 /*
  * Representation of a php file (normal compilation unit).
  */
 struct Unit {
-  int64_t sn{-1};
-  SHA1 sha1;
   LSString filename;
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
@@ -635,6 +662,8 @@ struct Unit {
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;
   LSString moduleName;
+
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 /*
@@ -644,7 +673,6 @@ struct Program {
   std::mutex lock;
   std::atomic<uint32_t> nextFuncId{};
   std::vector<std::unique_ptr<Unit>> units;
-  std::vector<php::Func*> constInits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -667,6 +695,66 @@ bool check(const Func&);
 bool check(const Class&);
 bool check(const Unit&);
 bool check(const Program&);
+
+//////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+// Helpers to stamp out BlobEncoderHelpers for unique_ptr and
+// copy_ptrs wrapping the above types.
+
+template <typename T> struct UPBlobImpl {
+  template <typename SerDe, typename... Extra>
+  static void serde(SerDe& sd, std::unique_ptr<T>& p, Extra... extra) {
+    if constexpr (SerDe::deserializing) {
+      p = std::make_unique<T>();
+    } else {
+      assertx(p);
+    }
+    sd(*p, extra...);
+  }
+};
+
+template <typename T> struct CPBlobImpl {
+  template <typename SerDe, typename... Extra>
+  static void serde(SerDe& sd, copy_ptr<T>& p, Extra... extra) {
+    if constexpr (SerDe::deserializing) {
+      sd(*p.emplace(), extra...);
+    } else {
+      assertx(p);
+      sd(*p, extra...);
+    }
+  }
+};
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#define MAKE_UNIQUE_PTR_BLOB_HELPER(T)                          \
+  template<>                                                    \
+  struct BlobEncoderHelper<std::unique_ptr<HHBBC::php::T>>      \
+    : public HHBBC::php::detail::UPBlobImpl<HHBBC::php::T> {};
+
+#define MAKE_COPY_PTR_BLOB_HELPER(T)                            \
+  template<>                                                    \
+  struct BlobEncoderHelper<copy_ptr<HHBBC::php::T>>             \
+    : public HHBBC::php::detail::CPBlobImpl<HHBBC::php::T> {};
+
+MAKE_COPY_PTR_BLOB_HELPER(Block)
+MAKE_UNIQUE_PTR_BLOB_HELPER(Unit)
+MAKE_UNIQUE_PTR_BLOB_HELPER(Func)
+MAKE_UNIQUE_PTR_BLOB_HELPER(Class)
+MAKE_UNIQUE_PTR_BLOB_HELPER(Constant)
+MAKE_UNIQUE_PTR_BLOB_HELPER(TypeAlias)
+MAKE_UNIQUE_PTR_BLOB_HELPER(Module)
+MAKE_UNIQUE_PTR_BLOB_HELPER(FatalInfo)
+#undef MAKE_UNIQUE_PTR_BLOB_HELPER
+#undef MAKE_COPY_PTR_BLOB_HELPER
 
 //////////////////////////////////////////////////////////////////////
 

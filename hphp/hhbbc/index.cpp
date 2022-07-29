@@ -3100,7 +3100,6 @@ void add_system_constants_to_index(IndexData& index) {
     assertx(cnsPair.second.m_type != KindOfUninit ||
             cnsPair.second.dynamic());
     auto pc = new php::Constant {
-      nullptr,
       cnsPair.first,
       cnsPair.second,
       AttrUnique | AttrPersistent

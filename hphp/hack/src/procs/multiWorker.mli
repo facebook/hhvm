@@ -60,12 +60,26 @@ val call :
   next:'input Hh_bucket.next ->
   'acc
 
+module type WorkItems_sig = sig
+  type t
+
+  type workitem
+
+  val of_workitem : workitem -> t
+
+  val pop : t -> workitem option * t
+
+  val push : workitem -> t -> t
+end
+
+(** [job] can return more items to process, e.g. the
+  part of the input that it could not process. *)
 val call_stateless :
+  (module WorkItems_sig with type workitem = 'input and type t = 'inputs) ->
   worker list ->
-  job:('acc -> 'input -> 'output) ->
+  job:('acc -> 'input -> 'input * 'output) ->
   merge:('output -> 'acc -> 'acc) ->
   neutral:'acc ->
-  next:('inputs -> ('input * 'inputs) option) ->
   inputs:'inputs ->
   'acc
 

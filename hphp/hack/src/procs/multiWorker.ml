@@ -81,34 +81,53 @@ end)
 
 let call_with_worker_id = Call.call
 
-let call workers ~job ~merge ~neutral ~next =
+let call workers ~(job : 'acc -> 'input -> 'output) ~merge ~neutral ~next =
   let job (_worker_id, a) b = job a b in
   let merge (_worker_id, a) b = merge a b in
   Call.call workers ~job ~merge ~neutral ~next
 
+module type WorkItems_sig = sig
+  type t
+
+  type workitem
+
+  val of_workitem : workitem -> t
+
+  val pop : t -> workitem option * t
+
+  val push : workitem -> t -> t
+end
+
 let call_stateless :
+    (module WorkItems_sig with type workitem = 'input and type t = 'inputs) ->
     worker list ->
-    job:('acc -> 'input -> 'output) ->
+    job:('acc -> 'input -> 'input * 'output) ->
     merge:('output -> 'acc -> 'acc) ->
     neutral:'acc ->
-    next:('inputs -> ('input * 'inputs) option) ->
     inputs:'inputs ->
     'acc =
- fun workers ~job ~merge ~neutral ~next ~inputs ->
-  let inputs_ref = ref (Some inputs) in
-  let next () =
-    match !inputs_ref with
-    | None -> Bucket.Done
-    | Some inputs ->
-      (match next inputs with
-      | None ->
-        inputs_ref := None;
-        Bucket.Done
-      | Some (input, inputs) ->
-        inputs_ref := Some inputs;
-        Bucket.Job input)
-  in
-  call (Some workers) ~job ~merge ~neutral ~next
+  fun (type input inputs)
+      (module WorkItems : WorkItems_sig
+        with type workitem = input
+         and type t = inputs)
+      workers
+      ~job
+      ~merge
+      ~neutral
+      ~inputs ->
+   let inputs_ref = ref inputs in
+   let next () =
+     let (input, inputs) = WorkItems.pop !inputs_ref in
+     inputs_ref := inputs;
+     match input with
+     | None -> Bucket.Done
+     | Some input -> Bucket.Job input
+   in
+   let merge (input, output) acc =
+     inputs_ref := WorkItems.push input !inputs_ref;
+     merge output acc
+   in
+   call (Some workers) ~job ~merge ~neutral ~next
 
 (* If we ever want this in MultiWorkerLwt then move this into CallFunctor *)
 let call_with_interrupt

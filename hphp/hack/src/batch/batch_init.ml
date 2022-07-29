@@ -59,10 +59,15 @@ let init
     ~(popt : ParserOptions.t)
     ~(tcopt : TypecheckerOptions.t)
     ~(deps_mode : Typing_deps_mode.t)
+    ?(gc_control : Gc.control option)
     (t : float) : Provider_context.t * MultiWorker.worker list * float =
   let nbr_procs = Sys_utils.nbr_procs in
   let heap_handle = SharedMem.init ~num_workers:nbr_procs shmem_config in
-  let gc_control = Core_kernel.Gc.get () in
+  let gc_control =
+    match gc_control with
+    | Some c -> c
+    | None -> Core_kernel.Gc.get ()
+  in
   let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =
     MultiWorker.make
@@ -85,3 +90,4 @@ let init_with_defaults =
     ~popt:ParserOptions.default
     ~tcopt:TypecheckerOptions.default
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ?gc_control:None

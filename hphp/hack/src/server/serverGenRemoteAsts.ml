@@ -9,27 +9,60 @@
 
 open Hh_prelude
 
-let save_contents (file : string) (contents : 'a) : unit =
-  Sys_utils.mkdir_p (Filename.dirname file);
-  let chan = Stdlib.open_out_bin file in
-  Marshal.to_channel chan contents [];
-  Stdlib.close_out chan
+let ( >>= ) res f =
+  Future.Promise.bind res (function
+      | Ok r -> f r
+      | Error e -> Future.Promise.return (Error e))
+
+let return_ok x = Future.Promise.return (Ok x)
+
+let return_err x = Future.Promise.return (Error x)
+
+let get_hh_config_version ~(root : Path.t) :
+    (string, string) result Future.Promise.t =
+  let hhconfig_path =
+    Path.to_string
+      (Path.concat root Config_file.file_path_relative_to_repo_root)
+  in
+  (if Disk.file_exists hhconfig_path then
+    return_ok (Config_file.parse_hhconfig hhconfig_path)
+  else
+    let error =
+      "Attempted to parse .hhconfig.\nBut it doesn't exist at this path:\n"
+      ^ hhconfig_path
+    in
+    return_err error)
+  >>= fun (_, config) ->
+  let version = Config_file.Getters.string_opt "version" config in
+  begin
+    match version with
+    | None -> failwith "Failed to parse hh version"
+    | Some version ->
+      let version = "v" ^ String_utils.lstrip version "^" in
+      return_ok version
+  end
+  >>= fun hh_config_version -> return_ok hh_config_version
 
 let go
     (env : ServerEnv.env)
     (genv : ServerEnv.genv)
     (workers : MultiWorker.worker list option)
-    (dir : string) : unit =
+    (_dir : string) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   let root = Wwwroot.get None in
-  let mergebase_rev =
-    match Future.get @@ Hg.current_mergebase_hg_rev (Path.to_string root) with
-    | Ok hash -> hash
-    | Error _ -> failwith "Exception getting the current mergebase revision"
+  let hh_config_version =
+    match Future.get @@ get_hh_config_version ~root with
+    | Ok (Ok result) -> result
+    | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
+    | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
-  let dir = Filename.concat dir mergebase_rev in
-  let asts_file_name = "asts.bin" in
-  let local_file = dir ^ "/" ^ asts_file_name in
+
+  let cmd =
+    "manifold mkdirs hack_ast_prefetching/tree/prefetch/"
+    ^ hh_config_version
+    ^ "/asts"
+  in
+  ignore (Sys.command cmd);
 
   let get_next =
     ServerUtils.make_next
@@ -54,7 +87,5 @@ let go
   in
 
   Hh_logger.log "Pased %d files into ASTs" (List.length results);
-  save_contents local_file results;
-  Hh_logger.log "Saved to local file %s" local_file;
-
+  let _ = Remote_asts_ffi.put_asts hh_config_version results in
   ()

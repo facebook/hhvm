@@ -135,6 +135,14 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name remote_asts_ffi)
+  (wrapped false)
+  (modules
+    remote_asts_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name remote_old_decls_ffi)
   (wrapped false)
   (modules

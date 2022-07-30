@@ -242,7 +242,7 @@ let make
     ~entry
     nbr_procs
     ~gc_control
-    ~heap_handle =
+    ~heap_handle : worker list =
   let setup_controller_fd () =
     if use_prespawned then
       let (parent_fd, child_fd) = Unix.pipe () in

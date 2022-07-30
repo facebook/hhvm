@@ -55,6 +55,8 @@ type pos =
 
 type id = pos * string * Int64.t option [@@deriving eq, show]
 
+val id_name : id -> string
+
 val pos_full : Pos.t * string * Int64.t option -> id
 
 val get_pos_filename : pos -> Relative_path.t

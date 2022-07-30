@@ -170,21 +170,23 @@ let process_file
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
         Errors.do_with_context fn Errors.Typing @@ fun () ->
-        let snd (_, x, _) = x in
         let (fun_tasts, fun_global_tvenvs) =
-          List.map funs ~f:snd
+          List.map funs ~f:FileInfo.id_name
           |> List.filter_map ~f:(type_fun ctx fn)
           |> List.unzip
         in
         let (class_tasts, class_global_tvenvs) =
-          List.map classes ~f:snd
+          List.map classes ~f:FileInfo.id_name
           |> List.filter_map ~f:(type_class ctx fn)
           |> List.unzip
         in
         let class_global_tvenvs = List.concat class_global_tvenvs in
-        List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
-        List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
-        List.map modules ~f:snd |> List.iter ~f:(ignore_check_module ctx fn);
+        List.map typedefs ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_typedef ctx fn);
+        List.map gconsts ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_const ctx fn);
+        List.map modules ~f:FileInfo.id_name
+        |> List.iter ~f:(ignore_check_module ctx fn);
         (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
       in
       match result with

@@ -75,6 +75,8 @@ type pos =
  *)
 type id = pos * string * Int64.t option [@@deriving eq, show]
 
+let id_name (_, x, _) = x
+
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)

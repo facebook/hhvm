@@ -51,7 +51,7 @@ val next :
   'a list ->
   'a list Hh_bucket.next
 
-(* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
+(** Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
 val call :
   worker list option ->
   job:('acc -> 'input -> 'output) ->

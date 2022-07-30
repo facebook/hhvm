@@ -461,6 +461,7 @@
   serverFileSync
   serverFormat
   serverGenPrefetchDir
+  serverGenRemoteAsts
   serverGenRemoteDecls
   serverGenShallowDeclsToDir
   serverIdle

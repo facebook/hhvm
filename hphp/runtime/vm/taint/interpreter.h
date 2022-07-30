@@ -169,7 +169,9 @@ void iopResolveRClsMethodS(SpecialClsRef ref, const StringData* methName);
 void iopResolveClass(Id id);
 void iopLazyClass(Id id);
 void iopNewObj();
+void iopNewObjR();
 void iopNewObjD(Id id);
+void iopNewObjRD(Id id);
 void iopNewObjS(SpecialClsRef ref);
 void iopLockObj();
 TCA iopFCallClsMethod(

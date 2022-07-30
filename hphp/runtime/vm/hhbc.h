@@ -578,6 +578,8 @@ constexpr bool isObjectConstructorOp(Op opcode) {
   return
     opcode == Op::NewObj ||
     opcode == Op::NewObjD ||
+    opcode == Op::NewObjR ||
+    opcode == Op::NewObjRD ||
     opcode == Op::NewObjS;
 }
 

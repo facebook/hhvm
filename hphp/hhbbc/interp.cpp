@@ -3072,7 +3072,7 @@ void in(ISS& env, const bc::CheckClsReifiedGenericMismatch& op) {
 void in(ISS& env, const bc::ClassHasReifiedGenerics& op) {
   // TODO(T121050961) Optimize for lazy classes too
   auto const cls = popC(env);
-  if (!cls.couldBe(BCls | BLazyCls)) {
+  if (!cls.couldBe(BCls)) {
     unreachable(env);
     return push(env, TBottom);
   }
@@ -3122,7 +3122,7 @@ void in(ISS& env, const bc::GetClsRGProp& op) {
 void in(ISS& env, const bc::HasReifiedParent& op) {
   // TODO(T121050961) Optimize for lazy classes too
   auto const cls = popC(env);
-  if (!cls.couldBe(BCls | BLazyCls)) {
+  if (!cls.couldBe(BCls)) {
     unreachable(env);
     return push(env, TBottom);
   }
@@ -4606,6 +4606,7 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
 } // namespace
 
 void in(ISS& env, const bc::NewObjD& op)  { newObjDImpl(env, op.str1, false); }
+void in(ISS& env, const bc::NewObjRD& op) { newObjDImpl(env, op.str1, true);  }
 
 void in(ISS& env, const bc::NewObjS& op) {
   auto const cls = specialClsRefToCls(env, op.subop1);
@@ -4641,6 +4642,39 @@ void in(ISS& env, const bc::NewObj& op) {
     );
   }
 
+  popC(env);
+  push(env, toobj(cls));
+}
+
+void in(ISS& env, const bc::NewObjR& op) {
+  auto const generics = topC(env);
+  auto const cls = topC(env, 1);
+
+  if (generics.subtypeOf(BInitNull)) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::NewObj {}
+    );
+  }
+
+  if (!cls.subtypeOf(BCls) || !is_specialized_cls(cls)) {
+    popC(env);
+    popC(env);
+    push(env, TObj);
+    return;
+  }
+
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::NewObj {}
+    );
+  }
+
+  popC(env);
   popC(env);
   push(env, toobj(cls));
 }

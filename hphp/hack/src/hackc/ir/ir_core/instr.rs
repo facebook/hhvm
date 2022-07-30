@@ -492,6 +492,8 @@ pub enum Hhbc {
     NewKeysetArray(Box<[ValueId]>, LocId),
     NewObj(ValueId, LocId),
     NewObjD(ClassId, LocId),
+    NewObjR([ValueId; 2], LocId),
+    NewObjRD(ValueId, ClassId, LocId),
     #[has_locals(none)]
     #[has_operands(none)]
     NewObjS(SpecialClsRef, LocId),

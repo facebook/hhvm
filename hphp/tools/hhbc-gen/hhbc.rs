@@ -290,6 +290,9 @@ mod fixups {
             "NewObjD" => vec![
                 replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
             ],
+            "NewObjRD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassName")),
+            ],
             "QueryM" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],

@@ -247,6 +247,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPrepareChild:
   case AKExistsObj:
   case AllocObj:
+  case AllocObjReified:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:

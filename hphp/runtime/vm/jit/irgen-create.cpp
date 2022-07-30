@@ -533,12 +533,11 @@ void emitCheckClsReifiedGenericMismatch(IRGS& env) {
     interpOne(env);
     return;
   }
-  auto const reified = topC(env);
+  auto const reified = popC(env);
   if (!reified->isA(TVec)) {
     PUNT(CheckClsReifiedGenericMismatch-InvalidTS);
   }
   gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), reified);
-  popDecRef(env, DecRefProfileId::Default);
 }
 
 void emitClassHasReifiedGenerics(IRGS& env) {

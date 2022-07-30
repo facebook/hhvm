@@ -4206,13 +4206,31 @@ iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
 namespace {
 
-ObjectData* newObjImpl(Class* cls) {
+ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
+  if (reified_types && cls->hasReifiedGenerics()) {
+    checkClassReifiedGenericMismatch(cls, reified_types);
+  }
   // Replace input with uninitialized instance.
-  auto this_ = ObjectData::newInstance<true>(cls);
+  auto this_ = reified_types
+    ? ObjectData::newInstanceReified<true>(cls, reified_types)
+    : ObjectData::newInstance<true>(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   profileArrLikePropsForInterp(this_);
   return this_;
+}
+
+void newObjDImpl(Id id, ArrayData* reified_types) {
+  const NamedEntityPair &nep =
+    vmfp()->func()->unit()->lookupNamedEntityPairId(id);
+  auto cls = Class::load(nep.second, nep.first);
+  if (cls == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS,
+                vmfp()->func()->unit()->lookupLitstrId(id)->data());
+  }
+  auto this_ = newObjImpl(cls, reified_types);
+  if (reified_types) vmStack().popC();
+  vmStack().pushObjectNoRc(this_);
 }
 
 } // namespace
@@ -4225,21 +4243,50 @@ OPTBLD_INLINE void iopNewObj() {
   auto const cls = clsCell->m_data.pclass;
 
   callerDynamicConstructChecks(cls);
-  auto this_ = newObjImpl(cls);
+  auto this_ = newObjImpl(cls, nullptr);
+  vmStack().popC();
+  vmStack().pushObjectNoRc(this_);
+}
+
+OPTBLD_INLINE void iopNewObjR() {
+  auto const reifiedCell = vmStack().topC();
+  auto const clsCell = vmStack().indC(1);
+
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting NewObjR with non-class");
+  }
+  auto const cls = clsCell->m_data.pclass;
+
+  auto const reified = [&] () -> ArrayData* {
+    if (reifiedCell->m_type == KindOfNull) return nullptr;
+    if (!tvIsVec(reifiedCell)) {
+      raise_error("Attempting NewObjR with invalid reified generics");
+    }
+    return reifiedCell->m_data.parr;
+  }();
+
+  callerDynamicConstructChecks(cls);
+  auto this_ = newObjImpl(cls, reified);
+  vmStack().popC();
   vmStack().popC();
   vmStack().pushObjectNoRc(this_);
 }
 
 OPTBLD_INLINE void iopNewObjD(Id id) {
-  const NamedEntityPair &nep =
-    vmfp()->func()->unit()->lookupNamedEntityPairId(id);
-  auto cls = Class::load(nep.second, nep.first);
-  if (cls == nullptr) {
-    raise_error(Strings::UNKNOWN_CLASS,
-                vmfp()->func()->unit()->lookupLitstrId(id)->data());
-  }
-  auto this_ = newObjImpl(cls);
-  vmStack().pushObjectNoRc(this_);
+  newObjDImpl(id, nullptr);
+}
+
+OPTBLD_INLINE void iopNewObjRD(Id id) {
+  auto const tsList = vmStack().topC();
+
+  auto const reified = [&] () -> ArrayData* {
+    if (tsList->m_type == KindOfNull) return nullptr;
+    if (!tvIsVec(tsList)) {
+      raise_error("Attempting NewObjRD with invalid reified generics");
+    }
+    return tsList->m_data.parr;
+  }();
+  newObjDImpl(id, reified);
 }
 
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
@@ -4247,7 +4294,9 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   if (ref == SpecialClsRef::LateBoundCls && cls->hasReifiedGenerics()) {
     raise_error(Strings::NEW_STATIC_ON_REIFIED_CLASS, cls->name()->data());
   }
-  auto this_ = newObjImpl(cls);
+  auto const reified_generics = cls->hasReifiedGenerics()
+    ? getClsReifiedGenericsProp(cls, vmfp()->getThis()) : nullptr;
+  auto this_ = newObjImpl(cls, reified_generics);
   vmStack().pushObjectNoRc(this_);
 }
 

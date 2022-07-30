@@ -1446,6 +1446,8 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::NewKeysetArray(..)
             | Opcode::NewObj
             | Opcode::NewObjD(..)
+            | Opcode::NewObjR
+            | Opcode::NewObjRD(..)
             | Opcode::NewObjS(..)
             | Opcode::NewPair
             | Opcode::NewStructDict(..)
@@ -1623,6 +1625,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::NativeImpl
         | Opcode::Neq
         | Opcode::NewObj
+        | Opcode::NewObjR
         | Opcode::NewPair
         | Opcode::Nop
         | Opcode::Not
@@ -1708,6 +1711,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::NewDictArray(_)
         | Opcode::NewKeysetArray(_)
         | Opcode::NewObjD(_)
+        | Opcode::NewObjRD(_)
         | Opcode::NewObjS(_)
         | Opcode::NewStructDict(_)
         | Opcode::NewVec(_)

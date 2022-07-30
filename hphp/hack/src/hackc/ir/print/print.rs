@@ -908,6 +908,21 @@ fn print_hhbc(
                 FmtIdentifierId(clsid.id, ctx.strings)
             )?;
         }
+        Hhbc::NewObjR([cls, rp], _) => {
+            write!(
+                w,
+                "new_obj_r {}, {}",
+                FmtVid(func, cls, verbose),
+                FmtVid(func, rp, verbose)
+            )?;
+        }
+        Hhbc::NewObjRD(_, clsid, _) => {
+            write!(
+                w,
+                "new_obj reified direct {}",
+                FmtIdentifierId(clsid.id, ctx.strings)
+            )?;
+        }
         Hhbc::NewObjS(clsref, _) => {
             write!(w, "new_obj static {}", FmtSpecialClsRef(clsref))?;
         }

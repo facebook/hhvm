@@ -450,6 +450,7 @@
   errors
   file_info
   nast
+  gc_utils
   global_options
   heap_global_storage
   procs_bucket

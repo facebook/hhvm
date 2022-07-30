@@ -284,8 +284,6 @@ let get_stats ~include_slightly_costly_stats tally :
     ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
     telemetry
 
-let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
-
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 let process_one_workitem
@@ -355,7 +353,7 @@ let process_one_workitem
         ProcessFilesTally.incr_prefetches tally )
   in
   let errors = Errors.merge file_errors errors in
-  let workitem_ends_under_cap = get_heap_size () <= workitem_cap_mb in
+  let workitem_ends_under_cap = Gc_utils.get_heap_size () <= workitem_cap_mb in
   let final_stats =
     get_stats
       ~include_slightly_costly_stats:
@@ -373,7 +371,7 @@ let process_one_workitem
   (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
      by flushing the parser cache and doing a major GC; (2) if this fails, we decline to typecheck
      the remaining files.
-     We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
+     We use [quick_stat] instead of [stat] in Gc_utils.get_heap_size in order to avoid walking the major heap,
      and we don't change the minor heap because it's small and fixed-size.
      This test is performed after we've processed at least one item, to ensure we make at least some progress. *)
   let tally = ProcessFilesTally.record_caps ~workitem_ends_under_cap tally in
@@ -385,7 +383,7 @@ let process_one_workitem
       HackEventLogger.flush ();
       Gc.compact ();
       hh_malloc_trim ();
-      get_heap_size () <= workitem_cap_mb
+      Gc_utils.get_heap_size () <= workitem_cap_mb
     end
   in
 

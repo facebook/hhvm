@@ -202,3 +202,8 @@
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
  (libraries utils_core sys_utils)
  (modules memory_stats))
+
+(library
+ (name gc_utils)
+ (modules gc_utils)
+ (libraries utils_core))

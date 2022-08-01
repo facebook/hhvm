@@ -119,7 +119,7 @@ impl UnstableFeatures {
             UnstableFeatures::ModuleReferences => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
-            UnstableFeatures::TypeConstMultipleBounds => Unstable,
+            UnstableFeatures::TypeConstMultipleBounds => Preview,
             UnstableFeatures::TypeConstSuperBound => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::TypeRefinements => Unstable,

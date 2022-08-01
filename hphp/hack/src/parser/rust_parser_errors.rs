@@ -4441,6 +4441,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     default(self)
                 }
             }
+            UpcastExpression(x) => self.check_constant_expression(&x.left_operand),
             BinaryExpression(x) => {
                 if let Token(token) = &x.operator.children {
                     use TokenKind::*;

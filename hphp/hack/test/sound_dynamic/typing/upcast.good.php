@@ -32,3 +32,7 @@ function j<T as int>(T $x) : void {
   $z = ($x + 1) upcast dynamic;
   hh_expect_equivalent<dynamic>($z);
 }
+
+class C {
+  public dynamic $d = 3 upcast dynamic;
+}

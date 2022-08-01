@@ -488,13 +488,13 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       const char *lf;
       cr = (const char *)memchr(readptr, '\r', avail);
       lf = (const char *)memchr(readptr, '\n', avail);
-      if (cr && lf != cr + 1 && !(lf && lf < cr) && cr != &readptr[avail - 1]) {
+      if (cr && lf != cr + 1 && !(lf && lf < cr)) {
         /* mac */
         eol = cr;
       } else if ((cr && lf && cr == lf - 1) || (lf)) {
         /* dos or unix endings */
         eol = lf;
-      } else if (cr != &readptr[avail - 1]) {
+      } else {
         eol = cr;
       }
 
@@ -532,10 +532,29 @@ String File::readLine(int64_t maxlen /* = 0 */) {
         m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
         m_data->m_bufferSize = m_data->m_chunkSize;
       }
+      if (m_data->m_bufferSize != m_data->m_chunkSize) {
+        m_data->m_buffer = (char *)realloc(m_data->m_buffer, m_data->m_chunkSize);
+        m_data->m_bufferSize = m_data->m_chunkSize;
+      }
       m_data->m_writepos = readImpl(m_data->m_buffer, m_data->m_bufferSize);
       m_data->m_readpos = 0;
+
       if (bufferedLen() == 0) {
         break;
+      }
+
+      // refuse to end chunk on \r when the next character may be \n
+      while (m_data->m_buffer[bufferedLen() - 1] == '\r') {
+        char extrachar[1];
+        int64_t len = readImpl(extrachar, 1);
+        if (len == 1) {
+          m_data->m_buffer = (char *)realloc(m_data->m_buffer, m_data->m_bufferSize + 1);
+          m_data->m_buffer[bufferedLen()] = extrachar[0];
+          m_data->m_writepos = m_data->m_writepos + 1;
+          m_data->m_bufferSize = m_data->m_bufferSize + 1;
+        } else {
+          break;
+        }
       }
     }
   }

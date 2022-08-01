@@ -42,8 +42,9 @@ fn main() {
 
 fn get_hhis_in_dir(root: &Path) -> impl Iterator<Item = (PathBuf, String)> + '_ {
     walkdir::WalkDir::new(root)
+        .sort_by_file_name()
         .into_iter()
-        .filter_map(|e| e.ok())
+        .map(|e| e.unwrap())
         .filter(|e| e.file_type().is_file())
         .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("hhi"))
         .map(move |e| {

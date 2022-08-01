@@ -7,7 +7,6 @@ use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Error;
 use crate::typing::typing_error::Result;
-use special_names;
 use ty::reason::Reason;
 
 impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {

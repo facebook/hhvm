@@ -8,16 +8,19 @@ use syn::Meta::NameValue;
 use syn::NestedMeta::Lit;
 use syn::NestedMeta::Meta;
 
+static DOC: &str = "doc";
 static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
 
 #[derive(Clone, Debug)]
 pub struct Container {
+    pub doc: Vec<String>,
     pub prefix: Option<String>,
 }
 
 impl Container {
     pub fn from_ast(item: &syn::DeriveInput) -> Self {
+        let doc = get_doc_comment(&item.attrs);
         let mut prefix = None;
 
         for meta_item in item
@@ -50,17 +53,19 @@ impl Container {
             }
         }
 
-        Self { prefix }
+        Self { doc, prefix }
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct Variant {
+    pub doc: Vec<String>,
     pub prefix: Option<String>,
 }
 
 impl Variant {
     pub fn from_ast(variant: &syn::Variant) -> Self {
+        let doc = get_doc_comment(&variant.attrs);
         let mut prefix = None;
 
         for meta_item in variant
@@ -93,8 +98,66 @@ impl Variant {
             }
         }
 
-        Self { prefix }
+        Self { doc, prefix }
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct Field {
+    pub doc: Vec<String>,
+}
+
+impl Field {
+    pub fn from_ast(field: &syn::Field) -> Self {
+        let doc = get_doc_comment(&field.attrs);
+
+        for meta_item in field
+            .attrs
+            .iter()
+            .flat_map(get_rust_to_ocaml_meta_items)
+            .flatten()
+        {
+            match &meta_item {
+                Meta(_meta_item) => {
+                    // let path = meta_item
+                    //     .path()
+                    //     .into_token_stream()
+                    //     .to_string()
+                    //     .replace(' ', "");
+                    // cx.error_spanned_by(
+                    //     meta_item.path(),
+                    //     format!("unknown rust_to_ocaml field attribute `{}`", path),
+                    // );
+                }
+                Lit(_lit) => {
+                    // cx.error_spanned_by(lit, "unexpected literal in rust_to_ocaml field attribute");
+                }
+            }
+        }
+
+        Self { doc }
+    }
+}
+
+pub fn get_doc_comment(attrs: &[syn::Attribute]) -> Vec<String> {
+    attrs
+        .iter()
+        .filter_map(|attr| {
+            if !attr.path.is_ident(DOC) {
+                return None;
+            }
+            match attr.parse_meta() {
+                Ok(syn::Meta::NameValue(meta)) => {
+                    if let syn::Lit::Str(s) = meta.lit {
+                        Some(s.value())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            }
+        })
+        .collect()
 }
 
 fn get_rust_to_ocaml_meta_items(attr: &syn::Attribute) -> Result<Vec<syn::NestedMeta>, ()> {

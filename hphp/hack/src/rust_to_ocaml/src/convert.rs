@@ -48,23 +48,27 @@ fn convert_item(item: &syn::Item) -> Result<Option<(TypeName, Def)>> {
 
 fn convert_item_type(item: &syn::ItemType) -> Result<(TypeName, Def)> {
     let name = TypeName(item.ident.to_string().to_case(Case::Snake));
+    let doc = attr_parser::get_doc_comment(&item.attrs);
     let ty = convert_type(&item.ty)?;
-    Ok((name, Def::Alias { ty }))
+    Ok((name, Def::Alias { doc, ty }))
 }
 
 fn convert_item_struct(item: &syn::ItemStruct) -> Result<(TypeName, Def)> {
     let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-    let attrs = attr_parser::Container::from_ast(&item.to_owned().into());
+    let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
     match &item.fields {
         syn::Fields::Named(fields) => {
             let fields = (fields.named.iter())
                 .map(|field| {
-                    let name = field_name(field.ident.as_ref(), attrs.prefix.as_deref());
+                    let field_attrs = attr_parser::Field::from_ast(field);
+                    let name = field_name(field.ident.as_ref(), container_attrs.prefix.as_deref());
                     let ty = convert_type(&field.ty)?;
-                    Ok((name, ty))
+                    let doc = field_attrs.doc;
+                    Ok(ir::Field { name, ty, doc })
                 })
                 .collect::<Result<Vec<_>>>()?;
-            Ok((name, Def::Record { fields }))
+            let doc = container_attrs.doc;
+            Ok((name, Def::Record { doc, fields }))
         }
         _ => todo!(),
     }
@@ -89,18 +93,22 @@ fn convert_item_enum(item: &syn::ItemEnum) -> Result<(TypeName, Def)> {
                 syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
                     (fields.named.iter())
                         .map(|field| {
+                            let field_attrs = attr_parser::Field::from_ast(field);
                             let name =
                                 field_name(field.ident.as_ref(), variant_attrs.prefix.as_deref());
                             let ty = convert_type(&field.ty)?;
-                            Ok((name, ty))
+                            let doc = field_attrs.doc;
+                            Ok(ir::Field { name, ty, doc })
                         })
                         .collect::<Result<_>>()?,
                 )),
             };
-            Ok((name, fields))
+            let doc = variant_attrs.doc;
+            Ok(ir::Variant { name, fields, doc })
         })
         .collect::<Result<Vec<_>>>()?;
-    Ok((name, Def::Variant { variants }))
+    let doc = container_attrs.doc;
+    Ok((name, Def::Variant { doc, variants }))
 }
 
 fn field_name(ident: Option<&syn::Ident>, prefix: Option<&str>) -> FieldName {

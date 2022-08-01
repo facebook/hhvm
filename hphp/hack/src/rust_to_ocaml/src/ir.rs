@@ -13,25 +13,27 @@ impl std::fmt::Display for File {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (name, def) in self.defs.iter() {
             match def {
-                Def::Alias { ty } => writeln!(f, "type {name} = {ty}")?,
-                Def::Record { fields } => {
+                Def::Alias { doc, ty } => {
+                    write_toplevel_doc_comment(f, doc)?;
+                    writeln!(f, "type {name} = {ty}")?
+                }
+                Def::Record { doc, fields } => {
+                    write_toplevel_doc_comment(f, doc)?;
                     writeln!(f, "type {name} = {{")?;
-                    for (field_name, ty) in fields {
-                        writeln!(f, "  {field_name}: {ty};")?;
+                    for field in fields {
+                        writeln!(f, "  {field}")?;
                     }
                     writeln!(f, "}}")?;
                 }
-                Def::Variant { variants } => {
+                Def::Variant { doc, variants } => {
+                    write_toplevel_doc_comment(f, doc)?;
                     writeln!(f, "type {name} =")?;
-                    for (variant_name, fields) in variants {
-                        write!(f, "  | {variant_name}")?;
-                        if let Some(fields) = fields {
-                            write!(f, " of {fields}")?;
-                        }
-                        writeln!(f)?;
+                    for variant in variants {
+                        writeln!(f, "  | {variant}")?;
                     }
                 }
             }
+            write!(f, "\n")?;
         }
         Ok(())
     }
@@ -39,19 +41,40 @@ impl std::fmt::Display for File {
 
 pub enum Def {
     Alias {
+        doc: Vec<String>,
         ty: Type,
     },
     Record {
-        fields: Vec<(FieldName, Type)>,
+        doc: Vec<String>,
+        fields: Vec<Field>,
     },
     Variant {
-        variants: Vec<(VariantName, Option<VariantFields>)>,
+        doc: Vec<String>,
+        variants: Vec<Variant>,
     },
+}
+
+pub struct Variant {
+    pub name: VariantName,
+    pub fields: Option<VariantFields>,
+    pub doc: Vec<String>,
+}
+
+impl std::fmt::Display for Variant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self { name, fields, doc } = self;
+        write!(f, "{name}")?;
+        if let Some(fields) = fields {
+            write!(f, " of {fields}")?;
+        }
+        write_field_or_variant_doc_comment(f, doc)?;
+        Ok(())
+    }
 }
 
 pub enum VariantFields {
     Unnamed(Vec<Type>),
-    Named(Vec<(FieldName, Type)>),
+    Named(Vec<Field>),
 }
 
 impl std::fmt::Display for VariantFields {
@@ -68,12 +91,27 @@ impl std::fmt::Display for VariantFields {
             }
             Self::Named(fields) => {
                 writeln!(f, "{{")?;
-                for (name, ty) in fields {
-                    writeln!(f, "    {name}: {ty};")?;
+                for field in fields {
+                    writeln!(f, "    {field}")?;
                 }
                 write!(f, "}}")
             }
         }
+    }
+}
+
+pub struct Field {
+    pub name: FieldName,
+    pub ty: Type,
+    pub doc: Vec<String>,
+}
+
+impl std::fmt::Display for Field {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self { name, ty, doc } = self;
+        write!(f, "{name}: {ty};")?;
+        write_field_or_variant_doc_comment(f, doc)?;
+        Ok(())
     }
 }
 
@@ -134,3 +172,38 @@ pub struct FieldName(pub String);
 
 #[derive(Clone, Hash, PartialEq, Eq, Display)]
 pub struct VariantName(pub String);
+
+fn write_toplevel_doc_comment(
+    f: &mut std::fmt::Formatter<'_>,
+    doc: &Vec<String>,
+) -> std::fmt::Result {
+    if doc.is_empty() {
+        return Ok(());
+    }
+    write!(f, "(**{}", doc.join("\n *"))?;
+    if doc.len() == 1 {
+        if !doc[0].contains('\n') {
+            write!(f, " ")?;
+        }
+    } else {
+        write!(f, "\n ")?;
+    }
+    write!(f, "*)\n")?;
+    Ok(())
+}
+
+fn write_field_or_variant_doc_comment(
+    f: &mut std::fmt::Formatter<'_>,
+    doc: &Vec<String>,
+) -> std::fmt::Result {
+    if doc.is_empty() {
+        return Ok(());
+    }
+    let joined = doc.join("\n       *");
+    write!(f, "(**{}", joined)?;
+    if !joined.ends_with(' ') {
+        write!(f, " ")?;
+    }
+    write!(f, "*)\n")?;
+    Ok(())
+}

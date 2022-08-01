@@ -113,14 +113,6 @@ static_assert(CheckSize<RepoAuthType, 8>(), "");
  * One-to-many case insensitive map, where the keys are static strings
  * and the values are some kind of pointer.
  */
-template<class T> using ISStringToMany =
-  std::unordered_multimap<
-    SString,
-    T*,
-    string_data_hash,
-    string_data_isame
-  >;
-
 template<class T> using SStringToMany =
   std::unordered_multimap<
     SString,
@@ -132,21 +124,15 @@ template<class T> using SStringToMany =
 /*
  * One-to-one case insensitive map, where the keys are static strings
  * and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
  */
 template<class T> using ISStringToOneT =
-  hphp_hash_map<
+  hphp_fast_map<
     SString,
     T,
     string_data_hash,
     string_data_isame
-  >;
-
-template<class T> using SStringToOneT =
-  hphp_hash_map<
-    SString,
-    T,
-    string_data_hash,
-    string_data_same
   >;
 
 /*
@@ -154,28 +140,22 @@ template<class T> using SStringToOneT =
  * and the values are some T.
  *
  * Elements are not stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
  */
-template<class T> using SStringToOneFastT =
-  hphp_fast_map<
-    SString,
-    T,
-    string_data_hash,
-    string_data_same
-  >;
-
-template<class T> using SStringToOneFastT =
-  hphp_fast_map<
-    SString,
-    T,
-    string_data_hash,
-    string_data_same
-  >;
+template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
 
 /*
- * One-to-one case insensitive map, where the keys are static strings
- * and the values are some kind of pointer.
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
  */
-template<class T> using ISStringToOne = ISStringToOneT<T*>;
+template<class T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -196,7 +176,12 @@ bool has_dep(Dep m, Dep t) {
 using DepMap =
   tbb::concurrent_hash_map<
     DependencyContext,
-    std::map<DependencyContext,Dep,DependencyContextLess>,
+    hphp_fast_map<
+      DependencyContext,
+      Dep,
+      DependencyContextHash,
+      DependencyContextEquals
+    >,
     DependencyContextHashCompare
   >;
 
@@ -247,23 +232,24 @@ struct MethTabEntry {
 }
 
 struct res::Func::MethTabEntryPair :
-      SStringToOneT<MethTabEntry>::value_type {};
+      SStringToOneNodeT<MethTabEntry>::value_type {};
 
 namespace {
 
 using MethTabEntryPair = res::Func::MethTabEntryPair;
 
 inline MethTabEntryPair* mteFromElm(
-  SStringToOneT<MethTabEntry>::value_type& elm) {
+  SStringToOneNodeT<MethTabEntry>::value_type& elm) {
   return static_cast<MethTabEntryPair*>(&elm);
 }
 
 inline const MethTabEntryPair* mteFromElm(
-  const SStringToOneT<MethTabEntry>::value_type& elm) {
+  const SStringToOneNodeT<MethTabEntry>::value_type& elm) {
   return static_cast<const MethTabEntryPair*>(&elm);
 }
 
-inline MethTabEntryPair* mteFromIt(SStringToOneT<MethTabEntry>::iterator it) {
+inline MethTabEntryPair*
+mteFromIt(SStringToOneNodeT<MethTabEntry>::iterator it) {
   return static_cast<MethTabEntryPair*>(&*it);
 }
 
@@ -621,7 +607,7 @@ struct ClassInfo {
    * associated with it.  This map is flattened across the inheritance
    * hierarchy.
    */
-  SStringToOneT<MethTabEntry> methods;
+  SStringToOneNodeT<MethTabEntry> methods;
 
   /*
    * A (case-sensitive) map from class method names to associated
@@ -634,10 +620,10 @@ struct ClassInfo {
    * Invariant: methods on this class with AttrNoOverride or
    * AttrPrivate will not have an entry in this map.
    */
-  SStringToOneFastT<FuncFamily*> methodFamilies;
+  SStringToOneT<FuncFamily*> methodFamilies;
   // Resolutions to single entries do not require a FuncFamily (this
   // saves space).
-  SStringToOneFastT<const MethTabEntryPair*> singleMethodFamilies;
+  SStringToOneT<const MethTabEntryPair*> singleMethodFamilies;
 
   /*
    * Subclasses of this class, including this class itself.
@@ -723,7 +709,7 @@ struct ClassInfo {
    * Note: the effective type we can assume a given static property may hold is
    * not just the value in these maps.
    */
-  hphp_hash_map<SString,PublicSPropEntry> publicStaticProps;
+  SStringToOneT<PublicSPropEntry> publicStaticProps;
 
   struct PreResolveState {
     hphp_fast_map<SString, std::pair<php::Prop, const ClassInfo*>> pbuildNoTrait;
@@ -1931,7 +1917,7 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
+using IfaceSlotMap = hphp_fast_map<const php::Class*, Slot>;
 
 // Inferred class constant type from a 86cinit.
 struct ClsConstInfo {
@@ -1968,17 +1954,17 @@ struct Index::IndexData {
    * it will be present in singleMethodFamilies instead (which saves
    * space by not requiring a FuncFamily).
    */
-  SStringToOneFastT<FuncFamily*>             methodFamilies;
-  SStringToOneFastT<const MethTabEntryPair*> singleMethodFamilies;
+  SStringToOneT<FuncFamily*>             methodFamilies;
+  SStringToOneT<const MethTabEntryPair*> singleMethodFamilies;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
     CompactVector<const php::Class*>
   > classClosureMap;
 
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
     hphp_fast_set<const php::Func*>
   > classExtraMethodMap;
@@ -2379,11 +2365,11 @@ struct ClsPreResolveUpdates {
     }
   };
 
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
     hphp_fast_set<const php::Func*>
   > extraMethods;
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
     CompactVector<const php::Class*>
   > closures;
@@ -3109,9 +3095,9 @@ void add_system_constants_to_index(IndexData& index) {
 }
 
 void add_unit_to_index(IndexData& index, php::Unit& unit) {
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
-    hphp_hash_set<const php::Class*>
+    hphp_fast_set<const php::Class*>
   > closureMap;
 
   for (auto& c : unit.classes) {
@@ -3133,12 +3119,10 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
     }
   }
 
-  if (!closureMap.empty()) {
-    for (auto const& c1 : closureMap) {
-      auto& s = index.classClosureMap[c1.first];
-      for (auto const& c2 : c1.second) {
-        s.push_back(c2);
-      }
+  for (auto const& c1 : closureMap) {
+    auto& s = index.classClosureMap[c1.first];
+    for (auto const& c2 : c1.second) {
+      s.push_back(c2);
     }
   }
 
@@ -3176,13 +3160,10 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
 struct ClassInfoData {
   // Map from name to types that directly use that name (as parent,
   // interface or trait).
-  hphp_hash_map<SString,
-                CompactVector<const php::Class*>,
-                string_data_hash,
-                string_data_isame>     users;
+  ISStringToOneT<CompactVector<const php::Class*>> users;
   // Map from types to number of dependencies, used in
   // conjunction with users field above.
-  hphp_hash_map<const php::Class*, uint32_t> depCounts;
+  hphp_fast_map<const php::Class*, uint32_t> depCounts;
 
   uint32_t cqFront{};
   uint32_t cqBack{};
@@ -3618,7 +3599,7 @@ void flatten_traits(const php::Program* program,
     }
   };
 
-  hphp_hash_set<PreClass::ClassRequirement, EqHash, EqHash> reqs;
+  hphp_fast_set<PreClass::ClassRequirement, EqHash, EqHash> reqs;
 
   for (auto const t : cinfo->usedTraits) {
     for (auto const& req : t->cls->requirements) {
@@ -4288,7 +4269,7 @@ struct ConflictGraph {
     map[i].insert(j);
   }
 
-  hphp_hash_map<const php::Class*,
+  hphp_fast_map<const php::Class*,
                 hphp_fast_set<const php::Class*>> map;
 };
 
@@ -4420,7 +4401,7 @@ void compute_iface_vtables(IndexData& index) {
 
   ConflictGraph cg;
   std::vector<const php::Class*>             ifaces;
-  hphp_hash_map<const php::Class*, int> iface_uses;
+  hphp_fast_map<const php::Class*, int> iface_uses;
 
   // Build up the conflict sets.
   for (auto& cinfo : index.allClassInfos) {
@@ -4457,7 +4438,7 @@ void compute_iface_vtables(IndexData& index) {
   // Assign slots, keeping track of the largest assigned slot and the total
   // number of uses for each slot.
   Slot max_slot = 0;
-  hphp_hash_map<Slot, int> slot_uses;
+  hphp_fast_map<Slot, int> slot_uses;
   for (auto* iface : ifaces) {
     auto const slot = find_min_slot(iface, index.ifaceSlotMap, cg);
     index.ifaceSlotMap[iface] = slot;

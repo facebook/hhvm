@@ -120,13 +120,6 @@ enum class DependencyContextType : uint16_t {
 
 using DependencyContext = CompactTaggedPtr<const void, DependencyContextType>;
 
-struct DependencyContextLess {
-  bool operator()(const DependencyContext& a,
-                  const DependencyContext& b) const {
-    return a.getOpaque() < b.getOpaque();
-  }
-};
-
 struct DependencyContextEquals {
   bool operator()(const DependencyContext& a,
                   const DependencyContext& b) const {
@@ -147,14 +140,11 @@ struct DependencyContextHashCompare : DependencyContextHash {
   size_t hash(const DependencyContext& d) const { return (*this)(d); }
 };
 
-using DependencyContextSet = hphp_hash_set<DependencyContext,
+using DependencyContextSet = hphp_fast_set<DependencyContext,
                                            DependencyContextHash,
                                            DependencyContextEquals>;
-using ContextSet = hphp_hash_set<Context, ContextHash>;
 
 std::string show(Context);
-
-using ConstantMap = hphp_hash_map<SString, TypedValue>;
 
 /*
  * State of properties on a class.  Map from property name to its

@@ -103,9 +103,9 @@ struct ParseUnitState {
 
 //////////////////////////////////////////////////////////////////////
 
-std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
-  std::set<Offset> blockStarts;
-  auto markBlock = [&] (Offset off) { blockStarts.insert(off); };
+std::vector<Offset> findBasicBlocks(const FuncEmitter& fe) {
+  std::vector<Offset> blockStarts;
+  auto markBlock = [&] (Offset off) { blockStarts.emplace_back(off); };
 
   // Each entry point for a DV funclet is the start of a basic
   // block.
@@ -171,8 +171,13 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   }
 
   // Now, each interval in blockStarts delinates a basic block.
-  blockStarts.insert(fe.bcPos());
+  blockStarts.emplace_back(fe.bcPos());
 
+  std::sort(blockStarts.begin(), blockStarts.end());
+  blockStarts.erase(
+    std::unique(blockStarts.begin(), blockStarts.end()),
+    blockStarts.end()
+  );
   return blockStarts;
 }
 
@@ -540,7 +545,7 @@ void build_cfg(ParseUnitState& puState,
     }()
   );
 
-  std::map<Offset,std::pair<BlockId, copy_ptr<php::Block>>> blockMap;
+  hphp_fast_map<Offset,std::pair<BlockId, copy_ptr<php::Block>>> blockMap;
   auto const bc = fe.bc();
 
   auto findBlock = [&] (Offset off, bool catchEntry = false) {

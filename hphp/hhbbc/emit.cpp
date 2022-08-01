@@ -1282,15 +1282,11 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
   // Go thought all constant and see if they still need their matching 86cinit
   // func. In repo mode we are able to optimize away most of them away. And if
   // the const don't need them anymore we should not emit them.
-  std::unordered_set<
-    const StringData*,
-    string_data_hash,
-    string_data_same
-  > const_86cinit_funcs;
+  hphp_fast_set<const StringData*> const_86cinit_funcs;
   for (size_t id = 0; id < unit.constants.size(); ++id) {
     auto& c = unit.constants[id];
     if (type(c->val) != KindOfUninit) {
-      const_86cinit_funcs.insert(Constant::funcNameFromName(c->name));
+      const_86cinit_funcs.emplace(Constant::funcNameFromName(c->name));
     }
   }
 

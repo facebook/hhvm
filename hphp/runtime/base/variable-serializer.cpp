@@ -39,6 +39,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
@@ -2241,7 +2242,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        auto const lookup = obj_cls->getDeclPropSlot(ctx, memberName.get());
+        // TODO(T126821336): Populate with module name. Do we know ctx is nonnull here always?
+        auto const propCtx = MemberLookupContext(ctx);
+        auto const lookup = obj_cls->getDeclPropSlot(propCtx, memberName.get());
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {

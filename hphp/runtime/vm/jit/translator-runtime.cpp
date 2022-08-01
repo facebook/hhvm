@@ -424,9 +424,11 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
                            Class* ctx,
                            bool ignoreLateInit,
                            bool writeMode) {
+  // TODO(T126821336): Populate with module name
+  auto const propCtx = MemberLookupContext(ctx);
   auto const lookup = ignoreLateInit
-    ? cls->getSPropIgnoreLateInit(ctx, name)
-    : cls->getSProp(ctx, name);
+    ? cls->getSPropIgnoreLateInit(propCtx, name)
+    : cls->getSProp(propCtx, name);
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
@@ -487,7 +489,7 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
 const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    auto const callCtx = MethodLookupCallContext(ctxFunc->cls(), ctxFunc);
+    auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
     UNUSED auto func =
       lookupMethodCtx(cls, nullptr, callCtx, CallType::CtorMethod,
                       MethodLookupErrorOptions::RaiseOnNotFound);
@@ -499,7 +501,7 @@ const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Func* ctxFunc) {
   const Func* f;
-  auto const callCtx = MethodLookupCallContext(ctxFunc->cls(), ctxFunc);
+  auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
   auto const res = lookupClsMethod(f, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
 

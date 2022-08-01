@@ -503,7 +503,8 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   CoeffectsAutoGuard _2;
 
   auto const lookup = class_->getSPropIgnoreLateInit(
-    force ? class_ : arGetContextClass(vmfp()),
+    force ? MemberLookupContext(class_) // class is always nonnull here
+    : MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func()),
     prop.get()
   );
   if (!lookup.val) {
@@ -532,9 +533,11 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
   VMRegAnchor _;
   CoeffectsAutoGuard _2;
-
+  // class_ is always nonnull here so we don't need to pass in the module name
+  auto const ctx = force ? MemberLookupContext(class_)
+  : MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
   auto const lookup = class_->getSPropIgnoreLateInit(
-    force ? class_ : arGetContextClass(vmfp()),
+    ctx,
     prop.get()
   );
   if (!lookup.val) {
@@ -1912,9 +1915,11 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   }
 
   auto data = Native::data<ReflectionPropHandle>(this_);
-
+  assertx(cls);
+  // cls is always nonnull, no need to pass in module name
+  auto const ctx = MemberLookupContext(cls);
   // is there a declared instance property?
-  auto lookup = cls->getDeclPropSlot(cls, prop_name.get());
+  auto lookup = cls->getDeclPropSlot(ctx, prop_name.get());
   auto propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->declProperties()[propIdx];
@@ -1927,7 +1932,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   }
 
   // is there a declared static property?
-  lookup = cls->findSProp(cls, prop_name.get());
+  lookup = cls->findSProp(ctx, prop_name.get());
   propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->staticProperties()[propIdx];
@@ -2125,7 +2130,9 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // it was declared in); so if we don't want to store propIdx we have to
       // look it up by name.
       auto cls = prop->cls;
-      auto lookup = cls->getDeclPropSlot(cls, prop->name);
+      // cls is never null here
+      auto const propCtx = MemberLookupContext(cls);
+      auto lookup = cls->getDeclPropSlot(propCtx, prop->name);
       auto propSlot = lookup.slot;
       assertx(propSlot != kInvalidSlot);
       auto propIndex = cls->propSlotToIndex(propSlot);

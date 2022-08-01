@@ -1195,13 +1195,38 @@ TypedValue* Class::getSPropData(Slot index) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
+MemberLookupContext::MemberLookupContext(const Class* cls): MemberLookupContext(cls, (const StringData*) nullptr) {}
+
+MemberLookupContext::MemberLookupContext(const Class* cls,
+                                         const Func* func)
+  : MemberLookupContext(cls, func->moduleName())
+  {}
+
+MemberLookupContext::MemberLookupContext(const Class* cls,
+                                         const StringData* moduleName) {
+  if (cls) {
+    m_data = cls;
+  } else {
+    m_data = moduleName;
+  }
+}
+
+const Class* MemberLookupContext::cls() const {
+  return m_data.left();
+}
+
+const StringData* MemberLookupContext::moduleName() const {
+  if (auto const cls = m_data.left()) return cls->moduleName();
+  return m_data.right();
+}
 
 Class::PropSlotLookup Class::getDeclPropSlot(
-  const Class* ctx,
+  const MemberLookupContext& propCtx,
   const StringData* key
 ) const {
   auto const propSlot = lookupDeclProp(key);
 
+  auto const ctx = propCtx.cls();
   auto accessible = false;
   auto readonly = false;
 
@@ -1217,20 +1242,19 @@ Class::PropSlotLookup Class::getDeclPropSlot(
 
       // If ctx == baseClass, we have the right property and we can stop here.
       if (ctx == baseClass) return PropSlotLookup { propSlot, true, false, readonly };
-
       // The anonymous context cannot access protected or private properties, so
       // we can fail fast here.
       if (ctx == nullptr) return PropSlotLookup { propSlot, false, false, readonly };
 
-      assertx(ctx);
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
         // accessible. We need to keep going because ctx may define a private
         // property with this name.
         accessible = false;
-      } else {
-        if (ctx == (Class*)-1 || ctx->classof(baseClass)) {
-          // The special ctx (Class*)-1 is used by unserialization to
+      }
+      else {
+        if (ctx == (Class*)-8 || ctx->classof(baseClass)) {
+          // The special ctx (Class*)-8 is used by unserialization to
           // mean that protected properties are ok. Otherwise,
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
@@ -1269,7 +1293,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
 
   // If ctx is an ancestor of this, check if ctx has a private property with the
   // same name.
-  if (ctx && ctx != (Class*)-1 && classof(ctx)) {
+  if (ctx && ctx != (Class*)-8 && classof(ctx)) {
     auto const ctxPropSlot = ctx->lookupDeclProp(key);
 
     if (ctxPropSlot != kInvalidSlot &&
@@ -1290,17 +1314,18 @@ Class::PropSlotLookup Class::getDeclPropSlot(
     // class has a parent class, and the current evaluation is a debugger
     // eval with bypassCheck == true, search for the property as a member of
     // the parent class. The debugger access is not subject to visibilty checks.
-    return m_parent->getDeclPropSlot(ctx, key);
+    return m_parent->getDeclPropSlot(propCtx, key);
   }
 
   return PropSlotLookup { propSlot, accessible, false, readonly };
 }
 
 Class::PropSlotLookup Class::findSProp(
-  const Class* ctx,
+  const MemberLookupContext& propCtx,
   const StringData* sPropName
 ) const {
   auto const sPropInd = lookupSProp(sPropName);
+  auto const ctx = propCtx.cls();
 
   // Non-existent property.
   if (sPropInd == kInvalidSlot)
@@ -1344,11 +1369,10 @@ Class::PropSlotLookup Class::findSProp(
 }
 
 Class::PropValLookup Class::getSPropIgnoreLateInit(
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* sPropName
 ) const {
   initialize();
-
   auto const lookup = findSProp(ctx, sPropName);
   if (lookup.slot == kInvalidSlot) {
     return PropValLookup { nullptr, kInvalidSlot, false, false, false };
@@ -1400,7 +1424,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
 }
 
 Class::PropValLookup Class::getSProp(
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* sPropName
 ) const {
   auto const lookup = getSPropIgnoreLateInit(ctx, sPropName);
@@ -1413,7 +1437,8 @@ Class::PropValLookup Class::getSProp(
   return lookup;
 }
 
-bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
+bool Class::IsPropAccessible(const Prop& prop, const MemberLookupContext& propCtx) {
+  auto const ctx = propCtx.cls();
   if (prop.attrs & AttrPublic) return true;
   if (prop.attrs & AttrPrivate) return prop.cls == ctx;
   if (!ctx) return false;

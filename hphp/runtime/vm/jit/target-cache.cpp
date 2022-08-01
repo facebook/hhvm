@@ -213,7 +213,7 @@ namespace {
 
 NEVER_INLINE
 const Func* lookup(const Class* cls, const StringData* name,
-                   const MethodLookupCallContext& callCtx) {
+                   const MemberLookupContext& callCtx) {
   auto const func = lookupMethodCtx(cls, name, callCtx, CallType::ObjMethod,
                                     MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
@@ -271,7 +271,7 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
 EXTERNALLY_VISIBLE const Func*
 handleDynamicCall(const Class* cls, const StringData* name,
                   const Class* ctx, const Func* callerFunc) {
-  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   // Perform lookup without any caching.
   return lookup(cls, name, callCtx);
 }
@@ -283,7 +283,7 @@ handleStaticCall(const Class* cls, const StringData* name,
   assertx(name->isStatic());
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
-  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.
@@ -482,7 +482,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
   // Class::load().
   assertx(cls == ne->getCachedClass());
 
-  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr, // there may be an active
                                               // this, but we can just fall
@@ -518,7 +518,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 
   const Func* f;
-  auto const callCtx = MethodLookupCallContext(ctx, callerFunc);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
                                      callCtx,

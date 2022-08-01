@@ -162,9 +162,10 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func = fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx = MemberLookupContext(func->cls(), func);
 
   DictInit arr(numDeclProps + numSProps);
 
@@ -339,8 +340,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
     );
     return Variant(Variant::NullInit());
   }
-
-  auto const lookup = cls->getDeclPropSlot(cls, property.get());
+  assertx(cls);
+  // Class is nonnull here, so no need to fill in module name in the lookup context
+  auto const lookup = cls->getDeclPropSlot(MemberLookupContext(cls), property.get());
   if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&

@@ -547,7 +547,10 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
                                            int nProp) {
 
   auto const cls = obj->getVMClass();
-  auto const lookup = cls->getDeclPropSlot(ctx, key.get());
+
+  // TODO(T126821336): unserializing variable may require module name
+  auto const propCtx = MemberLookupContext(ctx);
+  auto const lookup = cls->getDeclPropSlot(propCtx, key.get());
   auto const slot = lookup.slot;
   tv_lval t;
 
@@ -623,7 +626,10 @@ void VariableUnserializer::unserializeRemainingProps(
         }
       }
       String k(kdata + subLen, ksize - subLen, CopyString);
-      Class* ctx = (Class*)-1;
+      // We use (Class*)-8 as the sentinel value during deserialization to represent
+      // that we are allowed to look up protected properties. -8 allows 3 extra
+      // bits to be used for other purposes.
+      Class* ctx = (Class*)-8;
       if (kdata[1] != '*') {
         ctx = Class::lookup(
           String(kdata + 1, subLen - 2, CopyString).get());

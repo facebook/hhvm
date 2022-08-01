@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
 
@@ -86,7 +85,7 @@ bool will_symbol_raise_module_boundary_violation(const Sym* symbol,
 }
 
 template bool will_symbol_raise_module_boundary_violation(const Func*, const Func*);
-template bool will_symbol_raise_module_boundary_violation(const Func*, const MethodLookupCallContext*);
+template bool will_symbol_raise_module_boundary_violation(const Func*, const MemberLookupContext*);
 template bool will_symbol_raise_module_boundary_violation(const Class*, const Func*);
 
 } // namespace HPHP

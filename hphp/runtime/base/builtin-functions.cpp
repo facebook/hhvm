@@ -295,7 +295,7 @@ const Func* vm_decode_func_from_name(
   CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
   auto const moduleName =
     ar ? ar->func()->unit()->moduleName() : (const StringData*)nullptr;
-  auto const callCtx = MethodLookupCallContext(ctx, moduleName);
+  auto const callCtx = MemberLookupContext(ctx, moduleName);
   auto f = lookupMethodCtx(cc, funcName.get(), callCtx, lookupType,
                            MethodLookupErrorOptions::NoErrorOnModule);
   if (f && (f->attrs() & AttrStatic)) {

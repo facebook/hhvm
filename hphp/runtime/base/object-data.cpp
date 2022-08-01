@@ -1181,7 +1181,9 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   const Class* ctx,
   const StringData* key
 ) {
-  auto const lookup = m_cls->getDeclPropSlot(ctx, key);
+  // TODO(T126821336): Thread module member context here
+  auto const propCtx = MemberLookupContext(ctx);
+  auto const lookup = m_cls->getDeclPropSlot(propCtx, key);
   auto const propSlot = lookup.slot;
 
   if (LIKELY(propSlot != kInvalidSlot)) {

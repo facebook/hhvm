@@ -932,7 +932,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 bool& readonly,
                                 bool ignoreLateInit) {
   name = lookup_name(key);
-  auto const ctx = arGetContextClass(fp);
+  auto const ctx = MemberLookupContext(arGetContextClass(fp), fp->func());
 
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
@@ -2405,7 +2405,8 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
 
   auto const name = lookup_name(key);
   SCOPE_EXIT { decRefStr(name); };
-  auto const lookup = class_->getSProp(arGetContextClass(vmfp()), name);
+  auto const ctx = MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func()->moduleName());
+  auto const lookup = class_->getSProp(ctx, name);
   if (!lookup.val || !lookup.accessible) {
     raise_error("Invalid static property access: %s::%s",
                 class_->name()->data(),
@@ -3809,7 +3810,7 @@ JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
     }
     return Class::load(fca.context);
   }();
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(func, cls, methName, callCtx,
                         MethodLookupErrorOptions::RaiseOnNotFound);
@@ -3951,7 +3952,7 @@ namespace {
 const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
                                    callCtx,
                                    MethodLookupErrorOptions::NoErrorOnModule);
@@ -4071,7 +4072,7 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
   }();
   auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const res = lookupClsMethod(func, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
@@ -4310,7 +4311,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallCtor(bool retToJit, PC origpc, PC& pc,
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), callCtx,
                             MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(res == LookupResult::MethodFoundWithThis);

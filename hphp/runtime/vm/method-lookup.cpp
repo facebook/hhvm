@@ -31,29 +31,6 @@
 
 namespace HPHP {
 
-MethodLookupCallContext::MethodLookupCallContext(const Class* cls,
-                                                 const Func* func)
-  : MethodLookupCallContext(cls, func->unit()->moduleName())
-  {}
-
-MethodLookupCallContext::MethodLookupCallContext(const Class* cls,
-                                                 const StringData* moduleName) {
-  if (cls) {
-    m_data = cls;
-  } else {
-    m_data = moduleName;
-  }
-}
-
-const Class* MethodLookupCallContext::cls() const {
-  return m_data.left();
-}
-
-const StringData* MethodLookupCallContext::moduleName() const {
-  if (m_data.left()) return m_data.left()->preClass()->unit()->moduleName();
-  return m_data.right();
-}
-
 namespace {
 
 inline bool shouldRaise(MethodLookupErrorOptions raise) {
@@ -111,7 +88,7 @@ const Func* lookupIfaceMethod(const Class* cls, const StringData* methodName) {
 
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
-                            const MethodLookupCallContext& callCtx,
+                            const MemberLookupContext& callCtx,
                             CallType callType,
                             MethodLookupErrorOptions raise) {
   auto const ctx = callCtx.cls();
@@ -232,7 +209,7 @@ const Func* lookupMethodCtx(const Class* cls,
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise) {
   f = lookupMethodCtx(cls, methodName, callCtx, CallType::ObjMethod, raise);
   if (!f) return LookupResult::MethodNotFound;
@@ -245,7 +222,7 @@ LookupResult lookupObjMethod(const Func*& f,
 ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls,
                          const StringData* name,
-                         const MethodLookupCallContext& callCtx,
+                         const MemberLookupContext& callCtx,
                          bool exactClass) {
   auto constexpr notFound = ImmutableObjMethodLookup {
     ImmutableObjMethodLookup::Type::NotFound,
@@ -288,7 +265,7 @@ LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              ObjectData* obj,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise) {
   f = lookupMethodCtx(cls, methodName, callCtx, CallType::ClsMethod, raise);
   if (!f) {
@@ -303,7 +280,7 @@ LookupResult lookupClsMethod(const Func*& f,
 
 const Func* lookupImmutableClsMethod(const Class* cls,
                                      const StringData* name,
-                                     const MethodLookupCallContext& callCtx,
+                                     const MemberLookupContext& callCtx,
                                      bool exactClass) {
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
@@ -320,7 +297,7 @@ const Func* lookupImmutableClsMethod(const Class* cls,
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
-                              const MethodLookupCallContext& callCtx,
+                              const MemberLookupContext& callCtx,
                               MethodLookupErrorOptions raise) {
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
@@ -336,7 +313,7 @@ LookupResult lookupCtorMethod(const Func*& f,
 }
 
 const Func* lookupImmutableCtor(const Class* cls,
-                                const MethodLookupCallContext& callCtx) {
+                                const MemberLookupContext& callCtx) {
   if (!cls) return nullptr;
 
   auto const ctx = callCtx.cls();

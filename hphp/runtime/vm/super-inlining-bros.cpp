@@ -1929,7 +1929,7 @@ bool checkForKnownInstanceMethod(SrcKey sk) {
   }
 
   auto const ctx = vmfp() ? vmfp()->func()->cls() : nullptr;
-  auto const callCtx = MethodLookupCallContext(ctx, vmfp()->func());
+  auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const spec = box->type.clsSpec();
   auto const hint = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
   auto const hinted = !hint->empty()

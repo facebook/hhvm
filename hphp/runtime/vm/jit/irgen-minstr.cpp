@@ -149,6 +149,7 @@ getPropertyOffset(IRGS& env,
   auto const name = keyType.strVal();
 
   auto const ctx = curClass(env);
+  auto const moduleName = curUnit(env)->moduleName();
 
   // We need to check that baseClass cannot change between requests.
   if (!(baseClass->preClass()->attrs() & AttrUnique)) {
@@ -166,9 +167,10 @@ getPropertyOffset(IRGS& env,
       }
     }
   }
+  auto const propCtx = MemberLookupContext(ctx, moduleName);
 
   // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropSlot(ctx, name);
+  auto const lookup = baseClass->getDeclPropSlot(propCtx, name);
   auto const slot = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
@@ -221,7 +223,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   // If the property name is known, try to look it up and get its RAT.
   if (key->hasConstVal(TStr)) {
     auto const keyStr = key->strVal();
-    auto const ctx = curClass(env);
+    auto const ctx = MemberLookupContext(curClass(env), curUnit(env)->moduleName());
     auto const lookup = cls->getDeclPropSlot(ctx, keyStr);
     if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;

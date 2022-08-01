@@ -189,7 +189,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (!ssaCls->hasConstVal()) return false;
     auto const cls = ssaCls->clsVal();
 
-    auto const lookup = cls->findSProp(curClass(env), propName);
+    auto const lookup = cls->findSProp(MemberLookupContext(curClass(env), curUnit(env)->moduleName()), propName);
 
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;

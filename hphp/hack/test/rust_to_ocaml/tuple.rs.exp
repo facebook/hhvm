@@ -1,1 +1,3 @@
-type tuple = a * b
+type tuple_a = a * b
+
+type tuple_b = a * (b * c)

@@ -115,13 +115,14 @@ pub struct TypeTuple {
 
 impl std::fmt::Display for TypeTuple {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(")?;
         let mut elems = self.elems.iter();
         let elem = elems.next().expect("empty TypeTuple");
         write!(f, "{elem}")?;
         for elem in elems {
             write!(f, " * {elem}")?;
         }
-        Ok(())
+        write!(f, ")")
     }
 }
 

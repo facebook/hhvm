@@ -3,4 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-type Tuple = (A, B);
+type TupleA = (A, B);
+
+type TupleB = (A, (B, C));

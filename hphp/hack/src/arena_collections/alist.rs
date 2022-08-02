@@ -958,7 +958,9 @@ impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for SortedAssocList<'_, K, V
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
         let len = self.len();
-        let mut iter = self.iter();
+        let mut iter = self
+            .iter()
+            .map(|(k, v)| (k.to_ocamlrep(alloc), v.to_ocamlrep(alloc)));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
         value
     }

@@ -13,7 +13,7 @@ enum Enum2 : string {
   VAL3 = 'VAL3';
 }
 
-enum Enum3 : mixed {
+enum Enum3 : arraykey {
   VAL1 = 1;
   VAL2 = 'VAL2';
   VAL3 = 3;

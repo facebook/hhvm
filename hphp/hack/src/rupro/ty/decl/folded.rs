@@ -205,6 +205,7 @@ pub struct FoldedClass<R: Reason> {
     pub sealed_whitelist: Option<TypeNameIndexSet>,
     pub deferred_init_members: PropNameIndexSet,
     pub decl_errors: Box<[DeclError<R::Pos>]>,
+    pub docs_url: Option<String>,
 }
 
 impl<R: Reason> FoldedClass<R> {

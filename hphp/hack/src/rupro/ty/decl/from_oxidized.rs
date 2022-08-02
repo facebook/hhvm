@@ -471,6 +471,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::TypedefDecl<'_>> for shallow::Type
             is_ctx: x.is_ctx,
             attributes: slice(x.attributes),
             internal: x.internal,
+            docs_url: x.docs_url.map(Into::into),
         }
     }
 }
@@ -641,7 +642,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             xhp_attr_deps,
             enum_type,
             decl_errors,
-            docs_url: _,
+            docs_url,
         } = cls;
         Self {
             name: (*name).into(),
@@ -687,6 +688,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
                 .map(Into::into)
                 .collect(),
             decl_errors: slice(*decl_errors),
+            docs_url: docs_url.map(Into::into),
         }
     }
 }

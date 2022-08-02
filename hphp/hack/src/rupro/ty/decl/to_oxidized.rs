@@ -449,6 +449,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             xhp_attr_deps,
             enum_type,
             decl_errors,
+            docs_url,
         } = self;
         obr::decl_defs::DeclClassType {
             name: name.to_oxidized(arena),
@@ -487,7 +488,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             xhp_attr_deps: xhp_attr_deps.to_oxidized(arena),
             enum_type: enum_type.as_ref().map(|et| et.to_oxidized(arena)),
             decl_errors: decl_errors.to_oxidized(arena),
-            docs_url: None,
+            docs_url: docs_url.as_deref().to_oxidized(arena),
         }
     }
 }
@@ -758,6 +759,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
             is_ctx,
             attributes,
             internal,
+            docs_url,
         } = self;
         arena.alloc(obr::shallow_decl_defs::TypedefDecl {
             module: module.as_ref().map(|m| {
@@ -772,7 +774,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
             is_ctx: *is_ctx,
             attributes: attributes.to_oxidized(arena),
             internal: *internal,
-            docs_url: None,
+            docs_url: docs_url.as_deref().to_oxidized(arena),
         })
     }
 }

@@ -39,6 +39,14 @@ impl<'a, T: ToOxidized<'a>> ToOxidized<'a> for [T] {
     }
 }
 
+impl<'a> ToOxidized<'a> for &str {
+    type Output = &'a str;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        arena.alloc_str(self)
+    }
+}
+
 impl<'a, T1: ToOxidized<'a>, T2: ToOxidized<'a>> ToOxidized<'a> for (T1, T2) {
     type Output = &'a (T1::Output, T2::Output);
 

@@ -180,6 +180,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             sealed_whitelist,
             deferred_init_members,
             decl_errors,
+            docs_url,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -276,6 +277,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !decl_errors.is_empty() {
             s.field("decl_errors", decl_errors);
+        }
+        if let Some(docs_url) = docs_url {
+            s.field("docs_url", docs_url);
         }
 
         s.finish()

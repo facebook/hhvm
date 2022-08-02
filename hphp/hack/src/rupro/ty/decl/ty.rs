@@ -757,6 +757,7 @@ pub struct TypedefType<R: Reason> {
     pub is_ctx: bool,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub internal: bool,
+    pub docs_url: Option<String>,
 }
 
 walkable!(TypedefType<R> => [tparams, constraint, ty]);

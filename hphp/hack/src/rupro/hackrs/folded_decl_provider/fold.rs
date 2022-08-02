@@ -868,6 +868,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             sealed_whitelist,
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),
+            docs_url: self.child.docs_url.clone(),
         }))
     }
 }

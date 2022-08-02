@@ -4045,9 +4045,7 @@ void Class::setEnumType() {
     m_enumBaseTy = m_preClass->enumBaseTy().underlyingDataTypeResolved();
 
     // Make sure we've loaded a valid underlying type.
-    if (m_enumBaseTy &&
-        !isIntType(*m_enumBaseTy) &&
-        !isStringType(*m_enumBaseTy)) {
+    if (!m_preClass->enumBaseTy().validForEnumBase()) {
       raise_error("Invalid base type for enum %s",
                   m_preClass->name()->data());
     }
@@ -4923,10 +4921,7 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       }
       // enum
       if (preClass->attrs() & AttrEnum) {
-        auto const enumBaseTy =
-          preClass->enumBaseTy().underlyingDataTypeResolved();
-        if (!enumBaseTy ||
-            (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
+        if (!preClass->enumBaseTy().validForEnumBase()) {
           return nullptr;
         }
       }

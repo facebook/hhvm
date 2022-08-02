@@ -232,6 +232,11 @@ struct TypeConstraint {
     return !isCallable() && !isNothing() && !isNoReturn();
   }
 
+  bool validForEnumBase() const {
+    auto const resolved = underlyingDataTypeResolved();
+    return !resolved || isIntType(*resolved) || isStringType(*resolved);
+  }
+
   /*
    * Format this TypeConstraint for display to the user. Context is used to
    * optionally resolve This to its class name. Extra will cause the resolved

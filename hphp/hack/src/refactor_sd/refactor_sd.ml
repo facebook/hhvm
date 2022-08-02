@@ -21,13 +21,13 @@ let add_ns name =
     "\\" ^ name
 
 let do_
-    (function_name : string)
+    (upcasted_id : string)
     (options : options)
     (ctx : Provider_context.t)
     (tast : T.program) =
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
-  let function_name = add_ns function_name in
-  match options.mode with
+  let upcasted_id = add_ns upcasted_id in
+  match options.analysis_mode with
   | FlagTargets -> ()
   | DumpConstraints ->
     let print_function_constraints
@@ -39,8 +39,7 @@ let do_
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
-    Walker.program function_name ctx tast
-    |> SMap.iter print_function_constraints
+    Walker.program upcasted_id ctx tast |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : refactor_sd_result list)
         : unit =
@@ -51,7 +50,7 @@ let do_
     let process_callable id constraints =
       Solver.simplify empty_typing_env constraints |> print_callable_summary id
     in
-    Walker.program function_name ctx tast |> SMap.iter process_callable
+    Walker.program upcasted_id ctx tast |> SMap.iter process_callable
   | SolveConstraints -> ()
 
 let callable = Walker.callable

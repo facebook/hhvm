@@ -74,7 +74,7 @@ type mode =
   | Hover of (int * int) option
   | Apply_quickfixes
   | Shape_analysis of string
-  | Refactor_sound_dynamic of string * string
+  | Refactor_sound_dynamic of string * string * string
 
 type options = {
   files: string list;
@@ -331,6 +331,7 @@ let parse_options () =
   let enable_global_write_check = ref [] in
   let enable_global_write_check_functions = ref SSet.empty in
   let refactor_mode = ref "" in
+  let refactor_analysis_mode = ref "" in
   let set_enable_global_write_check_functions s =
     let json_obj = Hh_json.json_of_file s in
     let add_function f =
@@ -372,13 +373,15 @@ let parse_options () =
       ( "--refactor-sound-dynamic",
         Arg.Tuple
           [
-            Arg.Symbol
-              ( ["flag"; "dump"; "simplify"; "solve"],
-                (fun x -> refactor_mode := x) );
+            Arg.String (fun mode -> refactor_analysis_mode := mode);
+            Arg.String (fun mode -> refactor_mode := mode);
             Arg.String
               (fun x ->
                 batch_mode := true;
-                set_mode (Refactor_sound_dynamic (!refactor_mode, x)) ());
+                set_mode
+                  (Refactor_sound_dynamic
+                     (!refactor_analysis_mode, !refactor_mode, x))
+                  ());
           ],
         " Run the flow analysis" );
       ( "--deregister-attributes",
@@ -1820,14 +1823,19 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
-  | Refactor_sound_dynamic (mode, function_name) ->
+  | Refactor_sound_dynamic (analysis_mode, refactor_mode, element_name) ->
     let opts =
-      match Refactor_sd_options.parse mode with
-      | Some options -> options
-      | None -> die "invalid refactor sd analysis mode"
+      match
+        ( Refactor_sd_options.parse_analysis_mode analysis_mode,
+          Refactor_sd_options.parse_refactor_mode refactor_mode )
+      with
+      | (Some analysis_mode, Some refactor_mode) ->
+        Refactor_sd_options.mk ~analysis_mode ~refactor_mode
+      | (None, _) -> die "invalid refactor_sd analysis mode"
+      | (_, None) -> die "invalid refactor_sd refactor mode"
     in
     handle_constraint_mode
-      ~do_:(Refactor_sd.do_ function_name)
+      ~do_:(Refactor_sd.do_ element_name)
       "Sound Dynamic"
       opts
       ctx

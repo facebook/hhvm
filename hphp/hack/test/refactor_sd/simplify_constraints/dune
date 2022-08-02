@@ -18,6 +18,7 @@
    --enable-sound-dynamic-type
    --refactor-sound-dynamic
    simplify
+   Function
    f
    --error-format
    raw)))

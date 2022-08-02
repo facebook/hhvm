@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <vector>

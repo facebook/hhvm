@@ -435,10 +435,12 @@ let comparing_booleans p_expr p_var name value =
   let path = Pos.filename (Pos.to_absolute p_expr) in
   let lines = Errors.read_lines path in
   let src = String.concat ~sep:"\n" lines in
+  let (start_offset, end_offset) = Pos.info_raw p_expr in
+  let width = end_offset - start_offset in
   let original = Pos.get_text_from_pos ~content:src p_expr in
   let replacement = Pos.get_text_from_pos ~content:src p_var in
   Lints.add
-    ~autofix:(original, replacement)
+    ~autofix:(Some (original, replacement, start_offset, width))
     Codes.comparing_booleans
     Lint_advice
     p_expr

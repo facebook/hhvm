@@ -10,7 +10,9 @@
       "code":5643,
       "bypass_changed_lines":false,
       "original":"$x == true",
-      "replacement":"$x"
+      "replacement":"$x",
+      "start_offset":66,
+      "width":10
     },
     {
       "descr":"Consider changing this statement to ($x) instead",
@@ -22,7 +24,23 @@
       "code":5643,
       "bypass_changed_lines":false,
       "original":"true == $x",
-      "replacement":"$x"
+      "replacement":"$x",
+      "start_offset":186,
+      "width":10
+    },
+    {
+      "descr":"The boolean expression is pointless",
+      "severity":"warning",
+      "path":"run_json_on_file.php",
+      "line":17,
+      "start":7,
+      "end":16,
+      "code":5644,
+      "bypass_changed_lines":false,
+      "original":"",
+      "replacement":"",
+      "start_offset":null,
+      "width":null
     }
   ],
   "version":" Wed Dec 31 16:00:00 1969"

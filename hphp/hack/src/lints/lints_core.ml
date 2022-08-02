@@ -31,7 +31,7 @@ type 'pos t = {
    * lines they are raised on overlap with lines changed in a diff. This
    * flag bypasses that behavior *)
   bypass_changed_lines: bool;
-  autofix: string * string;
+  autofix: (string * string * int * int) option;
 }
 [@@deriving show]
 
@@ -42,12 +42,8 @@ let get_code { code; _ } = code
 let get_pos { pos; _ } = pos
 
 let add
-    ?(bypass_changed_lines = false)
-    ?(autofix = ("", ""))
-    code
-    severity
-    pos
-    message =
+    ?(bypass_changed_lines = false) ?(autofix = None) code severity pos message
+    =
   match !lint_list with
   | Some lst ->
     let lint =
@@ -86,16 +82,21 @@ let to_highlighted_string (lint : string Pos.pos t) =
   User_error.make_absolute lint.code [(lint.pos, lint.message)]
   |> Highlighted_error_formatter.to_string
 
-let to_json
-    {
-      pos;
-      code;
-      severity;
-      message;
-      bypass_changed_lines;
-      autofix = (original, replacement);
-    } =
+let to_json { pos; code; severity; message; bypass_changed_lines; autofix } =
   let (line, scol, ecol) = Pos.info_pos pos in
+  let (origin, repl, start, w) =
+    match autofix with
+    | Some (original, replacement, start_offset, width) ->
+      ( Hh_json.JSON_String original,
+        Hh_json.JSON_String replacement,
+        Hh_json.int_ start_offset,
+        Hh_json.int_ width )
+    | None ->
+      ( Hh_json.JSON_String "",
+        Hh_json.JSON_String "",
+        Hh_json.JSON_Null,
+        Hh_json.JSON_Null )
+  in
   Hh_json.JSON_Object
     [
       ("descr", Hh_json.JSON_String message);
@@ -106,8 +107,10 @@ let to_json
       ("end", Hh_json.int_ ecol);
       ("code", Hh_json.int_ code);
       ("bypass_changed_lines", Hh_json.JSON_Bool bypass_changed_lines);
-      ("original", Hh_json.JSON_String original);
-      ("replacement", Hh_json.JSON_String replacement);
+      ("original", origin);
+      ("replacement", repl);
+      ("start_offset", start);
+      ("width", w);
     ]
 
 let do_ f =

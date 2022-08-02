@@ -6,3 +6,9 @@ function run_json_on_file(bool $x): void {
     return;
   } //should provide quickfixes
 }
+
+function run_json_on_file_example_2(bool $x): void {
+  if (true == $x) {
+    return;
+  } //should provide quickfixes
+}

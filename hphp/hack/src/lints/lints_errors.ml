@@ -425,14 +425,24 @@ let switch_nonexhaustive p =
 let calling_pointless_boolean p txt =
   Lints.add Codes.pointless_booleans_expression Lint_warning p txt
 
-let comparing_booleans p name value =
+let comparing_booleans p_expr p_var name value =
   let msg =
     if value then
       "Consider changing this statement to " ^ "(" ^ name ^ ") instead"
     else
       "Consider changing this statement to " ^ "(!" ^ name ^ ") instead"
   in
-  Lints.add Codes.comparing_booleans Lint_advice p msg
+  let path = Pos.filename (Pos.to_absolute p_expr) in
+  let lines = Errors.read_lines path in
+  let src = String.concat ~sep:"\n" lines in
+  let original = Pos.get_text_from_pos ~content:src p_expr in
+  let replacement = Pos.get_text_from_pos ~content:src p_var in
+  Lints.add
+    ~autofix:(original, replacement)
+    Codes.comparing_booleans
+    Lint_advice
+    p_expr
+    msg
 
 let unconditional_recursion p =
   Lints.add

@@ -39,11 +39,15 @@ let handler =
         | Ast_defs.Eqeqeq ->
           (match checking_the_expression exp1 exp2 with
           | Some (name, boolean_var) ->
-            Lints_errors.comparing_booleans pos name boolean_var
+            (match exp1 with
+            | (_, pos_exp1, _) ->
+              Lints_errors.comparing_booleans pos pos_exp1 name boolean_var)
           | None ->
             (match checking_the_expression exp2 exp1 with
             | Some (name, boolean_var) ->
-              Lints_errors.comparing_booleans pos name boolean_var
+              (match exp2 with
+              | (_, pos_exp2, _) ->
+                Lints_errors.comparing_booleans pos pos_exp2 name boolean_var)
             | None -> ()))
         | _ -> ())
       | _ -> ()

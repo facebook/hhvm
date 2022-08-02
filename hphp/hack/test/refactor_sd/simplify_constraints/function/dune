@@ -1,23 +1,23 @@
 (rule
  (alias refactor_sd)
  (deps
-  %{exe:../../../src/hh_single_type_check.exe}
+  %{exe:../../../../src/hh_single_type_check.exe}
   %{project_root}/test/verify.py
   %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/refactor_sd/dump_constraints/*.php)
-  (glob_files %{project_root}/test/refactor_sd/dump_constraints/*.php.exp))
+  (glob_files %{project_root}/test/refactor_sd/simplify_constraints/function/*.php)
+  (glob_files %{project_root}/test/refactor_sd/simplify_constraints/function/*.php.exp))
  (action
   (run
    %{project_root}/test/verify.py
-   %{project_root}/test/refactor_sd/dump_constraints
+   %{project_root}/test/refactor_sd/simplify_constraints/function
    --program
-   %{exe:../../../src/hh_single_type_check.exe}
+   %{exe:../../../../src/hh_single_type_check.exe}
    --in-extension
    .php
    --flags
    --enable-sound-dynamic-type
    --refactor-sound-dynamic
-   dump
+   simplify
    Function
    f
    --error-format

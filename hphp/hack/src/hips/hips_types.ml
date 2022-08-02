@@ -8,10 +8,27 @@
 
 module A = Ast_defs
 
-type 'entity inter_constraint =
-  | Arg of A.id_ * int * 'entity
-  | Ret of A.id_ * 'entity
+type param_entity = string * int
 
-type ('intra_constraint, 'entity) constraint_ =
-  | Intra of 'intra_constraint
-  | Inter of 'entity inter_constraint
+type entity = Param of param_entity
+
+module type Intra = sig
+  type intra_entity
+
+  type intra_constraint
+
+  type inter_constraint = Arg of param_entity * intra_entity
+
+  type any_constraint =
+    | Intra of intra_constraint
+    | Inter of inter_constraint
+
+  val is_same_entity : entity -> intra_entity -> bool
+
+  val max_iteration : int
+
+  val equiv : any_constraint list -> any_constraint list -> bool
+
+  val substitute_inter_intra :
+    inter_constraint -> intra_constraint -> intra_constraint
+end

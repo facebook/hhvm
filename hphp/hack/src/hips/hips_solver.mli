@@ -8,23 +8,35 @@
 
 open Hips_types
 
-(*
- * One step substitution
- * For example:
- * substitute
- * (Arg f 0 p)
- * {f: [Intra Has_static_key(f0, 'a', int), Inter (Arg g 0 f1)]}
- * =
- * [Intra Has_static_key(p, 'a', int), Inter (Arg g 0 f1)]
- *)
-val substitute :
-  'entity inter_constraint ->
-  ('intra_constraint, 'entity) constraint_ list SMap.t ->
-  ('intra_constraint, 'entity) constraint_ list
+(** Generates an inter-procedural constraint solver from domain-specific
+    intra-procedural data. *)
+module Inter (I : Intra) : sig
+  (** Inter-procedural constraint type *)
+  type inter_constraint = I.inter_constraint
 
-(*
- * Full analysis
- * Removes interprocedural constraints using multiple one step substitutions
- *)
-val analyse :
-  ('intra_constraint, 'entity) constraint_ list SMap.t -> 'intra_constraint list
+  (** Union of inter- and intra-procedural constraint types *)
+  type any_constraint = I.any_constraint
+
+  (** Output type of analyse: applying substitution repeatedly either
+      converges, or diverges *)
+  type solution =
+    | Divergent of any_constraint list SMap.t
+    | Convergent of any_constraint list SMap.t
+
+  (** Verifies whether two dictionaries with constraint lists as values are
+      equivalent *)
+  val equiv : any_constraint list SMap.t -> any_constraint list SMap.t -> bool
+
+  (** Substitutes the inter-procedural constraints of the second argument with
+      respect to constraints in the first argument *)
+  val substitute :
+    base_constraint_map:any_constraint list SMap.t ->
+    any_constraint list SMap.t ->
+    any_constraint list SMap.t
+
+  (** The call "analyse base" repeatedly applies constraint substitution with
+      respect to "base", beginning with "base" itself. It either finds a fixpoint,
+      in which case it outputs "Convergent fp", or terminates early, in which case
+      it outputs "Divergent p". *)
+  val analyse : any_constraint list SMap.t -> solution
+end

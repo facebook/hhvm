@@ -166,7 +166,7 @@ function ob_get_level()[read_globals]: int;
  * @return array
  */
 <<__Native>>
-function ob_get_status(bool $full_status = false)[read_globals]: varray_or_darray;
+function ob_get_status(bool $full_status = false)[read_globals]: varray_or_darray<mixed>;
 
 /** ob_implicit_flush() will turn implicit flushing on or off. Implicit
  * flushing will result in a flush operation after every output call, so that
@@ -182,7 +182,7 @@ function ob_implicit_flush(bool $flag = true): void;
  * with ob_start(), ob_list_handlers() will return "default output handler".
  */
 <<__Native>>
-function ob_list_handlers()[read_globals]: varray;
+function ob_list_handlers()[read_globals]: varray<string>;
 
 /** Adds an entry to a log file that's written when server crashes. This is
  * useful for diagnose why server crashed. For example, logged-on user's ID.
@@ -213,14 +213,17 @@ function hphp_get_stats(string $name)[read_globals]: int;
  * @return array - Array of thread statuses.
  */
 <<__Native>>
-function hphp_get_status()[read_globals]: darray;
+function hphp_get_status()[read_globals]: darray<string, mixed>;
 
 /** Returns I/O status of current thread. EnableNetworkIOStatus has to be
  * turned on.
  * @return array - Array of all I/O so far for current thread.
  */
 <<__Native>>
-function hphp_get_iostatus()[read_globals]: darray;
+function hphp_get_iostatus()[read_globals]: darray<string, shape(
+  'ct' => int,
+  'wt' => int,
+)>;
 
 <<__Native, __Deprecated("this will be removed")>>
 function hphp_set_iostatus_address(string $name): void;

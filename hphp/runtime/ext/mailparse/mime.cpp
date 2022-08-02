@@ -536,7 +536,7 @@ const StaticString
   s_mime_version("mime-version"),
   s_content_transfer_encoding("content-transfer-encoding");
 
-Variant MimePart::getPartData() {
+Array MimePart::getPartData() {
   Array ret = Array::CreateDict();
 
   ret.set(s_headers, m_headers);

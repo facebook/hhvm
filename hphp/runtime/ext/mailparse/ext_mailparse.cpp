@@ -92,7 +92,7 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_part,
 }
 
 Array HHVM_FUNCTION(mailparse_msg_get_part_data, const Resource& mimemail) {
-  return cast<MimePart>(mimemail)->getPartData().toArray();
+  return cast<MimePart>(mimemail)->getPartData();
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_get_part,

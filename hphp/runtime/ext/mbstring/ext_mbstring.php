@@ -7,7 +7,7 @@
  *
  */
 <<__Native>>
-function mb_list_encodings()[]: varray;
+function mb_list_encodings()[]: varray<string>;
 
 /**
  * @param string $name
@@ -140,7 +140,7 @@ function mb_convert_kana(string $str,
 function mb_convert_variables(string $to_encoding,
                               mixed $from_encoding,
                               inout mixed $vars,
-                              ...$argv)[read_globals]: mixed;
+                              mixed... $argv)[read_globals]: mixed;
 
 /**
  * Decodes encoded-word string str in MIME header.

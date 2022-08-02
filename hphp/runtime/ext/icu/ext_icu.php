@@ -21,4 +21,4 @@ function icu_transliterate(string $str,
                            bool $remove_accents): string;
 
 <<__Native>>
-function icu_tokenize(string $text): varray;
+function icu_tokenize(string $text): varray<string>;

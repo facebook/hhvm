@@ -108,9 +108,17 @@ function iconv_mime_decode(string $encoded_header,
  *   an error occurs during the encoding.
  */
 <<__Native>>
-function iconv_mime_encode(string $field_name,
-                           string $field_value,
-                           ?darray $preferences = null): mixed;
+function iconv_mime_encode(
+  string $field_name,
+  string $field_value,
+  ?shape(
+    ?'scheme' => string,
+    ?'input-charset' => string,
+    ?'output-charset' => string,
+    ?'line-length' => int,
+    ?'line-break-chars' => string,
+  ) $preferences = null,
+): mixed;
 
 /**
  * Set current setting for character encoding conversion

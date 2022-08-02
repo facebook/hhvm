@@ -233,8 +233,10 @@ struct TypeConstraint {
   }
 
   bool validForEnumBase() const {
-    auto const resolved = underlyingDataTypeResolved();
-    return !resolved || isIntType(*resolved) || isStringType(*resolved);
+    auto const resolved = resolvedWithAutoload();
+    return resolved.isInt() || resolved.isString() ||
+           resolved.isArrayKey() || resolved.isClassname() ||
+           resolved.isNothing();
   }
 
   /*

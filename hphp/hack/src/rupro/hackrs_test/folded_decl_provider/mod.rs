@@ -106,7 +106,7 @@ fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
     fs::remove_file(ctx.root.path().join("a.php").as_path())?;
 
     // try getting a folded decl for 'D'
-    use hackrs::folded_decl_provider::Error;
+    use ::folded_decl_provider::Error;
     match ctx.folded_decl_provider.get_class(d.into(), d) {
         Err(
             ref err @ Error::Parent {

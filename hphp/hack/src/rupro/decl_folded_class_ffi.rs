@@ -3,7 +3,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_parser::DeclParser;
-use hackrs::folded_decl_provider::FoldedDeclProvider;
+use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::serde_store::Compression;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;

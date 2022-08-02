@@ -14,7 +14,7 @@ decl_parser = { path = "../../../decl_parser/cargo/decl_parser" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
-hackrs = { path = "../../../hackrs/cargo/hackrs" }
+folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_test = { path = "../../../../facebook/utils/cargo/hh24_test" }
 itertools = "0.10.3"

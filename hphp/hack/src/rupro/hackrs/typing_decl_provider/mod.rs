@@ -36,7 +36,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("{0}")]
-    Folded(#[from] crate::folded_decl_provider::Error),
+    Folded(#[from] folded_decl_provider::Error),
 }
 
 #[derive(Debug)]

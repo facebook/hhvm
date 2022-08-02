@@ -13,7 +13,7 @@ test = false
 decl_parser = { path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { path = "../../file_provider/cargo/file_provider" }
 find_utils = { path = "../../../utils/find_utils" }
-hackrs = { path = "../../hackrs/cargo/hackrs" }
+folded_decl_provider = { path = "../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
 indicatif = { version = "0.16", features = ["with_rayon"] }

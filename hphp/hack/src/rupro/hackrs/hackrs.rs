@@ -9,7 +9,6 @@ pub mod todo;
 
 pub mod ast_provider;
 pub mod errors;
-pub mod folded_decl_provider;
 pub mod inference_env;
 pub mod naming;
 pub mod parsing_error;

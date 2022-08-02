@@ -8,9 +8,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_parser::DeclParser;
+use folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::ast_provider::AstProvider;
 use hackrs::errors::HackError;
-use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::tast;
 use hackrs::tast::TastExpander;
 use hackrs::typing_check_utils::TypingCheckUtils;

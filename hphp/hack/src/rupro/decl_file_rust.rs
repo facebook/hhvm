@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_parser::DeclParser;
-use hackrs::folded_decl_provider::FoldedDeclProvider;
+use folded_decl_provider::FoldedDeclProvider;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hackrs::typing_decl_provider::TypingDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;

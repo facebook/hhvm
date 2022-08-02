@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![cfg(test)]
 
+use ::folded_decl_provider::FoldedDeclProvider;
+use ::folded_decl_provider::LazyFoldedDeclProvider;
 use anyhow::Result;
 use datastore::NonEvictingStore;
 use decl_parser::DeclParser;
 use fbinit::FacebookInit;
-use hackrs::folded_decl_provider::FoldedDeclProvider;
-use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs_test_utils::registrar::DependencyGraph;
 use hackrs_test_utils::serde_store::StoreOpts::Unserialized;
 use hackrs_test_utils::store::make_shallow_decl_store;

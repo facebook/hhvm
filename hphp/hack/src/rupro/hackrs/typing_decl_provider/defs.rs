@@ -6,9 +6,9 @@
 use super::Class;
 use super::Error;
 use super::Result;
-use crate::folded_decl_provider::FoldedDeclProvider;
-use crate::folded_decl_provider::Substitution;
 use depgraph_api::DeclName;
+use folded_decl_provider::FoldedDeclProvider;
+use folded_decl_provider::Substitution;
 use once_cell::unsync::OnceCell;
 use oxidized::ast_defs::ConstraintKind;
 use pos::MethodName;

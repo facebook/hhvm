@@ -6,6 +6,7 @@
 
 use ::folded_decl_provider::FoldedDeclProvider;
 use ::folded_decl_provider::LazyFoldedDeclProvider;
+use ::pos::RelativePathCtx;
 use anyhow::Result;
 use datastore::NonEvictingStore;
 use decl_parser::DeclParser;
@@ -15,7 +16,6 @@ use hackrs_test_utils::serde_store::StoreOpts::Unserialized;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hh24_test::TestRepo;
 use naming_provider::SqliteNamingTable;
-use pos::RelativePathCtx;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -25,6 +25,7 @@ use ty::reason::BReason;
 
 mod dependency_registrar;
 mod folded_decl_provider;
+mod pos;
 
 struct TestContext {
     root: TestRepo,

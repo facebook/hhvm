@@ -7,11 +7,11 @@
 
 use crate::FacebookInit;
 use crate::TestContext;
+use ::pos::Prefix;
+use ::pos::RelativePath;
+use ::pos::TypeName;
 use anyhow::Result;
 use maplit::btreemap;
-use pos::Prefix;
-use pos::RelativePath;
-use pos::TypeName;
 use std::fs;
 use ty::decl::shallow;
 use ty::decl_error::DeclError;

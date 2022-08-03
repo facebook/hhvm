@@ -8,12 +8,12 @@
 
 use crate::FacebookInit;
 use crate::TestContext;
+use ::pos::TypeName;
 use anyhow::Result;
 use depgraph_api::DeclName;
 use depgraph_api::DependencyName;
 use maplit::btreemap;
 use maplit::btreeset;
-use pos::TypeName;
 use std::collections::BTreeSet;
 
 #[fbinit::test]

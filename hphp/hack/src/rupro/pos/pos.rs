@@ -336,8 +336,52 @@ impl ToOcamlRep for BPos {
 }
 
 impl FromOcamlRep for BPos {
-    fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        todo!()
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_block(value)?;
+        match block.tag() {
+            0u8 /* Pos_small */ => {
+                ocamlrep::from::expect_block_size(block, 3usize)?;
+                let path = ocamlrep::from::expect_tuple(block[0], 2)?;
+                let (prefix, suffix) = (
+                    Prefix::from_ocamlrep(path[0])?,
+                    Bytes::from_ocamlrep(path[1])?
+                );
+                let span = Box::new((
+                    FilePosSmall::from_ocamlrep(block[1])?,
+                    FilePosSmall::from_ocamlrep(block[2])?
+                ));
+
+                Ok(BPos(PosImpl::Small{prefix, suffix, span}))
+            },
+            1u8 /* Pos_large */ => {
+                ocamlrep::from::expect_block_size(block, 3usize)?;
+                let path = ocamlrep::from::expect_tuple(block[0], 2)?;
+                let (prefix, suffix) = (
+                    Prefix::from_ocamlrep(path[0])?,
+                    Bytes::from_ocamlrep(path[1])?
+                );
+                let span = Box::new((
+                    FilePosLarge::from_ocamlrep(block[1])?,
+                    FilePosLarge::from_ocamlrep(block[2])?
+                ));
+
+                Ok(BPos(PosImpl::Large{prefix, suffix, span}))
+            },
+            2u8 /* Pos_tiny */ => {
+                ocamlrep::from::expect_block_size(block, 2usize)?;
+                let path = ocamlrep::from::expect_tuple(block[0], 2)?;
+                let (prefix, suffix) = (
+                    Prefix::from_ocamlrep(path[0])?,
+                    Bytes::from_ocamlrep(path[1])?
+                );
+                let span = PosSpanTiny::from_ocamlrep(block[1])?;
+
+                return Ok(BPos(PosImpl::Tiny{prefix, suffix, span}))
+            },
+            tag /* Pos_from_reason */ => {
+                Err(ocamlrep::FromError::BlockTagOutOfRange{max:2u8, actual:tag})
+            }
+        }
     }
 }
 

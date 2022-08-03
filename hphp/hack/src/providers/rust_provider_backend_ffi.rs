@@ -15,15 +15,15 @@ use ocamlrep_ocamlpool::Bump;
 use oxidized::file_info;
 use oxidized::naming_types;
 use oxidized::parser_options::ParserOptions;
-use oxidized_by_ref::decl_defs;
 use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::shallow_decl_defs;
-use oxidized_by_ref::typing_defs;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use pos::ToOxidized;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
+use std::sync::Arc;
+use ty::decl;
+use ty::reason::BReason;
 
 struct BackendWrapper(HhServerProviderBackend);
 
@@ -122,51 +122,43 @@ ocaml_ffi_with_arena! {
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::FunName,
-    ) -> Option<&shallow_decl_defs::FunDecl<'a>> {
+    ) -> Option<Arc<decl::FunDecl<BReason>>> {
         let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_fun(name.into(), name)
-            .unwrap()
-            .map(|f| f.to_oxidized(arena))
+        backend.folded_decl_provider().get_fun(name.into(), name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_shallow_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::TypeName,
-    ) -> Option<&shallow_decl_defs::ClassDecl<'a>> {
+    ) -> Option<Arc<decl::ShallowClass<BReason>>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_class(name)
-            .unwrap()
-            .map(|c| c.to_oxidized(arena))
+        backend.shallow_decl_provider().get_class(name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_typedef<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::TypeName,
-    ) -> Option<&shallow_decl_defs::TypedefDecl<'a>> {
+    ) -> Option<Arc<decl::TypedefDecl<BReason>>> {
         let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_typedef(name.into(), name)
-            .unwrap()
-            .map(|td| td.to_oxidized(arena))
+        backend.folded_decl_provider().get_typedef(name.into(), name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_gconst<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::ConstName,
-    ) -> Option<&shallow_decl_defs::ConstDecl<'a>> {
+    ) -> Option<Arc<decl::ConstDecl<BReason>>> {
         let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_const(name.into(), name)
-            .unwrap()
-            .map(|c| c.to_oxidized(arena))
+        backend.folded_decl_provider().get_const(name.into(), name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_module<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         _name: pos::ModuleName,
-    ) -> Option<shallow_decl_defs::ModuleDecl<'a>> {
+    ) -> Option<Arc<decl::ModuleDecl<BReason>>> {
         let _backend = unsafe { get_backend(backend) };
         todo!()
     }
@@ -175,66 +167,54 @@ ocaml_ffi_with_arena! {
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: (pos::TypeName, pos::PropName),
-    ) -> Option<&typing_defs::Ty<'a>> {
+    ) -> Option<decl::Ty<BReason>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_property_type(name.0, name.1)
-            .unwrap()
-            .map(|ty| ty.to_oxidized(arena))
+        backend.shallow_decl_provider().get_property_type(name.0, name.1).unwrap()
     }
 
     fn hh_rust_provider_backend_get_static_prop<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: (pos::TypeName, pos::PropName),
-    ) -> Option<&typing_defs::Ty<'a>> {
+    ) -> Option<decl::Ty<BReason>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_static_property_type(name.0, name.1)
-            .unwrap()
-            .map(|ty| ty.to_oxidized(arena))
+        backend.shallow_decl_provider().get_static_property_type(name.0, name.1).unwrap()
     }
 
     fn hh_rust_provider_backend_get_method<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: (pos::TypeName, pos::MethodName),
-    ) -> Option<&typing_defs::Ty<'a>> {
+    ) -> Option<decl::Ty<BReason>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_method_type(name.0, name.1)
-            .unwrap()
-            .map(|ty| ty.to_oxidized(arena))
+        backend.shallow_decl_provider().get_method_type(name.0, name.1).unwrap()
     }
 
     fn hh_rust_provider_backend_get_static_method<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: (pos::TypeName, pos::MethodName),
-    ) -> Option<&typing_defs::Ty<'a>> {
+    ) -> Option<decl::Ty<BReason>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_static_method_type(name.0, name.1)
-            .unwrap()
-            .map(|ty| ty.to_oxidized(arena))
+        backend.shallow_decl_provider().get_static_method_type(name.0, name.1).unwrap()
     }
 
     fn hh_rust_provider_backend_get_constructor<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::TypeName,
-    ) -> Option<&typing_defs::Ty<'a>> {
+    ) -> Option<decl::Ty<BReason>> {
         let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_constructor_type(name)
-            .unwrap()
-            .map(|ty| ty.to_oxidized(arena))
+        backend.shallow_decl_provider().get_constructor_type(name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_folded_class<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
         name: pos::TypeName,
-    ) -> Option<decl_defs::DeclClassType<'a>> {
+    ) -> Option<Arc<decl::FoldedClass<BReason>>> {
         let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_class(name.into(), name)
-            .unwrap()
-            .map(|c| c.to_oxidized(arena))
+        backend.folded_decl_provider().get_class(name.into(), name).unwrap()
     }
 
     fn hh_rust_provider_backend_declare_folded_class<'a>(

@@ -21,3 +21,4 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../../rupro/pos/cargo/pos" }
+ty = { path = "../../../rupro/ty/cargo/ty" }

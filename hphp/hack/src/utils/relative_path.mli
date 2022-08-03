@@ -36,13 +36,13 @@ type t = S.t [@@deriving eq, show, ord]
 
 val default : t
 
-(* Checks that string indeed has the given prefix before constructing path *)
+(** Checks that the provided string indeed has the given prefix before constructing path *)
 val create : prefix -> string -> t
 
-(* Creates a new path, inferring the prefix. Will default to Dummy. *)
+(** Creates a new path, inferring the prefix. Will default to Dummy. *)
 val create_detect_prefix : string -> t
 
-(* Creates a Relative_path.t relative to the root. The argument must be
+(** Creates a Relative_path.t relative to the root. The argument must be
     a *relative* path (the path suffix). If you wish to construct
     a Relative_path.t from an absolute path, use
     `create_detect_prefix` instead. *)

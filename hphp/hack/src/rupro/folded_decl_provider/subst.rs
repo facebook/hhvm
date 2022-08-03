@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 use ty::decl::subst::Subst;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;
+use ty::decl::ClassRefinement;
+use ty::decl::ClassTypeRefinement;
 use ty::decl::ConcreteTypeconst;
 use ty::decl::FunParam;
 use ty::decl::FunType;
@@ -19,7 +21,6 @@ use ty::decl::TrefinementType;
 use ty::decl::Ty;
 use ty::decl::Ty_;
 use ty::decl::TypeConst;
-use ty::decl::TypeConstRef;
 use ty::decl::Typeconst;
 use ty::decl::WhereConstraint;
 use ty::reason::Reason;
@@ -213,24 +214,27 @@ impl<'a, R: Reason> Substitution<'a, R> {
             }
             Ty_::Trefinement(tr) => Ty_::Trefinement(Box::new(TrefinementType {
                 ty: self.instantiate(&tr.ty),
-                typeconsts: tr
-                    .typeconsts
-                    .iter()
-                    .map(|(k, v)| (*k, self.instantiate_typeconst_ref(v)))
-                    .collect(),
+                typeconsts: ClassRefinement {
+                    types: (tr.typeconsts.types.iter())
+                        .map(|(k, v)| (*k, self.instantiate_class_type_refinement(v)))
+                        .collect(),
+                },
             })),
         }
     }
 
-    fn instantiate_typeconst_ref(&self, tr: &TypeConstRef<Ty<R>>) -> TypeConstRef<Ty<R>> {
-        use TypeConstRef::Exact;
-        use TypeConstRef::Loose;
+    fn instantiate_class_type_refinement(
+        &self,
+        tr: &ClassTypeRefinement<Ty<R>>,
+    ) -> ClassTypeRefinement<Ty<R>> {
+        use ClassTypeRefinement::Exact;
+        use ClassTypeRefinement::Loose;
         match tr {
             Exact(ty) => Exact(self.instantiate(ty)),
-            Loose(lo, hi) => Loose(
-                lo.iter().map(|ty| self.instantiate(ty)).collect(),
-                hi.iter().map(|ty| self.instantiate(ty)).collect(),
-            ),
+            Loose(bounds) => Loose(ty::decl::ClassTypeRefinementBounds {
+                lower: bounds.lower.iter().map(|ty| self.instantiate(ty)).collect(),
+                upper: bounds.upper.iter().map(|ty| self.instantiate(ty)).collect(),
+            }),
         }
     }
 

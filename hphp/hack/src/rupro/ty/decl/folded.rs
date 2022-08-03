@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl::ty::ConsistentKind;
+use crate::decl::ty::Enforceable;
 use crate::decl::ty::XhpEnumValue;
 use crate::decl::CeVisibility;
 use crate::decl::ClassConstKind;
@@ -21,6 +22,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::ToOcamlRep;
 use pos::Bytes;
 use pos::ClassConstNameIndexMap;
 use pos::MethodNameIndexMap;
@@ -42,6 +44,7 @@ pub use oxidized::ast_defs::Abstraction;
 pub use oxidized::ast_defs::ClassishKind;
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 pub struct FoldedElement {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub flags: ClassEltFlags,
@@ -80,6 +83,7 @@ pub struct FoldedElement {
 /// via a require extends type. This information is relevant when folding
 /// `substs` during inheritance. See the `inherit` module.
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct SubstContext<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.subst_context`
@@ -95,6 +99,7 @@ impl<R: Reason> SubstContext<R> {
 }
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct TypeConst<R: Reason> {
     // note(sf, 2022-02-08): c.f. `Typing_defs.typeconst_type`
@@ -102,8 +107,8 @@ pub struct TypeConst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>, // abstract or concrete
     pub origin: TypeName,
-    pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
-    pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
+    pub enforceable: Enforceable<R::Pos>,
+    pub reifiable: Option<R::Pos>, // When Some, points to __Reifiable attribute
     pub is_concretized: bool,
     pub is_ctx: bool,
 }
@@ -118,6 +123,7 @@ impl<R: Reason> TypeConst<R> {
 }
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ClassConst<R: Reason> {
     // note(sf, 2022-02-08): c.f. `Typing_defs.class_const`
@@ -155,6 +161,7 @@ impl<R: Reason> TypeConst<R> {
 /// }
 /// ```
 #[derive(Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct Requirement<R: Reason> {
     pub pos: R::Pos,
@@ -162,6 +169,7 @@ pub struct Requirement<R: Reason> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 pub struct Constructor {
     pub elt: Option<FoldedElement>,
     pub consistency: ConsistentKind,

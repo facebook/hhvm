@@ -6,6 +6,10 @@
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Conser;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::Lazy;
 use pos::BPos;
 use pos::NPos;
@@ -43,6 +47,8 @@ pub trait Reason:
     + DeserializeOwned
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
     + for<'a> ToOxidized<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
+    + ToOcamlRep
+    + FromOcamlRep
     + 'static
 {
     /// Position type.
@@ -236,9 +242,11 @@ pub trait Reason:
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct Blame<P>(pub P, pub BlameSource);
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -279,6 +287,7 @@ impl<'a> ToOxidized<'a> for ExprDepTypeReason {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum ReasonImpl<R, P> {
     Rnone,
     Rwitness(P),
@@ -378,6 +387,7 @@ pub enum ReasonImpl<R, P> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct BReason(Box<ReasonImpl<BReason, BPos>>);
 
 impl Reason for BReason {
@@ -673,6 +683,21 @@ impl<'a> ToOxidized<'a> for NReason {
 
     fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
         oxidized_by_ref::typing_reason::Reason::Rnone
+    }
+}
+
+impl ToOcamlRep for NReason {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        oxidized_by_ref::typing_reason::Reason::Rnone.to_ocamlrep(alloc)
+    }
+}
+
+impl FromOcamlRep for NReason {
+    fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self)
     }
 }
 

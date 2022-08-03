@@ -2,8 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 use std::cell::RefCell;
@@ -22,6 +25,7 @@ use std::rc::Rc;
     Ord
 )]
 #[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct Ident(u64);
 
 impl From<u64> for Ident {

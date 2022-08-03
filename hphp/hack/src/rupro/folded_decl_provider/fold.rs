@@ -218,7 +218,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     name: stc.name.clone(),
                     kind: stc.kind.clone(),
                     origin: self.child.name.id(),
-                    enforceable: stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
+                    enforceable: ty::decl::ty::Enforceable(
+                        stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
+                    ),
                     reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
                     is_concretized: false,
                     is_ctx: stc.is_ctx,

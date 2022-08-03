@@ -8,12 +8,14 @@ use crate::decl::Ty;
 use crate::reason::Reason;
 
 use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::ToOcamlRep;
 use pos::TypeNameIndexMap;
 use serde::Deserialize;
 use serde::Serialize;
 
 /// Maps type names to types with which to replace them.
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct Subst<R: Reason>(pub TypeNameIndexMap<Ty<R>>);
 

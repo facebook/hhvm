@@ -12,6 +12,8 @@ use std::sync::Weak;
 
 use dashmap::mapref::entry::Entry;
 use dashmap::DashMap;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
@@ -132,6 +134,21 @@ impl<T: Serialize> Serialize for Hc<T> {
 impl<'de, T: Deserialize<'de> + Consable> Deserialize<'de> for Hc<T> {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         Deserialize::deserialize(deserializer).map(Hc::new)
+    }
+}
+
+impl<T: ToOcamlRep + Consable> ToOcamlRep for Hc<T> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        (**self).to_ocamlrep(alloc)
+    }
+}
+
+impl<T: FromOcamlRep + Consable> FromOcamlRep for Hc<T> {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Hc::new(T::from_ocamlrep(value)?))
     }
 }
 

@@ -8,6 +8,10 @@ use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Hc;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::aast;
 use oxidized::ast_defs;
 use pos::Bytes;
@@ -60,12 +64,14 @@ pub enum Exact {
 
 // c.f. ast_defs::XhpEnumValue
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum XhpEnumValue {
     XEVInt(isize),
     XEVString(Symbol),
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum CeVisibility {
     Public,
     Private(TypeName),
@@ -84,6 +90,7 @@ pub enum CeVisibility {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum IfcFunDecl {
     FDPolicied(Option<Symbol>),
     FDInferFlows,
@@ -145,6 +152,7 @@ pub enum ShapeFieldNamePos<P> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum DependentType {
     Texpr(Ident),
 }
@@ -160,6 +168,7 @@ pub enum DependentType {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
     pub classname_params: Box<[TypeName]>,
@@ -176,6 +185,7 @@ pub struct UserAttribute<P> {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
@@ -199,6 +209,7 @@ walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [tparams, constraints]);
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct WhereConstraint<TY>(pub TY, pub ast_defs::ConstraintKind, pub TY);
 
 walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
@@ -213,6 +224,7 @@ walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R>>);
 
@@ -454,6 +466,187 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     }
 }
 
+/// It's not possible for us to derive ToOcamlRep for TshapeFieldName because we
+/// represent it differently: OCaml includes positions in TshapeFieldName, but
+/// we cannot (see the documentation on `TshapeFieldName` for rationale).
+///
+/// Instead, we store the positions in shape-map values, and feed them into this
+/// function to produce the OCaml representation of `TshapeFieldName`.
+fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
+    alloc: &'a A,
+    name: &'a TshapeFieldName,
+    field_name_pos: &'a ShapeFieldNamePos<P>,
+) -> OpaqueValue<'a> {
+    let simple_pos = || match field_name_pos {
+        ShapeFieldNamePos::Simple(p) => p.to_ocamlrep(alloc),
+        ShapeFieldNamePos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),
+    };
+    match name {
+        TshapeFieldName::TSFlitInt(x) => {
+            let mut pos_string = alloc.block_with_size(2);
+            alloc.set_field(&mut pos_string, 0, simple_pos());
+            alloc.set_field(&mut pos_string, 1, alloc.add(&*x));
+            let pos_string = pos_string.build();
+
+            let mut block = alloc.block_with_size_and_tag(1usize, 0u8);
+            alloc.set_field(&mut block, 0, pos_string);
+            block.build()
+        }
+        TshapeFieldName::TSFlitStr(x) => {
+            let mut pos_string = alloc.block_with_size(2);
+            alloc.set_field(&mut pos_string, 0, simple_pos());
+            alloc.set_field(&mut pos_string, 1, alloc.add(&*x));
+            let pos_string = pos_string.build();
+
+            let mut block = alloc.block_with_size_and_tag(1usize, 1u8);
+            alloc.set_field(&mut block, 0, pos_string);
+            block.build()
+        }
+        TshapeFieldName::TSFclassConst(cls, name) => {
+            let (pos1, pos2) = match field_name_pos {
+                ShapeFieldNamePos::ClassConst(p1, p2) => {
+                    (p1.to_ocamlrep(alloc), p2.to_ocamlrep(alloc))
+                }
+                ShapeFieldNamePos::Simple(..) => panic!("expected ShapeFieldNamePos::ClassConst"),
+            };
+
+            let mut cls_pos_id = alloc.block_with_size(2);
+            alloc.set_field(&mut cls_pos_id, 0, pos1);
+            alloc.set_field(&mut cls_pos_id, 1, alloc.add(&*cls));
+            let cls_pos_id = cls_pos_id.build();
+
+            let mut const_pos_string = alloc.block_with_size(2);
+            alloc.set_field(&mut const_pos_string, 0, pos2);
+            alloc.set_field(&mut const_pos_string, 1, alloc.add(&*name));
+            let const_pos_string = const_pos_string.build();
+
+            let mut block = alloc.block_with_size_and_tag(2usize, 2u8);
+            alloc.set_field(&mut block, 0, cls_pos_id);
+            alloc.set_field(&mut block, 1, const_pos_string);
+            block.build()
+        }
+    }
+}
+
+impl<R: Reason> ToOcamlRep for ShapeFieldType<R> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+        let mut block = alloc.block_with_size_and_tag(2usize, 0u8);
+        let ShapeFieldType {
+            optional,
+            ty,
+            field_name_pos: _,
+        } = self;
+        alloc.set_field(&mut block, 0, alloc.add(optional));
+        alloc.set_field(&mut block, 1, alloc.add(ty));
+        block.build()
+    }
+}
+
+impl<R: Reason> ToOcamlRep for Ty_<R> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+        match self {
+            Ty_::Tthis => OpaqueValue::int(0),
+            Ty_::Tapply(x) => {
+                let mut block = alloc.block_with_size_and_tag(2usize, 0u8);
+                alloc.set_field(&mut block, 0, alloc.add(&x.0));
+                alloc.set_field(&mut block, 1, alloc.add(&x.1));
+                block.build()
+            }
+            Ty_::Trefinement(x) => {
+                let mut block = alloc.block_with_size_and_tag(2usize, 1u8);
+                alloc.set_field(&mut block, 0, alloc.add(&x.ty));
+                alloc.set_field(&mut block, 1, alloc.add(&x.typeconsts)); // TODO: wrong?
+                block.build()
+            }
+            Ty_::Tmixed => OpaqueValue::int(1),
+            Ty_::Tlike(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 2u8);
+                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                block.build()
+            }
+            Ty_::Tany => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 3u8);
+                alloc.set_field(&mut block, 0, alloc.add(&())); // TanySentinel
+                block.build()
+            }
+            Ty_::Terr => OpaqueValue::int(2),
+            Ty_::Tnonnull => OpaqueValue::int(3),
+            Ty_::Tdynamic => OpaqueValue::int(4),
+            Ty_::Toption(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 4u8);
+                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                block.build()
+            }
+            Ty_::Tprim(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 5u8);
+                alloc.set_field(&mut block, 0, alloc.add(&*x));
+                block.build()
+            }
+            Ty_::Tfun(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 6u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+            Ty_::Ttuple(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 7u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+            Ty_::Tshape(shape) => {
+                let (shape_kind, shape_field_type_map): &(_, _) = shape;
+                let map = if shape_field_type_map.is_empty() {
+                    OpaqueValue::int(0)
+                } else {
+                    let len = shape_field_type_map.len();
+                    let mut iter = shape_field_type_map.iter().map(|(k, v)| {
+                        let k = shape_field_name_to_ocamlrep(alloc, k, &v.field_name_pos);
+                        (k, v.to_ocamlrep(alloc))
+                    });
+                    let (map, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
+                    map
+                };
+
+                let mut block = alloc.block_with_size_and_tag(2usize, 8u8);
+                alloc.set_field(&mut block, 0, alloc.add(&*shape_kind));
+                alloc.set_field(&mut block, 1, map);
+                block.build()
+            }
+            Ty_::Tvar(ident) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
+                alloc.set_field(&mut block, 0, alloc.add(&*ident));
+                block.build()
+            }
+            Ty_::Tgeneric(x) => {
+                let mut block = alloc.block_with_size_and_tag(2usize, 10u8);
+                alloc.set_field(&mut block, 0, alloc.add(&x.0));
+                alloc.set_field(&mut block, 1, alloc.add(&x.1));
+                block.build()
+            }
+            Ty_::Tunion(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 11u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+            Ty_::Tintersection(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 12u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+            Ty_::TvecOrDict(x) => {
+                let mut block = alloc.block_with_size_and_tag(2usize, 13u8);
+                alloc.set_field(&mut block, 0, alloc.add(&x.0));
+                alloc.set_field(&mut block, 1, alloc.add(&x.1));
+                block.build()
+            }
+            Ty_::Taccess(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 14u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**x));
+                block.build()
+            }
+        }
+    }
+}
+
 /// A Type const access expression of the form <type expr>::C.
 #[derive(
     Clone,
@@ -466,6 +659,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct TaccessType<R: Reason, TY> {
     /// Type expression to the left of `::`
@@ -478,51 +672,55 @@ pub struct TaccessType<R: Reason, TY> {
 walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [ty]);
 
 /// A decl refinement type of the form 'T with { Refinements }'
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    Hash,
-    PartialEq,
-    Serialize,
-    Deserialize
-)]
+#[derive(Clone, Debug, Eq, EqModuloPos, EqModuloPosAndReason, Hash, PartialEq)]
+#[derive(Serialize, Deserialize)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
 pub struct TrefinementType<TY> {
     /// Type expression to the left of `::`
     pub ty: TY,
 
     /// The type refinements
-    pub typeconsts: BTreeMap<TypeConstName, TypeConstRef<TY>>,
+    pub typeconsts: ClassRefinement<TY>,
+}
+
+walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, typeconsts]);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, EqModuloPosAndReason, Hash, PartialEq)]
+#[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub struct ClassRefinement<TY> {
+    pub types: BTreeMap<TypeConstName, ClassTypeRefinement<TY>>,
 }
 
 walkable!(TypeConstName); // To walk the typeconsts BTreeMap
-walkable!(impl<R: Reason> for TrefinementType<Ty<R>> => [ty, typeconsts]);
+walkable!(impl<R: Reason> for ClassRefinement<Ty<R>> => [types]);
 
 /// Type constant refinements
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    Hash,
-    PartialEq,
-    Serialize,
-    Deserialize
-)]
+#[derive(Clone, Debug, Eq, EqModuloPos, EqModuloPosAndReason, Hash, PartialEq)]
+#[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
-pub enum TypeConstRef<TY> {
+pub enum ClassTypeRefinement<TY> {
     Exact(TY),
-    Loose(Box<[TY]>, Box<[TY]>),
+    Loose(ClassTypeRefinementBounds<TY>),
 }
 
-walkable!(impl<R: Reason, TY> for TypeConstRef<TY> => {
+walkable!(impl<R: Reason, TY> for ClassTypeRefinement<TY> => {
     Self::Exact(ty) => [ty],
-    Self::Loose(lo, hi) => [lo, hi],
+    Self::Loose(bounds) => [bounds],
 });
+
+#[derive(Clone, Debug, Eq, EqModuloPos, EqModuloPosAndReason, Hash, PartialEq)]
+#[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
+pub struct ClassTypeRefinementBounds<TY> {
+    pub lower: Box<[TY]>,
+    pub upper: Box<[TY]>,
+}
+
+walkable!(impl<R: Reason, TY> for ClassTypeRefinementBounds<TY> => [lower, upper]);
 
 #[derive(
     Clone,
@@ -535,6 +733,7 @@ walkable!(impl<R: Reason, TY> for TypeConstRef<TY> => {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub enum Capability<R: Reason, TY> {
     CapDefaults(R::Pos),
@@ -559,6 +758,7 @@ walkable!(impl<R: Reason, TY> for Capability<R, TY> => {
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunImplicitParams<R: Reason, TY> {
     pub capability: Capability<R, TY>,
@@ -578,6 +778,7 @@ walkable!(impl<R: Reason, TY> for FunImplicitParams<R, TY> => [capability]);
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunType<R: Reason, TY> {
     pub tparams: Box<[Tparam<R, TY>]>,
@@ -605,6 +806,7 @@ walkable!(impl<R: Reason, TY> for FunType<R, TY> => [
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "TY: Serialize + DeserializeOwned")]
 pub struct PossiblyEnforcedTy<TY> {
     /// True if consumer of this type enforces it at runtime
@@ -625,6 +827,7 @@ walkable!(impl<R: Reason, TY> for PossiblyEnforcedTy<TY> => [ty]);
     Serialize,
     Deserialize
 )]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunParam<R: Reason, TY> {
     pub pos: R::Pos,
@@ -652,6 +855,7 @@ pub type FunParams<R, TY> = Box<[FunParam<R, TY>]>;
 ///
 /// class_const_from encodes the origin (class vs self).
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub enum ClassConstFrom {
     Self_,
     From(TypeName),
@@ -670,9 +874,11 @@ pub enum ClassConstFrom {
 /// Currently the syntax of constants allows direct references to another class
 /// like D::A, or self references using self::A.
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct ClassConstRef(pub ClassConstFrom, pub Symbol);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
@@ -682,6 +888,7 @@ pub struct ConstDecl<R: Reason> {
 walkable!(ConstDecl<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
@@ -697,6 +904,7 @@ pub struct FunElt<R: Reason> {
 walkable!(FunElt<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct AbstractTypeconst<R: Reason> {
     pub as_constraint: Option<Ty<R>>,
@@ -707,6 +915,7 @@ pub struct AbstractTypeconst<R: Reason> {
 walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ConcreteTypeconst<R: Reason> {
     pub ty: Ty<R>,
@@ -715,6 +924,7 @@ pub struct ConcreteTypeconst<R: Reason> {
 walkable!(ConcreteTypeconst<R> => [ty]);
 
 #[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub enum Typeconst<R: Reason> {
     TCAbstract(AbstractTypeconst<R>),
@@ -736,6 +946,7 @@ impl<R: Reason> fmt::Debug for Typeconst<R> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct EnumType<R: Reason> {
     pub base: Ty<R>,
@@ -746,6 +957,7 @@ pub struct EnumType<R: Reason> {
 walkable!(EnumType<R> => [base, constraint, includes]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
@@ -765,8 +977,30 @@ walkable!(TypedefType<R> => [tparams, constraint, ty]);
 walkable!(ast_defs::ConstraintKind);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct ModuleDefType<R: Reason> {
     pub pos: R::Pos,
 }
 
 walkable!(ModuleDefType<R> => []);
+
+/// When the option is `Some`, it points to the location of the `__Enforceable`
+/// attribute which caused the containing typeconst to be enforceable.
+///
+/// The newtype allows us to implement ToOxidized and ToOcamlRep in such a way
+/// that we produce `(Pos, bool)` tuples, which is how this is represented on
+/// the OCaml side.
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+pub struct Enforceable<P>(pub Option<P>);
+
+impl<P> Enforceable<P> {
+    pub fn is_some(&self) -> bool {
+        self.0.is_some()
+    }
+    pub fn is_none(&self) -> bool {
+        self.0.is_none()
+    }
+    pub fn as_ref(&self) -> Option<&P> {
+        self.0.as_ref()
+    }
+}

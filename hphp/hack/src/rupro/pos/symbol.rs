@@ -45,7 +45,7 @@ impl Symbol {
 }
 
 impl Symbol {
-    pub fn as_str(&self) -> &str {
+    pub fn as_str(&self) -> &'static str {
         self.0.as_str()
     }
 }
@@ -98,7 +98,7 @@ impl<'a> ToOxidized<'a> for Symbol {
     type Output = &'a str;
 
     fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
-        self.0.as_str()
+        self.as_str()
     }
 }
 
@@ -107,7 +107,7 @@ impl ToOcamlRep for Symbol {
         &'a self,
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::str_to_ocamlrep(self.as_str(), alloc)
+        self.as_str().to_ocamlrep(alloc)
     }
 }
 
@@ -135,13 +135,15 @@ pub struct Bytes(pub BytesId);
 // using the underlying bytestring after a fast check for equal ids.
 
 impl Bytes {
+    pub const EMPTY: Bytes = Bytes(BytesId::EMPTY);
+
     pub fn new<S: AsRef<[u8]>>(s: S) -> Self {
         Self(intern::string::intern_bytes(s.as_ref()))
     }
 }
 
 impl Bytes {
-    pub fn as_bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &'static [u8] {
         self.0.as_bytes()
     }
 
@@ -213,7 +215,7 @@ impl ToOcamlRep for Bytes {
         &'a self,
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::bytes_to_ocamlrep(self.as_bytes(), alloc)
+        self.as_bytes().to_ocamlrep(alloc)
     }
 }
 
@@ -241,7 +243,7 @@ macro_rules! common_impls {
                 Self(Symbol::new(s))
             }
 
-            pub fn as_str(&self) -> &str {
+            pub fn as_str(&self) -> &'static str {
                 self.0.as_str()
             }
 
@@ -286,7 +288,7 @@ macro_rules! common_impls {
             type Output = &'a str;
 
             fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
-                self.as_symbol().0.as_str()
+                self.as_str()
             }
         }
 
@@ -295,7 +297,7 @@ macro_rules! common_impls {
                 &'a self,
                 alloc: &'a A,
             ) -> ocamlrep::OpaqueValue<'a> {
-                ocamlrep::str_to_ocamlrep(self.as_str(), alloc)
+                self.as_str().to_ocamlrep(alloc)
             }
         }
 

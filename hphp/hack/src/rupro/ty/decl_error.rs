@@ -10,13 +10,13 @@ use serde::Serialize;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum DeclError<P> {
-    CyclicClassDef(P, Vec<TypeName>),
     WrongExtendKind {
-        parent_pos: P,
-        parent_kind: oxidized::ast_defs::ClassishKind,
-        parent_name: TypeName,
         pos: P,
         kind: oxidized::ast_defs::ClassishKind,
         name: TypeName,
+        parent_pos: P,
+        parent_kind: oxidized::ast_defs::ClassishKind,
+        parent_name: TypeName,
     },
+    CyclicClassDef(P, Vec<TypeName>),
 }

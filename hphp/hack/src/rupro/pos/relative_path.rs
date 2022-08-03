@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::Bytes;
 use crate::ToOxidized;
-use intern::string::BytesId;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
-use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::ffi::OsStrExt;
@@ -18,29 +19,30 @@ pub use oxidized::relative_path::Prefix;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct RelativePath {
     prefix: Prefix,
-    suffix: BytesId,
+    suffix: Bytes,
 }
 
 impl RelativePath {
     pub fn new<P: AsRef<Path>>(prefix: Prefix, suffix: P) -> Self {
-        let suffix = intern::string::intern_bytes(suffix.as_ref().as_os_str().as_bytes());
-        Self::from_bytes_id(prefix, suffix)
+        let suffix = Bytes::new(suffix.as_ref().as_os_str().as_bytes());
+        Self::from_bytes(prefix, suffix)
     }
 
     pub const fn empty() -> Self {
         Self {
             prefix: Prefix::Dummy,
-            suffix: BytesId::EMPTY,
+            suffix: Bytes::EMPTY,
         }
     }
 
     pub fn is_empty(&self) -> bool {
-        self.prefix == Prefix::Dummy && self.suffix == BytesId::EMPTY
+        self.prefix == Prefix::Dummy && self.suffix == Bytes::EMPTY
     }
 
-    pub const fn from_bytes_id(prefix: Prefix, suffix: BytesId) -> Self {
+    pub const fn from_bytes(prefix: Prefix, suffix: Bytes) -> Self {
         Self { prefix, suffix }
     }
 
@@ -50,7 +52,7 @@ impl RelativePath {
     }
 
     #[inline]
-    pub const fn suffix(&self) -> BytesId {
+    pub const fn suffix(&self) -> Bytes {
         self.suffix
     }
 
@@ -82,26 +84,6 @@ impl<'a> ToOxidized<'a> for RelativePath {
             self.prefix,
             Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
         ))
-    }
-}
-
-impl ToOcamlRep for RelativePath {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        let mut block = alloc.block_with_size(2);
-        let suffix = Path::new(OsStr::from_bytes(self.suffix.as_bytes()));
-        alloc.set_field(&mut block, 0, alloc.add(&self.prefix));
-        alloc.set_field(&mut block, 1, alloc.add(suffix));
-        block.build()
-    }
-}
-
-impl FromOcamlRep for RelativePath {
-    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let path = oxidized::relative_path::RelativePath::from_ocamlrep(value)?;
-        Ok(Self::from(&path))
     }
 }
 

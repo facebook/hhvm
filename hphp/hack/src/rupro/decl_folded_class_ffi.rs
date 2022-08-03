@@ -10,7 +10,7 @@ use hackrs_test_utils::store::make_shallow_decl_store;
 use hackrs_test_utils::store::populate_shallow_decl_store;
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
-use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
+use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use ocamlrep_ocamlpool::Bump;
 use oxidized::parser_options::ParserOptions;
@@ -18,7 +18,6 @@ use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use pos::ToOxidized;
 use pos::TypeName;
 use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
@@ -40,13 +39,12 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
         .filter(|path| find_utils::is_hack(path))
 }
 
-ocaml_ffi_arena_result! {
-    fn fold_classes_in_files_ffi<'a>(
-        arena: &'a Bump,
+ocaml_ffi! {
+    fn fold_classes_in_files_ffi(
         root: PathBuf,
         opts: ParserOptions,
         files: Vec<oxidized::relative_path::RelativePath>,
-    ) -> Result<BTreeMap<RelativePath, Vec<DeclClassType<'a>>>, String> {
+    ) -> Result<BTreeMap<RelativePath, Vec<Arc<FoldedClass<BReason>>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
         let path_ctx = Arc::new(RelativePathCtx {
             root: root.into(),
@@ -90,11 +88,10 @@ ocaml_ffi_arena_result! {
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?;
             }
             Ok((filename, classes.into_iter().map(|name| {
-                Ok(folded_decl_provider
+                folded_decl_provider
                     .get_class(name.into(), name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
-                    .ok_or_else(|| format!("Decl not found: class {}", name))?
-                    .to_oxidized(arena))
+                    .ok_or_else(|| format!("Decl not found: class {}", name))
             }).collect::<Result<_, String>>()?))
         })
         .collect()
@@ -118,20 +115,19 @@ ocaml_ffi_with_arena! {
     }
 }
 
-ocaml_ffi_arena_result! {
+ocaml_ffi! {
     // Due to memory constraints when folding over a large directory, it may be necessary to
     // fold over www in parts. This is achieved by finding the shallow decls of all of the files
     // in the directory but then only folding over a portion of the classes in those files
     // num_partitions controls the numbers of partitions (>= 1) the classes are divided into
     // and partition_index controls which partition is being folded
     // Returns a SMap from class_name to folded_decl
-    fn partition_and_fold_dir_ffi<'a>(
-        arena: &'a Bump,
+    fn partition_and_fold_dir_ffi(
         www_root: PathBuf,
         opts: ParserOptions,
         num_partitions: usize,
         partition_index: usize,
-    ) -> BTreeMap<String, DeclClassType<'a>> {
+    ) -> BTreeMap<String, Arc<FoldedClass<BReason>>> {
         // Collect hhi files
         let hhi_root = tempdir::TempDir::new("rupro_decl_repo_hhi").unwrap();
         hhi::write_hhi_files(hhi_root.path()).unwrap();
@@ -188,7 +184,7 @@ ocaml_ffi_arena_result! {
             })
             .collect();
         s.into_iter()
-            .map(|(name, fc)| (name, fc.to_oxidized(arena)))
+            .map(|(name, fc)| (name, fc))
             .collect()
     }
 }

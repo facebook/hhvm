@@ -1536,6 +1536,7 @@ version = "0.0.0"
 dependencies = [
  "dashmap",
  "fnv",
+ "ocamlrep",
  "once_cell",
  "serde",
 ]
@@ -2334,6 +2335,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytes",
+ "indexmap",
  "nohash-hasher",
  "serde",
 ]

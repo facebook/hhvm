@@ -5,7 +5,10 @@
 
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
-use intern::string::BytesId;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
@@ -33,6 +36,8 @@ pub trait Pos:
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidized<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
+    + ToOcamlRep
+    + FromOcamlRep
     + EqModuloPos
     + EqModuloPosAndReason
     + 'static
@@ -62,20 +67,21 @@ pub trait Pos:
 
 /// Represents a closed-ended range [start, end] in a file.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 enum PosImpl {
     Small {
         prefix: Prefix,
-        suffix: BytesId,
+        suffix: Bytes,
         span: Box<(FilePosSmall, FilePosSmall)>,
     },
     Large {
         prefix: Prefix,
-        suffix: BytesId,
+        suffix: Bytes,
         span: Box<(FilePosLarge, FilePosLarge)>,
     },
     Tiny {
         prefix: Prefix,
-        suffix: BytesId,
+        suffix: Bytes,
         span: PosSpanTiny,
     },
 }
@@ -157,7 +163,7 @@ impl BPos {
         match self.0 {
             PosImpl::Small { prefix, suffix, .. }
             | PosImpl::Large { prefix, suffix, .. }
-            | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::from_bytes_id(prefix, suffix),
+            | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::from_bytes(prefix, suffix),
         }
     }
 }
@@ -287,6 +293,54 @@ impl<'a> ToOxidized<'a> for BPos {
     }
 }
 
+impl ToOcamlRep for BPos {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        let file = match &self.0 {
+            PosImpl::Small { prefix, suffix, .. }
+            | PosImpl::Large { prefix, suffix, .. }
+            | PosImpl::Tiny { prefix, suffix, .. } => {
+                let mut file = alloc.block_with_size(2);
+                alloc.set_field(&mut file, 0, prefix.to_ocamlrep(alloc));
+                alloc.set_field(&mut file, 1, suffix.to_ocamlrep(alloc));
+                file.build()
+            }
+        };
+        match &self.0 {
+            PosImpl::Small { span, .. } => {
+                let (start, end) = &**span;
+                let mut pos = alloc.block_with_size_and_tag(3usize, 0u8);
+                alloc.set_field(&mut pos, 0, file);
+                alloc.set_field(&mut pos, 1, start.to_ocamlrep(alloc));
+                alloc.set_field(&mut pos, 2, end.to_ocamlrep(alloc));
+                pos.build()
+            }
+            PosImpl::Large { span, .. } => {
+                let (start, end) = &**span;
+                let mut pos = alloc.block_with_size_and_tag(3usize, 1u8);
+                alloc.set_field(&mut pos, 0, file);
+                alloc.set_field(&mut pos, 1, start.to_ocamlrep(alloc));
+                alloc.set_field(&mut pos, 2, end.to_ocamlrep(alloc));
+                pos.build()
+            }
+            PosImpl::Tiny { span, .. } => {
+                let mut pos = alloc.block_with_size_and_tag(2usize, 2u8);
+                alloc.set_field(&mut pos, 0, file);
+                alloc.set_field(&mut pos, 1, span.to_ocamlrep(alloc));
+                pos.build()
+            }
+        }
+    }
+}
+
+impl FromOcamlRep for BPos {
+    fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        todo!()
+    }
+}
+
 /// A stateless sentinel Pos.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NPos;
@@ -344,18 +398,26 @@ impl<'a> ToOxidized<'a> for NPos {
     }
 }
 
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    Hash,
-    Serialize,
-    Deserialize
-)]
+impl ToOcamlRep for NPos {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+        &'a self,
+        alloc: &'a A,
+    ) -> ocamlrep::OpaqueValue<'a> {
+        oxidized_by_ref::pos::Pos::none().to_ocamlrep(alloc)
+    }
+}
+
+impl FromOcamlRep for NPos {
+    fn from_ocamlrep(_value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, EqModuloPos, EqModuloPosAndReason, Hash)]
+#[derive(Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct Positioned<S, P> {
-    // Caution: field order will matter if we ever derive
+    // Caution: field order matters because we derive
     // `ToOcamlRep`/`FromOcamlRep` for this type.
     pos: P,
     id: S,

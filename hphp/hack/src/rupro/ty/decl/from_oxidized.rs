@@ -160,11 +160,11 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Trefinement(&(ty, tr)) => {
                 Trefinement(Box::new(decl::TrefinementType {
                     ty: ty.into(),
-                    typeconsts: tr
-                        .cr_types
-                        .iter()
-                        .map(|(k, v)| ((*k).into(), v.into()))
-                        .collect(),
+                    typeconsts: ty::ClassRefinement {
+                        types: (tr.cr_types.iter())
+                            .map(|(k, v)| ((*k).into(), v.into()))
+                            .collect(),
+                    },
                 }))
             }
             typing_defs_core::Ty_::Tvar(ident) => Tvar(ident.into()),
@@ -189,13 +189,26 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
     }
 }
 
-impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>> for ty::TypeConstRef<Ty<R>> {
+impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>>
+    for ty::ClassTypeRefinement<Ty<R>>
+{
     fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
         use obr::typing_defs::ClassTypeRefinement::Texact;
         use obr::typing_defs::ClassTypeRefinement::Tloose;
-        match ctr {
-            &Texact(ty) => Self::Exact(ty.into()),
-            Tloose(bnds) => Self::Loose(slice(bnds.lower), slice(bnds.upper)),
+        match *ctr {
+            Texact(ty) => Self::Exact(ty.into()),
+            Tloose(bounds) => Self::Loose(bounds.into()),
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinementBounds<'_>>
+    for ty::ClassTypeRefinementBounds<Ty<R>>
+{
+    fn from(bounds: &obr::typing_defs::ClassTypeRefinementBounds<'_>) -> Self {
+        Self {
+            lower: slice(bounds.lower),
+            upper: slice(bounds.upper),
         }
     }
 }
@@ -317,6 +330,16 @@ impl<R: Reason> From<&obr::typing_defs::EnumType<'_>> for ty::EnumType<R> {
     }
 }
 
+impl<P: Pos> From<(&obr::pos::Pos<'_>, bool)> for ty::Enforceable<P> {
+    fn from((pos, is_enforceable): (&obr::pos::Pos<'_>, bool)) -> Self {
+        if is_enforceable {
+            Self(Some(pos.into()))
+        } else {
+            Self(None)
+        }
+    }
+}
+
 impl<R: Reason> From<&obr::shallow_decl_defs::ShallowClassConst<'_>>
     for shallow::ShallowClassConst<R>
 {
@@ -337,11 +360,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ShallowTypeconst<'_>>
         Self {
             name: stc.name.into(),
             kind: stc.kind.into(),
-            enforceable: if stc.enforceable.1 {
-                Some(stc.enforceable.0.into())
-            } else {
-                None
-            },
+            enforceable: <ty::Enforceable<R::Pos>>::from(stc.enforceable),
             reifiable: stc.reifiable.map(Into::into),
             is_ctx: stc.is_ctx,
         }
@@ -534,11 +553,7 @@ impl<R: Reason> From<&obr::typing_defs::TypeconstType<'_>> for folded::TypeConst
             name: x.name.into(),
             kind: x.kind.into(),
             origin: x.origin.into(),
-            enforceable: if x.enforceable.1 {
-                Some(x.enforceable.0.into())
-            } else {
-                None
-            },
+            enforceable: x.enforceable.into(),
             reifiable: x.reifiable.map(Into::into),
             is_concretized: x.concretized,
             is_ctx: x.is_ctx,

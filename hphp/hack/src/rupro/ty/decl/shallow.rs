@@ -5,6 +5,7 @@
 
 use crate::decl::ty::ClassConstKind;
 use crate::decl::ty::ClassConstRef;
+use crate::decl::ty::Enforceable;
 use crate::decl::ty::EnumType;
 use crate::decl::ty::FunElt;
 use crate::decl::ty::ModuleDefType;
@@ -18,6 +19,7 @@ use crate::decl::ty::XhpAttribute;
 use crate::decl::ty::XhpEnumValue;
 use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::ToOcamlRep;
 use pos::Bytes;
 use pos::ClassConstName;
 use pos::ConstName;
@@ -39,6 +41,7 @@ pub use oxidized_by_ref::method_flags::MethodFlags;
 pub use oxidized_by_ref::prop_flags::PropFlags;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowClassConst<R: Reason> {
     pub kind: ClassConstKind,
@@ -66,12 +69,13 @@ pub struct ShallowClassConst<R: Reason> {
 walkable!(ShallowClassConst<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowTypeconst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>,
-    pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
-    pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
+    pub enforceable: Enforceable<R::Pos>,
+    pub reifiable: Option<R::Pos>, // When Some, points to __Reifiable attribute
     pub is_ctx: bool,
 }
 
@@ -87,6 +91,7 @@ impl<R: Reason> ShallowTypeconst<R> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<PropName, R::Pos>,
@@ -99,6 +104,7 @@ pub struct ShallowProp<R: Reason> {
 walkable!(ShallowProp<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowMethod<R: Reason> {
     // note(sf, 2022-01-27):
@@ -116,6 +122,7 @@ pub struct ShallowMethod<R: Reason> {
 walkable!(ShallowMethod<R> => [ty]);
 
 #[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowClass<R: Reason> {
     // note(sf, 2022-01-27):
@@ -125,8 +132,8 @@ pub struct ShallowClass<R: Reason> {
     pub mode: oxidized::file_info::Mode,
     pub is_final: bool,
     pub is_abstract: bool,
-    pub is_internal: bool,
     pub is_xhp: bool,
+    pub is_internal: bool,
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassishKind,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
@@ -169,6 +176,7 @@ pub type TypedefDecl<R> = TypedefType<R>;
 pub type ModuleDecl<R> = ModuleDefType<R>;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub enum Decl<R: Reason> {
     Class(TypeName, ClassDecl<R>),

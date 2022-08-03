@@ -116,7 +116,7 @@ type t = {
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
   tco_ignore_unsafe_cast: bool;
-  tco_readonly: bool;
+  tco_no_parser_readonly_check: bool;
   tco_enable_expression_trees: bool;
   tco_enable_modules: bool;
   tco_allowed_expression_tree_visitors: string list;
@@ -303,7 +303,7 @@ let default =
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
     tco_ignore_unsafe_cast = false;
-    tco_readonly = false;
+    tco_no_parser_readonly_check = false;
     tco_enable_expression_trees = false;
     tco_enable_modules = false;
     tco_allowed_expression_tree_visitors = [];
@@ -456,7 +456,7 @@ let make
     ?(tco_enable_strict_string_concat_interp =
       default.tco_enable_strict_string_concat_interp)
     ?(tco_ignore_unsafe_cast = default.tco_ignore_unsafe_cast)
-    ?(tco_readonly = default.tco_readonly)
+    ?(tco_no_parser_readonly_check = default.tco_no_parser_readonly_check)
     ?(tco_enable_expression_trees = default.tco_enable_expression_trees)
     ?(tco_enable_modules = default.tco_enable_modules)
     ?(tco_allowed_expression_tree_visitors =
@@ -603,7 +603,7 @@ let make
     po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp;
     tco_ignore_unsafe_cast;
-    tco_readonly;
+    tco_no_parser_readonly_check;
     tco_enable_expression_trees;
     tco_enable_modules;
     tco_allowed_expression_tree_visitors;
@@ -822,9 +822,10 @@ let set_global_inference t = { t with tco_global_inference = true }
 
 let set_ordered_solving t b = { t with tco_ordered_solving = b }
 
-let set_tco_readonly t b = { t with tco_readonly = b }
+let set_tco_no_parser_readonly_check t b =
+  { t with tco_no_parser_readonly_check = b }
 
-let tco_readonly t = t.tco_readonly
+let tco_no_parser_readonly_check t = t.tco_no_parser_readonly_check
 
 let po_parser_errors_only t = t.po_parser_errors_only
 

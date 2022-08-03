@@ -41,6 +41,7 @@ use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::ErrorType;
 use std::fmt;
 use thiserror::Error;
+use types::readonly_check;
 
 /// Common input needed for compilation.
 #[derive(Debug)]
@@ -79,6 +80,7 @@ bitflags! {
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
         const DUMP_IR = 1 << 5;
         const ENABLE_IR = 1 << 6;
+        const TYPES_IN_COMPILATION = 1 << 7;
     }
 }
 
@@ -525,6 +527,23 @@ fn emit_unit_from_ast<'arena, 'decl>(
     emit_unit(emitter, namespace, ast)
 }
 
+fn check_readonly_and_emit<'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    flags: EnvFlags,
+    namespace_env: RcOc<NamespaceEnv>,
+    ast: &mut ast::Program,
+    profile: &mut Profile,
+) -> Result<HackCUnit<'arena>, Error> {
+    if flags.contains(EnvFlags::TYPES_IN_COMPILATION) {
+        let res = readonly_check::check_program(ast, false);
+        // Ignores all errors after the first...
+        if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
+            return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
+        }
+    };
+    rewrite_and_emit(emitter, namespace_env, ast, profile)
+}
+
 fn emit_unit_from_text<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     flags: EnvFlags,
@@ -551,6 +570,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             !flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
             flags.contains(EnvFlags::IS_SYSTEMLIB),
+            flags.contains(EnvFlags::TYPES_IN_COMPILATION),
             profile,
         )
     });
@@ -560,8 +580,10 @@ fn emit_unit_from_text<'arena, 'decl>(
         Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || {
-                let u = rewrite_and_emit(emitter, namespace_env, &mut ast, profile);
-                (u, profile)
+                (
+                    check_readonly_and_emit(emitter, flags, namespace_env, &mut ast, profile),
+                    profile,
+                )
             })
         }
         Err(ParseError(pos, msg, fatal_op)) => {
@@ -599,7 +621,7 @@ fn create_emitter<'arena, 'decl>(
     )
 }
 
-fn create_parser_options(opts: &Options) -> ParserOptions {
+fn create_parser_options(opts: &Options, types_in_compilation: bool) -> ParserOptions {
     let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
     ParserOptions {
         po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
@@ -629,6 +651,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
+        tco_no_parser_readonly_check: types_in_compilation,
         ..Default::default()
     }
 }
@@ -643,6 +666,7 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
+    types_in_compilation: bool,
     profile: &mut Profile,
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
@@ -652,7 +676,7 @@ fn parse_file(
         keep_errors: false,
         is_systemlib,
         elaborate_namespaces,
-        parser_options: create_parser_options(opts),
+        parser_options: create_parser_options(opts, types_in_compilation),
         ..AastEnv::default()
     };
 

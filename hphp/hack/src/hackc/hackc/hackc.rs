@@ -82,6 +82,10 @@ struct Opts {
     /// Controls systemlib specific logic
     #[clap(long)]
     is_systemlib: bool,
+
+    /// [Experimental] Enable Types in Compilation
+    #[clap(long)]
+    types_in_compilation: bool,
 }
 
 /// Hack Compiler
@@ -167,6 +171,9 @@ impl Opts {
         }
         if self.is_systemlib {
             flags |= EnvFlags::IS_SYSTEMLIB;
+        }
+        if self.types_in_compilation {
+            flags |= EnvFlags::TYPES_IN_COMPILATION;
         }
         flags
     }

@@ -20,9 +20,10 @@ use oxidized::local_id;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
-use parser_core_types::syntax_error::SyntaxError;
 use std::collections::HashMap;
 use std::collections::HashSet;
+
+pub struct ReadOnlyError(pub Pos, pub ErrorMsg);
 
 // Local environment which keeps track of how many readonly values it has
 #[derive(PartialEq, Clone)]
@@ -487,7 +488,7 @@ fn check_assignment_validity(
 }
 
 struct Checker {
-    errors: Vec<SyntaxError>,
+    errors: Vec<ReadOnlyError>,
     is_typechecker: bool, // used for migration purposes
 }
 
@@ -500,9 +501,7 @@ impl Checker {
     }
 
     fn add_error(&mut self, pos: &Pos, msg: ErrorMsg) {
-        let (start_offset, end_offset) = pos.info_raw();
-        self.errors
-            .push(SyntaxError::make(start_offset, end_offset, msg, vec![]));
+        self.errors.push(ReadOnlyError(pos.clone(), msg));
     }
 
     fn subtype(&mut self, pos: &Pos, r_sub: &Rty, r_sup: &Rty, reason: &str) {
@@ -869,10 +868,6 @@ impl<'ast> VisitorMut<'ast> for Checker {
                         let var_name = local_id::get_name(&lid.1).to_string();
                         let rhs_rty = rty_expr(context, &i.1);
                         context.add_local(&var_name, rhs_rty);
-                        // Remove once typechecker change is landed
-                        if self.is_typechecker {
-                            i.recurse(context, self.object())?;
-                        }
                     }
                 }
                 block.recurse(context, self.object())
@@ -885,7 +880,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
 pub fn check_program(
     program: &mut aast::Program<(), ()>,
     is_typechecker: bool,
-) -> Vec<SyntaxError> {
+) -> Vec<ReadOnlyError> {
     let mut checker = Checker::new(is_typechecker);
     let mut context = Context::new(Rty::Mutable, Rty::Mutable, is_typechecker);
     visit_mut(&mut checker, &mut context, program).unwrap();

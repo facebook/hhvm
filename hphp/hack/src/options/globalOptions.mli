@@ -269,8 +269,8 @@ type t = {
   tco_enable_strict_string_concat_interp: bool;
   (* Ignores unsafe_cast and retains the original type of the expression *)
   tco_ignore_unsafe_cast: bool;
-  (* Enable Unstable feature readonly tast check *)
-  tco_readonly: bool;
+  (* Disable parser-based readonly checking *)
+  tco_no_parser_readonly_check: bool;
   (* Enable expression trees via unstable features flag *)
   tco_enable_expression_trees: bool;
   (* Enable unstable feature: modules *)
@@ -437,7 +437,7 @@ val make :
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->
-  ?tco_readonly:bool ->
+  ?tco_no_parser_readonly_check:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_enable_modules:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
@@ -705,9 +705,9 @@ val tco_enable_strict_string_concat_interp : t -> bool
 
 val tco_ignore_unsafe_cast : t -> bool
 
-val tco_readonly : t -> bool
+val tco_no_parser_readonly_check : t -> bool
 
-val set_tco_readonly : t -> bool -> t
+val set_tco_no_parser_readonly_check : t -> bool -> t
 
 val set_tco_enable_expression_trees : t -> bool -> t
 

@@ -169,9 +169,10 @@ let enable_strict_string_concat_interp =
 
 let ignore_unsafe_cast = GlobalOptions.tco_ignore_unsafe_cast
 
-let set_readonly = GlobalOptions.set_tco_readonly
+let set_no_parser_readonly_check =
+  GlobalOptions.set_tco_no_parser_readonly_check
 
-let readonly = GlobalOptions.tco_readonly
+let no_parser_readonly_check = GlobalOptions.tco_no_parser_readonly_check
 
 let set_tco_enable_expression_trees =
   GlobalOptions.set_tco_enable_expression_trees

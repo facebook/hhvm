@@ -1,5 +1,5 @@
 Errors:
-  [4:10-12] Please add a type hint `public SomeType x`
+  [4:10-12] Please add a type hint `public SomeType $x`
   [6:31-33] Was expecting a type hint
   [10:19-22] Was expecting a return type hint
 [(Class

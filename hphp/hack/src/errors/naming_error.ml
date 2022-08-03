@@ -257,7 +257,7 @@ let const_without_typehint pos name type_ =
 let prop_without_typehint pos name vis =
   let visibility = Render.vis_to_string vis in
   let msg =
-    Printf.sprintf "Please add a type hint `%s SomeType %s`" visibility name
+    Printf.sprintf "Please add a type hint `%s SomeType $%s`" visibility name
   in
   User_error.make Error_code.(to_enum AddATypehint) (pos, msg) []
 

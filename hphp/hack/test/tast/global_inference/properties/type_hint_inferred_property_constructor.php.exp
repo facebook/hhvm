@@ -1,5 +1,5 @@
 Errors:
-  [4:38-40] Please add a type hint `public SomeType x`
+  [4:38-40] Please add a type hint `public SomeType $x`
   [4:38-40] Was expecting a type hint
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 

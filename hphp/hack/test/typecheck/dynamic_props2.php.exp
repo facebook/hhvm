@@ -1,7 +1,7 @@
 File "dynamic_props2.php", line 12, characters 11-11:
 A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
 File "dynamic_props2.php", line 5, characters 10-12:
-Please add a type hint `public SomeType f1` (Naming[2001])
+Please add a type hint `public SomeType $f1` (Naming[2001])
 File "dynamic_props2.php", line 12, characters 11-21:
 Cannot use dynamic class name in strict mode (Naming[2078])
 File "dynamic_props2.php", line 8, characters 10-10:

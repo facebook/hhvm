@@ -1,6 +1,6 @@
 Errors:
-  [4:10-12] Please add a type hint `public SomeType x`
-  [8:10-12] Please add a type hint `public SomeType x`
+  [4:10-12] Please add a type hint `public SomeType $x`
+  [8:10-12] Please add a type hint `public SomeType $x`
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

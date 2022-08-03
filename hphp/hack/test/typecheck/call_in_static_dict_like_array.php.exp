@@ -1,7 +1,7 @@
 File "call_in_static_dict_like_array.php", line 7, characters 29-34:
 Expected constant expression for initializer (Parsing[1002])
 File "call_in_static_dict_like_array.php", line 7, characters 10-11:
-Please add a type hint `public SomeType x` (Naming[2001])
+Please add a type hint `public SomeType $x` (Naming[2001])
 File "call_in_static_dict_like_array.php", line 4, characters 26-26:
 Was expecting a return type hint (Typing[4030])
 File "call_in_static_dict_like_array.php", line 7, characters 29-34:

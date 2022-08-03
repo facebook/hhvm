@@ -20,6 +20,7 @@ use oxidized::local_id;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -321,9 +322,9 @@ fn strip_ns(name: &str) -> &str {
 fn is_special_builtin(f_name: &str) -> bool {
     let stripped = strip_ns(f_name);
     let namespaced_f_name = if is_hh_autoimport_fun(stripped) {
-        format!("HH\\{}", f_name)
+        Cow::Owned(format!("HH\\{}", f_name))
     } else {
-        stripped.to_string()
+        Cow::Borrowed(stripped)
     };
     match &namespaced_f_name[..] {
         "HH\\dict"

@@ -23,6 +23,14 @@ pub trait ToOxidized<'a> {
     }
 }
 
+impl<'a, T: ToOxidized<'a>> ToOxidized<'a> for std::sync::Arc<T> {
+    type Output = T::Output;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        (**self).to_oxidized(arena)
+    }
+}
+
 impl<'a, T: ToOxidized<'a>> ToOxidized<'a> for Box<[T]> {
     type Output = &'a [T::Output];
 

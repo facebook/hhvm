@@ -2,6 +2,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::serde_store::Compression;
@@ -10,14 +11,16 @@ use hackrs_test_utils::store::make_shallow_decl_store;
 use hackrs_test_utils::store::populate_shallow_decl_store;
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
-use ocamlrep_ocamlpool::Bump;
 use oxidized::parser_options::ParserOptions;
 use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use pos::ToOxidized;
 use pos::TypeName;
 use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
@@ -37,6 +40,27 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
         .filter(|e| !e.file_type().is_dir())
         .map(|e| e.path())
         .filter(|path| find_utils::is_hack(path))
+}
+
+/// Panic if the (possibly-handwritten) impl of ToOcamlRep doesn't match the
+/// result of invoking to_oxidized followed by to_ocamlrep (since oxidized types
+/// have a generated ToOcamlRep impl with stronger correctness guarantees).
+fn verify_to_ocamlrep<'a, T>(bump: &'a Bump, value: &'a T)
+where
+    T: ToOcamlRep + ToOxidized<'a> + std::fmt::Debug,
+    <T as ToOxidized<'a>>::Output: std::fmt::Debug + PartialEq + FromOcamlRepIn<'a>,
+{
+    let alloc = &ocamlrep::Arena::new();
+    let oxidized_val = value.to_oxidized(bump);
+    let ocaml_val = unsafe { ocamlrep::Value::from_bits(value.to_ocamlrep(alloc).to_bits()) };
+    let ocamlrep_round_trip_val =
+        <T as ToOxidized<'_>>::Output::from_ocamlrep_in(ocaml_val, bump).unwrap();
+    let type_name = std::any::type_name::<T>();
+    assert_eq!(
+        ocamlrep_round_trip_val, oxidized_val,
+        "{}::to_ocamlrep does not match {}::to_oxidized",
+        type_name, type_name
+    )
 }
 
 ocaml_ffi! {
@@ -71,9 +95,19 @@ ocaml_ffi! {
             );
 
         files.into_iter().map(|filename| {
-            let classes: Vec<TypeName> = decl_parser
+            let decls = decl_parser
                 .parse(filename)
-                .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?
+                .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?;
+            for decl in decls.iter() {
+                match decl {
+                    shallow::Decl::Class(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::Decl::Fun(_, decl)     => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::Decl::Typedef(_, decl) => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::Decl::Const(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::Decl::Module(_, decl)  => verify_to_ocamlrep(&Bump::new(), decl),
+                }
+            }
+            let classes: Vec<TypeName> = decls
                 .into_iter()
                 .filter_map(|decl: ty::decl::shallow::Decl<BReason>| match decl {
                     shallow::Decl::Class(name, _) => Some(name),
@@ -88,10 +122,12 @@ ocaml_ffi! {
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?;
             }
             Ok((filename, classes.into_iter().map(|name| {
-                folded_decl_provider
+                let folded_class = folded_decl_provider
                     .get_class(name.into(), name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
-                    .ok_or_else(|| format!("Decl not found: class {}", name))
+                    .ok_or_else(|| format!("Decl not found: class {}", name))?;
+                verify_to_ocamlrep(&Bump::new(), &folded_class);
+                Ok(folded_class)
             }).collect::<Result<_, String>>()?))
         })
         .collect()

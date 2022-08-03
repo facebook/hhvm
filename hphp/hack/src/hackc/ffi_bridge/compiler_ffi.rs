@@ -52,7 +52,7 @@ pub mod compile_ffi {
     }
 
     pub struct DeclResult {
-        hash: u64,
+        nopos_hash: u64,
         serialized: Vec<u8>,
         decls: Box<DeclsHolder>,
         has_errors: bool,
@@ -167,18 +167,18 @@ pub mod compile_ffi {
         fn hash_unit(unit: &HackCUnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
-        fn hackc_type_exists(result: &DeclResult, symbol: &str) -> bool;
+        fn hackc_type_exists(decls: &DeclResult, symbol: &str) -> bool;
 
         /// For testing: return true if deserializing produces the expected Decls.
-        fn hackc_verify_deserialization(result: &DeclResult) -> bool;
+        fn hackc_verify_deserialization(decls: &DeclResult) -> bool;
 
         /// Serialize a FactsResult to JSON
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        unsafe fn hackc_decls_to_facts_cpp_ffi(
+        fn hackc_decls_to_facts_cpp_ffi(
             decl_flags: i32,
-            decl_result: &DeclResult,
+            decls: &DeclResult,
             sha1sum: &CxxString,
         ) -> FactsResult;
     }
@@ -329,7 +329,7 @@ pub fn hackc_direct_decl_parse(
         direct_decl_parser::parse_decls_without_reference_text(&opts.0, filename, text, alloc);
 
     compile_ffi::DeclResult {
-        hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
+        nopos_hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
         serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
         decls: Box::new(DeclsHolder {
             decls: parsed_file.decls,

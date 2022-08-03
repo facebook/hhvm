@@ -45,11 +45,6 @@ bool Option::CachePHPFile = false;
 
 bool Option::ConstFoldFileBC = false;
 
-hphp_fast_string_imap<std::string> Option::AutoloadClassMap;
-hphp_fast_string_imap<std::string> Option::AutoloadFuncMap;
-hphp_fast_string_map<std::string> Option::AutoloadConstMap;
-std::string Option::AutoloadRoot;
-
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
@@ -136,16 +131,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::Bind(RuntimeOption::RepoDebugInfo,
                  ini, config, "Repo.DebugInfo",
                  RuntimeOption::RepoDebugInfo);
-  }
-
-  {
-    // AutoloadMap
-    // not using Bind here because those maps are enormous and cause performance
-    // problems when showing up later
-    AutoloadClassMap = Config::GetIFastMap(ini, config, "AutoloadMap.class");
-    AutoloadFuncMap = Config::GetIFastMap(ini, config, "AutoloadMap.function");
-    AutoloadConstMap = Config::GetFastMap(ini, config, "AutoloadMap.constant");
-    AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
   Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,

@@ -63,14 +63,6 @@ struct Option {
   static bool ConstFoldFileBC;
 
   /*
-   * Autoload information for resolving parse on-demand
-   */
-  static hphp_fast_string_imap<std::string> AutoloadClassMap;
-  static hphp_fast_string_imap<std::string> AutoloadFuncMap;
-  static hphp_fast_string_map<std::string> AutoloadConstMap;
-  static std::string AutoloadRoot;
-
-  /*
    * Whether to generate HHBC, HHAS, or a textual dump of HHBC
    */
   static bool GenerateTextHHBC;

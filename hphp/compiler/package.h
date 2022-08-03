@@ -38,6 +38,34 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct UnitIndex final {
+  using IMap = folly_concurrent_hash_map_simd<
+    const StringData*,
+    const StringData*,
+    string_data_hash,
+    string_data_isame
+  >;
+  using Map = folly_concurrent_hash_map_simd<
+    const StringData*,
+    const StringData*,
+    string_data_hash,
+    string_data_same
+  >;
+
+  IMap types;
+  IMap funcs;
+  Map constants;
+
+  // TODO: add Map<filename, decls_ref>
+  // TODO: will need modules for DeclProvider but not for parseOnDemand.
+
+  void clear() {
+    types.clear();
+    funcs.clear();
+    constants.clear();
+  }
+};
+
 struct Package {
   Package(const std::string& root,
           bool parseOnDemand,
@@ -61,7 +89,7 @@ struct Package {
 
   std::shared_ptr<FileCache> getFileCache();
 
-  // Configuration for parse workers. This should contain any runtime
+  // Configuration for index & parse workers. This should contain any runtime
   // options which can affect HackC (or the interface to it).
   struct Config {
     Config() = default;
@@ -108,7 +136,7 @@ struct Package {
     CoeffectsConfig coeffects;
   };
 
-  // Metadata for a parse job. Just filename things that we need to
+  // Metadata for a parse or index job. Just filenames that we need to
   // resolve when we have the whole source tree available.
   struct FileMeta {
     FileMeta() = default;
@@ -126,8 +154,27 @@ struct Package {
     }
   };
 
-  // Metadata obtained during parsing. Mainly symbol refs used to
-  // drive on-demand parsing.
+  // Index information collected during parsing, used to construct
+  // an autoload index for parse-on-demand.
+  struct IndexMeta {
+    std::vector<std::string> types;
+    std::vector<std::string> funcs;
+    std::vector<std::string> constants;
+
+    // If not empty, indexing resulted in an ICE or had parse errors.
+    std::string error;
+
+    template<typename SerDe> void serde(SerDe& sd) {
+      sd(types)
+        (funcs)
+        (constants)
+        (error);
+    }
+  };
+
+  // Metadata obtained during parsing. Includes SymbolRefs used to
+  // drive on-demand parsing as well as toplevel decl names (from UEs)
+  // for use later by HHBBC's whole-program Index.
   struct ParseMeta {
     // Symbols present in the unit. This will be used to find new files
     // for parse on-demand.
@@ -136,6 +183,7 @@ struct Package {
     // indicated that this should be fatal.
     std::string m_abort;
 
+    // List of symbol names extracted from UnitEmitters.
     struct Definitions {
       std::vector<const StringData*> m_classes;
       std::vector<const StringData*> m_enums;
@@ -166,6 +214,10 @@ struct Package {
     }
   };
 
+  using IndexCallback = std::function<void(std::string&&, IndexMeta&&)>;
+  using IndexMetaVec = std::vector<IndexMeta>;
+  coro::Task<bool> index(const IndexCallback&);
+
   using UEVec = std::vector<std::unique_ptr<UnitEmitter>>;
   using FileMetaVec = std::vector<FileMeta>;
   using ParseMetaVec = std::vector<ParseMeta>;
@@ -173,18 +225,20 @@ struct Package {
                               extern_worker::Ref<RepoOptionsFlags>>;
 
   using LocalCallback = std::function<coro::Task<void>(UEVec)>;
-  using Callback = std::function<coro::Task<ParseMetaVec>(
+  using ParseCallback = std::function<coro::Task<ParseMetaVec>(
     const extern_worker::Ref<Config>&,
     extern_worker::Ref<FileMetaVec>,
     std::vector<FileData>,
     bool
   )>;
 
-  coro::Task<bool> parse(const Callback&, const LocalCallback&);
+  coro::Task<bool> parse(const UnitIndex&, const ParseCallback&,
+                         const LocalCallback&);
 
   // These are meant to be called from extern-worker Jobs to perform
   // the actual parsing.
   static void parseInit(const Config&, FileMetaVec);
+  static IndexMetaVec indexFini();
   static ParseMetaVec parseFini();
   static UnitEmitterSerdeWrapper parseRun(const std::string&,
                                           const RepoOptionsFlags&);
@@ -196,33 +250,46 @@ private:
   };
   using FileAndSizeVec = std::vector<FileAndSize>;
 
-  struct ParseGroup {
+  struct Group {
     std::vector<std::filesystem::path> m_files;
     size_t m_size{0};
   };
 
-  using ParseGroups = std::vector<ParseGroup>;
+  using Groups = std::vector<Group>;
 
   struct GroupResult {
-    ParseGroups m_grouped;
+    Groups m_grouped;
     FileAndSizeVec m_ungrouped;
   };
 
-  coro::Task<void> parseAll();
+  // Partition all files specified for this package into groups,
+  // excluding files according to options. If exclude_dirs is false,
+  // ignore Option::PackageExcludeDirs, in support of parseOnDemand.
+  coro::Task<Groups> groupAll(bool exclude_dirs);
+  coro::Task<GroupResult> groupDirectories(std::string, bool exclude_dirs);
+  void groupFiles(Groups&, FileAndSizeVec);
 
-  coro::Task<GroupResult> groupDirectories(std::string);
-  void groupFiles(ParseGroups&, FileAndSizeVec);
+  coro::Task<void> prepareInputs(Group,
+    std::vector<std::filesystem::path>& paths,
+    std::vector<FileMeta>& metas,
+    std::vector<coro::Task<extern_worker::Ref<RepoOptionsFlags>>>& options);
 
-  coro::Task<FileAndSizeVec> parseGroups(ParseGroups);
-  coro::Task<FileAndSizeVec> parseGroup(ParseGroup);
+  coro::Task<void> indexAll(const IndexCallback&);
+  coro::Task<void> indexGroups(const IndexCallback&, Groups);
+  coro::Task<void> indexGroup(const IndexCallback&, Group);
 
-  void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, bool report = false);
+  coro::Task<void> parseAll(const UnitIndex&);
+  coro::Task<FileAndSizeVec> parseGroups(Groups, const UnitIndex&);
+  coro::Task<FileAndSizeVec> parseGroup(Group, const UnitIndex&);
+
+  void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, const UnitIndex&,
+      bool report = false);
 
   std::string m_root;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_parsedFiles;
 
-  std::atomic<bool> m_parseFailed;
+  std::atomic<bool> m_failed;
 
   bool m_parseOnDemand;
 
@@ -230,7 +297,7 @@ private:
   Optional<std::chrono::microseconds> m_parsingInputs;
   Optional<std::chrono::microseconds> m_parsingOndemand;
 
-  const Callback* m_callback;
+  const ParseCallback* m_callback;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::shared_ptr<FileCache> m_fileCache;
@@ -244,6 +311,8 @@ private:
   coro::TicketExecutor& m_executor;
   extern_worker::Client& m_client;
   coro::AsyncValue<extern_worker::Ref<Config>> m_config;
+
+  // Content-store for options: Map<hash(options), options>
   extern_worker::RefCache<SHA1, RepoOptionsFlags> m_repoOptions;
 };
 

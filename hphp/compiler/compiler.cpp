@@ -162,6 +162,28 @@ void applyBuildOverrides(IniSetting::Map& ini,
   }
 }
 
+bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
+  try {
+    auto query = folly::parseJson(queryStr);
+    if (!query.isObject()) {
+      Logger::FError("Autoload.Query is not a JSON Object");
+      return false;
+    }
+    auto expr = query["expression"];
+    for (auto& term : expr) {
+      if (term.isArray() && term[0] == "dirname") {
+        Logger::FInfo("adding autoload dir {}", term[1].asString());
+        package.addDirectory(term[1].asString());
+      }
+    }
+    return true;
+  } catch (const folly::json::parse_error& e) {
+    Logger::FError("Error JSON-parsing Autoload.Query = \"{}\": {}",
+                   queryStr, e.what());
+    return false;
+  }
+}
+
 void addInputsToPackage(Package& package, const CompilerOptions& po) {
   if (po.modules.empty() && po.fmodules.empty() &&
       po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
@@ -787,6 +809,159 @@ Options makeExternWorkerOptions() {
   return options;
 }
 
+void logPhaseStats(const std::string& phase, const Package& package,
+    extern_worker::Client& client, StructuredLogEntry& sample, int64_t micros)
+{
+  auto const& stats = client.getStats();
+  Logger::FInfo(
+    "  {}: total package files {:,}\n"
+    "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
+    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
+    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
+    "  Cpu: {:,} usec usage, {:,} allocated cores\n"
+    "  Mem: {:,} max used, {:,} reserved\n"
+    "  {:,} downloads ({:,} bytes), {:,} throttles",
+    phase,
+    package.getTotalFiles(),
+    stats.execs.load(),
+    stats.execCacheHits.load(),
+    stats.optimisticExecs.load(),
+    stats.execFallbacks.load(),
+    stats.files.load(),
+    stats.filesRead.load(),
+    stats.filesQueried.load(),
+    stats.filesUploaded.load(),
+    stats.fileBytesUploaded.load(),
+    stats.fileFallbacks.load(),
+    stats.blobs.load(),
+    stats.blobsQueried.load(),
+    stats.blobsUploaded.load(),
+    stats.blobBytesUploaded.load(),
+    stats.blobFallbacks.load(),
+    stats.execCpuUsec.load(),
+    stats.execAllocatedCores.load(),
+    stats.execMaxUsedMem.load(),
+    stats.execReservedMem.load(),
+    stats.downloads.load(),
+    stats.bytesDownloaded.load(),
+    stats.throttles.load()
+  );
+  sample.setInt(phase + "_total_files", package.getTotalFiles());
+
+  sample.setInt(phase + "_micros", micros);
+  if (auto const t = package.parsingInputsTime()) {
+    sample.setInt(
+      phase + "_input_micros",
+      std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
+    );
+  }
+  if (auto const t = package.parsingOndemandTime()) {
+    sample.setInt(
+      phase + "_ondemand_micros",
+      std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
+    );
+  }
+
+  sample.setInt(phase + "_total_execs", stats.execs.load());
+  sample.setInt(phase + "_cache_hits", stats.execCacheHits.load());
+  sample.setInt(phase + "_optimistically", stats.optimisticExecs.load());
+  sample.setInt(phase + "_fallbacks", stats.execFallbacks.load());
+
+  sample.setInt(phase + "_total_files", stats.files.load());
+  sample.setInt(phase + "_file_reads", stats.filesRead.load());
+  sample.setInt(phase + "_file_queries", stats.filesQueried.load());
+  sample.setInt(phase + "_file_stores", stats.filesUploaded.load());
+  sample.setInt(phase + "_file_stores_bytes", stats.fileBytesUploaded.load());
+  sample.setInt(phase + "_file_fallbacks", stats.fileFallbacks.load());
+
+  sample.setInt(phase + "_total_blobs", stats.blobs.load());
+  sample.setInt(phase + "_blob_queries", stats.blobsQueried.load());
+  sample.setInt(phase + "_blob_stores", stats.blobsUploaded.load());
+  sample.setInt(phase + "_blob_stores_bytes", stats.blobBytesUploaded.load());
+  sample.setInt(phase + "_blob_fallbacks", stats.blobFallbacks.load());
+
+  sample.setInt(phase + "_total_loads", stats.downloads.load());
+  sample.setInt(phase + "_total_loads_bytes", stats.bytesDownloaded.load());
+  sample.setInt(phase + "_throttles", stats.throttles.load());
+
+  sample.setInt(phase + "_exec_cpu_usec", stats.execCpuUsec.load());
+  sample.setInt(phase + "_exec_allocated_cores", stats.execAllocatedCores.load());
+  sample.setInt(phase + "_exec_max_used_mem", stats.execMaxUsedMem.load());
+  sample.setInt(phase + "_exec_reserved_mem", stats.execReservedMem.load());
+
+  sample.setStr(phase + "_fellback",
+    client.fellback() ? "true" : "false"
+  );
+}
+
+// Compute a UnitIndex by parsing decls for all autoload-eligible files.
+// If no Autoload.Query is specified by RepoOptions, this just indexes
+// the input files.
+bool compute_index(
+    const CompilerOptions& po,
+    StructuredLogEntry& sample,
+    coro::TicketExecutor& executor,
+    extern_worker::Client& client,
+    UnitIndex& index
+) {
+  auto const onIndex = [&] (std::string&& rpath, Package::IndexMeta&& meta) {
+    auto const interned_rpath = makeStaticString(rpath);
+    for (auto& name : meta.types) {
+      auto const interned_name = makeStaticString(name);
+      auto const ret = index.types.emplace(interned_name, interned_rpath);
+      if (!ret.second) {
+        Logger::FWarning("Duplicate type {} in {} and {}",
+            interned_name, ret.first->first, interned_rpath
+        );
+      }
+    }
+    for (auto& name : meta.funcs) {
+      auto const interned_name = makeStaticString(name);
+      auto const ret = index.funcs.emplace(interned_name, interned_rpath);
+      if (!ret.second) {
+        Logger::FWarning("Duplicate func {} in {} and {}",
+            interned_name, ret.first->first, interned_rpath
+        );
+      }
+    }
+    for (auto& name : meta.constants) {
+      auto const interned_name = makeStaticString(name);
+      auto const ret = index.constants.emplace(interned_name, interned_rpath);
+      if (!ret.second) {
+        Logger::FWarning("Duplicate constant {} in {} and {}",
+            interned_name, ret.first->first, interned_rpath
+        );
+      }
+    }
+  };
+
+  Package index_package{po.inputDir, false, executor, client};
+  Timer indexTimer(Timer::WallTime, "indexing");
+
+  auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+  auto const queryStr = repoFlags.autoloadQuery();
+  if (!queryStr.empty() && po.parseOnDemand) {
+    // Index the files specified by Autoload.Query
+    if (!addAutoloadQueryToPackage(index_package, queryStr)) return false;
+  } else {
+    // index just the input files
+    addInputsToPackage(index_package, po);
+  }
+
+  if (!coro::wait(index_package.index(onIndex))) return false;
+
+  logPhaseStats("index", index_package, client, sample,
+                indexTimer.getMicroSeconds());
+  Logger::FInfo("index size: types={:,} funcs={:,} constants={:,}",
+      index.types.size(),
+      index.funcs.size(),
+      index.constants.size()
+  );
+  client.resetStats();
+
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Parses a file and produces an UnitEmitter. Used when we're not
@@ -915,6 +1090,9 @@ bool process(const CompilerOptions &po) {
     std::make_unique<Client>(executor->sticky(), makeExternWorkerOptions());
 
   sample.setStr("extern_worker_impl", client->implName());
+
+  UnitIndex index;
+  if (!compute_index(po, sample, *executor, *client, index)) return false;
 
   auto package = std::make_unique<Package>(
     po.inputDir,
@@ -1091,89 +1269,14 @@ bool process(const CompilerOptions &po) {
       autoload.emplace();
       repo.emplace(outputFile);
     }
-    if (!coro::wait(package->parse(remote, local))) return false;
+    if (!coro::wait(package->parse(index, remote, local))) return false;
 
-    auto const& stats = client->getStats();
-    Logger::FInfo(
-      "{:,} files parsed\n"
-      "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
-      "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-      "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-      "  Cpu: {:,} usec usage, {:,} allocated cores\n"
-      "  Mem: {:,} max used, {:,} reserved\n"
-      "  {:,} downloads ({:,} bytes), {:,} throttles",
-      package->getTotalFiles(),
-      stats.execs.load(),
-      stats.execCacheHits.load(),
-      stats.optimisticExecs.load(),
-      stats.execFallbacks.load(),
-      stats.files.load(),
-      stats.filesRead.load(),
-      stats.filesQueried.load(),
-      stats.filesUploaded.load(),
-      stats.fileBytesUploaded.load(),
-      stats.fileFallbacks.load(),
-      stats.blobs.load(),
-      stats.blobsQueried.load(),
-      stats.blobsUploaded.load(),
-      stats.blobBytesUploaded.load(),
-      stats.blobFallbacks.load(),
-      stats.execCpuUsec.load(),
-      stats.execAllocatedCores.load(),
-      stats.execMaxUsedMem.load(),
-      stats.execReservedMem.load(),
-      stats.downloads.load(),
-      stats.bytesDownloaded.load(),
-      stats.throttles.load()
-    );
-    sample.setInt("total_parses", package->getTotalFiles());
-
-    sample.setInt("parsing_micros", parseTimer.getMicroSeconds());
-    if (auto const t = package->parsingInputsTime()) {
-      sample.setInt(
-        "parsing_input_micros",
-        std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
-      );
-    }
-    if (auto const t = package->parsingOndemandTime()) {
-      sample.setInt(
-        "parsing_ondemand_micros",
-        std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
-      );
-    }
-
-    sample.setInt("parse_total_execs", stats.execs.load());
-    sample.setInt("parse_cache_hits", stats.execCacheHits.load());
-    sample.setInt("parse_optimistically", stats.optimisticExecs.load());
-    sample.setInt("parse_fallbacks", stats.execFallbacks.load());
-
-    sample.setInt("parse_total_files", stats.files.load());
-    sample.setInt("parse_file_reads", stats.filesRead.load());
-    sample.setInt("parse_file_queries", stats.filesQueried.load());
-    sample.setInt("parse_file_stores", stats.filesUploaded.load());
-    sample.setInt("parse_file_stores_bytes", stats.fileBytesUploaded.load());
-    sample.setInt("parse_file_fallbacks", stats.fileFallbacks.load());
-
-    sample.setInt("parse_total_blobs", stats.blobs.load());
-    sample.setInt("parse_blob_queries", stats.blobsQueried.load());
-    sample.setInt("parse_blob_stores", stats.blobsUploaded.load());
-    sample.setInt("parse_blob_stores_bytes", stats.blobBytesUploaded.load());
-    sample.setInt("parse_blob_fallbacks", stats.blobFallbacks.load());
-
-    sample.setInt("parse_total_loads", stats.downloads.load());
-    sample.setInt("parse_total_loads_bytes", stats.bytesDownloaded.load());
-    sample.setInt("parse_throttles", stats.throttles.load());
-
-    sample.setInt("parse_exec_cpu_usec", stats.execCpuUsec.load());
-    sample.setInt("parse_exec_allocated_cores", stats.execAllocatedCores.load());
-    sample.setInt("parse_exec_max_used_mem", stats.execMaxUsedMem.load());
-    sample.setInt("parse_exec_reserved_mem", stats.execReservedMem.load());
-
-    sample.setStr(
-      "parse_fellback",
-      client->fellback() ? "true" : "false"
-    );
+    logPhaseStats("parse", *package, *client, sample,
+                  parseTimer.getMicroSeconds());
   }
+
+  // We don't need the ondemand/autoload index after this point.
+  index.clear();
 
   std::thread fileCache{
     [&, package = std::move(package)] () mutable {
@@ -1222,9 +1325,6 @@ bool process(const CompilerOptions &po) {
 
   // We don't need these anymore, and since they can consume a lot of
   // memory, free them before doing anything else.
-  decltype(Option::AutoloadClassMap){}.swap(Option::AutoloadClassMap);
-  decltype(Option::AutoloadFuncMap){}.swap(Option::AutoloadFuncMap);
-  decltype(Option::AutoloadConstMap){}.swap(Option::AutoloadConstMap);
   unique.reset();
   hhbbcConfig.reset();
 

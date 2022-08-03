@@ -237,7 +237,7 @@ struct WatchmanAutoloadMapKey {
       } catch (const folly::json::parse_error& e) {
         throw RepoOptionsParseExc{folly::sformat(
             "Error JSON-parsing Autoload.Query = \"{}\": {}",
-            queryStr.c_str(),
+            queryStr,
             e.what())};
       }
     }();

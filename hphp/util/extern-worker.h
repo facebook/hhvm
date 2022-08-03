@@ -565,8 +565,34 @@ struct Client {
     std::atomic<size_t> optimisticExecs{0};
 
     std::atomic<size_t> throttles{0};
+
+    void reset() {
+      filesRead.store(0);
+      files.store(0);
+      blobs.store(0);
+      filesQueried.store(0);
+      blobsQueried.store(0);
+      filesUploaded.store(0);
+      blobsUploaded.store(0);
+      fileBytesUploaded.store(0);
+      blobBytesUploaded.store(0);
+      fileFallbacks.store(0);
+      blobFallbacks.store(0);
+      downloads.store(0);
+      bytesDownloaded.store(0);
+      execs.store(0);
+      execCacheHits.store(0);
+      execFallbacks.store(0);
+      execCpuUsec.store(0);
+      execAllocatedCores.store(0);
+      execMaxUsedMem.store(0);
+      execReservedMem.store(0);
+      optimisticExecs.store(0);
+      throttles.store(0);
+    }
   };
   const Stats& getStats() const { return m_stats; }
+  void resetStats() { m_stats.reset(); }
 
   // Synthetically force a fallback event when storing data or
   // executing a job, as if the implementation failed. This is for

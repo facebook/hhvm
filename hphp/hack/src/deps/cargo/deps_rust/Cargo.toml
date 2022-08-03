@@ -10,8 +10,11 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 depgraph = { path = "../../../depgraph/cargo/depgraph" }
+eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
+no_pos_hash = { path = "../../../utils/no_pos_hash" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 once_cell = "1.12"
-oxidized = { path = "../../../oxidized" }
 rpds = "0.11.0"
+serde = { version = "1.0.136", features = ["derive", "rc"] }

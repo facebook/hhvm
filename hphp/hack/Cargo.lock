@@ -978,11 +978,14 @@ name = "deps_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
+ "eq_modulo_pos",
+ "no_pos_hash",
  "ocamlrep",
  "ocamlrep_custom",
+ "ocamlrep_derive",
  "once_cell",
- "oxidized",
  "rpds",
+ "serde",
 ]
 
 [[package]]

@@ -4,16 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub use depgraph::reader::Dep;
-use depgraph::reader::DepGraph;
-use depgraph::reader::DepGraphOpener;
-use ocamlrep::FromError;
-use ocamlrep::FromOcamlRep;
-use ocamlrep::Value;
-use ocamlrep_custom::caml_serialize_default_impls;
-use ocamlrep_custom::CamlSerialize;
+
 use once_cell::sync::OnceCell;
-use oxidized::typing_deps_mode::TypingDepsMode;
-use rpds::HashTrieSet;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -21,6 +13,23 @@ use std::io;
 use std::io::Read;
 use std::io::Write;
 use std::sync::Mutex;
+
+use rpds::HashTrieSet;
+use serde::Deserialize;
+use serde::Serialize;
+
+use depgraph::reader::DepGraph;
+use depgraph::reader::DepGraphOpener;
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
+use no_pos_hash::NoPosHash;
+use ocamlrep::FromError;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::Value;
+use ocamlrep_custom::caml_serialize_default_impls;
+use ocamlrep_custom::CamlSerialize;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -47,6 +56,45 @@ static DEPGRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
 /// Even though this is only used in a single-threaded context (from OCaml)
 /// we wrap it in a `Mutex` to ensure safety.
 static DEPGRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
+
+/// Which dependency graph format are we using?
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+// CAUTION: This must be kept in sync with typing_deps_mode.ml
+pub enum TypingDepsMode {
+    /// Keep track of newly discovered edges in an in-memory delta.
+    ///
+    /// Optionally, the in-memory delta is backed by a pre-computed
+    /// dependency graph stored using a custom file format.
+    InMemoryMode(Option<String>),
+    /// Mode that writes newly discovered edges to binary files on disk
+    /// (one file per disk). Those binary files can then be post-processed
+    /// using a tool of choice.
+    ///
+    /// The first parameter is (optionally) a path to an existing custom 64-bit
+    /// dependency graph. If it is present, only new edges will be written,
+    /// of not, all edges will be written.
+    SaveToDiskMode {
+        graph: Option<String>,
+        new_edges_dir: String,
+        human_readable_dep_map_dir: Option<String>,
+    },
+}
 
 /// A raw OCaml pointer to the dependency mode.
 ///

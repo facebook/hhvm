@@ -6,6 +6,7 @@
  *
  *)
 
+(* CAUTION: This type must be kept in sync with typing_deps.rs *)
 (** Which dependency graph format are we using? *)
 type t =
   | InMemoryMode of string option

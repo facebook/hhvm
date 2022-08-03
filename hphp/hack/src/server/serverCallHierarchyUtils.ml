@@ -11,14 +11,14 @@ let item_matches_symocc
     (item : Lsp.CallHierarchyItem.t)
     (symbol : Relative_path.t SymbolOccurrence.t) : bool =
   let open SymbolOccurrence in
-  item.name == symbol.name
-  && Lsp_helpers.lsp_call_item_is_declaration item == symbol.is_declaration
-  && Lsp_helpers.sym_occ_kind_to_lsp_sym_info_kind symbol.type_ == item.kind
+  item.name = symbol.name
+  && Lsp_helpers.lsp_call_item_is_declaration item = symbol.is_declaration
+  && Lsp_helpers.sym_occ_kind_to_lsp_sym_info_kind symbol.type_ = item.kind
   &&
   let selection = Lsp_helpers.position_to_lsp_range symbol.pos in
   let squiggle = item.selectionRange in
   Lsp_helpers.get_range_overlap selection squiggle
-  == Lsp_helpers.Selection_covers_whole_squiggle
+  = Lsp_helpers.Selection_covers_whole_squiggle
 
 let call_item_to_symbol_occ_list
     ~(ctx : Provider_context.t)

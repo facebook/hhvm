@@ -20,6 +20,8 @@ hh24_test = { path = "../../../../facebook/utils/cargo/hh24_test" }
 itertools = "0.10.3"
 maplit = "1.0"
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
+ocamlrep = { path = "../../../../ocamlrep" }
+oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 tempdir = "0.3"

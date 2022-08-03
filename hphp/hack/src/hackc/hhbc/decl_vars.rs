@@ -16,6 +16,7 @@ use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast::*;
+use oxidized::ast_defs;
 
 type SSet = std::collections::BTreeSet<String>;
 
@@ -50,12 +51,7 @@ impl<'a> DeclvarVisitor<'a> {
         }
     }
 
-    fn on_class_get(
-        &mut self,
-        cid: &ClassId,
-        cge: &ClassGetExpr,
-        is_call_target: bool,
-    ) -> Result<(), String> {
+    fn on_class_get(&mut self, cid: &ClassId, cge: &ClassGetExpr) -> Result<(), String> {
         use aast::ClassId_;
         match &cid.2 {
             ClassId_::CIparent | ClassId_::CIself | ClassId_::CIstatic | ClassId_::CI(_) => {
@@ -68,9 +64,7 @@ impl<'a> DeclvarVisitor<'a> {
                         // TODO(thomasjiang): For this to match correctly, we need to adjust
                         // ast_to_nast because it does not make a distinction between ID and Lvar,
                         // which is needed here
-                        if is_call_target {
-                            self.add_local(&pstr.1)
-                        }
+                        self.add_local(&pstr.1);
                         Ok(())
                     }
                     ClassGetExpr::CGexpr(e2) => self.visit_expr(&mut (), e2),
@@ -105,21 +99,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
         use aast::Expr_;
         match e {
-            Expr_::ObjGet(x) if x.as_ref().3 == PropOrMethod::IsProp => {
-                let (receiver_e, prop_e) = (&x.0, &x.1);
-                match &receiver_e.2 {
-                    Expr_::Lvar(id) if id.name() == "$this" => {}
-                    _ => receiver_e.recurse(env, self.object())?,
-                }
-                match &prop_e.2 {
-                    Expr_::Lvar(id) => self.add_local(id.name()),
-                    _ => prop_e.recurse(env, self.object())?,
-                }
-                Ok(())
-            }
-
-            Expr_::Binop(x) => {
-                let (binop, e1, e2) = (&x.0, &x.1, &x.2);
+            Expr_::Binop(box (binop, e1, e2)) => {
                 match (binop, &e2.2) {
                     (Bop::Eq(_), Expr_::Await(_)) | (Bop::Eq(_), Expr_::Yield(_)) => {
                         // Visit e2 before e1. The ordering of declvars in async
@@ -131,13 +111,15 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
             }
 
-            Expr_::Lvar(x) => Ok(self.add_local(x.name())),
-            Expr_::ClassGet(x) if x.as_ref().2 == PropOrMethod::IsProp => {
-                self.on_class_get(&x.0, &x.1, false)
+            Expr_::Lvar(x) => {
+                self.add_local(x.name());
+                Ok(())
             }
+
             // For an Lfun, we don't want to recurse, because it's a separate scope.
             Expr_::Lfun(_) => Ok(()),
-            Expr_::Efun(x) => {
+
+            Expr_::Efun(box (fun_, use_list)) => {
                 // at this point AST is already rewritten so use lists on EFun nodes
                 // contain list of captured variables. However if use list was initially absent
                 // it is not correct to traverse such nodes to collect locals because it will impact
@@ -152,7 +134,6 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 // $b = 2;
                 //
                 // 'explicit_use_set' is used to in order to avoid synthesized use list
-                let (fun_, use_list) = (&x.0, &x.1);
                 let fn_name = &fun_.name.1;
                 let has_use_list = self
                     .context
@@ -165,51 +146,28 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 Ok(())
             }
-            Expr_::Call(x) => {
-                let (func_e, pos_args, unpacked_arg) = (&x.0, &x.2, &x.3);
-                if let Expr_::Id(x) = &func_e.2 {
-                    let call_name = &x.1;
-                    if call_name == emitter_special_functions::SET_FRAME_METADATA {
-                        self.add_local("$86metadata");
-                    }
-                }
-                let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.2 {
-                    // Only add $this to locals if it's bare
-                    Expr_::Lvar(id) if &(id.1).1 == "$this" => Ok(()),
-                    _ => self_.visit_expr(env, x),
-                };
+
+            Expr_::Call(box (func_e, _, pos_args, unpacked_arg)) => {
                 match &func_e.2 {
-                    Expr_::ClassGet(x) if x.as_ref().2 == PropOrMethod::IsMethod => {
-                        let (id, prop) = (&x.0, &x.1);
-                        self.on_class_get(id, prop, true)?
+                    Expr_::Id(box ast_defs::Id(_, call_name)) => {
+                        if call_name == emitter_special_functions::SET_FRAME_METADATA {
+                            self.add_local("$86metadata");
+                        }
+                    }
+                    Expr_::ClassGet(box (id, prop, pom)) if *pom == PropOrMethod::IsMethod => {
+                        self.on_class_get(id, prop)?
                     }
                     _ => self.visit_expr(env, func_e)?,
                 }
                 // Calling convention doesn't matter here: we're just trying to figure out what
                 // variables are declared in this scope.
-                for (_, arg) in pos_args {
-                    on_arg(self, env, arg)?
-                }
+                pos_args.recurse(env, self.object())?;
                 if let Some(arg) = unpacked_arg {
-                    on_arg(self, env, arg)?
+                    arg.recurse(env, self.object())?;
                 }
                 Ok(())
             }
-            Expr_::New(x) => {
-                let (exprs1, expr2) = (&x.2, &x.3);
 
-                let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.2 {
-                    Expr_::Lvar(x) if &(x.1).1 == "$this" => Ok(()),
-                    _ => self_.visit_expr(env, expr),
-                };
-                for expr in exprs1 {
-                    add_bare_expr(self, env, expr)?;
-                }
-                if let Some(expr) = expr2 {
-                    add_bare_expr(self, env, expr)?
-                }
-                Ok(())
-            }
             e => e.recurse(env, self.object()),
         }
     }

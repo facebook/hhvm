@@ -17,6 +17,9 @@ module JSON = Hh_json
 
 exception Shape_analysis_exn = Shape_analysis_exn
 
+let simplify env constraints =
+  Solver.deduce constraints |> Solver.produce_results env
+
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let { mode; verbosity } = options in
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
@@ -50,14 +53,14 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
           Format.printf "%s\n" (show_shape_result empty_typing_env result))
     in
     let process_callable id constraints =
-      Solver.simplify empty_typing_env constraints |> print_callable_summary id
+      simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
     |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.iter process_callable
   | Codemod ->
     let process_callable constraints =
-      Solver.simplify empty_typing_env constraints
+      simplify empty_typing_env constraints
       |> Codemod.of_results empty_typing_env
     in
     Walker.program ctx tast
@@ -69,8 +72,6 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   | SolveConstraints -> ()
 
 let callable = Walker.callable
-
-let simplify = Solver.simplify
 
 let show_shape_result = show_shape_result
 

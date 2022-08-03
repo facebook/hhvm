@@ -8,4 +8,7 @@
 
 open Shape_analysis_types
 
-val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
+val deduce : constraint_ list -> constraint_ list
+
+val produce_results :
+  Typing_env_types.env -> constraint_ list -> shape_result list

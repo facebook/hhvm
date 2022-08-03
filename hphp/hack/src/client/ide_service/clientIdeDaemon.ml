@@ -36,6 +36,35 @@ let is_outfd_write_error (exn : Exception.t) : bool =
   | Outfd_write_error _ -> true
   | _ -> false
 
+type common_state = {
+  hhi_root: Path.t;
+      (** hhi_root files are written during initialize, deleted at shutdown, and
+      refreshed periodically in case the tmp-cleaner has deleted them. *)
+  sienv: SearchUtils.si_env; [@opaque]
+      (** sienv provides autocomplete and find-symbols. It is constructed during
+      initialization and stores a few in-memory structures such as namespace-list,
+      plus in-memory deltas. It is also updated during process_changed_files. *)
+  popt: ParserOptions.t;  (** parser options *)
+  tcopt: TypecheckerOptions.t;  (** typechecker options *)
+  local_memory: Provider_backend.local_memory; [@opaque]
+      (** Local_memory backend; includes decl caches *)
+}
+[@@deriving show]
+
+type open_files_state = {
+  open_files: Provider_context.entries;
+      (** all open files, along with caches of their ASTs and TASTs and errors *)
+  changed_files_to_process: Relative_path.Set.t;
+      (** changed_files_to_process is grown during File_changed events, and steadily
+  whittled down one by one in `serve` as we get around to processing them
+  via `process_changed_files`. *)
+  changed_files_denominator: int;
+      (** the user likes to see '5/10' for how many changed files has been processed
+  in the current batch of changes. The denominator counts up for every new file
+  that has to be processed, until the batch ends - i.e. changed_files_to_process
+  becomes empty - and we reset the denominator. *)
+}
+
 (** istate, "initialized state", is the state the daemon after it has
 finished initialization (i.e. finished loading saved state),
 concerning these data-structures:
@@ -125,8 +154,8 @@ Here are the algorithms we use that satisfy those invariants.
 *)
 type istate = {
   icommon: common_state;
-  ifiles: open_files_state;
-  naming_table: Naming_table.t;
+  ifiles: open_files_state; [@opaque]
+  naming_table: Naming_table.t; [@opaque]
       (** the forward-naming-table is constructed during initialize and updated
       during process_changed_files. It stores an in-memory map of FileInfos that
       have changed since sqlite. When a file is changed on disk, we need this to
@@ -138,40 +167,13 @@ type istate = {
 init message (and has parsed config files to get popt/tcopt, has initialized
 glean, as written out hhi files) but before it has loaded saved-state or processed
 file updates. *)
-and dstate = {
+type dstate = {
   start_time: float;
       (** When did we kick off the attempt to load saved-state? *)
   dcommon: common_state;
-  dfiles: open_files_state;
+  dfiles: open_files_state; [@opaque]
 }
-
-and common_state = {
-  hhi_root: Path.t;
-      (** hhi_root files are written during initialize, deleted at shutdown, and
-      refreshed periodically in case the tmp-cleaner has deleted them. *)
-  sienv: SearchUtils.si_env;
-      (** sienv provides autocomplete and find-symbols. It is constructed during
-      initialization and stores a few in-memory structures such as namespace-list,
-      plus in-memory deltas. It is also updated during process_changed_files. *)
-  popt: ParserOptions.t;  (** parser options *)
-  tcopt: TypecheckerOptions.t;  (** typechecker options *)
-  local_memory: Provider_backend.local_memory;
-      (** Local_memory backend; includes decl caches *)
-}
-
-and open_files_state = {
-  open_files: Provider_context.entries;
-      (** all open files, along with caches of their ASTs and TASTs and errors *)
-  changed_files_to_process: Relative_path.Set.t;
-      (** changed_files_to_process is grown during File_changed events, and steadily
-  whittled down one by one in `serve` as we get around to processing them
-  via `process_changed_files`. *)
-  changed_files_denominator: int;
-      (** the user likes to see '5/10' for how many changed files has been processed
-  in the current batch of changes. The denominator counts up for every new file
-  that has to be processed, until the batch ends - i.e. changed_files_to_process
-  becomes empty - and we reset the denominator. *)
-}
+[@@deriving show]
 
 type state =
   | Pending_init  (** We haven't yet received init request *)
@@ -747,6 +749,9 @@ let handle_request :
               Lwt_message_queue.push message_queue (LoadedState result)
             in
             Lwt.return_unit);
+        log
+          "Finished saved state initialization. State: %s"
+          (show_dstate dstate);
         Lwt.return (During_init dstate, Ok ())
       with
       | exn ->

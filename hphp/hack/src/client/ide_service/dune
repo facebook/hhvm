@@ -18,7 +18,7 @@
   state_loader
   sys_utils)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name client_ide_message)

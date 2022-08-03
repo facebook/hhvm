@@ -150,20 +150,38 @@ impl std::fmt::Display for Type {
 }
 
 pub struct TypePath {
-    pub idents: Vec<String>,
+    pub targs: Vec<Type>,
+    pub modules: Vec<String>,
+    pub ty: String,
 }
 
 impl TypePath {
     pub fn simple(id: impl Into<String>) -> Self {
         Self {
-            idents: vec![id.into()],
+            modules: vec![],
+            ty: id.into(),
+            targs: vec![],
         }
     }
 }
 
 impl std::fmt::Display for TypePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.idents.join("."))
+        match self.targs.as_slice() {
+            [] => {}
+            [targ] => write!(f, "{} ", targ)?,
+            [first, rest @ ..] => {
+                write!(f, "({}", first)?;
+                for targ in rest {
+                    write!(f, ", {}", targ)?;
+                }
+                write!(f, ") ")?;
+            }
+        }
+        for module in self.modules.iter() {
+            write!(f, "{}.", module.to_case(Case::UpperCamel))?;
+        }
+        write!(f, "{}", self.ty.to_case(Case::Snake))
     }
 }
 

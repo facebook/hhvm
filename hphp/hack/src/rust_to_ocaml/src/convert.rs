@@ -181,21 +181,27 @@ impl ItemConverter {
                 return Ok(ir::TypePath::simple(tparam));
             }
         }
+        let segments_except_last = ty.path.segments.iter().rev().skip(1).rev();
         Ok(ir::TypePath {
-            idents: ty
-                .path
-                .segments
-                .iter()
+            modules: segments_except_last
                 .map(|seg| {
-                    ensure!(seg.arguments.is_empty(), "Type args in paths not supported");
-                    let ident = seg.ident.to_string();
-                    if std::ptr::eq(seg, last_seg) {
-                        Ok(ident.to_case(Case::Snake))
-                    } else {
-                        Ok(ident.to_case(Case::UpperCamel))
-                    }
+                    ensure!(
+                        seg.arguments.is_empty(),
+                        "Type args only supported in last path segment"
+                    );
+                    Ok(seg.ident.to_string())
                 })
-                .collect::<Result<Vec<_>>>()?,
+                .collect::<Result<_>>()?,
+            ty: last_seg.ident.to_string(),
+            targs: match &last_seg.arguments {
+                syn::PathArguments::AngleBracketed(args) => (args.args.iter())
+                    .filter_map(|arg| match arg {
+                        syn::GenericArgument::Type(arg) => Some(self.convert_type(arg)),
+                        _ => None,
+                    })
+                    .collect::<Result<_>>()?,
+                _ => vec![],
+            },
         })
     }
 }

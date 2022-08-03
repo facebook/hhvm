@@ -36,7 +36,7 @@ let codemod_kind_of_marker_kind = function
   | Parameter
   | Return ->
     Some Codemod.Hint
-  | Argument -> None
+  | Debug -> None
 
 let of_results env results =
   List.filter_map

@@ -6,5 +6,5 @@ Summary for \f:
   shape('e' => string)
 [7:8-25] [Allocation]:
   shape('f' => float)
-[10:13-15] [Argument]:
+[10:13-15] [Debug]:
   shape('d' => int, 'e' => string, 'f' => float, 'fixpoint' => bool)

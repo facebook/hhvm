@@ -4,8 +4,8 @@ Summary for \f:
   shape('a' => int)
 [5:8-25] [Allocation]:
   shape('b' => bool)
-[6:12-14] [Argument]:
+[6:11-13] [Debug]:
   shape('a' => int)
-[6:16-18] [Argument]:
+[7:11-13] [Debug]:
   shape('b' => bool)
 Summary for \inspect2:

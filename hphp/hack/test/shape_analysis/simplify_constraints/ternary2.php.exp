@@ -4,5 +4,5 @@ Summary for \f:
   shape('a' => int)
 [4:31-46] [Allocation]:
   shape('b' => int)
-[5:11-13] [Argument]:
+[5:11-13] [Debug]:
   shape(?'a' => int, ?'b' => int)

@@ -2,11 +2,11 @@
 Summary for \f:
 [4:8-14] [Allocation]:
   shape()
-[9:15-17] [Argument]:
+[9:15-17] [Debug]:
   shape('a' => int)
-[13:15-17] [Argument]:
+[13:15-17] [Debug]:
   shape('b' => string)
-[17:15-17] [Argument]:
+[17:15-17] [Debug]:
   shape('c' => bool)
-[19:11-13] [Argument]:
+[19:11-13] [Debug]:
   shape(?'a' => int, ?'b' => string, ?'c' => bool)

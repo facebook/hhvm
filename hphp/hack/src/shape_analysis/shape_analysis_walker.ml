@@ -228,16 +228,19 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         (env, None)
       | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)
     end
-  | A.Call (_base, _targs, args, _unpacked) ->
-    (* TODO: This is obviously incomplete. It just adds a constraint to each
-       dict argument so that we know what shape type that reaches to the
-       given position is. *)
+  | A.Call ((_, _, A.Id (_, f_id)), _targs, args, _unpacked) ->
     let expr_arg env (_param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
       match arg_entity with
       | Some arg_entity_ ->
-        let constraint_ = decorate ~origin:__LINE__ @@ Marks (Argument, pos) in
-        let env = Env.add_constraint env constraint_ in
+        let env =
+          if String.equal f_id SN.Hips.inspect then
+            let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
+            Env.add_constraint env constraint_
+          else
+            env
+        in
+        (* TODO(T128046165) Generate and add inter-procedural constraints *)
         let new_entity_ = Literal pos in
         let env =
           when_tast_check env.tast_env ~default:env @@ fun () ->

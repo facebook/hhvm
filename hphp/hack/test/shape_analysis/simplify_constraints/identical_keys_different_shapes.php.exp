@@ -4,7 +4,7 @@ Summary for \f:
   shape()
 [3:37-56] [Parameter]:
   shape()
-[7:11-14] [Argument]:
+[7:11-14] [Debug]:
   shape('k' => int)
-[8:11-14] [Argument]:
+[8:11-14] [Debug]:
   shape('k' => bool)

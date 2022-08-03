@@ -1120,6 +1120,10 @@ module Shapes = struct
   let toDict = "toDict"
 end
 
+module Hips = struct
+  let inspect = "\\inspect"
+end
+
 module Superglobals = struct
   let globals = "$GLOBALS"
 

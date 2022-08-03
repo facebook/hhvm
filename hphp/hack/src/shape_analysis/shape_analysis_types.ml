@@ -42,7 +42,7 @@ type marker_kind =
   | Allocation
   | Parameter
   | Return
-  | Argument
+  | Debug
 [@@deriving show { with_path = false }]
 
 module Codemod = struct

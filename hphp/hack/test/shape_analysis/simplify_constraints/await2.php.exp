@@ -2,5 +2,5 @@
 Summary for \f:
 [3:28-45] [Parameter]:
   shape()
-[6:11-13] [Argument]:
+[6:11-13] [Debug]:
   shape('k' => int)

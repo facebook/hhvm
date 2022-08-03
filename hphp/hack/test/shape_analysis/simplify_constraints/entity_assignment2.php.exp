@@ -2,5 +2,5 @@
 Summary for \f:
 [4:8-14] [Allocation]:
   shape('a' => nothing)
-[8:11-13] [Argument]:
+[8:11-13] [Debug]:
   shape('a' => nothing)

@@ -2,5 +2,5 @@
 Summary for \f:
 [6:8-14] [Allocation]:
   shape()
-[10:11-13] [Argument]:
+[10:11-13] [Debug]:
   shape(?'k' => int)

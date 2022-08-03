@@ -10,5 +10,5 @@ Summary for \f:
   shape('d' => bool)
 [18:14-29] [Allocation]:
   shape('e' => int)
-[23:11-13] [Argument]:
+[23:11-13] [Debug]:
   shape(?'a' => int, ?'b' => float, ?'c' => bool, ?'d' => bool, ?'e' => int, 'f' => int)

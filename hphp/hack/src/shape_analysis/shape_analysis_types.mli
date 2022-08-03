@@ -62,7 +62,7 @@ type marker_kind =
   | Return
       (** A dict return of a function or method such as `function
           f(): dict<string,int> {...}` *)
-  | Argument
+  | Debug
       (** A dict argument to a function or method such as `$d = dict[]; f($d)`
        *)
 [@@deriving show]

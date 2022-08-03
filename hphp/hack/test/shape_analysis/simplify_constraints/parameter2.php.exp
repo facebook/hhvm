@@ -2,7 +2,7 @@
 Summary for \f:
 [3:20-37] [Parameter]:
   shape()
-[5:11-13] [Argument]:
+[5:11-13] [Debug]:
   shape('k' => int)
-[7:11-13] [Argument]:
+[7:11-13] [Debug]:
   shape('k' => int, 'l' => int)

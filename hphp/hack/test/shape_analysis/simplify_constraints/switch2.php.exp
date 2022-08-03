@@ -6,5 +6,5 @@ Summary for \f:
   shape('b' => int)
 [13:12-29] [Allocation]:
   shape('c' => bool)
-[16:11-13] [Argument]:
+[16:11-13] [Debug]:
   shape('a' => string, ?'b' => int, ?'c' => bool)

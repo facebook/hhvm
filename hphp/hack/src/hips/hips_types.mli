@@ -55,4 +55,7 @@ module type Intra = sig
       "Has_static_key(q, 'a', int)" otherwise. *)
   val substitute_inter_intra :
     inter_constraint -> intra_constraint -> intra_constraint
+
+  (** Deduces a simplified list of constraints.  *)
+  val deduce : any_constraint list -> any_constraint list
 end

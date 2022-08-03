@@ -35,8 +35,9 @@ module Inter (I : Intra) : sig
     any_constraint list SMap.t
 
   (** The call "analyse base" repeatedly applies constraint substitution with
-      respect to "base", beginning with "base" itself. It either finds a fixpoint,
-      in which case it outputs "Convergent fp", or terminates early, in which case
-      it outputs "Divergent p". *)
+      respect to "base" postcomposed with constraint deduction, beginning with
+      "base" itself. It either finds a fixpoint, in which case it outputs
+      "Convergent fp", or terminates early, in which case it outputs
+      "Divergent p". *)
   val analyse : any_constraint list SMap.t -> solution
 end

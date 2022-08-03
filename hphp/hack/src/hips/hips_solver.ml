@@ -78,10 +78,13 @@ module Inter (I : Intra) = struct
         let substituted_constraint_map =
           substitute ~base_constraint_map argument_constraint_map
         in
-        if equiv argument_constraint_map substituted_constraint_map then
+        let deduced_constraint_map =
+          SMap.map I.deduce substituted_constraint_map
+        in
+        if equiv argument_constraint_map deduced_constraint_map then
           Convergent argument_constraint_map
         else
-          analyse_help (completed_iterations + 1) substituted_constraint_map
+          analyse_help (completed_iterations + 1) deduced_constraint_map
     in
     analyse_help 0 base_constraint_map
 end

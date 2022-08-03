@@ -23,6 +23,7 @@ use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 use std::hash::Hash;
+use std::sync::Arc;
 
 use crate::decl;
 use crate::local;
@@ -388,18 +389,18 @@ pub enum ReasonImpl<R, P> {
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
-pub struct BReason(Box<ReasonImpl<BReason, BPos>>);
+pub struct BReason(Arc<ReasonImpl<BReason, BPos>>);
 
 impl Reason for BReason {
     type Pos = BPos;
 
     fn mk(cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self {
         let x = cons();
-        Self(Box::new(x))
+        Self(Arc::new(x))
     }
 
     fn none() -> Self {
-        BReason(Box::new(ReasonImpl::Rnone))
+        BReason(Arc::new(ReasonImpl::Rnone))
     }
 
     fn pos(&self) -> &BPos {

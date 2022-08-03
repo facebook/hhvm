@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+use convert_case::Case;
+use convert_case::Casing;
 use derive_more::Display;
 use hash::IndexMap;
 
@@ -13,21 +16,35 @@ impl std::fmt::Display for File {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (name, def) in self.defs.iter() {
             match def {
-                Def::Alias { doc, ty } => {
+                Def::Alias { doc, tparams, ty } => {
                     write_toplevel_doc_comment(f, doc)?;
-                    writeln!(f, "type {name} = {ty}")?
+                    write!(f, "type ")?;
+                    write_type_parameters(f, tparams)?;
+                    writeln!(f, "{name} = {ty}")?
                 }
-                Def::Record { doc, fields } => {
+                Def::Record {
+                    doc,
+                    tparams,
+                    fields,
+                } => {
                     write_toplevel_doc_comment(f, doc)?;
-                    writeln!(f, "type {name} = {{")?;
+                    write!(f, "type ")?;
+                    write_type_parameters(f, tparams)?;
+                    writeln!(f, "{name} = {{")?;
                     for field in fields {
                         writeln!(f, "  {field}")?;
                     }
                     writeln!(f, "}}")?;
                 }
-                Def::Variant { doc, variants } => {
+                Def::Variant {
+                    doc,
+                    tparams,
+                    variants,
+                } => {
                     write_toplevel_doc_comment(f, doc)?;
-                    writeln!(f, "type {name} =")?;
+                    write!(f, "type ")?;
+                    write_type_parameters(f, tparams)?;
+                    writeln!(f, "{name} =")?;
                     for variant in variants {
                         writeln!(f, "  | {variant}")?;
                     }
@@ -42,14 +59,17 @@ impl std::fmt::Display for File {
 pub enum Def {
     Alias {
         doc: Vec<String>,
+        tparams: Vec<String>,
         ty: Type,
     },
     Record {
         doc: Vec<String>,
+        tparams: Vec<String>,
         fields: Vec<Field>,
     },
     Variant {
         doc: Vec<String>,
+        tparams: Vec<String>,
         variants: Vec<Variant>,
     },
 }
@@ -205,5 +225,12 @@ fn write_field_or_variant_doc_comment(
         write!(f, " ")?;
     }
     write!(f, "*)\n")?;
+    Ok(())
+}
+
+fn write_type_parameters(f: &mut std::fmt::Formatter<'_>, tparams: &[String]) -> std::fmt::Result {
+    for tparam in tparams.iter() {
+        write!(f, "'{} ", tparam.to_case(Case::Snake))?;
+    }
     Ok(())
 }

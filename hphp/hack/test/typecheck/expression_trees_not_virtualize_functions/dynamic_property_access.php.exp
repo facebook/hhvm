@@ -1,0 +1,8 @@
+File "dynamic_property_access.php", line 12, characters 5-10:
+Expression trees only support named property access. (Parsing[1002])
+File "dynamic_property_access.php", line 12, characters 9-10:
+Dynamic method or attribute access is not allowed on a non-dynamic value. (Naming[2011])
+File "dynamic_property_access.php", line 12, characters 9-10:
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+  File "dynamic_property_access.php", line 9, characters 62-72:
+  Did you mean `$splice_var` instead?

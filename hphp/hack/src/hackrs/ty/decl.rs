@@ -9,6 +9,7 @@ mod from_oxidized;
 mod printer;
 pub mod shallow;
 pub mod subst;
+mod to_ocamlrep;
 mod to_oxidized;
 pub mod ty;
 

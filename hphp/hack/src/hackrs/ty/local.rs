@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod decl;
 mod kind;
+mod to_ocamlrep;
 mod ty;
 mod tyvar;
 mod variance;

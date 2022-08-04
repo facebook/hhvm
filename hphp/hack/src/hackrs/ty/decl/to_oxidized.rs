@@ -366,21 +366,6 @@ impl<'a, P: Pos> ToOxidized<'a> for Enforceable<P> {
     }
 }
 
-impl<P: Pos> ocamlrep::ToOcamlRep for Enforceable<P> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        let mut block = alloc.block_with_size(2);
-        let pos = self
-            .as_ref()
-            .map_or_else(|| alloc.add(obr::pos::Pos::none()), |p| alloc.add(p));
-        alloc.set_field(&mut block, 0, pos);
-        alloc.set_field(&mut block, 1, alloc.add_copy(self.is_some()));
-        block.build()
-    }
-}
-
 impl<'a, R: Reason> ToOxidized<'a> for folded::SubstContext<R> {
     type Output = &'a obr::decl_defs::SubstContext<'a>;
 
@@ -529,91 +514,6 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
     }
 }
 
-// We need to hand-roll a ToOcamlRep impl for FoldedClass instead of deriving it
-// in order to synthesize the `need_init` and `abstract` fields, which we derive
-// from other information in the class in rupro (whereas OCaml stores it
-// redundantly).
-impl<R: Reason> ocamlrep::ToOcamlRep for folded::FoldedClass<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        // Destructure to help ensure we convert every field.
-        let Self {
-            name,
-            pos,
-            kind,
-            is_final,
-            is_const,
-            is_internal,
-            is_xhp,
-            has_xhp_keyword,
-            support_dynamic_type,
-            module,
-            tparams,
-            where_constraints,
-            substs,
-            ancestors,
-            props,
-            static_props,
-            methods,
-            static_methods,
-            consts,
-            type_consts,
-            xhp_enum_values,
-            constructor,
-            deferred_init_members,
-            req_ancestors,
-            req_ancestors_extends,
-            req_class_ancestors,
-            extends,
-            sealed_whitelist,
-            xhp_attr_deps,
-            enum_type,
-            decl_errors,
-            docs_url,
-        } = self;
-        let need_init = self.has_concrete_constructor();
-        let abstract_ = self.is_abstract();
-        let mut block = alloc.block_with_size(34);
-        alloc.set_field(&mut block, 0, alloc.add_copy(need_init));
-        alloc.set_field(&mut block, 1, alloc.add_copy(abstract_));
-        alloc.set_field(&mut block, 2, alloc.add(is_final));
-        alloc.set_field(&mut block, 3, alloc.add(is_const));
-        alloc.set_field(&mut block, 4, alloc.add(is_internal));
-        alloc.set_field(&mut block, 5, alloc.add(deferred_init_members));
-        alloc.set_field(&mut block, 6, alloc.add(kind));
-        alloc.set_field(&mut block, 7, alloc.add(is_xhp));
-        alloc.set_field(&mut block, 8, alloc.add(has_xhp_keyword));
-        alloc.set_field(&mut block, 9, alloc.add(module));
-        alloc.set_field(&mut block, 10, alloc.add(name));
-        alloc.set_field(&mut block, 11, alloc.add(pos));
-        alloc.set_field(&mut block, 12, alloc.add(tparams));
-        alloc.set_field(&mut block, 13, alloc.add(where_constraints));
-        alloc.set_field(&mut block, 14, alloc.add(substs));
-        alloc.set_field(&mut block, 15, alloc.add(consts));
-        alloc.set_field(&mut block, 16, alloc.add(type_consts));
-        alloc.set_field(&mut block, 17, alloc.add(props));
-        alloc.set_field(&mut block, 18, alloc.add(static_props));
-        alloc.set_field(&mut block, 19, alloc.add(methods));
-        alloc.set_field(&mut block, 20, alloc.add(static_methods));
-        alloc.set_field(&mut block, 21, alloc.add(constructor));
-        alloc.set_field(&mut block, 22, alloc.add(ancestors));
-        alloc.set_field(&mut block, 23, alloc.add(support_dynamic_type));
-        alloc.set_field(&mut block, 24, alloc.add(req_ancestors));
-        alloc.set_field(&mut block, 25, alloc.add(req_ancestors_extends));
-        alloc.set_field(&mut block, 26, alloc.add(req_class_ancestors));
-        alloc.set_field(&mut block, 27, alloc.add(extends));
-        alloc.set_field(&mut block, 28, alloc.add(sealed_whitelist));
-        alloc.set_field(&mut block, 29, alloc.add(xhp_attr_deps));
-        alloc.set_field(&mut block, 30, alloc.add(xhp_enum_values));
-        alloc.set_field(&mut block, 31, alloc.add(enum_type));
-        alloc.set_field(&mut block, 32, alloc.add(decl_errors));
-        alloc.set_field(&mut block, 33, alloc.add(docs_url));
-        block.build()
-    }
-}
-
 impl<'a> ToOxidized<'a> for folded::FoldedElement {
     type Output = &'a obr::decl_defs::Element<'a>;
 
@@ -660,48 +560,6 @@ impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
                     stack.iter().map(|s| s.to_oxidized(arena)),
                 ),
             },
-        }
-    }
-}
-
-impl<P: ocamlrep::ToOcamlRep> ocamlrep::ToOcamlRep for crate::decl_error::DeclError<P> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        match self {
-            Self::WrongExtendKind {
-                pos,
-                kind,
-                name,
-                parent_pos,
-                parent_kind,
-                parent_name,
-            } => {
-                let mut block = alloc.block_with_size_and_tag(6usize, 0u8);
-                alloc.set_field(&mut block, 0, alloc.add(pos));
-                alloc.set_field(&mut block, 1, alloc.add(kind));
-                alloc.set_field(&mut block, 2, alloc.add(name));
-                alloc.set_field(&mut block, 3, alloc.add(parent_pos));
-                alloc.set_field(&mut block, 4, alloc.add(parent_kind));
-                alloc.set_field(&mut block, 5, alloc.add(parent_name));
-                block.build()
-            }
-            Self::CyclicClassDef(pos, stack) => {
-                // The stack is an SSet rather than a list in OCaml, so we need
-                // to construct a tree set here. One way is sorting the list and
-                // passing it to `sorted_iter_to_ocaml_set`.
-                let mut stack = stack.clone();
-                stack.sort();
-                stack.dedup();
-                let mut iter = stack.iter().copied().map(|s| alloc.add(s.as_str()));
-                let (stack, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, stack.len());
-
-                let mut block = alloc.block_with_size_and_tag(2usize, 1u8);
-                alloc.set_field(&mut block, 0, alloc.add(pos));
-                alloc.set_field(&mut block, 1, stack);
-                block.build()
-            }
         }
     }
 }

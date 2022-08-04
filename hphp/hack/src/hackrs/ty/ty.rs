@@ -7,3 +7,4 @@ pub mod local;
 pub mod local_error;
 pub mod prop;
 pub mod reason;
+mod to_ocamlrep;

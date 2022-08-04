@@ -1776,13 +1776,13 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   // It is possible that $name does not get serialized. If a class derives
   // from ReflectionClass and the return value of its __sleep() function does
   // not contain 'name', $name gets ignored. So, we restore $name here.
-  obj->setProp(nullptr, s_name.get(), result.asTypedValue());
+  obj->setProp(nullctx, s_name.get(), result.asTypedValue());
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
   assertx(Reflection::s_ReflectionExtensionClass);
   auto const name = this_->getProp(
-    Reflection::s_ReflectionExtensionClass,
+    MemberLookupContext(Reflection::s_ReflectionExtensionClass),
     s___name.get()
   );
   return tvCastToString(name.tv());
@@ -1924,9 +1924,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->declProperties()[propIdx];
     data->setInstanceProp(prop);
-    this_->setProp(nullptr, s_class.get(),
+    this_->setProp(nullctx, s_class.get(),
                    make_tv<KindOfPersistentString>(prop->cls->name()));
-    this_->setProp(nullptr, s_name.get(),
+    this_->setProp(nullctx, s_name.get(),
                    make_tv<KindOfPersistentString>(prop->name));
     return;
   }
@@ -1937,9 +1937,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->staticProperties()[propIdx];
     data->setStaticProp(prop);
-    this_->setProp(nullptr, s_class.get(),
+    this_->setProp(nullctx, s_class.get(),
                    make_tv<KindOfPersistentString>(prop->cls->name()));
-    this_->setProp(nullptr, s_name.get(),
+    this_->setProp(nullctx, s_name.get(),
                    make_tv<KindOfPersistentString>(prop->name));
     return;
   }
@@ -1956,9 +1956,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
         obj->raiseReadDynamicProp(prop_name.get());
       }
       data->setDynamicProp();
-      this_->setProp(nullptr, s_class.get(),
+      this_->setProp(nullctx, s_class.get(),
                      make_tv<KindOfPersistentString>(cls->name()));
-      this_->setProp(nullptr, s_name.get(), prop_name.asTypedValue());
+      this_->setProp(nullctx, s_name.get(), prop_name.asTypedValue());
       return;
     }
   }

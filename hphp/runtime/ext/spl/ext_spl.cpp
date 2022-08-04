@@ -214,7 +214,7 @@ static req::ptr<T> getDir(const Object& dir_iter) {
                 "Only cast to directories");
   assertx(s_DirectoryIterator_class);
   auto const dir = dir_iter->getProp(
-    s_DirectoryIterator_class, s_dir.get()
+    MemberLookupContext(s_DirectoryIterator_class), s_dir.get()
   );
   assertx(dir.is_set());
   assertx(dir.type() == KindOfResource);
@@ -227,7 +227,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
   if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
     auto const path = array_dir->path();
     assertx(s_DirectoryIterator_class);
-    this_->setProp(s_DirectoryIterator_class, s_dirName.get(), path.asTypedValue());
+    this_->setProp(MemberLookupContext(s_DirectoryIterator_class), s_dirName.get(), path.asTypedValue());
   }
 
   return HHVM_FN(readdir)(Resource(dir));

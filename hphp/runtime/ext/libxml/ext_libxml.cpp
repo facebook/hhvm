@@ -643,22 +643,23 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret{s_LibXMLError_class};
-  ret->setProp(nullptr, s_level.get(), make_tv<KindOfInt64>(error.level));
-  ret->setProp(nullptr, s_code.get(), make_tv<KindOfInt64>(error.code));
-  ret->setProp(nullptr, s_column.get(), make_tv<KindOfInt64>(error.int2));
+  // Setting only public properties
+  ret->setProp(nullctx, s_level.get(), make_tv<KindOfInt64>(error.level));
+  ret->setProp(nullctx, s_code.get(), make_tv<KindOfInt64>(error.code));
+  ret->setProp(nullctx, s_column.get(), make_tv<KindOfInt64>(error.int2));
   if (error.message) {
     String message(error.message);
-    ret->setProp(nullptr, s_message.get(), message.asTypedValue());
+    ret->setProp(nullctx, s_message.get(), message.asTypedValue());
   } else {
-    ret->setProp(nullptr, s_message.get(), make_tv<KindOfNull>());
+    ret->setProp(nullctx, s_message.get(), make_tv<KindOfNull>());
   }
   if (error.file) {
     String file(error.file);
-    ret->setProp(nullptr, s_file.get(), file.asTypedValue());
+    ret->setProp(nullctx, s_file.get(), file.asTypedValue());
   } else {
-    ret->setProp(nullptr, s_file.get(), make_tv<KindOfNull>());
+    ret->setProp(nullctx, s_file.get(), make_tv<KindOfNull>());
   }
-  ret->setProp(nullptr, s_line.get(), make_tv<KindOfInt64>(error.line));
+  ret->setProp(nullctx, s_line.get(), make_tv<KindOfInt64>(error.line));
   return ret;
 }
 

@@ -2290,7 +2290,7 @@ tv_lval propPreStdclass(TypedValue& tvRef) {
 
 template<MOpMode mode>
 inline tv_lval nullSafeProp(TypedValue& tvRef,
-                            Class* ctx,
+                            MemberLookupContext& ctx,
                             TypedValue base,
                             StringData* key,
                             ReadonlyOp op) {
@@ -2330,7 +2330,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places.
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any>
-inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
+inline tv_lval PropObj(TypedValue& tvRef, const MemberLookupContext& ctx,
                        ObjectData* instance, key_type<keyType> key,
                        ReadonlyOp op) {
   auto keySD = prepareKey(key);
@@ -2351,7 +2351,7 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
-inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
+inline tv_lval Prop(TypedValue& tvRef, const MemberLookupContext& ctx,
                     TypedValue base, key_type<keyType> key, ReadonlyOp op) {
   if (LIKELY(type(base) == KindOfObject)) {
     return PropObj<mode,keyType>(tvRef, ctx, val(base).pobj, key, op);
@@ -2397,7 +2397,7 @@ inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
 }
 
 template <KeyType kt>
-inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
+inline bool IssetPropObj(MemberLookupContext& ctx, ObjectData* instance, key_type<kt> key) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<kt>(keySD); };
 
@@ -2405,7 +2405,7 @@ inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
 }
 
 template <KeyType kt = KeyType::Any>
-bool IssetProp(Class* ctx, TypedValue base, key_type<kt> key) {
+bool IssetProp(MemberLookupContext& ctx, TypedValue base, key_type<kt> key) {
   if (LIKELY(type(base) == KindOfObject)) {
     return IssetPropObj<kt>(ctx, val(base).pobj, key);
   }
@@ -2419,7 +2419,7 @@ inline void SetPropNull() {
 }
 
 template <KeyType keyType>
-inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
+inline void SetPropObj(MemberLookupContext& ctx, ObjectData* instance, key_type<keyType> key,
                        TypedValue val, ReadonlyOp op) {
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
@@ -2430,7 +2430,7 @@ inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
 
 // $base->$key = $val
 template <KeyType keyType = KeyType::Any>
-inline void SetProp(Class* ctx, TypedValue base, key_type<keyType> key,
+inline void SetProp(MemberLookupContext& ctx, TypedValue base, key_type<keyType> key,
                     TypedValue val, ReadonlyOp op) {
   switch (type(base)) {
     case KindOfUninit:
@@ -2475,7 +2475,7 @@ inline tv_lval SetOpPropNull(TypedValue& tvRef) {
   return &tvRef;
 }
 
-inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
+inline tv_lval SetOpPropObj(TypedValue& tvRef, MemberLookupContext& ctx,
                             SetOpOp op, ObjectData* instance,
                             TypedValue key, TypedValue* rhs) {
   StringData* keySD = prepareKey(key);
@@ -2485,7 +2485,7 @@ inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
 
 // $base->$key <op>= $rhs
 inline tv_lval SetOpProp(TypedValue& tvRef,
-                         Class* ctx, SetOpOp op,
+                         MemberLookupContext& ctx, SetOpOp op,
                          TypedValue base, TypedValue key,
                          TypedValue* rhs) {
   switch (type(base)) {
@@ -2533,7 +2533,7 @@ inline TypedValue IncDecPropNull() {
   return make_tv<KindOfNull>();
 }
 
-inline TypedValue IncDecPropObj(Class* ctx,
+inline TypedValue IncDecPropObj(MemberLookupContext& ctx,
                           IncDecOp op,
                           ObjectData* base,
                           TypedValue key) {
@@ -2543,7 +2543,7 @@ inline TypedValue IncDecPropObj(Class* ctx,
 }
 
 inline TypedValue IncDecProp(
-  Class* ctx,
+  MemberLookupContext& ctx,
   IncDecOp op,
   TypedValue base,
   TypedValue key
@@ -2588,7 +2588,7 @@ inline TypedValue IncDecProp(
   unknownBaseType(type(base));
 }
 
-inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
+inline void UnsetPropObj(MemberLookupContext& ctx, ObjectData* instance, TypedValue key) {
   // Prepare key.
   auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
@@ -2596,7 +2596,7 @@ inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
   instance->unsetProp(ctx, keySD);
 }
 
-inline void UnsetProp(Class* ctx, TypedValue base, TypedValue key) {
+inline void UnsetProp(MemberLookupContext& ctx, TypedValue base, TypedValue key) {
   // Validate base.
   if (LIKELY(type(base) == KindOfObject)) {
     UnsetPropObj(ctx, val(base).pobj, key);

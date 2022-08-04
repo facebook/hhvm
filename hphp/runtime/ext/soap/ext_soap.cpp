@@ -1282,14 +1282,14 @@ static xmlDocPtr serialize_response_call(
           }
         }
         hdr_ret = ht->m_data;
-        obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asTypedValue());
+        obj->setProp(nullctx, s_headerfault.get(), *hdr_ret.asTypedValue());
       }
 
       if (h->function) {
         if (serialize_response_call2(head, h->function,
                                      h->function_name.data(), uri,
                                      hdr_ret, version, 0) == SOAP_ENCODED) {
-          obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asTypedValue());
+          obj->setProp(nullctx, s_headerfault.get(), *hdr_ret.asTypedValue());
           use = SOAP_ENCODED;
         }
       } else {
@@ -3030,19 +3030,19 @@ void HHVM_METHOD(SoapVar, __construct,
       return;
     }
   }
-  this_->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(ntype));
-  if (data.toBoolean()) this_->setProp(nullptr, s_enc_value.get(), *data.asTypedValue());
+  this_->setProp(nullctx, s_enc_type.get(), make_tv<KindOfInt64>(ntype));
+  if (data.toBoolean()) this_->setProp(nullctx, s_enc_value.get(), *data.asTypedValue());
   if (!type_name.empty()) {
-    this_->setProp(nullptr, s_enc_stype.get(), type_name.asTypedValue());
+    this_->setProp(nullctx, s_enc_stype.get(), type_name.asTypedValue());
   }
   if (!type_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_ns.get(), type_namespace.asTypedValue());
+    this_->setProp(nullctx, s_enc_ns.get(), type_namespace.asTypedValue());
   }
   if (!node_name.empty()) {
-    this_->setProp(nullptr, s_enc_name.get(), node_name.asTypedValue());
+    this_->setProp(nullctx, s_enc_name.get(), node_name.asTypedValue());
   }
   if (!node_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_namens.get(), node_namespace.asTypedValue());
+    this_->setProp(nullctx, s_enc_namens.get(), node_namespace.asTypedValue());
   }
 }
 
@@ -3101,10 +3101,10 @@ void HHVM_METHOD(SoapHeader, __construct,
   nativeData->m_data = data;
   nativeData->m_mustUnderstand = mustunderstand;
 
-  this_->setProp(nullptr, s_namespace.get(), ns.asTypedValue());
-  this_->setProp(nullptr, s_name.get(), name.asTypedValue());
-  this_->setProp(nullptr, s_data.get(), data.asInitTVTmp());
-  this_->setProp(nullptr, s_mustUnderstand.get(),
+  this_->setProp(nullctx, s_namespace.get(), ns.asTypedValue());
+  this_->setProp(nullctx, s_name.get(), name.asTypedValue());
+  this_->setProp(nullctx, s_data.get(), data.asInitTVTmp());
+  this_->setProp(nullctx, s_mustUnderstand.get(),
                  make_tv<KindOfBoolean>(mustunderstand));
 
   if (actor.isInteger() &&

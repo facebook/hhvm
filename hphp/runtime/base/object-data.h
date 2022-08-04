@@ -483,11 +483,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
   // never box the lval returned from getPropLval; use propB instead
-  tv_lval getPropLval(const Class*, const StringData*);
-  tv_rval getProp(const Class*, const StringData*) const;
+  tv_lval getPropLval(const MemberLookupContext&, const StringData*);
+  tv_rval getProp(const MemberLookupContext&, const StringData*) const;
   // Like getProp() but does not throw for <<__LateInit>>. Value can be
   // KindOfUninit.
-  tv_rval getPropIgnoreLateInit(const Class* ctx,
+  tv_rval getPropIgnoreLateInit(const MemberLookupContext& ctx,
                                 const StringData* key) const;
   // don't use getPropIgnoreAccessibility in new code
   tv_lval getPropIgnoreAccessibility(const StringData*);
@@ -510,7 +510,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
-  PropLookup getPropImpl(const Class*, const StringData*);
+  PropLookup getPropImpl(const MemberLookupContext&, const StringData*);
 
   enum class PropMode : int {
     ReadNoWarn,
@@ -519,25 +519,25 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
+  tv_lval propImpl(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval prop(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propW(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propU(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propD(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
 
-  bool propIsset(const Class* ctx, const StringData* key);
+  bool propIsset(const MemberLookupContext& ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op = ReadonlyOp::Any);
-  tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
+  void setProp(const MemberLookupContext& ctx, const StringData* key, TypedValue val, ReadonlyOp op = ReadonlyOp::Any);
+  tv_lval setOpProp(TypedValue& tvRef, const MemberLookupContext& ctx, SetOpOp op,
                     const StringData* key, TypedValue* val);
 
-  TypedValue incDecProp(Class* ctx, IncDecOp op, const StringData* key);
+  TypedValue incDecProp(const MemberLookupContext& ctx, IncDecOp op, const StringData* key);
 
-  void unsetProp(Class* ctx, const StringData* key);
+  void unsetProp(const MemberLookupContext& ctx, const StringData* key);
 
   tv_lval makeDynProp(const StringData* key);
 

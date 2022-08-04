@@ -1276,7 +1276,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     if (name) {
       ret.toObject()->o_set(String(name), any);
     } else {
-      ret.toObject()->setProp(nullptr, s_any.get(), *any.asTypedValue());
+      ret.toObject()->setProp(nullctx, s_any.get(), *any.asTypedValue());
     }
   }
 }
@@ -1424,7 +1424,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           return ret;
         }
         ret = create_object(ce, Array());
-        ret.toObject()->setProp(nullptr, s__.get(),
+        ret.toObject()->setProp(nullctx, s__.get(),
                                 *master_to_zval_int(enc, data).asTypedValue());
       } else {
         FIND_XML_NULL(data, ret);
@@ -1470,7 +1470,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         ret = create_object(ce, Array());
         soap_add_xml_ref(ret, data);
         ret.toObject()->setProp(
-          nullptr,
+          nullctx,
           s__.get(),
           *master_to_zval_int(sdlType->encode, data).asTypedValue()
         );
@@ -1485,7 +1485,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
     }
     if (sdlType->model) {
       if (redo_any) {
-        ret.toObject()->unsetProp(nullptr, s_any.get());
+        ret.toObject()->unsetProp(nullctx, s_any.get());
         soap_add_xml_ref(ret, data);
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);

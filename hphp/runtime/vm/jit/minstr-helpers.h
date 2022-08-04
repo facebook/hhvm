@@ -81,9 +81,10 @@ BASE_G_HELPER_TABLE(X)
   m(propCWS,   MOpMode::Warn,       KeyType::Str)
 
 #define X(nm, mode, kt)                                       \
-inline tv_lval nm(Class* ctx, TypedValue base, key_type<kt> key,\
+inline tv_lval nm(Class* cls, TypedValue base, key_type<kt> key,\
                   TypedValue& tvRef, ReadonlyOp op) {         \
-  return Prop<mode,kt>(tvRef, ctx, base, key, op);            \
+  auto ctx = HPHP::MemberLookupContext(cls);              \
+  return Prop<mode,kt>(tvRef, ctx, base, key, op);        \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -94,8 +95,9 @@ PROP_HELPER_TABLE(X)
   m(propCDS,   KeyType::Str)
 
 #define X(nm, kt)                                             \
-inline tv_lval nm(Class* ctx, TypedValue base, key_type<kt> key,\
+inline tv_lval nm(Class* cls, TypedValue base, key_type<kt> key,\
                   TypedValue& tvRef, ReadonlyOp op) {         \
+  auto ctx = HPHP::MemberLookupContext(cls);                  \
   return Prop<MOpMode::Define,kt>(tvRef, ctx, base, key, op); \
 }
 PROPD_HELPER_TABLE(X)
@@ -111,8 +113,9 @@ PROPD_HELPER_TABLE(X)
   m(propCWOS,  MOpMode::Warn,       KeyType::Str)    \
 
 #define X(nm, mode, kt)                                           \
-inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key, \
+inline tv_lval nm(Class* cls, ObjectData* base, key_type<kt> key, \
                   TypedValue& tvRef, ReadonlyOp op) {             \
+  auto ctx = HPHP::MemberLookupContext(cls);                      \
   return PropObj<mode,kt>(tvRef, ctx, base, key, op);             \
 }
 PROP_OBJ_HELPER_TABLE(X)
@@ -124,8 +127,9 @@ PROP_OBJ_HELPER_TABLE(X)
   m(propCDOS,  KeyType::Str)                         \
 
 #define X(nm, kt)                                                  \
-inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,  \
+inline tv_lval nm(Class* cls, ObjectData* base, key_type<kt> key,  \
                   TypedValue& tvRef, ReadonlyOp op) {              \
+  auto ctx = HPHP::MemberLookupContext(cls);                       \
   return PropObj<MOpMode::Define,kt>(tvRef, ctx, base, key, op);   \
 }
 PROPD_OBJ_HELPER_TABLE(X)
@@ -138,16 +142,18 @@ PROPD_OBJ_HELPER_TABLE(X)
   m(propQ,         MOpMode::Warn)                 \
 
 #define X(nm, mode)                                                \
-inline tv_lval nm(Class* ctx, TypedValue base, StringData* key,    \
+inline tv_lval nm(Class* cls, TypedValue base, StringData* key,    \
                       TypedValue& tvRef, ReadonlyOp op) {          \
-  return nullSafeProp<mode>(tvRef, ctx, base, key, op);            \
+  auto ctx = HPHP::MemberLookupContext(cls);                   \
+  return nullSafeProp<mode>(tvRef, ctx, base, key, op);        \
 }
 PROPQ_HELPER_TABLE(X)
 #undef X
 
 // NullSafe prop with object base.
-inline tv_lval propCOQ(Class* ctx, ObjectData* base, StringData* key,
+inline tv_lval propCOQ(Class* cls, ObjectData* base, StringData* key,
                        TypedValue& tvRef, ReadonlyOp op) {
+  auto ctx = HPHP::MemberLookupContext(cls);
   return base->prop(&tvRef, ctx, key, op);
 }
 
@@ -162,6 +168,8 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   return *result;
 }
 
+//TODO(T126821336): all ctxs below need module associated with them
+
 #define CGET_PROP_HELPER_TABLE(m)                      \
   /* name            keyType       mode  */            \
   m(cGetPropCQuiet,  KeyType::Any, MOpMode::None)      \
@@ -170,9 +178,10 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   m(cGetPropS,       KeyType::Str, MOpMode::Warn)      \
 
 #define X(nm, kt, mode)                                               \
-inline TypedValue nm(Class* ctx, TypedValue base, key_type<kt> key,   \
+inline TypedValue nm(Class* cls, TypedValue base, key_type<kt> key,   \
                      ReadonlyOp op) {                                 \
   TypedValue localTvRef;                                              \
+  auto ctx = HPHP::MemberLookupContext(cls);                          \
   auto result = Prop<mode,kt>(localTvRef, ctx, base, key, op);        \
   return cGetRefShuffle(localTvRef, result);                          \
 }
@@ -187,9 +196,10 @@ CGET_PROP_HELPER_TABLE(X)
   m(cGetPropSO,      KeyType::Str, MOpMode::Warn)      \
 
 #define X(nm, kt, mode)                                               \
-inline TypedValue nm(Class* ctx, ObjectData* base, key_type<kt> key,  \
+inline TypedValue nm(Class* cls, ObjectData* base, key_type<kt> key,  \
                      ReadonlyOp op) {                                 \
   TypedValue localTvRef;                                              \
+  auto ctx = HPHP::MemberLookupContext(cls);                          \
   auto result = PropObj<mode,kt>(localTvRef, ctx, base, key, op);     \
   return cGetRefShuffle(localTvRef, result);                          \
 }
@@ -204,20 +214,22 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
   m(cGetPropQQuiet,  MOpMode::None)     \
   m(cGetPropQ,       MOpMode::Warn)     \
 
-#define X(nm, mode)                                                \
-inline TypedValue nm(Class* ctx, TypedValue base, StringData* key, \
-                     ReadonlyOp op) {                              \
-  TypedValue localTvRef;                                           \
-  auto result = nullSafeProp<mode>(localTvRef, ctx, base, key, op);\
-  return cGetRefShuffle(localTvRef, result);                       \
+#define X(nm, mode)                                                     \
+inline TypedValue nm(Class* cls, TypedValue base, StringData* key,      \
+                     ReadonlyOp op) {                                   \
+  TypedValue localTvRef;                                                \
+  auto ctx = HPHP::MemberLookupContext(cls);                        \
+  auto result = nullSafeProp<mode>(localTvRef, ctx, base, key, op); \
+  return cGetRefShuffle(localTvRef, result);                            \
 }
 CGET_PROPQ_HELPER_TABLE(X)
 #undef X
 
 // NullSafe prop with object base.
-inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
+inline TypedValue cGetPropSOQ(Class* cls, ObjectData* base, StringData* key,
                               ReadonlyOp op) {
   TypedValue localTvRef;
+  auto ctx = HPHP::MemberLookupContext(cls);
   auto result = base->prop(&localTvRef, ctx, key, op);
   return cGetRefShuffle(localTvRef, result);
 }
@@ -229,9 +241,10 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
   m(setPropC,    KeyType::Any)           \
   m(setPropCS,   KeyType::Str)           \
 
-#define X(nm, kt)                                                            \
-inline void nm(Class* ctx, TypedValue base, key_type<kt> key, TypedValue val,\
-               ReadonlyOp op) {                                              \
+#define X(nm, kt)                                                                \
+inline void nm(Class* cls, TypedValue base, key_type<kt> key, TypedValue val,    \
+               ReadonlyOp op) {                                                  \
+  auto ctx = HPHP::MemberLookupContext(cls);                                 \
   HPHP::SetProp<kt>(ctx, base, key, val, op);                                \
 }
 SETPROP_HELPER_TABLE(X)
@@ -243,48 +256,55 @@ SETPROP_HELPER_TABLE(X)
   m(setPropCOS,  KeyType::Str)          \
 
 #define X(nm, kt)                                                              \
-inline void nm(Class* ctx, ObjectData* base, key_type<kt> key, TypedValue val, \
+inline void nm(Class* cls, ObjectData* base, key_type<kt> key, TypedValue val, \
                ReadonlyOp op) {                                                \
-  HPHP::SetPropObj<kt>(ctx, base, key, val, op);                               \
+  auto ctx = HPHP::MemberLookupContext(cls);                               \
+  HPHP::SetPropObj<kt>(ctx, base, key, val, op);                           \
 }
 SETPROP_OBJ_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-inline void unsetPropC(Class* ctx, TypedValue base, TypedValue key) {
+inline void unsetPropC(Class* cls, TypedValue base, TypedValue key) {
+  auto ctx = HPHP::MemberLookupContext(cls);
   HPHP::UnsetProp(ctx, base, key);
 }
 
-inline void unsetPropCO(Class* ctx, ObjectData* base, TypedValue key) {
+inline void unsetPropCO(Class* cls, ObjectData* base, TypedValue key) {
+  auto ctx = HPHP::MemberLookupContext(cls);
   HPHP::UnsetPropObj(ctx, base, key);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-inline TypedValue setOpPropC(Class* ctx, TypedValue base, TypedValue key,
+inline TypedValue setOpPropC(Class* cls, TypedValue base, TypedValue key,
                              TypedValue val, SetOpOp op) {
   TypedValue localTvRef;
+  auto ctx = HPHP::MemberLookupContext(cls);
   auto result = HPHP::SetOpProp(localTvRef, ctx, op, base, key, &val);
   return cGetRefShuffle(localTvRef, result);
 }
 
-inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
+inline TypedValue setOpPropCO(Class* cls, ObjectData* base, TypedValue key,
                               TypedValue val, SetOpOp op) {
   TypedValue localTvRef;
+  auto ctx = HPHP::MemberLookupContext(cls);
   auto result = SetOpPropObj(localTvRef, ctx, op, base, key, &val);
   return cGetRefShuffle(localTvRef, result);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-inline TypedValue incDecPropC(Class* ctx, TypedValue base, TypedValue key,
+inline TypedValue incDecPropC(Class* cls, TypedValue base, TypedValue key,
                               IncDecOp op) {
+  auto ctx = HPHP::MemberLookupContext(cls);
   return HPHP::IncDecProp(ctx, op, base, key);
 }
 
-inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
+inline TypedValue incDecPropCO(Class* cls, ObjectData* base, TypedValue key,
                                IncDecOp op) {
+  auto ctx = HPHP::MemberLookupContext(cls);
   return HPHP::IncDecPropObj(ctx, op, base, key);
 }
 
@@ -297,7 +317,8 @@ inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 #define X(nm, kt)                                                   \
 /* This returns uint64_t to ensure all 64 bits of rax are valid. */ \
-inline uint64_t nm(Class* ctx, TypedValue base, key_type<kt> key) { \
+inline uint64_t nm(Class* cls, TypedValue base, key_type<kt> key) { \
+  auto ctx = HPHP::MemberLookupContext(cls);                        \
   return HPHP::IssetProp<kt>(ctx, base, key);                       \
 }
 ISSET_PROP_HELPER_TABLE(X)
@@ -310,7 +331,8 @@ ISSET_PROP_HELPER_TABLE(X)
 
 #define X(nm, kt)                                                    \
 /* This returns uint64_t to ensure all 64 bits of rax are valid. */  \
-inline uint64_t nm(Class* ctx, ObjectData* base, key_type<kt> key) { \
+inline uint64_t nm(Class* cls, ObjectData* base, key_type<kt> key) { \
+  auto ctx = HPHP::MemberLookupContext(cls);                         \
   return IssetPropObj<kt>(ctx, base, key);                           \
 }
 ISSET_OBJ_PROP_HELPER_TABLE(X)

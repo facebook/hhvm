@@ -118,7 +118,7 @@ struct SoapVar {
   }
 
   static void setEncType(ObjectData* obj, int64_t t) {
-    obj->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(t));
+    obj->setProp(nullctx, s_enc_type.get(), make_tv<KindOfInt64>(t));
   }
 
   static Variant getEncValue(ObjectData* obj) {
@@ -126,15 +126,15 @@ struct SoapVar {
   }
 
   static void setEncValue(ObjectData* obj, const Variant& val) {
-    obj->setProp(nullptr, s_enc_value.get(), *val.asTypedValue());
+    obj->setProp(nullctx, s_enc_value.get(), *val.asTypedValue());
   }
 
 #define X(Name, str_name) \
   static void setEnc##Name(ObjectData* obj, const String& str) { \
     if (str.isNull()) { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
+      obj->setProp(nullctx, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), str.asTypedValue()); \
+      obj->setProp(nullctx, s_enc_##str_name.get(), str.asTypedValue()); \
     } \
   } \
   static String getEnc##Name(ObjectData* obj) { \
@@ -191,4 +191,3 @@ struct SoapHeader {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

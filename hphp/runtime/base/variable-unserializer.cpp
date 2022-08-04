@@ -563,7 +563,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   } else {
     // We'll check if this doesn't violate the type-hint once we're done
     // unserializing all the props.
-    t = obj->getPropLval(ctx, key.get());
+    t = obj->getPropLval(propCtx, key.get());
   }
 
   unserializePropertyValue(t, nProp);
@@ -1033,7 +1033,7 @@ void VariableUnserializer::unserializeVariant(
       } else {
         warnOrThrowUnknownClass(clsName);
         obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
-        obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+        obj->setProp(nullctx, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asTypedValue());
       }
       assertx(!obj.isNull());
@@ -1197,9 +1197,9 @@ void VariableUnserializer::unserializeVariant(
         }
         warnOrThrowUnknownClass(clsName);
         Object ret = create_object_only(s_PHP_Incomplete_Class);
-        ret->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+        ret->setProp(nullctx, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asTypedValue());
-        ret->setProp(nullptr, s_serialized.get(), serialized.asTypedValue());
+        ret->setProp(nullctx, s_serialized.get(), serialized.asTypedValue());
         return ret;
       }();
 

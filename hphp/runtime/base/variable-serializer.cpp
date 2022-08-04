@@ -2343,7 +2343,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
 
         // If we have a DebugDisplay prop saved, use it.
-        auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
+        auto const debugDisp = obj->getProp(nullctx, s_PHP_DebugDisplay.get());
         if (debugDisp) {
           serializeVariant(debugDisp, false, false, true);
           return;
@@ -2364,7 +2364,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
            type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {
         auto const cname = obj->getProp(
-          nullptr,
+          nullctx,
           s_PHP_Incomplete_Class_Name.get()
         );
         if (cname && isStringType(cname.type())) {

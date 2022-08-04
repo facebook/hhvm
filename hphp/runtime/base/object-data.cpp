@@ -415,12 +415,13 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Can't use propImpl here because if the property is not accessible and
   // there is no native get, propImpl will raise_error("Cannot access ...",
   // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
 
-  auto const lookup = getPropImpl<false, true, true>(ctx, propName.get());
+  auto const lookup = getPropImpl<false, true, true>(propCtx, propName.get());
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
       return Variant::wrap(lookup.val.tv());
@@ -454,12 +455,13 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Can't use setProp here because if the property is not accessible and
   // there is no native set, setProp will raise_error("Cannot access ...",
   // but o_set will skip writing and return normally.
 
-  auto const lookup = getPropImpl<true, false, true>(ctx, propName.get());
+  auto const lookup = getPropImpl<true, false, true>(propCtx, propName.get());
   auto prop = lookup.val;
   if (prop && lookup.accessible) {
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
@@ -498,8 +500,11 @@ void ObjectData::o_setArray(const Array& properties) {
       }
       k = k.substr(subLen);
     }
-
-    setProp(ctx, k.get(), tvAssertPlausible(iter.secondVal()));
+    // TODO(T126821336): property can be internal
+    // This function is only used in ext_mysql.cpp,
+    // but has its own encoding mechanism
+    auto const propCtx = MemberLookupContext(ctx);
+    setProp(propCtx, k.get(), tvAssertPlausible(iter.secondVal()));
   }
 }
 
@@ -601,7 +606,7 @@ Array ObjectData::toArray<IntishCast::Cast>(bool, bool) const;
 namespace {
 
 size_t getPropertyIfAccessible(ObjectData* obj,
-                               const Class* ctx,
+                               const MemberLookupContext& ctx,
                                const StringData* key,
                                Array& properties,
                                size_t propLeft) {
@@ -642,6 +647,7 @@ Array ObjectData::o_toIterArray(const String& context) {
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
+  auto const propCtx = MemberLookupContext(ctx);
 
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
@@ -653,7 +659,7 @@ Array ObjectData::o_toIterArray(const String& context) {
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, retArray, accessibleProps);
+          this, propCtx, key, retArray, accessibleProps);
     }
     klass = klass->parent();
   }
@@ -663,7 +669,7 @@ Array ObjectData::o_toIterArray(const String& context) {
       auto const key = prop.name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, retArray, accessibleProps);
+          this, propCtx, key, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }
@@ -1178,11 +1184,9 @@ bool ObjectData::isLazyProp(tv_rval prop) {
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
-  const Class* ctx,
+  const MemberLookupContext& propCtx,
   const StringData* key
 ) {
-  // TODO(T126821336): Thread module member context here
-  auto const propCtx = MemberLookupContext(ctx);
   auto const lookup = m_cls->getDeclPropSlot(propCtx, key);
   auto const propSlot = lookup.slot;
 
@@ -1236,7 +1240,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   return { nullptr, nullptr, kInvalidSlot, false, !forWrite, false };
 }
 
-tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
+tv_lval ObjectData::getPropLval(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<true, false, true>(ctx, key);
   if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
     throwMutateConstProp(lookup.slot);
@@ -1244,13 +1248,13 @@ tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
+tv_rval ObjectData::getProp(const MemberLookupContext& ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false, true, false>(ctx, key);
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
+tv_rval ObjectData::getPropIgnoreLateInit(const MemberLookupContext& ctx,
                                           const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false, true, true>(ctx, key);
@@ -1258,7 +1262,7 @@ tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
 }
 
 tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl<false, true, true>(nullptr, key);
+  auto const lookup = getPropImpl<false, true, true>(MemberLookupContext(nullptr, (const StringData*) nullptr), key);
   auto prop = lookup.val;
   if (!prop) return nullptr;
   if (lookup.prop && type(prop) == KindOfUninit &&
@@ -1272,7 +1276,7 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
-tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
+tv_lval ObjectData::propImpl(TypedValue* tvRef, const MemberLookupContext& ctx,
                              const StringData* key, const ReadonlyOp op) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
@@ -1333,7 +1337,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
 tv_lval ObjectData::prop(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1342,7 +1346,7 @@ tv_lval ObjectData::prop(
 
 tv_lval ObjectData::propW(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1351,7 +1355,7 @@ tv_lval ObjectData::propW(
 
 tv_lval ObjectData::propU(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
@@ -1360,14 +1364,14 @@ tv_lval ObjectData::propU(
 
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
-  const Class* ctx,
+  const MemberLookupContext& ctx,
   const StringData* key,
   const ReadonlyOp op
 ) {
   return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
 }
 
-bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
+bool ObjectData::propIsset(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(ctx, key);
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
@@ -1386,7 +1390,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   return false;
 }
 
-void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op) {
+void ObjectData::setProp(const MemberLookupContext& ctx, const StringData* key, TypedValue val, ReadonlyOp op) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
@@ -1421,7 +1425,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
 }
 
 tv_lval ObjectData::setOpProp(TypedValue& tvRef,
-                              Class* ctx,
+                              const MemberLookupContext& ctx,
                               SetOpOp op,
                               const StringData* key,
                               TypedValue* val) {
@@ -1489,7 +1493,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
-TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
+TypedValue ObjectData::incDecProp(const MemberLookupContext& ctx, IncDecOp op, const StringData* key) {
   auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
@@ -1561,7 +1565,7 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
   return IncDecBody(op, prop);
 }
 
-void ObjectData::unsetProp(Class* ctx, const StringData* key) {
+void ObjectData::unsetProp(const MemberLookupContext& ctx, const StringData* key) {
   auto const lookup = getPropImpl<true, false, true>(ctx, key);
   auto const prop = lookup.val;
 

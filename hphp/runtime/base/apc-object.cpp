@@ -399,7 +399,7 @@ Object APCObject::createObjectSlow(bool pure) const {
       }
 
       auto val = prop->val ? prop->val->toLocal(pure) : init_null();
-      obj->setProp(const_cast<Class*>(ctx), key, *val.asTypedValue());
+      obj->setProp(MemberLookupContext(const_cast<Class*>(ctx)), key, *val.asTypedValue());
     }
   }
 

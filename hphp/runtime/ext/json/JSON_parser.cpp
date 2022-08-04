@@ -1142,7 +1142,7 @@ static void object_set(const json_parser* json,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->setProp(nullptr, s__empty_.get(), *value.asTypedValue());
+      var.getObjectData()->setProp(nullctx, s__empty_.get(), *value.asTypedValue());
     } else {
       var.getObjectData()->o_set(key, value);
     }

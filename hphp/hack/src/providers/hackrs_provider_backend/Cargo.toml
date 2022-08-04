@@ -11,25 +11,25 @@ path = "hackrs_provider_backend.rs"
 anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
-datastore = { path = "../../rupro/datastore" }
-decl_parser = { path = "../../rupro/decl_parser/cargo/decl_parser" }
-depgraph_api = { path = "../../rupro/depgraph_api/cargo/depgraph_api" }
+datastore = { path = "../../hackrs/datastore" }
+decl_parser = { path = "../../hackrs/decl_parser/cargo/decl_parser" }
+depgraph_api = { path = "../../hackrs/depgraph_api/cargo/depgraph_api" }
 deps_rust = { path = "../../deps/cargo/deps_rust" }
-file_provider = { path = "../../rupro/file_provider/cargo/file_provider" }
-folded_decl_provider = { path = "../../rupro/folded_decl_provider/cargo/folded_decl_provider" }
+file_provider = { path = "../../hackrs/file_provider/cargo/file_provider" }
+folded_decl_provider = { path = "../../hackrs/folded_decl_provider/cargo/folded_decl_provider" }
 hh24_types = { path = "../../utils/hh24_types" }
 names = { path = "../../naming/names_rust" }
-naming_provider = { path = "../../rupro/naming_provider/cargo/naming_provider" }
+naming_provider = { path = "../../hackrs/naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_derive = { path = "../../ocamlrep_derive" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
-pos = { path = "../../rupro/pos/cargo/pos" }
+pos = { path = "../../hackrs/pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
-shallow_decl_provider = { path = "../../rupro/shallow_decl_provider/cargo/shallow_decl_provider" }
+shallow_decl_provider = { path = "../../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 shm_store = { path = "../../shmffi/cargo/shm_store" }
-ty = { path = "../../rupro/ty/cargo/ty" }
+ty = { path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]
 hh24_test = { path = "../../facebook/utils/cargo/hh24_test" }

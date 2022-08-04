@@ -161,6 +161,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::phplogue:
     case Vinstr::stubtophp:
     case Vinstr::loadstubret:
+    case Vinstr::restorerip:
     case Vinstr::phpret:
     case Vinstr::callphp:
     case Vinstr::callphpfe:

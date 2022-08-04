@@ -273,6 +273,7 @@ struct Vgen {
     setCallFuncId(env, a->frontier());
   }
   void emit(const contenter& i);
+  void emit(const restorerip& i);
   void emit(const phpret& i);
 
   // vm entry abi
@@ -812,6 +813,10 @@ void Vgen::emit(const callfaststub& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const restorerip& i) {
+  a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
+}
 
 void Vgen::emit(const phpret& i) {
   // prefer load-pair instruction

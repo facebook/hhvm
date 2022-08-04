@@ -117,7 +117,7 @@ void storeVMRegs(Vout& v) { storeVmfp(v); storeVmsp(v); }
  */
 void popFrameToFuncEntryRegs(Vout& v) {
   v << copy{rvmfp(), rvmsp()};
-  v << pushm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << restorerip{rvmfp()};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
 }
 
@@ -126,8 +126,8 @@ void popFrameToFuncEntryRegs(Vout& v) {
  */
 void pushFrameFromFuncEntryRegs(Vout& v) {
   v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
-  v << popm{Vreg(rvmsp()) + AROFF(m_savedRip)};
   v << copy{rvmsp(), rvmfp()};
+  v << phplogue{rvmfp()};
 }
 
 /*

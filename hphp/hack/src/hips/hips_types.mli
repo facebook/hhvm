@@ -56,6 +56,6 @@ module type Intra = sig
   val substitute_inter_intra :
     inter_constraint -> intra_constraint -> intra_constraint
 
-  (** Deduces a simplified list of constraints.  *)
-  val deduce : any_constraint list -> any_constraint list
+  (** Deduces a simplified list of intra-procedural constraints.  *)
+  val deduce : intra_constraint list -> intra_constraint list
 end

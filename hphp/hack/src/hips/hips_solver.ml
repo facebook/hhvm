@@ -6,12 +6,15 @@
  *
  *)
 
+open Hh_prelude
 open Hips_types
 
 module Inter (I : Intra) = struct
   open Hips_types
 
   type inter_constraint = I.inter_constraint
+
+  type intra_constraint = I.intra_constraint
 
   type any_constraint = I.any_constraint
 
@@ -59,27 +62,55 @@ module Inter (I : Intra) = struct
             (match constr_list_at with
             | None -> []
             | Some constr_list_at ->
-              List.map (substitute_inter_any inter_constr) constr_list_at)
+              List.map constr_list_at ~f:(substitute_inter_any inter_constr))
             (* TODO(T127947010) Add case for inter-procedural return constraint *)
         end
     in
     let substitute_any_list (xs : any_constraint list) : any_constraint list =
-      List.map substitute_any xs |> List.concat
+      List.map xs ~f:substitute_any |> List.concat
     in
     SMap.map substitute_any_list argument_constraint_map
 
   let analyse (base_constraint_map : any_constraint list SMap.t) : solution =
+    let deduce_any_list (any_constraint_list : any_constraint list) :
+        any_constraint list =
+      let destruct (any_constraint_list : any_constraint list) :
+          intra_constraint list * inter_constraint list =
+        let f (any_constraint : any_constraint) :
+            (intra_constraint, inter_constraint) Base__.Either0.t =
+          match any_constraint with
+          | I.Intra intra_constr -> First intra_constr
+          | I.Inter inter_constr -> Second inter_constr
+        in
+        List.partition_map ~f any_constraint_list
+      in
+      let construct
+          ((intra_constraint_list, inter_constraint_list) :
+            intra_constraint list * inter_constraint list) : any_constraint list
+          =
+        List.map
+          ~f:(fun intra_constr -> I.Intra intra_constr)
+          intra_constraint_list
+        @ List.map
+            ~f:(fun inter_constr -> I.Inter inter_constr)
+            inter_constraint_list
+      in
+      destruct any_constraint_list
+      |> (fun (intra_constr_list, inter_constr_list) ->
+           (I.deduce intra_constr_list, inter_constr_list))
+      |> construct
+    in
     let rec analyse_help
         (completed_iterations : int)
         (argument_constraint_map : any_constraint list SMap.t) : solution =
-      if completed_iterations == I.max_iteration then
+      if Int.equal completed_iterations I.max_iteration then
         Divergent argument_constraint_map
       else
         let substituted_constraint_map =
           substitute ~base_constraint_map argument_constraint_map
         in
         let deduced_constraint_map =
-          SMap.map I.deduce substituted_constraint_map
+          SMap.map deduce_any_list substituted_constraint_map
         in
         if equiv argument_constraint_map deduced_constraint_map then
           Convergent argument_constraint_map

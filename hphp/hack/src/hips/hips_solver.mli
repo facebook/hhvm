@@ -14,6 +14,9 @@ module Inter (I : Intra) : sig
   (** Inter-procedural constraint type *)
   type inter_constraint = I.inter_constraint
 
+  (** Intra-procedural constraint type *)
+  type intra_constraint = I.intra_constraint
+
   (** Union of inter- and intra-procedural constraint types *)
   type any_constraint = I.any_constraint
 

@@ -4,13 +4,13 @@
 
 async function nullable_bool(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): ?ExampleBool)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): ?ExampleBool)>>> {
   throw new Exception();
 }
 
 async function a_bool(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): ExampleBool)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): ExampleBool)>>> {
   throw new Exception();
 }
 

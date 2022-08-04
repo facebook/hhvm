@@ -1,0 +1,3 @@
+--nast
+--enable-higher-kinded-types
+--expression-tree-virtualize-functions

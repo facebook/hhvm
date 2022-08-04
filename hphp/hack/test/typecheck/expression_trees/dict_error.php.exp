@@ -1,18 +1,18 @@
-File "dict_error.php", line 55, characters 3-11:
+File "dict_error.php", line 59, characters 3-11:
 The values of this `dict` are incompatible (Typing[4110])
   File "dict_error.php", line 12, characters 33-78:
   Expected `Spliceable<DictError, mixed, TInfer#1>`
-  File "dict_error.php", line 54, characters 15-24:
+  File "dict_error.php", line 58, characters 15-24:
   But got `ExampleInt`
-File "dict_error.php", line 57, characters 10-14:
+File "dict_error.php", line 61, characters 10-14:
 Typing error (Typing[4110])
-  File "dict_error.php", line 57, characters 10-14:
+  File "dict_error.php", line 61, characters 10-14:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "dict_error.php", line 54, characters 15-24:
+  File "dict_error.php", line 58, characters 15-24:
   But got `ExampleInt`
-File "dict_error.php", line 57, characters 12-13:
+File "dict_error.php", line 61, characters 12-13:
 Invalid argument (Typing[4110])
-  File "dict_error.php", line 48, characters 5-45:
+  File "dict_error.php", line 52, characters 5-45:
   Expected `Spliceable<DictError, mixed, [unresolved]>`
-  File "dict_error.php", line 54, characters 15-24:
+  File "dict_error.php", line 58, characters 15-24:
   But got `ExampleInt`

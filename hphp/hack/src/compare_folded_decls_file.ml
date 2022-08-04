@@ -235,6 +235,7 @@ let () =
       ignored_arg "--explicit-consistent-constructors";
       ignored_arg "--require-types-class-consts";
       ignored_flag "--skip-tast-checks";
+      ignored_flag "--expression-tree-virtualize-functions";
     ]
     set_file
     usage;

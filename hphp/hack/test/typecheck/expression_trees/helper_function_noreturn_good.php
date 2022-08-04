@@ -4,14 +4,14 @@
 
 class Foo {
   public static async function bar(ExampleContext $_):
-    Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): noreturn)>>
+    Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): noreturn)>>>
   {
     throw new Exception();
   }
 }
 
 function baz(ExampleContext $_):
-  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): noreturn)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): noreturn)>>>
 {
   throw new Exception();
 }

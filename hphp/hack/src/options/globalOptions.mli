@@ -328,6 +328,8 @@ type t = {
   tco_record_fine_grained_dependencies: bool;
   (* When set, uses the given number of iterations while typechecking loops *)
   tco_loop_iteration_upper_bound: int option;
+  (* When enabled, wrap function types in Expression Trees in user defined virtual function types *)
+  tco_expression_tree_virtualize_functions: bool;
 }
 [@@deriving eq, show]
 
@@ -464,6 +466,7 @@ val make :
   ?tco_use_manifold_cython_client:bool ->
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
+  ?tco_expression_tree_virtualize_functions:bool ->
   unit ->
   t
 
@@ -764,3 +767,5 @@ val tco_use_manifold_cython_client : t -> bool
 val tco_record_fine_grained_dependencies : t -> bool
 
 val tco_loop_iteration_upper_bound : t -> int option
+
+val tco_expression_tree_virtualize_functions : t -> bool

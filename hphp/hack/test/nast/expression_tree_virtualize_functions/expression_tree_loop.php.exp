@@ -1,0 +1,272 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
+        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-49],
+            (Expr
+               ((), [4:3-48],
+                (ExpressionTree
+                   { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
+                     et_splices = [];
+                     et_function_pointers =
+                     [([4:37-40], (Expr ((), [4:37-40], (Binop ((Eq None), ((), [4:37-40], (Lvar ([4:37-40], $0fp0))), ((), [4:37-40], (FunctionPointer ((FP_id ([4:37-40], "\\foo")), []))))))))];
+                     et_virtualized_expr =
+                     ((), [4:14-47],
+                      (Call (
+                         ((), [4:14-47],
+                          (Efun (
+                             { f_span = [4:14-47]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_ret = ((), None); f_name = ([4:14-47], ";anonymous"); 
+                               f_tparams = []; f_where_constraints = []; 
+                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast =
+                                 [([4:14-47],
+                                   (Return
+                                      (Some ((), [4:14-47],
+                                             (Call (((), [4:14-47], (Class_const (((), [4:14-47], (CI ([4:14-47], "\\ExampleDsl"))), ([4:14-47], "lambdaType")))), 
+                                                [],
+                                                [(Pnormal,
+                                                  ((), [4:14-47],
+                                                   (Lfun (
+                                                      { f_span = [4:14-47]; 
+                                                        f_readonly_this = None; 
+                                                        f_annotation = (); 
+                                                        f_readonly_ret = None; 
+                                                        f_ret = ((), None); 
+                                                        f_name = ([4:14-47], ";anonymous"); 
+                                                        f_tparams = []; 
+                                                        f_where_constraints = []; 
+                                                        f_params = []; 
+                                                        f_ctxs = None; 
+                                                        f_unsafe_ctxs = None;
+                                                        f_body =
+                                                        { fb_ast =
+                                                          [([4:23-45],
+                                                            (While (
+                                                               ((), [4:29-33],
+                                                                (Call (
+                                                                   ((), [4:29-33],
+                                                                    (
+                                                                    Obj_get (
+                                                                    ((), [4:29-33],
+                                                                    (Call (((), [4:29-33], (Class_const (((), [4:29-33], (CI ([4:29-33], "\\ExampleDsl"))), ([4:29-33], "boolType")))), [], [], None))),
+                                                                    ((), [4:29-33], (Id ([4:29-33], "__bool"))), OG_nullthrows, Is_method))),
+                                                                   [], 
+                                                                   [], None))),
+                                                               [([4:37-43],
+                                                                 (Expr
+                                                                    (
+                                                                    (), [4:37-42],
+                                                                    (
+                                                                    Call (
+                                                                    ((), [4:37-42],
+                                                                    (Call (
+                                                                    ((), [4:37-42],
+                                                                    (Obj_get (
+                                                                    ((), [4:37-42],
+                                                                    (Call ((
+                                                                    (), [4:37-42], (Class_const (((), [4:37-42], (CI ([4:37-42], "\\ExampleDsl"))), ([4:37-42], "symbolType")))), 
+                                                                    [], 
+                                                                    [(Pnormal, ((), [4:37-40], (Lvar ([4:37-40], $0fp0))))], None))), (
+                                                                    (), [4:37-42], (Id ([4:37-42], "__unwrap"))), OG_nullthrows, Is_method))), 
+                                                                    [], 
+                                                                    [], None))), 
+                                                                    [], 
+                                                                    [], None)))))
+                                                                 ]
+                                                               )));
+                                                            ([4:14-47],
+                                                             (Return
+                                                                (Some (
+                                                                (), [4:14-47],
+                                                                (Call (((), [4:14-47], (Class_const (((), [4:14-47], (CI ([4:14-47], "\\ExampleDsl"))), ([4:14-47], "voidType")))), [], [], None))))))
+                                                            ]
+                                                          };
+                                                        f_fun_kind = FSync; 
+                                                        f_user_attributes = []; 
+                                                        f_external = false; 
+                                                        f_doc_comment = None },
+                                                      [([4:37-40], $0fp0)]))))
+                                                  ],
+                                                None))))))
+                                   ]
+                                 };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_doc_comment = None },
+                             [([4:3-13], $0fp0)]))),
+                         [], [], None)));
+                     et_runtime_expr =
+                     ((), [4:14-47],
+                      (Call (
+                         ((), [4:14-47],
+                          (Lfun (
+                             { f_span = [4:14-47]; f_readonly_this = None; 
+                               f_annotation = (); f_readonly_ret = None; 
+                               f_ret = ((), None); f_name = ([4:14-47], ";anonymous"); 
+                               f_tparams = []; f_where_constraints = []; 
+                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                               f_body =
+                               { fb_ast =
+                                 [([4:14-47],
+                                   (Return
+                                      (Some ((), [4:3-13],
+                                             (Call (((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))), 
+                                                [],
+                                                [(Pnormal,
+                                                  ((), [4:14-47],
+                                                   (Shape
+                                                      [((SFlit_str ([4:14-47], "path")), ((), [4:14-47], (Id ([4:14-47], "\\__FILE__"))));
+                                                        ((SFlit_str ([4:14-47], "start_line")), ((), [4:14-47], (Int "4"))); (
+                                                        (SFlit_str ([4:14-47], "end_line")), ((), [4:14-47], (Int "4"))); (
+                                                        (SFlit_str ([4:14-47], "start_column")), ((), [4:14-47], (Int "13"))); (
+                                                        (SFlit_str ([4:14-47], "end_column")), ((), [4:14-47], (Int "46")))])));
+                                                  (Pnormal,
+                                                   ((), [4:3-13],
+                                                    (Shape
+                                                       [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (Dict, None, []))));
+                                                         ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (Vec, None, [((), [4:37-40], (Lvar ([4:37-40], $0fp0)))]))));
+                                                         ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (Vec, None, []))))])));
+                                                  (Pnormal,
+                                                   ((), [4:14-47],
+                                                    (Lfun (
+                                                       { f_span = [4:14-47]; 
+                                                         f_readonly_this = None; 
+                                                         f_annotation = (); 
+                                                         f_readonly_ret = None; 
+                                                         f_ret = ((), None); 
+                                                         f_name = ([4:14-47], ";anonymous"); 
+                                                         f_tparams = []; 
+                                                         f_where_constraints = [];
+                                                         f_params =
+                                                         [{ param_annotation = (); 
+                                                            param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
+                                                            param_is_variadic = false; 
+                                                            param_pos = [4:3-13]; 
+                                                            param_name = "$0v"; 
+                                                            param_expr = None; 
+                                                            param_readonly = None; 
+                                                            param_callconv = Pnormal; 
+                                                            param_user_attributes = []; 
+                                                            param_visibility = None }
+                                                           ];
+                                                         f_ctxs = None; 
+                                                         f_unsafe_ctxs = None;
+                                                         f_body =
+                                                         { fb_ast =
+                                                           [([4:14-47],
+                                                             (Return
+                                                                (Some (
+                                                                (), [4:14-47],
+                                                                (Call (
+                                                                   ((), [4:14-47],
+                                                                    (
+                                                                    Obj_get (((), [4:14-47], (Lvar ([4:14-47], $0v))), ((), [4:14-47], (Id ([4:14-47], "visitLambda"))), OG_nullthrows, Is_method))),
+                                                                   [],
+                                                                   [(Pnormal,
+                                                                    ((), [4:14-47],
+                                                                    (Shape
+                                                                    [((SFlit_str ([4:14-47], "path")), ((), [4:14-47], (Id ([4:14-47], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:14-47], "start_line")), ((), [4:14-47], (Int "4")));
+                                                                    ((SFlit_str ([4:14-47], "end_line")), ((), [4:14-47], (Int "4")));
+                                                                    ((SFlit_str ([4:14-47], "start_column")), ((), [4:14-47], (Int "13")));
+                                                                    ((SFlit_str ([4:14-47], "end_column")), ((), [4:14-47], (Int "46")))])));
+                                                                    (Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))));
+                                                                    (Pnormal,
+                                                                    ((), [4:23-45],
+                                                                    (ValCollection (Vec, None,
+                                                                    [((), [4:23-45],
+                                                                    (Call (
+                                                                    ((), [4:23-45],
+                                                                    (Obj_get (((), [4:23-45], (Lvar ([4:23-45], $0v))), ((), [4:23-45], (Id ([4:23-45], "visitWhile"))), OG_nullthrows, Is_method))),
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [4:23-45],
+                                                                    (Shape
+                                                                    [((SFlit_str ([4:23-45], "path")), ((), [4:23-45], (Id ([4:23-45], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:23-45], "start_line")), ((), [4:23-45], (Int "4")));
+                                                                    ((SFlit_str ([4:23-45], "end_line")), ((), [4:23-45], (Int "4")));
+                                                                    ((SFlit_str ([4:23-45], "start_column")), ((), [4:23-45], (Int "22")));
+                                                                    ((SFlit_str ([4:23-45], "end_column")), ((), [4:23-45], (Int "44")))])));
+                                                                    (Pnormal,
+                                                                    ((), [4:29-33],
+                                                                    (Call (
+                                                                    ((), [4:29-33],
+                                                                    (Obj_get (((), [4:29-33], (Lvar ([4:29-33], $0v))), ((), [4:29-33], (Id ([4:29-33], "visitBool"))), OG_nullthrows, Is_method))),
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [4:29-33],
+                                                                    (Shape
+                                                                    [((SFlit_str ([4:29-33], "path")), ((), [4:29-33], (Id ([4:29-33], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:29-33], "start_line")), ((), [4:29-33], (Int "4")));
+                                                                    ((SFlit_str ([4:29-33], "end_line")), ((), [4:29-33], (Int "4")));
+                                                                    ((SFlit_str ([4:29-33], "start_column")), ((), [4:29-33], (Int "28")));
+                                                                    ((SFlit_str ([4:29-33], "end_column")), ((), [4:29-33], (Int "32")))]))); (
+                                                                    Pnormal, ((), [4:29-33], True))], None))));
+                                                                    (Pnormal,
+                                                                    ((), [4:37-42],
+                                                                    (ValCollection (Vec, None,
+                                                                    [((), [4:37-42],
+                                                                    (Call (
+                                                                    ((), [4:37-42],
+                                                                    (Obj_get (((), [4:37-42], (Lvar ([4:37-42], $0v))), ((), [4:37-42], (Id ([4:37-42], "visitCall"))), OG_nullthrows, Is_method))),
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [4:37-42],
+                                                                    (Shape
+                                                                    [((SFlit_str ([4:37-42], "path")), ((), [4:37-42], (Id ([4:37-42], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:37-42], "start_line")), ((), [4:37-42], (Int "4")));
+                                                                    ((SFlit_str ([4:37-42], "end_line")), ((), [4:37-42], (Int "4")));
+                                                                    ((SFlit_str ([4:37-42], "start_column")), ((), [4:37-42], (Int "36")));
+                                                                    ((SFlit_str ([4:37-42], "end_column")), ((), [4:37-42], (Int "41")))])));
+                                                                    (Pnormal,
+                                                                    ((), [4:37-42],
+                                                                    (Call (
+                                                                    ((), [4:37-42],
+                                                                    (Obj_get ((
+                                                                    (), [4:37-42], (Lvar ([4:37-42], $0v))), (
+                                                                    (), [4:37-42], (Id ([4:37-42], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [4:37-42],
+                                                                    (Shape
+                                                                    [((SFlit_str ([4:37-42], "path")), ((), [4:37-42], (Id ([4:37-42], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:37-42], "start_line")), ((), [4:37-42], (Int "4")));
+                                                                    ((SFlit_str ([4:37-42], "end_line")), ((), [4:37-42], (Int "4")));
+                                                                    ((SFlit_str ([4:37-42], "start_column")), ((), [4:37-42], (Int "36")));
+                                                                    ((SFlit_str ([4:37-42], "end_column")), ((), [4:37-42], (Int "41")))]))); (
+                                                                    Pnormal, ((), [4:37-40], (Lvar ([4:37-40], $0fp0))))], None)))); (
+                                                                    Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))))], None)))]))))], None)))]))))],
+                                                                   None))))))
+                                                             ]
+                                                           };
+                                                         f_fun_kind = FSync; 
+                                                         f_user_attributes = []; 
+                                                         f_external = false; 
+                                                         f_doc_comment = None },
+                                                       [([4:37-40], $0fp0)]))))
+                                                  ],
+                                                None))))))
+                                   ]
+                                 };
+                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_external = false; f_doc_comment = None },
+                             [([4:37-40], $0fp0)]))),
+                         [], [], None)));
+                     et_dollardollar_pos = None }))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None })
+  ]

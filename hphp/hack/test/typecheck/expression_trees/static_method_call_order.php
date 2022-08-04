@@ -5,31 +5,31 @@
 class MyExample {
   public static function foo(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(int, string): void)>> {
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(int, string): void)>>> {
     throw new Exception();
   }
 
   public static function bar(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(float, bool): int)>> {
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(float, bool): int)>>> {
     throw new Exception();
   }
 
   public static function baz(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): float)>> {
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): float)>>> {
     throw new Exception();
   }
 
   public static function qux(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): bool)>> {
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): bool)>>> {
     throw new Exception();
   }
 
   public static function qaal(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): string)>> {
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): string)>>> {
     throw new Exception();
   }
 }

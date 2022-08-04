@@ -142,6 +142,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_use_manifold_cython_client: false,
     tco_record_fine_grained_dependencies: false,
     tco_loop_iteration_upper_bound: None,
+    tco_expression_tree_virtualize_functions: false,
 };
 
 impl GlobalOptions<'static> {
@@ -419,6 +420,8 @@ impl GlobalOptions<'_> {
         let tco_use_manifold_cython_client = self.tco_use_manifold_cython_client;
         let tco_record_fine_grained_dependencies = self.tco_record_fine_grained_dependencies;
         let tco_loop_iteration_upper_bound = self.tco_loop_iteration_upper_bound;
+        let tco_expression_tree_virtualize_functions =
+            self.tco_expression_tree_virtualize_functions;
 
         GlobalOptions::<'a> {
             tco_experimental_features,
@@ -554,6 +557,7 @@ impl GlobalOptions<'_> {
             tco_use_manifold_cython_client,
             tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound,
+            tco_expression_tree_virtualize_functions,
         }
     }
 }

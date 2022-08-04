@@ -51,6 +51,11 @@ class ExampleDsl {
   ): T {
     throw new Exception();
   }
+  public static function lambdaType<T>(
+    T $_,
+  ): ExampleFunction<T> {
+    throw new Exception();
+  }
 
   // The visitFoo methods are called at runtime when the expression tree literal
   // is evaluated. You will need to provide implementations of these methods,
@@ -267,3 +272,7 @@ interface ExampleFloat extends ExampleMixed {}
 final class ExampleContext {}
 
 interface ExampleVoid {}
+
+interface ExampleFunction<T> {
+  public function __unwrap(): T;
+}

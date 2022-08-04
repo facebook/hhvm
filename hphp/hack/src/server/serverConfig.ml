@@ -502,6 +502,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (string_list_opt "allowed_files_for_module_declarations" config)
       ?tco_allow_all_files_for_module_declarations:
         (bool_opt "allow_all_files_for_module_declarations" config)
+      ?tco_expression_tree_virtualize_functions:
+        (bool_opt "expression_tree_virtualize_functions" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -4,8 +4,17 @@
 
 async function potential_void_return<T>(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function((function(): T)): T)>> {
-  return ExampleDsl`((function(): T) $x): T ==> {
+): Awaitable<
+    ExprTree<
+      ExampleDsl,
+      ExampleDsl::TAst,
+      ExampleFunction<(function(
+        ExampleFunction<(function(): T)>
+      ): T)>
+    >
+  >
+{
+  return ExampleDsl`(ExampleFunction<(function(): T)> $x): T ==> {
     return $x();
   }`;
 }

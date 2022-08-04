@@ -310,6 +310,7 @@ let parse_options () =
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
   let strict_value_equality = ref false in
+  let expression_tree_virtualize_functions = ref false in
   let naming_table = ref None in
   let root = ref None in
   let sharedmem_config = ref SharedMem.default_config in
@@ -831,6 +832,9 @@ let parse_options () =
         Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
         " Sets the maximum number of iterations that will be used to typecheck loops"
       );
+      ( "--expression-tree-virtualize-functions",
+        Arg.Set expression_tree_virtualize_functions,
+        " Enables function virtualization in Expression Trees" );
     ]
   in
 
@@ -994,6 +998,8 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
+      ~tco_expression_tree_virtualize_functions:
+        !expression_tree_virtualize_functions
       ()
   in
   Errors.allowed_fixme_codes_strict :=

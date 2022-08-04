@@ -10,7 +10,7 @@ Typing error (Typing[4110])
   But got `ExampleDsl`
 File "pipe5.php", line 17, characters 22-39:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 195, characters 5-47:
+  File "expr_tree.hhi", line 200, characters 5-47:
   Expected `Spliceable<ExampleDsl, mixed, [unresolved]>`
   File "pipe5.php", line 9, characters 70-124:
   But got `ExampleDsl`

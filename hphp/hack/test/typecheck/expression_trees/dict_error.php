@@ -22,6 +22,10 @@ class DictError {
     throw new Exception();
   }
 
+  public static function lambdaType<T>(T $_): ExampleFunction<T> {
+    throw new Exception();
+  }
+
   public function visitLocal(?ExprPos $_, string $_): DictError::TAst {
     throw new Exception();
   }

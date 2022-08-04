@@ -144,6 +144,7 @@ impl Default for GlobalOptions {
             tco_use_manifold_cython_client: false,
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,
+            tco_expression_tree_virtualize_functions: false,
         }
     }
 }

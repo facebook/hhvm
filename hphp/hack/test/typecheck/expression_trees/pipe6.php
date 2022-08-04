@@ -11,19 +11,19 @@ function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<Ex
 }
 
 function helper_baz(ExampleContext $_):
-  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleFloat)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleString): ExampleFloat)>>>
 {
   throw new Exception();
 }
 
 function helper_foo(ExampleContext $_):
-  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleInt): ExampleInt)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleInt): ExampleInt)>>>
 {
   throw new Exception();
 }
 
 function helper_quux(ExampleContext $_):
-  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleFloat): ExampleInt)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleFloat): ExampleInt)>>>
 {
   throw new Exception();
 }

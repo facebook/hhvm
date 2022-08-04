@@ -14,7 +14,7 @@ class IntBox extends MyBox {
 
 async function setState<T as MyBox, TVal>(
   ExampleContext $_visitor,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(Wrapper<T>, TVal): void)>>
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(Wrapper<T>, TVal): void)>>>
 where
   TVal = T::TInner {
   throw new \Exception();

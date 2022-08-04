@@ -8,7 +8,7 @@ File "instance_method_call2.php", line 19, characters 19-21:
 No instance method `bar` in `Awaitable` (Typing[4053])
   File "classes.hhi", line 157, characters 26-49:
   Did you mean static method `setOnIOWaitEnterCallback` instead?
-  File "instance_method_call2.php", line 13, characters 4-75:
+  File "instance_method_call2.php", line 13, characters 4-92:
   This is why I think it is an object of type HH\Awaitable
   File "classes.hhi", line 156, characters 16-24:
   Declaration of `Awaitable` is here

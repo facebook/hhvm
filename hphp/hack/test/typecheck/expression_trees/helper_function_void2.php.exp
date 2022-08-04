@@ -1,20 +1,20 @@
-File "helper_function_void2.php", line 20, characters 22-31:
+File "helper_function_void2.php", line 22, characters 22-31:
 Invalid argument (Typing[4110])
-  File "helper_function_void2.php", line 19, characters 69-69:
+  File "helper_function_void2.php", line 20, characters 70-70:
   Expected `T`
-  File "helper_function_void2.php", line 7, characters 67-70:
+  File "helper_function_void2.php", line 7, characters 83-86:
   But got `void`
-File "helper_function_void2.php", line 20, characters 22-31:
+File "helper_function_void2.php", line 22, characters 22-31:
 You are using the return value of a `void` function (Typing[4119])
-  File "helper_function_void2.php", line 7, characters 67-70:
+  File "helper_function_void2.php", line 7, characters 83-86:
   A `void` function doesn't return a value.
-File "helper_function_void2.php", line 21, characters 22-26:
+File "helper_function_void2.php", line 23, characters 22-26:
 Invalid argument (Typing[4110])
-  File "helper_function_void2.php", line 19, characters 69-69:
+  File "helper_function_void2.php", line 20, characters 70-70:
   Expected `T`
-  File "helper_function_void2.php", line 14, characters 65-68:
+  File "helper_function_void2.php", line 14, characters 81-84:
   But got `void`
-File "helper_function_void2.php", line 21, characters 22-26:
+File "helper_function_void2.php", line 23, characters 22-26:
 You are using the return value of a `void` function (Typing[4119])
-  File "helper_function_void2.php", line 14, characters 65-68:
+  File "helper_function_void2.php", line 14, characters 81-84:
   A `void` function doesn't return a value.

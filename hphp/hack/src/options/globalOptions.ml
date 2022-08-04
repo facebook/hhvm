@@ -143,6 +143,7 @@ type t = {
   tco_use_manifold_cython_client: bool;
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
+  tco_expression_tree_virtualize_functions: bool;
 }
 [@@deriving eq, show]
 
@@ -330,6 +331,7 @@ let default =
     tco_use_manifold_cython_client = false;
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
+    tco_expression_tree_virtualize_functions = false;
   }
 
 let make
@@ -495,6 +497,8 @@ let make
     ?(tco_record_fine_grained_dependencies =
       default.tco_record_fine_grained_dependencies)
     ?(tco_loop_iteration_upper_bound = default.tco_loop_iteration_upper_bound)
+    ?(tco_expression_tree_virtualize_functions =
+      default.tco_expression_tree_virtualize_functions)
     () =
   {
     tco_experimental_features;
@@ -630,6 +634,7 @@ let make
     tco_use_manifold_cython_client;
     tco_record_fine_grained_dependencies;
     tco_loop_iteration_upper_bound;
+    tco_expression_tree_virtualize_functions;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -940,3 +945,6 @@ let tco_record_fine_grained_dependencies t =
   t.tco_record_fine_grained_dependencies
 
 let tco_loop_iteration_upper_bound t = t.tco_loop_iteration_upper_bound
+
+let tco_expression_tree_virtualize_functions t =
+  t.tco_expression_tree_virtualize_functions

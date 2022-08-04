@@ -6,6 +6,6 @@
  *
  *)
 
-let get_asts _ _ = failwith "not implemented"
+let get_files _ _ = failwith "not implemented"
 
-let put_asts _ _ = failwith "not implemented"
+let put_files _ _ = failwith "not implemented"

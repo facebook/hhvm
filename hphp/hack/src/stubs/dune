@@ -135,10 +135,10 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name remote_asts_ffi)
+  (name remote_files_ffi)
   (wrapped false)
   (modules
-    remote_asts_ffi)
+    remote_files_ffi)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 

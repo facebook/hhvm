@@ -43,12 +43,7 @@ let get_hh_config_version ~(root : Path.t) :
   end
   >>= fun hh_config_version -> return_ok hh_config_version
 
-let go
-    (env : ServerEnv.env)
-    (genv : ServerEnv.genv)
-    (workers : MultiWorker.worker list option)
-    (_dir : string) : unit =
-  let ctx = Provider_utils.ctx_from_server_env env in
+let go (genv : ServerEnv.genv) : unit =
   let root = Wwwroot.get None in
   let hh_config_version =
     match Future.get @@ get_hh_config_version ~root with
@@ -57,11 +52,10 @@ let go
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
 
-  let cmd =
-    "manifold mkdirs hack_ast_prefetching/tree/prefetch/"
-    ^ hh_config_version
-    ^ "/asts"
+  let manifold_dir =
+    "hack_sub1m_file_store/tree/" ^ hh_config_version ^ "/files"
   in
+  let cmd = "manifold mkdirs " ^ manifold_dir in
   ignore (Sys.command cmd);
 
   let get_next =
@@ -76,16 +70,30 @@ let go
     List.fold_left
       ~init:acc
       ~f:(fun acc fn ->
-        let ast = Ast_provider.get_ast ~full:true ctx fn in
-        let ast_hash = Nast.generate_ast_decl_hash ast in
-        (OpaqueDigest.to_hex ast_hash, Marshal.to_string ast []) :: acc)
+        let filename = Relative_path.to_absolute fn in
+        if Disk.file_exists filename then
+          let file_contents = Sys_utils.cat filename in
+          let file_hash = SharedMemHash.hash_string filename in
+          let content_sha1 = Sha1.digest file_contents in
+          ( Int64.to_string file_hash ^ content_sha1,
+            Marshal.to_string (filename, file_contents) [] )
+          :: acc
+        else (
+          Hh_logger.log "%s doesn't exist" filename;
+          acc
+        ))
       fnl
   in
 
   let results =
-    MultiWorker.call workers ~job ~neutral:[] ~merge:List.append ~next:get_next
+    MultiWorker.call
+      genv.ServerEnv.workers
+      ~job
+      ~neutral:[]
+      ~merge:List.append
+      ~next:get_next
   in
 
-  Hh_logger.log "Pased %d files into ASTs" (List.length results);
-  let _ = Remote_asts_ffi.put_asts hh_config_version results in
+  Hh_logger.log "Uploading %d files to %s" (List.length results) manifold_dir;
+  let _ = Remote_files_ffi.put_files hh_config_version results in
   ()

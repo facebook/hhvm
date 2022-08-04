@@ -8,6 +8,29 @@
 
 open Hh_prelude
 
+let symbol_in_call_hierarchy (sym_occ : Relative_path.t SymbolOccurrence.t) :
+    bool =
+  let open SymbolOccurrence in
+  match sym_occ.type_ with
+  | Class _ -> true
+  | BuiltInType _ -> false
+  | Function -> true
+  | Method _ -> true
+  | LocalVar -> false
+  | TypeVar -> false
+  | Property _ -> true
+  | XhpLiteralAttr _ -> false
+  | ClassConst _ -> false
+  | Typeconst _ -> false
+  | GConst -> false
+  | Attribute _ -> true
+  | EnumClassLabel _ -> true
+  | Keyword _ -> false
+  | PureFunctionContext -> false
+  | BestEffortArgument _ -> false
+  | HhFixme -> false
+  | Module -> true
+
 let is_target target_line target_char (occ : Relative_path.t SymbolOccurrence.t)
     =
   let open SymbolOccurrence in
@@ -18,7 +41,7 @@ let is_target target_line target_char (occ : Relative_path.t SymbolOccurrence.t)
 let body_symbols
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    (declarations : Relative_path.t SymbolOccurrence.t list)
+    (filter_against : Relative_path.t SymbolOccurrence.t list)
     (occ : Relative_path.t SymbolOccurrence.t)
     (def : Relative_path.t SymbolDefinition.t) :
     Relative_path.t SymbolOccurrence.t list =
@@ -43,7 +66,7 @@ let body_symbols
       let pos_filter (o : Relative_path.t SymbolOccurrence.t) =
         (not (phys_equal o occ)) && Pos.contains span_pos o.pos
       in
-      List.filter declarations ~f:pos_filter)
+      List.filter filter_against ~f:pos_filter)
 
 let get_ast_getdef (ctx : Provider_context.t) (entry : Provider_context.entry) =
   let ast =

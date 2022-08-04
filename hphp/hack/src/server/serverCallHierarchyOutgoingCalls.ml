@@ -47,9 +47,9 @@ let group_occs_by_def
 let go (item : Lsp.CallHierarchyItem.t) ~(ctx : Provider_context.t) =
   let file = Lsp_helpers.lsp_uri_to_path item.Lsp.CallHierarchyItem.uri in
   let (ctx, entry, _, get_def) = ServerDepsUtil.get_def_setup ctx file in
-  let declarations =
+  let dependable_symbols =
     IdentifySymbolService.all_symbols_ctx ~ctx ~entry
-    |> List.filter (fun s -> s.SymbolOccurrence.is_declaration)
+    |> List.filter ServerDepsUtil.symbol_in_call_hierarchy
   in
   let target_symbols =
     ServerCallHierarchyUtils.call_item_to_symbol_occ_list ~ctx ~entry ~item
@@ -65,7 +65,7 @@ let go (item : Lsp.CallHierarchyItem.t) ~(ctx : Provider_context.t) =
   let target_defs_filtered_nopt = List.map Option.get target_defs_filtered in
   let body_symbols_lists =
     List.map2
-      (ServerDepsUtil.body_symbols ~ctx ~entry declarations)
+      (ServerDepsUtil.body_symbols ~ctx ~entry dependable_symbols)
       target_symbols_filtered
       target_defs_filtered_nopt
   in

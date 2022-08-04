@@ -116,47 +116,32 @@ let pos_to_lsp_range (p : 'a Pos.pos) : range =
   in
   { start = start_position; end_ = end_position }
 
-let declaration_string = "is_declaration:"
-
 let symbol_to_lsp_call_item
     (sym_occ : Relative_path.t SymbolOccurrence.t)
     (sym_def_opt : Relative_path.t SymbolDefinition.t option) :
     CallHierarchyItem.t =
   let open CallHierarchyItem in
   let open SymbolOccurrence in
-  let (selectionRange_, range_) =
+  let (selectionRange_, range_, file_pos) =
     match sym_def_opt with
     | None ->
       let sym_range = pos_to_lsp_range sym_occ.pos in
-      (sym_range, sym_range)
+      (sym_range, sym_range, sym_occ.pos)
     | Some sym_def ->
       ( pos_to_lsp_range sym_def.SymbolDefinition.pos,
-        pos_to_lsp_range sym_def.SymbolDefinition.span )
+        pos_to_lsp_range sym_def.SymbolDefinition.span,
+        sym_def.SymbolDefinition.pos )
   in
-  let filename_ = Pos.to_absolute sym_occ.pos |> Pos.filename in
+  let filename_ = Pos.to_absolute file_pos |> Pos.filename in
   let uri_ = path_to_lsp_uri filename_ ~default_path:"www" in
   {
     name = sym_occ.name;
     kind = sym_occ_kind_to_lsp_sym_info_kind sym_occ.type_;
-    detail = Some (declaration_string ^ string_of_bool sym_occ.is_declaration);
+    detail = None;
     uri = uri_;
     range = range_;
     selectionRange = selectionRange_;
   }
-
-let lsp_call_item_is_declaration (item : CallHierarchyItem.t) : bool =
-  match item.CallHierarchyItem.detail with
-  | None -> false
-  | Some detail_string ->
-    let declaration_regex = Str.regexp (declaration_string ^ "....") in
-    let match_ = Str.string_match declaration_regex detail_string 0 in
-    if not match_ then
-      false
-    else
-      let match_string = Str.matched_string detail_string in
-      let match_length = String.length match_string in
-      let last_four = String.sub match_string (match_length - 4) 4 in
-      bool_of_string last_four
 
 let position_to_lsp_range (pos : 'a Pos.pos) : range =
   let (start_line, end_line, start_col, end_col) = Pos.info_pos_extended pos in

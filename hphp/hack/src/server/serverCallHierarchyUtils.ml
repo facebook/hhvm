@@ -12,7 +12,6 @@ let item_matches_symocc
     (symbol : Relative_path.t SymbolOccurrence.t) : bool =
   let open SymbolOccurrence in
   item.name = symbol.name
-  && Lsp_helpers.lsp_call_item_is_declaration item = symbol.is_declaration
   && Lsp_helpers.sym_occ_kind_to_lsp_sym_info_kind symbol.type_ = item.kind
   &&
   let selection = Lsp_helpers.position_to_lsp_range symbol.pos in

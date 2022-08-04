@@ -376,7 +376,7 @@ impl FromOcamlRep for BPos {
                 );
                 let span = PosSpanTiny::from_ocamlrep(block[1])?;
 
-                return Ok(BPos(PosImpl::Tiny{prefix, suffix, span}))
+                Ok(BPos(PosImpl::Tiny{prefix, suffix, span}))
             },
             tag /* Pos_from_reason */ => {
                 Err(ocamlrep::FromError::BlockTagOutOfRange{max:2u8, actual:tag})

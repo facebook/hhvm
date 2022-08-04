@@ -5,8 +5,6 @@
 
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
-use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
-use hackrs::typing_decl_provider::TypingDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
@@ -15,6 +13,8 @@ use jwalk::WalkDir;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use rupro::typing_decl_provider::FoldingTypingDeclProvider;
+use rupro::typing_decl_provider::TypingDeclProvider;
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;

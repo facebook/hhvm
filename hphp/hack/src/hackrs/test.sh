@@ -4,7 +4,7 @@ trap "exit" INT # exit on ctrl-c
 
 function usage {
   echo "Usage:"
-  echo "  buck run //hphp/hack/src/rupro:test -- [--vim] <FILEPATH>.php"
+  echo "  buck run //hphp/hack/src/hackrs:test -- [--vim] <FILEPATH>.php"
 }
 
 if [[ -z "$BUCK_DEFAULT_RUNTIME_RESOURCES" ]]; then
@@ -23,7 +23,7 @@ while true; do
   [ -f "$HSTC_CAML" ] && break
   RESOURCES_DIR="$(dirname "$RESOURCES_DIR")"
 done
-HSTC_RUST="$RESOURCES_DIR/hphp/hack/src/rupro/stc"
+HSTC_RUST="$RESOURCES_DIR/hphp/hack/src/hackrs/stc"
 [ -f "$HSTC_CAML" ] || { echo "fatal: ocaml hstc not found anywhere around $BUCK_DEFAULT_RUNTIME_RESOURCES" >&2; exit 1; }
 [ -f "$HSTC_RUST" ] || { echo "fatal: rust hstc not found anywhere around $BUCK_DEFAULT_RUNTIME_RESOURCES" >&2; exit 1; }
 

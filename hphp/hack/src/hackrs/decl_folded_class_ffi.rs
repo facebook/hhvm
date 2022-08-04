@@ -71,7 +71,7 @@ ocaml_ffi! {
     ) -> Result<BTreeMap<RelativePath, Vec<Arc<FoldedClass<BReason>>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
         let path_ctx = Arc::new(RelativePathCtx {
-            root: root.into(),
+            root,
             ..Default::default()
         });
         let file_provider: Arc<dyn file_provider::FileProvider> =
@@ -180,7 +180,7 @@ ocaml_ffi! {
         );
 
         let path_ctx = Arc::new(RelativePathCtx {
-            root: www_root.into(),
+            root: www_root,
             hhi: hhi_root_path,
             ..Default::default()
         });

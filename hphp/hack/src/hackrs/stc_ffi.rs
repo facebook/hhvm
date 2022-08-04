@@ -9,18 +9,18 @@
 
 use decl_parser::DeclParser;
 use folded_decl_provider::LazyFoldedDeclProvider;
-use hackrs::ast_provider::AstProvider;
-use hackrs::errors::HackError;
-use hackrs::tast;
-use hackrs::tast::TastExpander;
-use hackrs::typing_check_utils::TypingCheckUtils;
-use hackrs::typing_ctx::TypingCtx;
-use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hcons::Consable;
 use oxidized::global_options::GlobalOptions;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use rupro::ast_provider::AstProvider;
+use rupro::errors::HackError;
+use rupro::tast;
+use rupro::tast::TastExpander;
+use rupro::typing_check_utils::TypingCheckUtils;
+use rupro::typing_ctx::TypingCtx;
+use rupro::typing_decl_provider::FoldingTypingDeclProvider;
 use shallow_decl_provider::EagerShallowDeclProvider;
 use std::path::PathBuf;
 use std::rc::Rc;

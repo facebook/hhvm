@@ -74,7 +74,7 @@ impl AstProvider {
 
     fn process_scour_comments(
         &self,
-        _acc: &mut Vec<ParsingError>,
+        _acc: &mut [ParsingError],
         sc: oxidized::scoured_comments::ScouredComments,
     ) {
         if !sc.error_pos.is_empty() {
@@ -111,7 +111,7 @@ impl AstProvider {
 
     fn process_non_syntax_errors(
         &self,
-        _acc: &mut Vec<ParsingError>,
+        _acc: &mut [ParsingError],
         errs: Vec<oxidized::errors::Error>,
     ) {
         if !errs.is_empty() {

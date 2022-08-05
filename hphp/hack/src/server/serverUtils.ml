@@ -145,7 +145,8 @@ let exit_on_exception (e : Exception.t) =
     Exit.exit Exit_status.Worker_failed_to_send_job
   | File_provider.File_provider_stale ->
     Exit.exit Exit_status.File_provider_stale
-  | Decl_class.Decl_heap_elems_bug -> Exit.exit Exit_status.Decl_heap_elems_bug
+  | Decl_class.Decl_heap_elems_bug _ ->
+    Exit.exit Exit_status.Decl_heap_elems_bug
   | Decl_defs.Decl_not_found _ -> Exit.exit Exit_status.Decl_not_found
   | SharedMem.C_assertion_failure _ ->
     Hh_logger.exception_ e;

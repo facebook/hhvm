@@ -13,7 +13,15 @@ open Decl_defs
 module Inst = Decl_instantiate
 module SN = Naming_special_names
 
-exception Decl_heap_elems_bug
+type decl_heap_elems_bug = {
+  child_class_name: string;
+  member_origin: string;
+  member_name: string;
+  err: Decl_folded_class.lazy_member_lookup_error option;
+}
+[@@deriving show { with_path = false }]
+
+exception Decl_heap_elems_bug of decl_heap_elems_bug
 
 (** Raise an exception when the class element can't be found.
 
@@ -45,7 +53,9 @@ let raise_not_found
     (Option.map ~f:Decl_folded_class.show_lazy_member_lookup_error err
     |> Option.value ~default:"no lazy member lookup performed")
     Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
-  raise Decl_heap_elems_bug
+  raise
+    (Decl_heap_elems_bug
+       { child_class_name; member_origin = elt_origin; member_name; err })
 
 let unpack_member_lookup_result
     (type a)
@@ -182,7 +192,7 @@ let find_constructor ctx ~child_class_name ~elt_origin =
          ~elt_origin
          ~member_name:SN.Members.__construct
 
-let map_element dc_substs find name elt =
+let map_element dc_substs find name (elt : element) =
   let pty =
     lazy
       ((elt.elt_origin, name) |> find |> apply_substs dc_substs elt.elt_origin)

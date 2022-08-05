@@ -23,7 +23,13 @@ let make_error_internal
     match exn with
     | None -> (message, Exception.get_current_callstack_string 99)
     | Some exn ->
-      ( message ^ ": " ^ Exception.get_ctor_string exn,
+      let details =
+        match Exception.unwrap exn with
+        | Decl_class.Decl_heap_elems_bug details ->
+          Decl_class.show_decl_heap_elems_bug details
+        | _ -> ""
+      in
+      ( message ^ ": " ^ Exception.get_ctor_string exn ^ details,
         Exception.get_backtrace_string exn )
   in
   let stack = ("stack", stack |> Exception.clean_stack |> string_) in

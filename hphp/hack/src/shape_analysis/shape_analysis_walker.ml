@@ -229,7 +229,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)
     end
   | A.Call ((_, _, A.Id (_, f_id)), _targs, args, _unpacked) ->
-    let expr_arg env (_param_kind, ((_ty, pos, _exp) as arg)) =
+    let expr_arg arg_idx env (_param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
       match arg_entity with
       | Some arg_entity_ ->
@@ -238,7 +238,10 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
             Env.add_constraint env constraint_
           else
-            env
+            let inter_constraint_ =
+              decorate ~origin:__LINE__ @@ Arg (f_id, arg_idx, arg_entity_)
+            in
+            Env.add_inter_constraint env inter_constraint_
         in
         (* TODO(T128046165) Generate and add inter-procedural constraints *)
         let new_entity_ = Literal pos in
@@ -256,7 +259,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         env
       | None -> env
     in
-    let env = List.fold ~f:expr_arg ~init:env args in
+    let env = List.foldi ~f:expr_arg ~init:env args in
     (env, None)
   | A.Eif (cond, Some then_expr, else_expr) ->
     let (parent_env, _cond_entity) = expr_ env cond in
@@ -442,7 +445,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let decl_hint tast_env kind ((ty, hint) : T.type_hint) :
-    decorated_constraint list * entity =
+    constraint_ decorated list * entity =
   if is_suitable_target_ty tast_env ty then
     let hint_pos = dict_pos_of_hint hint in
     let decorate ~origin constraint_ =
@@ -465,7 +468,7 @@ let decl_hint tast_env kind ((ty, hint) : T.type_hint) :
     ([], None)
 
 let init_params tast_env (params : T.fun_param list) :
-    decorated_constraint list * entity LMap.t =
+    constraint_ decorated list * entity LMap.t =
   let add_param
       (constraints, lmap)
       A.{ param_name; param_type_hint; param_is_variadic; _ } =
@@ -483,17 +486,17 @@ let init_params tast_env (params : T.fun_param list) :
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 
-let callable tast_env params ~return body : decorated_constraint list =
+let callable tast_env params ~return body : decorated_constraints =
   let (param_constraints, param_env) = init_params tast_env params in
   let (return_constraints, return) = decl_hint tast_env Return return in
   let constraints = return_constraints @ param_constraints in
-  let env = Env.init tast_env constraints param_env ~return in
+  let env = Env.init tast_env constraints [] param_env ~return in
   let env = block env body.A.fb_ast in
-  env.constraints
+  (env.constraints, env.inter_constraints)
 
 let program (ctx : Provider_context.t) (tast : Tast.program) :
-    decorated_constraint list SMap.t =
-  let def (def : T.def) : (string * decorated_constraint list) list =
+    decorated_constraints SMap.t =
+  let def (def : T.def) : (string * decorated_constraints) list =
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->

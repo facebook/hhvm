@@ -6,6 +6,7 @@
  *
  *)
 
+module A = Ast_defs
 module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
@@ -96,6 +97,10 @@ type constraint_ =
           `e'` for example as a result of merging environments after an if
           statement. *)
 
+(** Interprocedural constraint: currently only `Arg(f, 0, p)`, which models
+    a function call f(p, _, ...). *)
+type inter_constraint_ = Arg of A.id_ * int * entity_
+
 type shape_result =
   | Shape_like_dict of Pos.t * marker_kind * shape_keys
       (** A dict that acts like a shape along with its keys, types the keys
@@ -112,15 +117,22 @@ type shape_result =
 type lenv = entity LMap.t KMap.t
 
 (** Dressing on top of constraints that are solely used to help debug constraints *)
-type decorated_constraint = {
+type 'constraint_ decorated = {
   hack_pos: Pos.t;  (** Hack source code position that led to the constraint *)
   origin: int;
       (** The origin of the constraint from Shape_analysis_walker.ml *)
-  constraint_: constraint_;  (** The constraint proper *)
+  constraint_: 'constraint_;  (** The constraint proper *)
 }
 
+(** Tuple of lists of decorated intra- and inter-procedural constraints *)
+type decorated_constraints =
+  constraint_ decorated list * inter_constraint_ decorated list
+
 type env = {
-  constraints: decorated_constraint list;  (** Append-only set of constraints *)
+  constraints: constraint_ decorated list;
+      (** Append-only set of intra-procedural constraints *)
+  inter_constraints: inter_constraint_ decorated list;
+      (** Append-only set of inter-procedural constraints *)
   lenv: lenv;  (** Local variable information *)
   return: entity;  (** Entity for the return of a callable *)
   tast_env: Tast_env.env;

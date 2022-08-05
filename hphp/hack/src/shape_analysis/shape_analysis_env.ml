@@ -18,7 +18,7 @@ let fresh_var () : entity_ =
   Variable !var_counter
 
 let union_continuation_at_lid ~pos ~origin (entity1 : entity) (entity2 : entity)
-    : decorated_constraint list * entity =
+    : constraint_ decorated list * entity =
   match (entity1, entity2) with
   | (Some left, Some right) ->
     let join = fresh_var () in
@@ -31,9 +31,9 @@ let union_continuation_at_lid ~pos ~origin (entity1 : entity) (entity2 : entity)
     ([], entity)
 
 let union_continuation
-    ~pos ~origin (constraints : decorated_constraint list) cont1 cont2 =
+    ~pos ~origin (constraints : constraint_ decorated list) cont1 cont2 =
   let union_continuation_at_lid constraints _lid entity1_opt entity2_opt :
-      decorated_constraint list * entity option =
+      constraint_ decorated list * entity option =
     match (entity1_opt, entity2_opt) with
     | (Some entity1, Some entity2) ->
       let (new_constraints, entity) =
@@ -88,8 +88,8 @@ module LEnv = struct
   let restore_conts_from lenv ~from conts : t =
     List.fold ~f:(restore_cont_from ~from) ~init:lenv conts
 
-  let union ~pos ~origin (lenv1 : t) (lenv2 : t) : decorated_constraint list * t
-      =
+  let union ~pos ~origin (lenv1 : t) (lenv2 : t) :
+      constraint_ decorated list * t =
     let combine constraints _ cont1 cont2 =
       let (constraints, cont) =
         union_continuation ~pos ~origin constraints cont1 cont2
@@ -111,11 +111,20 @@ module LEnv = struct
     Cont.Map.map_env refresh_cont [] lenv
 end
 
-let init tast_env constraints bindings ~return =
-  { constraints; lenv = LEnv.init bindings; return; tast_env }
+let init tast_env constraints inter_constraints bindings ~return =
+  {
+    constraints;
+    inter_constraints;
+    lenv = LEnv.init bindings;
+    return;
+    tast_env;
+  }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }
+
+let add_inter_constraint env inter_constraint_ =
+  { env with inter_constraints = inter_constraint_ :: env.inter_constraints }
 
 let reset_constraints env = { env with constraints = [] }
 
@@ -160,7 +169,8 @@ let stash_and_do env conts f : env =
   restore_conts_from env ~from:parent_locals conts
 
 let union_cont_opt
-    ~pos ~origin (constraints : decorated_constraint list) cont_opt1 cont_opt2 =
+    ~pos ~origin (constraints : constraint_ decorated list) cont_opt1 cont_opt2
+    =
   match (cont_opt1, cont_opt2) with
   | (None, opt)
   | (opt, None) ->

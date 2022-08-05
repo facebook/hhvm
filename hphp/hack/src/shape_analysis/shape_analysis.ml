@@ -36,12 +36,16 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
     let print_function_constraints
-        (id : string) (constraints : decorated_constraint list) : unit =
+        (id : string) (constraints : decorated_constraints) : unit =
       Format.printf "Constraints for %s:\n" id;
-      constraints
-      |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
-      |> List.map ~f:(show_decorated_constraint ~verbosity empty_typing_env)
-      |> List.iter ~f:(Format.printf "%s\n");
+      let print_help projection constr_printer constr =
+        projection constr
+        |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+        |> List.map ~f:(constr_printer ~verbosity empty_typing_env)
+        |> List.iter ~f:(Format.printf "%s\n")
+      in
+      print_help fst show_decorated_constraint constraints;
+      print_help snd show_decorated_inter_constraint constraints;
       Format.printf "\n"
     in
     Walker.program ctx tast |> SMap.iter print_function_constraints
@@ -56,6 +60,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
+    |> SMap.map fst
     |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.iter process_callable
   | Codemod ->
@@ -64,6 +69,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       |> Codemod.of_results empty_typing_env
     in
     Walker.program ctx tast
+    |> SMap.map fst
     |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.map process_callable
     |> SMap.values

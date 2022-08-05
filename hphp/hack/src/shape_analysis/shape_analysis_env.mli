@@ -15,13 +15,17 @@ val fresh_var : unit -> entity_
 (** Initialise shape analysis environment *)
 val init :
   Tast_env.env ->
-  decorated_constraint list ->
+  constraint_ decorated list ->
+  inter_constraint_ decorated list ->
   entity LMap.t ->
   return:entity ->
   env
 
-(** Record a shape analysis constraint *)
-val add_constraint : env -> decorated_constraint -> env
+(** Record a shape analysis intra-procedural constraint *)
+val add_constraint : env -> constraint_ decorated -> env
+
+(** Record a shape analysis inter-procedural constraint *)
+val add_inter_constraint : env -> inter_constraint_ decorated -> env
 
 (** Ignore all existing constraints. The intention of this is to prevent
     unnecessary duplication of constraints when multiple environments need to

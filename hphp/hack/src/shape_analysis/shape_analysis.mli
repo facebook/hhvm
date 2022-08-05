@@ -22,7 +22,7 @@ val callable :
   Tast.fun_param list ->
   return:Tast.type_hint ->
   Tast.func_body ->
-  decorated_constraint list
+  decorated_constraints
 
 val do_ : options -> Provider_context.t -> Tast.program -> unit
 

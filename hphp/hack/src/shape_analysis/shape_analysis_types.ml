@@ -6,6 +6,7 @@
  *
  *)
 
+module A = Ast_defs
 module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
@@ -64,20 +65,26 @@ type constraint_ =
       join: entity_;
     }
 
+type inter_constraint_ = Arg of A.id_ * int * entity_
+
 type shape_result =
   | Shape_like_dict of Pos.t * marker_kind * shape_keys
   | Dynamically_accessed_dict of entity_
 
 type lenv = entity LMap.t KMap.t
 
-type decorated_constraint = {
+type 'constraint_ decorated = {
   hack_pos: Pos.t;
   origin: int;
-  constraint_: constraint_;
+  constraint_: 'constraint_;
 }
 
+type decorated_constraints =
+  constraint_ decorated list * inter_constraint_ decorated list
+
 type env = {
-  constraints: decorated_constraint list;
+  constraints: constraint_ decorated list;
+  inter_constraints: inter_constraint_ decorated list;
   lenv: lenv;
   return: entity;
   tast_env: Tast_env.t;

@@ -43,7 +43,7 @@ let compute_results tast_env id params return body =
   let strip_decorations { constraint_; _ } = constraint_ in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   try
-    SA.callable tast_env params ~return body
+    fst (SA.callable tast_env params ~return body)
     |> List.map ~f:strip_decorations
     |> SA.simplify typing_env
     |> List.filter ~f:SA.is_shape_like_dict

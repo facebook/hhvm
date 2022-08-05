@@ -58,12 +58,8 @@ fn process_one_file(
         let f = f.as_ref();
         let result = std::panic::catch_unwind(|| {
             let mut profile1 = compile::Profile::default();
-            let result = crate::compile::process_single_file(
-                &compile_opts,
-                f.into(),
-                content,
-                &mut profile1,
-            );
+            let result =
+                crate::compile::process_single_file(compile_opts, f.into(), content, &mut profile1);
             (result, profile1)
         });
         match result {

@@ -89,7 +89,7 @@ pub fn run(opts: &mut Opts) -> Result<()> {
     // Collect a Vec first so we process all files - not just up to the first failure.
     files
         .into_par_iter()
-        .map(|path| process_one_file(&path, &opts, &writer))
+        .map(|path| process_one_file(&path, opts, &writer))
         .collect::<Vec<_>>()
         .into_iter()
         .collect()

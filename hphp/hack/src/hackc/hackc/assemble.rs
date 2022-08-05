@@ -965,7 +965,7 @@ fn assemble_typed_value<'arena>(
         /// Advances and consumes the start of s until f is no longer true on the
         /// first character of s. Returns (characters consumed, rest of src)
         fn read_while_matches(s: &[u8], f: impl Fn(u8) -> bool) -> (&[u8], &[u8]) {
-            let stake = s.iter().position(|c| !f(*c)).unwrap_or_else(|| s.len());
+            let stake = s.iter().position(|c| !f(*c)).unwrap_or(s.len());
             s.split_at(stake)
         }
 
@@ -1842,7 +1842,7 @@ fn assemble_decl_vars<'arena>(
 }
 
 /// Opcodes and Pseudos
-fn assemble_instr<'arena, 'a>(
+fn assemble_instr<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut HashMap<Vec<u8>, u32>,
@@ -2594,7 +2594,7 @@ fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc
 }
 
 /// Just a string literal
-fn assemble_fcall_context<'a, 'arena>(
+fn assemble_fcall_context<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {

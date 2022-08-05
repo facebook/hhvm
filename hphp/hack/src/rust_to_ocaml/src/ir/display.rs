@@ -12,6 +12,12 @@ use std::fmt::Result;
 
 impl Display for ir::File {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        self.root.fmt(f)
+    }
+}
+
+impl Display for ir::Module {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         for (name, def) in self.defs.iter() {
             match def {
                 ir::Def::Alias { doc, tparams, ty } => {

@@ -16,11 +16,18 @@ use anyhow::Result;
 use convert_case::Case;
 use convert_case::Casing;
 
-pub fn convert_file(file: &syn::File) -> Result<String> {
+pub fn convert_file(filename: &std::path::Path, file: &syn::File) -> Result<String> {
     let defs = (file.items.iter())
         .filter_map(|item| ItemConverter::convert_item(item).transpose())
         .collect::<Result<_>>()?;
-    let mut file = File { defs };
+    let file_stem = filename.file_stem().context("expected nonempty filename")?;
+    let module_name = file_stem.to_str().context("non-UTF8 filename")?.to_owned();
+    let mut file = File {
+        root: ir::Module {
+            name: ir::ModuleName(module_name),
+            defs,
+        },
+    };
     crate::rewrite_types::rewrite_file(&mut file);
     Ok(file.to_string())
 }

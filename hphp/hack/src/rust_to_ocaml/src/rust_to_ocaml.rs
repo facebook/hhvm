@@ -40,7 +40,7 @@ fn main() -> Result<()> {
 
     let src = std::fs::read_to_string(&opts.filename)?;
     let file = syn::parse_file(&src)?;
-    let mut ocaml_src = convert::convert_file(&file)?;
+    let mut ocaml_src = convert::convert_file(&opts.filename, &file)?;
 
     if !opts.no_header {
         ocaml_src = attach_header(opts.regen_cmd.as_deref(), &ocaml_src);

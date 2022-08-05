@@ -9,6 +9,11 @@ use derive_more::Display;
 use hash::IndexMap;
 
 pub struct File {
+    pub root: Module,
+}
+
+pub struct Module {
+    pub name: ModuleName,
     pub defs: IndexMap<TypeName, Def>,
 }
 

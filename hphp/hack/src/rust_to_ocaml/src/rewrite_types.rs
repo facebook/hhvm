@@ -4,71 +4,115 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::ir;
+use convert_case::Case;
+use convert_case::Casing;
 
 pub fn rewrite_file(file: &mut ir::File) {
-    file.defs.values_mut().for_each(rewrite_def)
+    Rewriter::rewrite_module(&mut file.root)
 }
 
-fn rewrite_def(def: &mut ir::Def) {
-    match def {
-        ir::Def::Alias { ty, .. } => rewrite_type(ty),
-        ir::Def::Record { fields, .. } => fields.iter_mut().for_each(rewrite_field),
-        ir::Def::Variant { variants, .. } => variants.iter_mut().for_each(rewrite_variant),
+struct Rewriter {
+    module_name: ir::ModuleName,
+}
+
+impl Rewriter {
+    fn rewrite_module(module: &mut ir::Module) {
+        let this = Self {
+            module_name: module.name.clone(),
+        };
+        module.defs = (module.defs.drain(..))
+            .map(|(mut name, mut def)| {
+                this.rewrite_def(&mut name, &mut def);
+                (name, def)
+            })
+            .collect()
     }
-}
 
-fn rewrite_field(field: &mut ir::Field) {
-    rewrite_type(&mut field.ty)
-}
-
-fn rewrite_variant(variant: &mut ir::Variant) {
-    variant.fields.iter_mut().for_each(rewrite_variant_fields)
-}
-
-fn rewrite_variant_fields(fields: &mut ir::VariantFields) {
-    match fields {
-        ir::VariantFields::Unnamed(tys) => tys.iter_mut().for_each(rewrite_type),
-        ir::VariantFields::Named(fields) => fields.iter_mut().for_each(rewrite_field),
-    }
-}
-
-fn rewrite_type(ty: &mut ir::Type) {
-    match ty {
-        ir::Type::Path(path) => {
-            let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
-            match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
-                // Remove pointer types; every block is behind an indirection in OCaml
-                ([] | ["std", "boxed"], "Box", [_targ])
-                | ([] | ["std", "rc"], "Rc", [_targ])
-                | ([] | ["std", "sync"], "Arc", [_targ])
-                | ([] | ["ocamlrep", "rc"], "RcOc", [_targ]) => {
-                    *ty = path.targs.pop().unwrap();
-                    rewrite_type(ty);
-                }
-                _ => rewrite_type_path(path),
+    fn rewrite_def(&self, name: &mut ir::TypeName, def: &mut ir::Def) {
+        if name.as_str() == self.module_name.as_str() {
+            *name = ir::TypeName(String::from("t"));
+        }
+        match def {
+            ir::Def::Alias { ty, .. } => self.rewrite_type(ty),
+            ir::Def::Record { fields, .. } => fields.iter_mut().for_each(|f| self.rewrite_field(f)),
+            ir::Def::Variant { variants, .. } => {
+                variants.iter_mut().for_each(|v| self.rewrite_variant(v))
             }
         }
-        ir::Type::Tuple(tuple) => rewrite_type_tuple(tuple),
     }
-}
 
-fn rewrite_type_path(path: &mut ir::TypePath) {
-    let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
-    match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
-        // Convert all integer types to `int`. The impls of ToOcamlRep
-        // and FromOcamlRep for integer types do checked conversions, so
-        // we'll fail at runtime if our int value doesn't fit into
-        // OCaml's integer width.
-        (
-            [],
-            "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128" | "isize"
-            | "usize",
-            [],
-        ) => path.ty = ir::TypeName(String::from("int")),
-        _ => path.targs.iter_mut().for_each(rewrite_type),
+    fn rewrite_field(&self, field: &mut ir::Field) {
+        self.rewrite_type(&mut field.ty)
     }
-}
 
-fn rewrite_type_tuple(tuple: &mut ir::TypeTuple) {
-    tuple.elems.iter_mut().for_each(rewrite_type)
+    fn rewrite_variant(&self, variant: &mut ir::Variant) {
+        variant
+            .fields
+            .iter_mut()
+            .for_each(|f| self.rewrite_variant_fields(f))
+    }
+
+    fn rewrite_variant_fields(&self, fields: &mut ir::VariantFields) {
+        match fields {
+            ir::VariantFields::Unnamed(tys) => tys.iter_mut().for_each(|ty| self.rewrite_type(ty)),
+            ir::VariantFields::Named(fields) => {
+                fields.iter_mut().for_each(|f| self.rewrite_field(f))
+            }
+        }
+    }
+
+    fn rewrite_type(&self, ty: &mut ir::Type) {
+        match ty {
+            ir::Type::Path(path) => {
+                let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
+                match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
+                    // Remove pointer types; every block is behind an indirection in OCaml
+                    ([] | ["std", "boxed"], "Box", [_targ])
+                    | ([] | ["std", "rc"], "Rc", [_targ])
+                    | ([] | ["std", "sync"], "Arc", [_targ])
+                    | ([] | ["ocamlrep", "rc"], "RcOc", [_targ]) => {
+                        *ty = path.targs.pop().unwrap();
+                        self.rewrite_type(ty);
+                    }
+                    _ => self.rewrite_type_path(path),
+                }
+            }
+            ir::Type::Tuple(tuple) => self.rewrite_type_tuple(tuple),
+        }
+    }
+
+    fn rewrite_type_path(&self, path: &mut ir::TypePath) {
+        match path.modules.get(0).map(ir::ModuleName::as_str) {
+            Some("crate" | "super") => {
+                path.modules.remove(0);
+            }
+            _ => {}
+        }
+        let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
+        match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
+            // Convert all integer types to `int`. The impls of ToOcamlRep
+            // and FromOcamlRep for integer types do checked conversions, so
+            // we'll fail at runtime if our int value doesn't fit into
+            // OCaml's integer width.
+            (
+                [],
+                "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
+                | "isize" | "usize",
+                [],
+            ) => path.ty = ir::TypeName(String::from("int")),
+            _ => {
+                let ty = path.ty.as_str().to_case(Case::Snake);
+                let ty_matches_last_module_in_path =
+                    modules.last().map_or(false, |&module| ty == module);
+                if ty_matches_last_module_in_path || ty == self.module_name.as_str() {
+                    path.ty = ir::TypeName(String::from("t"));
+                }
+                path.targs.iter_mut().for_each(|ty| self.rewrite_type(ty))
+            }
+        }
+    }
+
+    fn rewrite_type_tuple(&self, tuple: &mut ir::TypeTuple) {
+        tuple.elems.iter_mut().for_each(|ty| self.rewrite_type(ty))
+    }
 }

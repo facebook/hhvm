@@ -427,7 +427,7 @@ let parse_options () =
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted> Error formatting style" );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
-      ("--json", Arg.Unit (set_mode Lint_json), " Produce json lint output");
+      ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");
       ( "--no-builtins",
         Arg.Set no_builtins,
         " Don't use builtins (e.g. ConstSet); implied by --root" );

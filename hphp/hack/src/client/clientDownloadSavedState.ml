@@ -61,6 +61,7 @@ let additional_info_of_json
   let open Hh_json_helpers in
   match saved_state_type with
   | Saved_state_loader.Naming_table -> ()
+  | Saved_state_loader.Shallow_decls -> ()
   | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
     let dirty_files = Jget.obj_exn json "dirty_files" in
@@ -134,6 +135,7 @@ let make_replay_token_of_additional_info
     ~(additional_info : additional_info) : Hh_json.json =
   match saved_state_type with
   | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
+  | Saved_state_loader.Shallow_decls -> Hh_json.JSON_Null
   | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
     let Saved_state_loader.Naming_and_dep_table_info.
           {

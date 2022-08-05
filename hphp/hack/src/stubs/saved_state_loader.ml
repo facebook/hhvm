@@ -65,6 +65,12 @@ module Naming_table_info = struct
   type additional_info = unit
 end
 
+module Shallow_decls_info = struct
+  type main_artifacts = { shallow_decls_path: Path.t }
+
+  type additional_info = unit
+end
+
 type _ saved_state_type =
   | Naming_and_dep_table : {
       naming_sqlite: bool;
@@ -74,6 +80,9 @@ type _ saved_state_type =
          saved_state_type
   | Naming_table
       : (Naming_table_info.main_artifacts * Naming_table_info.additional_info)
+        saved_state_type
+  | Shallow_decls
+      : (Shallow_decls_info.main_artifacts * Shallow_decls_info.additional_info)
         saved_state_type
 
 (** List of files changed since the saved-state's commit. This list of files may

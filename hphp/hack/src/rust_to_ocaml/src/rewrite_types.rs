@@ -53,7 +53,20 @@ fn rewrite_type(ty: &mut ir::Type) {
 }
 
 fn rewrite_type_path(path: &mut ir::TypePath) {
-    path.targs.iter_mut().for_each(rewrite_type)
+    let modules: Vec<_> = path.modules.iter().map(String::as_str).collect();
+    match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
+        // Convert all integer types to `int`. The impls of ToOcamlRep
+        // and FromOcamlRep for integer types do checked conversions, so
+        // we'll fail at runtime if our int value doesn't fit into
+        // OCaml's integer width.
+        (
+            [],
+            "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128" | "isize"
+            | "usize",
+            [],
+        ) => path.ty = String::from("int"),
+        _ => path.targs.iter_mut().for_each(rewrite_type),
+    }
 }
 
 fn rewrite_type_tuple(tuple: &mut ir::TypeTuple) {

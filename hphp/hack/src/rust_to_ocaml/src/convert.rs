@@ -168,15 +168,7 @@ impl ItemConverter {
         ensure!(ty.qself.is_none(), "Qualified self in paths not supported");
         let last_seg = ty.path.segments.last().unwrap();
         if ty.path.segments.len() == 1 && last_seg.arguments.is_empty() {
-            // The impls of ToOcamlRep and FromOcamlRep for integer types do checked
-            // conversions, so we'll fail at runtime if our int value doesn't fit
-            // into OCaml's integer width.
             let ident = last_seg.ident.to_string();
-            match ident.as_str() {
-                "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128"
-                | "isize" | "usize" => return Ok(ir::TypePath::simple("int")),
-                _ => {}
-            }
             if self.tparams.contains(&ident) {
                 let tparam = format!("'{}", ident.to_case(Case::Snake));
                 return Ok(ir::TypePath::simple(tparam));

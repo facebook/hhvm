@@ -125,6 +125,8 @@ Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_unexpected_rhs(self) -> None:
@@ -135,6 +137,8 @@ Type A -> SMethod B::foo
             expected_exception=NotImplementedError,
             msg="Not supported SMethod on the right hand side.",
         ):
+            # pyre-fixme[6]: For 1st param expected `List[str]` but got
+            #  `List[typing_extensions.LiteralString]`.
             agentGenerator.extract_logic_rules(deps.split("\n"))
 
     def test_multiple_lines(self) -> None:
@@ -163,6 +167,8 @@ Extends I4 -> Type C5,
                Type I12,
                Type I13,
                Type I14"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_multiple_lines_all(self) -> None:
@@ -206,6 +212,8 @@ Extends I4 -> Type C5,
                Type I14"""
         self.assertListEqual(
             exp,
+            # pyre-fixme[6]: For 1st param expected `List[str]` but got
+            #  `List[typing_extensions.LiteralString]`.
             agentGenerator.extract_logic_rules(deps.replace(",\n", ",").split("\n")),
         )
 
@@ -229,6 +237,8 @@ Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_extends_type_smethod_dependency(self) -> None:
@@ -249,6 +259,8 @@ Method I::bar -> Type A
 SMethod A::foo -> Fun B, Type T
 Type A -> Fun B, Type T
 Type I -> Type A"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_extends_type_fun_dependency(self) -> None:
@@ -268,6 +280,8 @@ Method I::bar -> Type A
 Fun F -> Type A
 Type A -> Type B, Type T
 Type I -> Type A"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_unsupported_type_dependency(self) -> None:
@@ -278,6 +292,8 @@ Extends A -> Type B
 Type A -> Type B
 Type HH\Capabilities\AccessGlobals -> Type B
 Type HH\Contexts\Unsafe\globals -> Type A"""
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
 
@@ -540,6 +556,8 @@ Type I -> Type B
 Type T -> Type A, Type B
 """
         raw_codegen = agentGenerator.CodeGenerator()
+        # pyre-fixme[6]: For 1st param expected `List[str]` but got
+        #  `List[typing_extensions.LiteralString]`.
         additional_programs = agentGenerator.extract_logic_rules(deps.split("\n"))
         agentGenerator.do_reasoning(
             additional_programs=additional_programs, generator=raw_codegen

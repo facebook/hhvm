@@ -20,22 +20,26 @@ impl Rewriter {
         let this = Self {
             module_name: module.name.clone(),
         };
-        module.defs = (module.defs.drain(..))
-            .map(|(mut name, mut def)| {
-                this.rewrite_def(&mut name, &mut def);
-                (name, def)
-            })
-            .collect()
+        module.defs.iter_mut().for_each(|def| this.rewrite_def(def))
     }
 
-    fn rewrite_def(&self, name: &mut ir::TypeName, def: &mut ir::Def) {
-        if name.as_str() == self.module_name.as_str() {
-            *name = ir::TypeName(String::from("t"));
-        }
+    fn rewrite_def(&self, def: &mut ir::Def) {
+        let rewrite_name = |name: &mut ir::TypeName| {
+            if name.as_str() == self.module_name.as_str() {
+                *name = ir::TypeName(String::from("t"));
+            }
+        };
         match def {
-            ir::Def::Alias { ty, .. } => self.rewrite_type(ty),
-            ir::Def::Record { fields, .. } => fields.iter_mut().for_each(|f| self.rewrite_field(f)),
-            ir::Def::Variant { variants, .. } => {
+            ir::Def::Alias { name, ty, .. } => {
+                rewrite_name(name);
+                self.rewrite_type(ty)
+            }
+            ir::Def::Record { name, fields, .. } => {
+                rewrite_name(name);
+                fields.iter_mut().for_each(|f| self.rewrite_field(f))
+            }
+            ir::Def::Variant { name, variants, .. } => {
+                rewrite_name(name);
                 variants.iter_mut().for_each(|v| self.rewrite_variant(v))
             }
         }

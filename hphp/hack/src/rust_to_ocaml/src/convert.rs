@@ -37,7 +37,7 @@ struct ItemConverter {
 }
 
 impl ItemConverter {
-    fn convert_item(item: &syn::Item) -> Result<Option<(TypeName, Def)>> {
+    fn convert_item(item: &syn::Item) -> Result<Option<Def>> {
         use syn::Item;
         match item {
             Item::Type(item) => {
@@ -70,21 +70,19 @@ impl ItemConverter {
         Self { tparams }
     }
 
-    fn convert_item_type(self, item: &syn::ItemType) -> Result<(TypeName, Def)> {
+    fn convert_item_type(self, item: &syn::ItemType) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
         let doc = attr_parser::get_doc_comment(&item.attrs);
         let ty = self.convert_type(&item.ty)?;
-        Ok((
+        Ok(Def::Alias {
+            doc,
+            tparams: self.tparams,
             name,
-            Def::Alias {
-                doc,
-                tparams: self.tparams,
-                ty,
-            },
-        ))
+            ty,
+        })
     }
 
-    fn convert_item_struct(self, item: &syn::ItemStruct) -> Result<(TypeName, Def)> {
+    fn convert_item_struct(self, item: &syn::ItemStruct) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
         let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
         match &item.fields {
@@ -100,20 +98,18 @@ impl ItemConverter {
                     })
                     .collect::<Result<Vec<_>>>()?;
                 let doc = container_attrs.doc;
-                Ok((
+                Ok(Def::Record {
+                    doc,
+                    tparams: self.tparams,
                     name,
-                    Def::Record {
-                        doc,
-                        tparams: self.tparams,
-                        fields,
-                    },
-                ))
+                    fields,
+                })
             }
             _ => todo!(),
         }
     }
 
-    fn convert_item_enum(self, item: &syn::ItemEnum) -> Result<(TypeName, Def)> {
+    fn convert_item_enum(self, item: &syn::ItemEnum) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
         let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
         let variants = item
@@ -149,14 +145,12 @@ impl ItemConverter {
             })
             .collect::<Result<Vec<_>>>()?;
         let doc = container_attrs.doc;
-        Ok((
+        Ok(Def::Variant {
+            doc,
+            tparams: self.tparams,
             name,
-            Def::Variant {
-                doc,
-                tparams: self.tparams,
-                variants,
-            },
-        ))
+            variants,
+        })
     }
 
     fn convert_type(&self, ty: &syn::Type) -> Result<ir::Type> {

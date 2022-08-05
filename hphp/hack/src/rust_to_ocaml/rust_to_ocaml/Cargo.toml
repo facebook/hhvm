@@ -14,6 +14,5 @@ attr_parser = { path = "../attr_parser" }
 clap = { version = "3.2.10", features = ["derive", "regex", "unicode", "wrap_help"] }
 convert_case = "0.4.0"
 derive_more = "0.99.17"
-hash = { path = "../../utils/hash" }
 signed_source = { path = "../../utils/rust/signed_source" }
 syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

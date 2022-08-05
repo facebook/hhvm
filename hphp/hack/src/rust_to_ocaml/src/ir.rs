@@ -6,7 +6,6 @@
 mod display;
 
 use derive_more::Display;
-use hash::IndexMap;
 
 pub struct File {
     pub root: Module,
@@ -14,23 +13,26 @@ pub struct File {
 
 pub struct Module {
     pub name: ModuleName,
-    pub defs: IndexMap<TypeName, Def>,
+    pub defs: Vec<Def>,
 }
 
 pub enum Def {
     Alias {
         doc: Vec<String>,
         tparams: Vec<String>,
+        name: TypeName,
         ty: Type,
     },
     Record {
         doc: Vec<String>,
         tparams: Vec<String>,
+        name: TypeName,
         fields: Vec<Field>,
     },
     Variant {
         doc: Vec<String>,
         tparams: Vec<String>,
+        name: TypeName,
         variants: Vec<Variant>,
     },
 }

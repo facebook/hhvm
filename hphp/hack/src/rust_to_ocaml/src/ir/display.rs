@@ -18,44 +18,58 @@ impl Display for ir::File {
 
 impl Display for ir::Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        for (name, def) in self.defs.iter() {
-            match def {
-                ir::Def::Alias { doc, tparams, ty } => {
-                    write_toplevel_doc_comment(f, doc)?;
-                    write!(f, "type ")?;
-                    write_type_parameters(f, tparams)?;
-                    writeln!(f, "{name} = {ty}")?
+        for def in self.defs.iter() {
+            def.fmt(f)?
+        }
+        Ok(())
+    }
+}
+
+impl Display for ir::Def {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match self {
+            Self::Alias {
+                doc,
+                tparams,
+                name,
+                ty,
+            } => {
+                write_toplevel_doc_comment(f, doc)?;
+                write!(f, "type ")?;
+                write_type_parameters(f, tparams)?;
+                writeln!(f, "{name} = {ty}")?
+            }
+            Self::Record {
+                doc,
+                tparams,
+                name,
+                fields,
+            } => {
+                write_toplevel_doc_comment(f, doc)?;
+                write!(f, "type ")?;
+                write_type_parameters(f, tparams)?;
+                writeln!(f, "{name} = {{")?;
+                for field in fields {
+                    writeln!(f, "  {field}")?;
                 }
-                ir::Def::Record {
-                    doc,
-                    tparams,
-                    fields,
-                } => {
-                    write_toplevel_doc_comment(f, doc)?;
-                    write!(f, "type ")?;
-                    write_type_parameters(f, tparams)?;
-                    writeln!(f, "{name} = {{")?;
-                    for field in fields {
-                        writeln!(f, "  {field}")?;
-                    }
-                    writeln!(f, "}}")?;
-                }
-                ir::Def::Variant {
-                    doc,
-                    tparams,
-                    variants,
-                } => {
-                    write_toplevel_doc_comment(f, doc)?;
-                    write!(f, "type ")?;
-                    write_type_parameters(f, tparams)?;
-                    writeln!(f, "{name} =")?;
-                    for variant in variants {
-                        writeln!(f, "  | {variant}")?;
-                    }
+                writeln!(f, "}}")?;
+            }
+            Self::Variant {
+                doc,
+                tparams,
+                name,
+                variants,
+            } => {
+                write_toplevel_doc_comment(f, doc)?;
+                write!(f, "type ")?;
+                write_type_parameters(f, tparams)?;
+                writeln!(f, "{name} =")?;
+                for variant in variants {
+                    writeln!(f, "  | {variant}")?;
                 }
             }
-            writeln!(f)?;
         }
+        writeln!(f)?;
         Ok(())
     }
 }

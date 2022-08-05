@@ -35,7 +35,7 @@ fn rewrite_variant_fields(fields: &mut ir::VariantFields) {
 fn rewrite_type(ty: &mut ir::Type) {
     match ty {
         ir::Type::Path(path) => {
-            let modules: Vec<_> = path.modules.iter().map(String::as_str).collect();
+            let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
             match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
                 // Remove pointer types; every block is behind an indirection in OCaml
                 ([] | ["std", "boxed"], "Box", [_targ])
@@ -53,7 +53,7 @@ fn rewrite_type(ty: &mut ir::Type) {
 }
 
 fn rewrite_type_path(path: &mut ir::TypePath) {
-    let modules: Vec<_> = path.modules.iter().map(String::as_str).collect();
+    let modules: Vec<_> = path.modules.iter().map(ir::ModuleName::as_str).collect();
     match (modules.as_slice(), path.ty.as_str(), path.targs.as_slice()) {
         // Convert all integer types to `int`. The impls of ToOcamlRep
         // and FromOcamlRep for integer types do checked conversions, so
@@ -64,7 +64,7 @@ fn rewrite_type_path(path: &mut ir::TypePath) {
             "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128" | "isize"
             | "usize",
             [],
-        ) => path.ty = String::from("int"),
+        ) => path.ty = ir::TypeName(String::from("int")),
         _ => path.targs.iter_mut().for_each(rewrite_type),
     }
 }

@@ -182,10 +182,10 @@ impl ItemConverter {
                         seg.arguments.is_empty(),
                         "Type args only supported in last path segment"
                     );
-                    Ok(seg.ident.to_string())
+                    Ok(ir::ModuleName(seg.ident.to_string()))
                 })
                 .collect::<Result<_>>()?,
-            ty: last_seg.ident.to_string(),
+            ty: TypeName(last_seg.ident.to_string()),
             targs: match &last_seg.arguments {
                 syn::PathArguments::AngleBracketed(args) => (args.args.iter())
                     .filter_map(|arg| match arg {

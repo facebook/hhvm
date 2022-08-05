@@ -121,9 +121,9 @@ impl Display for ir::TypePath {
             }
         }
         for module in self.modules.iter() {
-            write!(f, "{}.", module.to_case(Case::UpperCamel))?;
+            write!(f, "{}.", module)?;
         }
-        write!(f, "{}", self.ty.to_case(Case::Snake))
+        write!(f, "{}", self.ty)
     }
 }
 
@@ -137,6 +137,18 @@ impl Display for ir::TypeTuple {
             write!(f, " * {elem}")?;
         }
         write!(f, ")")
+    }
+}
+
+impl Display for ir::ModuleName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        self.0.to_case(Case::UpperCamel).fmt(f)
+    }
+}
+
+impl Display for ir::TypeName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        self.0.to_case(Case::Snake).fmt(f)
     }
 }
 

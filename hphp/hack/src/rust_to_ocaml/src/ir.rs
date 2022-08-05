@@ -54,15 +54,15 @@ pub enum Type {
 
 pub struct TypePath {
     pub targs: Vec<Type>,
-    pub modules: Vec<String>,
-    pub ty: String,
+    pub modules: Vec<ModuleName>,
+    pub ty: TypeName,
 }
 
 impl TypePath {
     pub fn simple(id: impl Into<String>) -> Self {
         Self {
             modules: vec![],
-            ty: id.into(),
+            ty: TypeName(id.into()),
             targs: vec![],
         }
     }
@@ -72,8 +72,23 @@ pub struct TypeTuple {
     pub elems: Vec<Type>,
 }
 
-#[derive(Clone, Hash, PartialEq, Eq, Display)]
+#[derive(Clone, Hash, PartialEq, Eq)]
+pub struct ModuleName(pub String);
+
+impl ModuleName {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+#[derive(Clone, Hash, PartialEq, Eq)]
 pub struct TypeName(pub String);
+
+impl TypeName {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 #[derive(Clone, Hash, PartialEq, Eq, Display)]
 pub struct FieldName(pub String);

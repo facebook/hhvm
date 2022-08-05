@@ -22,7 +22,8 @@ module type RemoteServerApi = sig
 
   val build_naming_table : unit -> unit
 
-  (* Downloads the naming table via saved state and adds updates from changed_files.
+  (* A combination of `download_naming_and_dep_table` and `update_naming_table` below.
+     Downloads the naming table via saved state and adds updates from changed_files.
      Returns the path to the dep table downloaded.
   *)
   val download_and_update_naming_table :
@@ -31,6 +32,22 @@ module type RemoteServerApi = sig
     string option ->
     Relative_path.t list option ->
     string option
+
+  (* Downloads the naming table via saved state.
+     Returns the naming table along with the path to the dep table. *)
+  val download_naming_and_dep_table :
+    string option ->
+    string ->
+    use_manifold_cython_client:bool ->
+    (Naming_table.t * Path.t, string) result
+
+  (* Updates the naming table with changed files.
+     Returns the path to the dep table downloaded. *)
+  val update_naming_table :
+    Naming_table.t ->
+    Path.t ->
+    Relative_path.t list option ->
+    (string, string) result
 
   (* Called by the worker to type check a list of files.
      The state filename is where the type checker should save its state that

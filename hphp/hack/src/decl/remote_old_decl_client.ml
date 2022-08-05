@@ -59,12 +59,16 @@ module FetchAsync = struct
       and writes them to a file. *)
   let fetch { hh_config_version; destination_path; no_limit; decl_hashes } :
       unit =
-    let (decl_blobs : string list) =
-      Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
-    in
-    let chan = Stdlib.open_out_bin destination_path in
-    Marshal.to_channel chan decl_blobs [];
-    Stdlib.close_out chan;
+    begin
+      match
+        Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
+      with
+      | Ok decl_blobs ->
+        let chan = Stdlib.open_out_bin destination_path in
+        Marshal.to_channel chan decl_blobs [];
+        Stdlib.close_out chan
+      | Error msg -> Hh_logger.log "Error fetching remote decls: %s" msg
+    end;
 
     (* The intention here is to force the daemon process to exit with
        an failed exit code so that the main process can detect

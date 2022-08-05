@@ -221,16 +221,14 @@ let make_remote_server_api
           ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
       in
       Hh_logger.log "Building naming table - Parsing";
-      let (defs_per_file, _errorl, _failed_parsing) =
-        ( Direct_decl_service.go
-            ctx
-            workers
-            ~ide_files:Relative_path.Set.empty
-            ~get_next
-            ~trace:false
-            ~cache_decls:true,
-          Errors.empty,
-          Relative_path.Set.empty )
+      let defs_per_file =
+        Direct_decl_service.go
+          ctx
+          workers
+          ~ide_files:Relative_path.Set.empty
+          ~get_next
+          ~trace:false
+          ~cache_decls:true
       in
       Hh_logger.log "Building naming table - Naming";
       let naming_table = Naming_table.create defs_per_file in
@@ -240,13 +238,38 @@ let make_remote_server_api
       Hh_logger.log "Building naming table - Done!";
       ()
 
-    let download_dep_table
+    let load_naming_and_dep_table
+        (saved_state_main_artifacts :
+          Saved_state_loader.Naming_and_dep_table_info.main_artifacts) :
+        (Naming_table.t * Path.t, string) result =
+      let {
+        Saved_state_loader.Naming_and_dep_table_info.naming_table_path = _;
+        dep_table_path;
+        naming_sqlite_table_path;
+        legacy_hot_decls_path = _;
+        shallow_hot_decls_path = _;
+        errors_path = _;
+      } =
+        saved_state_main_artifacts
+      in
+      if not (Sys.file_exists (Path.to_string naming_sqlite_table_path)) then
+        Error
+          (Printf.sprintf
+             "Expected naming sqlite table at %s"
+             (Path.to_string naming_sqlite_table_path))
+      else
+        let naming_table =
+          Naming_table.load_from_sqlite
+            ctx
+            (Path.to_string naming_sqlite_table_path)
+        in
+        Ok (naming_table, dep_table_path)
+
+    let download_naming_and_dep_table
         (manifold_api_key : string option)
-        (use_manifold_cython_client : bool)
-        (manifold_path : string) :
-        ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
-          string )
-        result =
+        (manifold_path : string)
+        ~(use_manifold_cython_client : bool) :
+        (Naming_table.t * Path.t, string) result =
       let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
       Disk.mkdir_p target_path;
 
@@ -288,7 +311,7 @@ let make_remote_server_api
             Hh_logger.log
               "Downloaded naming table to %s"
               (Path.to_string naming_table_path);
-            Ok main_artifacts
+            load_naming_and_dep_table main_artifacts
         end
 
     let remove_decls naming_table fast_parsed =
@@ -316,48 +339,14 @@ let make_remote_server_api
               ~consts:(List.map consts ~f:snd)
               ~modules:(List.map modules ~f:snd))
 
-    let load_dep_table
-        (saved_state_main_artifacts :
-          Saved_state_loader.Naming_and_dep_table_info.main_artifacts) :
-        (Naming_table.t * Path.t, string) result =
-      let {
-        Saved_state_loader.Naming_and_dep_table_info.naming_table_path = _;
-        dep_table_path;
-        naming_sqlite_table_path;
-        legacy_hot_decls_path = _;
-        shallow_hot_decls_path = _;
-        errors_path = _;
-      } =
-        saved_state_main_artifacts
-      in
-      if not (Sys.file_exists (Path.to_string naming_sqlite_table_path)) then
-        Error
-          (Printf.sprintf
-             "Expected naming sqlite table at %s"
-             (Path.to_string naming_sqlite_table_path))
-      else
-        let naming_table =
-          Naming_table.load_from_sqlite
-            ctx
-            (Path.to_string naming_sqlite_table_path)
-        in
-        Ok (naming_table, dep_table_path)
-
-    let download_and_update_naming_table_helper
-        (manifold_api_key : string option)
-        (use_manifold_cython_client : bool)
-        (path : string)
+    let update_naming_table
+        (naming_table : Naming_table.t)
+        (dep_table_path : Path.t)
         (changed_files : Relative_path.t list option) : (string, string) result
         =
-      download_dep_table manifold_api_key use_manifold_cython_client path
-      >>= fun saved_state_main_artifacts ->
-      Hh_logger.log "Loading dep graph artifacts...";
-      load_dep_table saved_state_main_artifacts
-      >>= fun (naming_table, dep_table_path) ->
       match changed_files with
       | None -> Error "No changed files uploaded for remote worker's payload"
-      | Some lst ->
-        Ok (naming_table, lst) >>= fun (naming_table, changed_files) ->
+      | Some changed_files ->
         Hh_logger.log "Cleaning naming table of changed files";
         ignore
           (clean_changed_files_state
@@ -427,13 +416,15 @@ let make_remote_server_api
         build_naming_table ();
         None
       | Some path ->
-        (match
-           download_and_update_naming_table_helper
-             manifold_api_key
-             use_manifold_cython_client
-             path
-             changed_files
-         with
+        let dep_table_path_result =
+          download_naming_and_dep_table
+            manifold_api_key
+            path
+            ~use_manifold_cython_client
+          >>= fun (naming_table, dep_table_path) ->
+          update_naming_table naming_table dep_table_path changed_files
+        in
+        (match dep_table_path_result with
         | Ok dep_table_path -> Some dep_table_path
         | Error err ->
           Hh_logger.log "Could not build naming table from saved state: %s" err;

@@ -20,7 +20,8 @@ pub fn convert_file(file: &syn::File) -> Result<String> {
     let defs = (file.items.iter())
         .filter_map(|item| ItemConverter::convert_item(item).transpose())
         .collect::<Result<_>>()?;
-    let file = File { defs };
+    let mut file = File { defs };
+    crate::rewrite_types::rewrite_file(&mut file);
     Ok(file.to_string())
 }
 

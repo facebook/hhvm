@@ -5,6 +5,7 @@
 
 mod convert;
 mod ir;
+mod rewrite_types;
 
 use anyhow::Result;
 use std::io::Write;

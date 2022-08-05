@@ -1,2 +1,2 @@
-other_bool HH\MemberOf<MyEnum, MyBox<bool>>
-a_bool HH\MemberOf<MyEnum, MyBox<bool>>
+other_bool MyBox<bool>
+a_bool MyBox<bool>

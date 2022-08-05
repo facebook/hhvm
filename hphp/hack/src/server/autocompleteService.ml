@@ -613,13 +613,28 @@ let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
     consts
   | _ -> compatible_consts
 
+(* If [ty] is a MemberOf, unwrap the inner type, otherwise return the
+   argument unchanged.
+
+   MemberOf<SomeEnum, X> -> X
+   Y -> Y *)
+let unwrap_enum_memberof (ty : Typing_defs.decl_ty) : Typing_defs.decl_ty =
+  let (_, ty_) = Typing_defs_core.deref ty in
+  match ty_ with
+  | Tapply ((_, name), [_; arg])
+    when String.equal name Naming_special_names.Classes.cMemberOf ->
+    arg
+  | _ -> ty
+
 let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
   argument_global_type := Some Acclass_get;
   let suggest_members cls =
     List.iter
       (compatible_enum_class_consts env cls expected_ty)
       ~f:(fun (name, cc) ->
-        let res_ty = Tast_env.print_decl_ty env cc.cc_type in
+        let res_ty =
+          Tast_env.print_decl_ty env (unwrap_enum_memberof cc.cc_type)
+        in
         let ty = Phase.decl cc.cc_type in
         let kind = SearchUtils.SI_ClassConstant in
         let complete =

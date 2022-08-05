@@ -9,10 +9,15 @@
 
 open Hh_prelude
 
+type error = {
+  message: string;
+  data: Hh_json.json;
+}
+
 let make_error_internal
     ~(message : string)
     ~(data : Hh_json.json option)
-    ~(exn : Exception.t option) : string * Hh_json.json option * string =
+    ~(exn : Exception.t option) : error =
   let open Hh_json in
   let (message, stack) =
     match exn with
@@ -33,16 +38,15 @@ let make_error_internal
     | Some data -> [("data", data); stack]
   in
   let data = Hh_json.JSON_Object elems in
-  let data_str = Hh_json.json_to_string data in
-  (message, Some data, data_str)
+  { message; data }
 
 let log_bug
     ?(data : Hh_json.json option = None)
     ?(exn : Exception.t option)
     ~(telemetry : bool)
     (message : string) : unit =
-  let (message, data, data_str) = make_error_internal ~message ~exn ~data in
-  Hh_logger.error "%s\n%s" message data_str;
+  let { message; data } = make_error_internal ~message ~exn ~data in
+  Hh_logger.error "%s\n%s" message (Hh_json.json_to_string data);
   if telemetry then HackEventLogger.serverless_ide_bug ~message ~data;
   ()
 
@@ -50,19 +54,19 @@ let make_bug_error
     ?(data : Hh_json.json option = None)
     ?(exn : Exception.t option)
     (message : string) : Lsp.Error.t =
-  let (message, data, _) = make_error_internal ~message ~exn ~data in
-  { Lsp.Error.code = Lsp.Error.UnknownErrorCode; message; data }
+  let { message; data } = make_error_internal ~message ~exn ~data in
+  { Lsp.Error.code = Lsp.Error.UnknownErrorCode; message; data = Some data }
 
 let make_bug_reason
     ?(data : Hh_json.json option = None)
     ?(exn : Exception.t option)
     (message : string) : ClientIdeMessage.stopped_reason =
-  let (message, _, data_str) = make_error_internal ~message ~exn ~data in
+  let { message; data } = make_error_internal ~message ~exn ~data in
   {
     ClientIdeMessage.short_user_message = "failed";
     medium_user_message = "Hack IDE has failed.";
     long_user_message =
       "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.";
-    debug_details = message ^ "\nDETAILS:\n" ^ data_str;
+    debug_details = message ^ "\nDETAILS:\n" ^ Hh_json.json_to_string data;
     is_actionable = false;
   }

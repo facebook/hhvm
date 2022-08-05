@@ -613,6 +613,14 @@ type t = {
       (** Stop loading hack/naming since hack/64 now has naming table *)
   use_manifold_cython_client: bool;
       (** Required for Hedwig support for saved state downloads *)
+  cache_remote_decls: bool;
+      (** Configure whether fetch and cache remote decls *)
+  use_shallow_decls_saved_state: bool;
+      (** (only when cache_remote_decls == true) Configure where to fetch and cache remote decls
+          true --> from saved_state hach/shallow_decls
+          false --> from remote old shallow decl service *)
+  shallow_decls_manifold_path: string option;
+      (** A manifold path to a shallow_decls to be used for Hulk Lite when typechecking. *)
 }
 
 let default =
@@ -724,6 +732,9 @@ let default =
     no_marshalled_naming_table_in_saved_state = false;
     no_load_two_saved_states = false;
     use_manifold_cython_client = false;
+    cache_remote_decls = false;
+    use_shallow_decls_saved_state = false;
+    shallow_decls_manifold_path = None;
   }
 
 let path =
@@ -1495,6 +1506,23 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let cache_remote_decls =
+    bool_if_min_version
+      "cache_remote_decls"
+      ~default:default.cache_remote_decls
+      ~current_version
+      config
+  in
+  let use_shallow_decls_saved_state =
+    bool_if_min_version
+      "use_shallow_decls_saved_state"
+      ~default:default.use_shallow_decls_saved_state
+      ~current_version
+      config
+  in
+  let shallow_decls_manifold_path =
+    string_opt "shallow_decls_manifold_path" config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1611,6 +1639,9 @@ let load_ fn ~silent ~current_version overrides =
     no_marshalled_naming_table_in_saved_state;
     no_load_two_saved_states;
     use_manifold_cython_client;
+    cache_remote_decls;
+    use_shallow_decls_saved_state;
+    shallow_decls_manifold_path;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

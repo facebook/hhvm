@@ -21,7 +21,10 @@ let init
     ~(bin_root : Path.t)
     ~(root : Path.t)
     ~(mode : HulkStrategy.hulk_mode)
-    ~(saved_state_manifold_path : string option) : unit =
+    ~(cache_remote_decls : bool)
+    ~(use_shallow_decls_saved_state : bool)
+    ~(saved_state_manifold_path : string option)
+    ~(shallow_decls_manifold_path : string option) : unit =
   let (server
         : (module RemoteWorker.RemoteServerApi
              with type naming_table = Naming_table.t option)) =
@@ -57,7 +60,10 @@ let init
       ~transport_channel
       ~root
       ~mode
+      ~cache_remote_decls
+      ~use_shallow_decls_saved_state
       ~saved_state_manifold_path
+      ~shallow_decls_manifold_path
       artifact_store_config
       server
   in

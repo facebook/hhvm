@@ -78,7 +78,10 @@ type 'naming_table work_env = {
   naming_table_base: 'naming_table;
   timeout: int;
   mode: HulkStrategy.hulk_mode;
+  cache_remote_decls: bool;
+  use_shallow_decls_saved_state: bool;
   saved_state_manifold_path: string option;
+  shallow_decls_manifold_path: string option;
   server: (module RemoteServerApi with type naming_table = 'naming_table);
 }
 
@@ -94,7 +97,10 @@ let make_env
     ~(transport_channel : string option)
     ~(root : Path.t)
     ~(mode : HulkStrategy.hulk_mode)
+    ~(cache_remote_decls : bool)
+    ~(use_shallow_decls_saved_state : bool)
     ~(saved_state_manifold_path : string option)
+    ~(shallow_decls_manifold_path : string option)
     ?(timeout = (600 : int))
     (artifact_store_config : ArtifactStore.config)
     (server : (module RemoteServerApi with type naming_table = 'naming_table)) :
@@ -113,7 +119,10 @@ let make_env
     naming_table_base = None;
     root;
     mode;
+    cache_remote_decls;
+    use_shallow_decls_saved_state;
     saved_state_manifold_path;
+    shallow_decls_manifold_path;
     timeout;
     server;
   }

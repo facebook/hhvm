@@ -176,6 +176,12 @@ impl ItemConverter {
                     .map(|e| self.convert_type(e))
                     .collect::<Result<_>>()?,
             })),
+            syn::Type::Reference(ty) => Ok(self.convert_type(&ty.elem)?),
+            syn::Type::Slice(ty) => Ok(ir::Type::Path(ir::TypePath {
+                modules: vec![],
+                targs: vec![self.convert_type(&ty.elem)?],
+                ty: ir::TypeName(String::from("list")),
+            })),
             _ => bail!("Not supported: {:?}", ty),
         }
     }

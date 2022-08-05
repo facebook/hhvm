@@ -58,6 +58,21 @@ impl ItemConverter {
                     format!("Failed to convert type {}", item.ident)
                 })?))
             }
+            Item::Mod(item) => {
+                if let Some((_brace, items)) = &item.content {
+                    let defs = items
+                        .iter()
+                        .filter_map(|item| Self::convert_item(item).transpose())
+                        .collect::<Result<_>>()
+                        .with_context(|| format!("Failed to convert module {}", item.ident))?;
+                    Ok(Some(Def::Module(ir::Module {
+                        name: ir::ModuleName(item.ident.to_string()),
+                        defs,
+                    })))
+                } else {
+                    Ok(None)
+                }
+            }
             _ => Ok(None),
         }
     }

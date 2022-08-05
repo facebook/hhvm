@@ -5,3 +5,9 @@ type b = RelativePath.t
 type c = Collections.SSet.t
 
 type t = d
+
+module Foo = struct
+  type t = e
+
+  type maybe = t option
+end

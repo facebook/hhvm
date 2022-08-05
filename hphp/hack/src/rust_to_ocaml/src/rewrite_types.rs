@@ -30,6 +30,7 @@ impl Rewriter {
             }
         };
         match def {
+            ir::Def::Module(module) => Self::rewrite_module(module),
             ir::Def::Alias { name, ty, .. } => {
                 rewrite_name(name);
                 self.rewrite_type(ty)

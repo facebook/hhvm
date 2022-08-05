@@ -28,6 +28,11 @@ impl Display for ir::Module {
 impl Display for ir::Def {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
+            Self::Module(module) => {
+                writeln!(f, "module {} = struct", module.name)?;
+                module.fmt(f)?;
+                writeln!(f, "end")?
+            }
             Self::Alias {
                 doc,
                 tparams,

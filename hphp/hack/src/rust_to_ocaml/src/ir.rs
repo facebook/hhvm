@@ -17,6 +17,7 @@ pub struct Module {
 }
 
 pub enum Def {
+    Module(Module),
     Alias {
         doc: Vec<String>,
         tparams: Vec<String>,

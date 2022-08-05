@@ -286,6 +286,8 @@ struct SymbolSets {
     // Verify uniqueness of symbols and set Attrs appropriately.
     auto const path = ue.m_filepath;
 
+    add(units, path, path, "unit");
+
     for (size_t n = 0; n < ue.numPreClasses(); ++n) {
       auto pce = ue.pce(n);
       pce->setAttrs(pce->attrs() | AttrUnique | AttrPersistent);
@@ -318,6 +320,8 @@ struct SymbolSets {
 
   // For remote parses, where we don't have an UnitEmitter
   void add(const Package::ParseMeta::Definitions& d, const StringData* path) {
+    add(units, path, path, "unit");
+
     for (auto const& c : d.m_classes) {
       add(classes, c, path, "class", typeAliases);
     }
@@ -421,6 +425,7 @@ private:
   IMap typeAliases;
   Map constants;
   Map modules;
+  Map units;
 };
 
 RepoGlobalData getGlobalData() {
@@ -1218,6 +1223,7 @@ bool process(const CompilerOptions &po) {
       // We don't have unit-emitters to do uniqueness checking, but
       // the parse metadata has the definitions we can use instead.
       for (auto const& p : parseMetas) {
+        if (!p.m_filepath) continue;
         unique->add(p.m_definitions, p.m_filepath);
       }
 

@@ -374,7 +374,8 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
 
   if (!options.extendedStats) return;
 
-  auto const ctx = AnalysisContext { func.unit, cf, func.cls };
+  auto const ctx =
+    AnalysisContext { index.lookup_func_unit(func), cf, func.cls };
   auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
@@ -424,25 +425,6 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   }
 }
 
-void collect_stats(Stats& stats,
-                   const Index& index,
-                   const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& unit) {
-      for (auto const& c : unit->classes) {
-        collect_class(stats, index, *c);
-        for (auto const& m : c->methods) {
-          collect_func(stats, index, *m);
-        }
-      }
-      for (auto const& x : unit->funcs) {
-        collect_func(stats, index, *x);
-      }
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -464,17 +446,21 @@ StatsHolder allocate_stats() {
 
 void collect_stats(const StatsHolder& stats,
                    const Index& index,
-                   const php::Unit* unit) {
+                   const php::Unit& unit) {
   if (!stats) return;
-  for (auto& c : unit->classes) {
-    collect_class(*stats.stats, index, *c);
-    for (auto& m : c->methods) {
-      collect_func(*stats.stats, index, *m);
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) {
+      collect_class(*stats.stats, index, c);
+      for (auto const& m : c.methods) {
+        collect_func(*stats.stats, index, *m);
+      }
     }
-  }
-  for (auto& x : unit->funcs) {
-    collect_func(*stats.stats, index, *x);
-  }
+  );
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { collect_func(*stats.stats, index, f); }
+  );
 }
 
 void print_stats(const StatsHolder& stats) {

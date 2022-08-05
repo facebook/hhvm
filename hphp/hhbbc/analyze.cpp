@@ -250,10 +250,9 @@ prepare_incompleteQ(const Index& index,
  * Note that in the interpreter code, ctx.func->cls is not
  * necessarily the same as ctx.cls because of closures.
  */
-AnalysisContext adjust_closure_context(AnalysisContext ctx) {
-  if (ctx.cls && ctx.cls->closureContextCls) {
-    ctx.cls = ctx.cls->closureContextCls;
-  }
+AnalysisContext adjust_closure_context(const Index& index,
+                                       AnalysisContext ctx) {
+  if (ctx.cls) ctx.cls = index.lookup_closure_context(*ctx.cls);
   return ctx;
 }
 
@@ -261,7 +260,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
                                 const AnalysisContext& ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
-  assertx(ctx.cls == adjust_closure_context(ctx).cls);
+  assertx(ctx.cls == adjust_closure_context(index, ctx).cls);
   auto ai = FuncAnalysis { ctx };
 
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
@@ -469,7 +468,7 @@ FuncAnalysis do_analyze(const Index& index,
                         ClassAnalysis* clsAnalysis,
                         const KnownArgs* knownArgs = nullptr,
                         CollectionOpts opts = CollectionOpts{}) {
-  auto const ctx = adjust_closure_context(inputCtx);
+  auto const ctx = adjust_closure_context(index, inputCtx);
   auto collect = CollectedInfo { index, ctx, clsAnalysis, opts };
 
   auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
@@ -822,7 +821,10 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     for (auto const m : *associatedMethods) {
       auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
       assertx(inserted);
-      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr, 0, 0});
+      funcMeta.emplace(
+        m,
+        FuncMeta{index.lookup_func_unit(*m), ctx.cls, nullptr, 0, 0}
+      );
     }
   }
 

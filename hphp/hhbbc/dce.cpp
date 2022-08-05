@@ -2049,7 +2049,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
-    FTRACE(2, "  == #{} {}\n", idx, show(func, op));
+    FTRACE(2, "  == #{} {}\n", idx, show(*func, op));
 
     if ((idx + 1) < blk->hhbcs.size()) states.next();
 

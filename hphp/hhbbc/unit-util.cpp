@@ -23,8 +23,12 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_systemlib_part(SString filename) {
+  return FileUtil::isSystemName(filename->slice());
+}
+
 bool is_systemlib_part(const php::Unit& unit) {
-  return FileUtil::isSystemName(unit.filename->slice());
+  return is_systemlib_part(unit.filename);
 }
 
 //////////////////////////////////////////////////////////////////////

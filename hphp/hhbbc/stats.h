@@ -46,7 +46,7 @@ struct Index;
  * to stdout.
  */
 StatsHolder allocate_stats();
-void collect_stats(const StatsHolder&, const Index&, const php::Unit*);
+void collect_stats(const StatsHolder&, const Index&, const php::Unit&);
 void print_stats(const StatsHolder&);
 
 //////////////////////////////////////////////////////////////////////

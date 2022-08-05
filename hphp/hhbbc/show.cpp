@@ -363,21 +363,23 @@ std::string show(const Class& cls) {
   return ret;
 }
 
-std::string show(const Unit& unit) {
+std::string show(const Unit& unit,
+                 const std::vector<const php::Class*>& classes,
+                 const std::vector<const php::Func*>& funcs) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
     &ret
   );
 
-  for (auto& c : unit.classes) {
+  for (auto const c : classes) {
     folly::toAppend(
       indent(2, show(*c)),
       &ret
     );
   }
 
-  for (auto& f : unit.funcs) {
+  for (auto const f : funcs) {
     folly::toAppend(
       "  function ", f->name->data(), ":\n",
       indent(4, show(*f)),
@@ -389,10 +391,38 @@ std::string show(const Unit& unit) {
   return ret;
 }
 
-std::string show(const Program& p) {
+std::string show(const Unit& unit, const Index& index) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) { classes.emplace_back(&c); }
+  );
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { funcs.emplace_back(&f); }
+  );
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Unit& unit, const Program& p) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  for (auto const& c : p.classes) {
+    if (c->unit != unit.filename) continue;
+    classes.emplace_back(c.get());
+  }
+  for (auto const& f : p.funcs) {
+    if (f->unit != unit.filename) continue;
+    funcs.emplace_back(f.get());
+  }
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Program& p, const Index& index) {
   using namespace folly::gen;
   return from(p.units)
-    | map([] (const std::unique_ptr<php::Unit>& u) { return show(*u); })
+    | map([&] (const std::unique_ptr<php::Unit>& u) { return show(*u, index); })
     | unsplit<std::string>("--------------\n")
     ;
 }

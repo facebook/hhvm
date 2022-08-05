@@ -317,12 +317,12 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
   auto interp = Interp { index, ctx, visit.collect, bid, cblk.get(), state };
 
   for (auto& op : cblk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(func, op));
+    FTRACE(2, "  == {}\n", show(*func, op));
 
     auto gen = [&] (const Bytecode& newb) {
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(func, newBCs.back()));
+      FTRACE(2, "   + {}\n", show(*func, newBCs.back()));
     };
 
     if (state.unreachable) {
@@ -462,7 +462,7 @@ struct OptimizeIterState {
       if (!eligible.any()) break;
 
       auto const& op = blk->hhbcs[opIdx];
-      FTRACE(2, "  == {}\n", show(func, op));
+      FTRACE(2, "  == {}\n", show(*func, op));
 
       if (state.unreachable) break;
 
@@ -598,7 +598,7 @@ void optimize_iterators(VisitContext& visit) {
 
     if (!state.eligible[fixup.init]) {
       // This iteration loop isn't eligible, so don't apply the fixup
-      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(func, op));
+      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(*func, op));
       continue;
     }
 
@@ -644,11 +644,11 @@ void optimize_iterators(VisitContext& visit) {
 
     FTRACE(
       2, "   ({}): {} ==> {}\n",
-      fixup.show(*func), show(func, op),
+      fixup.show(*func), show(*func, op),
       [&] {
         using namespace folly::gen;
         return from(newOps)
-          | map([&] (const Bytecode& bc) { return show(func, bc); })
+          | map([&] (const Bytecode& bc) { return show(*func, bc); })
           | unsplit<std::string>(",");
       }()
     );

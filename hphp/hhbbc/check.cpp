@@ -165,33 +165,35 @@ bool check(const php::Class& c) {
 
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);
-  if (c.closureContextCls) {
-    assertx(c.closureContextCls->unit == c.unit);
-    assertx(isClo);
-  }
+  assertx(IMPLIES(c.closureContextCls, isClo));
   if (isClo) {
     assertx(c.methods.size() == 1 || c.methods.size() == 2);
     assertx(c.methods[0]->name == s_invoke.get());
     assertx(c.methods[0]->isClosureBody);
     assertx(c.methods.size() == 1);
-  } else {
-    assertx(!c.closureContextCls);
   }
-
   return true;
 }
 
-bool check(const php::Unit& u) {
-  for (DEBUG_ONLY auto& c : u.classes) assertx(check(*c));
-  for (DEBUG_ONLY auto& f : u.funcs)   assertx(check(*f));
+bool check(const php::Unit& u, const Index& index) {
+  index.for_each_unit_class(
+    u, [&] (const php::Class& c) { assertx(check(c)); }
+  );
+  index.for_each_unit_func(
+    u, [&] (const php::Func& f) { assertx(check(f)); }
+  );
   return true;
 }
 
 bool check(const php::Program& p) {
   trace_time tracer("check");
   parallel::for_each(
-    p.units,
-    [] (const std::unique_ptr<php::Unit>& u) { assertx(check(*u)); }
+    p.classes,
+    [] (const std::unique_ptr<php::Class>& c) { assertx(check(*c)); }
+  );
+  parallel::for_each(
+    p.funcs,
+    [] (const std::unique_ptr<php::Func>& f) { assertx(check(*f)); }
   );
   return true;
 }

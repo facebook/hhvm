@@ -496,15 +496,13 @@ void testCompression(Program& program) {
     buffer.clear();
   };
 
-  for (auto& unit : program.units) {
-    for (auto& c : unit->classes) {
-      for (auto& m : c->methods) {
-        test_compression_function(*m);
-      }
+  for (auto& c : program.classes) {
+    for (auto& m : c->methods) {
+      test_compression_function(*m);
     }
-    for (auto& f : unit->funcs) {
-      test_compression_function(*f);
-    }
+  }
+  for (auto& f : program.funcs) {
+    test_compression_function(*f);
   }
 
   TRACE(1, "Overall compression ratio: %.2f\n",

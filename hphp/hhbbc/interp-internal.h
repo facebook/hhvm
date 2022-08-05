@@ -431,7 +431,8 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   // Internal functions may raise module boundary violations
   if ((func->attrs & AttrInternal) &&
-      env.ctx.func->unit->moduleName != func->unit->moduleName) {
+      env.index.lookup_func_unit(*env.ctx.func)->moduleName !=
+      env.index.lookup_func_unit(*func)->moduleName) {
     return false;
   }
 

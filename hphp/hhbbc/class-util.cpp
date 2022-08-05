@@ -99,7 +99,7 @@ bool prop_might_have_bad_initial_value(const Index& index,
   auto const initial = from_cell(prop.val);
   if (initial.subtypeOf(BUninit)) return true;
 
-  auto const ctx = Context{ cls.unit, nullptr, &cls };
+  auto const ctx = Context{ index.lookup_class_unit(cls), nullptr, &cls };
   if (!index.satisfies_constraint(ctx, initial, prop.typeConstraint)) {
     return true;
   }

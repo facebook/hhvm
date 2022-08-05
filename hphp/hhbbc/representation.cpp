@@ -83,20 +83,13 @@ template <typename SerDe> void Local::serde(SerDe& sd) {
 }
 
 template <typename SerDe> void Func::serde(SerDe& sd,
-                                           Unit* parentUnit,
                                            Class* parentClass) {
   // This isn't true in general, but is right now for where we're
   // using the serializer.
   if constexpr (SerDe::deserializing) {
-    unit = parentUnit;
     cls = parentClass;
-    originalUnit = nullptr;
-    originalClass = parentClass;
   } else {
-    assertx(unit == parentUnit);
     assertx(cls == parentClass);
-    assertx(!originalUnit);
-    assertx(originalClass == parentClass);
   }
 
   sd(name)
@@ -105,11 +98,14 @@ template <typename SerDe> void Func::serde(SerDe& sd,
     (attrs)
     (params)
     (locals)
+    (unit)
     (dvEntries)
     (numIters)
     (mainEntry)
     (returnUserType)
     (originalFilename)
+    (originalUnit)
+    (originalClass)
     (returnUBs)
     (retTypeConstraint)
     (requiredCoeffects)
@@ -156,8 +152,6 @@ template <typename SerDe> void Prop::serde(SerDe& sd) {
 }
 
 template <typename SerDe> void Const::serde(SerDe& sd, Class* parentClass) {
-  // This isn't true in general, but is right now for where we're
-  // using the serializer.
   if constexpr (SerDe::deserializing) {
     cls = parentClass;
   } else {
@@ -174,23 +168,14 @@ template <typename SerDe> void Const::serde(SerDe& sd, Class* parentClass) {
   SD_BITFIELD(isFromTrait);
 }
 
-template <typename SerDe> void Class::serde(SerDe& sd, Unit* parentUnit) {
-  // This isn't true in general, but is right now for where we're
-  // using the serializer.
-  if constexpr (SerDe::deserializing) {
-    unit = parentUnit;
-    closureContextCls = nullptr;
-  } else {
-    assertx(unit == parentUnit);
-  }
-
+template <typename SerDe> void Class::serde(SerDe& sd) {
   sd(name)
     (srcInfo)
     (attrs)
     (id)
+    (unit)
     (parentName)
-    // closureContextCls is deliberately skipped. It will be encoded
-    // by the parent unit.
+    (closureContextCls)
     (interfaceNames)
     (includedEnumNames)
     (usedTraitNames)
@@ -199,7 +184,7 @@ template <typename SerDe> void Class::serde(SerDe& sd, Unit* parentUnit) {
     (constants, this)
     (userAttributes)
     (enumBaseTy)
-    (methods, parentUnit, this);
+    (methods, this);
 
   SD_BITFIELD(hasReifiedGenerics);
   SD_BITFIELD(hasConstProp);
@@ -240,8 +225,8 @@ template <typename SerDe> void FatalInfo::serde(SerDe& sd) {
 template <typename SerDe> void Unit::serde(SerDe& sd) {
   sd(filename)
     .nullable(fatalInfo)
-    (funcs, this, nullptr)
-    (classes, this)
+    (funcs)
+    (classes)
     (typeAliases)
     (constants)
     (modules)
@@ -249,50 +234,6 @@ template <typename SerDe> void Unit::serde(SerDe& sd) {
     (metaData)
     (fileAttributes)
     (moduleName);
-
-  // We deferred encoding closureContextCls in Class. This is because
-  // its difficult to refer to another class until we've seen all of
-  // them. Now that we've seen all the classes, handle
-  // closureContextCls.
-  if constexpr (SerDe::deserializing) {
-    hphp_fast_map<int32_t, Class*> idToCls;
-    idToCls.reserve(classes.size());
-    for (auto& c : classes) {
-      assertx(c->id != kInvalidId);
-      auto const DEBUG_ONLY inserted =
-        idToCls.emplace(c->id, c.get()).second;
-      assertx(inserted);
-    }
-
-    for (auto& c : classes) {
-      assertx(!c->closureContextCls);
-      if (!is_closure(*c)) continue;
-
-      int32_t id;
-      sd(id);
-      if (id == kInvalidId) continue;
-
-      auto const it = idToCls.find(id);
-      assertx(it != idToCls.end());
-
-      c->closureContextCls = it->second;
-    }
-  } else {
-    for (auto const& c : classes) {
-      if (!is_closure(*c)) {
-        assertx(!c->closureContextCls);
-        continue;
-      }
-
-      if (c->closureContextCls) {
-        assertx(c->closureContextCls->unit == this);
-        assertx(c->closureContextCls->id != kInvalidId);
-        sd(c->closureContextCls->id);
-      } else {
-        sd(kInvalidId);
-      }
-    }
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -319,8 +260,8 @@ template void Param::serde(BlobDecoder&);
 template void Local::serde(BlobEncoder&);
 template void Local::serde(BlobDecoder&);
 
-template void Func::serde(BlobEncoder&, Unit*, Class*);
-template void Func::serde(BlobDecoder&, Unit*, Class*);
+template void Func::serde(BlobEncoder&, Class*);
+template void Func::serde(BlobDecoder&, Class*);
 
 template void Prop::serde(BlobEncoder&);
 template void Prop::serde(BlobDecoder&);
@@ -328,8 +269,8 @@ template void Prop::serde(BlobDecoder&);
 template void Const::serde(BlobEncoder&, Class*);
 template void Const::serde(BlobDecoder&, Class*);
 
-template void Class::serde(BlobEncoder&, Unit*);
-template void Class::serde(BlobDecoder&, Unit*);
+template void Class::serde(BlobEncoder&);
+template void Class::serde(BlobDecoder&);
 
 template void Constant::serde(BlobEncoder&);
 template void Constant::serde(BlobDecoder&);

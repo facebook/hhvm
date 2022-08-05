@@ -537,7 +537,7 @@ private:
  * Shows up in a few different interpreter structures.
  */
 using ClosureUseVarMap = hphp_fast_map<
-  php::Class*,
+  const php::Class*,
   CompactVector<Type>
 >;
 
@@ -546,7 +546,7 @@ using ClosureUseVarMap = hphp_fast_map<
  * `clo' into the destination map.
  */
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 php::Class* clo,
+                                 const php::Class& clo,
                                  CompactVector<Type>);
 
 //////////////////////////////////////////////////////////////////////

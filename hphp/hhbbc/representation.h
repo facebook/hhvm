@@ -304,7 +304,7 @@ struct Func : FuncBase {
    * Which unit defined this function.  If it is a method, the cls
    * field will be set to the class that contains it.
    */
-  Unit* unit;
+  LSString unit;
   Class* cls;
 
   /*
@@ -342,15 +342,16 @@ struct Func : FuncBase {
    * drop the originalFilename.
    */
   LSString originalFilename;
-  Unit* originalUnit{};
+  LSString originalUnit{};
 
   /*
-   * The reference of the trait where the method was originally defined.
-   * This is used to detected if a method is imported multiple
-   * times via different use-chains as the pair (name, originalClass)
-   * uniquely identifies a method.
+   * The reference of the trait where the method was originally
+   * defined.  This is used to detected if a method is imported
+   * multiple times via different use-chains as the pair (name,
+   * originalClass) uniquely identifies a method. If nullptr, the
+   * "original" class is just the function's class.
    */
-  Class* originalClass;
+  LSString originalClass{};
 
   /*
    * This is the generated function for a closure body.  I.e. this
@@ -427,9 +428,7 @@ struct Func : FuncBase {
    */
   UserAttributeMap userAttributes;
 
-  template <typename SerDe> void serde(SerDe&,
-                                       Unit* parentUnit,
-                                       Class* parentClass);
+  template <typename SerDe> void serde(SerDe&, Class*);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -524,7 +523,7 @@ struct Class : ClassBase {
   /*
    * Which unit defined this class.
    */
-  Unit* unit;
+  LSString unit;
 
   /*
    * Name of the parent class.
@@ -532,15 +531,15 @@ struct Class : ClassBase {
   LSString parentName;
 
   /*
-   * If this class represents a closure, this points to the class that
-   * lexically contains the closure, if there was one.  If this class
-   * doesn't represent a closure, this will be nullptr.
+   * If this class represents a closure, this points to the name of
+   * the class that lexically contains the closure, if there was one.
+   * If this class doesn't represent a closure, this will be nullptr.
    *
    * The significance of this is that closures created lexically
    * inside of a class run as if they were part of that class context
    * (with regard to access checks, etc).
    */
-  php::Class* closureContextCls;
+  LSString closureContextCls;
 
   /*
    * Names of inherited interfaces.
@@ -599,7 +598,7 @@ struct Class : ClassBase {
    */
   bool sampleDynamicConstruct : 1;
 
-  template <typename SerDe> void serde(SerDe&, Unit* parentUnit);
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct Constant {
@@ -653,8 +652,8 @@ struct FatalInfo {
 struct Unit {
   LSString filename;
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
-  CompactVector<std::unique_ptr<Func>> funcs;
-  CompactVector<std::unique_ptr<Class>> classes;
+  CompactVector<SString> funcs;
+  CompactVector<SString> classes;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::unique_ptr<Constant>> constants;
   CompactVector<std::unique_ptr<Module>> modules;
@@ -670,8 +669,8 @@ struct Unit {
  * A php Program is a set of compilation units.
  */
 struct Program {
-  std::mutex lock;
-  std::atomic<uint32_t> nextFuncId{};
+  std::vector<std::unique_ptr<Func>> funcs;
+  std::vector<std::unique_ptr<Class>> classes;
   std::vector<std::unique_ptr<Unit>> units;
 };
 
@@ -681,19 +680,19 @@ std::string show(const Func&);
 std::string show(const Func&, const Block&);
 std::string show(const Func&, const Bytecode& bc);
 std::string show(const Class&);
-std::string show(const Unit&);
-std::string show(const Program&);
+std::string show(const Unit&,
+                 const std::vector<const Class*>&,
+                 const std::vector<const Func*>&);
+std::string show(const Unit&, const Index&);
+std::string show(const Unit&, const Program&);
+std::string show(const Program&, const Index&);
 std::string local_string(const Func&, LocalId);
-
-inline std::string show(const Func* f, const Bytecode& bc) {
-  return show(*f, bc);
-}
 
 //////////////////////////////////////////////////////////////////////
 
 bool check(const Func&);
 bool check(const Class&);
-bool check(const Unit&);
+bool check(const Unit&, const Index&);
 bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////

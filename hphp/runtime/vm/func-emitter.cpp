@@ -695,9 +695,10 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
 
     (params)
     (m_localNames, [](auto s) { return s; })
-    (ehtab,
+    .delta(
+      ehtab,
       [&](const EHEnt& prev, EHEnt cur) -> EHEnt {
-        if (!SerDe::deserializing) {
+        if constexpr (!SerDe::deserializing) {
           cur.m_handler -= cur.m_past;
           cur.m_past -= cur.m_base;
           cur.m_base -= prev.m_base;
@@ -749,7 +750,7 @@ void FuncEmitter::serde(SerDe& sd, bool lazy) {
       : createLineTable(m_sourceLocTab, m_bclen);
     sd.withSize(
       [&] {
-        sd(
+        sd.delta(
           lines,
           [&] (const LineEntry& prev, const LineEntry& curDelta) {
             return LineEntry {
@@ -789,7 +790,7 @@ void FuncEmitter::deserializeLineTable(BlobDecoder& decoder,
                                        LineTable& lineTable) {
   decoder.withSize(
     [&] {
-      decoder(
+      decoder.delta(
         lineTable,
         [&] (const LineEntry& prev, const LineEntry& curDelta) {
           return LineEntry {

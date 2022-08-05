@@ -396,9 +396,9 @@ Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
 //////////////////////////////////////////////////////////////////////
 
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 php::Class* clo,
+                                 const php::Class& clo,
                                  CompactVector<Type> types) {
-  auto& current = dst[clo];
+  auto& current = dst[&clo];
   if (current.empty()) {
     current = std::move(types);
     return;

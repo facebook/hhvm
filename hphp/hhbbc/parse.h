@@ -25,7 +25,15 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue);
+struct ParsedUnit {
+  std::unique_ptr<php::Unit> unit;
+  std::vector<std::unique_ptr<php::Func>> funcs;
+  std::vector<std::unique_ptr<php::Class>> classes;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(unit)(funcs, nullptr)(classes);
+  }
+};
+ParsedUnit parse_unit(const UnitEmitter& ue);
 
 //////////////////////////////////////////////////////////////////////
 

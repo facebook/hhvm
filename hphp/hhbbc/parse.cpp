@@ -663,7 +663,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->name        = fe.name;
   ret->srcInfo     = php::SrcInfo { fe.getLocation(),
                                     fe.docComment };
-  ret->unit        = unit;
+  ret->unit        = unit->filename;
   ret->cls         = cls;
 
   ret->attrs       = static_cast<Attr>((fe.attrs & ~AttrNoOverride) |
@@ -679,7 +679,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->hasReturnWithMultiUBs = fe.hasReturnWithMultiUBs;
   ret->returnUBs          = fe.retUpperBounds;
   ret->originalFilename   = fe.originalFilename;
-  ret->originalClass      = ret->cls;
 
   ret->isClosureBody       = fe.isClosureBody;
   ret->isAsync             = fe.isAsync;
@@ -867,7 +866,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->name               = pce.name();
   ret->srcInfo            = php::SrcInfo { pce.getLocation(),
                                            pce.docComment() };
-  ret->unit               = unit;
+  ret->unit               = unit->filename;
   ret->closureContextCls  = nullptr;
   ret->parentName         = pce.parentName()->empty() ? nullptr
                                                       : pce.parentName();
@@ -999,9 +998,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
 void assign_closure_context(const ParseUnitState&, php::Class*);
 
-php::Class*
-find_closure_context(const ParseUnitState& puState,
-                     php::Func* createClFunc) {
+LSString find_closure_context(const ParseUnitState& puState,
+                              php::Func* createClFunc) {
   if (auto const cls = createClFunc->cls) {
     if (is_closure(*cls)) {
       // We have a closure created by a closure's invoke method, which
@@ -1010,7 +1008,7 @@ find_closure_context(const ParseUnitState& puState,
       assign_closure_context(puState, cls);
       return cls->closureContextCls;
     }
-    return cls;
+    return cls->name;
   }
   return nullptr;
 }
@@ -1042,14 +1040,6 @@ void assign_closure_context(const ParseUnitState& puState,
     }
   }
   clo->closureContextCls = representative;
-}
-
-void find_additional_metadata(const ParseUnitState& puState,
-                              php::Unit* unit) {
-  for (auto& c : unit->classes) {
-    if (!is_closure(*c)) continue;
-    assign_closure_context(puState, c.get());
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1097,15 +1087,17 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   });
 }
 
-std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
+ParsedUnit parse_unit(const UnitEmitter& ue) {
   Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, ue.isASystemLib()};
   FTRACE(2, "parse_unit {}\n", ue.m_filepath->data());
 
-  auto ret            = std::make_unique<php::Unit>();
-  ret->filename       = ue.m_filepath;
-  ret->metaData       = ue.m_metaData;
-  ret->fileAttributes = ue.m_fileAttributes;
-  ret->moduleName     = ue.m_moduleName;
+  ParsedUnit ret;
+  ret.unit = std::make_unique<php::Unit>();
+
+  ret.unit->filename       = ue.m_filepath;
+  ret.unit->metaData       = ue.m_metaData;
+  ret.unit->fileAttributes = ue.m_fileAttributes;
+  ret.unit->moduleName     = ue.m_moduleName;
 
   if (RO::EvalAbortBuildOnVerifyError && !ue.check(false)) {
     // Record a FatalInfo without a location. This represents a
@@ -1119,49 +1111,56 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
         ue.m_filepath
       )
     };
-    ret->fatalInfo = std::make_unique<php::FatalInfo>(std::move(fi));
+    ret.unit->fatalInfo = std::make_unique<php::FatalInfo>(std::move(fi));
     return ret;
   }
 
   if (ue.m_fatalUnit) {
     php::FatalInfo fi{ue.m_fatalLoc, ue.m_fatalOp, ue.m_fatalMsg};
-    ret->fatalInfo = std::make_unique<php::FatalInfo>(std::move(fi));
+    ret.unit->fatalInfo = std::make_unique<php::FatalInfo>(std::move(fi));
   }
 
   ParseUnitState puState;
 
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {
-    auto cls = parse_class(puState, ret.get(), *ue.pce(i));
-    ret->classes.emplace_back(std::move(cls));
+    auto cls = parse_class(puState, ret.unit.get(), *ue.pce(i));
+    ret.unit->classes.emplace_back(cls->name);
+    ret.classes.emplace_back(std::move(cls));
   }
 
   for (auto const& fe : ue.fevec()) {
-    auto func = parse_func(puState, ret.get(), nullptr, *fe);
     assertx(!fe->pce());
-    ret->funcs.emplace_back(std::move(func));
+    auto func = parse_func(puState, ret.unit.get(), nullptr, *fe);
+    ret.unit->funcs.emplace_back(func->name);
+    ret.funcs.emplace_back(std::move(func));
   }
 
-  ret->srcLocs.resize(puState.srcLocs.size());
+  ret.unit->srcLocs.resize(puState.srcLocs.size());
   for (auto const& srcInfo : puState.srcLocs) {
-    ret->srcLocs[srcInfo.second] = srcInfo.first;
+    ret.unit->srcLocs[srcInfo.second] = srcInfo.first;
   }
 
   for (auto const& te : ue.typeAliases()) {
-    ret->typeAliases.emplace_back(parse_type_alias(*te));
+    ret.unit->typeAliases.emplace_back(parse_type_alias(*te));
   }
 
   for (auto const& c : ue.constants()) {
-    ret->constants.emplace_back(parse_constant(c));
+    ret.unit->constants.emplace_back(parse_constant(c));
   }
 
   for (auto const& m : ue.modules()) {
-    ret->modules.emplace_back(parse_module(m));
+    ret.unit->modules.emplace_back(parse_module(m));
   }
 
-  find_additional_metadata(puState, ret.get());
+  for (auto& c : ret.classes) {
+    if (!is_closure(*c)) continue;
+    assign_closure_context(puState, c.get());
+  }
 
-  assertx(check(*ret));
-
+  if (debug) {
+    for (auto const& f : ret.funcs)   always_assert(check(*f));
+    for (auto const& c : ret.classes) always_assert(check(*c));
+  }
   return ret;
 }
 

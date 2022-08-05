@@ -227,23 +227,9 @@ struct BlobEncoder {
     encode(kv.second);
   }
 
-  template<class T, typename FDeltaEncode>
-  void encode(const std::vector<T>& cont, FDeltaEncode deltaEncode) {
-    if (cont.size() >= 0xffffffffu) {
-      throw std::runtime_error("maximum vector size exceeded in BlobEncoder");
-    }
-
-    auto prev = T{};
-    encode(uint32_t(cont.size()));
-    for (auto it = cont.begin(); it != cont.end(); ++it) {
-      encode(deltaEncode(prev, *it));
-      prev = *it;
-    }
-  }
-
-  template<typename T, typename A>
-  void encode(const std::vector<T, A>& vec) {
-    encodeOrderedContainer(vec);
+  template<typename T, typename A, typename... Extra>
+  void encode(const std::vector<T, A>& vec, Extra... extra) {
+    encodeOrderedContainer(vec, extra...);
   }
 
   template<typename T, typename A, typename... Extra>
@@ -316,6 +302,21 @@ struct BlobEncoder {
   template<class T, class... F>
   BlobEncoder& operator()(const T& t, F... lambdas) {
     encode(t, lambdas...);
+    return *this;
+  }
+
+  template<typename T, typename FDeltaEncode>
+  BlobEncoder& delta(const std::vector<T>& cont, FDeltaEncode deltaEncode) {
+    if (cont.size() >= 0xffffffffu) {
+      throw std::runtime_error("maximum vector size exceeded in BlobEncoder");
+    }
+
+    auto prev = T{};
+    encode(uint32_t(cont.size()));
+    for (auto it = cont.begin(); it != cont.end(); ++it) {
+      encode(deltaEncode(prev, *it));
+      prev = *it;
+    }
     return *this;
   }
 
@@ -584,36 +585,9 @@ struct BlobDecoder {
     decode(val.second);
   }
 
-  template<typename Cont>
-  auto decode(Cont& vec) -> decltype(vec.emplace_back(), void()) {
-    uint32_t size;
-    decode(size);
-    if (size) vec.reserve(vec.size() + size);
-    for (uint32_t i = 0; i < size; ++i) {
-      vec.emplace_back();
-      decode(vec.back());
-    }
-  }
-
-  template<class T, typename FDeltaDecode>
-  void decode(std::vector<T>& vec, FDeltaDecode deltaDecode) {
-    uint32_t size;
-    decode(size);
-    vec.reserve(size);
-
-    auto prev = T{};
-    auto delta = T{};
-    for (uint32_t i = 0; i < size; ++i) {
-      decode(delta);
-      prev = deltaDecode(prev, delta);
-      vec.push_back(prev);
-    }
-    vec.shrink_to_fit();
-  }
-
-  template<typename T, typename A>
-  void decode(std::vector<T, A>& vec) {
-    decodeVecContainer(vec);
+  template<typename T, typename A, typename... Extra>
+  void decode(std::vector<T, A>& vec, Extra... extra) {
+    decodeVecContainer(vec, extra...);
     vec.shrink_to_fit();
   }
 
@@ -688,6 +662,23 @@ struct BlobDecoder {
   template<class T, class... F>
   BlobDecoder& operator()(T& t, F... lambdas) {
     decode(t, lambdas...);
+    return *this;
+  }
+
+  template<class T, typename FDeltaDecode>
+  BlobDecoder& delta(std::vector<T>& vec, FDeltaDecode deltaDecode) {
+    uint32_t size;
+    decode(size);
+    vec.reserve(size);
+
+    auto prev = T{};
+    auto delta = T{};
+    for (uint32_t i = 0; i < size; ++i) {
+      decode(delta);
+      prev = deltaDecode(prev, delta);
+      vec.push_back(prev);
+    }
+    vec.shrink_to_fit();
     return *this;
   }
 

@@ -1152,7 +1152,9 @@ where
             (_, TokenKind::Async) | (_, TokenKind::Function)
                 if !(next_token.has_leading_trivia_kind(TriviaKind::EndOfLine)) =>
             {
-                self.with_error_on_whole_token(Errors::error1056);
+                self.with_error_on_whole_token(Errors::error1056(
+                    self.token_text(&self.peek_token()),
+                ));
                 self.skip_and_log_unexpected_token(false);
                 self.parse_methodish(attribute_spec, modifiers)
             }

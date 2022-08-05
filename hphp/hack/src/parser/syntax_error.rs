@@ -174,9 +174,12 @@ pub const error1055: Error = Cow::Borrowed(concat!(
     "A fallthrough directive can only appear at the end of",
     " a `switch` section."
 ));
-// TODO(20052790): use the specific token's text in the message body.
-pub const error1056: Error =
-    Cow::Borrowed("This token is not valid as part of a function declaration.");
+pub fn error1056(text: &str) -> Error {
+    Cow::Owned(format!(
+        "This token `{}` is not valid as part of a function declaration.",
+        text
+    ))
+}
 pub fn error1057(text: &str) -> Error {
     // TODO (kasper): T52404885: why does removing to_string() here segfaults
     Cow::Owned(format!("Encountered unexpected token `{}`.", text))

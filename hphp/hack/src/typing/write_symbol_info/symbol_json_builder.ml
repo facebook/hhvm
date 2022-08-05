@@ -53,7 +53,8 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
             when String.for_all ~f:(fun c -> Caml.Char.code c < 127) s ->
             (* TODO make this more general *)
             Some (Symbol_build_json.build_argument_lit_json s)
-          | Aast.Id (id_pos, _id) ->
+          | Aast.Id (id_pos, _)
+          | Aast.Class_const (_, (id_pos, _)) ->
             Option.map
               ~f:Symbol_build_json.build_argument_xref_json
               (XRefs.PosMap.find_opt id_pos pos_map)

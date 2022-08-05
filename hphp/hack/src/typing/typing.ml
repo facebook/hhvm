@@ -1910,7 +1910,11 @@ let safely_refine_is_array env ty p pred_name arg_expr =
        * See analogous code in safely_refine_class_type.
        *)
       let (env, supertypes) =
-        TUtils.get_concrete_supertypes ~abstract_enum:true env arg_ty
+        TUtils.get_concrete_supertypes
+          ~expand_supportdyn:false
+          ~abstract_enum:true
+          env
+          arg_ty
       in
       let env =
         List.fold_left supertypes ~init:env ~f:(fun env ty ->

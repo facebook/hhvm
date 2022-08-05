@@ -79,6 +79,11 @@ impl Rewriter {
                         *ty = path.targs.pop().unwrap();
                         self.rewrite_type(ty);
                     }
+                    ([] | ["std", "vec"], "Vec", [_targ]) => {
+                        path.modules = vec![];
+                        path.ty = ir::TypeName(String::from("list"));
+                        path.targs.iter_mut().for_each(|ty| self.rewrite_type(ty));
+                    }
                     _ => self.rewrite_type_path(path),
                 }
             }

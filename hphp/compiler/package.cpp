@@ -1197,7 +1197,7 @@ coro::Task<bool> Package::index(const IndexCallback& callback) {
 
   // TODO: index systemlib. But here is too late; they have already been
   // parsed into UEs at startup, and not yet claimed.
-  HPHP_CORO_AWAIT(indexAll(callback));
+  HPHP_CORO_AWAIT(indexAll(callback).scheduleOn(m_executor.sticky()));
   HPHP_CORO_RETURN(!m_failed.load());
 }
 

@@ -8,7 +8,7 @@
 
 module A = Ast_defs
 
-type param_entity = string * int
+type param_entity = A.id_ * int
 
 type entity = Param of param_entity
 

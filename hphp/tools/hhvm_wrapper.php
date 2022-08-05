@@ -30,7 +30,6 @@ function my_option_map(): OptionInfoMap {
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '',  'Disable PGO' },
 'bespoke:'        => Pair { '',  'Bespoke array mode' },
-'lazyclass'       => Pair { '',  'Enable lazy classes' },
 'hadva'           => Pair { '',  'Enable HAM and automarking' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
@@ -156,13 +155,6 @@ function determine_flags(OptionMap $opts): string {
         '-v Eval.ExportLoggingArrayDataPath="/tmp/logging-array-export" '.
         '-v Eval.EmitLoggingArraySampleRate=17 '.
         '-v Eval.BespokeEscalationSampleRate=1000 '.
-        '';
-  }
-
-  if ($opts->containsKey('lazyclass')) {
-    $flags .=
-        '-v Eval.EmitClassPointers=2 '.
-        '-v Eval.ClassPassesClassname=true '.
         '';
   }
 

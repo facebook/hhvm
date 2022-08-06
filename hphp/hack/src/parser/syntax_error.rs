@@ -6,11 +6,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 //
 
-use crate::token_kind::TokenKind;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 use std::borrow::Cow;
 use std::cmp::Ordering;
+
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+
+use crate::token_kind::TokenKind;
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;

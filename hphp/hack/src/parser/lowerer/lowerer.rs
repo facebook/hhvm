@@ -4,8 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::desugar_expression_tree::desugar;
-use crate::modifier;
+use std::cell::Ref;
+use std::cell::RefCell;
+use std::cell::RefMut;
+use std::matches;
+use std::mem;
+use std::rc::Rc;
+use std::slice::Iter;
+use std::str::FromStr;
+
 use bstr::BString;
 use bstr::B;
 use bumpalo::Bump;
@@ -57,15 +64,10 @@ use parser_core_types::syntax_trait::SyntaxTrait;
 use parser_core_types::token_factory::TokenMutator;
 use parser_core_types::token_kind::TokenKind as TK;
 use regex::bytes::Regex;
-use std::cell::Ref;
-use std::cell::RefCell;
-use std::cell::RefMut;
-use std::matches;
-use std::mem;
-use std::rc::Rc;
-use std::slice::Iter;
-use std::str::FromStr;
 use thiserror::Error;
+
+use crate::desugar_expression_tree::desugar;
+use crate::modifier;
 
 fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
     Ok(escaper::unescape_single(s)?.into())

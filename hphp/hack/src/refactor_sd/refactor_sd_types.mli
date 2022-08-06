@@ -27,11 +27,17 @@ type analysis_mode =
 type refactor_mode =
   | Class  (** Locate upcasts of a specific Class *)
   | Function  (** Locate upcasts of a specific Function *)
+  | Method  (** Locate upcasts of a specific Method *)
 
 type options = {
   analysis_mode: analysis_mode;
   refactor_mode: refactor_mode;
 }
+
+(** Information about the class or function or method of interest, so that we
+    can limit our reports to the upcasts of that specific element.
+    Class name is only used if the refactor mode is Method. *)
+type element_info = { element_name: string }
 
 type entity_ =
   | Literal of Pos.t

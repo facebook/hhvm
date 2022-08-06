@@ -20,11 +20,14 @@ type analysis_mode =
 type refactor_mode =
   | Class
   | Function
+  | Method
 
 type options = {
   analysis_mode: analysis_mode;
   refactor_mode: refactor_mode;
 }
+
+type element_info = { element_name: string }
 
 type entity_ =
   | Literal of Pos.t

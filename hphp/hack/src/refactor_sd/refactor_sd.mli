@@ -18,7 +18,7 @@ val simplify :
   Typing_env_types.env -> constraint_ list -> refactor_sd_result list
 
 val callable :
-  string ->
+  element_info ->
   Tast_env.t ->
   Tast.fun_param list ->
   Tast.func_body ->

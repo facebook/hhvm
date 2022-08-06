@@ -73,7 +73,8 @@ let join (env : env) (then_entity : entity) (else_entity : entity) =
   | (None, Some _) -> (env, else_entity)
   | (_, _) -> (env, then_entity)
 
-let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
+let rec expr_
+    (upcasted_info : element_info) (env : env) ((_ty, pos, e) : T.expr) :
     env * entity =
   match e with
   | A.Int _
@@ -95,19 +96,19 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
         | Ast_defs.Usilence ),
         e ) ->
     (* unary operations won't return function pointrs, so we discard the entity. *)
-    let (env, _) = expr_ upcasted_id env e in
+    let (env, _) = expr_ upcasted_info env e in
     (env, None)
   | A.Binop (Ast_defs.Eq None, e1, e2) ->
-    let (env, entity_rhs) = expr_ upcasted_id env e2 in
+    let (env, entity_rhs) = expr_ upcasted_info env e2 in
     let env = assign env e1 entity_rhs in
     (env, None)
   | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
-    let (env, entity1) = expr_ upcasted_id env e1 in
-    let (env, entity2) = expr_ upcasted_id env e2 in
+    let (env, entity1) = expr_ upcasted_info env e1 in
+    let (env, entity2) = expr_ upcasted_info env e2 in
     join env entity1 entity2
   | A.Binop (Ast_defs.Eq (Some Ast_defs.QuestionQuestion), e1, e2) ->
-    let (env, entity1) = expr_ upcasted_id env e1 in
-    let (env, entity2) = expr_ upcasted_id env e2 in
+    let (env, entity1) = expr_ upcasted_info env e1 in
+    let (env, entity2) = expr_ upcasted_info env e2 in
     let (env, entity_rhs) = join env entity1 entity2 in
     let env = assign env e1 entity_rhs in
     (env, None)
@@ -121,8 +122,8 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
         e1,
         e2 ) ->
     (* most binary operations won't return function pointers, so we discard the entity. *)
-    let (env, _) = expr_ upcasted_id env e1 in
-    let (env, _) = expr_ upcasted_id env e2 in
+    let (env, _) = expr_ upcasted_info env e1 in
+    let (env, _) = expr_ upcasted_info env e2 in
     (env, None)
   | A.KeyValCollection (kvc_kind, _, field_list) ->
     begin
@@ -130,7 +131,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | A.Dict ->
         let var = Env.fresh_var () in
         let handle_init (env : env) ((_e_key, e_val) : T.expr * T.expr) =
-          let (env, entity_rhs) = expr_ upcasted_id env e_val in
+          let (env, entity_rhs) = expr_ upcasted_info env e_val in
           match entity_rhs with
           | Some entity_rhs_ ->
             Env.add_constraint env (Subset (entity_rhs_, var))
@@ -147,7 +148,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | A.Vec ->
         let var = Env.fresh_var () in
         let handle_init (env : env) (e_inner : T.expr) =
-          let (env, entity_rhs) = expr_ upcasted_id env e_inner in
+          let (env, entity_rhs) = expr_ upcasted_info env e_inner in
           match entity_rhs with
           | Some entity_rhs_ ->
             Env.add_constraint env (Subset (entity_rhs_, var))
@@ -158,11 +159,11 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
     end
   | A.Array_get (((_, _, A.Lvar (_, _lid)) as base), Some ix) ->
-    let (env, entity_exp) = expr_ upcasted_id env base in
-    let (env, _entity_ix) = expr_ upcasted_id env ix in
+    let (env, entity_exp) = expr_ upcasted_info env base in
+    let (env, _entity_ix) = expr_ upcasted_info env ix in
     (env, entity_exp)
   | A.Upcast (e, _) ->
-    let (env, entity) = expr_ upcasted_id env e in
+    let (env, entity) = expr_ upcasted_info env e in
     let env =
       match entity with
       | Some entity -> Env.add_constraint env (Upcast (entity, pos))
@@ -171,9 +172,9 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     (env, entity)
   | A.Call (e, _targs, args, _unpacked) ->
     (* Until interprocedural analaysis has been implemented, this is all incomplete. *)
-    let (env, entity) = expr_ upcasted_id env e in
+    let (env, entity) = expr_ upcasted_info env e in
     let handle_args env (_, arg) =
-      let (env, _) = expr_ upcasted_id env arg in
+      let (env, _) = expr_ upcasted_info env arg in
       env
     in
     let env = List.fold ~init:env args ~f:handle_args in
@@ -187,8 +188,8 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     in
     (env, None)
   | A.Obj_get (e_obj, e_meth, _, _) ->
-    let (env, entity_obj) = expr_ upcasted_id env e_obj in
-    let (env, _entity_meth) = expr_ upcasted_id env e_meth in
+    let (env, entity_obj) = expr_ upcasted_info env e_obj in
+    let (env, _entity_meth) = expr_ upcasted_info env e_meth in
     begin
       match entity_obj with
       | Some _entity ->
@@ -199,7 +200,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | None -> (env, None)
     end
   | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
-    if String.equal upcasted_id id then
+    if String.equal upcasted_info.element_name id then
       let entity_ = Literal pos in
       let env = Env.add_constraint env (Introduction pos) in
       (* Handle copy-on-write by creating a variable indirection *)
@@ -208,15 +209,15 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
     else
       (env, None)
   | A.New ((_, _, A.CI (_, id)), _, expr_list, e, _) ->
-    if String.equal upcasted_id id then
+    if String.equal upcasted_info.element_name id then
       let handle_init (env : env) (e : T.expr) =
-        let (env, _entity_rhs) = expr_ upcasted_id env e in
+        let (env, _entity_rhs) = expr_ upcasted_info env e in
         env
       in
       let env = List.fold ~init:env ~f:handle_init expr_list in
       let env =
         match e with
-        | Some e -> fst (expr_ upcasted_id env e)
+        | Some e -> fst (expr_ upcasted_info env e)
         | None -> env
       in
       let entity_ = Literal pos in
@@ -228,7 +229,7 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       (env, None)
   | A.Class_const ((_, _, A.CI (_, id)), (_, method_id)) ->
     let equals_method_id = String.equal method_id "class" in
-    if String.equal upcasted_id id && equals_method_id then
+    if String.equal upcasted_info.element_name id && equals_method_id then
       let entity_ = Literal pos in
       let env = Env.add_constraint env (Introduction pos) in
       (* Handle copy-on-write by creating a variable indirection *)
@@ -238,31 +239,31 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       (env, None)
   (* Eventually, we should be able to track method pointers inside a class, i.e.
       also track the following expression with A.CIexpr (_, _, This). *)
-  | A.Class_const ((_, _, A.CIexpr e_obj), _) -> expr_ upcasted_id env e_obj
+  | A.Class_const ((_, _, A.CIexpr e_obj), _) -> expr_ upcasted_info env e_obj
   | A.Eif (cond, Some then_expr, else_expr) ->
-    let (parent_env, _cond_entity) = expr_ upcasted_id env cond in
+    let (parent_env, _cond_entity) = expr_ upcasted_info env cond in
     let base_env = Env.reset_constraints parent_env in
-    let (then_env, then_entity) = expr_ upcasted_id base_env then_expr in
-    let (else_env, else_entity) = expr_ upcasted_id base_env else_expr in
+    let (then_env, then_entity) = expr_ upcasted_info base_env then_expr in
+    let (else_env, else_entity) = expr_ upcasted_info base_env else_expr in
     let env = Env.union parent_env then_env else_env in
     join env then_entity else_entity
   | A.Eif (cond, None, else_expr) ->
-    let (env, cond_entity) = expr_ upcasted_id env cond in
-    let (env, else_entity) = expr_ upcasted_id env else_expr in
+    let (env, cond_entity) = expr_ upcasted_info env cond in
+    let (env, else_entity) = expr_ upcasted_info env else_expr in
     join env cond_entity else_entity
-  | A.Await e -> expr_ upcasted_id env e
-  | A.As (e, _ty, _) -> expr_ upcasted_id env e
+  | A.Await e -> expr_ upcasted_info env e
+  | A.As (e, _ty, _) -> expr_ upcasted_info env e
   | A.Is (e, _ty) ->
     (* `is` expressions always evaluate to bools, so we discard the entity. *)
-    let (env, _) = expr_ upcasted_id env e in
+    let (env, _) = expr_ upcasted_info env e in
     (env, None)
   | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
 
-let expr (upcasted_id : string) (env : env) (e : T.expr) : env =
-  expr_ upcasted_id env e |> fst
+let expr (upcasted_info : element_info) (env : env) (e : T.expr) : env =
+  expr_ upcasted_info env e |> fst
 
 let rec switch
-    (upcasted_id : string)
+    (upcasted_info : element_info)
     (parent_locals : lenv)
     (env : env)
     (cases : ('ex, 'en) A.case list)
@@ -274,40 +275,41 @@ let rec switch
   in
   let handle_case env (e, b) =
     let env = initialize_next_cont env in
-    let env = expr upcasted_id env e in
-    block upcasted_id env b
+    let env = expr upcasted_info env e in
+    block upcasted_info env b
   in
   let handle_default_case env dfl =
     dfl
     |> Option.fold ~init:env ~f:(fun env (_, b) ->
            let env = initialize_next_cont env in
-           block upcasted_id env b)
+           block upcasted_info env b)
   in
   let env = List.fold ~init:env ~f:handle_case cases in
   let env = handle_default_case env dfl in
   env
 
-and stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
+and stmt (upcasted_info : element_info) (env : env) ((pos, stmt) : T.stmt) : env
+    =
   match stmt with
-  | A.Expr e -> expr upcasted_id env e
+  | A.Expr e -> expr upcasted_info env e
   | A.Return None -> env
   | A.Return (Some e) ->
-    let (env, _expr) = expr_ upcasted_id env e in
+    let (env, _expr) = expr_ upcasted_info env e in
     env
   | A.If (cond, then_bl, else_bl) ->
-    let parent_env = expr upcasted_id env cond in
+    let parent_env = expr upcasted_info env cond in
     let base_env = Env.reset_constraints parent_env in
-    let then_env = block upcasted_id base_env then_bl in
-    let else_env = block upcasted_id base_env else_bl in
+    let then_env = block upcasted_info base_env then_bl in
+    let else_env = block upcasted_info base_env else_bl in
     Env.union parent_env then_env else_env
   | A.Switch (cond, cases, dfl) ->
-    let env = expr upcasted_id env cond in
+    let env = expr upcasted_info env cond in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
      * See the note in
      * http://php.net/manual/en/control-structures.continue.php *)
     Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
     let parent_locals = env.lenv in
-    let env = switch upcasted_id parent_locals env cases dfl in
+    let env = switch upcasted_info parent_locals env cases dfl in
     Env.update_next_from_conts env [Cont.Continue; Cont.Break; Cont.Next]
   | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
   | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue
@@ -317,15 +319,15 @@ and stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
     let env = Env.save_and_merge_next_in_cont env Cont.Continue in
     let env_before_iteration = env in
     let env_after_iteration =
-      let env = expr upcasted_id env cond in
-      let env = block upcasted_id env bl in
+      let env = expr upcasted_info env cond in
+      let env = block upcasted_info env bl in
       env
     in
     let env =
       Env.loop_continuation Cont.Next ~env_before_iteration ~env_after_iteration
     in
     let env = Env.update_next_from_conts env [Cont.Continue; Cont.Next] in
-    let env = expr upcasted_id env cond in
+    let env = expr upcasted_info env cond in
     let env = Env.update_next_from_conts env [Cont.Break; Cont.Next] in
     env
   | A.Noop
@@ -334,8 +336,8 @@ and stmt (upcasted_id : string) (env : env) ((pos, stmt) : T.stmt) : env =
     env
   | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)
 
-and block (upcasted_id : string) (env : env) : T.block -> env =
-  List.fold ~init:env ~f:(stmt upcasted_id)
+and block (upcasted_info : element_info) (env : env) : T.block -> env =
+  List.fold ~init:env ~f:(stmt upcasted_info)
 
 let init_params _tast_env (params : T.fun_param list) :
     constraint_ list * entity LMap.t =
@@ -344,25 +346,26 @@ let init_params _tast_env (params : T.fun_param list) :
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 
-let callable function_id tast_env params body : constraint_ list =
+let callable upcasted_info tast_env params body : constraint_ list =
   let (param_constraints, param_env) = init_params tast_env params in
   let env = Env.init tast_env param_constraints param_env in
-  let env = block function_id env body.A.fb_ast in
+  let env = block upcasted_info env body.A.fb_ast in
   env.constraints
 
 let program
-    (function_id : string) (ctx : Provider_context.t) (tast : Tast.program) :
-    constraint_ list SMap.t =
+    (upcasted_info : element_info)
+    (ctx : Provider_context.t)
+    (tast : Tast.program) : constraint_ list SMap.t =
   let def (def : T.def) : (string * constraint_ list) list =
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_params; _ } = fd.A.fd_fun in
-      [(id, callable function_id tast_env f_params f_body)]
+      [(id, callable upcasted_info tast_env f_params f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
       let handle_method A.{ m_body; m_name = (_, method_name); m_params; _ } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable function_id tast_env m_params m_body)
+        (id, callable upcasted_info tast_env m_params m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"

@@ -27,6 +27,7 @@ let do_
     (tast : T.program) =
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
   let upcasted_id = add_ns upcasted_id in
+  let upcasted_info = { element_name = upcasted_id } in
   match options.analysis_mode with
   | FlagTargets -> ()
   | DumpConstraints ->
@@ -39,7 +40,8 @@ let do_
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
-    Walker.program upcasted_id ctx tast |> SMap.iter print_function_constraints
+    Walker.program upcasted_info ctx tast
+    |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : refactor_sd_result list)
         : unit =
@@ -50,7 +52,7 @@ let do_
     let process_callable id constraints =
       Solver.simplify empty_typing_env constraints |> print_callable_summary id
     in
-    Walker.program upcasted_id ctx tast |> SMap.iter process_callable
+    Walker.program upcasted_info ctx tast |> SMap.iter process_callable
   | SolveConstraints -> ()
 
 let callable = Walker.callable

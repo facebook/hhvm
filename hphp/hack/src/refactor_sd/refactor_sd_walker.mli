@@ -9,11 +9,11 @@
 open Refactor_sd_types
 
 val callable :
-  string ->
+  element_info ->
   Tast_env.t ->
   Tast.fun_param list ->
   Tast.func_body ->
   constraint_ list
 
 val program :
-  string -> Provider_context.t -> Tast.program -> constraint_ list SMap.t
+  element_info -> Provider_context.t -> Tast.program -> constraint_ list SMap.t

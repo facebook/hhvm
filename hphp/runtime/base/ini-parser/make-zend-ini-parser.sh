@@ -1,4 +1,23 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
+
+# `custom_rule` passed in install_dir
+OPTS=$(getopt -o '' --long install_dir: -n 'parse-options' -- "$@")
+eval set -- "$OPTS"
+while true; do
+    case "$1" in
+        --install_dir)
+            shift; shift;
+            ;;
+        --)
+            shift; break
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
@@ -10,16 +29,19 @@ if [ -z "${INSTALL_DIR}" ]; then
   INSTALL_DIR="${DIR}"
 fi
 
-BISON=$(which bison)
-if [ ! -x "${BISON}" ]; then
-  echo "bison not found" 1>&2
-  exit 1
+BISON=("$@")
+if [ ${#BISON[@]} -eq 0 ]; then
+  BISON_SYS=$(which bison)
+  if [ ! -x "${BISON_SYS}" ]; then
+    echo "bison not found" 1>&2
+    exit 1
+  fi
 fi
 
 OUTFILE="${INSTALL_DIR}/zend-ini.tab.cpp"
 OUTHEADER="${INSTALL_DIR}/zend-ini.tab.hpp"
 
-"${BISON}" -pini_ --verbose --locations --defines="${OUTHEADER}" -o "${OUTFILE}" "${INFILE}"
+"${BISON[@]}" -pini_ --verbose --locations --defines="${OUTHEADER}" -o "${OUTFILE}" "${INFILE}"
 if [ $? -ne 0 ]; then
   exit 1
 fi

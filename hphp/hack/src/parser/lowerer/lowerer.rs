@@ -4164,6 +4164,18 @@ fn process_attribute_constructor_call<'a>(
             > 0
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
+    } else if (name.1.eq_ignore_ascii_case(special_attrs::MEMOIZE)
+        || name.1.eq_ignore_ascii_case(special_attrs::MEMOIZE_LSB))
+        && constructor_call_argument_list
+            .syntax_node_to_list_skip_separator()
+            .count()
+            > 1
+    {
+        raise_parsing_error(
+            node,
+            env,
+            &syntax_error::memoize_too_many_arguments(&name.1),
+        );
     }
     // TODO(T123026333): Remove once migration is over
     if env.codegen()

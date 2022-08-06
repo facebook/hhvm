@@ -1019,6 +1019,10 @@ pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str) -> Error {
     ))
 }
 
+pub fn memoize_too_many_arguments(attr: &String) -> Error {
+    Cow::Owned(format!("The attribute {} takes at most one argument", attr))
+}
+
 pub fn lambda_effect_polymorphic(kind: &str) -> Error {
     Cow::Owned(format!("{} cannot have a polymorphic context", kind))
 }

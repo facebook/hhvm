@@ -4,12 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
+
 use crate::compact_trivia::CompactTrivia;
 use crate::compact_trivia::TriviaKinds;
 use crate::syntax_by_ref::positioned_trivia;
 use crate::syntax_by_ref::positioned_trivia::PositionedTrivia;
 use crate::trivia_factory::SimpleTriviaFactoryImpl;
-use bumpalo::Bump;
 
 pub type PositionedToken<'a> = internal::PositionedToken<'a, usize>;
 
@@ -107,6 +108,8 @@ impl<'a> internal::TokenFactory<'a, positioned_trivia::Factory<'a>, PositionedTr
 }
 
 pub(crate) mod internal {
+    use bumpalo::Bump;
+
     use crate::compact_trivia::CompactTrivia;
     use crate::compact_trivia::TriviaKinds;
     use crate::lexable_token::LexablePositionedToken;
@@ -119,7 +122,6 @@ pub(crate) mod internal {
     use crate::trivia_factory::SimpleTriviaFactoryImpl;
     use crate::trivia_factory::TriviaFactory;
     use crate::trivia_kind::TriviaKind;
-    use bumpalo::Bump;
 
     pub trait SizedTrivia {
         fn kinds(&self) -> TriviaKinds;

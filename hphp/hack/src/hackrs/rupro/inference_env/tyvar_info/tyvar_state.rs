@@ -5,13 +5,14 @@
 
 #![allow(dead_code)]
 
-use super::tyvar_constraints::TyvarConstraints;
 use im::HashSet;
 use pos::ToOxidized;
 use ty::local::Ty;
 use ty::local::Tyvar;
 use ty::local::Variance;
 use ty::reason::Reason;
+
+use super::tyvar_constraints::TyvarConstraints;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TyvarState<R: Reason> {

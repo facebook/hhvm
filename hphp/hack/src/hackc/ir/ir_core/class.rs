@@ -3,6 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Str;
+pub use hhbc::hhas_class::TraitReqKind;
+pub use hhbc::hhas_pos::HhasSpan;
+pub use hhbc::hhas_property::HhasProperty as Property;
+
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassId;
@@ -11,11 +16,6 @@ use crate::HackConstant;
 use crate::Method;
 use crate::Type;
 use crate::TypeConstant;
-use ffi::Str;
-
-pub use hhbc::hhas_class::TraitReqKind;
-pub use hhbc::hhas_pos::HhasSpan;
-pub use hhbc::hhas_property::HhasProperty as Property;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]

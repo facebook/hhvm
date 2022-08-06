@@ -12,6 +12,10 @@ mod profile;
 mod util;
 mod verify;
 
+use std::io::BufRead;
+use std::path::Path;
+use std::path::PathBuf;
+
 use ::compile::EnvFlags;
 use ::compile::HHBCFlags;
 use ::compile::NativeEnv;
@@ -23,9 +27,6 @@ use hhvm_options::HhvmOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
-use std::io::BufRead;
-use std::path::Path;
-use std::path::PathBuf;
 
 /// Hack Compiler
 #[derive(Parser, Debug, Default)]

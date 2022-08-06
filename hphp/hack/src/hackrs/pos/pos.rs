@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
+use std::hash::Hash;
+
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use ocamlrep::FromOcamlRep;
@@ -15,8 +18,6 @@ use oxidized::pos_span_tiny::PosSpanTiny;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
-use std::fmt;
-use std::hash::Hash;
 
 mod relative_path;
 mod symbol;

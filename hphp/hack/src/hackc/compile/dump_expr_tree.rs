@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::EnvFlags;
-use crate::ParseError;
-use crate::Profile;
+use std::fs;
+
 // use crate::compile_rust as compile;
 use ocamlrep::rc::RcOc;
 use options::LangFlags;
@@ -19,7 +18,10 @@ use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
-use std::fs;
+
+use crate::EnvFlags;
+use crate::ParseError;
+use crate::Profile;
 
 struct ExprTreeLiteralExtractor {
     literals: Vec<(Pos, ast::ExpressionTree)>,

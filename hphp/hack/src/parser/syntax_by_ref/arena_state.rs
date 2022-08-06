@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::has_arena::HasArena;
 use bumpalo::Bump;
 use ocamlrep::Allocator;
 use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
+
+use super::has_arena::HasArena;
 
 #[derive(Clone)]
 pub struct State<'a> {

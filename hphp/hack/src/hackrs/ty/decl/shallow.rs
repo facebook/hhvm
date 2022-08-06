@@ -3,23 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl::ty::ClassConstKind;
-use crate::decl::ty::ClassConstRef;
-use crate::decl::ty::Enforceable;
-use crate::decl::ty::EnumType;
-use crate::decl::ty::FunElt;
-use crate::decl::ty::ModuleDefType;
-use crate::decl::ty::Tparam;
-use crate::decl::ty::Ty;
-use crate::decl::ty::Typeconst;
-use crate::decl::ty::TypedefType;
-use crate::decl::ty::UserAttribute;
-use crate::decl::ty::WhereConstraint;
-use crate::decl::ty::XhpAttribute;
-use crate::decl::ty::XhpEnumValue;
-use crate::reason::Reason;
+use std::collections::BTreeMap;
+
 use eq_modulo_pos::EqModuloPos;
 use ocamlrep_derive::ToOcamlRep;
+pub use oxidized::ast_defs::Visibility;
+pub use oxidized_by_ref::method_flags::MethodFlags;
+pub use oxidized_by_ref::prop_flags::PropFlags;
 use pos::Bytes;
 use pos::ClassConstName;
 use pos::ConstName;
@@ -33,12 +23,23 @@ use pos::TypeConstName;
 use pos::TypeName;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::BTreeMap;
 
+use crate::decl::ty::ClassConstKind;
+use crate::decl::ty::ClassConstRef;
 pub use crate::decl::ty::ConstDecl;
-pub use oxidized::ast_defs::Visibility;
-pub use oxidized_by_ref::method_flags::MethodFlags;
-pub use oxidized_by_ref::prop_flags::PropFlags;
+use crate::decl::ty::Enforceable;
+use crate::decl::ty::EnumType;
+use crate::decl::ty::FunElt;
+use crate::decl::ty::ModuleDefType;
+use crate::decl::ty::Tparam;
+use crate::decl::ty::Ty;
+use crate::decl::ty::Typeconst;
+use crate::decl::ty::TypedefType;
+use crate::decl::ty::UserAttribute;
+use crate::decl::ty::WhereConstraint;
+use crate::decl::ty::XhpAttribute;
+use crate::decl::ty::XhpEnumValue;
+use crate::reason::Reason;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep)]

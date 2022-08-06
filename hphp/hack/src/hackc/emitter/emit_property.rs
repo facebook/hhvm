@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute;
-use crate::emit_expression;
 use env::emitter::Emitter;
 use env::Env;
 use error::Error;
@@ -25,6 +23,9 @@ use oxidized::aast_defs;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::doc_comment;
+
+use crate::emit_attribute;
+use crate::emit_expression;
 
 pub struct FromAstArgs<'ast> {
     pub user_attributes: &'ast [ast::UserAttribute],

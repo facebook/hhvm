@@ -4,11 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use proc_macro2::TokenStream;
+use quote::quote;
+
 use super::context::Context;
 use super::generator::Generator;
 use crate::common::*;
-use proc_macro2::TokenStream;
-use quote::quote;
 
 pub struct TypeParamGenerator;
 

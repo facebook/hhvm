@@ -92,8 +92,9 @@ pub fn decode<'a>(s: &'a [u8]) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn test() {

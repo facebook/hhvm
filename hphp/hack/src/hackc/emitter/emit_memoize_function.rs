@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute;
-use crate::emit_body;
-use crate::emit_memoize_helpers;
-use crate::emit_param;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use emit_pos::emit_pos_then;
@@ -39,6 +35,11 @@ use options::Options;
 use options::RepoFlags;
 use oxidized::ast;
 use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_param;
 
 pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm

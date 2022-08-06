@@ -3,10 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ClassExpr;
-use crate::IterGen;
-use crate::LabelGen;
-use crate::LocalGen;
+use std::borrow::Cow;
+use std::collections::BTreeSet;
+
 use adata_state::AdataState;
 use decl_provider::DeclProvider;
 use ffi::Slice;
@@ -26,8 +25,11 @@ use oxidized::ast_defs;
 use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
-use std::borrow::Cow;
-use std::collections::BTreeSet;
+
+use crate::ClassExpr;
+use crate::IterGen;
+use crate::LabelGen;
+use crate::LocalGen;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {

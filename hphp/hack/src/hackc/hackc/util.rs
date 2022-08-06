@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::bail;
-use anyhow::Result;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
+
+use anyhow::bail;
+use anyhow::Result;
 
 /// Took this from https://docs.rs/once_cell/latest/once_cell/index.html#lazily-compiled-regex
 /// with this macro we can avoid re-initializing regexes, which are expensive to do

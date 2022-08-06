@@ -6,7 +6,6 @@
 use ocamlrep::Allocator;
 use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
-
 pub use oxidized_by_ref::typing_defs_core::*;
 
 pub type PrimKind = oxidized_by_ref::aast_defs::Tprim;

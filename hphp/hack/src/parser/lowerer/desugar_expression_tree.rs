@@ -1,4 +1,3 @@
-use crate::lowerer::Env;
 use bstr::BString;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::expression_trees as et;
@@ -25,6 +24,8 @@ use oxidized::ast_defs;
 use oxidized::ast_defs::*;
 use oxidized::local_id;
 use oxidized::pos::Pos;
+
+use crate::lowerer::Env;
 
 pub struct DesugarResult {
     pub expr: Expr,

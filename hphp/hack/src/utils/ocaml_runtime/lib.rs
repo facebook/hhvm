@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::CLOSURE_TAG;
 use std::ffi::CString;
 use std::os::raw::c_char;
+
+use ocamlrep::CLOSURE_TAG;
 
 extern "C" {
     fn caml_named_value(name: *const c_char) -> *mut usize;

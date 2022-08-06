@@ -2,7 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::inference_env::InferenceEnv;
+use std::marker::PhantomData;
+
 use bumpalo::Bump;
 use ocamlrep::Allocator;
 use ocamlrep::OpaqueValue;
@@ -12,10 +13,11 @@ use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::Params;
 use oxidized::aast_visitor::VisitorMut;
 use pos::ToOxidized;
-use std::marker::PhantomData;
 use ty::local;
 use ty::local::Ty;
 use ty::reason::Reason;
+
+use crate::inference_env::InferenceEnv;
 
 #[derive(Clone, Debug)]
 pub struct SavedEnv<R: Reason> {

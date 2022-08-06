@@ -3,18 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ir;
-use crate::ir::Def;
-use crate::ir::FieldName;
-use crate::ir::File;
-use crate::ir::TypeName;
-use crate::ir::VariantName;
 use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Context;
 use anyhow::Result;
 use convert_case::Case;
 use convert_case::Casing;
+
+use crate::ir;
+use crate::ir::Def;
+use crate::ir::FieldName;
+use crate::ir::File;
+use crate::ir::TypeName;
+use crate::ir::VariantName;
 
 pub fn convert_file(filename: &std::path::Path, file: &syn::File) -> Result<String> {
     let defs = (file.items.iter())

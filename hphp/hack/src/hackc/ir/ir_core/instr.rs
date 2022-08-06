@@ -1,21 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::BlockId;
-use crate::ClassId;
-use crate::ConstId;
-use crate::FunctionId;
-use crate::LocId;
-use crate::MethodId;
-use crate::PropId;
-use crate::UnitStringId;
-use crate::ValueId;
-use crate::VarId;
-use macros::HasLoc;
-use macros::HasLocals;
-use macros::HasOperands;
-use newtype::newtype_int;
-use smallvec::SmallVec;
-
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
 pub use hhbc::BareThisOp;
@@ -41,6 +25,22 @@ pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;
 pub use hhbc::SwitchKind;
 pub use hhbc::TypeStructResolveOp;
+use macros::HasLoc;
+use macros::HasLocals;
+use macros::HasOperands;
+use newtype::newtype_int;
+use smallvec::SmallVec;
+
+use crate::BlockId;
+use crate::ClassId;
+use crate::ConstId;
+use crate::FunctionId;
+use crate::LocId;
+use crate::MethodId;
+use crate::PropId;
+use crate::UnitStringId;
+use crate::ValueId;
+use crate::VarId;
 
 pub trait HasLoc {
     fn loc_id(&self) -> LocId;

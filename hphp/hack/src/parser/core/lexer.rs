@@ -4,6 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cell::RefCell;
+use std::ops::DerefMut;
+use std::rc::Rc;
+
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::lexable_trivia::LexableTrivium;
@@ -19,10 +23,6 @@ use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_factory::TriviaFactory;
 use parser_core_types::trivia_kind::TriviaKind;
 use static_assertions::*;
-
-use std::cell::RefCell;
-use std::ops::DerefMut;
-use std::rc::Rc;
 
 #[derive(Debug)]
 struct LexerPreSnapshot {

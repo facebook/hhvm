@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::typed_value::TypedValue;
 use ffi::Slice;
 use ffi::Str;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use serde::Serialize;
+
+use crate::typed_value::TypedValue;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:
@@ -195,9 +196,9 @@ pub mod native_arg {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use naming_special_names::user_attributes as ua;
+
+    use super::*;
 
     #[test]
     fn example_is_memoized_vs_eq_memoize() {

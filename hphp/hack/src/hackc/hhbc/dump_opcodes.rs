@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use anyhow::Result;
-use hhbc_gen::OpcodeData;
-use quote::quote;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Stdio;
+
+use anyhow::Result;
+use hhbc_gen::OpcodeData;
+use quote::quote;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]

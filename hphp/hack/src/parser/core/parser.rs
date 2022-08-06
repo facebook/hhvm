@@ -4,6 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::SyntaxError;
+
 use crate::declaration_parser::DeclarationParser;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
@@ -11,8 +14,6 @@ use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
 use crate::smart_constructors::NodeType;
 use crate::smart_constructors::SmartConstructors;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax_error::SyntaxError;
 
 pub struct Parser<'a, S>
 where

@@ -5,7 +5,6 @@
 
 #![cfg(test)]
 use anyhow::Result;
-
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::file_pos_large::FilePosLarge;

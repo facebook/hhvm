@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+
 use anyhow::Result;
 use cbindgen::Builder;
 use cbindgen::Config;
@@ -11,7 +13,6 @@ use cbindgen::Language;
 use cbindgen::MacroExpansionConfig;
 use cbindgen::RenameRule;
 use clap::Parser;
-use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[clap(

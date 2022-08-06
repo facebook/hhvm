@@ -6,7 +6,6 @@
 
 use naming_special_names_rust::coeffects;
 use naming_special_names_rust::special_idents;
-
 use oxidized::aast;
 use oxidized::aast_visitor::visit;
 use oxidized::aast_visitor::AstParams;

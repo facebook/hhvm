@@ -5,15 +5,16 @@
 
 #![feature(allocator_api)]
 
-use anyhow::Result;
-use parking_lot::Mutex;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use std::alloc::Layout;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Read;
 use std::io::Write;
+
+use anyhow::Result;
+use parking_lot::Mutex;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 
 pub struct ShmStore<K, V> {
     /// An LRU cache of hashconsed values in front of the serialized shm heap.

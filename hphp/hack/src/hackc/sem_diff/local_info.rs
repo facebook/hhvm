@@ -1,8 +1,9 @@
-use crate::node::NodeInstr;
 use hhbc::Local;
 use hhbc::LocalRange;
 use hhbc::Opcode;
 use hhbc::SilenceOp;
+
+use crate::node::NodeInstr;
 
 pub(crate) enum LocalInfo {
     None,

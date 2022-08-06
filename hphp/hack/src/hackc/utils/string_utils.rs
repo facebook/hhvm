@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+use std::cell::Cell;
+
 use escaper::*;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes as ns_classes;
 use naming_special_names_rust::members;
 use regex::Regex;
-use std::borrow::Cow;
-use std::cell::Cell;
 
 lazy_static! {
     static ref HH_NS_RE: Regex = Regex::new(r"^\\?HH\\").unwrap();

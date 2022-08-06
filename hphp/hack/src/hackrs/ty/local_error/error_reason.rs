@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
 
+use utils::Lazy;
+
 use crate::local_error::Primary;
 use crate::local_error::TypingError;
 use crate::local_error::TypingErrorCode;
 use crate::reason::Reason;
-use utils::Lazy;
 
 #[derive(Clone, Debug)]
 enum Component {

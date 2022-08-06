@@ -2,10 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use pos::TypeName;
+
 use crate::decl::folded;
 use crate::decl::Ty;
 use crate::reason::Reason;
-use pos::TypeName;
 
 #[derive(Debug)]
 pub struct ClassElt<R: Reason> {

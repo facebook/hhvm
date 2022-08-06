@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::Store;
+use std::hash::Hash;
+use std::sync::Arc;
+
 use anyhow::Result;
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use std::hash::Hash;
-use std::sync::Arc;
+
+use crate::Store;
 
 /// A stack of temporary changes on top of a fallback data store.
 pub struct ChangesStore<K, V> {

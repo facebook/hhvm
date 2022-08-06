@@ -6,9 +6,8 @@
 mod node_impl_generator;
 mod visitor_trait_generator;
 
-use crate::common::by_ref_context::Context;
-
 pub use crate::common::args::Args;
+use crate::common::by_ref_context::Context;
 
 pub fn run(args: &Args) -> anyhow::Result<Vec<(std::path::PathBuf, String)>> {
     let files = crate::common::parse_all(&args.input)?;

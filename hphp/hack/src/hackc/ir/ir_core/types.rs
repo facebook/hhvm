@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-
 pub use hhvm_types_ffi::ffi::TypeConstraintFlags;
 
 #[derive(Debug, Eq, PartialEq, Hash)]

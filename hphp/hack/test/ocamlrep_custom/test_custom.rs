@@ -2,14 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::cell::RefCell;
+use std::io::Write;
+use std::rc::Rc;
+
 use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
-
-use std::cell::RefCell;
-use std::io::Write;
-use std::rc::Rc;
 
 struct DropTest(Rc<RefCell<bool>>);
 

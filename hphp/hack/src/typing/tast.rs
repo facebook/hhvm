@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::aast;
-use oxidized::aast_defs;
-use oxidized::ast_defs;
-
 pub use aast::*;
 pub use aast_defs::*;
 pub use ast_defs::*;
+use oxidized::aast;
+use oxidized::aast_defs;
+use oxidized::ast_defs;
 
 type Ex<'a> = (
     &'a oxidized_by_ref::pos::Pos<'a>,

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use hhbc::ImmType;
 use hhbc::InstrFlags;
 use hhbc::OpcodeData;
@@ -11,7 +13,6 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
-use std::collections::HashSet;
 use syn::spanned::Spanned;
 use syn::Attribute;
 use syn::Data;

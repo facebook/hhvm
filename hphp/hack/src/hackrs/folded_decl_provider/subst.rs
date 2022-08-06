@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use pos::TypeName;
 use std::collections::BTreeMap;
+
+use pos::TypeName;
 use ty::decl::subst::Subst;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;

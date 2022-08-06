@@ -4,9 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use proc_macro2::TokenStream;
+
 use super::context::Context;
 use crate::common::*;
-use proc_macro2::TokenStream;
 
 #[macro_export]
 macro_rules! impl_generator {

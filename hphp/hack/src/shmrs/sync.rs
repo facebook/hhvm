@@ -394,8 +394,6 @@ unsafe impl<T: Sync> Sync for RwLockWriteGuard<'_, T> {}
 
 #[cfg(test)]
 mod integration_tests {
-    use super::*;
-
     use std::mem::MaybeUninit;
     use std::sync::atomic::AtomicBool;
     use std::sync::atomic::Ordering;
@@ -404,6 +402,8 @@ mod integration_tests {
     use nix::sys::wait::WaitStatus;
     use nix::unistd::ForkResult;
     use rand::prelude::*;
+
+    use super::*;
 
     struct Incr {
         counter: RwLock<u64>,

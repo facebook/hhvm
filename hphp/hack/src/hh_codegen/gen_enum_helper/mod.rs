@@ -6,8 +6,11 @@
 
 mod ref_kind;
 
-use crate::common::*;
-use crate::quote_helper::*;
+use std::fmt::Write;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::anyhow;
 use anyhow::Result;
@@ -15,13 +18,11 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use ref_kind::RefKind;
-use std::fmt::Write;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
 use structopt::StructOpt;
 use syn::*;
+
+use crate::common::*;
+use crate::quote_helper::*;
 
 #[derive(Debug, StructOpt)]
 pub struct Args {

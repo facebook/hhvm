@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Debug;
+
 use deps_rust::Dep;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
 use pos::PropName;
 use pos::TypeName;
-use std::fmt::Debug;
 use typing_deps_hash::DepType;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

@@ -1,12 +1,13 @@
-use crate::body::Body;
-use crate::instr_ptr::InstrPtr;
-use crate::state::State;
-use crate::value::ValueBuilder;
 use ffi::Maybe;
 use ffi::Pair;
 use hash::HashSet;
 use hhbc::Local;
 use log::trace;
+
+use crate::body::Body;
+use crate::instr_ptr::InstrPtr;
+use crate::state::State;
+use crate::value::ValueBuilder;
 
 #[derive(Default)]
 pub(crate) struct WorkQueue<'arena, 'a> {

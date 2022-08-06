@@ -2,12 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::typing::env::typing_local_types::Local;
-use crate::typing::env::typing_local_types::LocalMap;
-use im::HashMap;
 use std::cell::RefCell;
+
+use im::HashMap;
 use ty::reason::Reason;
 use utils::core::LocalId;
+
+use crate::typing::env::typing_local_types::Local;
+use crate::typing::env::typing_local_types::LocalMap;
 
 /// All possible continuations.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

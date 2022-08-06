@@ -3,15 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::folded;
-use super::shallow;
-use super::ty::*;
-use crate::reason::Reason;
+use oxidized_by_ref as obr;
 use oxidized_by_ref::ast::Id;
 use pos::Pos;
 use pos::ToOxidized;
 
-use oxidized_by_ref as obr;
+use super::folded;
+use super::shallow;
+use super::ty::*;
+use crate::reason::Reason;
 
 impl<'a> ToOxidized<'a> for CeVisibility {
     type Output = obr::typing_defs::CeVisibility<'a>;

@@ -6,6 +6,8 @@
 //! Verifier for HackIR.  This traverses the HackIR structures and makes sure
 //! that the required invariants still hold true.
 
+use std::collections::hash_map::Entry;
+
 use analysis::PredecessorFlags;
 use analysis::Predecessors;
 use ir_core::instr::HasEdges;
@@ -29,7 +31,6 @@ use print::DisplayFunc;
 use print::FmtBid;
 use print::FmtRawVid;
 use print::FmtVid;
-use std::collections::hash_map::Entry;
 
 type Result<T = ()> = anyhow::Result<T>;
 

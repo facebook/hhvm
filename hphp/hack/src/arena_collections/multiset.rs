@@ -23,12 +23,11 @@
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
-use bumpalo::Bump;
-use serde::Serialize;
-
 use arena_trait::TrivialDrop;
+use bumpalo::Bump;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
+use serde::Serialize;
 
 use crate::AssocList;
 use crate::AssocListMut;

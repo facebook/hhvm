@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::hhas_param::HhasParam;
-use crate::Label;
 use ffi::Just;
 use ffi::Maybe;
 use hash::IndexSet;
@@ -17,6 +15,9 @@ use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast::*;
 use oxidized::ast_defs;
+
+use crate::hhas_param::HhasParam;
+use crate::Label;
 
 type SSet = std::collections::BTreeSet<String>;
 

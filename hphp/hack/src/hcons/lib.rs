@@ -14,12 +14,11 @@ use dashmap::mapref::entry::Entry;
 use dashmap::DashMap;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+pub use once_cell::sync::Lazy;
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
 use serde::Serializer;
-
-pub use once_cell::sync::Lazy;
 
 /// A hash-consed pointer.
 pub struct Hc<T>(Arc<T>);

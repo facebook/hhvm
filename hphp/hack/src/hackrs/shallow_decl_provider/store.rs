@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use anyhow::Result;
 use datastore::Store;
 use pos::ConstName;
@@ -11,7 +13,6 @@ use pos::MethodName;
 use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
-use std::sync::Arc;
 use ty::decl::shallow::Decl;
 use ty::decl::shallow::ModuleDecl;
 use ty::decl::ConstDecl;

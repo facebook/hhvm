@@ -7,15 +7,14 @@ use std::cmp::Ordering;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use serde::Deserialize;
-use serde::Serialize;
-
 use arena_deserializer::impl_deserialize_in_arena;
 use arena_trait::Arena;
 use arena_trait::TrivialDrop;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// The maximum height difference (or balance factor) that is allowed
 /// in the implementation of the AVL tree.
@@ -545,8 +544,9 @@ impl<'a, K, V> Iterator for MapIter<'a, K, V> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_is_empty() {
@@ -575,13 +575,15 @@ mod tests {
 
 #[cfg(test)]
 mod tests_arbitrary {
-    use super::*;
-    use bumpalo::Bump;
-    use quickcheck::*;
     use std::collections::BTreeMap;
     use std::collections::BTreeSet;
     use std::collections::HashMap;
     use std::hash::Hash;
+
+    use bumpalo::Bump;
+    use quickcheck::*;
+
+    use super::*;
 
     quickcheck! {
         fn prop_mem_find(xs: Vec<(u32, u32)>, ys: Vec<u32>) -> bool {
@@ -716,8 +718,9 @@ mod tests_arbitrary {
 
 #[cfg(test)]
 mod tests_iter {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_iter_manual() {

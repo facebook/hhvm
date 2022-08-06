@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use depgraph::reader::Dep;
-
-use once_cell::sync::OnceCell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -14,10 +11,7 @@ use std::io::Read;
 use std::io::Write;
 use std::sync::Mutex;
 
-use rpds::HashTrieSet;
-use serde::Deserialize;
-use serde::Serialize;
-
+pub use depgraph::reader::Dep;
 use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
 use eq_modulo_pos::EqModuloPos;
@@ -30,6 +24,10 @@ use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
+use once_cell::sync::OnceCell;
+use rpds::HashTrieSet;
+use serde::Deserialize;
+use serde::Serialize;
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we

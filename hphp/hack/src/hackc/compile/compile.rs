@@ -5,6 +5,8 @@
 
 pub mod dump_expr_tree;
 
+use std::fmt;
+
 use aast_parser::rust_aast_parser_types::Env as AastEnv;
 use aast_parser::rust_aast_parser_types::ParserResult;
 use aast_parser::AastParser;
@@ -39,7 +41,6 @@ use oxidized::relative_path::RelativePath;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::ErrorType;
-use std::fmt;
 use thiserror::Error;
 use types::readonly_check;
 use types::type_check;

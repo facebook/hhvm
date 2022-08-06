@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::serde_store::StoreOpts;
-use crate::SerializingStore;
+use std::sync::Arc;
+
 use datastore::NonEvictingStore;
 use decl_parser::DeclParser;
 use indicatif::ParallelProgressIterator;
@@ -13,8 +13,10 @@ use pos::TypeName;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use shallow_decl_provider::ShallowDeclStore;
-use std::sync::Arc;
 use ty::reason::Reason;
+
+use crate::serde_store::StoreOpts;
+use crate::SerializingStore;
 
 pub fn make_shallow_decl_store<R: Reason>(opts: StoreOpts) -> ShallowDeclStore<R> {
     match opts {

@@ -2,11 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_expression;
-use crate::emit_param;
-use crate::emit_statement;
-use crate::generator;
-use crate::reified_generics_helpers as RGH;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bitflags::bitflags;
@@ -48,6 +43,12 @@ use oxidized::namespace_env;
 use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
+
+use crate::emit_expression;
+use crate::emit_param;
+use crate::emit_statement;
+use crate::generator;
+use crate::reified_generics_helpers as RGH;
 
 static THIS: &str = "$this";
 

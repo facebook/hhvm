@@ -4,18 +4,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::syntax_kind::SyntaxKind;
-use crate::token_kind::TokenKind;
-
-use itertools::Either::Left;
-use itertools::Either::Right;
 use std::fmt::Debug;
 use std::iter::empty;
 use std::iter::once;
 
+use itertools::Either::Left;
+use itertools::Either::Right;
+
+use crate::lexable_token::LexableToken;
 pub use crate::syntax_generated::*;
+use crate::syntax_kind::SyntaxKind;
 pub use crate::syntax_type::*;
+use crate::token_kind::TokenKind;
 
 pub trait SyntaxValueType<T>
 where

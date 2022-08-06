@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::NamingTable;
+use std::path::PathBuf;
+
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use maplit::btreemap;
@@ -14,7 +15,8 @@ use pos::Prefix;
 use pos::RelativePath;
 use pos::TypeName;
 use rpds::HashTrieSet;
-use std::path::PathBuf;
+
+use super::NamingTable;
 
 fn setup(files: std::collections::BTreeMap<&str, &str>) -> (hh24_test::TestRepo, NamingTable) {
     let repo = hh24_test::TestRepo::new(&files).unwrap();

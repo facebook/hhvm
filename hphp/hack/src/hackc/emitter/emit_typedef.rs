@@ -2,9 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute;
-use crate::emit_body;
-use crate::emit_type_constant;
+use std::collections::BTreeMap;
+
 use env::emitter::Emitter;
 use error::Result;
 use hhbc::hhas_pos::HhasSpan;
@@ -15,7 +14,10 @@ use hhbc::TypedValue;
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::aast_defs::Hint;
 use oxidized::ast;
-use std::collections::BTreeMap;
+
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_type_constant;
 
 pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

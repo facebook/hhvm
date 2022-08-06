@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::simple_type::SimpleType;
-use crate::util::InterestingFields;
+use std::borrow::Cow;
+
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
-use std::borrow::Cow;
 use syn::spanned::Spanned;
 use syn::Attribute;
 use syn::Data;
@@ -23,6 +22,9 @@ use syn::Meta;
 use syn::NestedMeta;
 use syn::Result;
 use syn::Variant;
+
+use crate::simple_type::SimpleType;
+use crate::util::InterestingFields;
 
 /// Builds a HasLoc impl.
 ///

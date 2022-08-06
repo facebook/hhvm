@@ -6,15 +6,14 @@
 use std::ffi::CString;
 use std::panic::UnwindSafe;
 
+pub use bumpalo::Bump;
 use ocamlrep::Allocator;
 use ocamlrep::BlockBuilder;
+pub use ocamlrep::FromOcamlRep;
+pub use ocamlrep::FromOcamlRepIn;
 use ocamlrep::MemoizationCache;
 use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
-
-pub use bumpalo::Bump;
-pub use ocamlrep::FromOcamlRep;
-pub use ocamlrep::FromOcamlRepIn;
 pub use ocamlrep::Value;
 
 extern "C" {

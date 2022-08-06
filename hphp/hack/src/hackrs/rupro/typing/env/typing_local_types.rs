@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
 use im::HashMap;
-
 use ty::local::Ty;
 use ty::reason::Reason;
 use utils::core::Ident;

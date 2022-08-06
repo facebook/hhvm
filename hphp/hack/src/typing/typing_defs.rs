@@ -2,11 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-pub use crate::typing_defs_core::*;
 use arena_trait::TrivialDrop;
 use bumpalo::collections::Vec as BVec;
 use oxidized::pos::Pos;
 use typing_collections_rust::SMap;
+
+pub use crate::typing_defs_core::*;
 
 #[derive(Debug)]
 pub struct ExpandEnv<'a> {

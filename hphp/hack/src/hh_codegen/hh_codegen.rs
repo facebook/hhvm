@@ -10,14 +10,15 @@ mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
 
-use anyhow::Context;
-use anyhow::Result;
-use common::*;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+
+use anyhow::Context;
+use anyhow::Result;
+use common::*;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

@@ -13,13 +13,12 @@ use std::process::Child;
 use std::process::Command;
 use std::process::Stdio;
 
+use framing::LineFeedUnescaper;
 use itertools::Itertools;
 use rayon::iter::ParallelBridge;
 use rayon::iter::ParallelIterator;
 use structopt::clap::arg_enum;
 use structopt::StructOpt;
-
-use framing::LineFeedUnescaper;
 
 arg_enum! {
     #[derive(Debug)]

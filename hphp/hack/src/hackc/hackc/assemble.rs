@@ -3,8 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::regex;
-use crate::FileOpts;
+use std::collections::HashMap;
+use std::collections::VecDeque;
+use std::ffi::OsString;
+use std::fmt;
+use std::fs;
+use std::fs::File;
+use std::io::stdout;
+use std::io::Write;
+use std::os::unix::ffi::OsStringExt;
+use std::path::Path;
+use std::path::PathBuf;
+use std::str::FromStr;
+use std::sync::Mutex;
+
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
@@ -25,19 +37,9 @@ use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
 use rayon::prelude::*;
 use regex::bytes::Regex;
-use std::collections::HashMap;
-use std::collections::VecDeque;
-use std::ffi::OsString;
-use std::fmt;
-use std::fs;
-use std::fs::File;
-use std::io::stdout;
-use std::io::Write;
-use std::os::unix::ffi::OsStringExt;
-use std::path::Path;
-use std::path::PathBuf;
-use std::str::FromStr;
-use std::sync::Mutex;
+
+use crate::regex;
+use crate::FileOpts;
 
 #[derive(Parser, Debug)]
 pub struct Opts {

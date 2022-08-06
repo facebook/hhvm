@@ -7,15 +7,14 @@ use std::rc::Rc;
 
 use oxidized::aast;
 use oxidized::nast;
+use ty::reason::Reason;
 
 use crate::errors::HackError;
 use crate::parsing_error::ParsingError;
+use crate::tast;
 use crate::typing::typing_error::Result;
 use crate::typing_check_job::TypingCheckJob;
 use crate::typing_ctx::TypingCtx;
-use ty::reason::Reason;
-
-use crate::tast;
 
 pub struct TypingCheckUtils;
 

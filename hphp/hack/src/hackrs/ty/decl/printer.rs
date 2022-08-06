@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::ty::*;
-use crate::reason::Reason;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
+
+use super::ty::*;
+use crate::reason::Reason;
 
 // This module provides a `Display` impl for `Ty` which uses Hack-like
 // syntax. The `Debug` impl for `Ty` uses this `Display` impl to make debug

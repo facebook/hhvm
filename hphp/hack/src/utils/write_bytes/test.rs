@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+
 use crate::format_bytes;
 use crate::write_bytes;
-use std::borrow::Cow;
 
 type Result = std::io::Result<()>;
 

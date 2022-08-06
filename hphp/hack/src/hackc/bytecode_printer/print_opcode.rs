@@ -3,7 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::print;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::io::Result;
+use std::io::Write;
+
 use ffi::Str;
 use hash::HashSet;
 use hhbc::AdataId;
@@ -47,10 +51,8 @@ use hhbc::TypeStructResolveOp;
 use hhbc_string_utils::float;
 use print_opcode::PrintOpcode;
 use print_opcode::PrintOpcodeTypes;
-use std::io::Error;
-use std::io::ErrorKind;
-use std::io::Result;
-use std::io::Write;
+
+use crate::print;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use dashmap::mapref::entry::Entry;
 use dashmap::DashMap;
 use depgraph_api::DeclName;
@@ -11,7 +13,6 @@ use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
 use depgraph_api::Result;
 use deps_rust::Dep;
-use std::collections::HashSet;
 
 pub type DeclNameSet = HashSet<DeclName>;
 

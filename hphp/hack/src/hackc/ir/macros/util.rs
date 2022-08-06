@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::simple_type::SimpleType;
 use proc_macro2::Ident;
+
+use crate::simple_type::SimpleType;
 
 pub(crate) enum InterestingFields<'a> {
     None,

@@ -2,9 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_adata;
-use crate::emit_fatal;
-use crate::emit_type_constant;
+use std::borrow::Cow;
+use std::collections::BTreeMap;
+use std::iter;
+use std::str::FromStr;
+
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
@@ -76,10 +78,10 @@ use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use oxidized::pos::Pos;
 use regex::Regex;
-use std::borrow::Cow;
-use std::collections::BTreeMap;
-use std::iter;
-use std::str::FromStr;
+
+use crate::emit_adata;
+use crate::emit_fatal;
+use crate::emit_type_constant;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -115,17 +117,19 @@ pub fn is_local_this<'a, 'arena>(env: &Env<'a, 'arena>, lid: &local_id::LocalId)
 }
 
 mod inout_locals {
-    use super::Emitter;
-    use super::Env;
-    use super::Local;
-    use super::ParamKind;
+    use std::marker::PhantomData;
+
     use hash::HashMap;
     use oxidized::aast_defs::Lid;
     use oxidized::aast_visitor;
     use oxidized::aast_visitor::Node;
     use oxidized::ast;
     use oxidized::ast_defs;
-    use std::marker::PhantomData;
+
+    use super::Emitter;
+    use super::Env;
+    use super::Local;
+    use super::ParamKind;
 
     pub(super) struct AliasInfo {
         first_inout: isize,

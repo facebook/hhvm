@@ -4,6 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+
 use digest::Digest;
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
@@ -24,8 +27,6 @@ use serde::Serializer;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::json;
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -562,8 +563,9 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
+    use pretty_assertions::assert_eq;
+
+    use super::*; // make assert_eq print huge diffs more human-readable
 
     #[test]
     fn type_kind_to_json() {

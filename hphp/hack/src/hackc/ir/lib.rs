@@ -8,7 +8,6 @@ pub use ir_core::*;
 pub use passes;
 pub use print;
 pub use print::print_unit;
-pub use verify;
-
 #[cfg(test)]
 pub use testutils;
+pub use verify;

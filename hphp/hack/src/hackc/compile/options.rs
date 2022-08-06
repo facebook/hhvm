@@ -38,6 +38,13 @@
 
 mod options_cli;
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
+use std::path::PathBuf;
+
 use bitflags::bitflags;
 use bstr::BString;
 use bstr::ByteSlice;
@@ -49,12 +56,6 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::json;
 use serde_json::value::Value as Json;
-use std::cell::RefCell;
-use std::collections::BTreeMap;
-use std::ffi::OsStr;
-use std::os::unix::ffi::OsStrExt;
-use std::path::Path;
-use std::path::PathBuf;
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
 trait PrefixedFlags:
@@ -175,10 +176,11 @@ impl Default for HhvmFlags {
 }
 
 mod serde_bstr_str {
-    use super::*;
     use serde::ser::Error;
     use serde::Deserialize;
     use serde::Serialize;
+
+    use super::*;
     pub(crate) fn serialize<S: Serializer>(s: &Arg<BString>, ser: S) -> Result<S::Ok, S::Error> {
         let s = Arg::new(String::from_utf8(s.get().to_vec()).map_err(Error::custom)?);
         s.serialize(ser)
@@ -191,10 +193,11 @@ mod serde_bstr_str {
 }
 
 mod serde_bstr_vec {
-    use super::*;
     use serde::ser::Error;
     use serde::Deserialize;
     use serde::Serialize;
+
+    use super::*;
     pub(crate) fn serialize<S: Serializer>(
         s: &Arg<Vec<BString>>,
         ser: S,
@@ -225,10 +228,11 @@ mod serde_bstr_vec {
 }
 
 mod serde_bstr_btree {
-    use super::*;
     use serde::ser::Error;
     use serde::Deserialize;
     use serde::Serialize;
+
+    use super::*;
     pub(crate) fn serialize<S: Serializer>(
         s: &Arg<BTreeMap<BString, BString>>,
         ser: S,
@@ -726,8 +730,9 @@ impl<K: Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
+    use pretty_assertions::assert_eq;
+
+    use super::*; // make assert_eq print huge diffs more human-readable
 
     const HHVM_1: &str = r#"{
   "hhvm.aliased_namespaces": {

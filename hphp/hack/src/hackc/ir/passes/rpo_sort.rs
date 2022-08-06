@@ -134,7 +134,6 @@ fn block_order_matches<'a>(func: &Func<'a>, order: &[BlockId]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hash::HashMap;
     use hash::HashSet;
     use ir_core::Block;
@@ -142,6 +141,8 @@ mod tests {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
     use rand::Rng;
+
+    use super::*;
 
     fn make_dummy_blocks(names: &[&str]) -> IdVec<BlockId, Block> {
         IdVec::new_from_vec(

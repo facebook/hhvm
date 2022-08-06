@@ -2,12 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute::from_asts;
 use env::emitter::Emitter;
 use error::Result;
 use hhbc::hhas_attribute::HhasAttribute;
 use itertools::Itertools;
 use oxidized::ast;
+
+use crate::emit_attribute::from_asts;
 
 fn emit_file_attributes<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

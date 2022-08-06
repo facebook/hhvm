@@ -1,13 +1,6 @@
-use crate::body::Body;
-use crate::instr_ptr::InstrPtr;
-use crate::local_info::LocalInfo;
-use crate::node;
-use crate::node::Input;
-use crate::node::Node;
-use crate::node::NodeInstr;
-use crate::sequence::Sequence;
-use crate::value::Value;
-use crate::value::ValueBuilder;
+use std::collections::hash_map::Entry;
+use std::rc::Rc;
+
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
@@ -38,8 +31,17 @@ use hhbc_gen::Outputs;
 use itertools::Itertools;
 use log::trace;
 use newtype::BuildIdHasher;
-use std::collections::hash_map::Entry;
-use std::rc::Rc;
+
+use crate::body::Body;
+use crate::instr_ptr::InstrPtr;
+use crate::local_info::LocalInfo;
+use crate::node;
+use crate::node::Input;
+use crate::node::Node;
+use crate::node::NodeInstr;
+use crate::sequence::Sequence;
+use crate::value::Value;
+use crate::value::ValueBuilder;
 
 /// A State is an abstract interpreter over HHVM bytecode.
 #[derive(Clone)]

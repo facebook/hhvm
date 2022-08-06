@@ -3,16 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::convert;
-use crate::convert::HackCUnitBuilder;
-use crate::emitter;
-use crate::pusher;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Triple;
 use hhbc::hhas_method::HhasMethod;
 use ir::string_intern::StringInterner;
 use log::trace;
+
+use crate::convert;
+use crate::convert::HackCUnitBuilder;
+use crate::emitter;
+use crate::pusher;
 
 /// Convert an ir::Func to an HhasBody.
 ///

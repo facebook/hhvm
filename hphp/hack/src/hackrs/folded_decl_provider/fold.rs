@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::inherit::Inherited;
-use super::Result;
-use super::Substitution;
+use std::sync::Arc;
+
 use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPosAndReason;
 use oxidized::global_options::GlobalOptions;
@@ -22,7 +21,6 @@ use pos::TypeName;
 use pos::TypeNameIndexMap;
 use pos::TypeNameIndexSet;
 use special_names as sn;
-use std::sync::Arc;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
 use ty::decl::AbstractTypeconst;
@@ -50,6 +48,10 @@ use ty::decl::Typeconst;
 use ty::decl::Visibility;
 use ty::decl_error::DeclError;
 use ty::reason::Reason;
+
+use super::inherit::Inherited;
+use super::Result;
+use super::Substitution;
 
 mod decl_enum;
 

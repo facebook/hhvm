@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::hhas_symbol_refs::IncludePath;
-use oxidized::relative_path::RelativePath;
 use std::fmt;
 use std::io::Result;
 use std::io::Write;
 use std::path::PathBuf;
+
+use hhbc::hhas_symbol_refs::IncludePath;
+use oxidized::relative_path::RelativePath;
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.

@@ -5,14 +5,15 @@
 
 //! Print utility functions.
 
-use ir_core::instr::HasOperands;
-use ir_core::Func;
-use ir_core::InstrIdSet;
-use ir_core::ValueId;
 use std::cell::Cell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+
+use ir_core::instr::HasOperands;
+use ir_core::Func;
+use ir_core::InstrIdSet;
+use ir_core::ValueId;
 
 /// Display the iterator by calling the helper to display each value separated
 /// by commas.

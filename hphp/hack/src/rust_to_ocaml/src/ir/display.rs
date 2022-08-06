@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ir;
-use convert_case::Case;
-use convert_case::Casing;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+
+use convert_case::Case;
+use convert_case::Casing;
+
+use crate::ir;
 
 impl Display for ir::File {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {

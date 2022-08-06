@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ir;
 use convert_case::Case;
 use convert_case::Casing;
+
+use crate::ir;
 
 pub fn rewrite_file(file: &mut ir::File) {
     Rewriter::rewrite_module(&mut file.root)

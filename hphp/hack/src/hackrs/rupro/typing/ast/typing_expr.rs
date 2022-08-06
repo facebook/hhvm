@@ -2,13 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::tast;
-use crate::typing::ast::typing_localize::LocalizeEnv;
-use crate::typing::ast::typing_localize::LocalizeFunTypeParams;
-use crate::typing::ast::typing_obj_get::TCObjGet;
-use crate::typing::ast::typing_trait::Infer;
-use crate::typing::env::typing_env::TEnv;
-use crate::typing::typing_error::Result;
 use pos::FunName;
 use ty::decl;
 use ty::local::FunParam;
@@ -16,6 +9,14 @@ use ty::local::Ty;
 use ty::local::Ty_;
 use ty::reason::Reason;
 use utils::core::LocalId;
+
+use crate::tast;
+use crate::typing::ast::typing_localize::LocalizeEnv;
+use crate::typing::ast::typing_localize::LocalizeFunTypeParams;
+use crate::typing::ast::typing_obj_get::TCObjGet;
+use crate::typing::ast::typing_trait::Infer;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::typing_error::Result;
 
 /// Parameters that affect the typing of expressions.
 #[derive(Default)]

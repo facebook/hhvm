@@ -853,9 +853,10 @@ mod test {
 
 #[cfg(test)]
 mod test_integrity_check {
+    use SlabIntegrityError::*;
+
     use super::test::*;
     use super::*;
-    use SlabIntegrityError::*;
 
     #[test]
     fn bad_size() {

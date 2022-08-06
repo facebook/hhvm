@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::tast;
-use crate::typing::ast::typing_trait::Infer;
-use crate::typing::env::typing_env::TEnv;
-use crate::typing::typing_error::Result;
 use oxidized::aast;
 use oxidized::aast_defs;
 use oxidized::ast_defs;
@@ -14,6 +10,11 @@ use ty::decl;
 use ty::local;
 use ty::local::Variance;
 use ty::reason::Reason;
+
+use crate::tast;
+use crate::typing::ast::typing_trait::Infer;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::typing_error::Result;
 
 impl<R: Reason> Infer<R> for oxidized::aast::Tparam<(), ()> {
     type Params = ();

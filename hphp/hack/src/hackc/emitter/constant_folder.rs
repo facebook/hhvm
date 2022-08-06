@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::collections::hash_map::RandomState;
+use std::fmt;
+
 use env::emitter::Emitter;
 use env::ClassExpr;
 use ffi::Pair;
@@ -21,8 +24,6 @@ use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
-use std::collections::hash_map::RandomState;
-use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {

@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+
 use crate::aast::*;
 use crate::ast_defs;
 use crate::pos::Pos;
-use std::borrow::Cow;
 
 impl<Ex, En> Program<Ex, En> {
     pub fn as_slice(&self) -> &[Def<Ex, En>] {

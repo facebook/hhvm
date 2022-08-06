@@ -2,6 +2,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cmp;
+use std::collections::BTreeMap;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use bumpalo::Bump;
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
@@ -24,11 +30,6 @@ use pos::ToOxidized;
 use pos::TypeName;
 use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
-use std::cmp;
-use std::collections::BTreeMap;
-use std::path::Path;
-use std::path::PathBuf;
-use std::sync::Arc;
 use ty::decl::folded::FoldedClass;
 use ty::decl::shallow;
 use ty::reason::BReason;

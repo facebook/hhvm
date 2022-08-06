@@ -2,12 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ty::reason::Reason;
+
 use crate::tast;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::typing_error::Error;
 use crate::typing::typing_error::Result;
-use ty::reason::Reason;
 
 impl<R: Reason> Infer<R> for oxidized::aast::Class_<(), ()> {
     type Params = ();

@@ -5,8 +5,8 @@
 
 // Everything you want to know about what InstrIds are alive when.
 
-use crate::PredecessorCatchMode;
-use crate::PredecessorFlags;
+use std::collections::VecDeque;
+
 use ir_core::instr::HasOperands;
 use ir_core::BlockId;
 use ir_core::BlockIdMap;
@@ -17,7 +17,9 @@ use ir_core::InstrIdSet;
 use ir_core::ValueId;
 use itertools::Itertools;
 use newtype::IdVec;
-use std::collections::VecDeque;
+
+use crate::PredecessorCatchMode;
+use crate::PredecessorFlags;
 
 /// Used to compute the set of live InstrIds across a Func.
 pub struct LiveInstrs {
@@ -35,9 +37,10 @@ pub struct LiveInstrs {
 
 impl std::fmt::Debug for LiveInstrs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use std::fmt::Display;
+
         use print::FmtRawVid;
         use print::FmtSep;
-        use std::fmt::Display;
         writeln!(f, "instr_last_use: {{")?;
         for (vid, v) in self.instr_last_use.iter().enumerate() {
             writeln!(

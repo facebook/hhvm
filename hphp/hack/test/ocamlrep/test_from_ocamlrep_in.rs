@@ -8,7 +8,6 @@
 use std::fmt::Debug;
 
 use bumpalo::Bump;
-
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;

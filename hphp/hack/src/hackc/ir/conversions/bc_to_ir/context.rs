@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::sequence::Sequence;
+use std::collections::VecDeque;
+
 use ffi::Str;
 use hhbc::Instruct;
 use ir::instr;
@@ -17,7 +18,8 @@ use ir::LocalId;
 use ir::ValueId;
 use ir::VarId;
 use newtype::newtype_int;
-use std::collections::VecDeque;
+
+use crate::sequence::Sequence;
 
 pub(crate) type LabelMap<T> =
     std::collections::HashMap<hhbc::Label, T, newtype::BuildIdHasher<u32>>;

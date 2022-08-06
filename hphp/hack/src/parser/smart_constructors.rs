@@ -9,7 +9,6 @@ pub mod smart_constructors_wrappers;
 
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
-
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_by_ref::syntax::Syntax;
 use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;

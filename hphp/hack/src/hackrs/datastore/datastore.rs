@@ -8,9 +8,9 @@ mod delta_store;
 mod empty;
 mod non_evicting;
 
-use anyhow::Result;
 use std::fmt::Debug;
 
+use anyhow::Result;
 pub use changes_store::ChangesStore;
 pub use delta_store::DeltaStore;
 pub use empty::EmptyStore;

@@ -15,9 +15,10 @@
 //! ```
 //!
 
-use crate::print::FuncContext;
-use crate::util::FmtEscapedString;
-use crate::util::FmtSep;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result;
+
 use ffi::Pair;
 use ffi::Str;
 use ir_core::instr::BareThisOp;
@@ -33,9 +34,10 @@ use ir_core::instr::Special;
 use ir_core::instr::SpecialClsRef;
 use ir_core::string_intern::StringInterner;
 use ir_core::*;
-use std::fmt::Display;
-use std::fmt::Formatter;
-use std::fmt::Result;
+
+use crate::print::FuncContext;
+use crate::util::FmtEscapedString;
+use crate::util::FmtSep;
 
 pub(crate) struct FmtAttr(pub Attr);
 

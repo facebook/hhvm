@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+use std::collections::HashMap;
+
 use arena_trait::TrivialDrop;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
@@ -10,8 +13,6 @@ use ocamlrep::ToOcamlRep;
 use oxidized_by_ref::i_map::IMap;
 use oxidized_by_ref::s_map::SMap;
 use oxidized_by_ref::s_set::SSet;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
 
 pub trait ToOxidized<'a> {
     type Output: TrivialDrop + Clone + ToOcamlRep + 'a;

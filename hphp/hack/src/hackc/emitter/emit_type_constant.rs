@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+
 use error::Error;
 use error::Result;
 use ffi::Pair;
@@ -17,7 +19,6 @@ use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::ast_defs;
 use oxidized::ast_defs::ShapeFieldName;
-use std::collections::BTreeMap;
 
 fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
     if tparams.contains(&p) {

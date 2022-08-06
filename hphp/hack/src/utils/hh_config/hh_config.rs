@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+use std::path::Path;
+
 use oxidized::decl_parser_options::DeclParserOptions;
 use sha1::Digest;
 use sha1::Sha1;
-use std::collections::BTreeMap;
-use std::path::Path;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 

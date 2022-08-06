@@ -6,6 +6,7 @@ use std::fmt::Debug;
 use std::io;
 use std::io::Result;
 use std::io::Write;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]

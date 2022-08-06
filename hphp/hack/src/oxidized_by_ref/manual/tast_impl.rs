@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[allow(unused_imports)]
-use crate::*;
-
 use i_map::IMap;
 use s_map::SMap;
 use tast::SavedEnv;
@@ -13,6 +10,9 @@ use type_parameter_env::TypeParameterEnv;
 use typing_inference_env::TypingInferenceEnv;
 use typing_logic::SubtypeProp;
 use typing_tyvar_occurrences::TypingTyvarOccurrences;
+
+#[allow(unused_imports)]
+use crate::*;
 
 const INFERENCE_ENV: TypingInferenceEnv<'_> = TypingInferenceEnv {
     tvenv: IMap::empty(),

@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::datatypes::*;
-use crate::FileSummary;
-
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::ToplevelSymbolHash;
@@ -16,6 +13,9 @@ use oxidized::relative_path::RelativePath;
 use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;
+
+use crate::datatypes::*;
+use crate::FileSummary;
 
 #[derive(Clone, Debug)]
 pub struct SymbolItem {

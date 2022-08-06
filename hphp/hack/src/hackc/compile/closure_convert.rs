@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
@@ -67,7 +69,6 @@ use oxidized::file_info::Mode;
 use oxidized::local_id;
 use oxidized::namespace_env;
 use oxidized::s_map::SMap;
-use std::borrow::Cow;
 use unique_id_builder::get_unique_id_for_function;
 use unique_id_builder::get_unique_id_for_main;
 use unique_id_builder::get_unique_id_for_method;

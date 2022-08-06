@@ -74,8 +74,9 @@ pub fn time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::time::Instant;
+
+    use super::*;
 
     #[test]
     fn test_profile_longer_than() {

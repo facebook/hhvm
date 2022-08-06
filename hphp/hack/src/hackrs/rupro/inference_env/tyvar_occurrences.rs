@@ -123,8 +123,9 @@ impl<'a> ToOxidized<'a> for TyvarOccurrences {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use utils::core::IdentGen;
+
+    use super::*;
 
     #[test]
     fn test_add_remove_id() {

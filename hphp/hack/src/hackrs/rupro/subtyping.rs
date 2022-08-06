@@ -8,18 +8,15 @@ pub mod oracle;
 mod solve;
 mod visited_goals;
 
-use crate::inference_env::InferenceEnv;
-use crate::subtyping::normalize::NormalizeEnv;
-use crate::typaram_env::TyparamEnv;
-use crate::typing::typing_error::Result;
+use std::ops::Deref;
+use std::rc::Rc;
+
 use im::HashSet;
 use oracle::Oracle;
 use pos::Symbol;
 use pos::TypeName;
 pub use solve::force_solve;
 pub use solve::solve;
-use std::ops::Deref;
-use std::rc::Rc;
 use ty::local::Ty;
 use ty::local::Ty_;
 use ty::local::Tyvar;
@@ -28,6 +25,11 @@ use ty::prop::Cstr;
 use ty::prop::Prop;
 use ty::prop::PropF;
 use ty::reason::Reason;
+
+use crate::inference_env::InferenceEnv;
+use crate::subtyping::normalize::NormalizeEnv;
+use crate::typaram_env::TyparamEnv;
+use crate::typing::typing_error::Result;
 
 /// A structure that can handle and normalize subtyping constraints, and
 /// propagate them to the inference environment.
@@ -317,9 +319,10 @@ impl<'a, R: Reason> Subtyper<'a, R> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ty::reason::NReason;
     use utils::core::IdentGen;
+
+    use super::*;
 
     #[test]
     fn test_prim() {

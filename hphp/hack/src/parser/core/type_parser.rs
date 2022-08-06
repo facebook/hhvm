@@ -4,6 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
+use parser_core_types::token_kind::TokenKind;
+
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
 use crate::lexer::Lexer;
@@ -14,10 +19,6 @@ use crate::parser_trait::SeparatedListKind;
 use crate::smart_constructors::NodeType;
 use crate::smart_constructors::SmartConstructors;
 use crate::smart_constructors::Token;
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::SyntaxError;
-use parser_core_types::syntax_error::{self as Errors};
-use parser_core_types::token_kind::TokenKind;
 
 #[derive(Clone)]
 pub struct TypeParser<'a, S>

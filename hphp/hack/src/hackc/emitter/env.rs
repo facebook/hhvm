@@ -13,18 +13,17 @@ mod local;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bitflags::bitflags;
+pub use class_expr::ClassExpr;
 use emitter::Emitter;
 use hhbc::IterId;
 use hhbc::Label;
 use hhbc::Local;
-use ocamlrep::rc::RcOc;
-use oxidized::ast;
-use oxidized::namespace_env::Env as NamespaceEnv;
-
-pub use class_expr::ClassExpr;
 pub use iterator::*;
 pub use label::*;
 pub use local::*;
+use ocamlrep::rc::RcOc;
+use oxidized::ast;
+use oxidized::namespace_env::Env as NamespaceEnv;
 
 bitflags! {
     #[derive(Default)]

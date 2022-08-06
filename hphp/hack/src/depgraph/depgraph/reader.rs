@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::byteutils;
-pub use crate::dep::Dep;
-
 use std::ops::Deref;
 
 use rpds::HashTrieSet;
+
+use crate::byteutils;
+pub use crate::dep::Dep;
 
 /// Use a `DepGraphOpener` to initialize a dependency graph from a file.
 ///

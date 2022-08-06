@@ -7,6 +7,12 @@
 use std::borrow::Cow;
 use std::marker::PhantomData;
 
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::{self as Errors};
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_kind::TokenKind;
+
 use crate::declaration_parser::DeclarationParser;
 use crate::lexer::Lexer;
 use crate::lexer::StringLiteralKind;
@@ -20,11 +26,6 @@ use crate::smart_constructors::SmartConstructors;
 use crate::smart_constructors::Token;
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::SyntaxError;
-use parser_core_types::syntax_error::{self as Errors};
-use parser_core_types::token_factory::TokenFactory;
-use parser_core_types::token_kind::TokenKind;
 
 #[derive(PartialEq)]
 pub enum BinaryExpressionPrefixKind<P> {

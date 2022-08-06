@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::registrar::DependencyGraph;
-use crate::serde_store::StoreOpts;
-use crate::SerializingStore;
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use datastore::NonEvictingStore;
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
@@ -15,9 +15,11 @@ use shallow_decl_provider::EagerShallowDeclProvider;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
-use std::path::PathBuf;
-use std::sync::Arc;
 use ty::reason::Reason;
+
+use crate::registrar::DependencyGraph;
+use crate::serde_store::StoreOpts;
+use crate::SerializingStore;
 
 pub fn make_folded_decl_provider<R: Reason>(
     store_opts: StoreOpts,

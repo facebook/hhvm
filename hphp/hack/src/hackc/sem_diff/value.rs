@@ -1,7 +1,9 @@
+use std::fmt;
+
+use hash::HashMap;
+
 use crate::node::Input;
 use crate::node::NodeInstr;
-use hash::HashMap;
-use std::fmt;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub(crate) enum Value {

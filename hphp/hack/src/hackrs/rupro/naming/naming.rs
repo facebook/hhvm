@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::naming::naming_elaborate_namespaces;
 use im::HashSet;
 use oxidized::aast;
 use special_names as sn;
+
+use crate::naming::naming_elaborate_namespaces;
 
 #[derive(Clone, Debug, Default)]
 struct NamingEnv {

@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::emitter::Emitter;
 use ast_scope::Scope;
 use hhbc::ClassishKind;
 use hhbc::SpecialClsRef;
@@ -13,6 +12,8 @@ use naming_special_names_rust::classes;
 use oxidized::aast::*;
 use oxidized::ast;
 use oxidized::ast_defs;
+
+use crate::emitter::Emitter;
 
 #[derive(Debug)]
 pub enum ClassExpr<'arena> {

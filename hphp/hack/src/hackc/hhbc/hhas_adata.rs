@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::typed_value::TypedValue;
 use ffi::Str;
 use serde::Serialize;
+
+use crate::typed_value::TypedValue;
 
 pub const VARRAY_PREFIX: &str = "y";
 pub const DARRAY_PREFIX: &str = "Y";

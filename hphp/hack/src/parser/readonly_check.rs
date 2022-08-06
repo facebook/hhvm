@@ -4,6 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 use aast::Expr_ as E_;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
@@ -21,8 +24,6 @@ use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
 use parser_core_types::syntax_error::SyntaxError;
-use std::collections::HashMap;
-use std::collections::HashSet;
 
 // Local environment which keeps track of how many readonly values it has
 #[derive(PartialEq, Clone)]

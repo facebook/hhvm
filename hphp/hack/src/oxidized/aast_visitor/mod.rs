@@ -36,13 +36,14 @@ mod type_params_defaults {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::aast::*;
     use node::Node;
     use node_mut::NodeMut;
     use pretty_assertions::assert_eq;
     use visitor::Visitor;
     use visitor_mut::VisitorMut;
+
+    use super::*;
+    use crate::aast::*;
 
     #[test]
     fn simple() {
@@ -101,10 +102,11 @@ mod tests {
 
     #[test]
     fn local_map_id() {
+        use std::collections::BTreeMap;
+
         use crate::aast::*;
         use crate::local_id::LocalId;
         use crate::LocalIdMap;
-        use std::collections::BTreeMap;
 
         impl<'ast> Visitor<'ast> for u8 {
             type Params = type_params_defaults::P<(), (), u8, ()>;

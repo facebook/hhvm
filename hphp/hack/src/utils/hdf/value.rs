@@ -1,14 +1,16 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::hdf::ffi;
-use cxx::let_cxx_string;
-use cxx::UniquePtr;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
+
+use cxx::let_cxx_string;
+use cxx::UniquePtr;
 use thiserror::Error;
+
+use crate::hdf::ffi;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

@@ -1,6 +1,8 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::io::Write;
+
 use anyhow::Result;
 use clap::Parser;
 use facts_rust::Facts;
@@ -9,7 +11,6 @@ use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use serde_json::json;
 use serde_json::Value;
-use std::io::Write;
 
 /// Facts subcommand options
 #[derive(Parser, Debug, Default)]

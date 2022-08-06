@@ -4,10 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::source_text::SourceText;
+use std::rc::Rc;
+
 use line_break_map::LineBreakMap;
 use oxidized::pos::Pos;
-use std::rc::Rc;
+
+use crate::source_text::SourceText;
 
 #[derive(Debug)]
 pub struct IndexedSourceTextImpl<'a> {

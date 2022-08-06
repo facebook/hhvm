@@ -1,8 +1,5 @@
-use crate::code_path::CodePath;
-use crate::instr_ptr::InstrPtr;
-use crate::sequence::Sequence;
-use crate::value::ValueBuilder;
-use crate::work_queue::WorkQueue;
+use std::rc::Rc;
+
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
@@ -20,7 +17,12 @@ use hhbc::SrcLoc;
 use hhbc_gen::OpcodeData;
 use newtype::IdVec;
 use once_cell::sync::OnceCell;
-use std::rc::Rc;
+
+use crate::code_path::CodePath;
+use crate::instr_ptr::InstrPtr;
+use crate::sequence::Sequence;
+use crate::value::ValueBuilder;
+use crate::work_queue::WorkQueue;
 
 /// Compare two `HhasBody`s to figure out if they are semantically equivalent.
 ///

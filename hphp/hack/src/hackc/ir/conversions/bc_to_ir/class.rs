@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::convert;
-use crate::types;
 use ffi::Pair;
 use ffi::Str;
 use hhbc::hhas_class::HhasClass;
 use ir::class::TraitReqKind;
 use ir::Type;
+
+use crate::convert;
+use crate::types;
 
 pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &HhasClass<'a>) {
     let constants: Vec<ir::HackConstant<'a>> = cls

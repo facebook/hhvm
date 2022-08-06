@@ -3,15 +3,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::collections::BTreeMap;
+
+use itertools::Either;
+use ocamlrep::rc::RcOc;
+
 use super::node::Node;
 use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor::Visitor;
 use super::visitor_mut::VisitorMut;
 use crate::pos::Pos;
-use itertools::Either;
-use ocamlrep::rc::RcOc;
-use std::collections::BTreeMap;
 
 macro_rules! leaf_node {
     ($ty:ty) => {

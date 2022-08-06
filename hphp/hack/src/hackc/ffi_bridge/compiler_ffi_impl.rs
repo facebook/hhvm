@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::*;
-use itertools::Itertools;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+
+use itertools::Itertools;
+
+use super::*;
 
 impl From<compile_ffi::TypeKind> for facts::TypeKind {
     fn from(type_kind: compile_ffi::TypeKind) -> facts::TypeKind {

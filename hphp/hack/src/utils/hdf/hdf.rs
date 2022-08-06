@@ -30,10 +30,12 @@ pub(crate) mod ffi {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::ffi::CStr;
+
     use cxx::let_cxx_string;
     use cxx::UniquePtr;
-    use std::ffi::CStr;
+
+    use super::*;
 
     fn abc() -> UniquePtr<ffi::Hdf> {
         let mut hdf = ffi::hdf_new();

@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod assertion_utils;
 
+pub use assertion_utils::*;
 use hhvm_hhbc_defs_ffi::ffi::FatalOp;
 use oxidized::ast_defs::Pos;
 use thiserror::Error;
-
-pub use assertion_utils::*;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

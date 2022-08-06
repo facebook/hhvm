@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::context::Addr;
-use crate::context::AddrMap;
-use crate::context::LabelMap;
+use std::borrow::Cow;
+use std::ops::Range;
+
 use hhbc::Instruct;
 use ir::BlockId;
 use ir::BlockIdMap;
@@ -13,8 +13,10 @@ use ir::ExFrameId;
 use ir::FuncBuilder;
 use ir::LocId;
 use ir::TryCatchId;
-use std::borrow::Cow;
-use std::ops::Range;
+
+use crate::context::Addr;
+use crate::context::AddrMap;
+use crate::context::LabelMap;
 
 /// A Sequence is a linear sequence of HHBC Instructs that doesn't cross either
 /// a Label or a Try/Catch boundary.

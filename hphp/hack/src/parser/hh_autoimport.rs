@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use lazy_static::lazy_static;
 use std::collections::BTreeMap;
+
+use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref TYPES_MAP: BTreeMap<String, String> = make_map(TYPES);

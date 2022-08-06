@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
+use hhvm_types_ffi::ffi::Attr;
+use serde::Serialize;
+
 use crate::hhas_attribute::HhasAttribute;
 use crate::hhas_pos::HhasSpan;
 use crate::hhas_type::HhasTypeInfo;
 use crate::typed_value::TypedValue;
 use crate::ClassName;
-use ffi::Slice;
-use hhvm_types_ffi::ffi::Attr;
-use serde::Serialize;
 
 #[derive(Clone, Debug, Serialize)]
 #[repr(C)]

@@ -10,14 +10,13 @@ use std::path::PathBuf;
 
 use ::anyhow::Context;
 use ::anyhow::Result;
+use oxidized::relative_path;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::direct_decl_parser::Decls;
 use serde::Deserialize;
 use serde::Serialize;
 use structopt::StructOpt;
 use walkdir::WalkDir;
-
-use oxidized::relative_path;
-use oxidized::relative_path::RelativePath;
-use oxidized_by_ref::direct_decl_parser::Decls;
 
 #[derive(StructOpt, Clone, Debug)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)

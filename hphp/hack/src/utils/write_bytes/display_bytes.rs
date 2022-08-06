@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::BytesFormatter;
-use bstr::BStr;
-use bstr::BString;
 use std::io::Result;
 use std::io::Write;
+
+use bstr::BStr;
+use bstr::BString;
+
+use crate::BytesFormatter;
 
 pub trait DisplayBytes {
     fn fmt(&self, fmt: &mut BytesFormatter<'_>) -> Result<()>;

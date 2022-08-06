@@ -4,6 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![cfg(test)]
 
+use std::collections::BTreeMap;
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use anyhow::Result;
 use datastore::NonEvictingStore;
 use decl_parser::DeclParser;
@@ -17,9 +21,6 @@ use hh24_test::TestRepo;
 use naming_provider::SqliteNamingTable;
 use pos::RelativePathCtx;
 use shallow_decl_provider::LazyShallowDeclProvider;
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-use std::sync::Arc;
 use tempdir::TempDir;
 use ty::reason::BReason;
 

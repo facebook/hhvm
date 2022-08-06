@@ -3,6 +3,30 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+use std::fmt;
+
+use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::ToOcamlRep;
+pub use oxidized::ast_defs::Abstraction;
+pub use oxidized::ast_defs::ClassishKind;
+use pos::Bytes;
+use pos::ClassConstNameIndexMap;
+use pos::MethodNameIndexMap;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::PropNameIndexMap;
+use pos::PropNameIndexSet;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeConstNameIndexMap;
+use pos::TypeName;
+use pos::TypeNameIndexMap;
+use pos::TypeNameIndexSet;
+use serde::Deserialize;
+use serde::Serialize;
+
+pub use crate::decl::subst::Subst;
 use crate::decl::ty::ConsistentKind;
 use crate::decl::ty::Enforceable;
 use crate::decl::ty::XhpEnumValue;
@@ -18,30 +42,6 @@ use crate::decl::WhereConstraint;
 use crate::decl::XhpAttribute;
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
-use serde::Deserialize;
-use serde::Serialize;
-
-use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::ToOcamlRep;
-use pos::Bytes;
-use pos::ClassConstNameIndexMap;
-use pos::MethodNameIndexMap;
-use pos::ModuleName;
-use pos::Positioned;
-use pos::PropNameIndexMap;
-use pos::PropNameIndexSet;
-use pos::Symbol;
-use pos::TypeConstName;
-use pos::TypeConstNameIndexMap;
-use pos::TypeName;
-use pos::TypeNameIndexMap;
-use pos::TypeNameIndexSet;
-use std::collections::BTreeMap;
-use std::fmt;
-
-pub use crate::decl::subst::Subst;
-pub use oxidized::ast_defs::Abstraction;
-pub use oxidized::ast_defs::ClassishKind;
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep)]

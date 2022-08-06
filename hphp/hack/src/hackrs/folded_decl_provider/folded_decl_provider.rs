@@ -3,16 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use depgraph_api::DeclName;
+use std::fmt::Debug;
+use std::sync::Arc;
 
+use depgraph_api::DeclName;
 use itertools::Itertools;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
 use pos::PropName;
 use pos::TypeName;
-use std::fmt::Debug;
-use std::sync::Arc;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
 use ty::decl::FunDecl;
@@ -25,9 +25,8 @@ mod inherit;
 mod provider;
 mod subst;
 
-pub use subst::Substitution;
-
 pub use provider::LazyFoldedDeclProvider;
+pub use subst::Substitution;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

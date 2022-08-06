@@ -3,14 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use crate::decl;
-pub use crate::decl::ty::Exact;
-pub use crate::decl::ty::Prim;
-use crate::decl::UserAttribute;
-use crate::local::tyvar::Tyvar;
-use crate::reason::Reason;
-use crate::visitor::Visitor;
-use crate::visitor::Walkable;
+use std::ops::Deref;
+
 use hcons::Hc;
 use im::HashSet;
 use oxidized::aast_defs::ReifyKind;
@@ -21,7 +15,15 @@ use pos::Positioned;
 use pos::Symbol;
 use pos::ToOxidized;
 use pos::TypeName;
-use std::ops::Deref;
+
+pub use crate::decl;
+pub use crate::decl::ty::Exact;
+pub use crate::decl::ty::Prim;
+use crate::decl::UserAttribute;
+use crate::local::tyvar::Tyvar;
+use crate::reason::Reason;
+use crate::visitor::Visitor;
+use crate::visitor::Walkable;
 
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -537,11 +539,12 @@ impl<'a, R: Reason> ToOxidized<'a> for Tparam<R> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::reason::NReason;
     use pos::NPos;
     use pos::Pos;
     use utils::core::IdentGen;
+
+    use super::*;
+    use crate::reason::NReason;
 
     #[test]
     fn test_non_var() {

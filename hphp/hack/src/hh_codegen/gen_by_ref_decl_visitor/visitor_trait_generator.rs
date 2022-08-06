@@ -7,10 +7,9 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 
+use super::Context;
 use crate::common::gen_helpers;
 use crate::common::to_snake;
-
-use super::Context;
 
 pub fn gen(ctx: &Context) -> TokenStream {
     let uses = gen_helpers::gen_module_uses(ctx.modules());

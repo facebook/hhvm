@@ -240,8 +240,9 @@ pub mod map {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn test_valid_usize_prefix() {

@@ -1,12 +1,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
-use std::borrow::Cow;
-use std::collections::HashMap;
-use std::collections::HashSet;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
@@ -375,10 +376,11 @@ mod test_helpers {
 // #[rustfmt::skip] // skip rustfmt because it tends to add unwanted tokens to our quotes.
 #[allow(dead_code)]
 mod test {
+    use quote::quote;
+
     use super::*;
     use crate::test_helpers::assert_error;
     use crate::test_helpers::assert_pat_eq;
-    use quote::quote;
 
     #[test]
     fn test_basic() {

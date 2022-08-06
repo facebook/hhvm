@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use log::info;
-use parking_lot::Mutex;
-use rayon::prelude::*;
-
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ffi::OsString;
@@ -25,7 +21,10 @@ use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
 use depgraph_writer::ShardedLookupTableWriter;
 use deps_rust::DepGraphDelta;
+use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
+use parking_lot::Mutex;
+use rayon::prelude::*;
 
 struct EdgesDir {
     // For local typechecks, we output edges in a list format

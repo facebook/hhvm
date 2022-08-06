@@ -6,7 +6,6 @@
 use std::hash::Hasher;
 
 use fnv::FnvHasher;
-
 use oxidized::file_info::NameType;
 
 /// Variant types used in the naming table.

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Borrow;
+
 use oxidized::file_info::Mode;
 
 use crate::lexable_token::LexableToken;
@@ -10,7 +12,6 @@ use crate::source_text::SourceText;
 use crate::syntax_by_ref::syntax::Syntax;
 use crate::syntax_error::SyntaxError;
 use crate::syntax_trait::SyntaxTrait;
-use std::borrow::Borrow;
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,

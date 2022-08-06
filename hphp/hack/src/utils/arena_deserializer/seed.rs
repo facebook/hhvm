@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::deserializer::obtain_arena;
-use crate::impls::DeserializeInArena;
+use std::marker::PhantomData;
+
 use serde::de::DeserializeSeed;
 use serde::de::Deserializer;
-use std::marker::PhantomData;
+
+use crate::deserializer::obtain_arena;
+use crate::impls::DeserializeInArena;
 
 pub struct ArenaSeed<T> {
     marker: PhantomData<fn() -> T>,

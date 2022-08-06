@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::naming;
-use crate::parsing_error::ParsingError;
+use std::fs;
+use std::sync::Arc;
+
 use aast_parser::AastParser;
 use aast_parser::Error as ParserError;
 use lint_rust::LintError;
@@ -15,8 +16,9 @@ use parser_core_types::syntax_error::SyntaxError;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use rust_aast_parser_types::Env as ParserEnv;
-use std::fs;
-use std::sync::Arc;
+
+use crate::naming;
+use crate::parsing_error::ParsingError;
 
 pub type AstItem = (oxidized::aast::Program<(), ()>, Vec<ParsingError>);
 

@@ -59,8 +59,6 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
 
 #[cfg(test)]
 mod integration_tests {
-    use super::*;
-
     use std::collections::HashMap;
     use std::collections::HashSet;
     use std::mem::MaybeUninit;
@@ -70,6 +68,7 @@ mod integration_tests {
     use nix::unistd::ForkResult;
     use rand::prelude::*;
 
+    use super::*;
     use crate::filealloc::FileAlloc;
     use crate::sync::RwLock;
 

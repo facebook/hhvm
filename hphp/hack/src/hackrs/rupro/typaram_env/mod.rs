@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::ops::Deref;
+
 use im::HashMap;
 use im::HashSet;
 use pos::Pos;
 use pos::TypeName;
-use std::ops::Deref;
 use ty::local::Kind;
 use ty::local::Ty;
 use ty::local::Ty_;
@@ -240,9 +241,10 @@ impl<R: Reason> Default for TyparamEnv<R> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pos::NPos;
     use ty::reason::NReason;
+
+    use super::*;
 
     #[test]
     fn test_add() {

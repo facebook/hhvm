@@ -7,14 +7,14 @@ mod deserializer;
 mod impls;
 mod seed;
 
+pub use bumpalo;
+pub use serde;
 use serde::de::DeserializeSeed;
 use serde::de::Deserializer;
 
 pub use crate::deserializer::ArenaDeserializer;
 pub use crate::impls::DeserializeInArena;
 pub use crate::seed::ArenaSeed;
-pub use bumpalo;
-pub use serde;
 
 pub fn arena<'arena, D, T>(deserializer: D) -> Result<T, D::Error>
 where

@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::DeclProvider;
-use crate::DeclsHolder;
+use std::ffi::c_void;
+
 use arena_deserializer::serde::Deserialize;
 use decl_provider::Error;
 use decl_provider::Result;
@@ -14,7 +14,9 @@ use libc::c_char;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::FunDecl;
 use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
-use std::ffi::c_void;
+
+use crate::DeclProvider;
+use crate::DeclsHolder;
 
 /// Keep this in sync with struct ExternalDeclProviderResult in decl_provider.h
 #[repr(C)]

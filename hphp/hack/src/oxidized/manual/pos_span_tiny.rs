@@ -259,8 +259,9 @@ impl<'a> FromOcamlRepIn<'a> for PosSpanTiny {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn test_tiny_small() {

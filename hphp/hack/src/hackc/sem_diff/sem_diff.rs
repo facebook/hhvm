@@ -1,5 +1,3 @@
-use crate::code_path::CodePath;
-use crate::helpers::*;
 use anyhow::Result;
 use ffi::Pair;
 use ffi::Str;
@@ -17,6 +15,9 @@ use hhbc::hhas_pos::HhasPos;
 use hhbc::hhas_symbol_refs::HhasSymbolRefs;
 use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::FatalOp;
+
+use crate::code_path::CodePath;
+use crate::helpers::*;
 
 /// Compare two HackCUnits semantically.
 ///

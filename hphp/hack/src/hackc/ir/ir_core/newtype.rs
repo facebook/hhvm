@@ -1,9 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use crate::string_intern::StringInterner;
-use crate::UnitStringId;
-use newtype::newtype_int;
-
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
 pub use hhbc::BareThisOp;
@@ -25,6 +21,10 @@ pub use hhbc::SetOpOp;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;
 pub use hhbc::TypeStructResolveOp;
+use newtype::newtype_int;
+
+use crate::string_intern::StringInterner;
+use crate::UnitStringId;
 
 macro_rules! interned_hhbc_id {
     ($name: ident, $hhbc: ident) => {

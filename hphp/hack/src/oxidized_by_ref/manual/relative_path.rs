@@ -11,15 +11,13 @@ use std::path::PathBuf;
 
 use bumpalo::Bump;
 use camino::Utf8Path;
-use serde::Deserialize;
-use serde::Serialize;
-
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
-
 pub use oxidized::relative_path::Prefix;
 pub use oxidized::relative_path::PrefixPathMap;
+use serde::Deserialize;
+use serde::Serialize;
 
 // Named Relative_path.default in OCaml, but it really isn't a suitable default
 // for most purposes.
@@ -270,10 +268,12 @@ pub mod map {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::path::Path;
+
     use arena_deserializer::ArenaDeserializer;
     use arena_deserializer::DeserializeInArena;
-    use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn test_serde() {

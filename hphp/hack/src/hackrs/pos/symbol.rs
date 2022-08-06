@@ -7,7 +7,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::ToOxidized;
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hh24_types::ToplevelCanonSymbolHash;
@@ -23,8 +25,8 @@ use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::HashMap;
-use std::collections::HashSet;
+
+use crate::ToOxidized;
 
 pub type BuildSymbolHasher = BuildIdHasher<u32>;
 pub type SymbolMap<V> = HashMap<Symbol, V, BuildSymbolHasher>;

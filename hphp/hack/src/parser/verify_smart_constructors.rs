@@ -5,6 +5,7 @@
 
 mod verify_smart_constructors_generated;
 
+use bumpalo::Bump;
 use ocamlrep::Allocator;
 use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
@@ -15,8 +16,6 @@ use parser_core_types::syntax_by_ref::positioned_token::TokenFactory;
 use parser_core_types::syntax_kind::SyntaxKind;
 use syntax_smart_constructors::StateType;
 use syntax_smart_constructors::SyntaxSmartConstructors;
-
-use bumpalo::Bump;
 
 // TODO: This parser is only used by the ffp tests, and should be moved out of
 // the parser crate into a separate crate colocated with the tests. This will

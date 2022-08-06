@@ -6,15 +6,15 @@ mod error_code;
 mod error_primary;
 mod error_reason;
 
+use eq_modulo_pos::EqModuloPos;
 pub use error_code::TypingErrorCode;
 pub use error_primary::Primary;
 pub use error_reason::ReasonsCallback;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::decl_error::DeclError;
 use crate::reason::Reason;
-use eq_modulo_pos::EqModuloPos;
-use serde::Deserialize;
-use serde::Serialize;
 
 #[derive(Clone, Debug)]
 pub struct ErrorMessage<P>(P, String);

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hash::HashMap;
+
 use crate::instr::HasOperands;
 use crate::instr::Special;
 use crate::Block;
@@ -16,7 +18,6 @@ use crate::LiteralId;
 use crate::LocId;
 use crate::SrcLoc;
 use crate::ValueId;
-use hash::HashMap;
 
 pub struct FuncBuilder<'a> {
     pub func: Func<'a>,

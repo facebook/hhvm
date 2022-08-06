@@ -3,13 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(unused_variables, dead_code)]
-use super::NormalizeEnv;
-use crate::inference_env::InferenceEnv;
-use crate::subtyping::Subtyper;
-use crate::typing::typing_error::Result;
+use std::ops::Deref;
+
 use im::HashSet;
 use oxidized::ast_defs::Variance;
-use std::ops::Deref;
 use ty::local::FunParam;
 use ty::local::FunType;
 use ty::local::Ty;
@@ -19,6 +16,11 @@ use ty::local::Variance as V;
 use ty::local_error::TypingError;
 use ty::prop::Cstr;
 use ty::reason::Reason;
+
+use super::NormalizeEnv;
+use crate::inference_env::InferenceEnv;
+use crate::subtyping::Subtyper;
+use crate::typing::typing_error::Result;
 
 /// Attempt to 'solve' a type variable. We first look for a type appearing
 /// in both the upper and lower bound. If there is no such type, we consider
@@ -510,17 +512,19 @@ fn remove_tyvar_from_lower_bound_help<R: Reason>(
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
+    use pos::NPos;
+    use pos::Pos;
+    use ty::local::Variance as V;
+    use ty::reason::NReason;
+    use utils::core::IdentGen;
+
     use super::*;
     use crate::subtyping::oracle::NoClasses;
     use crate::subtyping::visited_goals::VisitedGoals;
     use crate::subtyping::Subtyper;
     use crate::typaram_env::TyparamEnv;
-    use pos::NPos;
-    use pos::Pos;
-    use std::rc::Rc;
-    use ty::local::Variance as V;
-    use ty::reason::NReason;
-    use utils::core::IdentGen;
 
     fn default_normalize_env<R: Reason>() -> NormalizeEnv<R> {
         NormalizeEnv {

@@ -4,14 +4,16 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod constraint;
 
-use crate::local::Ty;
-use crate::local_error::TypingError;
-use crate::reason::Reason;
+use std::ops::Deref;
+
 pub use constraint::Cstr;
 use hcons::Conser;
 use hcons::Hc;
 use pos::ToOxidized;
-use std::ops::Deref;
+
+use crate::local::Ty;
+use crate::local_error::TypingError;
+use crate::reason::Reason;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropF<R: Reason, A> {

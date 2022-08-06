@@ -4,11 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::aast_check;
-use crate::coeffects_check;
-use crate::expression_tree_check;
-use crate::modules_check;
-use crate::readonly_check;
+use std::borrow::Borrow;
+
 use bumpalo::Bump;
 use lowerer::lower;
 use lowerer::ScourComment;
@@ -36,7 +33,12 @@ pub use rust_aast_parser_types::Env;
 pub use rust_aast_parser_types::ParserResult;
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
-use std::borrow::Borrow;
+
+use crate::aast_check;
+use crate::coeffects_check;
+use crate::expression_tree_check;
+use crate::modules_check;
+use crate::readonly_check;
 
 type PositionedSyntaxTree<'src, 'arena> = SyntaxTree<'src, PositionedSyntax<'arena>, NoState>;
 

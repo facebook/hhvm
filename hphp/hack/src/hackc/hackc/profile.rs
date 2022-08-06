@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hash::HashMap;
 use std::borrow::Cow;
 use std::fmt;
 use std::fmt::Display;
@@ -14,6 +13,8 @@ use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::time::Duration;
 use std::time::Instant;
+
+use hash::HashMap;
 
 pub(crate) struct Timing {
     total: Duration,

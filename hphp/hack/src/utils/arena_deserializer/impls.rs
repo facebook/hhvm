@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::seed::ArenaSeed;
+use std::fmt;
+use std::marker::PhantomData;
+
 use bumpalo::collections::Vec as ArenaVec;
 use bumpalo::Bump;
 use serde::de::Deserializer;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
 use serde::Deserialize;
-use std::fmt;
-use std::marker::PhantomData;
+
+use crate::seed::ArenaSeed;
 
 pub trait DeserializeInArena<'arena>: Sized {
     fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>

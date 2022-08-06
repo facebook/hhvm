@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::hash::Hash;
+use std::sync::Arc;
+
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Conser;
@@ -11,6 +14,8 @@ use ocamlrep::ToOcamlRep;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::Lazy;
+pub use oxidized::typing_reason::ArgPosition;
+pub use oxidized::typing_reason::BlameSource;
 use pos::BPos;
 use pos::NPos;
 use pos::Pos;
@@ -22,17 +27,12 @@ use pos::TypeName;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
-use std::hash::Hash;
-use std::sync::Arc;
 
 use crate::decl;
 use crate::local;
 use crate::prop::Prop;
 use crate::prop::PropF;
 use crate::visitor::Walkable;
-
-pub use oxidized::typing_reason::ArgPosition;
-pub use oxidized::typing_reason::BlameSource;
 
 pub trait Reason:
     Eq

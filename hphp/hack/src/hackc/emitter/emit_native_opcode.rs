@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_body;
-use crate::emit_param;
 use ast_scope::Scope;
 use env::emitter::Emitter;
 use error::Error;
@@ -17,6 +15,9 @@ use instruction_sequence::InstrSeq;
 use oxidized::aast;
 use oxidized::ast;
 use oxidized::pos::Pos;
+
+use crate::emit_body;
+use crate::emit_param;
 
 pub fn emit_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

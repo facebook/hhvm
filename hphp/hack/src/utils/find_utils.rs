@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::Path;
+
 use lazy_static::lazy_static;
 use regex::RegexSet;
-use std::path::Path;
 
 const EXTENSIONS: [&str; 8] = [
     "php",         // normal php file
@@ -62,10 +63,11 @@ pub fn is_non_ignored_hack(path: &Path) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::PathBuf;
 
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn dot_files() {

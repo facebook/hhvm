@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::hhas_param::HhasParam;
-use crate::hhas_type::HhasTypeInfo;
-use crate::hhbc_ast::Instruct;
 use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
+
+use crate::hhas_param::HhasParam;
+use crate::hhas_type::HhasTypeInfo;
+use crate::hhbc_ast::Instruct;
 
 #[derive(Debug, Default, Serialize)]
 #[repr(C)]

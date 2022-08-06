@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Debug;
+use std::sync::Arc;
+
 use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
@@ -10,8 +13,6 @@ use pos::MethodName;
 use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
-use std::fmt::Debug;
-use std::sync::Arc;
 use ty::decl::shallow::ConstDecl;
 use ty::decl::shallow::FunDecl;
 use ty::decl::shallow::TypedefDecl;

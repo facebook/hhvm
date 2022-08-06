@@ -2,12 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::tast;
-use crate::typing::ast::typing_trait::Infer;
-use crate::typing::env::typing_env::TEnv;
-use crate::typing::typing_error::Result;
-use crate::typing_decl_provider::Class;
-use crate::typing_decl_provider::TypeDecl;
 use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::Positioned;
 use pos::SymbolMap;
@@ -18,6 +12,13 @@ use ty::local::Exact;
 use ty::local::FunParam;
 use ty::local::FunType;
 use ty::reason::Reason;
+
+use crate::tast;
+use crate::typing::ast::typing_trait::Infer;
+use crate::typing::env::typing_env::TEnv;
+use crate::typing::typing_error::Result;
+use crate::typing_decl_provider::Class;
+use crate::typing_decl_provider::TypeDecl;
 
 /// Localization environment, controlling localization.
 ///

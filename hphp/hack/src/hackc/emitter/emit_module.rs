@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute;
 use env::emitter::Emitter;
 use error::Result;
 use ffi::Maybe;
@@ -12,6 +11,8 @@ use hhbc::hhas_module::HhasModule;
 use hhbc::hhas_pos::HhasSpan;
 use hhbc::ClassName;
 use oxidized::ast;
+
+use crate::emit_attribute;
 
 pub fn emit_module<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,

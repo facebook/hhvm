@@ -2,6 +2,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashMap;
+
 use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::Error as AastError;
 use ocamlrep::rc::RcOc;
@@ -24,7 +26,6 @@ use quote::quote_spanned;
 use quote::ToTokens;
 use regex::Match;
 use regex::Regex;
-use std::collections::HashMap;
 use syn::parse::ParseStream;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
@@ -645,16 +646,18 @@ fn convert_lowpri_error(
 mod emit {
     // This section is more focused on `ast` than `syn` - so don't import too
     // much conflicting stuff from syn.
-    use super::ReplVar;
-    use super::VarOp;
+    use std::collections::HashMap;
+
     use oxidized::ast;
     use proc_macro2::Span;
     use proc_macro2::TokenStream;
     use quote::quote;
     use quote::quote_spanned;
     use quote::ToTokens;
-    use std::collections::HashMap;
     use syn::Result;
+
+    use super::ReplVar;
+    use super::VarOp;
 
     pub(crate) trait EmitTokens {
         fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream>;

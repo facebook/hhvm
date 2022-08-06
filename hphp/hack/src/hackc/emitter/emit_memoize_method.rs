@@ -3,11 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::emit_attribute;
-use crate::emit_body;
-use crate::emit_memoize_helpers;
-use crate::emit_method;
-use crate::emit_param;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bitflags::bitflags;
@@ -42,6 +37,12 @@ use naming_special_names_rust::members;
 use naming_special_names_rust::user_attributes;
 use oxidized::ast;
 use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_method;
+use crate::emit_param;
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'arena> {

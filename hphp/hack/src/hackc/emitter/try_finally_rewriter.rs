@@ -2,9 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_expression;
-use crate::emit_fatal;
-use crate::reified_generics_helpers as reified;
+use std::collections::BTreeMap;
+
 use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::emitter::Emitter;
@@ -22,7 +21,10 @@ use indexmap::IndexSet;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
-use std::collections::BTreeMap;
+
+use crate::emit_expression;
+use crate::emit_fatal;
+use crate::reified_generics_helpers as reified;
 
 type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
 

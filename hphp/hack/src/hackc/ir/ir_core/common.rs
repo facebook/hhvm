@@ -1,7 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 
 use ffi::Str;
-
 // Types imported from HHAS
 pub use hhbc::TypedValue;
 pub use hhvm_types_ffi::ffi::Attr;

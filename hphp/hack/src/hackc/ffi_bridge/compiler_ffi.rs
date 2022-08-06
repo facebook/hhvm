@@ -9,6 +9,11 @@
 mod compiler_ffi_impl;
 pub mod external_decl_provider;
 
+use std::ffi::c_void;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::PathBuf;
+
 use anyhow::Result;
 use compile::EnvFlags;
 use cxx::CxxString;
@@ -23,10 +28,6 @@ use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use parser_core_types::source_text::SourceText;
 use sha1::Digest;
 use sha1::Sha1;
-use std::ffi::c_void;
-use std::ffi::OsStr;
-use std::os::unix::ffi::OsStrExt;
-use std::path::PathBuf;
 
 #[allow(clippy::derivable_impls)]
 #[cxx::bridge]

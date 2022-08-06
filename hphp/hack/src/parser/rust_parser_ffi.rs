@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-
 use mode_parser::parse_mode;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::Allocator;
@@ -24,7 +23,6 @@ use parser_core_types::syntax_by_ref::positioned_trivia::PositionedTrivia;
 use parser_core_types::syntax_error::SyntaxError;
 use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::token_kind::TokenKind;
-
 use to_ocaml_impl::*;
 
 pub fn parse<'a, ParseFn, Node, State>(

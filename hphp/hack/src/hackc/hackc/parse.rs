@@ -3,6 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::io::stdin;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Write;
+use std::path::PathBuf;
+
 use aast_parser::AastParser;
 use anyhow::Context;
 use anyhow::Result;
@@ -14,11 +20,6 @@ use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use std::io::stdin;
-use std::io::BufRead;
-use std::io::BufReader;
-use std::io::Write;
-use std::path::PathBuf;
 use strum::VariantNames;
 use strum_macros::Display;
 use strum_macros::EnumString;

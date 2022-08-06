@@ -138,10 +138,11 @@ fn get_frame<'c>(
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use ir::Block;
     use ir::BlockId;
     use ir::TryCatchId;
+
+    use super::*;
 
     fn make_test_func<'a>(
         blocks: Vec<(/* bid */ usize, /* tcid */ Option<&'static str>)>,

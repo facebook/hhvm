@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
@@ -28,7 +30,6 @@ use oxidized::namespace_env;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use rewrite_xml::rewrite_xml;
-use std::path::PathBuf;
 
 fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     /*

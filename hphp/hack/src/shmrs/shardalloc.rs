@@ -300,7 +300,6 @@ unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
     use crate::sync::RwLock;
 
     const CHUNK_SIZE: usize = 200 * 1024;

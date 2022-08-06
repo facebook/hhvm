@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::io::Result;
+use std::io::Write;
+
+use hhbc::hhas_coeffects::HhasCoeffects;
+use write_bytes::write_bytes;
+use write_bytes::DisplayBytes;
+
 use crate::context::Context;
 use crate::context::FmtIndent;
 use crate::write::fmt_separated;
 use crate::write::fmt_separated_with;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use std::io::Result;
-use std::io::Write;
-use write_bytes::write_bytes;
-use write_bytes::DisplayBytes;
 
 pub(crate) fn coeffects_to_hhas(
     ctx: &Context<'_>,

@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::compile::SingleFileOpts;
-use crate::profile;
-use crate::profile::DurationEx;
-use crate::profile::StatusTicker;
-use crate::profile::Timing;
-use crate::regex;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
+use std::time::Duration;
+use std::time::Instant;
+
 use anyhow::ensure;
 use clap::Parser;
 use itertools::Itertools;
@@ -20,14 +22,14 @@ use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use regex::Regex;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
-use std::time::Duration;
-use std::time::Instant;
 use thiserror::Error;
+
+use crate::compile::SingleFileOpts;
+use crate::profile;
+use crate::profile::DurationEx;
+use crate::profile::StatusTicker;
+use crate::profile::Timing;
+use crate::regex;
 
 // Several of these would be better as the underlying error (anyhow::Error or
 // std::io::Error) but then we couldn't derive Hash or Eq.

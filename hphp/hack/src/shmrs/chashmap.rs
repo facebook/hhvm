@@ -450,8 +450,6 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
 
 #[cfg(test)]
 mod integration_tests {
-    use super::*;
-
     use std::collections::HashMap;
     use std::collections::HashSet;
     use std::time::Duration;
@@ -459,6 +457,8 @@ mod integration_tests {
     use nix::sys::wait::WaitStatus;
     use nix::unistd::ForkResult;
     use rand::prelude::*;
+
+    use super::*;
 
     struct U64Value(u64);
 

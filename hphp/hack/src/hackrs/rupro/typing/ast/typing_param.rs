@@ -2,17 +2,18 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use pos::Symbol;
+use ty::local::ParamMode;
+use ty::local::Ty;
+use ty::reason::Reason;
+use utils::core::LocalId;
+
 use crate::tast;
 use crate::typing::ast::typing_localize::LocalizeEnv;
 use crate::typing::ast::typing_trait::Infer;
 use crate::typing::env::typing_env::TEnv;
 use crate::typing::hint_utils::HintUtils;
 use crate::typing::typing_error::Result;
-use pos::Symbol;
-use ty::local::ParamMode;
-use ty::local::Ty;
-use ty::reason::Reason;
-use utils::core::LocalId;
 
 /// Type function parameters and bind the variables in the environment.
 impl<R: Reason> Infer<R> for oxidized::aast::FunParam<(), ()> {

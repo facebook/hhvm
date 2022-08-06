@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::ptr::NonNull;
+
 use lz4::liblz4;
 use shmrs::chashmap::CMapValue;
-use std::ptr::NonNull;
 
 extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
@@ -309,9 +310,9 @@ impl<'a> SerializedValue<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use rand::prelude::*;
+
+    use super::*;
 
     #[test]
     fn test_heap_value_header() {

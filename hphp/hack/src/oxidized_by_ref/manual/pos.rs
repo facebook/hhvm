@@ -10,9 +10,6 @@ use std::result::Result::*;
 use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
-use serde::Deserialize;
-use serde::Serialize;
-
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos::FilePos;
@@ -20,6 +17,8 @@ use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::relative_path::RelativePath;
 
@@ -482,9 +481,10 @@ pub mod map {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::relative_path::Prefix;
-    use pretty_assertions::assert_eq;
 
     fn make_pos<'a>(
         b: &'a Bump,

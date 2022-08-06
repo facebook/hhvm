@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::hash::BuildHasherDefault;
+use std::mem::MaybeUninit;
+
+use nohash_hasher::NoHashHasher;
+
 use crate::chashmap::CMap;
 use crate::chashmap::CMapRef;
 use crate::filealloc::FileAlloc;
-use nohash_hasher::NoHashHasher;
-use std::hash::BuildHasherDefault;
-use std::mem::MaybeUninit;
 
 /// The u64s are the first 8 bytes of a shasum. As such, they should have
 /// enough entropy to be used directly as keys into the hashmap.

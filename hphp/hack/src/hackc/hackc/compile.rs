@@ -3,7 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::FileOpts;
+use std::cell::RefCell;
+use std::fs::File;
+use std::io::stdout;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::Mutex;
+
 use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
@@ -24,13 +31,8 @@ use oxidized_by_ref::shallow_decl_defs::FunDecl;
 use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use std::cell::RefCell;
-use std::fs::File;
-use std::io::stdout;
-use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
-use std::sync::Mutex;
+
+use crate::FileOpts;
 
 #[derive(Parser, Debug)]
 pub struct Opts {

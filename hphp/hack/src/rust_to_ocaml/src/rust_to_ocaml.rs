@@ -7,10 +7,11 @@ mod convert;
 mod ir;
 mod rewrite_types;
 
-use anyhow::Result;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+
+use anyhow::Result;
 
 #[derive(Debug, clap::Parser)]
 struct Opts {

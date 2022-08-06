@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
@@ -15,8 +18,6 @@ use pos::RelativePath;
 use pos::RelativePathCtx;
 use rupro::typing_decl_provider::FoldingTypingDeclProvider;
 use rupro::typing_decl_provider::TypingDeclProvider;
-use std::path::PathBuf;
-use std::sync::Arc;
 use structopt::StructOpt;
 use ty::decl::shallow;
 use ty::reason::BReason;

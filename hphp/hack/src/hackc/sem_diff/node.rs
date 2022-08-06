@@ -1,3 +1,6 @@
+use std::fmt;
+use std::rc::Rc;
+
 use hhbc::IncDecOp;
 use hhbc::Label;
 use hhbc::MOpMode;
@@ -9,8 +12,6 @@ use hhbc::SetOpOp;
 use hhbc::SetRangeOp;
 use hhbc::SrcLoc;
 use hhbc::Targets;
-use std::fmt;
-use std::rc::Rc;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub(crate) enum Input {

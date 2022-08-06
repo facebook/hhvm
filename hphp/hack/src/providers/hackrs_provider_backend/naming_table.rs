@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use anyhow::Result;
 use datastore::ChangesStore;
 use datastore::DeltaStore;
@@ -22,8 +25,6 @@ use pos::RelativePath;
 use pos::TypeName;
 use reverse_naming_table::ReverseNamingTable;
 use shm_store::ShmStore;
-use std::path::PathBuf;
-use std::sync::Arc;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
@@ -326,6 +327,9 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
 }
 
 mod reverse_naming_table {
+    use std::hash::Hash;
+    use std::sync::Arc;
+
     use anyhow::Result;
     use datastore::ChangesStore;
     use datastore::DeltaStore;
@@ -335,8 +339,6 @@ mod reverse_naming_table {
     use serde::de::DeserializeOwned;
     use serde::Serialize;
     use shm_store::ShmStore;
-    use std::hash::Hash;
-    use std::sync::Arc;
 
     /// In-memory delta for symbols which support a canon-name lookup API (types
     /// and funs).

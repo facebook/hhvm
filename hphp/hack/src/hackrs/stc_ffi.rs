@@ -7,6 +7,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::PathBuf;
+use std::rc::Rc;
+use std::sync::Arc;
+
 use decl_parser::DeclParser;
 use folded_decl_provider::LazyFoldedDeclProvider;
 use hcons::Consable;
@@ -22,9 +26,6 @@ use rupro::typing_check_utils::TypingCheckUtils;
 use rupro::typing_ctx::TypingCtx;
 use rupro::typing_decl_provider::FoldingTypingDeclProvider;
 use shallow_decl_provider::EagerShallowDeclProvider;
-use std::path::PathBuf;
-use std::rc::Rc;
-use std::sync::Arc;
 use structopt::StructOpt;
 use ty::reason::BReason;
 use ty::reason::NReason;

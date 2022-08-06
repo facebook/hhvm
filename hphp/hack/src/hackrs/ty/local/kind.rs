@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use im::HashSet;
+
 use super::ty::Ty;
 use crate::reason::Reason;
-use im::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub struct KindFlags {

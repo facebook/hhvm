@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::subst::Substitution;
-use super::Result;
+use std::sync::Arc;
+
 use depgraph_api::DeclName;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
@@ -18,7 +18,6 @@ use pos::PropNameIndexMap;
 use pos::TypeConstNameIndexMap;
 use pos::TypeName;
 use pos::TypeNameIndexMap;
-use std::sync::Arc;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
 use ty::decl::ty::ConsistentKind;
@@ -36,6 +35,9 @@ use ty::decl::Ty;
 use ty::decl::TypeConst;
 use ty::decl::Typeconst;
 use ty::reason::Reason;
+
+use super::subst::Substitution;
+use super::Result;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
 

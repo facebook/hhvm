@@ -2,9 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::shallow_decl_defs::Decl;
 use ocamlrep::slab::OwnedSlab;
 use oxidized::file_info::NameType;
+
+use crate::shallow_decl_defs::Decl;
 
 impl<'a> Decl<'a> {
     pub fn kind(&self) -> NameType {

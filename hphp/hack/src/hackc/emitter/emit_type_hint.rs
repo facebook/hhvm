@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::borrow::Cow;
+
 use error::Error;
 use error::Result;
 use ffi::Maybe;
@@ -21,7 +23,6 @@ use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::aast_defs::Tprim;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ShapeFieldName;
-use std::borrow::Cow;
 
 #[derive(Eq, PartialEq)]
 pub enum Kind {

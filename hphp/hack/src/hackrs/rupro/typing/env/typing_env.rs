@@ -2,6 +2,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use depgraph_api::DeclName;
+use im::HashMap;
+use pos::FunName;
+use pos::TypeName;
+use ty::local::ParamMode;
+use ty::local::Ty;
+use ty::local::Variance;
+use ty::local_error::TypingError;
+use ty::reason::Reason;
+use utils::core::IdentGen;
+use utils::core::LocalId;
+
 use crate::inference_env::InferenceEnv;
 use crate::subtyping::Subtyper;
 use crate::tast::SavedEnv;
@@ -15,19 +30,6 @@ use crate::typing::env::typing_per_cont_env::TypingContKey;
 use crate::typing::env::typing_return_info::TypingReturnInfo;
 use crate::typing::typing_error::Result;
 use crate::typing_ctx::TypingCtx;
-use depgraph_api::DeclName;
-use im::HashMap;
-use pos::FunName;
-use pos::TypeName;
-use std::cell::RefCell;
-use std::rc::Rc;
-use ty::local::ParamMode;
-use ty::local::Ty;
-use ty::local::Variance;
-use ty::local_error::TypingError;
-use ty::reason::Reason;
-use utils::core::IdentGen;
-use utils::core::LocalId;
 
 /// The main typing environment.
 #[derive(Debug)]

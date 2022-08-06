@@ -312,8 +312,6 @@ pub mod ptr;
 pub mod rc;
 pub mod slab;
 
-pub use bumpalo::Bump;
-
 pub use arena::Arena;
 pub use block::Block;
 pub use block::BlockBuilder;
@@ -322,6 +320,7 @@ pub use block::CUSTOM_TAG;
 pub use block::DOUBLE_TAG;
 pub use block::NO_SCAN_TAG;
 pub use block::STRING_TAG;
+pub use bumpalo::Bump;
 pub use cache::MemoizationCache;
 pub use error::FromError;
 pub use error::SlabIntegrityError;

@@ -3,10 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::context::Addr;
-use crate::context::Context;
-use crate::context::MemberOpBuilder;
-use crate::sequence::SequenceKind;
+use std::cmp::Ordering;
+use std::fmt::Display;
+
 use hhbc::Instruct;
 use hhbc::Opcode;
 use hhbc::Pseudo;
@@ -26,8 +25,11 @@ use ir::TryCatchId;
 use ir::UnitStringId;
 use ir::ValueId;
 use log::trace;
-use std::cmp::Ordering;
-use std::fmt::Display;
+
+use crate::context::Addr;
+use crate::context::Context;
+use crate::context::MemberOpBuilder;
+use crate::sequence::SequenceKind;
 
 /// Convert the sequence that starts with the offset `addr`.
 ///

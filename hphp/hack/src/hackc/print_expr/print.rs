@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::context::Context;
-use crate::write;
-use crate::write::Error;
+use std::borrow::Cow;
+use std::io::Result;
+use std::io::Write;
+use std::write;
+
 use bstr::BString;
 use bstr::ByteSlice;
 use core_utils_rust::add_ns;
@@ -30,11 +32,11 @@ use oxidized::ast_defs;
 use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use regex::Regex;
-use std::borrow::Cow;
-use std::io::Result;
-use std::io::Write;
-use std::write;
 use write_bytes::write_bytes;
+
+use crate::context::Context;
+use crate::write;
+use crate::write::Error;
 
 #[derive(Default, Debug, Clone, Eq, PartialEq)]
 #[repr(C)]

@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::convert;
-use crate::convert::HackCUnitBuilder;
-use crate::types;
 use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ir::class::TraitReqKind;
 use ir::string_intern::StringInterner;
+
+use crate::convert;
+use crate::convert::HackCUnitBuilder;
+use crate::types;
 
 pub(crate) fn convert_class<'a>(
     alloc: &'a bumpalo::Bump,

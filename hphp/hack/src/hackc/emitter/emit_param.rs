@@ -2,8 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_attribute;
-use crate::emit_expression;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::marker::PhantomData;
+
 use ast_scope::Scope;
 use emit_type_hint::hint_to_type_info;
 use emit_type_hint::Kind;
@@ -31,9 +33,9 @@ use oxidized::ast as a;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ReadonlyKind;
 use oxidized::pos::Pos;
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
-use std::marker::PhantomData;
+
+use crate::emit_attribute;
+use crate::emit_expression;
 
 pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

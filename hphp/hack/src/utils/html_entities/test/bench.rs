@@ -16,7 +16,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use html_entities::*;
-
     use test::Bencher;
 
     #[bench]

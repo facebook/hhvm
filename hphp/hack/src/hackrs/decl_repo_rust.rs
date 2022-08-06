@@ -11,16 +11,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use indicatif::ParallelProgressIterator;
-use jwalk::WalkDir;
-use rayon::prelude::*;
-use structopt::StructOpt;
-use tempdir::TempDir;
-
-use ty::reason::BReason;
-use ty::reason::NReason;
-use ty::reason::Reason;
-
 use decl_parser::DeclParser;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::decl_provider::make_folded_decl_provider;
@@ -28,10 +18,18 @@ use hackrs_test_utils::serde_store::Compression;
 use hackrs_test_utils::serde_store::StoreOpts;
 use hackrs_test_utils::store::make_shallow_decl_store;
 use hackrs_test_utils::store::populate_shallow_decl_store;
+use indicatif::ParallelProgressIterator;
+use jwalk::WalkDir;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
+use rayon::prelude::*;
+use structopt::StructOpt;
+use tempdir::TempDir;
+use ty::reason::BReason;
+use ty::reason::NReason;
+use ty::reason::Reason;
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {

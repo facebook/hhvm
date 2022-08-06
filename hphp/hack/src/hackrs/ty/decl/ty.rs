@@ -3,30 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason;
-use crate::reason::Reason;
+use std::collections::BTreeMap;
+use std::fmt;
+
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Hc;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::aast;
-use oxidized::ast_defs;
-use pos::Bytes;
-use pos::ModuleName;
-use pos::Positioned;
-use pos::Symbol;
-use pos::TypeConstName;
-use pos::TypeName;
-use serde::de::DeserializeOwned;
-use serde::Deserialize;
-use serde::Serialize;
-use std::collections::BTreeMap;
-use std::fmt;
-use utils::core::Ident;
-
 pub use oxidized::aast_defs::ReifyKind;
 pub use oxidized::aast_defs::Tprim as Prim;
+use oxidized::ast_defs;
 pub use oxidized::ast_defs::Abstraction;
 pub use oxidized::ast_defs::ClassishKind;
 pub use oxidized::ast_defs::ConstraintKind;
@@ -43,6 +31,19 @@ pub use oxidized::typing_defs_flags::FunParamFlags;
 pub use oxidized::typing_defs_flags::FunTypeFlags;
 pub use oxidized::xhp_attribute::Tag;
 pub use oxidized::xhp_attribute::XhpAttribute;
+use pos::Bytes;
+use pos::ModuleName;
+use pos::Positioned;
+use pos::Symbol;
+use pos::TypeConstName;
+use pos::TypeName;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
+use utils::core::Ident;
+
+use crate::reason;
+use crate::reason::Reason;
 
 #[derive(
     Copy,

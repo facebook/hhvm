@@ -2,13 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use log::info;
-
 use std::collections::HashSet;
 use std::ffi::OsString;
 
 use depgraph::reader::Dep;
 use depgraph::reader::DepGraphOpener;
+use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 fn main(dep_graph: OsString) {

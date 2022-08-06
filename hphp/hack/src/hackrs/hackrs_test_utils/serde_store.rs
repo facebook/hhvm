@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Debug;
+use std::hash::Hash;
+
 use anyhow::Result;
 use dashmap::DashMap;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::fmt::Debug;
-use std::hash::Hash;
 
 pub struct SerializingStore<K: Hash + Eq, V: Serialize + DeserializeOwned> {
     /// A non-evicting store for serialized values.

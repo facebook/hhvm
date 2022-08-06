@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use oxidized_by_ref as obr;
+use pos::Pos;
+
 use crate::decl;
 use crate::decl::folded;
 use crate::decl::shallow;
@@ -10,9 +13,6 @@ use crate::decl::ty;
 use crate::decl::Ty;
 use crate::decl::Ty_;
 use crate::reason::Reason;
-use pos::Pos;
-
-use oxidized_by_ref as obr;
 
 #[inline]
 fn slice<T: Copy + Into<U>, U>(items: &[T]) -> Box<[U]> {

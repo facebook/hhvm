@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use arena_trait::Arena;
 use bumpalo::collections::String as BString;
 use bumpalo::collections::Vec as BVec;
 use bumpalo::vec;
 use bumpalo::Bump;
-
-use arena_trait::Arena;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::collections;
 use oxidized_by_ref::ident;
@@ -16,14 +15,14 @@ use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::tany_sentinel::TanySentinel;
 use oxidized_by_ref::typing_defs_flags::FunParamFlags;
 use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
+use typing_collections_rust::SMap;
+use typing_collections_rust::Vec;
 
 use crate::typing_defs::ExpandEnv;
 use crate::typing_defs_core::*;
 use crate::typing_logic::SubtypeProp;
 use crate::typing_logic::SubtypePropEnum;
 use crate::typing_reason::*;
-use typing_collections_rust::SMap;
-use typing_collections_rust::Vec;
 
 // Struct off which we call type builder methods
 // This gives us the option to keep some state here e.g. for hash consing

@@ -1,14 +1,15 @@
-use crate::code_path::CodePath;
-use crate::helpers::*;
-use crate::node::Input;
-use crate::node::Node;
-use crate::node::NodeInstr;
 use anyhow::bail;
 use anyhow::Result;
 use ffi::Slice;
 use hhbc::Opcode;
 use itertools::Itertools;
 use log::trace;
+
+use crate::code_path::CodePath;
+use crate::helpers::*;
+use crate::node::Input;
+use crate::node::Node;
+use crate::node::NodeInstr;
 
 pub(crate) struct Sequence<'arena> {
     pub(crate) debug_name: String,

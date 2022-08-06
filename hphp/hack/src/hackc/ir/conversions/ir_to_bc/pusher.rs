@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::push_count::PushCount;
 use ir::analysis;
 use ir::instr;
 use ir::instr::HasLocals;
@@ -28,6 +27,8 @@ use ir::ValueIdMap;
 use itertools::Itertools;
 use log::trace;
 use smallvec::SmallVec;
+
+use crate::push_count::PushCount;
 
 /// Run through a Func and insert pushes and pops for instructions in
 /// preparation of emitting bytecode. In general no attempt is made to optimize

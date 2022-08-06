@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
+
 use super::folded::FoldedClass;
 use super::shallow::ShallowClass;
 use crate::reason::Reason;
-use std::fmt;
 
 // Our Class structs have a lot of fields, but in a lot of cases, most of them
 // will have empty or default values, making Debug output very noisy. These

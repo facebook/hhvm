@@ -5,6 +5,12 @@
 
 #![cfg_attr(use_unstable_features, feature(test))]
 
+use std::cell::RefCell;
+use std::collections::HashSet;
+use std::collections::VecDeque;
+use std::ffi::OsString;
+use std::path::Path;
+
 use depgraph::reader::Dep;
 use deps_rust::DepGraphDelta;
 use deps_rust::DepSet;
@@ -16,11 +22,6 @@ use ocamlrep_custom::CamlSerialize;
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use rpds::HashTrieSet;
-use std::cell::RefCell;
-use std::collections::HashSet;
-use std::collections::VecDeque;
-use std::ffi::OsString;
-use std::path::Path;
 use typing_deps_hash::hash1;
 use typing_deps_hash::hash2;
 use typing_deps_hash::DepType;

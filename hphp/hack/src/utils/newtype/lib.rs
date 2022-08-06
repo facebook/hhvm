@@ -2,12 +2,12 @@
 
 mod idhasher;
 
-use serde::Deserialize;
-use serde::Serialize;
 use std::hash::Hash;
 use std::hash::Hasher;
 
 pub use idhasher::BuildIdHasher;
+use serde::Deserialize;
+use serde::Serialize;
 
 pub trait HasNone: Copy {
     const NONE: Self;

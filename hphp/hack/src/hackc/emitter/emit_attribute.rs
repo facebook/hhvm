@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::emit_expression;
 use env::emitter::Emitter;
 use env::Env;
 use error::Error;
@@ -12,6 +11,8 @@ use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
+
+use crate::emit_expression;
 
 pub fn from_asts<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

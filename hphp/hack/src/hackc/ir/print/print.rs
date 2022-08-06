@@ -12,8 +12,11 @@
 //! `print_thing(thing: &Thing)`.
 //!
 
-use crate::formatters::*;
-use crate::util::FmtSep;
+use std::fmt::Display;
+use std::fmt::Error;
+use std::fmt::Result;
+use std::fmt::Write;
+
 use ir_core::class::Property;
 use ir_core::class::TraitReqKind;
 use ir_core::instr::BaseOp;
@@ -39,10 +42,9 @@ use ir_core::instr::Tmp;
 use ir_core::string_intern::StringInterner;
 use ir_core::*;
 use itertools::Itertools;
-use std::fmt::Display;
-use std::fmt::Error;
-use std::fmt::Result;
-use std::fmt::Write;
+
+use crate::formatters::*;
+use crate::util::FmtSep;
 
 pub(crate) struct FuncContext<'a, 'b> {
     pub(crate) cur_loc_id: LocId,

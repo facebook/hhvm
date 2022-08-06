@@ -4,18 +4,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::context::Context;
-use super::gen_helper::*;
-use super::generator::Generator;
-use super::syn_helper::*;
-use super::visitor_trait_generator;
-use crate::impl_generator;
 use anyhow::anyhow;
 use anyhow::Result;
 use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
+
+use super::context::Context;
+use super::gen_helper::*;
+use super::generator::Generator;
+use super::syn_helper::*;
+use super::visitor_trait_generator;
+use crate::impl_generator;
 
 pub trait NodeImpl {
     fn filename() -> String;

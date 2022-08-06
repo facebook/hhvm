@@ -596,9 +596,10 @@ pub fn unquote_slice(content: &[u8]) -> &[u8] {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bstr::B;
-    use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
+    use pretty_assertions::assert_eq;
+
+    use super::*; // make assert_eq print huge diffs more human-readable
 
     #[test]
     fn unescape_single_or_nowdoc() {

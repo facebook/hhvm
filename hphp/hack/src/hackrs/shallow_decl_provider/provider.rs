@@ -3,10 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::Error;
-use super::Result;
-use super::ShallowDeclStore;
-use super::TypeDecl;
+use std::sync::Arc;
+
 use decl_parser::DeclParser;
 use itertools::Itertools;
 use naming_provider::NamingProvider;
@@ -17,7 +15,6 @@ use pos::MethodName;
 use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
-use std::sync::Arc;
 use ty::decl::shallow::Decl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
@@ -25,6 +22,11 @@ use ty::decl::ShallowClass;
 use ty::decl::Ty;
 use ty::decl::TypedefDecl;
 use ty::reason::Reason;
+
+use super::Error;
+use super::Result;
+use super::ShallowDeclStore;
+use super::TypeDecl;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
 /// store, uses the given naming table to find the file containing the requested

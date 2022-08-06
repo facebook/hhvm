@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use oxidized::pos::Pos;
+
 use crate::indexed_source_text::IndexedSourceText;
 use crate::source_text::SourceText;
-use oxidized::pos::Pos;
 
 /// SyntaxTrait defines basic functionality implemented by each Syntax.
 /// It corresponds to Syntax_sig::Syntax_S in OCaml implementation. It is a trait

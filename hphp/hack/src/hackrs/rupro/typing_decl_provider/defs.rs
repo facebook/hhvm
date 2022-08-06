@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::Class;
-use super::Error;
-use super::Result;
+use std::cell::RefCell;
+use std::fmt;
+use std::rc::Rc;
+use std::sync::Arc;
+
 use depgraph_api::DeclName;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::Substitution;
@@ -16,10 +18,6 @@ use pos::MethodNameMap;
 use pos::PropName;
 use pos::PropNameMap;
 use pos::TypeName;
-use std::cell::RefCell;
-use std::fmt;
-use std::rc::Rc;
-use std::sync::Arc;
 use ty::decl::ty::ConsistentKind;
 use ty::decl::EnumType;
 use ty::decl::FoldedClass;
@@ -31,6 +29,10 @@ use ty::decl::WhereConstraint;
 use ty::decl_error::DeclError;
 use ty::local::ClassElt;
 use ty::reason::Reason;
+
+use super::Class;
+use super::Error;
+use super::Result;
 
 /// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]

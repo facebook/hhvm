@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::marker::PhantomData;
+use std::sync::Arc;
+
 use arena_collections::list::List;
 use file_provider::FileProvider;
 use names::FileSummary;
@@ -14,8 +17,6 @@ use oxidized::parser_options::ParserOptions;
 use oxidized_by_ref as obr;
 use pos::RelativePath;
 use pos::TypeName;
-use std::marker::PhantomData;
-use std::sync::Arc;
 use ty::decl::shallow;
 use ty::reason::Reason;
 

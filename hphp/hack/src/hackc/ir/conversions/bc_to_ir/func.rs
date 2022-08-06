@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::context::Context;
-use crate::convert;
-use crate::types;
 use ffi::Maybe;
 use ffi::Pair;
 use ffi::Str;
@@ -19,6 +16,10 @@ use ir::ClassIdMap;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
+
+use crate::context::Context;
+use crate::convert;
+use crate::types;
 
 /// Convert a HhasFunction to an ir::Function
 pub(crate) fn convert_function<'a>(unit: &mut ir::Unit<'a>, src: &HhasFunction<'a>) {

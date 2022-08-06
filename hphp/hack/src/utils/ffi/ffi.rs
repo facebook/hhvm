@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::BStr;
-use serde::Serialize;
-use serde::Serializer;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::slice::from_raw_parts;
+
+use bstr::BStr;
+use serde::Serialize;
+use serde::Serializer;
 
 /// Maybe<T> is similar to C++ `std::option`. It is just like Rust `Option<T>`
 /// but has repr(C) for use with with cbindgen.

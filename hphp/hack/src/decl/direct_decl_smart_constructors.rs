@@ -4,6 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod direct_decl_smart_constructors_generated;
 
+use std::collections::BTreeMap;
+use std::rc::Rc;
+
 use arena_collections::AssocListMut;
 use arena_collections::List;
 use arena_collections::MultiSetMut;
@@ -87,8 +90,6 @@ use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_kind::SyntaxKind;
 use parser_core_types::token_factory::SimpleTokenFactoryImpl;
 use parser_core_types::token_kind::TokenKind;
-use std::collections::BTreeMap;
-use std::rc::Rc;
 
 type SK = SyntaxKind;
 

@@ -1,11 +1,13 @@
-use crate::code_path::CodePath;
+use std::fmt;
+
 use anyhow::bail;
 use anyhow::Result;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
 use hash::HashSet;
-use std::fmt;
+
+use crate::code_path::CodePath;
 
 pub(crate) trait MapName {
     fn get_name(&self) -> &str;

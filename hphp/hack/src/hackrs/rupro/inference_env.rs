@@ -8,12 +8,13 @@
 mod tyvar_info;
 mod tyvar_occurrences;
 
+use std::ops::Deref;
+
 use im::HashMap;
 use im::HashSet;
 use pos::Pos;
 use pos::ToOxidized;
 use pos::TypeName;
-use std::ops::Deref;
 use ty::local::Ty;
 use ty::local::Ty_;
 use ty::local::Tyvar;
@@ -471,12 +472,13 @@ impl<'a, R: Reason> ToOxidized<'a> for InferenceEnv<R> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use oxidized::typing_defs_flags::FunTypeFlags;
     use pos::NPos;
     use ty::local::FunParam;
     use ty::local::FunType;
     use ty::reason::NReason;
+
+    use super::*;
 
     #[test]
     fn test_unsolved_empty_env() {

@@ -2,11 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-pub use depgraph::dep::Dep;
-
 use std::collections::HashMap;
 use std::io::Write;
 
+pub use depgraph::dep::Dep;
 use memmap::MmapMut;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -382,15 +381,15 @@ impl DepGraphWriter<Phase3RegisterLookupTable> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use depgraph::reader::DepGraphOpener;
-
     use std::collections::BTreeSet;
     use std::collections::HashMap;
     use std::collections::HashSet;
     use std::fs;
 
+    use depgraph::reader::DepGraphOpener;
     use tempfile::NamedTempFile;
+
+    use super::*;
 
     struct T {
         graph: HashMap<u64, BTreeSet<u64>>,

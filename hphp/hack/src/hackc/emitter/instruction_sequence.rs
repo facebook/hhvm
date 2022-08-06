@@ -162,7 +162,6 @@ impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
 }
 
 pub mod instr {
-    use crate::InstrSeq;
     use ffi::Slice;
     use ffi::Str;
     use hhbc::AdataId;
@@ -207,6 +206,8 @@ pub mod instr {
     use hhbc::StackIndex;
     use hhbc::SwitchKind;
     use hhbc::TypeStructResolveOp;
+
+    use crate::InstrSeq;
 
     // This macro builds helper functions for each of the given opcodes.  See
     // the definition of define_instr_seq_helpers for details.
@@ -568,11 +569,12 @@ impl<'a> InstrSeq<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ffi::Str;
     use instr::instr;
     use instr::instrs;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn iter() {

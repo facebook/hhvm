@@ -1,4 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+use std::collections::hash_map::Entry;
+
 use analysis::compute_predecessor_blocks;
 use analysis::PredecessorCatchMode;
 use analysis::PredecessorFlags;
@@ -18,7 +20,6 @@ use ir_core::ValueId;
 use ir_core::VarId;
 use itertools::Itertools;
 use newtype::IdVec;
-use std::collections::hash_map::Entry;
 
 /*
 
@@ -440,7 +441,6 @@ pub fn run(func: &mut Func<'_>, strings: &StringInterner<'_>) -> bool {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use ir_core::instr::HasOperands;
     use ir_core::instr::Predicate;
     use ir_core::instr::Terminator;
@@ -449,6 +449,8 @@ mod test {
     use ir_core::Literal;
     use ir_core::LocId;
     use ir_core::StringInterner;
+
+    use super::*;
 
     #[test]
     fn already_ssa() {

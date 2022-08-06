@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 /**
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +15,6 @@ use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
-use std::path::PathBuf;
 
 #[cxx::bridge]
 mod ffi {

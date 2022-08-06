@@ -346,10 +346,11 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
     // Foo | Bar | Baz => default
     // Foo | Bar | Baz => {}
 
+    use std::collections::HashMap;
+
     use convert_case::Case;
     use convert_case::Casing;
     use proc_macro2::TokenTree;
-    use std::collections::HashMap;
     use syn::parse::ParseStream;
     use syn::parse::Parser;
     use syn::Error;
@@ -542,10 +543,11 @@ pub fn define_instr_seq_helpers(input: TokenStream, opcodes: &[OpcodeData]) -> R
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
+
+    use super::*;
 
     #[test]
     fn test_basic() {

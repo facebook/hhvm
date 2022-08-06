@@ -3,6 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeSet;
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use hackrs_provider_backend::Config;
 use hackrs_provider_backend::FileType;
 use hackrs_provider_backend::HhServerProviderBackend;
@@ -19,9 +23,6 @@ use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::shallow_decl_defs;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use std::collections::BTreeSet;
-use std::path::PathBuf;
-use std::sync::Arc;
 use ty::decl;
 use ty::reason::BReason;
 

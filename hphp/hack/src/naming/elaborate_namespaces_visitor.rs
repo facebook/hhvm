@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use core_utils_rust as core_utils;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as sn;
-use std::collections::HashSet;
-
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;

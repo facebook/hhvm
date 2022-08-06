@@ -52,8 +52,9 @@ impl<R: Reason> VisitedGoals<R> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ty::reason::NReason;
+
+    use super::*;
 
     #[test]
     fn test_visited_goals() {

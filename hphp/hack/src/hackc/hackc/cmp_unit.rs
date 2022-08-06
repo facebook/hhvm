@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
+
 use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
@@ -28,7 +30,6 @@ use hhbc::FatalOp;
 use hhbc::Instruct;
 use hhbc::Opcode;
 use hhbc::TypedValue;
-use std::fmt;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub(crate) struct CmpError {

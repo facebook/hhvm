@@ -3,6 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Str;
+pub use hhbc::hhas_function::HhasFunctionFlags as FunctionFlags;
+pub use hhbc::hhas_method::HhasMethodFlags as MethodFlags;
+pub use hhbc::hhas_pos::HhasSpan;
+pub use hhbc::FunctionName;
+pub use hhbc::MethodName;
+pub use hhbc::Visibility;
+use newtype::newtype_int;
+use newtype::IdVec;
+
 use crate::block::BlockIdIterator;
 use crate::instr::Terminator;
 use crate::Attr;
@@ -24,17 +34,6 @@ use crate::Type;
 use crate::UnitStringId;
 use crate::ValueId;
 use crate::ValueIdMap;
-
-use ffi::Str;
-use newtype::newtype_int;
-use newtype::IdVec;
-
-pub use hhbc::hhas_function::HhasFunctionFlags as FunctionFlags;
-pub use hhbc::hhas_method::HhasMethodFlags as MethodFlags;
-pub use hhbc::hhas_pos::HhasSpan;
-pub use hhbc::FunctionName;
-pub use hhbc::MethodName;
-pub use hhbc::Visibility;
 
 /// Func parameters.
 #[derive(Debug)]

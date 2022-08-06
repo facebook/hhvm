@@ -1,12 +1,12 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 mod hhvm_config;
 
-use anyhow::anyhow;
-use anyhow::Result;
-use clap::Parser;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
+use anyhow::anyhow;
+use anyhow::Result;
+use clap::Parser;
 pub use hhvm_config::*;
 
 // Define HHVM-compatible options, as best as we can with structopt.

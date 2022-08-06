@@ -6,10 +6,11 @@
 // NOTE: Most of the types in this file come from runtime/vm/hhbc.h and need to
 // be kept in sync.
 
-use bitflags::bitflags;
-use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
+
+use bitflags::bitflags;
+use once_cell::sync::OnceCell;
 
 #[cfg(fbcode_build)]
 mod opcodes;
@@ -97,8 +98,9 @@ pub struct OpcodeData {
 }
 
 mod fixups {
-    use super::*;
     use maplit::hashmap;
+
+    use super::*;
 
     pub(crate) trait Action {
         fn perform(&self, opcode: &mut OpcodeData);
@@ -396,13 +398,14 @@ pub fn opcode_data() -> &'static [OpcodeData] {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use fixups::add_flag;
     use fixups::insert_imm;
     use fixups::remove_imm;
     use fixups::rename_imm;
     use fixups::replace_imm;
     use maplit::hashmap;
+
+    use super::*;
 
     #[test]
     fn test_replace_imm() {

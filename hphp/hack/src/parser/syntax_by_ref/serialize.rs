@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::positioned_token::PositionedTokenFullTrivia;
-use crate::indexed_source_text::IndexedSourceText;
-use crate::lexable_token::LexableToken;
-use crate::positioned_trivia::PositionedTrivium;
 use serde::ser::SerializeSeq;
 use serde::ser::SerializeStruct;
 use serde::Serialize;
 use serde::Serializer;
+
+use super::positioned_token::PositionedTokenFullTrivia;
+use crate::indexed_source_text::IndexedSourceText;
+use crate::lexable_token::LexableToken;
+use crate::positioned_trivia::PositionedTrivium;
 
 pub struct WithContext<'a, T: ?Sized>(pub &'a IndexedSourceText<'a>, pub &'a T);
 

@@ -3,16 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::file_info::Mode;
+use std::path::PathBuf;
 
+pub use hh24_types::ToplevelCanonSymbolHash;
+use oxidized::file_info::Mode;
 use oxidized::relative_path::Prefix;
 use rusqlite::types::FromSql;
 use rusqlite::types::FromSqlError;
 use rusqlite::types::FromSqlResult;
 use rusqlite::types::ValueRef;
-use std::path::PathBuf;
-
-pub use hh24_types::ToplevelCanonSymbolHash;
 
 pub(crate) struct SqlitePrefix {
     pub value: Prefix,

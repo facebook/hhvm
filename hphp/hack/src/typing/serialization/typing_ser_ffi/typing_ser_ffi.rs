@@ -5,9 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use lazy_static::lazy_static;
-
 use framing::LineFeedEscaper;
+use lazy_static::lazy_static;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized_by_ref::typing_defs_core;
 

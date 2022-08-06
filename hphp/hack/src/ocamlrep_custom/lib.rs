@@ -524,8 +524,9 @@ extern "C" fn deserialize_value<T: CamlSerialize>(data_ptr: *mut c_void) -> usiz
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::mem::*;
+
+    use super::*;
 
     #[test]
     fn custom_block_ocamlrep_size() {

@@ -184,9 +184,9 @@ impl Allocator for Arena {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use std::time::Instant;
+
+    use super::*;
 
     #[test]
     fn test_alloc_block_of_three_fields() {

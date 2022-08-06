@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::convert::HackCUnitBuilder;
-use crate::ex_frame::BlockIdOrExFrame;
-use crate::ex_frame::ExFrame;
+use std::collections::VecDeque;
+use std::fmt::Display;
+
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
@@ -27,8 +27,10 @@ use ir::BlockId;
 use ir::BlockIdMap;
 use ir::LocalId;
 use log::trace;
-use std::collections::VecDeque;
-use std::fmt::Display;
+
+use crate::convert::HackCUnitBuilder;
+use crate::ex_frame::BlockIdOrExFrame;
+use crate::ex_frame::ExFrame;
 
 pub(crate) fn emit_func<'a>(
     alloc: &'a bumpalo::Bump,

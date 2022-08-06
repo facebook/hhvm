@@ -1,5 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+use newtype::IdVec;
+
 use crate::instr::HasOperands;
 use crate::BlockId;
 use crate::Func;
@@ -8,7 +10,6 @@ use crate::InstrId;
 use crate::TryCatchId;
 use crate::ValueId;
 use crate::ValueIdMap;
-use newtype::IdVec;
 
 /// A Block represents a basic-block in a CFG. A well-formed Block contains zero
 /// or more non-terminal InstrIds followed by a terminal InstrId. The

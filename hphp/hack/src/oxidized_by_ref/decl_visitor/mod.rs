@@ -18,11 +18,12 @@ mod test {
 
     #[test]
     fn test_simple_visitor() {
+        use Ty_::*;
+
         use crate::pos::Pos;
         use crate::relative_path::RelativePath;
         use crate::typing_defs_core::*;
         use crate::typing_reason::Reason;
-        use Ty_::*;
 
         struct PrintEveryTapplyVisitor<'a>(Vec<&'a Pos<'a>>, Vec<String>);
 

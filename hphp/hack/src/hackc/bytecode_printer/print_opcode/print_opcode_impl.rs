@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use hhbc_gen::ImmType;
 use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
@@ -11,7 +13,6 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
-use std::collections::HashSet;
 use syn::spanned::Spanned;
 use syn::DeriveInput;
 use syn::Error;
@@ -283,10 +284,11 @@ pub trait PrintOpcodeTypes {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
+
+    use super::*;
 
     #[test]
     fn test_basic() {

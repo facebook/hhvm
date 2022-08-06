@@ -8,6 +8,9 @@ pub mod naming_table;
 #[cfg(test)]
 mod test_naming_table;
 
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use anyhow::Result;
 use datastore::ChangesStore;
 use datastore::Store;
@@ -27,8 +30,6 @@ use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
 use shm_store::ShmStore;
-use std::path::PathBuf;
-use std::sync::Arc;
 use ty::decl;
 use ty::decl::folded::FoldedClass;
 use ty::reason::BReason;

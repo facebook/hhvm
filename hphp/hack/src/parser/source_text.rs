@@ -4,12 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::rc::Rc;
+
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::relative_path::RelativePath;
-use std::rc::Rc;
 
 pub const INVALID: char = '\x00';
 

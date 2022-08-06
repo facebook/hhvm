@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
-
 #[cfg(test)]
 use ocamlrep::Allocator;
 #[cfg(test)]
@@ -18,6 +15,8 @@ use ocamlrep::FromOcamlRep;
 use ocamlrep::OpaqueValue;
 #[cfg(test)]
 use ocamlrep::Value;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 
 #[test]
 fn expected_block_but_got_int() {

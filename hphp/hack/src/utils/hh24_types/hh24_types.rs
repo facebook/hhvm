@@ -555,8 +555,9 @@ impl std::fmt::Display for StringifiedError {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use anyhow::Context; // to bring Result<T,E>.context into scope
+    use anyhow::Context;
+
+    use super::*; // to bring Result<T,E>.context into scope
 
     fn stringify_inner() -> anyhow::Result<()> {
         anyhow::bail!("oops");

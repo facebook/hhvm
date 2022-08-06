@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::emit_body;
-use crate::emit_expression;
 use core_utils_rust as utils;
 use emit_type_hint::Kind;
 use env::emitter::Emitter;
@@ -24,6 +22,9 @@ use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::ast;
+
+use crate::emit_body;
+use crate::emit_expression;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,

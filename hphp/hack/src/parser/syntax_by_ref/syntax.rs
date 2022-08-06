@@ -7,6 +7,10 @@
 use std::iter::empty;
 use std::iter::once;
 
+use bumpalo::collections::Vec;
+use itertools::Either::Left;
+use itertools::Either::Right;
+
 use super::has_arena::HasArena;
 use super::syntax_children_iterator::SyntaxChildrenIterator;
 use super::syntax_variant_generated::SyntaxVariant;
@@ -15,9 +19,6 @@ use crate::syntax::SyntaxTypeBase;
 use crate::syntax::SyntaxValueType;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
-use bumpalo::collections::Vec;
-use itertools::Either::Left;
-use itertools::Either::Right;
 
 #[derive(Debug, Clone)]
 pub struct Syntax<'a, T, V> {

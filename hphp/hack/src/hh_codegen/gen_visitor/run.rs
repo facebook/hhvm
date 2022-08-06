@@ -3,18 +3,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
+
+use anyhow::Result;
+use structopt::StructOpt;
+
 use super::context::Context;
 use super::generator::Generator;
 use super::node_impl_generator::*;
 use super::node_trait_generator::*;
 use super::type_params_generator::*;
 use super::visitor_trait_generator::*;
-use anyhow::Result;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
-use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 pub struct Args {

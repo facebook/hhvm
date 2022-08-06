@@ -2,18 +2,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::ClassName;
-use crate::ConstName;
-use crate::FunctionName;
-use bstr::BString;
-use ffi::Slice;
-use ffi::Str;
-use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
+
+use bstr::BString;
+use ffi::Slice;
+use ffi::Str;
+use serde::Serialize;
+
+use crate::ClassName;
+use crate::ConstName;
+use crate::FunctionName;
 
 /// Data structure for keeping track of symbols (and includes) we
 /// encounter in the course of emitting bytecode for an AST. We split

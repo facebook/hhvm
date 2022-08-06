@@ -3,6 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
+use std::fmt::Debug;
+use std::path::Path;
+
 use anyhow::Result;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info::NameType;
@@ -12,9 +16,6 @@ use pos::ConstName;
 use pos::FunName;
 use pos::RelativePath;
 use pos::TypeName;
-use std::fmt;
-use std::fmt::Debug;
-use std::path::Path;
 
 /// An abstraction over the global symbol table. Should be used by
 /// `LazyShallowDeclProvider` only, since folding and typechecking logic should

@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::aast;
-use crate::aast_defs;
-use crate::ast_defs;
-
 pub use aast::*;
 pub use aast_defs::*;
 pub use ast_defs::*;
+
+use crate::aast;
+use crate::aast_defs;
+use crate::ast_defs;
 
 // Expressions have no type annotation.
 type Ex = ();

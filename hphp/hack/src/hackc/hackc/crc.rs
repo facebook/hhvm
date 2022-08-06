@@ -3,18 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::compile::SingleFileOpts;
-use crate::profile;
-use crate::profile::DurationEx;
-use crate::profile::MaxValue;
-use crate::profile::StatusTicker;
-use crate::profile::Timing;
-use anyhow::bail;
-use anyhow::Result;
-use clap::Parser;
-use log::info;
-use multifile_rust as multifile;
-use rayon::prelude::*;
 use std::borrow::Cow;
 use std::fs;
 use std::hash::Hash;
@@ -28,6 +16,20 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
 use std::time::Instant;
+
+use anyhow::bail;
+use anyhow::Result;
+use clap::Parser;
+use log::info;
+use multifile_rust as multifile;
+use rayon::prelude::*;
+
+use crate::compile::SingleFileOpts;
+use crate::profile;
+use crate::profile::DurationEx;
+use crate::profile::MaxValue;
+use crate::profile::StatusTicker;
+use crate::profile::Timing;
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 

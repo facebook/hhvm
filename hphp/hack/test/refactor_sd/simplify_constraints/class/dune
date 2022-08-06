@@ -1,0 +1,29 @@
+(rule
+ (alias refactor_sd)
+ (deps
+  %{exe:../../../../src/hh_single_type_check.exe}
+  %{project_root}/test/verify.py
+  %{project_root}/test/review.sh
+  (glob_files %{project_root}/test/refactor_sd/simplify_constraints/class/*.php)
+  (glob_files %{project_root}/test/refactor_sd/simplify_constraints/class/*.php.exp))
+ (action
+  (run
+   %{project_root}/test/verify.py
+   %{project_root}/test/refactor_sd/simplify_constraints/class
+   --program
+   %{exe:../../../../src/hh_single_type_check.exe}
+   --in-extension
+   .php
+   --flags
+   --enable-sound-dynamic-type
+   --refactor-sound-dynamic
+   simplify
+   Class
+   C
+   --error-format
+   raw)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias refactor_sd)))

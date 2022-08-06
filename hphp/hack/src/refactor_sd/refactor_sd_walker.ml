@@ -186,6 +186,18 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       | None -> env
     in
     (env, None)
+  | A.Obj_get (e_obj, e_meth, _, _) ->
+    let (env, entity_obj) = expr_ upcasted_id env e_obj in
+    let (env, _entity_meth) = expr_ upcasted_id env e_meth in
+    begin
+      match entity_obj with
+      | Some _entity ->
+        let location = Literal pos in
+        let env = Env.add_constraint env (Subset (_entity, location)) in
+        let env = Env.add_constraint env (Called pos) in
+        (env, entity_obj)
+      | None -> (env, None)
+    end
   | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
     if String.equal upcasted_id id then
       let entity_ = Literal pos in
@@ -195,6 +207,38 @@ let rec expr_ (upcasted_id : string) (env : env) ((_ty, pos, e) : T.expr) :
       (env, Some var)
     else
       (env, None)
+  | A.New ((_, _, A.CI (_, id)), _, expr_list, e, _) ->
+    if String.equal upcasted_id id then
+      let handle_init (env : env) (e : T.expr) =
+        let (env, _entity_rhs) = expr_ upcasted_id env e in
+        env
+      in
+      let env = List.fold ~init:env ~f:handle_init expr_list in
+      let env =
+        match e with
+        | Some e -> fst (expr_ upcasted_id env e)
+        | None -> env
+      in
+      let entity_ = Literal pos in
+      let env = Env.add_constraint env (Introduction pos) in
+      (* Handle copy-on-write by creating a variable indirection *)
+      let (env, var) = redirect env entity_ in
+      (env, Some var)
+    else
+      (env, None)
+  | A.Class_const ((_, _, A.CI (_, id)), (_, method_id)) ->
+    let equals_method_id = String.equal method_id "class" in
+    if String.equal upcasted_id id && equals_method_id then
+      let entity_ = Literal pos in
+      let env = Env.add_constraint env (Introduction pos) in
+      (* Handle copy-on-write by creating a variable indirection *)
+      let (env, var) = redirect env entity_ in
+      (env, Some var)
+    else
+      (env, None)
+  (* Eventually, we should be able to track method pointers inside a class, i.e.
+      also track the following expression with A.CIexpr (_, _, This). *)
+  | A.Class_const ((_, _, A.CIexpr e_obj), _) -> expr_ upcasted_id env e_obj
   | A.Eif (cond, Some then_expr, else_expr) ->
     let (parent_env, _cond_entity) = expr_ upcasted_id env cond in
     let base_env = Env.reset_constraints parent_env in

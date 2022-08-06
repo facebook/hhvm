@@ -16,6 +16,7 @@ let parse_analysis_mode = function
   | _ -> None
 
 let parse_refactor_mode = function
+  | "Class" -> Some Class
   | "Function" -> Some Function
   | _ -> None
 

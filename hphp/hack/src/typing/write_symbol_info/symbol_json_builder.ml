@@ -97,12 +97,15 @@ let process_doc_comment
   | None -> prog
   | Some (pos, _doc) -> snd (Add_fact.decl_comment ~path pos decl_ref_json prog)
 
-let process_span
-    path (span : Pos.t option) (ref_json : Hh_json.json) (prog : Fact_acc.t) :
-    Fact_acc.t =
-  match span with
-  | None -> prog
-  | Some span_pos -> snd (Add_fact.decl_span ~path span_pos ref_json prog)
+let process_loc_span
+    path
+    (pos : Pos.t)
+    (span : Pos.t)
+    (ref_json : Hh_json.json)
+    (prog : Fact_acc.t) : Fact_acc.t =
+  let (_, prog) = Add_fact.decl_loc ~path pos ref_json prog in
+  let (_, prog) = Add_fact.decl_span ~path span ref_json prog in
+  prog
 
 let process_decl_loc
     (decl_fun : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t)
@@ -110,7 +113,7 @@ let process_decl_loc
     (decl_ref_fun : Fact_id.t -> Hh_json.json)
     ~(path : string)
     (pos : Pos.t)
-    (span : Pos.t option)
+    (span : Pos.t)
     (id : Ast_defs.id_)
     (elem : 'elem)
     (doc : Aast.doc_comment option)
@@ -118,9 +121,8 @@ let process_decl_loc
   let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
-  let (_, prog) = Add_fact.decl_loc ~path pos ref_json prog in
   let prog = process_doc_comment doc path ref_json prog in
-  let prog = process_span path span ref_json prog in
+  let prog = process_loc_span path pos span ref_json prog in
   (decl_id, prog)
 
 let process_container_decl ctx path source_text con (all_decls, progress) =
@@ -141,7 +143,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
             Build.build_property_decl_json_ref
             ~path
             pos
-            (Some prop.cv_span)
+            prop.cv_span
             id
             prop
             prop.cv_doc_comment
@@ -159,7 +161,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
             Build.build_class_const_decl_json_ref
             ~path
             pos
-            (Some const.cc_span)
+            const.cc_span
             id
             const
             const.cc_doc_comment
@@ -180,7 +182,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
             Build.build_type_const_decl_json_ref
             ~path
             pos
-            (Some tc.c_tconst_span)
+            tc.c_tconst_span
             id
             tc
             tc.c_tconst_doc_comment
@@ -198,7 +200,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
             Build.build_method_decl_json_ref
             ~path
             pos
-            (Some meth.m_span)
+            meth.m_span
             id
             meth
             meth.m_doc_comment
@@ -213,8 +215,7 @@ let process_container_decl ctx path source_text con (all_decls, progress) =
     Add_fact.container_defn ctx source_text con con_decl_id members prog
   in
   let ref_json = Build.build_container_decl_json_ref con_type con_decl_id in
-  let (_, prog) = Add_fact.decl_loc ~path con_pos ref_json prog in
-  let (_, prog) = Add_fact.decl_span ~path con.c_span ref_json prog in
+  let prog = process_loc_span path con_pos con.c_span ref_json prog in
   let all_decls = all_decls @ [ref_json] @ members in
   let prog = process_doc_comment con.c_doc_comment path ref_json prog in
   (all_decls, prog)
@@ -243,8 +244,7 @@ let process_enum_decl ctx path source_text enm (all_decls, progress) =
   | Some enum_data ->
     let (enum_id, prog) = Add_fact.enum_decl id progress in
     let enum_decl_ref = Build.build_enum_decl_json_ref enum_id in
-    let (_, prog) = Add_fact.decl_loc ~path pos enum_decl_ref prog in
-    let (_, prog) = Add_fact.decl_span ~path enm.c_span enum_decl_ref prog in
+    let prog = process_loc_span path pos enm.c_span enum_decl_ref prog in
     let (enumerators, decl_refs, prog) =
       List.fold_right
         enm.c_consts
@@ -252,8 +252,11 @@ let process_enum_decl ctx path source_text enm (all_decls, progress) =
         ~f:(fun enumerator (decls, refs, prog) ->
           let (pos, id) = enumerator.cc_id in
           let (decl_id, prog) = Add_fact.enumerator enum_id id prog in
+          let _span = enumerator.cc_span in
           let ref_json = Build.build_enumerator_decl_json_ref decl_id in
-          let (_, prog) = Add_fact.decl_loc ~path pos ref_json prog in
+          (* TODO we're using pos instead of _span. _span refer to the whole enum container,
+             rather than the enumerator *)
+          let prog = process_loc_span path pos pos ref_json prog in
           let prog =
             process_doc_comment enumerator.cc_doc_comment path ref_json prog
           in
@@ -283,7 +286,7 @@ let process_func_decl ctx path source_text fd (all_decls, progress) =
       Build.build_func_decl_json_ref
       ~path
       pos
-      (Some elem.f_span)
+      elem.f_span
       id
       fd
       elem.f_doc_comment
@@ -308,7 +311,7 @@ let process_gconst_decl ctx path source_text elem (all_decls, progress) =
       Build.build_gconst_decl_json_ref
       ~path
       pos
-      (Some elem.cst_span)
+      elem.cst_span
       id
       elem
       None
@@ -457,7 +460,7 @@ let process_typedef_decl ctx path source_text elem (all_decls, progress) =
       Build.build_typedef_decl_json_ref
       ~path
       pos
-      (Some elem.t_span)
+      elem.t_span
       id
       elem
       None
@@ -474,7 +477,7 @@ let process_module_decl ctx path source_text elem (all_decls, progress) =
       Build.build_module_decl_json_ref
       ~path
       pos
-      (Some elem.md_span)
+      elem.md_span
       id
       elem
       None
@@ -498,7 +501,7 @@ let process_namespace_decl ~path (pos, id) (all_decls, progress) =
       Build.build_namespace_decl_json_ref
       ~path
       pos
-      None
+      pos (* no span for a namespace decl, we re-use the location *)
       id
       ()
       None

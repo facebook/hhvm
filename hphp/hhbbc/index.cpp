@@ -5638,8 +5638,6 @@ materialize_inputs(Index::Input input,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<Client> client,
                    const DisposeCallback& dispose) {
-  using namespace folly::gen;
-
   trace_time tracer("materialize inputs");
 
   // For speed, split up the unit loading into chunks.
@@ -5712,39 +5710,6 @@ materialize_inputs(Index::Input input,
     );
   }
   coro::wait(coro::collectRange(std::move(tasks)));
-
-  auto const& stats = client->getStats();
-  Logger::FInfo(
-    "HHBBC:\n"
-    "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
-    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-    "  Cpu: {:,} usec usage, {:,} allocated cores\n"
-    "  Mem: {:,} max used, {:,} reserved\n"
-    "  {:,} downloads ({:,} bytes), {:,} throttles",
-    stats.execs.load(),
-    stats.execCacheHits.load(),
-    stats.optimisticExecs.load(),
-    stats.execFallbacks.load(),
-    stats.files.load(),
-    stats.filesRead.load(),
-    stats.filesQueried.load(),
-    stats.filesUploaded.load(),
-    stats.fileBytesUploaded.load(),
-    stats.fileFallbacks.load(),
-    stats.blobs.load(),
-    stats.blobsQueried.load(),
-    stats.blobsUploaded.load(),
-    stats.blobBytesUploaded.load(),
-    stats.blobFallbacks.load(),
-    stats.execCpuUsec.load(),
-    stats.execAllocatedCores.load(),
-    stats.execMaxUsedMem.load(),
-    stats.execReservedMem.load(),
-    stats.downloads.load(),
-    stats.bytesDownloaded.load(),
-    stats.throttles.load()
-  );
 
   // Done with any extern-worker stuff at this point (for now).
   dispose(std::move(executor), std::move(client));

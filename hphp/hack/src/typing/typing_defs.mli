@@ -195,6 +195,8 @@ val get_var_i : internal_type -> Ident.t option
 
 val is_tyvar : 'a ty -> bool
 
+val is_tyvar_i : internal_type -> bool
+
 val is_var_v : 'a ty -> Ident.t -> bool
 
 val is_generic : 'a ty -> bool

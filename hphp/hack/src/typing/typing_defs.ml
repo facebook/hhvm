@@ -346,6 +346,8 @@ let get_var_i t =
 
 let is_tyvar t = Option.is_some (get_var t)
 
+let is_tyvar_i t = Option.is_some (get_var_i t)
+
 let is_var_v t v =
   match get_node t with
   | Tvar v' when Ident.equal v v' -> true

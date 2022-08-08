@@ -356,11 +356,9 @@ let rec describe_ty_super ~is_coeffect env ty =
     | Tvar v ->
       let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
       (* The constraint graph is transitively closed so we can filter tyvars. *)
-      let is_not_tyvar = function
-        | LoclType t -> not (is_tyvar t)
-        | _ -> true
+      let upper_bounds =
+        List.filter upper_bounds ~f:(fun t -> not (is_tyvar_i t))
       in
-      let upper_bounds = List.filter upper_bounds ~f:is_not_tyvar in
       (match upper_bounds with
       | [] -> "some type not known yet"
       | tyl ->
@@ -633,12 +631,19 @@ and default_subtype
           let (env, simplified_super_ty) =
             Typing_solver_utils.remove_tyvar_from_upper_bound env id ty_super
           in
-          let mixed = MakeType.mixed Reason.none in
-          (match simplified_super_ty with
-          | LoclType simplified_super_ty when ty_equal simplified_super_ty mixed
-            ->
+          (* If the type is already in the upper bounds of the type variable,
+           * then we already know that this subtype assertion is valid
+           *)
+          if ITySet.mem simplified_super_ty (Env.get_tyvar_upper_bounds env id)
+          then
             valid env
-          | _ -> default env)
+          else
+            let mixed = MakeType.mixed Reason.none in
+            (match simplified_super_ty with
+            | LoclType simplified_super_ty
+              when ty_equal simplified_super_ty mixed ->
+              valid env
+            | _ -> default env)
         (* Special case if Tany is in an intersection on the left:
          *   t1 & ... & _ & ... & tn <: u
          * simplifies to
@@ -778,15 +783,19 @@ and default_subtype
         match deref lty_sub with
         | (_, Tvar _) ->
           begin
-            match subtype_env.coerce with
-            | Some cd ->
+            match (subtype_env.coerce, get_node lty_super) with
+            | (Some TL.CoerceToDynamic, Tdynamic) ->
+              let r = get_reason lty_super in
+              let ty_super = MakeType.supportdyn r (MakeType.mixed r) in
+              default_subtype_inner env ty_sub (LoclType ty_super)
+            | (Some cd, _) ->
               ( env,
                 mk_issubtype_prop
                   ~coerce:(Some cd)
                   env
                   (LoclType lty_sub)
                   (LoclType lty_super) )
-            | None -> default_subtype_inner env ty_sub ty_super
+            | (None, _) -> default_subtype_inner env ty_sub ty_super
           end
         | (r_sub, Tprim Nast.Tvoid) ->
           let r =
@@ -3493,7 +3502,7 @@ and add_tyvar_upper_bound_and_close
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
     Env.add_tyvar_upper_bound_and_update_variances
-      ~intersect:(try_intersect_i env)
+      ~intersect:(try_intersect_i ~ignore_tyvars:true env)
       env
       var
       ty
@@ -3916,39 +3925,48 @@ and is_sub_type_ignore_generic_params_i env ty1 ty2 =
  * we simplify (as above) wherever practical.
  * It can be assumed that the original list contains no redundancy.
  *)
-and try_intersect_i env ty tyl =
+and try_intersect_i ?(ignore_tyvars = false) env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty' :: tyl' ->
-    if is_sub_type_ignore_generic_params_i env ty ty' then
-      try_intersect_i env ty tyl'
+    let (env, ty) = Env.expand_internal_type env ty in
+    let (env, ty') = Env.expand_internal_type env ty' in
+    let default env = ty' :: try_intersect_i env ~ignore_tyvars ty tyl' in
+    (* Do not attempt to simplify intersection of type variables, as we use
+     * intersection simplification when transitively closing through type variable
+     * upper bounds and this would result in a type failing to be added.
+     *)
+    if ignore_tyvars && (is_tyvar_i ty || is_tyvar_i ty') then
+      default env
+    else if is_sub_type_ignore_generic_params_i env ty ty' then
+      try_intersect_i ~ignore_tyvars env ty tyl'
     else if is_sub_type_ignore_generic_params_i env ty' ty then
       tyl
     else
       let nonnull_ty = LoclType (MakeType.nonnull (reason ty)) in
-      let (env, ty) = Env.expand_internal_type env ty in
-      let (env, ty') = Env.expand_internal_type env ty' in
-      let default env = ty' :: try_intersect_i env ty tyl' in
       (match (ty, ty') with
       | (LoclType lty, _)
         when is_sub_type_ignore_generic_params_i env ty' nonnull_ty ->
         begin
           match get_node lty with
-          | Toption t -> try_intersect_i env (LoclType t) (ty' :: tyl')
+          | Toption t ->
+            try_intersect_i ~ignore_tyvars env (LoclType t) (ty' :: tyl')
           | _ -> default env
         end
       | (_, LoclType lty)
         when is_sub_type_ignore_generic_params_i env ty nonnull_ty ->
         begin
           match get_node lty with
-          | Toption t -> try_intersect_i env (LoclType t) (ty :: tyl')
+          | Toption t ->
+            try_intersect_i ~ignore_tyvars env (LoclType t) (ty :: tyl')
           | _ -> default env
         end
       | (_, _) -> default env)
 
-and try_intersect env ty tyl =
+and try_intersect ?(ignore_tyvars = false) env ty tyl =
   List.map
     (try_intersect_i
+       ~ignore_tyvars
        env
        (LoclType ty)
        (List.map tyl ~f:(fun ty -> LoclType ty)))

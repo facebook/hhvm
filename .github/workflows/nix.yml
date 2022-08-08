@@ -10,6 +10,8 @@ permissions:
 
 jobs:
   build-and-test:
+    env:
+      NIX_STORE_DIR: /opt/hhvm/nix/store
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
@@ -29,6 +31,9 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+    - run: sudo mkdir -p /opt/hhvm/nix/store
+    - run: sudo chgrp nixbld /opt/hhvm/nix/store
+    - run: sudo chmod 771 /opt/hhvm/nix/store
     - run: nix-build --no-sandbox
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"

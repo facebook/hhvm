@@ -6544,7 +6544,9 @@ res::Func Index::resolve_method(Context ctx,
      * Look up the method in the target class.
      */
     auto const methIt = cinfo->methods.find(name);
-    if (methIt == end(cinfo->methods)) return find_extra_method();
+    if (methIt == end(cinfo->methods)) {
+      return isExact ? general() : find_extra_method();
+    }
     auto const ftarget = methIt->second.func;
 
     // Be conservative around unflattened trait methods, since their cls

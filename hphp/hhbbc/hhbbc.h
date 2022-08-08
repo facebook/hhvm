@@ -68,7 +68,6 @@ struct WholeProgramInput {
   };
   struct Value {
     void serde(BlobEncoder&) const;
-    void serde(BlobDecoder&);
 
     struct Impl;
     struct Deleter { void operator()(Impl*) const; };

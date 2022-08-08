@@ -512,43 +512,99 @@ void final_pass(Index& index,
 
 // Right now Key is nothing, and Value is the UnitEmitter.
 
-struct WholeProgramInput::Key::Impl {};
+struct WholeProgramInput::Key::Impl {
+  enum class Type {
+    Fail,
+    Unit,
+    Func,
+    Class
+  };
+  Type type;
+  LSString name;
+
+  Impl(Type type, SString name) : type{type}, name{name} {}
+};
 struct WholeProgramInput::Value::Impl {
-  ParsedUnit unit;
+  std::unique_ptr<php::Func> func;
+  std::unique_ptr<php::Class> cls;
+  std::unique_ptr<php::Unit> unit;
+
+  explicit Impl(std::nullptr_t) {}
+  explicit Impl(std::unique_ptr<php::Func> func) : func{std::move(func)} {}
+  explicit Impl(std::unique_ptr<php::Class> cls) : cls{std::move(cls)} {}
+  explicit Impl(std::unique_ptr<php::Unit> unit) : unit{std::move(unit)} {}
 };
 struct WholeProgramInput::Impl {
-  folly::AtomicLinkedList<Ref<Value>> values;
+  folly::AtomicLinkedList<std::pair<Key, Ref<Value>>> values;
 };
 
 WholeProgramInput::WholeProgramInput() : m_impl{new Impl} {}
 
-void WholeProgramInput::add(Key, extern_worker::Ref<Value> v) {
+void WholeProgramInput::add(Key k, extern_worker::Ref<Value> v) {
   assertx(m_impl);
-  m_impl->values.insertHead(std::move(v));
+  m_impl->values.insertHead(std::make_pair(std::move(k), std::move(v)));
 }
 
 std::vector<std::pair<WholeProgramInput::Key, WholeProgramInput::Value>>
 WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   assertx(ue);
-  Key key;
-  Value value;
-  value.m_impl.reset(new Value::Impl);
-  value.m_impl->unit = parse_unit(*ue);
+
+  auto parsed = parse_unit(*ue);
+
   std::vector<std::pair<Key, Value>> out;
-  out.emplace_back(std::move(key), std::move(value));
+
+  auto const add = [&] (Key::Impl::Type type, SString name, auto v) {
+    Key key;
+    Value value;
+    key.m_impl.reset(new Key::Impl{type, name});
+    value.m_impl.reset(new Value::Impl{std::move(v)});
+    out.emplace_back(std::move(key), std::move(value));
+  };
+
+  if (parsed.unit) {
+    if (auto const& fi = parsed.unit->fatalInfo) {
+      if (!fi->fatalLoc) {
+        add(Key::Impl::Type::Fail, makeStaticString(fi->fatalMsg), nullptr);
+        return out;
+      }
+    }
+    auto const name = parsed.unit->filename;
+    add(Key::Impl::Type::Unit, name, std::move(parsed.unit));
+  }
+  for (auto& c : parsed.classes) {
+    auto const name = c->name;
+    add(Key::Impl::Type::Class, name, std::move(c));
+  }
+  for (auto& f : parsed.funcs) {
+    auto const name = f->name;
+    add(Key::Impl::Type::Func, name, std::move(f));
+  }
   return out;
 }
 
-void WholeProgramInput::Key::serde(BlobEncoder&) const {}
-void WholeProgramInput::Key::serde(BlobDecoder&) {}
+void WholeProgramInput::Key::serde(BlobEncoder& sd) const {
+  assertx(m_impl);
+  sd(m_impl->type)(m_impl->name);
+}
+void WholeProgramInput::Key::serde(BlobDecoder& sd) {
+  Key::Impl::Type type;
+  SString name;
+  sd(type)(name);
+  m_impl.reset(new Impl{type, name});
+}
 
 void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
   assertx(m_impl);
-  sd(m_impl->unit);
-}
-void WholeProgramInput::Value::serde(BlobDecoder& sd) {
-  m_impl.reset(new Impl);
-  sd(m_impl->unit);
+  assertx(
+    (bool)m_impl->func + (bool)m_impl->cls + (bool)m_impl->unit <= 1
+  );
+  if (m_impl->func) {
+    sd(m_impl->func, nullptr);
+  } else if (m_impl->cls) {
+    sd(m_impl->cls);
+  } else if (m_impl->unit) {
+    sd(m_impl->unit);
+  }
 }
 
 void WholeProgramInput::Key::Deleter::operator()(Impl* i) const {
@@ -578,59 +634,83 @@ std::unique_ptr<php::Program> make_program(
   // For speed, split up the unit loading into chunks.
   constexpr size_t kLoadChunkSize = 500;
 
-  using V = WholeProgramInput::Value;
-  std::vector<std::vector<Ref<V>>> chunked;
-  std::vector<Ref<V>> current;
+  struct Chunk {
+    std::vector<Ref<std::unique_ptr<php::Class>>> classes;
+    std::vector<Ref<std::unique_ptr<php::Func>>> funcs;
+    std::vector<Ref<std::unique_ptr<php::Unit>>> units;
+
+    size_t size() const {
+      return classes.size() + funcs.size() + units.size();
+    }
+    bool empty() const {
+      return classes.empty() && funcs.empty() && units.empty();
+    }
+  };
+  std::vector<Chunk> chunks;
+  Chunk current;
+
+  using WPI = WholeProgramInput;
+  using Key = WPI::Key::Impl;
   input.m_impl->values.sweep(
-    [&] (Ref<V>&& v) {
-      current.emplace_back(std::move(v));
+    [&] (const std::pair<WPI::Key, Ref<WPI::Value>>& p) {
+      switch (p.first.m_impl->type) {
+        case Key::Type::Fail:
+          // An unit which failed the verifier. This causes us
+          // to exit immediately with an error.
+          fprintf(stderr, "%s", p.first.m_impl->name->data());
+          _Exit(1);
+          break;
+        case Key::Type::Class:
+          current.classes.emplace_back(
+            p.second.cast<std::unique_ptr<php::Class>>()
+          );
+          break;
+        case Key::Type::Func:
+          current.funcs.emplace_back(
+            p.second.cast<std::unique_ptr<php::Func>>()
+          );
+          break;
+        case Key::Type::Unit:
+          current.units.emplace_back(
+            p.second.cast<std::unique_ptr<php::Unit>>()
+          );
+          break;
+      }
       if (current.size() >= kLoadChunkSize) {
-        chunked.emplace_back(std::move(current));
+        chunks.emplace_back(std::move(current));
       }
     }
   );
-  if (!current.empty()) chunked.emplace_back(std::move(current));
+  if (!current.empty()) chunks.emplace_back(std::move(current));
 
   std::mutex lock;
   auto program = std::make_unique<php::Program>();
 
-  auto const loadAndParse = [&] (std::vector<Ref<V>> r) -> coro::Task<void> {
-    auto const values = HPHP_CORO_AWAIT(client->load(std::move(r)));
-
-    // Add every parsed unit into the Program.
-    for (auto const& v : values) {
-      // Check for any unit which failed the verifier. This causes us
-      // to exit immediately with an error.
-      if (auto const& fi = v.m_impl->unit.unit->fatalInfo) {
-        if (!fi->fatalLoc) {
-          fprintf(stderr, "%s", fi->fatalMsg.c_str());
-          _Exit(1);
-        }
-      }
-    }
+  auto const loadAndParse = [&] (Chunk chunk) -> coro::Task<void> {
+    auto [classes, funcs, units] = HPHP_CORO_AWAIT(coro::collect(
+      client->load(std::move(chunk.classes)),
+      client->load(std::move(chunk.funcs)),
+      client->load(std::move(chunk.units))
+    ));
 
     {
       std::scoped_lock<std::mutex> _{lock};
-      for (auto& v : values) {
-        program->units.emplace_back(std::move(v.m_impl->unit.unit));
-        program->funcs.insert(
-          program->funcs.end(),
-          std::make_move_iterator(v.m_impl->unit.funcs.begin()),
-          std::make_move_iterator(v.m_impl->unit.funcs.end())
-        );
-        program->classes.insert(
-          program->classes.end(),
-          std::make_move_iterator(v.m_impl->unit.classes.begin()),
-          std::make_move_iterator(v.m_impl->unit.classes.end())
-        );
+      for (auto& unit : units) {
+        program->units.emplace_back(std::move(unit));
+      }
+      for (auto& cls : classes) {
+        program->classes.emplace_back(std::move(cls));
+      }
+      for (auto& func : funcs) {
+        program->funcs.emplace_back(std::move(func));
       }
     }
     HPHP_CORO_RETURN_VOID;
   };
 
   std::vector<coro::TaskWithExecutor<void>> tasks;
-  tasks.reserve(chunked.size());
-  for (auto& c : chunked) {
+  tasks.reserve(chunks.size());
+  for (auto& c : chunks) {
     tasks.emplace_back(
       loadAndParse(std::move(c)).scheduleOn(executor->sticky())
     );

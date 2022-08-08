@@ -428,7 +428,7 @@ struct Func : FuncBase {
    */
   UserAttributeMap userAttributes;
 
-  template <typename SerDe> void serde(SerDe&, Class*);
+  template <typename SerDe> void serde(SerDe&, Class* c = nullptr);
 };
 
 //////////////////////////////////////////////////////////////////////

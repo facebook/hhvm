@@ -726,6 +726,9 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_TYPE_ERROR_AT_POS x)),
         " (mode) show type error at a given position in file [line:character]"
       );
+      ( "--is-subtype",
+        Arg.Unit (fun () -> set_mode MODE_IS_SUBTYPE),
+        " (mode) take a JSON list of subtype queries via stdin" );
       ( "--tast-holes",
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES x)),
         " (mode) return all TAST Holes in a given file" );

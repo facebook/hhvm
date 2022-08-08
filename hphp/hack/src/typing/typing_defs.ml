@@ -224,6 +224,7 @@ type deserialization_error =
           able to deserialize it again. *)
   | Deserialization_error of string
       (** The input JSON was invalid for some reason. *)
+[@@deriving show]
 
 module Type_expansions : sig
   (** A list of the type defs and type access we have expanded thus far. Used

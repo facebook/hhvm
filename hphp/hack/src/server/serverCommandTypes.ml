@@ -343,6 +343,7 @@ type _ t =
       (string * int * int * (int * int) option) list
       -> string list t
   | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
+  | IS_SUBTYPE : string -> (string, string) result t
   | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :

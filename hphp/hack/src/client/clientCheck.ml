@@ -512,6 +512,16 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       in
       List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_IS_SUBTYPE ->
+      let stdin = Sys_utils.read_stdin_to_string () in
+      let%lwt (response, telemetry) = rpc args @@ Rpc.IS_SUBTYPE stdin in
+      (match response with
+      | Ok str ->
+        Printf.printf "%s" str;
+        Lwt.return (Exit_status.No_error, telemetry)
+      | Error str ->
+        Printf.eprintf "%s" str;
+        raise Exit_status.(Exit_with Input_error))
     | MODE_TYPE_ERROR_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let (fn, line, char) =

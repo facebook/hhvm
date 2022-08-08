@@ -467,6 +467,7 @@
   serverIdle
   serverInferTypeBatch
   serverInvalidateUnits
+  serverIsSubtype
   serverLint
   serverMethodJumps
   serverMethodJumpsBatch

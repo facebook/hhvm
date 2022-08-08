@@ -143,6 +143,7 @@ type deserialization_error =
   | Wrong_phase of string
   | Not_supported of string
   | Deserialization_error of string
+[@@deriving show]
 
 module Type_expansions : sig
   (** A list of the type defs and type access we have expanded thus far. Used

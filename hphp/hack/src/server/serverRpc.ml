@@ -88,6 +88,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, result)
   | INFER_TYPE_BATCH positions ->
     (env, ServerInferTypeBatch.go genv.workers positions env)
+  | IS_SUBTYPE stdin -> (env, ServerIsSubtype.check genv.workers stdin env)
   | TAST_HOLES (file_input, hole_filter) ->
     let path =
       match file_input with

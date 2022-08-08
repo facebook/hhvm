@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<535644932159198a39db445570f8f20f>>
+// @generated SignedSource<<9cf7ac648bca69e032ce162207bed354>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,11 +17,10 @@ use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
 
 /// A substitution context contains all the information necessary for
 /// changing the type of an inherited class element to the class that is

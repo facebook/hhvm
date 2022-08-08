@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9408f0f60f10b29516779b5d3f51c40e>>
+// @generated SignedSource<<891621c517b4aac1458a676065a75bcc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,16 +14,14 @@ use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+pub use reason::PosId;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[allow(unused_imports)]
-use crate::*;
-
 pub use crate::t_shape_map;
 pub use crate::typing_reason as reason;
-
-pub use reason::PosId;
+#[allow(unused_imports)]
+use crate::*;
 
 #[derive(
     Clone,
@@ -81,11 +79,9 @@ pub enum IfcFunDecl<'a> {
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
-pub use oxidized::typing_defs_core::ValKind;
-
 pub use oxidized::typing_defs_core::FunTparamsKind;
-
 pub use oxidized::typing_defs_core::ShapeKind;
+pub use oxidized::typing_defs_core::ValKind;
 
 #[derive(
     Clone,

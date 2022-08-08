@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47b1b5549ebc7dec8214cc422d640faf>>
+// @generated SignedSource<<3ea353b296afa2967c113eb7c55e6dba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,13 +16,11 @@ use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs_core::*;
+pub use typing_defs_flags::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs_flags::*;
-
-pub use typing_defs_core::*;
 
 /// Origin of Class Constant References:
 /// In order to be able to detect cycle definitions like

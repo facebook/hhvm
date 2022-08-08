@@ -3,34 +3,32 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06c6a7202e734bc5fcc45ba27d7e88ca>>
+// @generated SignedSource<<7e84cd062e73caf2def04e1b14883a47>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
-use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
-use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
-use serde::Deserialize;
-use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
-pub use crate::ast_defs::shape_map;
-
 pub use ast_defs::OgNullFlavor;
 pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
 pub use ast_defs::PropOrMethod;
 pub use ast_defs::Pstring;
 pub use ast_defs::Visibility;
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 pub use local_id::LocalId;
+use no_pos_hash::NoPosHash;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 pub use shape_map::ShapeMap;
+
+pub use crate::ast_defs::shape_map;
+#[allow(unused_imports)]
+use crate::*;
 
 #[derive(
     Clone,

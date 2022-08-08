@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b0297f1394584713e71c2b6bc50f6cd>>
+// @generated SignedSource<<b24cbf90e05132e16ec33bbae889dfaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+pub use aast_defs::*;
 use arena_trait::TrivialDrop;
+pub use doc_comment::DocComment;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -18,9 +20,6 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use aast_defs::*;
-pub use doc_comment::DocComment;
 
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred type)

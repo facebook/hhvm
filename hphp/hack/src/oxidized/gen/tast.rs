@@ -3,24 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad3275c779c5814a3812e136ee2d98b1>>
+// @generated SignedSource<<d9ee0894004b1593f03a773686d1d52e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+pub use aast_defs::*;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
-pub use aast_defs::*;
 pub use typing_defs::PossiblyEnforcedTy;
 pub use typing_defs::Ty;
 pub use typing_defs::ValKind;
+
+#[allow(unused_imports)]
+use crate::*;
 
 pub type DeclTy = typing_defs::Ty;
 

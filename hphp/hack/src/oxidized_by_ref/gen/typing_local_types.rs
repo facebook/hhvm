@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<892392bddb53a06c202664a2d99a1a6d>>
+// @generated SignedSource<<d382e242d68dc673f6919ef11710980d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,11 +16,10 @@ use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
 
 pub type ExpressionId = ident::Ident;
 

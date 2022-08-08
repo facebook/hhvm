@@ -3,25 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f813e96ccb5148a53c9bf05c161a1b7>>
+// @generated SignedSource<<02b2a56254bcbab0fd4cafa2b457e3e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
-#[allow(unused_imports)]
-use crate::*;
+pub use oxidized::errors::ErrorCode;
+pub use oxidized::errors::Format;
+pub use oxidized::errors::Phase;
 
 pub use crate::error_codes::GlobalWriteCheck;
 pub use crate::error_codes::Naming;
 pub use crate::error_codes::NastCheck;
 pub use crate::error_codes::Parsing;
 pub use crate::error_codes::Typing;
-
-pub use oxidized::errors::ErrorCode;
-
-pub use oxidized::errors::Phase;
-
-pub use oxidized::errors::Format;
+#[allow(unused_imports)]
+use crate::*;
 
 /// Results of single file analysis.
 pub type FileT<'a, A> = phase_map::PhaseMap<'a, &'a [A]>;

@@ -3,23 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db98a0db8c8d3b4660f017843731d7ff>>
+// @generated SignedSource<<3f18d2b0cf082deb128c6f1eea4a639f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+pub use c::map as c_map;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
+pub use crate::typing_continuations as c;
 #[allow(unused_imports)]
 use crate::*;
-
-pub use crate::typing_continuations as c;
-pub use c::map as c_map;
 
 #[derive(
     Clone,

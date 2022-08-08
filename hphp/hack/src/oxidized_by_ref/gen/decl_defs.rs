@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6b957e5f202a536f90c754b0ecc0c65>>
+// @generated SignedSource<<fd899d251ce7a10a9bbd136d5a2b6868>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,11 +16,10 @@ use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
 
 /// A substitution context contains all the information necessary for
 /// changing the type of an inherited class element to the class that is
@@ -80,9 +79,8 @@ pub struct SubstContext<'a> {
 impl<'a> TrivialDrop for SubstContext<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SubstContext<'arena>);
 
-pub use oxidized::decl_defs::SourceType;
-
 pub use oxidized::decl_defs::LinearizationKind;
+pub use oxidized::decl_defs::SourceType;
 
 #[derive(
     Clone,

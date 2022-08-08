@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9da41d36ecde8700876e9eac3f78545c>>
+// @generated SignedSource<<1da5ff31b207c3a27e7d165b36af25b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,15 +14,13 @@ use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+pub use pos::Pos;
 use serde::Deserialize;
 use serde::Serialize;
 
+pub use crate::shape_map;
 #[allow(unused_imports)]
 use crate::*;
-
-pub use crate::shape_map;
-
-pub use pos::Pos;
 
 pub type Id_<'a> = str;
 
@@ -85,15 +83,11 @@ pub enum ShapeFieldName<'a> {
 impl<'a> TrivialDrop for ShapeFieldName<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeFieldName<'arena>);
 
-pub use oxidized::ast_defs::Variance;
-
-pub use oxidized::ast_defs::ConstraintKind;
-
-pub use oxidized::ast_defs::Reified;
-
 pub use oxidized::ast_defs::Abstraction;
-
 pub use oxidized::ast_defs::ClassishKind;
+pub use oxidized::ast_defs::ConstraintKind;
+pub use oxidized::ast_defs::Reified;
+pub use oxidized::ast_defs::Variance;
 
 #[derive(
     Clone,
@@ -125,13 +119,10 @@ pub enum ParamKind<'a> {
 impl<'a> TrivialDrop for ParamKind<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ParamKind<'arena>);
 
-pub use oxidized::ast_defs::ReadonlyKind;
-
-pub use oxidized::ast_defs::OgNullFlavor;
-
-pub use oxidized::ast_defs::PropOrMethod;
-
 pub use oxidized::ast_defs::FunKind;
+pub use oxidized::ast_defs::OgNullFlavor;
+pub use oxidized::ast_defs::PropOrMethod;
+pub use oxidized::ast_defs::ReadonlyKind;
 
 #[derive(
     Clone,
@@ -208,7 +199,6 @@ impl<'a> TrivialDrop for Bop<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Bop<'arena>);
 
 pub use oxidized::ast_defs::Uop;
-
 pub use oxidized::ast_defs::Visibility;
 
 /// Literal values that can occur in XHP enum properties.

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<814d28383f0c03a6ad692474624e1a13>>
+// @generated SignedSource<<32d0a61578a1a5317fda7551ffb77754>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,15 +14,13 @@ use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
 pub use typing_defs::*;
 
 pub use crate::internal_type_set as i_ty_set;
 pub use crate::typing_logic as t_l;
 pub use crate::typing_tyvar_occurrences as occ;
+#[allow(unused_imports)]
+use crate::*;
 
 #[derive(
     Clone,

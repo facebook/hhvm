@@ -3,34 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22c5b78f316801e60b048fdb3bd4b1a5>>
+// @generated SignedSource<<d4be49607634861fe53b3ef0991c51e2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
-use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
-use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
-use serde::Deserialize;
-use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
-pub use crate::ast_defs::shape_map;
-
 pub use ast_defs::OgNullFlavor;
 pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
 pub use ast_defs::PropOrMethod;
 pub use ast_defs::Pstring;
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 pub use local_id::LocalId;
+use no_pos_hash::NoPosHash;
+use ocamlrep_derive::FromOcamlRepIn;
+use ocamlrep_derive::ToOcamlRep;
+pub use oxidized::aast_defs::Visibility;
+use serde::Deserialize;
+use serde::Serialize;
 pub use shape_map::ShapeMap;
 
-pub use oxidized::aast_defs::Visibility;
+pub use crate::ast_defs::shape_map;
+#[allow(unused_imports)]
+use crate::*;
 
 #[derive(
     Clone,
@@ -424,10 +421,8 @@ impl<'a> TrivialDrop for NastShapeInfo<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(NastShapeInfo<'arena>);
 
 pub use oxidized::aast_defs::KvcKind;
-
-pub use oxidized::aast_defs::VcKind;
-
 pub use oxidized::aast_defs::TypedefVisibility;
+pub use oxidized::aast_defs::VcKind;
 
 #[derive(
     Clone,

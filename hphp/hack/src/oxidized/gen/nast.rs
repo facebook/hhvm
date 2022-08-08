@@ -3,21 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<284c09b78dfa8f88470d22e426f75408>>
+// @generated SignedSource<<760bf80b071c1aca3957b0e33cf3ced0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
-
-use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
-use serde::Deserialize;
-use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
-pub use crate::ast_defs::shape_map;
 
 pub use aast::ClassHint;
 pub use aast::Hint;
@@ -25,6 +14,15 @@ pub use aast::Sid;
 pub use aast::TraitHint;
 pub use aast::XhpAttrHint;
 pub use ast_defs::ShapeFieldName;
+use no_pos_hash::NoPosHash;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
+
+pub use crate::ast_defs::shape_map;
+#[allow(unused_imports)]
+use crate::*;
 
 pub type Program = aast::Program<(), ()>;
 

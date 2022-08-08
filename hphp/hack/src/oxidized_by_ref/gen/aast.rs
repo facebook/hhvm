@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec22bb911e7c68be2f551ae68bd24464>>
+// @generated SignedSource<<3456ffead8ab9aa6b96102923088f095>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+pub use aast_defs::*;
 use arena_trait::TrivialDrop;
+pub use doc_comment::DocComment;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -17,9 +19,6 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use aast_defs::*;
-pub use doc_comment::DocComment;
 
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred type)
@@ -1632,9 +1631,8 @@ pub struct Tparam<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Tparam<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena, Ex, En>);
 
-pub use oxidized::aast::RequireKind;
-
 pub use oxidized::aast::EmitId;
+pub use oxidized::aast::RequireKind;
 
 #[derive(
     Clone,

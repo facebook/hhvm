@@ -158,6 +158,8 @@ struct CodeCache {
   Address threadLocalStart() { return m_threadLocalStart; }
 
 private:
+  void cutTCSizeTo(size_t targetSize);
+
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
   size_t m_tcSize; // jit output

@@ -694,6 +694,28 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 context.add_local(dollardollar, left_rty);
                 self.visit_expr(context, right)?;
             }
+            aast::Expr_::Yield(y) => {
+                // TODO: T128042708 Remove once typechecker change is landed
+                if self.is_typechecker {
+                    let mut expect_mutable = |expr| match rty_expr(context, expr) {
+                        Rty::Readonly => {
+                            self.add_error(expr.pos(), syntax_error::yield_readonly);
+                        }
+                        Rty::Mutable => (),
+                    };
+
+                    match &**y {
+                        aast::Afield::AFkvalue(k, v) => {
+                            expect_mutable(k);
+                            expect_mutable(v);
+                        }
+                        aast::Afield::AFvalue(v) => {
+                            expect_mutable(v);
+                        }
+                    };
+                }
+            }
+
             _ => {}
         }
         Ok(())

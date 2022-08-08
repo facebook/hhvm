@@ -1,0 +1,2 @@
+File "yield_expression_bug.php", line 11, characters 9-10:
+This expression is readonly. We currently do not support yielding readonly values. (Parsing[1002])

@@ -1087,6 +1087,10 @@ pub const inout_readonly_argument: Error = Cow::Borrowed(
     "This expression is readonly. We currently do not support passing readonly values to an inout parameter.",
 );
 
+pub const yield_readonly: Error = Cow::Borrowed(
+    "This expression is readonly. We currently do not support yielding readonly values.",
+);
+
 pub const enum_class_constant_missing_initializer: Error =
     Cow::Borrowed("Concrete enum class constants must have an initial value");
 

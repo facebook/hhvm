@@ -47,9 +47,7 @@ struct UnitIndex final {
   >;
   using Map = folly_concurrent_hash_map_simd<
     const StringData*,
-    const StringData*,
-    string_data_hash,
-    string_data_same
+    const StringData*
   >;
 
   IMap types;
@@ -157,9 +155,9 @@ struct Package {
   // Index information collected during parsing, used to construct
   // an autoload index for parse-on-demand.
   struct IndexMeta {
-    std::vector<std::string> types;
-    std::vector<std::string> funcs;
-    std::vector<std::string> constants;
+    std::vector<const StringData*> types;
+    std::vector<const StringData*> funcs;
+    std::vector<const StringData*> constants;
 
     // If not empty, indexing resulted in an ICE or had parse errors.
     std::string error;

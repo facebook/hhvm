@@ -911,33 +911,19 @@ bool compute_index(
 ) {
   auto const onIndex = [&] (std::string&& rpath, Package::IndexMeta&& meta) {
     auto const interned_rpath = makeStaticString(rpath);
-    for (auto& name : meta.types) {
-      auto const interned_name = makeStaticString(name);
-      auto const ret = index.types.emplace(interned_name, interned_rpath);
-      if (!ret.second) {
-        Logger::FWarning("Duplicate type {} in {} and {}",
-            interned_name, ret.first->first, interned_rpath
-        );
+    auto insert = [&](auto const& names, auto& map, const char* kind) {
+      for (auto name : names) {
+        auto const ret = map.emplace(name, interned_rpath);
+        if (!ret.second) {
+          Logger::FWarning("Duplicate {} {} in {} and {}",
+              kind, name, ret.first->first, interned_rpath
+          );
+        }
       }
-    }
-    for (auto& name : meta.funcs) {
-      auto const interned_name = makeStaticString(name);
-      auto const ret = index.funcs.emplace(interned_name, interned_rpath);
-      if (!ret.second) {
-        Logger::FWarning("Duplicate func {} in {} and {}",
-            interned_name, ret.first->first, interned_rpath
-        );
-      }
-    }
-    for (auto& name : meta.constants) {
-      auto const interned_name = makeStaticString(name);
-      auto const ret = index.constants.emplace(interned_name, interned_rpath);
-      if (!ret.second) {
-        Logger::FWarning("Duplicate constant {} in {} and {}",
-            interned_name, ret.first->first, interned_rpath
-        );
-      }
-    }
+    };
+    insert(meta.types, index.types, "type");
+    insert(meta.funcs, index.funcs, "function");
+    insert(meta.constants, index.constants, "constant");
   };
 
   Package index_package{po.inputDir, false, executor, client};
@@ -1196,7 +1182,7 @@ bool process(const CompilerOptions &po) {
   auto const remote = [&] (const Ref<Package::Config>& config,
                            Ref<Package::FileMetaVec> fileMetas,
                            std::vector<Package::FileData> files,
-                           bool opportunistic)
+                           bool optimistic)
     -> coro::Task<Package::ParseMetaVec> {
     if (RO::EvalUseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
@@ -1211,7 +1197,7 @@ bool process(const CompilerOptions &po) {
             std::move(fileMetas)
           ),
           std::move(files),
-          opportunistic
+          optimistic
         )
       );
 
@@ -1251,7 +1237,7 @@ bool process(const CompilerOptions &po) {
           std::move(fileMetas)
         ),
         std::move(files),
-        opportunistic
+        optimistic
       )
     );
 

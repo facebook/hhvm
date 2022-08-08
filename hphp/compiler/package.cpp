@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -935,33 +936,23 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(
           // actually present in the workers, the execution will throw
           // an exception. If everything is present, we've skipped a
           // lot of work.
-          auto inputs = HPHP_CORO_AWAIT(storeInputs(
+          auto [configRef, metasRef, fileRefs] = HPHP_CORO_AWAIT(storeInputs(
               true, paths, metas, options, storedOptions, m_client, m_config
           ));
           try {
-            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(
-              (*m_callback)(
-                *std::get<0>(inputs),
-                std::move(std::get<1>(inputs)),
-                std::move(std::get<2>(inputs)),
-                true
-              )
-            ));
+            HPHP_CORO_RETURN(HPHP_CORO_AWAIT((*m_callback)(
+              *configRef, std::move(metasRef), std::move(fileRefs), true
+            )));
           } catch (const extern_worker::Error&) {}
         }
         // Either optimistic mode isn't enabled, or it failed
         // above. Try again, actually storing everything this time.
-        auto inputs = HPHP_CORO_AWAIT(storeInputs(
+        auto [configRef, metasRef, fileRefs] = HPHP_CORO_AWAIT(storeInputs(
             false, paths, metas, options, storedOptions, m_client, m_config
         ));
-        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(
-          (*m_callback)(
-            *std::get<0>(inputs),
-            std::move(std::get<1>(inputs)),
-            std::move(std::get<2>(inputs)),
-            false
-          )
-        ));
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT((*m_callback)(
+          *configRef, std::move(metasRef), std::move(fileRefs), false
+        )));
       }
     ));
 
@@ -1172,13 +1163,13 @@ UnitDecls IndexJob::run(
   auto facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, "");
   Package::IndexMeta summary;
   for (auto& e : facts.facts.types) {
-    summary.types.emplace_back(std::move(e.name));
+    summary.types.emplace_back(makeStaticString(std::string(e.name)));
   }
   for (auto& e : facts.facts.functions) {
-    summary.funcs.emplace_back(std::move(e));
+    summary.funcs.emplace_back(makeStaticString(std::string(e)));
   }
   for (auto& e : facts.facts.constants) {
-    summary.constants.emplace_back(std::move(e));
+    summary.constants.emplace_back(makeStaticString(std::string(e)));
   }
   s_indexMetas.emplace_back(std::move(summary));
   return UnitDecls{
@@ -1254,22 +1245,21 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
     Optional<std::vector<Ref<RepoOptionsFlags>>> storedOptions;
 
     using ExecT = decltype(g_indexJob)::ExecT;
-    auto const doExec = [&] (auto inputs, bool optimistic) -> coro::Task<ExecT> {
+    auto const doExec = [&] (
+        auto configRef, auto metasRef, auto fileRefs, bool optimistic
+    ) -> coro::Task<ExecT> {
       auto out = HPHP_CORO_AWAIT(
         m_client.exec(
           g_indexJob,
-          std::make_tuple(
-            *std::get<0>(inputs),
-            std::move(std::get<1>(inputs))
-          ),
-          std::move(std::get<2>(inputs)),
+          std::make_tuple(*configRef, std::move(metasRef)),
+          std::move(fileRefs),
           optimistic
         )
       );
       HPHP_CORO_MOVE_RETURN(out);
     };
 
-    auto [decls_refs, summaries_ref] = HPHP_CORO_AWAIT(coro::invoke(
+    auto [declsRefs, summariesRef] = HPHP_CORO_AWAIT(coro::invoke(
       [&] () -> coro::Task<ExecT> {
         if (Option::ParserOptimisticStore &&
             m_client.supportsOptimistic()) {
@@ -1278,26 +1268,30 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           // actually present in the workers, the execution will throw
           // an exception. If everything is present, we've skipped a
           // lot of work.
-          auto inputs = HPHP_CORO_AWAIT(storeInputs(
+          auto [configRef, metasRef, fileRefs] = HPHP_CORO_AWAIT(storeInputs(
               true, paths, metas, options, storedOptions, m_client, m_config
           ));
           try {
-            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(std::move(inputs), true)));
+            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(
+              configRef, std::move(metasRef), std::move(fileRefs), true
+            )));
           } catch (const extern_worker::Error&) {}
         }
         // Either optimistic mode isn't enabled, or it failed
         // above. Try again, actually storing everything this time.
-        auto inputs = HPHP_CORO_AWAIT(storeInputs(
+        auto [configRef, metasRef, fileRefs] = HPHP_CORO_AWAIT(storeInputs(
             false, paths, metas, options, storedOptions, m_client, m_config
         ));
-        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(std::move(inputs), false)));
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(
+          configRef, std::move(metasRef), std::move(fileRefs), false
+        )));
       }
     ));
 
     // Load the summaries but leave decls in external storage
-    auto summaries = HPHP_CORO_AWAIT(m_client.load(summaries_ref));
+    auto summaries = HPHP_CORO_AWAIT(m_client.load(summariesRef));
     assertx(metas.size() == workItems);
-    assertx(decls_refs.size() == workItems);
+    assertx(declsRefs.size() == workItems);
     always_assert(summaries.size() == workItems);
     m_total += workItems;
 

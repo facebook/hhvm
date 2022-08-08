@@ -1188,7 +1188,15 @@ static int start_server(const std::string &username, int xhprof) {
     RuntimeOption::EvalNum1GPagesForReqHeap,
     RuntimeOption::EvalNum2MPagesForReqHeap
   };
-  setup_local_arenas(reqHeapSpec, RuntimeOption::EvalNumReservedSlabs);
+  unsigned nSlabs = RO::EvalNumReservedMBForSlabs * (1ull << 20) / kSlabSize;
+  if (nSlabs == 0) {
+    // We are in the process of migrating from Eval.NumReservedSlabs to
+    // Eval.NumReservedMBForSlabs. Currently, when NumReservedMBForSlabs is set,
+    // we ignore NumReservedSlabs; otherwise, we adjust NumReservedSlabs, which
+    // is needed because the option assumes 2M slab size.
+    nSlabs = RO::EvalNumReservedSlabs * (2ull << 20) / kSlabSize;
+  }
+  setup_local_arenas(reqHeapSpec, nSlabs);
 #endif
 
   HttpServer::Server->runOrExitProcess();

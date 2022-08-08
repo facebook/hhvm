@@ -31,6 +31,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
+#include "hphp/hhbbc/parse.h"
 
 namespace HPHP::HHBBC {
 
@@ -230,38 +231,38 @@ void dump_index(const std::string& dir,
 
 //////////////////////////////////////////////////////////////////////
 
-void banner(const char* what) {
-  TRACE_SET_MOD(hhbbc);
-  FTRACE(2, "{:-^70}\n", what);
-}
-
 void state_after(const char* when,
-                 const Index& index,
-                 const php::Unit& u) {
+                 const php::Unit& u,
+                 const Index& index) {
   TRACE_SET_MOD(hhbbc);
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(u)};
   FTRACE(4, "{:-^70}\n{}{:-^70}\n", when, show(u, index), "");
 }
 
-void state_after(const char* when,
-                 const php::Program& program) {
+void state_after(const char* when, const ParsedUnit& parsed) {
   TRACE_SET_MOD(hhbbc);
-  banner(when);
+  Trace::Bump bumper{
+    Trace::hhbbc,
+    kSystemLibBump,
+    is_systemlib_part(*parsed.unit)
+  };
 
-  hphp_fast_map<SString, std::vector<const php::Class*>> classes;
-  hphp_fast_map<SString, std::vector<const php::Func*>> funcs;
-  for (auto const& c : program.classes) {
-    classes[c->unit].emplace_back(c.get());
+  std::vector<const php::Func*> funcs;
+  std::vector<const php::Class*> classes;
+  for (auto const& f : parsed.funcs) {
+    funcs.emplace_back(f.get());
   }
-  for (auto const& f : program.funcs) {
-    funcs[f->unit].emplace_back(f.get());
+  for (auto const& c : parsed.classes) {
+    classes.emplace_back(c.get());
   }
 
-  for (auto const& u : program.units) {
-    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
-    FTRACE(4, "{}", show(*u, classes[u->filename], funcs[u->filename]));
-  }
-  banner("");
+  FTRACE(
+    4,
+    "{:-^70}\n{}{:-^70}\n",
+    when,
+    show(*parsed.unit, classes, funcs),
+    ""
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -475,40 +475,6 @@ bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
 
 }
 
-void testCompression(Program& program) {
-  trace_time tracer("test compression");
-  auto total_full_size = size_t{0};
-  auto total_compressed_size = size_t{0};
-  auto temp = BlockVec{};
-  auto buffer = Buffer{};
-
-  auto test_compression_function = [&](Func& func) {
-    auto mf = WideFunc::mut(&func);
-    auto& blocks = mf.blocks();
-    encodeBlockVec(buffer, blocks);
-    std::swap(temp, blocks);
-    auto pos = size_t{0};
-    blocks = decodeBlockVec(buffer, pos);
-    always_assert(pos == buffer.size());
-    always_assert(checkBlockVecs(func, temp, blocks));
-    total_full_size += estimateHeapSize(blocks);
-    total_compressed_size += buffer.size();
-    buffer.clear();
-  };
-
-  for (auto& c : program.classes) {
-    for (auto& m : c->methods) {
-      test_compression_function(*m);
-    }
-  }
-  for (auto& f : program.funcs) {
-    test_compression_function(*f);
-  }
-
-  TRACE(1, "Overall compression ratio: %.2f\n",
-        1.0 * total_full_size / std::max(total_compressed_size, size_t{1}));
-}
-
 //////////////////////////////////////////////////////////////////////
 
 WideFunc::WideFunc(const Func* func, bool mut)

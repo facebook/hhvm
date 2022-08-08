@@ -26,6 +26,10 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+struct ParsedUnit;
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * If the hhbbc_dump trace module is on, dump the entire program to a
  * temporary directory as readable text.
@@ -41,9 +45,8 @@ void dump_index(const std::string&, const Index&, const php::Unit&);
  * transformations.
  */
 
-void banner(const char* what);
-void state_after(const char* when, const Index&, const php::Unit&);
-void state_after(const char* when, const php::Program&);
+void state_after(const char* when, const php::Unit&, const Index&);
+void state_after(const char* when, const ParsedUnit&);
 
 //////////////////////////////////////////////////////////////////////
 

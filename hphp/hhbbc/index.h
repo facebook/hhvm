@@ -617,11 +617,21 @@ std::string show(const Class&);
  * "update" step in between whole program analysis rounds).
  */
 struct Index {
+  struct Input {
+    template <typename T> using R = extern_worker::Ref<std::unique_ptr<T>>;
+    std::vector<std::pair<SString, R<php::Unit>>> units;
+    std::vector<std::pair<SString, R<php::Class>>> classes;
+    std::vector<std::pair<SString, R<php::Func>>> funcs;
+  };
+
   /*
    * Create an Index for a php::Program.  Performs some initial
    * analysis of the program.
    */
-  explicit Index(std::unique_ptr<php::Program>);
+  Index(Input,
+        std::unique_ptr<coro::TicketExecutor>,
+        std::unique_ptr<extern_worker::Client>,
+        DisposeCallback);
   ~Index();
 
   /*

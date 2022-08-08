@@ -22,13 +22,6 @@ namespace HPHP::HHBBC { namespace php {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Run a correctness test of compression: compress and decompress all the
- * Funcs in the given Program. Although we take a mutable ref to the
- * program as input, this operation shouldn't change the program's code.
- */
-void testCompression(Program& program);
-
-/*
  * Only used to implement WideFunc::blockRange. Probably overkill.
  */
 template <typename T>

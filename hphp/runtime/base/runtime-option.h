@@ -776,8 +776,6 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
-  /* Equivalent to setting the --test-compression HHBBC-only flag. */   \
-  F(bool, HHBBCTestCompression,        false)                           \
   /* Threshold number of units to log to hhvm_whole_program table.
      systemlib has around 200 units, so use a larger default to avoid
      logging for unit tests. */                                         \

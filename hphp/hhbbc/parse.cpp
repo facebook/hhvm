@@ -45,6 +45,7 @@
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/optimize.h"
@@ -1161,6 +1162,8 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     for (auto const& f : ret.funcs)   always_assert(check(*f));
     for (auto const& c : ret.classes) always_assert(check(*c));
   }
+  state_after("parse", ret);
+
   return ret;
 }
 

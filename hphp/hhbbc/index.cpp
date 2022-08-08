@@ -79,6 +79,10 @@ TRACE_SET_MOD(hhbbc_index);
 
 //////////////////////////////////////////////////////////////////////
 
+using namespace extern_worker;
+
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -1926,9 +1930,7 @@ struct ClsConstInfo {
 };
 
 struct Index::IndexData {
-  explicit IndexData(Index* index, std::unique_ptr<php::Program> program)
-    : m_index{index}
-    , program{std::move(program)} {}
+  explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
   ~IndexData() {
@@ -5628,12 +5630,143 @@ void preresolveTypes(IndexData& index, ClassInfoData& cid) {
   );
 }
 
+// Construct a php::Program from an Index:::Input. Right now this is
+// just loading the data and adding them to a php::Program. The units
+// have already been constructed in extern-worker jobs.
+std::unique_ptr<php::Program>
+materialize_inputs(Index::Input input,
+                   std::unique_ptr<coro::TicketExecutor> executor,
+                   std::unique_ptr<Client> client,
+                   const DisposeCallback& dispose) {
+  using namespace folly::gen;
+
+  trace_time tracer("materialize inputs");
+
+  // For speed, split up the unit loading into chunks.
+  constexpr size_t kLoadChunkSize = 500;
+
+  struct Chunk {
+    std::vector<Ref<std::unique_ptr<php::Class>>> classes;
+    std::vector<Ref<std::unique_ptr<php::Func>>> funcs;
+    std::vector<Ref<std::unique_ptr<php::Unit>>> units;
+
+    size_t size() const {
+      return classes.size() + funcs.size() + units.size();
+    }
+    bool empty() const {
+      return classes.empty() && funcs.empty() && units.empty();
+    }
+  };
+  std::vector<Chunk> chunks;
+  Chunk current;
+
+  auto const added = [&] {
+    if (current.size() >= kLoadChunkSize) {
+      chunks.emplace_back(std::move(current));
+    }
+  };
+  for (auto& unit : input.units) {
+    current.units.emplace_back(std::move(unit.second));
+    added();
+  }
+  for (auto& cls : input.classes) {
+    current.classes.emplace_back(std::move(cls.second));
+    added();
+  }
+  for (auto& func : input.funcs) {
+    current.funcs.emplace_back(std::move(func.second));
+    added();
+  }
+  if (!current.empty()) chunks.emplace_back(std::move(current));
+
+  std::mutex lock;
+  auto program = std::make_unique<php::Program>();
+
+  auto const loadAndParse = [&] (Chunk chunk) -> coro::Task<void> {
+    auto [classes, funcs, units] = HPHP_CORO_AWAIT(coro::collect(
+      client->load(std::move(chunk.classes)),
+      client->load(std::move(chunk.funcs)),
+      client->load(std::move(chunk.units))
+    ));
+
+    {
+      std::scoped_lock<std::mutex> _{lock};
+      for (auto& unit : units) {
+        program->units.emplace_back(std::move(unit));
+      }
+      for (auto& cls : classes) {
+        program->classes.emplace_back(std::move(cls));
+      }
+      for (auto& func : funcs) {
+        program->funcs.emplace_back(std::move(func));
+      }
+    }
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  std::vector<coro::TaskWithExecutor<void>> tasks;
+  tasks.reserve(chunks.size());
+  for (auto& c : chunks) {
+    tasks.emplace_back(
+      loadAndParse(std::move(c)).scheduleOn(executor->sticky())
+    );
+  }
+  coro::wait(coro::collectRange(std::move(tasks)));
+
+  auto const& stats = client->getStats();
+  Logger::FInfo(
+    "HHBBC:\n"
+    "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
+    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
+    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
+    "  Cpu: {:,} usec usage, {:,} allocated cores\n"
+    "  Mem: {:,} max used, {:,} reserved\n"
+    "  {:,} downloads ({:,} bytes), {:,} throttles",
+    stats.execs.load(),
+    stats.execCacheHits.load(),
+    stats.optimisticExecs.load(),
+    stats.execFallbacks.load(),
+    stats.files.load(),
+    stats.filesRead.load(),
+    stats.filesQueried.load(),
+    stats.filesUploaded.load(),
+    stats.fileBytesUploaded.load(),
+    stats.fileFallbacks.load(),
+    stats.blobs.load(),
+    stats.blobsQueried.load(),
+    stats.blobsUploaded.load(),
+    stats.blobBytesUploaded.load(),
+    stats.blobFallbacks.load(),
+    stats.execCpuUsec.load(),
+    stats.execAllocatedCores.load(),
+    stats.execMaxUsedMem.load(),
+    stats.execReservedMem.load(),
+    stats.downloads.load(),
+    stats.bytesDownloaded.load(),
+    stats.throttles.load()
+  );
+
+  // Done with any extern-worker stuff at this point (for now).
+  dispose(std::move(executor), std::move(client));
+  return program;
+}
+
 } //namespace
 
-Index::Index(std::unique_ptr<php::Program> program)
-  : m_data(std::make_unique<IndexData>(this, std::move(program)))
+Index::Index(Input input,
+             std::unique_ptr<coro::TicketExecutor> executor,
+             std::unique_ptr<Client> client,
+             DisposeCallback dispose)
+  : m_data{std::make_unique<IndexData>(this)}
 {
   trace_time tracer("create index");
+
+  m_data->program = materialize_inputs(
+    std::move(input),
+    std::move(executor),
+    std::move(client),
+    dispose
+  );
 
   add_system_constants_to_index(*m_data);
   add_program_to_index(*m_data);

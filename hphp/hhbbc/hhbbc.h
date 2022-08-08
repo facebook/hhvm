@@ -106,7 +106,7 @@ void whole_program(WholeProgramInput inputs,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<extern_worker::Client> client,
                    const EmitCallback& callback,
-                   const DisposeCallback& dispose,
+                   DisposeCallback dispose,
                    Optional<StructuredLogEntry> sample = std::nullopt,
                    int num_threads = 0);
 

@@ -148,7 +148,6 @@ void parse_options(int argc, char** argv) {
     ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ("public-sprop-refine-limit", po::value(&options.publicSPropRefineLimit))
-    ("test-compression",     po::bool_switch(&options.TestCompression))
     ;
 
   po::options_description oflags("Optimization Flags");

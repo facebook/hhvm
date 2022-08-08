@@ -123,11 +123,6 @@ struct Options {
   std::string profileMemory;
 
   /*
-   * Run a test of HHBBC memory compression (e.g. bytecode compression).
-   */
-  bool TestCompression;
-
-  /*
    * Extern-worker config
    */
   std::string ExternWorkerUseCase;

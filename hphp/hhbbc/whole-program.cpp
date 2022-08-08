@@ -491,7 +491,7 @@ void final_pass(Index& index,
         auto const ctx = AnalysisContext { context.unit, func, context.cls };
         optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
       }
-      state_after("optimize", index, *unit);
+      state_after("optimize", *unit, index);
       if (!dump_dir.empty()) {
         if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
           dump_representation(dump_dir, index, *unit);
@@ -621,105 +621,44 @@ void WholeProgramInput::Deleter::operator()(Impl* i) const {
 
 namespace {
 
-// Construct a php::Program from a WholeProgramInput. Right now this
-// is just loading the Values and adding them to a php::Program. The
-// units have already been constructed in extern-worker jobs.
-std::unique_ptr<php::Program> make_program(
-    WholeProgramInput input,
-    std::unique_ptr<coro::TicketExecutor> executor,
-    std::unique_ptr<Client> client,
-    const DisposeCallback& dispose) {
-  trace_time tracer("materialize inputs");
-
-  // For speed, split up the unit loading into chunks.
-  constexpr size_t kLoadChunkSize = 500;
-
-  struct Chunk {
-    std::vector<Ref<std::unique_ptr<php::Class>>> classes;
-    std::vector<Ref<std::unique_ptr<php::Func>>> funcs;
-    std::vector<Ref<std::unique_ptr<php::Unit>>> units;
-
-    size_t size() const {
-      return classes.size() + funcs.size() + units.size();
-    }
-    bool empty() const {
-      return classes.empty() && funcs.empty() && units.empty();
-    }
-  };
-  std::vector<Chunk> chunks;
-  Chunk current;
+Index::Input make_index_input(WholeProgramInput input) {
+  Index::Input out;
 
   using WPI = WholeProgramInput;
   using Key = WPI::Key::Impl;
+
   input.m_impl->values.sweep(
     [&] (const std::pair<WPI::Key, Ref<WPI::Value>>& p) {
       switch (p.first.m_impl->type) {
         case Key::Type::Fail:
           // An unit which failed the verifier. This causes us
           // to exit immediately with an error.
-          fprintf(stderr, "%s", p.first.m_impl->name->data());
-          _Exit(1);
-          break;
-        case Key::Type::Class:
-          current.classes.emplace_back(
-            p.second.cast<std::unique_ptr<php::Class>>()
-          );
-          break;
-        case Key::Type::Func:
-          current.funcs.emplace_back(
-            p.second.cast<std::unique_ptr<php::Func>>()
-          );
-          break;
-        case Key::Type::Unit:
-          current.units.emplace_back(
-            p.second.cast<std::unique_ptr<php::Unit>>()
-          );
-          break;
-      }
-      if (current.size() >= kLoadChunkSize) {
-        chunks.emplace_back(std::move(current));
+           fprintf(stderr, "%s", p.first.m_impl->name->data());
+           _Exit(1);
+           break;
+         case Key::Type::Class:
+           out.classes.emplace_back(
+             p.first.m_impl->name,
+             p.second.cast<std::unique_ptr<php::Class>>()
+           );
+           break;
+         case Key::Type::Func:
+           out.funcs.emplace_back(
+             p.first.m_impl->name,
+             p.second.cast<std::unique_ptr<php::Func>>()
+           );
+           break;
+         case Key::Type::Unit:
+           out.units.emplace_back(
+             p.first.m_impl->name,
+             p.second.cast<std::unique_ptr<php::Unit>>()
+           );
+           break;
       }
     }
   );
-  if (!current.empty()) chunks.emplace_back(std::move(current));
 
-  std::mutex lock;
-  auto program = std::make_unique<php::Program>();
-
-  auto const loadAndParse = [&] (Chunk chunk) -> coro::Task<void> {
-    auto [classes, funcs, units] = HPHP_CORO_AWAIT(coro::collect(
-      client->load(std::move(chunk.classes)),
-      client->load(std::move(chunk.funcs)),
-      client->load(std::move(chunk.units))
-    ));
-
-    {
-      std::scoped_lock<std::mutex> _{lock};
-      for (auto& unit : units) {
-        program->units.emplace_back(std::move(unit));
-      }
-      for (auto& cls : classes) {
-        program->classes.emplace_back(std::move(cls));
-      }
-      for (auto& func : funcs) {
-        program->funcs.emplace_back(std::move(func));
-      }
-    }
-    HPHP_CORO_RETURN_VOID;
-  };
-
-  std::vector<coro::TaskWithExecutor<void>> tasks;
-  tasks.reserve(chunks.size());
-  for (auto& c : chunks) {
-    tasks.emplace_back(
-      loadAndParse(std::move(c)).scheduleOn(executor->sticky())
-    );
-  }
-  coro::wait(coro::collectRange(std::move(tasks)));
-
-  // Done with any extern-worker stuff at this point (for now).
-  dispose(std::move(executor), std::move(client));
-  return program;
+  return out;
 }
 
 }
@@ -730,7 +669,7 @@ void whole_program(WholeProgramInput inputs,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<Client> client,
                    const EmitCallback& callback,
-                   const DisposeCallback& dispose,
+                   DisposeCallback dispose,
                    Optional<StructuredLogEntry> sample,
                    int num_threads) {
   trace_time tracer("whole program");
@@ -741,20 +680,13 @@ void whole_program(WholeProgramInput inputs,
     parallel::final_threads = (num_threads > 1) ? (num_threads - 1) : 1;
   }
 
-  auto program = make_program(
-    std::move(inputs),
+  Index index{
+    make_index_input(std::move(inputs)),
     std::move(executor),
     std::move(client),
-    dispose
-  );
+    std::move(dispose)
+  };
 
-  if (options.TestCompression || RO::EvalHHBBCTestCompression) {
-    php::testCompression(*program);
-  }
-
-  state_after("parse", *program);
-
-  Index index{std::move(program)};
   auto stats = allocate_stats();
   auto const emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);

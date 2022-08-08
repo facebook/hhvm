@@ -360,7 +360,10 @@ constexpr size_t kSizeClassesPerDoubling = (1u << kLgSizeClassesPerDoubling);
  *
  * We want kMaxSmallSize to be the largest size-class less than kSlabSize.
  */
-constexpr size_t kNumSmallSizes = 63;
+constexpr size_t kNumSmallSizes =
+  kSizeClassesPerDoubling * (kLgSlabSize - 6 /* log of size 64 bytes */)
+  + 4 /* number of size classes up to 64 bytes */
+  - 1 /* exclude kSlabSize */;
 static_assert(kNumSizeClasses < 256,
               "size class index must fit in 8 bits in HeapObject header");
 static_assert(kNumSmallSizes < kNumSizeClasses,

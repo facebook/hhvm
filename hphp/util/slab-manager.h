@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-constexpr unsigned kLgSlabSize = 21;
+constexpr unsigned kLgSlabSize = 20;
 constexpr size_t kSlabSize = 1ull << kLgSlabSize;
 constexpr size_t kSlabAlign = kSlabSize;
 

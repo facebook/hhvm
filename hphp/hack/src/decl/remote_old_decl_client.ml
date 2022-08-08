@@ -11,40 +11,36 @@
 (*****************************************************************************)
 open Hh_prelude
 
-let get_hh_version () =
-  let repo = Wwwroot.get None in
-  let hhconfig_path =
-    Path.to_string
-      (Path.concat repo Config_file.file_path_relative_to_repo_root)
-  in
-  let version =
-    if Disk.file_exists hhconfig_path then
-      let (_, config) = Config_file.parse_hhconfig hhconfig_path in
-      Config_file.Getters.string_opt "version" config
-    else
-      None
-  in
-  match version with
-  | None -> Hh_version.version
-  | Some version ->
-    let version = "v" ^ String_utils.lstrip version "^" in
-    version
+module Utils = struct
+  let get_hh_version () =
+    let repo = Wwwroot.get None in
+    let hhconfig_path =
+      Path.to_string
+        (Path.concat repo Config_file.file_path_relative_to_repo_root)
+    in
+    let version =
+      if Disk.file_exists hhconfig_path then
+        let (_, config) = Config_file.parse_hhconfig hhconfig_path in
+        Config_file.Getters.string_opt "version" config
+      else
+        None
+    in
+    match version with
+    | None -> Hh_version.version
+    | Some version ->
+      let version = "v" ^ String_utils.lstrip version "^" in
+      version
 
-let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
-  ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
+  let db_path_of_ctx ~(ctx : Provider_context.t) : Naming_sqlite.db_path option
+      =
+    ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
-let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
-  let dep = Typing_deps.(Dep.make (Dep.Type name)) in
-  let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
-  if Option.is_some decl_hash then
-    Hh_logger.log
-      "Attempting to fetch old decl with decl hash %s remotely"
-      (Option.value_exn decl_hash)
-  else
-    Hh_logger.log
-      "Couldn't find decl hash for %s in sqlite naming table. Not fetching its old decl."
-      name;
-  decl_hash
+  let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path)
+      =
+    let dep = Typing_deps.(Dep.make (Dep.Type name)) in
+    let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
+    decl_hash
+end
 
 module FetchAsync = struct
   (** The input record that gets passed from the main process to the daemon process *)
@@ -81,7 +77,10 @@ module FetchAsync = struct
 end
 
 let fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes =
-  Hh_logger.log "Fetching remote old decls to %s" destination_path;
+  Hh_logger.log
+    "Fetching %d remote old decls to %s"
+    (List.length decl_hashes)
+    destination_path;
   let open FetchAsync in
   FutureProcess.make
     (Process.run_entry
@@ -94,16 +93,16 @@ let fetch_old_decls
     ~(telemetry_label : string)
     ~(ctx : Provider_context.t)
     (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
-  let db_path_opt = db_path_of_ctx ctx in
+  let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
   | None -> SMap.empty
   | Some db_path ->
     let decl_hashes =
       List.filter_map
-        ~f:(fun name -> name_to_decl_hash_opt ~name ~db_path)
+        ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
         names
     in
-    let hh_config_version = get_hh_version () in
+    let hh_config_version = Utils.get_hh_version () in
     let start_t = Unix.gettimeofday () in
     let no_limit =
       TypecheckerOptions.remote_old_decls_no_limit

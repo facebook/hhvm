@@ -49,6 +49,15 @@ module type RemoteServerApi = sig
     Relative_path.t list option ->
     (string, string) result
 
+  val fetch_and_cache_remote_decls :
+    ctx:Provider_context.t ->
+    Naming_table.t ->
+    from_saved_state:bool ->
+    string option ->
+    string ->
+    bool ->
+    unit
+
   (* Called by the worker to type check a list of files.
      The state filename is where the type checker should save its state that
      changed as a result of type checking the files

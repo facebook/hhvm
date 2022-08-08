@@ -432,6 +432,292 @@ let make_remote_server_api
           build_naming_table ();
           None)
 
+    let load_shallow_decls_saved_state
+        (saved_state_main_artifacts :
+          Saved_state_loader.Shallow_decls_info.main_artifacts) :
+        ((Int64.t * string) list, string) result =
+      let { Saved_state_loader.Shallow_decls_info.shallow_decls_path } =
+        saved_state_main_artifacts
+      in
+      if not (Sys.file_exists (Path.to_string shallow_decls_path)) then
+        Error
+          (Printf.sprintf
+             "Expected shallow_decls_saved_state at %s"
+             (Path.to_string shallow_decls_path))
+      else
+        let chan = Stdlib.open_in_bin (Path.to_string shallow_decls_path) in
+        let contents = Marshal.from_channel chan in
+        Stdlib.close_in chan;
+        Ok contents
+
+    let download_shallow_decls_saved_state
+        (manifold_api_key : string option)
+        (manifold_path : string)
+        (use_manifold_cython_client : bool) :
+        ((Int64.t * string) list, string) result =
+      let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
+      Disk.mkdir_p target_path;
+
+      let shallow_decls_future =
+        State_loader_futures.download_and_unpack_saved_state_from_manifold
+          ~env:
+            {
+              Saved_state_loader.log_saved_state_age_and_distance = false;
+              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
+              Saved_state_loader.use_manifold_cython_client;
+            }
+          ~progress_callback:(fun _ -> ())
+          ~saved_state_type:Saved_state_loader.Shallow_decls
+          ~manifold_path
+          ~target_path:(Path.make target_path)
+      in
+      match Future.get ~timeout:600 shallow_decls_future with
+      | Error err ->
+        let err = Future.error_to_string err in
+        Hh_logger.error "Downloading shallow_decls saved state failed: %s" err;
+        Error err
+      | Ok download_result ->
+        begin
+          match download_result with
+          | Error (err, _telemetry) ->
+            Error (Saved_state_loader.debug_details_of_error err)
+          | Ok (main_artifacts, _telemetry) ->
+            let (_ : float) =
+              Hh_logger.log_duration
+                "Finished downloading shallow_decls saved state."
+                (Future.start_t shallow_decls_future)
+            in
+            let shallow_decls_path =
+              main_artifacts
+                .Saved_state_loader.Shallow_decls_info.shallow_decls_path
+            in
+            Hh_logger.log
+              "Downloaded shallow_decls to %s"
+              (Path.to_string shallow_decls_path);
+            load_shallow_decls_saved_state main_artifacts
+        end
+
+    let unmarshal_decls_from_download_result
+        ~(ctx : Provider_context.t)
+        (shallow_decls : (Int64.t * string) list)
+        (classnames : SSet.elt list) :
+        Shallow_decl_defs.shallow_class option SMap.t =
+      (* unmarshall shallow decls in parallel*)
+      let job
+          (acc : (Int64.t * Shallow_decl_defs.shallow_class option) list list)
+          (decls : (Int64.t * string) list) =
+        List.map decls ~f:(fun (hash, marshalled_decl) ->
+            let decl = Marshal.from_string marshalled_decl 0 in
+            (hash, Some decl))
+        :: acc
+      in
+      let shallow_decls =
+        List.concat
+          (MultiWorker.call
+             workers
+             ~job
+             ~neutral:[]
+             ~merge:(fun a b -> List.concat [a; b])
+             ~next:(MultiWorker.next ~max_size:50000 workers shallow_decls))
+      in
+      (* match shallow decls with classnames according to hash code *)
+      let db_path_opt = Remote_old_decl_client.Utils.db_path_of_ctx ~ctx in
+      match db_path_opt with
+      | None -> SMap.empty
+      | Some db_path ->
+        let decl_name_and_hashes =
+          List.filter_map
+            ~f:(fun name ->
+              match
+                Remote_old_decl_client.Utils.name_to_decl_hash_opt
+                  ~name
+                  ~db_path
+              with
+              | None -> None
+              | Some hash -> Some (name, Int64.of_string hash))
+            classnames
+        in
+        let sorted_saved_states =
+          List.sort shallow_decls ~compare:(fun (hash1, _) (hash2, _) ->
+              Int64.compare hash1 hash2)
+        in
+        let sorted_targets =
+          List.sort decl_name_and_hashes ~compare:(fun (_, hash1) (_, hash2) ->
+              Int64.compare hash1 hash2)
+        in
+        Hh_logger.log "finished sorting";
+        let rec lookup_shallow_decls states targets result =
+          match (states, targets) with
+          | ([], _) -> result
+          | (_, []) -> result
+          | ( (state_hash, decl) :: states',
+              (target_name, target_hash) :: targets' ) ->
+            if Int64.( < ) state_hash target_hash then
+              lookup_shallow_decls states' targets result
+            else if Int64.( > ) state_hash target_hash then
+              lookup_shallow_decls states targets' result
+            else
+              lookup_shallow_decls
+                states'
+                targets'
+                ((target_name, decl) :: result)
+        in
+        let fetched_decls =
+          lookup_shallow_decls sorted_saved_states sorted_targets []
+        in
+        Hh_logger.log "finished fetching";
+        SMap.of_list fetched_decls
+    (*
+        Hh_logger.log "computed hashes";
+        let shallow_decls =
+          List.fold_left
+            ~init:[]
+            ~f:(fun acc (hash, decl) ->
+              List.cons (Int64.to_string hash, decl) acc)
+            shallow_decls
+        in
+        let shallow_decls_map = SMap.of_list shallow_decls in
+        Hh_logger.log "constructed smap";
+        List.fold_left
+          ~init:SMap.empty
+          ~f:(fun acc (name, hash) ->
+            match SMap.find_opt hash shallow_decls_map with
+            | None -> acc
+            | Some marshalled_decl ->
+              let decl = Marshal.from_string marshalled_decl 0 in
+              SMap.add name (Some decl) acc)
+          decl_name_and_hashes
+          *)
+
+    let fetch_remote_decls_from_saved_state
+        manifold_api_key manifold_path use_manifold_cython_client classnames =
+      match
+        download_shallow_decls_saved_state
+          manifold_api_key
+          manifold_path
+          use_manifold_cython_client
+      with
+      | Ok shallow_decls_download_result ->
+        let _ =
+          Hh_logger.log
+            "loaded %d shallow decls from saved state"
+            (List.length shallow_decls_download_result)
+        in
+        let state_decls =
+          unmarshal_decls_from_download_result
+            ~ctx
+            shallow_decls_download_result
+            classnames
+        in
+        let _ =
+          Hh_logger.log
+            "extracted %d shallow decls from saved state"
+            (SMap.cardinal state_decls)
+        in
+        state_decls
+      | Error err -> failwith err
+
+    let fetch_remote_decls_from_remote_old_decl_service classnames =
+      let job (acc : 'a SMap.t) (classnames : string list) : 'a SMap.t =
+        Hh_logger.log
+          "Fecthing %d decls from the remote decl store"
+          (List.length classnames);
+        let remotely_fetched_decls =
+          Remote_old_decl_client.fetch_old_decls
+            ~telemetry_label:"hulk type check"
+            ~ctx
+            classnames
+        in
+        Hh_logger.log
+          "Fetched %d decls from the remote decl store"
+          (SMap.cardinal remotely_fetched_decls);
+        SMap.merge
+          (fun _key a b ->
+            if Option.is_some a then
+              a
+            else
+              b)
+          acc
+          remotely_fetched_decls
+      in
+      MultiWorker.call
+        workers
+        ~job
+        ~neutral:SMap.empty
+        ~merge:
+          (SMap.merge (fun _key a b ->
+               if Option.is_some a then
+                 a
+               else
+                 b))
+        ~next:(MultiWorker.next ~max_size:50000 workers classnames)
+
+    let fetch_and_cache_remote_decls
+        ~ctx
+        naming_table
+        ~(from_saved_state : bool)
+        (manifold_api_key : string option)
+        (manifold_path : string)
+        (use_manifold_cython_client : bool) =
+      let start_t = Unix.gettimeofday () in
+      let fileinfos_from_naming_table =
+        naming_table
+        |> Naming_table.to_defs_per_file ~warn_on_naming_costly_iter:false
+        |> Relative_path.Map.elements
+      in
+      let classnames =
+        List.fold
+          fileinfos_from_naming_table
+          ~init:[]
+          ~f:(fun acc (_filename, fileinfo) ->
+            SSet.fold
+              (fun class_name acc -> class_name :: acc)
+              fileinfo.FileInfo.n_classes
+              acc)
+      in
+      let remotely_fetched_decls =
+        if from_saved_state then
+          fetch_remote_decls_from_saved_state
+            manifold_api_key
+            manifold_path
+            use_manifold_cython_client
+            classnames
+        else
+          fetch_remote_decls_from_remote_old_decl_service classnames
+      in
+      List.iter fileinfos_from_naming_table ~f:(fun (filename, fileinfo) ->
+          let class_names = fileinfo.FileInfo.n_classes in
+          let pfh_decls : (string * Shallow_decl_defs.decl * Int64.t) list =
+            SSet.fold
+              (fun name acc ->
+                let remotely_fetched_decl =
+                  Option.join (SMap.find_opt name remotely_fetched_decls)
+                in
+                match
+                  Option.Monad_infix.(
+                    remotely_fetched_decl >>= fun decl ->
+                    Remote_old_decl_client.Utils.db_path_of_ctx ~ctx
+                    >>= fun db_path ->
+                    Remote_old_decl_client.Utils.name_to_decl_hash_opt
+                      ~name
+                      ~db_path
+                    >>= fun hash ->
+                    Some
+                      (name, Shallow_decl_defs.Class decl, Int64.of_string hash))
+                with
+                | Some pfh_decl -> pfh_decl :: acc
+                | None -> acc)
+              class_names
+              []
+          in
+          Direct_decl_utils.cache_decls ctx filename pfh_decls);
+      let (_ : float) =
+        Hh_logger.log_duration
+          "Fetched and cached decls from remote decl store"
+          start_t
+      in
+      ()
+
     let type_check
         ctx ~init_id ~check_id files_to_check ~state_filename ~telemetry =
       let t = Unix.gettimeofday () in

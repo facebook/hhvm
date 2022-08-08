@@ -2459,7 +2459,17 @@ let module_ ctx module_ =
     (not allow_all_files)
     && not
          (List.exists allowed_files ~f:(fun allowed_file ->
-              String.equal allowed_file module_file))
+              let len = String.length allowed_file in
+              if len > 0 then
+                match allowed_file.[len - 1] with
+                | '*' ->
+                  let allowed_dir =
+                    String.sub allowed_file ~pos:0 ~len:(len - 1)
+                  in
+                  String_utils.string_starts_with module_file allowed_dir
+                | _ -> String.equal allowed_file module_file
+              else
+                false))
   then
     Errors.add_naming_error
     @@ Naming_error.Module_declaration_outside_allowed_files module_.md_span;

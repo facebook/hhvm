@@ -619,8 +619,17 @@ std::string show(const Class&);
 struct Index {
   struct Input {
     template <typename T> using R = extern_worker::Ref<std::unique_ptr<T>>;
+
+    struct ClassMeta {
+      R<php::Class> cls;
+      SString name;
+      std::vector<SString> dependencies;
+    };
+
+    static std::vector<SString> makeDeps(const php::Class&);
+
+    std::vector<ClassMeta> classes;
     std::vector<std::pair<SString, R<php::Unit>>> units;
-    std::vector<std::pair<SString, R<php::Class>>> classes;
     std::vector<std::pair<SString, R<php::Func>>> funcs;
   };
 

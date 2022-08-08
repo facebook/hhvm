@@ -521,8 +521,10 @@ struct WholeProgramInput::Key::Impl {
   };
   Type type;
   LSString name;
+  std::vector<SString> dependencies;
 
-  Impl(Type type, SString name) : type{type}, name{name} {}
+  Impl(Type type, SString name, std::vector<SString> dependencies)
+    : type{type}, name{name}, dependencies{std::move(dependencies)} {}
 };
 struct WholeProgramInput::Value::Impl {
   std::unique_ptr<php::Func> func;
@@ -553,10 +555,13 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 
   std::vector<std::pair<Key, Value>> out;
 
-  auto const add = [&] (Key::Impl::Type type, SString name, auto v) {
+  auto const add = [&] (Key::Impl::Type type,
+                        SString name,
+                        auto v,
+                        std::vector<SString> deps = {}) {
     Key key;
     Value value;
-    key.m_impl.reset(new Key::Impl{type, name});
+    key.m_impl.reset(new Key::Impl{type, name, std::move(deps)});
     value.m_impl.reset(new Value::Impl{std::move(v)});
     out.emplace_back(std::move(key), std::move(value));
   };
@@ -573,7 +578,13 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   }
   for (auto& c : parsed.classes) {
     auto const name = c->name;
-    add(Key::Impl::Type::Class, name, std::move(c));
+    auto deps = Index::Input::makeDeps(*c);
+    add(
+      Key::Impl::Type::Class,
+      name,
+      std::move(c),
+      std::move(deps)
+    );
   }
   for (auto& f : parsed.funcs) {
     auto const name = f->name;
@@ -585,12 +596,15 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 void WholeProgramInput::Key::serde(BlobEncoder& sd) const {
   assertx(m_impl);
   sd(m_impl->type)(m_impl->name);
+  if (m_impl->type == Impl::Type::Class) sd(m_impl->dependencies);
 }
 void WholeProgramInput::Key::serde(BlobDecoder& sd) {
   Key::Impl::Type type;
   SString name;
+  std::vector<SString> dependencies;
   sd(type)(name);
-  m_impl.reset(new Impl{type, name});
+  if (type == Impl::Type::Class) sd(dependencies);
+  m_impl.reset(new Impl{type, name, std::move(dependencies)});
 }
 
 void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
@@ -628,7 +642,7 @@ Index::Input make_index_input(WholeProgramInput input) {
   using Key = WPI::Key::Impl;
 
   input.m_impl->values.sweep(
-    [&] (const std::pair<WPI::Key, Ref<WPI::Value>>& p) {
+    [&] (std::pair<WPI::Key, Ref<WPI::Value>>&& p) {
       switch (p.first.m_impl->type) {
         case Key::Type::Fail:
           // An unit which failed the verifier. This causes us
@@ -638,8 +652,11 @@ Index::Input make_index_input(WholeProgramInput input) {
            break;
          case Key::Type::Class:
            out.classes.emplace_back(
-             p.first.m_impl->name,
-             p.second.cast<std::unique_ptr<php::Class>>()
+             Index::Input::ClassMeta{
+               p.second.cast<std::unique_ptr<php::Class>>(),
+               p.first.m_impl->name,
+               std::move(p.first.m_impl->dependencies)
+             }
            );
            break;
          case Key::Type::Func:

@@ -5670,7 +5670,7 @@ materialize_inputs(Index::Input input,
     added();
   }
   for (auto& cls : input.classes) {
-    current.classes.emplace_back(std::move(cls.second));
+    current.classes.emplace_back(std::move(cls.cls));
     added();
   }
   for (auto& func : input.funcs) {
@@ -5751,7 +5751,26 @@ materialize_inputs(Index::Input input,
   return program;
 }
 
-} //namespace
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::vector<SString> Index::Input::makeDeps(const php::Class& cls) {
+  std::vector<SString> deps;
+  if (cls.parentName) deps.emplace_back(cls.parentName);
+  deps.insert(deps.end(), cls.interfaceNames.begin(), cls.interfaceNames.end());
+  deps.insert(deps.end(), cls.usedTraitNames.begin(), cls.usedTraitNames.end());
+  deps.insert(
+    deps.end(),
+    cls.includedEnumNames.begin(),
+    cls.includedEnumNames.end()
+  );
+  return deps;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 Index::Index(Input input,
              std::unique_ptr<coro::TicketExecutor> executor,

@@ -462,8 +462,15 @@ Index make_index() {
   }
   for (auto& c : parse.classes) {
     auto const name = c->name;
+    auto deps = Index::Input::makeDeps(*c);
     auto stored = coro::wait(client->store(std::move(c)));
-    indexInput.classes.emplace_back(name, std::move(stored));
+    indexInput.classes.emplace_back(
+      Index::Input::ClassMeta{
+        std::move(stored),
+        name,
+        std::move(deps)
+      }
+    );
   }
   for (auto& f : parse.funcs) {
     auto const name = f->name;

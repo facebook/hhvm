@@ -40,7 +40,8 @@
    --shallow-class-decl
    --error-format
    raw
-   --enable-higher-kinded-types)))
+   --enable-higher-kinded-types
+   --enable-supportdyn-hint)))
 
 (alias
  (name runtest)

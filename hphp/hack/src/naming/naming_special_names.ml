@@ -941,8 +941,6 @@ module Typehints = struct
 
   let dynamic = "dynamic"
 
-  let supportdynamic = "supportdynamic"
-
   let nothing = "nothing"
 
   let int = "int"

@@ -1208,7 +1208,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         self.node_to_ty_(node, true)
     }
 
-    fn make_supportdynamic(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
+    fn make_supportdyn(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
         Ty_::Tapply(self.alloc((
             (pos, naming_special_names::typehints::HH_SUPPORTDYN),
             self.alloc([self.alloc(Ty(
@@ -1319,13 +1319,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => {
                             if self.opts.everything_sdt {
-                                self.make_supportdynamic(pos)
+                                self.make_supportdyn(pos)
                             } else {
                                 Ty_::Tnonnull
                             }
                         }
                         "dynamic" => Ty_::Tdynamic,
-                        "supportdynamic" => self.make_supportdynamic(pos),
                         "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
@@ -2672,7 +2671,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         self.alloc(Reason::hint(token_pos(self))),
                         Ty_::Toption(self.alloc(Ty(
                             self.alloc(Reason::hint(token_pos(self))),
-                            self.make_supportdynamic(token_pos(self)),
+                            self.make_supportdyn(token_pos(self)),
                         ))),
                     )))
                 } else {

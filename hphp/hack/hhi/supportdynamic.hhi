@@ -4,5 +4,4 @@
 
 namespace HH {
   newtype supportdyn<+T> as T = (T & dynamic);
-  type supportdynamic = supportdyn<nonnull>;
 }

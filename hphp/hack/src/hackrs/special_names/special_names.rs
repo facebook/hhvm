@@ -283,7 +283,6 @@ pub mod typehints {
     pub static nonnull: Lazy<TypeName> = lazy!(sn::typehints::NONNULL);
     pub static this: Lazy<TypeName> = lazy!(sn::typehints::THIS);
     pub static dynamic: Lazy<TypeName> = lazy!(sn::typehints::DYNAMIC);
-    pub static supportdynamic: Lazy<TypeName> = lazy!(sn::typehints::SUPPORTDYNAMIC);
     pub static nothing: Lazy<TypeName> = lazy!(sn::typehints::NOTHING);
     pub static int: Lazy<TypeName> = lazy!(sn::typehints::INT);
     pub static bool: Lazy<TypeName> = lazy!(sn::typehints::BOOL);

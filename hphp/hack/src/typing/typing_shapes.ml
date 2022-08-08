@@ -51,10 +51,11 @@ let refine_shape field_name pos env shape =
       Reason.Rmissing_optional_field
         (get_pos shape, TUtils.get_printable_shape_field_name field_name)
     in
+    let mixed = MakeType.mixed r in
     if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-      MakeType.nullablesupportdynamic r
+      MakeType.supportdyn r mixed
     else
-      MakeType.mixed r
+      mixed
   in
   let sft = { sft_optional = false; sft_ty } in
   Option.iter ~f:Errors.add_typing_error e1;

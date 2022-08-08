@@ -78,7 +78,7 @@ Invalid argument (Typing[4110])
     via this generic `T`
 File "supportdyn.bad.php", line 38, characters 10-18:
 Invalid return type (Typing[4110])
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdyn.bad.php", line 37, characters 42-48:
   Expected `nonnull`
   File "supportdyn.bad.php", line 36, characters 20-23:
   But got `void`

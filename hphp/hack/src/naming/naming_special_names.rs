@@ -629,8 +629,6 @@ pub mod typehints {
 
     pub const DYNAMIC: &str = "dynamic";
 
-    pub const SUPPORTDYNAMIC: &str = "supportdynamic";
-
     pub const NOTHING: &str = "nothing";
 
     pub const INT: &str = "int";

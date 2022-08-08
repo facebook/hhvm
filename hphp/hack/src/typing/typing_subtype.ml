@@ -1810,7 +1810,7 @@ and simplify_subtype_i
             valid env
           else
             (* Special case of function type subtype dynamic.
-             *   (function(ty1,...,tyn):ty <: supportdynamic)
+             *   (function(ty1,...,tyn):ty <: supportdyn<nonnull>)
              *   iff
              *   dynamic <D: ty1 & ... & dynamic <D: tyn & ty <D: dynamic
              *)
@@ -1869,7 +1869,7 @@ and simplify_subtype_i
                        * it is a subtype of the same type whose corresponding type arguments
                        * are replaced by dynamic, intersected with the parameter's upper bounds.
                        *
-                       * For example, to check dict<int,float> <: supportdynamic
+                       * For example, to check dict<int,float> <: supportdyn<nonnull>
                        * we check dict<int,float> <D: dict<arraykey,dynamic>
                        * which in turn requires int <D: arraykey and float <D: dynamic.
                     *)

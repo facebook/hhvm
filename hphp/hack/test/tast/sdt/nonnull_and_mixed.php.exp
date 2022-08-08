@@ -1,6 +1,3 @@
-Errors:
-  [4:3-10] Unbound name: `supportdynamic`
-  [5:3-8] Unbound name: `supportdynamic`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -12,11 +9,11 @@ Errors:
         f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid)))); 
         f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
         f_params =
-        [{ param_annotation = (supportdynamic); param_type_hint = ((supportdynamic), (Some ([4:3-10], (Happly (([4:3-10], "supportdynamic"), []))))); 
+        [{ param_annotation = (supportdyn<nonnull>); param_type_hint = ((supportdyn<nonnull>), (Some ([4:3-10], (Happly (([4:3-10], "\\HH\\supportdyn"), [([4:3-10], Hnonnull)])))));
            param_is_variadic = false; param_pos = [4:11-13]; param_name = "$n"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (?supportdynamic); param_type_hint = ((?supportdynamic), (Some ([5:3-8], (Hoption ([5:3-8], (Happly (([5:3-8], "supportdynamic"), []))))))); 
+          { param_annotation = (supportdyn<mixed>); param_type_hint = ((supportdyn<mixed>), (Some ([5:3-8], (Happly (([5:3-8], "\\HH\\supportdyn"), [([5:3-8], Hmixed)])))));
             param_is_variadic = false; param_pos = [5:9-11]; param_name = "$m"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

@@ -447,6 +447,8 @@ and hint_
     Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
     N.Herr
 
+and wrap_supportdyn p h = N.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
+
 and hint_id
     ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env ((p, x) as id) hl
     =
@@ -507,29 +509,22 @@ and hint_id
       | x when String.equal x SN.Typehints.resource -> N.Hprim N.Tresource
       | x when String.equal x SN.Typehints.arraykey -> N.Hprim N.Tarraykey
       | x when String.equal x SN.Typehints.mixed ->
+        let mixed = N.Hmixed in
         if
           TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
         then
-          N.Hoption (p, N.Happly ((p, SN.Typehints.supportdynamic), []))
+          wrap_supportdyn p mixed
         else
-          N.Hmixed
+          mixed
       | x when String.equal x SN.Typehints.nonnull ->
+        let nonnull = N.Hnonnull in
         if
           TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
         then
-          N.Happly ((p, SN.Typehints.supportdynamic), [])
+          wrap_supportdyn p nonnull
         else
-          N.Hnonnull
+          nonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
-      | x when String.equal x SN.Typehints.supportdynamic ->
-        if
-          not
-            (TypecheckerOptions.experimental_feature_enabled
-               (Provider_context.get_tcopt env.ctx)
-               TypecheckerOptions.experimental_supportdynamic_type_hint)
-        then
-          Errors.experimental_feature p "supportdynamic type hint";
-        N.Happly ((p, SN.Typehints.supportdynamic), [])
       | x when String.equal x SN.Classes.cSupportDyn && not (Pos.is_hhi p) ->
         if
           not

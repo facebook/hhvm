@@ -52,7 +52,6 @@ let types =
     "SleepWaitHandle";
     "StaticWaitHandle";
     "supportdyn";
-    "supportdynamic";
     "Traversable";
     "typename";
     "TypeStructure";

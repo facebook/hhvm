@@ -111,11 +111,11 @@ let supportdyn r ty =
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
 
-let supportdynamic r = supportdyn r (nonnull r)
+let supportdyn_nonnull r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
 
-let nullablesupportdynamic r = supportdyn r (mixed r)
+let supportdyn_mixed r = supportdyn r (mixed r)
 
 let hh_formatstring r ty =
   mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))

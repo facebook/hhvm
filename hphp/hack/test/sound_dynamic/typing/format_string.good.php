@@ -24,7 +24,7 @@ function getDyn():dynamic {
 <<__SupportDynamicType>>
 function mysprintf(
   \HH\FormatString<\PlainSprintf> $fmt,
-  ?supportdynamic ...$fmt_args
+  supportdyn<mixed> ...$fmt_args
 )[]: ~string {
   return "A";
   }

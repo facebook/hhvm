@@ -590,7 +590,10 @@ module Primary = struct
       | Enum_class_label_unknown of {
           pos: Pos.t;
           label_name: string;
-          class_name: string;
+          enum_name: string;
+          decl_pos: Pos_or_decl.t;
+          most_similar: (string * Pos_or_decl.t) option;
+          ty_pos: Pos_or_decl.t option;
         }
       | Enum_class_label_as_expr of Pos.t
       | Enum_class_label_member_mismatch of {
@@ -715,13 +718,53 @@ module Primary = struct
       in
       (Error_code.EnumSwitchWrongClass, claim, lazy [], [])
 
-    let enum_class_label_unknown pos label_name class_name =
+    let enum_class_label_unknown
+        pos label_name enum_name decl_pos most_similar ty_pos =
+      let enum_name = Markdown_lite.md_codify (Render.strip_ns enum_name) in
+
       let claim =
         lazy
-          (let class_name = Render.strip_ns class_name in
-           (pos, "Unknown constant " ^ label_name ^ " in " ^ class_name))
+          ( pos,
+            Printf.sprintf
+              "Enum class %s does not contain a label named %s."
+              enum_name
+              (Markdown_lite.md_codify label_name) )
       in
-      (Error_code.EnumClassLabelUnknown, claim, lazy [], [])
+
+      let decl_reason =
+        [(decl_pos, Printf.sprintf "%s is defined here" enum_name)]
+      in
+      let (similar_reason, quickfixes) =
+        match most_similar with
+        | Some (similar_name, similar_pos) ->
+          ( [
+              ( similar_pos,
+                Printf.sprintf
+                  "Did you mean %s?"
+                  (Markdown_lite.md_codify similar_name) );
+            ],
+            [
+              Quickfix.make
+                ~title:("Change to " ^ Markdown_lite.md_codify similar_name)
+                ~new_text:similar_name
+                pos;
+            ] )
+        | None -> ([], [])
+      in
+      let ty_reason =
+        match ty_pos with
+        | Some ty_pos ->
+          [
+            ( ty_pos,
+              Printf.sprintf
+                "This is why I expected an enum class label from %s."
+                enum_name );
+          ]
+        | None -> []
+      in
+
+      let reason = lazy (decl_reason @ similar_reason @ ty_reason) in
+      (Error_code.EnumClassLabelUnknown, claim, reason, quickfixes)
 
     let enum_class_label_as_expr pos =
       let claim =
@@ -803,8 +846,15 @@ module Primary = struct
       | Enum_switch_not_const pos -> enum_switch_not_const pos
       | Enum_switch_wrong_class { pos; kind; expected; actual } ->
         enum_switch_wrong_class pos kind expected actual
-      | Enum_class_label_unknown { pos; label_name; class_name } ->
-        enum_class_label_unknown pos label_name class_name
+      | Enum_class_label_unknown
+          { pos; label_name; enum_name; decl_pos; most_similar; ty_pos } ->
+        enum_class_label_unknown
+          pos
+          label_name
+          enum_name
+          decl_pos
+          most_similar
+          ty_pos
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos
       | Enum_class_label_member_mismatch { pos; label; expected_ty_msg_opt } ->
         enum_class_label_member_mismatch pos label expected_ty_msg_opt

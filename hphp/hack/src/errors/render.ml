@@ -58,7 +58,7 @@ let suggestion_message ?(modifier = "") orig hint hint_pos =
         (highlight_differences orig hint |> Markdown_lite.md_codify)
     else
       Printf.sprintf
-        "Did you mean %s%s instead?" (* here? *)
+        "Did you mean %s%s instead?"
         modifier
         (Markdown_lite.md_codify hint)
   in

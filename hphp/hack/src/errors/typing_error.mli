@@ -181,7 +181,10 @@ module Primary : sig
       | Enum_class_label_unknown of {
           pos: Pos.t;
           label_name: string;
-          class_name: string;
+          enum_name: string;
+          decl_pos: Pos_or_decl.t;
+          most_similar: (string * Pos_or_decl.t) option;
+          ty_pos: Pos_or_decl.t option;
         }
       | Enum_class_label_as_expr of Pos.t
       | Enum_class_label_member_mismatch of {

@@ -2019,17 +2019,18 @@ module EnumClassLabelOps = struct
     | Invalid
     | Skip
 
-  (** Given an [enum_name] and an [label], tries to see if
-      [enum_name] has a constant named [label].
+  (** Given an [enum_name] and a [label_name, tries to see if
+      [enum_name] has a constant named [label_name].
       In such case, creates the expected typed expression.
 
-      If [label] is not there, it will register and error.
+      If [label_name] is not there, it will register an error.
 
       [ctor] is either `MemberOf` or `Label`
-      [full] describe if the original expression was a full
+      [full] describes if the original expression was a full
       label, as in E#A, or a short version, as in #A
   *)
-  let expand pos env ~full ~ctor enum_name label_name =
+  let expand
+      pos env ~full ~ctor enum_name label_name (ty_pos : Pos_or_decl.t option) =
     let cls = Env.get_class env enum_name in
     match cls with
     | Some cls ->
@@ -2059,11 +2060,27 @@ module EnumClassLabelOps = struct
         let te = (hi, pos, EnumClassLabel (qualifier, label_name)) in
         (env, Success (te, lty))
       | None ->
+        let consts =
+          List.map (Cls.consts cls) ~f:(fun (name, const) ->
+              ( (if full then
+                  Render.strip_ns enum_name ^ "#" ^ name
+                else
+                  "#" ^ name),
+                const.cc_pos ))
+        in
+        let most_similar = Env.most_similar label_name consts fst in
         Errors.add_typing_error
           Typing_error.(
             enum
             @@ Primary.Enum.Enum_class_label_unknown
-                 { pos; label_name; class_name = enum_name });
+                 {
+                   pos;
+                   label_name;
+                   enum_name;
+                   decl_pos = Cls.pos cls;
+                   most_similar;
+                   ty_pos;
+                 });
         let r = Reason.Rwitness pos in
         let ty = Typing_utils.terr env r in
         let te = (ty, pos, EnumClassLabel (None, label_name)) in
@@ -4918,15 +4935,16 @@ and expr_
       p
       (Aast.EnumClassLabel (None, s))
       (mk (Reason.Rwitness p, Terr))
-  | EnumClassLabel ((Some (pos, cname) as e), name) ->
+  | EnumClassLabel ((Some (_, cname) as e), name) ->
     let (env, res) =
       EnumClassLabelOps.expand
-        pos
+        p
         env
         ~full:true
         ~ctor:SN.Classes.cEnumClassLabel
         cname
         name
+        None
     in
     let error () =
       make_result
@@ -8768,13 +8786,15 @@ and call
                   (match compute_enum_name env ty_enum with
                   | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
                   | (env, Some enum_name) ->
+                    let ty_pos = Typing_defs.get_pos ty_enum in
                     EnumClassLabelOps.expand
                       pos
                       env
                       ~full:false
                       ~ctor
                       enum_name
-                      label_name)
+                      label_name
+                      (Some ty_pos))
                 | _ ->
                   (* Already reported, see Typing_type_wellformedness *)
                   (env, EnumClassLabelOps.Invalid))

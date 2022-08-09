@@ -77,8 +77,11 @@ namespace HPHP {
 namespace Facts {
 namespace {
 
-// SQLFacts version number representing the DB's schema. We change this number
-// when we make a breaking change to the DB's contents or schema.
+// SQLFacts version number representing the DB's schema.  This number is
+// determined randomly, but should match the number in the SQL Facts
+// implementation.  We use this when we make a change that invalidates
+// the cache, such as adding a new table which would otherwise be
+// unpopulated without a cache rebuild.
 constexpr size_t kSchemaVersion = 1916337637;
 
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";

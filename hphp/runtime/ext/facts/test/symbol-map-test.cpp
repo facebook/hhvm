@@ -813,12 +813,13 @@ TEST_F(SymbolMapTest, addPaths) {
       m.getFileModules(path1),
       UnorderedElementsAre("some_module", "some_other_module"));
 
-  // Check for case insensitivity (constants are case-sensitive, nothing else
-  // is)
+  // Check for case insensitivity
   EXPECT_EQ(m.getTypeFile("someclass"), path1.native());
   EXPECT_EQ(m.getFunctionFile("SOME_FN"), path1.native());
-  EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
   EXPECT_EQ(m.getTypeAliasFile("sometypealias"), path1.native());
+
+  // Check for case sensitivity
+  EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
   EXPECT_EQ(m.getModuleFile("Some_Module"), nullptr);
 
   // Check for undefined symbols

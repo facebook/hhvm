@@ -115,11 +115,13 @@ jobs:
         base64 --decode |
         gpg --import
     - name: Mount Apt Repository
+      env:
+        # s3fs uses environment variable names without underscores, unlike aws-cli
+        AWSACCESSKEYID: ${{ env.AWS_ACCESS_KEY_ID }}
+        AWSSECRETACCESSKEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        AWSSESSIONTOKEN: ${{ env.AWS_SESSION_TOKEN }}
       run: |
         HHVM_DOWNLOAD="$(mktemp --directory)" &&
-        AWSACCESSKEYID="$AWS_ACCESS_KEY_ID" \
-        AWSSECRETACCESSKEY="$AWS_SECRET_ACCESS_KEY" \
-        AWSSESSIONTOKEN="$AWS_SESSION_TOKEN" \
         s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &&
         echo "REPREPRO_BASE_DIR=$HHVM_DOWNLOAD/universal" >> $GITHUB_ENV
     - name: Initiate Apt Repository

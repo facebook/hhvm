@@ -380,3 +380,28 @@ let substitute_inter_intra
             join = replace intra_entity_join;
           }
     end
+
+let equiv
+    (any_constr_list_1 : any_constraint list)
+    (any_constr_list_2 : any_constraint list) : bool =
+  let only_intra_constr any_constr =
+    let only_inter_ent (intra_constr : constraint_) :
+        entity_ -> constraint_ option = function
+      | Inter _ -> Some intra_constr
+      | _ -> None
+    in
+    match any_constr with
+    | Intra intra_constr ->
+      (match intra_constr with
+      | Marks _ -> Some intra_constr
+      | Has_static_key (ent, _, _) -> only_inter_ent intra_constr ent
+      | Has_optional_key (ent, _) -> only_inter_ent intra_constr ent
+      | Has_dynamic_key ent -> only_inter_ent intra_constr ent
+      | _ -> None)
+    | Inter _ -> None
+  in
+  ConstraintSet.equal
+    (ConstraintSet.of_list
+       (List.filter_map ~f:only_intra_constr any_constr_list_1))
+    (ConstraintSet.of_list
+       (List.filter_map ~f:only_intra_constr any_constr_list_2))

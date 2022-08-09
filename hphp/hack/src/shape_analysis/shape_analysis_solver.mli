@@ -20,3 +20,5 @@ val is_same_entity : HT.entity -> entity_ -> bool
 (** Substitutes the intra-procedural constraint in the second argument
       with respect to the inter-procedural constraint in the first argument *)
 val substitute_inter_intra : inter_constraint_ -> constraint_ -> constraint_
+
+val equiv : any_constraint list -> any_constraint list -> bool

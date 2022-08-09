@@ -68,7 +68,7 @@ type marker_kind =
   | Debug
       (** A dict argument to a function or method such as `$d = dict[]; f($d)`
        *)
-[@@deriving show]
+[@@deriving ord, show]
 
 module Codemod : sig
   type kind =
@@ -80,10 +80,10 @@ end
 
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
-  | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
+  | Has_static_key of entity_ * T.TShapeField.t * T.locl_ty
       (** Records a static key an entity is accessed with along with the Hack
           type of that key *)
-  | Has_optional_key of entity_ * T.TShapeMap.key
+  | Has_optional_key of entity_ * T.TShapeField.t
       (** Records an optional static key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
@@ -98,6 +98,7 @@ type constraint_ =
       (** `Join(e,e',e'')` represents that `e''` is the join point of `e` and
           `e'` for example as a result of merging environments after an if
           statement. *)
+[@@deriving ord]
 
 (** Interprocedural constraint: currently only `Arg((f, 0), p)`, which models
     a function call f(p, _, ...). *)
@@ -147,6 +148,8 @@ module EntityMap : Map.S with type key = entity_
 
 module EntitySet : Set.S with type elt = entity_
 
+module ConstraintSet : Set.S with type elt = constraint_
+
 (** Events used for logging purposes *)
 type log_event =
   | Result of {
@@ -157,3 +160,7 @@ type log_event =
       id: string;
       error_message: string;
     }  (** Indicates that the analysis malfunctioned *)
+
+type any_constraint =
+  | Intra of constraint_
+  | Inter of inter_constraint_

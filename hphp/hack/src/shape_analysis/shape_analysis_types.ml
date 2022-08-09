@@ -46,7 +46,7 @@ type marker_kind =
   | Parameter
   | Return
   | Debug
-[@@deriving show { with_path = false }]
+[@@deriving ord, show { with_path = false }]
 
 module Codemod = struct
   type kind =
@@ -57,8 +57,8 @@ end
 
 type constraint_ =
   | Marks of marker_kind * Pos.t
-  | Has_static_key of entity_ * T.TShapeMap.key * T.locl_ty
-  | Has_optional_key of entity_ * T.TShapeMap.key
+  | Has_static_key of entity_ * T.TShapeField.t * T.locl_ty
+  | Has_optional_key of entity_ * T.TShapeField.t
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_
   | Joins of {
@@ -66,6 +66,7 @@ type constraint_ =
       right: entity_;
       join: entity_;
     }
+[@@deriving ord]
 
 type inter_constraint_ = Arg of HT.param_entity * entity_
 
@@ -113,6 +114,12 @@ module EntitySet = Set.Make (struct
   let compare = compare_entity_
 end)
 
+module ConstraintSet = Set.Make (struct
+  type t = constraint_
+
+  let compare = compare_constraint_
+end)
+
 type log_event =
   | Result of {
       id: string;
@@ -122,3 +129,7 @@ type log_event =
       id: string;
       error_message: string;
     }
+
+type any_constraint =
+  | Intra of constraint_
+  | Inter of inter_constraint_

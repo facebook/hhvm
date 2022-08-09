@@ -1492,6 +1492,13 @@ public:
   static Class* load(const StringData* name);
 
   /*
+   * Same as Class::load but also checks for module boundary violations
+   */
+  static Class* resolve(const NamedEntity* ne, const StringData* name,
+                        const Func* callerFunc);
+  static Class* resolve(const StringData* name, const Func* callerFunc);
+
+  /*
    * Autoload the Class with name `name' and bind it `ne' in this request.
    *
    * @requires: NamedEntity::get(name) == ne

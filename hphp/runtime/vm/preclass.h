@@ -438,6 +438,7 @@ public:
    */
   static constexpr Offset nameOffset()  { return offsetof(PreClass, m_name); }
   static constexpr Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
+  static constexpr Offset unitOffset() { return offsetof(PreClass, m_unit); }
 
 
   /////////////////////////////////////////////////////////////////////////////

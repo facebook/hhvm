@@ -1,4 +1,4 @@
 Accessing internal function foo in module a from module b is not allowed @ %s/resolve-throw-2.php:17
 in f
 Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-throw-2.php:22
-in f_static
+in C::f_static

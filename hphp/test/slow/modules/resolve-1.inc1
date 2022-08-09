@@ -6,5 +6,10 @@ module a;
 internal function foo() { echo "in f\n"; }
 
 class C {
-  static internal function foo_static() { echo "in f_static\n"; }
+  static internal function foo_static() { echo "in C::f_static\n"; }
+}
+
+internal class CInternal {
+  public function __construct() { echo "in CInternal ctor\n"; }
+  static internal function foo_static() { echo "in CInternal::f_static\n"; }
 }

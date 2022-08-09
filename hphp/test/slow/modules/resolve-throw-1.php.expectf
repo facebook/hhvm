@@ -1,6 +1,10 @@
-Accessing internal function foo in module a from module b is not allowed @ %s/resolve-1.inc:6
-Accessing internal function foo in module a from module b is not allowed @ %s/resolve-throw-1.php:17
-Accessing internal function foo in module a from module b is not allowed @ %s/resolve-1.inc:8
-Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-1.inc:9
-Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-throw-1.php:22
-Accessing internal method C::foo_static in module a from module b is not allowed @ %s/resolve-1.inc:11
+Accessing internal function foo in module a from module b is not allowed @ %s:6
+Accessing internal function foo in module a from module b is not allowed @ %s:17
+Accessing internal function foo in module a from module b is not allowed @ %s:8
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s:9
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s:22
+Accessing internal method C::foo_static in module a from module b is not allowed @ %s:11
+Accessing internal class CInternal in module a from module b is not allowed @ %s:13
+Accessing internal method CInternal::foo_static in module a from module b is not allowed @ %s:27
+Accessing internal class CInternal in module a from module b is not allowed @ %s:30
+Accessing internal method CInternal::foo_static in module a from module b is not allowed @ %s:32

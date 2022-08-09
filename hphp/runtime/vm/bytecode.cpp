@@ -946,6 +946,24 @@ static inline void lookup_sprop(ActRec* fp,
   accessible = lookup.accessible;
 }
 
+namespace {
+
+void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
+  auto const caller = vmfp()->func();
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
+    raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
+  }
+}
+
+void checkModuleBoundaryViolation(const Class* cls) {
+  auto const caller = vmfp()->func();
+  if (will_symbol_raise_module_boundary_violation(cls, caller)) {
+    raiseModuleBoundaryViolation(cls, caller->moduleName());
+  }
+}
+
+} // namespace
+
 static inline Class* lookupClsRef(TypedValue* input) {
   Class* class_ = nullptr;
   if (isStringType(input->m_type) || isLazyClassType(input->m_type)) {
@@ -963,6 +981,7 @@ static inline Class* lookupClsRef(TypedValue* input) {
     raise_error("Cls: Expected string or object, got %s",
                 describe_actual_type(input).c_str());
   }
+  checkModuleBoundaryViolation(class_);
   return class_;
 }
 
@@ -2163,7 +2182,7 @@ OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
 
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
-  auto const class_ = Class::load(cname);
+  auto const class_ = Class::resolve(cname, vmfp()->func());
   // TODO (T61651936): Disallow implicit conversion to string
   if (class_ == nullptr) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
@@ -3569,17 +3588,6 @@ OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
   }
 }
 
-namespace {
-
-void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
-  auto const caller = vmfp()->func();
-  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
-    raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
-  }
-}
-
-} // namespace
-
 /*
  * Supports callables:
  *   array($instance, 'method')
@@ -3609,6 +3617,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
   }
 
   checkModuleBoundaryViolation(cls, func);
+  if (cls) checkModuleBoundaryViolation(cls);
 
   Object thisRC(thiz);
   arr.reset();
@@ -3645,6 +3654,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
   }
 
   checkModuleBoundaryViolation(cls, func);
+  if (cls) checkModuleBoundaryViolation(cls);
 
   Object thisRC(thiz);
   str.reset();
@@ -3991,7 +4001,7 @@ OPTBLD_INLINE void iopResolveClsMethod(const StringData* methName) {
 OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
                                         const StringData* methName) {
   auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  auto cls = Class::load(nep.second, nep.first);
+  auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
   }
@@ -4044,7 +4054,7 @@ OPTBLD_INLINE void iopResolveRClsMethod(const StringData* methName) {
 OPTBLD_INLINE void iopResolveRClsMethodD(Id classId,
                                          const StringData* methName) {
   auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  auto cls = Class::load(nep.second, nep.first);
+  auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
   }
@@ -4169,7 +4179,7 @@ iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  Class* cls = Class::load(nep.second, nep.first);
+  Class* cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
@@ -4227,7 +4237,7 @@ ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
 void newObjDImpl(Id id, ArrayData* reified_types) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(id);
-  auto cls = Class::load(nep.second, nep.first);
+  auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->func()->unit()->lookupLitstrId(id)->data());

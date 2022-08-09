@@ -1,17 +1,36 @@
-Warning: Accessing internal function foo in module a from module b is not allowed in %s/resolve-1.inc on line 6
+Warning: Accessing internal function foo in module a from module b is not allowed in %s on line 6
 in f
 
-Warning: Accessing internal function foo in module a from module b is not allowed in %s/resolve-1.php on line 12
+Warning: Accessing internal function foo in module a from module b is not allowed in %s on line 12
 in f
 
-Warning: Accessing internal function foo in module a from module b is not allowed in %s/resolve-1.inc on line 8
+Warning: Accessing internal function foo in module a from module b is not allowed in %s on line 8
 in f
 
-Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.inc on line 9
-in f_static
+Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s on line 9
+in C::f_static
 
-Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.php on line 15
-in f_static
+Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s on line 15
+in C::f_static
 
-Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s/resolve-1.inc on line 11
-in f_static
+Warning: Accessing internal method C::foo_static in module a from module b is not allowed in %s on line 11
+in C::f_static
+
+Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 13
+
+Warning: Accessing internal method CInternal::foo_static in module a from module b is not allowed in %s on line 13
+in CInternal::f_static
+
+Warning: Accessing internal method CInternal::foo_static in module a from module b is not allowed in %s on line 19
+
+Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 19
+in CInternal::f_static
+
+Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 21
+in CInternal ctor
+
+Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 22
+in CInternal ctor
+
+Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 23
+in CInternal ctor

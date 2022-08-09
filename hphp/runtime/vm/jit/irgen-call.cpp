@@ -224,31 +224,33 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   }
 }
 
-void emitModuleBoundaryCheckKnown(IRGS& env, const Func* callee) {
+template <typename T>
+void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
   auto const caller = curFunc(env);
-  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
+  if (will_symbol_raise_module_boundary_violation(symbol, caller)) {
       auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseModuleBoundaryViolation, data, cns(env, callee));
+      gen(env, RaiseModuleBoundaryViolation, data, cns(env, symbol));
   }
 }
 
-void emitModuleBoundaryCheck(IRGS& env, SSATmp* callee) {
+void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func = true) {
   if (!RO::EvalEnforceModules) return;
   auto const caller = curFunc(env);
   ifElse(
     env,
     [&] (Block* skip) {
       auto const data = AttrData { AttrInternal };
-      auto const internal = gen(env, FuncHasAttr, data, callee);
+      auto const internal =
+        gen(env, func ? FuncHasAttr : ClassHasAttr, data, symbol);
       gen(env, JmpZero, skip, internal);
       auto violate =
-        gen(env, CallViolatesModuleBoundary, FuncData { caller }, callee);
+        gen(env, CallViolatesModuleBoundary, FuncData { caller }, symbol);
       gen(env, JmpZero, skip, violate);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseModuleBoundaryViolation, data, callee);
+      gen(env, RaiseModuleBoundaryViolation, data, symbol);
     }
   );
 }
@@ -1464,6 +1466,7 @@ void emitNewObj(IRGS& env) {
   auto const cls = popC(env);
   if (!cls->isA(TCls)) PUNT(NewObj-NotClass);
   emitDynamicConstructChecks(env, cls);
+  emitModuleBoundaryCheck(env, cls, false);
   push(env, gen(env, AllocObj, cls));
 }
 
@@ -1473,6 +1476,7 @@ void emitNewObjR(IRGS& env) {
   if (!cls->isA(TCls))     PUNT(NewObjR-NotClass);
 
   emitDynamicConstructChecks(env, cls);
+  emitModuleBoundaryCheck(env, cls, false);
   auto const obj = [&] {
     if (generics->isA(TVec)) {
       emitReifiedClassChecks(env, cls, generics);
@@ -1495,11 +1499,13 @@ void emitNewObjDImpl(IRGS& env, const StringData* className,
   bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
   if (persistentCls && canInstantiate && !cls->hasNativePropHandler() &&
       !cls->hasReifiedGenerics() && !cls->hasReifiedParent()) {
+    emitModuleBoundaryCheckKnown(env, cls);
     push(env, allocObjFast(env, cls));
     return;
   }
 
   auto const finishWithKnownCls = [&] {
+    emitModuleBoundaryCheckKnown(env, cls);
     if (cls->hasReifiedGenerics()) {
       if (!tsList) PUNT(NewObjD-ReifiedCls);
       gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), tsList);
@@ -1512,6 +1518,7 @@ void emitNewObjDImpl(IRGS& env, const StringData* className,
   if (persistentCls) return finishWithKnownCls();
   auto const cachedCls = gen(env, LdClsCached, cns(env, className));
   if (cls) return finishWithKnownCls();
+  emitModuleBoundaryCheck(env, cachedCls, false);
   if (tsList) {
     emitReifiedClassChecks(env, cachedCls, tsList);
     push(env, gen(env, AllocObjReified, cachedCls, tsList));
@@ -1692,6 +1699,7 @@ void emitFCallClsMethodD(IRGS& env,
         gen(env, LdClsCached, cns(env, className));
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+      emitModuleBoundaryCheckKnown(env, cls);
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
     }
   }
@@ -1709,6 +1717,7 @@ void emitFCallClsMethodD(IRGS& env,
     ClsMethodData { className, methodName, ne, callerCtx, curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   auto const ctx = gen(env, LdClsMethodCacheCls, data);
+  emitModuleBoundaryCheck(env, ctx, false);
   prepareAndCallProfiled(env, func, fca, ctx, false, false);
 }
 
@@ -1947,6 +1956,8 @@ void fcallClsMethodCommon(IRGS& env,
                              dynamicCall, suppressDynCallCheck);
     }
   };
+
+  emitModuleBoundaryCheck(env, clsVal, false);
 
   if (!methVal->hasConstVal()) {
     emitFCall();

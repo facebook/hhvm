@@ -566,13 +566,22 @@ void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
 
 void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const func = srcLoc(env, inst, 0).reg();
-  auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
   auto& v = vmain(env);
 
   auto const unit = v.makeReg();
+  if (inst->src(0)->isA(TFunc)) {
+    auto const func = srcLoc(env, inst, 0).reg();
+    v << load{func[Func::unitOff()], unit};
+  } else {
+    assertx(inst->src(0)->isA(TCls));
+    auto const cls = srcLoc(env, inst, 0).reg();
+    auto const preclass = v.makeReg();
+    v << load{cls[Class::preClassOff()], preclass};
+    v << load{preclass[PreClass::unitOffset()], unit};
+  }
+
+  auto const callerModuleName = inst->extra<FuncData>()->func->moduleName();
   auto const sf = v.makeReg();
-  v << load{func[Func::unitOff()], unit};
   emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
   v << setcc{CC_NZ, sf, dst};
 }

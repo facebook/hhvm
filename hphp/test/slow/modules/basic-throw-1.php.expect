@@ -6,3 +6,11 @@ Accessing internal function foo in module B from module A is not allowed
 Accessing internal method Cls::foo_static in module B from module A is not allowed
 Accessing internal method Cls::foo_static in module B from module A is not allowed
 Accessing internal method Cls::foo in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed
+Accessing internal class ReifiedInternalCls in module B from module A is not allowed
+Accessing internal class ReifiedInternalCls in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed
+Accessing internal class InternalCls in module B from module A is not allowed

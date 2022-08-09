@@ -760,7 +760,7 @@ To string conversions:
 
   Set D to true iff S0 has a reified parent.
 
-| CallViolatesModuleBoundary<caller>, D(Bool), S(Func), NF
+| CallViolatesModuleBoundary<caller>, D(Bool), S(Func,Cls), NF
 
   Set D to true iff function call from caller to S0 violates module boundary.
   Requires that S0 is an internal method.

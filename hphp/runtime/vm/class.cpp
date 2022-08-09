@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -5042,6 +5043,28 @@ Class* Class::load(const NamedEntity* ne, const StringData* name) {
     return cls;
   }
   return loadMissing(ne, name);
+}
+
+namespace {
+void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
+  if (!RO::EvalEnforceModules || !cls || !caller) return;
+  if (will_symbol_raise_module_boundary_violation(cls, caller)) {
+    raiseModuleBoundaryViolation(cls, caller->moduleName());
+  }
+}
+} // namespace
+
+Class* Class::resolve(const NamedEntity* ne, const StringData* name,
+                      const Func* callerFunc) {
+  Class* cls = load(ne, name);
+  handleModuleBoundaryViolation(cls, callerFunc);
+  return cls;
+}
+
+Class* Class::resolve(const StringData* name, const Func* callerFunc) {
+  Class* cls = load(name);
+  handleModuleBoundaryViolation(cls, callerFunc);
+  return cls;
 }
 
 Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {

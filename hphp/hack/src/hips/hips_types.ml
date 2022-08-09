@@ -8,9 +8,9 @@
 
 module A = Ast_defs
 
-type param_entity = A.id_ * int
+type param_entity = A.id_ * int [@@deriving eq, ord, show]
 
-type entity = Param of param_entity
+type entity = Param of param_entity [@@deriving eq, ord, show]
 
 module type Intra = sig
   type intra_entity

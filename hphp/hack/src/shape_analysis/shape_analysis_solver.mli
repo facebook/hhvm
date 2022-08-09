@@ -7,8 +7,12 @@
  *)
 
 open Shape_analysis_types
+module HT = Hips_types
 
 val deduce : constraint_ list -> constraint_ list
 
 val produce_results :
   Typing_env_types.env -> constraint_ list -> shape_result list
+
+(** Equality of entity_ and HT.entity, which is embedded into the former *)
+val is_same_entity : HT.entity -> entity_ -> bool

@@ -9,4 +9,6 @@
  (libraries
   core_kernel
   ast)
+  (preprocess
+  (pps visitors.ppx ppx_deriving.std))
 )

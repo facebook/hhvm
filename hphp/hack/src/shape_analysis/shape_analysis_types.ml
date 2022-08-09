@@ -10,6 +10,7 @@ module A = Ast_defs
 module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
+module HT = Hips_types
 
 exception Shape_analysis_exn of string
 
@@ -33,6 +34,7 @@ type options = {
 type entity_ =
   | Literal of Pos.t
   | Variable of int
+  | Inter of HT.entity
 [@@deriving eq, ord]
 
 type entity = entity_ option

@@ -10,6 +10,7 @@ open Hh_prelude
 open Shape_analysis_types
 module T = Typing_defs
 module Logic = Shape_analysis_logic
+module HT = Hips_types
 
 type constraints = {
   markers: (marker_kind * Pos.t) list;
@@ -314,7 +315,9 @@ let produce_results
            match entity with
            | Literal pos ->
              Pos.Map.update pos (update_entity entity key ty) pos_map
-           | Variable _ -> pos_map)
+           | Variable _
+           | Inter _ ->
+             pos_map)
   in
 
   (* Convert to individual statically accessed dict results *)
@@ -335,3 +338,10 @@ let produce_results
   in
 
   static_shape_results @ dynamic_shape_results
+
+let is_same_entity (param_ent_1 : HT.entity) (ent : entity_) : bool =
+  match ent with
+  | Literal _
+  | Variable _ ->
+    false
+  | Inter param_ent_2 -> HT.equal_entity param_ent_1 param_ent_2

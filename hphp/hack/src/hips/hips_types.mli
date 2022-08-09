@@ -8,9 +8,9 @@
 
 module A = Ast_defs
 
-type param_entity = A.id_ * int
+type param_entity = A.id_ * int [@@deriving eq, ord, show]
 
-type entity = Param of param_entity
+type entity = Param of param_entity [@@deriving eq, ord, show]
 
 (** Domain-specific intra-procedural data that can be used to instantiate an
     inter-procedural constraint solver. Examples we have in mind include the

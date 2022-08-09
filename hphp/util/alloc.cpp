@@ -179,20 +179,6 @@ std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::BumpFileMapper* cold_file_mapper = nullptr;
 
-// Customized hooks to use 1g pages for jemalloc metadata.
-static extent_hooks_t huge_page_metadata_hooks;
-static extent_alloc_t* orig_alloc = nullptr;
-
-static bool enableArenaMetadata1GPage = false;
-static bool enableNumaArenaMetadata1GPage = false;
-// jemalloc metadata is allocated through the internal base allocator, which
-// expands memory with an increasingly larger sequence.  The default reserved
-// space (216MB)is a sum of the sequence, from 2MB to 40MB.
-static size_t a0MetadataReservedSize = 0;
-static std::atomic<bool> jemallocMetadataCanUseHuge(false);
-static void* a0ReservedBase = nullptr;
-static std::atomic<size_t> a0ReservedLeft(0);
-
 // Explicit per-thread tcache arenas needing it.
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
@@ -429,88 +415,6 @@ DefaultArena* next_extra_arena(int node) {
   auto counter = s_extra_arenas[n].second;
   auto const next = counter->fetch_add(1, std::memory_order_relaxed);
   return s_extra_arenas[n].first[next % s_extra_arena_per_node];
-}
-
-void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
-                             size_t size, size_t alignment, bool* zero,
-                             bool* commit, unsigned arena_ind) {
-  // This is used for arena 0's extent_alloc.  No malloc / free allowed within
-  // this function since reentrancy is not supported for a0's extent hooks.
-
-  // Note that, only metadata will use 2M alignment (size will be multiple of 2M
-  // as well). Aligned allocation doesn't require alignment by default, because
-  // of the way virtual memory is expanded with opt.retain (which is the
-  // default).  The current extent hook API has no other way to tell if the
-  // allocation is for metadata.  The next major jemalloc release will include
-  // this information in the API.
-  if (!jemallocMetadataCanUseHuge.load() || alignment != size2m) {
-    goto default_alloc;
-  }
-
-  assert(a0ReservedBase != nullptr && (size & (size2m - 1)) == 0);
-  if (arena_ind == 0) {
-    size_t oldValue;
-    while (size <= (oldValue = a0ReservedLeft.load())) {
-      // Try placing a0 metadata on 1G huge pages.
-      if (a0ReservedLeft.compare_exchange_weak(oldValue, oldValue - size)) {
-        assert((oldValue & (size2m - 1)) == 0);
-        return
-          reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(a0ReservedBase) +
-                                   (a0MetadataReservedSize - oldValue));
-      }
-    }
-  } else if (auto ma = alloc::highArena()) {
-    // For non arena 0: malloc / free allowed in this branch.
-    void* ret = ma->extent_alloc(extent_hooks, addr, size, alignment, zero,
-                                 commit, high_arena);
-    if (ret != nullptr) return ret;
-  }
-default_alloc:
-  return orig_alloc(extent_hooks, addr, size, alignment, zero,
-                    commit, arena_ind);
-}
-
-/*
- * Customize arena 0's extent hook to use 1g pages for metadata.
- */
-void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
-                                         size_t reserved) {
-#if !JEMALLOC_METADATA_1G_PAGES
-  return;
-#endif
-  assert(!jemallocMetadataCanUseHuge.load());
-  enableArenaMetadata1GPage = enable;
-  enableNumaArenaMetadata1GPage = enable_numa_arena;
-  a0MetadataReservedSize = reserved;
-
-  auto ma = alloc::highArena();
-  if (!ma) return;
-  bool retain_enabled = false;
-  mallctlRead("opt.retain", &retain_enabled);
-  if (!enableArenaMetadata1GPage || !retain_enabled) return;
-
-  bool zero = true, commit = true;
-  void* ret = ma->extent_alloc(nullptr, nullptr, a0MetadataReservedSize, size2m,
-                               &zero, &commit, high_arena);
-  if (!ret) return;
-
-  a0ReservedBase = ret;
-  a0ReservedLeft.store(a0MetadataReservedSize);
-
-  extent_hooks_t* orig_hooks;
-  int err = mallctlRead<extent_hooks_t*, true>("arena.0.extent_hooks",
-                                               &orig_hooks);
-  if (err) return;
-
-  orig_alloc = orig_hooks->alloc;
-  huge_page_metadata_hooks = *orig_hooks;
-  huge_page_metadata_hooks.alloc = &huge_page_extent_alloc;
-
-  err = mallctlWrite<extent_hooks_t*, true>("arena.0.extent_hooks",
-                                            &huge_page_metadata_hooks);
-  if (err) return;
-
-  jemallocMetadataCanUseHuge.store(true);
 }
 
 void arenas_thread_init() {

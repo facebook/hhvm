@@ -1126,12 +1126,6 @@ struct RuntimeOption {
   F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableCompactBacktrace, true)                                 \
   F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
-  /* Use 1G pages for jemalloc metadata. */                             \
-  F(bool, EnableArenaMetadata1GPage, false)                             \
-  /* Use 1G pages for jemalloc metadata (NUMA arenas if applicable). */ \
-  F(bool, EnableNumaArenaMetadata1GPage, false)                         \
-  /* Reserved space on 1G pages for jemalloc metadata (arena0). */      \
-  F(uint64_t, ArenaMetadataReservedSize, 216 << 20)                     \
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(bool, LogServerRestartStats, false)                                 \

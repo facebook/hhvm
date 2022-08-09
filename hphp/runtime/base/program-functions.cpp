@@ -1896,17 +1896,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 #endif
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (RuntimeOption::EvalEnableArenaMetadata1GPage) {
-    // Set up extent hook so that we can place jemalloc metadata on 1G pages.
-    // This needs to be done after initializing LightProcess (which forks),
-    // because the child process does malloc which won't work with jemalloc
-    // metadata on 1G huge pages.
-    setup_jemalloc_metadata_extent_hook(
-      RuntimeOption::EvalEnableArenaMetadata1GPage,
-      RuntimeOption::EvalEnableNumaArenaMetadata1GPage,
-      RuntimeOption::EvalArenaMetadataReservedSize
-    );
-  } else if (RuntimeOption::ServerExecutionMode()) {
+  if (RuntimeOption::ServerExecutionMode()) {
     purge_all();
     setup_arena0({RuntimeOption::EvalNum1GPagesForA0,
                   RuntimeOption::EvalNum2MPagesForA0});

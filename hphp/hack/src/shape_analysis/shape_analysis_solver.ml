@@ -350,7 +350,7 @@ let substitute_inter_intra
     (inter_constr : inter_constraint_) (intra_constr : constraint_) :
     constraint_ =
   match inter_constr with
-  | Arg (param_ent, intra_ent_1) ->
+  | HT.Arg (param_ent, intra_ent_1) ->
     let replace intra_ent_2 =
       if is_same_entity (HT.Param param_ent) intra_ent_2 then
         intra_ent_1
@@ -391,14 +391,14 @@ let equiv
       | _ -> None
     in
     match any_constr with
-    | Intra intra_constr ->
+    | HT.Intra intra_constr ->
       (match intra_constr with
       | Marks _ -> Some intra_constr
       | Has_static_key (ent, _, _) -> only_inter_ent intra_constr ent
       | Has_optional_key (ent, _) -> only_inter_ent intra_constr ent
       | Has_dynamic_key ent -> only_inter_ent intra_constr ent
       | _ -> None)
-    | Inter _ -> None
+    | HT.Inter _ -> None
   in
   ConstraintSet.equal
     (ConstraintSet.of_list

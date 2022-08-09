@@ -34,10 +34,10 @@ module Inter (I : Intra) = struct
     let substitute_inter_inter
         ~inter_constr_1 (inter_constr_2 : inter_constraint) : inter_constraint =
       match (inter_constr_1, inter_constr_2) with
-      | ( I.Arg (param_entity_left, intra_entity_left),
-          I.Arg (param_entity_right, intra_entity_right) ) ->
+      | ( Arg (param_entity_left, intra_entity_left),
+          Arg (param_entity_right, intra_entity_right) ) ->
         if I.is_same_entity (Param param_entity_left) intra_entity_right then
-          I.Arg (param_entity_right, intra_entity_left)
+          Arg (param_entity_right, intra_entity_left)
         else
           inter_constr_2
       (* TODO(T127947010) Add case for inter-procedural return constraint *)
@@ -46,18 +46,18 @@ module Inter (I : Intra) = struct
         (inter_constr_1 : inter_constraint) (constr : any_constraint) :
         any_constraint =
       match constr with
-      | I.Intra intra_constr ->
-        I.Intra (I.substitute_inter_intra inter_constr_1 intra_constr)
-      | I.Inter inter_constr_2 ->
-        I.Inter (substitute_inter_inter ~inter_constr_1 inter_constr_2)
+      | Intra intra_constr ->
+        Intra (I.substitute_inter_intra inter_constr_1 intra_constr)
+      | Inter inter_constr_2 ->
+        Inter (substitute_inter_inter ~inter_constr_1 inter_constr_2)
     in
     let substitute_any (constr : any_constraint) : any_constraint list =
       match constr with
-      | I.Intra _ -> [constr]
-      | I.Inter inter_constr ->
+      | Intra _ -> [constr]
+      | Inter inter_constr ->
         begin
           match inter_constr with
-          | I.Arg ((f, _), _) ->
+          | Arg ((f, _), _) ->
             let constr_list_at = SMap.find_opt f base_constraint_map in
             (match constr_list_at with
             | None -> []
@@ -79,8 +79,8 @@ module Inter (I : Intra) = struct
         let f (any_constraint : any_constraint) :
             (intra_constraint, inter_constraint) Base__.Either0.t =
           match any_constraint with
-          | I.Intra intra_constr -> First intra_constr
-          | I.Inter inter_constr -> Second inter_constr
+          | Intra intra_constr -> First intra_constr
+          | Inter inter_constr -> Second inter_constr
         in
         List.partition_map ~f any_constraint_list
       in
@@ -89,10 +89,10 @@ module Inter (I : Intra) = struct
             intra_constraint list * inter_constraint list) : any_constraint list
           =
         List.map
-          ~f:(fun intra_constr -> I.Intra intra_constr)
+          ~f:(fun intra_constr -> Intra intra_constr)
           intra_constraint_list
         @ List.map
-            ~f:(fun inter_constr -> I.Inter inter_constr)
+            ~f:(fun inter_constr -> Inter inter_constr)
             inter_constraint_list
       in
       destruct any_constraint_list

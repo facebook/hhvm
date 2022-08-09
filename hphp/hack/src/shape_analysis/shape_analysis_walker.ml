@@ -239,7 +239,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             Env.add_constraint env constraint_
           else
             let inter_constraint_ =
-              decorate ~origin:__LINE__ @@ Arg ((f_id, arg_idx), arg_entity_)
+              decorate ~origin:__LINE__ @@ HT.Arg ((f_id, arg_idx), arg_entity_)
             in
             Env.add_inter_constraint env inter_constraint_
         in

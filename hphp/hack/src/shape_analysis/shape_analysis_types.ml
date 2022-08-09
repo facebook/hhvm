@@ -68,7 +68,7 @@ type constraint_ =
     }
 [@@deriving ord]
 
-type inter_constraint_ = Arg of HT.param_entity * entity_
+type inter_constraint_ = entity_ HT.inter_constraint_
 
 type shape_result =
   | Shape_like_dict of Pos.t * marker_kind * shape_keys
@@ -130,6 +130,4 @@ type log_event =
       error_message: string;
     }
 
-type any_constraint =
-  | Intra of constraint_
-  | Inter of inter_constraint_
+type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_

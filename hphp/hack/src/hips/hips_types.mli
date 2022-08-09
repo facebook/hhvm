@@ -12,6 +12,12 @@ type param_entity = A.id_ * int [@@deriving eq, ord, show]
 
 type entity = Param of param_entity [@@deriving eq, ord, show]
 
+type ('a, 'b) any_constraint_ =
+  | Intra of 'a
+  | Inter of 'b
+
+type 'a inter_constraint_ = Arg of param_entity * 'a
+
 (** Domain-specific intra-procedural data that can be used to instantiate an
     inter-procedural constraint solver. Examples we have in mind include the
     shape-like-dict analysis and the detection of function upcasts to dynamic. *)
@@ -26,13 +32,11 @@ module type Intra = sig
   (** Inter-procedural constraints type, e.g. "Arg("f", 1, q)" for f(_, q, _).
       TODO(T127947010): Add inter-procedural return type, e.g. "Ret(f, p)", if
       the function f returns p. *)
-  type inter_constraint = Arg of param_entity * intra_entity
+  type inter_constraint = intra_entity inter_constraint_
 
   (** The union of inter- and intra-procedural constraint types. For example,
       "Intra Has_static_key(f0, 'a', int)" or "Inter Arg("f", 1, p)". *)
-  type any_constraint =
-    | Intra of intra_constraint
-    | Inter of inter_constraint
+  type any_constraint = (intra_constraint, inter_constraint) any_constraint_
 
   (** Verifies whether an entity is the nth argument of a given function.
       For instance, calling with ("f", 0) and "p" should result in "true",

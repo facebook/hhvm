@@ -658,7 +658,7 @@ struct FactsStoreImpl final
         });
   }
 
-  Optional<String> getModuleFile(const String& module) override {
+  Optional<String> getModuleFile(const String& module) override { // NOLINT
     // TODO(T121190265)
     return std::nullopt;
   }
@@ -699,7 +699,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<fs::path> getModuleFile(std::string_view name) override {
+  Optional<fs::path> getModuleFile(std::string_view name) override { // NOLINT
     // TODO(T121190265)
     return std::nullopt;
   }
@@ -732,7 +732,7 @@ struct FactsStoreImpl final
     });
   }
 
-  Array getFileModules(const String& path) override {
+  Array getFileModules(const String& path) override { // NOLINT
     // TODO(T121190265)
     return Array{};
   }

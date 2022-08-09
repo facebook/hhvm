@@ -182,6 +182,12 @@ void createSchema(SQLiteTxn& txn) {
            " attribute_value TEXT NULL,"
            " UNIQUE (pathid, attribute_name, attribute_position)"
            ")");
+
+  txn.exec("CREATE TABLE IF NOT EXISTS file_modules ("
+           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+           " module_name TEXT NOT NULL,"
+           " UNIQUE (pathid, module_name)"
+           ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -232,6 +238,10 @@ void rebuildIndices(SQLiteTxn& txn) {
   txn.exec("CREATE INDEX IF NOT EXISTS "
            "file_attributes__attribute_name__pathid__attribute_position"
            " ON file_attributes (attribute_name, pathid, attribute_position)");
+
+  // file_modules
+  txn.exec("CREATE INDEX IF NOT EXISTS file_modules__module_name"
+           " ON file_modules (module_name)");
 }
 
 TypeKind toTypeKind(const std::string_view kind) {
@@ -524,6 +534,26 @@ struct ConstantStmts {
   SQLiteStmt m_getAll;
 };
 
+struct ModuleStmts {
+  explicit ModuleStmts(SQLite& db)
+      : m_insert{db.prepare(
+            "INSERT OR IGNORE INTO file_modules (pathid, module_name) VALUES("
+            " (SELECT pathid FROM all_paths WHERE path=@path),"
+            " @module_name"
+            ")")}
+      , m_getModulePath{db.prepare("SELECT path FROM file_modules"
+                                   " JOIN all_paths USING (pathid)"
+                                   " WHERE module_name=@module_name")}
+      , m_getPathModules{db.prepare("SELECT module_name FROM file_modules"
+                                    " JOIN all_paths USING (pathid)"
+                                    " WHERE path=@path")} {
+  }
+
+  SQLiteStmt m_insert;
+  SQLiteStmt m_getModulePath;
+  SQLiteStmt m_getPathModules;
+};
+
 struct ClockStmts {
   explicit ClockStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -545,6 +575,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       , m_fileStmts{m_db}
       , m_functionStmts{m_db}
       , m_constantStmts{m_db}
+      , m_moduleStmts{m_db}
       , m_clockStmts{m_db} {
   }
 
@@ -1111,6 +1142,38 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return constants;
   }
 
+  void insertModule(std::string_view module, const fs::path& path) override {
+    assertx(path.is_relative());
+    auto query = m_txn.query(m_moduleStmts.m_insert);
+    query.bindString("@module_name", module);
+    query.bindString("@path", path.native());
+    XLOGF(DBG9, "Running {}", query.sql());
+    query.step();
+  }
+
+  std::vector<fs::path> getModulePath(std::string_view module) override {
+    auto query = m_txn.query(m_moduleStmts.m_getModulePath);
+    query.bindString("@module_name", module);
+    std::vector<fs::path> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.emplace_back(std::string{query.getString(0)});
+    }
+    return results;
+  }
+
+  std::vector<std::string> getPathModules(const fs::path& path) override {
+    assertx(path.is_relative());
+    auto query = m_txn.query(m_moduleStmts.m_getPathModules);
+    query.bindString("@path", path.native());
+    std::vector<std::string> modules;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      modules.emplace_back(query.getString(0));
+    }
+    return modules;
+  }
+
   MultiResult<PathAndHash> getAllPathsAndHashes() override {
     auto query = m_txn.query(m_pathStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
@@ -1214,6 +1277,7 @@ private:
   FileStmts m_fileStmts;
   FunctionStmts m_functionStmts;
   ConstantStmts m_constantStmts;
+  ModuleStmts m_moduleStmts;
   ClockStmts m_clockStmts;
 };
 

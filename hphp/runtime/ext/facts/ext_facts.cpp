@@ -79,7 +79,7 @@ namespace {
 
 // SQLFacts version number representing the DB's schema. We change this number
 // when we make a breaking change to the DB's contents or schema.
-constexpr size_t kSchemaVersion = 3413321234;
+constexpr size_t kSchemaVersion = 1916337637;
 
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";
 constexpr std::string_view kSchemaPlaceholder = "%{schema}";

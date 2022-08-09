@@ -220,6 +220,14 @@ public:
   virtual std::vector<std::string>
   getPathConstants(const std::filesystem::path& path) = 0;
 
+  // Modules
+  virtual void
+  insertModule(std::string_view module, const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path>
+  getModulePath(std::string_view module) = 0;
+  virtual std::vector<std::string>
+  getPathModules(const std::filesystem::path& path) = 0;
+
   /**
    * Return a list of all paths defined in the given root, as absolute paths.
    *

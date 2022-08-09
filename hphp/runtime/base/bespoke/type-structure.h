@@ -37,6 +37,7 @@
  *      1-byte m_extra_lo8 field for boolean fields
  *      1-byte m_extra_hi8 field for the fields byte
  *      2-byte bespoke::LayoutIndex (only high byte is used)
+ *  8-byte m_raw_positions field
  *  1-byte m_kind field
  *  8-byte m_alias field
  *  8-byte m_typevars field
@@ -88,18 +89,19 @@ using Kind = HPHP::TypeStructure::Kind;
  *   - Field : name of the method to call to access the field in TypeStructure
  *   - FieldString : static string name of the field
  *   - DataType : DataType for the field as a TypedValue
+ *   - Pos : the position value of the field for m_raw_positions
  */
 
-#define TYPE_STRUCTURE_FIELDS                                \
-  X(nullable,           nullable,             KindOfBoolean) \
-  X(soft,               soft,                 KindOfBoolean) \
-  X(like,               like,                 KindOfBoolean) \
-  X(opaque,             opaque,               KindOfBoolean) \
-  X(optionalShapeField, optional_shape_field, KindOfBoolean) \
-  X(kind,               kind,                 KindOfInt64)   \
-  X(alias,              alias,                KindOfString)  \
-  X(typevars,           typevars,             KindOfString)  \
-  X(typevarTypes,       typevar_types,        KindOfDict)
+#define TYPE_STRUCTURE_FIELDS                                     \
+  X(nullable,           nullable,             KindOfBoolean,  1)  \
+  X(soft,               soft,                 KindOfBoolean,  2)  \
+  X(like,               like,                 KindOfBoolean,  3)  \
+  X(opaque,             opaque,               KindOfBoolean,  4)  \
+  X(optionalShapeField, optional_shape_field, KindOfBoolean,  5)  \
+  X(kind,               kind,                 KindOfInt64,    6)  \
+  X(alias,              alias,                KindOfString,   7)  \
+  X(typevars,           typevars,             KindOfString,   8)  \
+  X(typevarTypes,       typevar_types,        KindOfDict,     9)
 
 /*
  * The following _FIELDS macros describe properties for each field belonging
@@ -110,31 +112,32 @@ using Kind = HPHP::TypeStructure::Kind;
  *   - Type : type of the field
  *   - DataType : DataType for the field as a TypedValue
  *   - Struct : child struct the field belongs to
- *   - FieldsByteffset : the offset that indicates the field group in kFieldsByte
+ *   - FieldsByteOffset : the offset that indicates the field group in kFieldsByte
+ *   - Pos : the position value of the field for m_raw_positions
  */
 
 #define TSSHAPE_FIELDS(X)                                                   \
-  X(fields,                 ArrayData*,   KindOfDict,     TSShape, 1)       \
-  X(allows_unknown_fields,  bool,         KindOfBoolean,  TSShape, 1)
+  X(fields,                 ArrayData*,   KindOfDict,     TSShape, 1, 10)       \
+  X(allows_unknown_fields,  bool,         KindOfBoolean,  TSShape, 1, 11)
 
 #define TSTUPLE_FIELDS(X)                                                   \
-  X(elem_types,             ArrayData*,   KindOfVec,      TSTuple, 2)       \
+  X(elem_types,             ArrayData*,   KindOfVec,      TSTuple, 2, 10)       \
 
 #define TSFUN_FIELDS(X)                                                     \
-  X(param_types,            ArrayData*,   KindOfVec,      TSFun, 3)         \
-  X(return_type,            ArrayData*,   KindOfDict,     TSFun, 3)         \
-  X(variadic_type,          ArrayData*,   KindOfDict,     TSFun, 3)         \
+  X(param_types,            ArrayData*,   KindOfVec,      TSFun, 3, 10)         \
+  X(return_type,            ArrayData*,   KindOfDict,     TSFun, 3, 11)         \
+  X(variadic_type,          ArrayData*,   KindOfDict,     TSFun, 3, 12)         \
 
 #define TSTYPEVAR_FIELDS(X)                                                 \
-  X(name,             StringData*,  KindOfString,   TSTypevar, 4)
+  X(name,             StringData*,  KindOfString,   TSTypevar, 4, 10)
 
 #define TSGENERIC_FIELDS(X)                                                 \
-  X(generic_types,    ArrayData*,   KindOfVec,      TSWithGenericTypes, 5)  \
+  X(generic_types,    ArrayData*,   KindOfVec,      TSWithGenericTypes, 5, 10)  \
 
 #define TSCLASSISH_FIELDS(X)                                                \
-  X(generic_types,    ArrayData*,   KindOfVec,      TSWithClassishTypes, 5) \
-  X(classname,        StringData*,  KindOfString,   TSWithClassishTypes, 6) \
-  X(exact,            bool,         KindOfBoolean,  TSWithClassishTypes, 6)
+  X(generic_types,    ArrayData*,   KindOfVec,      TSWithClassishTypes, 5, 10) \
+  X(classname,        StringData*,  KindOfString,   TSWithClassishTypes, 6, 11) \
+  X(exact,            bool,         KindOfBoolean,  TSWithClassishTypes, 6, 12)
 
 #define TYPE_STRUCTURE_CHILDREN_FIELDS                    \
   TSSHAPE_FIELDS(X)                                       \
@@ -149,15 +152,14 @@ using Kind = HPHP::TypeStructure::Kind;
   void decRefFields();                                                  \
   bool containsField(const StringData* k) const;                        \
   bool checkInvariants() const;                                         \
-  void moveFieldsToVanilla(ArrayData* ad) const;                        \
   static TypedValue tsNvGetStr(const T* tad, const StringData* k);      \
-  static TypedValue tsGetPosKey(const T* tad, ssize_t pos);             \
-  static TypedValue tsGetPosVal(const T* tad, ssize_t pos);             \
   static void scan(const T* tad, type_scan::Scanner& scanner);          \
   static void initializeFields(T* tad);                                 \
   static bool setField(T* tad, StringData* k, TypedValue v);            \
   static void convertToUncounted(T* tad, const MakeUncountedEnv& env);  \
   static void releaseUncounted(T* tad);                                 \
+  static TypedValue getKeyFromPositionValue(const T* tad, int value);   \
+  static TypedValue getValFromPositionValue(const T* tad, int value);   \
   static size_t getFieldOffset(const StringData* k);                    \
   static int countFields(const ArrayData* ad);                          \
   static void onSetEvalScalar(T* tad);
@@ -225,6 +227,8 @@ struct TypeStructure : BespokeArray {
   };
 
   static constexpr uint8_t kFieldsByte = kTypeStructureFieldsByte;
+  static constexpr uint8_t kMaxPositionValue = 9;
+  static constexpr uint8_t kMaxPossibleFields = 12;
 
   static constexpr size_t kindOffset() {
     static_assert(folly::kIsLittleEndian);
@@ -261,6 +265,15 @@ struct TypeStructure : BespokeArray {
   StringData* typevars() const { return m_typevars; }
   ArrayData* typevarTypes() const { return m_typevar_types; }
   uint8_t fieldsByte() const { return m_extra_hi8; }
+  int8_t getPositionValue(int pos) const {
+    if (pos > kMaxPossibleFields) return 0;
+    return m_raw_positions >> (pos * 4) & 0xf;
+  }
+  void setIterationPosition(StringData* field, int i) {
+    auto pos = getPositionValueFromField(field);
+    assertx(0 <= pos && pos < 0xf);
+    m_raw_positions |= pos << (i * 4);
+  }
 
 private:
   static size_t sizeIndex(Kind);
@@ -272,6 +285,32 @@ private:
   bool containsField(const StringData* k) const;
 
   static TypedValue tsNvGetStr(const TypeStructure* tad, const StringData* k);
+  static int8_t getPositionValueFromField(StringData* field);
+
+  /*
+   * m_raw_positions is used to store the order in which fields are added to
+   * the type structure. This order needs to be preserved for iteration and
+   * escalation purposes.
+   *
+   * m_raw_positions is divided into 4-bit chunks, and the value in each chunk
+   * represents a field on the type structure. The position value that maps to
+   * each field is defined in the _FIELDS macros. The insertion order is stored
+   * from the lowest to highest bit, so the lowest bit represents the field
+   * that was added first.
+   *
+   * This is just a packed integer array for memory efficiency.
+   *
+   * m_raw_positions  ->
+   *   |  ...  |  0111  |  0001  |  0110  |
+   *                         ^        ^
+   *                         |       lowest bit, field was inserted first
+   *                         |       value is 0110, so inserted field is 'kind'
+   *                         |
+   *                        field inserted second
+   *
+   * A value of 0 indicates nothing was inserted at that position.
+   */
+  int64_t m_raw_positions;
 
   uint8_t m_kind;
   StringData* m_alias;

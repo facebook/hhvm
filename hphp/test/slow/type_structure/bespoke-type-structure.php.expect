@@ -63,6 +63,21 @@ dict(1) {
   }
 }
 int(1)
+dict(4) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+  ["generic_types"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+  ["alias"]=>
+  string(8) "FooClass"
+}
 int(15)
 string(3) "Foo"
 vec(1) {
@@ -93,4 +108,28 @@ dict(1) {
     ["kind"]=>
     int(1)
   }
+}
+dict(5) {
+  ["soft"]=>
+  bool(true)
+  ["like"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(10) "FooSoftInt"
+}
+dict(5) {
+  ["like"]=>
+  bool(true)
+  ["soft"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(10) "FooLikeInt"
 }

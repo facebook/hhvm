@@ -89,9 +89,10 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(tvAlias.m_type == KindOfUninit);
   }
   {
-    Array arr = Array::CreateDict();
-    arr.set(Variant{"kind"}, kindInt);
-    arr.set(Variant{"soft"}, Variant{true});
+    Array arr = make_dict_array(
+      "soft", true,
+      "kind", int8_t(Kind::T_shape)
+    );
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
     auto tv = bespoke::TypeStructure::GetPosKey(ts, 0);
     EXPECT_TRUE(isStringType(tv.m_type));
@@ -100,18 +101,20 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(tvUninit.m_type == KindOfUninit);
   }
   {
-    Array arr = Array::CreateDict();
-    arr.set(Variant{"kind"}, kindInt);
-    arr.set(Variant{"soft"}, Variant{true});
+    Array arr = make_dict_array(
+      "soft", true,
+      "kind", int8_t(Kind::T_shape)
+    );
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
     auto tv = bespoke::TypeStructure::GetPosVal(ts, 0);
     EXPECT_TRUE(tv.m_type == KindOfBoolean);
     EXPECT_TRUE(val(tv).num == 1);
   }
   {
-    Array arr = Array::CreateDict();
-    arr.set(Variant{"kind"}, kindInt);
-    arr.set(Variant{"alias"}, Variant{t});
+    Array arr = make_dict_array(
+      "kind", int8_t(Kind::T_shape),
+      "alias", t
+    );
     auto ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
     auto tvKey = bespoke::TypeStructure::GetPosKey(ts, 1);
     EXPECT_TRUE(isStringType(tvKey.m_type));

@@ -55,12 +55,10 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
 void moveFieldToVanilla(ArrayData* vad, StringData* key, TypedValue tv) {
   auto const type = tv.m_type;
-  if (type == KindOfUninit || (type == KindOfBoolean && !val(tv).num)) {
-    return;
-  }
+  if (type == KindOfUninit) return;
   auto const res = VanillaDict::SetStrMove(vad, key, tv);
   assertx(vad == res);
-  if (isRefcountedType(type)) tvIncRefGen(tv);
+  tvIncRefGen(tv);
   vad = res;
 }
 
@@ -141,6 +139,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   tad->m_kind = uint8_t(kind);
   tad->m_extra_hi8 = TypeStructure::kFieldsByte;
   tad->m_extra_lo8 = 0;
+  tad->m_raw_positions = 0;
   tad->m_alias = nullptr;
   tad->m_typevars = nullptr;
   tad->m_typevar_types = nullptr;
@@ -162,15 +161,17 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
 template <typename Type>
 size_t setFields(Type* ts, ArrayData* ad) {
-  auto fields = 0;
+  auto i = 0;
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) {
     assertx(tvIsString(k));
-    if (Type::setField(ts, val(k).pstr, v)) {
-      fields++;
+    auto const fieldKey = val(k).pstr;
+    if (Type::setField(ts, fieldKey, v)) {
+      ts->setIterationPosition(fieldKey, i);
       tvIncRefGen(v);
+      i++;
     }
   });
-  return fields;
+  return i;
 }
 
 void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
@@ -207,6 +208,18 @@ bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
   return true;
 }
 
+int8_t TypeStructure::getPositionValueFromField(StringData* field) {
+#define X(Field, FieldString, KindOfType, Pos) \
+  if (s_##FieldString.same(field)) return Pos;
+TYPE_STRUCTURE_FIELDS
+#undef X
+#define X(Field, Type, KindOfType, Struct, FieldsByteOffset, Pos) \
+  if (s_##Field.same(field)) return Pos;
+TYPE_STRUCTURE_CHILDREN_FIELDS
+#undef X
+  return 0;
+}
+
 TypeStructure* TypeStructure::MakeFromVanilla(
     ArrayData* ad, bool forceNonStatic) {
   if (!ad->isVanillaDict() || !ad->exists(s_kind)) return nullptr;
@@ -217,12 +230,18 @@ TypeStructure* TypeStructure::MakeFromVanilla(
     ? MakeReserve<true>(ad->isLegacyArray(), kind)
     : MakeReserve<false>(ad->isLegacyArray(), kind);
 
-  auto size = setFields<TypeStructure>(result, ad);
+  auto size = 0;
 
   switch (kind) {
 #define X(Name, Type) \
+  case Kind::T_##Name:
+TYPE_STRUCTURE_KINDS
+#undef X
+    size = setFields<TypeStructure>(result, ad); \
+    break;
+#define X(Name, Type) \
   case Kind::T_##Name: \
-    size += setFields<Type>(reinterpret_cast<Type*>(result), ad); \
+    size = setFields<Type>(reinterpret_cast<Type*>(result), ad); \
     break;
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
@@ -278,7 +297,7 @@ bool TypeStructure::isValidTypeStructure(const ArrayData* ad) {
 
   // check that the key exists and that the type matches
   auto fields = 0;
-#define X(Field, FieldString, KindOfType)                             \
+#define X(Field, FieldString, KindOfType, ...)                        \
   if (ad->exists(s_##FieldString) &&                                  \
       equivDataTypes(ad->get(s_##FieldString).type(), KindOfType)) {  \
     fields++;                                                         \
@@ -314,24 +333,10 @@ ArrayData* TypeStructure::escalateWithCapacity(
   auto ad = VanillaDict::MakeReserveDict(capacity);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
-  // move base TypeStructure fields
-#define X(Field, FieldString, KindOfType) {                           \
-  auto const key = s_##FieldString.get();                             \
-  auto const tv = make_tv_safe(Field());                              \
-  moveFieldToVanilla(ad, key, tv);                                    \
-}
-TYPE_STRUCTURE_FIELDS
-#undef X
-
-  // move any remaining children fields
-  switch (typeKind()) {
-#define X(Name, Type) \
-  case Kind::T_##Name: \
-    reinterpret_cast<const Type*>(this)->moveFieldsToVanilla(ad); \
-    break;
-TYPE_STRUCTURE_CHILDREN_KINDS
-#undef X
-    default: break;
+  for (auto i = 0; i < m_size; i++) {
+    auto const keyTV = GetPosKey(this, i);
+    auto const valTV = GetPosVal(this, i);
+    moveFieldToVanilla(ad, keyTV.val().pstr, valTV);
   }
 
   assertx(isValidTypeStructure(ad));
@@ -415,7 +420,7 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 }
 
 bool TypeStructure::containsField(const StringData* k) const {
-#define X(Field, FieldString, KindOfType) \
+#define X(Field, FieldString, KindOfType, ...) \
   if (s_##FieldString.same(k)) return true;
 TYPE_STRUCTURE_FIELDS
 #undef X
@@ -433,12 +438,12 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
 std::pair<DataType, uint8_t> TypeStructure::getFieldPair(const StringData* k) {
   // fields in base TypeStructure always exist and are represented by offset 0
-#define X(Field, FieldString, KindOfType) \
+#define X(Field, FieldString, KindOfType, ...) \
   if (s_##FieldString.same(k)) return {KindOfType, 0};
   TYPE_STRUCTURE_FIELDS
 #undef X
 
-#define X(Field, Type, KindOfType, Struct, FieldsByteOffset) \
+#define X(Field, Type, KindOfType, Struct, FieldsByteOffset, ...) \
   if (s_##Field.same(k)) return {KindOfType, FieldsByteOffset};
   TYPE_STRUCTURE_CHILDREN_FIELDS
 #undef X
@@ -599,7 +604,7 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 
 TypedValue TypeStructure::tsNvGetStr(
     const TypeStructure* tad, const StringData* k) {
-#define X(Field, FieldString, KindOfType)                             \
+#define X(Field, FieldString, ...)                                    \
   if (s_##FieldString.same(k)) {                                      \
     return make_tv_safe(tad->Field());                                \
   }
@@ -609,42 +614,53 @@ TYPE_STRUCTURE_FIELDS
 }
 
 TypedValue TypeStructure::GetPosKey(const TypeStructure* tad, ssize_t pos) {
-#define X(Field, FieldString, KindOfType)                             \
-  if ((isIntType(KindOfType) || tad->Field()) && pos-- == 0) {        \
-    return make_tv<KindOfPersistentString>(s_##FieldString.get());    \
-  }
+  auto const fieldPosVal = tad->getPositionValue(pos);
+  if (fieldPosVal == 0) return make_tv<KindOfUninit>();
+
+  if (fieldPosVal <= TypeStructure::kMaxPositionValue) {
+    switch (fieldPosVal) {
+#define X(Field, FieldString, KindOfType, Value) \
+      case Value: \
+        return make_tv<KindOfPersistentString>(s_##FieldString.get());
 TYPE_STRUCTURE_FIELDS
 #undef X
+    }
+  }
 
   switch (tad->typeKind()) {
 #define X(Name, Type) \
     case Kind::T_##Name: \
-      return Type::tsGetPosKey(reinterpret_cast<const Type*>(tad), pos);
+      return Type::getKeyFromPositionValue(reinterpret_cast<const Type*>(tad), fieldPosVal);
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
     default: break;
   }
-
   return make_tv<KindOfUninit>();
 }
 
 TypedValue TypeStructure::GetPosVal(const TypeStructure* tad, ssize_t pos) {
-#define X(Field, FieldString, KindOfType)                             \
-  if ((isIntType(KindOfType) || tad->Field()) && pos-- == 0) {        \
-    return make_tv_safe(tad->Field());                                \
+  auto const fieldPosVal = tad->getPositionValue(pos);
+  if (fieldPosVal == 0) return make_tv<KindOfUninit>();
+
+  if (fieldPosVal <= TypeStructure::kMaxPositionValue) {
+    switch (fieldPosVal) {
+  #define X(Field, FieldString, KindOfType, Value) \
+      case Value: \
+        return make_tv_safe(tad->Field());
+  TYPE_STRUCTURE_FIELDS
+  #undef X
+      default: break;
+    }
   }
-TYPE_STRUCTURE_FIELDS
-#undef X
 
   switch (tad->typeKind()) {
 #define X(Name, Type) \
     case Kind::T_##Name: \
-      return Type::tsGetPosVal(reinterpret_cast<const Type*>(tad), pos);
+      return Type::getValFromPositionValue(reinterpret_cast<const Type*>(tad), fieldPosVal);
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
     default: break;
   }
-
   return make_tv<KindOfUninit>();
 }
 
@@ -855,20 +871,6 @@ void setEvalScalar(ArrayData*& field) {
 #define MAKE_TV_FIELD(Field, ...)                                           \
   if (s_##Field.same(k)) return make_tv_safe(tad->m_##Field);
 
-#define GET_POS_KEY(Field, ...)                                             \
-  if (tad->m_##Field && pos-- == 0) {                                       \
-    return make_tv<KindOfPersistentString>(s_##Field.get());                \
-  }
-
-#define GET_POS_VAL(Field, ...)                                             \
-  if (tad->m_##Field && pos-- == 0) {                                       \
-    return make_tv_safe(tad->m_##Field);                                    \
-  }
-
-#define MOVE_FIELD_TO_VANILLA(Field, Type, KindOfType, ...) {               \
-  auto const tv = make_tv_safe(m_##Field);                                  \
-  moveFieldToVanilla(ad, s_##Field.get(), tv);                              \
-}
 #define CONTAINS_FIELD(Field, Type, ...)                                    \
   if (s_##Field.same(k)) return true;
 
@@ -882,6 +884,12 @@ void setEvalScalar(ArrayData*& field) {
 #define SCAN_FIELD(Field, Type, ...) scanField<Type>(tad->m_##Field, scanner);
 #define INC_REF_FIELD(Field, Type, ...) incRefField<Type>(m_##Field);
 #define DEC_REF_FIELD(Field, Type, ...) decRefField<Type>(m_##Field);
+
+#define GET_KEY_FROM_POS(Field, Type, KindOfType, Struct, FieldsByteOffset, Pos) \
+  if (value == Pos) return make_tv<KindOfPersistentString>(s_##Field.get());
+
+#define GET_VAL_FROM_POS(Field, Type, KindOfType, Struct, FieldsByteOffset, Pos) \
+  if (value == Pos) return make_tv_safe(tad->m_##Field);
 
 #define GET_FIELD_OFFSET(Field, Type, KindOfType, Struct, ...)              \
   if (s_##Field.same(k)) return offsetof(Struct, m_##Field);
@@ -899,17 +907,6 @@ void setEvalScalar(ArrayData*& field) {
 TypedValue ChildStruct::tsNvGetStr(const ChildStruct* tad, const StringData* k) { \
   FieldsMacro(MAKE_TV_FIELD)                                                \
   return make_tv<KindOfUninit>();                                           \
-}                                                                           \
-TypedValue ChildStruct::tsGetPosKey(const ChildStruct* tad, ssize_t pos) {  \
-  FieldsMacro(GET_POS_KEY)                                                  \
-  return make_tv<KindOfUninit>();                                           \
-}                                                                           \
-TypedValue ChildStruct::tsGetPosVal(const ChildStruct* tad, ssize_t pos) {  \
-  FieldsMacro(GET_POS_VAL)                                                  \
-  return make_tv<KindOfUninit>();                                           \
-}                                                                           \
-void ChildStruct::moveFieldsToVanilla(ArrayData* ad) const {                \
-  FieldsMacro(MOVE_FIELD_TO_VANILLA)                                        \
 }                                                                           \
 void ChildStruct::convertToUncounted(ChildStruct* tad, const MakeUncountedEnv& env) { \
   FieldsMacro(CONVERT_TO_UNCOUNTED)                                         \
@@ -932,6 +929,14 @@ void ChildStruct::decRefFields() {                                          \
 bool ChildStruct::containsField(const StringData* k) const {                \
   FieldsMacro(CONTAINS_FIELD)                                               \
   return false;                                                             \
+}                                                                           \
+TypedValue ChildStruct::getKeyFromPositionValue(const ChildStruct* tad, int value) { \
+  FieldsMacro(GET_KEY_FROM_POS)                                             \
+  return make_tv<KindOfUninit>();                                           \
+}                                                                           \
+TypedValue ChildStruct::getValFromPositionValue(const ChildStruct* tad, int value) { \
+  FieldsMacro(GET_VAL_FROM_POS)                                             \
+  return make_tv<KindOfUninit>();                                           \
 }                                                                           \
 size_t ChildStruct::getFieldOffset(const StringData* k) {                   \
   FieldsMacro(GET_FIELD_OFFSET)                                             \
@@ -956,16 +961,17 @@ O(TSWithGenericTypes, TSGENERIC_FIELDS)
 #undef O
 
 #undef MAKE_TV_FIELD
-#undef GET_POS_KEY
-#undef GET_POS_VAL
-#undef MOVE_FIELD_TO_VANILLA
-#undef CONTAINS_FIELD
 #undef CONVERT_TO_UNCOUNTED
 #undef RELEASE_UNCOUNTED
 #undef INITIALIZE_FIELD
 #undef SCAN_FIELD
 #undef INC_REF_FIELD
 #undef DEC_REF_FIELD
+#undef CONTAINS_FIELD
+#undef GET_KEY_FROM_POS
+#undef GET_VAL_FROM_POS
+#undef GET_FIELD_OFFSET
+#undef COUNT_FIELDS
 #undef SET_EVAL_SCALAR
 
 bool TSShape::checkInvariants() const {
@@ -1013,7 +1019,7 @@ bool TSShape::setField(TSShape* tad, StringData* k, TypedValue v) {
     assertx(tvIsBool(v));
     tad->m_allows_unknown_fields = val(v).num;
   } else {
-    return false;
+    return TypeStructure::setField(tad, k, v);
   }
   return true;
 }
@@ -1022,7 +1028,7 @@ bool TSTuple::setField(TSTuple* tad, StringData* k, TypedValue v) {
     setArrayField(tad->m_elem_types, v);
     return true;
   }
-  return false;
+  return TypeStructure::setField(tad, k, v);
 }
 bool TSFun::setField(TSFun* tad, StringData* k, TypedValue v) {
   if (s_param_types.same(k)) {
@@ -1032,7 +1038,7 @@ bool TSFun::setField(TSFun* tad, StringData* k, TypedValue v) {
   } else if (s_variadic_type.same(k)) {
     setArrayField(tad->m_variadic_type, v);
   } else {
-    return false;
+    return TypeStructure::setField(tad, k, v);
   }
   return true;
 }
@@ -1041,7 +1047,7 @@ bool TSTypevar::setField(TSTypevar* tad, StringData* k, TypedValue v) {
     setStringField(tad->m_name, v);
     return true;
   }
-  return false;
+  return TypeStructure::setField(tad, k, v);
 }
 bool TSWithClassishTypes::setField(TSWithClassishTypes* tad, StringData* k, TypedValue v) {
   if (s_generic_types.same(k)) {
@@ -1052,7 +1058,7 @@ bool TSWithClassishTypes::setField(TSWithClassishTypes* tad, StringData* k, Type
     assertx(tvIsBool(v));
     tad->m_exact = val(v).num;
   } else {
-    return false;
+    return TypeStructure::setField(tad, k, v);
   }
   return true;
 }
@@ -1061,7 +1067,7 @@ bool TSWithGenericTypes::setField(TSWithGenericTypes* tad, StringData* k, TypedV
     setArrayField(tad->m_generic_types, v);
     return true;
   }
-  return false;
+  return TypeStructure::setField(tad, k, v);
 }
 
 //////////////////////////////////////////////////////////////////////////////

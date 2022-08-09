@@ -1,6 +1,23 @@
 int(14)
 dict(0) {
 }
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["a"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+    ["b"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
 int(14)
 dict(2) {
   ["a"]=>
@@ -23,6 +40,20 @@ bool(true)
 string(6) "FooInt"
 int(1)
 bool(true)
+dict(3) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(15) "FooTypevarTypes"
+  ["typevar_types"]=>
+  dict(1) {
+    ["F"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
 string(15) "FooTypevarTypes"
 dict(1) {
   ["F"]=>
@@ -54,3 +85,12 @@ vec(2) {
 int(2)
 int(1)
 bool(true)
+int(15)
+int(14)
+dict(1) {
+  ["T"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}

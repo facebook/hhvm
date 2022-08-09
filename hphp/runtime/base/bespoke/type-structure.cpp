@@ -75,6 +75,32 @@ void setArrayField(ArrayData*& field, TypedValue v) {
   field = val(v).parr;
 }
 
+TypedValue make_tv_safe(uint8_t val) {
+  return make_tv<KindOfInt64>(val);
+}
+TypedValue make_tv_safe(bool val) {
+  // to match the current behaviour of type structures
+  return val ? make_tv<KindOfBoolean>(true) : make_tv<KindOfUninit>();
+}
+TypedValue make_tv_safe(StringData* val) {
+  if (val == nullptr) return make_tv<KindOfUninit>();
+  return val->isStatic()
+    ? make_tv<KindOfPersistentString>(val)
+    : make_tv<KindOfString>(val);
+}
+TypedValue make_tv_safe(ArrayData* val) {
+  if (val == nullptr) return make_tv<KindOfUninit>();
+  if (val->isDictType()) {
+    return val->isStatic()
+      ? make_tv<KindOfPersistentDict>(val)
+      : make_tv<KindOfDict>(val);
+  }
+  assertx(val->isVecType());
+  return val->isStatic()
+    ? make_tv<KindOfPersistentVec>(val)
+    : make_tv<KindOfVec>(val);
+}
+
 }
 
 size_t TypeStructure::sizeIndex(Kind kind) {
@@ -291,7 +317,7 @@ ArrayData* TypeStructure::escalateWithCapacity(
   // move base TypeStructure fields
 #define X(Field, FieldString, KindOfType) {                           \
   auto const key = s_##FieldString.get();                             \
-  auto const tv = TypeStructure::tsNvGetStr(this, key);               \
+  auto const tv = make_tv_safe(Field());                              \
   moveFieldToVanilla(ad, key, tv);                                    \
 }
 TYPE_STRUCTURE_FIELDS
@@ -460,36 +486,6 @@ uint8_t TypeStructure::getBooleanBitOffset(const StringData* key) {
 
 //////////////////////////////////////////////////////////////////////////////
 // ArrayData interface
-
-namespace {
-
-TypedValue make_tv_safe(uint8_t val) {
-  return make_tv<KindOfInt64>(val);
-}
-TypedValue make_tv_safe(bool val) {
-  // to match the current behaviour of type structures
-  return val ? make_tv<KindOfBoolean>(true) : make_tv<KindOfUninit>();
-}
-TypedValue make_tv_safe(StringData* val) {
-  if (val == nullptr) return make_tv<KindOfUninit>();
-  return val->isStatic()
-    ? make_tv<KindOfPersistentString>(val)
-    : make_tv<KindOfString>(val);
-}
-TypedValue make_tv_safe(ArrayData* val) {
-  if (val == nullptr) return make_tv<KindOfUninit>();
-  if (val->isDictType()) {
-    return val->isStatic()
-      ? make_tv<KindOfPersistentDict>(val)
-      : make_tv<KindOfDict>(val);
-  }
-  assertx(val->isVecType());
-  return val->isStatic()
-    ? make_tv<KindOfPersistentVec>(val)
-    : make_tv<KindOfVec>(val);
-}
-
-}
 
 ArrayData* TypeStructure::EscalateToVanilla(
     const TypeStructure* tad, const char* reason) {
@@ -708,8 +704,7 @@ tv_lval TypeStructure::ElemStr(
 
 ArrayData* TypeStructure::SetIntMove(
     TypeStructure* tad, int64_t k, TypedValue v) {
-  auto const capacity = tad->size() + 1;
-  auto const vad = tad->escalateWithCapacity(capacity, __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size() + 1, __func__);
   auto const res = VanillaDict::SetIntMove(vad, k, v);
   assertx(vad == res);
   if (tad->decReleaseCheck()) Release(tad);
@@ -718,7 +713,7 @@ ArrayData* TypeStructure::SetIntMove(
 
 ArrayData* TypeStructure::SetStrMove(
     TypeStructure* tad, StringData* k, TypedValue v) {
-  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
+  auto const vad = tad->escalateWithCapacity(tad->size() + 1, __func__);
   auto const res = VanillaDict::SetStrMove(vad, k, v);
   if (tad->decReleaseCheck()) Release(tad);
   return res;
@@ -806,13 +801,13 @@ void initializeField<ArrayData*&>(ArrayData*& field) {
   field = nullptr;
 }
 
-template<class T> void scanField(T t, type_scan::Scanner& scanner) {}
+template<class T> void scanField(const T& t, type_scan::Scanner& scanner) {}
 template<>
-void scanField<StringData*>(StringData* field, type_scan::Scanner& scanner) {
+void scanField<StringData*>(StringData *const& field, type_scan::Scanner& scanner) {
   scanner.scan(field);
 }
 template<>
-void scanField<ArrayData*>(ArrayData* field, type_scan::Scanner& scanner) {
+void scanField<ArrayData*>(ArrayData *const& field, type_scan::Scanner& scanner) {
   scanner.scan(field);
 }
 
@@ -829,11 +824,11 @@ void incRefField<ArrayData*>(ArrayData* field) {
 template<class T> void decRefField(T t) {}
 template<>
 void decRefField<StringData*>(StringData* field) {
-  if (field) field->decRefCount();
+  if (field) field->decRefAndRelease();
 }
 template<>
 void decRefField<ArrayData*>(ArrayData* field) {
-  if (field) field->decRefCount();
+  if (field) field->decRefAndRelease();
 }
 
 template<class T> void setEvalScalar(T t) {}

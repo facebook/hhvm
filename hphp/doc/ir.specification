@@ -665,7 +665,7 @@ To string conversions:
   Returns whether t instanceof S0 returns true when t is of the given type.
 
 | ResolveTypeStruct<class,suppress,offset,size,isOrAsOp>,
-|   D(Dict), S(StkPtr) S(Cls|Nullptr), NF
+|   D(Dict), S(StkPtr) S(Cls|Nullptr), LA
 
   Applies class/alias resolution on the type structure that is at the stack
   offset given by S0 and offset. If size > 1, combine the type structures on

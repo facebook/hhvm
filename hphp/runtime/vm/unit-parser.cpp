@@ -83,6 +83,25 @@ struct CompileException : Exception {
   throw CompileException("{}: {}", what, folly::errnoStr(errno));
 }
 
+CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::HackCUnit& unit,
+                                                    const char* filename,
+	                                                  const SHA1& sha1,
+	                                                  const SHA1& bcSha1,
+                                                    const Native::FuncTable& nativeFuncs,
+                                                    bool& internal_error,
+                                                    CompileAbortMode mode) {
+  try {
+    return unitEmitterFromHackCUnit(unit,
+                                    filename,
+                                    sha1,
+                                    bcSha1,
+                                    nativeFuncs);
+  } catch (const TranslationFatal& ex) {
+    if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
+    return ex.what();
+  }
+}
+
 CompilerResult assemble_string_handle_errors(const char* code,
                                              const std::string& hhas,
                                              const char* filename,
@@ -221,52 +240,45 @@ CompilerResult hackc_compile(
     auto const assemblerOut = [&]() -> std::string {
       if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&res)) {
         (*ue)->finish();
-        return disassemble((*ue)->create().get(), true);
+        return disassemble((*ue)->create().get());
       }
       return boost::get<std::string>(res);
     }();
+
     const hackc::hhbc::HackCUnit* unit = hackCUnitRaw(unit_wrapped);
-    try {
-      auto const ue = unitEmitterFromHackCUnit(*unit,
-                                               filename,
-                                               sha1,
-                                               bcSha1,
-                                               nativeFuncs);
-      auto const hackCTranslatorOut = disassemble(ue->create().get(), true);
+    auto hackCResult = unitEmitterFromHackCUnitHandleErrors
+      (*unit, filename, sha1, bcSha1, nativeFuncs, internal_error, mode
+    );
 
-      if (hackCTranslatorOut.length() != assemblerOut.length()) {
-        Logger::FError("HackC Translator incorrect length: {}\n", filename);
+    auto const hackCTranslatorOut = [&]() -> std::string {
+      if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&hackCResult)) {
+        (*ue)->finish();
+        return disassemble((*ue)->create().get());
       }
+      return boost::get<std::string>(hackCResult);
+    }();
 
-      UNUSED auto start_of_line = 0;
-      for(int i = 0; i < hackCTranslatorOut.length(); i++) {
-        if (hackCTranslatorOut[i] == '\n' || assemblerOut[i] == '\n') {
-          start_of_line = i;
-        }
-        if (hackCTranslatorOut[i] != assemblerOut[i]) {
-          while (i < hackCTranslatorOut.length() &&
-                 hackCTranslatorOut[i] != '\n' && assemblerOut[i] != '\n') {
-            i++;
-          }
-          Logger::FError("HackC Translator incorrect: {}\n", filename);
-          ITRACE(3, "HackC Translator: {}\n\nassembler: {}\n\n",
-            hackCTranslatorOut.substr(start_of_line,i),
-            assemblerOut.substr(start_of_line,i)
-          );
-          ITRACE(4, "HackC Translator:\n{}\n", hackCTranslatorOut);
-          ITRACE(4, "assembler:\n{}\n", assemblerOut);
-          break;
-        }
+    UNUSED auto start_of_line = 0;
+    for(int i = 0; i < hackCTranslatorOut.length(); i++) {
+      if (hackCTranslatorOut[i] == '\n' || assemblerOut[i] == '\n') {
+        start_of_line = i;
       }
-    } catch (const TranslationFatal& ex) {
-      auto const err = ex.what();
-      if (std::strcmp(err, assemblerOut.c_str())) {
-        Logger::FError("HackC Translator incorrect error: {}\n", filename);
+      if (hackCTranslatorOut[i] != assemblerOut[i]) {
+        while (i < hackCTranslatorOut.length() &&
+                hackCTranslatorOut[i] != '\n' && assemblerOut[i] != '\n') {
+          i++;
+        }
+        Logger::FError("HackC Translator incorrect: {}\n", filename);
+        ITRACE(3, "HackC Translator: {}\n\nassembler: {}\n\n",
+          hackCTranslatorOut.substr(start_of_line,i),
+          assemblerOut.substr(start_of_line,i)
+        );
+        ITRACE(4, "HackC Translator:\n{}\n", hackCTranslatorOut);
+        ITRACE(4, "assembler:\n{}\n", assemblerOut);
+        break;
       }
-      ITRACE(4, "HackC Translator Err: {}\n", err);
     }
   }
-
   return res;
 }
 

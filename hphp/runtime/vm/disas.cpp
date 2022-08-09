@@ -570,7 +570,6 @@ std::string opt_attrs(AttrContext ctx, Attr attrs,
   return str;
 }
 
-template<bool isTest=false>
 std::string func_param_list(const FuncInfo& finfo) {
   auto ret = std::string{};
   auto const func = finfo.func;
@@ -598,8 +597,7 @@ std::string func_param_list(const FuncInfo& finfo) {
       auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
       if (auto const code = func->params()[i].phpCode) {
-        // TODO(@voork): Handle escaped default value strings.
-        if (!isTest) ret += folly::format("({})", escaped_long(code)).str();
+        ret += folly::format("({})", escaped_long(code)).str();
       }
     }
   }
@@ -648,7 +646,6 @@ std::string opt_ubs(const UBMap& ubs) {
   return ret;
 }
 
-template<bool isTest = false>
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
@@ -658,7 +655,7 @@ void print_func(Output& out, const Func* func) {
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
-    func_param_list<isTest>(finfo),
+    func_param_list(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
     print_func_directives(out, finfo);
@@ -732,7 +729,6 @@ void print_property(Output& out, const PreClass::Prop* prop) {
   print_prop_or_field_impl(out, *prop);
 }
 
-template<bool isTest=false>
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{}{}{}{} {}{}({}){}{{",
@@ -742,7 +738,7 @@ void print_method(Output& out, const Func* func) {
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
-    func_param_list<isTest>(finfo),
+    func_param_list(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
     print_func_directives(out, finfo);
@@ -807,7 +803,6 @@ void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
   out.fmtln(".require {} <{}>;", kind, req.name()->data());
 }
 
-template<bool isTest = false>
 void print_cls_directives(Output& out, const PreClass* cls) {
   if (RuntimeOption::EvalDisassemblerDocComments) {
     if (cls->docComment() && !cls->docComment()->empty()) {
@@ -819,10 +814,9 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
-  for (auto* m : cls->allMethods())    print_method<isTest>(out, m);
+  for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
-template<bool isTest = false>
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
@@ -850,7 +844,7 @@ void print_cls(Output& out, const PreClass* cls) {
   print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
-  indented(out, [&] { print_cls_directives<isTest>(out, cls); });
+  indented(out, [&] { print_cls_directives(out, cls); });
   out.fmtln("}}");
   out.nl();
 }
@@ -948,18 +942,6 @@ void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 
-void print_unit_test(Output& out, const Unit* unit) {
-  out.fmtln("# {} starts here", unit->origFilepath());
-  out.nl();
-  print_unit_metadata(out, unit);
-  for (auto* func : unit->funcs())        print_func<true>(out, func);
-  for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
-  for (auto& alias : unit->typeAliases()) print_alias(out, alias);
-  for (auto& c : unit->constants())       print_constant(out, c);
-  for (auto& m : unit->modules())         print_module(out, m);
-  out.fmtln("# {} ends here", unit->origFilepath());
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -970,17 +952,11 @@ void print_unit_test(Output& out, const Unit* unit) {
  *
  * - .line/.srcpos directives
  *
- * TODO: T112774575 remove isTest flag when HackC Translator is complete
- *
  */
-std::string disassemble(const Unit* unit, bool isTest) {
+std::string disassemble(const Unit* unit) {
   std::ostringstream os;
   Output out { os };
-  if (isTest) {
-    print_unit_test(out, unit);
-  } else {
-    print_unit(out, unit);
-  }
+  print_unit(out, unit);
   return os.str();
 }
 

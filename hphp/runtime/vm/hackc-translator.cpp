@@ -292,7 +292,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
     }
     not_reached();
   }();
-  checkSize(hphp_tv, RuntimeOption::EvalAssemblerMaxScalarSize);
+  auto avail = RuntimeOption::EvalAssemblerMaxScalarSize;
+  checkSize(hphp_tv, avail);
   return hphp_tv;
 }
 
@@ -1002,7 +1003,6 @@ void translateParameter(TranslationState& ts,
                     param.typeConstraint, hasReifiedGenerics);
 
   auto const dv = maybe(p.default_value);
-  // TODO default value strings are currently escaped
   if (dv) translateDefaultParameterValue(ts, dv.value(), param);
   auto const name = toNamedLocalStaticString(p.name);
 
@@ -1385,6 +1385,12 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
     ue->finish();
   } catch (const FatalUnitError& e) {
     ue = createFatalUnit(e.filePath, sha1, e.op, e.what(), e.pos);
+  } catch (const FatalErrorException& e) {
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
+  } catch (const TranslationFatal& e) {
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
+  } catch (const std::exception& e) {
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   }
   return ue;
 }

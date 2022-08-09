@@ -1021,7 +1021,11 @@ fn print_param_default_value<'arena>(
 ) -> Result<()> {
     w.write_all(b" = ")?;
     print_label(w, &label, dv_labels)?;
-    paren(w, |w| triple_quotes(w, |w| w.write_all(&php_code)))
+    paren(w, |w| {
+        triple_quotes(w, |w| {
+            w.write_all(&escaper::escape_bstr(php_code.as_bstr()))
+        })
+    })
 }
 
 pub(crate) fn print_label(

@@ -179,21 +179,22 @@ fn print_expr_int(w: &mut dyn Write, i: &str) -> Result<()> {
 fn print_expr_string(w: &mut dyn Write, s: &[u8]) -> Result<()> {
     fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
         match c {
-            b'\n' => Some((&b"\\\\n"[..]).into()),
-            b'\r' => Some((&b"\\\\r"[..]).into()),
-            b'\t' => Some((&b"\\\\t"[..]).into()),
-            b'\\' => Some((&b"\\\\\\\\"[..]).into()),
-            b'"' => Some((&b"\\\\\\\""[..]).into()),
-            b'$' => Some((&b"\\\\$"[..]).into()),
+            b'\n' => Some(Cow::Borrowed(b"\\n")),
+            b'\r' => Some(Cow::Borrowed(b"\\r")),
+            b'\t' => Some(Cow::Borrowed(b"\\t")),
+            b'\\' => Some(Cow::Borrowed(b"\\\\")),
+            b'"' => Some(Cow::Borrowed(b"\\\"")),
+            b'$' => Some(Cow::Borrowed(b"\\$")),
             c if escaper::is_lit_printable(c) => None,
             c => {
-                let mut r = vec![];
-                write!(r, "\\\\{:03o}", c).unwrap();
-                Some(r.into())
+                let mut buf = vec![];
+                write!(buf, "\\{:03o}", c).unwrap();
+                Some(buf.into())
             }
         }
     }
-    write::wrap_by(w, "\\\"", |w| {
+
+    write::wrap_by(w, "\"", |w| {
         w.write_all(&escaper::escape_bstr_by(s.as_bstr().into(), escape_char))
     })
 }
@@ -218,7 +219,7 @@ fn print_expr(
     ast::Expr(_, _, expr): &ast::Expr,
 ) -> Result<()> {
     fn adjust_id<'a>(env: &ExprEnv<'_, '_>, id: &'a str) -> Cow<'a, str> {
-        let s: Cow<'a, str> = match env.codegen_env {
+        match env.codegen_env {
             Some(env) => {
                 if env.is_namespaced
                     && id
@@ -233,24 +234,22 @@ fn print_expr(
                 }
             }
             _ => id.into(),
-        };
-        escaper::escape(s)
+        }
     }
     fn print_expr_id<'a>(w: &mut dyn Write, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
         w.write_all(adjust_id(env, s).as_bytes())
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
-        let cn: Cow<'a, str> = if is_xhp(strip_global_ns(&id)) {
-            escaper::escape(strip_global_ns(&mangle(id.into())))
-                .to_string()
-                .into()
+        let stripped = strip_global_ns(&id);
+        let mangled = if is_xhp(&id) {
+            mangle(stripped.to_string())
         } else {
-            escaper::escape(strip_global_ns(&id)).to_string().into()
+            stripped.to_string()
         };
         if is_class_constant {
-            format!("\\\\{}", cn).into()
+            format!("\\{}", mangled).into()
         } else {
-            cn
+            mangled.into()
         }
     }
     fn get_class_name_from_id<'e>(
@@ -310,7 +309,7 @@ fn print_expr(
     use ast::Expr_;
     match expr {
         Expr_::Id(id) => print_expr_id(w, env, id.1.as_ref()),
-        Expr_::Lvar(lid) => w.write_all(escaper::escape(&(lid.1).1).as_bytes()),
+        Expr_::Lvar(lid) => w.write_all((lid.1).1.as_bytes()),
         Expr_::Float(f) => {
             if f.contains('E') || f.contains('e') {
                 let s = format!(
@@ -353,7 +352,7 @@ fn print_expr(
             let name = types::fix_casing(name);
             match name {
                 "Set" | "Pair" | "Vector" | "Map" | "ImmSet" | "ImmVector" | "ImmMap" => {
-                    w.write_all(b"HH\\\\")?;
+                    w.write_all(b"HH\\")?;
                     w.write_all(name.as_bytes())?;
                     write::wrap_by_(w, " {", "}", |w| {
                         Ok(if !c.2.is_empty() {
@@ -382,11 +381,11 @@ fn print_expr(
             let (e, _, es, unpacked_element) = &**c;
             match e.as_id() {
                 Some(ast_defs::Id(_, call_id)) => {
-                    w.write_all(lstrip(adjust_id(env, call_id).as_ref(), "\\\\").as_bytes())?
+                    w.write_all(lstrip(adjust_id(env, call_id).as_ref(), "\\").as_bytes())?
                 }
                 None => {
                     let buf = print_expr_to_string(ctx, env, e)?;
-                    w.write_all(lstrip_bslice(&buf, br"\\"))?
+                    w.write_all(lstrip_bslice(&buf, br"\"))?
                 }
             };
             write::paren(w, |w| {
@@ -422,13 +421,13 @@ fn print_expr(
                                     )
                                     .unsafe_as_str(),
                                 ),
-                                "\\\\",
+                                "\\",
                             )
                             .as_bytes(),
                         )?,
                         None => {
                             let buf = print_expr_to_string(ctx, env, ci_expr)?;
-                            w.write_all(lstrip_bslice(&buf, br"\\"))?
+                            w.write_all(lstrip_bslice(&buf, br"\"))?
                         }
                     }
                     write::paren(w, |w| {
@@ -473,9 +472,7 @@ fn print_expr(
             }
             w.write_all(b"::")?;
             match &cg.1 {
-                ast::ClassGetExpr::CGstring((_, litstr)) => {
-                    w.write_all(escaper::escape(litstr).as_bytes())
-                }
+                ast::ClassGetExpr::CGstring((_, litstr)) => w.write_all(litstr.as_bytes()),
                 ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
             }
         }
@@ -601,7 +598,7 @@ fn print_expr(
             let (fp_id, targs) = &**fp;
             match fp_id {
                 ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
-                    w.write_all(lstrip(adjust_id(env, sid).as_ref(), "\\\\").as_bytes())?
+                    w.write_all(lstrip(adjust_id(env, sid).as_ref(), "\\").as_bytes())?
                 }
                 ast::FunctionPtrId::FPClassConst(ast::ClassId(_, _, class_id), (_, meth_name)) => {
                     match class_id {
@@ -794,7 +791,7 @@ fn print_block_(
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
 ) -> Result<()> {
-    write::wrap_by_(w, "{\\n", "}\\n", |w| {
+    write::wrap_by_(w, "{\n", "}\n", |w| {
         write::concat(w, block, |w, stmt| {
             if !matches!(stmt.1, ast::Stmt_::Noop) {
                 w.write_all(b"  ")?;
@@ -813,7 +810,7 @@ fn print_statement(
 ) -> Result<()> {
     use ast::Stmt_ as S_;
     match &stmt.1 {
-        S_::Return(expr) => write::wrap_by_(w, "return", ";\\n", |w| {
+        S_::Return(expr) => write::wrap_by_(w, "return", ";\n", |w| {
             write::option(w, &**expr, |w, e| {
                 w.write_all(b" ")?;
                 print_expr(ctx, w, env, e)
@@ -821,13 +818,13 @@ fn print_statement(
         }),
         S_::Expr(expr) => {
             print_expr(ctx, w, env, &**expr)?;
-            w.write_all(b";\\n")
+            w.write_all(b";\n")
         }
         S_::Throw(expr) => {
-            write::wrap_by_(w, "throw ", ";\\n", |w| print_expr(ctx, w, env, &**expr))
+            write::wrap_by_(w, "throw ", ";\n", |w| print_expr(ctx, w, env, &**expr))
         }
-        S_::Break => w.write_all(b"break;\\n"),
-        S_::Continue => w.write_all(b"continue;\\n"),
+        S_::Break => w.write_all(b"break;\n"),
+        S_::Continue => w.write_all(b"continue;\n"),
         S_::While(x) => {
             let (cond, block) = &**x;
             write::wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
@@ -920,11 +917,8 @@ fn print_hint(w: &mut dyn Write, ns: bool, hint: &ast::Hint) -> Result<()> {
         ErrorKind::Unrecoverable(s) => Error::fail(s),
         _ => Error::fail("Error printing hint"),
     })?;
-    if ns {
-        w.write_all(escaper::escape(h).as_bytes())
-    } else {
-        w.write_all(escaper::escape(strip_ns(&h)).as_bytes())
-    }
+    let stripped = if ns { &h } else { strip_ns(&h) };
+    w.write_all(stripped.as_bytes())
 }
 
 fn print_import_flavor(w: &mut dyn Write, flavor: &ast::ImportFlavor) -> Result<()> {

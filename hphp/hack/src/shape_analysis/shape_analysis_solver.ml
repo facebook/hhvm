@@ -345,3 +345,38 @@ let is_same_entity (param_ent_1 : HT.entity) (ent : entity_) : bool =
   | Variable _ ->
     false
   | Inter param_ent_2 -> HT.equal_entity param_ent_1 param_ent_2
+
+let substitute_inter_intra
+    (inter_constr : inter_constraint_) (intra_constr : constraint_) :
+    constraint_ =
+  match inter_constr with
+  | Arg (param_ent, intra_ent_1) ->
+    let replace intra_ent_2 =
+      if is_same_entity (HT.Param param_ent) intra_ent_2 then
+        intra_ent_1
+      else
+        intra_ent_2
+    in
+    begin
+      match intra_constr with
+      | Marks _ -> intra_constr
+      | Has_static_key (intra_ent_2, key, ty) ->
+        Has_static_key (replace intra_ent_2, key, ty)
+      | Has_optional_key (intra_ent_2, key) ->
+        Has_optional_key (replace intra_ent_2, key)
+      | Has_dynamic_key intra_ent_2 -> Has_dynamic_key (replace intra_ent_2)
+      | Subsets (intra_ent_2, intra_ent_3) ->
+        Subsets (replace intra_ent_2, replace intra_ent_3)
+      | Joins
+          {
+            left = intra_entity_left;
+            right = intra_entity_right;
+            join = intra_entity_join;
+          } ->
+        Joins
+          {
+            left = replace intra_entity_left;
+            right = replace intra_entity_right;
+            join = replace intra_entity_join;
+          }
+    end

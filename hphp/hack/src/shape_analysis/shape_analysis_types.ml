@@ -67,7 +67,7 @@ type constraint_ =
       join: entity_;
     }
 
-type inter_constraint_ = Arg of A.id_ * int * entity_
+type inter_constraint_ = Arg of HT.param_entity * entity_
 
 type shape_result =
   | Shape_like_dict of Pos.t * marker_kind * shape_keys

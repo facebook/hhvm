@@ -99,9 +99,9 @@ type constraint_ =
           `e'` for example as a result of merging environments after an if
           statement. *)
 
-(** Interprocedural constraint: currently only `Arg(f, 0, p)`, which models
+(** Interprocedural constraint: currently only `Arg((f, 0), p)`, which models
     a function call f(p, _, ...). *)
-type inter_constraint_ = Arg of A.id_ * int * entity_
+type inter_constraint_ = Arg of HT.param_entity * entity_
 
 type shape_result =
   | Shape_like_dict of Pos.t * marker_kind * shape_keys

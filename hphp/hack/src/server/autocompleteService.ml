@@ -1738,8 +1738,22 @@ let keywords filename tree : unit =
     | ClassishBody cb ->
       List.iter (syntax_node_to_list cb.classish_body_elements) ~f:(fun d ->
           match d.syntax with
-          | ErrorSyntax es ->
-            class_member_start_keywords filename es.error_error !inner_ctx
+          | ErrorSyntax { error_error } ->
+            (match
+               ( Syntax.leading_width error_error,
+                 Syntax.trailing_width error_error )
+             with
+            | (0, 0) ->
+              (* If there's no leading or trailing whitespace, the
+                 user has their cursor between the curly braces.
+
+                 class Foo {AUTO332}
+
+                 We don't want to offer completion here, because it
+                 interferes with pressing enter to insert a
+                 newline. *)
+              ()
+            | _ -> class_member_start_keywords filename error_error !inner_ctx)
           | _ -> ())
     | MethodishDeclaration md ->
       let header = md.methodish_function_decl_header in

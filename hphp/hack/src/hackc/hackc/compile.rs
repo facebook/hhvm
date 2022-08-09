@@ -190,10 +190,10 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
     Ok(())
 }
 
-fn compile_impl<'decl>(
+fn compile_impl<'d>(
     env: NativeEnv<'_>,
     source_text: Vec<u8>,
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    decl_provider: Option<&'d dyn DeclProvider>,
 ) -> Result<Vec<u8>> {
     let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
@@ -286,7 +286,7 @@ struct SingleDeclProvider<'a> {
     module_requests: RefCell<Vec<Access>>,
 }
 
-impl<'a> DeclProvider<'a> for SingleDeclProvider<'a> {
+impl<'a> DeclProvider for SingleDeclProvider<'a> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>, Error> {
         let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
         Self::record_access(&self.type_requests, symbol, depth, decl.is_ok());

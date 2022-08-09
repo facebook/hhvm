@@ -281,7 +281,7 @@ fn hackc_compile_from_text_cpp_ffi(
         &native_env,
         decl_provider
             .as_ref()
-            .map(|provider| provider as &dyn DeclProvider<'_>),
+            .map(|provider| provider as &dyn DeclProvider),
         &mut Default::default(),
     )
     .map_err(|e| e.to_string())?;
@@ -377,7 +377,7 @@ fn hackc_compile_unit_from_text_cpp_ffi(
         &native_env,
         decl_provider
             .as_ref()
-            .map(|provider| provider as &dyn DeclProvider<'_>),
+            .map(|provider| provider as &dyn DeclProvider),
         &mut Default::default(),
     )
     .map(|unit| Box::new(HackCUnitWrapper(unit, bump)))

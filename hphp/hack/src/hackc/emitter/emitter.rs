@@ -61,7 +61,7 @@ pub struct Emitter<'arena, 'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    pub decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    pub decl_provider: Option<&'decl dyn DeclProvider>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -70,7 +70,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         systemlib: bool,
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+        decl_provider: Option<&'decl dyn DeclProvider>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,

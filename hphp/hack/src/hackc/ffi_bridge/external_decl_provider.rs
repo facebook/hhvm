@@ -5,7 +5,6 @@
 
 use std::ffi::c_void;
 
-use arena_deserializer::serde::Deserialize;
 use decl_provider::Error;
 use decl_provider::Result;
 use decl_provider::TypeDecl;
@@ -66,7 +65,7 @@ pub struct ExternalDeclProvider<'a> {
     pub arena: &'a bumpalo::Bump,
 }
 
-impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
+impl<'a> DeclProvider for ExternalDeclProvider<'a> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>> {
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
@@ -110,16 +109,9 @@ impl<'a> ExternalDeclProvider<'a> {
                 find(&holder.decls)
             }
             ExternalDeclProviderResult::Bytes(p) => {
-                let data = unsafe {
-                    // turn raw pointer back into &Bytes, then &[u8]
-                    p.as_ref().unwrap().as_slice()
-                };
-                let op = bincode::config::Options::with_native_endian(bincode::options());
-                let mut de = bincode::de::Deserializer::from_slice(data, op);
-                let de = arena_deserializer::ArenaDeserializer::new(self.arena, &mut de);
-                let decls = direct_decl_parser::Decls::deserialize(de)
-                    .map_err(|e| format!("failed to deserialize, error: {}", e))
-                    .unwrap();
+                // turn raw pointer back into &Vec<u8>
+                let data = unsafe { p.as_ref().unwrap() };
+                let decls = decl_provider::deserialize_decls(self.arena, &data)?;
                 find(&decls)
             }
         }

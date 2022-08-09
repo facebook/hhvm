@@ -70,16 +70,16 @@ pub enum TypeDecl<'a> {
 /// Further traversal into the type of Bar should it too be a type alias
 /// would be at a depth of two.
 ///
-pub trait DeclProvider<'a>: std::fmt::Debug {
+pub trait DeclProvider: std::fmt::Debug {
     /// Get a decl for the given type name and depth.
     /// * `symbol` - the name of the symbol being requested
     /// * `depth` - a hint to the provider about the number of layers of decl
     ///             request traversed to arrive at this request
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>>;
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'_>>;
 
-    fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>>;
-    fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>>;
-    fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>>;
+    fn func_decl(&self, symbol: &str) -> Result<&'_ FunDecl<'_>>;
+    fn const_decl(&self, symbol: &str) -> Result<&'_ ConstDecl<'_>>;
+    fn module_decl(&self, symbol: &str) -> Result<&'_ ModuleDecl<'_>>;
 }
 
 pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {

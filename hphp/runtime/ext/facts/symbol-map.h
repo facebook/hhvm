@@ -108,6 +108,8 @@ struct SymbolMap {
   Path getFunctionFile(const StringData& function);
   Path getConstantFile(Symbol<SymKind::Constant> constant);
   Path getConstantFile(const StringData& constant);
+  Path getModuleFile(Symbol<SymKind::Module> module);
+  Path getModuleFile(const StringData& module);
   Path getTypeAliasFile(Symbol<SymKind::Type> typeAlias);
   Path getTypeAliasFile(const StringData& typeAlias);
 
@@ -140,6 +142,10 @@ struct SymbolMap {
   std::vector<Symbol<SymKind::Constant>> getFileConstants(Path path);
   std::vector<Symbol<SymKind::Constant>>
   getFileConstants(const std::filesystem::path& path);
+
+  std::vector<Symbol<SymKind::Module>> getFileModules(Path path);
+  std::vector<Symbol<SymKind::Module>>
+  getFileModules(const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
   std::vector<Symbol<SymKind::Type>>
@@ -427,6 +433,7 @@ struct SymbolMap {
     PathToSymbolsMap<SymKind::Type> m_typePath;
     PathToSymbolsMap<SymKind::Function> m_functionPath;
     PathToSymbolsMap<SymKind::Constant> m_constantPath;
+    PathToSymbolsMap<SymKind::Module> m_modulePath;
     PathToMethodsMap m_methodPath;
 
     /**

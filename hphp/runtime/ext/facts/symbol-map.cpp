@@ -58,6 +58,13 @@ typename std::enable_if<
 getPathSymMap(const typename SymbolMap::Data& data) {
   return data.m_constantPath;
 }
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Module,
+    const PathToSymbolsMap<SymKind::Module>&>::type
+getPathSymMap(const typename SymbolMap::Data& data) {
+  return data.m_modulePath;
+}
 
 // non-const
 template <SymKind k>
@@ -79,6 +86,12 @@ typename std::enable_if<
     PathToSymbolsMap<SymKind::Constant>&>::type
 getPathSymMap(typename SymbolMap::Data& data) {
   return data.m_constantPath;
+}
+template <SymKind k>
+typename std::
+    enable_if<k == SymKind::Module, PathToSymbolsMap<SymKind::Module>&>::type
+    getPathSymMap(typename SymbolMap::Data& data) {
+  return data.m_modulePath;
 }
 
 /**
@@ -237,6 +250,19 @@ std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(Path path) {
 std::vector<Symbol<SymKind::Constant>>
 SymbolMap::getFileConstants(const fs::path& path) {
   return getFileConstants(Path{path});
+}
+
+std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(Path path) {
+  auto const& symbols = getPathSymbols<SymKind::Module>(path);
+  std::vector<Symbol<SymKind::Module>> symbolVec;
+  symbolVec.reserve(symbols.size());
+  std::copy(symbols.begin(), symbols.end(), std::back_inserter(symbolVec));
+  return symbolVec;
+}
+
+std::vector<Symbol<SymKind::Module>>
+SymbolMap::getFileModules(const fs::path& path) {
+  return getFileModules(Path{path});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
@@ -933,6 +959,14 @@ SymbolMap::getFileAttributeArgs(Path path, const StringData& attribute) {
   return getFileAttributeArgs(path, Symbol<SymKind::Type>{attribute});
 }
 
+Path SymbolMap::getModuleFile(Symbol<SymKind::Module> module) {
+  return getSymbolPath(module);
+}
+
+Path SymbolMap::getModuleFile(const StringData& module) {
+  return getModuleFile(Symbol<SymKind::Module>{module});
+}
+
 TypeKind SymbolMap::getKind(Symbol<SymKind::Type> type) {
   return getKindAndFlags(type).first;
 }
@@ -1294,6 +1328,10 @@ void SymbolMap::updateDBPath(
     }
   }
 
+  for (auto const& module : facts.m_modules) {
+    db.insertModule(module.m_name, path);
+  }
+
   for (auto const& function : facts.m_functions) {
     db.insertFunction(function, path);
   }
@@ -1407,6 +1445,8 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
               return db.getFunctionPath(symbol.slice());
             case SymKind::Constant:
               return db.getConstantPath(symbol.slice());
+            case SymKind::Module:
+              return db.getModulePath(symbol.slice());
           }
         }();
 
@@ -1454,6 +1494,8 @@ SymbolMap::getPathSymbols(Path path) {
               return db.getPathFunctions(path);
             case SymKind::Constant:
               return db.getPathConstants(path);
+            case SymKind::Module:
+              return db.getPathModules(path);
           }
         }(fs::path{std::string{path.slice()}});
 
@@ -1477,6 +1519,7 @@ SymbolMap::Data::Data()
     , m_typePath{m_versions}
     , m_functionPath{m_versions}
     , m_constantPath{m_versions}
+    , m_modulePath{m_versions}
     , m_methodPath{m_versions}
     , m_inheritanceInfo{m_versions}
     , m_typeAttrs{m_versions}
@@ -1543,6 +1586,12 @@ void SymbolMap::Data::updatePath(
     }
   }
 
+  typename PathToSymbolsMap<SymKind::Module>::Symbols modules;
+  for (auto const& module : facts.m_modules) {
+    always_assert(!module.m_name.empty());
+    modules.push_back(Symbol<SymKind::Module>{module.m_name});
+  }
+
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
   for (auto const& function : facts.m_functions) {
     always_assert(!function.empty());
@@ -1557,6 +1606,7 @@ void SymbolMap::Data::updatePath(
 
   m_fileAttrs.setAttributes({path}, facts.m_attributes);
 
+  m_modulePath.replacePathSymbols(path, std::move(modules));
   m_typePath.replacePathSymbols(path, std::move(types));
   m_functionPath.replacePathSymbols(path, std::move(functions));
   m_constantPath.replacePathSymbols(path, std::move(constants));

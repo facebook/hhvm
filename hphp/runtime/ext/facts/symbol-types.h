@@ -30,6 +30,7 @@ enum class SymKind {
   Type,
   Function,
   Constant,
+  Module,
 };
 
 constexpr std::string_view toString(SymKind k) {
@@ -40,6 +41,8 @@ constexpr std::string_view toString(SymKind k) {
       return "function";
     case SymKind::Constant:
       return "constant";
+    case SymKind::Module:
+      return "module";
   }
   return "unknown";
 }
@@ -50,6 +53,7 @@ constexpr bool isCaseSensitive(SymKind k) {
     case SymKind::Function:
       return false;
     case SymKind::Constant:
+    case SymKind::Module:
       return true;
   }
 }

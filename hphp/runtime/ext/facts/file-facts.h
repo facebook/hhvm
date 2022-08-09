@@ -130,6 +130,10 @@ struct TypeDetails {
   }
 };
 
+struct ModuleDetails {
+  std::string m_name;
+};
+
 struct FileFacts {
 
   bool isEmpty() const noexcept {
@@ -139,6 +143,7 @@ struct FileFacts {
   std::vector<TypeDetails> m_types;
   std::vector<std::string> m_functions;
   std::vector<std::string> m_constants;
+  std::vector<ModuleDetails> m_modules;
   std::vector<Attribute> m_attributes;
   std::string m_sha1hex;
 };

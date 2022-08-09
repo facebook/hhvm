@@ -116,12 +116,25 @@ std::vector<TypeDetails> move_type_vec(folly::dynamic* types) {
   return ret;
 }
 
+std::vector<ModuleDetails> move_module_vec(folly::dynamic* modules) {
+  if (modules == nullptr) {
+    return {};
+  }
+  std::vector<ModuleDetails> ret;
+  for (auto& module : *modules) {
+    ret.push_back(
+        ModuleDetails{.m_name = std::move(module.at("name")).getString()});
+  }
+  return ret;
+}
+
 FileFacts make_file_facts(folly::dynamic facts) {
   try {
     return {
         .m_types = move_type_vec(facts.get_ptr("types")),
         .m_functions = move_str_vec(facts.get_ptr("functions")),
         .m_constants = move_str_vec(facts.get_ptr("constants")),
+        .m_modules = move_module_vec(facts.get_ptr("modules")),
         .m_attributes = move_attr_vec(facts.get_ptr("fileAttributes")),
         .m_sha1hex = std::move(facts.at("sha1sum")).getString()};
   } catch (const folly::TypeError& e) {

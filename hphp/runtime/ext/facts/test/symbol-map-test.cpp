@@ -39,11 +39,15 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
 
+using ::testing::_;
 using ::testing::AllOf;
 using ::testing::Contains;
 using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::SaveArg;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
@@ -193,16 +197,294 @@ void PrintTo(
   *os << std::get<0>(typeInfo).slice();
 }
 
+void PrintTo(const Path& path, ::std::ostream* os) {
+  if (path.m_path == nullptr) {
+    *os << "<unset>";
+  } else {
+    *os << path.slice();
+  }
+}
+
 template <SymKind k, typename T, typename U>
 bool operator==(
     const std::tuple<Symbol<k>, Path, T, U>& typeInfo, const char* str) {
   return std::get<0>(typeInfo) == str;
 }
 
+bool operator==(const Path& path, const std::string& other) {
+  return (path == std::string_view(other));
+}
+
 namespace {
 
 constexpr int kTypeFlagAbstractBit = 1;
 constexpr int kTypeFlagFinalBit = 2;
+
+struct MockAutoloadDB : public AutoloadDB {
+  MOCK_METHOD(bool, isReadOnly, (), (const override));
+  MOCK_METHOD(void, commit, (), (override));
+
+  MOCK_METHOD(
+      void, insertPath, (const std::filesystem::path& path), (override));
+  MOCK_METHOD(void, erasePath, (const std::filesystem::path& path), (override));
+
+  MOCK_METHOD(
+      void,
+      insertSha1Hex,
+      (const std::filesystem::path& path, const Optional<std::string>& sha1hex),
+      (override));
+  MOCK_METHOD(
+      std::string, getSha1Hex, (const std::filesystem::path& path), (override));
+
+  // Types
+  MOCK_METHOD(
+      void,
+      insertType,
+      (std::string_view type,
+       const std::filesystem::path& path,
+       TypeKind kind,
+       TypeFlagMask flags),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getTypePath,
+      (std::string_view type),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathTypes,
+      (const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      KindAndFlags,
+      getKindAndFlags,
+      (std::string_view type, const std::filesystem::path& path),
+      (override));
+
+  // Inheritance
+  MOCK_METHOD(
+      void,
+      insertBaseType,
+      (const std::filesystem::path& path,
+       std::string_view derivedType,
+       DeriveKind kind,
+       std::string_view baseType),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getBaseTypes,
+      (const std::filesystem::path& path,
+       std::string_view derivedType,
+       DeriveKind kind),
+      (override));
+
+  /**
+   * Return all types extending the given baseType, along with the paths which
+   * claim the derived type extends this baseType.
+   *
+   * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
+   */
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getDerivedTypes,
+      (std::string_view baseType, DeriveKind kind),
+      (override));
+
+  // Attributes
+
+  MOCK_METHOD(
+      void,
+      insertTypeAttribute,
+      (const std::filesystem::path& path,
+       std::string_view type,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      void,
+      insertMethodAttribute,
+      (const std::filesystem::path& path,
+       std::string_view type,
+       std::string_view method,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      void,
+      insertFileAttribute,
+      (const std::filesystem::path& path,
+       std::string_view attributeName,
+       Optional<int> attributePosition,
+       const folly::dynamic* attributeValue),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfType,
+      (std::string_view type, const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfMethod,
+      (std::string_view type,
+       std::string_view method,
+       const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getAttributesOfFile,
+      (const std::filesystem::path& path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getTypeAttributeArgs,
+      (std::string_view type,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getTypeAliasAttributeArgs,
+      (std::string_view typeAlias,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getMethodAttributeArgs,
+      (std::string_view type,
+       std::string_view method,
+       std::string_view path,
+       std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<folly::dynamic>,
+      getFileAttributeArgs,
+      (std::string_view path, std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getTypesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+  MOCK_METHOD(
+      std::vector<SymbolPath>,
+      getTypeAliasesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<MethodPath>,
+      getPathMethods,
+      (std::string_view path),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<MethodPath>,
+      getMethodsWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getFilesWithAttribute,
+      (std::string_view attributeName),
+      (override));
+
+  // Functions
+  MOCK_METHOD(
+      void,
+      insertFunction,
+      (std::string_view function, const std::filesystem::path& path),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getFunctionPath,
+      (std::string_view function),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathFunctions,
+      (const std::filesystem::path& path),
+      (override));
+
+  // Constants
+  MOCK_METHOD(
+      void,
+      insertConstant,
+      (std::string_view constant, const std::filesystem::path& path),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getConstantPath,
+      (std::string_view constant),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathConstants,
+      (const std::filesystem::path& path),
+      (override));
+
+  // Modules
+  MOCK_METHOD(
+      void,
+      insertModule,
+      (std::string_view, const std::filesystem::path&),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getModulePath,
+      (std::string_view),
+      (override));
+  MOCK_METHOD(
+      std::vector<std::string>,
+      getPathModules,
+      (const std::filesystem::path&),
+      (override));
+
+  /**
+   * Return a list of all paths defined in the given root, as absolute paths.
+   *
+   * Paths come paired with the last known SHA1 hash of the file.
+   *
+   * Returns results in the form of a lazy generator.
+   */
+  MOCK_METHOD(MultiResult<PathAndHash>, getAllPathsAndHashes, (), (override));
+
+  /**
+   * Return a list of all symbols and paths defined in the given root.
+   *
+   * Returns results in the form of a lazy generator.
+   */
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllTypePaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllFunctionPaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllConstantPaths, (), (override));
+
+  MOCK_METHOD(void, insertClock, (const Clock& clock), (override));
+  MOCK_METHOD(Clock, getClock, (), (override));
+  MOCK_METHOD(void, runPostBuildOptimizations, (), (override));
+
+  void DelegateToFake() {
+    ON_CALL(*this, isReadOnly()).WillByDefault(Return(false));
+    ON_CALL(*this, insertClock(_)).WillByDefault(SaveArg<0>(&clock_));
+    ON_CALL(*this, getClock()).WillByDefault(Return(clock_));
+  }
+
+private:
+  Clock clock_;
+};
 
 /**
  * RAII wrapper which ensures we finish draining the given
@@ -316,11 +598,179 @@ protected:
     return *m_wrappers.back().m_map;
   }
 
+  SymbolMap& make(
+      std::string root,
+      MockAutoloadDB& db,
+      std::shared_ptr<folly::ManualExecutor> exec = nullptr,
+      hphp_hash_set<std::string> indexedMethodAttributes = {}) {
+
+    m_wrappers.push_back(SymbolMapWrapper{
+        std::make_unique<SymbolMap>(
+            std::move(root),
+            [&db]() -> AutoloadDB& { return db; },
+            std::move(indexedMethodAttributes)),
+        std::move(exec)});
+    return *m_wrappers.back().m_map;
+  }
+
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
   std::shared_ptr<folly::ManualExecutor> m_exec;
   std::shared_ptr<folly::ManualExecutor> m_exec2;
   std::vector<SymbolMapWrapper> m_wrappers;
 };
+
+TEST_F(SymbolMapTest, NewModules) {
+  MockAutoloadDB db;
+  db.DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+
+  FileFacts ff{
+      .m_modules = {
+          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
+
+  EXPECT_CALL(db, insertModule("some_module", path1));
+  EXPECT_CALL(db, insertModule("some_other_module", path1));
+  update(m, "", "1:2:3", {path1}, {}, {ff});
+
+  // We didn't actually write to any database, so if the symbol map is working,
+  // we should still get the results.
+  EXPECT_THAT(m.getModuleFile("some_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_other_module"), Eq(path1));
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_module", "some_other_module"));
+
+  m_wrappers.clear();
+}
+
+TEST_F(SymbolMapTest, ModulesFromDB) {
+  MockAutoloadDB db;
+  db.DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  EXPECT_CALL(db, insertPath(_)).Times(0);
+
+  EXPECT_CALL(db, getModulePath("some_new_module"))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(db, getModulePath("some_other_new_module"))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(db, getModulePath("some_new_third_module"))
+      .WillOnce(Return(std::vector<fs::path>{path2}));
+
+  EXPECT_CALL(db, getPathModules(path1))
+      .WillOnce(Return(std::vector<std::string>{
+          "some_new_module", "some_other_new_module"}));
+  EXPECT_CALL(db, getPathModules(path2))
+      .WillOnce(Return(std::vector<std::string>{"some_new_third_module"}));
+
+  EXPECT_THAT(m.getModuleFile("some_new_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_other_new_module"), Eq(path1));
+  EXPECT_THAT(m.getModuleFile("some_new_third_module"), Eq(path2));
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_new_module", "some_other_new_module"));
+  EXPECT_THAT(
+      m.getFileModules(path2), UnorderedElementsAre("some_new_third_module"));
+
+  m_wrappers.clear();
+}
+
+TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
+  const char* kFirstPath1 = "k-1-1";
+  const char* kFirstPath2 = "k-1-2";
+  const char* kFirstPath3 = "k-1-3";
+  const char* kSecondPath1 = "k-2-1";
+  const char* kSecondPath2 = "k-2-2";
+  const char* kSecondPath3 = "k-2-3";
+
+  NiceMock<MockAutoloadDB> db;
+  db.DelegateToFake();
+
+  auto& m = make("/var/www", db);
+  fs::path path1 = {"some/path1.php"};
+  fs::path path2 = {"some/path2.php"};
+
+  // These paths won't be in memory, so the symbol map will try to get
+  // them from the database.
+  EXPECT_CALL(db, getModulePath(kFirstPath1))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(db, getModulePath(kFirstPath2))
+      .WillOnce(Return(std::vector<fs::path>{path1}));
+  EXPECT_CALL(db, getModulePath(kFirstPath3))
+      .WillOnce(Return(std::vector<fs::path>{path2}));
+
+  EXPECT_CALL(db, getPathModules(path1))
+      .WillOnce(Return(std::vector<std::string>{kFirstPath1, kFirstPath2}));
+  EXPECT_CALL(db, getPathModules(path2))
+      .WillOnce(Return(std::vector<std::string>{kFirstPath3}));
+
+  // Everything should be read from the database.
+  EXPECT_THAT(m.getModuleFile(kFirstPath1), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kFirstPath2), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kFirstPath3), Eq(path2));
+  EXPECT_THAT(
+      m.getFileModules(path1), UnorderedElementsAre(kFirstPath1, kFirstPath2));
+  EXPECT_THAT(m.getFileModules(path2), UnorderedElementsAre(kFirstPath3));
+
+  // Now we overwrite it with new information.  The new information should
+  // be returned by the symbol map and the db should get updated.
+  FileFacts ff1{.m_modules = {{.m_name = kSecondPath1}}};
+  FileFacts ff2{
+      .m_modules = {{.m_name = kSecondPath2}, {.m_name = kSecondPath3}}};
+
+  EXPECT_CALL(db, erasePath(path1));
+  EXPECT_CALL(db, erasePath(path2));
+  EXPECT_CALL(db, insertModule(kSecondPath1, path1));
+  EXPECT_CALL(db, insertModule(kSecondPath2, path2));
+  EXPECT_CALL(db, insertModule(kSecondPath3, path2));
+
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
+
+  // TODO:  This doesn't seem right.  It seems like it should happen for the old
+  // values
+  /*
+  EXPECT_CALL(db, getModulePath(kSecondPath1))
+      .WillOnce(Return(std::vector<fs::path>{}));
+  EXPECT_CALL(db, getModulePath(kSecondPath2))
+      .WillOnce(Return(std::vector<fs::path>{}));
+  EXPECT_CALL(db, getModulePath(kSecondPath3))
+      .WvillOnce(Return(std::vector<fs::path>{}));
+  */
+
+  // The in memory map should already know these were blown away.
+  Path empty_path{nullptr};
+  EXPECT_CALL(db, getModulePath(kFirstPath1)).Times(0);
+  EXPECT_CALL(db, getModulePath(kFirstPath2)).Times(0);
+  EXPECT_CALL(db, getModulePath(kFirstPath3)).Times(0);
+  EXPECT_THAT(m.getModuleFile(kFirstPath1), Eq(empty_path));
+  EXPECT_THAT(m.getModuleFile(kFirstPath2), Eq(empty_path));
+  EXPECT_THAT(m.getModuleFile(kFirstPath3), Eq(empty_path));
+
+  std::vector<fs::path> empty_path_list{};
+  EXPECT_CALL(db, getModulePath(kSecondPath1))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(db, getModulePath(kSecondPath2))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(db, getModulePath(kSecondPath3))
+      .WillOnce(Return(empty_path_list));
+  EXPECT_CALL(db, getPathModules(path1)).Times(0);
+  EXPECT_CALL(db, getPathModules(path2)).Times(0);
+  EXPECT_THAT(m.getModuleFile(kSecondPath1), Eq(path1));
+  EXPECT_THAT(m.getModuleFile(kSecondPath2), Eq(path2));
+  EXPECT_THAT(m.getModuleFile(kSecondPath3), Eq(path2));
+
+  EXPECT_THAT(m.getFileModules(path1), UnorderedElementsAre(kSecondPath1));
+  EXPECT_THAT(
+      m.getFileModules(path2),
+      UnorderedElementsAre(kSecondPath2, kSecondPath3));
+
+  m_wrappers.clear();
+}
 
 TEST_F(SymbolMapTest, addPaths) {
   auto& m = make("/var/www");
@@ -333,7 +783,9 @@ TEST_F(SymbolMapTest, addPaths) {
            {.m_name = "BaseClass", .m_kind = TypeKind::Class},
            {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
       .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"}};
+      .m_constants = {"SOME_CONSTANT"},
+      .m_modules = {
+          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
 
   // Define symbols in path
   fs::path path1 = {"some/path1.php"};
@@ -345,6 +797,7 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFunctionFile("some_fn"), path1.native());
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path1.native());
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path1.native());
+  EXPECT_EQ(m.getModuleFile("some_module"), path1.native());
 
   // Types and type aliases are still different
   EXPECT_EQ(m.getTypeAliasFile("SomeClass"), nullptr);
@@ -356,6 +809,9 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFileFunctions(path1).at(0), "some_fn");
   EXPECT_EQ(m.getFileConstants(path1).at(0), "SOME_CONSTANT");
   EXPECT_EQ(m.getFileTypeAliases(path1).at(0), "SomeTypeAlias");
+  EXPECT_THAT(
+      m.getFileModules(path1),
+      UnorderedElementsAre("some_module", "some_other_module"));
 
   // Check for case insensitivity (constants are case-sensitive, nothing else
   // is)
@@ -363,12 +819,14 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFunctionFile("SOME_FN"), path1.native());
   EXPECT_EQ(m.getConstantFile("Some_Constant"), nullptr);
   EXPECT_EQ(m.getTypeAliasFile("sometypealias"), path1.native());
+  EXPECT_EQ(m.getModuleFile("Some_Module"), nullptr);
 
   // Check for undefined symbols
   EXPECT_EQ(m.getTypeFile("UndefinedClass"), nullptr);
   EXPECT_EQ(m.getFunctionFile("undefined_fn"), nullptr);
   EXPECT_EQ(m.getConstantFile("UNDEFINED_CONSTANT"), nullptr);
   EXPECT_EQ(m.getTypeAliasFile("UndefinedTypeAlias"), nullptr);
+  EXPECT_EQ(m.getModuleFile("undefined_module"), nullptr);
 
   // Check inheritance
   EXPECT_EQ(
@@ -392,6 +850,7 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getFunctionFile("some_fn"), path2.native());
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path2.native());
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path2.native());
+  EXPECT_EQ(m.getModuleFile("some_module"), path2.native());
 
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -422,7 +881,8 @@ TEST_F(SymbolMapTest, duplicateSymbols) {
 
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
-  // Remove the duplicate definition and verify that we're back in a sane state
+  // Remove the duplicate definition and verify that we're back in a sane
+  // state
   update(m, "1:2:3", "1:2:4", {}, {path1}, {});
   EXPECT_EQ(m.getTypeFile("SomeClass"), path2.native());
   EXPECT_EQ(m.getFunctionFile("some_fn"), path2.native());
@@ -1328,8 +1788,8 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
       m2.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("BaseClass"));
 
-  // Now query the subtypes of BaseClass. We should remember that SomeClass is a
-  // subtype of BaseClass, but we should also fetch information from the DB
+  // Now query the subtypes of BaseClass. We should remember that SomeClass is
+  // a subtype of BaseClass, but we should also fetch information from the DB
   // about OtherClass being a subtype of BaseClass.
   EXPECT_THAT(
       m2.getDerivedTypes("BaseClass", DeriveKind::Extends),

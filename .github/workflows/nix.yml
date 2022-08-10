@@ -59,6 +59,12 @@ jobs:
     - name: Show the deb package's content
       if: runner.os == 'Linux'
       run: dpkg-deb --contents bundle.deb
+    - name: Save the deb package as build artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v2
+      with:
+        name: bundle.deb
+        path: bundle.deb
     - name: Build the rpm package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1"
@@ -68,6 +74,12 @@ jobs:
     - name: Show the rpm package's content
       if: runner.os == 'Linux'
       run: rpm --query --list --package bundle.rpm
+    - name: Save the rpm package as build artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v2
+      with:
+        name: bundle.rpm
+        path: bundle.rpm
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials
@@ -82,3 +94,119 @@ jobs:
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+  upload-deb:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+    - uses: actions/checkout@v3
+    - name: Assume the AWS role
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        aws-region: us-west-2
+    - name: Download the bundle.deb from build-and-test job
+      uses: actions/download-artifact@v2
+      with:
+        name: bundle.deb
+    - uses: cachix/install-nix-action@v15
+      with:
+        extra_nix_config: |
+          extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-experimental-features = nix-command flakes
+          extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+    # Install s3fs from nix instead of apt because the s3fs version in
+    # ubuntu-latest is too old to support AWS role
+    - run: nix profile install nixpkgs#s3fs
+    - run: sudo apt-get install reprepro
+    - name: Decrypt the GPG key
+      run: |
+        set -o pipefail
+        aws kms decrypt \
+            --ciphertext-blob "fileb://$PWD/gpg-key.kms-ciphertext" \
+            --query Plaintext \
+            --output text |
+        base64 --decode |
+        gpg --import
+    - name: Mount Apt Repository
+      env:
+        # s3fs uses environment variable names without underscores, unlike aws-cli
+        AWSACCESSKEYID: ${{ env.AWS_ACCESS_KEY_ID }}
+        AWSSECRETACCESSKEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        AWSSESSIONTOKEN: ${{ env.AWS_SESSION_TOKEN }}
+      run: |
+        HHVM_DOWNLOAD="$(mktemp --directory)" &&
+        s3fs -o "endpoint=$AWS_REGION" -o use_session_token hhvm-downloads "$HHVM_DOWNLOAD" &&
+        echo "REPREPRO_BASE_DIR=$HHVM_DOWNLOAD/universal" >> $GITHUB_ENV
+    - name: Initiate Apt Repository
+      run: |
+        set -e
+        mkdir -p "$REPREPRO_BASE_DIR/conf"
+        touch "$REPREPRO_BASE_DIR/conf/distributions"
+    - name: Create nightly suite
+      if: startsWith(github.ref_name, 'nightly-')
+      run: |
+        if [[ ! -d "$REPREPRO_BASE_DIR/dists/nightly" ]]
+        then
+          (
+            echo ''
+            echo 'Origin: HHVM'
+            echo 'Label: HHVM'
+            echo 'Codename: nightly'
+            echo 'Suite: nightly'
+            echo 'Architectures: amd64'
+            echo 'Components: main'
+            echo 'Description: Apt suite for HHVM nightly'
+            echo 'SignWith: D386EB94'
+          ) >> "$REPREPRO_BASE_DIR/conf/distributions" &&
+          reprepro export nightly
+        fi
+    - if: startsWith(github.ref_name, 'nightly-')
+      run: reprepro includedeb nightly bundle.deb
+    - name: Create release suite
+      if: startsWith(github.ref_name, 'HHVM-')
+      run: |
+        if [[ ! -d "$REPREPRO_BASE_DIR/dists/release" ]]
+        then
+          (
+            echo ''
+            echo 'Origin: HHVM'
+            echo 'Label: HHVM'
+            echo 'Codename: release'
+            echo 'Suite: release'
+            echo 'Architectures: amd64'
+            echo 'Components: main'
+            echo 'Description: Apt suite for HHVM release versions'
+            echo 'SignWith: D386EB94'
+          ) >> "$REPREPRO_BASE_DIR/conf/distributions" &&
+          reprepro export release
+        fi
+    - if: startsWith(github.ref_name, 'HHVM-')
+      run: reprepro includedeb release bundle.deb
+    - name: Determine HHVM version
+      if: startsWith(github.ref_name, 'HHVM-')
+      run: |
+        [[ "$GITHUB_REF_NAME" =~ HHVM-([0-9]+\.[0-9]+)\.[0-9]+ ]] &&
+        echo "HHVM_VERSION_MAJAR_MINOR=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+    - name: Create version specific release suite
+      if: startsWith(github.ref_name, 'HHVM-')
+      run: |
+        if [[ ! -d "$REPREPRO_BASE_DIR/dists/release-$HHVM_VERSION_MAJAR_MINOR" ]]
+        then
+          (
+            echo ''
+            echo 'Origin: HHVM'
+            echo 'Label: HHVM'
+            echo "Codename: release-$HHVM_VERSION_MAJAR_MINOR"
+            echo "Suite: release-$HHVM_VERSION_MAJAR_MINOR"
+            echo 'Architectures: amd64'
+            echo 'Components: main'
+            echo "Description: Apt suite for $HHVM_VERSION_MAJAR_MINOR.* release versions"
+            echo 'SignWith: D386EB94'
+          ) >> "$REPREPRO_BASE_DIR/conf/distributions" &&
+          reprepro export "release-$HHVM_VERSION_MAJAR_MINOR"
+        fi
+    - if: startsWith(github.ref_name, 'HHVM-')
+      run: reprepro includedeb "release-$HHVM_VERSION_MAJAR_MINOR" bundle.deb

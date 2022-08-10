@@ -215,6 +215,8 @@ pub fn error1060(extension: &str) -> Error {
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
+pub const error1066: Error = Cow::Borrowed("Only one 'exports to' is allowed.");
+pub const error1067: Error = Cow::Borrowed("Only one 'imports from' is allowed.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in `strict` mode.");
 pub const error2003: Error =
     Cow::Borrowed("A `case` statement may only appear directly inside a `switch`.");

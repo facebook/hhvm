@@ -1011,7 +1011,21 @@ module type Syntax_S = sig
         module_declaration_module_keyword: t;
         module_declaration_name: t;
         module_declaration_left_brace: t;
+        module_declaration_exports: t;
+        module_declaration_imports: t;
         module_declaration_right_brace: t;
+      }
+    | ModuleExports of {
+        module_exports_exports_keyword: t;
+        module_exports_left_brace: t;
+        module_exports_exports: t;
+        module_exports_right_brace: t;
+      }
+    | ModuleImports of {
+        module_imports_imports_keyword: t;
+        module_imports_left_brace: t;
+        module_imports_imports: t;
+        module_imports_right_brace: t;
       }
     | ModuleMembershipDeclaration of {
         module_membership_declaration_module_keyword: t;
@@ -1424,7 +1438,11 @@ module type Syntax_S = sig
 
   val make_enum_class_label_expression : t -> t -> t -> t
 
-  val make_module_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_module_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_module_exports : t -> t -> t -> t -> t
+
+  val make_module_imports : t -> t -> t -> t -> t
 
   val make_module_membership_declaration : t -> t -> t -> t
 
@@ -1773,6 +1791,10 @@ module type Syntax_S = sig
   val is_enum_class_label_expression : t -> bool
 
   val is_module_declaration : t -> bool
+
+  val is_module_exports : t -> bool
+
+  val is_module_imports : t -> bool
 
   val is_module_membership_declaration : t -> bool
 

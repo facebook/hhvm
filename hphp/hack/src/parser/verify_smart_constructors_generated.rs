@@ -1419,9 +1419,25 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
-    fn make_module_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output) -> Self::Output {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5);
+    fn make_module_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output, arg6: Self::Output, arg7: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_module_exports(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_exports(self, arg0, arg1, arg2, arg3);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_module_imports(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_imports(self, arg0, arg1, arg2, arg3);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

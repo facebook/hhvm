@@ -6549,6 +6549,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         {
           module_declaration_right_brace =
             validate_token x.module_declaration_right_brace;
+          module_declaration_imports =
+            validate_module_imports x.module_declaration_imports;
+          module_declaration_exports =
+            validate_module_exports x.module_declaration_exports;
           module_declaration_left_brace =
             validate_token x.module_declaration_left_brace;
           module_declaration_name =
@@ -6582,8 +6586,80 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_name_aggregate x.module_declaration_name;
             module_declaration_left_brace =
               invalidate_token x.module_declaration_left_brace;
+            module_declaration_exports =
+              invalidate_module_exports x.module_declaration_exports;
+            module_declaration_imports =
+              invalidate_module_imports x.module_declaration_imports;
             module_declaration_right_brace =
               invalidate_token x.module_declaration_right_brace;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_module_exports : module_exports validator = function
+    | { Syntax.syntax = Syntax.ModuleExports x; value = v } ->
+      ( v,
+        {
+          module_exports_right_brace =
+            validate_token x.module_exports_right_brace;
+          module_exports_exports =
+            validate_list_with validate_name_aggregate x.module_exports_exports;
+          module_exports_left_brace = validate_token x.module_exports_left_brace;
+          module_exports_exports_keyword =
+            validate_token x.module_exports_exports_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ModuleExports) s
+
+  and invalidate_module_exports : module_exports invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ModuleExports
+          {
+            module_exports_exports_keyword =
+              invalidate_token x.module_exports_exports_keyword;
+            module_exports_left_brace =
+              invalidate_token x.module_exports_left_brace;
+            module_exports_exports =
+              invalidate_list_with
+                invalidate_name_aggregate
+                x.module_exports_exports;
+            module_exports_right_brace =
+              invalidate_token x.module_exports_right_brace;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_module_imports : module_imports validator = function
+    | { Syntax.syntax = Syntax.ModuleImports x; value = v } ->
+      ( v,
+        {
+          module_imports_right_brace =
+            validate_token x.module_imports_right_brace;
+          module_imports_imports =
+            validate_list_with validate_name_aggregate x.module_imports_imports;
+          module_imports_left_brace = validate_token x.module_imports_left_brace;
+          module_imports_imports_keyword =
+            validate_token x.module_imports_imports_keyword;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ModuleImports) s
+
+  and invalidate_module_imports : module_imports invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ModuleImports
+          {
+            module_imports_imports_keyword =
+              invalidate_token x.module_imports_imports_keyword;
+            module_imports_left_brace =
+              invalidate_token x.module_imports_left_brace;
+            module_imports_imports =
+              invalidate_list_with
+                invalidate_name_aggregate
+                x.module_imports_imports;
+            module_imports_right_brace =
+              invalidate_token x.module_imports_right_brace;
           };
       Syntax.value = v;
     }

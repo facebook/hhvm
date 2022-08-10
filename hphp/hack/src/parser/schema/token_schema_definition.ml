@@ -110,6 +110,7 @@ let given_text_tokens =
     make_token_node "Endif" "endif" ();
     make_token_node "Enum" "enum" ~allowed_as_identifier:true ();
     make_token_node "Eval" "eval" ();
+    make_token_node "Exports" "exports" ~allowed_as_identifier:true ();
     make_token_node "Extends" "extends" ();
     make_token_node "Fallthrough" "fallthrough" ~allowed_as_identifier:true ();
     make_token_node "Float" "float" ~allowed_as_identifier:true ();
@@ -122,6 +123,7 @@ let given_text_tokens =
     make_token_node "Global" "global" ();
     make_token_node "If" "if" ();
     make_token_node "Implements" "implements" ();
+    make_token_node "Imports" "imports" ~allowed_as_identifier:true ();
     make_token_node "Include" "include" ();
     make_token_node "Include_once" "include_once" ();
     make_token_node "Inout" "inout" ();

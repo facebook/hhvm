@@ -5236,6 +5236,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         }
                     }
                 }
+                if !x.exports.is_missing() || !x.imports.is_missing() {
+                    self.check_can_use_feature(node, &UnstableFeatures::ModuleReferences);
+                }
             }
             ModuleMembershipDeclaration(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Modules);

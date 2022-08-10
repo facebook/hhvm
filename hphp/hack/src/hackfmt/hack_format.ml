@@ -2474,6 +2474,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           module_declaration_module_keyword = mod_kw;
           module_declaration_name = name;
           module_declaration_left_brace = lb;
+          module_declaration_exports = exports;
+          module_declaration_imports = imports;
           module_declaration_right_brace = rb;
         } ->
       Concat
@@ -2487,6 +2489,61 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env name;
           Space;
           t env lb;
+          Newline;
+          t env exports;
+          when_present exports newline;
+          t env imports;
+          when_present imports newline;
+          t env rb;
+          Newline;
+        ]
+    | Syntax.ModuleExports
+        {
+          module_exports_exports_keyword = exports_kw;
+          module_exports_left_brace = lb;
+          module_exports_exports = exports;
+          module_exports_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env exports_kw;
+          Space;
+          t env lb;
+          Newline;
+          WithRule
+            ( Rule.Parental,
+              Nest
+                [
+                  handle_possible_list
+                    env
+                    exports
+                    ~after_each:after_each_argument;
+                ] );
+          t env rb;
+          Newline;
+        ]
+    | Syntax.ModuleImports
+        {
+          module_imports_imports_keyword = imports_kw;
+          module_imports_left_brace = lb;
+          module_imports_imports = imports;
+          module_imports_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env imports_kw;
+          Space;
+          t env lb;
+          Newline;
+          WithRule
+            ( Rule.Parental,
+              Nest
+                [
+                  handle_possible_list
+                    env
+                    imports
+                    ~after_each:after_each_argument;
+                ] );
           t env rb;
           Newline;
         ]

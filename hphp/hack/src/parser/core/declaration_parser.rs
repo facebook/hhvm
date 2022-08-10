@@ -2457,9 +2457,64 @@ where
 
         let name = self.require_qualified_module_name();
         let lb = self.require_left_brace();
-        let rb = self.require_right_brace();
-        self.sc_mut()
-            .make_module_declaration(attrs, new_kw, module_kw, name, lb, rb)
+        let pos = self.pos();
+        let mut exports_block = self.sc_mut().make_missing(pos);
+        let mut imports_block = self.sc_mut().make_missing(pos);
+        loop {
+            let kind = self.peek_token_kind();
+
+            match kind {
+                TokenKind::Exports => {
+                    let exports = self.require_token(TokenKind::Exports, Errors::error1004);
+                    let exports_lb = self.require_left_brace();
+                    let (clauses, _) = self.parse_comma_list_allow_trailing(
+                        TokenKind::RightBrace,
+                        Errors::error1004,
+                        |x: &mut Self| x.require_qualified_referenced_module_name(),
+                    );
+                    let exports_rb = self.require_right_brace();
+
+                    if !exports_block.is_missing() {
+                        self.with_error(Errors::error1066);
+                    }
+
+                    exports_block = self
+                        .sc_mut()
+                        .make_module_exports(exports, exports_lb, clauses, exports_rb);
+                }
+                TokenKind::Imports => {
+                    let imports = self.require_token(TokenKind::Imports, Errors::error1004);
+                    let imports_lb = self.require_left_brace();
+                    let (clauses, _) = self.parse_comma_list_allow_trailing(
+                        TokenKind::RightBrace,
+                        Errors::error1004,
+                        |x: &mut Self| x.require_qualified_referenced_module_name(),
+                    );
+                    let imports_rb = self.require_right_brace();
+
+                    if !imports_block.is_missing() {
+                        self.with_error(Errors::error1067);
+                    }
+
+                    imports_block = self
+                        .sc_mut()
+                        .make_module_imports(imports, imports_lb, clauses, imports_rb);
+                }
+                _ => {
+                    let rb = self.require_right_brace();
+                    return self.sc_mut().make_module_declaration(
+                        attrs,
+                        new_kw,
+                        module_kw,
+                        name,
+                        lb,
+                        exports_block,
+                        imports_block,
+                        rb,
+                    );
+                }
+            }
+        }
     }
 
     fn parse_module_membership_declaration(&mut self) -> S::Output {

@@ -188,7 +188,9 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_error(ctx: &C, error_error: Self) -> Self;
     fn make_list_item(ctx: &C, list_item: Self, list_separator: Self) -> Self;
     fn make_enum_class_label_expression(ctx: &C, enum_class_label_qualifier: Self, enum_class_label_hash: Self, enum_class_label_expression: Self) -> Self;
-    fn make_module_declaration(ctx: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_right_brace: Self) -> Self;
+    fn make_module_declaration(ctx: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_exports: Self, module_declaration_imports: Self, module_declaration_right_brace: Self) -> Self;
+    fn make_module_exports(ctx: &C, module_exports_exports_keyword: Self, module_exports_left_brace: Self, module_exports_exports: Self, module_exports_right_brace: Self) -> Self;
+    fn make_module_imports(ctx: &C, module_imports_imports_keyword: Self, module_imports_left_brace: Self, module_imports_imports: Self, module_imports_right_brace: Self) -> Self;
     fn make_module_membership_declaration(ctx: &C, module_membership_declaration_module_keyword: Self, module_membership_declaration_name: Self, module_membership_declaration_semicolon: Self) -> Self;
 
 }

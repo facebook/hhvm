@@ -233,6 +233,8 @@ module WithToken (Token : TokenType) = struct
       | ListItem _ -> SyntaxKind.ListItem
       | EnumClassLabelExpression _ -> SyntaxKind.EnumClassLabelExpression
       | ModuleDeclaration _ -> SyntaxKind.ModuleDeclaration
+      | ModuleExports _ -> SyntaxKind.ModuleExports
+      | ModuleImports _ -> SyntaxKind.ModuleImports
       | ModuleMembershipDeclaration _ -> SyntaxKind.ModuleMembershipDeclaration
 
     let kind node = to_kind (syntax node)
@@ -624,6 +626,10 @@ module WithToken (Token : TokenType) = struct
       has_kind SyntaxKind.EnumClassLabelExpression
 
     let is_module_declaration = has_kind SyntaxKind.ModuleDeclaration
+
+    let is_module_exports = has_kind SyntaxKind.ModuleExports
+
+    let is_module_imports = has_kind SyntaxKind.ModuleImports
 
     let is_module_membership_declaration =
       has_kind SyntaxKind.ModuleMembershipDeclaration
@@ -2418,6 +2424,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         let acc = f acc module_declaration_attribute_spec in
@@ -2425,7 +2433,33 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc module_declaration_module_keyword in
         let acc = f acc module_declaration_name in
         let acc = f acc module_declaration_left_brace in
+        let acc = f acc module_declaration_exports in
+        let acc = f acc module_declaration_imports in
         let acc = f acc module_declaration_right_brace in
+        acc
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        let acc = f acc module_exports_exports_keyword in
+        let acc = f acc module_exports_left_brace in
+        let acc = f acc module_exports_exports in
+        let acc = f acc module_exports_right_brace in
+        acc
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        let acc = f acc module_imports_imports_keyword in
+        let acc = f acc module_imports_left_brace in
+        let acc = f acc module_imports_imports in
+        let acc = f acc module_imports_right_brace in
         acc
       | ModuleMembershipDeclaration
           {
@@ -4030,6 +4064,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         [
@@ -4038,7 +4074,35 @@ module WithToken (Token : TokenType) = struct
           module_declaration_module_keyword;
           module_declaration_name;
           module_declaration_left_brace;
+          module_declaration_exports;
+          module_declaration_imports;
           module_declaration_right_brace;
+        ]
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        [
+          module_exports_exports_keyword;
+          module_exports_left_brace;
+          module_exports_exports;
+          module_exports_right_brace;
+        ]
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        [
+          module_imports_imports_keyword;
+          module_imports_left_brace;
+          module_imports_imports;
+          module_imports_right_brace;
         ]
       | ModuleMembershipDeclaration
           {
@@ -5676,6 +5740,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           } ->
         [
@@ -5684,7 +5750,35 @@ module WithToken (Token : TokenType) = struct
           "module_declaration_module_keyword";
           "module_declaration_name";
           "module_declaration_left_brace";
+          "module_declaration_exports";
+          "module_declaration_imports";
           "module_declaration_right_brace";
+        ]
+      | ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          } ->
+        [
+          "module_exports_exports_keyword";
+          "module_exports_left_brace";
+          "module_exports_exports";
+          "module_exports_right_brace";
+        ]
+      | ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          } ->
+        [
+          "module_imports_imports_keyword";
+          "module_imports_left_brace";
+          "module_imports_imports";
+          "module_imports_right_brace";
         ]
       | ModuleMembershipDeclaration
           {
@@ -7537,6 +7631,8 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
           ] ) ->
         ModuleDeclaration
@@ -7546,7 +7642,37 @@ module WithToken (Token : TokenType) = struct
             module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
+            module_declaration_exports;
+            module_declaration_imports;
             module_declaration_right_brace;
+          }
+      | ( SyntaxKind.ModuleExports,
+          [
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          ] ) ->
+        ModuleExports
+          {
+            module_exports_exports_keyword;
+            module_exports_left_brace;
+            module_exports_exports;
+            module_exports_right_brace;
+          }
+      | ( SyntaxKind.ModuleImports,
+          [
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
+          ] ) ->
+        ModuleImports
+          {
+            module_imports_imports_keyword;
+            module_imports_left_brace;
+            module_imports_imports;
+            module_imports_right_brace;
           }
       | ( SyntaxKind.ModuleMembershipDeclaration,
           [
@@ -9945,6 +10071,8 @@ module WithToken (Token : TokenType) = struct
           module_declaration_module_keyword
           module_declaration_name
           module_declaration_left_brace
+          module_declaration_exports
+          module_declaration_imports
           module_declaration_right_brace =
         let syntax =
           ModuleDeclaration
@@ -9954,7 +10082,43 @@ module WithToken (Token : TokenType) = struct
               module_declaration_module_keyword;
               module_declaration_name;
               module_declaration_left_brace;
+              module_declaration_exports;
+              module_declaration_imports;
               module_declaration_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_exports
+          module_exports_exports_keyword
+          module_exports_left_brace
+          module_exports_exports
+          module_exports_right_brace =
+        let syntax =
+          ModuleExports
+            {
+              module_exports_exports_keyword;
+              module_exports_left_brace;
+              module_exports_exports;
+              module_exports_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_imports
+          module_imports_imports_keyword
+          module_imports_left_brace
+          module_imports_imports
+          module_imports_right_brace =
+        let syntax =
+          ModuleImports
+            {
+              module_imports_imports_keyword;
+              module_imports_left_brace;
+              module_imports_imports;
+              module_imports_right_brace;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

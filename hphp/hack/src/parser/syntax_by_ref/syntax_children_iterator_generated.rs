@@ -1704,13 +1704,35 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ModuleDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.new_keyword),
                     2 => Some(&x.module_keyword),
                     3 => Some(&x.name),
                     4 => Some(&x.left_brace),
-                    5 => Some(&x.right_brace),
+                    5 => Some(&x.exports),
+                    6 => Some(&x.imports),
+                    7 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleExports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.exports_keyword),
+                    1 => Some(&x.left_brace),
+                    2 => Some(&x.exports),
+                    3 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleImports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.imports_keyword),
+                    1 => Some(&x.left_brace),
+                    2 => Some(&x.imports),
+                    3 => Some(&x.right_brace),
                         _ => None,
                     }
                 })

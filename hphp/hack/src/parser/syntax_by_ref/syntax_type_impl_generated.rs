@@ -1860,13 +1860,37 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, right_brace: Self) -> Self {
+    fn make_module_declaration(ctx: &C, attribute_spec: Self, new_keyword: Self, module_keyword: Self, name: Self, left_brace: Self, exports: Self, imports: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(ctx.get_arena().alloc(ModuleDeclarationChildren {
             attribute_spec,
             new_keyword,
             module_keyword,
             name,
             left_brace,
+            exports,
+            imports,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_exports(ctx: &C, exports_keyword: Self, left_brace: Self, exports: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleExports(ctx.get_arena().alloc(ModuleExportsChildren {
+            exports_keyword,
+            left_brace,
+            exports,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_imports(ctx: &C, imports_keyword: Self, left_brace: Self, imports: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleImports(ctx.get_arena().alloc(ModuleImportsChildren {
+            imports_keyword,
+            left_brace,
+            imports,
             right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

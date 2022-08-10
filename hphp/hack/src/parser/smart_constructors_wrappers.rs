@@ -578,8 +578,14 @@ where S: SmartConstructors<State = St>,
     fn make_enum_class_label_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::EnumClassLabelExpression, self.s.make_enum_class_label_expression(arg0.1, arg1.1, arg2.1))
     }
-    fn make_module_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::ModuleDeclaration, self.s.make_module_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
+    fn make_module_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ModuleDeclaration, self.s.make_module_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1))
+    }
+    fn make_module_exports(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ModuleExports, self.s.make_module_exports(arg0.1, arg1.1, arg2.1, arg3.1))
+    }
+    fn make_module_imports(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ModuleImports, self.s.make_module_imports(arg0.1, arg1.1, arg2.1, arg3.1))
     }
     fn make_module_membership_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ModuleMembershipDeclaration, self.s.make_module_membership_declaration(arg0.1, arg1.1, arg2.1))

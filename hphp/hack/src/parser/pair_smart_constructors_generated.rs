@@ -753,8 +753,16 @@ where
         Node(self.0.make_enum_class_label_expression(qualifier.0, hash.0, expression.0), self.1.make_enum_class_label_expression(qualifier.1, hash.1, expression.1))
     }
 
-    fn make_module_declaration(&mut self, attribute_spec: Self::Output, new_keyword: Self::Output, module_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, right_brace: Self::Output) -> Self::Output {
-        Node(self.0.make_module_declaration(attribute_spec.0, new_keyword.0, module_keyword.0, name.0, left_brace.0, right_brace.0), self.1.make_module_declaration(attribute_spec.1, new_keyword.1, module_keyword.1, name.1, left_brace.1, right_brace.1))
+    fn make_module_declaration(&mut self, attribute_spec: Self::Output, new_keyword: Self::Output, module_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, exports: Self::Output, imports: Self::Output, right_brace: Self::Output) -> Self::Output {
+        Node(self.0.make_module_declaration(attribute_spec.0, new_keyword.0, module_keyword.0, name.0, left_brace.0, exports.0, imports.0, right_brace.0), self.1.make_module_declaration(attribute_spec.1, new_keyword.1, module_keyword.1, name.1, left_brace.1, exports.1, imports.1, right_brace.1))
+    }
+
+    fn make_module_exports(&mut self, exports_keyword: Self::Output, left_brace: Self::Output, exports: Self::Output, right_brace: Self::Output) -> Self::Output {
+        Node(self.0.make_module_exports(exports_keyword.0, left_brace.0, exports.0, right_brace.0), self.1.make_module_exports(exports_keyword.1, left_brace.1, exports.1, right_brace.1))
+    }
+
+    fn make_module_imports(&mut self, imports_keyword: Self::Output, left_brace: Self::Output, imports: Self::Output, right_brace: Self::Output) -> Self::Output {
+        Node(self.0.make_module_imports(imports_keyword.0, left_brace.0, imports.0, right_brace.0), self.1.make_module_imports(imports_keyword.1, left_brace.1, imports.1, right_brace.1))
     }
 
     fn make_module_membership_declaration(&mut self, module_keyword: Self::Output, name: Self::Output, semicolon: Self::Output) -> Self::Output {

@@ -5773,6 +5773,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _module_keyword: Self::Output,
         name: Self::Output,
         _left_brace: Self::Output,
+        _exports: Self::Output,
+        _imports: Self::Output,
         _right_brace: Self::Output,
     ) -> Self::Output {
         match name {

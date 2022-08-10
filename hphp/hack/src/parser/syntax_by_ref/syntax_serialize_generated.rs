@@ -1536,15 +1536,35 @@ ss.serialize_field("enum_class_label_hash", &self.with(hash))?;
 ss.serialize_field("enum_class_label_expression", &self.with(expression))?;
       ss.end()
 } 
-SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,new_keyword,module_keyword,name,left_brace,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 7)?;
+SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,new_keyword,module_keyword,name,left_brace,exports,imports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 9)?;
       ss.serialize_field("kind", "module_declaration")?;
       ss.serialize_field("module_declaration_attribute_spec", &self.with(attribute_spec))?;
 ss.serialize_field("module_declaration_new_keyword", &self.with(new_keyword))?;
 ss.serialize_field("module_declaration_module_keyword", &self.with(module_keyword))?;
 ss.serialize_field("module_declaration_name", &self.with(name))?;
 ss.serialize_field("module_declaration_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_declaration_exports", &self.with(exports))?;
+ss.serialize_field("module_declaration_imports", &self.with(imports))?;
 ss.serialize_field("module_declaration_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::ModuleExports (ModuleExportsChildren{exports_keyword,left_brace,exports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
+      ss.serialize_field("kind", "module_exports")?;
+      ss.serialize_field("module_exports_exports_keyword", &self.with(exports_keyword))?;
+ss.serialize_field("module_exports_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_exports_exports", &self.with(exports))?;
+ss.serialize_field("module_exports_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::ModuleImports (ModuleImportsChildren{imports_keyword,left_brace,imports,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
+      ss.serialize_field("kind", "module_imports")?;
+      ss.serialize_field("module_imports_imports_keyword", &self.with(imports_keyword))?;
+ss.serialize_field("module_imports_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_imports_imports", &self.with(imports))?;
+ss.serialize_field("module_imports_right_brace", &self.with(right_brace))?;
       ss.end()
 } 
 SyntaxVariant::ModuleMembershipDeclaration (ModuleMembershipDeclarationChildren{module_keyword,name,semicolon} ) => {

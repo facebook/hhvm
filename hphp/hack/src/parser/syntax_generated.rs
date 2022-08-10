@@ -1854,14 +1854,38 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_module_declaration(_: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_right_brace: Self) -> Self {
+    fn make_module_declaration(_: &C, module_declaration_attribute_spec: Self, module_declaration_new_keyword: Self, module_declaration_module_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_exports: Self, module_declaration_imports: Self, module_declaration_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
             module_declaration_attribute_spec,
             module_declaration_new_keyword,
             module_declaration_module_keyword,
             module_declaration_name,
             module_declaration_left_brace,
+            module_declaration_exports,
+            module_declaration_imports,
             module_declaration_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_exports(_: &C, module_exports_exports_keyword: Self, module_exports_left_brace: Self, module_exports_exports: Self, module_exports_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleExports(Box::new(ModuleExportsChildren {
+            module_exports_exports_keyword,
+            module_exports_left_brace,
+            module_exports_exports,
+            module_exports_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_module_imports(_: &C, module_imports_imports_keyword: Self, module_imports_left_brace: Self, module_imports_imports: Self, module_imports_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleImports(Box::new(ModuleImportsChildren {
+            module_imports_imports_keyword,
+            module_imports_left_brace,
+            module_imports_imports,
+            module_imports_right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -3224,13 +3248,31 @@ where
                 acc
             },
             SyntaxVariant::ModuleDeclaration(x) => {
-                let ModuleDeclarationChildren { module_declaration_attribute_spec, module_declaration_new_keyword, module_declaration_module_keyword, module_declaration_name, module_declaration_left_brace, module_declaration_right_brace } = *x;
+                let ModuleDeclarationChildren { module_declaration_attribute_spec, module_declaration_new_keyword, module_declaration_module_keyword, module_declaration_name, module_declaration_left_brace, module_declaration_exports, module_declaration_imports, module_declaration_right_brace } = *x;
                 let acc = f(module_declaration_attribute_spec, acc);
                 let acc = f(module_declaration_new_keyword, acc);
                 let acc = f(module_declaration_module_keyword, acc);
                 let acc = f(module_declaration_name, acc);
                 let acc = f(module_declaration_left_brace, acc);
+                let acc = f(module_declaration_exports, acc);
+                let acc = f(module_declaration_imports, acc);
                 let acc = f(module_declaration_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::ModuleExports(x) => {
+                let ModuleExportsChildren { module_exports_exports_keyword, module_exports_left_brace, module_exports_exports, module_exports_right_brace } = *x;
+                let acc = f(module_exports_exports_keyword, acc);
+                let acc = f(module_exports_left_brace, acc);
+                let acc = f(module_exports_exports, acc);
+                let acc = f(module_exports_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::ModuleImports(x) => {
+                let ModuleImportsChildren { module_imports_imports_keyword, module_imports_left_brace, module_imports_imports, module_imports_right_brace } = *x;
+                let acc = f(module_imports_imports_keyword, acc);
+                let acc = f(module_imports_left_brace, acc);
+                let acc = f(module_imports_imports, acc);
+                let acc = f(module_imports_right_brace, acc);
                 acc
             },
             SyntaxVariant::ModuleMembershipDeclaration(x) => {
@@ -3418,6 +3460,8 @@ where
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumClassLabelExpression {..} => SyntaxKind::EnumClassLabelExpression,
             SyntaxVariant::ModuleDeclaration {..} => SyntaxKind::ModuleDeclaration,
+            SyntaxVariant::ModuleExports {..} => SyntaxKind::ModuleExports,
+            SyntaxVariant::ModuleImports {..} => SyntaxKind::ModuleImports,
             SyntaxVariant::ModuleMembershipDeclaration {..} => SyntaxKind::ModuleMembershipDeclaration,
         }
     }
@@ -4583,13 +4627,29 @@ where
                  enum_class_label_qualifier: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ModuleDeclaration, 6) => SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
+             (SyntaxKind::ModuleDeclaration, 8) => SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
                  module_declaration_right_brace: ts.pop().unwrap(),
+                 module_declaration_imports: ts.pop().unwrap(),
+                 module_declaration_exports: ts.pop().unwrap(),
                  module_declaration_left_brace: ts.pop().unwrap(),
                  module_declaration_name: ts.pop().unwrap(),
                  module_declaration_module_keyword: ts.pop().unwrap(),
                  module_declaration_new_keyword: ts.pop().unwrap(),
                  module_declaration_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ModuleExports, 4) => SyntaxVariant::ModuleExports(Box::new(ModuleExportsChildren {
+                 module_exports_right_brace: ts.pop().unwrap(),
+                 module_exports_exports: ts.pop().unwrap(),
+                 module_exports_left_brace: ts.pop().unwrap(),
+                 module_exports_exports_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ModuleImports, 4) => SyntaxVariant::ModuleImports(Box::new(ModuleImportsChildren {
+                 module_imports_right_brace: ts.pop().unwrap(),
+                 module_imports_imports: ts.pop().unwrap(),
+                 module_imports_left_brace: ts.pop().unwrap(),
+                 module_imports_imports_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ModuleMembershipDeclaration, 3) => SyntaxVariant::ModuleMembershipDeclaration(Box::new(ModuleMembershipDeclarationChildren {
@@ -5935,7 +5995,25 @@ pub struct ModuleDeclarationChildren<T, V> {
     pub module_declaration_module_keyword: Syntax<T, V>,
     pub module_declaration_name: Syntax<T, V>,
     pub module_declaration_left_brace: Syntax<T, V>,
+    pub module_declaration_exports: Syntax<T, V>,
+    pub module_declaration_imports: Syntax<T, V>,
     pub module_declaration_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleExportsChildren<T, V> {
+    pub module_exports_exports_keyword: Syntax<T, V>,
+    pub module_exports_left_brace: Syntax<T, V>,
+    pub module_exports_exports: Syntax<T, V>,
+    pub module_exports_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleImportsChildren<T, V> {
+    pub module_imports_imports_keyword: Syntax<T, V>,
+    pub module_imports_left_brace: Syntax<T, V>,
+    pub module_imports_imports: Syntax<T, V>,
+    pub module_imports_right_brace: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6120,6 +6198,8 @@ pub enum SyntaxVariant<T, V> {
     ListItem(Box<ListItemChildren<T, V>>),
     EnumClassLabelExpression(Box<EnumClassLabelExpressionChildren<T, V>>),
     ModuleDeclaration(Box<ModuleDeclarationChildren<T, V>>),
+    ModuleExports(Box<ModuleExportsChildren<T, V>>),
+    ModuleImports(Box<ModuleImportsChildren<T, V>>),
     ModuleMembershipDeclaration(Box<ModuleMembershipDeclarationChildren<T, V>>),
 }
 
@@ -7805,13 +7885,35 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ModuleDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.module_declaration_attribute_spec),
                     1 => Some(&x.module_declaration_new_keyword),
                     2 => Some(&x.module_declaration_module_keyword),
                     3 => Some(&x.module_declaration_name),
                     4 => Some(&x.module_declaration_left_brace),
-                    5 => Some(&x.module_declaration_right_brace),
+                    5 => Some(&x.module_declaration_exports),
+                    6 => Some(&x.module_declaration_imports),
+                    7 => Some(&x.module_declaration_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleExports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.module_exports_exports_keyword),
+                    1 => Some(&x.module_exports_left_brace),
+                    2 => Some(&x.module_exports_exports),
+                    3 => Some(&x.module_exports_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleImports(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.module_imports_imports_keyword),
+                    1 => Some(&x.module_imports_left_brace),
+                    2 => Some(&x.module_imports_imports),
+                    3 => Some(&x.module_imports_right_brace),
                         _ => None,
                     }
                 })

@@ -557,7 +557,7 @@ void TypeStructure::OnSetEvalScalar(TypeStructure* tad) {
     auto arr = Array(tad->m_typevar_types);
     arr.setEvalScalar();
     decRefArr(tad->m_typevar_types);
-    tad->m_typevar_types = arr.get();
+    tad->m_typevar_types = arr.detach();
   }
 
   switch (tad->typeKind()) {
@@ -849,9 +849,9 @@ template<class T> void setEvalScalar(T t) {}
 template<>
 void setEvalScalar(StringData*& field) {
   if (field && !field->isStatic()) {
-    auto staticField = field;
-    field = makeStaticString(staticField);
-    decRefStr(field);
+    auto tempField = field;
+    field = makeStaticString(tempField);
+    decRefStr(tempField);
   }
 }
 template<>
@@ -860,7 +860,7 @@ void setEvalScalar(ArrayData*& field) {
     auto arr = Array(field);
     arr.setEvalScalar();
     decRefArr(field);
-    field = arr.get();
+    field = arr.detach();
   }
 }
 

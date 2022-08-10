@@ -1040,9 +1040,7 @@ void Package::resolveOnDemand(FileAndSizeVec& out,
 
   auto const onMap = [&] (auto const& syms, auto const& sym_to_file) {
     for (auto const& sym : syms) {
-      auto const interned = lookupStaticString(sym);
-      if (!interned) continue; // cannot be in index
-      auto const it = sym_to_file.find(interned);
+      auto const it = sym_to_file.find(makeStaticString(sym));
       if (it == sym_to_file.end()) continue;
       onPath(it->second);
     }

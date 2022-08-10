@@ -53,13 +53,11 @@ TYPE_STRUCTURE_CHILDREN_KINDS
   }
 }
 
-void moveFieldToVanilla(ArrayData* vad, StringData* key, TypedValue tv) {
+void copyFieldToVanilla(ArrayData* vad, StringData* key, TypedValue tv) {
   auto const type = tv.m_type;
   if (type == KindOfUninit) return;
-  auto const res = VanillaDict::SetStrMove(vad, key, tv);
-  assertx(vad == res);
+  VanillaDict::SetStrMove(vad, key, tv);
   tvIncRefGen(tv);
-  vad = res;
 }
 
 void setStringField(StringData*& field, TypedValue v) {
@@ -336,7 +334,7 @@ ArrayData* TypeStructure::escalateWithCapacity(
   for (auto i = 0; i < m_size; i++) {
     auto const keyTV = GetPosKey(this, i);
     auto const valTV = GetPosVal(this, i);
-    moveFieldToVanilla(ad, keyTV.val().pstr, valTV);
+    copyFieldToVanilla(ad, keyTV.val().pstr, valTV);
   }
 
   assertx(isValidTypeStructure(ad));

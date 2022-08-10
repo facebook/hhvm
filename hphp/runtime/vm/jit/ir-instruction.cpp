@@ -888,6 +888,9 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
       auto const loggingLayout =
         ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
       auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
+      // bespoke type structures can be created in HHBBC and bespoke arrays
+      // should not be compared in profiling mode
+      if (src(0)->type().arrSpec().is_type_structure()) return false;
       return src(0)->type().maybe(loggingArray);
     }
 

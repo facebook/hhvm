@@ -273,7 +273,7 @@ bool typeStructureIsType(
         typeFields,
         [&](TypedValue k, TypedValue v) {
           assertx(tvIsDict(v));
-          auto typeField = getShapeFieldElement(v);
+          auto typeField = Array(getShapeFieldElement(v));
           auto const tv = inputFields->get(k);
           if (!tv.is_init()) {
             result = false;
@@ -285,13 +285,13 @@ bool typeStructureIsType(
             result = false;
             return true; // short circuit
           }
-          auto inputField = getShapeFieldElement(tv);
+          auto inputField = Array(getShapeFieldElement(tv));
           // If this field is associated with the value, kill it
           // This is safe since we already checked this above
-          auto cleanedInput = inputField->removeMove(s_optional_shape_field.get());
-          auto cleanedType = typeField->removeMove(s_optional_shape_field.get());
-          if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
-            if (warn || is_ts_soft(typeField)) {
+          inputField.remove(StrNR{s_optional_shape_field.get()});
+          typeField.remove(StrNR{s_optional_shape_field.get()});
+          if (!typeStructureIsType(inputField.get(), typeField.get(), warn, strict)) {
+            if (warn || is_ts_soft(typeField.get())) {
               willWarn = true;
               warn = false;
               return false;

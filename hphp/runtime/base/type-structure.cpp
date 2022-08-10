@@ -877,7 +877,8 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
   if (alias) ts.set(s_alias, Variant(alias));
   if (typevarTypes) ts.set(s_typevar_types, Variant(typevarTypes));
 
-  if (RO::EvalEmitBespokeTypeStructures
+  if (allowBespokeArrayLikes()
+      && RO::EvalEmitBespokeTypeStructures
       && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
     auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
     if (bespokeTS) return Array::attach(bespokeTS);

@@ -246,7 +246,8 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
 /// Warning: Experimental usage of decls in compilation.
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
-pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
+pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
+    env: &Env<'a, 'arena>,
     emitter: &mut Emitter<'arena, 'decl>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
@@ -254,6 +255,17 @@ pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
     use aast::ReifyKind;
     match hint.as_ref() {
         Hint_::Happly(Id(_, id), _) => {
+            // If the parameter itself is a reified type parameter, then we want to do the tparam check
+            if is_reified_tparam(env, true, id).is_some()
+                || is_reified_tparam(env, false, id).is_some()
+            {
+                return true;
+            }
+            // If the parameter is an erased type parameter, then no check is necessary
+            if get_erased_tparams(env).any(|tparam| &tparam == id) {
+                return false;
+            }
+            // Otherwise, we have a class or typedef name that we want to look up
             let provider = match emitter.decl_provider {
                 Some(p) => p,
                 None => {

@@ -483,7 +483,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                     (L::Unconstrained, _) => Ok(instr::empty()),
                     (L::Not, _) => Ok(instr::verify_param_type(param_local)),
                     (L::Maybe, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(emitter, &h) {
+                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
                             Ok(instr::verify_param_type(param_local))
                         } else {
                             Ok(InstrSeq::gather(vec![
@@ -502,7 +502,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                         }
                     }
                     (L::Definitely, Some(h)) => {
-                        if !RGH::happly_decl_has_reified_generics(emitter, &h) {
+                        if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
                             Ok(instr::verify_param_type(param_local))
                         } else {
                             let check =

@@ -2515,9 +2515,10 @@ bool build_class_constants(IndexData& index,
 
       if ((cns->cls->attrs & AttrInterface ||
            (RO::EvalTraitConstantInterfaceBehavior && (cns->cls->attrs & AttrTrait))) &&
-          existing->isAbstract) {
-        // because existing has val, this covers the case where it is
-        // abstract with default allow incoming to win
+          (existing->isAbstract || cns->kind == ConstModifiers::Kind::Type)) {
+        // Because existing has val, this covers the case where it is abstract
+        // with default allow incoming to win.  Also, type constants from
+        // interfaces may be overridden even if they're not abstract.
       } else {
         // A constant from an interface or from an included enum collides
         // with an existing constant.

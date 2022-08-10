@@ -431,6 +431,7 @@ final class Options {
     public ?string $retranslate_all;
     public ?string $jit_serialize;
     public ?string $hhvm_binary_path;
+    public ?string $working_dir;
     public ?string $vendor;
     public ?string $record_failures;
     public ?string $ignore_oids;
@@ -489,6 +490,7 @@ function get_options(
     '*retranslate-all:' => '',
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
+    '*working-dir:' => 'w:',
     '*vendor:' => '',
     'record-failures:' => '',
     '*ignore-oids' => '',
@@ -1535,8 +1537,8 @@ final class Status {
   const int YELLOW = 33;
   const int BLUE = 34;
 
-  public static function createTmpDir(): void {
-    $parent = sys_get_temp_dir();
+  public static function createTmpDir(?string $working_dir): void {
+    $parent = $working_dir ?? sys_get_temp_dir();
     if (substr($parent, -1) !== "/") {
       $parent .= "/";
     }
@@ -3772,7 +3774,7 @@ function main(vec<string> $argv): int {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
 
-  Status::createTmpDir();
+  Status::createTmpDir($options->working_dir);
 
   $servers = null;
   if ($options->server || $options->cli_server) {

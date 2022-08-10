@@ -244,10 +244,10 @@ impl compile_ffi::NativeEnv {
     }
 }
 
-fn hash_unit(unit: &HackCUnitWrapper) -> [u8; 20] {
+fn hash_unit(HackCUnitWrapper(unit, _): &HackCUnitWrapper) -> [u8; 20] {
     let mut hasher = Sha1::new();
-    let slice: &[u8] = &bincode::serialize(&unit.0).unwrap();
-    hasher.update(slice);
+    let w = std::io::BufWriter::new(&mut hasher);
+    bincode::serialize_into(w, unit).unwrap();
     hasher.finalize().into()
 }
 

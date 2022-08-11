@@ -330,6 +330,9 @@ type t = {
   tco_loop_iteration_upper_bound: int option;
   (* When enabled, wrap function types in Expression Trees in user defined virtual function types *)
   tco_expression_tree_virtualize_functions: bool;
+  (* When set, mutates generic entities by substituting type parameters and
+     typechecks the mutated program *)
+  tco_substitution_mutation: bool;
 }
 [@@deriving eq, show]
 
@@ -467,6 +470,7 @@ val make :
   ?tco_record_fine_grained_dependencies:bool ->
   ?tco_loop_iteration_upper_bound:int option ->
   ?tco_expression_tree_virtualize_functions:bool ->
+  ?tco_substitution_mutation:bool ->
   unit ->
   t
 

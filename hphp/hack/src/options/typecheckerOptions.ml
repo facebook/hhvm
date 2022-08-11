@@ -307,3 +307,5 @@ let log_fanout t ~fanout_cardinal =
   match t.GlobalOptions.tco_log_large_fanouts_threshold with
   | None -> false
   | Some threshold -> Int.(fanout_cardinal >= threshold)
+
+let substitution_mutation t = t.GlobalOptions.tco_substitution_mutation

@@ -145,6 +145,7 @@ impl Default for GlobalOptions {
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,
             tco_expression_tree_virtualize_functions: false,
+            tco_substitution_mutation: false,
         }
     }
 }

@@ -143,6 +143,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_record_fine_grained_dependencies: false,
     tco_loop_iteration_upper_bound: None,
     tco_expression_tree_virtualize_functions: false,
+    tco_substitution_mutation: false,
 };
 
 impl GlobalOptions<'static> {
@@ -422,6 +423,7 @@ impl GlobalOptions<'_> {
         let tco_loop_iteration_upper_bound = self.tco_loop_iteration_upper_bound;
         let tco_expression_tree_virtualize_functions =
             self.tco_expression_tree_virtualize_functions;
+        let tco_substitution_mutation = self.tco_substitution_mutation;
 
         GlobalOptions::<'a> {
             tco_experimental_features,
@@ -558,6 +560,7 @@ impl GlobalOptions<'_> {
             tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound,
             tco_expression_tree_virtualize_functions,
+            tco_substitution_mutation,
         }
     }
 }

@@ -348,6 +348,7 @@ let parse_options () =
   in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
+  let substitution_mutation = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -835,6 +836,10 @@ let parse_options () =
       ( "--expression-tree-virtualize-functions",
         Arg.Set expression_tree_virtualize_functions,
         " Enables function virtualization in Expression Trees" );
+      ( "--substitution-mutation",
+        Arg.Set substitution_mutation,
+        " Applies substitution mutation to applicable entities and typechecks them"
+      );
     ]
   in
 
@@ -1000,6 +1005,7 @@ let parse_options () =
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       ~tco_expression_tree_virtualize_functions:
         !expression_tree_virtualize_functions
+      ~tco_substitution_mutation:!substitution_mutation
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -162,6 +162,7 @@ type t = {
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
   tco_expression_tree_virtualize_functions: bool;
+  tco_substitution_mutation: bool;
 }
 [@@deriving eq, show]
 
@@ -301,6 +302,7 @@ let default =
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
     tco_expression_tree_virtualize_functions = false;
+    tco_substitution_mutation = false;
   }
 
 let make
@@ -468,6 +470,7 @@ let make
     ?(tco_loop_iteration_upper_bound = default.tco_loop_iteration_upper_bound)
     ?(tco_expression_tree_virtualize_functions =
       default.tco_expression_tree_virtualize_functions)
+    ?(tco_substitution_mutation = default.tco_substitution_mutation)
     () =
   {
     tco_experimental_features;
@@ -604,6 +607,7 @@ let make
     tco_record_fine_grained_dependencies;
     tco_loop_iteration_upper_bound;
     tco_expression_tree_virtualize_functions;
+    tco_substitution_mutation;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

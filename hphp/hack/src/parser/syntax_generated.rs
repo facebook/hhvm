@@ -49,6 +49,14 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_name(_: &C, module_name_parts: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleName(Box::new(ModuleNameChildren {
+            module_name_parts,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_simple_type_specifier(_: &C, simple_type_specifier: Self) -> Self {
         let syntax = SyntaxVariant::SimpleTypeSpecifier(Box::new(SimpleTypeSpecifierChildren {
             simple_type_specifier,
@@ -1937,6 +1945,11 @@ where
                 let acc = f(qualified_name_parts, acc);
                 acc
             },
+            SyntaxVariant::ModuleName(x) => {
+                let ModuleNameChildren { module_name_parts } = *x;
+                let acc = f(module_name_parts, acc);
+                acc
+            },
             SyntaxVariant::SimpleTypeSpecifier(x) => {
                 let SimpleTypeSpecifierChildren { simple_type_specifier } = *x;
                 let acc = f(simple_type_specifier, acc);
@@ -3294,6 +3307,7 @@ where
             SyntaxVariant::EndOfFile {..} => SyntaxKind::EndOfFile,
             SyntaxVariant::Script {..} => SyntaxKind::Script,
             SyntaxVariant::QualifiedName {..} => SyntaxKind::QualifiedName,
+            SyntaxVariant::ModuleName {..} => SyntaxKind::ModuleName,
             SyntaxVariant::SimpleTypeSpecifier {..} => SyntaxKind::SimpleTypeSpecifier,
             SyntaxVariant::LiteralExpression {..} => SyntaxKind::LiteralExpression,
             SyntaxVariant::PrefixedStringExpression {..} => SyntaxKind::PrefixedStringExpression,
@@ -3480,6 +3494,10 @@ where
              })),
              (SyntaxKind::QualifiedName, 1) => SyntaxVariant::QualifiedName(Box::new(QualifiedNameChildren {
                  qualified_name_parts: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ModuleName, 1) => SyntaxVariant::ModuleName(Box::new(ModuleNameChildren {
+                 module_name_parts: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::SimpleTypeSpecifier, 1) => SyntaxVariant::SimpleTypeSpecifier(Box::new(SimpleTypeSpecifierChildren {
@@ -4676,6 +4694,11 @@ pub struct ScriptChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct QualifiedNameChildren<T, V> {
     pub qualified_name_parts: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleNameChildren<T, V> {
+    pub module_name_parts: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6032,6 +6055,7 @@ pub enum SyntaxVariant<T, V> {
     EndOfFile(Box<EndOfFileChildren<T, V>>),
     Script(Box<ScriptChildren<T, V>>),
     QualifiedName(Box<QualifiedNameChildren<T, V>>),
+    ModuleName(Box<ModuleNameChildren<T, V>>),
     SimpleTypeSpecifier(Box<SimpleTypeSpecifierChildren<T, V>>),
     LiteralExpression(Box<LiteralExpressionChildren<T, V>>),
     PrefixedStringExpression(Box<PrefixedStringExpressionChildren<T, V>>),
@@ -6240,6 +6264,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
             QualifiedName(x) => {
                 get_index(1).and_then(|index| { match index {
                         0 => Some(&x.qualified_name_parts),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleName(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.module_name_parts),
                         _ => None,
                     }
                 })

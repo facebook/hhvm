@@ -65,6 +65,11 @@ where
         Self::Output::make_qualified_name(self.state_mut(), arg0)
     }
 
+    fn make_module_name(&mut self, arg0 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0]);
+        Self::Output::make_module_name(self.state_mut(), arg0)
+    }
+
     fn make_simple_type_specifier(&mut self, arg0 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0]);
         Self::Output::make_simple_type_specifier(self.state_mut(), arg0)

@@ -28,6 +28,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::EndOfFile {..} => SyntaxKind::EndOfFile,
             SyntaxVariant::Script {..} => SyntaxKind::Script,
             SyntaxVariant::QualifiedName {..} => SyntaxKind::QualifiedName,
+            SyntaxVariant::ModuleName {..} => SyntaxKind::ModuleName,
             SyntaxVariant::SimpleTypeSpecifier {..} => SyntaxKind::SimpleTypeSpecifier,
             SyntaxVariant::LiteralExpression {..} => SyntaxKind::LiteralExpression,
             SyntaxVariant::PrefixedStringExpression {..} => SyntaxKind::PrefixedStringExpression,

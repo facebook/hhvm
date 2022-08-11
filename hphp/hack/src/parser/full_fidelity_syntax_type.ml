@@ -171,6 +171,7 @@ struct
     | EndOfFile of { end_of_file_token: t }
     | Script of { script_declarations: t }
     | QualifiedName of { qualified_name_parts: t }
+    | ModuleName of { module_name_parts: t }
     | SimpleTypeSpecifier of { simple_type_specifier: t }
     | LiteralExpression of { literal_expression: t }
     | PrefixedStringExpression of {
@@ -1453,13 +1454,17 @@ struct
 
   and todo_aggregate = TODOEndOfFile of end_of_file
 
-  and name_aggregate = NameQualifiedName of qualified_name
+  and name_aggregate =
+    | NameQualifiedName of qualified_name
+    | NameModuleName of module_name
 
   and end_of_file = { end_of_file_token: Token.t value }
 
   and script = { script_declarations: top_level_declaration listesque value }
 
   and qualified_name = { qualified_name_parts: Token.t listesque value }
+
+  and module_name = { module_name_parts: Token.t listesque value }
 
   and simple_type_specifier = { simple_type_specifier: name_aggregate value }
 

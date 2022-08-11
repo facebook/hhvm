@@ -93,6 +93,10 @@ where
         Node(self.0.make_qualified_name(parts.0), self.1.make_qualified_name(parts.1))
     }
 
+    fn make_module_name(&mut self, parts: Self::Output) -> Self::Output {
+        Node(self.0.make_module_name(parts.0), self.1.make_module_name(parts.1))
+    }
+
     fn make_simple_type_specifier(&mut self, specifier: Self::Output) -> Self::Output {
         Node(self.0.make_simple_type_specifier(specifier.0), self.1.make_simple_type_specifier(specifier.1))
     }

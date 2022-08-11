@@ -59,6 +59,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile _ -> SyntaxKind.EndOfFile
       | Script _ -> SyntaxKind.Script
       | QualifiedName _ -> SyntaxKind.QualifiedName
+      | ModuleName _ -> SyntaxKind.ModuleName
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | PrefixedStringExpression _ -> SyntaxKind.PrefixedStringExpression
@@ -256,6 +257,8 @@ module WithToken (Token : TokenType) = struct
     let is_script = has_kind SyntaxKind.Script
 
     let is_qualified_name = has_kind SyntaxKind.QualifiedName
+
+    let is_module_name = has_kind SyntaxKind.ModuleName
 
     let is_simple_type_specifier = has_kind SyntaxKind.SimpleTypeSpecifier
 
@@ -734,6 +737,9 @@ module WithToken (Token : TokenType) = struct
         acc
       | QualifiedName { qualified_name_parts } ->
         let acc = f acc qualified_name_parts in
+        acc
+      | ModuleName { module_name_parts } ->
+        let acc = f acc module_name_parts in
         acc
       | SimpleTypeSpecifier { simple_type_specifier } ->
         let acc = f acc simple_type_specifier in
@@ -2482,6 +2488,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> [end_of_file_token]
       | Script { script_declarations } -> [script_declarations]
       | QualifiedName { qualified_name_parts } -> [qualified_name_parts]
+      | ModuleName { module_name_parts } -> [module_name_parts]
       | SimpleTypeSpecifier { simple_type_specifier } -> [simple_type_specifier]
       | LiteralExpression { literal_expression } -> [literal_expression]
       | PrefixedStringExpression { prefixed_string_name; prefixed_string_str }
@@ -4126,6 +4133,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> ["end_of_file_token"]
       | Script { script_declarations } -> ["script_declarations"]
       | QualifiedName { qualified_name_parts } -> ["qualified_name_parts"]
+      | ModuleName { module_name_parts } -> ["module_name_parts"]
       | SimpleTypeSpecifier { simple_type_specifier } ->
         ["simple_type_specifier"]
       | LiteralExpression { literal_expression } -> ["literal_expression"]
@@ -5890,6 +5898,8 @@ module WithToken (Token : TokenType) = struct
         Script { script_declarations }
       | (SyntaxKind.QualifiedName, [qualified_name_parts]) ->
         QualifiedName { qualified_name_parts }
+      | (SyntaxKind.ModuleName, [module_name_parts]) ->
+        ModuleName { module_name_parts }
       | (SyntaxKind.SimpleTypeSpecifier, [simple_type_specifier]) ->
         SimpleTypeSpecifier { simple_type_specifier }
       | (SyntaxKind.LiteralExpression, [literal_expression]) ->
@@ -7751,6 +7761,11 @@ module WithToken (Token : TokenType) = struct
 
       let make_qualified_name qualified_name_parts =
         let syntax = QualifiedName { qualified_name_parts } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_name module_name_parts =
+        let syntax = ModuleName { module_name_parts } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 

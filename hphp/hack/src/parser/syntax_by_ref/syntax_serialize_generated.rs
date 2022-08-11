@@ -61,6 +61,12 @@ SyntaxVariant::QualifiedName (QualifiedNameChildren{parts} ) => {
       ss.serialize_field("qualified_name_parts", &self.with(parts))?;
       ss.end()
 } 
+SyntaxVariant::ModuleName (ModuleNameChildren{parts} ) => {
+      let mut ss = s.serialize_struct("", 2)?;
+      ss.serialize_field("kind", "module_name")?;
+      ss.serialize_field("module_name_parts", &self.with(parts))?;
+      ss.end()
+} 
 SyntaxVariant::SimpleTypeSpecifier (SimpleTypeSpecifierChildren{specifier} ) => {
       let mut ss = s.serialize_struct("", 2)?;
       ss.serialize_field("kind", "simple_type_specifier")?;

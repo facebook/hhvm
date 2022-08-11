@@ -171,10 +171,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
-        Id(pos, self.qualified_name_string_from_parts(parts, pos))
-    }
-
-    fn qualified_name_string_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> &'a str {
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
         let mut len = 0;
@@ -195,7 +191,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         // qualified name in the original source text instead of copying it.
         let source_len = pos.end_offset() - pos.start_offset();
         if source_len == len {
-            return self.str_from_utf8(self.source_text_at_pos(pos));
+            let qualified_name: &'a str = self.str_from_utf8(self.source_text_at_pos(pos));
+            return Id(pos, qualified_name);
         }
         // Allocate `len` bytes and fill them with the fully qualified name.
         let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
@@ -203,18 +200,48 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
-                &Node::ListItem(&(Node::Name(&(name, _)), Node::Token(qualifier))) => {
+                &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
                     qualified_name.push_str(name);
-                    match qualifier.kind() {
-                        TokenKind::Dot => qualified_name.push_str("."),
-                        TokenKind::Backslash => qualified_name.push_str("\\"),
-                        _ => {}
-                    }
+                    qualified_name.push_str("\\");
                 }
-                &Node::ListItem(&(Node::Token(t), _qualifier))
+                &Node::ListItem(&(Node::Token(t), _backslash))
                     if t.kind() == TokenKind::Namespace =>
                 {
                     qualified_name.push_str("namespace\\");
+                }
+                _ => {}
+            }
+        }
+        debug_assert_eq!(len, qualified_name.len());
+        debug_assert_eq!(len, qualified_name.capacity());
+        Id(pos, qualified_name.into_bump_str())
+    }
+
+    fn module_name_string_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> &'a str {
+        // Count the length of the qualified name, so that we can allocate
+        // exactly the right amount of space for it in our arena.
+        let mut len = 0;
+        for part in parts {
+            match part {
+                Node::Name(&(name, _)) => len += name.len(),
+                Node::ListItem(&(Node::Name(&(name, _)), _dot)) => len += name.len() + 1,
+                _ => {}
+            }
+        }
+        // If there's no internal trivia, then we can just reference the
+        // qualified name in the original source text instead of copying it.
+        let source_len = pos.end_offset() - pos.start_offset();
+        if source_len == len {
+            return self.str_from_utf8(self.source_text_at_pos(pos));
+        }
+        // Allocate `len` bytes and fill them with the fully qualified name.
+        let mut qualified_name = bump::String::with_capacity_in(len, self.arena);
+        for part in parts {
+            match part {
+                Node::Name(&(name, _pos)) => qualified_name.push_str(name),
+                &Node::ListItem(&(Node::Name(&(name, _)), _)) => {
+                    qualified_name.push_str(name);
+                    qualified_name.push_str(".");
                 }
                 _ => {}
             }
@@ -859,6 +886,7 @@ pub enum Node<'a> {
     XhpName(&'a (&'a str, &'a Pos<'a>)),
     Variable(&'a (&'a str, &'a Pos<'a>)),
     QualifiedName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
+    ModuleName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
     StringLiteral(&'a (&'a BStr, &'a Pos<'a>)), // For shape keys and const expressions.
     IntLiteral(&'a (&'a str, &'a Pos<'a>)),     // For const expressions.
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
@@ -1152,6 +1180,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Node::Ty(ty) => return ty.get_pos(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
+            Node::ModuleName(&(_, pos)) => pos,
             Node::IntLiteral(&(_, pos))
             | Node::FloatingLiteral(&(_, pos))
             | Node::StringLiteral(&(_, pos))
@@ -2798,6 +2827,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Node::List(nodes) => Node::QualifiedName(self.alloc((nodes, pos))),
             node if node.is_ignored() => Node::Ignored(SK::QualifiedName),
             node => Node::QualifiedName(
+                self.alloc((bumpalo::vec![in self.arena; node].into_bump_slice(), pos)),
+            ),
+        }
+    }
+
+    fn make_module_name(&mut self, parts: Self::Output) -> Self::Output {
+        let pos = self.get_pos(parts);
+        match parts {
+            Node::List(nodes) => Node::ModuleName(self.alloc((nodes, pos))),
+            node if node.is_ignored() => Node::Ignored(SK::ModuleName),
+            node => Node::ModuleName(
                 self.alloc((bumpalo::vec![in self.arena; node].into_bump_slice(), pos)),
             ),
         }
@@ -5778,12 +5818,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _right_brace: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::QualifiedName(&(parts, mdt_pos)) => {
+            Node::ModuleName(&(parts, mdt_pos)) => {
                 let module = self.alloc(shallow_decl_defs::ModuleDefType { mdt_pos });
-                self.add_module(
-                    self.qualified_name_string_from_parts(parts, mdt_pos),
-                    module,
-                );
+                self.add_module(self.module_name_string_from_parts(parts, mdt_pos), module);
             }
             _ => {}
         }
@@ -5797,11 +5834,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _semicolon: Self::Output,
     ) -> Self::Output {
         match name {
-            Node::QualifiedName(&(parts, pos)) => {
+            Node::ModuleName(&(parts, pos)) => {
                 if self.module.is_none() {
                     self.module = Some(oxidized_by_ref::ast::Id(
                         pos,
-                        self.qualified_name_string_from_parts(parts, pos),
+                        self.module_name_string_from_parts(parts, pos),
                     ));
                 }
             }

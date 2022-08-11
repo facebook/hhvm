@@ -1256,12 +1256,15 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.QualifiedName _ ->
       tag validate_qualified_name (fun x -> NameQualifiedName x) x
+    | Syntax.ModuleName _ ->
+      tag validate_module_name (fun x -> NameModuleName x) x
     | s -> aggregation_fail Def.Name s
 
   and invalidate_name_aggregate : name_aggregate invalidator =
    fun (value, thing) ->
     match thing with
     | NameQualifiedName thing -> invalidate_qualified_name (value, thing)
+    | NameModuleName thing -> invalidate_module_name (value, thing)
 
   and validate_end_of_file : end_of_file validator = function
     | { Syntax.syntax = Syntax.EndOfFile x; value = v } ->
@@ -1319,6 +1322,27 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           {
             qualified_name_parts =
               invalidate_list_with invalidate_token x.qualified_name_parts;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_module_name : module_name validator = function
+    | { Syntax.syntax = Syntax.ModuleName x; value = v } ->
+      ( v,
+        {
+          module_name_parts =
+            validate_list_with validate_token x.module_name_parts;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ModuleName) s
+
+  and invalidate_module_name : module_name invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ModuleName
+          {
+            module_name_parts =
+              invalidate_list_with invalidate_token x.module_name_parts;
           };
       Syntax.value = v;
     }

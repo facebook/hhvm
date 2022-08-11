@@ -42,6 +42,7 @@ pub trait SmartConstructors: Clone {
     fn make_end_of_file(&mut self, arg0: Self::Output) -> Self::Output;
     fn make_script(&mut self, arg0: Self::Output) -> Self::Output;
     fn make_qualified_name(&mut self, arg0: Self::Output) -> Self::Output;
+    fn make_module_name(&mut self, arg0: Self::Output) -> Self::Output;
     fn make_simple_type_specifier(&mut self, arg0: Self::Output) -> Self::Output;
     fn make_literal_expression(&mut self, arg0: Self::Output) -> Self::Output;
     fn make_prefixed_string_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;

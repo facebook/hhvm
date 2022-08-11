@@ -23,6 +23,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_end_of_file(ctx: &C, end_of_file_token: Self) -> Self;
     fn make_script(ctx: &C, script_declarations: Self) -> Self;
     fn make_qualified_name(ctx: &C, qualified_name_parts: Self) -> Self;
+    fn make_module_name(ctx: &C, module_name_parts: Self) -> Self;
     fn make_simple_type_specifier(ctx: &C, simple_type_specifier: Self) -> Self;
     fn make_literal_expression(ctx: &C, literal_expression: Self) -> Self;
     fn make_prefixed_string_expression(ctx: &C, prefixed_string_name: Self, prefixed_string_str: Self) -> Self;

@@ -83,6 +83,9 @@ where S: SmartConstructors<State = St>,
     fn make_qualified_name(&mut self, arg0 : Self::Output) -> Self::Output {
         compose(SyntaxKind::QualifiedName, self.s.make_qualified_name(arg0.1))
     }
+    fn make_module_name(&mut self, arg0 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ModuleName, self.s.make_module_name(arg0.1))
+    }
     fn make_simple_type_specifier(&mut self, arg0 : Self::Output) -> Self::Output {
         compose(SyntaxKind::SimpleTypeSpecifier, self.s.make_simple_type_specifier(arg0.1))
     }

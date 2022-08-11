@@ -29,6 +29,7 @@ pub enum SyntaxVariant<'a, T, V> {
     EndOfFile(&'a EndOfFileChildren<'a, T, V>),
     Script(&'a ScriptChildren<'a, T, V>),
     QualifiedName(&'a QualifiedNameChildren<'a, T, V>),
+    ModuleName(&'a ModuleNameChildren<'a, T, V>),
     SimpleTypeSpecifier(&'a SimpleTypeSpecifierChildren<'a, T, V>),
     LiteralExpression(&'a LiteralExpressionChildren<'a, T, V>),
     PrefixedStringExpression(&'a PrefixedStringExpressionChildren<'a, T, V>),
@@ -212,6 +213,11 @@ pub struct ScriptChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct QualifiedNameChildren<'a, T, V> {
+    pub parts: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleNameChildren<'a, T, V> {
     pub parts: Syntax<'a, T, V>,
 }
 

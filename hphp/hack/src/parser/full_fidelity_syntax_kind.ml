@@ -24,6 +24,7 @@ type t =
   | EndOfFile
   | Script
   | QualifiedName
+  | ModuleName
   | SimpleTypeSpecifier
   | LiteralExpression
   | PrefixedStringExpression
@@ -203,6 +204,7 @@ let to_string kind =
   | EndOfFile -> "end_of_file"
   | Script -> "script"
   | QualifiedName -> "qualified_name"
+  | ModuleName -> "module_name"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | LiteralExpression -> "literal"
   | PrefixedStringExpression -> "prefixed_string"

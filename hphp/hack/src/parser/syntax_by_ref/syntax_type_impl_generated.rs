@@ -55,6 +55,14 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_name(ctx: &C, parts: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleName(ctx.get_arena().alloc(ModuleNameChildren {
+            parts,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_simple_type_specifier(ctx: &C, specifier: Self) -> Self {
         let syntax = SyntaxVariant::SimpleTypeSpecifier(ctx.get_arena().alloc(SimpleTypeSpecifierChildren {
             specifier,

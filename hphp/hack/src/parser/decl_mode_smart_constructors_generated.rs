@@ -71,6 +71,10 @@ where
         <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_qualified_name(self, arg0)
     }
 
+    fn make_module_name(&mut self, arg0: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_module_name(self, arg0)
+    }
+
     fn make_simple_type_specifier(&mut self, arg0: Self::Output) -> Self::Output {
         <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_simple_type_specifier(self, arg0)
     }

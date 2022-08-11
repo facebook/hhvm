@@ -63,6 +63,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ModuleName(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.parts),
+                        _ => None,
+                    }
+                })
+            },
             SimpleTypeSpecifier(x) => {
                 get_index(1).and_then(|index| { match index {
                         0 => Some(&x.specifier),

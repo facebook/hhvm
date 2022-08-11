@@ -638,7 +638,7 @@ where
 
         let pos = self.pos();
         let list_node = self.sc_mut().make_list(parts, pos);
-        self.sc_mut().make_qualified_name(list_node)
+        self.sc_mut().make_module_name(list_node)
     }
 
     fn require_qualified_referenced_module_name(&mut self) -> S::Output {
@@ -686,7 +686,7 @@ where
 
         let pos = self.pos();
         let list_node = self.sc_mut().make_list(parts, pos);
-        self.sc_mut().make_qualified_name(list_node)
+        self.sc_mut().make_module_name(list_node)
     }
 
     fn require_name(&mut self) -> S::Output {

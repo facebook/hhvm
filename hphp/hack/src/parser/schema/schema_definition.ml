@@ -72,6 +72,15 @@ let schema : schema_node list =
       fields = [("parts", ZeroOrMore Token)];
     };
     {
+      kind_name = "ModuleName";
+      type_name = "module_name";
+      func_name = "module_name";
+      description = "module_name";
+      prefix = "module_name";
+      aggregates = [Name];
+      fields = [("parts", ZeroOrMore Token)];
+    };
+    {
       kind_name = "SimpleTypeSpecifier";
       type_name = "simple_type_specifier";
       func_name = "simple_type_specifier";

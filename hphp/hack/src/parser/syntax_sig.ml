@@ -41,6 +41,7 @@ module type Syntax_S = sig
     | EndOfFile of { end_of_file_token: t }
     | Script of { script_declarations: t }
     | QualifiedName of { qualified_name_parts: t }
+    | ModuleName of { module_name_parts: t }
     | SimpleTypeSpecifier of { simple_type_specifier: t }
     | LiteralExpression of { literal_expression: t }
     | PrefixedStringExpression of {
@@ -1097,6 +1098,8 @@ module type Syntax_S = sig
 
   val make_qualified_name : t -> t
 
+  val make_module_name : t -> t
+
   val make_simple_type_specifier : t -> t
 
   val make_literal_expression : t -> t
@@ -1459,6 +1462,8 @@ module type Syntax_S = sig
   val is_script : t -> bool
 
   val is_qualified_name : t -> bool
+
+  val is_module_name : t -> bool
 
   val is_simple_type_specifier : t -> bool
 

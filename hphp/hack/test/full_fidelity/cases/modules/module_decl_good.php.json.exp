@@ -208,8 +208,8 @@
           }
         },
         "module_declaration_name":{
-          "kind":"qualified_name",
-          "qualified_name_parts":{
+          "kind":"module_name",
+          "module_name_parts":{
             "kind":"list",
             "elements":[
               {
@@ -292,8 +292,8 @@
           }
         },
         "module_declaration_name":{
-          "kind":"qualified_name",
-          "qualified_name_parts":{
+          "kind":"module_name",
+          "module_name_parts":{
             "kind":"list",
             "elements":[
               {
@@ -581,8 +581,8 @@
           }
         },
         "module_declaration_name":{
-          "kind":"qualified_name",
-          "qualified_name_parts":{
+          "kind":"module_name",
+          "module_name_parts":{
             "kind":"list",
             "elements":[
               {

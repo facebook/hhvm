@@ -78,6 +78,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_qualified_name(self, parts)
     }
 
+    fn make_module_name(&mut self, parts: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_module_name(self, parts)
+    }
+
     fn make_simple_type_specifier(&mut self, specifier: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_simple_type_specifier(self, specifier)
     }

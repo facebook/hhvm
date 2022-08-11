@@ -172,6 +172,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.QualifiedName { qualified_name_parts } ->
       handle_possible_list env qualified_name_parts
+    | Syntax.ModuleName { module_name_parts } ->
+      handle_possible_list env module_name_parts
     | Syntax.ExpressionStatement _ -> transform_simple_statement env node
     | Syntax.EnumDeclaration
         {

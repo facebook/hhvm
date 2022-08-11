@@ -99,6 +99,14 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
+    fn make_module_name(&mut self, arg0: Self::Output) -> Self::Output {
+        let args = arg_kinds!(arg0);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_name(self, arg0);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
     fn make_simple_type_specifier(&mut self, arg0: Self::Output) -> Self::Output {
         let args = arg_kinds!(arg0);
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_simple_type_specifier(self, arg0);

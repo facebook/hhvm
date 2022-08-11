@@ -71,6 +71,14 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
+    fn make_module_name(&mut self, arg0: Self::Output) -> Self::Output {
+        if Self::is_zero(&arg0) {
+          Self::zero(SyntaxKind::ModuleName)
+        } else {
+          self.flatten(SyntaxKind::ModuleName, vec!(arg0))
+        }
+    }
+
     fn make_simple_type_specifier(&mut self, arg0: Self::Output) -> Self::Output {
         if Self::is_zero(&arg0) {
           Self::zero(SyntaxKind::SimpleTypeSpecifier)

@@ -70,6 +70,8 @@ struct SQLite {
     ReadWriteCreate = 3,
   };
 
+  static std::string_view openModeName(SQLite::OpenMode mode) noexcept;
+
   /**
    * Return a new SQLite connection, creating the DB file if necessary.
    *

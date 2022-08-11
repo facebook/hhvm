@@ -42,6 +42,7 @@ struct SQLiteKey {
    * Render the Key as a string
    */
   std::string toString() const;
+  std::string toDebugString() const;
 
   /**
    * Hash the Key into an int

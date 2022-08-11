@@ -14,29 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#include <atomic>
+#include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
+
 #include <chrono>
 #include <exception>
-#include <fcntl.h>
 #include <filesystem>
-#include <grp.h>
 #include <memory>
+#include <stdexcept>
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <string_view>
 #include <tuple>
-#include <unistd.h>
 #include <utility>
 #include <vector>
 
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
+#include <folly/container/F14Map.h>
+#include <folly/dynamic.h>
 #include <folly/json.h>
+#include <folly/logging/LogStreamProcessor.h>
 #include <folly/logging/xlog.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
-#include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
+#include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/optional.h"
+#include "hphp/util/sqlite-wrapper-helpers.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/thread-local.h"
 
@@ -51,7 +61,9 @@ namespace {
  * Create the given file if it doesn't exist, setting its group ownership and
  * permissions along the way.
  */
-void createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
+bool createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
+  bool succeeded = true;
+
   XLOGF(
       DBG1,
       "Creating {} with gid={} and perms={:04o}",
@@ -61,7 +73,7 @@ void createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
   int dbFd = ::open(path.native().c_str(), O_CREAT, perms);
   if (dbFd == -1) {
     XLOGF(ERR, "Could not open DB at {}: errno={}", path.native(), errno);
-    return;
+    return false;
   }
   SCOPE_EXIT {
     ::close(dbFd);
@@ -73,6 +85,7 @@ void createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
         path.native(),
         gid,
         errno);
+    succeeded = false;
   }
   if (::fchmod(dbFd, perms) == -1) {
     XLOGF(
@@ -81,7 +94,10 @@ void createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
         path.native(),
         perms,
         errno);
+    succeeded = false;
   }
+
+  return succeeded;
 }
 
 // Representation of inheritance kinds in the DB
@@ -595,14 +611,12 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       try {
         return SQLite::connect(dbData.m_path.native(), dbData.m_writable);
       } catch (SQLiteExc& e) {
-        XLOGF(
-            ERR,
-            "Exception when trying to open/create native Facts DB at {} ({})",
-            dbData.m_path.native(),
+        auto exception_str = folly::sformat(
+            "Couldn't open or create native Facts DB.  Key: {} Reason: {}",
+            dbData.toDebugString(),
             e.what());
-        throw std::runtime_error{folly::sformat(
-            "Couldn't open or create native Facts DB at {}",
-            dbData.m_path.native())};
+        XLOG(ERR, exception_str);
+        throw std::runtime_error{exception_str};
       }
     }();
 
@@ -613,11 +627,20 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       case SQLite::OpenMode::ReadWriteCreate:
         // If we can create the DB, create it with the correct owner and
         // permissions.
-        createFileWithPerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
-        createFileWithPerms(
-            fs::path{dbData.m_path} += "-shm", dbData.m_gid, dbData.m_perms);
-        createFileWithPerms(
-            fs::path{dbData.m_path} += "-wal", dbData.m_gid, dbData.m_perms);
+        std::vector<fs::path> paths_to_create = {
+            dbData.m_path,
+            fs::path{dbData.m_path} += "-shm",
+            fs::path{dbData.m_path} += "-wal",
+        };
+        for (const auto& path : paths_to_create) {
+          if (!createFileWithPerms(path, dbData.m_gid, dbData.m_perms)) {
+            XLOGF(
+                ERR,
+                "Failed createFileWithPerms for {}:  Debug data: {}",
+                path.native(),
+                dbData.toDebugString());
+          }
+        }
         break;
     }
 

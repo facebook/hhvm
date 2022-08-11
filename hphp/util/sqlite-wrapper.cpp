@@ -492,6 +492,18 @@ Optional<const std::string_view> SQLiteQuery::getNullableString(
   return {getString(iCol)};
 }
 
+std::string_view SQLite::openModeName(SQLite::OpenMode mode) noexcept {
+  switch(mode) {
+    case SQLite::OpenMode::ReadOnly:
+      return "READ";
+    case SQLite::OpenMode::ReadWrite:
+      return "READ/WRITE";
+    case SQLite::OpenMode::ReadWriteCreate:
+      return "READ/WRITE/CREATE";
+  }
+  not_reached();
+}
+
 SQLiteQuery::SQLiteQuery(SQLiteStmt& stmt) : m_stmt{&stmt} {}
 
 //==============================================================================

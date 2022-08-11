@@ -515,7 +515,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   Errors.error_codes_treated_strictly :=
     GlobalOptions.error_codes_treated_strictly global_opts;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason global_opts;
+    TypecheckerOptions.report_pos_from_reason global_opts;
   ( {
       version;
       load_script_timeout;

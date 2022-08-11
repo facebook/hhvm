@@ -71,7 +71,7 @@ let reinfer_type_to_string_opt ty =
   | Gi_reinfer_type_not_supported -> None
 
 let must_reinfer_type tcopt (ty : decl_phase ty_) =
-  let reinfer_types = GlobalOptions.tco_gi_reinfer_types tcopt in
+  let reinfer_types = TypecheckerOptions.gi_reinfer_types tcopt in
   match reinfer_type_to_string_opt ty with
   | None -> false
   | Some ty_str -> List.mem reinfer_types ty_str ~equal:String.equal
@@ -79,9 +79,8 @@ let must_reinfer_type tcopt (ty : decl_phase ty_) =
 let hint_to_type_opt ~is_lambda env reason hint =
   let ty = Option.map hint ~f:(Decl_hint.hint env) in
   let tcopt = Provider_context.get_tcopt env.Decl_env.ctx in
-  let tco_global_inference = GlobalOptions.tco_global_inference tcopt in
-  let tvar = mk (reason, Tvar 0) in
-  if tco_global_inference && not is_lambda then
+  if TypecheckerOptions.global_inference tcopt && not is_lambda then
+    let tvar = mk (reason, Tvar 0) in
     let ty =
       match ty with
       | None -> tvar

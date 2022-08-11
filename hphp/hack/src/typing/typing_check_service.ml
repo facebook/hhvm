@@ -166,7 +166,7 @@ let process_file
         Deferred_decl.with_deferred_decls
           ~enable:(should_enable_deferring file)
           ~declaration_threshold_opt:
-            (GlobalOptions.tco_defer_class_declaration_threshold opts)
+            (TypecheckerOptions.defer_class_declaration_threshold opts)
           ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
         Errors.do_with_context fn Errors.Typing @@ fun () ->
@@ -191,7 +191,7 @@ let process_file
       in
       match result with
       | Ok (file_errors, (tasts, global_tvenvs)) ->
-        if GlobalOptions.tco_global_inference opts then
+        if TypecheckerOptions.global_inference opts then
           Typing_global_inference.StateSubConstraintGraphs.build_and_save
             ctx
             tasts
@@ -1156,7 +1156,7 @@ let go_with_interrupt
       ~config:check_info.per_file_profiling
   in
   let opts = Provider_context.get_tcopt ctx in
-  let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
+  let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
   let fnl =
     match mode with
     | HulkStrategy.Lite

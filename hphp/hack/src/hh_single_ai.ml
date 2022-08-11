@@ -173,7 +173,7 @@ let parse_options () =
   Errors.codes_not_raised_partial :=
     GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason tcopt;
+    TypecheckerOptions.report_pos_from_reason tcopt;
   ( {
       files = fns;
       extra_builtins = !extra_builtins;

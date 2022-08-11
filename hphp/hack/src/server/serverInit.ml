@@ -244,7 +244,7 @@ let init
   let lazy_lev = get_lazy_level genv in
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =
-    if GlobalOptions.tco_global_inference env.tcopt then (
+    if TypecheckerOptions.global_inference env.tcopt then (
       Typing_global_inference.init ();
       (Off, Full_init)
     ) else

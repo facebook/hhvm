@@ -62,7 +62,7 @@ let catch_exc
          []);
     r
 
-let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt
+let is_ordered_solving env = TypecheckerOptions.ordered_solving env.genv.tcopt
 
 module type MarshalledData = sig
   type t

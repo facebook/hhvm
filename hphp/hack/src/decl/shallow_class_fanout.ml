@@ -156,7 +156,8 @@ let get_fanout_cardinal (fanout : AffectedDeps.t) : int =
 
 module Log = struct
   let do_log ctx ~fanout_cardinal =
-    GlobalOptions.log_fanout ~fanout_cardinal @@ Provider_context.get_tcopt ctx
+    TypecheckerOptions.log_fanout ~fanout_cardinal
+    @@ Provider_context.get_tcopt ctx
 
   let log_class_fanout
       ctx

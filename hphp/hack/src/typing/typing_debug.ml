@@ -25,7 +25,7 @@ let env_size env = local_env_size env + inference_env_size env.inference_env
 
 let log_env_if_too_big pos env =
   if
-    (Env.get_tcopt env).GlobalOptions.tco_timeout > 0
+    Env.get_tcopt env |> TypecheckerOptions.timeout > 0
     && List.length !(env.big_envs) < 1
     && env_size env >= 1000
   then

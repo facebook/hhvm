@@ -296,11 +296,8 @@ let () =
             ~everything_sdt
         in
         let tco_experimental_features =
-          if !disallow_static_memoized then
-            SSet.singleton
-              GlobalOptions.tco_experimental_disallow_static_memoized
-          else
-            SSet.empty
+          TypecheckerOptions.experimental_from_flags
+            ~disallow_static_memoized:!disallow_static_memoized
         in
         let popt = { popt with GlobalOptions.tco_experimental_features } in
         let ctx = init (Path.dirname file) popt in

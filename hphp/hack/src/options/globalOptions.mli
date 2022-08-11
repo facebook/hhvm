@@ -470,33 +470,9 @@ val make :
   unit ->
   t
 
-val tco_experimental_feature_enabled : t -> SSet.elt -> bool
+val default : t
 
-val tco_migration_flag_enabled : t -> SSet.elt -> bool
-
-val tco_num_local_workers : t -> int option
-
-val tco_parallel_type_checking_threshold : t -> int
-
-val tco_max_typechecker_worker_memory_mb : t -> int option
-
-val tco_defer_class_declaration_threshold : t -> int option
-
-val tco_prefetch_deferred_files : t -> bool
-
-val tco_remote_type_check_threshold : t -> int
-
-val tco_remote_type_check : t -> bool
-
-val tco_remote_worker_key : t -> string option
-
-val tco_remote_check_id : t -> string option
-
-val tco_remote_max_batch_size : t -> int
-
-val tco_remote_min_batch_size : t -> int
-
-val tco_num_remote_workers : t -> int
+(* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
 
 val so_remote_version_specifier : t -> string option
 
@@ -512,97 +488,15 @@ val po_disallow_toplevel_requires : t -> bool
 
 val po_codegen : t -> bool
 
-val log_fanout : t -> fanout_cardinal:int -> bool
-
-val tco_log_inference_constraints : t -> bool
-
-val tco_language_feature_logging : t -> bool
-
-val tco_timeout : t -> int
-
-val tco_disallow_invalid_arraykey : t -> bool
-
-val tco_disallow_byref_dynamic_calls : t -> bool
-
-val tco_disallow_byref_calls : t -> bool
-
-val default : t
-
-val tco_experimental_generics_arity : string
-
-val tco_experimental_forbid_nullable_cast : string
-
-val tco_experimental_disallow_static_memoized : string
-
-val tco_experimental_abstract_type_const_with_default : string
-
-val tco_experimental_infer_flows : string
-
-val tco_experimental_supportdynamic_type_hint : string
-
-val tco_experimental_all : SSet.t
-
-val tco_migration_flags_all : SSet.t
-
 val allowed_fixme_codes_strict : t -> ISet.t
 
 val allowed_fixme_codes_partial : t -> ISet.t
 
 val codes_not_raised_partial : t -> ISet.t
 
-val log_levels : t -> int SMap.t
-
 val po_disable_lval_as_an_expression : t -> bool
 
-val tco_shallow_class_decl : t -> bool
-
-val tco_force_shallow_decl_fanout : t -> bool
-
-val tco_remote_old_decls_no_limit : t -> bool
-
-val tco_fetch_remote_old_decls : t -> bool
-
-val tco_force_load_hot_shallow_decls : t -> bool
-
-val tco_populate_member_heaps : t -> bool
-
-val tco_skip_hierarchy_checks : t -> bool
-
-val tco_skip_tast_checks : t -> bool
-
-val tco_like_type_hints : t -> bool
-
-val tco_union_intersection_type_hints : t -> bool
-
-val tco_call_coeffects : t -> bool
-
-val tco_local_coeffects : t -> bool
-
-val tco_strict_contexts : t -> bool
-
-val ifc_enabled : t -> string list
-
-val enable_ifc : t -> t
-
-val global_write_check_enabled : t -> string list
-
-val enable_global_write_check : t -> t
-
-val global_write_check_functions_enabled : t -> SSet.t
-
-val tco_like_casts : t -> bool
-
-val tco_simple_pessimize : t -> float
-
-val tco_complex_coercion : t -> bool
-
 val error_codes_treated_strictly : t -> ISet.t
-
-val tco_check_xhp_attribute : t -> bool
-
-val tco_check_redundant_generics : t -> bool
-
-val tco_disallow_unresolved_type_variables : t -> bool
 
 val po_enable_class_level_where_clauses : t -> bool
 
@@ -612,17 +506,7 @@ val po_allowed_decl_fixme_codes : t -> ISet.t
 
 val po_allow_new_attribute_syntax : t -> bool
 
-val tco_global_inference : t -> bool
-
-val tco_gi_reinfer_types : t -> string list
-
-val tco_ordered_solving : t -> bool
-
-val tco_const_static_props : t -> bool
-
 val po_disable_legacy_attribute_syntax : t -> bool
-
-val tco_const_attribute : t -> bool
 
 val po_const_default_func_args : t -> bool
 
@@ -634,13 +518,7 @@ val po_abstract_static_props : t -> bool
 
 val po_allow_unstable_features : t -> bool
 
-val set_global_inference : t -> t
-
-val set_ordered_solving : t -> bool -> t
-
 val po_parser_errors_only : t -> bool
-
-val tco_check_attribute_locations : t -> bool
 
 val glean_service : t -> string
 
@@ -668,10 +546,6 @@ val symbol_write_include_hhi : t -> bool
 
 val po_disallow_func_ptrs_in_constants : t -> bool
 
-val tco_error_php_lambdas : t -> bool
-
-val tco_disallow_discarded_nullable_awaitables : t -> bool
-
 val po_enable_xhp_class_modifier : t -> bool
 
 val po_disable_xhp_element_mangling : t -> bool
@@ -682,90 +556,12 @@ val po_enable_enum_classes : t -> bool
 
 val po_disable_hh_ignore_error : t -> bool
 
-val tco_enable_systemlib_annotations : t -> bool
-
-val tco_higher_kinded_types : t -> bool
-
-val tco_method_call_inference : t -> bool
-
-val tco_report_pos_from_reason : t -> bool
-
-val tco_typecheck_sample_rate : t -> float
-
-val tco_enable_sound_dynamic : t -> bool
-
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val po_disallow_inst_meth : t -> bool
-
-val tco_use_direct_decl_parser : t -> bool
 
 val po_enable_enum_supertyping : t -> bool
 
 val po_interpret_soft_types_as_like_types : t -> bool
 
-val tco_enable_strict_string_concat_interp : t -> bool
-
-val tco_ignore_unsafe_cast : t -> bool
-
-val tco_no_parser_readonly_check : t -> bool
-
-val set_tco_no_parser_readonly_check : t -> bool -> t
-
-val set_tco_enable_expression_trees : t -> bool -> t
-
-val tco_enable_modules : t -> bool
-
-val set_tco_enable_modules : t -> bool -> t
-
-val expression_trees_enabled : t -> bool
-
-val allowed_expression_tree_visitors : t -> string list
-
-val tco_math_new_code : t -> bool
-
-val tco_typeconst_concrete_concrete_error : t -> bool
-
-val tco_enable_strict_const_semantics : t -> int
-
-val tco_strict_wellformedness : t -> int
-
-val tco_meth_caller_only_public_visibility : t -> bool
-
-val tco_require_extends_implements_ancestors : t -> bool
-
-val tco_strict_value_equality : t -> bool
-
-val tco_enforce_sealed_subclasses : t -> bool
-
-val tco_everything_sdt : t -> bool
-
-val tco_pessimise_builtins : t -> bool
-
-val tco_enable_disk_heap : t -> bool
-
-val tco_explicit_consistent_constructors : t -> int
-
-val tco_require_types_class_consts : t -> int
-
-val tco_type_printer_fuel : t -> int
-
-val tco_log_saved_state_age_and_distance : t -> bool
-
-val tco_specify_manifold_api_key : t -> bool
-
-val tco_saved_state_manifold_api_key : t -> string option
-
-val tco_profile_top_level_definitions : t -> bool
-
-val tco_allow_all_files_for_module_declarations : t -> bool
-
-val tco_allowed_files_for_module_declarations : t -> string list
-
-val tco_use_manifold_cython_client : t -> bool
-
-val tco_record_fine_grained_dependencies : t -> bool
-
-val tco_loop_iteration_upper_bound : t -> int option
-
-val tco_expression_tree_virtualize_functions : t -> bool
+(* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)

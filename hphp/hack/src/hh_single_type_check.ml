@@ -1009,7 +1009,7 @@ let parse_options () =
   Errors.codes_not_raised_partial :=
     GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
-    GlobalOptions.tco_report_pos_from_reason tcopt;
+    TypecheckerOptions.report_pos_from_reason tcopt;
 
   let tco_experimental_features =
     tcopt.GlobalOptions.tco_experimental_features
@@ -1017,7 +1017,7 @@ let parse_options () =
   let tco_experimental_features =
     if !forbid_nullable_cast then
       SSet.add
-        GlobalOptions.tco_experimental_forbid_nullable_cast
+        TypecheckerOptions.experimental_forbid_nullable_cast
         tco_experimental_features
     else
       tco_experimental_features
@@ -1025,7 +1025,7 @@ let parse_options () =
   let tco_experimental_features =
     if is_ifc_mode then
       SSet.add
-        GlobalOptions.tco_experimental_infer_flows
+        TypecheckerOptions.experimental_infer_flows
         tco_experimental_features
     else
       tco_experimental_features
@@ -1033,7 +1033,7 @@ let parse_options () =
   let tco_experimental_features =
     if !disallow_static_memoized then
       SSet.add
-        GlobalOptions.tco_experimental_disallow_static_memoized
+        TypecheckerOptions.experimental_disallow_static_memoized
         tco_experimental_features
     else
       tco_experimental_features
@@ -1041,7 +1041,7 @@ let parse_options () =
   let tco_experimental_features =
     if !enable_supportdyn_hint then
       SSet.add
-        GlobalOptions.tco_experimental_supportdynamic_type_hint
+        TypecheckerOptions.experimental_supportdynamic_type_hint
         tco_experimental_features
     else
       tco_experimental_features

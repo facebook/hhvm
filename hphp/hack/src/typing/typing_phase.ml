@@ -105,7 +105,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   @@
   let tvar_or_localize ~ety_env env r ty ~i =
     if
-      GlobalOptions.tco_global_inference env.genv.tcopt
+      TypecheckerOptions.global_inference env.genv.tcopt
       && (is_any ty || is_tyvar ty)
     then
       let (env, tv) = Env.new_global_tyvar env ~i r in

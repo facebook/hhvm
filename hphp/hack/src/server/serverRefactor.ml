@@ -493,7 +493,7 @@ let get_upcast_locations ctx files element_name =
   Buffer.contents buf
 
 let go_sound_dynamic ctx action genv env =
-  if not (GlobalOptions.tco_enable_sound_dynamic env.tcopt) then
+  if not (TypecheckerOptions.enable_sound_dynamic env.tcopt) then
     ( env,
       Done
         "Server is NOT using sound dynamic. Change the .hhconfig file to enable sound dynamic. \n"

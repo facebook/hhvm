@@ -64,10 +64,7 @@ let with_disable_legacy_attribute_syntax po b =
 
 let disallow_silence = GlobalOptions.po_disallow_silence
 
-let const_static_props = GlobalOptions.tco_const_static_props
-
-let enable_systemlib_annotations =
-  GlobalOptions.tco_enable_systemlib_annotations
+let const_static_props t = t.GlobalOptions.tco_const_static_props
 
 let with_const_static_props po b =
   { po with GlobalOptions.tco_const_static_props = b }
@@ -234,4 +231,4 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po,
-    enable_systemlib_annotations po )
+    po.GlobalOptions.tco_enable_systemlib_annotations )

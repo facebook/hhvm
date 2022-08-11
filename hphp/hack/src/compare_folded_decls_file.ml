@@ -262,10 +262,8 @@ let () =
         ~everything_sdt
     in
     let tco_experimental_features =
-      if !disallow_static_memoized then
-        SSet.singleton GlobalOptions.tco_experimental_disallow_static_memoized
-      else
-        SSet.empty
+      TypecheckerOptions.experimental_from_flags
+        ~disallow_static_memoized:!disallow_static_memoized
     in
     let popt = { popt with GlobalOptions.tco_experimental_features } in
     (* Temporarily set the root to the location of the test file so that

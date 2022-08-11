@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d95b392e4d7fd40e46269b2ad8408af>>
+// @generated SignedSource<<bfa82d20a5ef5cab60a4ff1afe0a4f84>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,6 +17,10 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+/// Naming conventions for fields in this struct:
+/// - tco_<feature/flag/setting> - type checker option
+/// - po_<feature/flag/setting> - parser option
+/// - so_<feature/flag/setting> - server option
 #[derive(
     Clone,
     Debug,

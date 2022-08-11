@@ -798,7 +798,7 @@ let log_pessimise_return ?level env pos =
   log_pessimise_ ?level env "ret" (Pos_or_decl.of_raw_pos pos) ""
 
 let increment_feature_count env s =
-  if GlobalOptions.tco_language_feature_logging env.genv.tcopt then
+  if TypecheckerOptions.language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0
 
 module GlobalInference = struct

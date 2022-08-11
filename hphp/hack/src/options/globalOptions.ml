@@ -7,8 +7,26 @@
  *
  *)
 
+[@@@warning "-33"]
+
 open Hh_prelude
 
+[@@@warning "+33"]
+
+(* NOTE: this file is in the middle of a large refactoring.
+   Please try to avoid changes other than adding a field to struct `t`,
+   updating `default` value and `make` functions
+   Encapsulation and helpers better fit in the respective modules: e.g.,
+   TypecheckerOptions for tco_* fields
+   ParserOptions for po_*fields
+   etc.
+*)
+
+(** Naming conventions for fields in this struct:
+  - tco_<feature/flag/setting> - type checker option
+  - po_<feature/flag/setting> - parser option
+  - so_<feature/flag/setting> - server option
+*)
 type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
@@ -146,55 +164,6 @@ type t = {
   tco_expression_tree_virtualize_functions: bool;
 }
 [@@deriving eq, show]
-
-(**
- * Insist on instantiations for all generic types, even in non-strict files
- *)
-let tco_experimental_generics_arity = "generics_arity"
-
-(**
- * Forbid casting nullable values, since they have unexpected semantics. For
- * example, casting `null` to an int results in `0`, which may or may not be
- * what you were expecting.
- *)
-let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
-
-(*
-* Disallow static memoized functions in non-final classes
-*)
-
-let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
-
-(**
- * Enable abstract const type with default syntax, i.e.
- * abstract const type T as num = int;
- *)
-let tco_experimental_abstract_type_const_with_default =
-  "abstract_type_const_with_default"
-
-(*
-* Allow typechecker to do global inference and infer IFC flows
-* with the <<InferFlows>> flag
-*
-*)
-let tco_experimental_infer_flows = "ifc_infer_flows"
-
-let tco_experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
-
-let tco_experimental_all =
-  List.fold_right
-    ~f:SSet.add
-    ~init:SSet.empty
-    [
-      tco_experimental_generics_arity;
-      tco_experimental_forbid_nullable_cast;
-      tco_experimental_disallow_static_memoized;
-      tco_experimental_abstract_type_const_with_default;
-      tco_experimental_infer_flows;
-      tco_experimental_supportdynamic_type_hint;
-    ]
-
-let tco_migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
 
 let default =
   {
@@ -637,38 +606,6 @@ let make
     tco_expression_tree_virtualize_functions;
   }
 
-let tco_experimental_feature_enabled t s =
-  SSet.mem s t.tco_experimental_features
-
-let tco_migration_flag_enabled t s = SSet.mem s t.tco_migration_flags
-
-let tco_num_local_workers t = t.tco_num_local_workers
-
-let tco_parallel_type_checking_threshold t =
-  t.tco_parallel_type_checking_threshold
-
-let tco_max_typechecker_worker_memory_mb t =
-  t.tco_max_typechecker_worker_memory_mb
-
-let tco_defer_class_declaration_threshold t =
-  t.tco_defer_class_declaration_threshold
-
-let tco_prefetch_deferred_files t = t.tco_prefetch_deferred_files
-
-let tco_remote_type_check_threshold t = t.tco_remote_type_check_threshold
-
-let tco_remote_type_check t = t.tco_remote_type_check
-
-let tco_remote_worker_key t = t.tco_remote_worker_key
-
-let tco_remote_check_id t = t.tco_remote_check_id
-
-let tco_remote_max_batch_size t = t.tco_remote_max_batch_size
-
-let tco_remote_min_batch_size t = t.tco_remote_min_batch_size
-
-let tco_num_remote_workers t = t.tco_num_remote_workers
-
 let so_remote_version_specifier t = t.so_remote_version_specifier
 
 let so_remote_worker_vfs_checkout_threshold t =
@@ -680,26 +617,9 @@ let po_auto_namespace_map t = t.po_auto_namespace_map
 
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 
-let log_fanout t ~fanout_cardinal =
-  match t.tco_log_large_fanouts_threshold with
-  | None -> false
-  | Some threshold -> Int.(fanout_cardinal >= threshold)
-
-let tco_log_inference_constraints t = t.tco_log_inference_constraints
-
 let po_codegen t = t.po_codegen
 
 let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
-
-let tco_language_feature_logging t = t.tco_language_feature_logging
-
-let tco_timeout t = t.tco_timeout
-
-let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
-
-let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
-
-let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
 
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
 
@@ -707,63 +627,9 @@ let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
 
 let codes_not_raised_partial t = t.codes_not_raised_partial
 
-let log_levels t = t.log_levels
-
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 
-let tco_shallow_class_decl t = t.tco_shallow_class_decl
-
-let tco_force_shallow_decl_fanout t = t.tco_force_shallow_decl_fanout
-
-let tco_remote_old_decls_no_limit t = t.tco_remote_old_decls_no_limit
-
-let tco_fetch_remote_old_decls t = t.tco_fetch_remote_old_decls
-
-let tco_force_load_hot_shallow_decls t = t.tco_force_load_hot_shallow_decls
-
-let tco_populate_member_heaps t = t.tco_populate_member_heaps
-
-let tco_skip_hierarchy_checks t = t.tco_skip_hierarchy_checks
-
-let tco_skip_tast_checks t = t.tco_skip_tast_checks
-
-let tco_like_type_hints t = t.tco_like_type_hints
-
-let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
-
-let tco_call_coeffects t = t.tco_coeffects
-
-let tco_local_coeffects t = t.tco_coeffects_local
-
-let tco_strict_contexts t = t.tco_strict_contexts
-
-let ifc_enabled t = t.tco_ifc_enabled
-
-(* Fully enable IFC on the tcopt *)
-let enable_ifc t = { t with tco_ifc_enabled = ["/"] }
-
-let global_write_check_enabled t = t.tco_global_write_check_enabled
-
-let enable_global_write_check t =
-  { t with tco_global_write_check_enabled = ["/"] }
-
-let global_write_check_functions_enabled t =
-  t.tco_global_write_check_functions_enabled
-
-let tco_like_casts t = t.tco_like_casts
-
-let tco_simple_pessimize t = t.tco_simple_pessimize
-
-let tco_complex_coercion t = t.tco_complex_coercion
-
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
-
-let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
-
-let tco_check_redundant_generics t = t.tco_check_redundant_generics
-
-let tco_disallow_unresolved_type_variables t =
-  t.tco_disallow_unresolved_type_variables
 
 let po_enable_class_level_where_clauses t =
   t.po_enable_class_level_where_clauses
@@ -776,17 +642,7 @@ let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 
 let po_allow_unstable_features t = t.po_allow_unstable_features
 
-let tco_global_inference t = t.tco_global_inference
-
-let tco_gi_reinfer_types t = t.tco_gi_reinfer_types
-
-let tco_ordered_solving t = t.tco_ordered_solving
-
-let tco_const_static_props t = t.tco_const_static_props
-
 let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
-
-let tco_const_attribute t = t.tco_const_attribute
 
 let po_const_default_func_args t = t.po_const_default_func_args
 
@@ -795,8 +651,6 @@ let po_const_default_lambda_args t = t.po_const_default_lambda_args
 let po_disallow_silence t = t.po_disallow_silence
 
 let po_abstract_static_props t = t.po_abstract_static_props
-
-let tco_check_attribute_locations t = t.tco_check_attribute_locations
 
 let glean_service t = t.glean_service
 
@@ -823,23 +677,9 @@ let symbol_write_index_paths_file_output t =
 
 let symbol_write_include_hhi t = t.symbol_write_include_hhi
 
-let set_global_inference t = { t with tco_global_inference = true }
-
-let set_ordered_solving t b = { t with tco_ordered_solving = b }
-
-let set_tco_no_parser_readonly_check t b =
-  { t with tco_no_parser_readonly_check = b }
-
-let tco_no_parser_readonly_check t = t.tco_no_parser_readonly_check
-
 let po_parser_errors_only t = t.po_parser_errors_only
 
 let po_disallow_func_ptrs_in_constants t = t.po_disallow_func_ptrs_in_constants
-
-let tco_error_php_lambdas t = t.tco_error_php_lambdas
-
-let tco_disallow_discarded_nullable_awaitables t =
-  t.tco_disallow_discarded_nullable_awaitables
 
 let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
 
@@ -852,99 +692,12 @@ let po_enable_enum_classes t = t.po_enable_enum_classes
 
 let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
 
-let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
-
-let tco_higher_kinded_types t = t.tco_higher_kinded_types
-
-let tco_method_call_inference t = t.tco_method_call_inference
-
-let tco_report_pos_from_reason t = t.tco_report_pos_from_reason
-
-let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate
-
-let tco_enable_sound_dynamic t = t.tco_enable_sound_dynamic
-
 let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
 
 let po_disallow_inst_meth t = t.po_disallow_inst_meth
 
-let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
-
 let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
 
 let po_interpret_soft_types_as_like_types t =
   t.po_interpret_soft_types_as_like_types
-
-let tco_enable_strict_string_concat_interp t =
-  t.tco_enable_strict_string_concat_interp
-
-let tco_ignore_unsafe_cast t = t.tco_ignore_unsafe_cast
-
-let set_tco_enable_expression_trees t b =
-  { t with tco_enable_expression_trees = b }
-
-let expression_trees_enabled t = t.tco_enable_expression_trees
-
-let tco_enable_modules t = t.tco_enable_modules
-
-let set_tco_enable_modules t b = { t with tco_enable_modules = b }
-
-let allowed_expression_tree_visitors t = t.tco_allowed_expression_tree_visitors
-
-let tco_math_new_code t = t.tco_math_new_code
-
-let tco_typeconst_concrete_concrete_error t =
-  t.tco_typeconst_concrete_concrete_error
-
-let tco_enable_strict_const_semantics t = t.tco_enable_strict_const_semantics
-
-let tco_strict_wellformedness t = t.tco_strict_wellformedness
-
-let tco_meth_caller_only_public_visibility t =
-  t.tco_meth_caller_only_public_visibility
-
-let tco_require_extends_implements_ancestors t =
-  t.tco_require_extends_implements_ancestors
-
-let tco_strict_value_equality t = t.tco_strict_value_equality
-
-let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
-
-let tco_everything_sdt t = t.tco_everything_sdt
-
-let tco_pessimise_builtins t = t.tco_pessimise_builtins
-
-let tco_enable_disk_heap t = t.tco_enable_disk_heap
-
-let tco_explicit_consistent_constructors t =
-  t.tco_explicit_consistent_constructors
-
-let tco_require_types_class_consts t = t.tco_require_types_class_consts
-
-let tco_type_printer_fuel t = t.tco_type_printer_fuel
-
-let tco_log_saved_state_age_and_distance t =
-  t.tco_log_saved_state_age_and_distance
-
-let tco_specify_manifold_api_key t = t.tco_specify_manifold_api_key
-
-let tco_saved_state_manifold_api_key t = t.tco_saved_state_manifold_api_key
-
-let tco_profile_top_level_definitions t = t.tco_profile_top_level_definitions
-
-let tco_allow_all_files_for_module_declarations t =
-  t.tco_allow_all_files_for_module_declarations
-
-let tco_allowed_files_for_module_declarations t =
-  t.tco_allowed_files_for_module_declarations
-
-let tco_use_manifold_cython_client t = t.tco_use_manifold_cython_client
-
-let tco_record_fine_grained_dependencies t =
-  t.tco_record_fine_grained_dependencies
-
-let tco_loop_iteration_upper_bound t = t.tco_loop_iteration_upper_bound
-
-let tco_expression_tree_virtualize_functions t =
-  t.tco_expression_tree_virtualize_functions

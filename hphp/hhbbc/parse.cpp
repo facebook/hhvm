@@ -951,7 +951,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->constants.push_back(
       php::Const {
         cconst.name(),
-        ret.get(),
+        ret->name,
         cconstValue,
         cconst.coeffects(),
         nullptr,
@@ -976,7 +976,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         ret->constants.push_back(
           php::Const {
             cnsMap.first,
-            ret.get(),
+            ret->name,
             tvaux,
             {},
             nullptr,

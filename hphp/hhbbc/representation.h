@@ -465,7 +465,7 @@ struct Const {
   LSString name;
 
   // The class that defined this constant.
-  php::Class* cls;
+  LSString cls;
 
   /*
    * The value will be KindOfUninit if the class constant is defined
@@ -485,7 +485,7 @@ struct Const {
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
 
-  template <typename SerDe> void serde(SerDe&, Class* parentClass);
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*

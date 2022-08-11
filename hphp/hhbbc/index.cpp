@@ -2465,9 +2465,9 @@ bool build_class_constants(IndexData& index,
         "`{}' as a {} and by `{}' as a {}\n",
         cinfo->cls->name,
         cns->name,
-        cns->cls->name,
+        cns->cls,
         ConstModifiers::show(cns->kind),
-        existing->cls->name,
+        existing->cls,
         ConstModifiers::show(existing->kind)
       );
       return false;
@@ -2488,20 +2488,22 @@ bool build_class_constants(IndexData& index,
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
       // Type and Context constants can be overriden.
+      auto const existingCls = index.classes.at(existing->cls);
+      auto const cnsCls = index.classes.at(cns->cls);
       if (cns->kind == ConstModifiers::Kind::Value &&
           !existing->isAbstract &&
-          existing->cls->attrs & AttrInterface &&
-          !(cns->cls->attrs & AttrInterface && fromTrait)) {
+          existingCls->attrs & AttrInterface &&
+          !(cnsCls->attrs & AttrInterface && fromTrait)) {
         for (auto const& interface : cinfo->declInterfaces) {
-          if (existing->cls == interface->cls) {
+          if (existingCls == interface->cls) {
             ITRACE(
               2,
               "build_class_constants failed for `{}' because "
               "`{}' was defined by both `{}' and `{}'\n",
               cinfo->cls->name,
               cns->name,
-              cns->cls->name,
-              existing->cls->name
+              cns->cls,
+              existing->cls
             );
             return false;
           }
@@ -2513,8 +2515,9 @@ bool build_class_constants(IndexData& index,
         if (fromTrait) return true;
       }
 
-      if ((cns->cls->attrs & AttrInterface ||
-           (RO::EvalTraitConstantInterfaceBehavior && (cns->cls->attrs & AttrTrait))) &&
+      if ((cnsCls->attrs & AttrInterface ||
+           (RO::EvalTraitConstantInterfaceBehavior &&
+            (cnsCls->attrs & AttrTrait))) &&
           (existing->isAbstract || cns->kind == ConstModifiers::Kind::Type)) {
         // Because existing has val, this covers the case where it is abstract
         // with default allow incoming to win.  Also, type constants from
@@ -2522,16 +2525,17 @@ bool build_class_constants(IndexData& index,
       } else {
         // A constant from an interface or from an included enum collides
         // with an existing constant.
-        if (cns->cls->attrs & (AttrInterface | AttrEnum | AttrEnumClass) ||
-            (RO::EvalTraitConstantInterfaceBehavior && (cns->cls->attrs & AttrTrait))) {
+        if (cnsCls->attrs & (AttrInterface | AttrEnum | AttrEnumClass) ||
+            (RO::EvalTraitConstantInterfaceBehavior &&
+             (cnsCls->attrs & AttrTrait))) {
           ITRACE(
             2,
             "build_class_constants failed for `{}' because "
             "`{}' was defined by both `{}' and `{}'\n",
             cinfo->cls->name,
             cns->name,
-            cns->cls->name,
-            existing->cls->name
+            cns->cls,
+            existing->cls
           );
           return false;
         }
@@ -2618,8 +2622,10 @@ bool build_class_constants(IndexData& index,
       auto const& cns = *t.second;
       if (cns.isAbstract && cns.val) {
         if (cns.val.value().m_type == KindOfUninit) {
-          // We need to copy the constant's initializer into this class
-          auto const& cns_86cinit = cns.cls->methods.back().get();
+          // We need to copy the constant's initializer into this
+          // class.
+          auto const cnsCls = index.classes.at(cns.cls);
+          auto const& cns_86cinit = cnsCls->methods.back().get();
           assertx(cns_86cinit->name == s_86cinit.get());
 
           std::unique_ptr<php::Func> empty;
@@ -2651,10 +2657,9 @@ bool build_class_constants(IndexData& index,
           } else {
             append_86cinit(current_86cinit.get(), *cns_86cinit);
           }
-
         }
         auto concretizedCns = cns;
-        concretizedCns.cls = cls;
+        concretizedCns.cls = cls->name;
         concretizedCns.isAbstract = false;
 
         // this is similar to trait constant flattening
@@ -3582,7 +3587,7 @@ void flatten_traits(IndexData& index,
   for (auto const& c : cinfo->traitConsts) {
     ITRACE(5, "  - const {}\n", c.name);
     cls->constants.push_back(c);
-    cls->constants.back().cls = cls;
+    cls->constants.back().cls = cls->name;
     cinfo->clsConstants[c.name].cls = cls;
     cinfo->clsConstants[c.name].idx = cls->constants.size()-1;
     cinfo->preResolveState->constsFromTraits.erase(c.name);
@@ -5850,6 +5855,10 @@ php::Class* Index::lookup_unit_class_mutable(php::Unit& unit, Id id) {
   return m_data->classes.at(unit.classes[id]);
 }
 
+const php::Class* Index::lookup_const_class(const php::Const& cns) const {
+  return m_data->classes.at(cns.cls);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void Index::for_each_unit_func(const php::Unit& unit,
@@ -7230,15 +7239,16 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
         // analysis and add a dependency. We cannot cache in this
         // case.
         cachable = false;
+        auto const cnsCls = m_data->classes.at(cns.cls);
         if (ctx.func) {
-          auto const cinit = cns.cls->methods.back().get();
+          auto const cinit = cnsCls->methods.back().get();
           assertx(cinit->name == s_86cinit.get());
           add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
         }
 
         ITRACE(4, "(dynamic)\n");
         auto const it =
-          m_data->clsConstTypes.find(std::make_pair(cns.cls, cns.name));
+          m_data->clsConstTypes.find(std::make_pair(cnsCls, cns.name));
         auto const type =
           (it == m_data->clsConstTypes.end()) ? TInitCell : it->second.type;
         return R{ type, TriBool::Yes, true };
@@ -7357,7 +7367,7 @@ Index::lookup_class_type_constant(
     if (!cns.val.has_value()) return abstract();
 
     assertx(tvIsDict(*cns.val));
-    ITRACE(4, "({}) {}\n", cns.cls->name, show(dict_val(val(*cns.val).parr)));
+    ITRACE(4, "({}) {}\n", cns.cls, show(dict_val(val(*cns.val).parr)));
 
     // If we've been given a resolver, use it. Otherwise resolve it in
     // the normal way.

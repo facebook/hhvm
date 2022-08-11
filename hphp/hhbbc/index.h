@@ -715,6 +715,12 @@ struct Index {
   php::Class* lookup_unit_class_mutable(php::Unit&, Id);
 
   /*
+   * Obtain a pointer to the class which defines the given class
+   * constant.
+   */
+  const php::Class* lookup_const_class(const php::Const&) const;
+
+  /*
    * Obtain a pointer to the class which serves as the context for the
    * given class. For non-closures, this is just the input, but may be
    * different in closures.

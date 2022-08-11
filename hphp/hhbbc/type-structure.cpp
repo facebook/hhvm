@@ -583,7 +583,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
           return Resolution { dict_val(cns.resolvedTypeStructure), false };
         }
         ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache};
-        newCtx.selfCls = cns.cls;
+        newCtx.selfCls = ctx.index->lookup_const_class(cns);
         newCtx.thisCls = &thiz;
         newCtx.generics = ctx.generics;
         return resolve(newCtx, val(*cns.val).parr);
@@ -889,7 +889,7 @@ Resolution resolve_type_structure(const Index& index,
 
   Cache cache;
   ResolveCtx ctx{Context{}, &index, &cache};
-  ctx.selfCls = cns.cls;
+  ctx.selfCls = index.lookup_const_class(cns);
   ctx.thisCls = &thiz;
   return resolve(ctx, val(*cns.val).parr);
 }

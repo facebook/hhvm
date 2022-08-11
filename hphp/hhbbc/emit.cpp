@@ -1093,7 +1093,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       continue;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
-      assertx(cconst.cls == &cls);
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
@@ -1103,7 +1103,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.isFromTrait
       );
     } else if (!cconst.val.has_value()) {
-      assertx(cconst.cls == &cls);
+      assertx(cconst.cls->isame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addAbstractConstant(
@@ -1115,7 +1115,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       needs86cinit |= cconst.val->m_type == KindOfUninit;
       pce->addConstant(
         cconst.name,
-        (cconst.cls == &cls) ? nullptr : cconst.cls->name,
+        cconst.cls->isame(cls.name) ? nullptr : cconst.cls,
         &cconst.val.value(),
         ArrNR{cconst.resolvedTypeStructure},
         cconst.kind,

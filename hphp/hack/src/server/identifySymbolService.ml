@@ -366,14 +366,15 @@ let visitor =
                     }
                 | _ -> self#zero)
               | _ -> self#zero)
-            | Some (_, enum_name) ->
-              Result_set.singleton
-                {
-                  name = Utils.strip_ns enum_name ^ "#" ^ label_name;
-                  type_ = EnumClassLabel (enum_name, label_name);
-                  is_declaration = false;
-                  pos;
-                }
+            | Some ((_, enum_name) as enum_id) ->
+              process_class_id enum_id
+              + Result_set.singleton
+                  {
+                    name = Utils.strip_ns enum_name ^ "#" ^ label_name;
+                    type_ = EnumClassLabel (enum_name, label_name);
+                    is_declaration = false;
+                    pos;
+                  }
           end
         | _ -> self#zero
       in

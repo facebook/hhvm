@@ -40,6 +40,13 @@ let class_const_ty env (cc : Tast.class_const) : Tast.ty option =
     in
     init_expr >>| fun (ty, _, _) -> ty
 
+let class_id_ty env (id : Ast_defs.id) : Tast.ty =
+  let (p, _) = id in
+  let hint = (p, Aast.Happly (id, [])) in
+  let decl_ty = Tast_env.hint_to_ty env hint in
+  let (_, ty) = Tast_env.localize_no_subst env ~ignore_errors:true decl_ty in
+  ty
+
 (** Return the type of the smallest expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
@@ -157,6 +164,14 @@ let base_visitor ~human_friendly line char =
         | None -> acc
       else
         acc
+
+    method! on_EnumClassLabel env id label_name =
+      let acc = super#on_EnumClassLabel env id label_name in
+      match id with
+      | Some ((pos, _) as id) when Pos.inside pos line char ->
+        let ty = class_id_ty env id in
+        Some (pos, env, ty)
+      | _ -> acc
   end
 
 (** Return the type of the node associated with exactly the given range.

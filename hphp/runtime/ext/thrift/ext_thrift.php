@@ -98,6 +98,7 @@ final class TClientBufferedStream {
     (function(?string, ?Exception): TStreamResponse) $streamDecode,
   ): HH\AsyncGenerator<null, TStreamResponse, void> {
     while (true) {
+      /* HH_FIXME[2049] TODO(T128347870) */
       $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
@@ -120,6 +121,7 @@ final class TClientBufferedStream {
       if ($ex_msg !== null) {
         $streamDecode(
           null,
+          /* HH_FIXME[2049] TODO(T128347870) */
           new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
         );
         break;
@@ -136,11 +138,15 @@ final class TClientSink {
   public function __construct(): void {}
 
   public async function genCreditsOrFinalResponseHelper(
-  ): Awaitable<(int, ?string, ?Exception)> {
+  ): Awaitable<(?int, ?string, ?Exception)> {
+    /* HH_FIXME[2049] TODO(T128347870) */
     $timer = WallTimeOperation::begin();
     try {
       list($credits, $final_response, $exception) =
-        await $this->genCreditsOrFinalResponse();
+        HH\FIXME\UNSAFE_CAST<
+          ?(int, ?string, ?string),
+          (?int, ?string, ?string)
+        >(await $this->genCreditsOrFinalResponse());
     } finally {
       $timer->end();
     }
@@ -155,6 +161,7 @@ final class TClientSink {
       $credits,
       $final_response,
       $exception !== null
+        /* HH_FIXME[2049] TODO(T128347870) */
         ? new TApplicationException($exception, TApplicationException::UNKNOWN)
         : null,
     );
@@ -172,6 +179,7 @@ final class TClientSink {
       if ($final_response !== null || $exception !== null) {
         break;
       }
+      $credits = HH\FIXME\UNSAFE_CAST<?int, int>($credits);
       if ($credits > 0 && $shouldContinue) {
         try {
           foreach ($payload_generator await as $pld) {

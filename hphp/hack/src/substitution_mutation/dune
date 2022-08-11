@@ -1,0 +1,12 @@
+(library
+ (name substitution_mutation)
+ (wrapped false)
+ (flags
+  (:standard -linkall))
+ (modules
+  substitution_mutation)
+ (libraries
+  core_kernel
+  annotated_ast)
+ (preprocess
+  (pps visitors.ppx ppx_deriving.std)))

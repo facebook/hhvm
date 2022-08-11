@@ -39,6 +39,15 @@ let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true ctx fn x with
   | Some fd ->
+    let fd =
+      if
+        Provider_context.get_tcopt ctx
+        |> TypecheckerOptions.substitution_mutation
+      then
+        Substitution_mutation.mutate_fun_def fd
+      else
+        fd
+    in
     let f = fd.Aast.fd_fun in
     handle_exn_as_error f.Aast.f_span (fun () ->
         let fun_ = Naming.fun_def ctx fd in

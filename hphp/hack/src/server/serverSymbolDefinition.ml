@@ -163,6 +163,11 @@ let go ctx ast result =
     Cls.get_const class_ const_name >>= fun m ->
     get_member_def ctx (Class_const, m.cc_origin, const_name)
   | SO.ClassConst (SO.UnknownClass, _) -> None
+  | SO.EnumClassLabel (class_name, member_name) ->
+    (* An enum class is a classish with class constants. *)
+    Decl_provider.get_class ctx class_name >>= fun class_ ->
+    Cls.get_const class_ member_name >>= fun m ->
+    get_member_def ctx (Class_const, m.cc_origin, member_name)
   | SO.Function ->
     get_function_by_name ctx result.SO.name >>= fun f ->
     Some (FileOutline.summarize_fun f)
@@ -184,8 +189,6 @@ let go ctx ast result =
     (match ast with
     | None -> None
     | Some ast -> ServerFindTypeVar.go ast result.SO.pos result.SO.name)
-  | SO.EnumClassLabel (class_name, _member_name) ->
-    summarize_class_typedef ctx class_name
   | SO.HhFixme -> None
   | SO.Module ->
     get_module_def_by_name ctx result.SO.name >>= fun md ->
@@ -211,6 +214,7 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
         | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
+        | (SymbolDefinition.Const, SyntaxKind.EnumClassEnumerator)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumClassDeclaration)
         | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)

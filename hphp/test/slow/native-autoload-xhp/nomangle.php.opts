@@ -1,4 +1,4 @@
 -vAutoload.Enabled=true
+-vEval.EnableExternFacts=false
 --count 2
--vLog.Level=None
 -vHack.Lang.DisableXHPElementMangling=true

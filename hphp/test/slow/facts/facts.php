@@ -215,12 +215,14 @@ function print_num_symbols(
 }
 
 function print_extracted_facts(vec<string> $files): void {
-  $files_with_null_hashes = vec[];
+  $files_with_hashes = vec[];
   foreach ($files as $file) {
-    $files_with_null_hashes[] = tuple($file, null);
+    $actual_file = dirname(__FILE__)."/".$file;
+    $hash = sha1(file_get_contents($actual_file));
+    $files_with_hashes[] = tuple($file, $hash);
   }
   foreach (
-    HH\Facts\extract($files_with_null_hashes) as $file => $facts
+    HH\Facts\extract($files_with_hashes) as $file => $facts
   ) {
     print "Facts in $file:\n";
 

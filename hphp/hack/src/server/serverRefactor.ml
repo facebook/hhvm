@@ -616,7 +616,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
     | (Typedef, [class_name]) ->
       let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
       Ok (go ctx command genv env)
-    | (Const, [class_name; const_name]) ->
+    | (ClassConst, [class_name; const_name]) ->
       let command =
         ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
       in

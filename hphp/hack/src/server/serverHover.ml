@@ -71,7 +71,8 @@ let docs_url ctx def : string option =
   | Function
   | Method
   | Property
-  | Const
+  | ClassConst
+  | GlobalConst
   | LocalVar
   | TypeVar
   | Param

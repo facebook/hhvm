@@ -692,7 +692,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             [],
             [
-                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"const"}}]'
+                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"class constant"}}]'
             ],
             options=["--identify", "FbidMapField::FBID"],
         )

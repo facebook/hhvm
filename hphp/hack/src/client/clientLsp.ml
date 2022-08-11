@@ -2984,7 +2984,8 @@ let rec hack_symbol_tree_to_lsp
     | SymbolDefinition.Class -> SymbolInformation.Class
     | SymbolDefinition.Method -> SymbolInformation.Method
     | SymbolDefinition.Property -> SymbolInformation.Property
-    | SymbolDefinition.Const -> SymbolInformation.Constant
+    | SymbolDefinition.ClassConst -> SymbolInformation.Constant
+    | SymbolDefinition.GlobalConst -> SymbolInformation.Constant
     | SymbolDefinition.Enum -> SymbolInformation.Enum
     | SymbolDefinition.Interface -> SymbolInformation.Interface
     | SymbolDefinition.Trait -> SymbolInformation.Interface

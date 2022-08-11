@@ -80,7 +80,7 @@ let maybe_summarize_property class_name ~skip var =
   else
     [summarize_property class_name var]
 
-let summarize_const class_name cc =
+let summarize_class_const class_name cc =
   let (pos, name) = cc.cc_id in
   let (span, modifiers) =
     match cc.cc_kind with
@@ -88,7 +88,7 @@ let summarize_const class_name cc =
     | CCAbstract (Some (_, p_default, _)) -> (Pos.btw pos p_default, [Abstract])
     | CCAbstract None -> (pos, [Abstract])
   in
-  let kind = Const in
+  let kind = ClassConst in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
   {
@@ -266,7 +266,7 @@ let summarize_class class_ ~no_children =
         (* Summarized consts *)
         List.fold_left
           ~init:acc
-          ~f:(fun acc c -> summarize_const class_name c :: acc)
+          ~f:(fun acc c -> summarize_class_const class_name c :: acc)
           class_.c_consts
       in
       let acc =
@@ -360,7 +360,7 @@ let summarize_gconst cst =
   let pos = fst cst.cst_name in
   let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
   let (_, gconst_end, _) = cst.cst_value in
-  let kind = Const in
+  let kind = GlobalConst in
   let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
@@ -433,7 +433,8 @@ let should_add_docblock = function
   | Class
   | Method
   | Property
-  | Const
+  | ClassConst
+  | GlobalConst
   | Enum
   | Interface
   | Trait

@@ -216,11 +216,11 @@ let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Mixed -> SymbolDefinition.LocalVar
   | SearchUtils.SI_Function -> SymbolDefinition.Function
   | SearchUtils.SI_Typedef -> SymbolDefinition.Typedef
-  | SearchUtils.SI_GlobalConstant -> SymbolDefinition.Const
+  | SearchUtils.SI_GlobalConstant -> SymbolDefinition.GlobalConst
   | SearchUtils.SI_XHP -> SymbolDefinition.Class
   | SearchUtils.SI_ClassMethod -> SymbolDefinition.Method
   | SearchUtils.SI_Literal -> SymbolDefinition.LocalVar
-  | SearchUtils.SI_ClassConstant -> SymbolDefinition.Const
+  | SearchUtils.SI_ClassConstant -> SymbolDefinition.ClassConst
   | SearchUtils.SI_Property -> SymbolDefinition.Property
   | SearchUtils.SI_LocalVariable -> SymbolDefinition.LocalVar
   | SearchUtils.SI_Constructor -> SymbolDefinition.Method

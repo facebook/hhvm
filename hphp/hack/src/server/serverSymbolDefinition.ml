@@ -85,7 +85,7 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
         (List.find consts ~f:name_matches)
         (List.find abs_consts ~f:name_matches)
     in
-    Option.map ~f:(FileOutline.summarize_const member_origin) res
+    Option.map ~f:(FileOutline.summarize_class_const member_origin) res
   | Typeconst ->
     let tconsts = c.c_typeconsts in
     List.find tconsts ~f:(fun t ->
@@ -213,8 +213,9 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
-        | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
-        | (SymbolDefinition.Const, SyntaxKind.EnumClassEnumerator)
+        | (SymbolDefinition.ClassConst, SyntaxKind.ConstDeclaration)
+        | (SymbolDefinition.GlobalConst, SyntaxKind.ConstDeclaration)
+        | (SymbolDefinition.ClassConst, SyntaxKind.EnumClassEnumerator)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumClassDeclaration)
         | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)

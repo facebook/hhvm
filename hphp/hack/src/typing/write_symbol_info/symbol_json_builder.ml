@@ -343,7 +343,7 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
     | Some cls ->
       if is_enum_or_enum_class cls.c_kind then
         match kind with
-        | SymbolDefinition.Const ->
+        | SymbolDefinition.ClassConst ->
           let (enum_id, prog) = Add_fact.enum_decl con_name prog in
           process_xref
             (Add_fact.enumerator enum_id)
@@ -594,13 +594,10 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
                 Predicate.parent_decl_predicate Predicate.ClassContainer
               in
               process_container_xref con_kind name pos (xrefs, prog)
-            | Const ->
-              (match occ.type_ with
-              | ClassConst _ ->
-                let ref_fun = Build.build_class_const_decl_json_ref in
-                proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
-              | GConst -> process_gconst_xref name pos (xrefs, prog)
-              | _ -> (xrefs, prog))
+            | ClassConst ->
+              let ref_fun = Build.build_class_const_decl_json_ref in
+              proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
+            | GlobalConst -> process_gconst_xref name pos (xrefs, prog)
             | Enum -> process_enum_xref name pos (xrefs, prog)
             | Function -> process_function_xref name pos (xrefs, prog)
             | Interface ->

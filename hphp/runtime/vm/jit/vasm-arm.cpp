@@ -666,8 +666,16 @@ void Vgen::patch(Venv& env) {
     patch(addr, target);
   }
   for (auto const& p : env.leas) {
-    (void)p;
-    not_implemented();
+    auto addr = env.text.toDestAddress(p.instr);
+    auto const target = env.vaddrs[p.target];
+
+    // Get the address the LDR loads.
+    auto const ldr = Instruction::Cast(addr);
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit);
+    auto literalAddr = ldr->LiteralAddress();
+
+    // Patch it to target
+    patchTarget32(literalAddr, target);
   }
 }
 

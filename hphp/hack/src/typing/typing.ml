@@ -2019,8 +2019,8 @@ module EnumClassLabelOps = struct
     | Invalid
     | Skip
 
-  (** Given an [enum_name] and a [label_name, tries to see if
-      [enum_name] has a constant named [label_name].
+  (** Given an [enum_id] and a [label_name], tries to see if
+      [enum_id] has a constant named [label_name].
       In such case, creates the expected typed expression.
 
       If [label_name] is not there, it will register an error.
@@ -2030,7 +2030,8 @@ module EnumClassLabelOps = struct
       label, as in E#A, or a short version, as in #A
   *)
   let expand
-      pos env ~full ~ctor enum_name label_name (ty_pos : Pos_or_decl.t option) =
+      pos env ~full ~ctor enum_id label_name (ty_pos : Pos_or_decl.t option) =
+    let (_, enum_name) = enum_id in
     let cls = Env.get_class env enum_name in
     match cls with
     | Some cls ->
@@ -2053,7 +2054,7 @@ module EnumClassLabelOps = struct
         let hi = lty in
         let qualifier =
           if full then
-            Some (pos, enum_name)
+            Some enum_id
           else
             None
         in
@@ -4935,7 +4936,7 @@ and expr_
       p
       (Aast.EnumClassLabel (None, s))
       (mk (Reason.Rwitness p, Terr))
-  | EnumClassLabel ((Some (_, cname) as e), name) ->
+  | EnumClassLabel ((Some cname as e), name) ->
     let (env, res) =
       EnumClassLabelOps.expand
         p
@@ -8792,7 +8793,7 @@ and call
                       env
                       ~full:false
                       ~ctor
-                      enum_name
+                      (Pos.none, enum_name)
                       label_name
                       (Some ty_pos))
                 | _ ->

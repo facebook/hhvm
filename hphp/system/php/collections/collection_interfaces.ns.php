@@ -66,6 +66,9 @@ interface ConstVector<+Tv>
           \HH\KeyedIterable<int, Tv> {
   // TODO(T121423772) This interface should get the methods seen in
   // `hphp/hack/hhi/collections/interfaces.hhi:ConstVector`
+
+  public function toVArray(): varray<Tv>;
+
 }
 
 <<__Sealed(/* HH_FIXME[2049] */ Vector::class)>>

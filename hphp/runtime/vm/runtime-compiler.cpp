@@ -80,22 +80,18 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
   std::unique_ptr<UnitEmitter> ue;
-  // Check if this file contains raw hip hop bytecode instead of
-  // php.  This is dictated by a special file extension.
-  if (RuntimeOption::EvalAllowHhas) {
-    if (const char* dot = strrchr(filename, '.')) {
-      const char hhbc_ext[] = "hhas";
-      if (!strcmp(dot + 1, hhbc_ext)) {
-        auto const& contents = loader.contents();
-        ue = assemble_string(
-          contents.data(),
-          contents.size(),
-          filename,
-          loader.sha1(),
-          nativeFuncs
-        );
-      }
-    }
+  // Check if this file contains raw HHAS instead of Hack source code.
+  // This is dictated by a special file extension.
+  if (RuntimeOption::EvalAllowHhas &&
+      folly::StringPiece(filename).endsWith(".hhas")) {
+    auto const& contents = loader.contents();
+    ue = assemble_string(
+      contents.data(),
+      contents.size(),
+      filename,
+      loader.sha1(),
+      nativeFuncs
+    );
   }
 
   // If ue != nullptr then we assembled it above, so don't feed it into
@@ -117,8 +113,8 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       }
     };
     try {
-      bool ignore;
-      ue = uc->compile(ignore);
+      bool cache_hit;
+      ue = uc->compile(cache_hit);
     } catch (const CompilerAbort& exn) {
       fprintf(stderr, "%s", exn.what());
       _Exit(1);

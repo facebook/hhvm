@@ -283,10 +283,11 @@ public:
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
 
-  // m_deps is a list of dependencies queried by the frontend while compiling
-  // this unit, while m_symbol_refs is a list of symbols which were observed
-  // but not necessarily queried during compilation.
+  // A list of dependencies queried by the frontend while compiling
+  // this unit.
   std::vector<DeclDep> m_deps;
+
+  // A list of symbols which will be required by this unit at runtime.
   SymbolRefs m_symbol_refs;
 
   /*

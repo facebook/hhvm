@@ -283,15 +283,15 @@ CompilerResult hackc_compile(
 }
 
 /// A simple UnitCompiler that invokes hackc in-process.
-struct HackcUnitCompiler final : public UnitCompiler {
+struct HackcUnitCompiler final : UnitCompiler {
   using UnitCompiler::UnitCompiler;
 
-  virtual std::unique_ptr<UnitEmitter> compile(
+  std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
     HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) override;
 
-  virtual const char* getName() const override { return "HackC"; }
+  const char* getName() const override { return "HackC"; }
 };
 
 // UnitCompiler which first tries to retrieve the UnitEmitter via the
@@ -299,7 +299,7 @@ struct HackcUnitCompiler final : public UnitCompiler {
 // UnitCompiler produced by the "makeFallback" lambda (this avoids
 // having to create the fallback UnitEmitter until we need it). The
 // lambda will only be called once. Its output is cached afterwards.
-struct CacheUnitCompiler final : public UnitCompiler {
+struct CacheUnitCompiler final : UnitCompiler {
   CacheUnitCompiler(LazyUnitContentsLoader& loader,
                     const char* filename,
                     const Native::FuncTable& nativeFuncs,
@@ -317,12 +317,12 @@ struct CacheUnitCompiler final : public UnitCompiler {
       }
     , m_makeFallback{std::move(makeFallback)} {}
 
-  virtual std::unique_ptr<UnitEmitter> compile(
+  std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
     HhvmDeclProvider*,
     CompileAbortMode = CompileAbortMode::Never) override;
 
-  virtual const char* getName() const override { return "Cache"; }
+  const char* getName() const override { return "Cache"; }
 private:
   std::function<std::unique_ptr<UnitCompiler>()> m_makeFallback;
   std::unique_ptr<UnitCompiler> m_fallback;

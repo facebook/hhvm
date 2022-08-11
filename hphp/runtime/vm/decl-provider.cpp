@@ -137,43 +137,46 @@ ExternalDeclProviderResult HhvmDeclProvider::getDecls(
 
 std::vector<DeclDep> HhvmDeclProvider::getFlatDeps() const {
   hphp_hash_map<std::string, SHA1> deps;
-  for (auto& [k, v] : m_deps) deps.emplace(v.file, v.hash);
+  for (auto& [sym, info] : m_deps) deps.emplace(info.file, info.hash);
 
-  std::vector<DeclDep> ret;
-  for (auto [k, v] : deps) ret.emplace_back(DeclDep{k, v});
-  return ret;
+  std::vector<DeclDep> flat;
+  for (auto [file, hash] : deps) flat.emplace_back(DeclDep{file, hash});
+  return flat;
 }
 
-std::vector<std::vector<DeclLoc>> HhvmDeclProvider::getDeps() const {
+std::vector<std::vector<DeclLoc>> HhvmDeclProvider::getLocsByDepth() const {
   uint64_t max_depth = 0;
 
   hphp_hash_map<std::string, std::pair<DeclSym, DepInfo>> deps;
-  for (auto& [k, v] : m_deps) {
-    auto [it, ins] = deps.emplace(v.file, std::make_pair(k, v));
+  for (auto& [sym, info] : m_deps) {
+    auto [it, inserted] = deps.emplace(info.file, std::make_pair(sym, info));
     // smaller depth replaces entry with bigger depth, for equal depths,
     // first one wins.
-    if (!ins && v.depth < it->second.second.depth) {
-      it->second = std::make_pair(k, v);
+    if (!inserted && info.depth < it->second.second.depth) {
+      it->second = std::make_pair(sym, info);
     }
-    max_depth = std::max(v.depth, max_depth);
+    max_depth = std::max(info.depth, max_depth);
   }
 
-  std::vector<std::vector<DeclLoc>> ret(max_depth + 1);
-  for (auto [k, v] : deps) {
-    ret[v.second.depth].emplace_back(
-      std::make_pair(v.first, DeclDep{k, v.second.hash})
+  std::vector<std::vector<DeclLoc>> locs_by_depth(max_depth + 1);
+  for (auto& [file, sym_info] : deps) {
+    auto& [sym, info] = sym_info;
+    locs_by_depth[info.depth].emplace_back(
+      std::make_pair(sym, DeclDep{file, info.hash})
     );
   }
 
   // Now that we've collapsed files in multiple dep lists to the list with the
   // lowest level there may be empty lists. Our clients care about an ordering
-  // of dependencies not the specific levels themselves, so as a convenience
-  // guarantee that each dependency list is non-empty.
-  ret.erase(
-    std::remove_if(ret.begin(), ret.end(), [] (auto& v) { return v.empty(); }),
-    ret.end()
+  // of dependencies by depth, not the specific levels themselves,
+  // so as a convenience guarantee that each dependency list is non-empty.
+  locs_by_depth.erase(
+    std::remove_if(locs_by_depth.begin(), locs_by_depth.end(), [] (auto& locs) {
+      return locs.empty();
+    }),
+    locs_by_depth.end()
   );
 
-  return ret;
+  return locs_by_depth;
 }
 }//namespace HPHP

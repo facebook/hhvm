@@ -108,6 +108,8 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
       sd(sha1);
       sd(filepath);
 
+      // Systemlib units are not currently deserialized from extern workers
+      // so we never need to supply a native func table here.
       auto ue = std::make_unique<UnitEmitter>(
         sha1, SHA1{}, Native::s_noNativeFuncs
       );

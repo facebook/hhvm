@@ -26,7 +26,7 @@ namespace HPHP {
 // Symbol key used to look up decl
 using DeclSym = std::pair<AutoloadMap::KindOf, std::string>;
 
-// Decl dependencies (path, SHA1)
+// Decl dependencies (source file path, source text hash)
 using DeclDep = std::pair<std::string, SHA1>;
 
 // A symbol and its location/version

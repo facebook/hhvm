@@ -330,28 +330,25 @@ Package::parseRun(const std::string& content,
   auto const& fileName = meta.m_filename;
 
   try {
-    if (RO::EvalAllowHhas) {
-      if (fileName.size() > 5 &&
-          !fileName.compare(fileName.size() - 5, std::string::npos, ".hhas")) {
-        auto ue = assemble_string(
-          content.data(),
-          content.size(),
-          fileName.c_str(),
-          SHA1{string_sha1(content)},
-          Native::s_noNativeFuncs
+    if (RO::EvalAllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
+      auto ue = assemble_string(
+        content.data(),
+        content.size(),
+        fileName.c_str(),
+        SHA1{string_sha1(content)},
+        Native::s_noNativeFuncs
+      );
+      if (meta.m_targetPath) {
+        ue = createSymlinkWrapper(
+          fileName, *meta.m_targetPath, std::move(ue)
         );
-        if (meta.m_targetPath) {
-          ue = createSymlinkWrapper(
-            fileName, *meta.m_targetPath, std::move(ue)
-          );
-          if (!ue) {
-            // If the symlink contains no EntryPoint we don't do
-            // anything but it is still success
-            return output(nullptr);
-          }
+        if (!ue) {
+          // If the symlink contains no EntryPoint we don't do
+          // anything but it is still success
+          return output(nullptr);
         }
-        return output(std::move(ue));
       }
+      return output(std::move(ue));
     }
 
     LazyUnitContentsLoader loader{

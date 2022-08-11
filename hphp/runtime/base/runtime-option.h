@@ -765,7 +765,7 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
-  /* enable decls in compilation */                                     \
+  /* enable decl-directed bytecode compilation */                       \
   F(bool, EnableDecl, false)                                     \
   /* When using embedded data, extract it to the ExtractPath or the
    * ExtractFallback. */                                                \

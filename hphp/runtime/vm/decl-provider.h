@@ -60,7 +60,7 @@ struct HhvmDeclProvider: ::DeclProvider {
   // Get a list of observed dependencies from the decl provider, which may
   // optionally be indexed by the depth of the dependency
   std::vector<DeclDep> getFlatDeps() const;
-  std::vector<std::vector<DeclLoc>> getDeps() const;
+  std::vector<std::vector<DeclLoc>> getLocsByDepth() const;
 
   const std::filesystem::path& repoRoot() const { return m_repo; }
   AutoloadMap* map() const { return m_map; }
@@ -76,8 +76,13 @@ struct HhvmDeclProvider: ::DeclProvider {
   ) noexcept;
 
   struct DepInfo {
+    // Source filename
     std::string file;
+
+    // Minimum number of indirect references traversed to this file.
     uint64_t depth;
+
+    // Source text hash of this file.
     SHA1 hash;
   };
 

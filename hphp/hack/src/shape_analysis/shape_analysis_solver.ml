@@ -313,11 +313,10 @@ let produce_results
     static_accesses
     |> List.fold ~init:static_shape_results ~f:(fun pos_map (entity, key, ty) ->
            match entity with
-           | Literal pos ->
+           | Literal pos
+           | Inter (HT.Param (_, _, pos)) ->
              Pos.Map.update pos (update_entity entity key ty) pos_map
-           | Variable _
-           | Inter _ ->
-             pos_map)
+           | Variable _ -> pos_map)
   in
 
   (* Convert to individual statically accessed dict results *)

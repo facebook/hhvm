@@ -8,9 +8,9 @@
 
 module A = Ast_defs
 
-type param_entity = A.id_ * int [@@deriving eq, ord, show]
+type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
 
-type entity = Param of param_entity [@@deriving eq, ord, show]
+type entity = Param of param_entity [@@deriving ord, show]
 
 type ('a, 'b) any_constraint_ =
   | Intra of 'a
@@ -38,3 +38,9 @@ module type Intra = sig
 
   val deduce : intra_constraint list -> intra_constraint list
 end
+
+let show_entity (Param (id, idx, _) : entity) : string =
+  Format.asprintf "Arg(%s, %i)" id idx
+
+let equal_entity (Param (f_id, f_idx, _)) (Param (g_id, g_idx, _)) : bool =
+  String.equal f_id g_id && Int.equal f_idx g_idx

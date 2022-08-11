@@ -24,7 +24,8 @@ type mode =
   | DumpConstraints
   | SimplifyConstraints
   | Codemod
-  | SolveConstraints [@deriving eq]
+  | SolveConstraints
+  | CloseConstraints [@deriving eq]
 
 type options = {
   mode: mode;

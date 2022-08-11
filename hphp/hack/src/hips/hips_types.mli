@@ -8,7 +8,7 @@
 
 module A = Ast_defs
 
-type param_entity = A.id_ * int [@@deriving eq, ord, show]
+type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
 
 type entity = Param of param_entity [@@deriving eq, ord, show]
 

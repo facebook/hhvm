@@ -1,3 +1,5 @@
+[RESULT] \g: [3:12-31] [Parameter]:
+  shape()
 [RESULT] \f: [7:8-25] [Allocation]:
   shape('b' => bool)
 No errors

@@ -14,6 +14,7 @@ let parse_mode = function
   | "simplify" -> Some SimplifyConstraints
   | "codemod" -> Some Codemod
   | "solve" -> Some SolveConstraints
+  | "close" -> Some CloseConstraints
   | _ -> None
 
 let mk ~mode ~verbosity = { mode; verbosity }

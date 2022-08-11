@@ -1,0 +1,8 @@
+=== Shape analysis results for dynamic.php
+Summary after closing and simplifying for \f:
+[3:12-31] [Parameter]:
+  shape()
+Summary after closing and simplifying for \main:
+[3:12-31] [Parameter]:
+  shape()
+[9:5-20] : dynamic

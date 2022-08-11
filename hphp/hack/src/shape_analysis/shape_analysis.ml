@@ -14,16 +14,30 @@ module Solver = Shape_analysis_solver
 module Walker = Shape_analysis_walker
 module Codemod = Shape_analysis_codemod
 module JSON = Hh_json
+module Inter_shape = Hips_solver.Inter (Shape_analysis_hips.Intra_shape)
 
 exception Shape_analysis_exn = Shape_analysis_exn
 
 let simplify env constraints =
   Solver.deduce constraints |> Solver.produce_results env
 
+let strip_decoration_of_lists
+    ((intra_dec_list, inter_dec_list) : decorated_constraints) :
+    any_constraint list =
+  List.map ~f:(fun { constraint_; _ } -> HT.Intra constraint_) intra_dec_list
+  @ List.map ~f:(fun { constraint_; _ } -> HT.Inter constraint_) inter_dec_list
+
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let { mode; verbosity } = options in
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
   let strip_decorations { constraint_; _ } = constraint_ in
+  let analyse (dec_map : decorated_constraints SMap.t) :
+      any_constraint list SMap.t =
+    SMap.map strip_decoration_of_lists dec_map |> Inter_shape.analyse
+    |> function
+    | Inter_shape.Convergent constr_map -> constr_map
+    | Inter_shape.Divergent constr_map -> constr_map
+  in
   match mode with
   | FlagTargets ->
     let log_pos = Format.printf "%a\n" Pos.pp in
@@ -49,6 +63,21 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast |> SMap.iter print_function_constraints
+  | CloseConstraints ->
+    let print_function_constraints
+        (id : string) (any_constraints_list : any_constraint list) : unit =
+      Format.printf "Constraints after closing for %s:\n" id;
+      List.map
+        ~f:(function
+          | HT.Intra intra_constr ->
+            show_constraint empty_typing_env intra_constr
+          | HT.Inter inter_constr ->
+            show_inter_constraint empty_typing_env inter_constr)
+        any_constraints_list
+      |> List.iter ~f:(Format.printf "%s\n");
+      Format.printf "\n"
+    in
+    Walker.program ctx tast |> analyse |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : shape_result list) :
         unit =
@@ -75,7 +104,23 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     |> SMap.values
     |> JSON.array_ (fun json -> json)
     |> Format.printf "%a" JSON.pp_json
-  | SolveConstraints -> ()
+  | SolveConstraints ->
+    let print_callable_summary (id : string) (results : shape_result list) :
+        unit =
+      Format.printf "Summary after closing and simplifying for %s:\n" id;
+      List.iter results ~f:(fun result ->
+          Format.printf "%s\n" (show_shape_result empty_typing_env result))
+    in
+    let process_callable id constraints =
+      simplify empty_typing_env constraints |> print_callable_summary id
+    in
+    Walker.program ctx tast
+    |> analyse
+    |> SMap.map
+         (List.filter_map ~f:(function
+             | HT.Intra intra_constr -> Some intra_constr
+             | HT.Inter _ -> None))
+    |> SMap.iter process_callable
 
 let callable = Walker.callable
 

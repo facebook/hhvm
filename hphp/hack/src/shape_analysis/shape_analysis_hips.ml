@@ -6,10 +6,9 @@
  *
  *)
 
-(* module HS = Hips_solver *)
-module HT = Hips_types
 module ST = Shape_analysis_types
 module SS = Shape_analysis_solver
+module HT = Hips_types
 
 module Intra_shape :
   HT.Intra
@@ -35,8 +34,3 @@ module Intra_shape :
 
   let deduce = SS.deduce
 end
-
-(*
-module Inter_shape = HS.Inter (Intra_shape)
-let analyse = Inter_shape.analyse
-*)

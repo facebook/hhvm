@@ -1,3 +1,5 @@
+[RESULT] \:div::__construct: [5:5-24] [Parameter]:
+  shape()
 [FAILURE] \C::f: [15:5-12]: Unsupported expression: Xml
 [RESULT] \C::g: [19:5-33] [Allocation]:
   shape('a' => int, 'b' => bool)

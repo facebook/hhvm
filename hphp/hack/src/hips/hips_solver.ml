@@ -57,7 +57,7 @@ module Inter (I : Intra) = struct
       | Inter inter_constr ->
         begin
           match inter_constr with
-          | Arg ((f, _), _) ->
+          | Arg ((f, _, _), _) ->
             let constr_list_at = SMap.find_opt f base_constraint_map in
             (match constr_list_at with
             | None -> []

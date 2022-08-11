@@ -12,6 +12,7 @@ val collect_analysis_targets :
   Provider_context.t -> Tast.program -> potential_targets
 
 val callable :
+  Ast_defs.id_ ->
   Tast_env.t ->
   Tast.fun_param list ->
   return:Tast.type_hint ->

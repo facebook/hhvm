@@ -13,9 +13,14 @@ function run_json_on_file_example_2(bool $x): void {
   } //should provide quickfixes
 }
 
-function run_json_on_file_example_3(bool $x): void {
-  if ($x && true) {
+function run_json_on_file_example_1_false(bool $x): void {
+  if ($x === false) {
     return;
-  }
-  //should provide lint but no quickfix
+  } //should provide quickfixes
+}
+
+function run_json_on_file_example_2_false(bool $x): void {
+  if (false === $x) {
+    return;
+  } //should provide quickfixes
 }

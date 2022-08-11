@@ -438,7 +438,12 @@ let comparing_booleans p_expr p_var name value =
   let (start_offset, end_offset) = Pos.info_raw p_expr in
   let width = end_offset - start_offset in
   let original = Pos.get_text_from_pos ~content:src p_expr in
-  let replacement = Pos.get_text_from_pos ~content:src p_var in
+  let replacement =
+    if value then
+      Pos.get_text_from_pos ~content:src p_var
+    else
+      String.make 1 '!' ^ Pos.get_text_from_pos ~content:src p_var
+  in
   Lints.add
     ~autofix:(Some (original, replacement, start_offset, width))
     Codes.comparing_booleans

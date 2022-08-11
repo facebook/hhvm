@@ -29,18 +29,32 @@
       "width":10
     },
     {
-      "descr":"The boolean expression is pointless",
-      "severity":"warning",
+      "descr":"Consider changing this statement to (!$x) instead",
+      "severity":"advice",
       "path":"run_json_on_file.php",
       "line":17,
       "start":7,
-      "end":16,
-      "code":5644,
+      "end":18,
+      "code":5643,
       "bypass_changed_lines":false,
-      "original":"",
-      "replacement":"",
-      "start_offset":null,
-      "width":null
+      "original":"$x === false",
+      "replacement":"!$x",
+      "start_offset":312,
+      "width":12
+    },
+    {
+      "descr":"Consider changing this statement to (!$x) instead",
+      "severity":"advice",
+      "path":"run_json_on_file.php",
+      "line":23,
+      "start":7,
+      "end":18,
+      "code":5643,
+      "bypass_changed_lines":false,
+      "original":"false === $x",
+      "replacement":"!$x",
+      "start_offset":440,
+      "width":12
     }
   ],
   "version":" Wed Dec 31 16:00:00 1969"

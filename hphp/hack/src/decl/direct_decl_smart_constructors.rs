@@ -1461,6 +1461,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn partition_bounds_into_lower_and_upper(
         &self,
         constraints: Node<'a>,
+        match_constraint: impl Fn(Node<'a>) -> Option<(ConstraintKind, Node<'a>)>,
     ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
         let append = |tys: &mut bump::Vec<'_, _>, ty: Option<_>| {
             if let Some(ty) = ty {
@@ -1470,7 +1471,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         constraints.iter().fold(
             (bump::Vec::new_in(self.arena), bump::Vec::new_in(self.arena)),
             |(mut super_, mut as_), constraint| {
-                if let Node::TypeConstraint(&(kind, hint)) = constraint {
+                if let Some((kind, hint)) = match_constraint(*constraint) {
                     use ConstraintKind::*;
                     match kind {
                         ConstraintAs => append(&mut as_, self.node_to_ty(hint)),
@@ -1481,6 +1482,32 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 (super_, as_)
             },
         )
+    }
+
+    fn partition_type_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        self.partition_bounds_into_lower_and_upper(constraints, |constraint| {
+            if let Node::TypeConstraint(kind_hint) = constraint {
+                Some(*kind_hint)
+            } else {
+                None
+            }
+        })
+    }
+
+    fn partition_ctx_bounds_into_lower_and_upper(
+        &self,
+        constraints: Node<'a>,
+    ) -> (bump::Vec<'a, &'a Ty<'a>>, bump::Vec<'a, &'a Ty<'a>>) {
+        self.partition_bounds_into_lower_and_upper(constraints, |constraint| {
+            if let Node::ContextConstraint(kind_hint) = constraint {
+                Some(*kind_hint)
+            } else {
+                None
+            }
+        })
     }
 
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
@@ -5394,7 +5421,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let kind = if has_abstract_keyword {
             // Abstract type constant in EBNF-like notation:
             //     abstract const type T {as U | super L} [= D];
-            let (lower, upper) = self.partition_bounds_into_lower_and_upper(constraints);
+            let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
             Typeconst::TCAbstract(self.alloc(AbstractTypeconst {
                 // `as T1 as T2 as ...` == `as (T1 & T2 & ...)`
                 as_constraint: reduce_bounds(upper, |tys| Ty_::Tintersection(tys)),
@@ -5547,17 +5574,50 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
         if type_specifier.is_ignored() {
             // A loose refinement, with bounds
-            let (lower, upper) = self.partition_bounds_into_lower_and_upper(constraints);
+            let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
             Node::ClassTypeRefinement(self.alloc((
                 id,
                 ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
-                    lower: self.alloc(lower),
-                    upper: self.alloc(upper),
+                    lower: lower.into_bump_slice(),
+                    upper: upper.into_bump_slice(),
                 })),
             )))
         } else {
             // An exact refinement
             let ty = match self.node_to_ty(type_specifier) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeInRefinement),
+            };
+            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::Texact(ty))))
+        }
+    }
+
+    fn make_ctx_in_refinement(
+        &mut self,
+        _ctx_keyword: Self::Output,
+        ctx_constant_name: Self::Output,
+        _type_params: Self::Output,
+        constraints: Self::Output,
+        _equal_token: Self::Output,
+        ctx_list: Self::Output,
+    ) -> Self::Output {
+        let Id(_, id) = match self.expect_name(ctx_constant_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::TypeInRefinement),
+        };
+        if ctx_list.is_ignored() {
+            // A loose refinement, with bounds
+            let (lower, upper) = self.partition_ctx_bounds_into_lower_and_upper(constraints);
+            Node::ClassTypeRefinement(self.alloc((
+                id,
+                ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                    lower: lower.into_bump_slice(),
+                    upper: upper.into_bump_slice(),
+                })),
+            )))
+        } else {
+            // An exact refinement
+            let ty = match self.node_to_ty(ctx_list) {
                 Some(ty) => ty,
                 None => return Node::Ignored(SK::TypeInRefinement),
             };

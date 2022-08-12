@@ -217,7 +217,15 @@ and hint_ p env = function
       let cr_types =
         List.fold members ~init:SMap.empty ~f:(fun map r ->
             match r with
-            | Rctx _ -> (* TODO(type-refinements) *) map
+            | Rctx ((_, id), CRexact h) ->
+              SMap.add id (Texact (context_hint env h)) map
+            | Rctx (((_, id) as _pos), CRloose { cr_lower; cr_upper }) ->
+              let decl_bounds h =
+                Option.map ~f:(context_hint env) h |> Option.to_list
+              in
+              let tr_lower = decl_bounds cr_lower in
+              let tr_upper = decl_bounds cr_upper in
+              SMap.add id (Tloose { tr_lower; tr_upper }) map
             | Rtype ((_, id), Texact h) -> SMap.add id (Texact (hint env h)) map
             | Rtype ((_, id), Tloose { tr_lower; tr_upper }) ->
               let decl_bounds = List.map ~f:(hint env) in

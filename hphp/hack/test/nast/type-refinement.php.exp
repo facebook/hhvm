@@ -181,5 +181,178 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [16:1-56]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Class
+     { c_span = [18:1-20:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
+       c_name = ([18:16-26], "\\BoxWithCtx"); c_tparams = []; c_extends = [([18:35-38], (Happly (([18:35-38], "\\Box"), [])))]; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts =
+       [{ c_tconst_user_attributes = []; c_tconst_name = ([19:22-23], "C"); 
+          c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None }); 
+          c_tconst_span = [19:3-24]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
+         ];
+       c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [];
+       c_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+       c_internal = false; c_module = None });
+  (Typedef
+     { t_annotation = (); t_name = ([22:6-13], "\\PureBox"); t_tparams = []; 
+       t_constraint = None; t_kind = ([22:16-46], (Hrefinement (([22:16-26], (Happly (([22:16-26], "\\BoxWithCtx"), []))), [(Rctx (([22:38-39], "C"), (CRexact ([22:42-44], (Hintersection [])))))])));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [22:1-47]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Typedef
+     { t_annotation = (); t_name = ([23:6-14], "\\ZonedBox"); t_tparams = []; 
+       t_constraint = None;
+       t_kind =
+       ([23:17-52],
+        (Hrefinement (([23:17-27], (Happly (([23:17-27], "\\BoxWithCtx"), []))),
+           [(Rctx (([23:39-40], "C"), (CRexact ([23:43-50], (Hintersection [([23:44-49], (Happly (([23:44-49], "\\HH\\Contexts\\zoned"), [])))])))))])));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [23:1-53]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Typedef
+     { t_annotation = (); t_name = ([24:6-26], "\\BoxThatWritesGlobals"); 
+       t_tparams = []; t_constraint = None;
+       t_kind =
+       ([24:29-67],
+        (Hrefinement (([24:29-39], (Happly (([24:29-39], "\\BoxWithCtx"), []))),
+           [(Rctx (([24:51-52], "C"), (CRloose { cr_lower = None; cr_upper = (Some ([24:56-65], (Hintersection [([24:57-64], (Happly (([24:57-64], "\\HH\\Contexts\\globals"), [])))]))) })))])));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [24:1-68]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Typedef
+     { t_annotation = (); t_name = ([25:6-26], "\\WritePropsOrPurerBox"); 
+       t_tparams = []; t_constraint = None;
+       t_kind =
+       ([25:29-74],
+        (Hrefinement (([25:29-39], (Happly (([25:29-39], "\\BoxWithCtx"), []))),
+           [(Rctx (([25:51-52], "C"), (CRloose { cr_lower = (Some ([25:59-72], (Hintersection [([25:60-71], (Happly (([25:60-71], "\\HH\\Contexts\\write_props"), [])))]))); cr_upper = None })))])));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [25:1-75]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Typedef
+     { t_annotation = (); t_name = ([27:6-16], "\\WritingBox"); t_tparams = []; 
+       t_constraint = None;
+       t_kind =
+       ([27:19-69],
+        (Hrefinement (([27:19-29], (Happly (([27:19-29], "\\BoxWithCtx"), []))),
+           [(Rctx (([27:41-42], "C"),
+               (CRexact ([27:45-67], (Hintersection [([27:46-53], (Happly (([27:46-53], "\\HH\\Contexts\\globals"), []))); ([27:55-66], (Happly (([27:55-66], "\\HH\\Contexts\\write_props"), [])))])))
+               ))
+             ]
+           )));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [27:1-70]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
+       t_module = None; t_docs_url = None });
+  (Typedef
+     { t_annotation = (); t_name = ([28:6-24], "\\BoxThatWritesStuff"); 
+       t_tparams = []; t_constraint = None;
+       t_kind =
+       ([28:27-78],
+        (Hrefinement (([28:27-37], (Happly (([28:27-37], "\\BoxWithCtx"), []))),
+           [(Rctx (([28:49-50], "C"),
+               (CRloose
+                  { cr_lower = None;
+                    cr_upper =
+                    (Some ([28:54-76], (Hintersection [([28:55-62], (Happly (([28:55-62], "\\HH\\Contexts\\globals"), []))); ([28:64-75], (Happly (([28:64-75], "\\HH\\Contexts\\write_props"), [])))])))
+                    })
+               ))
+             ]
+           )));
+       t_user_attributes = [];
+       t_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       t_span = [28:1-79]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = None; t_docs_url = None })
   ]

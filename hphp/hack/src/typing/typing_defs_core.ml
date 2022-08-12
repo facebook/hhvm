@@ -682,16 +682,16 @@ module Pp = struct
       type a. Format.formatter -> a class_type_refinement -> unit =
    fun fmt r ->
     match r with
-    | Texact a0 ->
+    | Texact exact ->
       Format.pp_print_string fmt "Texact ";
-      pp_ty fmt a0
-    | Tloose { tr_lower = a0; tr_upper = a1 } ->
+      pp_ty fmt exact
+    | Tloose { tr_lower = lower; tr_upper = upper } ->
       Format.fprintf fmt "Tloose @[<2>{";
       Format.pp_print_string fmt "tr_lower = ";
-      pp_list pp_ty fmt a0;
+      pp_list pp_ty fmt lower;
       Format.fprintf fmt ";@ ";
-      Format.pp_print_string fmt "tr_lower = ";
-      pp_list pp_ty fmt a1;
+      Format.pp_print_string fmt "tr_upper = ";
+      pp_list pp_ty fmt upper;
       Format.fprintf fmt ";@ ";
       Format.fprintf fmt "}@]"
 

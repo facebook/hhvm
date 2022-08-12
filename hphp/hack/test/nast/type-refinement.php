@@ -14,3 +14,15 @@ type SupIBox = Box with { type Tb super int };
 type SupISBox = Box with { type Tb super int super string };
 
 type SubSupBox = Box with { type Tb as int super int };
+
+abstract class BoxWithCtx extends Box {
+  abstract const ctx C;
+}
+
+type PureBox = BoxWithCtx with { ctx C = [] };
+type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+type BoxThatWritesGlobals = BoxWithCtx with { ctx C as [globals] };
+type WritePropsOrPurerBox = BoxWithCtx with { ctx C super [write_props] };
+
+type WritingBox = BoxWithCtx with { ctx C = [globals, write_props] };
+type BoxThatWritesStuff = BoxWithCtx with { ctx C as [globals, write_props] };

@@ -986,7 +986,27 @@ fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refine
                 ast::TypeRefinement::Texact(p_hint(&c.type_, env)?)
             },
         )),
-        CtxInRefinement(_) => missing_syntax("refinement member", node, env),
+        CtxInRefinement(c) => {
+            let name = pos_name(&c.name, env)?;
+            if c.ctx_list.is_missing() {
+                let (lower, upper) = p_ctx_constraints(&c.constraints, env)?;
+                Ok(ast::Refinement::Rctx(
+                    name,
+                    ast::CtxRefinement::CRloose(ast::CtxRefinementBounds { lower, upper }),
+                ))
+            } else if let Some(hint) = p_context_list_to_intersection(
+                &c.ctx_list,
+                env,
+                "Refinement members cannot alias polymorphic contexts",
+            )? {
+                Ok(ast::Refinement::Rctx(
+                    name,
+                    ast::CtxRefinement::CRexact(hint),
+                ))
+            } else {
+                missing_syntax("refinement member's bound(s)", node, env)
+            }
+        }
         _ => missing_syntax("refinement member", node, env),
     }
 }

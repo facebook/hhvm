@@ -131,6 +131,18 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
+    method! on_ctx_refinement env =
+      function
+      | CRexact h -> CRexact (self#on_ctx_hint_ns contexts_ns env h)
+      | CRloose { cr_lower; cr_upper } ->
+        CRloose
+          {
+            cr_lower =
+              Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) cr_lower;
+            cr_upper =
+              Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) cr_upper;
+          }
+
     method on_class_ctx_const env kind =
       match kind with
       | TCConcrete { c_tc_type } ->

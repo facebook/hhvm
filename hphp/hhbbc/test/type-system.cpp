@@ -1592,7 +1592,7 @@ TEST(Type, SpecializedClasses) {
 #define ADD(cls, name, addExact)                                        \
   auto const cls = index.resolve_class(Context{}, name.get());          \
   if (!cls || !cls->resolved()) ADD_FAILURE();                          \
-  if (cls->couldBeOverriden()) {                                        \
+  if (cls->couldBeOverridden()) {                                        \
     baseTypes.emplace_back(make_specialized_sub_object(BObj, *cls));    \
   }                                                                     \
   if (addExact) {                                                       \

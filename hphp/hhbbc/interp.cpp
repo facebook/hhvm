@@ -4597,7 +4597,7 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
   if (rflavor && !rcls->couldHaveReifiedGenerics()) {
     return reduce(env, bc::PopC {}, bc::NewObjD { className });
   }
-  auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
+  auto const isCtx = !rcls->couldBeOverridden() && env.ctx.cls &&
     rcls->same(env.index.resolve_class(env.ctx.cls));
   if (rflavor) popC(env);
   push(env, setctx(objExact(*rcls), isCtx));
@@ -4617,7 +4617,7 @@ void in(ISS& env, const bc::NewObjS& op) {
 
   auto const& dcls = dcls_of(cls);
   if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
-      (!dcls.cls().couldBeOverriden() ||
+      (!dcls.cls().couldBeOverridden() ||
        equivalently_refined(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
   }

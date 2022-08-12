@@ -1056,7 +1056,7 @@ Optional<res::Class> Class::canonicalizeInterface() const {
   );
 }
 
-bool Class::couldBeOverriden() const {
+bool Class::couldBeOverridden() const {
   return val.match(
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
@@ -2487,7 +2487,7 @@ bool build_class_constants(IndexData& index,
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
-      // Type and Context constants can be overriden.
+      // Type and Context constants can be overridden.
       auto const existingCls = index.classes.at(existing->cls);
       auto const cnsCls = index.classes.at(cns->cls);
       if (cns->kind == ConstModifiers::Kind::Value &&

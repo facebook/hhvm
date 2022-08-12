@@ -64,7 +64,6 @@ struct ParamPrep {
     // The value with the appropriate ref-iness to pass to the C++ builtin
     SSATmp* argValue{nullptr};
     bool passByAddr{false};
-    bool needsConversion{false};
     bool isInOut{false};
   };
 
@@ -1267,17 +1266,17 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
  * If the builtin parameter has no type hints to cause coercion, this function
  * returns TBottom.
  */
-Type param_target_type(const Func* callee, uint32_t paramIdx) {
+Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
   if (tc.isNullable()) {
     // FIXME(T116301380): native builtins don't resolve properly
     auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-    if (!dt) return TBottom;
+    if (!dt) return std::nullopt;
     return TNull | Type(*dt);
   }
   if (!pi.builtinType) {
-    return tc.isVecOrDict() ? TVec|TDict : TBottom;
+    return tc.isVecOrDict() ? make_optional(TVec|TDict) : std::nullopt;
   }
   if (pi.builtinType == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
@@ -1306,8 +1305,6 @@ prepare_params(IRGS& env, const Func* callee, SSATmp* ctx,
     auto& cur = ret[offset];
     auto& pi = callee->params()[offset];
 
-    // If ty > TBottom, it had some kind of type hint.
-    cur.needsConversion = ty > TBottom;
     cur.isInOut = callee->isInOut(offset);
     cur.value = ldLoc(env, offset, DataTypeSpecific);
     // We do actually mean exact type equality here.  We're only capable of
@@ -1353,12 +1350,12 @@ template<class V, class C, class R>
 SSATmp* realize_param(IRGS& env,
                       ParamPrep::Info& param,
                       const Func* callee,
-                      Type targetTy,
+                      Optional<Type> targetTy,
                       V checkType,
                       C convertParam,
                       R realize) {
-  if (param.needsConversion) {
-    auto const baseTy = targetTy - TNull;
+  if (targetTy) {
+    auto const baseTy = *targetTy - TNull;
     assertx(baseTy.isKnownDataType() || baseTy == (TVec|TDict));
 
     if (auto const value = cond(
@@ -1458,7 +1455,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
       if (tc.isVecOrDict()) return s_vec_or_dict.get();
-      auto const dt = param_target_type(callee, param) - TNull;
+      auto const dt = param_target_type(callee, param).value_or(TUninit) - TNull;
       return getDataTypeString(dt.toDataType()).get();
     }();
     auto const data = FuncArgTypeData { callee, param + 1, expected_type };

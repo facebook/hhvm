@@ -217,6 +217,7 @@ and hint_ p env = function
       let cr_types =
         List.fold members ~init:SMap.empty ~f:(fun map r ->
             match r with
+            | Rctx _ -> (* TODO(type-refinements) *) map
             | Rtype ((_, id), Texact h) -> SMap.add id (Texact (hint env h)) map
             | Rtype ((_, id), Tloose { tr_lower; tr_upper }) ->
               let decl_bounds = List.map ~f:(hint env) in

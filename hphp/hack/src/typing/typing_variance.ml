@@ -679,24 +679,35 @@ and fun_arity env variance h =
   let empty_param_info = None in
   Option.iter h ~f:(hfun_param env variance empty_param_info)
 
-and refinement_member env variance (Aast.Rtype (_, ref)) =
-  match ref with
-  | Aast.Texact h ->
+and refinement_member env variance member =
+  let check_exact h =
     let pos = Ast_defs.get_pos h in
     let reason = [(pos, Rrefinement_eq, Pinvariant)] in
     let var = Vinvariant (reason, reason) in
     hint env var h
-  | Aast.Tloose { Aast.tr_lower = lb; tr_upper = ub } ->
-    List.iter lb ~f:(fun h ->
+  in
+  let check_loose (lower, upper) =
+    List.iter lower ~f:(fun h ->
         let pos = Ast_defs.get_pos h in
         let reason = (pos, Rrefinement_super, Pcontravariant) in
         let var = flip reason variance in
         hint env var h);
-    List.iter ub ~f:(fun h ->
+    List.iter upper ~f:(fun h ->
         let pos = Ast_defs.get_pos h in
         let reason = (pos, Rrefinement_as, Pcovariant) in
         let var = detail reason variance in
         hint env var h)
+  in
+  match member with
+  | Aast.Rtype (_, ref) ->
+    (match ref with
+    | Aast.Texact h -> check_exact h
+    | Aast.Tloose { Aast.tr_lower = lb; tr_upper = ub } -> check_loose (lb, ub))
+  | Aast.Rctx (_, ref) ->
+    (match ref with
+    | Aast.CRexact h -> check_exact h
+    | Aast.CRloose { Aast.cr_lower = lb; cr_upper = ub } ->
+      check_loose (Option.to_list lb, Option.to_list ub))
 
 let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
  fun env variance param ->

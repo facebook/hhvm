@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e84cd062e73caf2def04e1b14883a47>>
+// @generated SignedSource<<05935f0fb989070e14c4d445cc85046a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -339,6 +339,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
 )]
 #[repr(C, u8)]
 pub enum Refinement {
+    Rctx(Sid, CtxRefinement),
     Rtype(Sid, TypeRefinement),
 }
 
@@ -385,6 +386,51 @@ pub enum TypeRefinement {
 pub struct TypeRefinementBounds {
     pub lower: Vec<Hint>,
     pub upper: Vec<Hint>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum CtxRefinement {
+    CRexact(Hint),
+    CRloose(CtxRefinementBounds),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(prefix = "cr_")]
+#[repr(C)]
+pub struct CtxRefinementBounds {
+    pub lower: Option<Hint>,
+    pub upper: Option<Hint>,
 }
 
 #[derive(

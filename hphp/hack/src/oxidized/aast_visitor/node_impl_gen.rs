@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4bded07f512f4e18ed9def2c84bd6301>>
+// @generated SignedSource<<d9569578b8f617106cbdeec9aa8fbaf9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -497,6 +497,42 @@ impl<P: Params> Node<P> for Contexts {
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for CtxRefinement {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            CtxRefinement::CRexact(a0) => a0.accept(c, v),
+            CtxRefinement::CRloose(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> Node<P> for CtxRefinementBounds {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement_bounds(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.lower.accept(c, v)?;
+        self.upper.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Def<P::Ex, P::En> {
@@ -1646,6 +1682,10 @@ impl<P: Params> Node<P> for Refinement {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
+            Refinement::Rctx(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
             Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)

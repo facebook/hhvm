@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d4be49607634861fe53b3ef0991c51e2>>
+// @generated SignedSource<<a72884e637b415abf9d8a57de088128b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -307,6 +307,8 @@ pub use oxidized::aast_defs::Tprim;
 #[repr(C, u8)]
 pub enum Refinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Rctx(&'a (Sid<'a>, CtxRefinement<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rtype(&'a (Sid<'a>, TypeRefinement<'a>)),
 }
 impl<'a> TrivialDrop for Refinement<'a> {}
@@ -365,6 +367,60 @@ pub struct TypeRefinementBounds<'a> {
 }
 impl<'a> TrivialDrop for TypeRefinementBounds<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypeRefinementBounds<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum CtxRefinement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CRexact(&'a Hint<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CRloose(&'a CtxRefinementBounds<'a>),
+}
+impl<'a> TrivialDrop for CtxRefinement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(CtxRefinement<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(prefix = "cr_")]
+#[repr(C)]
+pub struct CtxRefinementBounds<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub lower: Option<&'a Hint<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub upper: Option<&'a Hint<'a>>,
+}
+impl<'a> TrivialDrop for CtxRefinementBounds<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(CtxRefinementBounds<'arena>);
 
 #[derive(
     Clone,

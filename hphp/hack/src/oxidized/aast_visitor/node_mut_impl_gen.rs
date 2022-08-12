@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<54c8c37f63cf568582e8be86e50f9b91>>
+// @generated SignedSource<<a708d1fc3af126a589558f556e959e98>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -497,6 +497,42 @@ impl<P: Params> NodeMut<P> for Contexts {
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for CtxRefinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            CtxRefinement::CRexact(a0) => a0.accept(c, v),
+            CtxRefinement::CRloose(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for CtxRefinementBounds {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ctx_refinement_bounds(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.lower.accept(c, v)?;
+        self.upper.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
@@ -1646,6 +1682,10 @@ impl<P: Params> NodeMut<P> for Refinement {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
+            Refinement::Rctx(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
             Refinement::Rtype(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)

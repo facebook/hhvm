@@ -56,7 +56,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       ppf
       (root, List.map ~f:snd ids)
   | Aast.Hrefinement (ty, members) ->
-    let pp_bounds ppf bounds =
+    let pp_bounds ~is_ctx ppf bounds =
       let bound ppf (kind, hint) =
         Fmt.string
           ppf
@@ -64,19 +64,32 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
           | `E -> "= "
           | `L -> "as "
           | `U -> "super ");
-        pp_hint ~is_ctx:false ppf hint
+        pp_hint ~is_ctx ppf hint
       in
       Fmt.list ~sep:Fmt.(const string " ") bound ppf bounds
     in
-    let member ppf (Aast.Rtype (ident, ref)) =
-      Fmt.string ppf ("type " ^ snd ident ^ " ");
-      pp_bounds
-        ppf
-        (match ref with
-        | Aast.Texact hint -> [(`E, hint)]
-        | Aast.Tloose { Aast.tr_lower; tr_upper } ->
-          List.map tr_lower ~f:(fun x -> (`L, x))
-          @ List.map tr_upper ~f:(fun x -> (`U, x)))
+    let member ppf = function
+      | Aast.Rtype (ident, ref) ->
+        Fmt.string ppf ("type " ^ snd ident ^ " ");
+        pp_bounds
+          ~is_ctx:false
+          ppf
+          (match ref with
+          | Aast.Texact hint -> [(`E, hint)]
+          | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+            List.map tr_lower ~f:(fun x -> (`L, x))
+            @ List.map tr_upper ~f:(fun x -> (`U, x)))
+      | Aast.Rctx (ident, ref) ->
+        Fmt.string ppf ("ctx " ^ snd ident ^ " ");
+        pp_bounds
+          ~is_ctx:true
+          ppf
+          (match ref with
+          | Aast.CRexact hint -> [(`E, hint)]
+          | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+            let opt_map = Option.value_map ~default:[] in
+            opt_map cr_lower ~f:(fun x -> [(`L, x)])
+            @ opt_map cr_upper ~f:(fun x -> [(`U, x)]))
     in
     Fmt.(suffix with_ (pp_hint ~is_ctx:false)) ppf ty;
     Fmt.(braces (list ~sep:semi_sep member)) ppf members

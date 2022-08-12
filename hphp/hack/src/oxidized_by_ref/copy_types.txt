@@ -1,10 +1,11 @@
+aast_defs::CtxRefinement
 aast_defs::Hint_
-aast_defs::Refinement
-aast_defs::TypeRefinement
 aast_defs::ParamKind
+aast_defs::Refinement
 aast_defs::ReifyKind
 aast_defs::Sid
 aast_defs::Tprim
+aast_defs::TypeRefinement
 aast_defs::XhpChild
 aast::Afield
 aast::AsExpr
@@ -153,6 +154,7 @@ typing_defs_core::CollectionStyle
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType
 typing_defs_core::ConstraintType_
+typing_defs_core::CtxRefinement
 typing_defs_core::DependentType
 typing_defs_core::DestructureKind
 typing_defs_core::Enforcement

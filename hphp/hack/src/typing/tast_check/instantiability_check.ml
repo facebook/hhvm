@@ -79,14 +79,23 @@ let rec check_hint env (pos, hint) =
     else
       List.iter tal ~f:(check_hint env)
   | Aast.Hrefinement (h, members) ->
-    let member (Aast.Rtype (_, ref)) =
-      match ref with
-      | Aast.Texact h -> check_hint env h
-      | Aast.Tloose { Aast.tr_lower; tr_upper } ->
-        List.iter tr_lower ~f:(check_hint env);
-        List.iter tr_upper ~f:(check_hint env)
+    let check_bounds (lower, upper) =
+      List.iter lower ~f:(check_hint env);
+      List.iter upper ~f:(check_hint env)
     in
-    List.iter members ~f:member;
+    let check_member = function
+      | Aast.Rtype (_, ref) ->
+        (match ref with
+        | Aast.Texact h -> check_hint env h
+        | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+          check_bounds (tr_lower, tr_upper))
+      | Aast.Rctx (_, ref) ->
+        (match ref with
+        | Aast.CRexact h -> check_hint env h
+        | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+          check_bounds (Option.to_list cr_lower, Option.to_list cr_upper))
+    in
+    List.iter members ~f:check_member;
     check_hint env h
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f0bfabe86bc06356652901512ea1bb84>>
+// @generated SignedSource<<040810dc55fe3aaab014b443c7a197dd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -776,25 +776,58 @@ impl Tprim {
     }
 }
 impl Refinement {
+    pub fn mk_rctx(p0: Sid, p1: CtxRefinement) -> Self {
+        Refinement::Rctx(p0, p1)
+    }
     pub fn mk_rtype(p0: Sid, p1: TypeRefinement) -> Self {
         Refinement::Rtype(p0, p1)
     }
+    pub fn is_rctx(&self) -> bool {
+        match self {
+            Refinement::Rctx(..) => true,
+            _ => false,
+        }
+    }
     pub fn is_rtype(&self) -> bool {
-        true
+        match self {
+            Refinement::Rtype(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_rctx(&self) -> Option<(&Sid, &CtxRefinement)> {
+        match self {
+            Refinement::Rctx(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
     }
     pub fn as_rtype(&self) -> Option<(&Sid, &TypeRefinement)> {
         match self {
             Refinement::Rtype(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_rctx_mut(&mut self) -> Option<(&mut Sid, &mut CtxRefinement)> {
+        match self {
+            Refinement::Rctx(p0, p1) => Some((p0, p1)),
+            _ => None,
         }
     }
     pub fn as_rtype_mut(&mut self) -> Option<(&mut Sid, &mut TypeRefinement)> {
         match self {
             Refinement::Rtype(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_rctx_into(self) -> Option<(Sid, CtxRefinement)> {
+        match self {
+            Refinement::Rctx(p0, p1) => Some((p0, p1)),
+            _ => None,
         }
     }
     pub fn as_rtype_into(self) -> Option<(Sid, TypeRefinement)> {
         match self {
             Refinement::Rtype(p0, p1) => Some((p0, p1)),
+            _ => None,
         }
     }
 }
@@ -850,6 +883,62 @@ impl TypeRefinement {
     pub fn as_tloose_into(self) -> Option<TypeRefinementBounds> {
         match self {
             TypeRefinement::Tloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl CtxRefinement {
+    pub fn mk_crexact(p0: Hint) -> Self {
+        CtxRefinement::CRexact(p0)
+    }
+    pub fn mk_crloose(p0: CtxRefinementBounds) -> Self {
+        CtxRefinement::CRloose(p0)
+    }
+    pub fn is_crexact(&self) -> bool {
+        match self {
+            CtxRefinement::CRexact(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_crloose(&self) -> bool {
+        match self {
+            CtxRefinement::CRloose(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_crexact(&self) -> Option<&Hint> {
+        match self {
+            CtxRefinement::CRexact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_crloose(&self) -> Option<&CtxRefinementBounds> {
+        match self {
+            CtxRefinement::CRloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_crexact_mut(&mut self) -> Option<&mut Hint> {
+        match self {
+            CtxRefinement::CRexact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_crloose_mut(&mut self) -> Option<&mut CtxRefinementBounds> {
+        match self {
+            CtxRefinement::CRloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_crexact_into(self) -> Option<Hint> {
+        match self {
+            CtxRefinement::CRexact(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_crloose_into(self) -> Option<CtxRefinementBounds> {
+        match self {
+            CtxRefinement::CRloose(p0) => Some(p0),
             _ => None,
         }
     }

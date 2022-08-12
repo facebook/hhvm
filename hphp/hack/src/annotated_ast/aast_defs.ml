@@ -147,7 +147,7 @@ and tprim =
   | Tnoreturn
 
 and refinement =
-  (* TODO(type-refinements): Rctx of ctx_refinement *)
+  | Rctx of sid * ctx_refinement
   | Rtype of sid * type_refinement
 
 and type_refinement =
@@ -157,6 +157,15 @@ and type_refinement =
 and type_refinement_bounds = {
   tr_lower: hint list;
   tr_upper: hint list;
+}
+
+and ctx_refinement =
+  | CRexact of hint
+  | CRloose of ctx_refinement_bounds
+
+and ctx_refinement_bounds = {
+  cr_lower: hint option;
+  cr_upper: hint option;
 }
 
 and shape_field_info = {

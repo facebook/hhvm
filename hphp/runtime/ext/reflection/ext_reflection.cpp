@@ -1534,11 +1534,13 @@ static TypedValue HHVM_METHOD(ReflectionClass, getConstant, const String& name) 
 static
 void addClassConstantNames(const Class* cls,
                            const req::ptr<c_Set>& st,
-                           size_t limit) {
+                           size_t limit,
+                           hphp_fast_set<const Class*>& seen) {
   assertx(cls && st && (st->size() < limit));
 
-  auto numConsts = cls->numConstants();
+  if (!seen.emplace(cls).second) return;
 
+  auto numConsts = cls->numConstants();
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
     if (consts[i].cls == cls && !consts[i].isAbstractAndUninit()
@@ -1550,17 +1552,17 @@ void addClassConstantNames(const Class* cls,
   auto const& allTraits = cls->usedTraitClasses();
   auto const numTraits = allTraits.size();
   for (int i = 0; i < numTraits && (st->size() < limit); ++i) {
-    addClassConstantNames(allTraits[i].get(), st, limit);
+    addClassConstantNames(allTraits[i].get(), st, limit, seen);
   }
 
   if ((st->size() < limit) && cls->parent()) {
-    addClassConstantNames(cls->parent(), st, limit);
+    addClassConstantNames(cls->parent(), st, limit, seen);
   }
 
   auto const& allIfaces = cls->allInterfaces();
   auto const numIfaces = allIfaces.size();
   for (int i = 0; i < numIfaces && (st->size() < limit); ++i) {
-    addClassConstantNames(allIfaces[i].get(), st, limit);
+    addClassConstantNames(allIfaces[i].get(), st, limit, seen);
   }
 }
 
@@ -1579,7 +1581,8 @@ static Array HHVM_STATIC_METHOD(
   auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
-  addClassConstantNames(cls, st, numConsts);
+  hphp_fast_set<const Class*> seen;
+  addClassConstantNames(cls, st, numConsts, seen);
   assertx(st->size() <= numConsts);
 
   DictInit ai(numConsts);

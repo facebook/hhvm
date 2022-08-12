@@ -84,9 +84,9 @@ struct Opts {
     #[clap(long)]
     is_systemlib: bool,
 
-    /// [Experimental] Enable Types in Compilation
+    /// [Experimental] Enable Type-Directed Bytecode Compilation
     #[clap(long)]
-    types_in_compilation: bool,
+    type_directed: bool,
 }
 
 /// Hack Compiler
@@ -173,8 +173,8 @@ impl Opts {
         if self.is_systemlib {
             flags |= EnvFlags::IS_SYSTEMLIB;
         }
-        if self.types_in_compilation {
-            flags |= EnvFlags::TYPES_IN_COMPILATION;
+        if self.type_directed {
+            flags |= EnvFlags::TYPE_DIRECTED;
         }
         flags
     }

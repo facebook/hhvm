@@ -69,9 +69,9 @@ pub(crate) struct SingleFileOpts {
     #[clap(long = "verbose", parse(from_occurrences))]
     pub(crate) verbosity: isize,
 
-    /// [Experimental] Enable Types in Compilation
+    /// [Experimental] Enable Type-Directed Bytecode Compilation
     #[clap(long)]
-    pub(crate) types_in_compilation: bool,
+    pub(crate) type_directed: bool,
 }
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
@@ -143,7 +143,7 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Nativ
     flags.set(EnvFlags::DUMP_IR, opts.dump_ir);
     flags.set(EnvFlags::ENABLE_IR, opts.enable_ir);
     flags.set(EnvFlags::IS_SYSTEMLIB, opts.systemlib);
-    flags.set(EnvFlags::TYPES_IN_COMPILATION, opts.types_in_compilation);
+    flags.set(EnvFlags::TYPE_DIRECTED, opts.type_directed);
     let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
         | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
         | HHBCFlags::FOLD_LAZY_CLASS_KEYS

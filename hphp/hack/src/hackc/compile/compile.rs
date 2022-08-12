@@ -82,7 +82,7 @@ bitflags! {
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
         const DUMP_IR = 1 << 5;
         const ENABLE_IR = 1 << 6;
-        const TYPES_IN_COMPILATION = 1 << 7;
+        const TYPE_DIRECTED = 1 << 7;
     }
 }
 
@@ -536,7 +536,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
     ast: &mut ast::Program,
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
-    if flags.contains(EnvFlags::TYPES_IN_COMPILATION) {
+    if flags.contains(EnvFlags::TYPE_DIRECTED) {
         let mut new_ast = type_check::type_program(ast);
         let res = readonly_check::check_program(&mut new_ast, false);
         // Ignores all errors after the first...
@@ -574,7 +574,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             !flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
             flags.contains(EnvFlags::IS_SYSTEMLIB),
-            flags.contains(EnvFlags::TYPES_IN_COMPILATION),
+            flags.contains(EnvFlags::TYPE_DIRECTED),
             profile,
         )
     });
@@ -625,7 +625,7 @@ fn create_emitter<'arena, 'decl>(
     )
 }
 
-fn create_parser_options(opts: &Options, types_in_compilation: bool) -> ParserOptions {
+fn create_parser_options(opts: &Options, type_directed: bool) -> ParserOptions {
     let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
     ParserOptions {
         po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
@@ -655,7 +655,7 @@ fn create_parser_options(opts: &Options, types_in_compilation: bool) -> ParserOp
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
-        tco_no_parser_readonly_check: types_in_compilation,
+        tco_no_parser_readonly_check: type_directed,
         ..Default::default()
     }
 }
@@ -670,7 +670,7 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
-    types_in_compilation: bool,
+    type_directed: bool,
     profile: &mut Profile,
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
@@ -680,7 +680,7 @@ fn parse_file(
         keep_errors: false,
         is_systemlib,
         elaborate_namespaces,
-        parser_options: create_parser_options(opts, types_in_compilation),
+        parser_options: create_parser_options(opts, type_directed),
         ..AastEnv::default()
     };
 

@@ -98,7 +98,7 @@ fn desugar_and_replace_et_literals(flags: EnvFlags, program: ast::Program, src: 
 /// syntax.
 pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
     let is_systemlib = flags.contains(EnvFlags::IS_SYSTEMLIB);
-    let types_in_compilation = flags.contains(EnvFlags::TYPES_IN_COMPILATION);
+    let type_directed = flags.contains(EnvFlags::TYPE_DIRECTED);
     let opts = Options::from_configs(&[]).expect("Invalid options");
     let content = fs::read(filepath.to_absolute()).unwrap();
     let source_text = SourceText::make(RcOc::new(filepath), &content);
@@ -116,7 +116,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
         false,
         ns,
         is_systemlib,
-        types_in_compilation,
+        type_directed,
         &mut Profile::default(),
     ) {
         Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),

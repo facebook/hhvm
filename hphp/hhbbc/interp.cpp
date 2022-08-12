@@ -4529,7 +4529,15 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     return;
   }
 
-  if (rfunc.exactFunc() && op.str2->empty()) {
+  auto moduleCheck = [&] {
+    auto const func = rfunc.exactFunc();
+    assertx(func);
+    if (!(func->cls->attrs & AttrInternal)) return true;
+    return env.index.lookup_func_unit(*env.ctx.func)->moduleName ==
+           env.index.lookup_func_unit(*func)->moduleName;
+  };
+
+  if (rfunc.exactFunc() && op.str2->empty() && moduleCheck()) {
     return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
   }
 

@@ -1,0 +1,9 @@
+<?hh
+<<file:__EnableUnstableFeatures("modules")>>
+module foo;
+
+internal class Child extends Foo {
+  public static function get(): int {
+    return 5;
+  }
+}

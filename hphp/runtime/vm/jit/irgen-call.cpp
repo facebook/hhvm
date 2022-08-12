@@ -1957,8 +1957,6 @@ void fcallClsMethodCommon(IRGS& env,
     }
   };
 
-  emitModuleBoundaryCheck(env, clsVal, false);
-
   if (!methVal->hasConstVal()) {
     emitFCall();
     return;
@@ -2018,6 +2016,7 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
     op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
     !RO::EvalLogKnownMethodsAsDynamicCalls;
 
+  emitModuleBoundaryCheck(env, cls, false);
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, false,
                        true, suppressDynCallCheck,
                        2);
@@ -2047,6 +2046,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
     op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
     !RO::EvalLogKnownMethodsAsDynamicCalls;
 
+  emitModuleBoundaryCheck(env, cls, false);
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), false,
                        name->isA(TStr) || RO::EvalEmitClassPointers == 0,
                        suppressDynCallCheck,

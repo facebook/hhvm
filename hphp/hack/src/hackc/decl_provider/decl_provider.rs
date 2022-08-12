@@ -3,7 +3,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod memo_provider;
+
 use bincode::Options;
+pub use memo_provider::MemoProvider;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -11,6 +14,8 @@ use oxidized_by_ref::shallow_decl_defs::Decl;
 use oxidized_by_ref::shallow_decl_defs::FunDecl;
 use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+use sha1::Digest;
+use sha1::Sha1;
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -24,6 +29,7 @@ pub enum Error {
     Bincode(#[from] bincode::Error),
 }
 
+#[derive(Clone, Copy)]
 pub enum TypeDecl<'a> {
     Class(&'a ClassDecl<'a>),
     Typedef(&'a TypedefDecl<'a>),
@@ -82,19 +88,46 @@ pub trait DeclProvider: std::fmt::Debug {
     fn module_decl(&self, symbol: &str) -> Result<&'_ ModuleDecl<'_>>;
 }
 
+/// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
 pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
-    bincode::options().with_native_endian().serialize(decls)
+    use std::io::Write;
+    let mut blob = Vec::new();
+    bincode::options()
+        .with_native_endian()
+        .serialize_into(&mut blob, decls)?;
+    let mut digest = Sha1::new();
+    digest.update(&blob);
+    blob.write_all(&digest.finalize())?;
+    Ok(blob)
 }
 
+/// Deserialize decls. Panic in cfg(debug) if the content hash is wrong.
 pub fn deserialize_decls<'a>(
     arena: &'a bumpalo::Bump,
     data: &[u8],
 ) -> Result<Decls<'a>, bincode::Error> {
     use arena_deserializer::serde::Deserialize;
+    let (data, hash) = split_serialized_decls(data);
+    debug_assert!({
+        let mut digest = Sha1::new();
+        digest.update(data);
+        digest.finalize().to_vec() == hash
+    });
     let op = bincode::options().with_native_endian();
     let mut de = bincode::de::Deserializer::from_slice(data, op);
     let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
     Decls::deserialize(de)
+}
+
+fn split_serialized_decls(data: &[u8]) -> (&[u8], &[u8]) {
+    assert!(data.len() >= Sha1::output_size());
+    let split = data.len() - Sha1::output_size();
+    (&data[0..split], &data[split..])
+}
+
+/// Recover the content hash that was appended to serialized decls.
+pub fn decls_content_hash(data: &[u8]) -> &[u8] {
+    split_serialized_decls(data).1
 }
 
 pub fn find_type_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<TypeDecl<'a>> {

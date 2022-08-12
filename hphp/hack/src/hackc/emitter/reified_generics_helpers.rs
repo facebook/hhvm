@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::DeclProvider;
 use decl_provider::TypeDecl;
 use env::emitter::Emitter;
 use env::Env;
@@ -266,7 +267,7 @@ pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
                 return false;
             }
             // Otherwise, we have a class or typedef name that we want to look up
-            let provider = match emitter.decl_provider {
+            let provider = match emitter.decl_provider.as_ref() {
                 Some(p) => p,
                 None => {
                     // Don't have a DeclProvider at all.

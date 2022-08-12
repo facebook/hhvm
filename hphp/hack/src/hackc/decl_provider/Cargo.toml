@@ -11,5 +11,7 @@ path = "decl_provider.rs"
 arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
+hash = { path = "../../utils/hash" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
+sha-1 = "0.10"
 thiserror = "1.0.30"

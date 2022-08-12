@@ -265,11 +265,10 @@ fn hackc_compile_from_text_cpp_ffi(
     let decl_allocator = bumpalo::Bump::new();
 
     let decl_provider = if env.decl_provider != 0 {
-        let provider = env.decl_provider as *const c_void;
-        Some(ExternalDeclProvider {
-            provider,
-            arena: &decl_allocator,
-        })
+        Some(ExternalDeclProvider::new(
+            env.decl_provider as *const c_void,
+            &decl_allocator,
+        ))
     } else {
         None
     };
@@ -362,11 +361,10 @@ fn hackc_compile_unit_from_text_cpp_ffi(
 
     let decl_allocator = bumpalo::Bump::new();
     let decl_provider = if env.decl_provider != 0 {
-        let provider = env.decl_provider as *const c_void;
-        Some(ExternalDeclProvider {
-            provider,
-            arena: &decl_allocator,
-        })
+        Some(ExternalDeclProvider::new(
+            env.decl_provider as *const c_void,
+            &decl_allocator,
+        ))
     } else {
         None
     };

@@ -17,6 +17,7 @@ cxx = "1.0.64"
 decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
+hash = { path = "../../utils/hash" }
 hhbc = { path = "../hhbc/cargo/hhbc" }
 itertools = "0.10.3"
 libc = "0.2.121"

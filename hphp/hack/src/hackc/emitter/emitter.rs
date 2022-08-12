@@ -8,6 +8,7 @@ use std::collections::BTreeSet;
 
 use adata_state::AdataState;
 use decl_provider::DeclProvider;
+use decl_provider::MemoProvider;
 use ffi::Slice;
 use ffi::Str;
 use global_state::GlobalState;
@@ -61,7 +62,7 @@ pub struct Emitter<'arena, 'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    pub decl_provider: Option<&'decl dyn DeclProvider>,
+    pub decl_provider: Option<MemoProvider<'decl>>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -76,7 +77,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             opts,
             systemlib,
             for_debugger_eval,
-            decl_provider,
+            decl_provider: decl_provider.map(MemoProvider::new),
             alloc,
 
             label_gen: LabelGen::new(),

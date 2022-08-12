@@ -554,6 +554,7 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "facts_rust",
+ "hash",
  "hhbc",
  "itertools 0.10.3",
  "libc",
@@ -941,7 +942,9 @@ dependencies = [
  "arena_deserializer",
  "bincode",
  "bumpalo",
+ "hash",
  "oxidized_by_ref",
+ "sha-1",
  "thiserror",
 ]
 

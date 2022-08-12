@@ -6,6 +6,7 @@
 use std::cell::RefCell;
 use std::ffi::c_void;
 
+use cxx::CxxString;
 use decl_provider::Error;
 use decl_provider::Result;
 use decl_provider::TypeDecl;
@@ -23,8 +24,9 @@ use crate::DeclsHolder;
 #[repr(C)]
 pub enum ExternalDeclProviderResult {
     Missing,
-    Decls(*const DeclsHolder), // XXX can we keep the <'decl> lifetime?
-    Bytes(*const Vec<u8>),
+    Decls(*const DeclsHolder),
+    RustVec(*const Vec<u8>),
+    CppString(*const CxxString),
 }
 
 // Bridge to C++ DeclProviders.
@@ -133,10 +135,15 @@ impl<'a> ExternalDeclProvider<'a> {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
                 find(&holder.decls)
             }
-            ExternalDeclProviderResult::Bytes(p) => {
+            ExternalDeclProviderResult::RustVec(p) => {
                 // turn raw pointer back into &Vec<u8>
                 let data = unsafe { p.as_ref().unwrap() };
                 find(self.deser(data)?)
+            }
+            ExternalDeclProviderResult::CppString(p) => {
+                // turn raw pointer back into &CxxString
+                let data = unsafe { p.as_ref().unwrap() };
+                find(self.deser(data.as_bytes())?)
             }
         }
     }

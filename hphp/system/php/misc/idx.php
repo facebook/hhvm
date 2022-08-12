@@ -99,24 +99,33 @@ namespace HH {
  * @return mixed                Value at array index if it exists,
  *                              or the default value if not.
  */
-function idx($arr, $idx, $default=null)[] {
+function idx(
+  mixed $arr,
+  mixed $idx,
+  mixed $default = null,
+)[]: mixed {
   if (\HH\is_any_array($arr)) {
     return \hphp_array_idx($arr, $idx, $default);
   }
 
   if ($idx !== null) {
     if (\is_object($arr)) {
-      if ($arr is \ConstIndexAccess) {
+      // We have to cast to `nothing` here as we're attempting to pass a local
+      // to an unbound generic: we don't have access to that specific type.
+      $idx = HH\FIXME\UNSAFE_CAST<nonnull, nothing>($idx);
+      if ($arr is \ConstIndexAccess<_, _>) {
         if ($arr->containsKey($idx)) {
-          return $arr[$idx];
+          return HH\FIXME\UNSAFE_CAST<mixed, KeyedContainer<arraykey, mixed>>(
+            $arr,
+          )[$idx];
         }
-      } else if ($arr is \ConstSet) {
+      } else if ($arr is \ConstSet<_>) {
         if ($arr->contains($idx)) {
           return $idx;
         }
       }
-    } else if (\is_string($arr)) {
-      if (isset($arr[$idx])) {
+    } else if ($arr is string) {
+      if (isset($arr[HH\FIXME\UNSAFE_CAST<nonnull, int>($idx)])) {
         return $arr[(int)$idx];
       }
     }
@@ -124,9 +133,18 @@ function idx($arr, $idx, $default=null)[] {
 
   return $default;
 }
+
 <<__IgnoreReadonlyLocalErrors>>
-function idx_readonly<Tk as arraykey, Tv>(readonly $arr, readonly $idx, readonly $default=null)[] : readonly Tv {
-  return readonly idx($arr, $idx, $default);
+function idx_readonly(
+  readonly mixed $arr,
+  readonly mixed $idx,
+  readonly mixed $default = null,
+)[]: readonly mixed {
+  return readonly idx(
+    $arr,
+    $idx,
+    HH\FIXME\UNSAFE_CAST<mixed, nothing>($default),
+  );
 }
 
 }

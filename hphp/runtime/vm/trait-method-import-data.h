@@ -81,9 +81,6 @@ namespace HPHP {
  *      findSingleTraitWithMethod(Context ctx, const String& origMethName);
  *    TraitMethod::class_type
  *      findTraitClass(Context ctx, const String& traitName);
- *    TraitMethod::method_type
- *      findTraitMethod(TraitMethod::class_type traitCls,
- *                      const String& origMethName);
  *
  *    // Errors.
  *    void errorUnknownMethod(const String& methName);

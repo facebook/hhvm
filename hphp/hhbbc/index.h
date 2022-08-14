@@ -551,7 +551,6 @@ struct Func {
   const CompactVector<CoeffectRule>* coeffectRules() const;
 
   struct FuncInfo;
-  struct MethTabEntryPair;
   struct FuncFamily;
 
 private:
@@ -566,10 +565,13 @@ private:
     bool operator==(MethodName o) const { return name == o.name; }
     SString name;
   };
-  // Like MethTabEntryPair, but the method is not guaranteed to
-  // actually exist (this only matters for things like exactFunc()).
+  struct Method {
+    const php::Func* func;
+  };
+  // Like Method, but the method is not guaranteed to actually exist
+  // (this only matters for things like exactFunc()).
   struct MethodOrMissing {
-    const MethTabEntryPair* mte;
+    const php::Func* func;
   };
   // Simultaneously a group of func families. Any data must be
   // intersected across all of the func families in the list. Used for
@@ -580,7 +582,7 @@ private:
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
-                            , const MethTabEntryPair*
+                            , Method
                             , FuncFamily*
                             , MethodOrMissing
                             , Isect

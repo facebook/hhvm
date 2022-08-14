@@ -453,6 +453,7 @@ void collect_stats(const StatsHolder& stats,
     [&] (const php::Class& c) {
       collect_class(*stats.stats, index, c);
       for (auto const& m : c.methods) {
+        if (!m) continue;
         collect_func(*stats.stats, index, *m);
       }
     }

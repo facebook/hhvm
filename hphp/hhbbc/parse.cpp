@@ -821,10 +821,14 @@ void parse_methods(ParseUnitState& puState,
     if (f->name == s_86cinit.get()) {
       cinit = std::move(f);
     } else {
-      ret->methods.push_back(std::move(f));
+      f->clsIdx = ret->methods.size();
+      ret->methods.emplace_back(std::move(f));
     }
   }
-  if (cinit) ret->methods.push_back(std::move(cinit));
+  if (cinit) {
+    cinit->clsIdx = ret->methods.size();
+    ret->methods.emplace_back(std::move(cinit));
+  }
 }
 
 void add_stringish(php::Class* cls) {

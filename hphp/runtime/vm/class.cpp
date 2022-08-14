@@ -4654,10 +4654,6 @@ struct TMIOps {
     }
     return ret;
   }
-  static const Func* findTraitMethod(const Class* traitCls,
-                                     const StringData* origMethName) {
-    return traitCls->lookupMethod(origMethName);
-  }
 
   // Errors.
   static void errorUnknownMethod(const StringData* methName) {

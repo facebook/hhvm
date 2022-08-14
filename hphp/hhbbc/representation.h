@@ -284,6 +284,13 @@ struct Func : FuncBase {
   uint32_t idx;
 
   /*
+   * If this function is a method, it's index in the owning Class'
+   * methods table (2^32-1 otherwise so that misuse will tend to cause
+   * crashes).
+   */
+  uint32_t clsIdx{std::numeric_limits<uint32_t>::max()};
+
+  /*
    * Basic information about the function.
    */
   LSString name;

@@ -161,7 +161,10 @@ bool check(const php::Func& f) {
 
 bool check(const php::Class& c) {
   assertx(checkName(c.name));
-  for (DEBUG_ONLY auto& m : c.methods) assertx(check(*m));
+  for (DEBUG_ONLY auto& m : c.methods) {
+    if (!m) continue;
+    assertx(check(*m));
+  }
 
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);

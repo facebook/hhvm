@@ -192,7 +192,11 @@ namespace php {
 
 ClassBase::ClassBase(const ClassBase& other) {
   for (auto& m : other.methods) {
-    methods.push_back(std::make_unique<php::Func>(*m));
+    if (!m) {
+      methods.emplace_back();
+    } else {
+      methods.emplace_back(std::make_unique<php::Func>(*m));
+    }
   }
 }
 

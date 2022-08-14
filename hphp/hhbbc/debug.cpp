@@ -218,6 +218,7 @@ void dump_index(const std::string& dir,
       [&] (const php::Class& c) {
         dump_class_state(out, index, &c);
         for (auto const& m : c.methods) {
+          if (!m) continue;
           dump_func_state(out, index, *m);
         }
       }

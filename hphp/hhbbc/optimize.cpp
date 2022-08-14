@@ -737,13 +737,19 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
         blk.hhbcs[0].op == Op::Null &&
         blk.hhbcs[1].op == Op::RetC) {
       FTRACE(2, "Erasing {}::{}\n", func->cls->name, func->name);
-      func->cls->methods.erase(
-        std::find_if(func->cls->methods.begin(),
-                     func->cls->methods.end(),
-                     [&](const std::unique_ptr<php::Func>& f) {
-                       return f.get() == func;
-                     }));
+      auto const it = std::find_if(
+        func->cls->methods.begin(),
+        func->cls->methods.end(),
+        [&](const std::unique_ptr<php::Func>& f) {
+          return f.get() == func;
+        }
+      );
+      assertx(it != func->cls->methods.end());
+      // Don't actually remove it from the methods table, as that
+      // would invalidate any indices in the table. Just null out the
+      // entry.
       func.release();
+      it->reset();
       return;
     }
   }

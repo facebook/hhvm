@@ -84,8 +84,6 @@ template <typename SerDe> void Local::serde(SerDe& sd) {
 
 template <typename SerDe> void Func::serde(SerDe& sd,
                                            Class* parentClass) {
-  // This isn't true in general, but is right now for where we're
-  // using the serializer.
   if constexpr (SerDe::deserializing) {
     cls = parentClass;
   } else {
@@ -94,6 +92,7 @@ template <typename SerDe> void Func::serde(SerDe& sd,
 
   sd(name)
     (idx)
+    (clsIdx)
     (srcInfo)
     (attrs)
     (params)

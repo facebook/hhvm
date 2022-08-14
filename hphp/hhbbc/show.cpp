@@ -353,6 +353,7 @@ std::string show(const Class& cls) {
     folly::toAppend("  implements ", i->data(), "\n", &ret);
   }
   for (auto& m : cls.methods) {
+    if (!m) continue;
     folly::toAppend(
       "  method ",
       m->name->data(), ":\n",

@@ -1127,8 +1127,9 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   }
 
   for (auto& m : cls.methods) {
+    if (!m) continue; // Removed
     if (!needs86cinit && m->name == s_86cinit.get()) continue;
-    FTRACE(2, "    method: {}\n", m->name->data());
+    FTRACE(2, "    method: {}\n", m->name);
     auto const fe = ue.newMethodEmitter(m->name, pce);
     emit_func(state, ue, *fe, *m);
     pce->addMethod(fe);

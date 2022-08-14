@@ -2240,20 +2240,12 @@ struct TMIOps {
     return traitCls->cls->name;
   }
 
-  // Return the name for the trait method.
-  static const string_type methName(method_type meth) {
-    return meth->name;
-  }
-
   // Return the name of the trait where the method was originally defined
   static origin_type originalClass(method_type meth) {
     return meth->originalClass ? meth->originalClass : meth->cls->name;
   }
 
   // Is-a methods.
-  static bool isTrait(class_type traitCls) {
-    return traitCls->cls->attrs & AttrTrait;
-  }
   static bool isAbstract(Attr modifiers) {
     return modifiers & AttrAbstract;
   }
@@ -2263,52 +2255,7 @@ struct TMIOps {
     return Func::isSpecial(methName);
   }
 
-  // TraitMethod constructor.
-  static TraitMethod traitMethod(class_type traitCls,
-                                 method_type traitMeth,
-                                 const PreClass::TraitAliasRule& rule) {
-    return TraitMethod { traitCls, traitMeth, rule.modifiers() };
-  }
-
-  // Register a trait alias once the trait class is found.
-  static void addTraitAlias(const ClassInfo* /*cls*/,
-                            const PreClass::TraitAliasRule& /*rule*/,
-                            class_type /*traitCls*/) {
-    // purely a runtime thing... nothing to do
-  }
-
-  // Trait class/method finders.
-  static class_type findSingleTraitWithMethod(class_type cls,
-                                              string_type origMethName) {
-    class_type traitCls = nullptr;
-
-    for (auto const t : cls->usedTraits) {
-      // Note: m_methods includes methods from parents/traits recursively.
-      if (t->methods.count(origMethName)) {
-        if (traitCls != nullptr) {
-          return nullptr;
-        }
-        traitCls = t;
-      }
-    }
-    return traitCls;
-  }
-
-  static class_type findTraitClass(class_type cls,
-                                   string_type traitName) {
-    for (auto const t : cls->usedTraits) {
-      if (traitName->isame(t->cls->name)) return t;
-    }
-    return nullptr;
-  }
-
   // Errors.
-  static void errorUnknownMethod(string_type methName) {
-    throw TMIException(folly::sformat("Unknown method '{}'", methName));
-  }
-  static void errorUnknownTrait(string_type traitName) {
-    throw TMIException(folly::sformat("Unknown trait '{}'", traitName));
-  }
   static void errorDuplicateMethod(class_type cls,
                                    string_type methName,
                                    const std::vector<const StringData*>&) {
@@ -2321,16 +2268,6 @@ struct TMIOps {
       return;
     }
     throw TMIException(folly::sformat("DuplicateMethod: {}", methName));
-  }
-  static void errorInconsistentInsteadOf(class_type cls,
-                                         string_type methName) {
-    throw TMIException(folly::sformat("InconsistentInsteadOf: {} {}",
-                                      methName, cls->cls->name));
-  }
-  static void errorMultiplyExcluded(string_type traitName,
-                                    string_type methName) {
-    throw TMIException(folly::sformat("MultiplyExcluded: {}::{}",
-                                      traitName, methName));
   }
 };
 

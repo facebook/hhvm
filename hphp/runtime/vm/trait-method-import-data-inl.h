@@ -24,50 +24,9 @@ inline void
 TraitMethodImportData<TraitMethod, Ops>
 ::add(const TraitMethod& tm, const String& name) {
   if (Ops::exclude(name)) return;
-
   auto const found = m_dataForName.count(name);
-
   m_dataForName[name].methods.push_back(tm);
   if (!found) m_orderedNames.push_back(name);
-}
-
-template <class TraitMethod, class Ops>
-inline void
-TraitMethodImportData<TraitMethod, Ops>
-::add(const TraitMethod& tm,
-      const String& aliasedName,
-      const String& origName) {
-  if (Ops::exclude(aliasedName)) return;
-
-  add(tm, aliasedName);
-
-  assertx(m_dataForName.count(origName));
-  m_dataForName[origName].aliases.push_back(aliasedName);
-}
-
-template <class TraitMethod, class Ops>
-inline void
-TraitMethodImportData<TraitMethod, Ops>
-::erase(const String& name) {
-  // We don't bother erasing `name' from any name lists---since it will not
-  // correspond to any NameData, it will be skipped during finalization anyway.
-  m_dataForName.erase(name);
-}
-
-template <class TraitMethod, class Ops>
-inline void
-TraitMethodImportData<TraitMethod, Ops>
-::setModifiers(const String& name,
-               typename TraitMethod::class_type trait,
-               Attr mods) {
-  auto& methods = m_dataForName[name].methods;
-
-  for (auto& tm : methods) {
-    if (tm.trait == trait) {
-      tm.modifiers = mods;
-      return;
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,7 +79,7 @@ TraitMethodImportData<TraitMethod, Ops>
 template <class TraitMethod, class Ops>
 inline void
 TraitMethodImportData<TraitMethod, Ops>
-::removeDiamondDuplicates(const bool enableMethodTraitDiamond) {
+::removeDiamondDuplicates(bool enableMethodTraitDiamond) {
   for (auto& nameData : m_dataForName) {
     auto& methods = nameData.second.methods;
 
@@ -141,24 +100,24 @@ TraitMethodImportData<TraitMethod, Ops>
 }
 
 template <class TraitMethod, class Ops>
-inline auto
+inline std::vector<typename TraitMethodImportData<TraitMethod, Ops>::MethodData>
 TraitMethodImportData<TraitMethod, Ops>
-::finish(typename TraitMethod::class_type ctx, const bool enableMethodTraitDiamond) {
+::finish(typename TraitMethod::class_type ctx, bool enableMethodTraitDiamond) {
   removeSpareTraitAbstractMethods();
   removeDiamondDuplicates(enableMethodTraitDiamond);
 
-  std::unordered_set<String> seenNames;
+  hphp_fast_set<String> seenNames;
   std::vector<MethodData> output;
 
   seenNames.reserve(m_orderedNames.size());
   output.reserve(m_orderedNames.size());
 
-  auto process = [&] (const String& name) {
-    if (seenNames.count(name)) return;
+  for (auto const& name : m_orderedNames) {
+    if (seenNames.count(name)) continue;
     auto const& methods = m_dataForName[name].methods;
 
     // The rules eliminated this method from all traits.
-    if (methods.size() == 0) return;
+    if (methods.size() == 0) continue;
 
     if (methods.size() > 1) {
       // This may or may not actually throw; if it doesn't, the client is okay
@@ -171,18 +130,6 @@ TraitMethodImportData<TraitMethod, Ops>
     seenNames.insert(name);
     auto const &front = *methods.begin();
     output.push_back({name, front});
-  };
-
-  for (auto const& name : m_orderedNames) {
-    auto const& nameData = m_dataForName[name];
-
-    // Aliases of a given method name are always ordered immediately before
-    // that name (in the order the aliases were declared in), even if
-    // precedence rules override them.
-    for (auto const& alias : nameData.aliases) {
-      process(alias);
-    }
-    process(name);
   }
 
   return output;

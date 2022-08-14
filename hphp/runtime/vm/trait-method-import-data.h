@@ -54,42 +54,20 @@ namespace HPHP {
  * Ops {
  *    // Return the name for a trait class/method.
  *    String clsName(TraitMethod::class_type traitCls);
- *    String methName(TraitMethod::method_type meth);
  *
  *    // Return the reference of the trait where the method was
  *    // originally defined in the bytecode.
  *    origin_type originalClass(TraitMethod::method_type meth);
  *
  *    // Is-a methods.
- *    bool isTrait(TraitMethod::class_type traitCls);
  *    bool isAbstract(Attr modifiers);
  *
  *    // Whether to exclude methods with name `methName' when adding.
  *    bool exclude(const String& methName);
  *
- *    // TraitMethod constructor.
- *    TraitMethod traitMethod(TraitMethod::class_type traitCls,
- *                            TraitMethod::method_type traitMeth,
- *                            alias_rule rule);
- *
- *    // Register a trait alias once the trait class is found.
- *    void addTraitAlias(Context ctx, const PreClass::TraitAliasRule& rule,
- *                       TraitMethod::class_type traitCls);
- *
- *    // Trait class/method finders.
- *    TraitMethod::class_type
- *      findSingleTraitWithMethod(Context ctx, const String& origMethName);
- *    TraitMethod::class_type
- *      findTraitClass(Context ctx, const String& traitName);
- *
  *    // Errors.
- *    void errorUnknownMethod(const String& methName);
- *    void errorUnknownTrait(const String& traitName);
  *    void errorDuplicateMethod(Context ctx, const String& methName,
  *                              const std::list<TraitMethod>& methods);
- *    void errorInconsistentInsteadOf(Context ctx, const String& methName);
- *    void errorMultiplyExcluded(const String& traitName,
- *                               const String& methName);
  * }
  */
 template <class TraitMethod, class Ops>
@@ -105,10 +83,9 @@ struct TraitMethodImportData {
   struct NameData {
     // List of all declared trait methods with the name.
     std::list<TraitMethod> methods;
-    // In-order aliases of the name.
-    std::vector<String> aliases;
-    // For error reporting, list of names of traits that declare methods with the name
-    // Includes duplicates that might have been removed from methods.
+    // For error reporting, list of names of traits that declare
+    // methods with the name Includes duplicates that might have been
+    // removed from methods.
     std::vector<String> methodOriginsWithDuplicates;
   };
 
@@ -117,18 +94,13 @@ struct TraitMethodImportData {
    * method) pair.
    */
   struct MethodData {
-    const String name;
-    const TraitMethod tm;
+    String name;
+    TraitMethod tm;
   };
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Public API.
-
-  /*
-   * Get a reference to the list of trait method names.
-   */
-  const std::vector<String>& methodNames() { return m_orderedNames; }
 
   /*
    * Add a trait method to the import data set.
@@ -137,22 +109,6 @@ struct TraitMethodImportData {
    * were included in the importing class.
    */
   void add(const TraitMethod& tm, const String& name);
-  void add(const TraitMethod& tm,
-           const String& aliasedName,
-           const String& origName);
-
-  /*
-   * Erase all records of a trait method called `name'.
-   */
-  void erase(const String& name);
-
-  /*
-   * Set rule modifiers on the trait declared on `trait' called `name' if it
-   * exists.
-   */
-  void setModifiers(const String& name,
-                    typename TraitMethod::class_type trait,
-                    Attr mods);
 
   /*
    * Declare that all imports have been added---and that all rules have been
@@ -161,15 +117,15 @@ struct TraitMethodImportData {
    *
    * Continued use of `this' after calling finish() is undefined.
    */
-  auto finish(typename TraitMethod::class_type ctx,
-              const bool enableMethodTraitDiamond);
+  std::vector<MethodData> finish(typename TraitMethod::class_type ctx,
+                                 bool enableMethodTraitDiamond);
 
   /////////////////////////////////////////////////////////////////////////////
   // Internals.
 
 private:
   void removeSpareTraitAbstractMethods();
-  void removeDiamondDuplicates(const bool enableMethodTraitDiamond);
+  void removeDiamondDuplicates(bool enableMethodTraitDiamond);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

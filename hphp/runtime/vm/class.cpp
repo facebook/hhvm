@@ -4583,18 +4583,11 @@ struct TMIOps {
     return traitCls->name();
   }
 
-  static const StringData* methName(const Func* method) {
-    return method->name();
-  }
-
   static origin_type originalClass(const Func* method) {
     return method->preClass();
   }
 
   // Is-a methods.
-  static bool isTrait(const Class* traitCls) {
-    return traitCls->attrs() & AttrTrait;
-  }
 
   static bool isAbstract(Attr modifiers) {
     return modifiers & AttrAbstract;
@@ -4605,64 +4598,7 @@ struct TMIOps {
     return Func::isSpecial(methName);
   }
 
-  // TraitMethod constructor.
-  static TraitMethod traitMethod(const Class* traitCls,
-                                 const Func* traitMeth,
-                                 const PreClass::TraitAliasRule& rule) {
-    return TraitMethod { traitCls, traitMeth, rule.modifiers() };
-  }
-
-  // Register a trait alias once the trait class is found.
-  static void addTraitAlias(const Class* cls,
-                            const PreClass::TraitAliasRule& rule,
-                            const Class* traitCls) {
-    PreClass::TraitAliasRule newRule { traitCls->name(),
-        rule.origMethodName(),
-        rule.newMethodName(),
-        rule.modifiers() };
-    cls->addTraitAlias(newRule);
-  }
-
-  // Trait class/method finders.
-  static const Class* findSingleTraitWithMethod(const Class* cls,
-                                                const StringData* methName)  {
-    Class* traitCls = nullptr;
-
-    for (auto const& t : cls->usedTraitClasses()) {
-      // Note: m_methods includes methods from parents/traits recursively.
-      if (t->lookupMethod(methName)) {
-        if (traitCls != nullptr) {
-          raise_error("more than one trait contains method '%s'",
-                      methName->data());
-        }
-        traitCls = t.get();
-      }
-    }
-    return traitCls;
-  }
-
-  static const Class* findTraitClass(const Class* cls,
-                                     const StringData* traitName) {
-    auto ret = Class::load(traitName);
-    if (!ret) return nullptr;
-    auto const& usedTraits = cls->preClass()->usedTraits();
-    if (std::find_if(usedTraits.begin(), usedTraits.end(),
-                     [&] (auto const name) {
-                       return traitName->isame(name);
-                     }) == usedTraits.end()) {
-      return nullptr;
-    }
-    return ret;
-  }
-
   // Errors.
-  static void errorUnknownMethod(const StringData* methName) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
-  }
-
-  static void errorUnknownTrait(const StringData* traitName) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
-  }
   static void errorDuplicateMethod(const Class* cls,
                                    const StringData* methName,
                                    const std::vector<const StringData*>& methodDefinitions) {
@@ -4677,16 +4613,6 @@ struct TMIOps {
     folly::join(", ", traitNames, traits);
 
     raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data(), traits.c_str());
-  }
-  static void errorInconsistentInsteadOf(const Class* cls,
-                                         const StringData* methName) {
-    raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
-                cls->name()->data(), cls->name()->data());
-  }
-  static void errorMultiplyExcluded(const StringData* traitName,
-                                    const StringData* methName) {
-    raise_error(Strings::MULTIPLY_EXCLUDED,
-                traitName->data(), methName->data());
   }
 };
 

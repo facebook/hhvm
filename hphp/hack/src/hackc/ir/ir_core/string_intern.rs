@@ -5,9 +5,8 @@
 
 use bstr::BStr;
 use ffi::Str;
-use hash::HashMap;
+use hash::IndexSet;
 use newtype::newtype_int;
-use newtype::IdVec;
 
 // Improvement list:
 //
@@ -16,6 +15,7 @@ use newtype::IdVec;
 // values in the table. It's not as safe as using lifetimes to track it but it's
 // a lot cleaner code.
 
+#[derive(Eq, Hash, PartialEq)]
 pub enum InternValue<'a> {
     Str(Str<'a>),
 }
@@ -45,21 +45,16 @@ newtype_int!(UnitStringId, u32, UnitStringIdMap, UnitStringIdSet);
 
 #[derive(Default)]
 pub struct StringInterner<'a> {
-    lookup: HashMap<Str<'a>, UnitStringId>,
-    table: IdVec<UnitStringId, InternValue<'a>>,
+    values: IndexSet<InternValue<'a>>,
 }
 
 impl<'a> StringInterner<'a> {
     pub fn intern_str(&mut self, s: Str<'a>) -> UnitStringId {
-        *self.lookup.entry(s).or_insert_with(|| {
-            let idx = self.table.len();
-            let v = InternValue::Str(s);
-            self.table.push(v);
-            UnitStringId::from_usize(idx)
-        })
+        let (index, _) = self.values.insert_full(InternValue::Str(s));
+        UnitStringId::from_usize(index)
     }
 
     pub fn lookup(&self, id: UnitStringId) -> &InternValue<'a> {
-        &self.table[id]
+        &self.values[id.as_usize()]
     }
 }

@@ -28,15 +28,6 @@ let apply_patches_to_file fn patch_list =
 let list_to_file_map =
   List.fold_left ~f:ServerRefactorTypes.map_patches_to_filename ~init:SMap.empty
 
-let apply_patches_to_file_contents file_contents patches =
-  let file_map = list_to_file_map patches in
-  let apply fn old_contents =
-    match SMap.find_opt fn file_map with
-    | Some patches -> apply_patches_to_string old_contents patches
-    | None -> old_contents
-  in
-  SMap.mapi apply file_contents
-
 let plural count one many =
   let obj =
     if count = 1 then

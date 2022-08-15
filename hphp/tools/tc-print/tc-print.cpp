@@ -606,15 +606,23 @@ dynamic getTransRec(const TransRec* tRec,
     always_assert(false);
   }();
 
-  const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
+  auto const offset = sk.prologue() || sk.funcEntry()
+    ? 0  // Unable to lookup entry offset, assume main entry.
+    : sk.offset();
+
+  dynamic src = dynamic::object("sha1", tRec->sha1.toString())
                                      ("funcId", sk.funcID().toInt())
                                      ("funcName", tRec->funcName)
                                      ("resumeMode", resumeMode)
                                      ("hasThis", sk.hasThis())
                                      ("prologue", sk.prologue())
                                      ("funcEntry", sk.funcEntry())
-                                     ("bcStartOffset", sk.printableOffset())
+                                     ("bcStartOffset", offset)
                                      ("guards", guards);
+
+  if (sk.prologue() || sk.funcEntry()) {
+    src["numEntryArgs"] = sk.numEntryArgs();
+  }
 
   const dynamic result = dynamic::object("id", tRec->id)
                                         ("src", src)
@@ -678,8 +686,15 @@ dynamic getTrans(TransID transId) {
       );
     }
 
+    auto const offset = [&]() {
+      if (!sk.prologue() && !sk.funcEntry()) return sk.offset();
+      if (sk.valid()) return sk.entryOffset();
+      // Unable to lookup entry offset, assume main entry.
+      return 0;
+    }();
+
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
-                                    ("start", sk.printableOffset())
+                                    ("start", offset)
                                     ("end", block.bcPast)
                                     ("unit", sk.valid() ?
                                              byteInfo.str() :
@@ -770,8 +785,12 @@ void printTrans(TransID transId) {
       auto sk = block.sk;
       if (!sk.valid()) {
         byteInfo << folly::format(
-          "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
-          block.sha1, block.sk.printableOffset(), block.bcPast);
+          "<<< couldn't find func in {} to print bytecode range [{}{},{}) >>>\n",
+          block.sha1,
+          block.sk.prologue() || block.sk.funcEntry() ? "numEntryArgs " : "",
+          block.sk.prologue() || block.sk.funcEntry()
+            ? block.sk.numEntryArgs() : block.sk.offset(),
+          block.bcPast);
         continue;
       }
 
@@ -883,7 +902,9 @@ void printCFG() {
       continue;
     }
 
-    auto const bcStart = TREC(tid)->src.printableOffset();
+    auto const bcStart = sk.prologue() || sk.funcEntry()
+      ? folly::sformat("numEntryArgs {}", TREC(tid)->src.numEntryArgs())
+      : TREC(tid)->src.printableOffset();
     uint32_t bcStop = TREC(tid)->bcPast();
     auto const shape = [&] {
       switch (TREC(tid)->kind) {

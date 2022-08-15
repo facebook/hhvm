@@ -731,8 +731,8 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
   alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
-    auto const bcOff = v.makeReg();
-    v << copy{rarg(0), bcOff};
+    auto const numArgs = v.makeReg();
+    v << copy{rarg(0), numArgs};
 
     if (pushFrame) pushFrameFromFuncEntryRegs(v);
     storeVmfp(v);
@@ -740,7 +740,7 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
     auto const ret = v.makeReg();
     v << vcall{
       CallSpec::direct(handler),
-      v.makeVcallArgs({{bcOff}}),
+      v.makeVcallArgs({{numArgs}}),
       v.makeTuple({ret}),
       Fixup::none(),
       DestType::SSA

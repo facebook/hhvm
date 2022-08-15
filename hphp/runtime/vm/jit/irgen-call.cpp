@@ -592,8 +592,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const hasRdsCache =
       hasConstParamMemoCache(env, callee, objOrClass);
 
-    auto const entryOffset = callee->getEntryForNumArgs(numArgsInclUnpack);
-    auto const entry = SrcKey { callee, entryOffset, SrcKey::FuncEntryTag {} };
+    auto const numArgs =
+      std::min(numArgsInclUnpack, callee->numNonVariadicParams());
+    auto const entry = SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} };
 
     if (isFCall(curSrcKey(env).op()) && !hasRdsCache) {
       if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset)) {

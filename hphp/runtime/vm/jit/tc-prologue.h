@@ -25,13 +25,13 @@ struct PrologueTranslator final : Translator {
   // it holds it as a const Func* and won't work for the mutations
   // required for publishing.
   Func* func;
-  int nPassed;
-  PrologueTranslator(Func* func, int nPassed,
+  uint32_t nPassed;
+  PrologueTranslator(Func* func, uint32_t nPassed,
                      TransKind kind = TransKind::Invalid)
     : Translator(
         SrcKey{
           func,
-          func->getEntryForNumArgs(paramIndexHelper(func, nPassed)),
+          paramIndexHelper(func, nPassed),
           SrcKey::PrologueTag{}
         },
         kind
@@ -39,12 +39,12 @@ struct PrologueTranslator final : Translator {
     , func(func)
     , nPassed(nPassed)
   {}
-  int paramIndex() const;
+  uint32_t paramIndex() const;
   Optional<TranslationResult> getCached() override;
   void resetCached() override;
   void setCachedForProcessFail() override;
   void smashBackup() override;
-  static int paramIndexHelper(const Func*, int);
+  static uint32_t paramIndexHelper(const Func*, uint32_t);
 private:
   void computeKind() override;
   void gen() override;

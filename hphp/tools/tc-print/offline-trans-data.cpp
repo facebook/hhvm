@@ -328,8 +328,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.resumeMode = {}\n"
     "  src.prologue = {}\n"
     "  src.funcEntry = {}\n"
-    "  src.bcStartOffset = {}\n"
-    "  src.guards = {}\n",
+    "  src.bcStartOffset = {}\n",
     tRec->id,
     tRec->sha1,
     tRec->src.funcID(),
@@ -337,8 +336,17 @@ void OfflineTransData::printTransRec(TransID transId,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
     tRec->src.funcEntry(),
-    tRec->src.printableOffset(),
-    tRec->guards.size());
+    // Unable to lookup entry offset, assume main entry.
+    tRec->src.prologue() || tRec->src.funcEntry()
+      ? 0 : tRec->src.offset());
+
+  if (tRec->src.prologue() || tRec->src.funcEntry()) {
+    std::cout << folly::format(
+      "  src.numEntryArgs = {}\n", tRec->src.numEntryArgs());
+  }
+
+  std::cout << folly::format(
+    "  src.guards = {}\n", tRec->guards.size());
 
   for (auto& guard : tRec->guards) {
     std::cout << "    " << guard << '\n';

@@ -54,14 +54,14 @@ namespace {
 
 uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto const t = static_cast<uint8_t>(type);
-  auto const bcOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
+  auto const bcOffOrNumArgs = sk.funcEntry() ? sk.numEntryArgs() : sk.offset();
   assertx(t < (1 << 2));
-  assertx(0 <= bcOff && bcOff < (1LL << 30));
+  assertx(0 <= bcOffOrNumArgs && bcOffOrNumArgs < (1LL << 30));
   assertx(0 <= spOff.offset && spOff.offset < (1LL << 31));
   return
     (static_cast<uint64_t>(t) << 62) +
     (static_cast<uint64_t>(sk.funcEntry()) << 61) +
-    (static_cast<uint64_t>(bcOff) << 31) +
+    (static_cast<uint64_t>(bcOffOrNumArgs) << 31) +
     (static_cast<uint64_t>(spOff.offset));
 }
 
@@ -123,7 +123,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto const emitFuncEntry = [&] (Vout& v) {
     assertx(sk.funcEntry());
     assertx(spOff == SBInvOffset{0});
-    v << copy{v.cns(sk.entryOffset()), rarg(0)};
+    v << copy{v.cns(sk.numEntryArgs()), rarg(0)};
     v << jmpi{typeToFuncEntryHandler(type), leave_trace_regs() | arg_regs(1)};
   };
 

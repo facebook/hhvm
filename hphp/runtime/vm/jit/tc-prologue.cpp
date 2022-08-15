@@ -71,12 +71,12 @@ void PrologueTranslator::computeKind() {
   }
 }
 
-int PrologueTranslator::paramIndex() const {
+uint32_t PrologueTranslator::paramIndex() const {
   return paramIndexHelper(func, nPassed);
 }
 
-int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
-  int const numParams = f->numNonVariadicParams();
+uint32_t PrologueTranslator::paramIndexHelper(const Func* f, uint32_t passed) {
+  auto const numParams = f->numNonVariadicParams();
   return passed <= numParams ? passed : numParams + 1;
 }
 
@@ -104,7 +104,7 @@ void PrologueTranslator::resetCached() {
 }
 
 void PrologueTranslator::setCachedForProcessFail() {
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed,
         tc::ustubs().fcallHelperNoTranslateThunk);
   func->setPrologue(paramIndex(), tc::ustubs().fcallHelperNoTranslateThunk);
@@ -197,7 +197,7 @@ void PrologueTranslator::publishCodeImpl() {
 
   const auto start = entry();
   assertx(start);
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed, start);
   func->setPrologue(paramIndex(), start);
 

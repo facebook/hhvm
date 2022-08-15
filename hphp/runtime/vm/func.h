@@ -428,14 +428,6 @@ public:
   bool isDVEntry(Offset offset) const;
 
   /*
-   * Number of params required when entering at the given offset.
-   *
-   * Return -1 if an invalid offset is provided.
-   */
-  int getEntryNumParams(Offset offset) const;
-  int getDVEntryNumParams(Offset offset) const;
-
-  /*
    * Get the correct entrypoint (whether the main entry or a DV funclet) when
    * `numArgsPassed' arguments are passed to the function.
    *

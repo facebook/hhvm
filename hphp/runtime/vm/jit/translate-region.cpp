@@ -957,7 +957,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
          "and stack:\n{}\n",
          curFunc(irgs)->fullName()->data(),
          entry.func()->fullName()->data(),
-         entry.func()->getEntryNumParams(entry.entryOffset()),
+         entry.numEntryArgs(),
          show(irgs));
 
   auto const returnBlock = irgen::defBlock(irgs);

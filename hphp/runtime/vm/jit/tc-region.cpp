@@ -200,8 +200,9 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      if (translator->sk == SrcKey{func, 0, SrcKey::FuncEntryTag{}} &&
-          func->numRequiredParams() == func->numNonVariadicParams()) {
+      auto const numParams = func->numNonVariadicParams();
+      if (translator->sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}} &&
+          func->numRequiredParams() == numParams) {
         func->setFuncEntry(tca);
       }
     } else {

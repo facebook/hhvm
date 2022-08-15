@@ -119,30 +119,28 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   }
 
   // If this prologue has a DV funclet, then regenerate it in Optimize mode.
-  if (nArgs < func->numNonVariadicParams()) {
-    auto paramInfo = func->params()[nArgs];
-    if (paramInfo.hasDefaultValue()) {
-      SrcKey funcletSK(func, paramInfo.funcletOff, SrcKey::FuncEntryTag {});
-      if (!profData()->optimized(funcletSK)) {
-        auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
-        if (funcletTransId != kInvalidTransID) {
-          auto translator = std::make_unique<tc::RegionTranslator>(
-            funcletSK, TransKind::Optimize
-          );
-          auto const region = selectHotRegion(funcletTransId);
-          translator->region = region;
-          auto const spOff = region->entry()->initialSpOffset();
-          translator->spOff = spOff;
-          tc::createSrcRec(funcletSK, spOff);
+  if (nArgs < func->numNonVariadicParams() &&
+      func->params()[nArgs].hasDefaultValue()) {
+    SrcKey funcletSK(func, nArgs, SrcKey::FuncEntryTag {});
+    if (!profData()->optimized(funcletSK)) {
+      auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
+      if (funcletTransId != kInvalidTransID) {
+        auto translator = std::make_unique<tc::RegionTranslator>(
+          funcletSK, TransKind::Optimize
+        );
+        auto const region = selectHotRegion(funcletTransId);
+        translator->region = region;
+        auto const spOff = region->entry()->initialSpOffset();
+        translator->spOff = spOff;
+        tc::createSrcRec(funcletSK, spOff);
 
-          translator->translate(info.tcBuf.view());
-          if (translator->translateSuccess()) {
-            // Flag that this translation has been retranslated, so that
-            // it's not retranslated again along with the function body.
-            profData()->setOptimized(funcletSK);
-            info.add(std::move(translator));
-            return true;
-          }
+        translator->translate(info.tcBuf.view());
+        if (translator->translateSuccess()) {
+          // Flag that this translation has been retranslated, so that
+          // it's not retranslated again along with the function body.
+          profData()->setOptimized(funcletSK);
+          info.add(std::move(translator));
+          return true;
         }
       }
     }

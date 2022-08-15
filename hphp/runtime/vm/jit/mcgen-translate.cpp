@@ -244,18 +244,18 @@ void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
 
 void createSrcRecs(const Func* func) {
   auto const profData = globalProfData();
+  auto const numParams = func->numNonVariadicParams();
 
-  auto create_one = [&] (Offset off) {
-    auto const sk = SrcKey { func, off, SrcKey::FuncEntryTag {} };
-    if (off == 0 ||
+  auto create_one = [&] (uint32_t numArgs) {
+    auto const sk = SrcKey { func, numArgs, SrcKey::FuncEntryTag {} };
+    if (numArgs == numParams ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, SBInvOffset{0});
     }
   };
 
-  create_one(0);
-  for (auto const& pi : func->params()) {
-    if (pi.hasDefaultValue()) create_one(pi.funcletOff);
+  for (auto i = func->numRequiredParams(); i <= numParams; ++i) {
+    create_one(i);
   }
 }
 

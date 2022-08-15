@@ -451,12 +451,12 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
   gen(env, ExitPrologue);
 
   // Emit the bindjmp for the function body.
-  auto const entryOffset = callee->getEntryForNumArgs(argc);
+  auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   gen(
     env,
     ReqBindJmp,
     ReqBindJmpData {
-      SrcKey { callee, entryOffset, SrcKey::FuncEntryTag {} },
+      SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} },
       SBInvOffset { 0 },
       spOffBCFromIRSP(env)
     },
@@ -629,7 +629,7 @@ void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
 void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
   auto const callee = curFunc(env);
-  auto const argc = callee->getEntryNumParams(curSrcKey(env).entryOffset());
+  auto const argc = curSrcKey(env).numEntryArgs();
 
   emitInitClosureLocals(env, callee);
   emitInitRegularLocals(env, callee);

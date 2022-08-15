@@ -429,20 +429,6 @@ bool Func::isDVEntry(Offset offset) const {
   return false;
 }
 
-int Func::getEntryNumParams(Offset offset) const {
-  if (offset == 0) return numNonVariadicParams();
-  return getDVEntryNumParams(offset);
-}
-
-int Func::getDVEntryNumParams(Offset offset) const {
-  auto const nparams = numNonVariadicParams();
-  for (int i = 0; i < nparams; i++) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
-  }
-  return -1;
-}
-
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
   assertx(numArgsPassed >= 0);
   auto const nparams = numNonVariadicParams();

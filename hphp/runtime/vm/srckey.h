@@ -75,8 +75,8 @@ struct SrcKey {
   SrcKey(const Func* f, PC pc, ResumeMode resumeMode);
   SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
-  SrcKey(const Func* f, Offset off, PrologueTag);
-  SrcKey(const Func* f, Offset off, FuncEntryTag);
+  SrcKey(const Func* f, uint32_t numArgs, PrologueTag);
+  SrcKey(const Func* f, uint32_t numArgs, FuncEntryTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -114,6 +114,10 @@ struct SrcKey {
   // Offset of the bytecode that will be used to enter the function.
   // Valid only when prologue() || funcEntry().
   Offset entryOffset() const;
+
+  // Number of arguments passed to the prologue or func entry.
+  // Valid only when prologue() || funcEntry().
+  uint32_t numEntryArgs() const;
 
   ResumeMode resumeMode() const;
   bool prologue() const;
@@ -196,7 +200,7 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : kNumOffsetBits;
+      uint32_t m_offsetOrNumArgs : kNumOffsetBits;
       uint32_t m_resumeModeAndTags : kNumModeBits;
     } m_s;
   };

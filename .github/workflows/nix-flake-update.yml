@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "42 15 * * *"
+    - cron: "0 3 * * *"
 jobs:
   nix-flake-update:
     runs-on: ubuntu-latest

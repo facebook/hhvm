@@ -5,6 +5,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod memo_provider;
 
+use std::io::BufReader;
+use std::io::BufWriter;
+use std::io::Write;
+
+use arena_deserializer::serde::Deserialize;
+use arena_deserializer::ArenaDeserializer;
 use bincode::Options;
 pub use memo_provider::MemoProvider;
 use oxidized_by_ref::direct_decl_parser::Decls;
@@ -90,11 +96,13 @@ pub trait DeclProvider: std::fmt::Debug {
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
 pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
-    use std::io::Write;
+    const ZSTD_LEVEL: i32 = 0;
     let mut blob = Vec::new();
+    let w = zstd::stream::write::Encoder::new(&mut blob, ZSTD_LEVEL)?.auto_finish();
+    let w = BufWriter::new(w);
     bincode::options()
         .with_native_endian()
-        .serialize_into(&mut blob, decls)?;
+        .serialize_into(w, decls)?;
     let mut digest = Sha1::new();
     digest.update(&blob);
     blob.write_all(&digest.finalize())?;
@@ -106,16 +114,17 @@ pub fn deserialize_decls<'a>(
     arena: &'a bumpalo::Bump,
     data: &[u8],
 ) -> Result<Decls<'a>, bincode::Error> {
-    use arena_deserializer::serde::Deserialize;
     let (data, hash) = split_serialized_decls(data);
     debug_assert!({
         let mut digest = Sha1::new();
         digest.update(data);
         digest.finalize().to_vec() == hash
     });
+    let r = zstd::stream::read::Decoder::new(data)?;
+    let r = BufReader::new(r);
     let op = bincode::options().with_native_endian();
-    let mut de = bincode::de::Deserializer::from_slice(data, op);
-    let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+    let mut de = bincode::de::Deserializer::with_reader(r, op);
+    let de = ArenaDeserializer::new(arena, &mut de);
     Decls::deserialize(de)
 }
 

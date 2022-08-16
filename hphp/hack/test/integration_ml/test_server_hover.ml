@@ -839,7 +839,7 @@ let class_id_positions_cases =
     ( ("class_id_positions.php", 3, 26),
       [
         {
-          snippet = "int CIPos2::MyConstInt";
+          snippet = "// Defined in CIPos2\nconst int MyConstInt";
           addendum = [];
           pos = pos_at (3, 26) (3, 35);
         };

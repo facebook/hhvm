@@ -1076,7 +1076,12 @@ module Full = struct
             [Doc.text "attribute"; Space; ty_doc; Space; text_strip_ns name]
         in
         (fuel, doc)
-      | ({ type_ = ClassConst _; name; _ }, _)
+      | ({ type_ = ClassConst (_, name); _ }, _) ->
+        let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+        let doc =
+          Concat [Doc.text "const"; Space; ty_doc; Space; text_strip_ns name]
+        in
+        (fuel, doc)
       | ({ type_ = GConst; name; _ }, _)
       | ({ type_ = EnumClassLabel _; name; _ }, _) ->
         let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in

@@ -1,6 +1,7 @@
 <?hh
 
 class Foo {
+  /** A doc comment. */
   const BAR = 1;
 }
 

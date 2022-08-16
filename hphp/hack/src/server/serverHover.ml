@@ -356,6 +356,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
           let param_name = nth_param ctx recv i in
           Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
         | ({ type_ = Method _; _ }, Some (env, ty))
+        | ({ type_ = ClassConst _; _ }, Some (env, ty))
         | ({ type_ = Property _; _ }, Some (env, ty)) ->
           defined_in
           ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt

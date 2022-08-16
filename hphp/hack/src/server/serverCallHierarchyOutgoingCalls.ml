@@ -32,17 +32,18 @@ let group_occs_by_def
     (Relative_path.t SymbolDefinition.t
     * Relative_path.t SymbolOccurrence.t list)
     list =
-  let table = ref (List.length sym_occs / 2 |> Hashtbl.create) in
+  let table = ref (3 * List.length sym_occs / 4 |> Hashtbl.create) in
+  let (key_list : Relative_path.t SymbolDefinition.t list ref) = ref [] in
   let add_sym_occ_to_table (sym_occ : Relative_path.t SymbolOccurrence.t) : unit
       =
     match get_def sym_occ with
     | None -> ()
-    | Some def -> Hashtbl.add !table def sym_occ
+    | Some def ->
+      if not (Hashtbl.mem !table def) then key_list := def :: !key_list;
+      Hashtbl.add !table def sym_occ
   in
   List.iter add_sym_occ_to_table sym_occs;
-  let keys = Hashtbl.to_seq_keys !table in
-  let update_assoc_list acc key = (key, Hashtbl.find_all !table key) :: acc in
-  Seq.fold_left update_assoc_list [] keys
+  List.map (fun key -> (key, Hashtbl.find_all !table key)) !key_list
 
 let go (item : Lsp.CallHierarchyItem.t) ~(ctx : Provider_context.t) =
   let file = Lsp_helpers.lsp_uri_to_path item.Lsp.CallHierarchyItem.uri in

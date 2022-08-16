@@ -8,14 +8,15 @@
 
 let group_refs_by_file (ref_result : ServerCommandTypes.Find_refs.result) :
     (string * ServerCommandTypes.Find_refs.result) list =
-  let table = ref (List.length ref_result / 2 |> Hashtbl.create) in
+  let table = ref (3 * List.length ref_result / 4 |> Hashtbl.create) in
+  let key_list : string list ref = ref [] in
   let add_ref_to_tbl ((name, pos) : string * Pos.absolute) : unit =
-    Hashtbl.add !table (Pos.filename pos) (name, pos)
+    let file_ = Pos.filename pos in
+    if not (Hashtbl.mem !table file_) then key_list := file_ :: !key_list;
+    Hashtbl.add !table file_ (name, pos)
   in
   List.iter add_ref_to_tbl ref_result;
-  let keys = Hashtbl.to_seq_keys !table in
-  let update_assoc_list acc key = (key, Hashtbl.find_all !table key) :: acc in
-  Seq.fold_left update_assoc_list [] keys
+  List.map (fun key -> (key, Hashtbl.find_all !table key)) !key_list
 
 let occ_defs_of_file (ctx : Provider_context.t) (file : string) :
     (Relative_path.t SymbolOccurrence.t

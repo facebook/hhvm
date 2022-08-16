@@ -1500,6 +1500,15 @@ and extend_tparams genv paraml =
   { genv with type_params = params }
 
 and fun_def ctx fd =
+  let fd =
+    if
+      Provider_context.get_tcopt ctx |> TypecheckerOptions.substitution_mutation
+      && FileInfo.equal_mode fd.Aast.fd_mode FileInfo.Mstrict
+    then
+      Substitution_mutation.mutate_fun_def fd
+    else
+      fd
+  in
   let genv = Env.make_fun_decl_genv ctx fd in
   let fd =
     elaborate_namespaces#on_fun_def

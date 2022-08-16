@@ -1,0 +1,24 @@
+(rule
+ (alias substitution_mutation)
+ (deps
+  %{exe:../../src/hh_single_type_check.exe}
+  %{project_root}/test/verify.py
+  %{project_root}/test/review.sh
+  (glob_files %{project_root}/test/substitution_mutation/*.php)
+  (glob_files %{project_root}/test/substitution_mutation/*.php.exp))
+ (action
+  (run
+   %{project_root}/test/verify.py
+   %{project_root}/test/substitution_mutation
+   --program
+   %{exe:../../src/hh_single_type_check.exe}
+   --in-extension
+   .php
+   --flags
+   --substitution-mutation
+   --tast)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias substitution_mutation)))

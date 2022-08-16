@@ -1,0 +1,24 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-50]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:30-33], (Hprim Tint)))); 
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:15-16], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:17-21]; param_name = "$one"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = (int); param_type_hint = ((int), (Some ([3:23-24], (Hprim Tint)))); 
+            param_is_variadic = false; param_pos = [3:25-27]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:36-48], (Return (Some ((int), [3:43-47], (Lvar ([3:43-47], $one))))))] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None })

@@ -7,6 +7,7 @@
   substitution_mutation)
  (libraries
   core_kernel
-  annotated_ast)
+  annotated_ast
+  naming_special_names)
  (preprocess
   (pps visitors.ppx ppx_deriving.std)))

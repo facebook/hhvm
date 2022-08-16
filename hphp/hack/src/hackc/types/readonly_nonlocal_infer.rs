@@ -21,7 +21,7 @@ macro_rules! box_tup {
 }
 
 impl<'arena, 'decl> Infer<'arena, 'decl> {
-    fn infer_expr(&self, expr: &ast::Expr) -> ast::Expr {
+    fn infer_expr(&self, expr: &ast::Expr, in_readonly: bool) -> ast::Expr {
         let aast::Expr(ex, pos, exp) = expr;
         use aast::Expr_::*;
 
@@ -30,32 +30,34 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 let kvs = kvs
                     .iter()
                     .map(|(k, v)| {
-                        let k = self.infer_expr(k);
-                        let v = self.infer_expr(v);
+                        let k = self.infer_expr(k, false);
+                        let v = self.infer_expr(v, false);
                         (k, v)
                     })
                     .collect();
                 Darray(box_tup!(ty_args_opt.clone(), kvs))
             }
             Varray(box (ty_args_opt, es)) => {
-                let es = self.infer_exprs(es);
+                let es = self.infer_exprs(es, false);
                 Varray(box_tup!(ty_args_opt.clone(), es))
             }
             Shape(fields) => {
                 let fields = fields
                     .iter()
-                    .map(|(name, e)| (name.clone(), self.infer_expr(e)))
+                    .map(|(name, e)| (name.clone(), self.infer_expr(e, false)))
                     .collect();
                 Shape(fields)
             }
             ValCollection(box (vc_kind, ty_var_opt, es)) => {
-                let es = self.infer_exprs(es);
+                let es = self.infer_exprs(es, false);
                 ValCollection(box_tup!(vc_kind.clone(), ty_var_opt.clone(), es))
             }
             KeyValCollection(box (kvc_kind, ty_var_opt, fields)) => {
                 let fields = fields
                     .iter()
-                    .map(|ast::Field(e1, e2)| ast::Field(self.infer_expr(e1), self.infer_expr(e2)))
+                    .map(|ast::Field(e1, e2)| {
+                        ast::Field(self.infer_expr(e1, false), self.infer_expr(e2, false))
+                    })
                     .collect();
                 KeyValCollection(box_tup!(kvc_kind.clone(), ty_var_opt.clone(), fields))
             }
@@ -67,15 +69,17 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             Id(_b) => exp.clone(),
             Lvar(_b) => exp.clone(),
             Dollardollar(_b) => exp.clone(),
-            Clone(box e) => Clone(Box::new(self.infer_expr(e))),
+            Clone(box e) => Clone(Box::new(self.infer_expr(e, false))),
             ArrayGet(box (arr, index_opt)) => {
-                let arr = self.infer_expr(arr);
-                let index_opt = index_opt.as_ref().map(|index| self.infer_expr(index));
+                let arr = self.infer_expr(arr, false);
+                let index_opt = index_opt
+                    .as_ref()
+                    .map(|index| self.infer_expr(index, false));
                 ArrayGet(box_tup!(arr, index_opt))
             }
             ObjGet(box (e1, e2, og_null_flavor, prop_or_meth)) => {
-                let e1 = self.infer_expr(e1);
-                let e2 = self.infer_expr(e2);
+                let e1 = self.infer_expr(e1, false);
+                let e2 = self.infer_expr(e2, false);
                 ObjGet(box_tup!(
                     e1,
                     e2,
@@ -87,41 +91,46 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 use aast::ClassGetExpr;
                 let get_expr = match get_expr {
                     ClassGetExpr::CGstring(_) => get_expr.clone(),
-                    ClassGetExpr::CGexpr(e) => ClassGetExpr::CGexpr(self.infer_expr(e)),
+                    ClassGetExpr::CGexpr(e) => ClassGetExpr::CGexpr(self.infer_expr(e, false)),
                 };
                 ClassGet(box_tup!(class_id.clone(), get_expr, prop_or_meth.clone()))
             }
             ClassConst(_b) => exp.clone(),
             Call(box (e1, ty_args, params, expr2_opt)) => {
-                let e1 = self.infer_expr(e1);
-                let should_wrap = match e1 {
-                    aast::Expr(pos, _, Id(box ref id)) => {
-                        let name = id.name();
-                        match self.decl_provider.func_decl(name) {
-                            Ok(func_decl) => {
-                                use oxidized::typing_defs_flags::FunTypeFlags;
-                                use oxidized_by_ref::typing_defs_core::Ty_::*;
-                                match func_decl.type_.1 {
-                                    Tfun(ft) => ft.flags.contains(FunTypeFlags::RETURNS_READONLY),
-                                    _ => false,
+                let e1 = self.infer_expr(e1, false);
+                let should_wrap = !in_readonly
+                    && match e1 {
+                        aast::Expr(pos, _, Id(box ref id)) => {
+                            let name = id.name();
+                            match self.decl_provider.func_decl(name) {
+                                Ok(func_decl) => {
+                                    use oxidized::typing_defs_flags::FunTypeFlags;
+                                    use oxidized_by_ref::typing_defs_core::Ty_::*;
+                                    match func_decl.type_.1 {
+                                        Tfun(ft) => {
+                                            ft.flags.contains(FunTypeFlags::RETURNS_READONLY)
+                                        }
+                                        _ => false,
+                                    }
+                                }
+                                Err(Error::NotFound) => false,
+                                Err(err @ Error::Bincode(_)) => {
+                                    panic!(
+                                        "Internal error when attempting to read the type of callable '{name}' at {:?}. {}",
+                                        pos, err
+                                    )
                                 }
                             }
-                            Err(Error::NotFound) => false,
-                            Err(err @ Error::Bincode(_)) => {
-                                panic!(
-                                    "Internal error when attempting to read the type of callable '{name}' at {:?}. {}",
-                                    pos, err
-                                )
-                            }
                         }
-                    }
-                    _ => false,
-                };
+                        _ => false,
+                    };
                 let params = params
                     .iter()
-                    .map(|(kind, e)| (kind.clone(), self.infer_expr(e)))
+                    .map(|(kind, e)| (kind.clone(), self.infer_expr(e, false)))
                     .collect();
-                let expr2_opt = expr2_opt.as_ref().map(|expr_2| self.infer_expr(expr_2));
+                let expr2_opt = expr2_opt
+                    .as_ref()
+                    .map(|expr_2| self.infer_expr(expr_2, false));
                 let call = Call(box_tup!(e1, ty_args.clone(), params, expr2_opt));
                 if should_wrap {
                     readonly_wrap_expr_(pos.clone(), call)
@@ -133,48 +142,48 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             Int(_s) => exp.clone(),
             Float(_s) => exp.clone(),
             String(_bstring) => exp.clone(),
-            String2(exprs) => String2(self.infer_exprs(exprs)),
+            String2(exprs) => String2(self.infer_exprs(exprs, false)),
             PrefixedString(box (str, e)) => {
-                PrefixedString(box_tup!(str.clone(), self.infer_expr(e)))
+                PrefixedString(box_tup!(str.clone(), self.infer_expr(e, false)))
             }
             Yield(box field) => {
                 let field = self.infer_a_field(field);
                 Yield(Box::new(field))
             }
-            Await(e) => Await(Box::new(self.infer_expr(e))),
-            ReadonlyExpr(box e) => ReadonlyExpr(Box::new(self.infer_expr(e))),
-            Tuple(exprs) => Tuple(self.infer_exprs(exprs)),
-            List(exprs) => List(self.infer_exprs(exprs)),
-            Cast(box (hint, e)) => Cast(box_tup!(hint.clone(), self.infer_expr(e))),
-            Unop(box (unop, e)) => Unop(box_tup!(unop.clone(), self.infer_expr(e))),
+            Await(e) => Await(Box::new(self.infer_expr(e, false))),
+            ReadonlyExpr(box e) => ReadonlyExpr(Box::new(self.infer_expr(e, true))),
+            Tuple(exprs) => Tuple(self.infer_exprs(exprs, false)),
+            List(exprs) => List(self.infer_exprs(exprs, false)),
+            Cast(box (hint, e)) => Cast(box_tup!(hint.clone(), self.infer_expr(e, false))),
+            Unop(box (unop, e)) => Unop(box_tup!(unop.clone(), self.infer_expr(e, false))),
             Binop(box (bo, lhs, rhs)) => Binop(box_tup!(
                 bo.clone(),
-                self.infer_expr(lhs),
-                self.infer_expr(rhs),
+                self.infer_expr(lhs, false),
+                self.infer_expr(rhs, false),
             )),
             Pipe(box (lid, lhs, rhs)) => {
-                let lhs = self.infer_expr(lhs);
-                let rhs = self.infer_expr(rhs);
+                let lhs = self.infer_expr(lhs, false);
+                let rhs = self.infer_expr(rhs, false);
                 Pipe(box_tup!(lid.clone(), lhs, rhs))
             }
             Eif(box (e1, e2_opt, e3)) => {
-                let e1 = self.infer_expr(e1);
-                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2));
-                let e3 = self.infer_expr(e3);
+                let e1 = self.infer_expr(e1, false);
+                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2, false));
+                let e3 = self.infer_expr(e3, false);
                 Eif(box_tup!(e1, e2_opt, e3))
             }
-            Is(box (e, hint)) => Is(box_tup!(self.infer_expr(e), hint.clone())),
+            Is(box (e, hint)) => Is(box_tup!(self.infer_expr(e, false), hint.clone())),
             As(box (e, hint, is_nullable)) => {
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 As(box_tup!(e, hint.clone(), *is_nullable))
             }
             Upcast(box (e, hint)) => {
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 Upcast(box_tup!(e, hint.clone()))
             }
             New(box (class_id, ty_args, es, e_opt, ex)) => {
-                let es = self.infer_exprs(es);
-                let e_opt = e_opt.as_ref().map(|e| self.infer_expr(e));
+                let es = self.infer_exprs(es, false);
+                let e_opt = e_opt.as_ref().map(|e| self.infer_expr(e, false));
                 New(box_tup!(
                     class_id.clone(),
                     ty_args.clone(),
@@ -192,7 +201,7 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 Lfun(box_tup!(fun, lid.clone()))
             }
             Xml(box (class_name, attrs, es)) => {
-                let es = self.infer_exprs(es);
+                let es = self.infer_exprs(es, false);
                 let attrs: Vec<_> = attrs
                     .iter()
                     .map(|attr| {
@@ -202,11 +211,11 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                                 XhpAttribute::XhpSimple(ast::XhpSimple {
                                     name: name.clone(),
                                     type_: type_.clone(),
-                                    expr: self.infer_expr(expr),
+                                    expr: self.infer_expr(expr, false),
                                 })
                             }
                             XhpAttribute::XhpSpread(e) => {
-                                XhpAttribute::XhpSpread(self.infer_expr(e))
+                                XhpAttribute::XhpSpread(self.infer_expr(e, false))
                             }
                         }
                     })
@@ -233,22 +242,24 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                     .iter()
                     .map(|fp| self.infer_stmt(fp))
                     .collect(),
-                virtualized_expr: self.infer_expr(&et.virtualized_expr),
-                runtime_expr: self.infer_expr(&et.runtime_expr),
+                virtualized_expr: self.infer_expr(&et.virtualized_expr, false),
+                runtime_expr: self.infer_expr(&et.runtime_expr, false),
                 dollardollar_pos: et.dollardollar_pos.clone(),
             })),
             Lplaceholder(_b) => exp.clone(),
             FunId(_b) => exp.clone(),
-            MethodId(box (e, p_str)) => MethodId(box_tup!(self.infer_expr(e), p_str.clone())),
+            MethodId(box (e, p_str)) => {
+                MethodId(box_tup!(self.infer_expr(e, false), p_str.clone()))
+            }
             MethodCaller(_b) => exp.clone(),
             SmethodId(_b) => exp.clone(),
             Pair(box (ty_args, e1, e2)) => {
-                let e1 = self.infer_expr(e1);
-                let e2 = self.infer_expr(e2);
+                let e1 = self.infer_expr(e1, false);
+                let e2 = self.infer_expr(e2, false);
                 Pair(box_tup!(ty_args.clone(), e1, e2))
             }
             ETSplice(box e) => {
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 ETSplice(Box::new(e))
             }
             EnumClassLabel(_b) => exp.clone(),
@@ -258,8 +269,11 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         aast::Expr(ex.clone(), pos.clone(), exp)
     }
 
-    fn infer_exprs(&self, exprs: &[ast::Expr]) -> Vec<ast::Expr> {
-        exprs.iter().map(|expr| self.infer_expr(expr)).collect()
+    fn infer_exprs(&self, exprs: &[ast::Expr], in_readonly: bool) -> Vec<ast::Expr> {
+        exprs
+            .iter()
+            .map(|expr| self.infer_expr(expr, in_readonly))
+            .collect()
     }
 
     fn infer_stmt(&self, stmt: &ast::Stmt) -> ast::Stmt {
@@ -269,19 +283,19 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         let new_stmt = match st {
             Fallthrough => Fallthrough,
             Expr(box expr) => {
-                let new_expr = self.infer_expr(expr);
+                let new_expr = self.infer_expr(expr, false);
                 Expr(Box::new(new_expr))
             }
             Break => Break,
             Continue => Continue,
             Throw(box expr) => {
-                let new_expr = self.infer_expr(expr);
+                let new_expr = self.infer_expr(expr, false);
                 Throw(Box::new(new_expr))
             }
             Return(box opt_expr) => match opt_expr {
                 None => Return(Box::new(None)),
                 Some(expr) => {
-                    let new_expr = self.infer_expr(expr);
+                    let new_expr = self.infer_expr(expr, false);
                     Return(Box::new(Some(new_expr)))
                 }
             },
@@ -289,22 +303,22 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             Awaitall(box (assigns, block)) => {
                 let assigns = assigns
                     .iter()
-                    .map(|(lid, e)| (lid.clone(), self.infer_expr(e)))
+                    .map(|(lid, e)| (lid.clone(), self.infer_expr(e, false)))
                     .collect();
                 let block = self.infer_stmts(block);
                 Awaitall(Box::new((assigns, block)))
             }
             If(box (expr, stmt1, stmt2)) => {
-                let new_expr = self.infer_expr(expr);
+                let new_expr = self.infer_expr(expr, false);
                 If(box_tup!(new_expr, stmt1.clone(), stmt2.clone()))
             }
             Do(box (stmts, e)) => {
                 let stmts = self.infer_stmts(stmts);
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 Do(box_tup!(stmts, e))
             }
             While(box (cond, block)) => {
-                let cond = self.infer_expr(cond);
+                let cond = self.infer_expr(cond, false);
                 let block = self.infer_stmts(block);
                 While(box_tup!(cond, block))
             }
@@ -315,7 +329,7 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 block,
             }) => {
                 let (pos, es) = exprs;
-                let es = self.infer_exprs(es);
+                let es = self.infer_exprs(es, false);
                 let block = self.infer_stmts(block);
                 Using(Box::new(ast::UsingStmt {
                     is_block_scoped: *is_block_scoped,
@@ -325,18 +339,18 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 }))
             }
             For(box (e1s, e2_opt, e3s, stmts)) => {
-                let e1s = self.infer_exprs(e1s);
-                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2));
-                let e3s = self.infer_exprs(e3s);
+                let e1s = self.infer_exprs(e1s, false);
+                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2, false));
+                let e3s = self.infer_exprs(e3s, false);
                 let stmts = self.infer_stmts(stmts);
                 For(box_tup!(e1s, e2_opt, e3s, stmts))
             }
             Switch(box (e, cases, default_opt)) => {
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 let cases = cases
                     .iter()
                     .map(|ast::Case(e, block)| {
-                        let e = self.infer_expr(e);
+                        let e = self.infer_expr(e, false);
                         let block = self.infer_stmts(block);
                         ast::Case(e, block)
                     })
@@ -348,7 +362,7 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 Switch(box_tup!(e, cases, default_opt))
             }
             Foreach(box (e, as_, stmts)) => {
-                let e = self.infer_expr(e);
+                let e = self.infer_expr(e, false);
                 let as_ = self.infer_as_expr(as_);
                 let stmts = self.infer_stmts(stmts);
 
@@ -379,9 +393,9 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
 
     fn infer_a_field(&self, a_field: &ast::Afield) -> ast::Afield {
         match a_field {
-            aast::Afield::AFvalue(v) => aast::Afield::AFvalue(self.infer_expr(v)),
+            aast::Afield::AFvalue(v) => aast::Afield::AFvalue(self.infer_expr(v, false)),
             aast::Afield::AFkvalue(k, v) => {
-                aast::Afield::AFkvalue(self.infer_expr(k), self.infer_expr(v))
+                aast::Afield::AFkvalue(self.infer_expr(k, false), self.infer_expr(v, false))
             }
         }
     }
@@ -389,16 +403,16 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
     fn infer_as_expr(&self, as_: &ast::AsExpr) -> ast::AsExpr {
         use ast::AsExpr;
         match as_ {
-            AsExpr::AsV(e) => AsExpr::AsV(self.infer_expr(e)),
+            AsExpr::AsV(e) => AsExpr::AsV(self.infer_expr(e, false)),
             AsExpr::AsKv(k, v) => {
-                let k = self.infer_expr(k);
-                let v = self.infer_expr(v);
+                let k = self.infer_expr(k, false);
+                let v = self.infer_expr(v, false);
                 AsExpr::AsKv(k, v)
             }
-            AsExpr::AwaitAsV(pos, v) => AsExpr::AwaitAsV(pos.clone(), self.infer_expr(v)),
+            AsExpr::AwaitAsV(pos, v) => AsExpr::AwaitAsV(pos.clone(), self.infer_expr(v, false)),
             AsExpr::AwaitAsKv(pos, k, v) => {
-                let k = self.infer_expr(k);
-                let v = self.infer_expr(v);
+                let k = self.infer_expr(k, false);
+                let v = self.infer_expr(v, false);
                 AsExpr::AwaitAsKv(pos.clone(), k, v)
             }
         }
@@ -427,8 +441,10 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             .map(|const_| {
                 use aast::ClassConstKind::*;
                 let kind = match &const_.kind {
-                    CCAbstract(e_opt) => CCAbstract(e_opt.as_ref().map(|e| self.infer_expr(e))),
-                    CCConcrete(e) => CCConcrete(self.infer_expr(e)),
+                    CCAbstract(e_opt) => {
+                        CCAbstract(e_opt.as_ref().map(|e| self.infer_expr(e, false)))
+                    }
+                    CCConcrete(e) => CCConcrete(self.infer_expr(e, false)),
                 };
                 ast::ClassConst {
                     kind,
@@ -453,7 +469,7 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             .vars
             .iter()
             .map(|var| {
-                let expr = var.expr.as_ref().map(|e| self.infer_expr(e));
+                let expr = var.expr.as_ref().map(|e| self.infer_expr(e, false));
                 ast::ClassVar {
                     expr,
                     ..var.clone()
@@ -474,7 +490,7 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
 
     fn type_gconst(&self, gc: &ast::Gconst) -> ast::Gconst {
         // future-proofing: currently has no effect, since const expressions are limited
-        let value = self.infer_expr(&gc.value);
+        let value = self.infer_expr(&gc.value, false);
         ast::Gconst {
             value,
             ..gc.clone()

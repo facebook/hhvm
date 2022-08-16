@@ -43,7 +43,7 @@ use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::ErrorType;
 use thiserror::Error;
 use types::readonly_check;
-use types::type_check;
+use types::readonly_nonlocal_infer;
 
 /// Common input needed for compilation.
 #[derive(Debug)]
@@ -540,7 +540,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
         match &emitter.decl_provider {
             None => (),
             Some(decl_provider) => {
-                let mut new_ast = type_check::type_program(ast, decl_provider);
+                let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);
                 let res = readonly_check::check_program(&mut new_ast, false);
                 // Ignores all errors after the first...
                 if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {

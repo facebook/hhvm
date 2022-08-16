@@ -12,4 +12,5 @@ decl_provider = { path = "../../../decl_provider" }
 hh_autoimport_rust = { path = "../../../../parser/cargo/hh_autoimport" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
+oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }

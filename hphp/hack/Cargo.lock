@@ -3539,6 +3539,7 @@ dependencies = [
  "hh_autoimport_rust",
  "naming_special_names_rust",
  "oxidized",
+ "oxidized_by_ref",
  "parser_core_types",
 ]
 

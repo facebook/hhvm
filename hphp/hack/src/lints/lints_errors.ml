@@ -422,8 +422,20 @@ let switch_nonexhaustive p =
     ^ " If none of the cases match, an exception will be thrown."
     ^ " Consider adding a default case.")
 
-let calling_pointless_boolean p txt =
-  Lints.add Codes.pointless_booleans_expression Lint_warning p txt
+let calling_pointless_boolean p_lint p_quickfix txt =
+  let path = Pos.filename (Pos.to_absolute p_lint) in
+  let lines = Errors.read_lines path in
+  let src = String.concat ~sep:"\n" lines in
+  let original = Pos.get_text_from_pos ~content:src p_quickfix in
+  let replacement = "" in
+  let (start_offset, end_offset) = Pos.info_raw p_quickfix in
+  let width = end_offset - start_offset in
+  Lints.add
+    ~autofix:(Some (original, replacement, start_offset, width))
+    Codes.pointless_booleans_expression
+    Lint_warning
+    p_lint
+    txt
 
 let comparing_booleans p_expr p_var name value =
   let msg =

@@ -1,0 +1,61 @@
+{
+  "errors":[
+    {
+      "descr":"The boolean expression is pointless",
+      "severity":"warning",
+      "path":"test_quickfix_lint_code_5644.php",
+      "line":4,
+      "start":7,
+      "end":20,
+      "code":5644,
+      "bypass_changed_lines":false,
+      "original":" && true",
+      "replacement":"",
+      "start_offset":48,
+      "width":8
+    },
+    {
+      "descr":"The boolean expression is always true",
+      "severity":"warning",
+      "path":"test_quickfix_lint_code_5644.php",
+      "line":10,
+      "start":7,
+      "end":20,
+      "code":5644,
+      "bypass_changed_lines":false,
+      "original":"true || ",
+      "replacement":"",
+      "start_offset":143,
+      "width":8
+    },
+    {
+      "descr":"The boolean expression is pointless",
+      "severity":"warning",
+      "path":"test_quickfix_lint_code_5644.php",
+      "line":16,
+      "start":7,
+      "end":20,
+      "code":5644,
+      "bypass_changed_lines":false,
+      "original":" && true",
+      "replacement":"",
+      "start_offset":250,
+      "width":8
+    },
+    {
+      "descr":"The boolean expression is pointless",
+      "severity":"warning",
+      "path":"test_quickfix_lint_code_5644.php",
+      "line":22,
+      "start":7,
+      "end":41,
+      "code":5644,
+      "bypass_changed_lines":false,
+      "original":" || false",
+      "replacement":"",
+      "start_offset":381,
+      "width":9
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

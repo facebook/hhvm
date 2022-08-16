@@ -33,6 +33,28 @@ let check_the_error logical_op boolean_literal =
     | _ -> None)
   | _ -> None
 
+let send_to_lint_error pos str line1 line2 bol1 bol2 col1 col2 =
+  let path_name = Pos.filename (Pos.to_absolute pos) in
+  let pos_quickfix =
+    Pos.make_from_lexing_pos
+      path_name
+      Lexing.
+        {
+          pos_fname = path_name;
+          pos_lnum = line1;
+          pos_bol = bol1;
+          pos_cnum = col1;
+        }
+      Lexing.
+        {
+          pos_fname = path_name;
+          pos_lnum = line2;
+          pos_bol = bol2;
+          pos_cnum = col2;
+        }
+  in
+  Lints_errors.calling_pointless_boolean pos pos_quickfix str
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -43,16 +65,52 @@ let handler =
         (match op with
         | Ast_defs.Ampamp
         | Ast_defs.Barbar ->
+          (* exp1 is the boolean literal (it is of the type true ||, false && etc)*)
+          (* The original string for quickfix starts from the
+             start of exp1 and ends at the start of exp2 *)
           (match checking_the_expression exp1 exp2 with
           | Some x ->
             (match check_the_error op x with
-            | Some str -> Lints_errors.calling_pointless_boolean pos str
+            | Some str ->
+              (match (exp1, exp2) with
+              | ((_, pos_exp1, _), (_, pos_exp2, _)) ->
+                let (line1, bol1, start_col1) = Pos.line_beg_offset pos_exp1 in
+                let (line2, bol2, start_col2) = Pos.line_beg_offset pos_exp2 in
+                send_to_lint_error
+                  pos
+                  str
+                  line1
+                  line2
+                  bol1
+                  bol2
+                  start_col1
+                  start_col2)
             | None -> ())
           | None ->
+            (* exp2 is the boolean literal (it is of the type && true, || false etc)*)
+            (* The original string for quickfix starts from the
+               end of exp1 and ends at the end of exp2 *)
             (match checking_the_expression exp2 exp1 with
             | Some x ->
               (match check_the_error op x with
-              | Some str -> Lints_errors.calling_pointless_boolean pos str
+              | Some str ->
+                (match (exp1, exp2) with
+                | ((_, pos_exp1, _), (_, pos_exp2, _)) ->
+                  let (line1, bol1, end_col1) =
+                    Pos.end_line_beg_offset pos_exp1
+                  in
+                  let (line2, bol2, end_col2) =
+                    Pos.end_line_beg_offset pos_exp2
+                  in
+                  send_to_lint_error
+                    pos
+                    str
+                    line1
+                    line2
+                    bol1
+                    bol2
+                    end_col1
+                    end_col2)
               | None -> ())
             | None -> ()))
         | _ -> ())

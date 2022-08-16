@@ -42,6 +42,8 @@ val end_line_column : 'a pos -> int * int
 (** Return line number, beginning of line character number and character number of start position. *)
 val line_beg_offset : t -> int * int * int
 
+val end_line_beg_offset : t -> int * int * int
+
 (** For spans over just one line, return the line number, start column and end column.
     This returns a closed interval.
     Undefined for multi-line spans. *)

@@ -2,7 +2,6 @@
 Constraints after closing for \f:
 Parameter at [3:12-31]
 DK Arg(\f, 0) : dyn
-DK Arg(\f, 0) : dyn
 [3:12-31] ⊆ [3:12-31]
 Arg(\f, 0) ⊆ Arg(\f, 0)
 
@@ -11,7 +10,6 @@ Parameter at [3:12-31]
 Allocation at [9:5-20]
 SK Base [9:5-20] : shape('a' => int)
 SK Derived [9:5-20] : shape('a' => int)
-DK [9:5-20] : dyn
 DK [9:5-20] : dyn
 [3:12-31] ⊆ [3:12-31]
 [9:5-20] ⊆ [9:5-20]

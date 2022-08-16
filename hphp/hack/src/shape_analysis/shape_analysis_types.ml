@@ -14,6 +14,11 @@ module HT = Hips_types
 
 exception Shape_analysis_exn of string
 
+module CommonSet (S : Set.S) = struct
+  let unions_map ~f set =
+    S.fold (fun elt acc -> S.union (f elt) acc) set S.empty
+end
+
 type potential_targets = {
   expressions_to_modify: Pos.t list;
   hints_to_modify: Pos.t list;
@@ -110,11 +115,16 @@ module EntityMap = Map.Make (struct
   let compare = compare_entity_
 end)
 
-module EntitySet = Set.Make (struct
-  type t = entity_
+module EntitySet = struct
+  module S = Set.Make (struct
+    type t = entity_
 
-  let compare = compare_entity_
-end)
+    let compare = compare_entity_
+  end)
+
+  include S
+  include CommonSet (S)
+end
 
 module ConstraintSet = Set.Make (struct
   type t = constraint_

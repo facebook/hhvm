@@ -12,6 +12,11 @@ module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 module HT = Hips_types
 
+(** Useful extension to sets *)
+module CommonSet (S : Set.S) : sig
+  val unions_map : f:(S.elt -> S.t) -> S.t -> S.t
+end
+
 (** A generic exception for all shape analysis specific failures *)
 exception Shape_analysis_exn of string
 
@@ -147,7 +152,11 @@ module PointsToSet : Set.S with type elt = entity_ * entity_
 
 module EntityMap : Map.S with type key = entity_
 
-module EntitySet : Set.S with type elt = entity_
+module EntitySet : sig
+  include Set.S with type elt = entity_
+
+  val unions_map : f:(elt -> t) -> t -> t
+end
 
 module ConstraintSet : Set.S with type elt = constraint_
 

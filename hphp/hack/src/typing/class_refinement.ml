@@ -12,10 +12,20 @@ open Typing_defs
 
 let is_empty { cr_types = trs } = SMap.is_empty trs
 
-let map_type_refinement :
-    type a. (a ty -> a ty) -> a class_type_refinement -> a class_type_refinement
-    =
- fun f r ->
+let add_type_ref id tr cr =
+  let combine
+      (type a) (r1 : a class_type_refinement) (r2 : a class_type_refinement) =
+    match (r1, r2) with
+    | ((Texact _ as exact), _)
+    | (_, (Texact _ as exact)) ->
+      exact
+    | ( Tloose { tr_lower = ls1; tr_upper = us1 },
+        Tloose { tr_lower = ls2; tr_upper = us2 } ) ->
+      Tloose { tr_lower = ls1 @ ls2; tr_upper = us1 @ us2 }
+  in
+  { cr_types = SMap.add ~combine id tr cr.cr_types }
+
+let map_type_refinement (type a) f (r : a class_type_refinement) =
   match r with
   | Texact ty -> Texact (f ty)
   | Tloose { tr_lower = ls; tr_upper = us } ->
@@ -47,9 +57,7 @@ let to_string ty_to_string { cr_types = trs } =
       String.concat ~sep:" " (l1 @ l2)
   in
   let members_list =
-    SMap.fold
-      (fun name tr acc -> ("type " ^ name ^ " " ^ tref_to_string tr) :: acc)
-      trs
-      []
+    let f name tr acc = ("type " ^ name ^ " " ^ tref_to_string tr) :: acc in
+    SMap.fold f trs []
   in
   "{" ^ String.concat ~sep:"; " members_list ^ "}"

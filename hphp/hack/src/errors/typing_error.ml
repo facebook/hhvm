@@ -6512,6 +6512,7 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_class_refinement of Pos_or_decl.t
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6780,6 +6781,7 @@ end = struct
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_class_refinement of Pos_or_decl.t
 
   let iter t ~on_prim ~on_snd =
     match t with
@@ -7458,6 +7460,9 @@ end = struct
         ],
       [] )
 
+  let unsupported_class_refinement pos =
+    (Error_code.InternalError, lazy [(pos, "Unsupported class refinement")], [])
+
   let eval t ~current_span :
       (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
       Eval_result.t =
@@ -7631,6 +7636,8 @@ end = struct
       Eval_result.single (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
       Eval_result.single (override_no_default_typeconst pos parent_pos)
+    | Unsupported_class_refinement pos ->
+      Eval_result.single (unsupported_class_refinement pos)
 end
 
 and Callback : sig

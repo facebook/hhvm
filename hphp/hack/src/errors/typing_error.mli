@@ -1625,6 +1625,7 @@ module Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Unsupported_class_refinement of Pos_or_decl.t
 end
 
 module Callback : sig

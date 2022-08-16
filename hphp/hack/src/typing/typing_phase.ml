@@ -116,11 +116,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
   | Terr -> ((env, None), TUtils.terr env r)
-  | Trefinement _ ->
-    (* TODO(type-refinements) Expand to a class and apply localized
-       refinements; raising an error for the unsupported DTloose _
-       case *)
-    ((env, None), TUtils.terr env r)
+  | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
   | Tany _ -> ((env, None), mk (r, TUtils.tany env))
   | Tvar _var ->
     let (env, tv) = Env.new_global_tyvar env r in
@@ -265,7 +261,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let (env, ty) = Typing_union.union_list env r tyl in
     ((env, ty_err_opt), ty)
   | Tintersection tyl ->
-    (* TODO: should we be taking the intersection of the errors? *)
     let ((env, ty_err_opt), tyl) =
       List.map_env_ty_err_opt
         env
@@ -276,12 +271,24 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let (env, ty) = Typing_intersection.intersect_list env r tyl in
     ((env, ty_err_opt), ty)
   | Taccess (root_ty, id) ->
-    (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
-       to allow accessing abstract type constants here. *)
     let rec allow_abstract_tconst ty =
       match get_node ty with
       | Tthis
       | Tgeneric _ ->
+        (*
+         * When the root of an access is 'this', abstract type constants
+         * are allowed and localized as rigid type variables (Tgeneric).
+         * This happens when typing generic code in an abstract class
+         * that deals with data whose type is going to be set later in
+         * derived classes.
+         *
+         * In case the root is a generic, we also accept accesses to
+         * abstract constant to type check the dangerous and ubiquitous
+         * pattern:
+         *
+         *   function get<TBox as Box, T>(TBox $foo) : T where T = TBox::T
+         *                                                         ^^^^^^^
+         *)
         true
       | Taccess (ty, _) -> allow_abstract_tconst ty
       | _ -> false
@@ -460,7 +467,6 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
                   apply_reasons ~on_error
                   @@ Secondary.Cyclic_enum_constraint pos)
         in
-
         ((env, ty_err_opt), mk (r, Typing_utils.tany env))
       | None ->
         if Ast_defs.is_c_enum_class (Cls.kind class_info) then
@@ -948,6 +954,38 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
   in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   ((env, ty_err_opt), tyl)
+
+and localize_refinement ~ety_env env r root { cr_types = trs } =
+  let mk_unsupported_err () =
+    let pos = Reason.to_pos r in
+    Option.map
+      ety_env.on_error
+      ~f:
+        Typing_error.(
+          fun on_error ->
+            apply_reasons ~on_error
+            @@ Secondary.Unsupported_class_refinement pos)
+  in
+  let ((env, ty_err_opt), root) = localize ~ety_env env root in
+  match get_node root with
+  | Tclass (c, Nonexact cr, tyl) ->
+    let both_opt e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
+    let ((env, ty_err_opt), cr) =
+      SMap.fold
+        (fun id tr ((env, ty_err_opt), cr) ->
+          match tr with
+          | Texact ty ->
+            let ((env, ty_err_opt'), ty) = localize ~ety_env env ty in
+            let cr = Class_refinement.add_type_ref id (Texact ty) cr in
+            ((env, both_opt ty_err_opt ty_err_opt'), cr)
+          | Tloose _ ->
+            let err = mk_unsupported_err () in
+            ((env, both_opt ty_err_opt err), cr))
+        trs
+        ((env, ty_err_opt), cr)
+    in
+    ((env, ty_err_opt), mk (r, Tclass (c, Nonexact cr, tyl)))
+  | _ -> ((env, mk_unsupported_err ()), TUtils.terr env r)
 
 (* Like localize_no_subst, but uses the supplied kind, enabling support
    for higher-kinded types *)

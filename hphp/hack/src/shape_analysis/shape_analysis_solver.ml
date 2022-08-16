@@ -147,7 +147,10 @@ let subset_lookups subsets =
   in
   (collect subset_map, collect superset_map)
 
-type adjacencies = { backwards: EntitySet.t }
+type adjacencies = {
+  backwards: EntitySet.t;
+  forwards: EntitySet.t;
+}
 
 let mk_adjacency_map subsets =
   let entities =
@@ -159,13 +162,52 @@ let mk_adjacency_map subsets =
     else
       None
   in
+  let forwards_of e (e1, e2) =
+    if equal_entity_ e e1 then
+      Some e2
+    else
+      None
+  in
   let find_adjacent of_ entity =
     List.filter_map ~f:(of_ entity) subsets |> EntitySet.of_list
   in
-  let add e m =
-    EntityMap.add e { backwards = find_adjacent backwards_of e } m
+  let adjacency e =
+    {
+      backwards = find_adjacent backwards_of e;
+      forwards = find_adjacent forwards_of e;
+    }
   in
+  let add e = EntityMap.add e (adjacency e) in
   EntitySet.fold add entities EntityMap.empty
+
+(*
+  Propagates `Has_static_key` constraints forward through the dataflow graph.
+  The implementation is semi-naïve, i.e., at each iteration it only considers
+  newly generated facts.
+
+  has_static_key_u(E, Key, Ty) :- has_static_key(E, Key, Ty).
+  has_static_key_u(F, Key, Ty) :- has_static_key(E, Key, Ty), subsets(E,F).
+*)
+let derive_static_accesses
+    adjacency_map ~base_static_accesses ~derived_static_accesses =
+  let open StaticAccess.Set in
+  let rec close_upwards ~delta ~acc =
+    if is_empty delta then
+      acc
+    else
+      let propagate (e, k, ty) =
+        match EntityMap.find_opt e adjacency_map with
+        | Some adjacency ->
+          EntitySet.fold (fun e -> add (e, k, ty)) adjacency.forwards empty
+        | None -> empty
+      in
+      let delta = unions_map ~f:propagate delta in
+      let delta = diff delta acc in
+      let acc = union delta acc in
+      close_upwards ~delta ~acc
+  in
+  let all = union base_static_accesses derived_static_accesses in
+  close_upwards ~delta:all ~acc:all
 
 (* The following program roughly summarises the solver in Datalog.
 
@@ -193,9 +235,6 @@ let mk_adjacency_map subsets =
   // Transitive closure closure
   subsets_tr(E,F) :- subsets(E,F).
   subsets_tr(E,F) :- subsets(E,F), subsets_re(E,F).
-
-  has_static_key_u(E, Key, Ty) :- has_static_key(E, Key, Ty).
-  has_static_key_u(F, Key, Ty) :- has_static_key(E, Key, Ty), subsets_tr(E,F).
 
   // Close dynamic key access in both directions to later invalidate all
   // results that touch it.
@@ -249,12 +288,10 @@ let deduce (constraints : constraint_ list) : constraint_ list =
 
   (* Close upwards *)
   let derived_static_accesses =
-    StaticAccess.Set.unions_map
-      ~f:(fun (entity, key, ty) ->
-        collect_supersets entity
-        |> List.map ~f:(fun entity -> (entity, key, ty))
-        |> StaticAccess.Set.of_list)
-      (StaticAccess.Set.union base_static_accesses derived_static_accesses)
+    derive_static_accesses
+      adjacency_map
+      ~base_static_accesses
+      ~derived_static_accesses
   in
   let static_keys_of e =
     let add_key (e', key, _) map =

@@ -173,31 +173,16 @@ CodeCache::CodeCache() {
     );
   }
 #endif
-
-  auto const allocBase = (uintptr_t)sbrk(allocationSize);
-
-  if (allocBase == (uintptr_t)-1) {
-    auto const newBrk = (uintptr_t)sbrk(0);
-    always_assert_flog(
-      newBrk != currBase,
-      "Could not allocate {} bytes for translation cache (sbrk = {})",
-      allocationSize,
-      currBase
-    );
-    Logger::FWarning(
-      "sbrk moved from {} to {} while allocating {} bytes. Retrying...",
-      currBase, newBrk, allocationSize
-    );
-    auto const limit = use_lowptr ? lowArenaMinAddr() : (2ul << 30);
-    cutTCSizeTo(limit - shiftTC(ru(newBrk)) - thread_local_size);
-    new (this) CodeCache;
-    return;
-  }
-
-  assertx(allocBase);
-  always_assert_flog(currBase == allocBase,
-                     "sbrk() moved from {} to {} during CodeCache creation!",
-                     currBase, allocBase);
+  auto const allocBase =
+    (uintptr_t)mmap(reinterpret_cast<void*>(usedBase), allocationSize,
+                    PROT_READ | PROT_WRITE,
+                    MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
+  always_assert_flog(allocBase == usedBase,
+                     "mmap failed for translation cache (errno = {})",
+                     errno);
+  auto const newBrk = (uintptr_t) sbrk(0);
+  always_assert_flog(allocBase >= (uintptr_t) newBrk,
+                     "unexpected brk movement, we cannot proceed safely");
   CodeAddress base = reinterpret_cast<CodeAddress>(usedBase);
   m_base = base;
 

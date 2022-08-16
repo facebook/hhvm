@@ -555,6 +555,10 @@ type t = {
       (** Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
   remote_worker_saved_state_manifold_path: string option;
       (** A manifold path to a naming table to be used for Hulk Lite when typechecking. *)
+  rust_provider_backend: bool;
+      (** Use Provider_backend.Rust_provider_backend as the global provider
+       * backend, servicing File_provider, Naming_provider, and Decl_provider
+       * using the hackrs implementation. *)
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;
@@ -704,6 +708,7 @@ let default =
     remote_version_specifier = None;
     remote_transport_channel = None;
     remote_worker_saved_state_manifold_path = None;
+    rust_provider_backend = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
     symbolindex_search_provider = "SqliteIndex";
@@ -1502,6 +1507,37 @@ let load_ fn ~silent ~current_version overrides =
   let remote_worker_saved_state_manifold_path =
     string_opt "remote_worker_saved_state_manifold_path" config
   in
+  let rust_provider_backend =
+    bool_if_min_version
+      "rust_provider_backend"
+      ~default:default.rust_provider_backend
+      ~current_version
+      config
+  in
+  let rust_provider_backend =
+    if rust_provider_backend && enable_disk_heap then (
+      Hh_logger.warn
+        "You have rust_provider_backend=true but enable_disk_heap=true. This is incompatible. Turning off rust_provider_backend";
+      false
+    ) else
+      rust_provider_backend
+  in
+  let rust_provider_backend =
+    if rust_provider_backend && not use_direct_decl_parser then (
+      Hh_logger.warn
+        "You have rust_provider_backend=true but use_direct_decl_parser=false. This is incompatible. Turning off rust_provider_backend";
+      false
+    ) else
+      rust_provider_backend
+  in
+  let rust_provider_backend =
+    if rust_provider_backend && not shm_use_sharded_hashtbl then (
+      Hh_logger.warn
+        "You have rust_provider_backend=true but shm_use_sharded_hashtbl=false. This is incompatible. Turning off rust_provider_backend";
+      false
+    ) else
+      rust_provider_backend
+  in
   let use_manifold_cython_client =
     bool_if_min_version
       "use_manifold_cython_client"
@@ -1611,6 +1647,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_version_specifier;
     remote_transport_channel;
     remote_worker_saved_state_manifold_path;
+    rust_provider_backend;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_search_provider;

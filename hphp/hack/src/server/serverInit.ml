@@ -240,7 +240,10 @@ let init
     ~(init_approach : init_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env) : ServerEnv.env * init_result =
-  Provider_backend.set_shared_memory_backend ();
+  if genv.local_config.ServerLocalConfig.rust_provider_backend then (
+    Hh_logger.log "ServerInit: using rust backend";
+    Provider_backend.set_rust_backend env.popt
+  );
   let lazy_lev = get_lazy_level genv in
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =

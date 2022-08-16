@@ -10,7 +10,6 @@
   test_error_throttling_open_file
   test_exception_handling
   test_failed_naming_ide
-  test_failed_parsing
   test_hhi_phpstdlib
   test_ide_check
   test_ide_close
@@ -140,12 +139,6 @@
   (run ../test_all.exe ide/remove_parent)))
 
 (rule
- (alias failed_parsing)
- (deps ../test_all.exe)
- (action
-  (run ../test_all.exe ide/failed_parsing)))
-
-(rule
  (alias failed_naming)
  (deps ../test_all.exe)
  (action
@@ -213,7 +206,6 @@
   (alias naming_errors)
   (alias override)
   (alias remove_parent)
-  (alias failed_parsing)
   (alias failed_naming)
   (alias unsaved_changes)
   (alias hhi_phpstdlib)

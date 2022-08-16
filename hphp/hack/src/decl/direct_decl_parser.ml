@@ -42,7 +42,7 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
   let hash = Some parsed_file.pfh_hash in
   List.fold
     parsed_file.pfh_decls
-    ~init:FileInfo.{ empty_t with hash; file_mode }
+    ~init:FileInfo.{ empty_t with hash; file_mode; comments = None }
     ~f:(fun acc (name, decl, hash) ->
       let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
       match decl with

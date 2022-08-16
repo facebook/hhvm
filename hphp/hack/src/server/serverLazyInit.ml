@@ -1095,10 +1095,14 @@ let write_symbol_info
           match Naming_table.get_file_info env.naming_table path with
           | None -> acc
           | Some _ ->
+            let path_str = Relative_path.S.to_string path in
             if
-              (exclude_hhi && Relative_path.is_hhi (Relative_path.prefix path))
+              Relative_path.is_hhi (Relative_path.prefix path)
+              && (exclude_hhi
+                 || String_utils.string_starts_with path_str "hhi|hsl_generated"
+                 )
               || List.exists ignore_paths ~f:(fun ignore ->
-                     String.equal (Relative_path.S.to_string path) ignore)
+                     String.equal path_str ignore)
             then
               acc
             else

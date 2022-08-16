@@ -181,10 +181,17 @@ let merge_saved_state_futures
         then (
           Hh_logger.log "Using sqlite naming table from hack/64 saved state";
           Some (Path.to_string naming_sqlite_table_path)
-        ) else
-          ServerCheckUtils.get_naming_table_fallback_path
-            genv
-            downloaded_naming_table_path
+        ) else (
+          HackEventLogger.naming_table_sqlite_missing ();
+          if genv.local_config.SLC.disable_naming_table_fallback_loading then (
+            Hh_logger.log
+              "Naming table fallback loading disabled via JustKnob and SQLite table is missing";
+            None
+          ) else
+            ServerCheckUtils.get_naming_table_fallback_path
+              genv
+              downloaded_naming_table_path
+        )
       in
       let (old_naming_table, old_errors) =
         SaveStateService.load_saved_state

@@ -368,6 +368,8 @@ let notifier_returned _ _ = ()
 
 let load_state_exn _ = ()
 
+let naming_table_sqlite_missing _ = ()
+
 let prechecked_update_rechecked _ = ()
 
 let prechecked_evaluate_init _ _ = ()

@@ -3535,6 +3535,7 @@ checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
 name = "types"
 version = "0.0.0"
 dependencies = [
+ "decl_provider",
  "hh_autoimport_rust",
  "naming_special_names_rust",
  "oxidized",

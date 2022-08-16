@@ -537,14 +537,19 @@ fn check_readonly_and_emit<'arena, 'decl>(
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
     if flags.contains(EnvFlags::TYPE_DIRECTED) {
-        let mut new_ast = type_check::type_program(ast);
-        let res = readonly_check::check_program(&mut new_ast, false);
-        // Ignores all errors after the first...
-        if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
-            return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
+        match &emitter.decl_provider {
+            None => (),
+            Some(decl_provider) => {
+                let mut new_ast = type_check::type_program(ast, decl_provider);
+                let res = readonly_check::check_program(&mut new_ast, false);
+                // Ignores all errors after the first...
+                if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
+                    return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
+                }
+                *ast = new_ast;
+            }
         }
-        let _old_ast = std::mem::replace(ast, new_ast);
-    };
+    }
     rewrite_and_emit(emitter, namespace_env, ast, profile)
 }
 

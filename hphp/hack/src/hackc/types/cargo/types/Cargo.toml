@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../lib.rs"
 
 [dependencies]
+decl_provider = { path = "../../../decl_provider" }
 hh_autoimport_rust = { path = "../../../../parser/cargo/hh_autoimport" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

@@ -597,16 +597,16 @@ and default_subtype
         | _ -> invalid ~fail env
       end
     | LoclType lty_sub ->
-      (*
-       * t1 | ... | tn <: t
-       *   if and only if
-       * t1 <: t /\ ... /\ tn <: t
-       * We want this even if t is a type variable e.g. consider
-       *   int | v <: v
-       *)
       begin
         match deref lty_sub with
         | (_, Tunion tyl) ->
+          (*
+           * t1 | ... | tn <: t
+           *   if and only if
+           * t1 <: t /\ ... /\ tn <: t
+           * We want this even if t is a type variable e.g. consider
+           *   int | v <: v
+           *)
           List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
               res
               &&& simplify_subtype_i
@@ -677,8 +677,8 @@ and default_subtype
                 let ty_sub = LoclType ty_sub in
                 res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super))
         | (_, Tgeneric (name_sub, tyargs)) ->
-          (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
-             Env.get_upper_bounds *)
+          (* TODO(T69551141) handle type arguments. right now, just passing
+           * tyargs to Env.get_upper_bounds *)
           (if subtype_env.require_completeness then
             default env
           else
@@ -2197,7 +2197,8 @@ and simplify_subtype_i
         (* All of these are definitely disjoint from class types *)
         | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
         | _ -> default_subtype env))
-    | (_, Tclass (((_, class_name) as x_super), exact_super, tyl_super)) ->
+    | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
+      ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
@@ -2237,6 +2238,37 @@ and simplify_subtype_i
             | (Nonexact _, Exact) -> false
             | (_, _) -> true
           in
+          let (env, refinements_prop) =
+            match exact_super with
+            | Exact -> valid env
+            | Nonexact cr ->
+              Class_refinement.fold_type_refs
+                cr
+                ~init:(valid env)
+                ~f:(fun type_id (Texact ref_ty) (env, prop) ->
+                  let (env, type_member) =
+                    (* TODO(refinements): The treatment of `this_ty` below is
+                     * no good; we should not default to `ty_sub`. `this_ty`
+                     * will be used when a type constant refers to another
+                     * constant either in its def or in its bounds.
+                     * See related FIXME(T59448452) below. *)
+                    Typing_type_member.lookup_type_member
+                      env
+                      ~this_ty:(Option.value this_ty ~default:ty_sub)
+                      ~on_error:subtype_env.on_error
+                      (x_sub, exact_sub)
+                      (Reason.to_pos r_super, type_id)
+                  in
+                  match type_member with
+                  | Typing_type_member.Error err -> invalid_env_with env err
+                  | Typing_type_member.Exact tconst_ty ->
+                    let this_ty = None in
+                    (env, prop)
+                    &&& simplify_subtype ~subtype_env ~this_ty tconst_ty ref_ty
+                    &&& simplify_subtype ~subtype_env ~this_ty ref_ty tconst_ty
+                  | Typing_type_member.Abstract _ -> invalid_env env)
+          in
+          (env, refinements_prop) &&& fun env ->
           if String.equal cid_super cid_sub then
             if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match
             then
@@ -2309,15 +2341,26 @@ and simplify_subtype_i
                   empty_expand_env with
                   substs =
                     TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
-                  (* TODO: do we need this? *)
+                  (* FIXME(T59448452): Unsound in general *)
                   this_ty = Option.value this_ty ~default:ty_sub;
                 }
               in
               let up_obj = Cls.get_ancestor class_sub cid_super in
+              let ty_super =
+                (* At this point we have already checked that all the
+                 * refinements in the super type hold, so we remove
+                 * them from ty_super *)
+                let exact_super =
+                  match exact_super with
+                  | Nonexact _ -> nonexact
+                  | Exact -> Exact
+                in
+                mk (r_super, Tclass (x_super, exact_super, tyl_super))
+              in
               (match up_obj with
               | Some up_obj ->
-                (* Since we have provided no `Typing_error.Reasons_callback.t` in the
-                   `expand_env`, this will not generate any errors *)
+                (* Since we have provided no `Typing_error.Reasons_callback.t`
+                 * in the `expand_env`, this will not generate any errors *)
                 let ((env, _ty_err_opt), up_obj) =
                   Phase.localize ~ety_env env up_obj
                 in
@@ -2336,15 +2379,16 @@ and simplify_subtype_i
                   let rec try_upper_bounds_on_this up_objs env =
                     match up_objs with
                     | [] ->
-                      (* It's crucial that we don't lose updates to tpenv in env that were
-                       * introduced by PHase.localize. TODO: avoid this requirement *)
+                      (* It's crucial that we don't lose updates to tpenv in
+                       * env that were introduced by Phase.localize.
+                       * TODO: avoid this requirement *)
                       invalid_env env
                     | ub_obj_typ :: up_objs ->
-                      (* a trait is never the runtime type, but it can be used
-                       * as a constraint if it has requirements or where constraints
-                       * for its using classes *)
-                      (* Since we have provided no `Typing_error.Reasons_callback.t` in the
-                         `expand_env`, this will not generate any errors *)
+                      (* A trait is never the runtime type, but it can be used
+                       * as a constraint if it has requirements or where
+                       * constraints for its using classes *)
+                      (* Since we have provided no `Typing_error.Reasons_callback.t`
+                       * in the `expand_env`, this will not generate any errors *)
                       let ((env, _ty_err_opt), ub_obj_typ) =
                         Phase.localize ~ety_env env ub_obj_typ
                       in

@@ -12,6 +12,12 @@ open Typing_defs
 
 let is_empty { cr_types = trs } = SMap.is_empty trs
 
+let has_type_ref pos_id cr = SMap.mem (snd pos_id) cr.cr_types
+
+let get_type_ref (_, id) cr = SMap.find_opt id cr.cr_types
+
+let fold_type_refs cr ~init:acc ~f = SMap.fold f cr.cr_types acc
+
 let add_type_ref id tr cr =
   let combine
       (type a) (r1 : a class_type_refinement) (r2 : a class_type_refinement) =

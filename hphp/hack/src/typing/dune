@@ -287,6 +287,7 @@
   typing_subtype
   typing_subtype_tconst
   typing_taccess
+  typing_type_member
   typing_union)
  (libraries
   type_mapper

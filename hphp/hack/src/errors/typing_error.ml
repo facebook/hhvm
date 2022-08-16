@@ -6513,6 +6513,11 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_class_refinement of Pos_or_decl.t
+    | Missing_type_constant of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        type_id: string;
+      }
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6782,6 +6787,11 @@ end = struct
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_class_refinement of Pos_or_decl.t
+    | Missing_type_constant of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        type_id: string;
+      }
 
   let iter t ~on_prim ~on_snd =
     match t with
@@ -7463,6 +7473,18 @@ end = struct
   let unsupported_class_refinement pos =
     (Error_code.InternalError, lazy [(pos, "Unsupported class refinement")], [])
 
+  let missing_type_constant pos class_id type_id =
+    ( Error_code.InternalError,
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Class %s has no type constant %s"
+              (Render.strip_ns class_id |> Markdown_lite.md_codify)
+              (Markdown_lite.md_codify type_id) );
+        ],
+      [] )
+
   let eval t ~current_span :
       (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
       Eval_result.t =
@@ -7638,6 +7660,8 @@ end = struct
       Eval_result.single (override_no_default_typeconst pos parent_pos)
     | Unsupported_class_refinement pos ->
       Eval_result.single (unsupported_class_refinement pos)
+    | Missing_type_constant { pos; class_id; type_id } ->
+      Eval_result.single (missing_type_constant pos class_id type_id)
 end
 
 and Callback : sig

@@ -1626,6 +1626,11 @@ module Secondary : sig
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_class_refinement of Pos_or_decl.t
+    | Missing_type_constant of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        type_id: string;
+      }
 end
 
 module Callback : sig

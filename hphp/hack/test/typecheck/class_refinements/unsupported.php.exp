@@ -1,0 +1,8 @@
+File "unsupported.php", line 11, characters 32-53:
+Invalid type hint (Other[0000])
+  File "unsupported.php", line 11, characters 32-53:
+  Unsupported class refinement
+File "unsupported.php", line 15, characters 41-60:
+Invalid type hint (Other[0000])
+  File "unsupported.php", line 15, characters 41-60:
+  Unsupported class refinement

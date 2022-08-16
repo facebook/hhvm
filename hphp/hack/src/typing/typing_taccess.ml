@@ -397,6 +397,12 @@ let rec expand ctx env root =
     let ((env, ty_err_opt), res) = expand ctx env ty in
     let name = Printf.sprintf "<cls#%s>" name in
     ((env, ty_err_opt), update_class_name env ctx.id name res)
+  | Tclass (_, Nonexact cr, _) when Class_refinement.has_type_ref ctx.id cr ->
+    begin
+      match Class_refinement.get_type_ref ctx.id cr with
+      | Some (Texact ty) -> ((env, None), Exact ty)
+      | None -> (* unreachable *) ((env, None), Missing None)
+    end
   | Tclass (cls, _, _) ->
     begin
       match Env.get_class env (snd cls) with

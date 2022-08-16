@@ -89,7 +89,7 @@ bool kind_is_resolved(TS::Kind kind) {
 
 using Resolution = TypeStructureResolution;
 
-Resolution makeBespokeTypeStructure(Resolution&& r) {
+Resolution&& makeBespokeTypeStructure(Resolution&& r) {
   // convert type structure into bespoke versions if possible
   if (!RO::EvalEmitBespokeTypeStructures) return std::move(r);
 
@@ -239,7 +239,7 @@ struct Builder {
     return std::move(r);
   }
 
-  Resolution finishTS() {
+  Resolution&& finishTS() {
     assertx(IMPLIES(r.type.is(BBottom), r.mightFail));
     assertx(r.type.subtypeOf(BDict));
 

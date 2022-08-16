@@ -1521,7 +1521,7 @@ Array VariableUnserializer::unserializeBespokeTypeStructure() {
 
   auto arr = unserializeDict();
   auto const ts = bespoke::TypeStructure::MakeFromVanilla(arr.get());
-  if (ts) arr.reset(ts);
+  if (ts) arr = Array::attach(ts);
   return arr;
 }
 

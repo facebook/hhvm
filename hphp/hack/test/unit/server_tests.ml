@@ -152,10 +152,14 @@ let test_compute_tast_counting () =
     expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")
     "There should be this many decling_count for shared_mem provider";
+
+  (* We'll read Bar.php from disk when we decl-parse it in order to compute the
+     TAST of Foo.php, but we won't read Foo.php from disk to get its AST or
+     decls, since we want to use the contents in the Provider_context entry. *)
   Asserter.Int_asserter.assert_equals
-    0
+    1
     (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "There should be 0 disk_cat_count for shared_mem provider";
+    "There should be 1 disk_cat_count for shared_mem provider";
 
   true
 

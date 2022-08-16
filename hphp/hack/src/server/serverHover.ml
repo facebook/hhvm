@@ -185,14 +185,10 @@ let nth_param ctx recv i : string option =
   | None -> None
 
 let make_hover_const_definition entry def_opt =
-  match def_opt with
-  | Some def ->
-    [
+  Option.map def_opt ~f:(fun def ->
       Pos.get_text_from_pos
         ~content:(Provider_context.read_file_contents_exn entry)
-        def.SymbolDefinition.span;
-    ]
-  | _ -> []
+        def.SymbolDefinition.span)
 
 (* Return a markdown description of built-in Hack attributes. *)
 let make_hover_attr_docs name =
@@ -363,6 +359,11 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
         | ({ type_ = Property _; _ }, Some (env, ty)) ->
           defined_in
           ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
+        | ({ type_ = GConst; _ }, Some (env, ty)) ->
+          (match make_hover_const_definition entry def_opt with
+          | Some def_txt -> def_txt
+          | None ->
+            Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt)
         | (occurrence, Some (env, ty)) ->
           Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in
@@ -373,12 +374,6 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
             [
               make_hover_attr_docs name;
               make_hover_doc_block ctx entry occurrence def_opt;
-            ]
-        | { type_ = GConst; _ } ->
-          List.concat
-            [
-              make_hover_doc_block ctx entry occurrence def_opt;
-              make_hover_const_definition entry def_opt;
             ]
         | { type_ = Keyword info; _ } -> [keyword_info info]
         | { type_ = HhFixme; _ } -> [hh_fixme_info]

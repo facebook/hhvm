@@ -4412,7 +4412,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "contents": [
                         {"language": "hack", "value": "THE_ANSWER"},
                         "A comment describing THE_ANSWER",
-                        "int THE_ANSWER = 42",
                     ],
                     "range": {
                         "start": {"line": 15, "character": 9},

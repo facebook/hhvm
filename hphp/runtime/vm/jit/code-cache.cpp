@@ -115,14 +115,21 @@ CodeCache::CodeCache() {
   m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
-  if ((kASize < (2 << 20)) ||
-      (kAColdSize < (2 << 20)) ||
-      (kAFrozenSize < (2 << 20)) ||
-      (kGDataSize < (2 << 20))) {
-    fprintf(stderr, "Allocation sizes ASize, AColdSize, AFrozenSize and "
-                    "GlobalDataSize are too small.\n");
-    exit(1);
-  }
+  always_assert_flog(
+    (kASize >= (2 << 20)) &&
+    (kAColdSize >= (2 << 20)) &&
+    (kAFrozenSize >= (2 << 20)) &&
+    (kGDataSize >= (2 << 20)),
+    "Allocation sizes are too small.\n"
+    "  ASize = {}\n"
+    "  AColdSize = {}\n"
+    "  AFrozenSize = {}\n"
+    "  GlobalDataSize = {}",
+    kASize,
+    kAColdSize,
+    kAFrozenSize,
+    kGDataSize
+  );
 
   auto const currBase = (uintptr_t)sbrk(0);
   auto const usedBase = shiftTC(ru(currBase));
@@ -147,10 +154,11 @@ CodeCache::CodeCache() {
     if (RuntimeOption::ServerExecutionMode()) {
       Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
     }
-    if (usedBase + (32u << 20) > lowArenaStart) {
-      fprintf(stderr, "brk is too big for LOWPTR build\n");
-      exit(1);
-    }
+    always_assert_flog(
+      usedBase + (32u << 20) <= lowArenaStart,
+      "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
+      usedBase, lowArenaStart
+    );
 
     if (usedBase + m_totalSize > lowArenaStart) {
       cutTCSizeTo(lowArenaStart - usedBase - thread_local_size);
@@ -169,9 +177,21 @@ CodeCache::CodeCache() {
   auto const allocBase = (uintptr_t)sbrk(allocationSize);
 
   if (allocBase == (uintptr_t)-1) {
-    fprintf(stderr, "could not allocate %zd bytes for translation cache\n",
-            allocationSize);
-    exit(1);
+    auto const newBrk = (uintptr_t)sbrk(0);
+    always_assert_flog(
+      newBrk != currBase,
+      "Could not allocate {} bytes for translation cache (sbrk = {})",
+      allocationSize,
+      currBase
+    );
+    Logger::FWarning(
+      "sbrk moved from {} to {} while allocating {} bytes. Retrying...",
+      currBase, newBrk, allocationSize
+    );
+    auto const limit = use_lowptr ? lowArenaMinAddr() : (2ul << 30);
+    cutTCSizeTo(limit - shiftTC(ru(newBrk)) - thread_local_size);
+    new (this) CodeCache;
+    return;
   }
 
   assertx(allocBase);

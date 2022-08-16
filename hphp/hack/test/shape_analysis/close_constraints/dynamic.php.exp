@@ -9,7 +9,8 @@ Arg(\f, 0) ⊆ Arg(\f, 0)
 Constraints after closing for \main:
 Parameter at [3:12-31]
 Allocation at [9:5-20]
-SK [9:5-20] : shape('a' => int)
+SK Base [9:5-20] : shape('a' => int)
+SK Derived [9:5-20] : shape('a' => int)
 DK [9:5-20] : dyn
 DK [9:5-20] : dyn
 [3:12-31] ⊆ [3:12-31]

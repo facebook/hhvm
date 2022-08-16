@@ -3,19 +3,14 @@ Constraints after closing for \f:
 Parameter at [3:12-31]
 Parameter at [3:12-31]
 Parameter at [8:12-31]
-SK [5:5-7] : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK Arg(\f, 0) : shape('a' => mixed)
-SK [5:5-7] : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK Arg(\f, 0) : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK [5:5-7] : shape('a' => mixed)
-SK [5:5-7] : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK Arg(\f, 0) : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK [5:5-7] : shape('b' => mixed)
+SK Base Arg(\f, 0) : shape('a' => mixed)
+SK Base Arg(\f, 0) : shape('b' => mixed)
+SK Derived [5:5-7] : shape('a' => mixed)
+SK Derived [5:5-7] : shape('b' => mixed)
+SK Derived [10:5-7] : shape('a' => mixed)
+SK Derived [10:5-7] : shape('b' => mixed)
+SK Derived Arg(\f, 0) : shape('a' => mixed)
+SK Derived Arg(\f, 0) : shape('b' => mixed)
 [3:12-31] ⊆ [3:12-31]
 [5:5-7] ⊆ [5:5-7]
 [8:12-31] ⊆ [8:12-31]
@@ -29,19 +24,14 @@ Constraints after closing for \g:
 Parameter at [8:12-31]
 Parameter at [8:12-31]
 Parameter at [3:12-31]
-SK [5:5-7] : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK Arg(\g, 0) : shape('b' => mixed)
-SK [5:5-7] : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK Arg(\g, 0) : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK [5:5-7] : shape('b' => mixed)
-SK [5:5-7] : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK Arg(\g, 0) : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK [5:5-7] : shape('a' => mixed)
+SK Base Arg(\g, 0) : shape('a' => mixed)
+SK Base Arg(\g, 0) : shape('b' => mixed)
+SK Derived [5:5-7] : shape('a' => mixed)
+SK Derived [5:5-7] : shape('b' => mixed)
+SK Derived [10:5-7] : shape('a' => mixed)
+SK Derived [10:5-7] : shape('b' => mixed)
+SK Derived Arg(\g, 0) : shape('a' => mixed)
+SK Derived Arg(\g, 0) : shape('b' => mixed)
 [3:12-31] ⊆ [3:12-31]
 [5:5-7] ⊆ [5:5-7]
 [8:12-31] ⊆ [8:12-31]
@@ -55,21 +45,22 @@ Constraints after closing for \main:
 Parameter at [8:12-31]
 Allocation at [14:5-33]
 Parameter at [3:12-31]
-SK [5:5-7] : shape('b' => mixed)
-SK [10:5-7] : shape('b' => mixed)
-SK [14:5-33] : shape('b' => mixed)
-SK [5:5-7] : shape('b' => int)
-SK [10:5-7] : shape('b' => int)
-SK [14:5-33] : shape('b' => int)
-SK [5:5-7] : shape('b' => int)
-SK [5:5-7] : shape('a' => bool)
-SK [10:5-7] : shape('a' => bool)
-SK [14:5-33] : shape('a' => bool)
-SK [5:5-7] : shape('a' => bool)
-SK [5:5-7] : shape('a' => mixed)
-SK [10:5-7] : shape('a' => mixed)
-SK [14:5-33] : shape('a' => mixed)
-SK [5:5-7] : shape('a' => mixed)
+SK Base [14:5-33] : shape('a' => mixed)
+SK Base [14:5-33] : shape('a' => bool)
+SK Base [14:5-33] : shape('b' => mixed)
+SK Base [14:5-33] : shape('b' => int)
+SK Derived [5:5-7] : shape('a' => mixed)
+SK Derived [5:5-7] : shape('a' => bool)
+SK Derived [5:5-7] : shape('b' => mixed)
+SK Derived [5:5-7] : shape('b' => int)
+SK Derived [10:5-7] : shape('a' => mixed)
+SK Derived [10:5-7] : shape('a' => bool)
+SK Derived [10:5-7] : shape('b' => mixed)
+SK Derived [10:5-7] : shape('b' => int)
+SK Derived [14:5-33] : shape('a' => mixed)
+SK Derived [14:5-33] : shape('a' => bool)
+SK Derived [14:5-33] : shape('b' => mixed)
+SK Derived [14:5-33] : shape('b' => int)
 [3:12-31] ⊆ [3:12-31]
 [5:5-7] ⊆ [5:5-7]
 [8:12-31] ⊆ [8:12-31]

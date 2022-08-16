@@ -118,7 +118,7 @@ let add_key_constraint
       | A.String str ->
         let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
         let ty = Tast_env.fully_expand env.tast_env ty in
-        let constraint_ = Has_static_key (entity, key, ty) in
+        let constraint_ = Has_static_key (Base, entity, key, ty) in
         let env = Env.add_constraint env { hack_pos; origin; constraint_ } in
         if is_optional then
           let constraint_ = Has_optional_key (entity, key) in

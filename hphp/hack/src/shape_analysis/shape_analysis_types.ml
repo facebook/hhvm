@@ -57,9 +57,14 @@ module Codemod = struct
   [@@deriving show { with_path = false }]
 end
 
+type source =
+  | Base
+  | Derived
+[@@deriving ord, show { with_path = false }]
+
 type constraint_ =
   | Marks of marker_kind * Pos.t
-  | Has_static_key of entity_ * T.TShapeField.t * T.locl_ty
+  | Has_static_key of source * entity_ * T.TShapeField.t * T.locl_ty
   | Has_optional_key of entity_ * T.TShapeField.t
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_

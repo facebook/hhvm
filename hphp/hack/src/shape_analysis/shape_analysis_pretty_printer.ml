@@ -28,12 +28,16 @@ let show_constraint env =
   function
   | Marks (kind, pos) ->
     Format.asprintf "%s at %a" (show_marker_kind kind) Pos.pp pos
-  | Has_static_key (entity, key, ty) ->
+  | Has_static_key (source, entity, key, ty) ->
     let field_map =
       T.TShapeMap.singleton key T.{ sft_ty = ty; sft_optional = false }
     in
     let shape = mk_shape field_map in
-    Format.asprintf "SK %s : %s" (show_entity entity) (show_ty shape)
+    Format.asprintf
+      "SK %s %s : %s"
+      (show_source source)
+      (show_entity entity)
+      (show_ty shape)
   | Has_optional_key (entity, key) ->
     Format.asprintf
       "OK %s : %s"

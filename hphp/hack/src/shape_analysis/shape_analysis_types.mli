@@ -81,9 +81,16 @@ module Codemod : sig
   [@@deriving show { with_path = false }]
 end
 
+(** When embedded in a constraint, it indicates if it originates by traversing
+    the source code or by deduction in the solver *)
+type source =
+  | Base
+  | Derived
+[@@deriving show]
+
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
-  | Has_static_key of entity_ * T.TShapeField.t * T.locl_ty
+  | Has_static_key of source * entity_ * T.TShapeMap.key * T.locl_ty
       (** Records a static key an entity is accessed with along with the Hack
           type of that key *)
   | Has_optional_key of entity_ * T.TShapeField.t

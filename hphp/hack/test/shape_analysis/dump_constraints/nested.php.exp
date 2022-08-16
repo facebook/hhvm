@@ -1,7 +1,7 @@
 === Shape analysis results for nested.php
 Constraints for \f:
-   4: SK [4:3-31] : shape('a' => \HH\dict<string, int>)
+   4: SK Base [4:3-31] : shape('a' => \HH\dict<string, int>)
    4: Allocation at [4:3-31]
-   4: SK [4:15-30] : shape('b' => int)
+   4: SK Base [4:15-30] : shape('b' => int)
    4: Allocation at [4:15-30]
 

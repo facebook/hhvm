@@ -12,9 +12,30 @@ module T = Typing_defs
 module Logic = Shape_analysis_logic
 module HT = Hips_types
 
+module StaticAccess = struct
+  type ty = entity_ * T.TShapeField.t * Typing_defs.locl_ty
+
+  let compare =
+    Tuple.T3.compare
+      ~cmp1:compare_entity_
+      ~cmp2:T.TShapeField.compare
+      ~cmp3:Typing_defs.compare_locl_ty
+
+  module Set = struct
+    include Caml.Set.Make (struct
+      type t = ty
+
+      let compare = compare
+    end)
+
+    let unions_map ~f set = fold (fun elt acc -> union (f elt) acc) set empty
+  end
+end
+
 type constraints = {
   markers: (marker_kind * Pos.t) list;
-  static_accesses: (entity_ * T.TShapeMap.key * Typing_defs.locl_ty) list;
+  base_static_accesses: StaticAccess.Set.t;
+  derived_static_accesses: StaticAccess.Set.t;
   optional_accesses: (entity_ * T.TShapeMap.key) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
@@ -23,7 +44,8 @@ type constraints = {
 let constraints_init =
   {
     markers = [];
-    static_accesses = [];
+    base_static_accesses = StaticAccess.Set.empty;
+    derived_static_accesses = StaticAccess.Set.empty;
     optional_accesses = [];
     dynamic_accesses = [];
     subsets = [];
@@ -49,10 +71,21 @@ let disassemble constraints =
   let partition_constraint constraints = function
     | Marks (kind, entity) ->
       { constraints with markers = (kind, entity) :: constraints.markers }
-    | Has_static_key (entity, key, ty) ->
+    | Has_static_key (Base, entity, key, ty) ->
       {
         constraints with
-        static_accesses = (entity, key, ty) :: constraints.static_accesses;
+        base_static_accesses =
+          StaticAccess.Set.add
+            (entity, key, ty)
+            constraints.base_static_accesses;
+      }
+    | Has_static_key (Derived, entity, key, ty) ->
+      {
+        constraints with
+        derived_static_accesses =
+          StaticAccess.Set.add
+            (entity, key, ty)
+            constraints.derived_static_accesses;
       }
     | Has_optional_key (entity, key) ->
       {
@@ -70,11 +103,21 @@ let disassemble constraints =
   List.fold ~init:constraints_init ~f:partition_constraint constraints
 
 let assemble
-    { markers; static_accesses; optional_accesses; dynamic_accesses; subsets } =
+    {
+      markers;
+      base_static_accesses;
+      derived_static_accesses;
+      optional_accesses;
+      dynamic_accesses;
+      subsets;
+    } =
   List.map ~f:(fun (kind, entity) -> Marks (kind, entity)) markers
   @ List.map
-      ~f:(fun (entity, key, ty) -> Has_static_key (entity, key, ty))
-      static_accesses
+      ~f:(fun (entity, key, ty) -> Has_static_key (Base, entity, key, ty))
+      (StaticAccess.Set.elements base_static_accesses)
+  @ List.map
+      ~f:(fun (entity, key, ty) -> Has_static_key (Derived, entity, key, ty))
+      (StaticAccess.Set.elements derived_static_accesses)
   @ List.map
       ~f:(fun (entity, key) -> Has_optional_key (entity, key))
       optional_accesses
@@ -175,14 +218,25 @@ let mk_adjacency_map subsets =
   has_optional_key_u(F,Key) :- has_optional_key_base(E,Key), subsets_tr(E,F).
 *)
 let deduce (constraints : constraint_ list) : constraint_ list =
-  let { markers; static_accesses; optional_accesses; dynamic_accesses; subsets }
-      =
+  let {
+    markers;
+    base_static_accesses;
+    derived_static_accesses;
+    optional_accesses;
+    dynamic_accesses;
+    subsets;
+  } =
     disassemble constraints
   in
 
   let subsets_reflexive =
     List.map ~f:(fun (_, pos) -> Literal pos) markers
-    @ List.map static_accesses ~f:(fun (e, _, _) -> e)
+    @ List.map
+        (StaticAccess.Set.elements base_static_accesses)
+        ~f:(fun (e, _, _) -> e)
+    @ List.map
+        (StaticAccess.Set.elements derived_static_accesses)
+        ~f:(fun (e, _, _) -> e)
     @ dynamic_accesses
     @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
     |> List.map ~f:(fun e -> (e, e))
@@ -194,22 +248,22 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let subsets = PointsToSet.elements subsets in
 
   (* Close upwards *)
-  let static_accesses =
-    List.concat_map
+  let derived_static_accesses =
+    StaticAccess.Set.unions_map
       ~f:(fun (entity, key, ty) ->
         collect_supersets entity
-        |> List.map ~f:(fun entity -> (entity, key, ty)))
-      static_accesses
+        |> List.map ~f:(fun entity -> (entity, key, ty))
+        |> StaticAccess.Set.of_list)
+      (StaticAccess.Set.union base_static_accesses derived_static_accesses)
   in
   let static_keys_of e =
-    List.filter_map
-      ~f:(fun (e', key, _) ->
-        if equal_entity_ e e' then
-          Some key
-        else
-          None)
-      static_accesses
-    |> T.TShapeSet.of_list
+    let add_key (e', key, _) map =
+      if equal_entity_ e e' then
+        T.TShapeSet.add key map
+      else
+        map
+    in
+    StaticAccess.Set.fold add_key derived_static_accesses T.TShapeSet.empty
   in
 
   let optional_accesses =
@@ -254,7 +308,14 @@ let deduce (constraints : constraint_ list) : constraint_ list =
     upward_dynamic_accesses @ downward_dynamic_accesses
   in
   assemble
-    { markers; static_accesses; optional_accesses; dynamic_accesses; subsets }
+    {
+      markers;
+      base_static_accesses;
+      derived_static_accesses;
+      optional_accesses;
+      dynamic_accesses;
+      subsets;
+    }
 
 (*
   static_shape_result(E) :- marks(E), not has_dynamic_key_ud(E).
@@ -266,7 +327,13 @@ let deduce (constraints : constraint_ list) : constraint_ list =
 let produce_results
     (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let { markers; static_accesses; optional_accesses; dynamic_accesses; _ } =
+  let {
+    markers;
+    derived_static_accesses;
+    optional_accesses;
+    dynamic_accesses;
+    _;
+  } =
     disassemble constraints
   in
 
@@ -312,13 +379,17 @@ let produce_results
         let optional_field = is_optional entity key in
         Some (kind, Logic.(singleton key ty optional_field <> shape_keys') ~env)
     in
-    static_accesses
-    |> List.fold ~init:static_shape_results ~f:(fun pos_map (entity, key, ty) ->
-           match entity with
-           | Literal pos
-           | Inter (HT.Param (_, _, pos)) ->
-             Pos.Map.update pos (update_entity entity key ty) pos_map
-           | Variable _ -> pos_map)
+    let add_entity (entity, key, ty) pos_map =
+      match entity with
+      | Literal pos
+      | Inter (HT.Param (_, _, pos)) ->
+        Pos.Map.update pos (update_entity entity key ty) pos_map
+      | Variable _ -> pos_map
+    in
+    StaticAccess.Set.fold
+      add_entity
+      derived_static_accesses
+      static_shape_results
   in
 
   (* Convert to individual statically accessed dict results *)
@@ -361,8 +432,8 @@ let substitute_inter_intra
     begin
       match intra_constr with
       | Marks _ -> intra_constr
-      | Has_static_key (intra_ent_2, key, ty) ->
-        Has_static_key (replace intra_ent_2, key, ty)
+      | Has_static_key (source, intra_ent_2, key, ty) ->
+        Has_static_key (source, replace intra_ent_2, key, ty)
       | Has_optional_key (intra_ent_2, key) ->
         Has_optional_key (replace intra_ent_2, key)
       | Has_dynamic_key intra_ent_2 -> Has_dynamic_key (replace intra_ent_2)
@@ -383,7 +454,7 @@ let equiv
     | HT.Intra intra_constr ->
       (match intra_constr with
       | Marks _ -> Some intra_constr
-      | Has_static_key (ent, _, _) -> only_inter_ent intra_constr ent
+      | Has_static_key (_, ent, _, _) -> only_inter_ent intra_constr ent
       | Has_optional_key (ent, _) -> only_inter_ent intra_constr ent
       | Has_dynamic_key ent -> only_inter_ent intra_constr ent
       | _ -> None)

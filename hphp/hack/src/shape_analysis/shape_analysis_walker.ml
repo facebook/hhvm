@@ -19,8 +19,10 @@ module HT = Hips_types
 let join ~pos ~origin (env : env) (left : entity_) (right : entity_) :
     env * entity_ =
   let join = Env.fresh_var () in
-  let constraint_ = Joins { left; right; join } in
-  let env = Env.add_constraint env @@ { hack_pos = pos; origin; constraint_ } in
+  let decorate constraint_ = { hack_pos = pos; origin; constraint_ } in
+  let add_constraint env c = Env.add_constraint env @@ decorate c in
+  let constraints = [Subsets (left, join); Subsets (right, join)] in
+  let env = List.fold ~f:add_constraint ~init:env constraints in
   (env, join)
 
 let when_tast_check tast_env ~default f =

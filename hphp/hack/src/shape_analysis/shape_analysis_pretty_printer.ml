@@ -41,8 +41,6 @@ let show_constraint env =
       (Typing_utils.get_printable_shape_field_name key)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
-  | Joins { left; right; join } ->
-    show_entity left ^ " ∪ " ^ show_entity right ^ " = " ^ show_entity join
 
 let show_inter_constraint _ = function
   | HT.Arg ((f_id, arg_idx, _), ent) ->

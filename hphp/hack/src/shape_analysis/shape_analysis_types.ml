@@ -62,11 +62,6 @@ type constraint_ =
   | Has_optional_key of entity_ * T.TShapeField.t
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_
-  | Joins of {
-      left: entity_;
-      right: entity_;
-      join: entity_;
-    }
 [@@deriving ord]
 
 type inter_constraint_ = entity_ HT.inter_constraint_

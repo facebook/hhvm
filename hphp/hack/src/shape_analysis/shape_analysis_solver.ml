@@ -18,7 +18,6 @@ type constraints = {
   optional_accesses: (entity_ * T.TShapeMap.key) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
-  joins: (entity_ * entity_ * entity_) list;
 }
 
 let constraints_init =
@@ -28,7 +27,6 @@ let constraints_init =
     optional_accesses = [];
     dynamic_accesses = [];
     subsets = [];
-    joins = [];
   }
 
 let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
@@ -68,20 +66,11 @@ let disassemble constraints =
       }
     | Subsets (sub, sup) ->
       { constraints with subsets = (sub, sup) :: constraints.subsets }
-    | Joins { left; right; join } ->
-      { constraints with joins = (left, right, join) :: constraints.joins }
   in
   List.fold ~init:constraints_init ~f:partition_constraint constraints
 
 let assemble
-    {
-      markers;
-      static_accesses;
-      optional_accesses;
-      dynamic_accesses;
-      subsets;
-      joins;
-    } =
+    { markers; static_accesses; optional_accesses; dynamic_accesses; subsets } =
   List.map ~f:(fun (kind, entity) -> Marks (kind, entity)) markers
   @ List.map
       ~f:(fun (entity, key, ty) -> Has_static_key (entity, key, ty))
@@ -91,7 +80,6 @@ let assemble
       optional_accesses
   @ List.map ~f:(fun entity -> Has_dynamic_key entity) dynamic_accesses
   @ List.map ~f:(fun (sub, sup) -> Subsets (sub, sup)) subsets
-  @ List.map ~f:(fun (left, right, join) -> Joins { left; right; join }) joins
 
 let subset_lookups subsets =
   let update entity entity' =
@@ -116,6 +104,26 @@ let subset_lookups subsets =
   in
   (collect subset_map, collect superset_map)
 
+type adjacencies = { backwards: EntitySet.t }
+
+let mk_adjacency_map subsets =
+  let entities =
+    List.concat_map ~f:(fun (e1, e2) -> [e1; e2]) subsets |> EntitySet.of_list
+  in
+  let backwards_of e (e1, e2) =
+    if equal_entity_ e e2 then
+      Some e1
+    else
+      None
+  in
+  let find_adjacent of_ entity =
+    List.filter_map ~f:(of_ entity) subsets |> EntitySet.of_list
+  in
+  let add e m =
+    EntityMap.add e { backwards = find_adjacent backwards_of e } m
+  in
+  EntitySet.fold add entities EntityMap.empty
+
 (* The following program roughly summarises the solver in Datalog.
 
   Variables with single letters E and F and their variants with primes all
@@ -137,11 +145,10 @@ let subset_lookups subsets =
   // Reflexive closure
   subsets_tr(E,E) :-
     subsets(E,_); subsets(_,E);
-    joins(E,_,_); joins(_,E,_); joins(_,_,E);
     has_static_key(E,_,_);
     has_dynamic_key(E,_,_).
   // Transitive closure closure
-  subsets_tr(E,F) :- subsets(E,F); joins(E,_,F); joins(_,E,F).
+  subsets_tr(E,F) :- subsets(E,F).
   subsets_tr(E,F) :- subsets(E,F), subsets_re(E,F).
 
   has_static_key_u(E, Key, Ty) :- has_static_key(E, Key, Ty).
@@ -160,22 +167,16 @@ let subset_lookups subsets =
   // observe the key to be definitely in place, but it would still be marked as
   // optional.
   has_optional_key_base(E,Key) :- has_optional_key(E,Key).
-  has_optional_key_base(E,Key) :-
-    (joins(E,F,Join); joins(F,E,Join)),
+  has_optional_key_base(Join,Key) :-
+    subsets(E,Join),
+    subsets(F,Join),
     has_static_key_u(E,Key),
     not has_static_key_u(F,Key).
   has_optional_key_u(F,Key) :- has_optional_key_base(E,Key), subsets_tr(E,F).
 *)
-(* TODO(T125884349): Specially handle flows into return type hints *)
 let deduce (constraints : constraint_ list) : constraint_ list =
-  let {
-    markers;
-    static_accesses;
-    optional_accesses;
-    dynamic_accesses;
-    subsets;
-    joins;
-  } =
+  let { markers; static_accesses; optional_accesses; dynamic_accesses; subsets }
+      =
     disassemble constraints
   in
 
@@ -184,13 +185,10 @@ let deduce (constraints : constraint_ list) : constraint_ list =
     @ List.map static_accesses ~f:(fun (e, _, _) -> e)
     @ dynamic_accesses
     @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
-    @ List.concat_map joins ~f:(fun (e, e', e'') -> [e; e'; e''])
     |> List.map ~f:(fun e -> (e, e))
   in
-  let subsets_through_joins =
-    List.concat_map joins ~f:(fun (e1, e2, join) -> [(e1, join); (e2, join)])
-  in
-  let subsets = subsets_through_joins @ subsets_reflexive @ subsets in
+  let adjacency_map = mk_adjacency_map subsets in
+  let subsets = subsets_reflexive @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
   let (collect_subsets, collect_supersets) = subset_lookups subsets in
   let subsets = PointsToSet.elements subsets in
@@ -203,27 +201,38 @@ let deduce (constraints : constraint_ list) : constraint_ list =
         |> List.map ~f:(fun entity -> (entity, key, ty)))
       static_accesses
   in
+  let static_keys_of e =
+    List.filter_map
+      ~f:(fun (e', key, _) ->
+        if equal_entity_ e e' then
+          Some key
+        else
+          None)
+      static_accesses
+    |> T.TShapeSet.of_list
+  in
 
   let optional_accesses =
-    let add_optional_key (left, right, join) =
-      let filter_keys e =
-        List.filter_map
-          ~f:(fun (e', key, _) ->
-            if equal_entity_ e e' then
-              Some key
-            else
-              None)
-          static_accesses
+    let add_optional_key join adjacencies acc =
+      let handle_predecessor pred_entity common_keys =
+        let keys = static_keys_of pred_entity in
+        T.TShapeSet.inter keys common_keys
       in
-      let left_static_keys = filter_keys left |> T.TShapeSet.of_list in
-      let right_static_keys = filter_keys right |> T.TShapeSet.of_list in
-      T.TShapeSet.diff
-        (T.TShapeSet.union left_static_keys right_static_keys)
-        (T.TShapeSet.inter left_static_keys right_static_keys)
-      |> T.TShapeSet.elements
-      |> List.map ~f:(fun optional_key -> (join, optional_key))
+      let all_keys = static_keys_of join in
+      let common_keys =
+        if EntitySet.cardinal adjacencies.backwards < 2 then
+          all_keys
+        else
+          EntitySet.fold handle_predecessor adjacencies.backwards all_keys
+      in
+      let optional_keys =
+        T.TShapeSet.diff all_keys common_keys
+        |> T.TShapeSet.elements
+        |> List.map ~f:(fun optional_key -> (join, optional_key))
+      in
+      optional_keys @ acc
     in
-    List.concat_map ~f:add_optional_key joins @ optional_accesses
+    EntityMap.fold add_optional_key adjacency_map [] @ optional_accesses
   in
   (* Close upwards *)
   let optional_accesses =
@@ -245,14 +254,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
     upward_dynamic_accesses @ downward_dynamic_accesses
   in
   assemble
-    {
-      markers;
-      static_accesses;
-      optional_accesses;
-      dynamic_accesses;
-      subsets;
-      joins;
-    }
+    { markers; static_accesses; optional_accesses; dynamic_accesses; subsets }
 
 (*
   static_shape_result(E) :- marks(E), not has_dynamic_key_ud(E).
@@ -366,18 +368,6 @@ let substitute_inter_intra
       | Has_dynamic_key intra_ent_2 -> Has_dynamic_key (replace intra_ent_2)
       | Subsets (intra_ent_2, intra_ent_3) ->
         Subsets (replace intra_ent_2, replace intra_ent_3)
-      | Joins
-          {
-            left = intra_entity_left;
-            right = intra_entity_right;
-            join = intra_entity_join;
-          } ->
-        Joins
-          {
-            left = replace intra_entity_left;
-            right = replace intra_entity_right;
-            join = replace intra_entity_join;
-          }
     end
 
 let equiv

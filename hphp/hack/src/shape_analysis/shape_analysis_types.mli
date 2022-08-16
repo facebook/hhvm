@@ -92,15 +92,6 @@ type constraint_ =
   | Subsets of entity_ * entity_
       (** Records that the first keys of the first entity are all present in
           the second. *)
-  | Joins of {
-      left: entity_;
-      right: entity_;
-      join: entity_;
-    }
-      (** `Join(e,e',e'')` represents that `e''` is the join point of `e` and
-          `e'` for example as a result of merging environments after an if
-          statement. *)
-[@@deriving ord]
 
 (** Interprocedural constraint: currently only `Arg((f, 0), p)`, which models
     a function call f(p, _, ...). *)

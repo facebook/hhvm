@@ -19,13 +19,14 @@ let fresh_var () : entity_ =
 
 let union_continuation_at_lid ~pos ~origin (entity1 : entity) (entity2 : entity)
     : constraint_ decorated list * entity =
+  let decorate constraint_ = { hack_pos = pos; origin; constraint_ } in
   match (entity1, entity2) with
   | (Some left, Some right) ->
     let join = fresh_var () in
-    let join_constraint =
-      { hack_pos = pos; origin; constraint_ = Joins { left; right; join } }
+    let constraints =
+      List.map ~f:decorate [Subsets (left, join); Subsets (right, join)]
     in
-    ([join_constraint], Some join)
+    (constraints, Some join)
   | (entity, None)
   | (None, entity) ->
     ([], entity)

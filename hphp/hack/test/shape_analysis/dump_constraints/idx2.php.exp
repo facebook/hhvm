@@ -1,7 +1,8 @@
 === Shape analysis results for idx2.php
 Constraints for \idx_ife:
    3: Parameter at [3:18-37]
-   4: Arg(\idx_ife, 0) ∪ Arg(\idx_ife, 0) = ?1
+   4: Arg(\idx_ife, 0) ⊆ ?1
+   4: Arg(\idx_ife, 0) ⊆ ?1
    5: SK Arg(\idx_ife, 0) : shape('a' => mixed)
    6: OK Arg(\idx_ife, 0) : b
    6: SK Arg(\idx_ife, 0) : shape('b' => mixed)

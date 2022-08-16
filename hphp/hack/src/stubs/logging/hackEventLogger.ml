@@ -69,6 +69,7 @@ type rollout_flags = {
   no_marshalled_naming_table_in_saved_state: bool;
   no_load_two_saved_states: bool;
   use_manifold_cython_client: bool;
+  disable_naming_table_fallback_loading: bool;
 }
 
 let flush () = ()

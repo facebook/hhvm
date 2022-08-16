@@ -581,6 +581,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // Callee checks and input initialization.
     emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
     emitCalleeArgumentArityChecks(env, callee, numArgsInclUnpack);
+    emitCalleeArgumentTypeChecks(env, callee, numArgsInclUnpack,
+                                 objOrClass ? objOrClass : cns(env, nullptr));
     emitCalleeDynamicCallChecks(env, callee, prologueFlags);
     emitCalleeCoeffectChecks(env, callee, prologueFlags, coeffects,
                              fca.skipCoeffectsCheck(),

@@ -49,8 +49,8 @@ struct RepoGlobalData {
 
   /*
    * Indicates whether a repo was compiled assumming that UpperBound type-hints
-   * will be verified by VerifyParamType and VerifyReturnType instructions
-   * at runtime.
+   * will be verified by the parameter type verification and VerifyReturnType
+   * instructions at runtime.
    *
    * This changes program behavior because this type hints that are checked
    * at runtime will enable additional HHBBC optimizations.

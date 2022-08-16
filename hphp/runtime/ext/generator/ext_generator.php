@@ -15,7 +15,7 @@ final class Generator implements HH\KeyedIterator {
   public function next()[/* gen $this */]: mixed;
 
   <<__Native("OpCodeImpl"), __NEVER_INLINE>>
-  private function throw(object $ex)[/* gen $this */]: mixed;
+  private function throw(Throwable $ex)[/* gen $this */]: mixed;
 
   <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function rewind()[/* gen $this */]: mixed;

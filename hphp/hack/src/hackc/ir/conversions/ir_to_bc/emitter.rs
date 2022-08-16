@@ -646,7 +646,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 let local = self.lookup_local(pid);
                 Opcode::VerifyOutType(local)
             }
-            Hhbc::VerifyParamType(pid, _) => {
+            Hhbc::VerifyParamType(_, pid, _) => {
                 let local = self.lookup_local(pid);
                 Opcode::VerifyParamType(local)
             }

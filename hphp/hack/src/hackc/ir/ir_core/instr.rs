@@ -539,7 +539,7 @@ pub enum Hhbc {
     UnsetL(LocalId, LocId),
     VerifyImplicitContextState(LocId),
     VerifyOutType(ValueId, LocalId, LocId),
-    VerifyParamType(LocalId, LocId),
+    VerifyParamType(ValueId, LocalId, LocId),
     VerifyParamTypeTS(ValueId, LocalId, LocId),
     VerifyRetTypeC(ValueId, LocId),
     VerifyRetTypeTS([ValueId; 2], LocId),

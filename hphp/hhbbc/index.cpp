@@ -330,7 +330,7 @@ struct res::Func::FuncInfo {
   /*
    * Bitset representing which parameters definitely don't affect the
    * result of the function, assuming it produces one. Note that
-   * VerifyParamType does not count as a use in this context.
+   * the parameter type verification does not count as a use in this context.
    */
   std::bitset<64> unusedParams;
 
@@ -7021,6 +7021,9 @@ bool Index::could_have_reified_type(Context ctx,
 
 std::tuple<Type, bool> Index::verify_param_type(Context ctx, uint32_t paramId,
                                                 Type t) const {
+  // Builtins verify parameter types differently.
+  if (ctx.func->isNative) return { t, true };
+
   auto const& pinfo = ctx.func->params[paramId];
   bool effectFree = true;
   std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};

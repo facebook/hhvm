@@ -1,28 +1,28 @@
-Warning: Argument 1 to a() must be of type @A, null given in %s/test/slow/typedef/typedef_callable.php on line 12
+Warning: Argument 1 to a() must be of type @A, null given in %s/test/slow/typedef/typedef_callable.php on line 19
 
-Warning: Argument 1 to a() must be of type @A, int given in %s/test/slow/typedef/typedef_callable.php on line 12
+Warning: Argument 1 to a() must be of type @A, int given in %s/test/slow/typedef/typedef_callable.php on line 20
 
-Warning: Argument 1 to a() must be of type @A, string given in %s/test/slow/typedef/typedef_callable.php on line 12
+Warning: Argument 1 to a() must be of type @A, string given in %s/test/slow/typedef/typedef_callable.php on line 22
 
-Warning: Argument 1 to a() must be of type @A, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 12
+Warning: Argument 1 to a() must be of type @A, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 24
 
-Warning: Argument 1 to b() must be of type @B, int given in %s/test/slow/typedef/typedef_callable.php on line 13
+Warning: Argument 1 to b() must be of type @B, int given in %s/test/slow/typedef/typedef_callable.php on line 27
 
-Warning: Argument 1 to b() must be of type @B, string given in %s/test/slow/typedef/typedef_callable.php on line 13
+Warning: Argument 1 to b() must be of type @B, string given in %s/test/slow/typedef/typedef_callable.php on line 29
 
-Warning: Argument 1 to b() must be of type @B, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 13
+Warning: Argument 1 to b() must be of type @B, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 31
 
-Warning: Argument 1 to c() must be of type @C, null given in %s/test/slow/typedef/typedef_callable.php on line 14
+Warning: Argument 1 to c() must be of type @C, null given in %s/test/slow/typedef/typedef_callable.php on line 33
 
-Warning: Argument 1 to c() must be of type @C, int given in %s/test/slow/typedef/typedef_callable.php on line 14
+Warning: Argument 1 to c() must be of type @C, int given in %s/test/slow/typedef/typedef_callable.php on line 34
 
-Warning: Argument 1 to c() must be of type @C, string given in %s/test/slow/typedef/typedef_callable.php on line 14
+Warning: Argument 1 to c() must be of type @C, string given in %s/test/slow/typedef/typedef_callable.php on line 36
 
-Warning: Argument 1 to c() must be of type @C, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 14
+Warning: Argument 1 to c() must be of type @C, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 38
 
-Warning: Argument 1 to d() must be of type @D, int given in %s/test/slow/typedef/typedef_callable.php on line 15
+Warning: Argument 1 to d() must be of type @D, int given in %s/test/slow/typedef/typedef_callable.php on line 41
 
-Warning: Argument 1 to d() must be of type @D, string given in %s/test/slow/typedef/typedef_callable.php on line 15
+Warning: Argument 1 to d() must be of type @D, string given in %s/test/slow/typedef/typedef_callable.php on line 43
 
-Warning: Argument 1 to d() must be of type @D, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 15
+Warning: Argument 1 to d() must be of type @D, HH\vec given in %s/test/slow/typedef/typedef_callable.php on line 45
 Done

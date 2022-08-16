@@ -9,7 +9,8 @@ class ReifiedGenericsClass<reify T> {}
 function test<T>(
   NoGenerics $one,
   ErasedGenericsClass<T> $t2,
-  // CHECK: VerifyParamType $t2
+  // CHECK-NOT: VerifyParamTypeTS $t2
 
   ReifiedGenericsClass<int> $t3,
+  // CHECK: VerifyParamTypeTS $t3
 ): void {}

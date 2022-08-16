@@ -59,7 +59,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::UnsetG(..)
             | Hhbc::UnsetL(..)
             | Hhbc::VerifyImplicitContextState(_)
-            | Hhbc::VerifyParamType(..)
             | Hhbc::VerifyParamTypeTS(..) => 0,
 
             // --- 1 pushed value
@@ -174,6 +173,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::Sub(..)
             | Hhbc::This(_)
             | Hhbc::VerifyOutType(..)
+            | Hhbc::VerifyParamType(..)
             | Hhbc::VerifyRetTypeC(..)
             | Hhbc::VerifyRetTypeTS(..)
             | Hhbc::WHResult(..)

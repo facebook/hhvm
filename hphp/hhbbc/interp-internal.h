@@ -742,9 +742,8 @@ bool locCouldBeUninit(ISS& env, LocalId l) {
 }
 
 /*
- * Update the known type of a local, based on assertions
- * (VerifyParamType; or IsType/JmpCC), rather than an actual
- * modification to the local.
+ * Update the known type of a local, based on assertions (e.g. IsType/JmpCC),
+ * rather than an actual modification to the local.
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);

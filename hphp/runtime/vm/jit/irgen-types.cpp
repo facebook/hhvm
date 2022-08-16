@@ -1197,21 +1197,45 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   }
 }
 
-void verifyParamTypeImpl(IRGS& env, int32_t id) {
-  auto const func = curFunc(env);
+}
+
+void verifyParamType(IRGS& env, const Func* func, int32_t id,
+                     BCSPRelOffset offset, SSATmp* prologueCtx) {
   auto const verifyFunc = [&](const TypeConstraint& tc) {
     verifyTypeImpl(
       env,
       tc,
       false,
       [&] { // Get value to test
-        return ldLoc(env, id, DataTypeSpecific);
+        return topC(env, offset, DataTypeGeneric);
       },
       [&] { // Get the class representing `this' type
-        return ldCtxCls(env);
+        if (prologueCtx == nullptr) return ldCtxCls(env);
+
+        if (!func->cls()) return cns(env, nullptr);
+        if (func->isClosureBody()) {
+          auto const closureTy = Type::ExactObj(func->implCls());
+          auto const closure = gen(env, AssertType, closureTy, prologueCtx);
+          if (func->isStatic()) {
+            return gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
+          }
+          auto const closureThis =
+            gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
+          return gen(env, LdObjClass, closureThis);
+        }
+
+        if (func->isStatic()) {
+          return gen(env, AssertType, Type::SubCls(func->cls()), prologueCtx);
+        }
+        auto const thiz =
+          gen(env, AssertType, Type::SubObj(func->cls()), prologueCtx);
+        return gen(env, LdObjClass, thiz);
       },
       [&] (SSATmp* updated) { // Set the potentially coerced value
-        stLocRaw(env, id, fp(env), updated);
+        auto const irspRelOffset = offsetFromIRSP(env, offset);
+        gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updated);
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
       },
       [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         gen(
@@ -1264,8 +1288,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       }
     }
   }
-}
-
 }
 
 void verifyPropType(IRGS& env,
@@ -1432,11 +1454,10 @@ void emitVerifyOutType(IRGS& env, int32_t paramId) {
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {
-  verifyParamTypeImpl(env, paramId);
+  verifyParamType(env, curFunc(env), paramId, BCSPRelOffset{0}, nullptr);
 }
 
 void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
-  verifyParamTypeImpl(env, paramId);
   auto const ts = popC(env);
   auto const cell = ldLoc(env, paramId, DataTypeSpecific);
   auto const reified = tcCouldBeReified(curFunc(env), paramId);

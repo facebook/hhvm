@@ -1,7 +1,4 @@
 .function <"" N  > test(<"\?HH\\string" "HH\\string" nullable extended_hint > $a, <"\?HH\\string" "HH\\string" nullable extended_hint > $b, <"HH\\string" "HH\\string" > $c) {
-  VerifyParamType $a
-  VerifyParamType $b
-  VerifyParamType $c
   IsTypeL $a Null
   JmpZ L1
   Null

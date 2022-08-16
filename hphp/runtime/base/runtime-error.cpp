@@ -93,12 +93,21 @@ void raise_typehint_error(const std::string& msg) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
+  raise_recoverable_error(msg);
+  raise_error("Error handler tried to recover from typehint violation");
+}
+
+void raise_typehint_error_without_first_frame(const std::string& msg) {
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    VMRegAnchor _;
+    SystemLib::throwTypeErrorObject(msg);
+  }
   raise_recoverable_error_without_first_frame(msg);
   raise_error("Error handler tried to recover from typehint violation");
 }
 
 void raise_reified_typehint_error(const std::string& msg, bool warn) {
-  if (!warn) return raise_typehint_error(msg);
+  if (!warn) return raise_typehint_error_without_first_frame(msg);
   raise_warning_unsampled(msg);
 }
 

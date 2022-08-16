@@ -1524,12 +1524,13 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
 
   ActRec* ar = vmStack().indA(numArgsInclUnpack + (hasGenerics ? 1 : 0));
+  void* ctx = thiz ? (void*)thiz : (void*)cls;
 
   // Callee checks and input initialization.
   calleeGenericsChecks(f, hasGenerics);
   calleeArgumentArityChecks(f, numArgsInclUnpack);
+  calleeArgumentTypeChecks(f, numArgsInclUnpack, ctx);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
-  void* ctx = thiz ? (void*)thiz : (void*)cls;
   calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
   f->recordCall();
   initFuncInputs(f, numArgsInclUnpack);

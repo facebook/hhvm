@@ -4,25 +4,21 @@
 
 
 .function use_class(<"@C" "C" extended_hint soft> $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function use_int_soft(<"@HH\\int" "HH\\int" extended_hint soft> $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function use_int_nullable(<"?HH\\int" "HH\\int" nullable extended_hint> $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function use_int(<"HH\\int" "HH\\int"> $x) {
-  VerifyParamType $x
   Null
   RetC
 }

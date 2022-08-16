@@ -1,28 +1,28 @@
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 30
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 66
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 29
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 35
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 67
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 34
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 40
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 68
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 39
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 45
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 70
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 45
 string(3) "Baz"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 50
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 72
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 49
@@ -32,9 +32,9 @@ class(Foo)
 class(Foo)
 class(Foo)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 62
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 76
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 62
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/lazyclass-string-typehint.php on line 76
 string(3) "Foo"
 string(3) "Foo"
 

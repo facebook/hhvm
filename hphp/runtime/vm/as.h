@@ -105,7 +105,7 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
         Atom::seq(Atom(OpSetL).onlyif(checkloc), Atom(OpPopC))
       ),
     }.ignore(
-      {OpAssertRATL, OpAssertRATStk}
+      {OpAssertRATL, OpAssertRATStk, OpVerifyParamType}
     ).matchAnchored(fe->bc(), pi.funcletOff, fe->bcPos());
 
     // Verify that the pattern we matched is either for the last DV initializer,

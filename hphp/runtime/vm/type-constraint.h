@@ -117,8 +117,8 @@ struct TypeConstraint {
 
   /*
    * Returns: whether this constraint implies any runtime checking at
-   * all.  If this function returns false, it means the
-   * VerifyParamType would be a no-op.
+   * all.  If this function returns false, it means the parameter type
+   * verification would be a no-op.
    */
   bool hasConstraint() const { return m_typeName; }
 

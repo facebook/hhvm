@@ -3479,6 +3479,7 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
   // Callee checks and input initialization.
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
+  calleeArgumentTypeChecks(func, numArgsInclUnpack, ctx);
   calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
   calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
   func->recordCall();
@@ -4606,31 +4607,15 @@ OPTBLD_INLINE void iopLateBoundCls() {
 }
 
 OPTBLD_INLINE void iopVerifyParamType(local_var param) {
-  const Func *func = vmfp()->func();
-  assertx(param.index < func->numParams());
-  assertx(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[param.index].typeConstraint;
-  if (tc.isCheckable()) {
-    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-    tc.verifyParam(param.lval, ctx, func, param.index);
-  }
-  if (func->hasParamsWithMultiUBs()) {
-    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
-    auto it = ubs.find(param.index);
-    if (it != ubs.end()) {
-      for (auto& ub : it->second) {
-        applyFlagsToUB(ub, tc);
-        if (ub.isCheckable()) {
-          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
-          ub.verifyParam(param.lval, ctx, func, param.index);
-        }
-      }
-    }
-  }
+  verifyParamType(
+    vmfp()->func(),
+    param.index,
+    vmStack().topTV(),
+    [] { return frameStaticClass(vmfp()); }
+  );
 }
 
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
-  iopVerifyParamType(param);
   auto const cell = vmStack().topC();
   assertx(tvIsDict(cell));
   auto isTypeVar = tcCouldBeReified(vmfp()->func(), param.index);

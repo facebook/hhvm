@@ -1147,8 +1147,13 @@ fn print_hhbc(
                 FmtLid(lid, ctx.strings),
             )?;
         }
-        Hhbc::VerifyParamType(lid, _) => {
-            write!(w, "verify_param_type {}", FmtLid(lid, ctx.strings))?;
+        Hhbc::VerifyParamType(vid, lid, _) => {
+            write!(
+                w,
+                "verify_param_type {}, {}",
+                FmtVid(func, vid, verbose),
+                FmtLid(lid, ctx.strings),
+            )?;
         }
         Hhbc::VerifyParamTypeTS(vid, lid, _) => {
             write!(

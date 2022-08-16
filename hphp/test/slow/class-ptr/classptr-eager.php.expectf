@@ -6,7 +6,7 @@ int(100)
 int(10)
 int(24)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 27
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 38
 string(3) "Foo"
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 26

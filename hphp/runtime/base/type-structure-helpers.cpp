@@ -455,9 +455,9 @@ bool isTSAllWildcards(const ArrayData* ts) {
   return allWildcard;
 }
 
-// This function will always be called after `VerifyParamType` instruction, so
-// we can make the assumption that if `param` is an object, outermost type in
-// `type_` is correct.
+// This function will always be called after the prologue parameter type
+// verification, so we can make the assumption that if `param` is an object,
+// outermost type in `type_` is correct.
 // This function will only be called when either `param` is an object or `type_`
 // is a primitive reified type parameter
 bool verifyReifiedLocalType(
@@ -473,12 +473,13 @@ bool verifyReifiedLocalType(
   auto const isObj = tvIsObject(param);
   // If it is not coming from a reified type variable and it is an object,
   // we do not need to run the check if the object in question does not have
-  // reified generics since `VerifyParamType` should have taken care of it
+  // reified generics since the parameter type verification should have taken
+  // care of it
   if (!isTypeVar && isObj) {
     auto const obj = val(param).pobj;
     auto const objcls = obj->getVMClass();
-    // Since we already checked that the class matches in VerifyParamType using
-    // the type annotation
+    // The parameter type verification in the prologue already checked that
+    // the class matches the type annocation.
     if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) {
       return true;
     }

@@ -251,12 +251,6 @@ interpOutputLocals(IRGS& env,
       break;
     }
 
-    case OpVerifyParamTypeTS:
-    case OpVerifyParamType: {
-      setImmLocType(0, TCell);
-      break;
-    }
-
     case OpSilence:
       if (static_cast<SilenceOp>(getImm(sk.pc(), 1).u_OA) == SilenceOp::Start) {
         setImmLocType(0, TInt);

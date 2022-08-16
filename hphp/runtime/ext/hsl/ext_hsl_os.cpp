@@ -354,10 +354,11 @@ struct HSLFileDescriptor {
 
   static HSLFileDescriptor* get(const Object& obj) {
     if (obj.isNull()) {
-      raise_typehint_error("Expected an HSL FileDescriptor, got null");
+      raise_typehint_error_without_first_frame(
+        "Expected an HSL FileDescriptor, got null");
     }
     if (!obj->instanceof(s_FQHSLFileDescriptor)) {
-      raise_typehint_error(
+      raise_typehint_error_without_first_frame(
         folly::sformat(
           "Expected an HSL FileDescriptor, got instance of class '{}'",
           obj->getClassName().c_str()
@@ -369,7 +370,7 @@ struct HSLFileDescriptor {
 
   static HSLFileDescriptor* get(const Variant& var) {
     if (!var.isObject()) {
-      raise_typehint_error(
+      raise_typehint_error_without_first_frame(
         folly::sformat(
           "Expected an HSL FileDescriptor, got {}",
           getDataTypeString(var.getType()).c_str()

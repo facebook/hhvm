@@ -1,7 +1,7 @@
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -33,7 +33,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -42,7 +42,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -56,7 +56,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -88,7 +88,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -97,7 +97,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -111,7 +111,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -143,7 +143,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -152,7 +152,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -166,7 +166,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -198,7 +198,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -207,7 +207,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -221,7 +221,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -253,7 +253,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -262,7 +262,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -276,7 +276,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -308,7 +308,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -317,7 +317,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -331,7 +331,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -363,7 +363,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -372,7 +372,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -386,7 +386,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -418,7 +418,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -427,7 +427,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -441,7 +441,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -473,7 +473,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -482,7 +482,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -496,7 +496,7 @@ string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(foo): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 bool(true)
 int(3)
@@ -528,7 +528,7 @@ bool(true)
 class(buz)
 notice(Closure$main): Implicit Class to string conversion for type-hint
 notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
 notice(io): Implicit Class to string conversion for type-hint
@@ -537,7 +537,7 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(io): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for type-hint
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"

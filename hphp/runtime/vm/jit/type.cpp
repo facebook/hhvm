@@ -969,13 +969,16 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   #undef O
 }
 
-Type typeFromPropTC(const HPHP::TypeConstraint& tc,
-                    const Class* propCls,
-                    const Class* ctx,
-                    bool isSProp) {
-  assertx(tc.validForProp());
+namespace {
 
-  if (!tc.isCheckable() || tc.isSoft()) return TCell;
+template<class TGetThisType>
+Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
+                    TGetThisType getThisType,
+                    const Class* ctx) {
+  if (!tc.isCheckable() || tc.isSoft() ||
+      (tc.isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2)) {
+    return TCell;
+  }
 
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
@@ -997,14 +1000,11 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::Classname:  return TStr | TCls | TLazyCls;
-      case A::This:
-        always_assert(propCls != nullptr);
-        return (isSProp && !tc.couldSeeMockObject())
-          ? Type::ExactObj(propCls)
-          : Type::SubObj(propCls);
+      case A::This:       return getThisType();
       case A::Nothing:
-      case A::NoReturn:
+      case A::NoReturn:   return TBottom;
       case A::Callable:
+        return TStr | TVec | TDict | TObj | TFuncLike | TObj | TClsMethLike;
       case A::Object:
       case A::Unresolved:
         break;
@@ -1060,6 +1060,54 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
   }();
   if (tc.isNullable()) base |= TInitNull;
   return base;
+}
+
+}
+
+Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+                    const Class* propCls,
+                    const Class* ctx,
+                    bool isSProp) {
+  assertx(tc.validForProp());
+
+  auto const getThisType = [&] {
+    always_assert(propCls != nullptr);
+    return isSProp && !tc.couldSeeMockObject()
+      ? Type::ExactObj(propCls)
+      : Type::SubObj(propCls);
+  };
+
+  return typeFromTCImpl(tc, getThisType, ctx);
+}
+
+
+Type typeFromFuncParam(const Func* func, uint32_t paramId) {
+  assertx(paramId < func->numNonVariadicParams());
+
+  // Builtins use a separate non-standard mechanism.
+  if (func->isCPPBuiltin()) return TInitCell;
+
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+
+  auto const& tc = func->params()[paramId].typeConstraint;
+
+  auto t = typeFromTCImpl(tc, getThisType, func->cls()) & TInitCell;
+  if (func->hasParamsWithMultiUBs()) {
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
+    auto it = ubs.find(paramId);
+    if (it != ubs.end()) {
+      for (auto& ub : it->second) {
+        // FIXME: doesn't seem right to update these structures at runtime,
+        // but we do the same in VerifyParamType.
+        applyFlagsToUB(ub, tc);
+        t &= typeFromTCImpl(ub, getThisType, func->cls());
+      }
+    }
+  }
+
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////

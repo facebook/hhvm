@@ -1,4 +1,4 @@
-Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 14
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 34
 class(A)
 
 Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 13
@@ -9,7 +9,7 @@ Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-
 Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 36
 class(B)
 
-Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 25
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 39
 class(A)
 
 Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/classname-type-hint.inc on line 24

@@ -176,13 +176,39 @@ bool blockHasUnprocessedPred(
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   if (!sk.funcEntry()) return;
 
+  uint32_t loc = 0;
+
+  // Set types of passed arguments. They were already type checked.
+  auto const numArgs = sk.numEntryArgs();
+  for (; loc < numArgs; ++loc) {
+    auto const t = typeFromFuncParam(func, loc);
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
+  }
+
+  // Set types of non-passed parameters (not yet initialized to default value).
+  auto const numNonVariadicParams = func->numNonVariadicParams();
+  for (; loc < numNonVariadicParams; ++loc) {
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, TUninit);
+  }
+
+  // Set the type of ...$args parameter.
+  if (func->hasVariadicCaptureParam()) {
+    assertx(func->numNonVariadicParams() == loc);
+    auto const t = numArgs == numNonVariadicParams
+      ? TVec : Type::cns(staticEmptyVec());
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
+    loc++;
+  }
+
+  assertx(loc == func->numParams());
+
   if (func->isClosureBody()) {
     // In a closure, non-parameter locals can have types other than Uninit
     // after the prologue runs, as use vars gets unpacked into them. We rely
     // on hhbbc to assert these types.
     return;
   }
-  auto loc = func->numParams();
+
   if (func->hasReifiedGenerics()) {
     // The next non-parameter local contains the reified generics.
     assertx(func->reifiedGenericsLocalId() == loc);

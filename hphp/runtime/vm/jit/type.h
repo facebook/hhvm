@@ -814,6 +814,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     const Class* propCls,
                     const Class* ctx,
                     bool isSProp);
+Type typeFromFuncParam(const Func* func, uint32_t paramId);
 
 ///////////////////////////////////////////////////////////////////////////////
 

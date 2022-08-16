@@ -481,10 +481,10 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                 let param_local = emitter.named_local(param.name);
                 match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
                     (L::Unconstrained, _) => Ok(instr::empty()),
-                    (L::Not, _) => Ok(instr::verify_param_type(param_local)),
+                    (L::Not, _) => Ok(instr::empty()),
                     (L::Maybe, Some(h)) => {
                         if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
-                            Ok(instr::verify_param_type(param_local))
+                            Ok(instr::empty())
                         } else {
                             Ok(InstrSeq::gather(vec![
                                 emit_expression::get_type_structure_for_hint(
@@ -503,7 +503,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                     }
                     (L::Definitely, Some(h)) => {
                         if !RGH::happly_decl_has_reified_generics(env, emitter, &h) {
-                            Ok(instr::verify_param_type(param_local))
+                            Ok(instr::empty())
                         } else {
                             let check =
                                 instr::is_type_l(emitter.named_local(param.name), IsTypeOp::Null);

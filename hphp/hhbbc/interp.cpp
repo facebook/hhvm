@@ -5042,18 +5042,14 @@ using TCVec = std::vector<const TypeConstraint*>;
 void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
-  if (env.ctx.func->isMemoizeImpl) {
-    // a MemoizeImpl's params have already been checked by the wrapper
-    return reduce(env);
-  }
-
   auto [newTy, effectFree] =
-    env.index.verify_param_type(env.ctx, op.loc1, locAsCell(env, op.loc1));
+    env.index.verify_param_type(env.ctx, op.loc1, topC(env));
 
   if (effectFree) return reduce(env);
   if (newTy.subtypeOf(BBottom)) unreachable(env);
 
-  setLoc(env, op.loc1, std::move(newTy));
+  popC(env);
+  push(env, std::move(newTy));
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
@@ -5070,7 +5066,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
       !env.index.could_have_reified_type(env.ctx, constraint)) {
-    return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+    return reduce(env, bc::PopC {});
   }
 
   if (auto const inputTS = tv(a)) {
@@ -5088,7 +5084,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       return;
     }
     if (shouldReduceToNonReifiedVerifyType(env, inputTS->m_data.parr)) {
-      return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+      return reduce(env, bc::PopC {});
     }
   }
   if (auto const last = last_op(env)) {
@@ -5096,7 +5092,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       if (auto const last2 = last_op(env, 1)) {
         if (last2->op == Op::Dict &&
             shouldReduceToNonReifiedVerifyType(env, last2->Dict.arr1)) {
-          return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+          return reduce(env, bc::PopC {});
         }
       }
     }

@@ -194,10 +194,12 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         .filter_map(|(i, (_, dv))| {
             // LocalIds for params are numbered from 0.
             dv.as_ref().map(|(lbl, expr)| {
+                let param_local = Local::new(i);
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
                     emit_pos::emit_pos(pos),
-                    instr::set_l(Local::new(i)),
+                    instr::verify_param_type(param_local),
+                    instr::set_l(param_local),
                     instr::pop_c(),
                 ]);
                 Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))

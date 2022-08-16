@@ -2,25 +2,21 @@
 
 
 .function foo(<"@Foo" "Foo" extended_hint soft > $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function bar(<"@Bar" "Bar" extended_hint soft > $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function baz(<"@Baz" "Baz" extended_hint soft > $x) {
-  VerifyParamType $x
   Null
   RetC
 }
 
 .function quux(<"@Quux" "Quux" extended_hint soft > $x) {
-  VerifyParamType $x
   Null
   RetC
 }

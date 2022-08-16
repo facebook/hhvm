@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -223,6 +224,21 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
   }
 }
 
+void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
+                                  uint32_t argc, SSATmp* prologueCtx) {
+  // Builtins use a separate non-standard mechanism.
+  if (callee->isCPPBuiltin()) return;
+
+  auto const numArgs = std::min(argc, callee->numNonVariadicParams());
+  auto const firstArgIdx = argc - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+  for (auto i = 0; i < numArgs; ++i) {
+    auto const offset = BCSPRelOffset { safe_cast<int32_t>(firstArgIdx - i) };
+    auto const irsproData = IRSPRelOffsetData { offsetFromIRSP(env, offset ) };
+    gen(env, AssertStk, TInitCell, irsproData, sp(env));
+    verifyParamType(env, callee, i, offset, prologueCtx);
+  }
+}
+
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                  SSATmp* prologueFlags) {
   if (!RuntimeOption::EvalNoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
@@ -380,6 +396,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, prologueFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
+  emitCalleeArgumentTypeChecks(env, callee, argc, prologueCtx);
   emitCalleeDynamicCallChecks(env, callee, prologueFlags);
   emitCalleeCoeffectChecks(env, callee, prologueFlags, nullptr, false,
                            argc, prologueCtx);

@@ -1819,7 +1819,7 @@ std::string serializeProfData(const std::string& filename) {
 
     // We've written everything directly referenced by the profile
     // data, but jitted code might still use Classes and TypeAliases
-    // that haven't been otherwise mentioned (eg VerifyParamType,
+    // that haven't been otherwise mentioned (eg TypeConstraint types,
     // InstanceOfD etc).
     write_seen_types(ser, pd);
 

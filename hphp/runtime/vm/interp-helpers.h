@@ -19,22 +19,51 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Random.h>
 
 namespace HPHP {
+
+template<class TGetCtx>
+void verifyParamType(const Func* func, int32_t id, tv_lval val,
+                     TGetCtx getCtx) {
+  assertx(id < func->numNonVariadicParams());
+  assertx(func->numParams() == int(func->params().size()));
+  const TypeConstraint& tc = func->params()[id].typeConstraint;
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? getCtx() : nullptr;
+    tc.verifyParam(val, ctx, func, id);
+  }
+  if (func->hasParamsWithMultiUBs()) {
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
+    auto it = ubs.find(id);
+    if (it != ubs.end()) {
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
+        if (ub.isCheckable()) {
+          auto const ctx = ub.isThis() ? getCtx() : nullptr;
+          ub.verifyParam(val, ctx, func, id);
+        }
+      }
+    }
+  }
+}
 
 /*
  * RAII wrapper for popping/pushing generics from/to the VM stack.
@@ -236,6 +265,32 @@ inline void calleeArgumentArityChecks(const Func* callee,
     if (numUnpackArgs != 0) {
       raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs);
     }
+  }
+}
+
+inline void calleeArgumentTypeChecks(const Func* callee,
+                                     uint32_t numArgsInclUnpack,
+                                     void* prologueCtx) {
+  // Builtins use a separate non-standard mechanism.
+  if (callee->isCPPBuiltin()) return;
+
+  auto const getCtx = [&] () -> const Class* {
+    if (!callee->cls()) return nullptr;
+    assertx(prologueCtx);
+    auto const ctx = callee->isClosureBody()
+      ? reinterpret_cast<c_Closure*>(prologueCtx)->getThisOrClass()
+      : prologueCtx;
+    return callee->isStatic()
+      ? reinterpret_cast<Class*>(ctx)
+      : reinterpret_cast<ObjectData*>(ctx)->getVMClass();
+  };
+
+  auto const numArgs =
+    std::min(numArgsInclUnpack, callee->numNonVariadicParams());
+  auto const firstArgIdx =
+    numArgsInclUnpack - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+  for (auto i = 0; i < numArgs; ++i) {
+    verifyParamType(callee, i, vmStack().indC(firstArgIdx - i), getCtx);
   }
 }
 

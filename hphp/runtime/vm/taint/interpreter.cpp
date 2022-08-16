@@ -1547,45 +1547,8 @@ void iopVerifyOutType(uint32_t /* paramId */) {
   iopUnhandled("VerifyOutType");
 }
 
-void iopVerifyParamType(local_var param) {
-  iopPreamble("VerifyParamType");
-
-  auto state = State::instance;
-  auto func = vmfp()->func();
-
-  // Taint propagation.
-  auto index = func->numParams() - (param.index + 1);
-  auto value = state->stack.peek(index);
-  if (value) {
-    FTRACE(
-        2,
-        "taint: setting parameter {} (index: {}) to `{}`\n",
-        param.lval,
-        param.index,
-        value);
-    auto path = value->to(state->arena.get(), Hop{callee(), func});
-    state->heap_locals.set(param.lval, path);
-  } else {
-    // Explicitly unset parameter here in case a value at this position was
-    // previously tainted
-    state->heap_locals.set(param.lval, nullptr);
-  }
-
-  // Taint generation.
-  auto sources = state->sources(func);
-  for (auto& source : sources) {
-    if (source.index && *source.index == param.index) {
-      FTRACE(
-          2,
-          "taint: parameter {} (index: {}) is tainted\n",
-          param.lval,
-          param.index);
-      // TODO: What hop should we put here?
-      auto path = Path::origin(state->arena.get(), Hop());
-      state->heap_locals.set(param.lval, path);
-      break;
-    }
-  }
+void iopVerifyParamType(local_var /* param */) {
+  iopUnhandled("VerifyParamType");
 }
 
 void iopVerifyParamTypeTS(local_var /* param */) {

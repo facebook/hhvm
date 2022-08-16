@@ -221,7 +221,7 @@ namespace HPHP {
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyOutType,   ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
-  O(VerifyParamType, ONE(ILA),         NOV,             NOV,        NF) \
+  O(VerifyParamType, ONE(ILA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamTypeTS, ONE(ILA),       ONE(CV),         NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \

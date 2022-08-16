@@ -307,9 +307,9 @@ static const struct {
   { OpCheckThis,   {This,             None,         OutNone         }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
-                   {Local,            Local,        OutUnknown      }},
+                   {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyParamTypeTS,
-                   {Local|Stack1,     Local,        OutUnknown      }},
+                   {Local|Stack1,     None,         OutNone         }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyRetTypeTS,
@@ -1116,8 +1116,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
       op == OpAwaitAll || // similar to Await
       op == OpClsCnsD || // side exits if misses in the RDS
       op == OpThrowNonExhaustiveSwitch || // control flow breaks bb
-      op == OpVerifyParamTypeTS || // avoids combinatorial explosion
-      op == OpVerifyParamType) {   // with nullable types
+      op == OpVerifyParamTypeTS) { // avoids combinatorial explosion
+                                   // with nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,

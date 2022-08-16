@@ -185,7 +185,8 @@ namespace {
  *
  * We don't need to autoload classes because it is impossible to have an
  * instance of a class if it's not defined.  However, we need to autoload
- * typedefs because they can affect whether VerifyParamType would succeed.
+ * typedefs because they can affect whether the parameter type verification
+ * would succeed.
  */
 const TypeAlias* getTypeAliasWithAutoload(const NamedEntity* ne,
                                           const StringData* name) {

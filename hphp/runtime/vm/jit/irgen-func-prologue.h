@@ -46,6 +46,9 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
                                    uint32_t& argc);
 
+void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
+                                  uint32_t argc, SSATmp* prologueCtx);
+
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                 SSATmp* prologueFlags);
 

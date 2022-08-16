@@ -68,8 +68,8 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
-State entry_state(const Index& index, const Context& ctx,
-                  const KnownArgs* knownArgs) {
+State entry_state(const Index& index, CollectedInfo& collect,
+                  const Context& ctx, const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisType = [&] {
@@ -101,25 +101,31 @@ State entry_state(const Index& index, const Context& ctx,
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = vec(std::move(pack));
         } else {
-          ret.locals[locId] = unctx(knownArgs->args[locId]);
+          auto [ ty, effectFree ] =
+            index.verify_param_type(ctx, locId, unctx(knownArgs->args[locId]));
+          ret.unreachable |= ty.subtypeOf(BBottom);
+          ret.locals[locId] = std::move(ty);
+          collect.effectFree &= effectFree;
         }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
       continue;
     }
-    auto const& param = ctx.func->params[locId];
-    if (ctx.func->isMemoizeImpl) {
-      auto const& constraint = param.typeConstraint;
-      if (constraint.hasConstraint() && !constraint.isTypeVar() &&
-          !constraint.isTypeConstant()) {
-        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
-        continue;
-      }
+
+    if (ctx.func->params[locId].isVariadic) {
+      ret.locals[locId] = TVec;
+      continue;
     }
+
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
-    ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TInitCell;
+
+    auto [ ty, effectFree] =
+      index.verify_param_type(ctx, locId, TInitCell);
+    ret.unreachable |= ty.subtypeOf(BBottom);
+    ret.locals[locId] = std::move(ty);
+    collect.effectFree &= effectFree;
   }
 
   // Closures have use vars, we need to look up their types from the index.
@@ -193,12 +199,13 @@ State entry_state(const Index& index, const Context& ctx,
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
                     FuncAnalysis& ai,
+                    CollectedInfo& collect,
                     const KnownArgs* knownArgs) {
   auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
 
-  auto const entryState = entry_state(index, ctx, knownArgs);
+  auto const entryState = entry_state(index, collect, ctx, knownArgs);
 
   if (knownArgs) {
     // When we have known args, we only need to add one of the entry points to
@@ -305,7 +312,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * back edges---when state merges cause a change to the block
    * stateIn, we will add it to this queue so it gets visited again.
    */
-  auto incompleteQ = prepare_incompleteQ(index, ai, knownArgs);
+  auto incompleteQ = prepare_incompleteQ(index, ai, collect, knownArgs);
 
   /*
    * There are potentially infinitely growing types when we're using union_of to

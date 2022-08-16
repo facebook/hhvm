@@ -58,7 +58,7 @@ struct BaseGenerator {
   static Offset userBase(const Func* func) {
     assertx(func->isGenerator());
 
-    // Skip past VerifyParamType bytecodes
+    // Skip past function initialization bytecodes
     auto pc = func->entry();
     auto end = func->at(func->bclen());
     while (peek_op(pc) != OpCreateCont) {

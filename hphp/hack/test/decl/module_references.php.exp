@@ -1,0 +1,21 @@
+[("a.b",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [6:12-15]; mdt_exports = []; mdt_imports = [] }));
+  ("a.c",
+   (Shallow_decl_defs.Module
+      { Typing_defs.mdt_pos = [9:12-15]; mdt_exports = []; mdt_imports = [] }));
+  ("z.c",
+   (Shallow_decl_defs.Module
+      { Typing_defs.mdt_pos = [12:12-15]; mdt_exports = []; mdt_imports = []
+        }));
+  ("z",
+   (Shallow_decl_defs.Module
+      { Typing_defs.mdt_pos = [15:12-13];
+        mdt_exports = [(Typing_defs.MRPrefix "z")];
+        mdt_imports =
+        [(Typing_defs.MRPrefix "a"); (Typing_defs.MRExact "z.c");
+          Typing_defs.MRGlobal]
+        }))
+  ]
+
+They matched!

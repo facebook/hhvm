@@ -235,7 +235,18 @@ let const_naming_and_decl_DEPRECATED
 (* Modules *)
 (*****************************************************************************)
 
+let module_reference_decl (name : Aast.md_name_kind) =
+  match name with
+  | MDNameGlobal _ -> MRGlobal
+  | MDNameExact (_, s) -> MRExact s
+  | MDNamePrefix (_, s) -> MRPrefix s
+
 let module_naming_and_decl_DEPRECATED
     (_ : Provider_context.t) (md : Nast.module_def) :
     string * Typing_defs.module_def_type =
-  (snd md.md_name, { mdt_pos = Pos_or_decl.of_raw_pos @@ fst md.md_name })
+  ( snd md.md_name,
+    {
+      mdt_pos = Pos_or_decl.of_raw_pos @@ fst md.md_name;
+      mdt_exports = List.map md.md_exports ~f:module_reference_decl;
+      mdt_imports = List.map md.md_imports ~f:module_reference_decl;
+    } )

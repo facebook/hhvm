@@ -25,6 +25,7 @@ aast::FunctionPtrId
 aast::FunVariadicity
 aast::GenCase
 aast::HoleSource
+aast::MdNameKind
 aast::ParamKind
 aast::Program
 aast::ReifyKind
@@ -195,6 +196,7 @@ typing_defs::DestructureKind
 typing_defs::Exact
 typing_defs::FunTparamsKind
 typing_defs::InternalType
+typing_defs::ModuleReference
 typing_defs::ParamMode
 typing_defs::ParamMutability
 typing_defs::PosByteString

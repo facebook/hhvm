@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1ef03cc9de30667dc4edd0161b9ce47>>
+// @generated SignedSource<<b9489e7e8b36487494460795714fdb3f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -498,8 +498,30 @@ impl<'a> Node<'a> for ModuleDefType<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ModuleDefType {
-                mdt_pos: ref __binding_0,
-            } => __binding_0.accept(v),
+                pos: ref __binding_0,
+                exports: ref __binding_1,
+                imports: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ModuleReference<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_module_reference(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ModuleReference::MRGlobal => {}
+            ModuleReference::MRPrefix(ref __binding_0) => __binding_0.accept(v),
+            ModuleReference::MRExact(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

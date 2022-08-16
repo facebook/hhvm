@@ -1,5 +1,8 @@
 File root|module_properties.php--modules.php
-[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:12-13] }))]
+[("A",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [4:12-13]; mdt_exports = []; mdt_imports = [] }))
+  ]
 
 File root|module_properties.php--A.php
 [("\\A",

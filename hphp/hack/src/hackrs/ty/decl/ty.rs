@@ -796,8 +796,18 @@ walkable!(ast_defs::ConstraintKind);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
+pub enum ModuleReference {
+    MRGlobal,
+    MRPrefix(ModuleName),
+    MRExact(ModuleName),
+}
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct ModuleDefType<R: Reason> {
     pub pos: R::Pos,
+    pub exports: Box<[ModuleReference]>,
+    pub imports: Box<[ModuleReference]>,
 }
 
 walkable!(ModuleDefType<R> => []);

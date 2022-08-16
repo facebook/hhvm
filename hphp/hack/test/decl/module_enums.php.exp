@@ -1,6 +1,11 @@
 File root|module_enums.php--modules.php
-[("X", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:12-13] }));
-  ("Y", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:12-13] }))]
+[("X",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [4:12-13]; mdt_exports = []; mdt_imports = [] }));
+  ("Y",
+   (Shallow_decl_defs.Module
+      { Typing_defs.mdt_pos = [5:12-13]; mdt_exports = []; mdt_imports = [] }))
+  ]
 
 File root|module_enums.php--X.php
 [("\\X",

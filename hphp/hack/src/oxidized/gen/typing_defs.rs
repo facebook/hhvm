@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3ea353b296afa2967c113eb7c55e6dba>>
+// @generated SignedSource<<99bca435b903072ee5455a45724e96e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -239,9 +239,35 @@ pub struct ClassConst {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C, u8)]
+pub enum ModuleReference {
+    MRGlobal,
+    MRPrefix(String),
+    MRExact(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(prefix = "mdt_")]
 #[repr(C)]
 pub struct ModuleDefType {
-    pub mdt_pos: pos_or_decl::PosOrDecl,
+    pub pos: pos_or_decl::PosOrDecl,
+    pub exports: Vec<ModuleReference>,
+    pub imports: Vec<ModuleReference>,
 }
 
 /// The position is that of the hint in the `use` / `implements` AST node

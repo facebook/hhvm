@@ -805,13 +805,32 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ConstDecl<R> {
     }
 }
 
+impl<'a> ToOxidized<'a> for ModuleReference {
+    type Output = obr::typing_defs::ModuleReference<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::typing_defs::ModuleReference as Obr;
+        match self {
+            ModuleReference::MRGlobal => Obr::MRGlobal,
+            ModuleReference::MRPrefix(m) => Obr::MRPrefix(m.to_oxidized(arena)),
+            ModuleReference::MRExact(m) => Obr::MRExact(m.to_oxidized(arena)),
+        }
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for shallow::ModuleDecl<R> {
     type Output = &'a obr::shallow_decl_defs::ModuleDecl<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        let Self { pos } = self;
+        let Self {
+            pos,
+            exports,
+            imports,
+        } = self;
         arena.alloc(obr::shallow_decl_defs::ModuleDecl {
-            mdt_pos: pos.to_oxidized(arena),
+            pos: pos.to_oxidized(arena),
+            exports: exports.to_oxidized(arena),
+            imports: imports.to_oxidized(arena),
         })
     }
 }

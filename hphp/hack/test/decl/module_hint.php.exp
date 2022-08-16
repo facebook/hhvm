@@ -1,6 +1,11 @@
 File root|module_hint.php--modules.php
-[("here", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:12-16] }));
-  ("there", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:12-17] }))]
+[("here",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [4:12-16]; mdt_exports = []; mdt_imports = [] }));
+  ("there",
+   (Shallow_decl_defs.Module
+      { Typing_defs.mdt_pos = [5:12-17]; mdt_exports = []; mdt_imports = [] }))
+  ]
 
 File root|module_hint.php--here.php
 [("\\C",

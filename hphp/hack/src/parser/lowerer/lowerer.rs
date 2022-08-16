@@ -492,6 +492,26 @@ where
     }
 }
 
+fn pos_module_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
+    if let ModuleName(c) = &node.children {
+        if let SyntaxList(l) = &c.parts.children {
+            let p = p_pos(node, env);
+            let mut s = String::with_capacity(node.width());
+            for i in l.iter() {
+                match &i.children {
+                    ListItem(li) => {
+                        s += text_str(&li.item, env);
+                        s += text_str(&li.separator, env);
+                    }
+                    _ => s += text_str(i, env),
+                }
+            }
+            return Ok(ast::Id(p, s));
+        }
+    }
+    missing_syntax("module name", node, env)
+}
+
 fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
     if let QualifiedName(c) = &node.children {
         if let SyntaxList(l) = &c.parts.children {
@@ -5130,6 +5150,86 @@ fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Opt
         })
 }
 
+fn pos_qualified_referenced_module_name<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<ast::MdNameKind> {
+    if let ModuleName(c) = &node.children {
+        if let SyntaxList(l) = &c.parts.children {
+            let p = p_pos(node, env);
+            let mut s = String::with_capacity(node.width());
+
+            for i in l.iter() {
+                match &i.children {
+                    ListItem(li) => match &li.item.children {
+                        Token(t) => match t.kind() {
+                            TK::SelfToken => {
+                                s += &name.1;
+                            }
+                            TK::Global => {
+                                return Ok(ast::MdNameKind::MDNameGlobal(p));
+                            }
+                            TK::Star => {
+                                return Ok(ast::MdNameKind::MDNamePrefix(ast::Id(p, s)));
+                            }
+                            TK::Name => {
+                                if !s.is_empty() {
+                                    s += ".";
+                                }
+                                s += text_str(&li.item, env);
+                            }
+                            _ => {
+                                return missing_syntax("module name", node, env);
+                            }
+                        },
+                        _ => {
+                            return missing_syntax("module name", node, env);
+                        }
+                    },
+                    _ => {
+                        return missing_syntax("module name", node, env);
+                    }
+                }
+            }
+            return Ok(ast::MdNameKind::MDNameExact(ast::Id(p, s)));
+        }
+    }
+    missing_syntax("module name", node, env)
+}
+
+fn p_module_exports<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Vec<ast::MdNameKind>> {
+    match &node.children {
+        Missing => Ok(vec![]),
+        ModuleExports(e) => Ok(e
+            .exports
+            .syntax_node_to_list_skip_separator()
+            .map(|n| pos_qualified_referenced_module_name(name, n, env))
+            .collect::<Result<Vec<_>, _>>()?),
+        _ => missing_syntax("module exports", node, env),
+    }
+}
+
+fn p_module_imports<'a>(
+    name: &ast::Sid,
+    node: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Vec<ast::MdNameKind>> {
+    match &node.children {
+        Missing => Ok(vec![]),
+        ModuleImports(e) => Ok(e
+            .imports
+            .syntax_node_to_list_skip_separator()
+            .map(|n| pos_qualified_referenced_module_name(name, n, env))
+            .collect::<Result<Vec<_>, _>>()?),
+        _ => missing_syntax("module imports", node, env),
+    }
+}
+
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
@@ -5740,14 +5840,22 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 namespace: mk_empty_ns_env(env),
             })])
         }
-        ModuleDeclaration(md) => Ok(vec![ast::Def::mk_module(ast::ModuleDef {
-            annotation: (),
-            name: pos_name(&md.name, env)?,
-            user_attributes: p_user_attributes(&md.attribute_spec, env)?,
-            span: p_pos(node, env),
-            mode: env.file_mode(),
-            doc_comment: doc_comment_opt,
-        })]),
+        ModuleDeclaration(md) => {
+            let name = pos_module_name(&md.name, env)?;
+            let exports = p_module_exports(&name, &md.exports, env)?;
+            let imports = p_module_imports(&name, &md.imports, env)?;
+
+            Ok(vec![ast::Def::mk_module(ast::ModuleDef {
+                annotation: (),
+                name,
+                user_attributes: p_user_attributes(&md.attribute_spec, env)?,
+                span: p_pos(node, env),
+                mode: env.file_mode(),
+                doc_comment: doc_comment_opt,
+                exports,
+                imports,
+            })])
+        }
         ModuleMembershipDeclaration(mm) => {
             Ok(vec![ast::Def::mk_set_module(pos_name(&mm.name, env)?)])
         }

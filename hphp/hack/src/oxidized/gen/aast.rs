@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b24cbf90e05132e16ec33bbae889dfaf>>
+// @generated SignedSource<<f3b01fd2c329143c4c1c4c550b135b38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1750,6 +1750,29 @@ pub struct ModuleDef<Ex, En> {
     pub span: Pos,
     pub mode: file_info::Mode,
     pub doc_comment: Option<DocComment>,
+    pub exports: Vec<MdNameKind>,
+    pub imports: Vec<MdNameKind>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum MdNameKind {
+    MDNameGlobal(Pos),
+    MDNamePrefix(Sid),
+    MDNameExact(Sid),
 }
 
 #[derive(

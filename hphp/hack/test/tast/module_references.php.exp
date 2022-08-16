@@ -1,0 +1,7 @@
+[(Module { md_annotation = (); md_name = ([6:12-15], "a.b"); md_user_attributes = []; md_span = [6:1-7:2]; md_mode = Mstrict; md_doc_comment = None; md_exports = []; md_imports = [] });
+  (Module { md_annotation = (); md_name = ([9:12-15], "a.c"); md_user_attributes = []; md_span = [9:1-10:2]; md_mode = Mstrict; md_doc_comment = None; md_exports = []; md_imports = [] });
+  (Module { md_annotation = (); md_name = ([12:12-15], "z.c"); md_user_attributes = []; md_span = [12:1-13:2]; md_mode = Mstrict; md_doc_comment = None; md_exports = []; md_imports = [] });
+  (Module
+     { md_annotation = (); md_name = ([15:12-13], "z"); md_user_attributes = []; 
+       md_span = [15:1-24:2]; md_mode = Mstrict; md_doc_comment = None; 
+       md_exports = [(MDNamePrefix ([22:5-8], "a"))]; md_imports = [(MDNamePrefix ([17:5-8], "a")); (MDNameExact ([18:5-11], "z.c")); (MDNameGlobal [19:5-11])] })

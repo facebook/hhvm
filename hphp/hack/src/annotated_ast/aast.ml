@@ -1002,7 +1002,14 @@ and ('ex, 'en) module_def = {
   md_span: pos;
   md_mode: FileInfo.mode; [@visitors.opaque]
   md_doc_comment: doc_comment option;
+  md_exports: md_name_kind list;
+  md_imports: md_name_kind list;
 }
+
+and md_name_kind =
+  | MDNameGlobal of pos
+  | MDNamePrefix of sid
+  | MDNameExact of sid
 
 and ('ex, 'en) def =
   | Fun of ('ex, 'en) fun_def

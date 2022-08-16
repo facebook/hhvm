@@ -78,6 +78,18 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast |> analyse |> SMap.iter print_function_constraints
+  | DumpDerivedConstraints ->
+    let print_function_constraints
+        (id : string) ((intra_constraints, _) : decorated_constraints) : unit =
+      Format.printf "Derived constraints for %s:\n" id;
+      intra_constraints
+      |> List.map ~f:(fun c -> c.constraint_)
+      |> Solver.deduce
+      |> List.map ~f:(show_constraint empty_typing_env)
+      |> List.iter ~f:(Format.printf "%s\n");
+      Format.printf "\n"
+    in
+    Walker.program ctx tast |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : shape_result list) :
         unit =

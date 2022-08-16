@@ -199,7 +199,9 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 // Primitives are always mutable
                 // Unfortunately, we don't make Hprim as a hint type until naming
                 // so we have to look at Happly
-                aast::Hint_::Happly(cn, _) if typehints::is_primitive_type_hint(cn.name()) => {
+                aast::Hint_::Happly(cn, _)
+                    if typehints::PRIMITIVE_TYPEHINTS.contains(cn.name()) =>
+                {
                     Rty::Mutable
                 }
                 _ => rty_expr(context, exp),

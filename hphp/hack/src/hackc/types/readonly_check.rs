@@ -4,12 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+//// Keep this file in sync with ../../parser/readonly_check.rs *except* for @HACKC_ADDED parts.
+//// TODO(T128733540): we should have only one readonly_check.rs
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 use aast::Expr_ as E_;
 use hh_autoimport_rust::is_hh_autoimport_fun;
+use lazy_static::lazy_static;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
@@ -24,6 +27,16 @@ use oxidized::local_id;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
 use parser_core_types::syntax_error::Error as ErrorMsg;
+
+lazy_static! {
+    // @HACKC_ADDED because primitives are namespaced in hackc
+    // behind [`is_codegen()` check](https://www.internalfb.com/code/fbsource/[53b542f7778a]/fbcode/hphp/hack/src/parser/namespaces.rs?lines=186)
+    // TODO(T128733540): remove this hack.
+    static ref PRIMITIVE_TYPEHINTS: HashSet<String> = typehints::PRIMITIVE_TYPEHINTS
+        .iter()
+        .map(|name| format!(r"\HH\{}", name))
+        .collect();
+}
 
 pub struct ReadOnlyError(pub Pos, pub ErrorMsg);
 
@@ -201,7 +214,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 // Primitives are always mutable
                 // Unfortunately, we don't make Hprim as a hint type until naming
                 // so we have to look at Happly
-                aast::Hint_::Happly(cn, _) if typehints::is_primitive_type_hint(cn.name()) => {
+                aast::Hint_::Happly(cn, _) if PRIMITIVE_TYPEHINTS.contains(cn.name()) => {
                     Rty::Mutable
                 }
                 _ => rty_expr(context, exp),

@@ -3537,6 +3537,7 @@ version = "0.0.0"
 dependencies = [
  "decl_provider",
  "hh_autoimport_rust",
+ "lazy_static",
  "naming_special_names_rust",
  "oxidized",
  "oxidized_by_ref",

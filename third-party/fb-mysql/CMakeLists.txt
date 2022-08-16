@@ -10,16 +10,9 @@ endif ()
 
 include(HPHPFunctions)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  FB_MYSQL_DOWNLOAD_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/mysql-5.6/archive/refs/tags/fb-prod8-202101.tar.gz"
-  SOURCE_HASH
-  "SHA512=4e07ae4e6628792ec5d77af7e524bddc2e9ac361dff4b93060f9fb5804d72a7144824ac84138487a3b4dcac350453cd5f17afd9a951b9d8248c292bf378e1e78"
-)
 ExternalProject_Add(
   bundled_fbmysqlclient
-  ${FB_MYSQL_DOWNLOAD_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   PATCH_COMMAND
   "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
   "${CMAKE_CURRENT_SOURCE_DIR}/patches"

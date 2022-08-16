@@ -19,3 +19,6 @@
 [submodule "xed-xed"]
 	path = third-party/xed/xed
 	url = https://github.com/intelxed/xed.git
+[submodule "fb-mysql"]
+	path = third-party/fb-mysql/mysql-5.6
+	url = https://github.com/facebook/mysql-5.6.git

@@ -28,9 +28,7 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        - macos-latest
     runs-on: ${{matrix.os}}
-    continue-on-error: ${{ matrix.os == 'macos-latest' }}
     steps:
     - uses: actions/checkout@v2.4.0
     - if: github.event_name == 'issue_comment'

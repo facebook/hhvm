@@ -134,10 +134,11 @@ std::string pathString(const ObjprofStack& stack, const char* sep) {
   return os.str();
 }
 
-void issueWarnings(std::vector<std::string>&& deferred_warnings) {
+void issueWarnings(std::vector<std::string>& deferred_warnings) {
   for (auto const& warning : deferred_warnings) {
     raise_warning(warning);
   }
+  deferred_warnings.clear();
 }
 
 /**
@@ -666,7 +667,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       );
     }
   });
-  issueWarnings(std::move(deferred_warnings));
+  issueWarnings(deferred_warnings);
 
   // Create response
   DictInit objs(histogram.size());
@@ -751,7 +752,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       );
       assertx(env.stack->size() == 0);
   });
-  issueWarnings(std::move(deferred_warnings));
+  issueWarnings(deferred_warnings);
 
   NamedEntity::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
@@ -810,7 +811,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       assertx(env.stack->size() == 0);
     }
   });
-  issueWarnings(std::move(deferred_warnings));
+  issueWarnings(deferred_warnings);
 
   // Create response
   DictInit objs(histogram.size());

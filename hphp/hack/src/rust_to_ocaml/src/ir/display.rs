@@ -223,8 +223,16 @@ fn write_field_or_variant_doc_comment(
 }
 
 fn write_type_parameters(f: &mut std::fmt::Formatter<'_>, tparams: &[String]) -> std::fmt::Result {
-    for tparam in tparams.iter() {
-        write!(f, "'{} ", tparam.to_case(Case::Snake))?;
+    match tparams {
+        [] => {}
+        [tparam] => write!(f, "'{} ", tparam.to_case(Case::Snake))?,
+        [first, rest @ ..] => {
+            write!(f, "('{}", first.to_case(Case::Snake))?;
+            for tparam in rest {
+                write!(f, ", '{} ", tparam.to_case(Case::Snake))?;
+            }
+            write!(f, ") ")?;
+        }
     }
     Ok(())
 }

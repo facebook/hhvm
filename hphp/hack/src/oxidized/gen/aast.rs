@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f3b01fd2c329143c4c1c4c550b135b38>>
+// @generated SignedSource<<ef1ad25ce8cc8d209171743ecc49ff01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,35 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq,
+    (visitors
+       {
+         variety = "iter";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["iter_defs"]
+       }),
+    (visitors
+       {
+         variety = "reduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["reduce_defs"]
+       }),
+    (visitors
+       {
+         variety = "map";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["map_defs"]
+       }),
+    (visitors
+       {
+         variety = "endo";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["endo_defs"]
+       }))"#)]
 #[repr(C)]
 pub struct Program<Ex, En>(pub Vec<Def<Ex, En>>);
 
@@ -1321,6 +1350,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
 pub struct Class_<Ex, En> {
     pub span: Pos,
     pub annotation: En,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub final_: bool,
     pub is_xhp: bool,
@@ -1457,6 +1487,11 @@ pub struct ClassConst<Ex, En> {
     pub doc_comment: Option<DocComment>,
 }
 
+/// This represents a type const definition. If a type const is abstract then
+/// then the type hint acts as a constraint. Any concrete definition of the
+/// type const must satisfy the constraint.
+///
+/// If the type const is not abstract then a type must be specified.
 #[derive(
     Clone,
     Debug,
@@ -1664,6 +1699,7 @@ pub struct Typedef<Ex, En> {
     pub kind: Hint,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub vis: TypedefVisibility,
     pub namespace: Nsenv,
@@ -1693,6 +1729,7 @@ pub struct Typedef<Ex, En> {
 #[repr(C)]
 pub struct Gconst<Ex, En> {
     pub annotation: En,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub name: Sid,
     pub type_: Option<Hint>,
@@ -1721,6 +1758,7 @@ pub struct Gconst<Ex, En> {
 pub struct FunDef<Ex, En> {
     pub namespace: Nsenv,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub fun: Fun_<Ex, En>,
     pub internal: bool,
@@ -1748,6 +1786,7 @@ pub struct ModuleDef<Ex, En> {
     pub name: ast_defs::Id,
     pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub span: Pos,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub doc_comment: Option<DocComment>,
     pub exports: Vec<MdNameKind>,

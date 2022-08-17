@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fd899d251ce7a10a9bbd136d5a2b6868>>
+// @generated SignedSource<<325eef4331c0625bce6d1b8d1468edca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -67,6 +67,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, ord)")]
 #[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct SubstContext<'a> {
@@ -99,6 +100,7 @@ pub use oxidized::decl_defs::SourceType;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError<'a> {
     WrongExtendKind {
@@ -139,6 +141,7 @@ arena_deserializer::impl_deserialize_in_arena!(DeclError<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType<'a> {

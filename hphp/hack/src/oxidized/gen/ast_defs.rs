@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ea53a098d7a5a70a5fec670368d8daa9>>
+// @generated SignedSource<<ed1bccf881e8022c8e0a1f9145e0049f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -449,11 +449,48 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
+    (visitors
+       {
+         name = "iter_defs";
+         variety = "iter";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["iter_defs_base"]
+       }),
+    (visitors
+       {
+         name = "endo_defs";
+         variety = "endo";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["endo_defs_base"]
+       }),
+    (visitors
+       {
+         name = "reduce_defs";
+         variety = "reduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["reduce_defs_base"]
+       }),
+    (visitors
+       {
+         name = "map_defs";
+         variety = "map";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["map_defs_base"]
+       }))"#)]
 #[repr(u8)]
 pub enum Visibility {
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Private""#)]
     Private,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Public""#)]
     Public,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Protected""#)]
     Protected,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Internal""#)]
     Internal,
 }
 impl TrivialDrop for Visibility {}
@@ -480,6 +517,7 @@ arena_deserializer::impl_deserialize_in_arena!(Visibility);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum XhpEnumValue {
     XEVInt(isize),

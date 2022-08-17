@@ -3,11 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<96e1c8de5c82fef7a62dd5102a1505b9>>
-//
-// To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
-
+// @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+use eq_modulo_pos::EqModuloPos;
+use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
@@ -17,14 +15,13 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[rust_to_ocaml(attr = "deriving (show, eq)")]
-pub type Fixmes = i_map::IMap<i_map::IMap<pos::Pos>>;
-
 #[derive(
     Clone,
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -32,14 +29,14 @@ pub type Fixmes = i_map::IMap<i_map::IMap<pos::Pos>>;
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
-#[rust_to_ocaml(attr = "deriving (show, eq)")]
-#[rust_to_ocaml(prefix = "sc_")]
+#[rust_to_ocaml(attr = r#"deriving (eq, show, (visitors { variety = "iter" }))"#)]
 #[repr(C)]
-pub struct ScouredComments {
-    pub comments: Vec<(pos::Pos, prim_defs::Comment)>,
-    pub fixmes: Fixmes,
-    pub misuses: Fixmes,
-    pub error_pos: Vec<pos::Pos>,
+pub struct A {
+    #[rust_to_ocaml(attr = "opaque")]
+    #[rust_to_ocaml(attr = "visitors.opaque")]
+    pub x: X,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
+    pub y: Y,
 }

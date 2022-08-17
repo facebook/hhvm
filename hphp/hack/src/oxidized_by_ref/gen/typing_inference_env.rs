@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32d0a61578a1a5317fda7551ffb77754>>
+// @generated SignedSource<<596db3c6c7bb986b806ae8e588893dd4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -116,6 +116,7 @@ arena_deserializer::impl_deserialize_in_arena!(TyvarInfo<'arena>);
 
 pub type Tvenv<'a> = i_map::IMap<'a, &'a TyvarInfo<'a>>;
 
+#[rust_to_ocaml(attr = "deriving eq")]
 pub type Identifier<'a> = isize;
 
 #[derive(

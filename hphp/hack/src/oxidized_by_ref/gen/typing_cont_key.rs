@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22caebd9574e9f4a66c59c11fb3e8bcd>>
+// @generated SignedSource<<8ae88aeea896d8e9bdf7930bbb4f3688>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(u8)]
 pub enum TypingContKey {
     Next,

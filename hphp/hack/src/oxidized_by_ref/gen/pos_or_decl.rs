@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cade3da2296de23a2c511bbcb91ec3a3>>
+// @generated SignedSource<<2a4f4fa2931519884ee6d2f8e305d959>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -19,6 +19,7 @@ pub use crate::pos::map;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 pub type PosOrDecl<'a> = pos::Pos<'a>;
 
 /// The decl and file of a position.

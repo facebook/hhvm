@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5d06ec888872793845b43ec71f7ae649>>
+// @generated SignedSource<<e7f3e027ae25fdb1621762fb59522edf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,6 +37,7 @@ use crate::*;
 #[serde(bound(
     deserialize = "PrimPos: 'de + arena_deserializer::DeserializeInArena<'de>, Pos: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
 pub struct UserError<'a, PrimPos, Pos> {
     pub code: isize,

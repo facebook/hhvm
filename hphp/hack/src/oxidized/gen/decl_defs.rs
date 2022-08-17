@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cf7ac648bca69e032ce162207bed354>>
+// @generated SignedSource<<ab96268c330e36b9fb0d4dd3a86e3c9c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,6 +68,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, ord)")]
 #[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct SubstContext {
@@ -94,6 +95,7 @@ pub struct SubstContext {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum SourceType {
     Child,
@@ -127,6 +129,7 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, ord)")]
 #[repr(u8)]
 pub enum LinearizationKind {
     MemberResolution,
@@ -151,6 +154,7 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError {
     WrongExtendKind {
@@ -183,6 +187,7 @@ pub enum DeclError {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType {

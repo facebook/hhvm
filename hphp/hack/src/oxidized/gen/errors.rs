@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7cbe4dea759d3d253661d2ee0070361e>>
+// @generated SignedSource<<e4bdc778d0e399ed0a7b6c7706d68895>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -46,6 +46,7 @@ pub type ErrorCode = isize;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
 #[repr(u8)]
 pub enum Phase {
     Init,
@@ -85,13 +86,17 @@ impl TrivialDrop for Format {}
 arena_deserializer::impl_deserialize_in_arena!(Format);
 
 /// Results of single file analysis.
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;
 
 /// Results of multi-file analysis.
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
 
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 pub type Error = user_error::UserError<pos::Pos, pos_or_decl::PosOrDecl>;
 
 pub type PerFileErrors = FileT<Error>;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type Errors = FilesT<Error>;

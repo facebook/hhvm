@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1da5ff31b207c3a27e7d165b36af25b5>>
+// @generated SignedSource<<6b6a848fbfe7a6378f881d7e7aa626cb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -223,6 +223,7 @@ pub use oxidized::ast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
     XEVInt(isize),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c925a9dc5213824d87631a07cfda1bfc>>
+// @generated SignedSource<<c9f72d8f192f21cd8593581808e61ca6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum CeVisibility {
     Vpublic,
@@ -64,6 +65,7 @@ pub enum CeVisibility {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord)")]
 #[repr(C, u8)]
 pub enum IfcFunDecl {
     FDPolicied(Option<String>),
@@ -88,6 +90,7 @@ pub enum IfcFunDecl {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving eq")]
 #[repr(u8)]
 pub enum ValKind {
     Lval,
@@ -115,6 +118,7 @@ arena_deserializer::impl_deserialize_in_arena!(ValKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving eq")]
 #[repr(u8)]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
@@ -149,6 +153,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(u8)]
 pub enum ShapeKind {
     ClosedShape,
@@ -173,9 +178,11 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
 pub struct PosString(pub pos_or_decl::PosOrDecl, pub String);
 
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 pub type TByteString = String;
 
 #[derive(
@@ -194,6 +201,7 @@ pub type TByteString = String;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
 pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 
@@ -213,6 +221,7 @@ pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName {
     TSFlitInt(PosString),
@@ -238,6 +247,7 @@ pub enum TshapeFieldName {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum ParamMode {
     FPnormal,
@@ -246,6 +256,7 @@ pub enum ParamMode {
 impl TrivialDrop for ParamMode {}
 arena_deserializer::impl_deserialize_in_arena!(ParamMode);
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type XhpAttr = xhp_attribute::XhpAttribute;
 
 /// Denotes the categories of requirements we apply to constructor overrides.
@@ -273,6 +284,7 @@ pub type XhpAttr = xhp_attribute::XhpAttribute;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum ConsistentKind {
     Inconsistent,
@@ -298,6 +310,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
@@ -319,6 +332,7 @@ pub enum DependentType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute {
@@ -342,6 +356,7 @@ pub struct UserAttribute {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam {
@@ -369,6 +384,7 @@ pub struct Tparam {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
@@ -390,6 +406,7 @@ pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show, ord)")]
 #[repr(u8)]
 pub enum Enforcement {
     Unenforced,
@@ -858,6 +875,7 @@ pub type FunParams = Vec<FunParam>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(u8)]
 pub enum DestructureKind {
     ListDestructure,
@@ -880,6 +898,7 @@ arena_deserializer::impl_deserialize_in_arena!(DestructureKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "d_")]
 #[repr(C)]
 pub struct Destructure {
@@ -918,6 +937,7 @@ pub struct Destructure {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "hm_")]
 #[repr(C)]
 pub struct HasMember {
@@ -926,7 +946,9 @@ pub struct HasMember {
     /// This is required to check ambiguous object access, where sometimes
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
+    #[rust_to_ocaml(attr = "opaque")]
     pub class_id: nast::ClassId_,
+    #[rust_to_ocaml(attr = "opaque")]
     pub explicit_targs: Option<Vec<nast::Targ>>,
 }
 
@@ -946,6 +968,7 @@ pub struct HasMember {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ci_")]
 #[repr(C)]
 pub struct CanIndex {
@@ -972,6 +995,7 @@ pub struct CanIndex {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ct_")]
 #[repr(C)]
 pub struct CanTraverse {
@@ -1020,6 +1044,7 @@ pub enum ConstraintType_ {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
 
@@ -1037,6 +1062,7 @@ pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum InternalType {
     LoclType(Ty),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<605699be9c54c1412de4a38599432183>>
+// @generated SignedSource<<6d0cd021265ea5888e35b83689de8e2a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,6 +20,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 pub type PosId<'a> = (&'a pos_or_decl::PosOrDecl<'a>, &'a ast_defs::Id_<'a>);
 
 pub use oxidized::typing_reason::ArgPosition;
@@ -76,6 +77,7 @@ pub use oxidized::typing_reason::BlameSource;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving eq")]
 #[repr(C, u8)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -335,6 +337,7 @@ pub type DeclT<'a> = T_<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum Ureason<'a> {
     URnone,

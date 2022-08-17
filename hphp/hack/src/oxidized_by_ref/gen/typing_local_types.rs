@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d382e242d68dc673f6919ef11710980d>>
+// @generated SignedSource<<8cf97a3a61cbbf2b01e525794fa33e37>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -21,6 +21,7 @@ pub use typing_defs::*;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type ExpressionId = ident::Ident;
 
 #[derive(
@@ -39,6 +40,7 @@ pub type ExpressionId = ident::Ident;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct Local<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,

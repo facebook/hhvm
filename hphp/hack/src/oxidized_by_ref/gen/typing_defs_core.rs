@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<891621c517b4aac1458a676065a75bcc>>
+// @generated SignedSource<<f77444757782a5f899296b0a7a317b10>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum CeVisibility<'a> {
     Vpublic,
@@ -70,6 +71,7 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord)")]
 #[repr(C, u8)]
 pub enum IfcFunDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -100,6 +102,7 @@ pub use oxidized::typing_defs_core::ValKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
 pub struct PosString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -109,6 +112,7 @@ pub struct PosString<'a>(
 impl<'a> TrivialDrop for PosString<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PosString<'arena>);
 
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 pub type TByteString<'a> = str;
 
 #[derive(
@@ -128,6 +132,7 @@ pub type TByteString<'a> = str;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
 pub struct PosByteString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -154,6 +159,7 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -168,6 +174,7 @@ arena_deserializer::impl_deserialize_in_arena!(TshapeFieldName<'arena>);
 
 pub use oxidized::typing_defs_core::ParamMode;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type XhpAttr = oxidized::xhp_attribute::XhpAttribute;
 
 pub use oxidized::typing_defs_core::ConsistentKind;
@@ -189,6 +196,7 @@ pub use oxidized::typing_defs_core::ConsistentKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
@@ -212,6 +220,7 @@ arena_deserializer::impl_deserialize_in_arena!(DependentType);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute<'a> {
@@ -239,6 +248,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam<'a> {
@@ -272,6 +282,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct WhereConstraint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
@@ -824,6 +835,7 @@ pub use oxidized::typing_defs_core::DestructureKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "d_")]
 #[repr(C)]
 pub struct Destructure<'a> {
@@ -867,6 +879,7 @@ arena_deserializer::impl_deserialize_in_arena!(Destructure<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "hm_")]
 #[repr(C)]
 pub struct HasMember<'a> {
@@ -878,8 +891,10 @@ pub struct HasMember<'a> {
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "opaque")]
     pub class_id: &'a nast::ClassId_<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "opaque")]
     pub explicit_targs: Option<&'a [&'a nast::Targ<'a>]>,
 }
 impl<'a> TrivialDrop for HasMember<'a> {}
@@ -901,6 +916,7 @@ arena_deserializer::impl_deserialize_in_arena!(HasMember<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ci_")]
 #[repr(C)]
 pub struct CanIndex<'a> {
@@ -934,6 +950,7 @@ arena_deserializer::impl_deserialize_in_arena!(CanIndex<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ct_")]
 #[repr(C)]
 pub struct CanTraverse<'a> {
@@ -993,6 +1010,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ConstraintType<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
@@ -1016,6 +1034,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum InternalType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

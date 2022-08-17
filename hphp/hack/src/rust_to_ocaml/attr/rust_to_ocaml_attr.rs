@@ -9,6 +9,10 @@ use proc_macro::TokenStream;
 /// tool, so this proc macro doesn't need to do anything other than return the
 /// item (with the rust_to_ocaml attribute stripped by rustc).
 ///
+/// Use of the rust_to_ocaml attribute in positions other than items (like field
+/// definitions) are stripped by ocamlrep_derive macros (which is simpler than
+/// filtering them from the `item` in this crate).
+///
 /// We may want to add validation later so that incorrect use of the attribute
 /// emits errors at compile time, but stripping is good enough for now.
 #[proc_macro_attribute]

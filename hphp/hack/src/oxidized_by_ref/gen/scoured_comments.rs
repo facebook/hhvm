@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42e487682737ce3d9600b7711b69f5c0>>
+// @generated SignedSource<<3f9661843e3f6cea5f093073b77e4524>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,6 +18,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
 pub type Fixmes<'a> = i_map::IMap<'a, i_map::IMap<'a, &'a pos::Pos<'a>>>;
 
 #[derive(
@@ -34,6 +35,7 @@ pub type Fixmes<'a> = i_map::IMap<'a, i_map::IMap<'a, &'a pos::Pos<'a>>>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct ScouredComments<'a> {

@@ -11,9 +11,24 @@ use synstructure::decl_derive;
 use synstructure::BindingInfo;
 use synstructure::VariantInfo;
 
-decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
-decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
-decl_derive!([FromOcamlRepIn] => derive_from_ocamlrep_in);
+// The rust_to_ocaml_attr crate provides the rust_to_ocaml attribute macro,
+// which is intended to be consumed by the rust_to_ocaml codegen tool. It
+// doesn't currently control the behavior of any derived ocamlrep trait impls.
+//
+// Unfortunately, rust_to_ocaml_attr does not strip the attribute macro from
+// positions where attribute macros are not allowed (like field definitions).
+// The easiest way to do that is to ask proc_macro_derive to do it, but that
+// requires the use of a derive macro.
+//
+// Since all of the types we are interested in passing to rust_to_ocaml
+// implement an ocamlrep trait, ask proc_macro_derive (via decl_derive) to strip
+// rust_to_ocaml attributes when deriving ocamlrep traits.
+//
+// Even with this stripping, the rust_to_ocaml_attr crate is still required to
+// strip the attribute from type aliases, which cannot use derive macros.
+decl_derive!([ToOcamlRep, attributes(rust_to_ocaml)] => derive_to_ocamlrep);
+decl_derive!([FromOcamlRep, attributes(rust_to_ocaml)] => derive_from_ocamlrep);
+decl_derive!([FromOcamlRepIn, attributes(rust_to_ocaml)] => derive_from_ocamlrep_in);
 
 fn derive_to_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type

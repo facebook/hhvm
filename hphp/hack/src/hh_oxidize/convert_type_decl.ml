@@ -369,6 +369,34 @@ let doc_comment_of_attribute_list attrs =
   |> Option.map ~f:convert_doc_comment
   |> Option.value ~default:""
 
+let stringify_attribute { attr_name; attr_payload; _ } =
+  match (attr_name, attr_payload) with
+  | ({ txt = "ocaml.doc" | "value"; _ }, _) -> None
+  | ({ txt; _ }, PStr []) -> Some txt
+  | ({ txt; _ }, PStr [structure_item]) ->
+    let item =
+      structure_item
+      |> Format.asprintf "%a" Pprintast.structure_item
+      |> String.strip ~drop:(function
+             | ' '
+             | '\t'
+             | ';' ->
+               true
+             | _ -> false)
+    in
+    Some (txt ^ " " ^ item)
+  | _ -> None
+
+let ocaml_attr attrs =
+  attrs
+  |> List.filter_map ~f:stringify_attribute
+  |> List.map ~f:(fun attr ->
+         if String.contains attr '"' then
+           Printf.sprintf "#[rust_to_ocaml(attr = r#\"%s\"#)]\n" attr
+         else
+           Printf.sprintf "#[rust_to_ocaml(attr = \"%s\")]\n" attr)
+  |> String.concat ~sep:""
+
 let type_param (ct, _) = core_type ct
 
 let type_params name params =
@@ -387,6 +415,7 @@ let type_params name params =
 let record_label_declaration
     ?(pub = false) ?(prefix = "") (ld : label_declaration) : label =
   let doc = doc_comment_of_attribute_list ld.pld_attributes in
+  let attr = ocaml_attr ld.pld_attributes in
   let pub =
     if pub then
       "pub "
@@ -398,9 +427,10 @@ let record_label_declaration
   in
   let ty = core_type ld.pld_type in
   sprintf
-    "%s%s%s %s: %s,\n"
+    "%s%s%s%s %s: %s,\n"
     doc
     (rust_de_field_attr [ty])
+    attr
     pub
     name
     (rust_type_to_string ty)
@@ -482,6 +512,7 @@ let variant_constructor_value cd =
 
 let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
+  let attr = ocaml_attr cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
   let value =
     variant_constructor_value cd
@@ -491,9 +522,10 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   | Pcstr_tuple types ->
     let tys = declare_constructor_arguments ~box_fields types in
     sprintf
-      "%s%s%s%s%s,\n"
+      "%s%s%s%s%s%s,\n"
       doc
       (rust_de_field_attr tys)
+      attr
       name
       (if List.is_empty tys then
         ""
@@ -503,9 +535,10 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   | Pcstr_record labels ->
     let prefix = find_record_label_prefix labels in
     sprintf
-      "%s%s%s%s%s,\n"
+      "%s%s%s%s%s%s,\n"
       doc
       (record_prefix_attr prefix)
+      attr
       name
       (declare_record_arguments labels ~prefix)
       value
@@ -559,6 +592,7 @@ let type_declaration name td =
       sprintf "#[serde(bound(deserialize = \"%s\" ))]" bounds
   in
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
+  let attr = ocaml_attr td.ptype_attributes in
   let attrs_and_vis ?(additional_attrs = "") enum_kind ~force_derive_copy =
     if
       force_derive_copy
@@ -605,7 +639,7 @@ let type_declaration name td =
       | Sum_type { num_variants } when num_variants <= 256 -> "\n#[repr(C, u8)]"
       | _ -> "\n#[repr(C)]"
     in
-    doc ^ derive_attr ^ serde_attr ^ additional_attrs ^ repr ^ "\npub"
+    doc ^ derive_attr ^ serde_attr ^ attr ^ additional_attrs ^ repr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
     if is_by_ref () || force_derive_copy || String.equal name "EmitId" then
@@ -681,8 +715,9 @@ let type_declaration name td =
              ^ mod_name_as_type))
       else
         sprintf
-          "%spub type %s = %s;"
+          "%s%spub type %s = %s;"
           doc
+          attr
           (rust_type name lifetime tparams |> rust_type_to_string)
           mod_name_as_type
     | Ptyp_constr ({ txt = id; _ }, targs) ->
@@ -698,8 +733,9 @@ let type_declaration name td =
         let ty = core_type ty in
         if should_add_rcoc name then
           sprintf
-            "%spub type %s = ocamlrep::rc::RcOc<%s>;"
+            "%s%spub type %s = ocamlrep::rc::RcOc<%s>;"
             doc
+            attr
             (rust_type name lifetime tparams |> rust_type_to_string)
             (rust_type_to_string ty)
         else if should_be_newtype name then
@@ -713,16 +749,18 @@ let type_declaration name td =
             (deserialize_in_arena_macro ~force_derive_copy:false)
         else
           sprintf
-            "%spub type %s = %s;"
+            "%s%spub type %s = %s;"
             doc
+            attr
             (rust_type name lifetime tparams |> rust_type_to_string)
             (deref ty |> rust_type_to_string)
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
         let ty = core_type ty |> deref |> rust_type_to_string in
         sprintf
-          "%spub type %s = %s;"
+          "%s%spub type %s = %s;"
           doc
+          attr
           (rust_type name lifetime tparams |> rust_type_to_string)
           ty
       else

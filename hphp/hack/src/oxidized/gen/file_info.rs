@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f1ca9d62fb0716a87e2d0365cb247c6>>
+// @generated SignedSource<<589ee1d5b77f20c5ee16b4d37af92df3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
 #[repr(u8)]
 pub enum Mode {
     /// just declare signatures, don't check anything
@@ -66,6 +67,7 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show, enum, ord)")]
 #[repr(u8)]
 pub enum NameType {
     Fun = 3,
@@ -95,6 +97,7 @@ arena_deserializer::impl_deserialize_in_arena!(NameType);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum Pos {
     Full(pos::Pos),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10b1e4a0937cd11573e318f179a9f84b>>
+// @generated SignedSource<<87d6d10f2a573ad6ef1bcfd8273034b6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "has_")]
 #[repr(C)]
 pub struct FunTastInfo {
@@ -58,9 +59,11 @@ arena_deserializer::impl_deserialize_in_arena!(FunTastInfo);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct SavedEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "opaque")]
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,
@@ -74,6 +77,7 @@ pub struct SavedEnv<'a> {
 impl<'a> TrivialDrop for SavedEnv<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SavedEnv<'arena>);
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type Program<'a> = aast::Program<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;
 
 pub type Def<'a> = aast::Def<'a, &'a Ty<'a>, &'a SavedEnv<'a>>;

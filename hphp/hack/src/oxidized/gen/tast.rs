@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9ee0894004b1593f03a773686d1d52e>>
+// @generated SignedSource<<3247ebe45346e0cfd6be40b61851a9c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,6 +37,7 @@ pub type DeclTy = typing_defs::Ty;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "has_")]
 #[repr(C)]
 pub struct FunTastInfo {
@@ -55,8 +56,10 @@ pub struct FunTastInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct SavedEnv {
+    #[rust_to_ocaml(attr = "opaque")]
     pub tcopt: typechecker_options::TypecheckerOptions,
     pub inference_env: typing_inference_env::TypingInferenceEnv,
     pub tpenv: type_parameter_env::TypeParameterEnv,
@@ -64,6 +67,7 @@ pub struct SavedEnv {
     pub fun_tast_info: Option<FunTastInfo>,
 }
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type Program = aast::Program<Ty, SavedEnv>;
 
 pub type Def = aast::Def<Ty, SavedEnv>;

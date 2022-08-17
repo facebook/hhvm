@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64733f14c446e1c6e7c5d153f20fdfcd>>
+// @generated SignedSource<<729a011cf1cf593dd9f0ff28268be123>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -100,6 +100,7 @@ pub struct TyvarInfo {
 
 pub type Tvenv = i_map::IMap<TyvarInfo>;
 
+#[rust_to_ocaml(attr = "deriving eq")]
 pub type Identifier = isize;
 
 #[derive(

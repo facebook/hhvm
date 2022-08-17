@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99bca435b903072ee5455a45724e96e7>>
+// @generated SignedSource<<484aa6fbeac7e8a0079008ac1a0ddde6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,6 +52,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom {
     Self_,
@@ -86,6 +87,7 @@ pub enum ClassConstFrom {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ClassConstRef(pub ClassConstFrom, pub String);
 
@@ -105,6 +107,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl {
@@ -128,6 +131,7 @@ pub struct ConstDecl {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
 pub struct ClassElt {
@@ -157,6 +161,7 @@ pub struct ClassElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt {
@@ -188,6 +193,7 @@ pub struct FunElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstKind {
     CCAbstract(bool),
@@ -210,6 +216,7 @@ pub enum ClassConstKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst {
@@ -239,6 +246,7 @@ pub struct ClassConst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum ModuleReference {
     MRGlobal,
@@ -262,6 +270,7 @@ pub enum ModuleReference {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "mdt_")]
 #[repr(C)]
 pub struct ModuleDefType {
@@ -455,6 +464,7 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType {
@@ -479,6 +489,7 @@ pub struct EnumType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType {
@@ -510,6 +521,7 @@ pub struct TypedefType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we

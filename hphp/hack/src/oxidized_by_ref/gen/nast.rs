@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8fb54b5007537a7cb55a8538d11d4b82>>
+// @generated SignedSource<<bc4372e4ffa043f013ef486122a6fe49>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -25,10 +25,12 @@ pub use crate::ast_defs::shape_map;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type Program<'a> = aast::Program<'a, (), ()>;
 
 pub type Def<'a> = aast::Def<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type Expr<'a> = aast::Expr<'a, (), ()>;
 
 pub type Expr_<'a> = aast::Expr_<'a, (), ()>;
@@ -37,8 +39,10 @@ pub type Stmt<'a> = aast::Stmt<'a, (), ()>;
 
 pub type Block<'a> = aast::Block<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 pub type UserAttribute<'a> = aast::UserAttribute<'a, (), ()>;
 
+#[rust_to_ocaml(attr = "deriving eq")]
 pub type ClassId_<'a> = aast::ClassId_<'a, (), ()>;
 
 pub type Class_<'a> = aast::Class_<'a, (), ()>;

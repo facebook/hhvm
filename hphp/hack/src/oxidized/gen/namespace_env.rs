@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cae9afd1b8b8de3bbab566e13701a52>>
+// @generated SignedSource<<8e6f54bcecf0bf30cf468fe530d38121>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -31,12 +31,17 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "ns_")]
 #[repr(C)]
 pub struct Env {
+    #[rust_to_ocaml(attr = "opaque")]
     pub ns_uses: s_map::SMap<String>,
+    #[rust_to_ocaml(attr = "opaque")]
     pub class_uses: s_map::SMap<String>,
+    #[rust_to_ocaml(attr = "opaque")]
     pub fun_uses: s_map::SMap<String>,
+    #[rust_to_ocaml(attr = "opaque")]
     pub const_uses: s_map::SMap<String>,
     pub name: Option<String>,
     pub auto_ns_map: Vec<(String, String)>,

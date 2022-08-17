@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f94598037d48303b964a897817ba3bf4>>
+// @generated SignedSource<<e618d573fd420e2180a7cc8cf86ffe70>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
 #[repr(u8)]
 pub enum Tag {
     Required,
@@ -65,6 +66,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tag);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "xa_")]
 #[repr(C)]
 pub struct XhpAttribute {

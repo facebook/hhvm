@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<957281ec7a76cc1d24b8848c522663c2>>
+// @generated SignedSource<<0b5dd4be28e395ff8bbe49092ffabb86>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct DeclParserOptions {
     pub auto_namespace_map: Vec<(String, String)>,

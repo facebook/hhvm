@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4a8b20c221ae6814bb092af02469de44>>
+// @generated SignedSource<<28b6225e232acdcdf71499a28cf7d97f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,6 +41,35 @@ use crate::*;
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq,
+    (visitors
+       {
+         variety = "iter";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["iter_defs"]
+       }),
+    (visitors
+       {
+         variety = "reduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["reduce_defs"]
+       }),
+    (visitors
+       {
+         variety = "map";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["map_defs"]
+       }),
+    (visitors
+       {
+         variety = "endo";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["endo_defs"]
+       }))"#)]
 #[repr(C)]
 pub struct Program<'a, Ex, En>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [Def<'a, Ex, En>],
@@ -1658,6 +1687,7 @@ pub struct Class_<'a, Ex, En> {
     pub span: &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena")]
     pub annotation: En,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,
     pub is_xhp: bool,
@@ -1821,6 +1851,11 @@ pub struct ClassConst<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ClassConst<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena, Ex, En>);
 
+/// This represents a type const definition. If a type const is abstract then
+/// then the type hint acts as a constraint. Any concrete definition of the
+/// type const must satisfy the constraint.
+///
+/// If the type const is not abstract then a type must be specified.
 #[derive(
     Clone,
     Debug,
@@ -2094,6 +2129,7 @@ pub struct Typedef<'a, Ex, En> {
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
     pub vis: oxidized::aast::TypedefVisibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2133,6 +2169,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typedef<'arena, Ex, En>);
 pub struct Gconst<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena")]
     pub annotation: En,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Sid<'a>,
@@ -2173,6 +2210,7 @@ pub struct FunDef<'a, Ex, En> {
     pub namespace: &'a Nsenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun: &'a Fun_<'a, Ex, En>,
@@ -2211,6 +2249,7 @@ pub struct ModuleDef<'a, Ex, En> {
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub span: &'a Pos<'a>,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: oxidized::file_info::Mode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,

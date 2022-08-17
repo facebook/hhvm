@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b8d9d715e29341504a2d882444f868b6>>
+// @generated SignedSource<<e6fc7a8306e11bac6bdccbe04f5cf1c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Parsing {
     FixmeFormat = 1001,
@@ -66,6 +67,7 @@ arena_deserializer::impl_deserialize_in_arena!(Parsing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Naming {
     AddATypehint = 2001,
@@ -165,6 +167,7 @@ arena_deserializer::impl_deserialize_in_arena!(Naming);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum NastCheck {
     AbstractBody = 3001,
@@ -244,6 +247,7 @@ arena_deserializer::impl_deserialize_in_arena!(NastCheck);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Typing {
     InternalError = 0,
@@ -593,6 +597,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Init {
     ForwardCompatibilityNotCurrent = 8001,
@@ -619,6 +624,7 @@ arena_deserializer::impl_deserialize_in_arena!(Init);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum GlobalWriteCheck {
     StaticVariableDirectWrite = 11001,

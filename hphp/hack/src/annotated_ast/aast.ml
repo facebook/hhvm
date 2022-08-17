@@ -885,7 +885,6 @@ and ('ex, 'en) class_const = {
  *
  * If the type const is not abstract then a type must be specified.
  *)
-
 and class_abstract_typeconst = {
   c_atc_as_constraint: hint option;
   c_atc_super_constraint: hint option;

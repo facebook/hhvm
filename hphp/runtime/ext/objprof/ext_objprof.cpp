@@ -104,34 +104,29 @@ enum ObjprofFlags {
   PER_PROPERTY = 4
 };
 
-std::pair<int, double> tvGetSize(
-  TypedValue tv,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  ObjprofFlags flags
-);
+struct ObjprofState {
+  const ObjectData* source;
+  Optional<ObjprofStack> stack;
+  Optional<PathsToObject> paths;
+  ObjprofValuePtrStack val_stack;
+  const std::unordered_set<std::string>& exclude_classes;
+  ObjprofFlags flags;
+};
+
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env);
 
 std::pair<int, double> getObjSize(
-  const ObjectData* obj,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ObjectData* obj, ObjprofState& env,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 );
 
-std::string pathString(ObjprofStack* stack, const char* sep) {
-  assertx(stack->size() < 100000000);
+std::string pathString(const ObjprofStack& stack, const char* sep) {
+  assertx(stack.size() < 100000000);
 
   std::ostringstream os;
-  for (size_t i = 0; i < stack->size(); ++i) {
+  for (size_t i = 0; i < stack.size(); ++i) {
     if (i != 0) os << sep;
-    os << (*stack)[i];
+    os << stack[i];
   }
   return os.str();
 }
@@ -169,47 +164,32 @@ bool isObjprofRoot(
  * into ObjectData* references.
  */
 std::pair<int, double> sizeOfArray(
-  const ArrayData* ad,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  Class* cls,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ArrayData* ad, ObjprofState& env, Class* cls,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 ) {
-  auto ptr_begin = val_stack->begin();
-  auto ptr_end = val_stack->end();
+  auto ptr_begin = env.val_stack.begin();
+  auto ptr_end = env.val_stack.end();
   if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
     FTRACE(3, "Cycle found for ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
   }
 
-  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
+  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
     raise_warning("objprof: data structure is too deep, pruning traversal");
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting ArrayData*({})\n", ad);
-  val_stack->push_back(ad);
+  env.val_stack.push_back(ad);
 
   int size = 0;
   double sized = 0;
   if (ad->isVecType()) {
     FTRACE(2, "Iterating vec\n");
-    if (stack) stack->push_back("ArrayIndex");
+    if (env.stack) env.stack->push_back("ArrayIndex");
 
     IterateV(ad, [&] (TypedValue v) {
-      auto val_size_pair = tvGetSize(
-        v,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto val_size_pair = tvGetSize(v, env);
       if (histogram) {
         auto histogram_key = std::make_pair(cls, "<index>");
         auto& metrics = (*histogram)[histogram_key];
@@ -223,7 +203,7 @@ std::pair<int, double> sizeOfArray(
       return false;
     });
 
-    if (stack) stack->pop_back();
+    if (env.stack) env.stack->pop_back();
   } else {
     FTRACE(2, "Iterating mixed array\n");
     IterateKV(ad, [&] (TypedValue k, TypedValue v) {
@@ -235,16 +215,10 @@ std::pair<int, double> sizeOfArray(
         case KindOfString: {
           auto const str = k.m_data.pstr;
           k_str = str->toCppString();
-          if (stack) stack->push_back(std::string("ArrayKeyString:" + k_str));
-          key_size_pair = tvGetSize(
-            k,
-            source,
-            stack,
-            paths,
-            val_stack,
-            exclude_classes,
-            flags
-          );
+          if (env.stack) {
+            env.stack->push_back(std::string("ArrayKeyString:" + k_str));
+          }
+          key_size_pair = tvGetSize(k, env);
           FTRACE(2, "  Iterating str-key {} with size {}:{}\n",
             str->data(), key_size_pair.first, key_size_pair.second);
           break;
@@ -252,16 +226,10 @@ std::pair<int, double> sizeOfArray(
         case KindOfInt64: {
           int64_t num = k.m_data.num;
           k_str = std::to_string(num);
-          if (stack) stack->push_back(std::string("ArrayKeyInt:" + k_str));
-          key_size_pair = tvGetSize(
-            k,
-            source,
-            stack,
-            paths,
-            val_stack,
-            exclude_classes,
-            flags
-          );
+          if (env.stack) {
+            env.stack->push_back(std::string("ArrayKeyInt:" + k_str));
+          }
+          key_size_pair = tvGetSize(k, env);
           FTRACE(2, "  Iterating num-key {} with size {}:{}\n",
             num, key_size_pair.first, key_size_pair.second);
           break;
@@ -287,15 +255,7 @@ std::pair<int, double> sizeOfArray(
           always_assert(false);
       }
 
-      auto val_size_pair = tvGetSize(
-        v,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto val_size_pair = tvGetSize(v, env);
       FTRACE(2, "  Value size for that key was {}:{}\n",
         val_size_pair.first, val_size_pair.second);
       if (histogram) {
@@ -308,15 +268,15 @@ std::pair<int, double> sizeOfArray(
       size += val_size_pair.first + key_size_pair.first;
       sized += val_size_pair.second + key_size_pair.second;
 
-      if (stack) stack->pop_back();
+      if (env.stack) env.stack->pop_back();
       return false;
     });
   }
 
   FTRACE(3, "Popping {} frm stack in sizeOfArray. Stack size before pop {}\n",
-    val_stack->back(), val_stack->size()
+    env.val_stack.back(), env.val_stack.size()
   );
-  val_stack->pop_back();
+  env.val_stack.pop_back();
 
   return std::make_pair(size, sized);
 }
@@ -325,15 +285,7 @@ std::pair<int, double> sizeOfArray(
  * Measures the size of the typed value and referenced objects without going
  * into ObjectData* references.
  */
-std::pair<int, double> tvGetSize(
-  TypedValue tv,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  ObjprofFlags flags
-) {
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
   int size = sizeof(tv);
   double sized = size;
 
@@ -366,15 +318,9 @@ std::pair<int, double> tvGetSize(
 
   auto add_array_size = [&](ArrayData* arr) {
     auto size_of_array_pair = sizeOfArray(
-      arr,
-      source,
-      stack,
-      paths,
-      val_stack,
-      exclude_classes,
+      arr, env,
       nullptr, /* cls */
-      nullptr, /* histogram */
-      flags
+      nullptr /* histogram */
     );
     auto arr_ref_count = int{cnt->count()};
     FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
@@ -431,17 +377,8 @@ std::pair<int, double> tvGetSize(
       assertx(cnt->isRefCounted());
       ObjectData* obj = (ObjectData*)cnt;
       // If its not a root node, recurse into the object to determine its size
-      if (!isObjprofRoot(obj, flags, exclude_classes)) {
-        auto obj_size_pair = getObjSize(
-          obj,
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          nullptr, /* histogram */
-          flags
-        );
+      if (!isObjprofRoot(obj, env.flags, env.exclude_classes)) {
+        auto obj_size_pair = getObjSize(obj, env, nullptr /* histogram */);
         size += obj_size_pair.first;
         auto obj_ref_count = int{cnt->count()};
         FTRACE(3, " ObjectData tv: at {} with ref count {}\n",
@@ -450,18 +387,18 @@ std::pair<int, double> tvGetSize(
         );
         assertx(obj_ref_count > 0);
         sized += obj_size_pair.second / (double)(obj_ref_count);
-      } else if (stack && paths) {
+      } else if (env.stack && env.paths) {
         // notice we might have multiple OBJ->path->OBJ for same path
         // (e.g. packed array where we omit the index number)
         auto cls = obj->getVMClass();
-        stack->push_back(std::string("Object:" + cls->name()->toCppString()));
-        auto pathStr = pathString(stack, "->");
-        stack->pop_back();
+        env.stack->push_back(std::string("Object:" + cls->name()->toCppString()));
+        auto pathStr = pathString(*env.stack, "->");
+        env.stack->pop_back();
 
-        auto& pathsToTv = (*paths)[obj];
+        auto& pathsToTv = (*env.paths)[obj];
         auto& referral = pathsToTv[pathStr];
-        if (source) {
-          referral.sources.insert(source);
+        if (env.source) {
+          referral.sources.insert(env.source);
         }
         referral.refs += 1;
 
@@ -522,31 +459,25 @@ std::pair<int, double> tvGetSize(
 }
 
 std::pair<int, double> getObjSize(
-  const ObjectData* obj,
-  const ObjectData* source,
-  ObjprofStack* stack,
-  PathsToObject* paths,
-  ObjprofValuePtrStack* val_stack,
-  const std::unordered_set<std::string>& exclude_classes,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
-  ObjprofFlags flags
+  const ObjectData* obj, ObjprofState& env,
+  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
 ) {
   Class* cls = obj->getVMClass();
 
-  auto ptr_begin = val_stack->begin();
-  auto ptr_end = val_stack->end();
+  auto ptr_begin = env.val_stack.begin();
+  auto ptr_end = env.val_stack.end();
   if (std::find(ptr_begin, ptr_end, obj) != ptr_end) {
     FTRACE(3, "Cycle found for {}*({})\n", obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }
 
-  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
+  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
     raise_warning("objprof: data structure is too deep, pruning traversal");
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting {}*({})\n", obj->getClassName().data(), obj);
-  val_stack->push_back(obj);
+  env.val_stack.push_back(obj);
 
   FTRACE(1, "Getting object size for type {} at {}\n",
     obj->getClassName().data(),
@@ -560,58 +491,32 @@ std::pair<int, double> getObjSize(
   }
   double sized = size;
 
-  if (stack) stack->push_back(
+  if (env.stack) env.stack->push_back(
     std::string("Object:" + cls->name()->toCppString())
   );
 
   if (obj->isCollection()) {
     auto const arr = collections::asArray(obj);
     if (arr) {
-      auto array_size_pair = sizeOfArray(
-        arr,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        cls,
-        histogram,
-        flags
-      );
+      auto array_size_pair = sizeOfArray(arr, env, cls, histogram);
       size += array_size_pair.first;
       sized += array_size_pair.second;
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<const c_Pair*>(obj);
-      auto elm_size_pair = tvGetSize(
-        *pair->get(0),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      auto elm_size_pair = tvGetSize(*pair->get(0), env);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
-      elm_size_pair = tvGetSize(
-        *pair->get(1),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
+      elm_size_pair = tvGetSize(*pair->get(1), env);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
     }
 
-    if (stack) stack->pop_back();
+    if (env.stack) env.stack->pop_back();
     FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-      val_stack->back(), val_stack->size()
+      env.val_stack.back(), env.val_stack.size()
     );
-    val_stack->pop_back();
+    env.val_stack.pop_back();
     return std::make_pair(size, sized);
   }
 
@@ -621,20 +526,14 @@ std::pair<int, double> getObjSize(
       FTRACE(2, "Skipping declared property key {}\n", prop.name->data());
 
       FTRACE(2, "Counting value for key {}\n", prop.name->data());
-      if (stack) {
-        stack->push_back(std::string("Property:" + prop.name->toCppString()));
+      if (env.stack) {
+        env.stack->push_back(
+          std::string("Property:" + prop.name->toCppString())
+        );
       }
 
-      auto val_size_pair = tvGetSize(
-        val.tv(),
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
-      if (stack) stack->pop_back();
+      auto val_size_pair = tvGetSize(val.tv(), env);
+      if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key=0:0, val={}:{}\n",
         prop.name->data(),
@@ -660,15 +559,7 @@ std::pair<int, double> getObjSize(
       if (tvIsString(key_tv)) {
         k_str = key_tv.m_data.pstr->toCppString();
         FTRACE(2, "Counting dynamic string key {}\n", k_str);
-        key_size_pair = tvGetSize(
-          key_tv,
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          flags
-        );
+        key_size_pair = tvGetSize(key_tv, env);
       } else {
         assertx(isIntType(key_tv.m_type));
         k_str = std::to_string(key_tv.m_data.num);
@@ -676,17 +567,9 @@ std::pair<int, double> getObjSize(
       }
 
       FTRACE(2, "Counting value for key {}\n", k_str);
-      if (stack) stack->push_back(std::string("Key:" + k_str));
-      auto val_size_pair = tvGetSize(
-        val,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
-      if (stack) stack->pop_back();
+      if (env.stack) env.stack->push_back(std::string("Key:" + k_str));
+      auto val_size_pair = tvGetSize(val, env);
+      if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key={}:{}, val={}:{}\n",
         k_str,
@@ -709,11 +592,11 @@ std::pair<int, double> getObjSize(
     }
   );
 
-  if (stack) stack->pop_back();
+  if (env.stack) env.stack->pop_back();
   FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-    val_stack->back(), val_stack->size()
+    env.val_stack.back(), env.val_stack.size()
   );
-  val_stack->pop_back();
+  env.val_stack.pop_back();
 
   return std::make_pair(size, sized);
 }
@@ -739,16 +622,17 @@ Array HHVM_FUNCTION(objprof_get_data,
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
-    std::vector<const void*> val_stack;
+    ObjprofState env{
+      .source = nullptr,
+      .stack = std::nullopt,
+      .paths = std::nullopt,
+      .val_stack = ObjprofValuePtrStack{},
+      .exclude_classes = exclude_classes,
+      .flags = (ObjprofFlags)flags
+    };
     auto objsizePair = getObjSize(
-      obj,
-      nullptr, /* source */
-      nullptr, /* stack */
-      nullptr, /* paths */
-      &val_stack,
-      exclude_classes,
-      objprof_props_mode ? &histogram : nullptr,
-      (ObjprofFlags)flags
+      obj, env,
+      objprof_props_mode ? &histogram : nullptr
     );
 
     if (!objprof_props_mode) {
@@ -812,23 +696,23 @@ Array HHVM_FUNCTION(objprof_get_paths,
       if (obj->hasZeroRefs()) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];
-      ObjprofStack stack;
-      PathsToObject pathsToObject;
-      std::vector<const void*> val_stack;
+      ObjprofState env{
+        .source = obj,
+        .stack = ObjprofStack{},
+        .paths = PathsToObject{},
+        .val_stack = ObjprofValuePtrStack{},
+        .exclude_classes = exclude_classes,
+        .flags = (ObjprofFlags)flags
+      };
       auto objsizePair = getObjSize(
         obj, /* obj */
-        obj, /* source */
-        &stack,
-        &pathsToObject,
-        &val_stack,
-        exclude_classes,
-        nullptr, /* histogram */
-        (ObjprofFlags)flags
+        env,
+        nullptr /* histogram */
       );
       metrics.instances += 1;
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
-      for (auto const& pathsIt : pathsToObject) {
+      for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
         auto& aggPaths = pathsToClass[cls];
@@ -847,14 +731,13 @@ Array HHVM_FUNCTION(objprof_get_paths,
        objsizePair.first,
        objsizePair.second
       );
-      assertx(stack.size() == 0);
+      assertx(env.stack->size() == 0);
   });
 
   NamedEntity::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
       return;
     }
-    std::vector<const void*> val_stack;
     auto const staticProps = cls->staticProperties();
     auto const nSProps = cls->numStaticProperties();
     for (Slot i = 0; i < nSProps; ++i) {
@@ -869,8 +752,14 @@ Array HHVM_FUNCTION(objprof_get_paths,
         StrNR(prop.name).data()
       );
 
-      ObjprofStack stack;
-      PathsToObject pathsToObject;
+      ObjprofState env{
+        .source = nullptr,
+        .stack = ObjprofStack{},
+        .paths = PathsToObject{},
+        .val_stack = ObjprofValuePtrStack{},
+        .exclude_classes = exclude_classes,
+        .flags = (ObjprofFlags)flags
+      };
 
       auto refname = std::string(
         "ClassProperty:" +
@@ -882,19 +771,11 @@ Array HHVM_FUNCTION(objprof_get_paths,
         continue;
       }
 
-      stack.push_back(refname);
-      tvGetSize(
-        *tv,
-        nullptr, /* source */
-        &stack,
-        &pathsToObject,
-        &val_stack,
-        exclude_classes,
-        (ObjprofFlags)flags
-      );
-      stack.pop_back();
+      env.stack->push_back(refname);
+      tvGetSize(*tv, env);
+      env.stack->pop_back();
 
-      for (auto const& pathsIt : pathsToObject) {
+      for (auto const& pathsIt : *env.paths) {
         auto cls = pathsIt.first->getVMClass();
         auto& paths = pathsIt.second;
         auto& aggPaths = pathsToClass[cls];
@@ -906,7 +787,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
           aggReferral.sources.insert(cls);
         }
       }
-      assertx(stack.size() == 0);
+      assertx(env.stack->size() == 0);
     }
   });
 

@@ -94,10 +94,10 @@ impl ItemConverter {
 
     fn convert_item_type(self, item: &syn::ItemType) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let doc = attr_parser::get_doc_comment(&item.attrs);
+        let attrs = attr_parser::Attrs::from_type(item);
         let ty = self.convert_type(&item.ty)?;
         Ok(Def::Alias {
-            doc,
+            doc: attrs.doc,
             tparams: self.tparams,
             name,
             ty,
@@ -106,12 +106,12 @@ impl ItemConverter {
 
     fn convert_item_struct(self, item: &syn::ItemStruct) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
+        let container_attrs = attr_parser::Attrs::from_struct(item);
         match &item.fields {
             syn::Fields::Named(fields) => {
                 let fields = (fields.named.iter())
                     .map(|field| {
-                        let field_attrs = attr_parser::Field::from_ast(field);
+                        let field_attrs = attr_parser::Attrs::from_field(field);
                         let name =
                             field_name(field.ident.as_ref(), container_attrs.prefix.as_deref());
                         let ty = self.convert_type(&field.ty)?;
@@ -133,13 +133,13 @@ impl ItemConverter {
 
     fn convert_item_enum(self, item: &syn::ItemEnum) -> Result<Def> {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
-        let container_attrs = attr_parser::Container::from_ast(&item.to_owned().into());
+        let container_attrs = attr_parser::Attrs::from_enum(item);
         let variants = item
             .variants
             .iter()
             .map(|variant| {
                 let name = variant_name(&variant.ident, container_attrs.prefix.as_deref());
-                let variant_attrs = attr_parser::Variant::from_ast(variant);
+                let variant_attrs = attr_parser::Attrs::from_variant(variant);
                 let fields = match &variant.fields {
                     syn::Fields::Unit => None,
                     syn::Fields::Unnamed(fields) => Some(ir::VariantFields::Unnamed(
@@ -150,7 +150,7 @@ impl ItemConverter {
                     syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
                         (fields.named.iter())
                             .map(|field| {
-                                let field_attrs = attr_parser::Field::from_ast(field);
+                                let field_attrs = attr_parser::Attrs::from_field(field);
                                 let name = field_name(
                                     field.ident.as_ref(),
                                     variant_attrs.prefix.as_deref(),

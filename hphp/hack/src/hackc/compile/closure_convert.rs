@@ -1762,6 +1762,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     for class in state.closures.into_iter() {
         defs.push(Def::mk_class(class));
     }
-    *e.emit_global_state_mut() = state.global_state;
+    *e.global_state_mut() = state.global_state;
     Ok(())
 }

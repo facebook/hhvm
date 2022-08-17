@@ -268,7 +268,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     body: &[ast::Stmt],
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
-    let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
+    let explicit_use_set = &emitter.global_state().explicit_use_set;
 
     let mut decl_vars =
         decl_vars::from_ast(params, body, explicit_use_set).map_err(Error::unrecoverable)?;

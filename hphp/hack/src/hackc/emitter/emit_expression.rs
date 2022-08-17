@@ -787,7 +787,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
     let cls_num = fndef_name
         .parse::<isize>()
         .map_err(|err| Error::unrecoverable(err.to_string()))?;
-    let explicit_use = e.emit_global_state().explicit_use_set.contains(fndef_name);
+    let explicit_use = e.global_state().explicit_use_set.contains(fndef_name);
     let is_in_lambda = env.scope.is_in_lambda();
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(

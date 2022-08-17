@@ -110,7 +110,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
         None => {
             // no finally blocks, but there might be some iterators that should be
             // released before exit - do it
-            let ctx = e.emit_statement_state();
+            let ctx = e.statement_state();
             let num_out = ctx.num_out;
             let verify_out = ctx.verify_out.clone();
             let verify_return = ctx.verify_return.clone();

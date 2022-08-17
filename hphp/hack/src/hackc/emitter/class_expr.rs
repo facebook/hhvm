@@ -35,7 +35,7 @@ impl<'arena> ClassExpr<'arena> {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter
-                    .emit_global_state()
+                    .global_state()
                     .get_closure_enclosing_class(class_name)
                 {
                     if ClassishKind::from(c.kind.clone()) != ClassishKind::Trait {
@@ -71,7 +71,7 @@ impl<'arena> ClassExpr<'arena> {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return opt_parent_name;
                 } else if let Some(c) = emitter
-                    .emit_global_state()
+                    .global_state()
                     .get_closure_enclosing_class(class_name)
                 {
                     return c.parent_class_name.clone();

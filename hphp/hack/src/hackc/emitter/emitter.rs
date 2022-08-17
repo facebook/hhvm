@@ -170,27 +170,27 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         self.systemlib
     }
 
-    pub fn emit_adata_state(&self) -> &AdataState<'arena> {
+    pub fn adata_state(&self) -> &AdataState<'arena> {
         self.adata_state_.as_ref().expect("uninit'd adata_state")
     }
-    pub fn emit_adata_state_mut(&mut self) -> &mut AdataState<'arena> {
+    pub fn adata_state_mut(&mut self) -> &mut AdataState<'arena> {
         self.adata_state_.get_or_insert_with(Default::default)
     }
 
-    pub fn emit_statement_state(&self) -> &StatementState<'arena> {
+    pub fn statement_state(&self) -> &StatementState<'arena> {
         self.statement_state_
             .as_ref()
             .expect("uninit'd statement_state")
     }
-    pub fn emit_statement_state_mut(&mut self) -> &mut StatementState<'arena> {
+    pub fn statement_state_mut(&mut self) -> &mut StatementState<'arena> {
         self.statement_state_
             .get_or_insert_with(StatementState::init)
     }
 
-    pub fn emit_global_state(&self) -> &GlobalState<'arena> {
+    pub fn global_state(&self) -> &GlobalState<'arena> {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
-    pub fn emit_global_state_mut(&mut self) -> &mut GlobalState<'arena> {
+    pub fn global_state_mut(&mut self) -> &mut GlobalState<'arena> {
         self.global_state_.get_or_insert_with(GlobalState::init)
     }
 

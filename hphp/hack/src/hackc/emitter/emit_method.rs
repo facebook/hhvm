@@ -194,14 +194,14 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
     let namespace = RcOc::clone(
         emitter
-            .emit_global_state()
+            .global_state()
             .closure_namespaces
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
     let mut coeffects = if method.ctxs == None && is_closure_body {
         let parent_coeffects = emitter
-            .emit_global_state()
+            .global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
         parent_coeffects.map_or(HhasCoeffects::default(), |pc| {
             pc.inherit_to_child_closure(emitter.alloc)

@@ -48,7 +48,7 @@ pub(crate) fn set_state<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     state: StatementState<'arena>,
 ) {
-    *e.emit_statement_state_mut() = state;
+    *e.statement_state_mut() = state;
 }
 
 // Wrapper functions
@@ -1479,11 +1479,11 @@ pub fn emit_dropthrough_return<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    match e.emit_statement_state().default_dropthrough.as_ref() {
+    match e.statement_state().default_dropthrough.as_ref() {
         Some(instrs) => Ok(InstrSeq::clone(instrs)),
         None => {
             let ret = emit_return(e, env)?;
-            let state = e.emit_statement_state();
+            let state = e.statement_state();
             Ok(InstrSeq::gather(vec![
                 emit_pos(&(state.function_pos.last_char())),
                 state.default_return_value.clone(),

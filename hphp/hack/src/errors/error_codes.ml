@@ -239,6 +239,7 @@ module NastCheck = struct
     | PrivateAndFinal [@value 3097]
     (* | InternalOutsideModuleDEPRECATED [@value 3098] *)
     | InternalMemberInsidePublicTrait [@value 3099]
+    | AttributeConflictingMemoize [@value 3100]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

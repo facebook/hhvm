@@ -118,6 +118,10 @@ type t =
       member_pos: Pos.t;
       trait_pos: Pos.t;
     }
+  | Attribute_conflicting_memoize of {
+      pos: Pos.t;
+      second_pos: Pos.t;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

@@ -121,6 +121,10 @@ type t =
       member_pos: Pos.t;
       trait_pos: Pos.t;
     }
+  | Attribute_conflicting_memoize of {
+      pos: Pos.t;
+      second_pos: Pos.t;
+    }
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -575,6 +579,20 @@ let internal_member_inside_public_trait member_pos trait_pos =
         "Only `internal` traits can have `internal` members" );
     ]
 
+let attribute_conflicting_memoize pos second_pos =
+  User_error.make
+    Error_code.(to_enum AttributeConflictingMemoize)
+    ( pos,
+      Printf.sprintf
+        "Methods cannot be both %s and %s."
+        (Markdown_lite.md_codify Naming_special_names.UserAttributes.uaMemoize)
+        (Markdown_lite.md_codify
+           Naming_special_names.UserAttributes.uaMemoizeLSB) )
+    [
+      ( Pos_or_decl.of_raw_pos second_pos,
+        "Conflicting memoize attribute is here" );
+    ]
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -641,3 +659,5 @@ let to_user_error = function
   | Private_and_final pos -> private_and_final pos
   | Internal_member_inside_public_trait { member_pos; trait_pos } ->
     internal_member_inside_public_trait member_pos trait_pos
+  | Attribute_conflicting_memoize { pos; second_pos } ->
+    attribute_conflicting_memoize pos second_pos

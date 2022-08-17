@@ -54,6 +54,19 @@ let check_attribute_arity attrs attr_name arg_spec =
     (fun err -> Errors.add_typing_error @@ Typing_error.primary err)
     prim_err_opt
 
+let attr_pos (attr : ('a, 'b) user_attribute) : Pos.t = fst attr.ua_name
+
+(* Ban methods having both __Memoize and __MemoizeLSB. *)
+let check_duplicate_memoize (attrs : Nast.user_attribute list) : unit =
+  let memoize = find_attribute SN.UserAttributes.uaMemoize attrs in
+  let memoize_lsb = find_attribute SN.UserAttributes.uaMemoizeLSB attrs in
+  match (memoize, memoize_lsb) with
+  | (Some memoize, Some memoize_lsb) ->
+    Errors.add_nast_check_error
+      (Nast_check_error.Attribute_conflicting_memoize
+         { pos = attr_pos memoize; second_pos = attr_pos memoize_lsb })
+  | _ -> ()
+
 let check_deprecated_static attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   match attr with
@@ -163,6 +176,7 @@ let handler =
         SN.UserAttributes.uaDeprecated
         (`Range (1, 2));
       check_deprecated_static m.m_user_attributes;
+      check_duplicate_memoize m.m_user_attributes;
       (* Ban variadic arguments on memoized methods. *)
       if
         has_attribute "__Memoize" m.m_user_attributes

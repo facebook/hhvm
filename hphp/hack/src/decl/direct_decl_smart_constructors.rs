@@ -2186,7 +2186,58 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                 ),
             ),
-            _ => return ty,
+            Ty_::Tintersection(tys) => Ty_::Tintersection(
+                self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))),
+            ),
+            Ty_::Tunion(tys) => {
+                Ty_::Tunion(self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))))
+            }
+            Ty_::Trefinement(&(root_ty, class_ref)) => {
+                let convert_class_type_ref = |ctr: &'a ClassTypeRefinement<'a>| match ctr {
+                    ClassTypeRefinement::Texact(ty) => {
+                        ClassTypeRefinement::Texact(self.convert_tapply_to_tgeneric(ty))
+                    }
+
+                    ClassTypeRefinement::Tloose(bnds) => {
+                        let convert_tys = |tys: &'a [&'a Ty<'a>]| {
+                            self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty)))
+                        };
+                        ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                            lower: convert_tys(bnds.lower),
+                            upper: convert_tys(bnds.upper),
+                        }))
+                    }
+                };
+                Ty_::Trefinement(
+                    self.alloc((
+                        self.convert_tapply_to_tgeneric(root_ty),
+                        ClassRefinement {
+                            cr_types: arena_collections::map::Map::from(
+                                self.arena,
+                                class_ref
+                                    .cr_types
+                                    .iter()
+                                    .map(|(id, ctr)| (*id, convert_class_type_ref(ctr))),
+                            ),
+                        },
+                    )),
+                )
+            }
+            Ty_::Taccess(_)
+            | Ty_::Tany(_)
+            | Ty_::Tclass(_)
+            | Ty_::Tdynamic
+            | Ty_::Terr
+            | Ty_::Tgeneric(_)
+            | Ty_::Tmixed
+            | Ty_::Tnonnull
+            | Ty_::Tprim(_)
+            | Ty_::Tthis => return ty,
+            Ty_::Tdependent(_)
+            | Ty_::Tneg(_)
+            | Ty_::Tnewtype(_)
+            | Ty_::Tvar(_)
+            | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),
         };
         self.alloc(Ty(ty.0, ty_))
     }

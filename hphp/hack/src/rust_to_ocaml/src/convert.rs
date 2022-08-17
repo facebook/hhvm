@@ -108,6 +108,27 @@ impl ItemConverter {
         let name = TypeName(item.ident.to_string().to_case(Case::Snake));
         let container_attrs = attr_parser::Attrs::from_struct(item);
         match &item.fields {
+            syn::Fields::Unit => Ok(Def::Alias {
+                doc: container_attrs.doc,
+                tparams: self.tparams,
+                name,
+                ty: ir::Type::Path(ir::TypePath::simple("unit")),
+            }),
+            syn::Fields::Unnamed(fields) => {
+                let elems = (fields.unnamed.iter())
+                    .map(|field| self.convert_type(&field.ty))
+                    .collect::<Result<Vec<_>>>()?;
+                Ok(Def::Alias {
+                    doc: container_attrs.doc,
+                    tparams: self.tparams,
+                    name,
+                    ty: if elems.is_empty() {
+                        ir::Type::Path(ir::TypePath::simple("unit"))
+                    } else {
+                        ir::Type::Tuple(ir::TypeTuple { elems })
+                    },
+                })
+            }
             syn::Fields::Named(fields) => {
                 let fields = (fields.named.iter())
                     .map(|field| {
@@ -127,7 +148,6 @@ impl ItemConverter {
                     fields,
                 })
             }
-            _ => todo!(),
         }
     }
 
@@ -178,11 +198,17 @@ impl ItemConverter {
     fn convert_type(&self, ty: &syn::Type) -> Result<ir::Type> {
         match ty {
             syn::Type::Path(ty) => Ok(ir::Type::Path(self.convert_type_path(ty)?)),
-            syn::Type::Tuple(ty) => Ok(ir::Type::Tuple(ir::TypeTuple {
-                elems: (ty.elems.iter())
-                    .map(|e| self.convert_type(e))
-                    .collect::<Result<_>>()?,
-            })),
+            syn::Type::Tuple(ty) => {
+                if ty.elems.is_empty() {
+                    Ok(ir::Type::Path(ir::TypePath::simple("unit")))
+                } else {
+                    Ok(ir::Type::Tuple(ir::TypeTuple {
+                        elems: (ty.elems.iter())
+                            .map(|e| self.convert_type(e))
+                            .collect::<Result<_>>()?,
+                    }))
+                }
+            }
             syn::Type::Reference(ty) => Ok(self.convert_type(&ty.elem)?),
             syn::Type::Slice(ty) => Ok(ir::Type::Path(ir::TypePath {
                 modules: vec![],

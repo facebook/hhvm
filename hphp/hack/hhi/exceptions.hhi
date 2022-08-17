@@ -71,7 +71,7 @@ interface IExceptionWithPureGetMessage {
 trait ExceptionWithPureGetMessageTrait implements IExceptionWithPureGetMessage {
   require extends Exception;
 
-  public function getMessage()[];
+  public function getMessage()[]: string;
 }
 
 class ExceptionWithPureGetMessage extends Exception {

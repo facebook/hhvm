@@ -111,6 +111,9 @@ struct ObjprofState {
   ObjprofValuePtrStack val_stack;
   const std::unordered_set<std::string>& exclude_classes;
   ObjprofFlags flags;
+  // While iterating the heap objprof is retaining pointers to heap objects,
+  // any logic that may reenter (or trigger frees) must be deferred.
+  std::vector<std::string>& deferred_warnings;
 };
 
 std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env);
@@ -129,6 +132,12 @@ std::string pathString(const ObjprofStack& stack, const char* sep) {
     os << stack[i];
   }
   return os.str();
+}
+
+void issueWarnings(std::vector<std::string>&& deferred_warnings) {
+  for (auto const& warning : deferred_warnings) {
+    raise_warning(warning);
+  }
 }
 
 /**
@@ -175,7 +184,9 @@ std::pair<int, double> sizeOfArray(
   }
 
   if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
-    raise_warning("objprof: data structure is too deep, pruning traversal");
+    env.deferred_warnings.push_back(
+      "objprof: data structure is too deep, pruning traversal"
+    );
     return std::make_pair(0, 0);
   }
 
@@ -472,7 +483,9 @@ std::pair<int, double> getObjSize(
   }
 
   if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
-    raise_warning("objprof: data structure is too deep, pruning traversal");
+    env.deferred_warnings.push_back(
+      "objprof: data structure is too deep, pruning traversal"
+    );
     return std::make_pair(0, 0);
   }
 
@@ -619,6 +632,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     exclude_classes.insert(iter.second().toString().data());
   }
 
+  std::vector<std::string> deferred_warnings;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
@@ -628,7 +642,8 @@ Array HHVM_FUNCTION(objprof_get_data,
       .paths = std::nullopt,
       .val_stack = ObjprofValuePtrStack{},
       .exclude_classes = exclude_classes,
-      .flags = (ObjprofFlags)flags
+      .flags = (ObjprofFlags)flags,
+      .deferred_warnings = deferred_warnings
     };
     auto objsizePair = getObjSize(
       obj, env,
@@ -651,6 +666,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       );
     }
   });
+  issueWarnings(std::move(deferred_warnings));
 
   // Create response
   DictInit objs(histogram.size());
@@ -691,6 +707,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
     exclude_classes.insert(iter.second().toString().data());
   }
 
+  std::vector<std::string> deferred_warnings;
   tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       if (obj->hasZeroRefs()) return;
@@ -702,7 +719,8 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .paths = PathsToObject{},
         .val_stack = ObjprofValuePtrStack{},
         .exclude_classes = exclude_classes,
-        .flags = (ObjprofFlags)flags
+        .flags = (ObjprofFlags)flags,
+        .deferred_warnings = deferred_warnings
       };
       auto objsizePair = getObjSize(
         obj, /* obj */
@@ -733,6 +751,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       );
       assertx(env.stack->size() == 0);
   });
+  issueWarnings(std::move(deferred_warnings));
 
   NamedEntity::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
@@ -758,7 +777,8 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .paths = PathsToObject{},
         .val_stack = ObjprofValuePtrStack{},
         .exclude_classes = exclude_classes,
-        .flags = (ObjprofFlags)flags
+        .flags = (ObjprofFlags)flags,
+        .deferred_warnings = deferred_warnings
       };
 
       auto refname = std::string(
@@ -790,6 +810,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       assertx(env.stack->size() == 0);
     }
   });
+  issueWarnings(std::move(deferred_warnings));
 
   // Create response
   DictInit objs(histogram.size());

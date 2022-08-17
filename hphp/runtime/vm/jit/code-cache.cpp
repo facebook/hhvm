@@ -133,8 +133,6 @@ CodeCache::CodeCache() {
 
   auto const currBase = (uintptr_t)sbrk(0);
   auto const usedBase = shiftTC(ru(currBase));
-  auto const baseAdjustment = usedBase - currBase;
-  const size_t allocationSize = m_totalSize + baseAdjustment;
 
   if (m_totalSize > (2ul << 30)) {
     fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, "
@@ -166,15 +164,15 @@ CodeCache::CodeCache() {
       return;
     }
     always_assert_flog(
-      currBase + allocationSize <= lowArenaStart,
+      usedBase + m_totalSize <= lowArenaStart,
       "computed allocationSize ({}) is too large to fit within "
-      "lowArenaStart ({}), currBase = {}\n",
-      allocationSize, lowArenaStart, currBase
+      "lowArenaStart ({}), usedBase = {}\n",
+      m_totalSize, lowArenaStart, usedBase
     );
   }
 #endif
   auto const allocBase =
-    (uintptr_t)mmap(reinterpret_cast<void*>(usedBase), allocationSize,
+    (uintptr_t)mmap(reinterpret_cast<void*>(usedBase), m_totalSize,
                     PROT_READ | PROT_WRITE,
                     MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
   always_assert_flog(allocBase == usedBase,
@@ -242,8 +240,6 @@ CodeCache::CodeCache() {
   AColdMaxUsage = maxUsage(AColdSize);
   AFrozenMaxUsage = maxUsage(AFrozenSize);
 
-  assertx(base - m_base <= allocationSize);
-  assertx(base - m_base + 2 * kRoundUp > allocationSize);
   assertx(base - m_base <= (2ul << 30));
 }
 

@@ -30,11 +30,12 @@ pub fn convert_file(
     let module_name = file_stem.to_str().context("non-UTF8 filename")?.to_owned();
     let mut file = File {
         root: ir::Module {
-            name: ir::ModuleName(module_name),
+            name: ir::ModuleName::new(module_name)?,
             defs,
         },
     };
     crate::rewrite_types::rewrite_file(config, &mut file);
+    crate::rewrite_module_names::rewrite_file(config, &mut file);
     Ok(file.to_string())
 }
 
@@ -72,7 +73,7 @@ impl ItemConverter {
                         .collect::<Result<_>>()
                         .with_context(|| format!("Failed to convert module {}", item.ident))?;
                     Ok(Some(Def::Module(ir::Module {
-                        name: ir::ModuleName(item.ident.to_string()),
+                        name: ir::ModuleName::new(item.ident.to_string())?,
                         defs,
                     })))
                 } else {
@@ -210,7 +211,7 @@ impl ItemConverter {
                         seg.arguments.is_empty(),
                         "Type args only supported in last path segment"
                     );
-                    Ok(ir::ModuleName(seg.ident.to_string()))
+                    Ok(ir::ModuleName::new(seg.ident.to_string())?)
                 })
                 .collect::<Result<_>>()?,
             ty: TypeName(last_seg.ident.to_string()),

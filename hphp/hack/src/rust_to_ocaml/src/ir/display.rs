@@ -169,7 +169,15 @@ impl Display for ir::TypeTuple {
 
 impl Display for ir::ModuleName {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        self.0.to_case(Case::UpperCamel).fmt(f)
+        let name = &self.0;
+        let mut first_char = name.chars().next().unwrap(); // Invariant: self.0 is nonempty
+        // OCaml modules _must_ start with an uppercase letter (the OCaml parser
+        // depends on this). We ensure in `ModuleName`'s constructor that the
+        // first character is ASCII, so we can use `make_ascii_uppercase`.
+        first_char.make_ascii_uppercase();
+        assert!(first_char.is_ascii_uppercase());
+        write!(f, "{}", first_char)?;
+        write!(f, "{}", &name[1..])
     }
 }
 

@@ -99,12 +99,6 @@ impl Rewriter {
                 _ => {}
             }
         }
-        match path.modules.get(0).map(ir::ModuleName::as_str) {
-            Some("crate" | "super") => {
-                path.modules.remove(0);
-            }
-            _ => {}
-        }
         if let Some(renamed_path) = self.config.get_renamed_type(path) {
             path.ty = renamed_path.ty;
             path.modules = renamed_path.modules;

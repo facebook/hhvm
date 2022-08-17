@@ -3,9 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+#[macro_use]
+mod macros;
+
 mod config;
 mod convert;
 mod ir;
+mod rewrite_module_names;
 mod rewrite_types;
 
 use std::io::Write;

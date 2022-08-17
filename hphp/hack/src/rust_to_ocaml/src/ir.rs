@@ -90,13 +90,39 @@ pub struct TypeTuple {
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
-pub struct ModuleName(pub String);
+pub struct ModuleName(String);
 
 impl ModuleName {
+    pub fn new(name: impl Into<String>) -> anyhow::Result<Self> {
+        let name: String = name.into();
+        anyhow::ensure!(!name.is_empty(), "Module names must not be empty");
+        let first_char = name.chars().next().unwrap();
+        anyhow::ensure!(
+            first_char.is_ascii(),
+            "Module names must start with an ASCII character: {}",
+            name
+        );
+        anyhow::ensure!(
+            first_char.to_ascii_uppercase().is_ascii_uppercase(),
+            "Module names must start with a character which can be converted to uppercase: {}",
+            name
+        );
+        Ok(Self(name))
+    }
+
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }
 }
+
+impl std::str::FromStr for ModuleName {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> anyhow::Result<Self> {
+        Self::new(s)
+    }
+}
+
+serde_from_display!(ModuleName, "a valid Rust or OCaml module name");
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct TypeName(pub String);

@@ -18,7 +18,16 @@ use crate::ir::TypeName;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Config {
+    #[serde(default)]
+    modules: ModulesConfig,
+    #[serde(default)]
     types: TypesConfig,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+struct ModulesConfig {
+    #[serde(default, with = "indexmap::serde_seq")]
+    rename: IndexMap<ModuleName, ModuleName>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,6 +50,9 @@ pub struct OcamlTypePath {
 }
 
 impl Config {
+    pub fn get_renamed_module(&self, name: &ModuleName) -> Option<ModuleName> {
+        self.modules.rename.get(name).cloned()
+    }
     pub fn is_transparent_type(&self, path: &ir::TypePath) -> bool {
         let rust_path = RustTypePath::from(path);
         self.types.transparent.contains(&rust_path)
@@ -132,58 +144,10 @@ fn parse_type_path(s: &str, sep: &str) -> anyhow::Result<(Vec<ModuleName>, TypeN
         None | Some("") => anyhow::bail!("Invalid type name: {:?}", s),
         Some(ty) => TypeName(ty.to_owned()),
     };
-    let mut modules = split
-        .map(|m| {
-            anyhow::ensure!(!m.is_empty(), "Invalid module name: {:?}", m);
-            Ok(ModuleName(m.to_owned()))
-        })
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut modules = split.map(ModuleName::new).collect::<Result<Vec<_>, _>>()?;
     modules.reverse();
     Ok((modules, ty))
 }
 
-impl Serialize for RustTypePath {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-impl Serialize for OcamlTypePath {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> Deserialize<'de> for RustTypePath {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct Visitor;
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = RustTypePath;
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(formatter, "a valid Rust type path string")
-            }
-            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
-                value.parse().map_err(|e| {
-                    E::invalid_value(serde::de::Unexpected::Other(&format!("{e}")), &self)
-                })
-            }
-        }
-        deserializer.deserialize_str(Visitor)
-    }
-}
-impl<'de> Deserialize<'de> for OcamlTypePath {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct Visitor;
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = OcamlTypePath;
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(formatter, "a valid OCaml type path string")
-            }
-            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
-                value.parse().map_err(|e| {
-                    E::invalid_value(serde::de::Unexpected::Other(&format!("{e}")), &self)
-                })
-            }
-        }
-        deserializer.deserialize_str(Visitor)
-    }
-}
+serde_from_display!(RustTypePath, "a valid Rust type path string");
+serde_from_display!(OcamlTypePath, "a valid OCaml type path string");

@@ -1,3 +1,7 @@
 type a = X.foo
 
 type b = Y.Z.foo
+
+type c = My_module.Some_submodule.foo
+
+type d = x IMap.t

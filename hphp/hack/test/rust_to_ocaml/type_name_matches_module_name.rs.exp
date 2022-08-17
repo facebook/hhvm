@@ -1,6 +1,6 @@
 type a = Pos.t
 
-type b = RelativePath.t
+type b = Relative_path.t
 
 type c = Collections.SSet.t
 

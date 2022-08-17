@@ -73,7 +73,7 @@ RegSet cross_trace_args(const BCMarker& marker) {
 void popFrameToFuncEntryRegs(Vout& v) {
   v << unrecordbasenativesp{};
   v << copy{rvmfp(), rvmsp()};
-  v << restorerip{rvmfp()};
+  v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
 }
 

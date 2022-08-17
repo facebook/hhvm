@@ -121,7 +121,7 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a.frontier());
   }
-  void emit(const restorerip& i);
+  void emit(const restoreripm& i);
   void emit(const phpret& i);
   void emit(const contenter& i);
 
@@ -752,8 +752,8 @@ void Vgen<X64Asm>::emit(const tailcallstubr& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class X64Asm>
-void Vgen<X64Asm>::emit(const restorerip& i) {
-  a.push(i.fp[AROFF(m_savedRip)]);
+void Vgen<X64Asm>::emit(const restoreripm& i) {
+  emit(pushm{i.s});
 }
 
 template<class X64Asm>

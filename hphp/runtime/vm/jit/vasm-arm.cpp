@@ -273,7 +273,6 @@ struct Vgen {
     setCallFuncId(env, a->frontier());
   }
   void emit(const contenter& i);
-  void emit(const restorerip& i);
   void emit(const phpret& i);
 
   // vm entry abi
@@ -821,10 +820,6 @@ void Vgen::emit(const callfaststub& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const restorerip& i) {
-  a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
-}
 
 void Vgen::emit(const phpret& i) {
   // prefer load-pair instruction
@@ -1703,6 +1698,13 @@ void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void lower(const VLS& e, restoreripm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    lowerVptr(i.s, v);
+    v << load{i.s, rlr()};
+  });
+}
 
 void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {

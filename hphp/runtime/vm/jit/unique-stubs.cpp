@@ -117,7 +117,7 @@ void storeVMRegs(Vout& v) { storeVmfp(v); storeVmsp(v); }
  */
 void popFrameToFuncEntryRegs(Vout& v) {
   v << copy{rvmfp(), rvmsp()};
-  v << restorerip{rvmfp()};
+  v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
 }
 
@@ -1214,7 +1214,7 @@ TCA emitUnwinderAsyncRet(CodeBlock& cb, DataBlock& data, const char* name) {
     markRDSAccess(v, g_unwind_rds.handle());
     v << load{rvmtl()[unwinderFSWHOff()], rret_data()};
     v << movzbq{v.cns(KindOfObject), rret_type()};
-    v << pushm{rvmtl()[unwinderSavedRipOff()]};
+    v << restoreripm{rvmtl()[unwinderSavedRipOff()]};
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};
     v << ret{php_return_regs()};
   }, name);
@@ -1226,7 +1226,7 @@ TCA emitUnwinderAsyncNullRet(CodeBlock& cb, DataBlock& data, const char* name) {
   return vwrap(cb, data, [&] (Vout& v) {
     markRDSAccess(v, g_unwind_rds.handle());
     v << movzbq{v.cns(KindOfUninit), rret_type()};
-    v << pushm{rvmtl()[unwinderSavedRipOff()]};
+    v << restoreripm{rvmtl()[unwinderSavedRipOff()]};
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};
     v << ret{php_return_regs()};
   }, name);

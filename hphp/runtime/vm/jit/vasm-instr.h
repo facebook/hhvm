@@ -129,7 +129,7 @@ struct Vunit;
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
-  O(restorerip, Inone, U(fp), Dn)\
+  O(restoreripm, Inone, U(s), Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(target), U(args), Dn)\
   O(callphpfe, I(target), U(args), Dn)\
@@ -856,10 +856,10 @@ struct syncvmrettype { Vreg type; };
 struct phplogue { Vreg fp; };
 
 /*
- * Restore m_savedRip off of `fp' into the CPU's expected location
+ * Restore the value stored at `s` into the CPU's expected location
  * for the return address prior to a function return.
  */
-struct restorerip { Vreg fp; };
+struct restoreripm { Vptr s; };
 
 /*
  * Load fp[m_sfp] into rvmfp() and return to m_savedRip on `fp'.

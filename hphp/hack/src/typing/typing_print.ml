@@ -1038,7 +1038,18 @@ module Full = struct
     let (fuel, body_doc) =
       match (occurrence, get_node x) with
       | ({ type_ = Class _; name; _ }, _) ->
-        (fuel, Concat [text "class"; Space; text_strip_ns name])
+        let keyword =
+          match Decl_provider.get_class env.decl_env.Decl_env.ctx name with
+          | Some decl ->
+            (match Cls.kind decl with
+            | Ast_defs.Cclass _ -> "class"
+            | Ast_defs.Cinterface -> "interface"
+            | Ast_defs.Ctrait -> "trait"
+            | Ast_defs.Cenum -> "enum"
+            | Ast_defs.Cenum_class _ -> "enum class")
+          | None -> "class"
+        in
+        (fuel, Concat [text keyword; Space; text_strip_ns name])
       | ({ type_ = Function; name; _ }, Tfun ft)
       | ({ type_ = Method (_, name); _ }, Tfun ft) ->
         (* Use short names for function types since they display a lot more

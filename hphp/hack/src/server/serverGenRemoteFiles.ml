@@ -42,7 +42,7 @@ let go (genv : ServerEnv.genv) : unit =
           let file_hash = SharedMemHash.hash_string filename in
           let content_sha1 = Sha1.digest file_contents in
           ( Int64.to_string file_hash ^ content_sha1,
-            Marshal.to_string (filename, file_contents) [] )
+            Marshal.to_string (fn, file_contents) [] )
           :: acc
         else (
           Hh_logger.log "%s doesn't exist" filename;

@@ -7,51 +7,17 @@
  *
  *)
 
+(*
+ * This module is used for sub1m testing. Usage:
+ *   1) Run hh --gen-remote-files
+ *   2) This will populate a remote file store at hack_sub1m_file_store/tree/v0.0.1/files
+ * The sub1m remote workers will prefetch files from the above manifold directory
+ *)
 open Hh_prelude
 
-let ( >>= ) res f =
-  Future.Promise.bind res (function
-      | Ok r -> f r
-      | Error e -> Future.Promise.return (Error e))
-
-let return_ok x = Future.Promise.return (Ok x)
-
-let return_err x = Future.Promise.return (Error x)
-
-let get_hh_config_version ~(root : Path.t) :
-    (string, string) result Future.Promise.t =
-  let hhconfig_path =
-    Path.to_string
-      (Path.concat root Config_file.file_path_relative_to_repo_root)
-  in
-  (if Disk.file_exists hhconfig_path then
-    return_ok (Config_file.parse_hhconfig hhconfig_path)
-  else
-    let error =
-      "Attempted to parse .hhconfig.\nBut it doesn't exist at this path:\n"
-      ^ hhconfig_path
-    in
-    return_err error)
-  >>= fun (_, config) ->
-  let version = Config_file.Getters.string_opt "version" config in
-  begin
-    match version with
-    | None -> failwith "Failed to parse hh version"
-    | Some version ->
-      let version = "v" ^ String_utils.lstrip version "^" in
-      return_ok version
-  end
-  >>= fun hh_config_version -> return_ok hh_config_version
-
 let go (genv : ServerEnv.genv) : unit =
-  let root = Wwwroot.get None in
-  let hh_config_version =
-    match Future.get @@ get_hh_config_version ~root with
-    | Ok (Ok result) -> result
-    | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
-    | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
-  in
-
+  (* Keep the hhconfig version (e.g. v0.0.1) consistent between decl and file prefetching *)
+  let hh_config_version = "v0.0.1" in
   let manifold_dir =
     "hack_sub1m_file_store/tree/" ^ hh_config_version ^ "/files"
   in

@@ -98,6 +98,7 @@ impl ItemConverter {
         let ty = self.convert_type(&item.ty)?;
         Ok(Def::Alias {
             doc: attrs.doc,
+            attrs: attrs.attrs,
             tparams: self.tparams,
             name,
             ty,
@@ -110,6 +111,7 @@ impl ItemConverter {
         match &item.fields {
             syn::Fields::Unit => Ok(Def::Alias {
                 doc: container_attrs.doc,
+                attrs: container_attrs.attrs,
                 tparams: self.tparams,
                 name,
                 ty: ir::Type::Path(ir::TypePath::simple("unit")),
@@ -120,6 +122,7 @@ impl ItemConverter {
                     .collect::<Result<Vec<_>>>()?;
                 Ok(Def::Alias {
                     doc: container_attrs.doc,
+                    attrs: container_attrs.attrs,
                     tparams: self.tparams,
                     name,
                     ty: if elems.is_empty() {
@@ -136,13 +139,17 @@ impl ItemConverter {
                         let name =
                             field_name(field.ident.as_ref(), container_attrs.prefix.as_deref());
                         let ty = self.convert_type(&field.ty)?;
-                        let doc = field_attrs.doc;
-                        Ok(ir::Field { name, ty, doc })
+                        Ok(ir::Field {
+                            name,
+                            ty,
+                            doc: field_attrs.doc,
+                            attrs: field_attrs.attrs,
+                        })
                     })
                     .collect::<Result<Vec<_>>>()?;
-                let doc = container_attrs.doc;
                 Ok(Def::Record {
-                    doc,
+                    doc: container_attrs.doc,
+                    attrs: container_attrs.attrs,
                     tparams: self.tparams,
                     name,
                     fields,
@@ -176,19 +183,27 @@ impl ItemConverter {
                                     variant_attrs.prefix.as_deref(),
                                 );
                                 let ty = self.convert_type(&field.ty)?;
-                                let doc = field_attrs.doc;
-                                Ok(ir::Field { name, ty, doc })
+                                Ok(ir::Field {
+                                    name,
+                                    ty,
+                                    doc: field_attrs.doc,
+                                    attrs: field_attrs.attrs,
+                                })
                             })
                             .collect::<Result<_>>()?,
                     )),
                 };
-                let doc = variant_attrs.doc;
-                Ok(ir::Variant { name, fields, doc })
+                Ok(ir::Variant {
+                    name,
+                    fields,
+                    doc: variant_attrs.doc,
+                    attrs: variant_attrs.attrs,
+                })
             })
             .collect::<Result<Vec<_>>>()?;
-        let doc = container_attrs.doc;
         Ok(Def::Variant {
-            doc,
+            doc: container_attrs.doc,
+            attrs: container_attrs.attrs,
             tparams: self.tparams,
             name,
             variants,

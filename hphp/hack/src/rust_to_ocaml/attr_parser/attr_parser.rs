@@ -11,11 +11,13 @@ use syn::NestedMeta::Meta;
 static DOC: &str = "doc";
 static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
+static ATTR: &str = "attr";
 
 #[derive(Clone, Debug)]
 pub struct Attrs {
     pub doc: Vec<String>,
     pub prefix: Option<String>,
+    pub attrs: Vec<String>,
 }
 
 impl Attrs {
@@ -39,6 +41,7 @@ impl Attrs {
     fn from_attributes(attrs: &[syn::Attribute], _kind: AttrKind) -> Self {
         let doc = get_doc_comment(attrs);
         let mut prefix = None;
+        let mut ocaml_attrs = vec![];
 
         for meta_item in attrs
             .iter()
@@ -50,6 +53,12 @@ impl Attrs {
                 Meta(NameValue(m)) if m.path.is_ident(PREFIX) => {
                     if let Ok(s) = get_lit_str(PREFIX, &m.lit) {
                         prefix = Some(s.value());
+                    }
+                }
+                // Parse `#[rust_to_ocaml(attr = "deriving eq")]`
+                Meta(NameValue(m)) if m.path.is_ident(ATTR) => {
+                    if let Ok(s) = get_lit_str(ATTR, &m.lit) {
+                        ocaml_attrs.push(s.value());
                     }
                 }
                 Meta(_meta_item) => {
@@ -69,7 +78,11 @@ impl Attrs {
             }
         }
 
-        Self { doc, prefix }
+        Self {
+            doc,
+            prefix,
+            attrs: ocaml_attrs,
+        }
     }
 }
 

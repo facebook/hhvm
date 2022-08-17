@@ -23,18 +23,21 @@ pub enum Def {
     Module(Module),
     Alias {
         doc: Vec<String>,
+        attrs: Vec<String>,
         tparams: Vec<String>,
         name: TypeName,
         ty: Type,
     },
     Record {
         doc: Vec<String>,
+        attrs: Vec<String>,
         tparams: Vec<String>,
         name: TypeName,
         fields: Vec<Field>,
     },
     Variant {
         doc: Vec<String>,
+        attrs: Vec<String>,
         tparams: Vec<String>,
         name: TypeName,
         variants: Vec<Variant>,
@@ -46,6 +49,7 @@ pub struct Variant {
     pub name: VariantName,
     pub fields: Option<VariantFields>,
     pub doc: Vec<String>,
+    pub attrs: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -59,6 +63,7 @@ pub struct Field {
     pub name: FieldName,
     pub ty: Type,
     pub doc: Vec<String>,
+    pub attrs: Vec<String>,
 }
 
 #[derive(Debug)]

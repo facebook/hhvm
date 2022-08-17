@@ -37,6 +37,7 @@ impl Display for ir::Def {
             }
             Self::Alias {
                 doc,
+                attrs,
                 tparams,
                 name,
                 ty,
@@ -44,10 +45,15 @@ impl Display for ir::Def {
                 write_toplevel_doc_comment(f, doc)?;
                 write!(f, "type ")?;
                 write_type_parameters(f, tparams)?;
-                writeln!(f, "{name} = {ty}")?
+                write!(f, "{name} = {ty}")?;
+                for attr in attrs {
+                    write!(f, " [@@{}]", attr)?;
+                }
+                writeln!(f)?;
             }
             Self::Record {
                 doc,
+                attrs,
                 tparams,
                 name,
                 fields,
@@ -59,10 +65,15 @@ impl Display for ir::Def {
                 for field in fields {
                     writeln!(f, "  {field}")?;
                 }
-                writeln!(f, "}}")?;
+                write!(f, "}}")?;
+                for attr in attrs {
+                    write!(f, " [@@{}]", attr)?;
+                }
+                writeln!(f)?;
             }
             Self::Variant {
                 doc,
+                attrs,
                 tparams,
                 name,
                 variants,
@@ -74,6 +85,11 @@ impl Display for ir::Def {
                 for variant in variants {
                     writeln!(f, "  | {variant}")?;
                 }
+                for attr in attrs {
+                    writeln!(f)?;
+                    write!(f, "[@@{}]", attr)?;
+                }
+                writeln!(f)?;
             }
         }
         writeln!(f)?;
@@ -83,10 +99,18 @@ impl Display for ir::Def {
 
 impl Display for ir::Variant {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let Self { name, fields, doc } = self;
+        let Self {
+            name,
+            fields,
+            doc,
+            attrs,
+        } = self;
         write!(f, "{name}")?;
         if let Some(fields) = fields {
             write!(f, " of {fields}")?;
+        }
+        for attr in attrs {
+            write!(f, " [@{}]", attr)?;
         }
         write_field_or_variant_doc_comment(f, doc)?;
         Ok(())
@@ -118,8 +142,16 @@ impl Display for ir::VariantFields {
 
 impl Display for ir::Field {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let Self { name, ty, doc } = self;
+        let Self {
+            name,
+            ty,
+            doc,
+            attrs,
+        } = self;
         write!(f, "{name}: {ty};")?;
+        for attr in attrs {
+            write!(f, " [@{}]", attr)?;
+        }
         write_field_or_variant_doc_comment(f, doc)?;
         Ok(())
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<484aa6fbeac7e8a0079008ac1a0ddde6>>
+// @generated SignedSource<<a46644fcd340909833f0653c2116ae7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -55,6 +55,7 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom {
+    #[rust_to_ocaml(name = "Self")]
     Self_,
     From(String),
 }
@@ -526,11 +527,14 @@ pub struct TypedefType {
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.
+    #[rust_to_ocaml(name = "Wrong_phase")]
     WrongPhase(String),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
     /// able to deserialize it again.
+    #[rust_to_ocaml(name = "Not_supported")]
     NotSupported(String),
     /// The input JSON was invalid for some reason.
+    #[rust_to_ocaml(name = "Deserialization_error")]
     DeserializationError(String),
 }

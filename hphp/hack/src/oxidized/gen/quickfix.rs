@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<17a3a700c509c1b33d8ef86843f4b977>>
+// @generated SignedSource<<4a0e80dfd9dc02562a8731cc9febe68a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ use crate::*;
 #[repr(C, u8)]
 pub enum QfPos {
     Qpos(pos::Pos),
+    #[rust_to_ocaml(name = "Qclassish_start")]
     QclassishStart(String),
 }
 

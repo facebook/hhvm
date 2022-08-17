@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28b6225e232acdcdf71499a28cf7d97f>>
+// @generated SignedSource<<655820e31ec0b324e972d524b4f07726>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -155,6 +155,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// as a generator.
     ///
     /// yield break;
+    #[rust_to_ocaml(name = "Yield_break")]
     YieldBreak,
     /// Concurrent block. All the await expressions are awaited at the
     /// same time, similar to genva().
@@ -354,12 +355,16 @@ arena_deserializer::impl_deserialize_in_arena!(UsingStmt<'arena, Ex, En>);
 #[repr(C, u8)]
 pub enum AsExpr<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "As_v")]
     AsV(&'a Expr<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "As_kv")]
     AsKv(&'a (&'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Await_as_v")]
     AwaitAsV(&'a (&'a Pos<'a>, &'a Expr<'a, Ex, En>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Await_as_kv")]
     AwaitAsKv(&'a (&'a Pos<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for AsExpr<'a, Ex, En> {}
@@ -535,8 +540,10 @@ arena_deserializer::impl_deserialize_in_arena!(CollectionTarg<'arena, Ex>);
 #[repr(C, u8)]
 pub enum FunctionPtrId<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "FP_id")]
     FPId(&'a Sid<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "FP_class_const")]
     FPClassConst(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunctionPtrId<'a, Ex, En> {}
@@ -718,6 +725,7 @@ pub enum Expr_<'a, Ex, En> {
     /// $foo[]
     /// $foo[$bar]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Array_get")]
     ArrayGet(&'a (&'a Expr<'a, Ex, En>, Option<&'a Expr<'a, Ex, En>>)),
     /// Instance property or method access.
     /// prop_or_method is
@@ -732,6 +740,7 @@ pub enum Expr_<'a, Ex, En> {
     ///   $foo?->bar()   // OG_nullsafe,   Is_method
     ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Obj_get")]
     ObjGet(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -750,6 +759,7 @@ pub enum Expr_<'a, Ex, En> {
     /// Foo::$bar();            // Is_method, name stored in local $bar
     /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Class_get")]
     ClassGet(
         &'a (
             &'a ClassId<'a, Ex, En>,
@@ -773,6 +783,7 @@ pub enum Expr_<'a, Ex, En> {
     /// parent::someStaticMeth()
     /// parent::someInstanceMeth()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Class_const")]
     ClassConst(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Function or method call.
     ///
@@ -1031,6 +1042,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// fun('foo')
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Fun_id")]
     FunId(&'a Sid<'a>),
     /// Instance method reference on a specific instance.
     ///
@@ -1039,6 +1051,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Method_id")]
     MethodId(&'a (&'a Expr<'a, Ex, En>, &'a Pstring<'a>)),
     /// Instance method reference that can be called with an instance.
     ///
@@ -1049,12 +1062,14 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Method_caller")]
     MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
     /// // equivalent: FooClass::some_static_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Smethod_id")]
     SmethodId(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Pair literal.
     ///
@@ -1072,6 +1087,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// ${$foo}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "ET_Splice")]
     ETSplice(&'a Expr<'a, Ex, En>),
     /// Label used for enum classes.
     ///
@@ -1380,8 +1396,10 @@ arena_deserializer::impl_deserialize_in_arena!(XhpSimple<'arena, Ex, En>);
 #[repr(C, u8)]
 pub enum XhpAttribute<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Xhp_simple")]
     XhpSimple(&'a XhpSimple<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Xhp_spread")]
     XhpSpread(&'a Expr<'a, Ex, En>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for XhpAttribute<'a, Ex, En> {}

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<325eef4331c0625bce6d1b8d1468edca>>
+// @generated SignedSource<<f060583aaa705163253156bd32b63645>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -103,6 +103,7 @@ pub use oxidized::decl_defs::SourceType;
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError<'a> {
+    #[rust_to_ocaml(name = "Wrong_extend_kind")]
     WrongExtendKind {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         pos: &'a pos::Pos<'a>,
@@ -115,6 +116,7 @@ pub enum DeclError<'a> {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         parent_name: &'a str,
     },
+    #[rust_to_ocaml(name = "Cyclic_class_def")]
     CyclicClassDef {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         pos: &'a pos::Pos<'a>,

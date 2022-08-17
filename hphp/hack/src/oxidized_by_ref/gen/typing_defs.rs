@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<218641faa71339a7d8d726cc40af5066>>
+// @generated SignedSource<<26fc6ce629cb798478a5205126f760ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -56,6 +56,7 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom<'a> {
+    #[rust_to_ocaml(name = "Self")]
     Self_,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     From(&'a str),
@@ -592,14 +593,17 @@ pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Wrong_phase")]
     WrongPhase(&'a str),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
     /// able to deserialize it again.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Not_supported")]
     NotSupported(&'a str),
     /// The input JSON was invalid for some reason.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Deserialization_error")]
     DeserializationError(&'a str),
 }
 impl<'a> TrivialDrop for DeserializationError<'a> {}

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f77444757782a5f899296b0a7a317b10>>
+// @generated SignedSource<<38815ea3e18e83930cd2604e306e46c5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -163,10 +163,13 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
 #[repr(C, u8)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "TSFlit_int")]
     TSFlitInt(&'a PosString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "TSFlit_str")]
     TSFlitStr(&'a PosByteString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "TSFclass_const")]
     TSFclassConst(&'a (PosId<'a>, PosString<'a>)),
 }
 impl<'a> TrivialDrop for TshapeFieldName<'a> {}
@@ -334,8 +337,10 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 #[repr(C, u8)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Neg_prim")]
     NegPrim(&'a aast::Tprim),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Neg_class")]
     NegClass(&'a PosId<'a>),
 }
 impl<'a> TrivialDrop for NegType<'a> {}
@@ -487,6 +492,7 @@ pub enum Ty_<'a> {
     Tintersection(&'a [&'a Ty<'a>]),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tvec_or_dict")]
     TvecOrDict(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Name of class, name of type const, remaining names of type consts
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -499,6 +505,7 @@ pub enum Ty_<'a> {
     /// type Foo2 = ...
     /// that simply doesn't require type arguments.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tunapplied_alias")]
     TunappliedAlias(&'a str),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
@@ -983,10 +990,13 @@ arena_deserializer::impl_deserialize_in_arena!(CanTraverse<'arena>);
 #[repr(C, u8)]
 pub enum ConstraintType_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Thas_member")]
     ThasMember(&'a HasMember<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(&'a CanIndex<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tcan_traverse")]
     TcanTraverse(&'a CanTraverse<'a>),
     /// The type of container destructuring via list() or splat `...`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

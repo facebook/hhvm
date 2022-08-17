@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a26c8023d2c275c2478b9b0e6a5e78f6>>
+// @generated SignedSource<<bc9251bb7d8d89a05570dba3eae68f66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub enum QfPos<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Qpos(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Qclassish_start")]
     QclassishStart(&'a str),
 }
 impl<'a> TrivialDrop for QfPos<'a> {}

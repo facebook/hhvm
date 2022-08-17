@@ -514,6 +514,12 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
   let attr = ocaml_attr cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
+  let name_attr =
+    if String.equal name cd.pcd_name.txt then
+      ""
+    else
+      sprintf "#[rust_to_ocaml(name = \"%s\")]\n" cd.pcd_name.txt
+  in
   let value =
     variant_constructor_value cd
     |> Option.value_map ~f:(( ^ ) " = ") ~default:""
@@ -522,10 +528,11 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   | Pcstr_tuple types ->
     let tys = declare_constructor_arguments ~box_fields types in
     sprintf
-      "%s%s%s%s%s%s,\n"
+      "%s%s%s%s%s%s%s,\n"
       doc
       (rust_de_field_attr tys)
       attr
+      name_attr
       name
       (if List.is_empty tys then
         ""
@@ -535,10 +542,11 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   | Pcstr_record labels ->
     let prefix = find_record_label_prefix labels in
     sprintf
-      "%s%s%s%s%s%s,\n"
+      "%s%s%s%s%s%s%s,\n"
       doc
-      (record_prefix_attr prefix)
       attr
+      (record_prefix_attr prefix)
+      name_attr
       name
       (declare_record_arguments labels ~prefix)
       value

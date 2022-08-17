@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a72884e637b415abf9d8a57de088128b>>
+// @generated SignedSource<<89ebbad1af8bed7d7e27a9445bacd5fd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -267,6 +267,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Habstr(&'a (&'a str, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Hvec_or_dict")]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hprim(&'a oxidized::aast_defs::Tprim),
@@ -278,6 +279,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hintersection(&'a [&'a Hint<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Hfun_context")]
     HfunContext(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hvar(&'a str),

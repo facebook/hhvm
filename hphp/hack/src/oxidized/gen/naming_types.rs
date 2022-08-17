@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cfd15aeee187dc634c734bc505510af>>
+// @generated SignedSource<<0495285c38390b0327864ea194adae38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,8 +69,12 @@ arena_deserializer::impl_deserialize_in_arena!(KindOfType);
 #[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[repr(C, u8)]
 pub enum NameKind {
+    #[rust_to_ocaml(name = "Type_kind")]
     TypeKind(KindOfType),
+    #[rust_to_ocaml(name = "Fun_kind")]
     FunKind,
+    #[rust_to_ocaml(name = "Const_kind")]
     ConstKind,
+    #[rust_to_ocaml(name = "Module_kind")]
     ModuleKind,
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab96268c330e36b9fb0d4dd3a86e3c9c>>
+// @generated SignedSource<<73305785914f9dc9a561b843ea5b1fc8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -132,7 +132,9 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
 #[rust_to_ocaml(attr = "deriving (show, ord)")]
 #[repr(u8)]
 pub enum LinearizationKind {
+    #[rust_to_ocaml(name = "Member_resolution")]
     MemberResolution,
+    #[rust_to_ocaml(name = "Ancestor_types")]
     AncestorTypes,
 }
 impl TrivialDrop for LinearizationKind {}
@@ -157,6 +159,7 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError {
+    #[rust_to_ocaml(name = "Wrong_extend_kind")]
     WrongExtendKind {
         pos: pos::Pos,
         kind: ast_defs::ClassishKind,
@@ -165,10 +168,8 @@ pub enum DeclError {
         parent_kind: ast_defs::ClassishKind,
         parent_name: String,
     },
-    CyclicClassDef {
-        pos: pos::Pos,
-        stack: s_set::SSet,
-    },
+    #[rust_to_ocaml(name = "Cyclic_class_def")]
+    CyclicClassDef { pos: pos::Pos, stack: s_set::SSet },
 }
 
 #[derive(

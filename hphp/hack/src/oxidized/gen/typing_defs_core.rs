@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9f72d8f192f21cd8593581808e61ca6>>
+// @generated SignedSource<<9d3215b130c36d8cc285626eb9a02d77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -130,6 +130,7 @@ pub enum FunTparamsKind {
     /// at every invocation, and ft_tparams specifies the type arguments with
     /// which the generic function was instantiated, as well as whether each
     /// explicit type argument must be reified.
+    #[rust_to_ocaml(name = "FTKinstantiated_targs")]
     FTKinstantiatedTargs,
 }
 impl TrivialDrop for FunTparamsKind {}
@@ -156,7 +157,9 @@ arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(u8)]
 pub enum ShapeKind {
+    #[rust_to_ocaml(name = "Closed_shape")]
     ClosedShape,
+    #[rust_to_ocaml(name = "Open_shape")]
     OpenShape,
 }
 impl TrivialDrop for ShapeKind {}
@@ -224,8 +227,11 @@ pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub bstr::BString);
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
 pub enum TshapeFieldName {
+    #[rust_to_ocaml(name = "TSFlit_int")]
     TSFlitInt(PosString),
+    #[rust_to_ocaml(name = "TSFlit_str")]
     TSFlitStr(PosByteString),
+    #[rust_to_ocaml(name = "TSFclass_const")]
     TSFclassConst(PosId, PosString),
 }
 
@@ -452,7 +458,9 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
 )]
 #[repr(C, u8)]
 pub enum NegType {
+    #[rust_to_ocaml(name = "Neg_prim")]
     NegPrim(aast::Tprim),
+    #[rust_to_ocaml(name = "Neg_class")]
     NegClass(PosId),
 }
 
@@ -582,6 +590,7 @@ pub enum Ty_ {
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
+    #[rust_to_ocaml(name = "Tvec_or_dict")]
     TvecOrDict(Ty, Ty),
     /// Name of class, name of type const, remaining names of type consts
     Taccess(TaccessType),
@@ -592,6 +601,7 @@ pub enum Ty_ {
     /// a higher-kinded type. It is never used for an alias like
     /// type Foo2 = ...
     /// that simply doesn't require type arguments.
+    #[rust_to_ocaml(name = "Tunapplied_alias")]
     TunappliedAlias(String),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
@@ -1021,8 +1031,11 @@ pub struct CanTraverse {
 )]
 #[repr(C, u8)]
 pub enum ConstraintType_ {
+    #[rust_to_ocaml(name = "Thas_member")]
     ThasMember(HasMember),
+    #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(CanIndex),
+    #[rust_to_ocaml(name = "Tcan_traverse")]
     TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`
     Tdestructure(Destructure),

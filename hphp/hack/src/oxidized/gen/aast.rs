@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ef1ad25ce8cc8d209171743ecc49ff01>>
+// @generated SignedSource<<b2a69234c763cba2062a1604e8bbe3c1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -133,6 +133,7 @@ pub enum Stmt_<Ex, En> {
     /// as a generator.
     ///
     /// yield break;
+    #[rust_to_ocaml(name = "Yield_break")]
     YieldBreak,
     /// Concurrent block. All the await expressions are awaited at the
     /// same time, similar to genva().
@@ -294,9 +295,13 @@ pub struct UsingStmt<Ex, En> {
 )]
 #[repr(C, u8)]
 pub enum AsExpr<Ex, En> {
+    #[rust_to_ocaml(name = "As_v")]
     AsV(Expr<Ex, En>),
+    #[rust_to_ocaml(name = "As_kv")]
     AsKv(Expr<Ex, En>, Expr<Ex, En>),
+    #[rust_to_ocaml(name = "Await_as_v")]
     AwaitAsV(Pos, Expr<Ex, En>),
+    #[rust_to_ocaml(name = "Await_as_kv")]
     AwaitAsKv(Pos, Expr<Ex, En>, Expr<Ex, En>),
 }
 
@@ -433,7 +438,9 @@ pub enum CollectionTarg<Ex> {
 )]
 #[repr(C, u8)]
 pub enum FunctionPtrId<Ex, En> {
+    #[rust_to_ocaml(name = "FP_id")]
     FPId(Sid),
+    #[rust_to_ocaml(name = "FP_class_const")]
     FPClassConst(ClassId<Ex, En>, Pstring),
 }
 
@@ -576,6 +583,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// $foo[]
     /// $foo[$bar]
+    #[rust_to_ocaml(name = "Array_get")]
     ArrayGet(Box<(Expr<Ex, En>, Option<Expr<Ex, En>>)>),
     /// Instance property or method access.
     /// prop_or_method is
@@ -589,6 +597,7 @@ pub enum Expr_<Ex, En> {
     ///   $foo?->bar     // OG_nullsafe,   Is_prop
     ///   $foo?->bar()   // OG_nullsafe,   Is_method
     ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
+    #[rust_to_ocaml(name = "Obj_get")]
     ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
     /// Static property or method access.
     ///
@@ -599,6 +608,7 @@ pub enum Expr_<Ex, En> {
     /// Foo::bar();             // Is_method
     /// Foo::$bar();            // Is_method, name stored in local $bar
     /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    #[rust_to_ocaml(name = "Class_get")]
     ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
@@ -615,6 +625,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// parent::someStaticMeth()
     /// parent::someInstanceMeth()
+    #[rust_to_ocaml(name = "Class_const")]
     ClassConst(Box<(ClassId<Ex, En>, Pstring)>),
     /// Function or method call.
     ///
@@ -820,6 +831,7 @@ pub enum Expr_<Ex, En> {
     /// Global function reference.
     ///
     /// fun('foo')
+    #[rust_to_ocaml(name = "Fun_id")]
     FunId(Box<Sid>),
     /// Instance method reference on a specific instance.
     ///
@@ -827,6 +839,7 @@ pub enum Expr_<Ex, En> {
     /// lowering or be removed. The emitter just sees a normal Call.
     ///
     /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
+    #[rust_to_ocaml(name = "Method_id")]
     MethodId(Box<(Expr<Ex, En>, Pstring)>),
     /// Instance method reference that can be called with an instance.
     ///
@@ -836,11 +849,13 @@ pub enum Expr_<Ex, En> {
     /// These examples are equivalent to:
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
+    #[rust_to_ocaml(name = "Method_caller")]
     MethodCaller(Box<(ClassName, Pstring)>),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
     /// // equivalent: FooClass::some_static_meth<>
+    #[rust_to_ocaml(name = "Smethod_id")]
     SmethodId(Box<(ClassId<Ex, En>, Pstring)>),
     /// Pair literal.
     ///
@@ -850,6 +865,7 @@ pub enum Expr_<Ex, En> {
     /// expression tree literal (backticks). See also `ExpressionTree`.
     ///
     /// ${$foo}
+    #[rust_to_ocaml(name = "ET_Splice")]
     ETSplice(Box<Expr<Ex, En>>),
     /// Label used for enum classes.
     ///
@@ -1077,7 +1093,9 @@ pub struct XhpSimple<Ex, En> {
 )]
 #[repr(C, u8)]
 pub enum XhpAttribute<Ex, En> {
+    #[rust_to_ocaml(name = "Xhp_simple")]
     XhpSimple(XhpSimple<Ex, En>),
+    #[rust_to_ocaml(name = "Xhp_spread")]
     XhpSpread(Expr<Ex, En>),
 }
 
@@ -1326,6 +1344,7 @@ arena_deserializer::impl_deserialize_in_arena!(RequireKind);
 )]
 #[repr(C, u8)]
 pub enum EmitId {
+    #[rust_to_ocaml(name = "Emit_id")]
     EmitId(isize),
     Anonymous,
 }

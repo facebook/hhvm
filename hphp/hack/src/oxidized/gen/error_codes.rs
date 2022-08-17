@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e6fc7a8306e11bac6bdccbe04f5cf1c9>>
+// @generated SignedSource<<66172e706372b28500a0cce6686fa52e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -98,6 +98,7 @@ pub enum Naming {
     NamingTooManyArguments = 2038,
     PrimitiveToplevel = 2039,
     ShadowedTypeParam = 2041,
+    #[rust_to_ocaml(name = "StartWith_T")]
     StartWithT = 2042,
     ThisMustBeReturn = 2043,
     ThisNoArgument = 2044,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b6a848fbfe7a6378f881d7e7aa626cb>>
+// @generated SignedSource<<2ac170ef1c6b515e77a3491a4ddf06c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -74,10 +74,13 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
 #[repr(C, u8)]
 pub enum ShapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "SFlit_int")]
     SFlitInt(&'a Pstring<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "SFlit_str")]
     SFlitStr(&'a PositionedByteString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "SFclass_const")]
     SFclassConst(&'a (Id<'a>, &'a Pstring<'a>)),
 }
 impl<'a> TrivialDrop for ShapeFieldName<'a> {}
@@ -226,8 +229,10 @@ pub use oxidized::ast_defs::Visibility;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
+    #[rust_to_ocaml(name = "XEV_Int")]
     XEVInt(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "XEV_String")]
     XEVString(&'a str),
 }
 impl<'a> TrivialDrop for XhpEnumValue<'a> {}

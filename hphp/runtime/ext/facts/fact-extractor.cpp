@@ -221,7 +221,8 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
   auto extractor = [&]() -> std::unique_ptr<Extractor> {
-    if (s_extractorFactory && RuntimeOption::EvalEnableExternFacts) {
+    if (s_extractorFactory &&
+        RuntimeOption::AutoloadEnableExternFactExtractor) {
       XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
       return s_extractorFactory(exec);
     } else {

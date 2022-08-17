@@ -852,6 +852,7 @@ std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
+bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;
 bool RuntimeOption::AutoloadDBCanCreate;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
@@ -2439,6 +2440,7 @@ void RuntimeOption::Load(
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
+    Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
 
     /**
      * If true, and if a Facts DB doesn't already exist, native Facts will

@@ -16,8 +16,13 @@ use crate::ir::FieldName;
 use crate::ir::File;
 use crate::ir::TypeName;
 use crate::ir::VariantName;
+use crate::Config;
 
-pub fn convert_file(filename: &std::path::Path, file: &syn::File) -> Result<String> {
+pub fn convert_file(
+    config: &'static Config,
+    filename: &std::path::Path,
+    file: &syn::File,
+) -> Result<String> {
     let defs = (file.items.iter())
         .filter_map(|item| ItemConverter::convert_item(item).transpose())
         .collect::<Result<_>>()?;
@@ -29,7 +34,7 @@ pub fn convert_file(filename: &std::path::Path, file: &syn::File) -> Result<Stri
             defs,
         },
     };
-    crate::rewrite_types::rewrite_file(&mut file);
+    crate::rewrite_types::rewrite_file(config, &mut file);
     Ok(file.to_string())
 }
 

@@ -1,0 +1,11 @@
+[types]
+transparent = [
+  "Box", "std::boxed::Box",
+  "Rc", "std::rc::Rc",
+  "Arc", "std::sync::Arc",
+  "RcOc", "ocamlrep::rc::RcOc",
+]
+rename = [
+  ["Vec", "list"],
+  ["std::vec::Vec", "list"],
+]

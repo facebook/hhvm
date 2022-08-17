@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+mod config;
 mod convert;
 mod ir;
 mod rewrite_types;
@@ -11,7 +12,10 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
+use anyhow::Context;
 use anyhow::Result;
+
+use crate::config::Config;
 
 #[derive(Debug, clap::Parser)]
 struct Opts {
@@ -22,6 +26,10 @@ struct Opts {
     /// The OCaml source file to generate.
     #[clap(value_name("OUTPATH"))]
     out_path: Option<PathBuf>,
+
+    /// Path to a configuration file.
+    #[clap(long)]
+    config: Option<PathBuf>,
 
     /// Command to regenerate the output. This text will be included in generated file headers.
     #[clap(long)]
@@ -39,9 +47,19 @@ struct Opts {
 fn main() -> Result<()> {
     let opts = <Opts as clap::Parser>::from_args();
 
+    let config = Box::leak(Box::new(match opts.config {
+        Some(path) => {
+            let contents = std::fs::read(&path)
+                .with_context(|| format!("Failed to read config file at {}", path.display()))?;
+            toml::from_slice(&contents)
+                .with_context(|| format!("Failed to parse config file at {}", path.display()))?
+        }
+        None => Config::default(),
+    }));
+
     let src = std::fs::read_to_string(&opts.filename)?;
     let file = syn::parse_file(&src)?;
-    let mut ocaml_src = convert::convert_file(&opts.filename, &file)?;
+    let mut ocaml_src = convert::convert_file(config, &opts.filename, &file)?;
 
     if !opts.no_header {
         ocaml_src = attach_header(opts.regen_cmd.as_deref(), &ocaml_src);

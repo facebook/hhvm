@@ -7,15 +7,18 @@ mod display;
 
 use derive_more::Display;
 
+#[derive(Debug)]
 pub struct File {
     pub root: Module,
 }
 
+#[derive(Debug)]
 pub struct Module {
     pub name: ModuleName,
     pub defs: Vec<Def>,
 }
 
+#[derive(Debug)]
 pub enum Def {
     Module(Module),
     Alias {
@@ -38,28 +41,33 @@ pub enum Def {
     },
 }
 
+#[derive(Debug)]
 pub struct Variant {
     pub name: VariantName,
     pub fields: Option<VariantFields>,
     pub doc: Vec<String>,
 }
 
+#[derive(Debug)]
 pub enum VariantFields {
     Unnamed(Vec<Type>),
     Named(Vec<Field>),
 }
 
+#[derive(Debug)]
 pub struct Field {
     pub name: FieldName,
     pub ty: Type,
     pub doc: Vec<String>,
 }
 
+#[derive(Debug)]
 pub enum Type {
     Path(TypePath),
     Tuple(TypeTuple),
 }
 
+#[derive(Debug)]
 pub struct TypePath {
     pub targs: Vec<Type>,
     pub modules: Vec<ModuleName>,
@@ -76,6 +84,7 @@ impl TypePath {
     }
 }
 
+#[derive(Debug)]
 pub struct TypeTuple {
     pub elems: Vec<Type>,
 }
@@ -103,3 +112,24 @@ pub struct FieldName(pub String);
 
 #[derive(Clone, Hash, PartialEq, Eq, Display)]
 pub struct VariantName(pub String);
+
+impl std::fmt::Debug for ModuleName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+impl std::fmt::Debug for TypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+impl std::fmt::Debug for FieldName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+impl std::fmt::Debug for VariantName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}

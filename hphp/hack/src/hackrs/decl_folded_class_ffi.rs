@@ -17,6 +17,7 @@ use hackrs_test_utils::store::make_shallow_decl_store;
 use hackrs_test_utils::store::populate_shallow_decl_store;
 use indicatif::ParallelProgressIterator;
 use jwalk::WalkDir;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
@@ -48,7 +49,9 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 /// have a generated ToOcamlRep impl with stronger correctness guarantees).
 fn verify_to_ocamlrep<'a, T>(bump: &'a Bump, value: &'a T)
 where
-    T: ToOcamlRep + ToOxidized<'a> + std::fmt::Debug,
+    T: ToOcamlRep + FromOcamlRep,
+    T: ToOxidized<'a> + From<<T as ToOxidized<'a>>::Output>,
+    T: std::fmt::Debug + PartialEq,
     <T as ToOxidized<'a>>::Output: std::fmt::Debug + PartialEq + FromOcamlRepIn<'a>,
 {
     let alloc = &ocamlrep::Arena::new();
@@ -61,7 +64,14 @@ where
         ocamlrep_round_trip_val, oxidized_val,
         "{}::to_ocamlrep does not match {}::to_oxidized",
         type_name, type_name
-    )
+    );
+    let from_ocaml_val = T::from_ocamlrep(ocaml_val).unwrap();
+    assert_eq!(
+        from_ocaml_val,
+        T::from(ocamlrep_round_trip_val),
+        "{}::from_ocamlrep does not match From<oxidized_by_ref> value",
+        type_name
+    );
 }
 
 ocaml_ffi! {
@@ -127,7 +137,7 @@ ocaml_ffi! {
                     .get_class(name.into(), name)
                     .map_err(|e| format!("Failed to fold class {}: {:?}", name, e))?
                     .ok_or_else(|| format!("Decl not found: class {}", name))?;
-                verify_to_ocamlrep(&Bump::new(), &folded_class);
+                verify_to_ocamlrep(&Bump::new(), &*folded_class);
                 Ok(folded_class)
             }).collect::<Result<_, String>>()?))
         })

@@ -487,6 +487,10 @@ impl<S, P> Positioned<S, P> {
         &self.pos
     }
 
+    pub fn into_pos(self) -> P {
+        self.pos
+    }
+
     pub fn id_ref(&self) -> &S {
         &self.id
     }

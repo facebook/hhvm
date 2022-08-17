@@ -567,6 +567,31 @@ fn btree_map_from_ocamlrep<K: FromOcamlRep + Ord, V: FromOcamlRep>(
     Ok(())
 }
 
+fn vec_from_ocaml_map_impl<K: FromOcamlRep, V: FromOcamlRep>(
+    vec: &mut Vec<(K, V)>,
+    value: Value<'_>,
+) -> Result<(), FromError> {
+    if value.is_immediate() {
+        let _ = from::expect_nullary_variant(value, 0)?;
+        return Ok(());
+    }
+    let block = from::expect_block_with_size_and_tag(value, 5, 0)?;
+    vec_from_ocaml_map_impl(vec, block[0])?;
+    let key: K = from::field(block, 1)?;
+    let val: V = from::field(block, 2)?;
+    vec.push((key, val));
+    vec_from_ocaml_map_impl(vec, block[3])?;
+    Ok(())
+}
+
+pub fn vec_from_ocaml_map<K: FromOcamlRep, V: FromOcamlRep>(
+    value: Value<'_>,
+) -> Result<Vec<(K, V)>, FromError> {
+    let mut vec = vec![];
+    vec_from_ocaml_map_impl(&mut vec, value)?;
+    Ok(vec)
+}
+
 pub fn vec_from_ocaml_map_in<'a, K, V>(
     value: Value<'_>,
     vec: &mut bumpalo::collections::Vec<'a, (K, V)>,
@@ -653,6 +678,27 @@ fn btree_set_from_ocamlrep<T: FromOcamlRep + Ord>(
     Ok(())
 }
 
+fn vec_from_ocaml_set_impl<T: FromOcamlRep>(
+    value: Value<'_>,
+    vec: &mut Vec<T>,
+) -> Result<(), FromError> {
+    if value.is_immediate() {
+        let _ = from::expect_nullary_variant(value, 0)?;
+        return Ok(());
+    }
+    let block = from::expect_block_with_size_and_tag(value, 4, 0)?;
+    vec_from_ocaml_set_impl(block[0], vec)?;
+    vec.push(from::field(block, 1)?);
+    vec_from_ocaml_set_impl(block[2], vec)?;
+    Ok(())
+}
+
+pub fn vec_from_ocaml_set<T: FromOcamlRep>(value: Value<'_>) -> Result<Vec<T>, FromError> {
+    let mut vec = vec![];
+    vec_from_ocaml_set_impl(value, &mut vec)?;
+    Ok(vec)
+}
+
 pub fn vec_from_ocaml_set_in<'a, T: FromOcamlRepIn<'a> + Ord>(
     value: Value<'_>,
     vec: &mut bumpalo::collections::Vec<'a, T>,
@@ -676,9 +722,10 @@ impl<K: ToOcamlRep + Ord, V: ToOcamlRep, S: BuildHasher + Default> ToOcamlRep
         if self.is_empty() {
             return OpaqueValue::int(0);
         }
-        let map: BTreeMap<&'a K, &'a V> = self.iter().collect();
-        let len = map.len();
-        let mut iter = map.iter().map(|(k, v)| {
+        let mut vec: Vec<(&'a K, &'a V)> = self.iter().collect();
+        vec.sort_unstable_by_key(|&(k, _)| k);
+        let len = vec.len();
+        let mut iter = vec.iter().map(|(k, v)| {
             let k: &'a K = *k;
             let v: &'a V = *v;
             (k.to_ocamlrep(alloc), v.to_ocamlrep(alloc))
@@ -692,8 +739,8 @@ impl<K: FromOcamlRep + Ord + Hash, V: FromOcamlRep, S: BuildHasher + Default> Fr
     for IndexMap<K, V, S>
 {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        let map = <BTreeMap<K, V>>::from_ocamlrep(value)?;
-        Ok(map.into_iter().collect())
+        let vec = vec_from_ocaml_map(value)?;
+        Ok(vec.into_iter().collect())
     }
 }
 
@@ -702,9 +749,10 @@ impl<T: ToOcamlRep + Ord, S: BuildHasher + Default> ToOcamlRep for IndexSet<T, S
         if self.is_empty() {
             return OpaqueValue::int(0);
         }
-        let set: BTreeSet<&'a T> = self.iter().collect();
-        let len = set.len();
-        let mut iter = set.iter().copied().map(|x| x.to_ocamlrep(alloc));
+        let mut vec: Vec<&'a T> = self.iter().collect();
+        vec.sort_unstable();
+        let len = vec.len();
+        let mut iter = vec.iter().copied().map(|x| x.to_ocamlrep(alloc));
         let (res, _) = sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         res
     }

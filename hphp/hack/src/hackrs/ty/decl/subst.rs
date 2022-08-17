@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use pos::TypeNameIndexMap;
 use serde::Deserialize;
@@ -15,7 +16,7 @@ use crate::reason::Reason;
 
 /// Maps type names to types with which to replace them.
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct Subst<R: Reason>(pub TypeNameIndexMap<Ty<R>>);
 

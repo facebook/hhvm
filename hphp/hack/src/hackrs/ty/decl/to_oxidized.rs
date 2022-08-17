@@ -434,7 +434,7 @@ impl<'a> ToOxidized<'a> for folded::Constructor {
 }
 
 impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
-    type Output = obr::decl_defs::DeclClassType<'a>;
+    type Output = &'a obr::decl_defs::DeclClassType<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         // Destructure to help ensure we convert every field.
@@ -472,7 +472,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             decl_errors,
             docs_url,
         } = self;
-        obr::decl_defs::DeclClassType {
+        arena.alloc(obr::decl_defs::DeclClassType {
             name: name.to_oxidized(arena),
             pos: pos.to_oxidized(arena),
             kind: *kind,
@@ -510,7 +510,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             enum_type: enum_type.as_ref().map(|et| et.to_oxidized(arena)),
             decl_errors: decl_errors.to_oxidized(arena),
             docs_url: docs_url.as_deref().to_oxidized(arena),
-        }
+        })
     }
 }
 

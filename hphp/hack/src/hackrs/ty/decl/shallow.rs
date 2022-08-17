@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 
 use eq_modulo_pos::EqModuloPos;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::method_flags::MethodFlags;
@@ -42,7 +43,7 @@ use crate::decl::ty::XhpEnumValue;
 use crate::reason::Reason;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowClassConst<R: Reason> {
     pub kind: ClassConstKind,
@@ -70,7 +71,7 @@ pub struct ShallowClassConst<R: Reason> {
 walkable!(ShallowClassConst<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowTypeconst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
@@ -92,7 +93,7 @@ impl<R: Reason> ShallowTypeconst<R> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<PropName, R::Pos>,
@@ -105,7 +106,7 @@ pub struct ShallowProp<R: Reason> {
 walkable!(ShallowProp<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowMethod<R: Reason> {
     // note(sf, 2022-01-27):
@@ -123,7 +124,7 @@ pub struct ShallowMethod<R: Reason> {
 walkable!(ShallowMethod<R> => [ty]);
 
 #[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ShallowClass<R: Reason> {
     // note(sf, 2022-01-27):
@@ -177,7 +178,7 @@ pub type TypedefDecl<R> = TypedefType<R>;
 pub type ModuleDecl<R> = ModuleDefType<R>;
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub enum Decl<R: Reason> {
     Class(TypeName, ClassDecl<R>),

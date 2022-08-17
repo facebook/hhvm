@@ -223,7 +223,7 @@ walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
     Serialize,
     Deserialize
 )]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R>>);
 
@@ -696,7 +696,7 @@ pub enum ClassConstFrom {
 pub struct ClassConstRef(pub ClassConstFrom, pub Symbol);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
@@ -706,7 +706,7 @@ pub struct ConstDecl<R: Reason> {
 walkable!(ConstDecl<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
@@ -722,7 +722,7 @@ pub struct FunElt<R: Reason> {
 walkable!(FunElt<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct AbstractTypeconst<R: Reason> {
     pub as_constraint: Option<Ty<R>>,
@@ -733,7 +733,7 @@ pub struct AbstractTypeconst<R: Reason> {
 walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct ConcreteTypeconst<R: Reason> {
     pub ty: Ty<R>,
@@ -742,7 +742,7 @@ pub struct ConcreteTypeconst<R: Reason> {
 walkable!(ConcreteTypeconst<R> => [ty]);
 
 #[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub enum Typeconst<R: Reason> {
     TCAbstract(AbstractTypeconst<R>),
@@ -764,7 +764,7 @@ impl<R: Reason> fmt::Debug for Typeconst<R> {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct EnumType<R: Reason> {
     pub base: Ty<R>,
@@ -775,7 +775,7 @@ pub struct EnumType<R: Reason> {
 walkable!(EnumType<R> => [base, constraint, includes]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
-#[derive(ToOcamlRep)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,

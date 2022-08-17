@@ -138,7 +138,7 @@ impl TypeName {
     }
 }
 
-#[derive(Clone, Hash, PartialEq, Eq, Display)]
+#[derive(Clone, Hash, PartialEq, Eq)]
 pub struct FieldName(pub String);
 
 #[derive(Clone, Hash, PartialEq, Eq, Display)]

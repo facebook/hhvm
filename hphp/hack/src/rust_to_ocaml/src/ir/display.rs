@@ -213,9 +213,38 @@ impl Display for ir::ModuleName {
     }
 }
 
+fn is_ocaml_keyword(name: &str) -> bool {
+    match name {
+        "and" | "as" | "assert" | "asr" | "begin" | "class" | "constraint" | "do" | "done"
+        | "downto" | "else" | "end" | "exception" | "external" | "false" | "for" | "fun"
+        | "function" | "functor" | "if" | "in" | "include" | "inherit" | "initializer" | "land"
+        | "lazy" | "let" | "lor" | "lsl" | "lsr" | "lxor" | "match" | "method" | "mod"
+        | "module" | "mutable" | "new" | "nonrec" | "object" | "of" | "open" | "or" | "private"
+        | "rec" | "sig" | "struct" | "then" | "to" | "true" | "try" | "type" | "val"
+        | "virtual" | "when" | "while" | "with" => true,
+        _ => false,
+    }
+}
+
 impl Display for ir::TypeName {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        self.0.to_case(Case::Snake).fmt(f)
+        let name = self.0.to_case(Case::Snake);
+        if is_ocaml_keyword(name.as_str()) {
+            write!(f, "{}_", name)
+        } else {
+            name.fmt(f)
+        }
+    }
+}
+
+impl Display for ir::FieldName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let name = self.0.to_case(Case::Snake);
+        if is_ocaml_keyword(name.as_str()) {
+            write!(f, "{}_", name)
+        } else {
+            name.fmt(f)
+        }
     }
 }
 

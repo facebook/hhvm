@@ -1,0 +1,154 @@
+type foo = {
+  and_: a;
+  assert_: a;
+  asr_: a;
+  begin_: a;
+  class_: a;
+  constraint_: a;
+  done_: a;
+  downto_: a;
+  end_: a;
+  exception_: a;
+  external_: a;
+  fun_: a;
+  function_: a;
+  functor_: a;
+  include_: a;
+  inherit_: a;
+  initializer_: a;
+  land_: a;
+  lazy_: a;
+  lor_: a;
+  lsl_: a;
+  lsr_: a;
+  lxor_: a;
+  method_: a;
+  module_: a;
+  mutable_: a;
+  new_: a;
+  nonrec_: a;
+  object_: a;
+  of_: a;
+  open_: a;
+  or_: a;
+  private_: a;
+  rec_: a;
+  sig_: a;
+  then_: a;
+  to_: a;
+  val_: a;
+  when_: a;
+  with_: a;
+}
+
+type a = and_
+
+type a = as_
+
+type a = assert_
+
+type a = asr_
+
+type a = begin_
+
+type a = class_
+
+type a = constraint_
+
+type a = do_
+
+type a = done_
+
+type a = downto_
+
+type a = else_
+
+type a = end_
+
+type a = exception_
+
+type a = external_
+
+type a = false_
+
+type a = for_
+
+type a = fun_
+
+type a = function_
+
+type a = functor_
+
+type a = if_
+
+type a = in_
+
+type a = include_
+
+type a = inherit_
+
+type a = initializer_
+
+type a = land_
+
+type a = lazy_
+
+type a = let_
+
+type a = lor_
+
+type a = lsl_
+
+type a = lsr_
+
+type a = lxor_
+
+type a = match_
+
+type a = method_
+
+type a = mod_
+
+type a = module_
+
+type a = mutable_
+
+type a = new_
+
+type a = nonrec_
+
+type a = object_
+
+type a = of_
+
+type a = open_
+
+type a = or_
+
+type a = private_
+
+type a = rec_
+
+type a = sig_
+
+type a = struct_
+
+type a = then_
+
+type a = to_
+
+type a = true_
+
+type a = try_
+
+type a = type_
+
+type a = val_
+
+type a = virtual_
+
+type a = when_
+
+type a = while_
+
+type a = with_

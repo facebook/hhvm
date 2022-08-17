@@ -69,7 +69,7 @@ let fun_def ctx fd :
   let (env, cap_ty, unsafe_cap_ty) =
     Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
-  let env = Env.set_module env fd.fd_module in
+  let env = Env.set_current_module env fd.fd_module in
   let env = Env.set_internal env fd.fd_internal in
   let env =
     if
@@ -82,7 +82,7 @@ let fun_def ctx fd :
       env
   in
   List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
-  Typing_env.make_depend_on_module env;
+  Typing_env.make_depend_on_current_module env;
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env

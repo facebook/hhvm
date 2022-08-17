@@ -93,7 +93,10 @@ let is_private_visible_for_class env x self_id cid class_ =
 
 let is_internal_visible env target =
   match
-    Module.can_access ~env ~current:(Env.get_module env) ~target:(Some target)
+    Module.can_access
+      ~env
+      ~current:(Env.get_current_module env)
+      ~target:(Some target)
   with
   | `Yes -> None
   | `Disjoint (current, target) ->
@@ -111,7 +114,10 @@ let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
     if internal then
       let open Typing_error.Primary.Modules in
       match
-        Module.can_access ~env ~current:(Env.get_module env) ~target:module_
+        Module.can_access
+          ~env
+          ~current:(Env.get_current_module env)
+          ~target:module_
       with
       | `Yes when in_signature && not (Env.get_internal env) ->
         Some (Module_hint { pos = use_pos; decl_pos = def_pos })

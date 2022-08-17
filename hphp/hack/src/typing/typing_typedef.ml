@@ -22,7 +22,7 @@ let typedef_def ctx typedef =
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
-  let env = Env.set_module env typedef.t_module in
+  let env = Env.set_current_module env typedef.t_module in
   let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -33,7 +33,7 @@ let typedef_def ctx typedef =
   Option.iter ~f:Errors.add_typing_error ty_err_opt1;
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.typedef env typedef;
-  Typing_env.make_depend_on_module env;
+  Typing_env.make_depend_on_current_module env;
   Typing_variance.typedef env typedef;
   let {
     t_annotation = ();

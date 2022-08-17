@@ -507,7 +507,7 @@ let genv_as_value env genv =
     fun_kind;
     fun_is_ctor;
     file = _;
-    this_module;
+    current_module;
     this_internal;
     this_support_dynamic_type;
   } =
@@ -528,9 +528,9 @@ let genv_as_value env genv =
        ("this_internal", bool_as_value this_internal);
        ("this_support_dynamic_type", bool_as_value this_support_dynamic_type);
      ]
-    @ (match this_module with
-      | Some this_module ->
-        [("this_module", string_as_value @@ Ast_defs.show_id this_module)]
+    @ (match current_module with
+      | Some current_module ->
+        [("current_module", string_as_value @@ Ast_defs.show_id current_module)]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

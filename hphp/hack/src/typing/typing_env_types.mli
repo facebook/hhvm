@@ -67,7 +67,7 @@ and genv = {
   fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
       (** Is the definition that we are checking marked internal? *)

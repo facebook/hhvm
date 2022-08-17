@@ -111,7 +111,7 @@ val make_depend_on_constructor : env -> type_key -> unit
 
 (** Register the current top-level structure as being dependent on the current
     module *)
-val make_depend_on_module : env -> unit
+val make_depend_on_current_module : env -> unit
 
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
@@ -243,13 +243,13 @@ val invalid_type_hint_assert_primary_pos_in_current_decl :
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
-val set_module : env -> Ast_defs.id option -> env
+val set_current_module : env -> Ast_defs.id option -> env
 
 val set_internal : env -> bool -> env
 
 val set_support_dynamic_type : env -> bool -> env
 
-val get_module : env -> string option
+val get_current_module : env -> string option
 
 val get_internal : env -> bool
 

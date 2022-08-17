@@ -1786,7 +1786,7 @@ let class_def_ env c tc =
 
 let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let env = Env.set_module env c.c_module in
+  let env = Env.set_current_module env c.c_module in
   let env = Env.set_internal env c.c_internal in
   let env =
     Env.set_support_dynamic_type
@@ -1803,7 +1803,7 @@ let class_def ctx c =
   let env = setup_env_for_class_def_check ctx c in
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in
-  Typing_env.make_depend_on_module env;
+  Typing_env.make_depend_on_current_module env;
   match tc with
   | None ->
     (* This can happen if there was an error during the declaration

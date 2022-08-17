@@ -1193,7 +1193,7 @@ let fun_type_of_id env x tal el =
           match
             Typing_modules.can_access
               ~env
-              ~current:(Env.get_module env)
+              ~current:(Env.get_current_module env)
               ~target:(Option.map fe_module ~f:snd)
           with
           | `Yes -> None

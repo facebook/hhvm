@@ -605,7 +605,7 @@ let make_depend_on_class_def env x cd =
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
-let make_depend_on_module env =
+let make_depend_on_current_module env =
   let f (_, mid) =
     let dep = Dep.Module mid in
     Option.iter env.decl_env.droot ~f:(fun root ->
@@ -613,7 +613,7 @@ let make_depend_on_module env =
     add_fine_dep_if_enabled env dep;
     ()
   in
-  Option.iter ~f env.genv.this_module
+  Option.iter ~f env.genv.current_module
 
 let env_with_method_droot_member env m ~static =
   let child =
@@ -630,9 +630,10 @@ let env_with_constructor_droot_member env =
   let decl_env = { env.decl_env with droot_member = Some member } in
   { env with decl_env }
 
-let set_module env m = { env with genv = { env.genv with this_module = m } }
+let set_current_module env m =
+  { env with genv = { env.genv with current_module = m } }
 
-let get_module env = Option.map env.genv.this_module ~f:snd
+let get_current_module env = Option.map env.genv.current_module ~f:snd
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 
@@ -666,7 +667,10 @@ let is_typedef_visible env ?(expand_visible_newtype = true) td =
          (get_file env)
   | Aast.OpaqueModule ->
     expand_visible_newtype
-    && Option.equal String.equal (get_module env) (Option.map td_module ~f:snd)
+    && Option.equal
+         String.equal
+         (get_current_module env)
+         (Option.map td_module ~f:snd)
   | Aast.Transparent -> true
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =

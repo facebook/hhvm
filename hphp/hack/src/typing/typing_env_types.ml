@@ -79,7 +79,7 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
 }
@@ -127,7 +127,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_kind = Ast_defs.FSync;
         fun_is_ctor = false;
         file;
-        this_module = None;
+        current_module = None;
         this_internal = false;
         this_support_dynamic_type = false;
       };

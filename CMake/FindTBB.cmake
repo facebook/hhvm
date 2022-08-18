@@ -18,7 +18,7 @@
 # TBB_INSTALL_DIR or $ENV{TBB21_INSTALL_DIR} or $ENV{TBB_INSTALL_DIR}
 
 # This module defines
-# TBB_INCLUDE_DIRS, where to find task_scheduler_init.h, etc.
+# TBB_INCLUDE_DIRS, where to find tbb.h, etc.
 # TBB_LIBRARY_DIRS, where to find libtbb, libtbbmalloc
 # TBB_INSTALL_DIR, the base TBB install directory
 # TBB_LIBRARIES, the libraries to link against to use TBB.
@@ -28,6 +28,7 @@
 # lets try in the obvious places first
 find_path(TEST_TBB_INCLUDE_DIR
     tbb/task_scheduler_init.h
+    tbb/tbb.h
 )
 find_library(TEST_TBB_LIBRARY tbb)
 
@@ -152,6 +153,7 @@ else (TBB_OBVIOUS_PLACE)
   set (TBB_INC_SEARCH_DIR ${_TBB_INSTALL_DIR}/include)
   find_path(TBB_INCLUDE_DIR
     tbb/task_scheduler_init.h
+    tbb/tbb.h
     PATHS ${TBB_INC_SEARCH_DIR}
   )
   mark_as_advanced(TBB_INCLUDE_DIR)
@@ -207,7 +209,12 @@ endif (TBB_OBVIOUS_PLACE)
 if (TBB_FOUND)
   set(TBB_INTERFACE_VERSION 0)
 
-  FILE(READ "${TBB_INCLUDE_DIRS}/tbb/tbb_stddef.h" _TBB_VERSION_CONTENTS)
+  if(EXISTS "${TBB_INCLUDE_DIRS}/oneapi/tbb/version.h")
+    FILE(READ "${TBB_INCLUDE_DIRS}/oneapi/tbb/version.h" _TBB_VERSION_CONTENTS)
+  else()
+    FILE(READ "${TBB_INCLUDE_DIRS}/tbb/tbb_stddef.h" _TBB_VERSION_CONTENTS)
+  endif()
+
   STRING(REGEX REPLACE ".*#define TBB_INTERFACE_VERSION ([0-9]+).*" "\\1" TBB_INTERFACE_VERSION "${_TBB_VERSION_CONTENTS}")
 
   set(TBB_INTERFACE_VERSION "${TBB_INTERFACE_VERSION}")

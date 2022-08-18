@@ -1,5 +1,5 @@
-File "sound_dynamic_callable_1.bad.php", line 11, characters 19-21:
-Method  `foo` in class `C` is not dynamically callable. (Typing[4402])
+File "sound_dynamic_callable_1.bad.php", line 12, characters 12-22:
+Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
   File "sound_dynamic_callable_1.bad.php", line 12, characters 12-22:
   Invalid return type
   File "sound_dynamic_callable_1.bad.php", line 11, characters 27-34:

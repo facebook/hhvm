@@ -1053,12 +1053,13 @@ let ambiguous_inheritance
     ~reasons:(lazy (claim_as_reason claim :: reasons @ [(pos, message)]))
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
-let function_is_not_dynamically_callable pos function_name error =
+let function_is_not_dynamically_callable function_name error =
   let function_name = Markdown_lite.md_codify (Render.strip_ns function_name) in
   let nested_error_reason = User_error.to_list_ error in
   add_list
-    (Typing.err_code Typing.ImplementsDynamic)
-    (pos, "Function  " ^ function_name ^ " is not dynamically callable.")
+    (User_error.get_code error)
+    ( User_error.get_pos error,
+      "Function  " ^ function_name ^ " is not dynamically callable." )
     nested_error_reason
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
@@ -1072,10 +1073,13 @@ let method_is_not_dynamically_callable
   let method_name = Markdown_lite.md_codify (Render.strip_ns method_name) in
   let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
 
-  let nested_error_reason =
+  let (code, pos, nested_error_reason) =
     match error_opt with
-    | None -> []
-    | Some e -> User_error.to_list_ e
+    | None -> (Typing.err_code Typing.ImplementsDynamic, pos, [])
+    | Some error ->
+      ( User_error.get_code error,
+        User_error.get_pos error,
+        User_error.to_list_ error )
   in
 
   let parent_class_reason =
@@ -1112,7 +1116,7 @@ let method_is_not_dynamically_callable
   in
 
   add_list
-    (Typing.err_code Typing.ImplementsDynamic)
+    code
     ( pos,
       "Method  "
       ^ method_name

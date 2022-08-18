@@ -1,5 +1,5 @@
-File "static_method_1.bad.php", line 12, characters 19-21:
-Method  `bar` in class `C` is not dynamically callable. (Typing[4402])
+File "static_method_1.bad.php", line 13, characters 12-24:
+Method  `bar` in class `C` is not dynamically callable. (Typing[4110])
   File "static_method_1.bad.php", line 13, characters 12-24:
   Invalid return type
   File "static_method_1.bad.php", line 12, characters 39-47:

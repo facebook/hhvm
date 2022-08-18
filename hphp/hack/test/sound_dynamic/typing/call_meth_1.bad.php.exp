@@ -1,13 +1,13 @@
-File "call_meth_1.bad.php", line 16, characters 19-21:
-Method  `foo` in class `Foo` is not dynamically callable. (Typing[4402])
+File "call_meth_1.bad.php", line 17, characters 33-44:
+Method  `foo` in class `Foo` is not dynamically callable. (Typing[4110])
   File "call_meth_1.bad.php", line 17, characters 33-44:
   Typing error
   File "call_meth_1.bad.php", line 17, characters 37-37:
   Expected `dynamic`
   File "call_meth_1.bad.php", line 17, characters 37-37:
   Type `A<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
-File "call_meth_1.bad.php", line 19, characters 19-21:
-Method  `bar` in class `Foo` is not dynamically callable. (Typing[4402])
+File "call_meth_1.bad.php", line 20, characters 29-40:
+Method  `bar` in class `Foo` is not dynamically callable. (Typing[4110])
   File "call_meth_1.bad.php", line 20, characters 29-40:
   Typing error
   File "call_meth_1.bad.php", line 20, characters 33-33:

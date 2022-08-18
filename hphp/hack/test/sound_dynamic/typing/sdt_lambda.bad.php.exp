@@ -1,13 +1,13 @@
-File "sdt_lambda.bad.php", line 10, characters 8-55:
-Function  `;anonymous` is not dynamically callable. (Typing[4402])
+File "sdt_lambda.bad.php", line 10, characters 49-55:
+Function  `;anonymous` is not dynamically callable. (Typing[4110])
   File "sdt_lambda.bad.php", line 10, characters 49-55:
   Invalid return type
   File "sdt_lambda.bad.php", line 10, characters 8-55:
   Expected `dynamic` because method must be callable in a dynamic context
   File "sdt_lambda.bad.php", line 10, characters 53-53:
   Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-File "sdt_lambda.bad.php", line 24, characters 8-159:
-Function  `;anonymous` is not dynamically callable. (Typing[4402])
+File "sdt_lambda.bad.php", line 27, characters 13-14:
+Function  `;anonymous` is not dynamically callable. (Typing[4110])
   File "sdt_lambda.bad.php", line 27, characters 13-14:
   Invalid argument
   File "sdt_lambda.bad.php", line 21, characters 18-18:

@@ -5075,7 +5075,7 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
         in
         ())
       (fun error ->
-        Errors.function_is_not_dynamically_callable pos (snd f.f_name) error)
+        Errors.function_is_not_dynamically_callable (snd f.f_name) error)
   in
   if not interface_check then function_body_check ()
 

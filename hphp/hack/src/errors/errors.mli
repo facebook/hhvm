@@ -247,7 +247,7 @@ val method_is_not_dynamically_callable :
   (Pos.t, Pos_or_decl.t) User_error.t option ->
   unit
 
-val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit
+val function_is_not_dynamically_callable : string -> error -> unit
 
 val global_access_error :
   Pos.t -> string -> string -> SSet.t -> Error_codes.GlobalWriteCheck.t -> unit

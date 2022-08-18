@@ -89,7 +89,7 @@ bool kind_is_resolved(TS::Kind kind) {
 
 using Resolution = TypeStructureResolution;
 
-Resolution&& makeBespokeTypeStructure(Resolution&& r) {
+Resolution&& maybeMakeBespoke(Resolution&& r) {
   // convert type structure into bespoke versions if possible
   if (!RO::EvalEmitBespokeTypeStructures) return std::move(r);
 
@@ -97,7 +97,7 @@ Resolution&& makeBespokeTypeStructure(Resolution&& r) {
     auto const ad = val(*t).parr;
     if (!bespoke::TypeStructure::isValidTypeStructure(ad)) return std::move(r);
 
-    if (auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad)) {
+    if (auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad, false)) {
       r.type = dict_val(ts);
     }
   }
@@ -243,7 +243,7 @@ struct Builder {
     assertx(IMPLIES(r.type.is(BBottom), r.mightFail));
     assertx(r.type.subtypeOf(BDict));
 
-    return makeBespokeTypeStructure(std::move(r));
+    return maybeMakeBespoke(std::move(r));
   }
 
 private:
@@ -402,6 +402,7 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
 }
 
 Resolution resolve(ResolveCtx&, SArray ts);
+Resolution resolveBespoke(ResolveCtx& ctx, SArray ts);
 
 Resolution resolve_list(ResolveCtx& ctx, SArray ts) {
   assertx(ts->isStatic());
@@ -411,7 +412,8 @@ Resolution resolve_list(ResolveCtx& ctx, SArray ts) {
   for (size_t i = 0; i < size; ++i) {
     auto const tv = ts->get(i);
     assertx(tvIsDict(tv));
-    b.append(resolve(ctx, val(tv).parr));
+    auto const r = resolveBespoke(ctx, val(tv).parr);
+    b.append(r);
     if (b.alwaysFails()) break;
   }
   return b.finish();
@@ -427,7 +429,7 @@ Optional<std::vector<Resolution>> resolve_list_separate(ResolveCtx& ctx,
   for (size_t i = 0; i < size; ++i) {
     auto const tv = ts->get(i);
     assertx(tvIsDict(tv));
-    out.emplace_back(resolve(ctx, val(tv).parr));
+    out.emplace_back(resolveBespoke(ctx, val(tv).parr));
     if (out.back().type.is(BBottom)) return std::nullopt;
   }
   return out;
@@ -435,25 +437,25 @@ Optional<std::vector<Resolution>> resolve_list_separate(ResolveCtx& ctx,
 
 Resolution resolve_fun(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_fun)
-    .resolve(s_return_type, get_ts_return_type(ts), ctx, resolve)
+    .resolve(s_return_type, get_ts_return_type(ts), ctx, resolveBespoke)
     .resolve(s_param_types, get_ts_param_types(ts), ctx, resolve_list)
-    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolve)
+    .resolve(s_variadic_type, get_ts_variadic_type_opt(ts), ctx, resolveBespoke)
     .optCopy(s_typevars, ts)
-    .finishTS();
+    .finish();
 }
 
 Resolution resolve_tuple(ResolveCtx& ctx, SArray ts) {
   return Builder::copy(ts, TS::Kind::T_tuple)
     .resolve(s_elem_types, get_ts_elem_types(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
-    .finishTS();
+    .finish();
 }
 
 Resolution resolve_arraylike(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
   return Builder::copy(ts, kind)
     .resolve(s_generic_types, get_ts_generic_types_opt(ts), ctx, resolve_list)
     .optCopy(s_typevars, ts)
-    .finishTS();
+    .finish();
 }
 
 Resolution resolve_typevar(ResolveCtx& ctx, SArray ts) {
@@ -528,8 +530,7 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
       auto const toResolve = [&] () -> SArray {
         auto const v = fieldValueArr->get(s_value);
         if (!v.is_init()) return fieldValueArr;
-        // Runtime will attempt to coerce this to an array if it's
-        // not.
+        // Runtime will attempt to coerce this to an array if it's not.
         if (!tvIsDict(v)) return nullptr;
         return val(v).parr;
       }();
@@ -540,11 +541,11 @@ Resolution resolve_shape(ResolveCtx& ctx, SArray ts) {
 
       return Builder::attach(std::move(r))
         .set(s_optional_shape_field, make_tv<KindOfBoolean>(true))
-        .finishTS();
+        .finish();
     }();
     resolution.mightFail |= key.second;
 
-    b.set(key.first, resolution);
+    b.set(key.first, maybeMakeBespoke(std::move(resolution)));
     if (b.alwaysFails()) break;
   }
 
@@ -654,7 +655,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   if (clsName->isame(s_callable.get())) {
     return setKindAndName(TS::Kind::T_class, clsName)
       .optCopy(s_typevars, ts)
-      .finishTS();
+      .finish();
   }
 
   auto const resolvedCls = [&] (const php::Class* cls, bool setExact) {
@@ -672,7 +673,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       b.resolve(s_generic_types, get_ts_generic_types_opt(ts),
                 ctx, resolve_list)
         .optCopy(s_typevars, ts)
-        .finishTS();
+        .finish();
   };
 
   if (ctx.selfCls) {
@@ -728,7 +729,6 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       auto const& preresolved = typeAlias->resolvedTypeStructure;
       if (!preresolved.isNull()) {
         assertx(preresolved.isDict());
-        assertx(!preresolved.empty());
         return Builder::attach(
           Resolution{ dict_val(preresolved.get()), false }
         );
@@ -752,11 +752,14 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
     if (typevarTypes) {
       auto d = Builder::dict();
       for (auto const& kv : *typevarTypes) {
-        d.set(makeStaticString(kv.first), Resolution { kv.second, false });
+        d.set(
+          makeStaticString(kv.first),
+          maybeMakeBespoke(Resolution { kv.second, false })
+        );
       }
       b.set(s_typevar_types, d.finish());
     }
-    return b.copyModifiers(ts).finishTS();
+    return b.copyModifiers(ts).finish();
   };
 
   if (typeAlias->typeStructure.exists(s_typevars) &&
@@ -850,7 +853,7 @@ Resolution resolve(ResolveCtx& ctx, SArray ts) {
   // immediately and skip the cache check.
   auto const kind = get_ts_kind(ts);
   if (kind_is_resolved(kind)) {
-    return makeBespokeTypeStructure(Resolution{ dict_val(ts), false });
+    return Resolution{ dict_val(ts), false };
   }
 
   if (auto const r = ctx.cache->enter(ctx, ts)) return *r;
@@ -860,7 +863,11 @@ Resolution resolve(ResolveCtx& ctx, SArray ts) {
   return r;
 }
 
+Resolution resolveBespoke(ResolveCtx& ctx, SArray ts) {
+  return maybeMakeBespoke(resolve(ctx, ts));
 }
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 
@@ -871,7 +878,7 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
   Cache cache;
   ResolveCtx ctx{env.ctx, &env.index, &cache};
   ctx.selfCls = env.ctx.cls;
-  return resolve(ctx, ts);
+  return resolveBespoke(ctx, ts);
 }
 
 Resolution resolve_type_structure(const Index& index,
@@ -891,7 +898,7 @@ Resolution resolve_type_structure(const Index& index,
   ResolveCtx ctx{Context{}, &index, &cache};
   ctx.selfCls = index.lookup_const_class(cns);
   ctx.thisCls = &thiz;
-  return resolve(ctx, val(*cns.val).parr);
+  return resolveBespoke(ctx, val(*cns.val).parr);
 }
 
 Resolution resolve_type_structure(const Index& index,

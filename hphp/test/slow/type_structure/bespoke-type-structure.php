@@ -22,17 +22,18 @@ newtype FooString = string;
 newtype FooTypevar<F> = F;
 newtype FooTypevarTypes = FooTypevar<int>;
 newtype FooClass = Foo<bool>;
-newtype FooAny = AnyArray<string, bool>;
+newtype FooAny = ?AnyArray<string, bool>;
+newtype FooTuple = (FooString, mixed);
 
 newtype FooSoftInt = @~int;
 newtype FooLikeInt = ~@int;
 
 type ComplicatedType<T> = shape(
-  'operator' => int,
-  ?'values' => vec<T>,
-  ?'operands' => vec<shape(
-    'operator' => bool,
-    ?'values' => vec<T>,
+  'a' => int,
+  ?'b' => vec<T>,
+  ?'c' => vec<shape(
+    'd' => ReifiedC<bool>,
+    ?'e' => FooAny,
     ...
   )>,
   ...
@@ -82,6 +83,11 @@ function main(): void {
   $ts = type_structure(__hhvm_intrinsics\launder_value('FooAny'), null);
   var_dump($ts['kind']);
   var_dump($ts['generic_types']);
+
+  $ts = type_structure(__hhvm_intrinsics\launder_value('FooTuple'), null);
+  var_dump($ts['alias']);
+  var_dump($ts['kind']);
+  var_dump($ts['elem_types']);
 
   $ts = type_structure('Bar', 'BarBool');
   var_dump($ts['kind']);

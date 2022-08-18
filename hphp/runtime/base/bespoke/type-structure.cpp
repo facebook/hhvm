@@ -65,10 +65,56 @@ void setStringField(StringData*& field, TypedValue v) {
   if (field) field->decRefAndRelease();
   field = val(v).pstr;
 }
-void setArrayField(ArrayData*& field, TypedValue v) {
+
+void setTypeField(ArrayData*& field, TypedValue v, bool nested) {
   assertx(tvIsArrayLike(v));
   if (field) field->decRefAndRelease();
-  field = val(v).parr;
+  auto arr = val(v).parr;
+  if (!nested) {
+    field = arr;
+    return;
+  }
+  field = TypeStructure::MakeFromVanillaNested(arr);
+  if (field != arr) tvDecRefGen(v);
+}
+
+void setVecField(ArrayData*& field, TypedValue v, bool nested) {
+  assertx(tvIsVec(v));
+  if (field) field->decRefAndRelease();
+  if (!nested) {
+    field = val(v).parr;
+    return;
+  }
+  auto arr = val(v).parr;
+  auto const size = arr->size();
+  auto newarr = Array::CreateVec();
+  for (size_t i = 0; i < size; ++i) {
+    auto val = arr->getValue(i).asCArrRef();
+    auto const r = TypeStructure::MakeFromVanillaNested(val.get());
+    newarr.append(Variant(r));
+  }
+  field = newarr.detach();
+  tvDecRefGen(v);
+}
+
+void setDictField(ArrayData*& field, TypedValue v, bool nested) {
+  assertx(tvIsDict(v));
+  if (field) field->decRefAndRelease();
+  if (!nested) {
+    field = val(v).parr;
+    return;
+  }
+  auto arr = val(v).parr;
+  auto const size = arr->size();
+  auto newarr = Array::CreateDict();
+  for (size_t i = 0; i < size; i++) {
+    Variant key = arr->getKey(i);
+    auto val = arr->getValue(i).asCArrRef();
+    auto const r = TypeStructure::MakeFromVanillaNested(val.get());
+    newarr.set(key, Variant(r));
+  }
+  field = newarr.detach();
+  tvDecRefGen(v);
 }
 
 TypedValue make_tv_safe(uint8_t val) {
@@ -97,7 +143,16 @@ TypedValue make_tv_safe(ArrayData* val) {
     : make_tv<KindOfVec>(val);
 }
 
+bool checkBespokeArray(const ArrayData* ad) {
+  auto const size = ad->size();
+  for (size_t i = 0; i < size; ++i) {
+    auto const val = ad->getValue(i).asCArrRef();
+    if (!TypeStructure::isFullyBespokeTypeStructure(val.get())) return false;
+  }
+  return true;
 }
+
+} // namespace
 
 size_t TypeStructure::sizeIndex(Kind kind) {
   return MemoryManager::size2Index(getSizeOfTypeStruct(kind));
@@ -109,6 +164,27 @@ LayoutIndex TypeStructure::GetLayoutIndex() {
 
 bool TypeStructure::isBespokeTypeStructure(const ArrayData* ad) {
   return !ad->isVanilla() && asBespoke(ad)->layoutIndex() == GetLayoutIndex();
+}
+
+bool TypeStructure::isFullyBespokeTypeStructure(const ArrayData* ad) {
+  if (!isBespokeTypeStructure(ad)) return false;
+  auto const ts = As(ad);
+
+  // check all nested fields that could contain type structures
+  if (ts->m_typevar_types && !checkBespokeArray(ts->m_typevar_types)) {
+    return false;
+  }
+  switch (ts->typeKind()) {
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    reinterpret_cast<const Type*>(ts)->checkBespokeChildren(); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
+  return true;
 }
 
 void TypeStructure::InitializeLayouts() {
@@ -158,12 +234,12 @@ TYPE_STRUCTURE_CHILDREN_KINDS
 }
 
 template <typename Type>
-size_t setFields(Type* ts, ArrayData* ad) {
+size_t setFields(Type* ts, ArrayData* ad, bool nested) {
   auto i = 0;
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) {
     assertx(tvIsString(k));
     auto const fieldKey = val(k).pstr;
-    if (Type::setField(ts, fieldKey, v)) {
+    if (Type::setField(ts, fieldKey, v, nested)) {
       ts->setIterationPosition(fieldKey, i);
       tvIncRefGen(v);
       i++;
@@ -180,7 +256,8 @@ void TypeStructure::setBitField(TypedValue v, BitFieldOffsets offset) {
 }
 
 // caller must incref TypedValue
-bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
+bool TypeStructure::setField(
+    TypeStructure* tad, StringData* k, TypedValue v, bool nested) {
   if (s_kind.same(k)) {
     assertx(tvIsInt(v));
     tad->m_kind = safe_cast<uint8_t>(val(v).num);
@@ -199,7 +276,7 @@ bool TypeStructure::setField(TypeStructure* tad, StringData* k, TypedValue v) {
   } else if (s_typevars.same(k)) {
     setStringField(tad->m_typevars, v);
   } else if (s_typevar_types.same(k)) {
-    setArrayField(tad->m_typevar_types, v);
+    setDictField(tad->m_typevar_types, v, nested);
   } else {
     return false;
   }
@@ -235,11 +312,11 @@ TypeStructure* TypeStructure::MakeFromVanilla(
   case Kind::T_##Name:
 TYPE_STRUCTURE_KINDS
 #undef X
-    size = setFields<TypeStructure>(result, ad); \
+    size = setFields<TypeStructure>(result, ad, false); \
     break;
 #define X(Name, Type) \
   case Kind::T_##Name: \
-    size = setFields<Type>(reinterpret_cast<Type*>(result), ad); \
+    size = setFields<Type>(reinterpret_cast<Type*>(result), ad, false); \
     break;
 TYPE_STRUCTURE_CHILDREN_KINDS
 #undef X
@@ -254,15 +331,55 @@ TYPE_STRUCTURE_CHILDREN_KINDS
   return result;
 }
 
-TypeStructure* TypeStructure::MakeFromVanillaStatic(ArrayData* ad) {
+TypeStructure* TypeStructure::MakeFromVanillaStatic(ArrayData* ad, bool nested) {
   // must create a non-static bespoke array first so that GetScalarArray won't
   // short-circuit on isStatic and will dedup properly
+  if (nested) {
+    ArrayData* ts = MakeFromVanillaNested(ad);
+    GetScalarArray(&ts);
+    return As(ts);
+  }
   ArrayData* ts = MakeFromVanilla(ad, true);
   if (ts) {
     GetScalarArray(&ts);
     return As(ts);
   }
   return nullptr;
+}
+
+// return ad instead of returning nullptr
+ArrayData* TypeStructure::MakeFromVanillaNested(ArrayData* ad) {
+  if (!isValidTypeStructure(ad)) return ad;
+
+  auto const kind =
+    static_cast<Kind>(Variant::wrap(ad->get(s_kind)).toInt64Val());
+
+  // always make non-static
+  auto result = MakeReserve<false>(ad->isLegacyArray(), kind);
+  auto size = 0;
+
+  switch (kind) {
+#define X(Name, Type) \
+  case Kind::T_##Name:
+TYPE_STRUCTURE_KINDS
+#undef X
+    size = setFields<TypeStructure>(result, ad, true); \
+    break;
+#define X(Name, Type) \
+  case Kind::T_##Name: \
+    size = setFields<Type>(reinterpret_cast<Type*>(result), ad, true); \
+    break;
+TYPE_STRUCTURE_CHILDREN_KINDS
+#undef X
+    default:
+      break;
+  }
+
+  assertx(ad->size() == size);
+  result->m_size = size;
+
+  assertx(result->checkInvariants());
+  return result;
 }
 
 bool TypeStructure::checkInvariants() const {
@@ -1010,62 +1127,93 @@ bool TSWithGenericTypes::checkInvariants() const {
   return true;
 }
 
-bool TSShape::setField(TSShape* tad, StringData* k, TypedValue v) {
+bool TSShape::checkBespokeChildren() const {
+  if (m_fields) checkBespokeArray(m_fields);
+  return true;
+}
+bool TSTuple::checkBespokeChildren() const {
+  return checkBespokeArray(m_elem_types);
+}
+bool TSFun::checkBespokeChildren() const {
+  if (!TypeStructure::isFullyBespokeTypeStructure(m_return_type)) return false;
+  if (m_variadic_type &&
+      !TypeStructure::isFullyBespokeTypeStructure(m_variadic_type)) {
+    return false;
+  }
+  if (m_param_types) checkBespokeArray(m_param_types);
+  return true;
+}
+bool TSTypevar::checkBespokeChildren() const {
+  return true;
+}
+bool TSWithClassishTypes::checkBespokeChildren() const {
+  if (m_generic_types) return checkBespokeArray(m_generic_types);
+  return true;
+}
+bool TSWithGenericTypes::checkBespokeChildren() const {
+  if (m_generic_types) return checkBespokeArray(m_generic_types);
+  return true;
+}
+
+bool TSShape::setField(TSShape* tad, StringData* k, TypedValue v, bool nested) {
   if (s_fields.same(k)) {
-    setArrayField(tad->m_fields, v);
+    setDictField(tad->m_fields, v, nested);
   } else if (s_allows_unknown_fields.same(k)) {
     assertx(tvIsBool(v));
     tad->m_allows_unknown_fields = val(v).num;
   } else {
-    return TypeStructure::setField(tad, k, v);
+    return TypeStructure::setField(tad, k, v, nested);
   }
   return true;
 }
-bool TSTuple::setField(TSTuple* tad, StringData* k, TypedValue v) {
+bool TSTuple::setField(TSTuple* tad, StringData* k, TypedValue v, bool nested) {
   if (s_elem_types.same(k)) {
-    setArrayField(tad->m_elem_types, v);
+    setVecField(tad->m_elem_types, v, nested);
     return true;
   }
-  return TypeStructure::setField(tad, k, v);
+  return TypeStructure::setField(tad, k, v, nested);
 }
-bool TSFun::setField(TSFun* tad, StringData* k, TypedValue v) {
+bool TSFun::setField(TSFun* tad, StringData* k, TypedValue v, bool nested) {
   if (s_param_types.same(k)) {
-    setArrayField(tad->m_param_types, v);
+    setVecField(tad->m_param_types, v, nested);
   } else if (s_return_type.same(k)) {
-    setArrayField(tad->m_return_type, v);
+    setTypeField(tad->m_return_type, v, nested);
   } else if (s_variadic_type.same(k)) {
-    setArrayField(tad->m_variadic_type, v);
+    setTypeField(tad->m_variadic_type, v, nested);
   } else {
-    return TypeStructure::setField(tad, k, v);
+    return TypeStructure::setField(tad, k, v, nested);
   }
   return true;
 }
-bool TSTypevar::setField(TSTypevar* tad, StringData* k, TypedValue v) {
+bool TSTypevar::setField(
+    TSTypevar* tad, StringData* k, TypedValue v, bool nested) {
   if (s_name.same(k)) {
     setStringField(tad->m_name, v);
     return true;
   }
-  return TypeStructure::setField(tad, k, v);
+  return TypeStructure::setField(tad, k, v, nested);
 }
-bool TSWithClassishTypes::setField(TSWithClassishTypes* tad, StringData* k, TypedValue v) {
+bool TSWithClassishTypes::setField(
+    TSWithClassishTypes* tad, StringData* k, TypedValue v, bool nested) {
   if (s_generic_types.same(k)) {
-    setArrayField(tad->m_generic_types, v);
+    setVecField(tad->m_generic_types, v, nested);
   } else if (s_classname.same(k)) {
     setStringField(tad->m_classname, v);
   } else if (s_exact.same(k)) {
     assertx(tvIsBool(v));
     tad->m_exact = val(v).num;
   } else {
-    return TypeStructure::setField(tad, k, v);
+    return TypeStructure::setField(tad, k, v, nested);
   }
   return true;
 }
-bool TSWithGenericTypes::setField(TSWithGenericTypes* tad, StringData* k, TypedValue v) {
+bool TSWithGenericTypes::setField(
+    TSWithGenericTypes* tad, StringData* k, TypedValue v, bool nested) {
   if (s_generic_types.same(k)) {
-    setArrayField(tad->m_generic_types, v);
+    setVecField(tad->m_generic_types, v, nested);
     return true;
   }
-  return TypeStructure::setField(tad, k, v);
+  return TypeStructure::setField(tad, k, v, nested);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -430,6 +430,18 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
 Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
   StringData* alias = nullptr, ArrayData* typevarTypes = nullptr);
 
+Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr);
+
+Array maybeMakeBespoke(Array& ts) {
+  if (allowBespokeArrayLikes() &&
+      RO::EvalEmitBespokeTypeStructures &&
+      bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
+    auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
+    if (bespokeTS) return Array::attach(bespokeTS);
+  }
+  return ts;
+}
+
 Array resolveList(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   auto const sz = arr.size();
 
@@ -595,13 +607,13 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
     auto tv = wrapper.lookup(s_value);
     auto valueArr = tv.is_init() ? tvAsVariant(tv).toArray() : wrapper;
-    auto value = resolveTS(env, ctx, valueArr);
+    auto value = resolveTSImpl(env, ctx, valueArr);
 
     if (wrapper.exists(s_optional_shape_field)) {
       value.set(s_optional_shape_field, make_tv<KindOfBoolean>(true));
     }
 
-    newfields.set(key, Variant(value));
+    newfields.set(key, Variant(maybeMakeBespoke(value)));
   }
 
   return newfields;
@@ -877,13 +889,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
   if (alias) ts.set(s_alias, Variant(alias));
   if (typevarTypes) ts.set(s_typevar_types, Variant(typevarTypes));
 
-  if (allowBespokeArrayLikes()
-      && RO::EvalEmitBespokeTypeStructures
-      && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
-    auto const bespokeTS = bespoke::TypeStructure::MakeFromVanilla(ts.get());
-    if (bespokeTS) return Array::attach(bespokeTS);
-  }
-  return ts;
+  return maybeMakeBespoke(ts);
 }
 
 } // anonymous namespace

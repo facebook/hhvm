@@ -940,8 +940,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     }
     auto const ad = val->val().parr;
     if (!bespoke::TypeStructure::isValidTypeStructure(ad)) return val;
-
-    auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad);
+    auto const ts = bespoke::TypeStructure::MakeFromVanillaStatic(ad, true);
     return make_optional(make_tv<KindOfPersistentDict>(ts));
   };
 
@@ -1074,7 +1073,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   auto ts = te.typeStructure();
   if (RO::EvalEmitBespokeTypeStructures) {
     if (!ts.isNull() && bespoke::TypeStructure::isValidTypeStructure(ts.get())) {
-      auto const newTs = bespoke::TypeStructure::MakeFromVanillaStatic(ts.get());
+      auto const newTs = bespoke::TypeStructure::MakeFromVanillaStatic(ts.get(), true);
       ts = ArrNR{newTs};
     }
   }

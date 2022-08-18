@@ -97,6 +97,22 @@ vec(2) {
     int(2)
   }
 }
+string(8) "FooTuple"
+int(10)
+vec(2) {
+  dict(3) {
+    ["kind"]=>
+    int(4)
+    ["opaque"]=>
+    bool(true)
+    ["alias"]=>
+    string(9) "FooString"
+  }
+  dict(1) {
+    ["kind"]=>
+    int(9)
+  }
+}
 int(2)
 int(1)
 bool(true)

@@ -152,10 +152,11 @@ using Kind = HPHP::TypeStructure::Kind;
   void decRefFields();                                                  \
   bool containsField(const StringData* k) const;                        \
   bool checkInvariants() const;                                         \
+  bool checkBespokeChildren() const;                                    \
   static TypedValue tsNvGetStr(const T* tad, const StringData* k);      \
   static void scan(const T* tad, type_scan::Scanner& scanner);          \
   static void initializeFields(T* tad);                                 \
-  static bool setField(T* tad, StringData* k, TypedValue v);            \
+  static bool setField(T* tad, StringData* k, TypedValue v, bool nested); \
   static void convertToUncounted(T* tad, const MakeUncountedEnv& env);  \
   static void releaseUncounted(T* tad);                                 \
   static TypedValue getKeyFromPositionValue(const T* tad, int value);   \
@@ -196,13 +197,16 @@ struct TypeStructure : BespokeArray {
   static void InitializeLayouts();
   static LayoutIndex GetLayoutIndex();
   static bool isBespokeTypeStructure(const ArrayData* ad);
+  static bool isFullyBespokeTypeStructure(const ArrayData* ad);
 
   // returns whether an array that is not a bespoke type structure can be
   // converted into the bespoke version
   static bool isValidTypeStructure(const ArrayData* ad);
 
   static TypeStructure* MakeFromVanilla(ArrayData* ad, bool forceNonStatic = false);
-  static TypeStructure* MakeFromVanillaStatic(ArrayData* ad);
+  static TypeStructure* MakeFromVanillaStatic(ArrayData* ad, bool nested);
+  // MakeFromVanillaNested always creates a non-static array
+  static ArrayData* MakeFromVanillaNested(ArrayData* ad);
   static const TypeStructure* As(const ArrayData* ad);
   static TypeStructure* As(ArrayData* ad);
   static void OnSetEvalScalar(TypeStructure* tad);
@@ -251,7 +255,8 @@ struct TypeStructure : BespokeArray {
   BESPOKE_LAYOUT_FUNCTIONS(TypeStructure)
 #undef X
 
-  static bool setField(TypeStructure* tad, StringData* k, TypedValue v);
+  static bool setField(
+    TypeStructure* tad, StringData* k, TypedValue v, bool nested);
 
   bool nullable() const { return m_extra_lo8 & (1 << kNullableOffset); }
   bool soft() const     { return m_extra_lo8 & (1 << kSoftOffset); }
@@ -321,6 +326,8 @@ private:
 struct TSShape : TypeStructure {
   TSCHILDREN_METHODS(TSShape)
   static constexpr uint8_t kFieldsByte = kTSShapeFieldsByte;
+  ArrayData* fields() const { return m_fields; };
+  bool allowsUnknownFields() const { return m_allows_unknown_fields; }
 private:
   ArrayData* m_fields;
   bool m_allows_unknown_fields;
@@ -329,6 +336,7 @@ private:
 struct TSTuple : TypeStructure {
   TSCHILDREN_METHODS(TSTuple)
   static constexpr uint8_t kFieldsByte = kTSTupleFieldsByte;
+  ArrayData* elemTypes() const { return m_elem_types; }
 private:
   ArrayData* m_elem_types;
 };
@@ -336,6 +344,9 @@ private:
 struct TSFun : TypeStructure {
   TSCHILDREN_METHODS(TSFun)
   static constexpr uint8_t kFieldsByte = kTSFunFieldsByte;
+  ArrayData* paramTypes() const { return m_param_types; }
+  ArrayData* returnTypes() const { return m_return_type; }
+  ArrayData* variadicTypes() const { return m_variadic_type; }
 private:
   ArrayData* m_param_types;
   ArrayData* m_return_type;
@@ -345,6 +356,7 @@ private:
 struct TSTypevar : TypeStructure {
   TSCHILDREN_METHODS(TSTypevar)
   static constexpr uint8_t kFieldsByte = kTSTypevarFieldsByte;
+  StringData* name() const { return m_name; }
 private:
   StringData* m_name;
 };
@@ -356,7 +368,8 @@ private:
 struct TSWithGenericTypes : TypeStructure {
   TSCHILDREN_METHODS(TSWithGenericTypes)
   static constexpr uint8_t kFieldsByte = kTSGenericTypesFieldsByte;
-private:
+  ArrayData* genericTypes() const { return m_generic_types; }
+protected:
   ArrayData* m_generic_types;
 };
 
@@ -364,11 +377,12 @@ private:
  * TSWithClassishTypes should only contain the kinds as specified
  * in TYPE_STRUCTURE_CHILDREN_KINDS
  */
-struct TSWithClassishTypes : TypeStructure {
+struct TSWithClassishTypes : TSWithGenericTypes {
   TSCHILDREN_METHODS(TSWithClassishTypes)
   static constexpr uint8_t kFieldsByte = kTSClassishTypesFieldsByte;
+  StringData* classname() const { return m_classname; }
+  bool exact() const { return m_exact; }
 private:
-  ArrayData* m_generic_types;
   StringData* m_classname;
   bool m_exact;
 };

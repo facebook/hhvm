@@ -46,11 +46,11 @@ TempFile::TempFile(bool autoDelete /* = true */,
 }
 
 TempFile::~TempFile() {
-  closeImpl();
+  TempFile::close();
 }
 
 void TempFile::sweep() {
-  closeImpl();
+  TempFile::close();
   using std::string;
   m_rawName.~string();
   PlainFile::sweep();
@@ -62,10 +62,6 @@ bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
 }
 
 bool TempFile::close() {
-  return closeImpl();
-}
-
-bool TempFile::closeImpl() {
   bool ret = true;
   *s_pcloseRet = 0;
   if (!isClosed()) {
@@ -84,7 +80,7 @@ bool TempFile::closeImpl() {
     }
     m_rawName.clear();
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 

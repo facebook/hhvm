@@ -35,11 +35,11 @@ OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
 }
 
 OutputFile::~OutputFile() {
-  OutputFile::closeImpl();
+  OutputFile::close();
 }
 
 void OutputFile::sweep() {
-  closeImpl();
+  OutputFile::close();
   File::sweep();
 }
 
@@ -48,10 +48,6 @@ bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
 }
 
 bool OutputFile::close() {
-  return closeImpl();
-}
-
-bool OutputFile::closeImpl() {
   *s_pcloseRet = 0;
   if (!isClosed()) {
     setIsClosed(true);

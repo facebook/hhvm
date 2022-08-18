@@ -145,7 +145,7 @@ struct File : SweepableResourceData {
    */
   virtual bool open(const String& filename, const String& mode) = 0;
 
-  virtual bool close() = 0;
+  virtual bool close();
   virtual bool isClosed() const { return !m_data || m_data->m_closed; }
 
   /* Use:
@@ -257,7 +257,6 @@ struct File : SweepableResourceData {
   std::shared_ptr<FileData> getData() const { return m_data; }
 
 protected:
-  bool closeImpl();
   void sweep() override;
 
   void setIsLocal(bool isLocal) { m_data->m_isLocal = isLocal; }

@@ -189,8 +189,8 @@ File::File(bool nonblocking /* = true */,
 { }
 
 File::~File() {
-  if(m_data.unique()) {
-    closeImpl();
+  if (m_data.unique()) {
+    File::close();
   }
   m_data.reset();
 }
@@ -201,13 +201,13 @@ void File::sweep() {
   // sweep() is responsible for closing m_fd and any other non-request
   // resources it might have allocated.
   assertx(!valid());
-  File::closeImpl();
+  File::close();
   m_data.reset();
   m_wrapperType = nullptr;
   m_streamType = nullptr;
 }
 
-bool File::closeImpl() {
+bool File::close() {
   return m_data ? m_data->closeImpl() : true;
 }
 

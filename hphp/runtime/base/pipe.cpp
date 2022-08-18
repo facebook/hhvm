@@ -33,7 +33,7 @@ Pipe::Pipe() {
 }
 
 Pipe::~Pipe() {
-  closeImpl();
+  Pipe::close();
 }
 
 bool Pipe::open(const String& filename, const String& mode) {
@@ -58,10 +58,6 @@ bool Pipe::open(const String& filename, const String& mode) {
 }
 
 bool Pipe::close() {
-  return closeImpl();
-}
-
-bool Pipe::closeImpl() {
   bool ret = true;
   *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
@@ -77,7 +73,7 @@ bool Pipe::closeImpl() {
     setIsClosed(true);
     m_stream = nullptr;
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 

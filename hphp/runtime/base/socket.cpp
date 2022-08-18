@@ -107,7 +107,7 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
 Socket::~Socket() { }
 
 void Socket::sweep() {
-  Socket::closeImpl();
+  File::close();
   File::sweep();
   m_data = nullptr;
 }
@@ -120,10 +120,6 @@ void Socket::setError(int err) {
 
 bool Socket::open(const String& /*filename*/, const String& /*mode*/) {
   throw_not_supported(__func__, "cannot open socket this way");
-}
-
-bool Socket::close() {
-  return closeImpl();
 }
 
 void Socket::internalSetTimeout(struct timeval &tv) {

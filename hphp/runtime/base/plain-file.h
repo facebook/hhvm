@@ -66,8 +66,6 @@ protected:
   char *m_buffer;       // For setbuffer.  Needed to reduce mmap
                         // contention due to how glibc allocates memory
                         // for buffered io.
-
-  bool closeImpl();
 };
 
 /**
@@ -77,7 +75,7 @@ struct BuiltinFile : PlainFile {
   explicit BuiltinFile(FILE *stream);
   explicit BuiltinFile(int fd);
   ~BuiltinFile() override;
-  bool close() override;
+  bool close() final;
   void sweep() override;
 };
 static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),

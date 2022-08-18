@@ -67,7 +67,6 @@ struct Socket : File {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
   int64_t readImpl(char *buffer, int64_t length) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
   bool eof() override;

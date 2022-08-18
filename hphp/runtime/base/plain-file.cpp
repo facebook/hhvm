@@ -89,11 +89,11 @@ PlainFile::PlainFile(int fd, bool nonblocking,
 }
 
 PlainFile::~PlainFile() {
-  closeImpl();
+  PlainFile::close();
 }
 
 void PlainFile::sweep() {
-  closeImpl();
+  PlainFile::close();
   File::sweep();
 }
 
@@ -143,10 +143,6 @@ bool PlainFile::open(const String& filename, const String& mode) {
 }
 
 bool PlainFile::close() {
-  return closeImpl();
-}
-
-bool PlainFile::closeImpl() {
   bool ret = true;
   *s_pcloseRet = 0;
   if (!isClosed()) {
@@ -164,7 +160,7 @@ bool PlainFile::closeImpl() {
     setIsClosed(true);
     setFd(-1);
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 
@@ -304,7 +300,7 @@ bool BuiltinFile::close() {
   setIsClosed(true);
   m_stream = nullptr;
   setFd(-1);
-  File::closeImpl();
+  File::close();
   return status == 0;
 }
 

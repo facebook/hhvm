@@ -82,7 +82,7 @@ struct ZipStream : File {
 
   bool open(const String&, const String&) override { return false; }
 
-  bool close() override {
+  bool close() final {
     bool noError = true;
     if (!eof()) {
       if (zip_fclose(m_zipFile) != 0) {

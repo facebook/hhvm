@@ -7,18 +7,16 @@
  *
  *)
 
-(*
-  Please change the error map file if you have changed the error codes.
-  The file is at hphp/hack/test/errors/error_map.ml
- *)
-
 (*****************************************************************************)
 (* Error codes.
  * Each error has a unique number associated with it. The following modules
  * define the error code associated with each kind of error.
  * It is ok to extend the codes with new values, it is NOT OK to change the
  * value of an existing error to a different error code!
- * I added some comments to make that extra clear :-)
+ *
+ * When removing error codes, you should NOT delete them! Instead, prefer to
+ * comment them out as documentation and append DEPRECATED to the name.
+ * See below for plenty of examples.
  *)
 (*****************************************************************************)
 
@@ -31,6 +29,7 @@ module Parsing = struct
     (* | UnterminatedXhpCommentDEPRECATED [@value 1005] *)
     (* | CallTimePassByReferenceDEPRECATED [@value 1006] *)
     | XhpParsingError [@value 1007]
+  (* Add new Parsing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -109,10 +108,10 @@ module Naming = struct
     | DollardollarUnused [@value 2069]
     | IllegalMemberVariableClass [@value 2070]
     | TooFewTypeArguments [@value 2071]
-    (* | GotoLabelAlreadyDefinedDEPRECATED [@value 2072]
-       | GotoLabelUndefinedDEPRECATED [@value 2073]
-       | GotoLabelDefinedInFinallyDEPRECATED [@value 2074]
-       | GotoInvokedInFinallyDEPRECATED [@value 2075] *)
+    (* | GotoLabelAlreadyDefinedDEPRECATED [@value 2072] *)
+    (* | GotoLabelUndefinedDEPRECATED [@value 2073] *)
+    (* | GotoLabelDefinedInFinallyDEPRECATED [@value 2074] *)
+    (* | GotoInvokedInFinallyDEPRECATED [@value 2075] *)
     (* | DynamicClassPropertyNameInStrictModeDEPRECATED [@value 2076] *)
     | ThisAsLexicalVariable [@value 2077]
     | DynamicClassNameInStrictMode [@value 2078]
@@ -125,15 +124,23 @@ module Naming = struct
     (* | AttributeClassNameConflictDEPRECATED [@value 2085] *)
     | MethodNeedsVisibility [@value 2086]
     (* | ReferenceInStrictModeDEPRECATED [@value 2087] *)
+    (* | ReferenceInRxDEPRECATED [@value 2088] *)
     (* | DeclareStatementDEPRECATED [@value 2089] *)
+    (* | MisplacedRxOfScopeDEPRECATED [@value 2090] *)
+    (* | RxOfScopeAndExplicitRxDEPRECATED [@value 2091] *)
     (* | UnsupportedFeatureDEPRECATED [@value 2092] *)
     (* | TraitInterfaceConstructorPromoDEPRECATED [@value 2093] *)
     | NonstaticPropertyWithLSB [@value 2094]
     (* | ReferenceInAnonUseClauseDEPRECATED [@value 2095] *)
+    (* | RxMoveInvalidLocationDEPRECATED [@value 2096] *)
+    (* | MisplacedMutabilityHintDEPRECATED [@value 2097] *)
+    (* | MutabilityHintInNonRxDEPRECATED [@value 2098] *)
+    (* | InvalidReturnMutableHintDEPRECATED [@value 2099] *)
     (* | NoTparamsOnTypeConstsDEPRECATED [@value 2100] *)
     (* | PocketUniversesDuplicationDEPRECATED [@value 2101] *)
     | UnsupportedTraitUseAs [@value 2102]
     | UnsupportedInsteadOf [@value 2103]
+    (* | InvalidTraitUseAsVisibilityDEPRECATED [@value 2104] *)
     | InvalidFunPointer [@value 2105]
     | IllegalUseOfDynamicallyCallable [@value 2106]
     (* | PocketUniversesNotInClassDEPRECATED [@value 2107] *)
@@ -145,11 +152,12 @@ module Naming = struct
     | SelfInNonFinalFunctionPointer [@value 2113]
     | ClassMethNonFinalCLASS [@value 2114]
     | WildcardTypeParamDisallowed [@value 2115]
-    (* | CallingAssert [@value 2116] *)
+    (* | CallingAssertDEPRECATED [@value 2116] *)
     | InvalidWildcardContext [@value 2117]
     | ExplicitConsistentConstructor [@value 2118]
     | InvalidReqClass [@value 2119]
     | ModuleDeclarationOutsideAllowedFiles [@value 2120]
+  (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -192,29 +200,46 @@ module NastCheck = struct
     (* | OptionalShapeFieldsNotSupportedDEPRECATED [@value 3033] *)
     (* | AwaitNotAllowedDEPRECATED [@value 3034] *)
     (* | AsyncInInterfaceDEPRECATED [@value 3035] *)
-    (* | AwaitInCoroutine [@value 3036] *)
-    (* | YieldInCoroutine [@value 3037] *)
-    (* | SuspendOutsideOfCoroutine [@value 3038] *)
-    (* | SuspendInFinally [@value 3039] *)
+    (* | AwaitInCoroutineDEPRECATED [@value 3036] *)
+    (* | YieldInCoroutineDEPRECATED [@value 3037] *)
+    (* | SuspendOutsideOfCoroutineDEPRECATED [@value 3038] *)
+    (* | SuspendInFinallyDEPRECATED [@value 3039] *)
     (* | BreakContinueNNotSupportedDEPRECATED [@value 3040] *)
     | StaticMemoizedFunction [@value 3041]
-    (* | InoutParamsInCoroutine [@value 3042] *)
+    (* | InoutParamsInCoroutineDEPRECATED [@value 3042] *)
     | InoutParamsSpecial [@value 3043]
     (* | InoutParamsMixByrefDEPRECATED [@value 3044] *)
     | InoutParamsMemoize [@value 3045]
     (* | InoutParamsRetByRefDEPRECATED [@value 3046] *)
     | ReadingFromAppend [@value 3047]
     (* | ConstAttributeProhibitedDEPRECATED [@value 3048] *)
-    (* | RetiredError3049DEPRECATED [@value 3049] *)
-    (* | InoutArgumentBadExpr [@value 3050] *)
+    (* | GlobalInReactiveContextDEPRECATED [@value 3049] *)
+    (* | InoutArgumentBadExprDEPRECATED [@value 3050] *)
+    (* | MutableParamsOutsideOfSyncDEPRECATED [@value 3051] *)
+    (* | MutableAsyncMethodDEPRECATED [@value 3052] *)
+    (* | MutableMethodsMustBeReactiveDEPRECATED [@value 3053] *)
+    (* | MutableAttributeOnFunctionDEPRECATED [@value 3054] *)
+    (* | MutableReturnAnnotatedDeclsMustBeReactiveDEPRECATED [@value 3055] *)
     | IllegalDestructor [@value 3056]
-    (* | CoroutineInConstructor [@value 3065] *)
+    (* | ConditionallyReactiveFunctionDEPRECATED [@value 3057] *)
+    (* | MultipleConditionallyReactiveAnnotationsDEPRECATED [@value 3058] *)
+    (* | ConditionallyReactiveAnnotationInvalidArgumentsDEPRECATED [@value 3059] *)
+    (* | MissingReactivityForConditionDEPRECATED [@value 3060] *)
+    (* | MultipleReactivityAnnotationsDEPRECATED [@value 3061] *)
+    (* | RxIsEnabledInvalidLocationDEPRECATED [@value 3062] *)
+    (* | MaybeRxInvalidLocationDEPRECATED [@value 3063] *)
+    (* | NoOnlyrxIfRxfuncForRxIfArgsDEPRECATED [@value 3064] *)
+    (* | CoroutineInConstructorDEPRECATED [@value 3065] *)
     (* | IllegalReturnByRefDEPRECATED [@value 3066] *)
     (* | IllegalByRefExprDEPRECATED [@value 3067] *)
     (* | VariadicByRefParamDEPRECATED [@value 3068] *)
+    (* | MaybeMutableAttributeOnFunctionDEPRECATED [@value 3069] *)
+    (* | ConflictingMutableAndMaybeMutableAttributesDEPRECATED [@value 3070] *)
+    (* | MaybeMutableMethodsMustBeReactiveDEPRECATED [@value 3071] *)
     | RequiresFinalClass [@value 3072]
     | InterfaceUsesTrait [@value 3073]
     | NonstaticMethodInAbstractFinalClass [@value 3074]
+    (* | MutableOnStaticDEPRECATED [@value 3075] *)
     (* | ClassnameConstInstanceOfDEPRECATED [@value 3076] *)
     (* | ByRefParamOnConstructDEPRECATED [@value 3077] *)
     (* | ByRefDynamicCallDEPRECATED [@value 3078] *)
@@ -240,6 +265,7 @@ module NastCheck = struct
     (* | InternalOutsideModuleDEPRECATED [@value 3098] *)
     | InternalMemberInsidePublicTrait [@value 3099]
     | AttributeConflictingMemoize [@value 3100]
+  (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -248,7 +274,7 @@ end
 module Typing = struct
   type t =
     | InternalError [@value 0]
-    (* | AbstractClassFinalDEPRECATED [@value 4001] [@value 4001] *)
+    (* | AbstractClassFinalDEPRECATED [@value 4001] *)
     | UninstantiableClass [@value 4002]
     (* | AnonymousRecursiveDEPRECATED [@value 4003] *)
     (* | AnonymousRecursiveCallDEPRECATED [@value 4004] *)
@@ -364,7 +390,7 @@ module Typing = struct
     (* | VoidParameterDEPRECATED [@value 4114] *)
     | WrongExtendKind [@value 4115]
     | GenericUnify [@value 4116]
-    (* | NullsafeNotNeeded [@value 4117] *)
+    (* | NullsafeNotNeededDEPRECATED [@value 4117] *)
     | TrivialStrictEq [@value 4118]
     | VoidUsage [@value 4119]
     | DeclaredCovariant [@value 4120]
@@ -416,14 +442,14 @@ module Typing = struct
     | UnknownFieldDisallowedInShape [@value 4166]
     | NullableCast [@value 4167]
     (* | PassByRefAnnotationMissingDEPRECATED [@value 4168] *)
-    (* | NonCallArgumentInSuspend [@value 4169] *)
-    (* | NonCoroutineCallInSuspend [@value 4170] *)
-    (* | CoroutineCallOutsideOfSuspend [@value 4171] *)
-    (* | FunctionIsNotCoroutine [@value 4172] *)
-    (* | CoroutinnessMismatch [@value 4173] *)
-    (* | ExpectingAwaitableReturnTypeHint [@value 4174] *)
+    (* | NonCallArgumentInSuspendDEPRECATED [@value 4169] *)
+    (* | NonCoroutineCallInSuspendDEPRECATED [@value 4170] *)
+    (* | CoroutineCallOutsideOfSuspendDEPRECATED [@value 4171] *)
+    (* | FunctionIsNotCoroutineDEPRECATED [@value 4172] *)
+    (* | CoroutinnessMismatchDEPRECATED [@value 4173] *)
+    (* | ExpectingAwaitableReturnTypeHintDEPRECATED [@value 4174] *)
     (* | ReffinessInvariantDEPRECATED [@value 4175] *)
-    (* | DollardollarLvalue [@value 4176] *)
+    (* | DollardollarLvalueDEPRECATED [@value 4176] *)
     (* | StaticMethodOnInterfaceDEPRECATED [@value 4177] *)
     | DuplicateUsingVar [@value 4178]
     | IllegalDisposable [@value 4179]
@@ -447,39 +473,78 @@ module Typing = struct
     | SelfConstParentNot [@value 4197]
     (* | ParentConstSelfNotDEPRECATED [@value 4198] *)
     (* | PartiallyValidIsAsExpressionHintDEPRECATED [@value 4199] *)
+    (* | NonreactiveFunctionCallDEPRECATED [@value 4200] *)
+    (* | NonreactiveIndexingDEPRECATED [@value 4201] *)
+    (* | ObjSetReactiveDEPRECATED [@value 4202] *)
+    (* | FunReactivityMismatchDEPRECATED [@value 4203] *)
     | OverridingPropConstMismatch [@value 4204]
     | InvalidReturnDisposable [@value 4205]
     | InvalidDisposableReturnHint [@value 4206]
     | ReturnDisposableMismatch [@value 4207]
     | InoutArgumentBadType [@value 4208]
     (* | InconsistentUnsetDEPRECATED [@value 4209] *)
+    (* | ReassignMutableVarDEPRECATED [@value 4210] *)
+    (* | InvalidFreezeTargetDEPRECATED [@value 4211] *)
+    (* | InvalidFreezeUseDEPRECATED [@value 4212] *)
+    (* | FreezeInNonreactiveContextDEPRECATED [@value 4213] *)
+    (* | MutableCallOnImmutableDEPRECATED [@value 4214] *)
+    (* | MutableArgumentMismatchDEPRECATED [@value 4215] *)
+    (* | InvalidMutableReturnResultDEPRECATED [@value 4216] *)
+    (* | MutableReturnResultMismatchDEPRECATED [@value 4217] *)
+    (* | NonreactiveCallFromShallowDEPRECATED [@value 4218] *)
     | EnumTypeTypedefNonnull [@value 4219]
+    (* | RxEnabledInNonRxContextDEPRECATED [@value 4220] *)
+    (* | RxEnabledInLambdasDEPRECATED [@value 4221] *)
     | AmbiguousLambda [@value 4222]
     | EllipsisStrictMode [@value 4223]
     (* | UntypedLambdaStrictModeDEPRECATED [@value 4224] *)
     (* | BindingRefInArrayDEPRECATED [@value 4225] *)
     | OutputInWrongContext [@value 4226]
+    (* | SuperglobalInReactiveContextDEPRECATED [@value 4227] *)
     | StaticPropertyInWrongContext [@value 4228]
+    (* | StaticInReactiveContextDEPRECATED [@value 4229] *)
+    (* | GlobalInReactiveContextDEPRECATED [@value 4230] *)
     | WrongExpressionKindAttribute [@value 4231]
     (* | AttributeClassNoConstructorArgsDEPRECATED [@value 4232] *)
+    (* | InvalidTypeForOnlyrxIfRxfuncParameterDEPRECATED [@value 4233] *)
+    (* | MissingAnnotationForOnlyrxIfRxfuncParameterDEPRECATED [@value 4234] *)
+    (* | CannotReturnBorrowedValueAsImmutableDEPRECATED [@value 4235] *)
     | DeclOverrideMissingHint [@value 4236]
+    (* | InvalidConditionallyReactiveCallDEPRECATED [@value 4237] *)
     | ExtendSealed [@value 4238]
     (* | SealedFinalDEPRECATED [@value 4239] *)
     | ComparisonInvalidTypes [@value 4240]
     (* | OptionVoidDEPRECATED [@value 4241] *)
+    (* | MutableInNonreactiveContextDEPRECATED [@value 4242] *)
+    (* | InvalidArgumentOfRxMutableFunctionDEPRECATED [@value 4243] *)
+    (* | LetVarImmutabilityViolationDEPRECATED [@value 4244] *)
     (* | UnsealableDEPRECATED [@value 4245] *)
+    (* | ReturnVoidToRxMismatchDEPRECATED [@value 4246] *)
+    (* | ReturnsVoidToRxAsNonExpressionStatementDEPRECATED [@value 4247] *)
+    (* | NonawaitedAwaitableInReactiveContextDEPRECATED [@value 4248] *)
     | ShapesKeyExistsAlwaysTrue [@value 4249]
     | ShapesKeyExistsAlwaysFalse [@value 4250]
     | ShapesMethodAccessWithNonExistentField [@value 4251]
     | NonClassMember [@value 4252]
     (* | PassingArrayCellByRefDEPRECATED [@value 4253] *)
+    (* | CallSiteReactivityMismatchDEPRECATED [@value 4254] *)
+    (* | RxParameterConditionMismatchDEPRECATED [@value 4255] *)
     | AmbiguousObjectAccess [@value 4256]
     (* | ExtendPPLDEPRECATED [@value 4257] *)
+    (* | ReassignMaybeMutableVarDEPRECATED [@value 4258] *)
+    (* | MaybeMutableArgumentMismatchDEPRECATED [@value 4259] *)
+    (* | ImmutableArgumentMismatchDEPRECATED [@value 4260] *)
+    (* | ImmutableCallOnMutableDEPRECATED [@value 4261] *)
+    (* | InvalidCallMaybeMutableDEPRECATED [@value 4262] *)
+    (* | MutabilityMismatchDEPRECATED [@value 4263] *)
     (* | InvalidPPLCallDEPRECATED [@value 4264] *)
     (* | InvalidPPLStaticCallDEPRECATED [@value 4265] *)
     (* | TypeTestInLambdaDEPRECATED [@value 4266] *)
-    (* | InvalidTraversableInRx [@value 4267] *)
-    (* | CoroutineOutsideExperimental [@value 4271] *)
+    (* | InvalidTraversableInRxDEPRECATED [@value 4267] *)
+    (* | ReassignMutableThisDEPRECATED [@value 4268] *)
+    (* | MutableExpressionAsMultipleMutableArgumentsDEPRECATED [@value 4269] *)
+    (* | InvalidUnsetTargetInRxDEPRECATED [@value 4270] *)
+    (* | CoroutineOutsideExperimentalDEPRECATED [@value 4271] *)
     (* | PPLMethPointerDEPRECATED [@value 4272] *)
     (* | InvalidTruthinessTestDEPRECATED [@value 4273] *)
     | RePrefixedNonString [@value 4274]
@@ -491,19 +556,24 @@ module Typing = struct
     | InvalidSwitchCaseValueType [@value 4280]
     | StringCast [@value 4281]
     | BadLateInitOverride [@value 4282]
+    (* | EscapingMutableObjectDEPRECATED [@value 4283] *)
     | OverrideLSB [@value 4284]
     | MultipleConcreteDefs [@value 4285]
+    (* | MoveInNonreactiveContextDEPRECATED [@value 4286] *)
     | InvalidMoveUse [@value 4287]
     | InvalidMoveTarget [@value 4288]
     (* | IgnoredResultOfFreezeDEPRECATED [@value 4289] *)
     (* | IgnoredResultOfMoveDEPRECATED [@value 4290] *)
     | UnexpectedTy [@value 4291]
     | UnserializableType [@value 4292]
+    (* | InconsistentMutabilityDEPRECATED [@value 4293] *)
+    (* | InvalidMutabilityFlavorInAssignmentDEPRECATED [@value 4294] *)
     | OptionNull [@value 4295]
     | UnknownObjectMember [@value 4296]
     | UnknownType [@value 4297]
     | InvalidArrayKeyRead [@value 4298]
     (* | ReferenceExprNotFunctionArgDEPRECATED [@value 4299] *)
+    (* | RedundantRxConditionDEPRECATED [@value 4300] *)
     | RedeclaringMissingMethod [@value 4301]
     | InvalidEnforceableTypeArgument [@value 4302]
     | RequireArgsReify [@value 4303]
@@ -556,10 +626,10 @@ module Typing = struct
     (* | PocketUniversesTypingDEPRECATED [@value 4350] *)
     | RecordInitValueDoesNotMatchHint [@value 4351]
     | AbstractTconstNotAllowed [@value 4352]
-    (* | NewAbstractRecord [@value 4353] *)
-    (* | RecordMissingRequiredField [@value 4354] *)
-    (* | RecordUnknownField [@value 4355] *)
-    (* | CyclicRecordDef [@value 4356] *)
+    (* | NewAbstractRecordDEPRECATED [@value 4353] *)
+    (* | RecordMissingRequiredFieldDEPRECATED [@value 4354] *)
+    (* | RecordUnknownFieldDEPRECATED [@value 4355] *)
+    (* | CyclicRecordDefDEPRECATED [@value 4356] *)
     | InvalidDestructure [@value 4357]
     | StaticMethWithClassReifiedGeneric [@value 4358]
     | SplatArrayRequired [@value 4359]
@@ -567,7 +637,7 @@ module Typing = struct
     | ExceptionOccurred [@value 4361]
     | InvalidReifiedFunctionPointer [@value 4362]
     | BadFunctionPointerConstruction [@value 4363]
-    (* | NotARecord [@value 4364] *)
+    (* | NotARecordDEPRECATED [@value 4364] *)
     | TraitReuseInsideClass [@value 4365]
     | RedundantGeneric [@value 4366]
     (* | PocketUniversesInvalidUpperBoundsDEPRECATED [@value 4367] *)
@@ -613,14 +683,14 @@ module Typing = struct
     | ConsiderMethCaller [@value 4407]
     | EnumSupertypingReservedSyntax [@value 4408]
     | ReadonlyValueModified [@value 4409]
-    (* | ReadonlyVarMismatch [@value 4410] DEPRECATED *)
+    (* | ReadonlyVarMismatchDEPRECATED [@value 4410] *)
     | ReadonlyMismatch [@value 4411]
     | ExplicitReadonlyCast [@value 4412]
     | ReadonlyMethodCall [@value 4413]
     | StrictStrConcatTypeMismatch [@value 4414]
     | StrictStrInterpTypeMismatch [@value 4415]
     | InvalidMethCallerCallingConvention [@value 4416]
-    (* | UnsafeCast [@value 4417] DEPRECATED *)
+    (* | UnsafeCastDEPRECATED [@value 4417] *)
     | ReadonlyException [@value 4418]
     | InvalidTypeHint [@value 4419]
     | ExperimentalExpressionTrees [@value 4420]
@@ -662,12 +732,14 @@ module Typing = struct
     | HigherKindedTypesUnsupportedFeature [@value 4456]
     | ThisFinal [@value 4457]
     | ExactClassFinal [@value 4458]
-    (* | GlobalVariableWrite [@value 4459] *)
-    (* | GlobalVariableInFunctionCall [@value 4460] *)
+    (* | GlobalVariableWriteDEPRECATED [@value 4459] *)
+    (* | GlobalVariableInFunctionCallDEPRECATED [@value 4460] *)
+    (* | MemoizedFunctionCallDEPRECATED [@value 4461] *)
     | DiamondTraitProperty [@value 4462]
     | ConstructNotInstanceMethod [@value 4463]
     | InvalidMethCallerReadonlyReturn [@value 4464]
     | AbstractMemberInConcreteClass [@value 4465]
+  (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -681,6 +753,7 @@ module Init = struct
   type t =
     | ForwardCompatibilityNotCurrent [@value 8001]
     | ForwardCompatibilityBelowMinimum [@value 8002]
+  (* Add new Init codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -701,6 +774,7 @@ module GlobalWriteCheck = struct
     | GlobalVariableWrite [@value 11002]
     | GlobalVariableInFunctionCall [@value 11003]
     | GlobalVariableDirectRead [@value 11004]
+  (* Add new GlobalWriteCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

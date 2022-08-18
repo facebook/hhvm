@@ -61,14 +61,19 @@ fn main() -> Result<()> {
         None => Config::default(),
     }));
 
-    let src = std::fs::read_to_string(&opts.filename)?;
+    let src = std::fs::read_to_string(&opts.filename)
+        .with_context(|| format!("Failed to read input file {}", opts.filename.display()))?;
     let file = syn::parse_file(&src)?;
     let mut ocaml_src = convert::convert_file(config, &opts.filename, &file)?;
 
     if !opts.no_header {
         ocaml_src = attach_header(opts.regen_cmd.as_deref(), &ocaml_src);
     }
-    let mut ocaml_src = ocamlformat(opts.formatter.as_deref(), ocaml_src.into_bytes())?;
+    let mut ocaml_src = ocamlformat(
+        opts.formatter.as_deref(),
+        opts.out_path.as_deref().and_then(Path::parent),
+        ocaml_src.into_bytes(),
+    )?;
     if !opts.no_header {
         ocaml_src = signed_source::sign_file(&ocaml_src)?;
     }
@@ -104,14 +109,27 @@ fn attach_header(regen_cmd: Option<&str>, contents: &str) -> String {
     )
 }
 
-fn ocamlformat(formatter: Option<&str>, contents: Vec<u8>) -> Result<Vec<u8>> {
+fn ocamlformat(
+    formatter: Option<&str>,
+    out_dir: Option<&Path>,
+    contents: Vec<u8>,
+) -> Result<Vec<u8>> {
     let formatter = match formatter {
         None => return Ok(contents),
         Some(f) => f,
     };
+    // Even if we format the file on disk (i.e., at `opts.out_path`),
+    // ocamlformat won't look for an .ocamlformat file in the directory
+    // containing the file. It only looks up from the current working directory.
+    // There's a --root arg, but it doesn't seem to produce the same behavior.
+    let prev_dir = std::env::current_dir()?;
+    if let Some(out_dir) = out_dir {
+        std::env::set_current_dir(out_dir)?;
+    }
     let mut child = std::process::Command::new(formatter)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
         .arg("--impl")
         .arg("-")
         .spawn()?;
@@ -120,6 +138,9 @@ fn ocamlformat(formatter: Option<&str>, contents: Vec<u8>) -> Result<Vec<u8>> {
     let output = child.wait_with_output()?;
     if !output.status.success() {
         anyhow::bail!("Formatter failed:\n{:#?}", output);
+    }
+    if out_dir.is_some() {
+        std::env::set_current_dir(prev_dir)?;
     }
     Ok(output.stdout)
 }

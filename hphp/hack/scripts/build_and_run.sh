@@ -57,7 +57,7 @@ elif [ -e "${FBCODE_ROOT}/third-party/CMakeLists.txt" ]; then
   dune_build
 elif [ -e "${HPHP_ROOT}/facebook" ]; then
   # FB Buck
-  exec buck run "//hphp/hack/${HACK_SUBDIR}:${TARGET}" -- "${ARGS[@]}"
+  exec buck2 run "//hphp/hack/${HACK_SUBDIR}:${TARGET}" -- "${ARGS[@]}"
 else
   echo "Couldn't determine build system"
   exit 1

@@ -40,9 +40,8 @@ SocketData::SocketData(int port, int type, bool nonblocking)
 {}
 
 bool SocketData::closeImpl() {
-  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
-    *s_pcloseRet = ::close(getFd());
+    ::close(getFd());
     setIsClosed(true);
     setFd(-1);
   }

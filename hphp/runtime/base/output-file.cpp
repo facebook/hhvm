@@ -47,8 +47,7 @@ bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
   raise_fatal_error("cannot open a php://output file ");
 }
 
-bool OutputFile::close() {
-  *s_pcloseRet = 0;
+bool OutputFile::close(int*) {
   if (!isClosed()) {
     setIsClosed(true);
     return true;

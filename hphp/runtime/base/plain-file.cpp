@@ -142,21 +142,19 @@ bool PlainFile::open(const String& filename, const String& mode) {
   return true;
 }
 
-bool PlainFile::close() {
+bool PlainFile::close(int*) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_stream) {
-      *s_pcloseRet = fclose(m_stream);
+      ret = (fclose(m_stream) == 0);
       m_stream = nullptr;
     } else if (getFd() >= 0) {
-      *s_pcloseRet = ::close(getFd());
+      ret = (::close(getFd()) == 0);
     }
     if (m_buffer) {
       free(m_buffer);
       m_buffer = nullptr;
     }
-    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     setFd(-1);
   }
@@ -292,7 +290,7 @@ BuiltinFile::~BuiltinFile() {
   setFd(-1);
 }
 
-bool BuiltinFile::close() {
+bool BuiltinFile::close(int*) {
   if (m_stream == rl_stdfiles->stdin)  rl_stdfiles->stdin = nullptr;
   if (m_stream == rl_stdfiles->stdout) rl_stdfiles->stdout = nullptr;
   if (m_stream == rl_stdfiles->stderr) rl_stdfiles->stderr = nullptr;

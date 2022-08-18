@@ -38,7 +38,7 @@ struct BZ2File : File {
   virtual ~BZ2File();
 
   bool open(const String& filename, const String& mode) override;
-  bool close() final;
+  bool close(int* unused = nullptr) final;
   int64_t errnu();
   String errstr();
   Array error();

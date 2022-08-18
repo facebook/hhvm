@@ -101,7 +101,7 @@ int64_t BZ2File::writeImpl(const char * buf, int64_t length) {
   return BZ2_bzwrite(m_bzFile, (char *)buf, length);
 }
 
-bool BZ2File::close() {
+bool BZ2File::close(int*) {
   if (!isClosed()) {
     if (m_bzFile) {
       BZ2_bzclose(m_bzFile);

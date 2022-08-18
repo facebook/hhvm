@@ -68,8 +68,6 @@ FileData::~FileData() {
 
 StaticString File::s_resource_name("stream");
 
-RDS_LOCAL(int, s_pcloseRet);
-
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
@@ -207,7 +205,7 @@ void File::sweep() {
   m_streamType = nullptr;
 }
 
-bool File::close() {
+bool File::close(int*) {
   return m_data ? m_data->closeImpl() : true;
 }
 

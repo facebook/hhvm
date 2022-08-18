@@ -41,7 +41,7 @@ struct MemFile : File {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   bool open(const String& filename, const String& mode) override;
-  bool close() final;
+  bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
   int64_t writeImpl(const char *buffer, int64_t length) override;

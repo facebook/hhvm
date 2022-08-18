@@ -349,8 +349,9 @@ bool HHVM_FUNCTION(fclose,
 Variant HHVM_FUNCTION(pclose,
                       const Variant& handle) {
   CHECK_HANDLE(handle.toResource(), f);
-  CHECK_ERROR(f->close());
-  return *s_pcloseRet;
+  int pclose_ret = 0;
+  CHECK_ERROR(f->close(&pclose_ret));
+  return pclose_ret;
 }
 
 Variant HHVM_FUNCTION(fseek,

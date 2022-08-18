@@ -89,8 +89,7 @@ bool MemFile::open(const String& filename, const String& mode) {
   return false;
 }
 
-bool MemFile::close() {
-  *s_pcloseRet = 0;
+bool MemFile::close(int*) {
   setIsClosed(true);
   if (m_malloced && m_data) {
     free(m_data);

@@ -57,9 +57,8 @@ bool Pipe::open(const String& filename, const String& mode) {
   return true;
 }
 
-bool Pipe::close() {
+bool Pipe::close(int* raw_pclose_return) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
     assertx(m_stream);
 #ifdef _MSC_VER
@@ -68,10 +67,12 @@ bool Pipe::close() {
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
 #endif
-    *s_pcloseRet = pcloseRet;
+    if (raw_pclose_return) *raw_pclose_return = pcloseRet;
     ret = (pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
+  } else if (raw_pclose_return) {
+    *raw_pclose_return = 0;
   }
   File::close();
   return ret;

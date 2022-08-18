@@ -69,13 +69,11 @@ bool ZipFile::open(const String& filename, const String& mode) {
   return false;
 }
 
-bool ZipFile::close() {
+bool ZipFile::close(int*) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_gzFile) {
-      *s_pcloseRet = gzclose(m_gzFile);
-      ret = (*s_pcloseRet == 0);
+      ret = (gzclose(m_gzFile) == 0);
       m_gzFile = nullptr;
     }
     setIsClosed(true);

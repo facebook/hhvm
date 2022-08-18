@@ -61,15 +61,13 @@ bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
                              getName()).c_str());
 }
 
-bool TempFile::close() {
+bool TempFile::close(int*) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (!isClosed()) {
     assertx(valid());
     if (m_stream) {
-      *s_pcloseRet = ::fclose(m_stream);
+      ret = (::fclose(m_stream) == 0);
     }
-    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
     setFd(-1);

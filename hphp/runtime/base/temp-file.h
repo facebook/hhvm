@@ -38,7 +38,7 @@ struct TempFile : PlainFile {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() final;
+  bool close(int* unused = nullptr) final;
 
   Object await(uint16_t /*events*/, double /*timeout*/) override {
     SystemLib::throwExceptionObject(

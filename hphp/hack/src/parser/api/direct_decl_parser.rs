@@ -53,7 +53,7 @@ pub fn parse_decls<'a>(
     }
 }
 
-/// Parse decls for decls in compilation.
+/// Parse decls for bytecode compilation.
 /// - Returns decls without reference to the source text to avoid the need to
 ///   keep the source text in memory when caching decls.
 /// - Preserves user attributes in decls necessary for producing facts.

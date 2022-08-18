@@ -244,7 +244,7 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
     rec(env, h)
 }
 
-/// Warning: Experimental usage of decls in compilation.
+/// Warning: Experimental usage of decl-directed bytecode compilation.
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
 pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
@@ -256,7 +256,8 @@ pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
     use aast::ReifyKind;
     match hint.as_ref() {
         Hint_::Happly(Id(_, id), _) => {
-            // If the parameter itself is a reified type parameter, then we want to do the tparam check
+            // If the parameter itself is a reified type parameter, then we want to do the
+            // tparam check
             if is_reified_tparam(env, true, id).is_some()
                 || is_reified_tparam(env, false, id).is_some()
             {

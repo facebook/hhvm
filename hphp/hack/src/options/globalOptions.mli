@@ -493,29 +493,5 @@ val codes_not_raised_partial : t -> ISet.t
 
 val error_codes_treated_strictly : t -> ISet.t
 
-val glean_service : t -> string
-
-val glean_hostname : t -> string
-
-val glean_port : t -> int
-
-val glean_reponame : t -> string
-
-val symbol_write_ownership : t -> bool
-
-val symbol_write_root_path : t -> string
-
-val symbol_write_hhi_path : t -> string
-
-val symbol_write_ignore_paths : t -> string list
-
-val symbol_write_index_paths : t -> string list
-
-val symbol_write_index_paths_file : t -> string option
-
-val symbol_write_index_paths_file_output : t -> string option
-
-val symbol_write_include_hhi : t -> bool
-
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
 (* NOTE: set/getters for po_* options moved to ParserOptions *)

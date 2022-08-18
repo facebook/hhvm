@@ -624,28 +624,3 @@ let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
 let codes_not_raised_partial t = t.codes_not_raised_partial
 
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
-
-let glean_service t = t.glean_service
-
-let glean_hostname t = t.glean_hostname
-
-let glean_port t = t.glean_port
-
-let glean_reponame t = t.glean_reponame
-
-let symbol_write_ownership t = t.symbol_write_ownership
-
-let symbol_write_root_path t = t.symbol_write_root_path
-
-let symbol_write_hhi_path t = t.symbol_write_hhi_path
-
-let symbol_write_ignore_paths t = t.symbol_write_ignore_paths
-
-let symbol_write_index_paths t = t.symbol_write_index_paths
-
-let symbol_write_index_paths_file t = t.symbol_write_index_paths_file
-
-let symbol_write_index_paths_file_output t =
-  t.symbol_write_index_paths_file_output
-
-let symbol_write_include_hhi t = t.symbol_write_include_hhi

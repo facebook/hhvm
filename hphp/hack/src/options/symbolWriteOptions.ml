@@ -6,18 +6,24 @@
  *
  *)
 
+[@@@warning "-33"]
+
+open Hh_prelude
+
+[@@@warning "+33"]
+
 type t = GlobalOptions.t [@@deriving show]
 
-let root_path = GlobalOptions.symbol_write_root_path
+let root_path t = t.GlobalOptions.symbol_write_root_path
 
-let hhi_path = GlobalOptions.symbol_write_hhi_path
+let hhi_path t = t.GlobalOptions.symbol_write_hhi_path
 
-let ignore_paths = GlobalOptions.symbol_write_ignore_paths
+let ignore_paths t = t.GlobalOptions.symbol_write_ignore_paths
 
-let index_paths = GlobalOptions.symbol_write_index_paths
+let index_paths t = t.GlobalOptions.symbol_write_index_paths
 
-let include_hhi = GlobalOptions.symbol_write_include_hhi
+let include_hhi t = t.GlobalOptions.symbol_write_include_hhi
 
-let ownership = GlobalOptions.symbol_write_ownership
+let ownership t = t.GlobalOptions.symbol_write_ownership
 
 let default = GlobalOptions.default

@@ -24,7 +24,7 @@ pub fn convert_file(
     file: &syn::File,
 ) -> Result<String> {
     let defs = (file.items.iter())
-        .filter_map(|item| ItemConverter::convert_item(item).transpose())
+        .filter_map(|item| ItemConverter::convert_item(config, item).transpose())
         .collect::<Result<_>>()?;
     let file_stem = filename.file_stem().context("expected nonempty filename")?;
     let module_name = file_stem.to_str().context("non-UTF8 filename")?.to_owned();
@@ -40,27 +40,28 @@ pub fn convert_file(
 }
 
 struct ItemConverter {
+    config: &'static Config,
     tparams: Vec<String>,
 }
 
 impl ItemConverter {
-    fn convert_item(item: &syn::Item) -> Result<Option<Def>> {
+    fn convert_item(config: &'static Config, item: &syn::Item) -> Result<Option<Def>> {
         use syn::Item;
         match item {
             Item::Type(item) => {
-                let this = ItemConverter::new(&item.generics);
+                let this = ItemConverter::new(config, &item.generics);
                 Ok(Some(this.convert_item_type(item).with_context(|| {
                     format!("Failed to convert type {}", item.ident)
                 })?))
             }
             Item::Struct(item) => {
-                let this = ItemConverter::new(&item.generics);
+                let this = ItemConverter::new(config, &item.generics);
                 Ok(Some(this.convert_item_struct(item).with_context(|| {
                     format!("Failed to convert type {}", item.ident)
                 })?))
             }
             Item::Enum(item) => {
-                let this = ItemConverter::new(&item.generics);
+                let this = ItemConverter::new(config, &item.generics);
                 Ok(Some(this.convert_item_enum(item).with_context(|| {
                     format!("Failed to convert type {}", item.ident)
                 })?))
@@ -69,7 +70,7 @@ impl ItemConverter {
                 if let Some((_brace, items)) = &item.content {
                     let defs = items
                         .iter()
-                        .filter_map(|item| Self::convert_item(item).transpose())
+                        .filter_map(|item| Self::convert_item(config, item).transpose())
                         .collect::<Result<_>>()
                         .with_context(|| format!("Failed to convert module {}", item.ident))?;
                     Ok(Some(Def::Module(ir::Module {
@@ -84,12 +85,12 @@ impl ItemConverter {
         }
     }
 
-    fn new(generics: &syn::Generics) -> Self {
+    fn new(config: &'static Config, generics: &syn::Generics) -> Self {
         let tparams = generics
             .type_params()
             .map(|tparam| tparam.ident.to_string())
             .collect();
-        Self { tparams }
+        Self { config, tparams }
     }
 
     fn convert_item_type(self, item: &syn::ItemType) -> Result<Def> {
@@ -176,11 +177,39 @@ impl ItemConverter {
                 };
                 let fields = match &variant.fields {
                     syn::Fields::Unit => None,
-                    syn::Fields::Unnamed(fields) => Some(ir::VariantFields::Unnamed(
-                        (fields.unnamed.iter())
+                    syn::Fields::Unnamed(fields) => {
+                        let mut fields = (fields.unnamed.iter())
                             .map(|field| self.convert_type(&field.ty))
-                            .collect::<Result<_>>()?,
-                    )),
+                            .collect::<Result<Vec<_>>>()?;
+                        if variant_attrs.inline_tuple {
+                            assert_eq!(fields.len(), 1);
+                            let field = fields.pop().unwrap();
+                            match field {
+                                ir::Type::Path(mut path) => {
+                                    if path.targs.len() == 1
+                                        && self.config.is_transparent_type(&path)
+                                        && matches!(path.targs[0], ir::Type::Tuple(..))
+                                    {
+                                        if let Some(ir::Type::Tuple(tuple)) = path.targs.pop() {
+                                            Some(ir::VariantFields::Unnamed(tuple.elems))
+                                        } else {
+                                            unreachable!()
+                                        }
+                                    } else {
+                                        anyhow::bail!(
+                                            "Variant {} must have a single argument which is a tuple",
+                                            variant.ident.to_string()
+                                        )
+                                    }
+                                }
+                                ir::Type::Tuple(tuple) => {
+                                    Some(ir::VariantFields::Unnamed(tuple.elems))
+                                }
+                            }
+                        } else {
+                            Some(ir::VariantFields::Unnamed(fields))
+                        }
+                    }
                     syn::Fields::Named(fields) => Some(ir::VariantFields::Named(
                         (fields.named.iter())
                             .map(|field| {

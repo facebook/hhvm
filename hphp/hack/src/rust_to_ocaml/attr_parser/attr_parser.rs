@@ -5,6 +5,7 @@
 
 use syn::Meta::List;
 use syn::Meta::NameValue;
+use syn::Meta::Path;
 use syn::NestedMeta::Lit;
 use syn::NestedMeta::Meta;
 
@@ -13,6 +14,7 @@ static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
 static ATTR: &str = "attr";
 static NAME: &str = "name";
+static INLINE_TUPLE: &str = "inline_tuple";
 
 #[derive(Clone, Debug)]
 pub struct Attrs {
@@ -20,6 +22,7 @@ pub struct Attrs {
     pub prefix: Option<String>,
     pub attrs: Vec<String>,
     pub name: Option<String>,
+    pub inline_tuple: bool,
 }
 
 impl Attrs {
@@ -40,11 +43,12 @@ impl Attrs {
         Self::from_attributes(&field.attrs, AttrKind::Field)
     }
 
-    fn from_attributes(attrs: &[syn::Attribute], _kind: AttrKind) -> Self {
+    fn from_attributes(attrs: &[syn::Attribute], kind: AttrKind) -> Self {
         let doc = get_doc_comment(attrs);
         let mut prefix = None;
         let mut ocaml_attrs = vec![];
         let mut name = None;
+        let mut inline_tuple = false;
 
         for meta_item in attrs
             .iter()
@@ -74,6 +78,12 @@ impl Attrs {
                         name = Some(s.value());
                     }
                 }
+                // Parse `#[rust_to_ocaml(inline_tuple)]`
+                Meta(Path(word)) if word.is_ident(INLINE_TUPLE) => {
+                    // TODO: emit an error instead
+                    assert_eq!(kind, AttrKind::Variant);
+                    inline_tuple = true;
+                }
                 Meta(_meta_item) => {
                     // let path = meta_item
                     //     .path()
@@ -96,11 +106,12 @@ impl Attrs {
             prefix,
             attrs: ocaml_attrs,
             name,
+            inline_tuple,
         }
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum AttrKind {
     Container,
     Variant,

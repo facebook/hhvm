@@ -42,6 +42,7 @@ pub enum X<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     E(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     F(&'a (&'a str, &'a str)),
 }
 impl<'a> TrivialDrop for X<'a> {}

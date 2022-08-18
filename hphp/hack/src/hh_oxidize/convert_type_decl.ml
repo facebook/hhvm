@@ -528,11 +528,15 @@ let variant_constructor_declaration ?(box_fields = false) cd =
   | Pcstr_tuple types ->
     let tys = declare_constructor_arguments ~box_fields types in
     sprintf
-      "%s%s%s%s%s%s%s,\n"
+      "%s%s%s%s%s%s%s%s,\n"
       doc
       (rust_de_field_attr tys)
       attr
       name_attr
+      (if box_fields && List.length types > 1 then
+        "#[rust_to_ocaml(inline_tuple)]"
+      else
+        "")
       name
       (if List.is_empty tys then
         ""

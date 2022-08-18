@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38815ea3e18e83930cd2604e306e46c5>>
+// @generated SignedSource<<c7ffb18c01e989ae035fb6f09e9ed99e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -170,6 +170,7 @@ pub enum TshapeFieldName<'a> {
     TSFlitStr(&'a PosByteString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "TSFclass_const")]
+    #[rust_to_ocaml(inline_tuple)]
     TSFclassConst(&'a (PosId<'a>, PosString<'a>)),
 }
 impl<'a> TrivialDrop for TshapeFieldName<'a> {}
@@ -403,9 +404,11 @@ pub enum Ty_<'a> {
     Tthis,
     /// Either an object type or a type alias, ty list are the arguments
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tapply(&'a (PosId<'a>, &'a [&'a Ty<'a>])),
     /// 'With' refinements of the form `_ with { type T as int; type TC = C; }`.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Trefinement(&'a (&'a Ty<'a>, ClassRefinement<'a>)),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -465,6 +468,7 @@ pub enum Ty_<'a> {
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tshape(
         &'a (
             oxidized::typing_defs_core::ShapeKind,
@@ -478,6 +482,7 @@ pub enum Ty_<'a> {
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tgeneric(&'a (&'a str, &'a [&'a Ty<'a>])),
     /// Union type.
     /// The values that are members of this type are the union of the values
@@ -493,6 +498,7 @@ pub enum Ty_<'a> {
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Tvec_or_dict")]
+    #[rust_to_ocaml(inline_tuple)]
     TvecOrDict(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Name of class, name of type const, remaining names of type consts
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -530,14 +536,17 @@ pub enum Ty_<'a> {
     ///
     /// The second parameter is the list of type arguments to the type.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
     /// see dependent_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tdependent(&'a (DependentType, &'a Ty<'a>)),
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Tclass(&'a (PosId<'a>, Exact<'a>, &'a [&'a Ty<'a>])),
     /// The negation of the type in neg_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1002,8 +1011,10 @@ pub enum ConstraintType_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdestructure(&'a Destructure<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     TCunion(&'a (&'a Ty<'a>, ConstraintType<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     TCintersection(&'a (&'a Ty<'a>, ConstraintType<'a>)),
 }
 impl<'a> TrivialDrop for ConstraintType_<'a> {}

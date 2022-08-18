@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2ac170ef1c6b515e77a3491a4ddf06c9>>
+// @generated SignedSource<<4c9bc0c7d472cc57ccd73045350a63c4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -81,6 +81,7 @@ pub enum ShapeFieldName<'a> {
     SFlitStr(&'a PositionedByteString<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "SFclass_const")]
+    #[rust_to_ocaml(inline_tuple)]
     SFclassConst(&'a (Id<'a>, &'a Pstring<'a>)),
 }
 impl<'a> TrivialDrop for ShapeFieldName<'a> {}

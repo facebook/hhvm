@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b2a69234c763cba2062a1604e8bbe3c1>>
+// @generated SignedSource<<cbc989582b484c609da3e70bacdab484>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -148,22 +148,26 @@ pub enum Stmt_<Ex, En> {
     /// $bar = await g();
     /// await h();
     /// }
+    #[rust_to_ocaml(inline_tuple)]
     Awaitall(Box<(Vec<(Option<Lid>, Expr<Ex, En>)>, Block<Ex, En>)>),
     /// If statement.
     ///
     /// if ($foo) { ... } else { ... }
+    #[rust_to_ocaml(inline_tuple)]
     If(Box<(Expr<Ex, En>, Block<Ex, En>, Block<Ex, En>)>),
     /// Do-while loop.
     ///
     /// do {
     /// bar();
     /// } while($foo)
+    #[rust_to_ocaml(inline_tuple)]
     Do(Box<(Block<Ex, En>, Expr<Ex, En>)>),
     /// While loop.
     ///
     /// while ($foo) {
     /// bar();
     /// }
+    #[rust_to_ocaml(inline_tuple)]
     While(Box<(Expr<Ex, En>, Block<Ex, En>)>),
     /// Initialize a value that is automatically disposed of.
     ///
@@ -176,6 +180,7 @@ pub enum Stmt_<Ex, En> {
     ///
     /// for ($i = 0; $i < 100; $i++) { ... }
     /// for ($x = 0, $y = 0; ; $x++, $y++) { ... }
+    #[rust_to_ocaml(inline_tuple)]
     For(
         Box<(
             Vec<Expr<Ex, En>>,
@@ -194,6 +199,7 @@ pub enum Stmt_<Ex, En> {
     /// baz();
     /// break;
     /// }
+    #[rust_to_ocaml(inline_tuple)]
     Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)>),
     /// For-each loop.
     ///
@@ -201,6 +207,7 @@ pub enum Stmt_<Ex, En> {
     /// foreach ($items as $key => value) { ... }
     /// foreach ($items await as $item) { ... } // AsyncIterator<_>
     /// foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
+    #[rust_to_ocaml(inline_tuple)]
     Foreach(Box<(Expr<Ex, En>, AsExpr<Ex, En>, Block<Ex, En>)>),
     /// Try statement, with catch blocks and a finally block.
     ///
@@ -211,6 +218,7 @@ pub enum Stmt_<Ex, En> {
     /// } finally {
     /// baz();
     /// }
+    #[rust_to_ocaml(inline_tuple)]
     Try(Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)>),
     /// No-op, the empty statement.
     ///
@@ -229,6 +237,7 @@ pub enum Stmt_<Ex, En> {
     Markup(Box<Pstring>),
     /// Used in IFC to track type inference environments. Not user
     /// denotable.
+    #[rust_to_ocaml(inline_tuple)]
     AssertEnv(Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>),
 }
 
@@ -513,6 +522,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// darray['x' => 0, 'y' => 1]
     /// darray<string, int>['x' => 0, 'y' => 1]
+    #[rust_to_ocaml(inline_tuple)]
     Darray(
         Box<(
             Option<(Targ<Ex>, Targ<Ex>)>,
@@ -523,6 +533,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// varray['hello', 'world']
     /// varray<string>['hello', 'world']
+    #[rust_to_ocaml(inline_tuple)]
     Varray(Box<(Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>),
     /// Shape literal.
     ///
@@ -535,12 +546,14 @@ pub enum Expr_<Ex, En> {
     /// Set<string> {'foo', 'bar'}
     /// vec[1, 2]
     /// keyset[]
+    #[rust_to_ocaml(inline_tuple)]
     ValCollection(Box<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)>),
     /// Collection literal for key-value structures.
     ///
     /// dict['x' => 1, 'y' => 2]
     /// Map<int, string> {}
     /// ImmMap {}
+    #[rust_to_ocaml(inline_tuple)]
     KeyValCollection(Box<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)>),
     /// Null literal.
     ///
@@ -584,6 +597,7 @@ pub enum Expr_<Ex, En> {
     /// $foo[]
     /// $foo[$bar]
     #[rust_to_ocaml(name = "Array_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ArrayGet(Box<(Expr<Ex, En>, Option<Expr<Ex, En>>)>),
     /// Instance property or method access.
     /// prop_or_method is
@@ -598,6 +612,7 @@ pub enum Expr_<Ex, En> {
     ///   $foo?->bar()   // OG_nullsafe,   Is_method
     ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
     #[rust_to_ocaml(name = "Obj_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
     /// Static property or method access.
     ///
@@ -609,6 +624,7 @@ pub enum Expr_<Ex, En> {
     /// Foo::$bar();            // Is_method, name stored in local $bar
     /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
     #[rust_to_ocaml(name = "Class_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
@@ -626,6 +642,7 @@ pub enum Expr_<Ex, En> {
     /// parent::someStaticMeth()
     /// parent::someInstanceMeth()
     #[rust_to_ocaml(name = "Class_const")]
+    #[rust_to_ocaml(inline_tuple)]
     ClassConst(Box<(ClassId<Ex, En>, Pstring)>),
     /// Function or method call.
     ///
@@ -639,6 +656,7 @@ pub enum Expr_<Ex, En> {
     /// async { return 1; }
     /// // lowered to:
     /// (async () ==> { return 1; })()
+    #[rust_to_ocaml(inline_tuple)]
     Call(
         Box<(
             Expr<Ex, En>,
@@ -651,6 +669,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// foo_fun<>
     /// FooCls::meth<int>
+    #[rust_to_ocaml(inline_tuple)]
     FunctionPointer(Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)>),
     /// Integer literal.
     ///
@@ -689,6 +708,7 @@ pub enum Expr_<Ex, En> {
     /// Prefixed string literal. Only used for regular expressions.
     ///
     /// re"foo"
+    #[rust_to_ocaml(inline_tuple)]
     PrefixedString(Box<(String, Expr<Ex, En>)>),
     /// Yield expression. The enclosing function should have an Iterator
     /// return type.
@@ -721,6 +741,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// (int)$foo
     /// (string)$foo
+    #[rust_to_ocaml(inline_tuple)]
     Cast(Box<(Hint, Expr<Ex, En>)>),
     /// Unary operator.
     ///
@@ -728,10 +749,12 @@ pub enum Expr_<Ex, En> {
     /// -$foo
     /// +$foo
     /// $foo++
+    #[rust_to_ocaml(inline_tuple)]
     Unop(Box<(ast_defs::Uop, Expr<Ex, En>)>),
     /// Binary operator.
     ///
     /// $foo + $bar
+    #[rust_to_ocaml(inline_tuple)]
     Binop(Box<(ast_defs::Bop, Expr<Ex, En>, Expr<Ex, En>)>),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
@@ -744,30 +767,36 @@ pub enum Expr_<Ex, En> {
     /// pretty pointless to use pipes without $$.
     ///
     /// foo() |> bar(); // equivalent: foo(); bar();
+    #[rust_to_ocaml(inline_tuple)]
     Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>),
     /// Ternary operator, or elvis operator.
     ///
     /// $foo ? $bar : $baz // ternary
     /// $foo ?: $baz // elvis
+    #[rust_to_ocaml(inline_tuple)]
     Eif(Box<(Expr<Ex, En>, Option<Expr<Ex, En>>, Expr<Ex, En>)>),
     /// Is operator.
     ///
     /// $foo is SomeType
+    #[rust_to_ocaml(inline_tuple)]
     Is(Box<(Expr<Ex, En>, Hint)>),
     /// As operator.
     ///
     /// $foo as int
     /// $foo ?as int
+    #[rust_to_ocaml(inline_tuple)]
     As(Box<(Expr<Ex, En>, Hint, bool)>),
     /// Upcast operator.
     ///
     /// $foo : int
+    #[rust_to_ocaml(inline_tuple)]
     Upcast(Box<(Expr<Ex, En>, Hint)>),
     /// Instantiation.
     ///
     /// new Foo(1, 2);
     /// new Foo<int, T>();
     /// new Foo('blah', ...$rest);
+    #[rust_to_ocaml(inline_tuple)]
     New(
         Box<(
             ClassId<Ex, En>,
@@ -786,16 +815,19 @@ pub enum Expr_<Ex, En> {
     /// function(int $x): int { return $x; }
     /// function($x) use ($y) { return $y; }
     /// function($x): int use ($y, $z) { return $x + $y + $z; }
+    #[rust_to_ocaml(inline_tuple)]
     Efun(Box<(Fun_<Ex, En>, Vec<Lid>)>),
     /// Hack lambda. Captures variables automatically.
     ///
     /// $x ==> $x
     /// (int $x): int ==> $x + $other
     /// ($x, $y) ==> { return $x + $y; }
+    #[rust_to_ocaml(inline_tuple)]
     Lfun(Box<(Fun_<Ex, En>, Vec<Lid>)>),
     /// XHP expression. May contain interpolated expressions.
     ///
     /// <foo x="hello" y={$foo}>hello {$bar}</foo>
+    #[rust_to_ocaml(inline_tuple)]
     Xml(Box<(ClassName, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>),
     /// Include or require expression.
     ///
@@ -803,12 +835,14 @@ pub enum Expr_<Ex, En> {
     /// require_once('foo.php')
     /// include('foo.php')
     /// include_once('foo.php')
+    #[rust_to_ocaml(inline_tuple)]
     Import(Box<(ImportFlavor, Expr<Ex, En>)>),
     /// Collection literal.
     ///
     /// TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
     ///
     /// Vector {}
+    #[rust_to_ocaml(inline_tuple)]
     Collection(Box<(ClassName, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)>),
     /// Expression tree literal. Expression trees are not evaluated at
     /// runtime, but desugared to an expression representing the code.
@@ -840,6 +874,7 @@ pub enum Expr_<Ex, En> {
     ///
     /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
     #[rust_to_ocaml(name = "Method_id")]
+    #[rust_to_ocaml(inline_tuple)]
     MethodId(Box<(Expr<Ex, En>, Pstring)>),
     /// Instance method reference that can be called with an instance.
     ///
@@ -850,16 +885,19 @@ pub enum Expr_<Ex, En> {
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[rust_to_ocaml(name = "Method_caller")]
+    #[rust_to_ocaml(inline_tuple)]
     MethodCaller(Box<(ClassName, Pstring)>),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
     /// // equivalent: FooClass::some_static_meth<>
     #[rust_to_ocaml(name = "Smethod_id")]
+    #[rust_to_ocaml(inline_tuple)]
     SmethodId(Box<(ClassId<Ex, En>, Pstring)>),
     /// Pair literal.
     ///
     /// Pair {$foo, $bar}
+    #[rust_to_ocaml(inline_tuple)]
     Pair(Box<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)>),
     /// Expression tree splice expression. Only valid inside an
     /// expression tree literal (backticks). See also `ExpressionTree`.
@@ -870,6 +908,7 @@ pub enum Expr_<Ex, En> {
     /// Label used for enum classes.
     ///
     /// enum_name#label_name or #label_name
+    #[rust_to_ocaml(inline_tuple)]
     EnumClassLabel(Box<(Option<ClassName>, String)>),
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
@@ -903,6 +942,7 @@ pub enum Expr_<Ex, En> {
     ///            , None
     ///            )
     /// ```
+    #[rust_to_ocaml(inline_tuple)]
     Hole(Box<(Expr<Ex, En>, Ex, Ex, HoleSource)>),
 }
 
@@ -1854,6 +1894,7 @@ pub enum Def<Ex, En> {
     Stmt(Box<Stmt<Ex, En>>),
     Typedef(Box<Typedef<Ex, En>>),
     Constant(Box<Gconst<Ex, En>>),
+    #[rust_to_ocaml(inline_tuple)]
     Namespace(Box<(Sid, Vec<Def<Ex, En>>)>),
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
     SetNamespaceEnv(Box<Nsenv>),

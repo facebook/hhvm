@@ -37,6 +37,7 @@ use crate::*;
 pub enum IntList<'a> {
     Nil,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Cons(&'a (isize, &'a IntList<'a>)),
 }
 impl<'a> TrivialDrop for IntList<'a> {}

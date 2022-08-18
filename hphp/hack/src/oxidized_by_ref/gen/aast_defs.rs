@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<89ebbad1af8bed7d7e27a9445bacd5fd>>
+// @generated SignedSource<<64e48920129be964438599e6cc173c6b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -83,8 +83,10 @@ pub enum XhpChild<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildList(&'a [XhpChild<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     ChildUnary(&'a (XhpChild<'a>, oxidized::aast_defs::XhpChildOp)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     ChildBinary(&'a (XhpChild<'a>, XhpChild<'a>)),
 }
 impl<'a> TrivialDrop for XhpChild<'a> {}
@@ -231,6 +233,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Htuple(&'a [&'a Hint<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
@@ -255,19 +258,23 @@ pub enum Hint_<'a> {
     ///
     /// Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Haccess(&'a (&'a Hint<'a>, &'a [Sid<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hsoft(&'a Hint<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Hrefinement(&'a (&'a Hint<'a>, &'a [Refinement<'a>])),
     Hany,
     Herr,
     Hmixed,
     Hnonnull,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Habstr(&'a (&'a str, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Hvec_or_dict")]
+    #[rust_to_ocaml(inline_tuple)]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hprim(&'a oxidized::aast_defs::Tprim),
@@ -309,8 +316,10 @@ pub use oxidized::aast_defs::Tprim;
 #[repr(C, u8)]
 pub enum Refinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rctx(&'a (Sid<'a>, CtxRefinement<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rtype(&'a (Sid<'a>, TypeRefinement<'a>)),
 }
 impl<'a> TrivialDrop for Refinement<'a> {}

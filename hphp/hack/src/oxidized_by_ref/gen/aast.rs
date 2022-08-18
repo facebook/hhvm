@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<655820e31ec0b324e972d524b4f07726>>
+// @generated SignedSource<<161290cf3f3750155a52d8319be84374>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -171,6 +171,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// await h();
     /// }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Awaitall(
         &'a (
             &'a [(Option<&'a Lid<'a>>, &'a Expr<'a, Ex, En>)],
@@ -181,6 +182,7 @@ pub enum Stmt_<'a, Ex, En> {
     ///
     /// if ($foo) { ... } else { ... }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     If(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -194,6 +196,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// bar();
     /// } while($foo)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Do(&'a (&'a Block<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// While loop.
     ///
@@ -201,6 +204,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// bar();
     /// }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     While(&'a (&'a Expr<'a, Ex, En>, &'a Block<'a, Ex, En>)),
     /// Initialize a value that is automatically disposed of.
     ///
@@ -215,6 +219,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// for ($i = 0; $i < 100; $i++) { ... }
     /// for ($x = 0, $y = 0; ; $x++, $y++) { ... }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     For(
         &'a (
             &'a [&'a Expr<'a, Ex, En>],
@@ -234,6 +239,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// break;
     /// }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Switch(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -248,6 +254,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// foreach ($items await as $item) { ... } // AsyncIterator<_>
     /// foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Foreach(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -265,6 +272,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// baz();
     /// }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Try(
         &'a (
             &'a Block<'a, Ex, En>,
@@ -292,6 +300,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// Used in IFC to track type inference environments. Not user
     /// denotable.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     AssertEnv(
         &'a (
             oxidized::aast::EnvAnnot,
@@ -359,12 +368,15 @@ pub enum AsExpr<'a, Ex, En> {
     AsV(&'a Expr<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "As_kv")]
+    #[rust_to_ocaml(inline_tuple)]
     AsKv(&'a (&'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Await_as_v")]
+    #[rust_to_ocaml(inline_tuple)]
     AwaitAsV(&'a (&'a Pos<'a>, &'a Expr<'a, Ex, En>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Await_as_kv")]
+    #[rust_to_ocaml(inline_tuple)]
     AwaitAsKv(&'a (&'a Pos<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for AsExpr<'a, Ex, En> {}
@@ -514,6 +526,7 @@ pub enum CollectionTarg<'a, Ex> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CollectionTV(&'a Targ<'a, Ex>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     CollectionTKV(&'a (&'a Targ<'a, Ex>, &'a Targ<'a, Ex>)),
 }
 impl<'a, Ex: TrivialDrop> TrivialDrop for CollectionTarg<'a, Ex> {}
@@ -544,6 +557,7 @@ pub enum FunctionPtrId<'a, Ex, En> {
     FPId(&'a Sid<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "FP_class_const")]
+    #[rust_to_ocaml(inline_tuple)]
     FPClassConst(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunctionPtrId<'a, Ex, En> {}
@@ -634,6 +648,7 @@ pub enum Expr_<'a, Ex, En> {
     /// darray['x' => 0, 'y' => 1]
     /// darray<string, int>['x' => 0, 'y' => 1]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Darray(
         &'a (
             Option<&'a (&'a Targ<'a, Ex>, &'a Targ<'a, Ex>)>,
@@ -645,6 +660,7 @@ pub enum Expr_<'a, Ex, En> {
     /// varray['hello', 'world']
     /// varray<string>['hello', 'world']
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Varray(&'a (Option<&'a Targ<'a, Ex>>, &'a [&'a Expr<'a, Ex, En>])),
     /// Shape literal.
     ///
@@ -659,6 +675,7 @@ pub enum Expr_<'a, Ex, En> {
     /// vec[1, 2]
     /// keyset[]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     ValCollection(
         &'a (
             oxidized::aast::VcKind,
@@ -672,6 +689,7 @@ pub enum Expr_<'a, Ex, En> {
     /// Map<int, string> {}
     /// ImmMap {}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     KeyValCollection(
         &'a (
             oxidized::aast::KvcKind,
@@ -726,6 +744,7 @@ pub enum Expr_<'a, Ex, En> {
     /// $foo[$bar]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Array_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ArrayGet(&'a (&'a Expr<'a, Ex, En>, Option<&'a Expr<'a, Ex, En>>)),
     /// Instance property or method access.
     /// prop_or_method is
@@ -741,6 +760,7 @@ pub enum Expr_<'a, Ex, En> {
     ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Obj_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ObjGet(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -760,6 +780,7 @@ pub enum Expr_<'a, Ex, En> {
     /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Class_get")]
+    #[rust_to_ocaml(inline_tuple)]
     ClassGet(
         &'a (
             &'a ClassId<'a, Ex, En>,
@@ -784,6 +805,7 @@ pub enum Expr_<'a, Ex, En> {
     /// parent::someInstanceMeth()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Class_const")]
+    #[rust_to_ocaml(inline_tuple)]
     ClassConst(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Function or method call.
     ///
@@ -798,6 +820,7 @@ pub enum Expr_<'a, Ex, En> {
     /// // lowered to:
     /// (async () ==> { return 1; })()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Call(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -811,6 +834,7 @@ pub enum Expr_<'a, Ex, En> {
     /// foo_fun<>
     /// FooCls::meth<int>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     FunctionPointer(&'a (FunctionPtrId<'a, Ex, En>, &'a [&'a Targ<'a, Ex>])),
     /// Integer literal.
     ///
@@ -854,6 +878,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// re"foo"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     PrefixedString(&'a (&'a str, &'a Expr<'a, Ex, En>)),
     /// Yield expression. The enclosing function should have an Iterator
     /// return type.
@@ -892,6 +917,7 @@ pub enum Expr_<'a, Ex, En> {
     /// (int)$foo
     /// (string)$foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Cast(&'a (&'a Hint<'a>, &'a Expr<'a, Ex, En>)),
     /// Unary operator.
     ///
@@ -900,11 +926,13 @@ pub enum Expr_<'a, Ex, En> {
     /// +$foo
     /// $foo++
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Unop(&'a (oxidized::ast_defs::Uop, &'a Expr<'a, Ex, En>)),
     /// Binary operator.
     ///
     /// $foo + $bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Binop(
         &'a (
             ast_defs::Bop<'a>,
@@ -924,12 +952,14 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// foo() |> bar(); // equivalent: foo(); bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Pipe(&'a (&'a Lid<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// Ternary operator, or elvis operator.
     ///
     /// $foo ? $bar : $baz // ternary
     /// $foo ?: $baz // elvis
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Eif(
         &'a (
             &'a Expr<'a, Ex, En>,
@@ -941,17 +971,20 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// $foo is SomeType
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Is(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>)),
     /// As operator.
     ///
     /// $foo as int
     /// $foo ?as int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     As(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>, bool)),
     /// Upcast operator.
     ///
     /// $foo : int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Upcast(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>)),
     /// Instantiation.
     ///
@@ -959,6 +992,7 @@ pub enum Expr_<'a, Ex, En> {
     /// new Foo<int, T>();
     /// new Foo('blah', ...$rest);
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     New(
         &'a (
             &'a ClassId<'a, Ex, En>,
@@ -978,6 +1012,7 @@ pub enum Expr_<'a, Ex, En> {
     /// function($x) use ($y) { return $y; }
     /// function($x): int use ($y, $z) { return $x + $y + $z; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Efun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
     /// Hack lambda. Captures variables automatically.
     ///
@@ -985,11 +1020,13 @@ pub enum Expr_<'a, Ex, En> {
     /// (int $x): int ==> $x + $other
     /// ($x, $y) ==> { return $x + $y; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Lfun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
     /// XHP expression. May contain interpolated expressions.
     ///
     /// <foo x="hello" y={$foo}>hello {$bar}</foo>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Xml(
         &'a (
             &'a ClassName<'a>,
@@ -1004,6 +1041,7 @@ pub enum Expr_<'a, Ex, En> {
     /// include('foo.php')
     /// include_once('foo.php')
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Import(&'a (oxidized::aast::ImportFlavor, &'a Expr<'a, Ex, En>)),
     /// Collection literal.
     ///
@@ -1011,6 +1049,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// Vector {}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Collection(
         &'a (
             &'a ClassName<'a>,
@@ -1052,6 +1091,7 @@ pub enum Expr_<'a, Ex, En> {
     /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Method_id")]
+    #[rust_to_ocaml(inline_tuple)]
     MethodId(&'a (&'a Expr<'a, Ex, En>, &'a Pstring<'a>)),
     /// Instance method reference that can be called with an instance.
     ///
@@ -1063,6 +1103,7 @@ pub enum Expr_<'a, Ex, En> {
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Method_caller")]
+    #[rust_to_ocaml(inline_tuple)]
     MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
     /// Static method reference.
     ///
@@ -1070,11 +1111,13 @@ pub enum Expr_<'a, Ex, En> {
     /// // equivalent: FooClass::some_static_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Smethod_id")]
+    #[rust_to_ocaml(inline_tuple)]
     SmethodId(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Pair literal.
     ///
     /// Pair {$foo, $bar}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Pair(
         &'a (
             Option<&'a (&'a Targ<'a, Ex>, &'a Targ<'a, Ex>)>,
@@ -1093,6 +1136,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// enum_name#label_name or #label_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     EnumClassLabel(&'a (Option<&'a ClassName<'a>>, &'a str)),
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
@@ -1127,6 +1171,7 @@ pub enum Expr_<'a, Ex, En> {
     ///            )
     /// ```
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Hole(&'a (&'a Expr<'a, Ex, En>, Ex, Ex, HoleSource<'a>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Expr_<'a, Ex, En> {}
@@ -1340,6 +1385,7 @@ pub enum Afield<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     AFvalue(&'a Expr<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     AFkvalue(&'a (&'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Afield<'a, Ex, En> {}
@@ -2337,6 +2383,7 @@ pub enum Def<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Constant(&'a Gconst<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Namespace(&'a (Sid<'a>, &'a [Def<'a, Ex, En>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     NamespaceUse(&'a [(oxidized::aast::NsKind, Sid<'a>, Sid<'a>)]),

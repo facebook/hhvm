@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b7523f6fb9201fa0d63354e409dc42c>>
+// @generated SignedSource<<0952f354392e00a90ec0408e24e2e9ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -81,6 +81,7 @@ pub use oxidized::typing_reason::BlameSource;
 #[repr(C, u8)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Blame(&'a (&'a pos::Pos<'a>, oxidized::typing_reason::BlameSource)),
 }
 impl<'a> TrivialDrop for Blame<'a> {}
@@ -116,6 +117,7 @@ pub enum T_<'a> {
     /// array or string. Position of indexing,
     /// reason for the indexed type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Ridx(&'a (&'a pos::Pos<'a>, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Ridx_vector")]
@@ -138,6 +140,7 @@ pub enum T_<'a> {
     /// pos, arg float typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rarith_ret_float")]
+    #[rust_to_ocaml(inline_tuple)]
     RarithRetFloat(
         &'a (
             &'a pos::Pos<'a>,
@@ -148,6 +151,7 @@ pub enum T_<'a> {
     /// pos, arg num typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rarith_ret_num")]
+    #[rust_to_ocaml(inline_tuple)]
     RarithRetNum(
         &'a (
             &'a pos::Pos<'a>,
@@ -188,9 +192,11 @@ pub enum T_<'a> {
     RnoReturnAsync(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rret_fun_kind")]
+    #[rust_to_ocaml(inline_tuple)]
     RretFunKind(&'a (&'a pos::Pos<'a>, oxidized::ast_defs::FunKind)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rret_fun_kind_from_decl")]
+    #[rust_to_ocaml(inline_tuple)]
     RretFunKindFromDecl(&'a (&'a pos_or_decl::PosOrDecl<'a>, oxidized::ast_defs::FunKind)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rhint(&'a pos_or_decl::PosOrDecl<'a>),
@@ -215,11 +221,14 @@ pub enum T_<'a> {
     RyieldSend(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rlost_info")]
+    #[rust_to_ocaml(inline_tuple)]
     RlostInfo(&'a (&'a str, T_<'a>, Blame<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rformat(&'a (&'a pos::Pos<'a>, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rclass_class")]
+    #[rust_to_ocaml(inline_tuple)]
     RclassClass(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Runknown_class")]
@@ -233,13 +242,16 @@ pub enum T_<'a> {
     /// splat pos, fun def pos, number of args before splat
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Runpack_param")]
+    #[rust_to_ocaml(inline_tuple)]
     RunpackParam(&'a (&'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>, isize)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rinout_param")]
     RinoutParam(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rinstantiate(&'a (T_<'a>, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rtypeconst(
         &'a (
             T_<'a>,
@@ -250,9 +262,11 @@ pub enum T_<'a> {
     ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rtype_access")]
+    #[rust_to_ocaml(inline_tuple)]
     RtypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a lazy::Lazy<&'a str>)])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rexpr_dep_type")]
+    #[rust_to_ocaml(inline_tuple)]
     RexprDepType(
         &'a (
             T_<'a>,
@@ -268,6 +282,7 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "Rtconst_no_cstr")]
     RtconstNoCstr(&'a PosId<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rpredicated(&'a (&'a pos::Pos<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Ris(&'a pos::Pos<'a>),
@@ -298,40 +313,50 @@ pub enum T_<'a> {
     RsetElement(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rmissing_optional_field")]
+    #[rust_to_ocaml(inline_tuple)]
     RmissingOptionalField(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Runset_field")]
+    #[rust_to_ocaml(inline_tuple)]
     RunsetField(&'a (&'a pos::Pos<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rcontravariant_generic")]
+    #[rust_to_ocaml(inline_tuple)]
     RcontravariantGeneric(&'a (T_<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rinvariant_generic")]
+    #[rust_to_ocaml(inline_tuple)]
     RinvariantGeneric(&'a (T_<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rregex(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rimplicit_upper_bound")]
+    #[rust_to_ocaml(inline_tuple)]
     RimplicitUpperBound(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rtype_variable")]
     RtypeVariable(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rtype_variable_generics")]
+    #[rust_to_ocaml(inline_tuple)]
     RtypeVariableGenerics(&'a (&'a pos::Pos<'a>, &'a str, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rglobal_type_variable_generics")]
+    #[rust_to_ocaml(inline_tuple)]
     RglobalTypeVariableGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rsolve_fail")]
     RsolveFail(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rcstr_on_generics")]
+    #[rust_to_ocaml(inline_tuple)]
     RcstrOnGenerics(&'a (&'a pos_or_decl::PosOrDecl<'a>, PosId<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rlambda_param")]
+    #[rust_to_ocaml(inline_tuple)]
     RlambdaParam(&'a (&'a pos::Pos<'a>, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     Rshape(&'a (&'a pos::Pos<'a>, &'a str)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Renforceable(&'a pos_or_decl::PosOrDecl<'a>),
@@ -371,9 +396,11 @@ pub enum T_<'a> {
     RsupportDynamicType(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rdynamic_partial_enforcement")]
+    #[rust_to_ocaml(inline_tuple)]
     RdynamicPartialEnforcement(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Rrigid_tvar_escape")]
+    #[rust_to_ocaml(inline_tuple)]
     RrigidTvarEscape(&'a (&'a pos::Pos<'a>, &'a str, &'a str, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
@@ -420,6 +447,7 @@ pub enum Ureason<'a> {
     URyield,
     /// Name of XHP class, Name of XHP attribute
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
     URxhp(&'a (&'a str, &'a str)),
     #[rust_to_ocaml(name = "URxhp_spread")]
     URxhpSpread,

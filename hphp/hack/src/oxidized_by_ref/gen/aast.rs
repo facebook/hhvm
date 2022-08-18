@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<161290cf3f3750155a52d8319be84374>>
+// @generated SignedSource<<2986d7d1b25b1b225077b0ef5e2b97ea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -124,20 +124,20 @@ arena_deserializer::impl_deserialize_in_arena!(Stmt<'arena, Ex, En>);
 pub enum Stmt_<'a, Ex, En> {
     /// Marker for a switch statement that falls through.
     ///
-    /// // FALLTHROUGH
+    ///     // FALLTHROUGH
     Fallthrough,
     /// Standalone expression.
     ///
-    /// 1 + 2;
+    ///     1 + 2;
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Expr(&'a Expr<'a, Ex, En>),
     /// Break inside a loop or switch statement.
     ///
-    /// break;
+    ///     break;
     Break,
     /// Continue inside a loop or switch statement.
     ///
-    /// continue;
+    ///     continue;
     Continue,
     /// Throw an exception.
     ///
@@ -146,15 +146,15 @@ pub enum Stmt_<'a, Ex, En> {
     Throw(&'a Expr<'a, Ex, En>),
     /// Return, with an optional value.
     ///
-    /// return;
-    /// return $foo;
+    ///     return;
+    ///     return $foo;
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Return(Option<&'a Expr<'a, Ex, En>>),
     /// Yield break, terminating the current generator. This behaves like
     /// return; but is more explicit, and ensures the function is treated
     /// as a generator.
     ///
-    /// yield break;
+    ///     yield break;
     #[rust_to_ocaml(name = "Yield_break")]
     YieldBreak,
     /// Concurrent block. All the await expressions are awaited at the
@@ -165,11 +165,11 @@ pub enum Stmt_<'a, Ex, En> {
     /// and the block assigns the temporary variables back to the locals.
     /// { $foo = __tmp$1; $bar = __tmp$2; }
     ///
-    /// concurrent {
-    /// $foo = await f();
-    /// $bar = await g();
-    /// await h();
-    /// }
+    ///     concurrent {
+    ///       $foo = await f();
+    ///       $bar = await g();
+    ///       await h();
+    ///     }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Awaitall(
@@ -180,7 +180,7 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// If statement.
     ///
-    /// if ($foo) { ... } else { ... }
+    ///     if ($foo) { ... } else { ... }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     If(
@@ -192,32 +192,32 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// Do-while loop.
     ///
-    /// do {
-    /// bar();
-    /// } while($foo)
+    ///     do {
+    ///       bar();
+    ///     } while($foo)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Do(&'a (&'a Block<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// While loop.
     ///
-    /// while ($foo) {
-    /// bar();
-    /// }
+    ///     while ($foo) {
+    ///       bar();
+    ///     }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     While(&'a (&'a Expr<'a, Ex, En>, &'a Block<'a, Ex, En>)),
     /// Initialize a value that is automatically disposed of.
     ///
-    /// using $foo = bar(); // disposed at the end of the function
-    /// using ($foo = bar(), $baz = quux()) {} // disposed after the block
+    ///     using $foo = bar(); // disposed at the end of the function
+    ///     using ($foo = bar(), $baz = quux()) {} // disposed after the block
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Using(&'a UsingStmt<'a, Ex, En>),
     /// For loop. The initializer and increment parts can include
     /// multiple comma-separated statements. The termination condition is
     /// optional.
     ///
-    /// for ($i = 0; $i < 100; $i++) { ... }
-    /// for ($x = 0, $y = 0; ; $x++, $y++) { ... }
+    ///     for ($i = 0; $i < 100; $i++) { ... }
+    ///     for ($x = 0, $y = 0; ; $x++, $y++) { ... }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     For(
@@ -230,14 +230,14 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// Switch statement.
     ///
-    /// switch ($foo) {
-    /// case X:
-    /// bar();
-    /// break;
-    /// default:
-    /// baz();
-    /// break;
-    /// }
+    ///     switch ($foo) {
+    ///       case X:
+    ///         bar();
+    ///         break;
+    ///       default:
+    ///         baz();
+    ///         break;
+    ///     }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Switch(
@@ -249,10 +249,10 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// For-each loop.
     ///
-    /// foreach ($items as $item) { ... }
-    /// foreach ($items as $key => value) { ... }
-    /// foreach ($items await as $item) { ... } // AsyncIterator<_>
-    /// foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
+    ///     foreach ($items as $item) { ... }
+    ///     foreach ($items as $key => value) { ... }
+    ///     foreach ($items await as $item) { ... } // AsyncIterator<_>
+    ///     foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Foreach(
@@ -264,13 +264,13 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// Try statement, with catch blocks and a finally block.
     ///
-    /// try {
-    /// foo();
-    /// } catch (SomeException $e) {
-    /// bar();
-    /// } finally {
-    /// baz();
-    /// }
+    ///     try {
+    ///       foo();
+    ///     } catch (SomeException $e) {
+    ///       bar();
+    ///     } finally {
+    ///       baz();
+    ///     }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Try(
@@ -282,19 +282,19 @@ pub enum Stmt_<'a, Ex, En> {
     ),
     /// No-op, the empty statement.
     ///
-    /// {}
-    /// while (true) ;
-    /// if ($foo) {} // the else is Noop here
+    ///     {}
+    ///     while (true) ;
+    ///     if ($foo) {} // the else is Noop here
     Noop,
     /// Block, a list of statements in curly braces.
     ///
-    /// { $foo = 42; }
+    ///     { $foo = 42; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Block(&'a Block<'a, Ex, En>),
     /// The mode tag at the beginning of a file.
     /// TODO: this really belongs in def.
     ///
-    /// <?hh
+    ///     <?hh
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Markup(&'a Pstring<'a>),
     /// Used in IFC to track type inference environments. Not user
@@ -435,17 +435,17 @@ pub enum ClassId_<'a, Ex, En> {
     ///
     /// In a trait, it is the parent class ID of the using class.
     ///
-    /// parent::some_meth()
-    /// parent::$prop = 1;
-    /// new parent();
+    ///     parent::some_meth()
+    ///     parent::$prop = 1;
+    ///     new parent();
     CIparent,
     /// The class ID of the lexically scoped class.
     ///
     /// In a trait, it is the class ID of the using class.
     ///
-    /// self::some_meth()
-    /// self::$prop = 1;
-    /// new self();
+    ///     self::some_meth()
+    ///     self::$prop = 1;
+    ///     new self();
     CIself,
     /// The class ID of the late static bound class.
     ///
@@ -453,26 +453,26 @@ pub enum ClassId_<'a, Ex, En> {
     ///
     /// In a trait, it is the late static bound class ID of the using class.
     ///
-    /// static::some_meth()
-    /// static::$prop = 1;
-    /// new static();
+    ///     static::some_meth()
+    ///     static::$prop = 1;
+    ///     new static();
     CIstatic,
     /// Dynamic class name.
     ///
     /// TODO: Syntactically this can only be an Lvar/This/Lplaceholder.
     /// We should use lid rather than expr.
     ///
-    /// // Assume $d has type dynamic.
-    /// $d::some_meth();
-    /// $d::$prop = 1;
-    /// new $d();
+    ///     // Assume $d has type dynamic.
+    ///     $d::some_meth();
+    ///     $d::$prop = 1;
+    ///     new $d();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CIexpr(&'a Expr<'a, Ex, En>),
     /// Explicit class name. This is the common case.
     ///
-    /// Foop::some_meth()
-    /// Foo::$prop = 1;
-    /// new Foo();
+    ///     Foop::some_meth()
+    ///     Foo::$prop = 1;
+    ///     new Foo();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CI(&'a ClassName<'a>),
 }
@@ -564,9 +564,9 @@ impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunctionPtrId<'a, Ex,
 arena_deserializer::impl_deserialize_in_arena!(FunctionPtrId<'arena, Ex, En>);
 
 /// An expression tree literal consists of a hint, splices, and
-/// expressions. Consider this example:
+///  expressions. Consider this example:
 ///
-/// Foo`1 + ${$x} + ${bar()}`
+///     Foo`1 + ${$x} + ${bar()}`
 #[derive(
     Clone,
     Debug,
@@ -593,30 +593,30 @@ pub struct ExpressionTree<'a, Ex, En> {
     /// The values spliced into expression tree at runtime are assigned
     /// to temporaries.
     ///
-    /// $0tmp1 = $x; $0tmp2 = bar();
+    ///     $0tmp1 = $x; $0tmp2 = bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub splices: &'a [&'a Stmt<'a, Ex, En>],
     /// The list of global functions and static methods assigned to
     /// temporaries.
     ///
-    /// $0fp1 = foo<>;
+    ///     $0fp1 = foo<>;
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub function_pointers: &'a [&'a Stmt<'a, Ex, En>],
     /// The expression that gets type checked.
     ///
-    /// 1 + $0tmp1 + $0tmp2
+    ///     1 + $0tmp1 + $0tmp2
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub virtualized_expr: &'a Expr<'a, Ex, En>,
     /// The expression that's executed at runtime.
     ///
-    /// Foo::makeTree($v ==> $v->visitBinOp(...))
+    ///     Foo::makeTree($v ==> $v->visitBinOp(...))
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub runtime_expr: &'a Expr<'a, Ex, En>,
     /// Position of the first $$ in a splice that refers
     /// to a variable outside the Expression Tree
     ///
-    /// $x |> Code`${ $$ }` // Pos of the $$
-    /// Code`${ $x |> foo($$) }` // None
+    ///     $x |> Code`${ $$ }` // Pos of the $$
+    ///     Code`${ $x |> foo($$) }` // None
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub dollardollar_pos: Option<&'a Pos<'a>>,
 }
@@ -645,8 +645,8 @@ arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
 pub enum Expr_<'a, Ex, En> {
     /// darray literal.
     ///
-    /// darray['x' => 0, 'y' => 1]
-    /// darray<string, int>['x' => 0, 'y' => 1]
+    ///     darray['x' => 0, 'y' => 1]
+    ///     darray<string, int>['x' => 0, 'y' => 1]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Darray(
@@ -657,23 +657,23 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// varray literal.
     ///
-    /// varray['hello', 'world']
-    /// varray<string>['hello', 'world']
+    ///     varray['hello', 'world']
+    ///     varray<string>['hello', 'world']
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Varray(&'a (Option<&'a Targ<'a, Ex>>, &'a [&'a Expr<'a, Ex, En>])),
     /// Shape literal.
     ///
-    /// shape('x' => 1, 'y' => 2)
+    ///     shape('x' => 1, 'y' => 2)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Shape(&'a [(ast_defs::ShapeFieldName<'a>, &'a Expr<'a, Ex, En>)]),
     /// Collection literal for indexable structures.
     ///
-    /// Vector {1, 2}
-    /// ImmVector {}
-    /// Set<string> {'foo', 'bar'}
-    /// vec[1, 2]
-    /// keyset[]
+    ///     Vector {1, 2}
+    ///     ImmVector {}
+    ///     Set<string> {'foo', 'bar'}
+    ///     vec[1, 2]
+    ///     keyset[]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     ValCollection(
@@ -685,9 +685,9 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Collection literal for key-value structures.
     ///
-    /// dict['x' => 1, 'y' => 2]
-    /// Map<int, string> {}
-    /// ImmMap {}
+    ///     dict['x' => 1, 'y' => 2]
+    ///     Map<int, string> {}
+    ///     ImmMap {}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     KeyValCollection(
@@ -699,65 +699,66 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Null literal.
     ///
-    /// null
+    ///     null
     Null,
     /// The local variable representing the current class instance.
     ///
-    /// $this
+    ///     $this
     This,
     /// Boolean literal.
     ///
-    /// true
+    ///     true
     True,
     /// Boolean literal.
     ///
-    /// false
+    ///     false
     False,
     /// The empty expression.
     ///
-    /// list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
+    ///     list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
     Omitted,
     /// An identifier. Used for method names and global constants.
     ///
-    /// SOME_CONST
-    /// $x->foo() // id: "foo"
+    ///     SOME_CONST
+    ///     $x->foo() // id: "foo"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Id(&'a Sid<'a>),
     /// Local variable.
     ///
-    /// $foo
+    ///     $foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Lvar(&'a Lid<'a>),
     /// The extra variable in a pipe expression.
     ///
-    /// $$
+    ///     $$
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Dollardollar(&'a Lid<'a>),
     /// Clone expression.
     ///
-    /// clone $foo
+    ///     clone $foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Clone(&'a Expr<'a, Ex, En>),
     /// Array indexing.
     ///
-    /// $foo[]
-    /// $foo[$bar]
+    ///     $foo[]
+    ///     $foo[$bar]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Array_get")]
     #[rust_to_ocaml(inline_tuple)]
     ArrayGet(&'a (&'a Expr<'a, Ex, En>, Option<&'a Expr<'a, Ex, En>>)),
     /// Instance property or method access.
-    /// prop_or_method is
-    ///   Is_prop for property access
-    ///   Is_method for method call, only possible when the node is
-    ///   the receiver in a Call node.
     ///
-    ///   $foo->bar      // OG_nullthrows, Is_prop: access named property
-    ///   $foo->bar()    // OG_nullthrows, Is_method: call named method
-    ///   ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
-    ///   $foo?->bar     // OG_nullsafe,   Is_prop
-    ///   $foo?->bar()   // OG_nullsafe,   Is_method
-    ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
+    /// prop_or_method is:
+    ///   - Is_prop for property access
+    ///   - Is_method for method call, only possible when the node is
+    ///   - the receiver in a Call node.
+    ///
+    ///     $foo->bar      // OG_nullthrows, Is_prop: access named property
+    ///     $foo->bar()    // OG_nullthrows, Is_method: call named method
+    ///     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
+    ///     $foo?->bar     // OG_nullsafe,   Is_prop
+    ///     $foo?->bar()   // OG_nullsafe,   Is_method
+    ///     ($foo?->bar)() // OG_nullsafe,   Is_prop
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Obj_get")]
     #[rust_to_ocaml(inline_tuple)]
@@ -771,13 +772,13 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Static property or method access.
     ///
-    /// Foo::$bar               // Is_prop
-    /// $some_classname::$bar   // Is_prop
-    /// Foo::${$bar}            // Is_prop, only in partial mode
+    ///     Foo::$bar               // Is_prop
+    ///     $some_classname::$bar   // Is_prop
+    ///     Foo::${$bar}            // Is_prop, only in partial mode
     ///
-    /// Foo::bar();             // Is_method
-    /// Foo::$bar();            // Is_method, name stored in local $bar
-    /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    ///     Foo::bar();             // Is_method
+    ///     Foo::$bar();            // Is_method, name stored in local $bar
+    ///     (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Class_get")]
     #[rust_to_ocaml(inline_tuple)]
@@ -795,30 +796,30 @@ pub enum Expr_<'a, Ex, En> {
     /// This is not ambiguous, because constants are not allowed to
     /// contain functions.
     ///
-    /// Foo::some_const // Class_const
-    /// Foo::someStaticMeth() // Call (Class_const)
+    ///     Foo::some_const // Class_const
+    ///     Foo::someStaticMeth() // Call (Class_const)
     ///
     /// This syntax is used for both static and instance methods when
     /// calling the implementation on the superclass.
     ///
-    /// parent::someStaticMeth()
-    /// parent::someInstanceMeth()
+    ///     parent::someStaticMeth()
+    ///     parent::someInstanceMeth()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Class_const")]
     #[rust_to_ocaml(inline_tuple)]
     ClassConst(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Function or method call.
     ///
-    /// foo()
-    /// $x()
-    /// foo<int>(1, 2, ...$rest)
-    /// $x->foo()
-    /// bar(inout $x);
-    /// foobar(inout $x[0])
+    ///     foo()
+    ///     $x()
+    ///     foo<int>(1, 2, ...$rest)
+    ///     $x->foo()
+    ///     bar(inout $x);
+    ///     foobar(inout $x[0])
     ///
-    /// async { return 1; }
-    /// // lowered to:
-    /// (async () ==> { return 1; })()
+    ///     async { return 1; }
+    ///     // lowered to:
+    ///     (async () ==> { return 1; })()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Call(
@@ -831,106 +832,106 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// A reference to a function or method.
     ///
-    /// foo_fun<>
-    /// FooCls::meth<int>
+    ///     foo_fun<>
+    ///     FooCls::meth<int>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     FunctionPointer(&'a (FunctionPtrId<'a, Ex, En>, &'a [&'a Targ<'a, Ex>])),
     /// Integer literal.
     ///
-    /// 42
-    /// 0123 // octal
-    /// 0xBEEF // hexadecimal
-    /// 0b11111111 // binary
+    ///     42
+    ///     0123 // octal
+    ///     0xBEEF // hexadecimal
+    ///     0b11111111 // binary
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Int(&'a str),
     /// Float literal.
     ///
-    /// 1.0
-    /// 1.2e3
-    /// 7E-10
+    ///     1.0
+    ///     1.2e3
+    ///     7E-10
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Float(&'a str),
     /// String literal.
     ///
-    /// "foo"
-    /// 'foo'
+    ///     "foo"
+    ///     'foo'
     ///
-    /// <<<DOC
-    /// foo
-    /// DOC
+    ///     <<<DOC
+    ///     foo
+    ///     DOC
     ///
-    /// <<<'DOC'
-    /// foo
-    /// DOC
+    ///     <<<'DOC'
+    ///     foo
+    ///     DOC
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     String(&'a bstr::BStr),
     /// Interpolated string literal.
     ///
-    /// "hello $foo $bar"
+    ///     "hello $foo $bar"
     ///
-    /// <<<DOC
-    /// hello $foo $bar
-    /// DOC
+    ///     <<<DOC
+    ///     hello $foo $bar
+    ///     DOC
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     String2(&'a [&'a Expr<'a, Ex, En>]),
     /// Prefixed string literal. Only used for regular expressions.
     ///
-    /// re"foo"
+    ///     re"foo"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     PrefixedString(&'a (&'a str, &'a Expr<'a, Ex, En>)),
     /// Yield expression. The enclosing function should have an Iterator
     /// return type.
     ///
-    /// yield $foo // enclosing function returns an Iterator
-    /// yield $foo => $bar // enclosing function returns a KeyedIterator
+    ///     yield $foo // enclosing function returns an Iterator
+    ///     yield $foo => $bar // enclosing function returns a KeyedIterator
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Yield(&'a Afield<'a, Ex, En>),
     /// Await expression.
     ///
-    /// await $foo
+    ///     await $foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Await(&'a Expr<'a, Ex, En>),
     /// Readonly expression.
     ///
-    /// readonly $foo
+    ///     readonly $foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ReadonlyExpr(&'a Expr<'a, Ex, En>),
     /// Tuple expression.
     ///
-    /// tuple("a", 1, $foo)
+    ///     tuple("a", 1, $foo)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tuple(&'a [&'a Expr<'a, Ex, En>]),
     /// List expression, only used in destructuring. Allows any arbitrary
     /// lvalue as a subexpression. May also nest.
     ///
-    /// list($x, $y) = vec[1, 2];
-    /// list(, $y) = vec[1, 2]; // skipping items
-    /// list(list($x)) = vec[vec[1]]; // nesting
-    /// list($v[0], $x[], $y->foo) = $blah;
+    ///     list($x, $y) = vec[1, 2];
+    ///     list(, $y) = vec[1, 2]; // skipping items
+    ///     list(list($x)) = vec[vec[1]]; // nesting
+    ///     list($v[0], $x[], $y->foo) = $blah;
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     List(&'a [&'a Expr<'a, Ex, En>]),
     /// Cast expression, converting a value to a different type. Only
     /// primitive types are supported in the hint position.
     ///
-    /// (int)$foo
-    /// (string)$foo
+    ///     (int)$foo
+    ///     (string)$foo
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Cast(&'a (&'a Hint<'a>, &'a Expr<'a, Ex, En>)),
     /// Unary operator.
     ///
-    /// !$foo
-    /// -$foo
-    /// +$foo
-    /// $foo++
+    ///     !$foo
+    ///     -$foo
+    ///     +$foo
+    ///     $foo++
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Unop(&'a (oxidized::ast_defs::Uop, &'a Expr<'a, Ex, En>)),
     /// Binary operator.
     ///
-    /// $foo + $bar
+    ///     $foo + $bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Binop(
@@ -945,19 +946,19 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// See also Dollardollar.
     ///
-    /// foo() |> bar(1, $$) // equivalent: bar(1, foo())
+    ///     foo() |> bar(1, $$) // equivalent: bar(1, foo())
     ///
     /// $$ is not required on the RHS of pipe expressions, but it's
     /// pretty pointless to use pipes without $$.
     ///
-    /// foo() |> bar(); // equivalent: foo(); bar();
+    ///     foo() |> bar(); // equivalent: foo(); bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Pipe(&'a (&'a Lid<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// Ternary operator, or elvis operator.
     ///
-    /// $foo ? $bar : $baz // ternary
-    /// $foo ?: $baz // elvis
+    ///     $foo ? $bar : $baz // ternary
+    ///     $foo ?: $baz // elvis
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Eif(
@@ -969,28 +970,28 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Is operator.
     ///
-    /// $foo is SomeType
+    ///     $foo is SomeType
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Is(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>)),
     /// As operator.
     ///
-    /// $foo as int
-    /// $foo ?as int
+    ///     $foo as int
+    ///     $foo ?as int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     As(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>, bool)),
     /// Upcast operator.
     ///
-    /// $foo : int
+    ///     $foo : int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Upcast(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>)),
     /// Instantiation.
     ///
-    /// new Foo(1, 2);
-    /// new Foo<int, T>();
-    /// new Foo('blah', ...$rest);
+    ///     new Foo(1, 2);
+    ///     new Foo<int, T>();
+    ///     new Foo('blah', ...$rest);
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     New(
@@ -1007,24 +1008,24 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// Mnemonic: 'expanded lambda', since we can desugar Lfun to Efun.
     ///
-    /// function($x) { return $x; }
-    /// function(int $x): int { return $x; }
-    /// function($x) use ($y) { return $y; }
-    /// function($x): int use ($y, $z) { return $x + $y + $z; }
+    ///     function($x) { return $x; }
+    ///     function(int $x): int { return $x; }
+    ///     function($x) use ($y) { return $y; }
+    ///     function($x): int use ($y, $z) { return $x + $y + $z; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Efun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
     /// Hack lambda. Captures variables automatically.
     ///
-    /// $x ==> $x
-    /// (int $x): int ==> $x + $other
-    /// ($x, $y) ==> { return $x + $y; }
+    ///     $x ==> $x
+    ///     (int $x): int ==> $x + $other
+    ///     ($x, $y) ==> { return $x + $y; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Lfun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
     /// XHP expression. May contain interpolated expressions.
     ///
-    /// <foo x="hello" y={$foo}>hello {$bar}</foo>
+    ///     <foo x="hello" y={$foo}>hello {$bar}</foo>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Xml(
@@ -1036,10 +1037,10 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Include or require expression.
     ///
-    /// require('foo.php')
-    /// require_once('foo.php')
-    /// include('foo.php')
-    /// include_once('foo.php')
+    ///     require('foo.php')
+    ///     require_once('foo.php')
+    ///     include('foo.php')
+    ///     include_once('foo.php')
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Import(&'a (oxidized::aast::ImportFlavor, &'a Expr<'a, Ex, En>)),
@@ -1047,7 +1048,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
     ///
-    /// Vector {}
+    ///     Vector {}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Collection(
@@ -1060,26 +1061,26 @@ pub enum Expr_<'a, Ex, En> {
     /// Expression tree literal. Expression trees are not evaluated at
     /// runtime, but desugared to an expression representing the code.
     ///
-    /// Foo`1 + bar()`
-    /// Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
+    ///     Foo`1 + bar()`
+    ///     Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
     ///
     /// Splices are evaluated as normal Hack code. The following two expression trees
     /// are equivalent. See also `ET_Splice`.
     ///
-    /// Foo`1 + ${do_stuff()}`
+    ///     Foo`1 + ${do_stuff()}`
     ///
-    /// $x = do_stuff();
-    /// Foo`1 + ${$x}`
+    ///     $x = do_stuff();
+    ///     Foo`1 + ${$x}`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ExpressionTree(&'a ExpressionTree<'a, Ex, En>),
     /// Placeholder local variable.
     ///
-    /// $_
+    ///     $_
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Lplaceholder(&'a Pos<'a>),
     /// Global function reference.
     ///
-    /// fun('foo')
+    ///     fun('foo')
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Fun_id")]
     FunId(&'a Sid<'a>),
@@ -1088,34 +1089,34 @@ pub enum Expr_<'a, Ex, En> {
     /// TODO: This is only created in naming, and ought to happen in
     /// lowering or be removed. The emitter just sees a normal Call.
     ///
-    /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
+    ///     inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Method_id")]
     #[rust_to_ocaml(inline_tuple)]
     MethodId(&'a (&'a Expr<'a, Ex, En>, &'a Pstring<'a>)),
     /// Instance method reference that can be called with an instance.
     ///
-    /// meth_caller(FooClass::class, 'some_meth')
-    /// meth_caller('FooClass', 'some_meth')
+    ///     meth_caller(FooClass::class, 'some_meth')
+    ///     meth_caller('FooClass', 'some_meth')
     ///
     /// These examples are equivalent to:
     ///
-    /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
+    ///     (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Method_caller")]
     #[rust_to_ocaml(inline_tuple)]
     MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
     /// Static method reference.
     ///
-    /// class_meth('FooClass', 'some_static_meth')
-    /// // equivalent: FooClass::some_static_meth<>
+    ///     class_meth('FooClass', 'some_static_meth')
+    ///     // equivalent: FooClass::some_static_meth<>
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Smethod_id")]
     #[rust_to_ocaml(inline_tuple)]
     SmethodId(&'a (&'a ClassId<'a, Ex, En>, &'a Pstring<'a>)),
     /// Pair literal.
     ///
-    /// Pair {$foo, $bar}
+    ///     Pair {$foo, $bar}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Pair(
@@ -1128,13 +1129,13 @@ pub enum Expr_<'a, Ex, En> {
     /// Expression tree splice expression. Only valid inside an
     /// expression tree literal (backticks). See also `ExpressionTree`.
     ///
-    /// ${$foo}
+    ///     ${$foo}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "ET_Splice")]
     ETSplice(&'a Expr<'a, Ex, En>),
     /// Label used for enum classes.
     ///
-    /// enum_name#label_name or #label_name
+    ///     enum_name#label_name or #label_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     EnumClassLabel(&'a (Option<&'a ClassName<'a>>, &'a str)),
@@ -1147,28 +1148,28 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// Given a call to [unsafe_cast]:
     /// ```
-    ///          function f(int $x): void { /* ... */ }
+    /// function f(int $x): void { /* ... */ }
     ///
-    ///          function g(float $x): void {
-    ///             f(unsafe_cast<float,int>($x));
-    ///          }
+    /// function g(float $x): void {
+    ///    f(unsafe_cast<float,int>($x));
+    /// }
     /// ```
     /// After typing, this is represented by the following TAST fragment
     /// ```
-    ///          Call
-    ///            ( ( (..., function(int $x): void), Id (..., "\f"))
-    ///            , []
-    ///            , [ ( (..., int)
-    ///                , Hole
-    ///                    ( ((..., float), Lvar (..., $x))
-    ///                    , float
-    ///                    , int
-    ///                    , UnsafeCast
-    ///                    )
-    ///                )
-    ///              ]
-    ///            , None
-    ///            )
+    /// Call
+    ///   ( ( (..., function(int $x): void), Id (..., "\f"))
+    ///   , []
+    ///   , [ ( (..., int)
+    ///       , Hole
+    ///           ( ((..., float), Lvar (..., $x))
+    ///           , float
+    ///           , int
+    ///           , UnsafeCast
+    ///           )
+    ///       )
+    ///     ]
+    ///   , None
+    ///   )
     /// ```
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
@@ -1520,6 +1521,7 @@ pub struct Fun_<'a, Ex, En> {
     pub readonly_this: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena")]
     pub annotation: En,
+    /// Whether the return value is readonly
     pub readonly_ret: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a TypeHint<'a, Ex>,
@@ -1865,13 +1867,13 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttr<'arena, Ex, En>);
 #[repr(C, u8)]
 pub enum ClassConstKind<'a, Ex, En> {
     /// CCAbstract represents the states
-    ///    abstract const int X;
-    ///    abstract const int Y = 4;
+    ///     abstract const int X;
+    ///     abstract const int Y = 4;
     /// The expr option is a default value
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CCAbstract(Option<&'a Expr<'a, Ex, En>>),
     /// CCConcrete represents
-    ///    const int Z = 4;
+    ///     const int Z = 4;
     /// The expr is the value of the constant. It is not optional
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CCConcrete(&'a Expr<'a, Ex, En>),

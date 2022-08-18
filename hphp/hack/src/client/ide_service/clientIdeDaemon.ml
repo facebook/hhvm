@@ -461,7 +461,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     SymbolIndex.initialize
       ~globalrev:None
       ~gleanopt
-      ~namespace_map:(GlobalOptions.po_auto_namespace_map tcopt)
+      ~namespace_map:(ParserOptions.auto_namespace_map tcopt)
       ~provider_name:
         local_config.ServerLocalConfig.ide_symbolindex_search_provider
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet

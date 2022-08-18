@@ -617,44 +617,13 @@ let so_remote_worker_vfs_checkout_threshold t =
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 
-let po_auto_namespace_map t = t.po_auto_namespace_map
-
-let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
-
-let po_codegen t = t.po_codegen
-
-let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
-
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
 
 let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
 
 let codes_not_raised_partial t = t.codes_not_raised_partial
 
-let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
-
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
-
-let po_enable_class_level_where_clauses t =
-  t.po_enable_class_level_where_clauses
-
-let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
-
-let po_allowed_decl_fixme_codes t = t.po_allowed_decl_fixme_codes
-
-let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
-
-let po_allow_unstable_features t = t.po_allow_unstable_features
-
-let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
-
-let po_const_default_func_args t = t.po_const_default_func_args
-
-let po_const_default_lambda_args t = t.po_const_default_lambda_args
-
-let po_disallow_silence t = t.po_disallow_silence
-
-let po_abstract_static_props t = t.po_abstract_static_props
 
 let glean_service t = t.glean_service
 
@@ -680,28 +649,3 @@ let symbol_write_index_paths_file_output t =
   t.symbol_write_index_paths_file_output
 
 let symbol_write_include_hhi t = t.symbol_write_include_hhi
-
-let po_parser_errors_only t = t.po_parser_errors_only
-
-let po_disallow_func_ptrs_in_constants t = t.po_disallow_func_ptrs_in_constants
-
-let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
-
-let po_disable_xhp_element_mangling t = t.po_disable_xhp_element_mangling
-
-let po_disable_xhp_children_declarations t =
-  t.po_disable_xhp_children_declarations
-
-let po_enable_enum_classes t = t.po_enable_enum_classes
-
-let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
-
-let po_disallow_fun_and_cls_meth_pseudo_funcs t =
-  t.po_disallow_fun_and_cls_meth_pseudo_funcs
-
-let po_disallow_inst_meth t = t.po_disallow_inst_meth
-
-let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
-
-let po_interpret_soft_types_as_like_types t =
-  t.po_interpret_soft_types_as_like_types

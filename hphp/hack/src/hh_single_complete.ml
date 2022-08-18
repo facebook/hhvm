@@ -138,7 +138,7 @@ let parse_options () =
       ()
   in
   (* Configure symbol index settings *)
-  let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
+  let namespace_map = ParserOptions.auto_namespace_map tcopt in
   let sienv =
     SymbolIndex.initialize
       ~globalrev:None

@@ -66,7 +66,7 @@ let post_init genv (env, t) =
   let (env, _t) = ServerAiInit.ai_check genv env.naming_table env t in
   (* Configure symbol index settings *)
   ServerProgress.send_progress "updating search index...";
-  let namespace_map = GlobalOptions.po_auto_namespace_map env.tcopt in
+  let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
   let env =
     {
       env with

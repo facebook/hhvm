@@ -477,6 +477,7 @@ val make :
 val default : t
 
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
+(* NOTE: set/getters for po_* options moved to ParserOptions *)
 
 val so_remote_version_specifier : t -> string option
 
@@ -484,45 +485,13 @@ val so_remote_worker_vfs_checkout_threshold : t -> int
 
 val so_naming_sqlite_path : t -> string option
 
-val po_auto_namespace_map : t -> (string * string) list
-
-val po_deregister_php_stdlib : t -> bool
-
-val po_disallow_toplevel_requires : t -> bool
-
-val po_codegen : t -> bool
-
 val allowed_fixme_codes_strict : t -> ISet.t
 
 val allowed_fixme_codes_partial : t -> ISet.t
 
 val codes_not_raised_partial : t -> ISet.t
 
-val po_disable_lval_as_an_expression : t -> bool
-
 val error_codes_treated_strictly : t -> ISet.t
-
-val po_enable_class_level_where_clauses : t -> bool
-
-val po_disable_legacy_soft_typehints : t -> bool
-
-val po_allowed_decl_fixme_codes : t -> ISet.t
-
-val po_allow_new_attribute_syntax : t -> bool
-
-val po_disable_legacy_attribute_syntax : t -> bool
-
-val po_const_default_func_args : t -> bool
-
-val po_const_default_lambda_args : t -> bool
-
-val po_disallow_silence : t -> bool
-
-val po_abstract_static_props : t -> bool
-
-val po_allow_unstable_features : t -> bool
-
-val po_parser_errors_only : t -> bool
 
 val glean_service : t -> string
 
@@ -548,24 +517,5 @@ val symbol_write_index_paths_file_output : t -> string option
 
 val symbol_write_include_hhi : t -> bool
 
-val po_disallow_func_ptrs_in_constants : t -> bool
-
-val po_enable_xhp_class_modifier : t -> bool
-
-val po_disable_xhp_element_mangling : t -> bool
-
-val po_disable_xhp_children_declarations : t -> bool
-
-val po_enable_enum_classes : t -> bool
-
-val po_disable_hh_ignore_error : t -> bool
-
-val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
-
-val po_disallow_inst_meth : t -> bool
-
-val po_enable_enum_supertyping : t -> bool
-
-val po_interpret_soft_types_as_like_types : t -> bool
-
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
+(* NOTE: set/getters for po_* options moved to ParserOptions *)

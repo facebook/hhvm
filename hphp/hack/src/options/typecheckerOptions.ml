@@ -184,8 +184,6 @@ let gi_reinfer_types t = t.GlobalOptions.tco_gi_reinfer_types
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
 
-let abstract_static_props = GlobalOptions.po_abstract_static_props
-
 let set_global_inference t =
   GlobalOptions.{ t with tco_global_inference = true }
 
@@ -255,7 +253,7 @@ let strict_value_equality t = t.GlobalOptions.tco_strict_value_equality
 
 let enforce_sealed_subclasses t = t.GlobalOptions.tco_enforce_sealed_subclasses
 
-let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping
+let enable_enum_supertyping t = t.GlobalOptions.po_enable_enum_supertyping
 
 let everything_sdt t = t.GlobalOptions.tco_everything_sdt
 

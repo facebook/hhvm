@@ -173,9 +173,6 @@ impl Opts {
         if self.is_systemlib {
             flags |= EnvFlags::IS_SYSTEMLIB;
         }
-        if self.type_directed {
-            flags |= EnvFlags::TYPE_DIRECTED;
-        }
         flags
     }
 

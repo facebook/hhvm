@@ -82,7 +82,6 @@ bitflags! {
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
         const DUMP_IR = 1 << 5;
         const ENABLE_IR = 1 << 6;
-        const TYPE_DIRECTED = 1 << 7;
     }
 }
 
@@ -531,23 +530,21 @@ fn emit_unit_from_ast<'arena, 'decl>(
 
 fn check_readonly_and_emit<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    flags: EnvFlags,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &mut ast::Program,
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>, Error> {
-    if flags.contains(EnvFlags::TYPE_DIRECTED) {
-        match &emitter.decl_provider {
-            None => (),
-            Some(decl_provider) => {
-                let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);
-                let res = readonly_check::check_program(&mut new_ast, false);
-                // Ignores all errors after the first...
-                if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
-                    return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
-                }
-                *ast = new_ast;
+    match &emitter.decl_provider {
+        // T128303794
+        None => (),
+        Some(decl_provider) => {
+            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);
+            let res = readonly_check::check_program(&mut new_ast, false);
+            // Ignores all errors after the first...
+            if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
+                return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
             }
+            *ast = new_ast;
         }
     }
     rewrite_and_emit(emitter, namespace_env, ast, profile)
@@ -560,6 +557,7 @@ fn emit_unit_from_text<'arena, 'decl>(
     profile: &mut Profile,
 ) -> Result<HackCUnit<'arena>> {
     profile.log_enabled = emitter.options().log_extern_compiler_perf();
+    let type_directed = emitter.decl_provider.is_some();
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -579,7 +577,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             !flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
             flags.contains(EnvFlags::IS_SYSTEMLIB),
-            flags.contains(EnvFlags::TYPE_DIRECTED),
+            type_directed,
             profile,
         )
     });
@@ -590,7 +588,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || {
                 (
-                    check_readonly_and_emit(emitter, flags, namespace_env, &mut ast, profile),
+                    check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),
                     profile,
                 )
             })

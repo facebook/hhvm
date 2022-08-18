@@ -97,8 +97,8 @@ fn desugar_and_replace_et_literals(flags: EnvFlags, program: ast::Program, src: 
 /// print the source code as if the user manually wrote the desugared
 /// syntax.
 pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
+    let type_directed = false;
     let is_systemlib = flags.contains(EnvFlags::IS_SYSTEMLIB);
-    let type_directed = flags.contains(EnvFlags::TYPE_DIRECTED);
     let opts = Options::from_configs(&[]).expect("Invalid options");
     let content = fs::read(filepath.to_absolute()).unwrap();
     let source_text = SourceText::make(RcOc::new(filepath), &content);

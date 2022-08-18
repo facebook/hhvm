@@ -12,12 +12,14 @@ static DOC: &str = "doc";
 static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
 static ATTR: &str = "attr";
+static NAME: &str = "name";
 
 #[derive(Clone, Debug)]
 pub struct Attrs {
     pub doc: Vec<String>,
     pub prefix: Option<String>,
     pub attrs: Vec<String>,
+    pub name: Option<String>,
 }
 
 impl Attrs {
@@ -42,6 +44,7 @@ impl Attrs {
         let doc = get_doc_comment(attrs);
         let mut prefix = None;
         let mut ocaml_attrs = vec![];
+        let mut name = None;
 
         for meta_item in attrs
             .iter()
@@ -51,6 +54,8 @@ impl Attrs {
             match &meta_item {
                 // Parse `#[rust_to_ocaml(prefix = "foo")]`
                 Meta(NameValue(m)) if m.path.is_ident(PREFIX) => {
+                    // TODO: emit error for AttrKind::Field (should use the
+                    // `name` meta item instead)
                     if let Ok(s) = get_lit_str(PREFIX, &m.lit) {
                         prefix = Some(s.value());
                     }
@@ -59,6 +64,14 @@ impl Attrs {
                 Meta(NameValue(m)) if m.path.is_ident(ATTR) => {
                     if let Ok(s) = get_lit_str(ATTR, &m.lit) {
                         ocaml_attrs.push(s.value());
+                    }
+                }
+                // Parse `#[rust_to_ocaml(name = "foo")]`
+                Meta(NameValue(m)) if m.path.is_ident(NAME) => {
+                    // TODO: emit error for AttrKind::Container (should add to
+                    // types.rename config instead)
+                    if let Ok(s) = get_lit_str(NAME, &m.lit) {
+                        name = Some(s.value());
                     }
                 }
                 Meta(_meta_item) => {
@@ -82,6 +95,7 @@ impl Attrs {
             doc,
             prefix,
             attrs: ocaml_attrs,
+            name,
         }
     }
 }

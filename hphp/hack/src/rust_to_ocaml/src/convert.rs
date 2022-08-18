@@ -136,8 +136,11 @@ impl ItemConverter {
                 let fields = (fields.named.iter())
                     .map(|field| {
                         let field_attrs = attr_parser::Attrs::from_field(field);
-                        let name =
-                            field_name(field.ident.as_ref(), container_attrs.prefix.as_deref());
+                        let name = if let Some(name) = field_attrs.name {
+                            FieldName(name)
+                        } else {
+                            field_name(field.ident.as_ref(), container_attrs.prefix.as_deref())
+                        };
                         let ty = self.convert_type(&field.ty)?;
                         Ok(ir::Field {
                             name,
@@ -165,8 +168,12 @@ impl ItemConverter {
             .variants
             .iter()
             .map(|variant| {
-                let name = variant_name(&variant.ident, container_attrs.prefix.as_deref());
                 let variant_attrs = attr_parser::Attrs::from_variant(variant);
+                let name = if let Some(name) = variant_attrs.name {
+                    VariantName(name)
+                } else {
+                    variant_name(&variant.ident, container_attrs.prefix.as_deref())
+                };
                 let fields = match &variant.fields {
                     syn::Fields::Unit => None,
                     syn::Fields::Unnamed(fields) => Some(ir::VariantFields::Unnamed(
@@ -178,10 +185,14 @@ impl ItemConverter {
                         (fields.named.iter())
                             .map(|field| {
                                 let field_attrs = attr_parser::Attrs::from_field(field);
-                                let name = field_name(
-                                    field.ident.as_ref(),
-                                    variant_attrs.prefix.as_deref(),
-                                );
+                                let name = if let Some(name) = field_attrs.name {
+                                    FieldName(name)
+                                } else {
+                                    field_name(
+                                        field.ident.as_ref(),
+                                        variant_attrs.prefix.as_deref(),
+                                    )
+                                };
                                 let ty = self.convert_type(&field.ty)?;
                                 Ok(ir::Field {
                                     name,
@@ -252,7 +263,7 @@ impl ItemConverter {
                         seg.arguments.is_empty(),
                         "Type args only supported in last path segment"
                     );
-                    Ok(ir::ModuleName::new(seg.ident.to_string())?)
+                    ir::ModuleName::new(seg.ident.to_string())
                 })
                 .collect::<Result<_>>()?,
             ty: TypeName(last_seg.ident.to_string()),

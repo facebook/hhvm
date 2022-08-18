@@ -199,8 +199,7 @@ let process_file
         { file_errors; deferred_decls = [] }
       | Error () ->
         let deferred_decls =
-          ast
-          |> Naming.program ctx
+          Errors.ignore_ (fun () -> Naming.program ctx ast)
           |> scrape_class_names
           |> SSet.elements
           |> List.filter_map ~f:(fun class_name ->

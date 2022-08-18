@@ -123,23 +123,34 @@ let params_source ~variadic (params : decl_ty fun_params) : string =
   in
   String.concat ~sep:", " explicit_params
 
+let of_implicit_params (impl_params : decl_ty fun_implicit_params) : string =
+  match impl_params.capability with
+  | CapDefaults _ -> ""
+  | CapTy t ->
+    (match get_node t with
+    | Tintersection tys ->
+      let contexts = List.map tys ~f:of_decl_ty in
+      Printf.sprintf "[%s]" (String.concat ~sep:", " contexts)
+    | _ -> "")
+
 let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
-  let (params, return_ty, async_modifier) =
+  let (params, return_ty, async_modifier, capabilities) =
     match ty_ with
     | Tfun ft ->
       ( params_source ~variadic:(get_ft_variadic ft) ft.ft_params,
         of_decl_ty ft.ft_ret.et_type,
-        if is_awaitable ft.ft_ret.et_type then
+        (if is_awaitable ft.ft_ret.et_type then
           "async "
         else
-          "" )
-    | _ -> ("", "mixed", "")
+          ""),
+        of_implicit_params ft.ft_implicit_params )
+    | _ -> ("", "mixed", "", "")
   in
 
   Printf.sprintf
-    "\n%s  %s %s%sfunction %s(%s): %s {}\n\n"
+    "\n%s  %s %s%sfunction %s(%s)%s: %s {}\n\n"
     (if is_override then
       "  <<__Override>>\n"
     else
@@ -152,4 +163,5 @@ let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     async_modifier
     name
     params
+    capabilities
     return_ty

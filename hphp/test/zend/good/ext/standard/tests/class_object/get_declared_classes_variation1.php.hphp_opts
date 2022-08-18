@@ -1,2 +1,2 @@
---ffile=test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
---ffile=hphp/test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
+--inputs=test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
+--inputs=hphp/test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc

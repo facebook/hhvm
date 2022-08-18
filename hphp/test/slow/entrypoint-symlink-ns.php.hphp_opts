@@ -1,2 +1,2 @@
---ffile=hphp/test/slow/entrypoint-symlink-ns2.inc
---ffile=hphp/test/slow/entrypoint-symlink-ns3.inc
+--inputs=hphp/test/slow/entrypoint-symlink-ns2.inc
+--inputs=hphp/test/slow/entrypoint-symlink-ns3.inc

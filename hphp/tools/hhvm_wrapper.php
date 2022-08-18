@@ -272,7 +272,7 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
     '--hphp '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
     ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
-    '-k1 -l3 '.
+    '-l3 '.
     $hphpc_flags.
     argv_for_shell().
     " >$hphp_out 2>&1";

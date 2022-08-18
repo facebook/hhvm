@@ -100,14 +100,11 @@ struct CompilerOptions {
   std::vector<std::string> excludeStaticDirs;
   std::vector<std::string> excludeStaticFiles;
   std::vector<std::string> excludeStaticPatterns;
-  std::vector<std::string> fmodules;
-  std::vector<std::string> ffiles;
   std::vector<std::string> cfiles;
   std::vector<std::string> cmodules;
   std::string push_phases;
   std::string matched_overrides;
   bool parseOnDemand;
-  bool keepTempDir;
   int logLevel;
   std::string filecache;
   bool coredump;
@@ -185,18 +182,11 @@ bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
 }
 
 void addInputsToPackage(Package& package, const CompilerOptions& po) {
-  if (po.modules.empty() && po.fmodules.empty() &&
-      po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
+  if (po.modules.empty() && po.inputs.empty() && po.inputList.empty()) {
     package.addDirectory("/");
   } else {
     for (auto const& module : po.modules) {
       package.addDirectory(module);
-    }
-    for (auto const& fmodule : po.fmodules) {
-      package.addDirectory(fmodule);
-    }
-    for (auto const& ffile : po.ffiles) {
-      package.addSourceFile(ffile);
     }
     for (auto const& cmodule : po.cmodules) {
       package.addStaticDirectory(cmodule);
@@ -524,22 +514,15 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
                            "\thphp <options> <inputs>\n\n"
                            "Options");
 
-  bool dummy;
-  bool dummy2;
-  std::string dummy3;
-  std::string dummy4;
-
   std::vector<std::string> formats;
 
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-    ("target,t", value<std::string>(&dummy4)->default_value("hhbc"),
-     "hhbc") // TODO: T115189426 remove this
     ("format,f", value<std::vector<std::string>>(&formats)->composing(),
      "HHBC Output format: binary (default) | hhas | text")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
-    ("inputs,i", value<std::vector<std::string>>(&po.inputs),
+    ("inputs,i", value<std::vector<std::string>>(&po.inputs)->composing(),
      "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
@@ -548,11 +531,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("exclude-dir",
      value<std::vector<std::string>>(&po.excludeDirs)->composing(),
      "directories to exclude from the input")
-    ("fmodule", value<std::vector<std::string>>(&po.fmodules)->composing(),
-     "same with module, except no exclusion checking is performed, so these "
-     "modules are forced to be included") // TODO: T115189426 remove this
-    ("ffile", value<std::vector<std::string>>(&po.ffiles)->composing(),
-     "extra PHP files forced to include without exclusion checking") // TODO: T115189426 remove this
     ("exclude-file",
      value<std::vector<std::string>>(&po.excludeFiles)->composing(),
      "files to exclude from the input, even if parse-on-demand finds it")
@@ -578,14 +556,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("parse-on-demand", value<bool>(&po.parseOnDemand)->default_value(true),
      "whether to parse files that are not specified from command line")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
-    ("sync-dir", value<std::string>(&dummy3), // TODO: T115189426 remove this
-     "Files will be created in this directory first, then sync with output "
-     "directory without overwriting identical files. Great for incremental "
-     "compilation and build.")
-    ("gen-stats", value<bool>(&dummy2)->default_value(false), // TODO: T115189426 remove this
-     "whether to generate code errors")
-    ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
-     "whether to keep the temporary directory")
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "config file name")
     ("config-value,v",
@@ -599,9 +569,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      value<int>(&po.logLevel)->default_value(-1),
      "-1: (default); 0: no logging; 1: errors only; 2: warnings and errors; "
      "3: informational as well; 4: really verbose.")
-    ("force",
-     value<bool>(&dummy)->default_value(true), // TODO: T115189426 remove this
-     "force to ignore code generation errors and continue compilations")
     ("file-cache",
      value<std::string>(&po.filecache),
      "if specified, generate a static file cache with this file name")

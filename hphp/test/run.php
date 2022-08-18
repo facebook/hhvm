@@ -1151,7 +1151,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
-    '-thhbc -l1 -k1',
+    '-l1',
     '-o "' . test_repo($options, $test) . '"',
     "\"$test\"",
     "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),

@@ -1,7 +1,7 @@
 -vAllVolatile=1
 -d hhvm.php7.all=0
---ffile=hphp/test/quick/autoload3-1.inc
---ffile=hphp/test/quick/autoload3-2.inc
---ffile=hphp/test/quick/autoload3-3.inc
---ffile=hphp/test/quick/autoload3-4.inc
---ffile=hphp/test/quick/autoload3-5.inc
+--inputs=hphp/test/quick/autoload3-1.inc
+--inputs=hphp/test/quick/autoload3-2.inc
+--inputs=hphp/test/quick/autoload3-3.inc
+--inputs=hphp/test/quick/autoload3-4.inc
+--inputs=hphp/test/quick/autoload3-5.inc

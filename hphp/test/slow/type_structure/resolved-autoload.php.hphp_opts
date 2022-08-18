@@ -1,2 +1,2 @@
---ffile=hphp/test/slow/type_structure/resolved-autoload.inc
+--inputs=hphp/test/slow/type_structure/resolved-autoload.inc
 

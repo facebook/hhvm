@@ -1,2 +1,2 @@
---ffile=hphp/test/quick/alias-chain-1.inc
---ffile=hphp/test/quick/alias-chain-2.inc
+--inputs=hphp/test/quick/alias-chain-1.inc
+--inputs=hphp/test/quick/alias-chain-2.inc

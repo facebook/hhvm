@@ -1,1 +1,1 @@
---ffile=hphp/test/slow/hhbbc/constant_folding.inc
+--inputs=hphp/test/slow/hhbbc/constant_folding.inc

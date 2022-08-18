@@ -345,8 +345,8 @@ struct TSFun : TypeStructure {
   TSCHILDREN_METHODS(TSFun)
   static constexpr uint8_t kFieldsByte = kTSFunFieldsByte;
   ArrayData* paramTypes() const { return m_param_types; }
-  ArrayData* returnTypes() const { return m_return_type; }
-  ArrayData* variadicTypes() const { return m_variadic_type; }
+  ArrayData* returnType() const { return m_return_type; }
+  ArrayData* variadicType() const { return m_variadic_type; }
 private:
   ArrayData* m_param_types;
   ArrayData* m_return_type;

@@ -38,8 +38,10 @@
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -1347,6 +1349,210 @@ Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
 }
 
 namespace {
+
+bespoke::TypeStructure* getBespokeTS(const Array& ts) {
+  return bespoke::TypeStructure::isBespokeTypeStructure(ts.get())
+    ? bespoke::TypeStructure::As(ts.get())
+    : nullptr;
+}
+bool getBool(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return false;
+  assertx(isBoolType(tv.m_type));
+  return tv.m_data.num;
+}
+String getString(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return String{};
+  assertx(isStringType(tv.m_type));
+  return String{tv.m_data.pstr};
+}
+Array getArray(const Array& ts, const String& key) {
+  auto const tv = ts.get()->get(key.get());
+  if (isNullType(tv.m_type)) return Array{};
+  assertx(isArrayLikeType(tv.m_type));
+  return Array{tv.m_data.parr};
+}
+
+} // namespace
+
+int64_t HHVM_FUNCTION(get_kind, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->kind();
+  }
+  auto const tv = ts.get()->get(s_kind.get());
+  assertx(isIntType(tv.m_type));
+  return tv.m_data.num;
+}
+
+bool HHVM_FUNCTION(get_nullable, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->nullable();
+  }
+  return getBool(ts, s_nullable);
+}
+
+bool HHVM_FUNCTION(get_soft, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->soft();
+  }
+  return getBool(ts, s_soft);
+}
+
+bool HHVM_FUNCTION(get_like, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->like();
+  }
+  return getBool(ts, s_like);
+}
+
+bool HHVM_FUNCTION(get_opaque, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->opaque();
+  }
+  return getBool(ts, s_opaque);
+}
+
+bool HHVM_FUNCTION(get_optional_shape_field, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return bespokeTS->optionalShapeField();
+  }
+  return getBool(ts, s_optional_shape_field);
+}
+
+String HHVM_FUNCTION(get_alias, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return String{bespokeTS->alias()};
+  }
+  return getString(ts, s_alias);
+}
+
+String HHVM_FUNCTION(get_typevars, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return String{bespokeTS->typevars()};
+  }
+  return getString(ts, s_typevars);
+}
+
+Array HHVM_FUNCTION(get_typevar_types, const Array& ts) {
+  if (auto const bespokeTS = getBespokeTS(ts)) {
+    return Array{bespokeTS->typevarTypes()};
+  }
+  return getArray(ts, s_typevar_types);
+}
+
+Array HHVM_FUNCTION(get_fields, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_shape) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSShape*>(bespokeTS);
+    return Array{s->fields()};
+  }
+  return getArray(ts, s_fields);
+}
+
+bool HHVM_FUNCTION(get_allows_unknown_fields, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_shape) {
+      return false;
+    }
+    auto const s = reinterpret_cast<bespoke::TSShape*>(bespokeTS);
+    return s->allowsUnknownFields();
+  }
+  return getBool(ts, s_allows_unknown_fields);
+}
+
+Array HHVM_FUNCTION(get_elem_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_tuple) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSTuple*>(bespokeTS);
+    return Array{s->elemTypes()};
+  }
+  return getArray(ts, s_elem_types);
+}
+
+Array HHVM_FUNCTION(get_param_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->paramTypes()};
+  }
+  return getArray(ts, s_param_types);
+}
+
+Array HHVM_FUNCTION(get_return_type, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->returnType()};
+  }
+  return getArray(ts, s_return_type);
+}
+
+Array HHVM_FUNCTION(get_variadic_type, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_fun) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSFun*>(bespokeTS);
+    return Array{s->variadicType()};
+  }
+  return getArray(ts, s_variadic_type);
+}
+
+String HHVM_FUNCTION(get_name, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->typeKind() != TypeStructure::Kind::T_typevar) {
+      return String{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSTypevar*>(bespokeTS);
+    return String{s->name()};
+  }
+  return getString(ts, s_name);
+}
+
+Array HHVM_FUNCTION(get_generic_types, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithGenericTypes::kFieldsByte &&
+        bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return Array{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithGenericTypes*>(bespokeTS);
+    return Array{s->genericTypes()};
+  }
+  return getArray(ts, s_generic_types);
+}
+
+String HHVM_FUNCTION(get_classname, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return String{};
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithClassishTypes*>(bespokeTS);
+    return String{s->classname()};
+  }
+  return getString(ts, s_classname);
+}
+
+bool HHVM_FUNCTION(get_exact, const Array& ts) {
+  if (auto bespokeTS = getBespokeTS(ts)) {
+    if (bespokeTS->fieldsByte() != bespoke::TSWithClassishTypes::kFieldsByte) {
+      return false;
+    }
+    auto const s = reinterpret_cast<bespoke::TSWithClassishTypes*>(bespokeTS);
+    return s->exact();
+  }
+  return getBool(ts, s_exact);
+}
+
+namespace {
 bool is_dynamically_callable_inst_method_impl(const StringData* cls,
                                               const StringData* meth) {
   if (auto const c = Class::load(cls)) {
@@ -1551,6 +1757,28 @@ static struct HHExtension final : Extension {
     X(request_event_stats);
     X(process_event_stats);
 #undef X
+#define X(nm) HHVM_NAMED_FE(HH\\TypeStructure\\nm, HHVM_FN(nm))
+    X(get_kind);
+    X(get_nullable);
+    X(get_soft);
+    X(get_like);
+    X(get_opaque);
+    X(get_optional_shape_field);
+    X(get_alias);
+    X(get_typevars);
+    X(get_typevar_types);
+    X(get_fields);
+    X(get_allows_unknown_fields);
+    X(get_elem_types);
+    X(get_param_types);
+    X(get_return_type);
+    X(get_variadic_type);
+    X(get_name);
+    X(get_generic_types);
+    X(get_classname);
+    X(get_exact);
+#undef X
+
 #define X(n, t) HHVM_RC_INT(HH\\n, static_cast<int64_t>(AutoloadMap::KindOf::t))
     X(AUTOLOAD_MAP_KIND_OF_TYPE, Type);
     X(AUTOLOAD_MAP_KIND_OF_FUNCTION, Function);

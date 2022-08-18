@@ -682,6 +682,67 @@ namespace HH\Coeffects {
 
 }
 
+namespace HH\TypeStructure {
+
+<<__Native>>
+function get_kind(dict<string, mixed> $ts): int;
+
+<<__Native>>
+function get_nullable(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_soft(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_like(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_opaque(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_optional_shape_field(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_alias(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_typevars(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_typevar_types(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_fields(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_allows_unknown_fields(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_elem_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_param_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_return_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_variadic_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_name(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_generic_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_classname(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_exact(dict<string, mixed> $ts): bool;
+
+}
+
 namespace __SystemLib {
 
 <<__Native>>

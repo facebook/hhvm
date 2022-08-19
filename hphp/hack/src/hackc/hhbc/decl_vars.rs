@@ -16,7 +16,7 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast::*;
 use oxidized::ast_defs;
 
-use crate::hhas_param::HhasParam;
+use crate::HhasParam;
 use crate::Label;
 
 type SSet = std::collections::BTreeSet<String>;

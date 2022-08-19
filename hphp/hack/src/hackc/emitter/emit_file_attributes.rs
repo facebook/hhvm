@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use env::emitter::Emitter;
 use error::Result;
-use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::HhasAttribute;
 use itertools::Itertools;
 use oxidized::ast;
 

@@ -9,16 +9,16 @@ use ffi::Str;
 use ffi::Triple;
 use serde::Serialize;
 
-use crate::hhas_adata::HhasAdata;
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_class::HhasClass;
-use crate::hhas_constant::HhasConstant;
-use crate::hhas_function::HhasFunction;
-use crate::hhas_module::HhasModule;
-use crate::hhas_pos::HhasPos;
-use crate::hhas_symbol_refs::HhasSymbolRefs;
-use crate::hhas_typedef::HhasTypedef;
 use crate::FatalOp;
+use crate::HhasAdata;
+use crate::HhasAttribute;
+use crate::HhasClass;
+use crate::HhasConstant;
+use crate::HhasFunction;
+use crate::HhasModule;
+use crate::HhasPos;
+use crate::HhasSymbolRefs;
+use crate::HhasTypedef;
 
 #[derive(Default, Debug, Serialize)]
 #[repr(C)]

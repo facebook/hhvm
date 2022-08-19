@@ -8,12 +8,12 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_body::HhasBody;
-use crate::hhas_coeffects::HhasCoeffects;
-use crate::hhas_param::HhasParam;
-use crate::hhas_pos::HhasSpan;
 use crate::FunctionName;
+use crate::HhasAttribute;
+use crate::HhasBody;
+use crate::HhasCoeffects;
+use crate::HhasParam;
+use crate::HhasSpan;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]

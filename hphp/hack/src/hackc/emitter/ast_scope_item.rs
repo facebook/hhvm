@@ -5,7 +5,7 @@
 
 use std::rc::Rc;
 
-use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::HhasCoeffects;
 use oxidized::ast;
 use oxidized::file_info;
 use oxidized::pos::Pos;

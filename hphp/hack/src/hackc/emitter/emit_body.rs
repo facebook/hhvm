@@ -19,12 +19,11 @@ use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::decl_vars;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_type;
-use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
+use hhbc::HhasBody;
+use hhbc::HhasParam;
+use hhbc::HhasTypeInfo;
 use hhbc::IsTypeOp;
 use hhbc::Label;
 use hhbc::Local;
@@ -310,7 +309,7 @@ pub fn emit_return_type_info<'arena>(
     match ret {
         None => Ok(HhasTypeInfo::make(
             Just("".into()),
-            hhas_type::Constraint::default(),
+            hhbc::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,

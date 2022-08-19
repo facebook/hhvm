@@ -20,7 +20,7 @@ use cxx::CxxString;
 use decl_provider::DeclProvider;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
-use hhbc::hackc_unit;
+use hhbc::HackCUnit;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
@@ -196,7 +196,7 @@ pub struct DeclsHolder {
 
 pub struct DeclParserOptions(direct_decl_parser::DeclParserOptions);
 
-pub struct HackCUnitWrapper(hackc_unit::HackCUnit<'static>, bumpalo::Bump);
+pub struct HackCUnitWrapper(HackCUnit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 

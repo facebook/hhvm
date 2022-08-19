@@ -14,10 +14,7 @@ use itertools::Itertools;
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
 ///
-pub fn ir_to_bc<'a>(
-    alloc: &'a bumpalo::Bump,
-    ir_unit: ir::Unit<'a>,
-) -> hhbc::hackc_unit::HackCUnit<'a> {
+pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::HackCUnit<'a> {
     let class_order = ir_unit.classes.iter().map(|cls| cls.name).collect_vec();
 
     let mut unit = HackCUnitBuilder::new_in(alloc, class_order);
@@ -51,14 +48,11 @@ pub fn ir_to_bc<'a>(
     );
     unit.modules = Slice::fill_iter(
         alloc,
-        ir_unit
-            .modules
-            .into_iter()
-            .map(|module| hhbc::hhas_module::HhasModule {
-                attributes: convert_attributes(alloc, module.attributes),
-                name: module.name.to_hhbc(alloc, &ir_unit.strings),
-                span: module.span,
-            }),
+        ir_unit.modules.into_iter().map(|module| hhbc::HhasModule {
+            attributes: convert_attributes(alloc, module.attributes),
+            name: module.name.to_hhbc(alloc, &ir_unit.strings),
+            span: module.span,
+        }),
     );
     unit.module_use = ir_unit.module_use.into();
     unit.symbol_refs = convert_symbol_refs(alloc, &ir_unit.symbol_refs);
@@ -74,7 +68,7 @@ pub fn ir_to_bc<'a>(
                 ir::FatalOp::Runtime(..) => hhbc::FatalOp::Runtime,
                 ir::FatalOp::RuntimeOmitFrame(..) => hhbc::FatalOp::RuntimeOmitFrame,
             };
-            let pos = hhbc::hhas_pos::HhasPos {
+            let pos = hhbc::HhasPos {
                 line_begin: loc.line_begin as usize,
                 col_begin: loc.col_begin as usize,
                 line_end: loc.line_end as usize,
@@ -88,9 +82,9 @@ pub fn ir_to_bc<'a>(
 }
 
 pub(crate) struct HackCUnitBuilder<'a> {
-    pub adata: Slice<'a, hhbc::hhas_adata::HhasAdata<'a>>,
-    pub functions: bumpalo::collections::Vec<'a, hhbc::hhas_function::HhasFunction<'a>>,
-    pub classes: bumpalo::collections::Vec<'a, hhbc::hhas_class::HhasClass<'a>>,
+    pub adata: Slice<'a, hhbc::HhasAdata<'a>>,
+    pub functions: bumpalo::collections::Vec<'a, hhbc::HhasFunction<'a>>,
+    pub classes: bumpalo::collections::Vec<'a, hhbc::HhasClass<'a>>,
     pub class_order: Vec<ir::ClassId>,
 }
 
@@ -104,8 +98,8 @@ impl<'a> HackCUnitBuilder<'a> {
         }
     }
 
-    fn finish(self) -> hhbc::hackc_unit::HackCUnit<'a> {
-        hhbc::hackc_unit::HackCUnit {
+    fn finish(self) -> hhbc::HackCUnit<'a> {
+        hhbc::HackCUnit {
             adata: self.adata,
             functions: self.functions.into_bump_slice().into(),
             classes: self.classes.into_bump_slice().into(),
@@ -124,20 +118,20 @@ fn convert_adata<'a>(
     _alloc: &'a bumpalo::Bump,
     name: Str<'a>,
     value: ir::TypedValue<'a>,
-) -> hhbc::hhas_adata::HhasAdata<'a> {
-    hhbc::hhas_adata::HhasAdata { id: name, value }
+) -> hhbc::HhasAdata<'a> {
+    hhbc::HhasAdata { id: name, value }
 }
 
 fn convert_symbol_refs<'a>(
     alloc: &'a bumpalo::Bump,
     symbol_refs: &ir::unit::SymbolRefs<'a>,
-) -> hhbc::hhas_symbol_refs::HhasSymbolRefs<'a> {
+) -> hhbc::HhasSymbolRefs<'a> {
     let classes = Slice::fill_iter(alloc, symbol_refs.classes.iter().cloned());
     let constants = Slice::fill_iter(alloc, symbol_refs.constants.iter().cloned());
     let functions = Slice::fill_iter(alloc, symbol_refs.functions.iter().cloned());
     let includes = Slice::fill_iter(alloc, symbol_refs.includes.iter().cloned());
 
-    hhbc::hhas_symbol_refs::HhasSymbolRefs {
+    hhbc::HhasSymbolRefs {
         classes,
         constants,
         functions,
@@ -148,14 +142,12 @@ fn convert_symbol_refs<'a>(
 pub(crate) fn convert_attributes<'a>(
     alloc: &'a bumpalo::Bump,
     attrs: Vec<ir::Attribute<'a>>,
-) -> Slice<'a, hhbc::hhas_attribute::HhasAttribute<'a>> {
+) -> Slice<'a, hhbc::HhasAttribute<'a>> {
     Slice::fill_iter(
         alloc,
-        attrs
-            .into_iter()
-            .map(|attr| hhbc::hhas_attribute::HhasAttribute {
-                name: attr.name,
-                arguments: Slice::fill_iter(alloc, attr.arguments.into_iter()),
-            }),
+        attrs.into_iter().map(|attr| hhbc::HhasAttribute {
+            name: attr.name,
+            arguments: Slice::fill_iter(alloc, attr.arguments.into_iter()),
+        }),
     )
 }

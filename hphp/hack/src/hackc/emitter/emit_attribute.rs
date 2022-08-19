@@ -6,7 +6,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use hhbc::hhas_attribute::HhasAttribute;
+use hhbc::HhasAttribute;
 use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;

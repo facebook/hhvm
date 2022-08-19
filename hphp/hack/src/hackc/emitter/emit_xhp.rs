@@ -8,7 +8,7 @@ use error::Error;
 use error::Result;
 use hack_macro::hack_expr;
 use hack_macro::hack_stmts;
-use hhbc::hhas_method::HhasMethod;
+use hhbc::HhasMethod;
 use hhbc::HhasXhpAttribute;
 use hhbc_string_utils as string_utils;
 use oxidized::ast::*;

@@ -8,7 +8,7 @@ use std::io::Result;
 use std::io::Write;
 use std::path::PathBuf;
 
-use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::IncludePath;
 use oxidized::relative_path::RelativePath;
 
 /// Indent is an abstraction of indentation. Configurable indentation

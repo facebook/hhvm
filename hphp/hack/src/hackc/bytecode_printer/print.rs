@@ -16,39 +16,36 @@ use ffi::Slice;
 use ffi::Str;
 use ffi::Triple;
 use hash::HashSet;
-use hhbc::hackc_unit::HackCUnit;
-use hhbc::hhas_adata::HhasAdata;
-use hhbc::hhas_adata::DICT_PREFIX;
-use hhbc::hhas_adata::KEYSET_PREFIX;
-use hhbc::hhas_adata::VEC_PREFIX;
-use hhbc::hhas_attribute::HhasAttribute;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_class::HhasClass;
-use hhbc::hhas_class::TraitReqKind;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_coeffects::HhasCtxConstant;
-use hhbc::hhas_constant::HhasConstant;
-use hhbc::hhas_function::HhasFunction;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_method::HhasMethodFlags;
-use hhbc::hhas_module::HhasModule;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_pos::HhasPos;
-use hhbc::hhas_pos::HhasSpan;
-use hhbc::hhas_property::HhasProperty;
-use hhbc::hhas_symbol_refs::HhasSymbolRefs;
-use hhbc::hhas_symbol_refs::IncludePath;
-use hhbc::hhas_type::HhasTypeInfo;
-use hhbc::hhas_type_const::HhasTypeConstant;
-use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::ClassName;
 use hhbc::ConstName;
 use hhbc::FCallArgs;
 use hhbc::FatalOp;
 use hhbc::FunctionName;
+use hhbc::HackCUnit;
+use hhbc::HhasAdata;
+use hhbc::HhasAttribute;
+use hhbc::HhasBody;
+use hhbc::HhasClass;
+use hhbc::HhasCoeffects;
+use hhbc::HhasConstant;
+use hhbc::HhasCtxConstant;
+use hhbc::HhasFunction;
+use hhbc::HhasMethod;
+use hhbc::HhasMethodFlags;
+use hhbc::HhasModule;
+use hhbc::HhasParam;
+use hhbc::HhasPos;
+use hhbc::HhasProperty;
+use hhbc::HhasSpan;
+use hhbc::HhasSymbolRefs;
+use hhbc::HhasTypeConstant;
+use hhbc::HhasTypeInfo;
+use hhbc::HhasTypedef;
+use hhbc::IncludePath;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Pseudo;
+use hhbc::TraitReqKind;
 use hhbc::TypedValue;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
@@ -725,13 +722,17 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
         TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, VEC_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, HhasAdata::VEC_PREFIX, None, values.as_ref())
         }
-        TypedValue::Dict(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, None, pairs.as_ref())
-        }
+        TypedValue::Dict(pairs) => print_adata_dict_collection_argument(
+            ctx,
+            w,
+            HhasAdata::DICT_PREFIX,
+            None,
+            pairs.as_ref(),
+        ),
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, HhasAdata::KEYSET_PREFIX, None, values.as_ref())
         }
     }
 }
@@ -747,7 +748,7 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) 
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
         escaped,
-        VEC_PREFIX,
+        HhasAdata::VEC_PREFIX,
         a.arguments.len()
     )?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;

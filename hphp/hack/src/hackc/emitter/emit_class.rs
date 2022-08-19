@@ -14,28 +14,26 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::hhas_attribute;
-use hhbc::hhas_class::HhasClass;
-use hhbc::hhas_class::TraitReqKind;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_coeffects::HhasCtxConstant;
-use hhbc::hhas_constant::HhasConstant;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_method::HhasMethodFlags;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_pos::HhasSpan;
-use hhbc::hhas_property::HhasProperty;
-use hhbc::hhas_type;
-use hhbc::hhas_type::HhasTypeInfo;
-use hhbc::hhas_type_const::HhasTypeConstant;
 use hhbc::ClassName;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::FatalOp;
+use hhbc::HhasClass;
+use hhbc::HhasCoeffects;
+use hhbc::HhasConstant;
+use hhbc::HhasCtxConstant;
+use hhbc::HhasMethod;
+use hhbc::HhasMethodFlags;
+use hhbc::HhasParam;
+use hhbc::HhasProperty;
+use hhbc::HhasSpan;
+use hhbc::HhasTypeConstant;
+use hhbc::HhasTypeInfo;
 use hhbc::HhasXhpAttribute;
 use hhbc::Local;
 use hhbc::ReadonlyOp;
 use hhbc::SpecialClsRef;
+use hhbc::TraitReqKind;
 use hhbc::TypedValue;
 use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
@@ -349,7 +347,7 @@ fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
 ) -> Result<Option<HhasTypeInfo<'arena>>> {
-    use hhas_type::Constraint;
+    use hhbc::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
@@ -492,7 +490,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhas_type::Constraint;
+    use hhbc::Constraint;
 
     let alloc = env.arena;
     let num_reified = ast_class
@@ -599,7 +597,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         )
     }
 
-    let is_const = hhas_attribute::has_const(attributes.as_ref());
+    let is_const = hhbc::has_const(attributes.as_ref());
     // In the future, we intend to set class_no_dynamic_props independently from
     // class_is_const, but for now class_is_const is the only thing that turns
     // it on.
@@ -660,7 +658,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         _ => false,
     };
     let is_final = ast_class.final_ || is_trait;
-    let is_sealed = hhas_attribute::has_sealed(attributes.as_ref());
+    let is_sealed = hhbc::has_sealed(attributes.as_ref());
 
     let tparams: Vec<&str> = ast_class
         .tparams
@@ -892,21 +890,15 @@ pub fn emit_class<'a, 'arena, 'decl>(
     flags.set(Attr::AttrSealed, is_sealed);
     flags.set(Attr::AttrTrait, is_trait);
     flags.set(Attr::AttrUnique, is_systemlib);
-    flags.set(
-        Attr::AttrEnumClass,
-        hhas_attribute::has_enum_class(&attributes),
-    );
-    flags.set(
-        Attr::AttrIsFoldable,
-        hhas_attribute::has_foldable(&attributes),
-    );
+    flags.set(Attr::AttrEnumClass, hhbc::has_enum_class(&attributes));
+    flags.set(Attr::AttrIsFoldable, hhbc::has_foldable(&attributes));
     flags.set(
         Attr::AttrDynamicallyConstructible,
-        hhas_attribute::has_dynamically_constructible(&attributes),
+        hhbc::has_dynamically_constructible(&attributes),
     );
     flags.set(
         Attr::AttrEnum,
-        enum_type.is_some() && !hhas_attribute::has_enum_class(&attributes),
+        enum_type.is_some() && !hhbc::has_enum_class(&attributes),
     );
     flags.set(Attr::AttrInternal, ast_class.internal);
 

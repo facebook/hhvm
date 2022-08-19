@@ -48,7 +48,7 @@ use std::path::PathBuf;
 use bitflags::bitflags;
 use bstr::BString;
 use bstr::ByteSlice;
-use hhbc::hhas_symbol_refs::IncludePath;
+use hhbc::IncludePath;
 use lru::LruCache;
 use options_serde::prefix_all;
 use oxidized::relative_path::RelativePath;

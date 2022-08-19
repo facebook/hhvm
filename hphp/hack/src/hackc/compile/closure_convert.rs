@@ -12,7 +12,7 @@ use global_state::ClosureEnclosingClassInfo;
 use global_state::GlobalState;
 use hack_macro::hack_expr;
 use hash::IndexSet;
-use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::HhasCoeffects;
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::fb;

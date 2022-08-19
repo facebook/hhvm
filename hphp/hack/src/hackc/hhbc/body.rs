@@ -9,9 +9,9 @@ use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
 
-use crate::hhas_param::HhasParam;
-use crate::hhas_type::HhasTypeInfo;
 use crate::hhbc_ast::Instruct;
+use crate::HhasParam;
+use crate::HhasTypeInfo;
 
 #[derive(Debug, Default, Serialize)]
 #[repr(C)]

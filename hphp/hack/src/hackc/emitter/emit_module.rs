@@ -7,9 +7,9 @@ use error::Result;
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::hhas_module::HhasModule;
-use hhbc::hhas_pos::HhasSpan;
 use hhbc::ClassName;
+use hhbc::HhasModule;
+use hhbc::HhasSpan;
 use oxidized::ast;
 
 use crate::emit_attribute;

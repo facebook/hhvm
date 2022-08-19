@@ -8,7 +8,7 @@ use error::Error;
 use error::Result;
 use ffi::Maybe::Just;
 use ffi::Slice;
-use hhbc::hhas_body::HhasBody;
+use hhbc::HhasBody;
 use hhbc::Local;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;

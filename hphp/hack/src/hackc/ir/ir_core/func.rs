@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::hhas_function::HhasFunctionFlags as FunctionFlags;
-pub use hhbc::hhas_method::HhasMethodFlags as MethodFlags;
-pub use hhbc::hhas_pos::HhasSpan;
 pub use hhbc::FunctionName;
+pub use hhbc::HhasFunctionFlags as FunctionFlags;
+pub use hhbc::HhasMethodFlags as MethodFlags;
+pub use hhbc::HhasSpan;
 pub use hhbc::MethodName;
 pub use hhbc::Visibility;
 use newtype::newtype_int;

@@ -5,11 +5,11 @@
 
 use ffi::Str;
 use hash::HashMap;
-pub use hhbc::hhas_symbol_refs::IncludePath;
-pub use hhbc::hhas_typedef::HhasTypedef as Typedef;
 pub use hhbc::ClassName;
 pub use hhbc::ConstName;
 pub use hhbc::FunctionName;
+pub use hhbc::HhasTypedef as Typedef;
+pub use hhbc::IncludePath;
 
 use crate::literal::AdataId;
 use crate::string_intern::StringInterner;

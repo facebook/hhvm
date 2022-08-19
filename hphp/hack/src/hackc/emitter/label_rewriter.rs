@@ -7,7 +7,7 @@ use env::emitter::Emitter;
 use env::LabelGen;
 use hash::HashMap;
 use hash::HashSet;
-use hhbc::hhas_param::HhasParam;
+use hhbc::HhasParam;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Opcode;

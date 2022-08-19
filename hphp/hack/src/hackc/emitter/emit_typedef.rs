@@ -6,10 +6,10 @@ use std::collections::BTreeMap;
 
 use env::emitter::Emitter;
 use error::Result;
-use hhbc::hhas_pos::HhasSpan;
-use hhbc::hhas_type::HhasTypeInfo;
-use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::ClassName;
+use hhbc::HhasSpan;
+use hhbc::HhasTypeInfo;
+use hhbc::HhasTypedef;
 use hhbc::TypedValue;
 use hhvm_types_ffi::ffi::Attr;
 use oxidized::aast_defs::Hint;

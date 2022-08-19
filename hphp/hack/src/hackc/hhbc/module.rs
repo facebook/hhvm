@@ -6,9 +6,9 @@
 use ffi::Slice;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_pos::HhasSpan;
 use crate::ClassName;
+use crate::HhasAttribute;
+use crate::HhasSpan;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]

@@ -6,7 +6,7 @@
 pub mod ast_scope_item;
 use std::borrow::Cow;
 
-use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::HhasCoeffects;
 use oxidized::ast;
 use oxidized::ast_defs::FunKind;
 use oxidized::ast_defs::Id;

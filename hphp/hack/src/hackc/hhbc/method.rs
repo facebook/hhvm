@@ -8,11 +8,11 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_body::HhasBody;
-use crate::hhas_coeffects::HhasCoeffects;
-use crate::hhas_pos::HhasSpan;
 use crate::hhbc_ast::Visibility;
+use crate::HhasAttribute;
+use crate::HhasBody;
+use crate::HhasCoeffects;
+use crate::HhasSpan;
 use crate::MethodName;
 
 #[derive(Debug, Serialize)]
@@ -39,7 +39,7 @@ bitflags! {
     }
 }
 
-impl<'a, 'arena> HhasMethod<'arena> {
+impl HhasMethod<'_> {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
     }

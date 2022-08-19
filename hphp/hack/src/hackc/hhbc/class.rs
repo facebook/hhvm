@@ -10,15 +10,15 @@ use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_coeffects::HhasCtxConstant;
-use crate::hhas_constant::HhasConstant;
-use crate::hhas_method::HhasMethod;
-use crate::hhas_pos::HhasSpan;
-use crate::hhas_property::HhasProperty;
-use crate::hhas_type::HhasTypeInfo;
-use crate::hhas_type_const::HhasTypeConstant;
 use crate::ClassName;
+use crate::HhasAttribute;
+use crate::HhasConstant;
+use crate::HhasCtxConstant;
+use crate::HhasMethod;
+use crate::HhasProperty;
+use crate::HhasSpan;
+use crate::HhasTypeConstant;
+use crate::HhasTypeInfo;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]

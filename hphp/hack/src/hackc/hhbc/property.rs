@@ -9,11 +9,11 @@ use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_type::HhasTypeInfo;
 use crate::hhbc_ast::Visibility;
-use crate::typed_value::TypedValue;
+use crate::HhasAttribute;
+use crate::HhasTypeInfo;
 use crate::PropName;
+use crate::TypedValue;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]

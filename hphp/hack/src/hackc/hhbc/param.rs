@@ -10,10 +10,10 @@ use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_type::Constraint;
-use crate::hhas_type::HhasTypeInfo;
 use crate::hhbc_ast::Label;
+use crate::Constraint;
+use crate::HhasAttribute;
+use crate::HhasTypeInfo;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]

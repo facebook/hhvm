@@ -7,10 +7,10 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Str;
 use ffi::Triple;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_function::HhasFunction;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_param::HhasParam;
+use hhbc::HhasBody;
+use hhbc::HhasFunction;
+use hhbc::HhasMethod;
+use hhbc::HhasParam;
 use ir::instr::Terminator;
 use ir::ClassIdMap;
 use ir::Instr;
@@ -217,7 +217,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &HhasParam<'a>) -> ir
     }
 }
 
-fn convert_coeffects<'a>(coeffects: &hhbc::hhas_coeffects::HhasCoeffects<'a>) -> ir::Coeffects<'a> {
+fn convert_coeffects<'a>(coeffects: &hhbc::HhasCoeffects<'a>) -> ir::Coeffects<'a> {
     ir::Coeffects {
         static_coeffects: coeffects.get_static_coeffects().to_vec(),
         unenforced_static_coeffects: coeffects.get_unenforced_static_coeffects().to_vec(),

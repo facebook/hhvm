@@ -7,11 +7,11 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhas_attribute::HhasAttribute;
-use crate::hhas_pos::HhasSpan;
-use crate::hhas_type::HhasTypeInfo;
-use crate::typed_value::TypedValue;
 use crate::ClassName;
+use crate::HhasAttribute;
+use crate::HhasSpan;
+use crate::HhasTypeInfo;
+use crate::TypedValue;
 
 #[derive(Clone, Debug, Serialize)]
 #[repr(C)]

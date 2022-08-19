@@ -10,17 +10,16 @@ use env::Env;
 use error::Result;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::hhas_attribute;
-use hhbc::hhas_attribute::HhasAttribute;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_function::HhasFunction;
-use hhbc::hhas_function::HhasFunctionFlags;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_pos::HhasSpan;
-use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
+use hhbc::HhasAttribute;
+use hhbc::HhasBody;
+use hhbc::HhasCoeffects;
+use hhbc::HhasFunction;
+use hhbc::HhasFunctionFlags;
+use hhbc::HhasParam;
+use hhbc::HhasSpan;
+use hhbc::HhasTypeInfo;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::LocalRange;
@@ -57,23 +56,17 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     let f = &fd.fun;
     let is_systemlib = emitter.systemlib();
     let is_dyn_call =
-        is_systemlib || (hhas_attribute::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_prov_skip_frame = hhas_attribute::has_provenance_skip_frame(user_attrs);
-    let is_meth_caller = hhas_attribute::has_meth_caller(user_attrs);
+        is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
+    let is_meth_caller = hhbc::has_meth_caller(user_attrs);
 
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
     attrs.set(Attr::AttrInterceptable, is_interceptable(emitter.options()));
-    attrs.set(
-        Attr::AttrIsFoldable,
-        hhas_attribute::has_foldable(user_attrs),
-    );
+    attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
-    attrs.set(
-        Attr::AttrNoInjection,
-        hhas_attribute::is_no_injection(user_attrs),
-    );
+    attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));
     attrs.set(Attr::AttrPersistent, is_systemlib);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
@@ -113,11 +106,10 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = hhas_attribute::is_keyed_by_ic_memoize(attributes.iter());
-    let is_make_ic_inaccessible_memoize =
-        hhas_attribute::is_make_ic_inaccessible_memoize(attributes.iter());
+    let should_emit_implicit_context = hhbc::is_keyed_by_ic_memoize(attributes.iter());
+    let is_make_ic_inaccessible_memoize = hhbc::is_make_ic_inaccessible_memoize(attributes.iter());
     let is_soft_make_ic_inaccessible_memoize =
-        hhas_attribute::is_soft_make_ic_inaccessible_memoize(attributes.iter());
+        hhbc::is_soft_make_ic_inaccessible_memoize(attributes.iter());
     let should_make_ic_inaccessible =
         if is_make_ic_inaccessible_memoize || is_soft_make_ic_inaccessible_memoize {
             Some(is_soft_make_ic_inaccessible_memoize)

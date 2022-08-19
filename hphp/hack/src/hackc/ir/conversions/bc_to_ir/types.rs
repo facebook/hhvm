@@ -5,8 +5,8 @@
 
 use ffi::Maybe;
 use ffi::Str;
-use hhbc::hhas_type::Constraint;
-use hhbc::hhas_type::HhasTypeInfo;
+use hhbc::Constraint;
+use hhbc::HhasTypeInfo;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use lazy_static::lazy_static;
 

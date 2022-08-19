@@ -5,7 +5,7 @@
 
 use ffi::Pair;
 use ffi::Str;
-use hhbc::hhas_class::HhasClass;
+use hhbc::HhasClass;
 use ir::class::TraitReqKind;
 use ir::Type;
 
@@ -101,9 +101,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &HhasClass<'a>) {
     });
 }
 
-fn convert_ctx_constant<'a>(
-    ctx: &hhbc::hhas_coeffects::HhasCtxConstant<'a>,
-) -> ir::CtxConstant<'a> {
+fn convert_ctx_constant<'a>(ctx: &hhbc::HhasCtxConstant<'a>) -> ir::CtxConstant<'a> {
     ir::CtxConstant {
         name: ctx.name,
         recognized: ctx.recognized.iter().cloned().collect(),
@@ -112,9 +110,7 @@ fn convert_ctx_constant<'a>(
     }
 }
 
-fn convert_type_constant<'a>(
-    tc: &hhbc::hhas_type_const::HhasTypeConstant<'a>,
-) -> ir::TypeConstant<'a> {
+fn convert_type_constant<'a>(tc: &hhbc::HhasTypeConstant<'a>) -> ir::TypeConstant<'a> {
     ir::TypeConstant {
         name: tc.name,
         initializer: tc.initializer.clone().into(),

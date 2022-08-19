@@ -8,13 +8,12 @@ use env::emitter::Emitter;
 use error::Result;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::hhas_attribute;
-use hhbc::hhas_attribute::HhasAttribute;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_function::HhasFunction;
-use hhbc::hhas_pos::HhasSpan;
 use hhbc::ClassName;
 use hhbc::FunctionName;
+use hhbc::HhasAttribute;
+use hhbc::HhasCoeffects;
+use hhbc::HhasFunction;
+use hhbc::HhasSpan;
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -31,7 +30,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
-    use hhbc::hhas_function::HhasFunctionFlags;
+    use hhbc::HhasFunctionFlags;
 
     let alloc = e.alloc;
     let f = &fd.fun;
@@ -112,7 +111,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         coeffects = coeffects.with_backdoor_globals_leak_safe(alloc)
     }
     let ast_body = &f.body.fb_ast;
-    let deprecation_info = hhas_attribute::deprecation_info(user_attrs.iter());
+    let deprecation_info = hhbc::deprecation_info(user_attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
         let native = user_attrs

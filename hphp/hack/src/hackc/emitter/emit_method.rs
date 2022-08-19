@@ -11,12 +11,11 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Slice;
-use hhbc::hhas_attribute;
-use hhbc::hhas_attribute::HhasAttribute;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_method::HhasMethodFlags;
-use hhbc::hhas_pos::HhasSpan;
+use hhbc::HhasAttribute;
+use hhbc::HhasCoeffects;
+use hhbc::HhasMethod;
+use hhbc::HhasMethodFlags;
+use hhbc::HhasSpan;
 use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
@@ -55,15 +54,14 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     is_memoize_impl: bool,
 ) -> Attr {
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
-    let is_dyn_callable = emitter.systemlib()
-        || (hhas_attribute::has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_dyn_callable =
+        emitter.systemlib() || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
     let is_interceptable = is_method_interceptable(emitter.options());
-    let is_native_opcode_impl = hhas_attribute::is_native_opcode_impl(user_attrs);
-    let is_no_injection = hhas_attribute::is_no_injection(user_attrs);
-    let is_prov_skip_frame = hhas_attribute::has_provenance_skip_frame(user_attrs);
+    let is_native_opcode_impl = hhbc::is_native_opcode_impl(user_attrs);
+    let is_no_injection = hhbc::is_no_injection(user_attrs);
+    let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_readonly_return = method.readonly_ret.is_some();
-    let is_unique =
-        emitter.systemlib() && hhas_attribute::has_native(user_attrs) && !is_native_opcode_impl;
+    let is_unique = emitter.systemlib() && hhbc::has_native(user_attrs) && !is_native_opcode_impl;
 
     let mut attrs = Attr::AttrNone;
     attrs.add(Attr::from(visibility));
@@ -72,10 +70,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_callable);
     attrs.set(Attr::AttrFinal, method.final_);
     attrs.set(Attr::AttrInterceptable, is_interceptable);
-    attrs.set(
-        Attr::AttrIsFoldable,
-        hhas_attribute::has_foldable(user_attrs),
-    );
+    attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrNoInjection, is_no_injection);
     attrs.set(Attr::AttrPersistent, is_unique);
     attrs.set(Attr::AttrReadonlyReturn, is_readonly_return);
@@ -125,7 +120,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let is_native = attributes
         .iter()
         .any(|attr| attr.is(user_attributes::is_native));
-    let is_native_opcode_impl = hhas_attribute::is_native_opcode_impl(&attributes);
+    let is_native_opcode_impl = hhbc::is_native_opcode_impl(&attributes);
     let is_async = method.fun_kind.is_fasync() || method.fun_kind.is_fasync_generator();
 
     if class.kind.is_cinterface() && !method.body.fb_ast.is_empty() {
@@ -161,7 +156,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let deprecation_info = if is_memoize {
         None
     } else {
-        hhas_attribute::deprecation_info(attributes.iter())
+        hhbc::deprecation_info(attributes.iter())
     };
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal::emit_fatal_runtimeomitframe(

@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::hhas_class::TraitReqKind;
-pub use hhbc::hhas_pos::HhasSpan;
-pub use hhbc::hhas_property::HhasProperty as Property;
+pub use hhbc::HhasProperty as Property;
+pub use hhbc::HhasSpan;
+pub use hhbc::TraitReqKind;
 
 use crate::Attr;
 use crate::Attribute;

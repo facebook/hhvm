@@ -6,7 +6,7 @@
 use std::io::Result;
 use std::io::Write;
 
-use hhbc::hhas_coeffects::HhasCoeffects;
+use hhbc::HhasCoeffects;
 use write_bytes::write_bytes;
 use write_bytes::DisplayBytes;
 

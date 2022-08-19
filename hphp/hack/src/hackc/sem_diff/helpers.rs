@@ -13,73 +13,73 @@ pub(crate) trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::hhas_adata::HhasAdata<'_> {
+impl MapName for hhbc::HhasAdata<'_> {
     fn get_name(&self) -> &str {
         self.id.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_class::HhasClass<'_> {
+impl MapName for hhbc::HhasClass<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_constant::HhasConstant<'_> {
+impl MapName for hhbc::HhasConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_coeffects::HhasCtxConstant<'_> {
+impl MapName for hhbc::HhasCtxConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_function::HhasFunction<'_> {
+impl MapName for hhbc::HhasFunction<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_method::HhasMethod<'_> {
+impl MapName for hhbc::HhasMethod<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_module::HhasModule<'_> {
+impl MapName for hhbc::HhasModule<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_property::HhasProperty<'_> {
+impl MapName for hhbc::HhasProperty<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_typedef::HhasTypedef<'_> {
+impl MapName for hhbc::HhasTypedef<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_type_const::HhasTypeConstant<'_> {
+impl MapName for hhbc::HhasTypeConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::hhas_class::TraitReqKind> {
+impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::hhas_type::HhasTypeInfo<'_>>> {
+impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::HhasTypeInfo<'_>>> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }

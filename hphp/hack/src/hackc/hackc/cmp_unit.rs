@@ -12,21 +12,21 @@ use ffi::Str;
 use ffi::Triple;
 use hash::HashMap;
 use hash::HashSet;
-use hhbc::hackc_unit::HackCUnit;
-use hhbc::hhas_attribute::HhasAttribute;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_class::HhasClass;
-use hhbc::hhas_constant::HhasConstant;
-use hhbc::hhas_function::HhasFunction;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_module::HhasModule;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_pos::HhasPos;
-use hhbc::hhas_property::HhasProperty;
-use hhbc::hhas_symbol_refs::HhasSymbolRefs;
-use hhbc::hhas_type::HhasTypeInfo;
-use hhbc::hhas_typedef::HhasTypedef;
 use hhbc::FatalOp;
+use hhbc::HackCUnit;
+use hhbc::HhasAttribute;
+use hhbc::HhasBody;
+use hhbc::HhasClass;
+use hhbc::HhasConstant;
+use hhbc::HhasFunction;
+use hhbc::HhasMethod;
+use hhbc::HhasModule;
+use hhbc::HhasParam;
+use hhbc::HhasPos;
+use hhbc::HhasProperty;
+use hhbc::HhasSymbolRefs;
+use hhbc::HhasTypeInfo;
+use hhbc::HhasTypedef;
 use hhbc::Instruct;
 use hhbc::Opcode;
 use hhbc::TypedValue;
@@ -112,73 +112,73 @@ trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::hhas_adata::HhasAdata<'_> {
+impl MapName for hhbc::HhasAdata<'_> {
     fn get_name(&self) -> &str {
         self.id.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_class::HhasClass<'_> {
+impl MapName for hhbc::HhasClass<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_constant::HhasConstant<'_> {
+impl MapName for hhbc::HhasConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_coeffects::HhasCtxConstant<'_> {
+impl MapName for hhbc::HhasCtxConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_function::HhasFunction<'_> {
+impl MapName for hhbc::HhasFunction<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_method::HhasMethod<'_> {
+impl MapName for hhbc::HhasMethod<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_module::HhasModule<'_> {
+impl MapName for hhbc::HhasModule<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_property::HhasProperty<'_> {
+impl MapName for hhbc::HhasProperty<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_typedef::HhasTypedef<'_> {
+impl MapName for hhbc::HhasTypedef<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::hhas_type_const::HhasTypeConstant<'_> {
+impl MapName for hhbc::HhasTypeConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::hhas_class::TraitReqKind> {
+impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::hhas_type::HhasTypeInfo<'_>>> {
+impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::HhasTypeInfo<'_>>> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }
@@ -268,8 +268,8 @@ where
 /// T126391106: BCP drops information
 /// T126543346: Difficult to verify IncludeRootRelative
 fn cmp_includes(
-    a: &Slice<'_, hhbc::hhas_symbol_refs::IncludePath<'_>>,
-    b: &Slice<'_, hhbc::hhas_symbol_refs::IncludePath<'_>>,
+    a: &Slice<'_, hhbc::IncludePath<'_>>,
+    b: &Slice<'_, hhbc::IncludePath<'_>>,
 ) -> Result<()> {
     for bv in b.iter() {
         if !a.iter().any(|av| cmp_include(av, bv).is_ok()) {
@@ -692,11 +692,8 @@ fn cmp_static_coeffects(
     }
 }
 
-fn cmp_coeffects(
-    a: &hhbc::hhas_coeffects::HhasCoeffects<'_>,
-    b: &hhbc::hhas_coeffects::HhasCoeffects<'_>,
-) -> Result<()> {
-    let hhbc::hhas_coeffects::HhasCoeffects {
+fn cmp_coeffects(a: &hhbc::HhasCoeffects<'_>, b: &hhbc::HhasCoeffects<'_>) -> Result<()> {
+    let hhbc::HhasCoeffects {
         static_coeffects: a_sc,
         unenforced_static_coeffects: a_usc,
         fun_param: a_fp,
@@ -708,7 +705,7 @@ fn cmp_coeffects(
         caller: a_c,
     } = a;
 
-    let hhbc::hhas_coeffects::HhasCoeffects {
+    let hhbc::HhasCoeffects {
         static_coeffects: b_sc,
         unenforced_static_coeffects: b_usc,
         fun_param: b_fp,
@@ -814,16 +811,10 @@ fn cmp_module(a: &HhasModule<'_>, b: &HhasModule<'_>) -> Result<()> {
 
 /// Compares two include paths. a can be a relative path and b an aboslute path as long as
 /// a is the end of b
-fn cmp_include(
-    a: &hhbc::hhas_symbol_refs::IncludePath<'_>,
-    b: &hhbc::hhas_symbol_refs::IncludePath<'_>,
-) -> Result<()> {
+fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result<()> {
     if a != b {
         match (a, b) {
-            (
-                hhbc::hhas_symbol_refs::IncludePath::SearchPathRelative(a_bs),
-                hhbc::hhas_symbol_refs::IncludePath::Absolute(b_bs),
-            ) => {
+            (hhbc::IncludePath::SearchPathRelative(a_bs), hhbc::IncludePath::Absolute(b_bs)) => {
                 let a_bs = a_bs.as_bstr();
                 let b_bs = b_bs.as_bstr();
                 if b_bs.ends_with(a_bs) {
@@ -832,10 +823,9 @@ fn cmp_include(
                     bail!("Mismatch {:?} vs {:?}", a, b)
                 }
             }
-            (
-                hhbc::hhas_symbol_refs::IncludePath::IncludeRootRelative(_, _),
-                hhbc::hhas_symbol_refs::IncludePath::Absolute(_),
-            ) => Ok(()),
+            (hhbc::IncludePath::IncludeRootRelative(_, _), hhbc::IncludePath::Absolute(_)) => {
+                Ok(())
+            }
             _ => bail!("Mismatch {:?} vs {:?}", a, b),
         }
     } else {
@@ -890,15 +880,12 @@ fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result<()
     }
 }
 
-fn cmp_type_constraint(
-    a: &hhbc::hhas_type::Constraint<'_>,
-    b: &hhbc::hhas_type::Constraint<'_>,
-) -> Result<()> {
-    let hhbc::hhas_type::Constraint {
+fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Result<()> {
+    let hhbc::Constraint {
         name: a_name,
         flags: a_flags,
     } = a;
-    let hhbc::hhas_type::Constraint {
+    let hhbc::Constraint {
         name: b_name,
         flags: b_flags,
     } = b;

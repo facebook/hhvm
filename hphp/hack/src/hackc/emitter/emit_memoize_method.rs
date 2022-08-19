@@ -14,16 +14,15 @@ use error::Error;
 use error::Result;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::hhas_attribute;
-use hhbc::hhas_body::HhasBody;
-use hhbc::hhas_coeffects::HhasCoeffects;
-use hhbc::hhas_method::HhasMethod;
-use hhbc::hhas_method::HhasMethodFlags;
-use hhbc::hhas_param::HhasParam;
-use hhbc::hhas_pos::HhasSpan;
-use hhbc::hhas_type::HhasTypeInfo;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
+use hhbc::HhasBody;
+use hhbc::HhasCoeffects;
+use hhbc::HhasMethod;
+use hhbc::HhasMethodFlags;
+use hhbc::HhasParam;
+use hhbc::HhasSpan;
+use hhbc::HhasTypeInfo;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::LocalRange;
@@ -167,21 +166,21 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     arg_flags.set(Flags::IS_REIFIED, is_reified);
     arg_flags.set(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
-        hhas_attribute::is_keyed_by_ic_memoize(attributes.iter()),
+        hhbc::is_keyed_by_ic_memoize(attributes.iter()),
     );
     arg_flags.set(
         Flags::SHOULD_MAKE_IC_INACCESSIBLE,
-        hhas_attribute::is_make_ic_inaccessible_memoize(attributes.iter()),
+        hhbc::is_make_ic_inaccessible_memoize(attributes.iter()),
     );
     arg_flags.set(
         Flags::SHOULD_SOFT_MAKE_IC_INACCESSIBLE,
-        hhas_attribute::is_soft_make_ic_inaccessible_memoize(attributes.iter()),
+        hhbc::is_soft_make_ic_inaccessible_memoize(attributes.iter()),
     );
     let mut args = Args {
         info,
         method,
         scope,
-        deprecation_info: hhas_attribute::deprecation_info(attributes.iter()),
+        deprecation_info: hhbc::deprecation_info(attributes.iter()),
         params: &method.params,
         ret,
         method_id: &name,

@@ -359,6 +359,152 @@ class TestLsp(TestCase[LspTestDriver]):
             "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
         )
 
+    def test_optional_param_completion(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("optional_param_completion.php"))
+        self.test_driver.stop_hh_server()
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("optional_param_completion"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(int $x, int $y=_): void",
+                            "inlineDetail": "(int $x)",
+                            "itemType": "void",
+                            "sortText": "doStuff",
+                            # We don't want to require the user to provide optional arguments, so
+                            # only insert $x, not $y.
+                            "insertText": "doStuff(${1:\\$x})",
+                            "insertTextFormat": 2,
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/optional_param_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletion",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_all_optional_params_completion(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("all_optional_params_completion.php"))
+        self.test_driver.stop_hh_server()
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("all_optional_params_completion"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(int $x=_, int $y=_): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "doStuff",
+                            "insertText": "doStuff()",
+                            "insertTextFormat": 2,
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/all_optional_params_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletionOptional",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_serverless_ide_completion(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))

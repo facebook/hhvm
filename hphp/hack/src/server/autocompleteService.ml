@@ -187,10 +187,11 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
       param_variadic = i + 1 = n && get_ft_variadic ft;
     }
   in
+  let min_arity = arity_min ft in
   {
     return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
-    min_arity = arity_min ft;
-    params = List.mapi ft.ft_params ~f:param_to_record;
+    min_arity;
+    params = List.mapi (List.take ft.ft_params min_arity) ~f:param_to_record;
   }
 
 (* Convert a `ty` into a func details structure *)

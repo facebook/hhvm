@@ -2066,7 +2066,34 @@ let check_class_extends_parents_typeconsts
                  typeconst = parent_tconst;
                }
              env ->
-          match Cls.get_typeconst class_ tconst_name with
+          (* If class_ is a trait that has a require class C constraint, and C provides a concrete definition
+           * for the type constant, then compare the parent type constant against the type constant defined in
+           * the required class.  Otherwise compare it against the type constant defined in class_, if any *)
+          let class_tconst_opt =
+            let class_req_tconst_opt =
+              if Ast_defs.is_c_trait (Cls.kind class_) then
+                List.find_map
+                  (Cls.all_ancestor_req_class_requirements class_)
+                  ~f:(fun (_, req_ty) ->
+                    match deref req_ty with
+                    | (_, Tapply ((_, cn), _)) ->
+                      Decl_provider.get_class (Env.get_ctx env) cn
+                      >>= fun cnc ->
+                      (* Since only final classes can satisfy require class constraints, if the type constant is
+                       * found in the require class then it must be concrete.  No need to check that here. *)
+                      Cls.get_typeconst cnc tconst_name
+                    | _ ->
+                      (* We ensure elsewhere that require class constraints can only be used with class names *)
+                      None)
+              else
+                None
+            in
+            match class_req_tconst_opt with
+            | None -> Cls.get_typeconst class_ tconst_name
+            | Some _ -> class_req_tconst_opt
+          in
+
+          match class_tconst_opt with
           | Some tconst ->
             check_typeconst_override
               env

@@ -163,12 +163,12 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4)
-      message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
+      message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 10.3 OR
-       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 10.3)
-     message(WARNING "HHVM is primarily tested on GCC 7.4-10.3. Using other versions may produce unexpected results, or may not even build at all.")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 11.3 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 11.3)
+     message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR

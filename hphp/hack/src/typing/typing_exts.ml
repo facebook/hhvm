@@ -64,6 +64,22 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->
+        (* Ugly hack to remove like-type from return syntactically so that in dynamic mode
+         * we don't simplify it to dynamic.
+         *)
+        let fty =
+          {
+            fty with
+            ft_ret =
+              {
+                fty.ft_ret with
+                et_type =
+                  (match get_node fty.ft_ret.et_type with
+                  | Tlike ty -> ty
+                  | _ -> fty.ft_ret.et_type);
+              };
+          }
+        in
         let ety_env = empty_expand_env in
         let instantiation =
           Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
@@ -84,9 +100,8 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
             { ft_params = pars; ft_ret = { et_type = ty; _ }; _ } ) ->
         Option.iter ty_err_opt ~f:Errors.add_typing_error;
         let (env, ty) = Env.expand_type env ty in
-        let stripped_ty = Typing_utils.strip_dynamic env ty in
         let ty_opt =
-          match get_node stripped_ty with
+          match get_node ty with
           | Tprim Tstring -> None
           | Tdynamic -> None
           | _ -> Some ty

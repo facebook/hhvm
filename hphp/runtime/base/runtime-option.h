@@ -1168,7 +1168,7 @@ struct RuntimeOption {
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
-  F(int64_t, ObjProfMaxNesting, 2500)                                   \
+  F(int64_t, ObjProfMaxNesting, 2000)                                   \
   /* Should we use type structures? */                                  \
   F(bool, EmitBespokeTypeStructures, false)                             \
   /* Choice of layout selection algorithms:                             \

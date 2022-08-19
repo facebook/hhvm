@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 function generate($arr) {
-  for ($i = 0; $i < 20000; $i++) {
+  for ($i = 0; $i < 2000; $i++) {
     $arr = vec[$arr];
   }
   return $arr;

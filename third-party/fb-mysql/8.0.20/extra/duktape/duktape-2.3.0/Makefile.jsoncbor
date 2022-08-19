@@ -1,0 +1,10 @@
+#
+#  Example Makefile for building the jsoncbor example
+#
+
+CC = gcc
+
+jsoncbor:
+	$(CC) -o $@ -std=c99 -Wall -Wextra -O2 -Isrc -Iextras/cbor \
+		src/duktape.c extras/cbor/duk_cbor.c extras/cbor/jsoncbor.c \
+		-lm

@@ -1,0 +1,96 @@
+'\" t
+.\"     Title: \fBmysqlrouter_passwd\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/05/2020
+.\"    Manual: MySQL Router
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLROUTER_PASSWD\FR" "1" "03/05/2020" "MySQL 8\&.0" "MySQL Router"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqlrouter_passwd \- MySQL Router Password Tool
+.SH "SYNOPSIS"
+.HP \w'\fBmysqlrouter_passwd\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBmysqlrouter_passwd [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBmysqlrouter_passwd\fR
+utility is a a command line application to manage the accounts in the passwd file\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+This feature was added in MySQL Router 8\&.0\&.16\&.
+.sp .5v
+.RE
+.PP
+Usage information:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Usage: \&./mysqlrouter_passwd [\-\-delete] [\-?|\-\-help] [\-\-kdf=<name>] [\-\-list] [\-\-verify]
+                            [\-V|\-\-version] [\-\-work\-factor=<num>] [filename username]
+Options:
+  \-\-delete
+      Delete username if it exists\&.
+  \-?, \-\-help
+      Display this help and exit\&.
+  \-\-kdf <name>
+      Key Derivation Function\&. One of pbkdf2\-sha256, pbkdf2\-sha512, sha256\-crypt, sha512\-crypt\&. default: sha256\-crypt
+  \-\-list
+      List account(s)\&.
+  \-\-verify
+      Verify password against stored hash for username\&. Exit\-code is 0 if password matches, 1 otherwise
+  \-V, \-\-version
+      Display version information and exit\&.
+  \-\-work\-factor <num>
+      Work\-factor hint for KDF if account is updated\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 2006, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

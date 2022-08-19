@@ -1,0 +1,93 @@
+/*****************************************************************************
+
+Copyright (c) 2016, 2017, Oracle and/or its affiliates. All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License, version 2.0, as published by the
+Free Software Foundation.
+
+This program is also distributed with certain software (including but not
+limited to OpenSSL) that is licensed under separate terms, as designated in a
+particular file or component or in included license documentation. The authors
+of MySQL hereby grant you an additional permission to link the program and
+your derivative works with the separately licensed software that they have
+included with MySQL.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License, version 2.0,
+for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+*****************************************************************************/
+Prototype to design the WL#8960 - Partial fetch and update of LOB.
+
+Uncompressed LOB:
+================
+
+There are 3 types of pages - data pages, index pages and the first page.  The
+data pages contain the LOB data.  The index pages contain the index entries.
+The first page is divided into two - the first half contains the index entries
+and the second half contains the LOB data.
+
+Each index entry defines one data page.  It contains the following information:
+
+.  the previous index entry (6 bytes)
+.  the next index entry (6 bytes)
+.  list of older versions (16 bytes)
+.  the trx id that created this index entry (6 bytes)
+.  the page number (4 bytes)
+.  data length. (2 bytes)
+
+Total size of 1 index entry is 40 bytes.
+
+For 16K page size, here are some useful information about the first page:
+
+.  The first page can contain 203 index entries.
+.  The first page can contain 8148 bytes of LOB data.
+.  The first page is sufficient for an LOB of 3MB size (3317716 bytes).
+
+For 16K page size, here are some useful information about an index page:
+
+.  The index page can contain 408 index entries.
+.  The index page can represent 6684672 bytes (6MB) of LOB data.
+.  For 1GB of data we need 160 index pages.
+.  For 4GB of data we need 640 index pages.
+
+So for a small LOB of about 9MB, we will have 1 first page and 1 index page.
+
+Reading the LOB:
+---------------
+
+The header of first page contains the base node of the list of index entries.
+Traversing this list will give the latest version of the LOB.  If any index
+entry is not to be seen by the reading trx, then its list of older version
+is checked to see if it can see any of them.  If no older version is to be
+seen, the index entry is skipped.
+
+Modification:
+------------
+
+There are 3 operations - replace (size does not change), insert middle at the
+given offset (size increases), remove middle at give offset (size decreases).
+All the 3 modifications do page level copy-on-write.  If an existing page is
+to be modified, then a copy is created and their index entries are adjusted
+so that the new version is the latest version and the existing page becomes
+an older version.
+
+Rollback and Purge:
+-------------------
+
+Given a trxid, the list of modified pages is available from the index
+entries.  For rollback and purge operation, the index entries can be
+traversed and the relevant index entries can be removed.
+
+Rolling back to savepoint:
+--------------------------
+
+Each page contains the FIL_PAGE_LSN. If this is greater than the save point
+lsn then remove this page, otherwise retain it.
+

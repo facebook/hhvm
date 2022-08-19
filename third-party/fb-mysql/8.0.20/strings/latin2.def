@@ -1,0 +1,478 @@
+; Character code definition file for latin2 languages (for use with cset)
+;   it's written for Czech, but may be used generally; works 
+;   minimum for Slovenian alphabet too (or at least I hope so)
+;
+; Written by Jaromir Dolecek <dolecek@ics.muni.cz>
+;
+; Notes of defined sorting order:
+;	Upper/Lower case is ignored
+;	All characters with the accents are sorted after appropriate 
+;	character without accent in order: 
+;	  Xacute, Xring , Xcaron, Xslash, Xcedilla, Xogonek, Xcircumflex, 
+;	  Xbreve, Xhungarumlaut, Xdieresis, Xdotaccent
+;
+latin2
+***
+NUL	0	C
+SOH		C
+STX		C
+ETX		C
+EOT		C
+ENQ		C
+ACK		C
+BEL		C
+BS		C
+HT		CS
+LF		CS
+VT		CS
+FF		CS
+CR		CS
+SO		C
+SI		C
+DLE		C
+DC1		C
+DC2		C
+DC3		C
+DC4		C
+NAK		C
+SYN		C
+ETB		C
+CAN		C
+EM		C
+SUB		C
+ESC		C
+FS		C
+GS		C
+RS		C
+US		C
+/space 		BS
+/exclam 	P
+/quotedbl 	P
+/numbersign 	P
+/dollar 	P
+/percent 	P
+/ampersand 	P
+/quoteright	P
+/parenleft 	P
+/parenright 	P
+/asterisk 	P
+/plus 		P
+/comma 		P
+/minus 		P
+/period 	P
+/slash		P
+/zero 		NX
+/one 		NX
+/two 		NX
+/three 		NX
+/four 		NX
+/five 		NX
+/six 		NX
+/seven		NX
+/eight 		NX
+/nine 		NX
+/colon 		P
+/semicolon 	P
+/less 		P
+/equal 		P
+/greater 	P
+/question	P
+/at 		P
+/A		UX
+/B 		UX
+/C 		UX
+/D 		UX
+/E 		UX
+/F 		UX
+/G		U
+/H 		U
+/I 		U
+/J 		U
+/K 		U
+/L 		U
+/M 		U
+/N 		U
+/O		U
+/P 		U
+/Q 		U
+/R 		U
+/S 		U
+/T 		U
+/U 		U
+/V 		U
+/W		U
+/X 		U
+/Y 		U
+/Z 		U
+/bracketleft 	P
+/backslash 	P
+/bracketright 	P
+/asciicircum 	P
+/underscore	P
+/quoteleft 	P
+/a 		LX
+/b 		LX
+/c 		LX
+/d 		LX
+/e 		LX
+/f 		LX
+/g		L
+/h 		L
+/i 		L
+/j 		L
+/k 		L
+/l 		L
+/m 		L
+/n  		L
+/o 		L
+/p  		L
+/q  		L
+/r  		L
+/s  		L
+/t  		L
+/u  		L
+/v  		L
+/w 		L
+/x  		L
+/y  		L
+/z  		L
+/braceleft 	P
+/bar 		P
+/braceright 	P
+/tilde 		P
+NUL_ 		C
+SOH_            C
+STX_            C
+ETX_            C
+EOT_            C
+ENQ_            C
+ACK_            C
+BEL_            C
+BS_             C
+HT_             CS
+LF_             CS
+VT_             CS
+FF_             CS
+CR_             CS
+SO_             C
+SI_             C
+DLE_            C
+DC1_            C
+DC2_            C
+DC3_            C
+DC4_            C
+NAK_            C
+SYN_            C
+ETB_            C
+CAN_            C
+EM_             C
+SUB_            C
+ESC_            C
+FS_             C
+GS_             C
+RS_             C
+US_              C
+/space_  	SB
+/Aogonek 	U
+/breve 		P
+/Lslash 	U
+/currency 	P
+/Lcaron 	U
+/Sacute 	U
+/dieresis	P
+/Scaron 169	U
+/Scedilla 	U
+/Tcaron 	U
+/Zacute 	U
+/hyphen 	P
+/Zcaron 	U
+/Zdotaccent	U
+/degree 	P
+/aogonek 	L
+/ogonek 	P
+/lslash 	L
+/acute 		P
+/lcaron 	L
+/sacute 	L
+/caron		P
+/cedilla 	P
+/scaron 	L
+/scedilla 	L
+/tcaron 	L
+/zacute 	L
+/hungarumlaut 	P
+/zcaron 	L
+/zdotaccent	L
+/Racute 	U
+/Aacute 	U
+/Acircumflex 	U
+/Abreve 	U
+/Adieresis 	U
+/Lacute 	U
+/Cacute 	U
+/Ccedilla	U
+/Ccaron 	U
+/Eacute 	U
+/Eogonek 	U
+/Edieresis 	U
+/Ecaron 	U
+/Iacute 	U
+/Icircumflex 	U
+/Dcaron		U
+/Eth 		P
+/Nacute 	U
+/Ncaron 	U
+/Oacute 	U
+/Ocircumflex 	U
+/Ohungarumlaut 	U
+/Odieresis 	U
+/multiply	P
+/Rcaron 	U
+/Uring 		U
+/Uacute 	U
+/Uhungarumlaut 	U
+/Udieresis 	U
+/Yacute 	U
+/Tcedilla 	U
+/germandbls	P
+/racute 	L
+/aacute 	L
+/acircumflex 	L
+/abreve 	L
+/adieresis 	L
+/lacute 	L
+/cacute 	L
+/ccedilla	L
+/ccaron 	L
+/eacute 	L
+/eogonek 	L
+/edieresis 	L
+/ecaron 	L
+/iacute 	L
+/icircumflex 	L
+/dcaron		L
+/dbar 		L
+/nacute 	L
+/ncaron 	L
+/oacute 	L
+/ocircumflex 	L
+/ohungarumlaut 	L
+/odieresis 	L
+/divide		P
+/rcaron 	L
+/uring 		L
+/uacute 	L
+/uhungarumlaut 	L
+/udieresis 	L
+/yacute 	L
+/tcedilla 	L
+/dotaccent	P
+***
+/A /a
+/B /b
+/C /c
+/D /d
+/E /e
+/F /f
+/G /g
+/H /h
+/I /i
+/J /j
+/K /k
+/L /l
+/M /m
+/N /n
+/O /o
+/P /p
+/Q /q
+/R /r
+/S /s
+/T /t
+/U /u
+/V /v
+/W /w
+/X /x
+/Y /y
+/Z /z
+/Aogonek /aogonek
+/Lslash	/lslash 
+/Lcaron /lcaron 
+/Sacute /sacute
+/Scaron /scaron
+/Scedilla /scedilla
+/Tcaron /tcaron
+/Zacute /zacute
+/Zcaron /zcaron
+/Zdotaccent /zdotaccent
+/Racute /racute
+/Aacute /aacute
+/Acircumflex /acircumflex 
+/Abreve /abreve
+/Adieresis /adieresis 
+/Lacute /lacute
+/Cacute /cacute
+/Ccedilla /ccedilla
+/Ccaron /ccaron
+/Eacute /eacute
+/Eogonek /eogonek
+/Edieresis /edieresis 
+/Ecaron /ecaron
+/Iacute /iacute
+/Icircumflex /icircumflex 
+/Dcaron /dcaron
+/Nacute /nacute
+/Ncaron /ncaron
+/Oacute /oacute
+/Ocircumflex /ocircumflex 
+/Ohungarumlaut /ohungarumlaut 
+/Odieresis /odieresis 
+/Rcaron /rcaron
+/Uring /uring
+/Uacute /uacute
+/Uhungarumlaut /uhungarumlaut 
+/Udieresis /udieresis 
+/Yacute /yacute 
+/Tcedilla /tcedilla 
+***
+NUL NUL_
+SOH SOH_
+STX STX_	
+ETX ETX_	
+EOT EOT_	
+ENQ ENQ_	
+ACK ACK_	
+BEL BEL_	
+BS BS_
+HT HT_	
+LF LF_	
+VT VT_
+FF FF_
+CR CR_
+SO SO_
+SI SI_
+DLE DLE_
+DC1 DC1_
+DC2 DC2_
+DC3 DC3_
+DC4 DC4_
+NAK NAK_
+SYN SYN_
+ETB ETB_
+CAN CAN_
+EM EM_
+SUB SUB_
+ESC ESC_
+FS FS_
+GS GS_
+RS RS_
+US US_
+/space 
+/exclam 
+/quotedbl 
+/numbersign 
+/dollar 
+/percent 
+/ampersand 
+/quoteright
+/parenleft 
+/parenright 
+/asterisk 
+/plus 
+/comma 
+/minus 
+/period 
+/slash
+/zero 
+/one 
+/two 
+/three 
+/four 
+/five 
+/six 
+/seven
+/eight 
+/nine 
+/colon 
+/semicolon 
+/less 
+/equal 
+/greater 
+/question
+/at 
+/A /a 
+/Aogonek /aogonek 
+/Aacute /aacute 
+/Acircumflex /acircumflex 
+/Abreve /abreve 
+/Adieresis /adieresis 
+/B /b
+/C /c 
+/Cacute /cacute
+/Ccaron /ccaron
+/Ccedilla /ccedilla
+/D /d 
+/Dcaron /dcaron
+/E /e 
+/Eacute /eacute 
+/Ecaron /ecaron 
+/Eogonek /eogonek 
+/Edieresis /edieresis 
+/F /f
+/G /g
+/H /h
+/I /i 
+/Icircumflex 
+/icircumflex 
+/Iacute /iacute
+/J /j
+/K /k
+/L /l 
+/Lslash /lslash 
+/Lcaron /lcaron 
+/Lacute /lacute
+/M /m
+/N /n 
+/Nacute /nacute 
+/Ncaron /ncaron
+/O /o 
+/Oacute /oacute 
+/Ocircumflex /ocircumflex 
+/Ohungarumlaut /ohungarumlaut 
+/Odieresis /odieresis 
+/P /p
+/Q /q
+/R /r 
+/Racute /racute 
+/Rcaron /rcaron
+/S /s 
+/Sacute /sacute 
+/Scaron /scaron
+/Scedilla /scedilla
+/T /t 
+/Tcaron /tcaron 
+/Tcedilla /tcedilla 
+/U /u 
+/Uacute /uacute 
+/Uring /uring 
+/Uhungarumlaut /uhungarumlaut 
+/Udieresis /udieresis 
+/V /v
+/W /w
+/X /x
+/Y /y 
+/Yacute /yacute 
+/Z /z 
+/Zacute /zacute 
+/Zcaron /zcaron
+/Zdotaccent /zdotaccent
+/bracketleft 
+/backslash 
+/bracketright 
+/asciicircum 
+/underscore
+/quoteleft 
+/braceleft 
+/bar 
+/braceright 
+/tilde 
+***

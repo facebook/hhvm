@@ -1,0 +1,121 @@
+'\" t
+.\"     Title: \fBndb_print_file\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_PRINT_FILE\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_print_file \- print NDB Disk Data file contents
+.SH "SYNOPSIS"
+.HP \w'\fBndb_print_file\ [\-v]\ [\-q]\ \fR\fB\fIfile_name\fR\fR\fB+\fR\ 'u
+\fBndb_print_file [\-v] [\-q] \fR\fB\fIfile_name\fR\fR\fB+\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_print_file\fR
+obtains information from an NDB Cluster Disk Data file\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_print_file [\-v] [\-q] \fIfile_name\fR+
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIfile_name\fR
+is the name of an NDB Cluster Disk Data file\&. Multiple filenames are accepted, separated by spaces\&.
+.PP
+Like
+\fBndb_print_schema_file\fR
+and
+\fBndb_print_sys_file\fR
+(and unlike most of the other
+NDB
+utilities that are intended to be run on a management server host or to connect to a management server)
+\fBndb_print_file\fR
+must be run on an NDB Cluster data node, since it accesses the data node file system directly\&. Because it does not make use of the management server, this utility can be used when the management server is not running, and even when the cluster has been completely shut down\&.
+Additional Options
+.PP
+\fBndb_print_file\fR
+supports the following options:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-v\fR: Make output verbose\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-q\fR: Suppress output (quiet mode)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-h\fR,
+\fB\-?\fR: Print help message\&.
+.RE
+.PP
+For more information, see
+Section\ \&22.5.13, \(lqNDB Cluster Disk Data Tables\(rq\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

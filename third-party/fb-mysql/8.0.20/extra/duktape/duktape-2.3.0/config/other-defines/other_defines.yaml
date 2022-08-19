@@ -1,0 +1,32 @@
+# Varargs copy, not always provided by platform
+- define: DUK_VA_COPY
+
+# Misc compiler/preprocessor
+- define: DUK_MACRO_STRINGIFY
+- define: DUK_CAUSE_SEGFAULT
+- define: DUK_UNREF
+- define: DUK_NORETURN
+- define: DUK_UNREACHABLE
+- define: DUK_LIKELY
+- define: DUK_UNLIKELY
+  # Inline control macros applied to function definition, not declaration.
+- define: DUK_NOINLINE
+- define: DUK_INLINE
+- define: DUK_ALWAYS_INLINE
+
+# Symbol visibility
+- define: DUK_EXTERNAL_DECL
+- define: DUK_EXTERNAL
+- define: DUK_INTERNAL_DECL
+- define: DUK_INTERNAL
+- define: DUK_LOCAL_DECL
+- define: DUK_LOCAL
+
+# File/line/function
+- define: DUK_FILE_MACRO
+- define: DUK_LINE_MACRO
+- define: DUK_FUNC_MACRO
+
+# Byteswap macros, definable because may want to use asm
+- define: DUK_BSWAP32
+- define: DUK_BSWAP16

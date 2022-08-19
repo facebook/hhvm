@@ -1,0 +1,718 @@
+'\" t
+.\"     Title: \fBndb_desc\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_DESC\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_desc \- describe NDB tables
+.SH "SYNOPSIS"
+.HP \w'\fBndb_desc\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_desc \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_desc\fR
+provides a detailed description of one or more
+NDB
+tables\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_desc \-c \fIconnection_string\fR \fItbl_name\fR \-d \fIdb_name\fR [\fIoptions\fR]
+ndb_desc \-c \fIconnection_string\fR \fIindex_name\fR \-d \fIdb_name\fR \-t \fItbl_name\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Additional options that can be used with
+\fBndb_desc\fR
+are listed later in this section\&.
+Sample Output
+.PP
+MySQL table creation and population statements:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+USE test;
+CREATE TABLE fish (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL,
+    length_mm INT(11) NOT NULL,
+    weight_gm INT(11) NOT NULL,
+    PRIMARY KEY pk (id),
+    UNIQUE KEY uk (name)
+) ENGINE=NDB;
+INSERT INTO fish VALUES
+    (NULL, \*(Aqguppy\*(Aq, 35, 2), (NULL, \*(Aqtuna\*(Aq, 2500, 150000),
+    (NULL, \*(Aqshark\*(Aq, 3000, 110000), (NULL, \*(Aqmanta ray\*(Aq, 1500, 50000),
+    (NULL, \*(Aqgrouper\*(Aq, 900, 125000), (NULL ,\*(Aqpuffer\*(Aq, 250, 2500);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Output from
+\fBndb_desc\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_desc \-c localhost fish \-d test \-p\fR
+\-\- fish \-\-
+Version: 2
+Fragment type: HashMapPartition
+K Value: 6
+Min load factor: 78
+Max load factor: 80
+Temporary table: no
+Number of attributes: 4
+Number of primary keys: 1
+Length of frm data: 337
+Max Rows: 0
+Row Checksum: 1
+Row GCI: 1
+SingleUserMode: 0
+ForceVarPart: 1
+PartitionCount: 2
+FragmentCount: 2
+PartitionBalance: FOR_RP_BY_LDM
+ExtraRowGciBits: 0
+ExtraRowAuthorBits: 0
+TableStatus: Retrieved
+Table options:
+HashMap: DEFAULT\-HASHMAP\-3840\-2
+\-\- Attributes \-\-
+id Int PRIMARY KEY DISTRIBUTION KEY AT=FIXED ST=MEMORY AUTO_INCR
+name Varchar(20;latin1_swedish_ci) NOT NULL AT=SHORT_VAR ST=MEMORY DYNAMIC
+length_mm Int NOT NULL AT=FIXED ST=MEMORY DYNAMIC
+weight_gm Int NOT NULL AT=FIXED ST=MEMORY DYNAMIC
+\-\- Indexes \-\-
+PRIMARY KEY(id) \- UniqueHashIndex
+PRIMARY(id) \- OrderedIndex
+uk(name) \- OrderedIndex
+uk$unique(name) \- UniqueHashIndex
+\-\- Per partition info \-\-
+Partition       Row count       Commit count    Frag fixed memory       Frag varsized memory    Extent_space    Free extent_space
+0               2               2               32768                   32768                   0               0
+1               4               4               32768                   32768                   0               0
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Information about multiple tables can be obtained in a single invocation of
+\fBndb_desc\fR
+by using their names, separated by spaces\&. All of the tables must be in the same database\&.
+.PP
+You can obtain additional information about a specific index using the
+\fB\-\-table\fR
+(short form:
+\fB\-t\fR) option and supplying the name of the index as the first argument to
+\fBndb_desc\fR, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_desc uk \-d test \-t fish\fR
+\-\- uk \-\-
+Version: 2
+Base table: fish
+Number of attributes: 1
+Logging: 0
+Index type: OrderedIndex
+Index status: Retrieved
+\-\- Attributes \-\-
+name Varchar(20;latin1_swedish_ci) NOT NULL AT=SHORT_VAR ST=MEMORY
+\-\- IndexTable 10/uk \-\-
+Version: 2
+Fragment type: FragUndefined
+K Value: 6
+Min load factor: 78
+Max load factor: 80
+Temporary table: yes
+Number of attributes: 2
+Number of primary keys: 1
+Length of frm data: 0
+Max Rows: 0
+Row Checksum: 1
+Row GCI: 1
+SingleUserMode: 2
+ForceVarPart: 0
+PartitionCount: 2
+FragmentCount: 2
+FragmentCountType: ONE_PER_LDM_PER_NODE
+ExtraRowGciBits: 0
+ExtraRowAuthorBits: 0
+TableStatus: Retrieved
+Table options:
+\-\- Attributes \-\-
+name Varchar(20;latin1_swedish_ci) NOT NULL AT=SHORT_VAR ST=MEMORY
+NDB$TNODE Unsigned [64] PRIMARY KEY DISTRIBUTION KEY AT=FIXED ST=MEMORY
+\-\- Indexes \-\-
+PRIMARY KEY(NDB$TNODE) \- UniqueHashIndex
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When an index is specified in this way, the
+\fB\-\-extra\-partition\-info\fR
+and
+\fB\-\-extra\-node\-info\fR
+options have no effect\&.
+.PP
+The
+Version
+column in the output contains the table\*(Aqs schema object version\&. For information about interpreting this value, see
+\m[blue]\fBNDB Schema Object Versions\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.PP
+Three of the table properties that can be set using
+NDB_TABLE
+comments embedded in
+CREATE TABLE
+and
+ALTER TABLE
+statements are also visible in
+\fBndb_desc\fR
+output\&. The table\*(Aqs
+FRAGMENT_COUNT_TYPE
+is always shown in the
+FragmentCountType
+column\&.
+READ_ONLY
+and
+FULLY_REPLICATED, if set to 1, are shown in the
+Table options
+column\&. You can see this after executing the following
+ALTER TABLE
+statement in the
+\fBmysql\fR
+client:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBALTER TABLE fish COMMENT=\*(AqNDB_TABLE=READ_ONLY=1,FULLY_REPLICATED=1\*(Aq;\fR
+1 row in set, 1 warning (0\&.00 sec)
+mysql> \fBSHOW WARNINGS\eG\fR
++\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Level   | Code | Message                                                                                                 |
++\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Warning | 1296 | Got error 4503 \*(AqTable property is FRAGMENT_COUNT_TYPE=ONE_PER_LDM_PER_NODE but not in comment\*(Aq from NDB |
++\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+1 row in set (0\&.00 sec)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The warning is issued because
+READ_ONLY=1
+requires that the table\*(Aqs fragment count type is (or be set to)
+ONE_PER_LDM_PER_NODE_GROUP;
+NDB
+sets this automatically in such cases\&. You can check that the
+ALTER TABLE
+statement has the desired effect using
+SHOW CREATE TABLE:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBSHOW CREATE TABLE fish\eG\fR
+*************************** 1\&. row ***************************
+       Table: fish
+Create Table: CREATE TABLE `fish` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  `length_mm` int(11) NOT NULL,
+  `weight_gm` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk` (`name`)
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1
+COMMENT=\*(AqNDB_TABLE=READ_BACKUP=1,FULLY_REPLICATED=1\*(Aq
+1 row in set (0\&.01 sec)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Because
+FRAGMENT_COUNT_TYPE
+was not set explicitly, its value is not shown in the comment text printed by
+SHOW CREATE TABLE\&.
+\fBndb_desc\fR, however, displays the updated value for this attribute\&. The
+Table options
+column shows the binary properties just enabled\&. You can see this in the output shown here (emphasized text):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_desc \-c localhost fish \-d test \-p\fR
+\-\- fish \-\-
+Version: 4
+Fragment type: HashMapPartition
+K Value: 6
+Min load factor: 78
+Max load factor: 80
+Temporary table: no
+Number of attributes: 4
+Number of primary keys: 1
+Length of frm data: 380
+Max Rows: 0
+Row Checksum: 1
+Row GCI: 1
+SingleUserMode: 0
+ForceVarPart: 1
+PartitionCount: 1
+FragmentCount: 1
+\fIFragmentCountType: ONE_PER_LDM_PER_NODE_GROUP\fR
+ExtraRowGciBits: 0
+ExtraRowAuthorBits: 0
+TableStatus: Retrieved
+\fITable options: readbackup, fullyreplicated\fR
+HashMap: DEFAULT\-HASHMAP\-3840\-1
+\-\- Attributes \-\-
+id Int PRIMARY KEY DISTRIBUTION KEY AT=FIXED ST=MEMORY AUTO_INCR
+name Varchar(20;latin1_swedish_ci) NOT NULL AT=SHORT_VAR ST=MEMORY DYNAMIC
+length_mm Int NOT NULL AT=FIXED ST=MEMORY DYNAMIC
+weight_gm Int NOT NULL AT=FIXED ST=MEMORY DYNAMIC
+\-\- Indexes \-\-
+PRIMARY KEY(id) \- UniqueHashIndex
+PRIMARY(id) \- OrderedIndex
+uk(name) \- OrderedIndex
+uk$unique(name) \- UniqueHashIndex
+\-\- Per partition info \-\-
+Partition       Row count       Commit count    Frag fixed memory       Frag varsized memory    Extent_space    Free extent_space
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For more information about these table properties, see
+Section\ \&13.1.20.11, \(lqSetting NDB_TABLE Options\(rq\&.
+.PP
+The
+Extent_space
+and
+Free extent_space
+columns are applicable only to
+NDB
+tables having columns on disk; for tables having only in\-memory columns, these columns always contain the value
+0\&.
+.PP
+To illustrate their use, we modify the previous example\&. First, we must create the necessary Disk Data objects, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE LOGFILE GROUP lg_1
+    ADD UNDOFILE \*(Aqundo_1\&.log\*(Aq
+    INITIAL_SIZE 16M
+    UNDO_BUFFER_SIZE 2M
+    ENGINE NDB;
+ALTER LOGFILE GROUP lg_1
+    ADD UNDOFILE \*(Aqundo_2\&.log\*(Aq
+    INITIAL_SIZE 12M
+    ENGINE NDB;
+CREATE TABLESPACE ts_1
+    ADD DATAFILE \*(Aqdata_1\&.dat\*(Aq
+    USE LOGFILE GROUP lg_1
+    INITIAL_SIZE 32M
+    ENGINE NDB;
+ALTER TABLESPACE ts_1
+    ADD DATAFILE \*(Aqdata_2\&.dat\*(Aq
+    INITIAL_SIZE 48M
+    ENGINE NDB;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+(For more information on the statements just shown and the objects created by them, see
+Section\ \&22.5.13.1, \(lqNDB Cluster Disk Data Objects\(rq, as well as
+Section\ \&13.1.16, \(lqCREATE LOGFILE GROUP Statement\(rq, and
+Section\ \&13.1.21, \(lqCREATE TABLESPACE Statement\(rq\&.)
+.PP
+Now we can create and populate a version of the
+fish
+table that stores 2 of its columns on disk (deleting the previous version of the table first, if it already exists):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE TABLE fish (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL,
+    length_mm INT(11) NOT NULL,
+    weight_gm INT(11) NOT NULL,
+    PRIMARY KEY pk (id),
+    UNIQUE KEY uk (name)
+) TABLESPACE ts_1 STORAGE DISK
+ENGINE=NDB;
+INSERT INTO fish VALUES
+    (NULL, \*(Aqguppy\*(Aq, 35, 2), (NULL, \*(Aqtuna\*(Aq, 2500, 150000),
+    (NULL, \*(Aqshark\*(Aq, 3000, 110000), (NULL, \*(Aqmanta ray\*(Aq, 1500, 50000),
+    (NULL, \*(Aqgrouper\*(Aq, 900, 125000), (NULL ,\*(Aqpuffer\*(Aq, 250, 2500);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When run against this version of the table,
+\fBndb_desc\fR
+displays the following output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_desc \-c localhost fish \-d test \-p\fR
+\-\- fish \-\-
+Version: 1
+Fragment type: HashMapPartition
+K Value: 6
+Min load factor: 78
+Max load factor: 80
+Temporary table: no
+Number of attributes: 4
+Number of primary keys: 1
+Length of frm data: 346
+Max Rows: 0
+Row Checksum: 1
+Row GCI: 1
+SingleUserMode: 0
+ForceVarPart: 1
+PartitionCount: 2
+FragmentCount: 2
+FragmentCountType: ONE_PER_LDM_PER_NODE
+ExtraRowGciBits: 0
+ExtraRowAuthorBits: 0
+TableStatus: Retrieved
+Table options:
+HashMap: DEFAULT\-HASHMAP\-3840\-2
+\-\- Attributes \-\-
+id Int PRIMARY KEY DISTRIBUTION KEY AT=FIXED ST=MEMORY AUTO_INCR
+name Varchar(20;latin1_swedish_ci) NOT NULL AT=SHORT_VAR ST=MEMORY
+length_mm Int NOT NULL AT=FIXED ST=DISK
+weight_gm Int NOT NULL AT=FIXED ST=DISK
+\-\- Indexes \-\-
+PRIMARY KEY(id) \- UniqueHashIndex
+PRIMARY(id) \- OrderedIndex
+uk(name) \- OrderedIndex
+uk$unique(name) \- UniqueHashIndex
+\-\- Per partition info \-\-
+Partition       Row count       Commit count    Frag fixed memory       Frag varsized memory    Extent_space    Free extent_space
+0               2               2               32768                   32768                   1048576         1044440
+1               4               4               32768                   32768                   1048576         1044400
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This means that 1048576 bytes are allocated from the tablespace for this table on each partition, of which 1044440 bytes remain free for additional storage\&. In other words, 1048576 \- 1044440 = 4136 bytes per partition is currently being used to store the data from this table\*(Aqs disk\-based columns\&. The number of bytes shown as
+Free extent_space
+is available for storing on\-disk column data from the
+fish
+table only; for this reason, it is not visible when selecting from the
+INFORMATION_SCHEMA\&.FILES
+table\&.
+.PP
+For fully replicated tables,
+\fBndb_desc\fR
+shows only the nodes holding primary partition fragment replicas; nodes with copy fragment replicas (only) are ignored\&. Beginning with NDB 7\&.5\&.4, you can obtain such information, using the
+\fBmysql\fR
+client, from the
+table_distribution_status,
+table_fragments,
+table_info, and
+table_replicas
+tables in the
+ndbinfo
+database\&.
+.PP
+The following table includes options that are specific to
+\fBndb_desc\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_desc\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.257.\ \&Command\-line options for the ndb_desc program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--blob-info\fR,
+.PP
+\fB \fR\fB-b\fR\fB \fR
+T}:T{
+Include partition information for BLOB tables in output. Requires that
+              the -p option also be used
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--database=dbname\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Name of database containing table
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--extra-node-info\fR,
+.PP
+\fB \fR\fB-n\fR\fB \fR
+T}:T{
+Include partition-to-data-node mappings in output. Requires that the -p
+              option also be used
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--extra-partition-info\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Display information about partitions
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--retries=#\fR,
+.PP
+\fB \fR\fB-r\fR\fB \fR
+T}:T{
+Number of times to retry the connection (once per second)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--table=tbl_name\fR,
+.PP
+\fB \fR\fB-t\fR\fB \fR
+T}:T{
+Specify the table in which to find an index. When this option is used,
+              -p and -n have no effect and are ignored
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--unqualified\fR,
+.PP
+\fB \fR\fB-u\fR\fB \fR
+T}:T{
+Use unqualified table names
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-blob\-info\fR,
+\fB\-b\fR
+.sp
+Include information about subordinate
+BLOB
+and
+TEXT
+columns\&.
+.sp
+Use of this option also requires the use of the
+\fB\-\-extra\-partition\-info\fR
+(\fB\-p\fR) option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database=\fR\fB\fIdb_name\fR\fR,
+\fB\-d\fR
+.sp
+Specify the database in which the table should be found\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-extra\-node\-info\fR,
+\fB\-n\fR
+.sp
+Include information about the mappings between table partitions and the data nodes upon which they reside\&. This information can be useful for verifying distribution awareness mechanisms and supporting more efficient application access to the data stored in NDB Cluster\&.
+.sp
+Use of this option also requires the use of the
+\fB\-\-extra\-partition\-info\fR
+(\fB\-p\fR) option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-extra\-partition\-info\fR,
+\fB\-p\fR
+.sp
+Print additional information about the table\*(Aqs partitions\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-retries=\fR\fB\fI#\fR\fR,
+\fB\-r\fR
+.sp
+Try to connect this many times before giving up\&. One connect attempt is made per second\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-table=\fR\fB\fItbl_name\fR\fR,
+\fB\-t\fR
+.sp
+Specify the table in which to look for an index\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-unqualified\fR,
+\fB\-u\fR
+.sp
+Use unqualified table names\&.
+.RE
+.PP
+In NDB 7\&.5\&.3 and later, table indexes listed in the output are ordered by ID\&. Previously, this was not deterministic and could vary between platforms\&. (Bug #81763, Bug #23547742)
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+NDB Schema Object Versions
+.RS 4
+\%https://dev.mysql.com/doc/ndb-internals/en/ndb-internals-schema-object-versions.html
+.RE
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

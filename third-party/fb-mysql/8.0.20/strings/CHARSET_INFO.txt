@@ -1,0 +1,315 @@
+Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License, version 2.0,
+as published by the Free Software Foundation.
+
+This program is also distributed with certain software (including
+but not limited to OpenSSL) that is licensed under separate terms,
+as designated in a particular file or component or in included license
+documentation.  The authors of MySQL hereby grant you an additional
+permission to link the program and your derivative works with the
+separately licensed software that they have included with MySQL.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License, version 2.0, for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+CHARSET_INFO
+============
+A structure containing data for charset+collation pair implementation. 
+
+Virtual functions that use this data are collected into separate
+structures, MY_CHARSET_HANDLER and MY_COLLATION_HANDLER.
+
+
+typedef struct charset_info_st
+{
+  uint      number;
+  uint      primary_number;
+  uint      binary_number;
+  uint      state;
+
+  const char *csname;
+  const char *name;
+  const char *comment;
+
+  const uchar *ctype;
+  const uchar *to_lower;
+  const uchar *to_upper;
+  const uchar *sort_order;
+
+  const uint16     *tab_to_uni;
+  const MY_UNI_IDX *tab_from_uni;
+
+  uchar state_map[256];
+  uchar ident_map[256];
+
+  uint      strxfrm_multiply;
+  uint      mbminlen;
+  uint      mbmaxlen;
+  uint      mbmaxlenlen;
+  uint16    max_sort_char; /* For LIKE optimization */
+
+  MY_CHARSET_HANDLER *cset;
+  MY_COLLATION_HANDLER *coll;
+
+  Pad_attribute pad_attribute;
+
+} CHARSET_INFO;
+
+
+CHARSET_INFO fields description:
+===============================
+
+
+Numbers (identifiers)
+---------------------
+
+number - an ID uniquely identifying this charset+collation pair.
+
+primary_number - ID of a charset+collation pair, which consists
+of the same character set and the default collation of this
+character set. Not really used now. Intended to optimize some
+parts of the code where we need to find the default collation
+using its non-default counterpart for the given character set.
+
+binary_number - ID of a charset+collation pair, which consists
+of the same character set and the binary collation of this
+character set. Not really used now. 
+
+Names
+-----
+
+  csname  - name of the character set for this charset+collation pair.
+  name    - name of the collation for this charset+collation pair.
+  comment - a text comment, displayed in "Description" column of
+            SHOW CHARACTER SET output.
+
+Conversion tables
+-----------------
+  
+  ctype      - pointer to array[257] of "type of characters"
+               bit mask for each character, e.g., whether a 
+               character is a digit, letter, separator, etc.
+
+               Monty 2004-10-21:
+                 If you look at the macros, we use ctype[(char)+1].
+                 ctype[0] is traditionally in most ctype libraries
+                 reserved for EOF (-1). The idea is that you can use
+                 the result from fgetc() directly with ctype[]. As
+                 we have to be compatible with external ctype[] versions,
+                 it's better to do it the same way as they do...
+
+  to_lower   - pointer to array[256] used in LCASE()
+  to_upper   - pointer to array[256] used in UCASE()
+  sort_order - pointer to array[256] used for strings comparison
+
+In all Asian charsets these arrays are set up as follows:
+
+- All bytes in the range 0x80..0xFF were marked as letters in the
+  ctype array.
+
+- The to_lower and to_upper arrays map only ASCII letters.
+  UPPER() and LOWER() doesn't really work for multi-byte characters.
+  Most of the characters in Asian character sets are ideograms
+  anyway and they don't have case mapping. However, there are
+  still some characters from European alphabets.
+  For example:
+  _ujis 0x8FAAF2 - LATIN CAPITAL LETTER Y WITH ACUTE
+  _ujis 0x8FABF2 - LATIN SMALL LETTER Y WITH ACUTE
+
+  But they don't map to each other with UPPER and LOWER operations.
+
+- The sort_order array is filled case insensitively for the
+  ASCII range 0x00..0x7F, and in "binary" fashion for the multi-byte
+  range 0x80..0xFF for these collations:
+
+  cp932_japanese_ci,
+  euckr_korean_ci,
+  eucjpms_japanese_ci,
+  gb2312_chinese_ci,
+  sjis_japanese_ci,
+  ujis_japanese_ci.
+
+  So multi-byte characters are sorted just according to their codes.
+
+
+- Two collations are still case insensitive for the ASCII characters,
+  but have special sorting order for multi-byte characters
+  (something more complex than just according to codes):
+
+  big5_chinese_ci
+  gbk_chinese_ci
+
+  So handlers for these collations use only the 0x00..0x7F part
+  of their sort_order arrays, and apply the special functions
+  for multi-byte characters
+
+In Unicode character sets we have full support of UPPER/LOWER mapping,
+for sorting order, and for character type detection.
+"utf8_general_ci" still has the "old-fashioned" arrays
+like to_upper, to_lower, sort_order and ctype, but they are
+not really used (maybe only in some rare legacy functions).
+
+
+
+Unicode conversion data
+-----------------------
+For 8-bit character sets:
+
+tab_to_uni  : array[256] of charset->Unicode translation
+tab_from_uni: a structure for Unicode->charset translation
+
+Non-8-bit charsets have their own structures per charset
+hidden in corresponding ctype-xxx.c file and don't use
+tab_to_uni and tab_from_uni tables.
+
+
+Parser maps
+-----------
+state_map[]
+ident_map[]
+
+These maps are used to quickly identify whether a character is an
+identifier part, a digit, a special character, or a part of another
+SQL language lexical item.
+
+Probably can be combined with ctype array in the future.
+But for some reasons these two arrays are used in the parser,
+while a separate ctype[] array is used in the other part of the
+code, like fulltext, etc.
+
+
+Miscellaneous fields
+--------------------
+
+  strxfrm_multiply - how many times a sort key (that is, a string
+                     that can be passed into memcmp() for comparison)
+                     can be longer than the original string. 
+                     Usually it is 1. For some complex
+                     collations it can be bigger. For example,
+                     in latin1_german2_ci, a sort key is up to
+                     two times longer than the original string.
+                     e.g. Letter 'A' with two dots above is
+                     substituted with 'AE'. 
+  mbminlen         - minimum multi-byte sequence length.
+                     Now always 1 except for ucs2. For ucs2,
+                     it is 2.
+  mbmaxlen         - maximum multi-byte sequence length.
+                     1 for 8-bit charsets. Can be also 2 or 3.
+
+  mbmaxlenlen      - maximum leading bytes of a sequence to
+                     determine the length of the multi-byte
+                     sequence length.
+
+  max_sort_char    - for LIKE range
+                     in case of 8-bit character sets - native code
+		     of maximum character (max_str pad byte);
+                     in case of UTF8 and UCS2 - Unicode code of the maximum
+		     possible character (usually U+FFFF). This code is
+		     converted to multi-byte representation (usually 0xEFBFBF)
+		     and then used as a pad sequence for max_str.
+		     in case of other multi-byte character sets -
+		     max_str pad byte (usually 0xFF).
+
+  pad_attribute    - whether this collation is a PAD SPACE or NO PAD
+                     collation. PAD SPACE collations treat strings
+		     as if they were conceptually padded with an infinite
+		     amount of space characters at the end.
+
+MY_CHARSET_HANDLER
+==================
+
+MY_CHARSET_HANDLER is a collection of character-set
+related routines. Defined in m_ctype.h. Have the 
+following set of functions:
+
+Multi-byte routines
+------------------
+ismbchar()  - detects whether the given string is a multi-byte sequence
+mbcharlen() - returns length of multi-byte sequence starting with
+              the given character
+numchars()  - returns number of characters in the given string, e.g.
+              in SQL function CHAR_LENGTH().
+charpos()   - calculates the offset of the given position in the string.
+              Used in SQL functions LEFT(), RIGHT(), SUBSTRING(), 
+              INSERT()
+
+well_formed_len()
+            - returns length of a given multi-byte string in bytes
+              Used in INSERTs to shorten the given string so it
+              a) is "well formed" according to the given character set
+              b) can fit into the given data type
+
+lengthsp()  - returns the length of the given string without trailing spaces.
+
+
+Unicode conversion routines
+---------------------------
+mb_wc       - converts the left multi-byte sequence into its Unicode code.
+mc_mb       - converts the given Unicode code into multi-byte sequence.
+
+
+Case and sort conversion
+------------------------
+caseup_str  - converts the given 0-terminated string to uppercase
+casedn_str  - converts the given 0-terminated string to lowercase
+caseup      - converts the given string to lowercase using length
+casedn      - converts the given string to lowercase using length
+
+Number-to-string conversion routines
+------------------------------------
+snprintf()
+long10_to_str()
+longlong10_to_str()
+
+The names are pretty self-describing.
+
+String padding routines
+-----------------------
+fill()     - writes the given Unicode value into the given string
+             with the given length. Used to pad the string, usually
+             with space character, according to the given charset.
+
+String-to-number conversion routines
+------------------------------------
+strntol()
+strntoul()
+strntoll()
+strntoull()
+strntod()
+
+These functions are almost the same as their STDLIB counterparts,
+but also:
+  - accept length instead of 0-terminator
+  - are character set dependent
+
+Simple scanner routines
+-----------------------
+scan()    - to skip leading spaces in the given string.
+            Used when a string value is inserted into a numeric field.
+
+
+
+MY_COLLATION_HANDLER
+====================
+strnncoll()   - compares two strings according to the given collation
+strnncollsp() - like the above but ignores trailing spaces for PAD SPACE
+                collations. For NO PAD collations, identical to strnncoll.
+strnxfrm()    - makes a sort key suitable for memcmp() corresponding
+                to the given string
+like_range()  - creates a LIKE range, for optimizer
+wildcmp()     - wildcard comparison, for LIKE
+strcasecmp()  - 0-terminated string comparison
+instr()       - finds the first substring appearance in the string
+hash_sort()   - calculates hash value taking into account
+                the collation rules, e.g. case-insensitivity, 
+                accent sensitivity, etc.
+
+ 

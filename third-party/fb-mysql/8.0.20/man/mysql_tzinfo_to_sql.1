@@ -1,0 +1,136 @@
+'\" t
+.\"     Title: \fBmysql_tzinfo_to_sql\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQL_TZINFO_TO_SQL\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysql_tzinfo_to_sql \- load the time zone tables
+.SH "SYNOPSIS"
+.HP \w'\fBmysql_tzinfo_to_sql\ \fR\fB\fIarguments\fR\fR\ 'u
+\fBmysql_tzinfo_to_sql \fR\fB\fIarguments\fR\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBmysql_tzinfo_to_sql\fR
+program loads the time zone tables in the
+mysql
+database\&. It is used on systems that have a
+\fIzoneinfo\fR
+database (the set of files describing time zones)\&. Examples of such systems are Linux, FreeBSD, Solaris, and macOS\&. One likely location for these files is the
+/usr/share/zoneinfo
+directory (/usr/share/lib/zoneinfo
+on Solaris)\&. If your system does not have a zoneinfo database, you can use the downloadable package described in
+Section\ \&5.1.13, \(lqMySQL Server Time Zone Support\(rq\&.
+.PP
+\fBmysql_tzinfo_to_sql\fR
+can be invoked several ways:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql_tzinfo_to_sql \fR\fB\fItz_dir\fR\fR
+shell> \fBmysql_tzinfo_to_sql \fR\fB\fItz_file tz_name\fR\fR
+shell> \fBmysql_tzinfo_to_sql \-\-leap \fR\fB\fItz_file\fR\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For the first invocation syntax, pass the zoneinfo directory path name to
+\fBmysql_tzinfo_to_sql\fR
+and send the output into the
+\fBmysql\fR
+program\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql_tzinfo_to_sql /usr/share/zoneinfo | mysql \-u root mysql\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmysql_tzinfo_to_sql\fR
+reads your system\*(Aqs time zone files and generates SQL statements from them\&.
+\fBmysql\fR
+processes those statements to load the time zone tables\&.
+.PP
+The second syntax causes
+\fBmysql_tzinfo_to_sql\fR
+to load a single time zone file
+\fItz_file\fR
+that corresponds to a time zone name
+\fItz_name\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql_tzinfo_to_sql \fR\fB\fItz_file\fR\fR\fB \fR\fB\fItz_name\fR\fR\fB | mysql \-u root mysql\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If your time zone needs to account for leap seconds, invoke
+\fBmysql_tzinfo_to_sql\fR
+using the third syntax, which initializes the leap second information\&.
+\fItz_file\fR
+is the name of your time zone file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql_tzinfo_to_sql \-\-leap \fR\fB\fItz_file\fR\fR\fB | mysql \-u root mysql\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+After running
+\fBmysql_tzinfo_to_sql\fR, it is best to restart the server so that it does not continue to use any previously cached time zone data\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

@@ -36,7 +36,7 @@ public class CleanerWrapperTest {
 
   @Test
   public void testRegister() throws Exception {
-    if ("9.0.1".compareTo(System.getProperty("java.version")) <= 0) {
+    if (System.getProperty("java.version").startsWith("1.8")) {
       return;
     }
 

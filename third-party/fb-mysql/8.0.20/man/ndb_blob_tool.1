@@ -1,0 +1,596 @@
+'\" t
+.\"     Title: \fBndb_blob_tool\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_BLOB_TOOL\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_blob_tool \- check and repair BLOB and TEXT columns of NDB Cluster tables
+.SH "SYNOPSIS"
+.HP \w'\fBndb_blob_tool\ \fR\fB\fIoptions\fR\fR\fB\ \fR\fB\fItable\fR\fR\fB\ [\fR\fB\fIcolumn\fR\fR\fB,\ \&.\&.\&.]\fR\ 'u
+\fBndb_blob_tool \fR\fB\fIoptions\fR\fR\fB \fR\fB\fItable\fR\fR\fB [\fR\fB\fIcolumn\fR\fR\fB, \&.\&.\&.]\fR
+.SH "DESCRIPTION"
+.PP
+This tool can be used to check for and remove orphaned BLOB column parts from
+NDB
+tables, as well as to generate a file listing any orphaned parts\&. It is sometimes useful in diagnosing and repairing corrupted or damaged
+NDB
+tables containing
+BLOB
+or
+TEXT
+columns\&.
+.PP
+The basic syntax for
+\fBndb_blob_tool\fR
+is shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_blob_tool [\fIoptions\fR] \fItable\fR [\fIcolumn\fR, \&.\&.\&.]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Unless you use the
+\fB\-\-help\fR
+option, you must specify an action to be performed by including one or more of the options
+\fB\-\-check\-orphans\fR,
+\fB\-\-delete\-orphans\fR, or
+\fB\-\-dump\-file\fR\&. These options cause
+\fBndb_blob_tool\fR
+to check for orphaned BLOB parts, remove any orphaned BLOB parts, and generate a dump file listing orphaned BLOB parts, respectively, and are described in more detail later in this section\&.
+.PP
+You must also specify the name of a table when invoking
+\fBndb_blob_tool\fR\&. In addition, you can optionally follow the table name with the (comma\-separated) names of one or more
+BLOB
+or
+TEXT
+columns from that table\&. If no columns are listed, the tool works on all of the table\*(Aqs
+BLOB
+and
+TEXT
+columns\&. If you need to specify a database, use the
+\fB\-\-database\fR
+(\fB\-d\fR) option\&.
+.PP
+The
+\fB\-\-verbose\fR
+option provides additional information in the output about the tool\*(Aqs progress\&.
+.PP
+The following table includes options that are specific to
+\fBndb_blob_tool\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_blob_tool\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.254.\ \&Command\-line options for the ndb_blob_tool program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--add-missing\fR\fB \fR
+T}:T{
+Write dummy blob parts to take place of those which are missing
+T}:T{
+.PP
+ADDED: NDB 8.0.20
+T}
+T{
+.PP
+\fB \fR\fB--check-missing\fR\fB \fR
+T}:T{
+Check for blobs having inline parts but missing one or more parts from
+              parts table
+T}:T{
+.PP
+ADDED: NDB 8.0.20
+T}
+T{
+.PP
+\fB \fR\fB--check-orphans\fR\fB \fR
+T}:T{
+Check for blob parts having no corresponding inline parts
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--database=db_name\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Database to find the table in
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--delete-orphans\fR\fB \fR
+T}:T{
+Delete blob parts having no corresponding inline parts
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--dump-file=file\fR\fB \fR
+T}:T{
+Write orphan keys to specified file
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--verbose\fR,
+.PP
+\fB \fR\fB-v\fR\fB \fR
+T}:T{
+Verbose output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-add\-missing\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--add-missing
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.20-ndb-8.0.20
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+For each inline part in NDB Cluster tables which has no corresponding BLOB part, write a dummy BLOB part of the required length, consisting of spaces\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-check\-missing\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--check-missing
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.20-ndb-8.0.20
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Check for inline parts in NDB Cluster tables which have no corresponding BLOB parts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-check\-orphans\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--check-orphans
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Check for BLOB parts in NDB Cluster tables which have no corresponding inline parts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database=\fR\fB\fIdb_name\fR\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--database=db_name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Specify the database to find the table in\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-delete\-orphans\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--delete-orphans
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Remove BLOB parts from NDB Cluster tables which have no corresponding inline parts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-dump\-file=\fR\fB\fIfile\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--dump-file=file
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Writes a list of orphaned BLOB column parts to
+\fIfile\fR\&. The information written to the file includes the table key and BLOB part number for each orphaned BLOB part\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--verbose
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Provide extra information in the tool\*(Aqs output regarding its progress\&.
+.RE
+Example
+.PP
+First we create an
+NDB
+table in the
+test
+database, using the
+CREATE TABLE
+statement shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+USE test;
+CREATE TABLE btest (
+    c0 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    c1 TEXT,
+    c2 BLOB
+)   ENGINE=NDB;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Then we insert a few rows into this table, using a series of statements similar to this one:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+INSERT INTO btest VALUES (NULL, \*(Aqx\*(Aq, REPEAT(\*(Aqx\*(Aq, 1000));
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When run with
+\fB\-\-check\-orphans\fR
+against this table,
+\fBndb_blob_tool\fR
+generates the following output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_blob_tool \-\-check\-orphans \-\-verbose \-d test btest\fR
+connected
+processing 2 blobs
+processing blob #0 c1 NDB$BLOB_19_1
+NDB$BLOB_19_1: nextResult: res=1
+total parts: 0
+orphan parts: 0
+processing blob #1 c2 NDB$BLOB_19_2
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=0
+NDB$BLOB_19_2: nextResult: res=1
+total parts: 10
+orphan parts: 0
+disconnected
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The tool reports that there are no
+NDB
+BLOB column parts associated with column
+c1, even though
+c1
+is a
+TEXT
+column\&. This is due to the fact that, in an
+NDB
+table, only the first 256 bytes of a
+BLOB
+or
+TEXT
+column value are stored inline, and only the excess, if any, is stored separately; thus, if there are no values using more than 256 bytes in a given column of one of these types, no
+BLOB
+column parts are created by
+NDB
+for this column\&. See
+Section\ \&11.7, \(lqData Type Storage Requirements\(rq, for more information\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

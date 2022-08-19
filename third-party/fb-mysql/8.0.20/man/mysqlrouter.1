@@ -1,0 +1,2477 @@
+'\" t
+.\"     Title: \fBmysqlrouter\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/05/2020
+.\"    Manual: MySQL Router
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLROUTER\FR" "1" "03/05/2020" "MySQL 8\&.0" "MySQL Router"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqlrouter \- MySQL Router
+.SH "SYNOPSIS"
+.HP \w'\fBmysqlrouter\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBmysqlrouter [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mysqlrouter Option Summaries
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mysqlrouter Option Descriptions
+.RE
+.PP
+MySQL Router accepts command line options that are passed into
+\fBmysqlrouter\fR
+to affect its behavior, or to bootstrap router based on an InnoDB cluster\&.
+.PP
+When starting Router, you can optionally use
+\fB\-\-config\fR
+to pass in the main configuration file\*(Aqs location (otherwise the default location is used) and
+\fB\-\-extra\-config\fR
+for an additional configuration file\&.
+.PP
+Bootstrapping command line options affect the generated files and directories that are used when starting MySQL Router\&.
+mysqlrouter Option Summariesmysqlrouter Option Descriptions
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--version , -V
+T}
+.TE
+.sp 1
+Displays the version number and related information of the application, and exits\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlrouter \-\-version\fR
+MySQL Router v8\&.0\&.21 on Linux (64\-bit) (GPL community edition)
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--help , -?
+T}
+.TE
+.sp 1
+Display help and informative information, and exit\&.
+.sp
+The
+\fB\-\-help\fR
+option has an added benefit\&. Along with the explanation of each of the options, the
+\fB\-\-help\fR
+option also displays the paths used to find the configuration file, and also several default paths\&. The following excerpt of the
+\fB\-\-help\fR
+output shows an example from a Ubuntu 16\&.04 machine:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlrouter \-\-help\fR
+\&.\&.\&.
+Start MySQL Router\&.
+Configuration read from the following files in the given order (enclosed
+in parentheses means not available for reading):
+  (/etc/mysqlrouter/mysqlrouter\&.conf)
+  /home/philip/\&.mysqlrouter\&.conf
+Plugin Path:
+  /usr/lib/x86_64\-linux\-gnu/mysqlrouter
+Default Log Directory:
+  /var/log/mysqlrouter
+Default Persistent Data Directory:
+  /var/lib/mysqlrouter
+Default Runtime State Directory:
+  /run/mysqlrouter
+Usage: mysqlrouter [\-V|\-\-version] [\-?|\-\-help]
+\&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The configuration section shows the order for the paths that may be used for reading the configuration file\&. In this case, only the second file is accessible\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-bootstrap \fR\fB\fIURI\fR\fR,
+\fB\-B \fR\fB\fIURI\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--bootstrap URI, -B URI
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+The main option to perform a bootstrap of MySQL Router by connecting to the InnoDB cluster metadata server at the URI provided\&. MySQL Router configures itself based on the information retrieved from the InnoDB cluster metadata server\&. A password is prompted for if needed\&. If a username is not provided as part of the URI then the default user name "root" is used\&. See
+\m[blue]\fBConnecting Using URI\-Like Connection Strings\fR\m[]\&\s-2\u[1]\d\s+2
+for information on using a path to specify a server instance\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+While
+\fB\-\-bootstrap\fR
+accepts a URI for TCP/IP connections, using the
+\fB\-\-bootstrap\-socket\fR
+option with a local Unix domain socket name replaces the "host:port" part of the URI passed to the
+\fB\-\-bootstrap\fR
+option with the socket on the same machine\&.
+.sp .5v
+.RE
+By default, the bootstrap process performs a system\-wide configuration of MySQL Router\&. Only one instance of MySQL Router can be configured for system\-wide operation\&. The system instance of MySQL Router has a
+router_name
+of "system"\&. If additional instances are desired, use the
+\fB\-\-directory\fR
+option to create self\-contained MySQL Router installations\&.
+.sp
+\fIURI\fR: a server instance from an InnoDB cluster to fetch metadata information from\&. If the provided
+\fIURI\fR
+is a read\-only instance, MySQL Router automatically reconnects to a read\-write instance in the InnoDB cluster so it can register MySQL Router\&.
+.sp
+If a configuration file already exists when you start MySQL Router with the
+\fB\-\-bootstrap\fR, the existing
+router_id
+in that file is reused, and a reconfiguration process occurs\&. The configuration file is regenerated from scratch and the MySQL Router\*(Aqs metadata server account is recreated, although with the same name\&.
+.sp
+During the reconfiguration process, all changes made to an existing configuration file are discarded\&. To customize a configuration file and still retain the ability of automatic reconfiguration (bootstrapping), you can use the
+\fB\-\-extra\-config\fR
+command line option to specify an additional configuration file that is read after the main configuration file\&. These configuration options are used because this extra configuration file is loaded after the main configuration file\&.
+.sp
+The bootstrap process creates a new MySQL user account with a randomly generated password to use by that specific MySQL Router instance\&. This account is used by MySQL Router when connecting to the metadata server and InnoDB cluster to fetch information about its current state\&. For detailed information about this user including how its password is stored and the MySQL privilege it requires, see documentation for the
+\fBMySQL user option\fR\&.
+.sp
+The generated configuration file is named
+mysqlrouter\&.conf, and its location depends on the type of instance being configured, the system, and the package\&. For system\-wide installations, the generated configuration file is added to the system\*(Aqs configuration directory such as
+/etc
+or
+%PROGRAMDATA%\eMySQL\eMySQL Router\e\&. Executing
+mysqlrouter \-\-help
+will display this location\&.
+.sp
+The
+\fB\-\-user\fR
+option is required if executing a bootstrap with a super user (uid=0)\&. Although not recommended, forcing the super user is possible by passing its name as an argument such as
+\fI\-\-user=root\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+The minimum GRANT permissions required to execute
+\fB\-\-boostrap\fR
+are:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+GRANT CREATE USER ON *\&.* TO \*(Aq\fIbootstrapuser\fR\*(Aq@\*(Aq%\*(Aq WITH GRANT OPTION;
+GRANT SELECT, INSERT, UPDATE, DELETE ON mysql_innodb_cluster_metadata\&.* TO
+\*(Aq\fIbootstrapuser\fR\*(Aq@\*(Aq%\*(Aq;
+GRANT SELECT ON mysql\&.user TO \*(Aq\fIbootstrapuser\fR\*(Aq@\*(Aq%\*(Aq;
+GRANT SELECT ON performance_schema\&.replication_group_members TO
+\*(Aq\fIbootstrapuser\fR\*(Aq@\*(Aq%\*(Aq;
+GRANT SELECT ON performance_schema\&.replication_group_member_stats TO
+\*(Aq\fIbootstrapuser\fR\*(Aq@\*(Aq%\*(Aq;
+.fi
+.if n \{\
+.RE
+.\}
+.sp .5v
+.RE
+Using
+\fB\-\-bootstrap\fR
+adds default values to the generated MySQL Router configuration file, and some of these default values depend on other conditions\&. Listed below are some of the conditions that affect the generated default values, where default is defined by passing in
+\fB\-\-bootstrap\fR
+by itself\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&4.2.\ \&Conditions that affect default \-\-bootstrap values
+.TS
+allbox tab(:);
+lB lB.
+T{
+Condition
+T}:T{
+Description
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fB--conf-base-port\fR
+T}:T{
+.PP
+Modifies generated
+\fBbind_port\fR
+values for each connection type.
+.PP
+By default, generated
+\fBbind_port\fR
+values are as follows: For the classic protocol, Read-Write uses 6446 and Read-Only uses 6447, and for the X protocol Read-Write uses 64460 and Read-Only uses 64470.
+T}
+T{
+\fB--conf-use-sockets\fR
+T}:T{
+Inserts \fBsocket\fR definitions for each connection type.
+T}
+T{
+\fB--conf-skip-tcp\fR
+T}:T{
+TCP/IP connection definitions are not defined.
+T}
+T{
+\fB--directory\fR
+T}:T{
+Affects all file paths, and also generates additional files.
+T}
+T{
+Other
+T}:T{
+This list is not exhaustive, other options and conditions also affect
+                the generated values.
+T}
+.TE
+.sp 1
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-bootstrap\-socket \fR\fB\fIsocket_name\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--bootstrap-socket socket_name
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Linux
+T}
+.TE
+.sp 1
+Used in conjunction with
+\fB\-\-bootstrap\fR
+to bootstrap using a local Unix domain socket instead of TCP/IP\&. The
+\fB\-\-bootstrap\-socket\fR
+value replaces the "host:port" part in the
+\fB\-\-bootstrap\fR
+definition with the assigned socket name for connecting to the MySQL metadata server using Unix domain sockets\&. This is the MySQL instance that is being bootstrapped from, and this instance must be on the same machine if sockets are used\&. For additional details about how bootstrapping works, see
+\fB\-\-bootstrap\fR\&.
+.sp
+This option is different than the
+\fB\-\-conf\-use\-sockets\fR
+command line option that sets the
+\fBsocket\fR
+configuration file option during the bootstrap process\&.
+.sp
+This option is not available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-directory \fR\fB\fIdir_path\fR\fR,
+\fB\-d \fR\fB\fIdir_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--directory dir_path, -d dir_path
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+Specifies that a self\-contained MySQL Router installation will be created at the defined directory instead of configuring the system\-wide router instance\&. This also allows multiple router instances to be created on the same system\&.
+.sp
+The self\-contained directory structure for Router is:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$path/start\&.sh
+$path/stop\&.sh
+$path/mysqlrouter\&.pid
+$path/mysqlrouter\&.conf
+$path/mysqlrouter\&.key
+$path/run
+$path/run/keyring
+$path/data
+$path/log
+$path/log/mysqlrouter\&.log
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If this option is specified, the keyring file is stored under the runtime state directory of that instance, under
+run/
+in the specified directory, as opposed to the system\-wide runtime state directory\&.
+.sp
+If
+\fB\-\-conf\-use\-sockets\fR
+is also enabled then the generated socket files are also added to this directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-master\-key\-writer\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--master-key-writer file_path
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.12
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+This optional bootstrap option accepts a script that reads the master key from
+\fISTDIN\fR\&. It also uses the
+\fIROUTER_ID\fR
+environment variable set by MySQL Router before the
+\fBmaster\-key\-writer\fR
+script is called\&.
+.sp
+The
+\fBmaster\-key\-writer\fR
+and
+\fBmaster\-key\-reader\fR
+options must be used together, and using them means the
+\fBmaster_key_file\fR
+option must not be defined in
+mysqlrouter\&.conf
+as the master key is not written to the
+mysqlrouter\&.key
+master key file\&.
+.sp
+This is also written to the generated MySQL Router configuration file as the
+\fBmaster\-key\-writer\fR
+[DEFAULT] option\&.
+.sp
+Example contents of a bash script named
+writer\&.sh
+used in our example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+#!/bin/bash
+KID_=$(keyctl padd user ${ROUTER_ID} @us <&0)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> mysqlrouter \-\-bootstrap=127\&.0\&.0\&.1:3310 \-\-master\-key\-reader=\&./reader\&.sh \-\-master\-key\-writer=\&./writer\&.sh
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This also affects the generated
+mysqlrouter\&.conf, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[DEFAULT]
+\&.\&.\&.
+master\-key\-reader=reader\&.sh
+master\-key\-writer=writer\&.sh  
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-master\-key\-reader\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--master-key-reader file_path
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.12
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+This optional bootstrap option accepts a script that writes the master key to
+\fISTDOUT\fR\&. It also uses the
+\fIROUTER_ID\fR
+environment variable set by MySQL Router before the
+\fBmaster\-key\-reader\fR
+script is called\&.
+.sp
+The
+\fBmaster\-key\-reader\fR
+and
+\fBmaster\-key\-writer\fR
+options must be used together, and using them means the
+\fBmaster_key_file\fR
+option must not be defined in
+mysqlrouter\&.conf
+as the master key is not written to the
+mysqlrouter\&.key
+master key file, and instead uses the value provided by this option\*(Aqs script\&.
+.sp
+This is also written to the generated MySQL Router configuration file as the
+\fBmaster\-key\-reader\fR
+[DEFAULT] option\&.
+.sp
+Example contents of a bash script named
+reader\&.sh
+used in our example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+#!/bin/bash
+KID_=$(keyctl search @us user ${ROUTER_ID} 2>/dev/null)
+if [ ! \-z $KID_ ]; then
+  keyctl pipe $KID_
+fi
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> mysqlrouter \-\-bootstrap=127\&.0\&.0\&.1:3310 \-\-master\-key\-reader=\&./reader\&.sh \-\-master\-key\-writer=\&./writer\&.sh
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This also affects the generated
+mysqlrouter\&.conf, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[DEFAULT]
+\&.\&.\&.
+master\-key\-reader=reader\&.sh
+master\-key\-writer=writer\&.sh  
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-strict\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--strict
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.19
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+Enables strict mode, which for example causes the bootstrap
+\fB\-\-account\fR
+user verification check to stop the bootstrap process rather than only emit a warning and continue if the supplied user does not pass the check\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-account\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--account username
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.19
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+A bootstrap option to specify the MySQL user to use, which either reuses an existing MySQL user account or creates one; behavior controlled by the related
+\fB\-\-account\-create\fR
+option\&.
+.sp
+With
+\fB\-\-account\fR, usage favors ease of management over ease of deployment as multiple routers may share the same account, and the username and password are manually defined rather than auto\-generated\&.
+.sp
+Setting this option triggers a password prompt for this account regardless of whether the password is available in the keyring\&.
+.sp
+Bootstrapping without passing in
+\fB\-\-account\fR
+does not recreate an existing MySQL server account\&. Prior to MySQL Router 8\&.0\&.18, bootstrapping would DROP the existing user and reCREATE it\&.
+.sp
+Using this option assumes the user has sufficient access rights for Router because the bootstrap process does not attempt to add missing grants to existing accounts\&. The bootstrap process does verify the permissions and outputs information to the console of the failed check\&. The bootstrap process continues despite these failed checks unless the optional
+\fB\-\-strict\fR
+option is also used\&. Example required permissions:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+GRANT SELECT ON mysql_innodb_cluster_metadata\&.* TO `theuser`
+GRANT SELECT ON performance_schema\&.replication_group_members TO `theuser`
+GRANT SELECT ON performance_schema\&.replication_group_member_stats TO `theuser`
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+A password is not accepted from the command\-line\&. For example, passing in "foo:bar" assumes "foo:bar" is the desired username rather than user
+\fIfoo\fR
+with the password
+\fIbar\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-account\-create\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--account-create behavior
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.19
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+if-not-exists
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+if-not-exists
+.PP
+always
+.PP
+never
+T}
+.TE
+.sp 1
+Specify the account creation policy to help guard against accidentally bootstrapping with the wrong user account\&. Potential values are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+if\-not\-exists
+(default): Bootstrap either way; reuse the account if it exists, otherwise create it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+always: Only bootstrap if the account does not already exist; and create it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+never: Only bootstrap if the account already exists; and reuse it\&.
+.RE
+.sp
+This option requires that the
+\fB\-\-account\fR
+option is also used, and that
+\fB\-\-account\-host\fR
+is not used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-account\-host\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--account-host host_pattern
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.12
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+%
+T}
+.TE
+.sp 1
+The host pattern used for accounts created by MySQL Router during the bootstrap process\&. This is optional and defaults to \*(Aq%\*(Aq\&.
+.sp
+Pass in this option multiple times to define multiple patterns, in which case the generated MySQL accounts use the same password\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Router does not perform sanity checking and does not ensure that the pattern authorizes Router to connect\&.
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Bootstrapping reuses existing Router accounts by dropping and recreating the user, and this user recreation process applies to every host\&.
+.sp .5v
+.RE
+Examples:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# One host
+shell> mysqlrouter \-\-bootstrap localhost:3310 \-\-account\-host host1
+# Or, multiple hosts
+shell> mysqlrouter \-\-bootstrap localhost:3310 \-\-account\-host host1 \-\-account\-host host2 \-\-account\-host host3
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-conf\-use\-sockets\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--conf-use-sockets
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Linux
+T}
+.TE
+.sp 1
+Enables local Unix domain sockets\&.
+.sp
+This option is used while bootstrapping, and enabling it adds the
+\fBsocket\fR
+option to the generated configuration file\&.
+.sp
+The name of the generated socket file depends on the
+\fBmode\fR
+and
+\fBprotocol\fR
+options\&. With the classic protocol enabled, the file is named
+mysql\&.sock
+in read\-write mode, and
+mysqlro\&.sock
+in read\-only mode\&. With the X Protocol enabled, the file is named
+mysqlx\&.sock
+in read\-write mode, and
+mysqlxro\&.sock
+in read\-only mode\&.
+.sp
+This option is not available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-conf\-use\-gr\-notifications\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--conf-use-gr-notifications
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.17
+T}
+.TE
+.sp 1
+Enables the
+\fBuse_gr_notifications\fR
+[metadata_cache] option during bootstrap\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pid\-file \fR\fB\fIpath\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--pid-file path
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.20
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+Sets location of the PID file\&. This can be set in three different ways (in order of precedence): this
+\fB\-\-pid\-file\fR
+command\-line option, setting
+\fBpid_file\fR
+in Router\*(Aqs configuration file, or defining the
+ROUTER_PID
+environment variable\&.
+.sp
+If
+\fB\-\-bootstrap\fR
+is specified, then setting \-\-pid\-file causes Router to fail\&. This is unlike ROUTER_PID and the pid_file configuration option, which are ignored if \-\-bootstrap is specified\&.
+.sp
+If
+\fB\-\-bootstrap\fR
+is not specified, then the following cause Router to fail: the \-\-pid\-file already exists, pid_file or ROUTER_PID are set but empty, or if Router can\*(Aqt write the PID file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-report\-host\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--report-host hostname
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.12
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+Optionally define Router\*(Aqs hostname instead of relying on auto\-detection to determine the externally visible hostname registered to metadata during the bootstrap process\&.
+.sp
+Router does not check or confirm that the supplied hostname is reachable, and it only checks the hostname string for illegal characters\&. Only alphanumeric, \*(Aq\-\*(Aq, \*(Aq\&.\*(Aq, and \*(Aq_\*(Aq characters are allowed\&.
+.sp
+The supplied hostname is written to the host_name field of the mysql_innodb_cluster_metadata\&.hosts table in the MySQL InnoDB cluster metadata store\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-conf\-skip\-tcp\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--conf-skip-tcp
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Linux
+T}
+.TE
+.sp 1
+Skips configuration of a TCP port for listening to incoming connections\&. See also
+\fB\-\-conf\-use\-sockets\fR\&.
+.sp
+This option is not available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-conf\-base\-port \fR\fB\fIport_num\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--conf-base-port port_num
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+.TE
+.sp 1
+Base (first) value used for the listening TCP ports by setting
+\fBbind_port\fR
+for each bootstrapped route\&.
+.sp
+This value is used for the classic read\-write route, and each additional allocated port is incremented by a value of one\&. The port order set is classic read\-write / read\-only, and then x read\-write / read\-only\&.
+.sp
+Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fB# Example without \-\-conf\-base\-port\fR
+shell> mysqlrouter \-\-bootstrap root@localhost:3310
+\&.\&.\&.
+Classic MySQL protocol connections to cluster \*(AqdevCluster\*(Aq:
+\- Read/Write Connections: localhost:6446
+\- Read/Only Connections: localhost:6447
+X protocol connections to cluster \*(AqdevCluster\*(Aq:
+\- Read/Write Connections: localhost:64460
+\- Read/Only Connections: localhost:64470
+\fB# Example demonstrating \-\-conf\-base\-port behavior\fR
+shell> mysqlrouter \-\-bootstrap root@localhost:3310 \-\-conf\-base\-port 6446
+\&.\&.\&.
+Classic MySQL protocol connections to cluster \*(AqdevCluster\*(Aq:
+\- Read/Write Connections: localhost:6446
+\- Read/Only Connections: localhost:6447
+X protocol connections to cluster \*(AqdevCluster\*(Aq:
+\- Read/Write Connections: localhost:6448
+\- Read/Only Connections: localhost:6449
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-conf\-bind\-address \fR\fB\fIaddress\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--conf-bind-address address
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0.0.0.0
+T}
+.TE
+.sp 1
+Modifies the
+\fBbind_address\fR
+value set by
+\fB\-\-bootstrap\fR
+in the generated Router configuration file\&. By default, bootstrapping sets
+\fBbind_address=0\&.0\&.0\&.0\fR
+for each route, and this option changes that value\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+The default
+\fBbind_address\fR
+value is
+\fI127\&.0\&.0\&.1\fR
+if
+\fBbind_address\fR
+is not defined\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-read\-timeout \fR\fB\fInum_seconds\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--read-timeout num_seconds
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.4
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+30
+T}
+.TE
+.sp 1
+Number of seconds before read operations to a metadata server are considered timed out\&.
+.sp
+This affects read operations during both the bootstrap process, and also affects normal MySQL Router operations by setting the associated
+\fBread_timeout\fR
+option in the generated
+mysqlrouter\&.conf\&.
+.sp
+This option is set under the
+[DEFAULT]
+namespace\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connect\-timeout \fR\fB\fInum_seconds\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connect-timeout num_seconds
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.4
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+30
+T}
+.TE
+.sp 1
+Number of seconds before connection attempts to a metadata server are considered timed out\&.
+.sp
+This affects connections during both the bootstrap process, and also affects normal MySQL Router operations by setting the associated
+\fBconnect_timeout\fR
+option in the generated
+mysqlrouter\&.conf\&.
+.sp
+There are two
+\fIconnect_timeout\fR
+variants\&. The metadata server variant is defined under the
+[DEFAULT]
+namespace, while the MySQL server variant is defined under the
+[routing]
+namespace\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user {\fR\fB\fIuser_name\fR\fR\fB|\fR\fB\fIuser_id\fR\fR\fB}\fR,
+\fB\-u {\fR\fB\fIuser_name\fR\fR\fB|\fR\fB\fIuser_id\fR\fR\fB}\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--user {user_name|user_id}, -u {user_name|user_id}
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Linux
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+Run
+\fBmysqlrouter\fR
+as the user having the name
+\fIuser_name\fR
+or the numeric user ID
+\fIuser_id\fR\&.
+\(lqUser\(rq
+in this context refers to a system login account, not a MySQL user listed in the grant tables\&. When bootstrapping, all generated files are owned by this user, and this also sets the associated
+\fBuser\fR
+option\&.
+.sp
+This system
+\fBuser\fR
+is defined in the configuration file under the
+[DEFAULT]
+namespace\&. For additional information, see the
+\fBuser\fR
+option\*(Aqs documentation that
+\fB\-\-user\fR
+configures\&.
+.sp
+The
+\fB\-\-user\fR
+option is required if executing a bootstrap as a super user (uid=0)\&. Although not recommended, forcing the super user is possible by passing its name as an argument, such as
+\fI\-\-user=root\fR\&.
+.sp
+This option is not available on Windows\&.
+.sp
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-name \fR\fB\fIrouter_name\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--name router_name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+system
+T}
+.TE
+.sp 1
+On initial bootstrap, specifies a symbolic name for a self\-contained Router instance\&. This option is optional, and is used with
+\fB\-\-directory\fR\&. When creating multiple instances, the names must be unique\&.
+.sp
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\-password\-validation\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--force-password-validation
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Linux
+T}
+.TE
+.sp 1
+By default, MySQL Router skips the MySQL Server\*(Aqs validate_password mechanism and instead Router generates and uses a STRONG password based on known validate_password default settings\&. This is because validate_password can be configured by the user and Router can not take into account unusual custom settings\&.
+.sp
+This option ensures that password validation (validate_password) is not skipped for generated passwords, and it is disabled by default\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-password\-retries \fR\fB\fInum_retries\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--password-retries num_retries
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+20
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+10000
+T}
+.TE
+.sp 1
+Specifies the number of times MySQL Router should attempt to generate a password when creating user account with the password validation rules\&. The default value is 20\&. The valid range is 1 to 10000\&.
+.sp
+The most likely reason for failure is due to custom validate_password settings with unusual requirements such as a 50 character minimum\&. In that fail scenario, either
+\fB\-\-force\-password\-validation\fR
+is set to true and/or the
+mysql_native_password
+MySQL Server plugin is disabled (this plugin allows bypassing validation)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--force
+T}
+.TE
+.sp 1
+Force a reconfiguration over a previously configured router instance on the host\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-mode \fR\fB\fImode\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-mode mode
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+PREFERRED
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+PREFERRED
+.PP
+DISABLED
+.PP
+REQUIRED
+.PP
+VERIFY_CA
+.PP
+VERIFY_IDENTITY
+T}
+.TE
+.sp 1
+SSL connection mode for use during bootstrap and normal operation when connecting to the metadata server\&. Analogous to
+\fB\-\-ssl\-mode\fR
+in the
+\fBmysql\fR
+client\&.
+.sp
+During bootstrap, all connections to metadata servers made by the Router will use the SSL options specified\&. If
+\fBssl_mode\fR
+is not specified in the configuration, it will default to PREFERRED\&. During normal operation, after Router is launched, its Metadata Cache plugin will read and honor all configured SSL settings\&.
+.sp
+When set to a value other than the default (PREFERRED), an
+\fBssl_mode\fR
+entry is inserted under the
+[metadata_cache]
+section in the generated configuration file\&.
+.sp
+Available values are DISABLED, PREFERRED, REQUIRED, VERIFY_CA, and VERIFY_IDENTITY\&. PREFERRED is the default value\&. As with the
+\fBmysql\fR
+client, this value is case\-insensitive\&.
+.sp
+The configuration file equivalent is documented separately at
+\fBssl_mode\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-cert \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-key file_path
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.4
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+The path name of the SSL public key certificate file in PEM format\&. This is used to facilitate client\-side authentication during the bootstrap process\&. This directly matches and uses functionality of the MySQL client\*(Aqs
+\fB\-\-ssl\-cert\fR
+option\&.
+.sp
+Like
+\fB\-\-ssl\-key\fR, this option is only used during bootstrap that uses a root account\&. It is useful when the root account was created with REQUIRE X509, and therefore logging in as root requires the client to authenticate itself\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-key \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-key file_path
+T}
+T{
+\fBIntroduced\fR
+T}:T{
+8.0.4
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+.TE
+.sp 1
+The path name of the SSL private key file in PEM format\&. This is used to facilitate client\-side authentication during the bootstrap process\&. This directly matches and uses functionality of the MySQL client\*(Aqs
+\fB\-\-ssl\-key\fR
+option\&.
+.sp
+Like
+\fB\-\-ssl\-cert\fR, this option is only used during a bootstrap process that uses a root account\&. It is useful when the root account was created with REQUIRE X509, and therefore logging in as root requires the client to authenticate itself\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-cipher \fR\fB\fIciphers\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-cipher ciphers
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+A colon\-separated (":") list of SSL ciphers to allow, if SSL is enabled\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tls\-version \fR\fB\fIversions\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--tls-version versions
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+A comma\-separated (",") list of TLS versions to request, if SSL is enabled\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-ca \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-ca file_path
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Path to the SSL CA file to verify a server\*(Aqs certificate against\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-capath \fR\fB\fIdir_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-capath dir_path
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Path to directory containing the SSL CA files to verify a server\*(Aqs certificate against\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-crl \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-crl file_path
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Path to the SSL CRL file to use when verifying a server\*(Aqs certificate\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-crlpath \fR\fB\fIdir_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ssl-crlpath dir_path
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Path to the directory containing SSL CRL files to use when verifying a server\*(Aqs certificate\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config \fR\fB\fIfile_path\fR\fR,
+\fB\-c \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--config file_path, -c file_path
+T}
+.TE
+.sp 1
+Used to provide a path and file name for the configuration file to use\&. Use this option if you want to use a configuration file located in a folder other than the default locations\&.
+.sp
+When used with
+\fB\-\-bootstrap\fR, and if the configuration file already exists, a copy of the current file is saved with a
+\fI\&.bak\fR
+extension if the generated configuration file contents is different than the original\&. Existing
+\fI\&.bak\fR
+files are overwritten\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-extra\-config \fR\fB\fIfile_path\fR\fR,
+\fB\-a \fR\fB\fIfile_path\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--extra-config file_path, -a file_path
+T}
+.TE
+.sp 1
+Used to provide an optional, additional configuration file to use\&. Use this option if you want to split the configuration file into two parts for testing, multiple instances of the application running on the same machine, etc\&.
+.sp
+This configuration file is read after the main configuration file\&. If there are conflicts (an option is set in multiple configuration files), values from the file that is loaded last is used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-install\-service\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--install-service
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Install Router as a Windows service that automatically starts when Windows starts\&. The service name is
+\fIMySQLRouter\fR\&.
+.sp
+This installation process does not validate configuration files passed in via
+\fB\-\-config\fR\&.
+.sp
+This option is only available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-install\-service\-manual\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--install-service-manual
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Install MySQL Router as a Windows service that can be manually started\&. The service name is
+\fIMySQLRouter\fR\&.
+.sp
+This option is only available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-remove\-service\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--remove-service
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Remove the Router Windows service\&.
+.sp
+This option is only available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-service\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--service
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Start Router as a Windows service\&.
+.sp
+This option is only available on Windows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-update\-credentials\-section\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--update-credentials-section section_name
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+This option is only available on Windows, and refers to its password vault\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-remove\-credentials\-section \fR\fB\fIsection_name\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--remove-credentials-section section_name
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Remove the credentials for a given section\&.
+.sp
+This option is only available on Windows, and refers to its password vault\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-clear\-all\-credentials\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--clear-all-credentials
+T}
+T{
+\fBPlatform Specific\fR
+T}:T{
+Windows
+T}
+.TE
+.sp 1
+Clear the password vault by removing all credentials stored in it\&.
+.sp
+This option is only available on Windows, and refers to its password vault\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 2006, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+Connecting Using URI-Like Connection Strings
+.RS 4
+\%https://dev.mysql.com/doc/refman/8.0/en/connecting-using-uri-or-key-value-pairs.html#connecting-using-uri
+.RE
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

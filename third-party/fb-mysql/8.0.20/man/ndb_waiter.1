@@ -1,0 +1,491 @@
+'\" t
+.\"     Title: \fBndb_waiter\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_WAITER\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_waiter \- wait for NDB Cluster to reach a given status
+.SH "SYNOPSIS"
+.HP \w'\fBndb_waiter\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_waiter \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_waiter\fR
+repeatedly (each 100 milliseconds) prints out the status of all cluster data nodes until either the cluster reaches a given status or the
+\fB\-\-timeout\fR
+limit is exceeded, then exits\&. By default, it waits for the cluster to achieve
+STARTED
+status, in which all nodes have started and connected to the cluster\&. This can be overridden using the
+\fB\-\-no\-contact\fR
+and
+\fB\-\-not\-started\fR
+options\&.
+.PP
+The node states reported by this utility are as follows:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NO_CONTACT: The node cannot be contacted\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+UNKNOWN: The node can be contacted, but its status is not yet known\&. Usually, this means that the node has received a
+START
+or
+RESTART
+command from the management server, but has not yet acted on it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NOT_STARTED: The node has stopped, but remains in contact with the cluster\&. This is seen when restarting the node using the management client\*(Aqs
+RESTART
+command\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+STARTING: The node\*(Aqs
+\fBndbd\fR
+process has started, but the node has not yet joined the cluster\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+STARTED: The node is operational, and has joined the cluster\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+SHUTTING_DOWN: The node is shutting down\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+SINGLE USER MODE: This is shown for all cluster data nodes when the cluster is in single user mode\&.
+.RE
+.PP
+The following table includes options that are specific to the NDB Cluster native backup restoration program
+\fBndb_waiter\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_waiter\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.275.\ \&Command\-line options for the ndb_waiter program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--no-contact\fR,
+.PP
+\fB \fR\fB-n\fR\fB \fR
+T}:T{
+Wait for cluster to reach NO CONTACT state
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--not-started\fR\fB \fR
+T}:T{
+Wait for cluster to reach NOT STARTED state
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--single-user\fR\fB \fR
+T}:T{
+Wait for cluster to enter single user mode
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--timeout=#\fR,
+.PP
+\fB \fR\fB-t\fR\fB \fR
+T}:T{
+Wait this many seconds, then exit whether or not cluster has reached
+              desired state; default is 2 minutes (120 seconds)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nowait-nodes=list\fR\fB \fR
+T}:T{
+List of nodes not to be waited for
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--wait-nodes=list\fR,
+.PP
+\fB \fR\fB-w\fR\fB \fR
+T}:T{
+List of nodes to be waited for
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_waiter [\-c \fIconnection_string\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Additional Options
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-contact\fR,
+\fB\-n\fR
+.sp
+Instead of waiting for the
+STARTED
+state,
+\fBndb_waiter\fR
+continues running until the cluster reaches
+NO_CONTACT
+status before exiting\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-not\-started\fR
+.sp
+Instead of waiting for the
+STARTED
+state,
+\fBndb_waiter\fR
+continues running until the cluster reaches
+NOT_STARTED
+status before exiting\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-timeout=\fR\fB\fIseconds\fR\fR,
+\fB\-t \fR\fB\fIseconds\fR\fR
+.sp
+Time to wait\&. The program exits if the desired state is not achieved within this number of seconds\&. The default is 120 seconds (1200 reporting cycles)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-single\-user\fR
+.sp
+The program waits for the cluster to enter single user mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nowait\-nodes=\fR\fB\fIlist\fR\fR
+.sp
+When this option is used, ndb_waiter does not wait for the nodes whose IDs are listed\&. The list is comma\-delimited; ranges can be indicated by dashes, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_waiter \-\-nowait\-nodes=1,3,7\-9\fR
+.fi
+.if n \{\
+.RE
+.\}
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+Do
+\fInot\fR
+use this option together with the
+\fB\-\-wait\-nodes\fR
+option\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-wait\-nodes=\fR\fB\fIlist\fR\fR,
+\fB\-w \fR\fB\fIlist\fR\fR
+.sp
+When this option is used,
+\fBndb_waiter\fR
+waits only for the nodes whose IDs are listed\&. The list is comma\-delimited; ranges can be indicated by dashes, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_waiter \-\-wait\-nodes=2,4\-6,10\fR
+.fi
+.if n \{\
+.RE
+.\}
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+Do
+\fInot\fR
+use this option together with the
+\fB\-\-nowait\-nodes\fR
+option\&.
+.sp .5v
+.RE
+.RE
+.PP
+\fBSample Output\fR. Shown here is the output from
+\fBndb_waiter\fR
+when run against a 4\-node cluster in which two nodes have been shut down and then started again manually\&. Duplicate reports (indicated by
+\&.\&.\&.) are omitted\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_waiter \-c localhost\fR
+Connecting to mgmsrv at (localhost)
+State node 1 STARTED
+State node 2 NO_CONTACT
+State node 3 STARTED
+State node 4 NO_CONTACT
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 UNKNOWN
+State node 3 STARTED
+State node 4 NO_CONTACT
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 STARTING
+State node 3 STARTED
+State node 4 NO_CONTACT
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 STARTING
+State node 3 STARTED
+State node 4 UNKNOWN
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 STARTING
+State node 3 STARTED
+State node 4 STARTING
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 STARTED
+State node 3 STARTED
+State node 4 STARTING
+Waiting for cluster enter state STARTED
+\&.\&.\&.
+State node 1 STARTED
+State node 2 STARTED
+State node 3 STARTED
+State node 4 STARTED
+Waiting for cluster enter state STARTED
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+If no connection string is specified, then
+\fBndb_waiter\fR
+tries to connect to a management on
+localhost, and reports
+Connecting to mgmsrv at (null)\&.
+.sp .5v
+.RE
+.PP
+Prior to NDB 8\&.0\&.20, this program printed
+NDBT_ProgramExit \- \fIstatus\fR
+upon completion of its run, due to an unnecessary dependency on the
+NDBT
+testing library\&. This dependency has been removed, eliminating the extraneous output\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

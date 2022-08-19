@@ -1,0 +1,328 @@
+'\" t
+.\"     Title: \fBcomp_err\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBCOMP_ERR\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+comp_err \- compile MySQL error message file
+.SH "SYNOPSIS"
+.HP \w'\fBcomp_err\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBcomp_err [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBcomp_err\fR
+creates the
+errmsg\&.sys
+file that is used by
+\fBmysqld\fR
+to determine the error messages to display for different error codes\&.
+\fBcomp_err\fR
+normally is run automatically when MySQL is built\&. It compiles the
+errmsg\&.sys
+file from text\-format error information in MySQL source distributions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+As of MySQL 8\&.0\&.19, the error information comes from the
+messages_to_error_log\&.txt
+and
+messages_to_clients\&.txt
+files in the
+share
+directory\&.
+.sp
+For more information about defining error messages, see the comments within those files, along with the
+errmsg_readme\&.txt
+file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Prior to MySQL 8\&.0\&.19, the error information comes from the
+errmsg\-utf8\&.txt
+file in the
+sql/share
+directory\&.
+.RE
+.PP
+\fBcomp_err\fR
+also generates the
+mysqld_error\&.h,
+mysqld_ername\&.h, and
+mysqld_errmsg\&.h
+header files\&.
+.PP
+Invoke
+\fBcomp_err\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBcomp_err [\fR\fB\fIoptions\fR\fR\fB]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBcomp_err\fR
+supports the following options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-charset=\fR\fB\fIdir_name\fR\fR,
+\fB\-C \fR\fB\fIdir_name\fR\fR
+.sp
+The character set directory\&. The default is
+\&.\&./sql/share/charsets\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
+\fB\-# \fR\fB\fIdebug_options\fR\fR
+.sp
+Write a debugging log\&. A typical
+\fIdebug_options\fR
+string is
+d:t:O,\fIfile_name\fR\&. The default is
+d:t:O,/tmp/comp_err\&.trace\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-info\fR,
+\fB\-T\fR
+.sp
+Print some debugging information when the program exits\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-errmsg\-file=\fR\fB\fIfile_name\fR\fR,
+\fB\-H \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the error message file\&. The default is
+mysqld_errmsg\&.h\&. This option was added in MySQL 8\&.0\&.18\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-header\-file=\fR\fB\fIfile_name\fR\fR,
+\fB\-H \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the error header file\&. The default is
+mysqld_error\&.h\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-in\-file=\fR\fB\fIfile_name\fR\fR,
+\fB\-F \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the input file\&. The default is
+\&.\&./share/errmsg\-utf8\&.txt\&.
+.sp
+This option was removed in MySQL 8\&.0\&.19 and replaced by the
+\fB\-\-in\-file\-errlog\fR
+and
+\fB\-\-in\-file\-toclient\fR
+options\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-in\-file\-errlog=\fR\fB\fIfile_name\fR\fR,
+\fB\-e \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the input file that defines error messages intended to be written to the error log\&. The default is
+\&.\&./share/messages_to_error_log\&.txt\&.
+.sp
+This option was added in MySQL 8\&.0\&.19\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-in\-file\-toclient=\fR\fB\fIfile_name\fR\fR,
+\fB\-c \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the input file that defines error messages intended to be written to clients\&. The default is
+\&.\&./share/messages_to_clients\&.txt\&.
+.sp
+This option was added in MySQL 8\&.0\&.19\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-name\-file=\fR\fB\fIfile_name\fR\fR,
+\fB\-N \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the error name file\&. The default is
+mysqld_ername\&.h\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-out\-dir=\fR\fB\fIdir_name\fR\fR,
+\fB\-D \fR\fB\fIdir_name\fR\fR
+.sp
+The name of the output base directory\&. The default is
+\&.\&./sql/share/\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-out\-file=\fR\fB\fIfile_name\fR\fR,
+\fB\-O \fR\fB\fIfile_name\fR\fR
+.sp
+The name of the output file\&. The default is
+errmsg\&.sys\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Display version information and exit\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

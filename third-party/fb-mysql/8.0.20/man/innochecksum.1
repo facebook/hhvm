@@ -1,0 +1,1033 @@
+'\" t
+.\"     Title: \fBinnochecksum\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBINNOCHECKSUM\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+innochecksum \- offline InnoDB file checksum utility
+.SH "SYNOPSIS"
+.HP \w'\fBinnochecksum\ [\fR\fB\fIoptions\fR\fR\fB]\ \fR\fB\fIfile_name\fR\fR\ 'u
+\fBinnochecksum [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIfile_name\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBinnochecksum\fR
+prints checksums for
+InnoDB
+files\&. This tool reads an
+InnoDB
+tablespace file, calculates the checksum for each page, compares the calculated checksum to the stored checksum, and reports mismatches, which indicate damaged pages\&. It was originally developed to speed up verifying the integrity of tablespace files after power outages but can also be used after file copies\&. Because checksum mismatches cause
+InnoDB
+to deliberately shut down a running server, it may be preferable to use this tool rather than waiting for an in\-production server to encounter the damaged pages\&.
+.PP
+\fBinnochecksum\fR
+cannot be used on tablespace files that the server already has open\&. For such files, you should use
+CHECK TABLE
+to check tables within the tablespace\&. Attempting to run
+\fBinnochecksum\fR
+on a tablespace that the server already has open will result in an
+\(lqUnable to lock file\(rq
+error\&.
+.PP
+If checksum mismatches are found, you would normally restore the tablespace from backup or start the server and attempt to use
+\fBmysqldump\fR
+to make a backup of the tables within the tablespace\&.
+.PP
+Invoke
+\fBinnochecksum\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIfile_name\fR\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+innochecksum Options
+.PP
+\fBinnochecksum\fR
+supports the following options\&. For options that refer to page numbers, the numbers are zero\-based\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.sp
+Displays command line help\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-help\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-info\fR,
+\fB\-I\fR
+.sp
+Synonym for
+\fB\-\-help\fR\&. Displays command line help\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-info\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Displays version information\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-version\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Verbose mode; prints a progress indicator to the log file every five seconds\&. In order for the progress indicator to be printed, the log file must be specified using the
+\-\-log option\&. To turn on
+verbose
+mode, run:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-verbose\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To turn off verbose mode, run:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-verbose=FALSE\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The
+\-\-verbose
+option and
+\-\-log
+option can be specified at the same time\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-verbose \-\-log=/var/lib/mysql/test/logtest\&.txt\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To locate the progress indicator information in the log file, you can perform the following search:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBcat \&./logtest\&.txt | grep \-i "okay"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The progress indicator information in the log file appears similar to the following:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+page 1663 okay: 2\&.863% done
+page 8447 okay: 14\&.537% done
+page 13695 okay: 23\&.568% done
+page 18815 okay: 32\&.379% done
+page 23039 okay: 39\&.648% done
+page 28351 okay: 48\&.789% done
+page 33023 okay: 56\&.828% done
+page 37951 okay: 65\&.308% done
+page 44095 okay: 75\&.881% done
+page 49407 okay: 85\&.022% done
+page 54463 okay: 93\&.722% done
+\&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-count\fR,
+\fB\-c\fR
+.sp
+Print a count of the number of pages in the file and exit\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-count \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-start\-page=\fR\fB\fInum\fR\fR,
+\fB\-s \fR\fB\fInum\fR\fR
+.sp
+Start at this page number\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-start\-page=600 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+or:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-s 600 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-end\-page=\fR\fB\fInum\fR\fR,
+\fB\-e \fR\fB\fInum\fR\fR
+.sp
+End at this page number\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-end\-page=700 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+or:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-p 700 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-page=\fR\fB\fInum\fR\fR,
+\fB\-p \fR\fB\fInum\fR\fR
+.sp
+Check only this page number\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-page=701 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-strict\-check\fR,
+\fB\-C\fR
+.sp
+Specify a strict checksum algorithm\&. Options include
+innodb,
+crc32, and
+none\&.
+.sp
+In this example, the
+innodb
+checksum algorithm is specified:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-strict\-check=innodb \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, the
+crc32
+checksum algorithm is specified:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-C crc32 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The following conditions apply:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If you do not specify the
+\fB\-\-strict\-check\fR
+option,
+\fBinnochecksum\fR
+validates against
+innodb,
+crc32
+and
+none\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If you specify the
+none
+option, only checksums generated by
+none
+are allowed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If you specify the
+innodb
+option, only checksums generated by
+innodb
+are allowed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If you specify the
+crc32
+option, only checksums generated by
+crc32
+are allowed\&.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-check\fR,
+\fB\-n\fR
+.sp
+Ignore the checksum verification when rewriting a checksum\&. This option may only be used with the
+\fBinnochecksum\fR
+\fB\-\-write\fR
+option\&. If the
+\fB\-\-write\fR
+option is not specified,
+\fBinnochecksum\fR
+will terminate\&.
+.sp
+In this example, an
+innodb
+checksum is rewritten to replace an invalid checksum:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-no\-check \-\-write innodb \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-allow\-mismatches\fR,
+\fB\-a\fR
+.sp
+The maximum number of checksum mismatches allowed before
+\fBinnochecksum\fR
+terminates\&. The default setting is 0\&. If
+\-\-allow\-mismatches=\fIN\fR, where
+\fIN\fR>=0,
+\fIN\fR
+mismatches are permitted and
+\fBinnochecksum\fR
+terminates at
+\fIN\fR+1\&. When
+\-\-allow\-mismatches
+is set to 0,
+\fBinnochecksum\fR
+terminates on the first checksum mismatch\&.
+.sp
+In this example, an existing
+innodb
+checksum is rewritten to set
+\-\-allow\-mismatches
+to 1\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-allow\-mismatches=1 \-\-write innodb \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+With
+\-\-allow\-mismatches
+set to 1, if there is a mismatch at page 600 and another at page 700 on a file with 1000 pages, the checksum is updated for pages 0\-599 and 601\-699\&. Because
+\-\-allow\-mismatches
+is set to 1, the checksum tolerates the first mismatch and terminates on the second mismatch, leaving page 600 and pages 700\-999 unchanged\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-write=\fR\fB\fIname\fR\fR,
+\fB\-w \fR\fB\fInum\fR\fR
+.sp
+Rewrite a checksum\&. When rewriting an invalid checksum, the
+\fB\-\-no\-check\fR
+option must be used together with the
+\fB\-\-write\fR
+option\&. The
+\fB\-\-no\-check\fR
+option tells
+\fBinnochecksum\fR
+to ignore verification of the invalid checksum\&. You do not have to specify the
+\fB\-\-no\-check\fR
+option if the current checksum is valid\&.
+.sp
+An algorithm must be specified when using the
+\fB\-\-write\fR
+option\&. Possible values for the
+\fB\-\-write\fR
+option are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+innodb: A checksum calculated in software, using the original algorithm from
+InnoDB\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+crc32: A checksum calculated using the
+crc32
+algorithm, possibly done with a hardware assist\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+none: A constant number\&.
+.RE
+.sp
+The
+\fB\-\-write\fR
+option rewrites entire pages to disk\&. If the new checksum is identical to the existing checksum, the new checksum is not written to disk in order to minimize I/O\&.
+.sp
+\fBinnochecksum\fR
+obtains an exclusive lock when the
+\fB\-\-write\fR
+option is used\&.
+.sp
+In this example, a
+crc32
+checksum is written for
+tab1\&.ibd:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-w crc32 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, a
+crc32
+checksum is rewritten to replace an invalid
+crc32
+checksum:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-no\-check \-\-write crc32 \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-page\-type\-summary\fR,
+\fB\-S\fR
+.sp
+Display a count of each page type in a tablespace\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-page\-type\-summary \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Sample output for
+\-\-page\-type\-summary:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+File::\&.\&./data/test/tab1\&.ibd
+================PAGE TYPE SUMMARY==============
+#PAGE_COUNT PAGE_TYPE
+===============================================
+       2        Index page
+       0        Undo log page
+       1        Inode page
+       0        Insert buffer free list page
+       2        Freshly allocated page
+       1        Insert buffer bitmap
+       0        System page
+       0        Transaction system page
+       1        File Space Header
+       0        Extent descriptor page
+       0        BLOB page
+       0        Compressed BLOB page
+       0        Other type of page
+===============================================
+Additional information:
+Undo page type: 0 insert, 0 update, 0 other
+Undo page state: 0 active, 0 cached, 0 to_free, 0 to_purge, 0 prepared, 0 other
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-page\-type\-dump\fR,
+\fB\-D\fR
+.sp
+Dump the page type information for each page in a tablespace to
+stderr
+or
+stdout\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-page\-type\-dump=/tmp/a\&.txt \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-log\fR,
+\fB\-l\fR
+.sp
+Log output for the
+\fBinnochecksum\fR
+tool\&. A log file name must be provided\&. Log output contains checksum values for each tablespace page\&. For uncompressed tables, LSN values are also provided\&. The
+\fB\-\-log\fR
+replaces the
+\-\-debug
+option, which was available in earlier releases\&. Example usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-\-log=/tmp/log\&.txt \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+or:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBinnochecksum \-l /tmp/log\&.txt \&.\&./data/test/tab1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-
+option\&.
+.sp
+Specify the
+\-
+option to read from standard input\&. If the
+\-
+option is missing when
+\(lqread from standard in\(rq
+is expected,
+\fBinnochecksum\fR
+will output
+\fBinnochecksum\fR
+usage information indicating that the
+\(lq\-\(rq
+option was omitted\&. Example usages:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBcat t1\&.ibd | innochecksum \-\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example,
+\fBinnochecksum\fR
+writes the
+crc32
+checksum algorithm to
+a\&.ibd
+without changing the original
+t1\&.ibd
+file\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBcat t1\&.ibd | innochecksum \-\-write=crc32 \- > a\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+Running innochecksum on Multiple User\-defined Tablespace Files
+.PP
+The following examples demonstrate how to run
+\fBinnochecksum\fR
+on multiple user\-defined tablespace files (\&.ibd
+files)\&.
+.PP
+Run
+\fBinnochecksum\fR
+for all tablespace (\&.ibd) files in the
+\(lqtest\(rq
+database:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> innochecksum \&./data/test/*\&.ibd
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Run
+\fBinnochecksum\fR
+for all tablespace files (\&.ibd
+files) that have a file name starting with
+\(lqt\(rq:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> innochecksum \&./data/test/t*\&.ibd
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Run
+\fBinnochecksum\fR
+for all tablespace files (\&.ibd
+files) in the
+data
+directory:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> innochecksum \&./data/*/*\&.ibd
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Running
+\fBinnochecksum\fR
+on multiple user\-defined tablespace files is not supported on Windows operating systems, as Windows shells such as
+\fBcmd\&.exe\fR
+do not support glob pattern expansion\&. On Windows systems,
+\fBinnochecksum\fR
+must be run separately for each user\-defined tablespace file\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cmd> innochecksum\&.exe t1\&.ibd
+cmd> innochecksum\&.exe t2\&.ibd
+cmd> innochecksum\&.exe t3\&.ibd
+.fi
+.if n \{\
+.RE
+.\}
+.sp .5v
+.RE
+Running innochecksum on Multiple System Tablespace Files
+.PP
+By default, there is only one
+InnoDB
+system tablespace file (ibdata1) but multiple files for the system tablespace can be defined using the
+innodb_data_file_path
+option\&. In the following example, three files for the system tablespace are defined using the
+innodb_data_file_path
+option:
+ibdata1,
+ibdata2, and
+ibdata3\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./bin/mysqld \-\-no\-defaults \-\-innodb\-data\-file\-path="ibdata1:10M;ibdata2:10M;ibdata3:10M:autoextend"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The three files (ibdata1,
+ibdata2, and
+ibdata3) form one logical system tablespace\&. To run
+\fBinnochecksum\fR
+on multiple files that form one logical system tablespace,
+\fBinnochecksum\fR
+requires the
+\-
+option to read tablespace files in from standard input, which is equivalent to concatenating multiple files to create one single file\&. For the example provided above, the following
+\fBinnochecksum\fR
+command would be used:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> cat ibdata* | innochecksum \-
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Refer to the
+\fBinnochecksum\fR
+options information for more information about the
+\(lq\-\(rq
+option\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Running
+\fBinnochecksum\fR
+on multiple files in the same tablespace is not supported on Windows operating systems, as Windows shells such as
+\fBcmd\&.exe\fR
+do not support glob pattern expansion\&. On Windows systems,
+\fBinnochecksum\fR
+must be run separately for each system tablespace file\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cmd> innochecksum\&.exe ibdata1
+cmd> innochecksum\&.exe ibdata2
+cmd> innochecksum\&.exe ibdata3
+.fi
+.if n \{\
+.RE
+.\}
+.sp .5v
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

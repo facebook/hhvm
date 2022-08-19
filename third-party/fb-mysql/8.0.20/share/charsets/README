@@ -1,0 +1,39 @@
+This directory holds configuration files that enable MySQL to work with
+different character sets.  It contains:
+
+charset_name.xml
+    Each charset_name.xml file contains information for a simple character
+    set.  The information in the file describes character types,
+    lower- and upper-case equivalencies and sorting orders for the
+    character values in the set.
+
+Index.xml
+    The Index.xml file lists all of the available charset configurations,
+    including collations.
+
+    Each collation must have a unique number.  The number is stored
+    IN THE DATABASE TABLE FILES and must not be changed.
+
+    The max-id attribute of the <charsets> element must be set to
+    the largest collation number.
+
+Compiled in or configuration file?
+    When should a character set be compiled in to MySQL's string library
+    (libmystrings), and when should it be placed in a charset_name.xml
+    configuration file?
+
+    If the character set requires the strcoll functions or is a
+    multi-byte character set, it MUST be compiled in to the string
+    library.  If it does not require these functions, it should be
+    placed in a charset_name.xml configuration file.
+
+    If the character set uses any one of the strcoll functions, it
+    must define all of them.  Likewise, if the set uses one of the
+    multi-byte functions, it must define them all.  See the manual for
+    more information on how to add a complex character set to MySQL.
+
+Syntax of configuration files
+    The syntax is very simple.  Words in <map> array elements are
+    separated by arbitrary amounts of whitespace. Each word must be a
+    number in hexadecimal format.  The ctype array has 257 words; the
+    other arrays (lower, upper, etc.) take up 256 words each after that.

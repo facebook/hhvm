@@ -1,0 +1,60 @@
+Template: mysql-@DEB_PRODUCTNAME@-server/root-pass
+Type: password
+Description: Enter root password:
+ Please provide a strong password that will be set for the root account of your MySQL database.
+ Leave it blank to enable password less login using UNIX socket based authentication.
+
+Template: mysql-@DEB_PRODUCTNAME@-server/re-root-pass
+Type: password
+Description: Re-enter root password:
+ Now that you have selected a password for the root account, please confirm by typing it again. Do not share the password with anyone.
+
+Template: mysql-@DEB_PRODUCTNAME@-server/root-pass-mismatch
+Type: error
+Description: The two passwords did not match
+ Please try again. Make sure you type the exact same password twice.
+
+Template: mysql-@DEB_PRODUCTNAME@-server/remove-data-dir
+Type: boolean
+Default: false
+Description: Remove data directories ?
+ This operation will remove the data directory at '/var/lib/mysql' that stores all the databases, tables and related meta-data.
+ Additionally, any import or export files stored at '/var/lib/mysql-files' will be removed along with directory.
+ Finally, any files in '/var/lib/mysql-keyring' will be deleted.
+ It is highly recommended to take data backup before removing the data directories.
+
+Template: mysql-@DEB_PRODUCTNAME@-server/data-dir
+Type: note
+Description: Data directory found when no MySQL server package is installed
+ A data directory '/var/lib/mysql' is present on this system when no MySQL server
+ package is currently installed on the system. The directory may be under control of
+ server package received from third-party vendors. It may also be an unclaimed data
+ directory from previous removal of mysql packages.
+ .
+ It is highly recommended to take data backup. If you have not done so, now would be
+ the time to take backup in another shell. Once completed, press 'Ok' to continue.
+
+Template: mysql-server/default-auth-override
+Type: select
+Choices: Use Strong Password Encryption (RECOMMENDED), Use Legacy Authentication Method (Retain MySQL 5.x Compatibility)
+Description: Select default authentication plugin
+ MySQL 8 uses a new authentication based on improved SHA256-based password methods. It is recommended that all new MySQL Server installations use this method going forward.
+ This new authentication plugin requires new versions of connectors and clients, with support for this new authentication method (caching_sha2_password).
+ Currently MySQL 8 Connectors and community drivers built with libmysqlclient21 support this new method. Clients built with older versions of libmysqlclient may not be able
+ to connect to the new server.
+ .
+ To retain compatibility with older client software, the default authentication plugin can be set to the legacy value (mysql_native_password)
+ This should only be done if required third-party software has not been updated to work with the new authentication method.
+ The change will be written to the file /etc/mysql/mysql.conf.d/default-auth-override.cnf
+ .
+ After installation, the default can be changed by setting the default_authentication_plugin server setting.
+
+
+Template: mysql-server/lowercase-table-names
+Type: select
+Choices: Enabled, Disabled
+Description: Enable lowercase table names
+ If enabled, this setting makes MySQL store table names in lowercase, and comparisons will not be case sensitive.
+ .
+ This setting must be enabled before the database is initialized
+ The change will be written to the file /etc/mysql/mysql.conf.d/lowercase-table-names.cnf

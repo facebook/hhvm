@@ -1,0 +1,99 @@
+# Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+# binaries
+usr/bin/ibd2sdi
+usr/bin/innochecksum
+usr/bin/lz4_decompress
+usr/bin/my_print_defaults
+usr/bin/mysqlbinlog
+usr/bin/myisamchk
+usr/bin/myisamlog
+usr/bin/myisampack
+usr/bin/mysql_ssl_rsa_setup
+usr/bin/mysql_tzinfo_to_sql
+usr/bin/mysql_upgrade
+usr/bin/mysql_secure_installation
+usr/bin/mysqld_multi
+usr/bin/mysqld_safe
+usr/bin/perror
+usr/bin/zlib_decompress
+usr/sbin/mysqld
+# man pages
+usr/share/man/man1/ibd2sdi.1
+usr/share/man/man1/innochecksum.1
+usr/share/man/man1/lz4_decompress.1
+usr/share/man/man1/my_print_defaults.1
+usr/share/man/man1/myisamchk.1
+usr/share/man/man1/myisamlog.1
+usr/share/man/man1/myisampack.1
+usr/share/man/man1/mysql_secure_installation.1
+usr/share/man/man1/mysql_ssl_rsa_setup.1
+usr/share/man/man1/mysql_tzinfo_to_sql.1
+usr/share/man/man1/mysql_upgrade.1
+usr/share/man/man1/mysql.server.1
+usr/share/man/man1/mysqlbinlog.1
+usr/share/man/man1/mysqld_multi.1
+usr/share/man/man1/mysqld_safe.1
+usr/share/man/man1/perror.1
+usr/share/man/man1/zlib_decompress.1
+usr/share/man/man8/mysqld.8
+# private shared libraries
+usr/lib/mysql/private/libprotobuf-lite.so.3.6.1
+usr/lib/mysql/private/libprotobuf.so.3.6.1
+# plugins
+usr/lib/mysql/plugin/component_log_filter_dragnet.so
+usr/lib/mysql/plugin/component_log_sink_json.so
+usr/lib/mysql/plugin/component_log_sink_syseventlog.so
+usr/lib/mysql/plugin/component_mysqlbackup.so
+usr/lib/mysql/plugin/component_validate_password.so
+usr/lib/mysql/plugin/component_audit_api_message_emit.so
+usr/lib/mysql/plugin/ddl_rewriter.so
+usr/lib/mysql/plugin/mysql_clone.so
+usr/lib/mysql/plugin/mysql_no_login.so
+usr/lib/mysql/plugin/innodb_engine.so
+usr/lib/mysql/plugin/rewriter.so
+usr/lib/mysql/plugin/mypluglib.so
+usr/lib/mysql/plugin/locking_service.so
+usr/lib/mysql/plugin/adt_null.so
+usr/lib/mysql/plugin/keyring_file.so
+usr/lib/mysql/plugin/keyring_udf.so
+usr/lib/mysql/plugin/libmemcached.so
+usr/lib/mysql/plugin/auth_socket.so
+usr/lib/mysql/plugin/authentication_ldap_sasl_client.so
+usr/lib/mysql/plugin/validate_password.so
+usr/lib/mysql/plugin/semisync_master.so
+usr/lib/mysql/plugin/semisync_slave.so
+usr/lib/mysql/plugin/libpluginmecab.so
+usr/lib/mysql/plugin/version_token.so
+usr/lib/mysql/plugin/group_replication.so
+usr/lib/mysql/plugin/connection_control.so
+# support files
+usr/share/mysql-@MYSQL_BASE_VERSION@/dictionary.txt
+usr/share/mysql-@MYSQL_BASE_VERSION@/mysql-log-rotate
+# localized error msgs
+usr/share/mysql-@MYSQL_BASE_VERSION@/*/errmsg.sys
+usr/share/mysql-@MYSQL_BASE_VERSION@/messages_to_error_log.txt
+usr/share/mysql-@MYSQL_BASE_VERSION@/messages_to_clients.txt
+# legal
+usr/share/mysql-@MYSQL_BASE_VERSION@/LICENSE usr/share/doc/mysql-@DEB_PRODUCTNAME@-server-core/
+usr/share/mysql-@MYSQL_BASE_VERSION@/README usr/share/doc/mysql-@DEB_PRODUCTNAME@-server-core/

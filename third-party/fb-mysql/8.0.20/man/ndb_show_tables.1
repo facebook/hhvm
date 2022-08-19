@@ -1,0 +1,323 @@
+'\" t
+.\"     Title: \fBndb_show_tables\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_SHOW_TABLES\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_show_tables \- display list of NDB tables
+.SH "SYNOPSIS"
+.HP \w'\fBndb_show_tables\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBndb_show_tables [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_show_tables\fR
+displays a list of all
+NDB
+database objects in the cluster\&. By default, this includes not only both user\-created tables and
+NDB
+system tables, but
+NDB\-specific indexes, internal triggers, and NDB Cluster Disk Data objects as well\&.
+.PP
+The following table includes options that are specific to the NDB Cluster native backup restoration program
+\fBndb_show_tables\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_show_tables\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.272.\ \&Command\-line options for the ndb_show_tables program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--database=string\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Specifies database in which table is found; database name must be
+              followed by table name
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--loops=#\fR,
+.PP
+\fB \fR\fB-l\fR\fB \fR
+T}:T{
+Number of times to repeat output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--parsable\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Return output suitable for MySQL LOAD DATA statement
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--show-temp-status\fR\fB \fR
+T}:T{
+Show table temporary flag
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--type=#\fR,
+.PP
+\fB \fR\fB-t\fR\fB \fR
+T}:T{
+Limit output to objects of this type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--unqualified\fR,
+.PP
+\fB \fR\fB-u\fR\fB \fR
+T}:T{
+Do not qualify table names
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_show_tables [\-c \fIconnection_string\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database\fR,
+\fB\-d\fR
+.sp
+Specifies the name of the database in which the desired table is found\&. If this option is given, the name of a table must follow the database name\&.
+.sp
+If this option has not been specified, and no tables are found in the
+TEST_DB
+database,
+\fBndb_show_tables\fR
+issues a warning\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-loops\fR,
+\fB\-l\fR
+.sp
+Specifies the number of times the utility should execute\&. This is 1 when this option is not specified, but if you do use the option, you must supply an integer argument for it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-parsable\fR,
+\fB\-p\fR
+.sp
+Using this option causes the output to be in a format suitable for use with
+LOAD DATA\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-show\-temp\-status\fR
+.sp
+If specified, this causes temporary tables to be displayed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-type\fR,
+\fB\-t\fR
+.sp
+Can be used to restrict the output to one type of object, specified by an integer type code as shown here:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+1: System table
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+2: User\-created table
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+3: Unique hash index
+.RE
+.sp
+Any other value causes all
+NDB
+database objects to be listed (the default)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-unqualified\fR,
+\fB\-u\fR
+.sp
+If specified, this causes unqualified object names to be displayed\&.
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Only user\-created NDB Cluster tables may be accessed from MySQL; system tables such as
+SYSTAB_0
+are not visible to
+\fBmysqld\fR\&. However, you can examine the contents of system tables using
+NDB
+API applications such as
+\fBndb_select_all\fR
+(see
+\fBndb_select_all\fR(1))\&.
+.sp .5v
+.RE
+.PP
+Prior to NDB 8\&.0\&.20, this program printed
+NDBT_ProgramExit \- \fIstatus\fR
+upon completion of its run, due to an unnecessary dependency on the
+NDBT
+testing library\&. This dependency has been removed, eliminating the extraneous output\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

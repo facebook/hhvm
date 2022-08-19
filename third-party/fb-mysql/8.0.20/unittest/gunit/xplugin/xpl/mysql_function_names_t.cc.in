@@ -1,0 +1,628 @@
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License, version 2.0,
+ as published by the Free Software Foundation.
+
+ This program is also distributed with certain software (including
+ but not limited to OpenSSL) that is licensed under separate terms,
+ as designated in a particular file or component or in included license
+ documentation.  The authors of MySQL hereby grant you an additional
+ permission to link the program and your derivative works with the
+ separately licensed software that they have included with MySQL.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License, version 2.0, for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
+
+#include <gtest/gtest.h>
+
+#include "plugin/x/src/helper/string_case.h"
+#include "plugin/x/src/mysql_function_names.h"
+
+namespace xpl {
+namespace mysql_function_names_test {
+std::vector<const char *> get_native_mysql_functions();
+std::vector<const char *> get_mysql_functions_that_return_json();
+std::vector<const char *> get_mysql_functions_that_operate_on_json();
+std::vector<const char *> get_other_mysql_functions();
+std::vector<const char *> get_special_mysql_functions();
+std::vector<const char *> get_all_mysql_function_names();
+}  // namespace mysql_function_names_test
+
+namespace test {
+
+class Mysql_function_names_order_test
+    : public ::testing::TestWithParam<std::vector<const char *>> {};
+
+TEST_P(Mysql_function_names_order_test, mysqld_function_order) {
+  const auto &param = GetParam();
+  std::vector<const char *> expect{param};
+  std::sort(expect.begin(), expect.end(), Is_less());
+  const auto p = std::mismatch(expect.begin(), expect.end(), param.begin());
+  ASSERT_EQ(expect.end(), p.first) << "Incorect order between '" << *p.second
+                                   << "' and '" << *p.first << "'";
+}
+
+INSTANTIATE_TEST_CASE_P(
+    Order_mysql_functions, Mysql_function_names_order_test,
+    ::testing::Values(
+        mysql_function_names_test::get_native_mysql_functions(),
+        mysql_function_names_test::get_mysql_functions_that_return_json(),
+        mysql_function_names_test::get_mysql_functions_that_operate_on_json(),
+        mysql_function_names_test::get_other_mysql_functions(),
+        mysql_function_names_test::get_special_mysql_functions()));
+
+class Mysql_function_names_pass_test
+    : public ::testing::TestWithParam<const char *> {};
+
+TEST_P(Mysql_function_names_pass_test, is_mysqld_function) {
+  const auto name = GetParam();
+  ASSERT_TRUE(is_native_mysql_function(name))
+      << "Function '" << name << "' is missing";
+}
+
+const char *const native_mysql_functions_param[] = {${NATIVE_MYSQL_FUNCTIONS}};
+
+const char *const special_mysql_functions_param[] = {
+    ${SPECIAL_MYSQL_FUNCTIONS}};
+
+const char *const other_mysql_functions_param[] = {
+    "PASSWORD",       "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP",
+    "GEOMCOLLECTION", "LAG",          "LEAD",         "LOCALTIME",
+    "LOCALTIMESTAMP", "SCHEMA",       "DISTINCT",     ${OTHER_MYSQL_FUNCTIONS}};
+
+INSTANTIATE_TEST_CASE_P(Native_mysql_functions, Mysql_function_names_pass_test,
+                        ::testing::ValuesIn(native_mysql_functions_param));
+
+INSTANTIATE_TEST_CASE_P(Special_mysql_functions, Mysql_function_names_pass_test,
+                        ::testing::ValuesIn(special_mysql_functions_param));
+
+INSTANTIATE_TEST_CASE_P(Other_mysql_functions, Mysql_function_names_pass_test,
+                        ::testing::ValuesIn(other_mysql_functions_param));
+
+class Mysql_function_names_fail_test
+    : public ::testing::TestWithParam<const char *> {};
+
+TEST_P(Mysql_function_names_fail_test, is_not_mysqld_function) {
+  ASSERT_FALSE(is_native_mysql_function(GetParam()));
+}
+
+INSTANTIATE_TEST_CASE_P(Mysql_function_names_fail,
+                        Mysql_function_names_fail_test,
+                        ::testing::Values("meeny", "miny", "moe"));
+
+class Mysql_function_names_reverse_test
+    : public ::testing::TestWithParam<const char *> {
+ protected:
+  template <typename T>
+  bool find(const T &array, const char *value) {
+    return std::find_if(std::begin(array), std::end(array),
+                        [&value](const char *name) {
+                          return std::strcmp(value, name) == 0;
+                        }) != std::end(array);
+  }
+};
+
+TEST_P(Mysql_function_names_reverse_test, mysqld_function_reverse_scenario) {
+  const auto &name = GetParam();
+  ASSERT_TRUE(find(native_mysql_functions_param, name) ||
+              find(special_mysql_functions_param, name) ||
+              find(other_mysql_functions_param, name))
+      << "Function '" << name << "' should be removed";
+}
+
+INSTANTIATE_TEST_CASE_P(
+    Mysql_function_names_reverse, Mysql_function_names_reverse_test,
+    ::testing::ValuesIn(
+        mysql_function_names_test::get_all_mysql_function_names()));
+
+struct Param_mysql_functions {
+  const char *name;
+  bool expect;
+};
+
+enum {
+  PASS = true,
+  FAIL = false,
+  OPERATOR = false,
+  INTERNAL = false,
+  REMOVED = false,
+  UDF = false,
+};
+
+// https://dev.mysql.com/doc/refman/8.0/en/func-op-summary-ref.html
+Param_mysql_functions documentation_mysql_functions_param[] = {
+    {"ABS", PASS},
+    {"ACOS", PASS},
+    {"ADDDATE", PASS},
+    {"ADDTIME", PASS},
+    {"AES_DECRYPT", PASS},
+    {"AES_ENCRYPT", PASS},
+    {"AND", OPERATOR},
+    {"&&", OPERATOR},
+    {"ANY_VALUE", PASS},
+    {"ASCII", PASS},
+    {"ASIN", PASS},
+    {"=", OPERATOR},
+    {":=", OPERATOR},
+    {"ASYMMETRIC_DECRYPT", UDF},
+    {"ASYMMETRIC_DERIVE", UDF},
+    {"ASYMMETRIC_ENCRYPT", UDF},
+    {"ASYMMETRIC_SIGN", UDF},
+    {"ASYMMETRIC_VERIFY", UDF},
+    {"ATAN", PASS},
+    {"ATAN2", PASS},
+    {"AVG", PASS},
+    {"BENCHMARK", PASS},
+    {"BETWEEN ... AND ...", OPERATOR},
+    {"BIN", PASS},
+    {"BIN_TO_UUID", PASS},
+    {"BINARY", OPERATOR},
+    {"BIT_AND", PASS},
+    {"BIT_COUNT", PASS},
+    {"BIT_LENGTH", PASS},
+    {"BIT_OR", PASS},
+    {"BIT_XOR", PASS},
+    {"&", OPERATOR},
+    {"~", OPERATOR},
+    {"|", OPERATOR},
+    {"^", OPERATOR},
+    {"CAN_ACCESS_COLUMN", INTERNAL},
+    {"CAN_ACCESS_DATABASE", INTERNAL},
+    {"CAN_ACCESS_TABLE", INTERNAL},
+    {"CAN_ACCESS_VIEW", INTERNAL},
+    {"CASE", OPERATOR},
+    {"CAST", PASS},
+    {"CEIL", PASS},
+    {"CEILING", PASS},
+    {"CHAR", PASS},
+    {"CHAR_LENGTH", PASS},
+    {"CHARACTER_LENGTH", PASS},
+    {"CHARSET", PASS},
+    {"COALESCE", PASS},
+    {"COERCIBILITY", PASS},
+    {"COLLATION", PASS},
+    {"COMPRESS", PASS},
+    {"CONCAT", PASS},
+    {"CONCAT_WS", PASS},
+    {"CONNECTION_ID", PASS},
+    {"CONV", PASS},
+    {"CONVERT", PASS},
+    {"CONVERT_TZ", PASS},
+    {"COS", PASS},
+    {"COT", PASS},
+    {"COUNT", PASS},
+    {"COUNT(DISTINCT)", OPERATOR},
+    {"CRC32", PASS},
+    {"CREATE_ASYMMETRIC_PRIV_KEY", UDF},
+    {"CREATE_ASYMMETRIC_PUB_KEY", UDF},
+    {"CREATE_DH_PARAMETERS", UDF},
+    {"CREATE_DIGEST", UDF},
+    {"CUME_DIST", PASS},
+    {"CURDATE", PASS},
+    {"CURRENT_DATE", PASS},
+    {"CURRENT_ROLE", PASS},
+    {"CURRENT_TIME", PASS},
+    {"CURRENT_TIMESTAMP", PASS},
+    {"CURRENT_USER", PASS},
+    {"CURTIME", PASS},
+    {"DATABASE", PASS},
+    {"DATE", PASS},
+    {"DATE_ADD", PASS},
+    {"DATE_FORMAT", PASS},
+    {"DATE_SUB", PASS},
+    {"DATEDIFF", PASS},
+    {"DAY", PASS},
+    {"DAYNAME", PASS},
+    {"DAYOFMONTH", PASS},
+    {"DAYOFWEEK", PASS},
+    {"DAYOFYEAR", PASS},
+    {"DECODE", REMOVED},
+    {"DEFAULT", PASS},
+    {"DEGREES", PASS},
+    {"DENSE_RANK", PASS},
+    {"DES_DECRYPT", REMOVED},
+    {"DES_ENCRYPT", REMOVED},
+    {"DIV", OPERATOR},
+    {"/", OPERATOR},
+    {"ELT", PASS},
+    {"ENCODE", REMOVED},
+    {"ENCRYPT", REMOVED},
+    {"=", OPERATOR},
+    {"<=>", OPERATOR},
+    {"EXP", PASS},
+    {"EXPORT_SET", PASS},
+    {"EXTRACT", PASS},
+    {"ExtractValue", PASS},
+    {"FIELD", PASS},
+    {"FIND_IN_SET", PASS},
+    {"FIRST_VALUE", PASS},
+    {"FLOOR", PASS},
+    {"FORMAT", PASS},
+    {"FORMAT_BYTES", PASS},
+    {"FORMAT_PICO_TIME", PASS},
+    {"FOUND_ROWS", PASS},
+    {"FROM_BASE64", PASS},
+    {"FROM_DAYS", PASS},
+    {"FROM_UNIXTIME", PASS},
+    {"GeomCollection", PASS},
+    {"GeometryCollection", PASS},
+    {"GET_DD_COLUMN_PRIVILEGES", INTERNAL},
+    {"GET_DD_CREATE_OPTIONS", INTERNAL},
+    {"GET_DD_INDEX_SUB_PART_LENGTH", INTERNAL},
+    {"GET_FORMAT", PASS},
+    {"GET_LOCK", PASS},
+    {">", OPERATOR},
+    {">=", OPERATOR},
+    {"GREATEST", PASS},
+    {"GROUP_CONCAT", PASS},
+    {"GROUPING", PASS},
+    {"GTID_SUBSET", PASS},
+    {"GTID_SUBTRACT", PASS},
+    {"HEX", PASS},
+    {"HOUR", PASS},
+    {"ICU_VERSION", PASS},
+    {"IF", PASS},
+    {"IFNULL", PASS},
+    {"IN", OPERATOR},
+    {"INET_ATON", PASS},
+    {"INET_NTOA", PASS},
+    {"INET6_ATON", PASS},
+    {"INET6_NTOA", PASS},
+    {"INSERT", PASS},
+    {"INSTR", PASS},
+    {"INTERNAL_AUTO_INCREMENT", INTERNAL},
+    {"INTERNAL_AVG_ROW_LENGTH", INTERNAL},
+    {"INTERNAL_CHECK_TIME", INTERNAL},
+    {"INTERNAL_CHECKSUM", INTERNAL},
+    {"INTERNAL_DATA_FREE", INTERNAL},
+    {"INTERNAL_DATA_LENGTH", INTERNAL},
+    {"INTERNAL_DD_CHAR_LENGTH", INTERNAL},
+    {"INTERNAL_GET_COMMENT_OR_ERROR", INTERNAL},
+    {"INTERNAL_GET_VIEW_WARNING_OR_ERROR", INTERNAL},
+    {"INTERNAL_INDEX_COLUMN_CARDINALITY", INTERNAL},
+    {"INTERNAL_INDEX_LENGTH", INTERNAL},
+    {"INTERNAL_KEYS_DISABLED", INTERNAL},
+    {"INTERNAL_MAX_DATA_LENGTH", INTERNAL},
+    {"INTERNAL_TABLE_ROWS", INTERNAL},
+    {"INTERNAL_UPDATE_TIME", INTERNAL},
+    {"INTERVAL", PASS},
+    {"IS", OPERATOR},
+    {"IS_FREE_LOCK", PASS},
+    {"IS_IPV4", PASS},
+    {"IS_IPV4_COMPAT", PASS},
+    {"IS_IPV4_MAPPED", PASS},
+    {"IS_IPV6", PASS},
+    {"IS NOT", OPERATOR},
+    {"IS NOT NULL", OPERATOR},
+    {"IS NULL", OPERATOR},
+    {"IS_USED_LOCK", PASS},
+    {"IS_UUID", PASS},
+    {"ISNULL", PASS},
+    {"JSON_ARRAY", PASS},
+    {"JSON_ARRAY_APPEND", PASS},
+    {"JSON_ARRAY_INSERT", PASS},
+    {"JSON_ARRAYAGG", PASS},
+    {"->", OPERATOR},
+    {"JSON_CONTAINS", PASS},
+    {"JSON_CONTAINS_PATH", PASS},
+    {"JSON_DEPTH", PASS},
+    {"JSON_EXTRACT", PASS},
+    {"->>", OPERATOR},
+    {"JSON_INSERT", PASS},
+    {"JSON_KEYS", PASS},
+    {"JSON_LENGTH", PASS},
+    {"JSON_MERGE", PASS},
+    {"JSON_MERGE_PATCH", PASS},
+    {"JSON_MERGE_PRESERVE", PASS},
+    {"JSON_OBJECT", PASS},
+    {"JSON_OBJECTAGG", PASS},
+    {"JSON_PRETTY", PASS},
+    {"JSON_QUOTE", PASS},
+    {"JSON_REMOVE", PASS},
+    {"JSON_REPLACE", PASS},
+    {"JSON_SEARCH", PASS},
+    {"JSON_SET", PASS},
+    {"JSON_STORAGE_FREE", PASS},
+    {"JSON_STORAGE_SIZE", PASS},
+    {"JSON_TABLE", FAIL},
+    {"JSON_TYPE", PASS},
+    {"JSON_UNQUOTE", PASS},
+    {"JSON_VALID", PASS},
+    {"LAG", PASS},
+    {"LAST_DAY", PASS},
+    {"LAST_INSERT_ID", PASS},
+    {"LAST_VALUE", PASS},
+    {"LCASE", PASS},
+    {"LEAD", PASS},
+    {"LEAST", PASS},
+    {"LEFT", PASS},
+    {"<<", OPERATOR},
+    {"LENGTH", PASS},
+    {"<", OPERATOR},
+    {"<=", OPERATOR},
+    {"LIKE", OPERATOR},
+    {"LineString", PASS},
+    {"LN", PASS},
+    {"LOAD_FILE", PASS},
+    {"LOCALTIME", PASS},
+    {"LOCALTIMESTAMP", PASS},
+    {"LOCATE", PASS},
+    {"LOG", PASS},
+    {"LOG10", PASS},
+    {"LOG2", PASS},
+    {"LOWER", PASS},
+    {"LPAD", PASS},
+    {"LTRIM", PASS},
+    {"MAKE_SET", PASS},
+    {"MAKEDATE", PASS},
+    {"MAKETIME", PASS},
+    {"MASTER_POS_WAIT", PASS},
+    {"MATCH", FAIL},
+    {"MAX", PASS},
+    {"MBRContains", PASS},
+    {"MBRCoveredBy", PASS},
+    {"MBRCovers", PASS},
+    {"MBRDisjoint", PASS},
+    {"MBREquals", PASS},
+    {"MBRIntersects", PASS},
+    {"MBROverlaps", PASS},
+    {"MBRTouches", PASS},
+    {"MBRWithin", PASS},
+    {"MD5", PASS},
+    {"MICROSECOND", PASS},
+    {"MID", PASS},
+    {"MIN", PASS},
+    {"-", OPERATOR},
+    {"MINUTE", PASS},
+    {"MOD", PASS},
+    {"%", OPERATOR},
+    {"MOD", PASS},
+    {"MONTH", PASS},
+    {"MONTHNAME", PASS},
+    {"MultiLineString", PASS},
+    {"MultiPoint", PASS},
+    {"MultiPolygon", PASS},
+    {"NAME_CONST", PASS},
+    {"NOT", OPERATOR},
+    {"!", OPERATOR},
+    {"NOT BETWEEN ... AND ...", OPERATOR},
+    {"!=", OPERATOR},
+    {"<>", OPERATOR},
+    {"NOT IN", OPERATOR},
+    {"NOT LIKE", OPERATOR},
+    {"NOT REGEXP", OPERATOR},
+    {"NOW", PASS},
+    {"NTH_VALUE", PASS},
+    {"NTILE", PASS},
+    {"NULLIF", PASS},
+    {"OCT", PASS},
+    {"OCTET_LENGTH", PASS},
+    {"||", OPERATOR},
+    {"OR", OPERATOR},
+    {"ORD", PASS},
+    {"PASSWORD", PASS},
+    {"PERCENT_RANK", PASS},
+    {"PERIOD_ADD", PASS},
+    {"PERIOD_DIFF", PASS},
+    {"PI", PASS},
+    {"+", OPERATOR},
+    {"Point", PASS},
+    {"Polygon", PASS},
+    {"POSITION", PASS},
+    {"POW", PASS},
+    {"POWER", PASS},
+    {"PS_CURRENT_THREAD_ID", PASS},
+    {"PS_THREAD_ID", PASS},
+    {"QUARTER", PASS},
+    {"QUOTE", PASS},
+    {"RADIANS", PASS},
+    {"RAND", PASS},
+    {"RANDOM_BYTES", PASS},
+    {"RANK", PASS},
+    {"REGEXP", OPERATOR},
+    {"REGEXP_INSTR", PASS},
+    {"REGEXP_LIKE", PASS},
+    {"REGEXP_REPLACE", PASS},
+    {"REGEXP_SUBSTR", PASS},
+    {"RELEASE_ALL_LOCKS", PASS},
+    {"RELEASE_LOCK", PASS},
+    {"REPEAT", PASS},
+    {"REPLACE", PASS},
+    {"REVERSE", PASS},
+    {"RIGHT", PASS},
+    {">>", OPERATOR},
+    {"RLIKE", OPERATOR},
+    {"ROLES_GRAPHML", PASS},
+    {"ROUND", PASS},
+    {"ROW_COUNT", PASS},
+    {"ROW_NUMBER", PASS},
+    {"RPAD", PASS},
+    {"RTRIM", PASS},
+    {"SCHEMA", PASS},
+    {"SEC_TO_TIME", PASS},
+    {"SECOND", PASS},
+    {"SESSION_USER", PASS},
+    {"SHA1", PASS},
+    {"SHA", PASS},
+    {"SHA2", PASS},
+    {"SIGN", PASS},
+    {"SIN", PASS},
+    {"SLEEP", PASS},
+    {"SOUNDEX", PASS},
+    {"SOUNDS LIKE", OPERATOR},
+    {"SPACE", PASS},
+    {"SQRT", PASS},
+    {"ST_Area", PASS},
+    {"ST_AsBinary", PASS},
+    {"ST_AsWKB", PASS},
+    {"ST_AsGeoJSON", PASS},
+    {"ST_AsText", PASS},
+    {"ST_AsWKT", PASS},
+    {"ST_Buffer", PASS},
+    {"ST_Buffer_Strategy", PASS},
+    {"ST_Centroid", PASS},
+    {"ST_Contains", PASS},
+    {"ST_ConvexHull", PASS},
+    {"ST_Crosses", PASS},
+    {"ST_Difference", PASS},
+    {"ST_Dimension", PASS},
+    {"ST_Disjoint", PASS},
+    {"ST_Distance", PASS},
+    {"ST_Distance_Sphere", PASS},
+    {"ST_EndPoint", PASS},
+    {"ST_Envelope", PASS},
+    {"ST_Equals", PASS},
+    {"ST_ExteriorRing", PASS},
+    {"ST_GeoHash", PASS},
+    {"ST_GeomCollFromText", PASS},
+    {"ST_GeometryCollectionFromText", PASS},
+    {"ST_GeomCollFromTxt", PASS},
+    {"ST_GeomCollFromWKB", PASS},
+    {"ST_GeometryCollectionFromWKB", PASS},
+    {"ST_GeometryN", PASS},
+    {"ST_GeometryType", PASS},
+    {"ST_GeomFromGeoJSON", PASS},
+    {"ST_GeomFromText", PASS},
+    {"ST_GeometryFromText", PASS},
+    {"ST_GeomFromWKB", PASS},
+    {"ST_GeometryFromWKB", PASS},
+    {"ST_InteriorRingN", PASS},
+    {"ST_Intersection", PASS},
+    {"ST_Intersects", PASS},
+    {"ST_IsClosed", PASS},
+    {"ST_IsEmpty", PASS},
+    {"ST_IsSimple", PASS},
+    {"ST_IsValid", PASS},
+    {"ST_LatFromGeoHash", PASS},
+    {"ST_Latitude", PASS},
+    {"ST_Length", PASS},
+    {"ST_LineFromText", PASS},
+    {"ST_LineStringFromText", PASS},
+    {"ST_LineFromWKB", PASS},
+    {"ST_LineStringFromWKB", PASS},
+    {"ST_LongFromGeoHash", PASS},
+    {"ST_Longitude", PASS},
+    {"ST_MakeEnvelope", PASS},
+    {"ST_MLineFromText", PASS},
+    {"ST_MultiLineStringFromText", PASS},
+    {"ST_MLineFromWKB", PASS},
+    {"ST_MultiLineStringFromWKB", PASS},
+    {"ST_MPointFromText", PASS},
+    {"ST_MultiPointFromText", PASS},
+    {"ST_MPointFromWKB", PASS},
+    {"ST_MultiPointFromWKB", PASS},
+    {"ST_MPolyFromText", PASS},
+    {"ST_MultiPolygonFromText", PASS},
+    {"ST_MPolyFromWKB", PASS},
+    {"ST_MultiPolygonFromWKB", PASS},
+    {"ST_NumGeometries", PASS},
+    {"ST_NumInteriorRing", PASS},
+    {"ST_NumInteriorRings", PASS},
+    {"ST_NumPoints", PASS},
+    {"ST_Overlaps", PASS},
+    {"ST_PointFromGeoHash", PASS},
+    {"ST_PointFromText", PASS},
+    {"ST_PointFromWKB", PASS},
+    {"ST_PointN", PASS},
+    {"ST_PolyFromText", PASS},
+    {"ST_PolygonFromText", PASS},
+    {"ST_PolyFromWKB", PASS},
+    {"ST_PolygonFromWKB", PASS},
+    {"ST_Simplify", PASS},
+    {"ST_SRID", PASS},
+    {"ST_StartPoint", PASS},
+    {"ST_SwapXY", PASS},
+    {"ST_SymDifference", PASS},
+    {"ST_Touches", PASS},
+    {"ST_Transform", PASS},
+    {"ST_Union", PASS},
+    {"ST_Validate", PASS},
+    {"ST_Within", PASS},
+    {"ST_X", PASS},
+    {"ST_Y", PASS},
+    {"STATEMENT_DIGEST", PASS},
+    {"STATEMENT_DIGEST_TEXT", PASS},
+    {"STD", PASS},
+    {"STDDEV", PASS},
+    {"STDDEV_POP", PASS},
+    {"STDDEV_SAMP", PASS},
+    {"STR_TO_DATE", PASS},
+    {"STRCMP", PASS},
+    {"SUBDATE", PASS},
+    {"SUBSTR", PASS},
+    {"SUBSTRING", PASS},
+    {"SUBSTRING_INDEX", PASS},
+    {"SUBTIME", PASS},
+    {"SUM", PASS},
+    {"SYSDATE", PASS},
+    {"SYSTEM_USER", PASS},
+    {"TAN", PASS},
+    {"TIME", PASS},
+    {"TIME_FORMAT", PASS},
+    {"TIME_TO_SEC", PASS},
+    {"TIMEDIFF", PASS},
+    {"*", OPERATOR},
+    {"TIMESTAMP", PASS},
+    {"TIMESTAMPADD", PASS},
+    {"TIMESTAMPDIFF", PASS},
+    {"TO_BASE64", PASS},
+    {"TO_DAYS", PASS},
+    {"TO_SECONDS", PASS},
+    {"TRIM", PASS},
+    {"TRUNCATE", PASS},
+    {"UCASE", PASS},
+    {"-", OPERATOR},
+    {"UNCOMPRESS", PASS},
+    {"UNCOMPRESSED_LENGTH", PASS},
+    {"UNHEX", PASS},
+    {"UNIX_TIMESTAMP", PASS},
+    {"UpdateXML", PASS},
+    {"UPPER", PASS},
+    {"USER", PASS},
+    {"UTC_DATE", PASS},
+    {"UTC_TIME", PASS},
+    {"UTC_TIMESTAMP", PASS},
+    {"UUID", PASS},
+    {"UUID_SHORT", PASS},
+    {"UUID_TO_BIN", PASS},
+    {"VALIDATE_PASSWORD_STRENGTH", PASS},
+    {"VALUES", PASS},
+    {"VAR_POP", PASS},
+    {"VAR_SAMP", PASS},
+    {"VARIANCE", PASS},
+    {"VERSION", PASS},
+    {"WAIT_FOR_EXECUTED_GTID_SET", PASS},
+    {"WAIT_UNTIL_SQL_THREAD_AFTER_GTIDS", PASS},
+    {"WEEK", PASS},
+    {"WEEKDAY", PASS},
+    {"WEEKOFYEAR", PASS},
+    {"WEIGHT_STRING", PASS},
+    {"XOR", OPERATOR},
+    {"YEAR", PASS},
+    {"YEARWEEK", PASS},
+};
+
+class Mysql_function_names_documentation_test
+    : public ::testing::TestWithParam<Param_mysql_functions> {};
+
+TEST_P(Mysql_function_names_documentation_test,
+       mysqld_function_from_documentation) {
+  const auto &param = GetParam();
+  ASSERT_EQ(param.expect, is_native_mysql_function(param.name))
+      << "Function '" << param.name << "' should "
+      << (param.expect ? "PASS" : "FAIL");
+}
+
+INSTANTIATE_TEST_CASE_P(
+    Mysql_function_names_documentation, Mysql_function_names_documentation_test,
+    ::testing::ValuesIn(documentation_mysql_functions_param));
+
+}  // namespace test
+}  // namespace xpl

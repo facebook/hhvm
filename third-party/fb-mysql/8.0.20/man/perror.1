@@ -1,0 +1,193 @@
+'\" t
+.\"     Title: \fBperror\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBPERROR\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perror \- display MySQL error message information
+.SH "SYNOPSIS"
+.HP \w'\fBperror\ [\fR\fB\fIoptions\fR\fR\fB]\ \fR\fB\fIerrorcode\fR\fR\fB\ \&.\&.\&.\fR\ 'u
+\fBperror [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIerrorcode\fR\fR\fB \&.\&.\&.\fR
+.SH "DESCRIPTION"
+.PP
+\fBperror\fR
+displays the error message for MySQL or operating system error codes\&. Invoke
+\fBperror\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBperror [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIerrorcode\fR\fR\fB \&.\&.\&.\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBperror\fR
+attempts to be flexible in understanding its arguments\&. For example, for the
+ER_WRONG_VALUE_FOR_VAR
+error,
+\fBperror\fR
+understands any of these arguments:
+\fB1231\fR,
+001231,
+MY\-1231, or
+MY\-001231, or
+ER_WRONG_VALUE_FOR_VAR\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBperror 1231\fR
+MySQL error code MY\-001231 (ER_WRONG_VALUE_FOR_VAR): Variable \*(Aq%\-\&.64s\*(Aq
+can\*(Aqt be set to the value of \*(Aq%\-\&.200s\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If an error number is in the range where MySQL and operating system errors overlap,
+\fBperror\fR
+displays both error messages:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBperror 1 13\fR
+OS error code   1:  Operation not permitted
+MySQL error code MY\-000001: Can\*(Aqt create/write to file \*(Aq%s\*(Aq (OS errno %d \- %s)
+OS error code  13:  Permission denied
+MySQL error code MY\-000013: Can\*(Aqt get stat of \*(Aq%s\*(Aq (OS errno %d \- %s)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+To obtain the error message for a MySQL Cluster error code, use the
+\fBndb_perror\fR
+utility\&.
+.PP
+The meaning of system error messages may be dependent on your operating system\&. A given error code may mean different things on different operating systems\&.
+.PP
+\fBperror\fR
+supports the following options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-\-info\fR,
+\fB\-I\fR,
+\fB\-?\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ndb\fR
+.sp
+Print the error message for a MySQL Cluster error code\&.
+.sp
+This option was removed in MySQL 8\&.0\&.13\&. Use the
+\fBndb_perror\fR
+utility instead\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-silent\fR,
+\fB\-s\fR
+.sp
+Silent mode\&. Print only the error message\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Verbose mode\&. Print error code and message\&. This is the default behavior\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Display version information and exit\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

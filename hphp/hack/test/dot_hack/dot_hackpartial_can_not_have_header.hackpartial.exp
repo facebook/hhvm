@@ -1,2 +1,0 @@
-File "dot_hackpartial_can_not_have_header.hackpartial", line 1, characters 1-4:
-Leading markup and `<?hh` are not permitted in `.hackpartial` files, which are always `partial`. (Parsing[1002])

@@ -39,8 +39,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_disallow_byref_dynamic_calls: false,
     tco_disallow_byref_calls: true,
     allowed_fixme_codes_strict: i_set::ISet::empty(),
-    allowed_fixme_codes_partial: i_set::ISet::empty(),
-    codes_not_raised_partial: i_set::ISet::empty(),
     log_levels: s_map::SMap::empty(),
     po_disable_lval_as_an_expression: false,
     tco_shallow_class_decl: false,
@@ -59,7 +57,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_like_casts: false,
     tco_simple_pessimize: 0.0,
     tco_complex_coercion: false,
-    error_codes_treated_strictly: i_set::ISet::empty(),
     tco_check_xhp_attribute: false,
     tco_check_redundant_generics: false,
     tco_disallow_unresolved_type_variables: false,
@@ -235,10 +232,6 @@ impl GlobalOptions<'_> {
         let tco_disallow_byref_calls = self.tco_disallow_byref_calls;
         let allowed_fixme_codes_strict: i_set::ISet<'a> =
             i_set::ISet::from(arena, self.allowed_fixme_codes_strict.into_iter().copied());
-        let allowed_fixme_codes_partial: i_set::ISet<'a> =
-            i_set::ISet::from(arena, self.allowed_fixme_codes_partial.into_iter().copied());
-        let codes_not_raised_partial: i_set::ISet<'a> =
-            i_set::ISet::from(arena, self.codes_not_raised_partial.into_iter().copied());
         let log_levels: s_map::SMap<'a, isize> = s_map::SMap::from(
             arena,
             self.log_levels
@@ -262,10 +255,6 @@ impl GlobalOptions<'_> {
         let tco_like_casts = self.tco_like_casts;
         let tco_simple_pessimize = self.tco_simple_pessimize;
         let tco_complex_coercion = self.tco_complex_coercion;
-        let error_codes_treated_strictly: i_set::ISet<'a> = i_set::ISet::from(
-            arena,
-            self.error_codes_treated_strictly.into_iter().copied(),
-        );
         let tco_check_xhp_attribute = self.tco_check_xhp_attribute;
         let tco_check_redundant_generics = self.tco_check_redundant_generics;
         let tco_disallow_unresolved_type_variables = self.tco_disallow_unresolved_type_variables;
@@ -456,8 +445,6 @@ impl GlobalOptions<'_> {
             tco_disallow_byref_dynamic_calls,
             tco_disallow_byref_calls,
             allowed_fixme_codes_strict,
-            allowed_fixme_codes_partial,
-            codes_not_raised_partial,
             log_levels,
             po_disable_lval_as_an_expression,
             tco_shallow_class_decl,
@@ -476,7 +463,6 @@ impl GlobalOptions<'_> {
             tco_like_casts,
             tco_simple_pessimize,
             tco_complex_coercion,
-            error_codes_treated_strictly,
             tco_check_xhp_attribute,
             tco_check_redundant_generics,
             tco_disallow_unresolved_type_variables,

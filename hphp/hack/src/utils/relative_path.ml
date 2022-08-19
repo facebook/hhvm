@@ -84,8 +84,6 @@ let suffix (p : t) = snd p
 
 let default = (Dummy, "")
 
-let is_partial p = String.is_suffix (suffix p) ~suffix:".hackpartial"
-
 (* We could have simply used Marshal.to_string here, but this does slightly
  * better on space usage. *)
 let storage_to_string (p, rest) = string_of_prefix p ^ "|" ^ rest

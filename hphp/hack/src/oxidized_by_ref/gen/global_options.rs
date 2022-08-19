@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39e19c123bf0b8780c7b55d146ae0030>>
+// @generated SignedSource<<49c4279c0b236c1bd72b0a81df8f069c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,10 +73,6 @@ pub struct GlobalOptions<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub allowed_fixme_codes_strict: i_set::ISet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub allowed_fixme_codes_partial: i_set::ISet<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub codes_not_raised_partial: i_set::ISet<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub log_levels: s_map::SMap<'a, isize>,
     pub po_disable_lval_as_an_expression: bool,
     pub tco_shallow_class_decl: bool,
@@ -95,8 +91,6 @@ pub struct GlobalOptions<'a> {
     pub tco_like_casts: bool,
     pub tco_simple_pessimize: f64,
     pub tco_complex_coercion: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub error_codes_treated_strictly: i_set::ISet<'a>,
     pub tco_check_xhp_attribute: bool,
     pub tco_check_redundant_generics: bool,
     pub tco_disallow_unresolved_type_variables: bool,

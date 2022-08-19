@@ -13,9 +13,6 @@ type batch_state = {
   trace: bool;
   paths_to_ignore: Str.regexp list;
   allowed_fixme_codes_strict: ISet.t;
-  allowed_fixme_codes_partial: ISet.t;
-  codes_not_raised_partial: ISet.t;
-  strict_codes: ISet.t;
 }
 
 let worker_id_str ~(worker_id : int) =
@@ -32,9 +29,6 @@ let restore
        trace;
        paths_to_ignore;
        allowed_fixme_codes_strict;
-       allowed_fixme_codes_partial;
-       codes_not_raised_partial;
-       strict_codes;
      } :
       batch_state)
     ~(worker_id : int) : unit =
@@ -45,9 +39,6 @@ let restore
   Typing_deps.trace := trace;
   FilesToIgnore.set_paths_to_ignore paths_to_ignore;
   Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
-  Errors.allowed_fixme_codes_partial := allowed_fixme_codes_partial;
-  Errors.codes_not_raised_partial := codes_not_raised_partial;
-  Errors.error_codes_treated_strictly := strict_codes;
   Errors.set_allow_errors_in_default_path false
 
 let save ~(trace : bool) : batch_state =
@@ -58,7 +49,4 @@ let save ~(trace : bool) : batch_state =
     trace;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     allowed_fixme_codes_strict = !Errors.allowed_fixme_codes_strict;
-    allowed_fixme_codes_partial = !Errors.allowed_fixme_codes_partial;
-    codes_not_raised_partial = !Errors.codes_not_raised_partial;
-    strict_codes = !Errors.error_codes_treated_strictly;
   }

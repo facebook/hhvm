@@ -48,9 +48,6 @@ val create_detect_prefix : string -> t
     `create_detect_prefix` instead. *)
 val from_root : suffix:string -> t
 
-(* Checks if a file is a partial file by checking if the extension is .hackpartial *)
-val is_partial : t -> bool
-
 val prefix : t -> prefix
 
 val suffix : t -> string

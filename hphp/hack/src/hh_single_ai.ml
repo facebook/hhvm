@@ -168,10 +168,6 @@ let parse_options () =
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial tcopt;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason tcopt;
   ( {

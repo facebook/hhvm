@@ -251,9 +251,6 @@ let prepare_iset config config_name initial_values =
   |> List.map ~f:int_of_string
   |> List.fold_right ~init:initial_values ~f:ISet.add
 
-let prepare_error_codes_treated_strictly config =
-  prepare_iset config "error_codes_treated_strictly" (ISet.of_list [])
-
 let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
@@ -347,10 +344,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "disable_lval_as_an_expression" config)
       ~allowed_fixme_codes_strict:
         (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
-      ~allowed_fixme_codes_partial:
-        (prepare_iset config "allowed_fixme_codes_partial" ISet.empty)
-      ~codes_not_raised_partial:
-        (prepare_iset config "codes_not_raised_partial" ISet.empty)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
       ~tco_experimental_features:(config_experimental_tc_features config)
       ?tco_log_large_fanouts_threshold:local_config.log_large_fanouts_threshold
@@ -380,9 +373,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_coeffects_local:(bool_opt "local_coeffects" config)
       ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
-      ?tco_complex_coercion:(bool_opt "complex_coercion" config)
-      ~error_codes_treated_strictly:
-        (prepare_error_codes_treated_strictly config)
       ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
       ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
       ?tco_disallow_unresolved_type_variables:
@@ -508,12 +498,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial global_opts;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial global_opts;
-  Errors.error_codes_treated_strictly :=
-    GlobalOptions.error_codes_treated_strictly global_opts;
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason global_opts;
   ( {

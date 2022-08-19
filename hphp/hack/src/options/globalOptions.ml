@@ -58,8 +58,6 @@ type t = {
   tco_disallow_byref_dynamic_calls: bool;
   tco_disallow_byref_calls: bool;
   allowed_fixme_codes_strict: ISet.t;
-  allowed_fixme_codes_partial: ISet.t;
-  codes_not_raised_partial: ISet.t;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
@@ -78,7 +76,6 @@ type t = {
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
-  error_codes_treated_strictly: ISet.t;
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
@@ -198,8 +195,6 @@ let default =
     tco_disallow_byref_dynamic_calls = false;
     tco_disallow_byref_calls = true;
     allowed_fixme_codes_strict = ISet.empty;
-    allowed_fixme_codes_partial = ISet.empty;
-    codes_not_raised_partial = ISet.empty;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
@@ -218,7 +213,6 @@ let default =
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
-    error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
@@ -337,8 +331,6 @@ let make
       default.tco_disallow_byref_dynamic_calls)
     ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
     ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
-    ?(allowed_fixme_codes_partial = default.allowed_fixme_codes_partial)
-    ?(codes_not_raised_partial = default.codes_not_raised_partial)
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
@@ -360,7 +352,6 @@ let make
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
-    ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
     ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
     ?(tco_disallow_unresolved_type_variables =
@@ -493,8 +484,6 @@ let make
     po_auto_namespace_map;
     po_codegen = false;
     allowed_fixme_codes_strict;
-    allowed_fixme_codes_partial;
-    codes_not_raised_partial;
     po_deregister_php_stdlib;
     po_disallow_toplevel_requires;
     po_allow_unstable_features;
@@ -523,7 +512,6 @@ let make
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
-    error_codes_treated_strictly;
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;
@@ -618,9 +606,3 @@ let so_remote_worker_vfs_checkout_threshold t =
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
-
-let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
-
-let codes_not_raised_partial t = t.codes_not_raised_partial
-
-let error_codes_treated_strictly t = t.error_codes_treated_strictly

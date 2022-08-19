@@ -83,13 +83,6 @@ val apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
-val allowed_fixme_codes_partial : ISet.t ref
-
-val codes_not_raised_partial : ISet.t ref
-
-(* Error codes that should be treated strictly, regardless of their file mode. *)
-val error_codes_treated_strictly : ISet.t ref
-
 val report_pos_from_reason : bool ref
 
 val is_strict_code : int -> bool

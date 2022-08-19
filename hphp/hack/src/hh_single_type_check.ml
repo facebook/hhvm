@@ -290,8 +290,6 @@ let parse_options () =
   let enable_systemlib_annotations = ref false in
   let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref None in
-  let allowed_fixme_codes_partial = ref None in
-  let codes_not_raised_partial = ref None in
   let allowed_decl_fixme_codes = ref None in
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
@@ -694,15 +692,6 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         " List of fixmes that are allowed in strict mode." );
-      ( "--allowed-fixme-codes-partial",
-        Arg.String
-          (fun s ->
-            allowed_fixme_codes_partial := Some (comma_string_to_iset s)),
-        " List of fixmes that are allowed in partial mode." );
-      ( "--codes-not-raised-partial",
-        Arg.String
-          (fun s -> codes_not_raised_partial := Some (comma_string_to_iset s)),
-        " List of error codes that are not raised in partial mode." );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
@@ -914,10 +903,6 @@ let parse_options () =
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
-      ~allowed_fixme_codes_partial:
-        (Option.value !allowed_fixme_codes_partial ~default:ISet.empty)
-      ~codes_not_raised_partial:
-        (Option.value !codes_not_raised_partial ~default:ISet.empty)
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_shallow_class_decl:!shallow_class_decl
@@ -1010,10 +995,6 @@ let parse_options () =
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.allowed_fixme_codes_partial :=
-    GlobalOptions.allowed_fixme_codes_partial tcopt;
-  Errors.codes_not_raised_partial :=
-    GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason tcopt;
 

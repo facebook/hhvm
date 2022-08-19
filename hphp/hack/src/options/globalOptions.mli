@@ -92,8 +92,6 @@ type t = {
   tco_disallow_byref_calls: bool;
   (* Error codes for which we allow HH_FIXMEs in strict mode *)
   allowed_fixme_codes_strict: ISet.t;
-  allowed_fixme_codes_partial: ISet.t;
-  codes_not_raised_partial: ISet.t;
   (* Initial hh_log_level settings *)
   log_levels: int SMap.t;
   (* Flag to disable using lvals as expressions. *)
@@ -139,8 +137,6 @@ type t = {
   tco_simple_pessimize: float;
   (* Enables complex coercion interactions that involve like types *)
   tco_complex_coercion: bool;
-  (* Set of codes to be treated as if they were in strict mode files *)
-  error_codes_treated_strictly: ISet.t;
   (* static check xhp required attribute *)
   tco_check_xhp_attribute: bool;
   (* Check redundant generics in return types *)
@@ -365,8 +361,6 @@ val make :
   ?tco_disallow_byref_dynamic_calls:bool ->
   ?tco_disallow_byref_calls:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
-  ?allowed_fixme_codes_partial:ISet.t ->
-  ?codes_not_raised_partial:ISet.t ->
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
@@ -385,7 +379,6 @@ val make :
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
-  ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
@@ -486,12 +479,6 @@ val so_remote_worker_vfs_checkout_threshold : t -> int
 val so_naming_sqlite_path : t -> string option
 
 val allowed_fixme_codes_strict : t -> ISet.t
-
-val allowed_fixme_codes_partial : t -> ISet.t
-
-val codes_not_raised_partial : t -> ISet.t
-
-val error_codes_treated_strictly : t -> ISet.t
 
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
 (* NOTE: set/getters for po_* options moved to ParserOptions *)

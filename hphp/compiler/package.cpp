@@ -70,7 +70,6 @@ Package::Package(const std::string& root,
   , m_failed{false}
   , m_parseOnDemand{parseOnDemand}
   , m_total{0}
-  , m_callback{nullptr}
   , m_fileCache{std::make_shared<FileCache>()}
   , m_executor{executor}
   , m_client{client}
@@ -500,7 +499,7 @@ Package::groupDirectories(std::string path, bool exclude_dirs) {
         if (!name.empty()) {
           auto canonFileName =
             FileUtil::canonicalize(String(name)).toCppString();
-          if (m_parsedFiles.emplace(std::move(canonFileName), true).second) {
+          if (m_seenFiles.emplace(std::move(canonFileName), true).second) {
             result.m_ungrouped.emplace_back(FileAndSize{name, size});
           }
         }
@@ -594,6 +593,7 @@ void Package::groupFiles(Groups& groups, FileAndSizeVec files) {
 // "ondemand" files obtained from that parsing.
 coro::Task<Package::FileAndSizeVec> Package::parseGroups(
   Groups groups,
+  const ParseCallback& callback,
   const UnitIndex& index
 ) {
   if (groups.empty()) HPHP_CORO_RETURN(FileAndSizeVec{});
@@ -603,7 +603,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroups(
   std::vector<coro::TaskWithExecutor<FileAndSizeVec>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
-      parseGroup(std::move(group), index)
+      parseGroup(std::move(group), callback, index)
         .scheduleOn(m_executor.sticky())
     );
   }
@@ -655,7 +655,7 @@ coro::Task<Package::Groups> Package::groupAll(bool exclude_dirs) {
   // and group them.
   FileAndSizeVec extraFiles;
   for (auto& file : m_filesToParse) {
-    if (!m_parsedFiles.insert(file).second) continue;
+    if (!m_seenFiles.insert(file).second) continue;
     extraFiles.emplace_back(FileAndSize{std::move(file.first), 0});
   }
   groupFiles(top.m_grouped, std::move(extraFiles));
@@ -682,7 +682,8 @@ coro::Task<Package::Groups> Package::groupAll(bool exclude_dirs) {
 // configuration), parse them, gather on-demand files, then repeat the
 // process until we have no new files to parse. Everything "under"
 // this call works asynchronously.
-coro::Task<void> Package::parseAll(const UnitIndex& index) {
+coro::Task<void>
+Package::parseAll(const ParseCallback& callback, const UnitIndex& index) {
   // Find the initial set of groups
   auto groups = HPHP_CORO_AWAIT(groupAll(true));
 
@@ -690,8 +691,8 @@ coro::Task<void> Package::parseAll(const UnitIndex& index) {
   FileAndSizeVec ondemand;
   {
     Timer timer{Timer::WallTime, "parsing inputs"};
-    ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups), index));
-    m_parsingInputs = std::chrono::microseconds{timer.getMicroSeconds()};
+    ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups), callback, index));
+    m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   }
 
   if (ondemand.empty()) {
@@ -704,9 +705,9 @@ coro::Task<void> Package::parseAll(const UnitIndex& index) {
   do {
     assertx(groups.empty());
     groupFiles(groups, std::move(ondemand));
-    ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups), index));
+    ondemand = HPHP_CORO_AWAIT(parseGroups(std::move(groups), callback, index));
   } while (!ondemand.empty());
-  m_parsingOndemand = std::chrono::microseconds{timer.getMicroSeconds()};
+  m_ondemandMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   HPHP_CORO_RETURN_VOID;
 }
 
@@ -715,7 +716,6 @@ coro::Task<bool> Package::parse(const UnitIndex& index,
                                 const LocalCallback& localCallback) {
   assertx(callback);
   assertx(localCallback);
-  assertx(!m_callback);
 
   Logger::FInfo(
     "parsing using {} threads using {}{}",
@@ -723,9 +723,6 @@ coro::Task<bool> Package::parse(const UnitIndex& index,
     m_client.implName(),
     coro::using_coros ? "" : " (coros disabled!)"
   );
-
-  m_callback = &callback;
-  SCOPE_EXIT { m_callback = nullptr; };
 
   HphpSession _{Treadmill::SessionKind::CompilerEmit};
 
@@ -750,7 +747,9 @@ coro::Task<bool> Package::parse(const UnitIndex& index,
     auto task = localCallback(std::move(localUEs));
     tasks.emplace_back(std::move(task).scheduleOn(m_executor.sticky()));
   }
-  tasks.emplace_back(parseAll(index).scheduleOn(m_executor.sticky()));
+  tasks.emplace_back(
+    parseAll(callback, index).scheduleOn(m_executor.sticky())
+  );
   HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
   HPHP_CORO_RETURN(!m_failed.load());
 }
@@ -889,6 +888,7 @@ coro::Task<void> Package::prepareInputs(
 // obtained, and return any on-demand files from the parsing.
 coro::Task<Package::FileAndSizeVec> Package::parseGroup(
     Group group,
+    const ParseCallback& callback,
     const UnitIndex& index
 ) {
   using namespace folly::gen;
@@ -924,8 +924,6 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(
 
     auto parseMetas = HPHP_CORO_AWAIT(coro::invoke(
       [&] () -> coro::Task<ParseMetaVec> {
-        assertx(m_callback);
-
         if (Option::ParserOptimisticStore &&
             m_client.supportsOptimistic()) {
           // Try optimistic mode first. We won't actually store
@@ -937,7 +935,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(
               true, paths, metas, options, storedOptions, m_client, m_config
           ));
           try {
-            HPHP_CORO_RETURN(HPHP_CORO_AWAIT((*m_callback)(
+            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(callback(
               *configRef, std::move(metasRef), std::move(fileRefs), true
             )));
           } catch (const extern_worker::Error&) {}
@@ -947,7 +945,7 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(
         auto [configRef, metasRef, fileRefs] = HPHP_CORO_AWAIT(storeInputs(
             false, paths, metas, options, storedOptions, m_client, m_config
         ));
-        HPHP_CORO_RETURN(HPHP_CORO_AWAIT((*m_callback)(
+        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(callback(
           *configRef, std::move(metasRef), std::move(fileRefs), false
         )));
       }
@@ -1016,7 +1014,7 @@ void Package::resolveOnDemand(FileAndSizeVec& out,
 
     // Only parse a file once. This ensures we eventually run out
     // of things to parse.
-    if (report || m_parsedFiles.emplace(canon, true).second) {
+    if (report || m_seenFiles.emplace(canon, true).second) {
       auto const absolute = [&] {
         if (FileUtil::isDirSeparator(canon.front())) {
           return canon;

@@ -821,13 +821,13 @@ void logPhaseStats(const std::string& phase, const Package& package,
   sample.setInt(phase + "_total_files", package.getTotalFiles());
 
   sample.setInt(phase + "_micros", micros);
-  if (auto const t = package.parsingInputsTime()) {
+  if (auto const t = package.inputsTime()) {
     sample.setInt(
       phase + "_input_micros",
       std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
     );
   }
-  if (auto const t = package.parsingOndemandTime()) {
+  if (auto const t = package.ondemandTime()) {
     sample.setInt(
       phase + "_ondemand_micros",
       std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
@@ -869,7 +869,7 @@ void logPhaseStats(const std::string& phase, const Package& package,
 // Compute a UnitIndex by parsing decls for all autoload-eligible files.
 // If no Autoload.Query is specified by RepoOptions, this just indexes
 // the input files.
-bool compute_index(
+bool computeIndex(
     const CompilerOptions& po,
     StructuredLogEntry& sample,
     coro::TicketExecutor& executor,
@@ -893,22 +893,22 @@ bool compute_index(
     insert(meta.constants, index.constants, "constant");
   };
 
-  Package index_package{po.inputDir, false, executor, client};
+  Package indexPackage{po.inputDir, false, executor, client};
   Timer indexTimer(Timer::WallTime, "indexing");
 
   auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
   auto const queryStr = repoFlags.autoloadQuery();
   if (!queryStr.empty() && po.parseOnDemand) {
     // Index the files specified by Autoload.Query
-    if (!addAutoloadQueryToPackage(index_package, queryStr)) return false;
+    if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return false;
   } else {
     // index just the input files
-    addInputsToPackage(index_package, po);
+    addInputsToPackage(indexPackage, po);
   }
 
-  if (!coro::wait(index_package.index(onIndex))) return false;
+  if (!coro::wait(indexPackage.index(onIndex))) return false;
 
-  logPhaseStats("index", index_package, client, sample,
+  logPhaseStats("index", indexPackage, client, sample,
                 indexTimer.getMicroSeconds());
   Logger::FInfo("index size: types={:,} funcs={:,} constants={:,}",
       index.types.size(),
@@ -1050,7 +1050,7 @@ bool process(const CompilerOptions &po) {
   sample.setStr("extern_worker_impl", client->implName());
 
   UnitIndex index;
-  if (!compute_index(po, sample, *executor, *client, index)) return false;
+  if (!computeIndex(po, sample, *executor, *client, index)) return false;
 
   auto package = std::make_unique<Package>(
     po.inputDir,

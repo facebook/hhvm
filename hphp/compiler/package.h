@@ -72,11 +72,11 @@ struct Package {
 
   size_t getTotalFiles() const { return m_total.load(); }
 
-  Optional<std::chrono::microseconds> parsingInputsTime() const {
-    return m_parsingInputs;
+  Optional<std::chrono::microseconds> inputsTime() const {
+    return m_inputMicros;
   }
-  Optional<std::chrono::microseconds> parsingOndemandTime() const {
-    return m_parsingOndemand;
+  Optional<std::chrono::microseconds> ondemandTime() const {
+    return m_ondemandMicros;
   }
 
   void addSourceFile(const std::string& fileName);
@@ -276,26 +276,26 @@ private:
   coro::Task<void> indexGroups(const IndexCallback&, Groups);
   coro::Task<void> indexGroup(const IndexCallback&, Group);
 
-  coro::Task<void> parseAll(const UnitIndex&);
-  coro::Task<FileAndSizeVec> parseGroups(Groups, const UnitIndex&);
-  coro::Task<FileAndSizeVec> parseGroup(Group, const UnitIndex&);
+  coro::Task<void> parseAll(const ParseCallback&, const UnitIndex&);
+  coro::Task<FileAndSizeVec>
+  parseGroups(Groups, const ParseCallback&, const UnitIndex&);
+  coro::Task<FileAndSizeVec>
+  parseGroup(Group, const ParseCallback&, const UnitIndex&);
 
   void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, const UnitIndex&,
       bool report = false);
 
   std::string m_root;
 
-  folly_concurrent_hash_map_simd<std::string, bool> m_parsedFiles;
+  folly_concurrent_hash_map_simd<std::string, bool> m_seenFiles;
 
   std::atomic<bool> m_failed;
 
   bool m_parseOnDemand;
 
   std::atomic<size_t> m_total;
-  Optional<std::chrono::microseconds> m_parsingInputs;
-  Optional<std::chrono::microseconds> m_parsingOndemand;
-
-  const ParseCallback* m_callback;
+  Optional<std::chrono::microseconds> m_inputMicros;
+  Optional<std::chrono::microseconds> m_ondemandMicros;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
   std::shared_ptr<FileCache> m_fileCache;

@@ -40,6 +40,7 @@
 #include <time.h>
 #include <list>
 #include <map>
+#include <array>
 #include <vector>
 
 #include "binlog_event.h"

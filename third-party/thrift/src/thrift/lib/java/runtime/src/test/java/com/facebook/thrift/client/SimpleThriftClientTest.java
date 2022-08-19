@@ -37,7 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -80,7 +79,6 @@ public class SimpleThriftClientTest {
   }
 
   @Test
-  @Ignore
   public void testPingVoidAsync() throws Exception {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =
@@ -169,7 +167,6 @@ public class SimpleThriftClientTest {
   }
 
   @Test
-  @Ignore
   public void testConnectionLimit() throws Throwable {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =
@@ -218,7 +215,6 @@ public class SimpleThriftClientTest {
   }
 
   @Test
-  @Ignore
   public void testSchedulerRejection() throws Throwable {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =
@@ -272,7 +268,6 @@ public class SimpleThriftClientTest {
   }
 
   @Test
-  @Ignore
   public void test10_000BlockingPingPongs() {
     sendNBlockingPingPongs(10_000);
   }

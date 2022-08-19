@@ -38,7 +38,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -225,7 +224,6 @@ public class RSocketThriftClientTest {
   }
 
   @Test
-  @Ignore
   public void test10_000BlockingPingPongs() {
     sendNBlockingPingPongs(10_000);
   }

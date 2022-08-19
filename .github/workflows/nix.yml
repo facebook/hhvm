@@ -162,7 +162,7 @@ jobs:
           reprepro export nightly
         fi
     - if: startsWith(github.ref_name, 'nightly-')
-      run: reprepro includedeb nightly bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb nightly bundle.deb
     - name: Create release suite
       if: startsWith(github.ref_name, 'HHVM-')
       run: |
@@ -182,7 +182,7 @@ jobs:
           reprepro export release
         fi
     - if: startsWith(github.ref_name, 'HHVM-')
-      run: reprepro includedeb release bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb release bundle.deb
     - name: Determine HHVM version
       if: startsWith(github.ref_name, 'HHVM-')
       run: |
@@ -207,4 +207,4 @@ jobs:
           reprepro export "release-$HHVM_VERSION_MAJAR_MINOR"
         fi
     - if: startsWith(github.ref_name, 'HHVM-')
-      run: reprepro includedeb "release-$HHVM_VERSION_MAJAR_MINOR" bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb "release-$HHVM_VERSION_MAJAR_MINOR" bundle.deb

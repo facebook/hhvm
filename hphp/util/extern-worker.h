@@ -208,6 +208,7 @@ struct RefId {
   std::string toString() const;
   bool operator==(const RefId&) const;
   bool operator!=(const RefId&) const;
+  bool operator<(const RefId&) const;
 
   // Despite their names, these fields can be used for anything.
   std::string m_id;
@@ -234,6 +235,11 @@ struct Ref {
   template <typename U> Ref<U> cast() const {
     return Ref<U>{m_id, m_fromFallback};
   }
+
+  bool operator==(const Ref<T>& x) const { return m_id == x.m_id; }
+  bool operator!=(const Ref<T>& x) const { return m_id != x.m_id; }
+  bool operator<(const Ref<T>& x) const { return m_id < x.m_id; }
+
 private:
   Ref(RefId, bool);
   RefId m_id;

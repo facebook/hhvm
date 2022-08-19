@@ -185,7 +185,7 @@ CompilerResult hackc_compile(
   bool& internal_error,
   const RepoOptionsFlags& options,
   CompileAbortMode mode,
-  HhvmDeclProvider* provider
+  DeclProvider* provider
 ) {
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
 
@@ -456,25 +456,21 @@ std::unique_ptr<UnitEmitter> UnitCompiler::compile(
   return compile(cacheHit, provider.get(), mode);
 }
 
-std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
-    bool& cacheHit,
-    HhvmDeclProvider* provider,
-    CompileAbortMode mode) {
-  auto ice = false;
-  cacheHit = false;
-
-  auto res = hackc_compile(m_loader.contents().data(),
-                           m_filename,
-                           m_loader.sha1(),
-                           m_nativeFuncs,
-                           m_isSystemLib,
-                           m_forDebuggerEval,
-                           ice,
-                           m_loader.options(),
-                           mode,
-                           provider);
-  auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(
-    res,
+std::unique_ptr<UnitEmitter> compile_unit(
+  const char* code,
+  const char* filename,
+  const SHA1& sha1,
+  const Native::FuncTable& nativeFuncs,
+  bool isSystemLib,
+  bool forDebuggerEval,
+  const RepoOptionsFlags& options,
+  CompileAbortMode mode,
+  DeclProvider* provider
+) {
+  bool ice = false;
+  auto res = hackc_compile(code, filename, sha1, nativeFuncs, isSystemLib,
+      forDebuggerEval, ice, options, mode, provider);
+  auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
       ue->finish();
       return std::move(ue);
@@ -491,19 +487,32 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
       case CompileAbortMode::OnlyICE:
       case CompileAbortMode::VerifyErrors:
       case CompileAbortMode::AllErrors:
-        // run_compiler will promote errors to ICE as appropriate based on mode
-        if (ice) throw CompilerAbort{m_filename, err};
+        // Abort on internal compile errors as appropriate based on mode
+        if (ice) throw CompilerAbort{filename, err};
       }
-      return createFatalUnit(
-        makeStaticString(m_filename),
-        m_loader.sha1(),
-        FatalOp::Runtime,
-        err
-      );
+      return createFatalUnit(makeStaticString(filename), sha1,
+                             FatalOp::Runtime, err);
     }
   );
 
   if (unitEmitter) unitEmitter->m_ICE = ice;
+  return unitEmitter;
+}
+
+std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
+    bool& cacheHit,
+    HhvmDeclProvider* provider,
+    CompileAbortMode mode) {
+  cacheHit = false;
+  auto unitEmitter = compile_unit(m_loader.contents().data(),
+                                  m_filename,
+                                  m_loader.sha1(),
+                                  m_nativeFuncs,
+                                  m_isSystemLib,
+                                  m_forDebuggerEval,
+                                  m_loader.options(),
+                                  mode,
+                                  provider);
   if (unitEmitter && provider) unitEmitter->m_deps = provider->getFlatDeps();
   return unitEmitter;
 }

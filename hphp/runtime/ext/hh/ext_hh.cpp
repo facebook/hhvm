@@ -1223,7 +1223,7 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     vec.push_back(std::make_pair(p.first, p.second.second));
   }
   std::sort(vec.begin(), vec.end(), [](const Elem e1, const Elem e2) {
-                                      return e1.first->hash() < e2.first->hash();
+                                      return e1.first->compare(e2.first) < 0;
                                     });
   StringBuffer sb;
   for (auto const& e : vec) {

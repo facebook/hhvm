@@ -1,0 +1,8 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "[localhost]:11132" ]
+    }
+  },
+  "route": "PoolRoute|A.wildcard"
+}

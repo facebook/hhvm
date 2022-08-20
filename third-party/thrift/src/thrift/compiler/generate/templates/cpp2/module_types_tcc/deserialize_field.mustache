@@ -1,0 +1,56 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  // TODO(afuller): Support adapted types.
+%>
+<%#type:resolves_to_container_or_struct?%>
+_readState.beforeSubobject(iprot);
+<%/type:resolves_to_container_or_struct?%>
+<%#field:cpp_ref?%>
+auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
+<%/field:cpp_ref?%>
+<%#field:cpp_first_adapter%>
+<%#field:cpp_exactly_one_adapter?%>
+constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, folly::remove_cvref_t<decltype(<% > field/member%>)>>::value;
+::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+  [&](auto& field) { <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(field), _readState); },
+  [&](auto&) {})(<% > field/member%>);
+if (!hasInplaceToThrift) {
+<%/field:cpp_exactly_one_adapter?%>
+<%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><%type:cpp_standard_type%> tvalue<%#type:resolves_to_container?%><%#type:cpp_use_allocator?%>(this->get_allocator())<%/type:cpp_use_allocator?%><%/type:resolves_to_container?%>;
+<%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><% > module_types_tcc/pm%>::readWithContext(*iprot, tvalue, _readState);
+<%#field:cpp_exactly_one_adapter?%>
+  <%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%> = <%!
+    %>::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(::std::move(tvalue), *this);
+}
+<%/field:cpp_exactly_one_adapter?%>
+<%^field:cpp_exactly_one_adapter?%>
+<%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%> = <%!
+  %>::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(<% > types/adapter_pre%>::std::move(tvalue)<% > types/adapter_post%>, *this);
+<%/field:cpp_exactly_one_adapter?%>
+<%/field:cpp_first_adapter%>
+<%^field:cpp_first_adapter%>
+<%^field:cpp_ref?%><%#type:resolves_to_container?%>
+<% > field/member%> = <%type:cpp_type%>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
+<%/type:resolves_to_container?%><%/field:cpp_ref?%>
+<% > module_types_tcc/pm%>::readWithContext(*iprot, <%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%>, _readState);
+<%/field:cpp_first_adapter%>
+<%#field:cpp_ref?%>
+<% > field/member%> = std::move(ptr);
+<%/field:cpp_ref?%>
+<%#type:resolves_to_container_or_struct?%>
+_readState.afterSubobject(iprot);
+<%/type:resolves_to_container_or_struct?%>

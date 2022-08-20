@@ -1,0 +1,74 @@
+- title: Installation
+  items:
+  - id: install
+  - id: release-notes
+- title: Invocation
+  items:
+  - id: cli-options
+  - id: watchman-make
+  - id: watchman-wait
+  - id: watchman-replicate-subscription
+  - id: cppclient
+  - id: nodejs
+  - id: config
+  - id: socket-interface
+- title: Compatibility
+  items:
+  - id: compatibility
+  - id: capabilities
+- title: Commands
+  items:
+  - id: cmd.clock
+  - id: cmd.find
+  - id: cmd.flush-subscriptions
+  - id: cmd.get-config
+  - id: cmd.get-sockname
+  - id: cmd.list-capabilities
+  - id: cmd.log
+  - id: cmd.log-level
+  - id: cmd.query
+  - id: cmd.shutdown-server
+  - id: cmd.since
+  - id: cmd.state-enter
+  - id: cmd.state-leave
+  - id: cmd.subscribe
+  - id: cmd.trigger
+  - id: cmd.trigger-del
+  - id: cmd.trigger-list
+  - id: cmd.unsubscribe
+  - id: cmd.version
+  - id: cmd.watch
+  - id: cmd.watch-del
+  - id: cmd.watch-del-all
+  - id: cmd.watch-list
+  - id: cmd.watch-project
+- title: Queries
+  items:
+  - id: clockspec
+  - id: file-query
+  - id: simple-query
+  - id: scm-query
+- title: Expression Terms
+  items:
+  - id: expr.allof
+  - id: expr.anyof
+  - id: expr.dirname
+  - id: expr.empty
+  - id: expr.exists
+  - id: expr.match
+  - id: expr.name
+  - id: expr.not
+  - id: expr.pcre
+  - id: expr.since
+  - id: expr.size
+  - id: expr.suffix
+  - id: expr.type
+- title: Internals
+  items:
+  - id: bser
+  - id: casefolding
+  - id: contributing
+  - id: cookies
+- title: Troubleshooting
+  items:
+  - id: troubleshooting

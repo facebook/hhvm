@@ -1,0 +1,102 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#type:typedef?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadTypeContainer}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadTypeContainer}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadTypeContainer}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+
+}}{{#type:set?}}{{!
+            }}{{> BoxedType}} {{field:javaName}};
+            {
+            TSet _set = oprot.readSetBegin();
+            {{^type:javaType}}{{field:javaName}} = new Hash{{> BoxedType}}(Math.max(0, _set.size));{{/type:javaType}}{{!
+            }}{{#type:javaType}}{{field:javaName}} = new {{type:javaType}}();{{/type:javaType}}{{!
+            }}
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                {{field:setIsNested}}
+                {{#type:set_elem_type}}
+                {{#type:isContainer?}}
+                {{> ReadTypeContainerNestedValue }}
+                {{/type:isContainer?}}
+                {{^type:isContainer?}}
+                {{> Type}} _value1 = {{> ReadType}};
+                {{/type:isContainer?}}{{!
+                }}{{field:javaName}}.add(_value1);
+                {{/type:set_elem_type}}
+            }
+            oprot.readSetEnd();
+            }{{!
+}}{{/type:set?}}{{!
+
+}}{{#type:list?}}{{!
+            }}{{> BoxedType}} {{field:javaName}};
+            {
+            TList _list = oprot.readListBegin();
+            {{^type:javaType}}{{field:javaName}} = new Array{{> BoxedType}}(Math.max(0, _list.size));{{/type:javaType}}{{!
+            }}{{#type:javaType}}{{field:javaName}} = new {{type:javaType}}();{{/type:javaType}}{{!
+            }}
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                {{field:setIsNested}}
+                {{#type:list_elem_type}}
+                {{#type:isContainer?}}
+                {{> ReadTypeContainerNestedValue }}
+                {{/type:isContainer?}}
+                {{^type:isContainer?}}
+                {{> Type}} _value1 = {{> ReadType}};
+                {{/type:isContainer?}}{{!
+                }}{{field:javaName}}.add(_value1);
+                {{/type:list_elem_type}}
+            }
+            oprot.readListEnd();
+            }{{!
+}}{{/type:list?}}{{!
+
+}}{{#type:map?}}{{!
+            }}{{> BoxedType}} {{field:javaName}};
+            {
+            TMap _map = oprot.readMapBegin();
+            {{^type:javaType}}{{field:javaName}} = new Hash{{> BoxedType}}(Math.max(0, _map.size));{{/type:javaType}}{{!
+            }}{{#type:javaType}}{{field:javaName}} = new {{type:javaType}}();{{/type:javaType}}{{!
+            }}
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                {{field:setIsNested}}
+                {{#type:key_type}}
+                {{#type:isContainer?}}
+                {{> ReadTypeContainerNestedKey }}
+                {{/type:isContainer?}}
+                {{^type:isContainer?}}
+                {{> Type}} _key1 = {{> ReadType}};
+                {{/type:isContainer?}}
+                {{/type:key_type}}
+                {{#type:value_type}}
+                {{#type:isContainer?}}
+                {{> ReadTypeContainerNestedValue }}
+                {{/type:isContainer?}}
+                {{^type:isContainer?}}
+                {{> Type}} _value1 = {{> ReadType}};
+                {{/type:isContainer?}}
+                {{/type:value_type}}{{!
+                }}{{field:javaName}}.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();{{!
+}}{{/type:map?}}{{!
+
+}}{{/type:typedef?}}{{!
+}}

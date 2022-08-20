@@ -1,0 +1,188 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%^program:tablebased?%>
+template <class Protocol_>
+void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
+  <%!
+    Terse fields are cleared to their intrinsic default values so that when fields are missing during
+    deserialization, it will be still set to intrinsic default even if the field has the custom default in IDL.
+  %>
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<%#struct:indexing?%>WithIndex<%/struct:indexing?%><Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+<%#program:enforce_required?%><%#struct:fields_in_serialization_order%><%#field:required?%>
+  bool isset_<%field:cpp_name%> = false;
+<%/field:required?%><%/struct:fields_in_serialization_order%><%/program:enforce_required?%>
+<%#struct:lazy_fields?%>
+  if (__fbthrift_protocol_ != iprot->protocolType()) {
+<%! Deserialize all lazy fields if new protocol is different that last deserialization protocol %>
+<%#struct:fields_in_serialization_order%><%#field:lazy?%>
+    std::as_const(*this).__fbthrift_read_field_<%field:cpp_name%>();
+<%/field:lazy?%><%/struct:fields_in_serialization_order%>
+    __fbthrift_protocol_ = iprot->protocolType();
+  }
+<%/struct:lazy_fields?%>
+
+<%#struct:fields?%>
+<%#struct:fields_in_serialization_order%>
+<%#field:type%>
+<%#first?%>
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          <%field:key%>,
+          apache::thrift::protocol::<% > module_types_tcc/struct_type%>))) {
+    goto _loop;
+  }
+<%/first?%>
+_readField_<%field:cpp_name%>:
+<%#field:lazy?%>
+  std::as_const(*this).__fbthrift_read_field_<%field:cpp_name%>();
+  if (auto iobuf = _readState.template tryFastSkip<
+          <% > common/type_class%>,
+          <%type:cpp_type%>
+      >(iprot,
+        <%field:key%>,
+        apache::thrift::protocol::<% > module_types_tcc/struct_type%>)) {
+    const auto isDeserialized = __fbthrift_isDeserialized_.<%field:cpp_name%>.load();
+    __fbthrift_serializedData_.<%field:cpp_name%> = <%!
+    %><%^field:lazy_ref?%>std::move(*iobuf);<%/field:lazy_ref?%><%!
+    %><%#field:lazy_ref?%>std::make_unique<folly::IOBuf>(std::move(*iobuf));<%/field:lazy_ref?%>
+    __fbthrift_isDeserialized_.<%field:cpp_name%> = isDeserialized & ~::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
+  } else {
+<%/field:lazy?%>
+<%^field:lazy?%>
+  {
+<%/field:lazy?%>
+    <% > module_types_tcc/deserialize_field%>
+
+  }
+<%#program:enforce_required?%><%#field:required?%>
+  isset_<%field:cpp_name%> = true;
+<%/field:required?%><%/program:enforce_required?%>
+<%#field:has_isset?%>
+ this->__isset.set(<%field:isset_index%>, true);
+<%/field:has_isset?%>
+
+<%^last?%>
+<%#field:serialization_next_field_type%>
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          <%field:key%>,
+          <%field:serialization_next_field_key%>,
+          apache::thrift::protocol::<% > module_types_tcc/struct_type%>))) {
+    goto _loop;
+  }
+<%/field:serialization_next_field_type%>
+<%/last?%>
+<%#last?%>
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          <%field:key%>,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+<%/last?%>
+<%/field:type%>
+<%/struct:fields_in_serialization_order%>
+<%/struct:fields?%>
+<%^struct:fields?%>
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+<%/struct:fields?%>
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  <%#program:enforce_required?%><%#struct:fields_in_serialization_order%><%#field:required?%>
+  if (!isset_<%field:cpp_name%>) {
+    TProtocolException::throwMissingRequiredField("<%field:name%>", "<%struct:name%>");
+  }
+  <%/field:required?%><%/struct:fields_in_serialization_order%><%/program:enforce_required?%>
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<<%struct:cpp_underlying_name%>>>();
+  }
+
+  switch (_readState.fieldId) {
+<%#struct:fields_in_serialization_order%><%#field:type%>
+    case <%field:key%>:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::<% > module_types_tcc/struct_type%>))) {
+        goto _readField_<%field:cpp_name%>;
+      } else {
+        goto _skip;
+      }
+    }
+<%/field:type%><%/struct:fields_in_serialization_order%>
+    default:
+    {
+<%#struct:fields?%>
+_skip:
+<%/struct:fields?%>
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+<%#struct:fields_in_serialization_order%>
+<%#field:type%>
+<%#field:lazy?%>
+template<class ProtocolReader>
+void <%struct:cpp_underlying_name%>::__fbthrift_read_field_<%field:cpp_name%>_impl() const {
+  ProtocolReader reader;
+  reader.setInput(&<%#field:lazy_ref?%>*<%/field:lazy_ref?%>__fbthrift_serializedData_.<%field:cpp_name%>);
+  ProtocolReader *iprot = &reader;
+  apache::thrift::detail::ProtocolReaderStructReadState<ProtocolReader> _readState;
+  <% > module_types_tcc/deserialize_field%>
+}
+<%/field:lazy?%>
+<%/field:type%>
+<%/struct:fields_in_serialization_order%>
+<%/program:tablebased?%>
+<%#program:tablebased?%>
+template <class Protocol_>
+void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
+  ::apache::thrift::detail::read(
+    iprot,
+    ::apache::thrift::detail::toStructInfo(
+      <% > common/namespace_cpp2%>__fbthrift_struct_info_<%struct:cpp_underlying_name%>
+    ),
+    this);
+}
+<%/program:tablebased?%>
+<%!
+%>

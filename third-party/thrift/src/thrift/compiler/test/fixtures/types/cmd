@@ -1,0 +1,6 @@
+hack:json src/module.thrift
+mstch_cpp2:reflection src/module.thrift
+mstch_py3 src/module.thrift
+mstch_rust src/module.thrift
+go src/module.thrift
+py src/module.thrift

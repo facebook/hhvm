@@ -1,0 +1,586 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "constants" : {
+    "MyConst" : {
+      "lineno" : 121,
+      "value" : { "ENUMERATOR" : "enum", "CONST" : "const" },
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "name" : "MyHackEnum" }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 121,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 122,
+          "column" : 78
+        }
+      }
+    }
+  },
+  "enumerations" : {
+    "MyEnum" : {
+      "lineno" : 112,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "count" : 4 }
+      },
+      "constants" : {
+        "UNKNOWN" : 0,
+        "ONE" : 1
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 112,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 119,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "annotated_with_default_string" : {
+      "lineno" : 47,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "structured_annotations" : {
+        "structured_annotation_with_default" : {  }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 47,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 48,
+          "column" : 45
+        }
+      }
+    },
+    "annotated_inline_string" : {
+      "lineno" : 50,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "count" : 1 },
+        "structured_annotation_with_default" : { "name" : "abc" }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 50,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 52,
+          "column" : 39
+        }
+      }
+    },
+    "annotated_inline_i64" : {
+      "lineno" : 54,
+      "type_enum" : "I64",
+      "spec_args" : null,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "count" : 2 }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 54,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 55,
+          "column" : 33
+        }
+      }
+    }
+  },
+  "structs" : {
+    "structured_annotation_inline" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "count" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 16
+            }
+          }
+        },
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : "abacaba",
+          "source_range" : {
+            "begin" : {
+              "line" : 25,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 25,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 26,
+          "column" : 2
+        }
+      }
+    },
+    "structured_annotation_with_default" : {
+      "lineno" : 28,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : "abacabadabacaba",
+          "source_range" : {
+            "begin" : {
+              "line" : 29,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 29,
+              "column" : 38
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 30,
+          "column" : 2
+        }
+      }
+    },
+    "structured_annotation_recursive" : {
+      "lineno" : 32,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 33,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 33,
+              "column" : 18
+            }
+          }
+        },
+        "recurse" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "structured_annotation_recursive",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 46
+            }
+          }
+        },
+        "forward" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "structured_annotation_forward",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 35,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 35,
+              "column" : 44
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 32,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 36,
+          "column" : 2
+        }
+      }
+    },
+    "structured_annotation_forward" : {
+      "lineno" : 38,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "count" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 39,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 39,
+              "column" : 16
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 38,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 40,
+          "column" : 2
+        }
+      }
+    },
+    "structured_annotation_nested" : {
+      "lineno" : 42,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 43,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 43,
+              "column" : 18
+            }
+          }
+        },
+        "nest" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "structured_annotation_with_default",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 44,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 44,
+              "column" : 46
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 42,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 2
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 57,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "count" : 2 },
+        "structured_annotation_with_default" : {  },
+        "structured_annotation_nested" : { "name" : "nesty2", "nest" : { "name" : "dcdbdcdadcdbdcd" } },
+        "included.structured_annotation_included" : { "name" : "aba" },
+        "test.namespace.structured_annotation_with_namespace" : { "name" : "bac" }
+      },
+      "fields" : {
+        "annotated_field" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_inline" : { "count" : 1, "name" : "counter" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 66,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 67,
+              "column" : 26
+            }
+          }
+        },
+        "annotated_type" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "annotated_inline_string",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 69,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 69,
+              "column" : 45
+            }
+          }
+        },
+        "annotated_recursive" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_recursive" : { "name" : "abc", "recurse" : { "name" : "cba" }, "forward" : { "count" : 3 } }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 71,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 76,
+              "column" : 33
+            }
+          }
+        },
+        "annotated_nested" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_nested" : { "name" : "nesty" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 78,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 79,
+              "column" : 27
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 57,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 80,
+          "column" : 2
+        }
+      }
+    },
+    "MyException" : {
+      "lineno" : 82,
+      "is_exception" : true,
+      "is_union" : false,
+      "structured_annotations" : {
+        "structured_annotation_nested" : { "name" : "nesty" }
+      },
+      "fields" : {
+        "context" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_with_default" : {  }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 84,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 85,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 82,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 86,
+          "column" : 2
+        }
+      }
+    },
+    "MyUnion" : {
+      "lineno" : 88,
+      "is_exception" : false,
+      "is_union" : true,
+      "structured_annotations" : {
+        "structured_annotation_nested" : { "name" : "nesty", "nest" : {  } }
+      },
+      "fields" : {
+        "first" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "annotated_inline_string",
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_with_default" : {  }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 93,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 94,
+              "column" : 36
+            }
+          }
+        },
+        "second" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "annotated_inline_i64",
+          "required" : true,
+          "structured_annotations" : {
+            "structured_annotation_with_default" : { "name" : "aba" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 96,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 97,
+              "column" : 34
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 88,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 98,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 100,
+      "structured_annotations" : {
+        "structured_annotation_inline" : { "count" : 3 }
+      },
+      "functions" : {
+        "MyService.first" : {
+          "return_type" : {
+            "type_enum" : "TYPEDEF",
+            "spec_args" : "annotated_inline_string"
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "structured_annotation_with_default" : {  }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 102,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 103,
+              "column" : 34
+            }
+          }
+        },
+        "MyService.second" : {
+          "return_type" : {
+            "type_enum" : "BOOL",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null,
+              "structured_annotations" : {
+                "structured_annotation_inline" : { "count" : 4 }
+              }
+            }
+          ],
+          "throws" : [],
+          "structured_annotations" : {
+            "structured_annotation_inline" : { "count" : 2 }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 105,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 109,
+              "column" : 4
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 100,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 110,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

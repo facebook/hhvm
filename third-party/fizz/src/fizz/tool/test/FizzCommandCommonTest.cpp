@@ -1,0 +1,166 @@
+/*
+ *  Copyright (c) 2018-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+#include <folly/portability/GMock.h>
+#include <folly/portability/GTest.h>
+
+#include <fizz/tool/FizzCommandCommon.h>
+#include <folly/container/Array.h>
+
+namespace fizz {
+namespace tool {
+namespace test {
+
+TEST(FizzCommandCommonTest, TestValidHostPortFromString) {
+  struct ExpectedValues {
+    std::string input;
+    std::string host;
+    uint16_t port;
+  };
+  auto results = folly::make_array(
+      ExpectedValues{"www.example.com:80", "www.example.com", 80},
+      ExpectedValues{"[::1]:80", "::1", 80},
+      ExpectedValues{"127.0.0.1:80", "127.0.0.1", 80});
+  for (auto result : results) {
+    std::string host;
+    uint16_t port;
+    std::tie(host, port) = hostPortFromString(result.input);
+    ASSERT_EQ(result.host, host);
+    ASSERT_EQ(result.port, port);
+  }
+}
+
+TEST(FizzCommandCommonTest, TestInvalidV6HostPortFromString) {
+  auto inputs = folly::make_array("::1:80", "[::1:80", "::1]:80");
+  for (auto input : inputs) {
+    ASSERT_THROW(hostPortFromString(input), std::runtime_error);
+  }
+}
+
+TEST(FizzCommandCommonTest, TestMissingPortHostPortFromString) {
+  auto inputs =
+      folly::make_array("www.example.com", "127.0.0.1", "[::1]", "::1");
+  for (auto input : inputs) {
+    ASSERT_THROW(hostPortFromString(input), std::runtime_error);
+  }
+}
+
+void checkECHConfigContent(const ech::ECHConfigContentDraft& echConfigContent) {
+  ASSERT_TRUE(folly::IOBufEqualTo()(
+      echConfigContent.public_name, folly::IOBuf::copyBuffer("publicname")));
+  auto expectedPubKey =
+      "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0";
+  ASSERT_TRUE(folly::IOBufEqualTo()(
+      echConfigContent.public_key,
+      folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
+  ASSERT_EQ(echConfigContent.kem_id, hpke::KEMId::secp256r1);
+  ASSERT_EQ(echConfigContent.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
+  ASSERT_EQ(
+      echConfigContent.cipher_suites[0].aead_id,
+      hpke::AeadId::TLS_AES_128_GCM_SHA256);
+  ASSERT_EQ(echConfigContent.maximum_name_length, 1000);
+
+  ASSERT_EQ(echConfigContent.extensions.size(), 1);
+  ASSERT_EQ(
+      echConfigContent.extensions[0].extension_type, ExtensionType::cookie);
+}
+
+TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
+  auto json = folly::parseJson(R"(
+      {
+        "echconfigs": [{
+                "version": "Draft9",
+                "public_name": "publicname",
+                "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
+                "kem_id": "secp256r1",
+                "cipher_suites": [{
+                        "kdf_id": "Sha256",
+                        "aead_id": "TLS_AES_128_GCM_SHA256"
+                }],
+                "maximum_name_length": 1000,
+                "extensions": "002c00080006636f6f6b6965"
+        }]
+      }
+  )");
+  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
+      parseECHConfigs(json);
+
+  ASSERT_TRUE(echConfigs.has_value());
+
+  ASSERT_EQ(echConfigs->size(), 1);
+  auto echConfig = echConfigs.value()[0];
+  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft9);
+
+  folly::io::Cursor cursor(echConfig.ech_config_content.get());
+  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
+  checkECHConfigContent(echConfigContent);
+}
+
+TEST(FizzCommandCommonTest, TestParseECHConfigsFailure) {
+  auto json = folly::parseJson(R"(
+      {
+        "echconfigs": [{
+          "version": "V2"
+        }]
+      }
+  )");
+  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
+      parseECHConfigs(json);
+  ASSERT_FALSE(echConfigs.has_value());
+}
+
+TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {
+  auto testJson = folly::parseJson(R"(
+      {
+        "echconfigs": [{
+                "version": "Draft9",
+                "public_name": "publicname",
+                "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
+                "kem_id": "secp256r1",
+                "cipher_suites": [{
+                        "kdf_id": "Sha256",
+                        "aead_id": "TLS_AES_128_GCM_SHA256"
+                }],
+                "maximum_name_length": 1000,
+                "extensions": "002c00080006636f6f6b6965"
+        }]
+      }
+  )");
+
+  // Test an exception is thrown when the json is invalid.
+  auto invalidJson = R"({"echconfigs"})";
+  ASSERT_THROW(parseECHConfigs(invalidJson), std::runtime_error);
+
+  // Test an exception is thrown on an invalid KDF id.
+  auto wrongKDFJson = testJson;
+  wrongKDFJson["echconfigs"][0]["cipher_suites"][0]["aead_id"] = "Sha473873";
+  ASSERT_THROW(parseECHConfigs(wrongKDFJson), std::runtime_error);
+
+  // Test an exception is thrown on an invalid Aead id.
+  auto wrongAeadIdJson = testJson;
+  wrongAeadIdJson["echconfigs"][0]["cipher_suites"][0]["aead_id"] =
+      "TLS_AES_something";
+  ASSERT_THROW(parseECHConfigs(wrongAeadIdJson), std::runtime_error);
+
+  // Test an exception is thrown on an invalid KEM id.
+  auto wrongKEMJson = testJson;
+  wrongKEMJson["echconfigs"][0]["kem_id"] = "secp48398";
+  ASSERT_THROW(parseECHConfigs(wrongKEMJson), std::runtime_error);
+}
+
+TEST(FizzCommandCommonTest, TestReadECHConfigsJsonException) {
+  // Test an exception is thrown when no file is provided.
+  ASSERT_THROW(readECHConfigsJson(""), std::runtime_error);
+
+  // Test an exception is thrown when we are unable to read the file provided.
+  ASSERT_THROW(readECHConfigsJson("test.txt"), std::runtime_error);
+}
+
+} // namespace test
+} // namespace tool
+} // namespace fizz

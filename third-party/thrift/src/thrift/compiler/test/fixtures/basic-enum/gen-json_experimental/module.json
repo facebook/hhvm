@@ -1,0 +1,187 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "namespaces": {
+    "cpp2": "test.fixtures.enumstrict",
+    "java": "test.fixtures.enumstrict",
+    "java.swift": "test.fixtures.swift.enumstrict",
+    "py3": "test.fixtures.enumstrict"
+  },
+  "constants": {
+      "kOne": {
+        "name": "kOne",
+        "type": "enum module.MyEnum",
+        "value": 1,
+        "lineno": 53
+      },
+      "enumNames": {
+        "name": "enumNames",
+        "type": "map<enum module.MyEnum, string>",
+        "value": {"1": "one", "2": "two"},
+        "lineno": 55
+      }
+  },
+  "enumerations" :
+  {
+      "EmptyEnum" : {
+        "name" : "EmptyEnum",
+        "lineno" : 22
+      },
+      "MyEnum" : {
+        "name" : "MyEnum",
+        "constants" : {
+          "ONE" : {
+            "name" : "ONE",
+            "lineno" : 26,
+            "value" : 1
+          },
+          "TWO" : {
+            "name" : "TWO",
+            "lineno" : 27,
+            "value" : 2
+          }
+        },
+        "lineno" : 25
+      },
+      "MyBigEnum" : {
+        "name" : "MyBigEnum",
+        "constants" : {
+          "UNKNOWN" : {
+            "name" : "UNKNOWN",
+            "lineno" : 31,
+            "value" : 0
+          },
+          "ONE" : {
+            "name" : "ONE",
+            "lineno" : 32,
+            "value" : 1
+          },
+          "TWO" : {
+            "name" : "TWO",
+            "lineno" : 33,
+            "value" : 2
+          },
+          "THREE" : {
+            "name" : "THREE",
+            "lineno" : 34,
+            "value" : 3
+          },
+          "FOUR" : {
+            "name" : "FOUR",
+            "lineno" : 35,
+            "value" : 4
+          },
+          "FIVE" : {
+            "name" : "FIVE",
+            "lineno" : 36,
+            "value" : 5
+          },
+          "SIX" : {
+            "name" : "SIX",
+            "lineno" : 37,
+            "value" : 6
+          },
+          "SEVEN" : {
+            "name" : "SEVEN",
+            "lineno" : 38,
+            "value" : 7
+          },
+          "EIGHT" : {
+            "name" : "EIGHT",
+            "lineno" : 39,
+            "value" : 8
+          },
+          "NINE" : {
+            "name" : "NINE",
+            "lineno" : 40,
+            "value" : 9
+          },
+          "TEN" : {
+            "name" : "TEN",
+            "lineno" : 41,
+            "value" : 10
+          },
+          "ELEVEN" : {
+            "name" : "ELEVEN",
+            "lineno" : 42,
+            "value" : 11
+          },
+          "TWELVE" : {
+            "name" : "TWELVE",
+            "lineno" : 43,
+            "value" : 12
+          },
+          "THIRTEEN" : {
+            "name" : "THIRTEEN",
+            "lineno" : 44,
+            "value" : 13
+          },
+          "FOURTEEN" : {
+            "name" : "FOURTEEN",
+            "lineno" : 45,
+            "value" : 14
+          },
+          "FIFTEEN" : {
+            "name" : "FIFTEEN",
+            "lineno" : 46,
+            "value" : 15
+          },
+          "SIXTEEN" : {
+            "name" : "SIXTEEN",
+            "lineno" : 47,
+            "value" : 16
+          },
+          "SEVENTEEN" : {
+            "name" : "SEVENTEEN",
+            "lineno" : 48,
+            "value" : 17
+          },
+          "EIGHTEEN" : {
+            "name" : "EIGHTEEN",
+            "lineno" : 49,
+            "value" : 18
+          },
+          "NINETEEN" : {
+            "name" : "NINETEEN",
+            "lineno" : 50,
+            "value" : 19
+          }
+        },
+        "lineno" : 30
+      }
+      },
+  "structs" :
+  {
+      "MyStruct" : {
+        "name" : "MyStruct",
+        "fields" : {
+          "myEnum" : {
+            "name" : "myEnum",
+            "key" : 1,
+            "lineno" : 58,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "MyEnum"
+}
+          },
+          "myBigEnum" : {
+            "name" : "myBigEnum",
+            "default_value" : 1,
+            "key" : 2,
+            "lineno" : 59,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "MyBigEnum"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 57
+      }
+      },
+  "source_path" : "src/module",
+  "py_namespace" : ""
+}

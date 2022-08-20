@@ -1,0 +1,49 @@
+{{!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Used in semistream object callbacks to convert the returned cpp folly::optional value type
+to a python type.
+
+}}{{#type:iobuf?}}{{!
+  }}_fbthrift_iobuf.from_unique_ptr(_value){{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+  }}_fbthrift_iobuf.from_unique_ptr(move_iobuf(_value)){{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}(<const char*>_value.data())[:_value.size()]{{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{#type:bool?}}<bint>_value{{/type:bool?}}{{!
+}}{{#type:byte?}}_value{{/type:byte?}}{{!
+}}{{#type:i16?}}_value{{/type:i16?}}{{!
+}}{{#type:i32?}}_value{{/type:i32?}}{{!
+}}{{#type:i64?}}_value{{/type:i64?}}{{!
+}}{{#type:double?}}_value{{/type:double?}}{{!
+}}{{#type:float?}}_value{{/type:float?}}{{!
+}}{{#type:string?}}_value.data().decode('UTF-8'){{/type:string?}}{{!
+}}{{#type:binary?}}_value{{/type:binary?}}{{!
+}}{{#type:struct}}{{> types/cython_python_type}}._fbthrift_create({{!
+  }}make_shared[{{> types/cython_cpp_type}}]({{!
+  }}_value)){{/type:struct}}{{!
+}}{{#type:container?}}{{> types/cython_python_type}}._fbthrift_create({{!
+  }}make_shared[{{> types/cython_cpp_type}}]({{!
+  }}_value)){{/type:container?}}{{!
+}}{{#type:void?}}None{{/type:void?}}{{!
+}}{{#type:enum}}{{> types/cython_python_type}}(<int> _value){{/type:enum}}{{!
+}}{{/type:hasCustomTypeBehavior?}}

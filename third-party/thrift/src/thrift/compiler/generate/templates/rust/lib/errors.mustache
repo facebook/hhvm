@@ -1,0 +1,211 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+    {{#service:interactions}}{{>lib/errors}}
+    {{/service:interactions}}
+    /// Errors for {{service:name}} functions.
+    pub mod {{service:snake}} {
+
+        {{#service:rust_exceptions}}
+        pub trait As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} {
+            fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}>;
+        }
+
+        impl As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} for ::anyhow::Error {
+            fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}> {
+                for cause in self.chain() {
+                {{#rust_exception:functions}}
+                {{#rust_exception_function:function}}
+                    if let Some({{function:upcamel}}Error::{{#rust_exception_function:field}}{{field:rust_name}}{{/rust_exception_function:field}}(e)) = cause.downcast_ref::<{{function:upcamel}}Error>() {
+                        return Some(e);
+                    }
+                {{/rust_exception_function:function}}
+                {{/rust_exception:functions}}
+                }
+                None
+            }
+        }
+
+        {{/service:rust_exceptions}}
+        {{#service:rustFunctions}}
+        {{^function:starts_interaction?}}
+        {{#function:exceptions?}}
+        /// Errors for {{function:rust_name}} (client side).
+        #[derive(Debug, ::thiserror::Error)]
+        pub enum {{function:upcamel}}Error {
+            {{#function:exceptions}}
+            #[error("{{service:name}}::{{function:rust_name}} failed with {0:?}")]
+            {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
+            {{/function:exceptions}}
+            #[error("Application exception: {0:?}")]
+            ApplicationException(::fbthrift::types::ApplicationException),
+            #[error("{0}")]
+            ThriftError(::anyhow::Error),
+        }
+
+        {{#function:uniqueExceptions}}
+        impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Error {
+            fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+                {{function:upcamel}}Error::{{field:rust_name}}(e)
+            }
+        }
+
+        impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}Error {
+            fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> Option<&{{#field:type}}{{>lib/type}}{{/field:type}}> {
+                match self {
+                    {{function:upcamel}}Error::{{field:rust_name}}(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        {{/function:uniqueExceptions}}
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Error {
+            fn from(err: ::anyhow::Error) -> Self {
+                {{function:upcamel}}Error::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Error {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                {{function:upcamel}}Error::ApplicationException(ae)
+            }
+        }
+        {{/function:exceptions?}}
+        {{^function:exceptions?}}
+        pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
+
+        {{/function:exceptions?}}
+        impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn> for
+            ::std::result::Result<{{#function:return_type}}{{>lib/type}}{{/function:return_type}}, {{function:upcamel}}Error>
+        {
+            fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
+                match e {
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::Success(res) => {
+                        {{^function:returns_stream?}}
+                        ::std::result::Result::Ok(res)
+                        {{/function:returns_stream?}}
+                        {{#function:returns_stream?}}
+                        use ::futures::stream::StreamExt;
+                        {{#function:stream_has_first_response?}}
+                        let (resp, stream) = res;
+                        ::std::result::Result::Ok((resp, stream.map(|res| match res {
+                            ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
+                            ::std::result::Result::Err(exn) => exn.into(),
+                        }).boxed()))
+                        {{/function:stream_has_first_response?}}
+                        {{^function:stream_has_first_response?}}
+                        let stream = res;
+                        ::std::result::Result::Ok(stream.map(|res| match res {
+                            ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
+                            ::std::result::Result::Err(exn) => exn.into(),
+                        }).boxed())
+                        {{/function:stream_has_first_response?}}
+                        {{/function:returns_stream?}}
+                    }
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err({{function:upcamel}}Error::ApplicationException(aexn)),
+                    {{#function:exceptions}}
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{field:rust_name}}(exn) =>
+                        ::std::result::Result::Err({{function:upcamel}}Error::{{field:rust_name}}(exn)),
+                    {{/function:exceptions}}
+                }
+            }
+        }
+
+        {{#function:returns_stream?}}
+        impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for
+            ::std::result::Result<{{!
+            }}{{#function:stream_has_first_response?}}{{>lib/function_stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
+            }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
+            }}, {{function:upcamel}}Error>
+        {
+            fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn) -> Self {
+                match e {
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::Success(res) =>
+                        ::std::result::Result::Ok(res),
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err({{function:upcamel}}Error::ApplicationException(aexn)),
+                    {{#function:exceptions}}
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) =>
+                        ::std::result::Result::Err({{function:upcamel}}Error::{{field:rust_name}}(exn)),
+                    {{/function:exceptions}}
+                }
+            }
+        }
+
+        {{#function:stream_exceptions?}}
+        #[derive(Debug, ::thiserror::Error)]
+        pub enum {{function:upcamel}}StreamError {
+            {{#function:stream_exceptions}}
+            #[error("{{service:name}}::{{function:rust_name}} stream failed with {0:?}")]
+            {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
+            {{/function:stream_exceptions}}
+            #[error("Application exception: {0:?}")]
+            ApplicationException(::fbthrift::types::ApplicationException),
+            #[error("{0}")]
+            ThriftError(::anyhow::Error),
+        }
+
+        {{#function:uniqueStreamExceptions}}
+        impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamError {
+            fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+                {{function:upcamel}}StreamError::{{field:rust_name}}(e)
+            }
+        }
+
+        {{/function:uniqueStreamExceptions}}
+        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamError {
+            fn from(err: ::anyhow::Error) -> Self {
+                {{function:upcamel}}StreamError::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}StreamError {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                {{function:upcamel}}StreamError::ApplicationException(ae)
+            }
+        }
+
+        {{/function:stream_exceptions?}}
+        {{^function:stream_exceptions?}}
+        pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
+
+        {{/function:stream_exceptions?}}
+        impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn> for
+            ::std::result::Result<{{>lib/function_stream_elem_type}}, {{function:upcamel}}StreamError>
+        {
+            fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn) -> Self {
+                match e {
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(res) =>
+                        ::std::result::Result::Ok(res),
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err({{function:upcamel}}StreamError::ApplicationException(aexn)),
+                    {{#function:stream_exceptions}}
+                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::{{field:rust_name}}(exn) =>
+                        ::std::result::Result::Err({{function:upcamel}}StreamError::{{field:rust_name}}(exn)),
+                    {{/function:stream_exceptions}}
+                }
+            }
+        }
+
+        {{/function:returns_stream?}}
+        {{/function:starts_interaction?}}
+        {{/service:rustFunctions}}
+    }
+
+{{!newline}}

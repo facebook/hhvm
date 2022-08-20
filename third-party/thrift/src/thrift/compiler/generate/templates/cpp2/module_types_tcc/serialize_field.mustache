@@ -1,0 +1,88 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+<%#field:type%>
+<% > module_types_tcc/if_should_write%>
+<%#struct:union?%>  <%/struct:union?%>    constexpr int16_t kPrevFieldId = <%#first?%><%#struct:indexing?%>::apache::thrift::detail::kSizeField.id<%/struct:indexing?%><%^struct:indexing?%>0<%/struct:indexing?%><%/first?%><%^first?%><%field:serialization_prev_field_key%><%/first?%>;
+<%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::<% > module_types_tcc/struct_type%>, <%field:key%>, kPrevFieldId>(*prot_, "<%field:name%>", <%^struct:union?%>previousFieldHasValue<%/struct:union?%><%#struct:union?%>false<%/struct:union?%>);
+<%^struct:union?%>
+<%#struct:union?%>  <%/struct:union?%>    previousFieldHasValue = true;
+<%/struct:union?%>
+<%#field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    indexWriter.recordFieldStart();
+<%/field:lazy?%>
+<%#field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    if constexpr (Protocol_::kHasIndexSupport()) {
+<%#struct:union?%>  <%/struct:union?%>      if (prot_->protocolType() == __fbthrift_protocol_) {
+<%#struct:union?%>  <%/struct:union?%>        auto lock = folly::make_shared_lock(__fbthrift_deserializationMutex_);
+<%#struct:union?%>  <%/struct:union?%>        if (__fbthrift_isDeserialized_.<%field:cpp_name%>.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+<%#struct:union?%>  <%/struct:union?%>          xfer += prot_->writeRaw(<%#field:lazy_ref?%>*<%/field:lazy_ref?%>__fbthrift_serializedData_.<%field:cpp_name%>);
+<%#struct:union?%>  <%/struct:union?%>          goto written_lazy_field_<%field:cpp_name%>;
+<%#struct:union?%>  <%/struct:union?%>        }
+<%#struct:union?%>  <%/struct:union?%>      }
+<%#struct:union?%>  <%/struct:union?%>    }
+<%#struct:union?%>  <%/struct:union?%>
+<%#struct:union?%>  <%/struct:union?%>    std::as_const(*this).__fbthrift_read_field_<%field:cpp_name%>();
+<%/field:lazy?%>
+<%^field:non_opt_cpp_ref?%>
+<%#struct:union?%>  <%/struct:union?%>    xfer += <% > module_types_tcc/pm%>::write(*prot_, <% > module_types_tcc/pm_value%>);
+<%/field:non_opt_cpp_ref?%>
+<%#field:non_opt_cpp_ref?%>
+<%#struct:union?%>  <%/struct:union?%>    if (<% > field/member%>) {
+<%#struct:union?%>  <%/struct:union?%>      xfer += <% > module_types_tcc/pm%>::write(*prot_, <% > module_types_tcc/pm_value%>);
+<%#type:resolves_to_container_or_enum?%>
+<%#struct:union?%>  <%/struct:union?%>    } else {
+<%#struct:union?%>  <%/struct:union?%>      xfer += prot_->write<% > module_types_tcc/struct_field_type%>Begin(<% > module_types_tcc/container_struct_type%>, 0);
+<%#struct:union?%>  <%/struct:union?%>      xfer += prot_->write<% > module_types_tcc/struct_field_type%>End();
+<%/type:resolves_to_container_or_enum?%>
+<%#type:struct?%>
+<%#struct:union?%>  <%/struct:union?%>    } else {
+<%#struct:union?%>  <%/struct:union?%>      xfer += prot_->writeStructBegin("<%type:name%>");
+<%#struct:union?%>  <%/struct:union?%>      xfer += prot_->writeStructEnd();
+<%#struct:union?%>  <%/struct:union?%>      xfer += prot_->writeFieldStop();
+<%/type:struct?%>
+<%#struct:union?%>  <%/struct:union?%>    }
+<%/field:non_opt_cpp_ref?%>
+<%#field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    written_lazy_field_<%field:cpp_name%>:
+<%#struct:union?%>  <%/struct:union?%>    indexWriter.template recordFieldEnd<decltype(<% > module_types_tcc/pm_value%>)>(<% > common/type_class%>{}, <%field:key%>);
+<%/field:lazy?%>
+<%#struct:union?%>  <%/struct:union?%>    xfer += prot_->writeFieldEnd();
+<%#struct:union?%>
+<% > module_types_tcc/if_should_write_end%>
+<%/struct:union?%>
+<%^struct:union?%>
+<%#field:optional?%>
+  } else {
+    previousFieldHasValue = false;
+  }
+<%/field:optional?%>
+<%#field:deprecated_terse_writes?%>
+  } else {
+    previousFieldHasValue = false;
+  }
+<%/field:deprecated_terse_writes?%>
+<%#field:terse?%>
+  } else {
+    previousFieldHasValue = false;
+  }
+<%/field:terse?%>
+<%^field:optional?%><%^field:deprecated_terse_writes?%><%^field:terse?%>
+  }
+<%/field:terse?%><%/field:deprecated_terse_writes?%><%/field:optional?%>
+<%/struct:union?%>
+<%/field:type%>

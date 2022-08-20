@@ -1,0 +1,55 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+  void Layout<<%struct:cpp_fullname%>>::thaw(
+      ViewPosition self, T& out) const {
+    auto type = this->type_Field.layout.view(self(this->type_Field.pos));
+    switch (type) {
+<%#struct:fields%><%#field:type%>
+      case <%struct:cpp_fullname%>::Type::<%field:cpp_name%>: {
+<%#field:cpp_ref?%>
+        <%! Since the ref fields are relative huge, if call set_field() directly,
+        there will be some expensive object copies. So we want to engage
+        the "mutable_field() = smart_pointer" style setter instead, which will
+        only do a pointer copy%>
+
+        <%! Use an empty value to set "type_" via the set_field() setter%>
+        <%type:cpp_type%> emptyValue;
+        out.set_<%field:cpp_name%>(std::move(emptyValue));
+
+        <%! Now use "mutable_field() = smart_pointer" setter to pass the real
+        smart pointer%>
+        auto ref = <% > module_types_h/smart_ptr_constructor%>;
+        thawField(self, this-><%field:cpp_name%>Field, ref);
+        out.mutable_<%field:cpp_name%>() = std::move(ref);
+<%/field:cpp_ref?%>
+<%^field:cpp_ref?%>
+        <%type:cpp_type%> fieldValue;
+        thawField(self, this-><%field:cpp_name%>Field, fieldValue);
+        out.set_<%field:cpp_name%>(std::move(fieldValue));
+<%/field:cpp_ref?%>
+        break;
+      }
+<%/field:type%><%/struct:fields%>
+      default: {
+        <%! The field has been removed during schema evolution, set the "type_"
+         to __EMPTY__ %>
+        apache::thrift::clear(out);
+        break;
+      }
+    }
+  }

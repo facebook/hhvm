@@ -1,0 +1,35 @@
+	
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "localhost:5001",
+                   "localhost:5002",
+                   "localhost:5003",
+                   "localhost:5004",
+                   "localhost:5005",
+                   "localhost:5006",
+                   "localhost:5007",
+                   "localhost:5008",
+                   "localhost:5009",
+                   "localhost:5010"]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": ["PoolRoute|A.wildcard",
+                {
+                  "type":"Pool",
+                  "name":"B1",
+                  "protocol":"caret",
+                  "servers": [ "localhost:5011"]
+                }
+                ],
+    "failover_policy": {
+      "type": "DeterministicOrderPolicy",
+      "max_tries": 2,
+      "max_error_tries": 2,
+      "ignore_normal_reply_index": true
+    }
+  }
+}
+

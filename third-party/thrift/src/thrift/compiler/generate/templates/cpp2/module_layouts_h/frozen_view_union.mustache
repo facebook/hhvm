@@ -1,0 +1,49 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+  struct View : public ViewBase<View, LayoutSelf, <%struct:cpp_fullname%>> {
+    <%struct:cpp_fullname%>::Type type_;
+    View() : type_(<%struct:cpp_fullname%>::Type::__EMPTY__) {}
+    View(const LayoutSelf* layout, ViewPosition position)
+        : ViewBase<View, LayoutSelf, <%struct:cpp_fullname%>>(layout, position) {
+      type_ = this->layout_->type_Field.layout.view(this->position_(this->layout_->type_Field.pos));
+      switch (type_) {
+<%#struct:fields%>
+        case <%struct:cpp_fullname%>::Type::<%field:cpp_name%>: {
+          break;
+        }
+<%/struct:fields%>
+        default: {
+          type_ = <%struct:cpp_fullname%>::Type::__EMPTY__;
+        }
+      }
+    }
+
+    <%struct:cpp_fullname%>::Type getType() {return type_;}
+
+<%#struct:fields%><%#field:type%>
+    auto get_<%field:cpp_name%>() const {
+      assert(type_ == <%struct:cpp_fullname%>::Type::<%field:cpp_name%>);
+      return this->layout_-><%field:cpp_name%>Field.layout.view(
+          this->position_(this->layout_-><%field:cpp_name%>Field.pos));
+    }
+<%/field:type%><%/struct:fields%>
+  };
+
+  View view(ViewPosition self) const {
+    return View(this, self);
+  }

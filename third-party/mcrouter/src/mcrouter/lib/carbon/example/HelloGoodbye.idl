@@ -1,0 +1,65 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace hellogoodbye;
+thrift_namespace hellogoodbye.thrift;
+
+import "mcrouter/lib/network/Common.idl"
+
+enum EnumUInt32 : uint32_t {
+  HIGH = 0,
+  URGENT = 1,
+  YESTERDAY = 2,
+};
+
+request HelloRequest {
+  id: 1;
+  name: "hello";
+  no_thrift_compression: true;
+  thrift_headers: {shardId,message, priority};
+  reply: HelloReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t shardId;
+  3: uint64_t deadlineMs;
+  4: std::string message;
+  5: EnumUInt32 priority;
+  6: uint64_t beforeLatencyUs;
+  7: uint64_t afterLatencyUs;
+  8: uint32_t clientVersion;
+};
+
+reply HelloReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+};
+
+request GoodbyeRequest {
+  id: 2;
+  name: "goodbye";
+  reply: GoodbyeReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t shardId;
+};
+
+reply GoodbyeReply {
+  1: Result result;
+  2: std::string message;
+};
+
+service {
+  additional_route_handles: [
+    DuplicateRoute @ "mcrouter/lib/carbon/example/DuplicateRoute.h",
+    CarbonLookasideRoute @ "mcrouter/lib/carbon/example/CarbonLookasideRoute.h"
+  ];
+  gen_client_tool: true;
+  compression_by_type: true;
+};

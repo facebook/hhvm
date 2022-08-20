@@ -1,0 +1,187 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Metadata for Thrift types
+}}
+{{> common/auto_generated_py}}
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+
+{{#program:include_namespaces}}
+{{#has_types?}}
+
+import {{included_module_path}}.thrift_metadata
+{{/has_types?}}
+{{/program:include_namespaces}}
+
+{{#program:structs}}
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "{{program:name}}.{{> structs/unadapted_name}}"
+
+    if qualified_name in metadata_struct.{{#struct:exception?}}exceptions{{/struct:exception?}}{{^struct:exception?}}structs{{/struct:exception?}}:
+        return metadata_struct
+    fields = [
+        {{#struct:fields_and_mixin_fields}}
+        _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+            {{#field:structured_annotations}}
+            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+            {{> metadata/const_struct }},
+            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+            {{/field:structured_annotations}}
+        ]),
+        {{/struct:fields_and_mixin_fields}}
+    ]
+    struct_dict = dict(metadata_struct.{{#struct:exception?}}exceptions{{/struct:exception?}}{{^struct:exception?}}structs{{/struct:exception?}})
+    struct_dict[qualified_name] = _fbthrift_metadata.{{!
+    }}{{#struct:exception?}}ThriftException{{/struct:exception?}}{{^struct:exception?}}ThriftStruct{{/struct:exception?}}(name=qualified_name, fields=fields,
+    {{^struct:exception?}}
+        is_union={{#struct:union?}}True{{/struct:union?}}{{^struct:union?}}False{{/struct:union?}},
+    {{/struct:exception?}}
+        structured_annotations=[
+            {{#struct:structured_annotations}}
+            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+            {{> metadata/const_struct }},
+            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+            {{/struct:structured_annotations}}
+        ])
+    new_struct = metadata_struct({{#struct:exception?}}exceptions{{/struct:exception?}}{{^struct:exception?}}structs{{/struct:exception?}}=struct_dict)
+
+    {{#struct:fields}}
+    {{#field:type}}{{> metadata/recursive_call }}{{/field:type}} # {{field:name}}
+    {{/struct:fields}}
+
+    return new_struct
+def gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}({{!
+    }}_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+{{/program:structs}}
+
+{{#program:services}}
+def gen_metadata_service_{{service:name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_{{service:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_{{service:name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "{{program:name}}.{{service:name}}"
+
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+
+    functions = [
+        {{#service:functions}}{{^function:starts_interaction?}}
+        _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#function:return_type}}{{> metadata/thrift_type }}{{/function:return_type}}, arguments=[
+            {{#function:args}}
+            _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+                {{#field:structured_annotations}}
+                {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+                {{> metadata/const_struct }},
+                {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+                {{/field:structured_annotations}}
+            ]),
+            {{/function:args}}
+        ], exceptions = [
+            {{#function:exceptions}}
+            _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+                {{#field:structured_annotations}}
+                {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+                {{> metadata/const_struct }},
+                {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+                {{/field:structured_annotations}}
+            ]),
+            {{/function:exceptions}}
+        ], is_oneway={{#function:oneway?}}True{{/function:oneway?}}{{^function:oneway?}}False{{/function:oneway?}}, structured_annotations=[
+            {{#function:structured_annotations}}
+            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+            {{> metadata/const_struct }},
+            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+            {{/function:structured_annotations}}
+        ]),
+        {{/function:starts_interaction?}}{{/service:functions}}
+    ]
+
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#service:extends?}}{{#service:extends}}parent="{{service:program_name}}.{{service:name}}",{{/service:extends}}{{/service:extends?}} structured_annotations=[
+        {{#service:structured_annotations}}
+        {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+        {{> metadata/const_struct }},
+        {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+        {{/service:structured_annotations}}
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    {{#service:extends?}}{{#service:extends}}
+    new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metadata.{{/service:external_program?}}_fbthrift_gen_metadata_service_{{service:name}}(new_struct)
+    {{/service:extends}}{{/service:extends?}}
+    {{#service:functions}}{{^function:starts_interaction?}}
+
+    {{#function:args}}
+    {{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
+    {{/function:args}}
+
+    {{#function:exceptions}}
+    {{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
+    {{/function:exceptions}}
+
+    {{#function:return_type}}{{> metadata/recursive_call }} # return value{{/function:return_type}}
+
+    {{/function:starts_interaction?}}{{/service:functions}}
+
+    return new_struct
+
+{{/program:services}}
+
+{{#program:enums}}
+def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "{{program:name}}.{{enum:name}}"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        {{#enum:values}}
+        {{enum_value:value}}: "{{enum_value:name}}",
+        {{/enum:values}}
+    }
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_{{enum:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+{{/program:enums}}
+
+def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
+    meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    {{#program:enums}}
+    meta = _fbthrift_gen_metadata_enum_{{enum:name}}(meta)
+    {{/program:enums}}
+    {{#program:structs}}
+    {{#struct:exception?}}
+    meta = _fbthrift_gen_metadata_exception_{{> structs/unadapted_name}}(meta)
+    {{/struct:exception?}}
+    {{^struct:exception?}}
+    meta = _fbthrift_gen_metadata_struct_{{> structs/unadapted_name}}(meta)
+    {{/struct:exception?}}
+    {{/program:structs}}
+    {{#program:services}}
+    meta = _fbthrift_gen_metadata_service_{{service:name}}(meta)
+    {{/program:services}}
+    return meta

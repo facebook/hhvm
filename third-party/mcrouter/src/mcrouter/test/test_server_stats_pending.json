@@ -1,0 +1,9 @@
+{
+  "pools": {
+    "foo": {
+      "servers": [ "localhost:12345" ]
+    }
+  },
+  "route": "AllAsyncRoute|PoolRoute|foo"
+}
+

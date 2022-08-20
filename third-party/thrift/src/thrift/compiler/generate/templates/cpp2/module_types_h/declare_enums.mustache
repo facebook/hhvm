@@ -1,0 +1,100 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>// BEGIN declare_enums
+<%#program:enums?%>
+<% > common/namespace_cpp2_begin%>
+
+<%#program:enums%>
+
+enum <%^enum:cpp_is_unscoped%>class <%/enum:cpp_is_unscoped%><%enum:cpp_name%><%#enum:cpp_enum_type%> : <%enum:cpp_enum_type%><%/enum:cpp_enum_type%> {
+<%#enum:values%>
+  <%enum_value:cpp_name%> = <%enum_value:value%>,
+<%/enum:values%>
+};
+
+<%#enum:cpp_declare_bitwise_ops%>
+<% > module_types_h/enum_bitwise_ops%>
+<%/enum:cpp_declare_bitwise_ops%>
+
+<%/program:enums%>
+
+<% > common/namespace_cpp2_end%>
+
+
+namespace std {
+<%#program:enums%>
+template<> struct hash<<% > common/namespace_cpp2%><%enum:cpp_name%>> :
+  ::apache::thrift::detail::enum_hash<<% > common/namespace_cpp2%><%enum:cpp_name%>> {};
+<%/program:enums%>
+} // std
+
+namespace apache { namespace thrift {
+
+<%#program:enums%>
+
+template <> struct TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>;
+
+template <> struct TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>> {
+  using type = <% > common/namespace_cpp2%><%enum:cpp_name%>;
+
+  static constexpr std::size_t const size = <%enum:size%>;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+  <%^enum:empty?%>
+  static constexpr type min() { return type::<%enum:min%>; }
+  static constexpr type max() { return type::<%enum:max%>; }
+  <%/enum:empty?%>
+};
+
+<%/program:enums%>
+
+}} // apache::thrift
+
+<% > common/namespace_cpp2_begin%>
+
+
+<%#program:enums%>
+using _<%enum:cpp_name%>_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<<%enum:cpp_name%>>;
+<%#enum:legacy_api?%>
+#ifndef ANDROID
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
+extern const _<%enum:cpp_name%>_EnumMapFactory::ValuesToNamesMapType _<%enum:cpp_name%>_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
+extern const _<%enum:cpp_name%>_EnumMapFactory::NamesToValuesMapType _<%enum:cpp_name%>_NAMES_TO_VALUES;
+#endif
+<%/enum:legacy_api?%>
+<%/program:enums%>
+<% > common/namespace_cpp2_end%>
+
+<%/program:enums?%>
+
+// END declare_enums

@@ -1,0 +1,16 @@
+{
+  "pools": {
+    "A": { "servers": [ { "type": "ErrorRoute" } ] },
+    "B": {
+      "servers": [
+        "127.0.0.1:12345",
+        { "type": "ErrorRoute" },
+        "127.0.0.1:12346"
+      ]
+    }
+  },
+  "routes": {
+    "/a/a/": "Pool|A",
+    "/b/b/": "HashRoute|Pool|B"
+  }
+}

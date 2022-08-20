@@ -1,0 +1,380 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "enumerations" : {
+    "Animal" : {
+      "lineno" : 26,
+      "constants" : {
+        "DOG" : 1,
+        "CAT" : 2,
+        "TARANTULA" : 3
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 26,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 30,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "PersonID" : {
+      "lineno" : 40,
+      "type_enum" : "I64",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 40,
+          "column" : 21
+        }
+      }
+    }
+  },
+  "structs" : {
+    "Color" : {
+      "lineno" : 19,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "red" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 20,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 20,
+              "column" : 17
+            }
+          }
+        },
+        "green" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 21,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 21,
+              "column" : 19
+            }
+          }
+        },
+        "blue" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 18
+            }
+          }
+        },
+        "alpha" : {
+          "type_enum" : "DOUBLE",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 23,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 23,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 19,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 2
+        }
+      }
+    },
+    "Vehicle" : {
+      "lineno" : 32,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "color" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Color",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 33,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 33,
+              "column" : 18
+            }
+          }
+        },
+        "licensePlate" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 35
+            }
+          }
+        },
+        "description" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 35,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 35,
+              "column" : 34
+            }
+          }
+        },
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 27
+            }
+          }
+        },
+        "hasAC" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : false,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 37,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 37,
+              "column" : 34
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 32,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 2
+        }
+      }
+    },
+    "Person" : {
+      "lineno" : 42,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "id" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "PersonID",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 43,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 43,
+              "column" : 18
+            }
+          }
+        },
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 44,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 44,
+              "column" : 18
+            }
+          }
+        },
+        "age" : {
+          "type_enum" : "I16",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 45,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 45,
+              "column" : 23
+            }
+          }
+        },
+        "address" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 46,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 46,
+              "column" : 30
+            }
+          }
+        },
+        "favoriteColor" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Color",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 47,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 47,
+              "column" : 35
+            }
+          }
+        },
+        "friends" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "PersonID"} ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 48,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 48,
+              "column" : 37
+            }
+          }
+        },
+        "bestFriend" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "PersonID",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 49,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 49,
+              "column" : 35
+            }
+          }
+        },
+        "petNames" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "ENUM", "spec_args" : "Animal" }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 50,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 50,
+              "column" : 44
+            }
+          }
+        },
+        "afraidOfAnimal" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Animal",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 51,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 51,
+              "column" : 37
+            }
+          }
+        },
+        "vehicles" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "STRUCT", "spec_args" : "Vehicle"} ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 52,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 52,
+              "column" : 39
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 42,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 53,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,73 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+
+#include "<%program:include_prefix%><%program:name%>_data.h"
+
+#include <thrift/lib/cpp2/gen/module_data_cpp.h>
+
+namespace apache {
+namespace thrift {
+<%#program:enums%>
+
+const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
+<%#enum:values%><%!
+%>  type::<%enum_value:cpp_name%>,
+<%/enum:values%>
+}};
+const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
+<%#enum:values%><%!
+%>  "<%enum_value:name%>",
+<%/enum:values%>
+}};
+<%/program:enums%>
+<%#program:structs%>
+<%#struct:union?%>
+
+const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
+<%#struct:fields%><%!
+%>  type::<%field:cpp_name%>,
+<%/struct:fields%>
+}};
+const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
+<%#struct:fields%><%!
+%>  "<%field:name%>",
+<%/struct:fields%>
+}};
+<%/struct:union?%>
+<%/program:structs%>
+<%#program:structs%>
+
+const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
+  <%#struct:fields%>
+  "<%field:name%>",
+  <%/struct:fields%>
+}};
+const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
+  <%#struct:fields%>
+  <%field:key%>,
+  <%/struct:fields%>
+}};
+const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_types = {{
+  <%#struct:fields%><%#field:type%>
+  TType::<% > module_types_tcc/struct_type%>,
+  <%/field:type%><%/struct:fields%>
+}};
+<%/program:structs%>
+
+} // namespace thrift
+} // namespace apache

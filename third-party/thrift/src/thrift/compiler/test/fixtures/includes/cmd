@@ -1,0 +1,16 @@
+json src/service.thrift
+py src/service.thrift
+android src/module.thrift
+cocoa:import_path=thrift src/service.thrift
+mstch_java src/service.thrift
+mstch_java src/module.thrift
+mstch_java src/includes.thrift
+mstch_java src/transitive.thrift
+mstch_cpp2 src/service.thrift
+mstch_cpp2 src/matching_module_name.thrift
+mstch_cpp2 src/module.thrift
+mstch_cpp2 src/includes.thrift
+go src/service.thrift
+go src/matching_names.thrift
+mstch_py3 src/service.thrift
+mstch_py3 src/matching_struct_names.thrift

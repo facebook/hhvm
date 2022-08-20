@@ -1,0 +1,30 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+bool <%struct:cpp_underlying_name%>::operator==(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+<%#struct:fields%><%#field:type%>
+<%#field:lazy?%>
+  lhs.<%field:cpp_name%>_ref();
+  rhs.<%field:cpp_name%>_ref();
+<%/field:lazy?%>
+  if (<% > field/neq%>) {
+    return false;
+  }
+<%/field:type%><%/struct:fields%>
+  return true;
+}

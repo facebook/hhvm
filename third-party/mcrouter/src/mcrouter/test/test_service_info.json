@@ -1,0 +1,17 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "127.0.0.1:11610" ]
+    },
+    "B": {
+      "servers": [ "127.0.0.1:11611" ]
+    }
+  },
+  "route": {
+    "type": "AllSyncRoute",
+    "children": [
+      "PoolRoute|A",
+      "PoolRoute|B"
+    ]
+  }
+}

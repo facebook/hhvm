@@ -1,0 +1,76 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Included on Cython structs in properties for retrieving child values from
+that struct. Most types can be returned directly and converted to python objects
+by Cython. Complex objects need to be wrapped or decoded appropriately. Structs
+are special because we try to memoize their wrappers on the parent handler
+if they have been previously retrieved.
+
+}}{{#type:iobuf?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).{{> types/cython_field_ref}}), self)
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    if not deref(self._cpp_obj).{{> types/cython_field_value_ref}}:
+        return None
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(deref(self._cpp_obj).{{> types/cython_field_value_ref}}.get(), self)
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}return (<const char*>deref(self._cpp_obj).{{> types/cython_field_value_ref}}{{!
+    }}.data())[:deref(self._cpp_obj).{{> types/cython_field_value_ref}}{{!
+    }}.size()]{{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{#field:reference?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    if not deref(self._cpp_obj).{{> types/cython_field_value_ref}}_ref():
+        return None
+    {{! Use an aliasing constructor since the object we're returning is still
+        managed by the top-level object, possible via a unique_ptr }}
+    self.__fbthrift_cached_{{field:py_name}} = {{> types/cython_python_type}}._fbthrift_create(__reference_shared_ptr({{!
+      }}deref(deref(self._cpp_obj).{{> types/cython_field_value_ref}}_ref()), self._cpp_obj))
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/field:reference?}}{{!
+}}{{^field:reference?}}{{!
+}}{{#type:base?}}{{!
+  }}return {{!
+    }}{{#type:bool?}}<pbool> {{/type:bool?}}{{!
+    }}{{#type:string?}}(<bytes>{{/type:string?}}{{!
+    }}deref(self._cpp_obj).{{> types/cython_field_value_ref}}{{!
+    }}{{#type:string?}}).decode('UTF-8'){{/type:string?}}{{!
+}}{{/type:base?}}{{!
+}}{{^type:base?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    self.__fbthrift_cached_{{field:py_name}} = {{!
+      }}{{#type:enum?}}translate_cpp_enum_to_python({{!
+        }}{{> types/cython_python_type}}, {{!
+        }}<int>({{!
+        }}deref(self._cpp_obj).{{> types/cython_field_value_ref}}{{!
+      }})){{/type:enum?}}{{!
+      }}{{^type:enum?}}{{> types/cython_python_type}}._fbthrift_create(__reference_shared_ptr({{!
+      }}deref(self._cpp_obj).{{> types/cython_field_ref}}, {{!
+      }}self._cpp_obj{{!
+      }})){{/type:enum?}}
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:base?}}{{!
+}}{{/field:reference?}}{{!
+}}{{/type:hasCustomTypeBehavior?}}

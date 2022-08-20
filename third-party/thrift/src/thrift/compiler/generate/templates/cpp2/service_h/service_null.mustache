@@ -1,0 +1,22 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>class <%service:cpp_name%>SvNull : public ::apache::thrift::ServiceHandler<<%service:cpp_name%>><%#service:extends%>, virtual public ::apache::thrift::ServiceHandler<<% > common/namespace_cpp2%><%service:cpp_name%>><%/service:extends%> {
+ public:
+<%#service:functions%><%#function:return_type%><%^function:starts_interaction?%><%^function:creates_interaction?%><%^function:eb%><%^function:returns_stream?%>
+  <% > service_common/sync_function_return_type_server%> <%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>) override;
+<%/function:returns_stream?%><%/function:eb%><%/function:creates_interaction?%><%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
+};

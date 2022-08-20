@@ -1,0 +1,183 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python classes for Thrift types
+}}
+{{> common/auto_generated_py}}
+{{#program:enums?}}
+import enum
+
+{{/program:enums?}}
+import folly.iobuf as _fbthrift_iobuf
+import {{program:base_library_package}}.types as _fbthrift_python_types
+import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
+
+{{#program:include_namespaces}}
+{{#has_types?}}
+
+import {{included_module_path}}.thrift_types
+{{/has_types?}}
+{{/program:include_namespaces}}
+{{#program:adapter_modules}}
+import {{module_path}}
+{{/program:adapter_modules}}
+{{#program:structs}}
+
+
+class {{> structs/unadapted_name}}(metaclass={{!
+        }}{{#struct:union?}}_fbthrift_python_types.UnionMeta{{/struct:union?}}{{!
+        }}{{^struct:union?}}{{!
+        }}{{#struct:exception?}}_fbthrift_python_exceptions.GeneratedErrorMeta{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}_fbthrift_python_types.StructMeta{{/struct:exception?}}{{!
+        }}{{/struct:union?}}{{!
+        }}):
+    _fbthrift_SPEC = (
+        {{#struct:fields_and_mixin_fields}}
+        (
+            {{field:key}},  # id
+            _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
+            "{{field:py_name}}",  # name
+            {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:user_default_value}}{{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{/field:type}}{{> types/constant_value }}{{/field:user_default_value}}{{!
+            }}{{^field:user_default_value}}None{{/field:user_default_value}},  # default value
+            {{> fields/adapter_class }},  # adapter class
+        ),
+        {{/struct:fields_and_mixin_fields}}
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{> structs/unadapted_name}}"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return {{#struct:thrift_uri}}"{{struct:thrift_uri}}"{{/struct:thrift_uri}}{{!
+            }}{{^struct:thrift_uri}}None{{/struct:thrift_uri}}
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
+
+    {{#struct:exception?}}
+    {{#struct:exception_message?}}
+
+    def __str__(self):
+        field = self.{{struct:exception_message}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+
+    {{/struct:exception_message?}}
+    {{/struct:exception?}}
+    {{#struct:legacy_api?}}
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("{{program:module_path}}.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.{{> structs/unadapted_name}}, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+    {{/struct:legacy_api?}}
+{{#struct:has_adapter?}}
+
+
+{{struct:name}} = {{struct:adapter_type_hint}}
+{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}
+
+# This unfortunately has to be down here to prevent circular imports
+import {{program:module_path}}.thrift_metadata
+
+{{#program:enums}}
+class {{enum:name}}(_fbthrift_python_types.Enum, enum.{{!
+        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+        }}{{^enum:flags?}}Enum{{/enum:flags?}}):
+    {{#enum:values}}
+    {{enum_value:py_name}} = {{enum_value:value}}
+    {{/enum:values}}
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{enum:name}}"
+
+    @staticmethod
+    def __get_metadata__():
+        return {{program:module_path}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
+
+    {{#enum:legacy_api?}}
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("{{program:module_path}}.types")
+        return py3_types.{{enum:name}}(self.value)
+
+    def _to_py_deprecated(self):
+        return self.value
+    {{/enum:legacy_api?}}
+{{/program:enums}}
+
+{{#program:structs}}
+def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():
+    return {{program:module_path}}.thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
+{{/program:structs}}
+
+_fbthrift_all_structs = [
+    {{#program:structs}}
+    {{> structs/unadapted_name}},
+    {{/program:structs}}
+]
+{{#program:structs?}}
+_fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+{{/program:structs?}}
+{{#program:constants?}}
+
+{{#program:constants}}
+
+{{constant:name}} = {{#constant:value}}{{> types/constant_value}}{{/constant:value}}
+{{/program:constants}}
+{{/program:constants?}}
+{{#program:typedefs?}}
+
+{{#program:typedefs}}
+{{typedef:name}} = {{#typedef:has_adapter?}}{{typedef:adapter_type_hint}}{{/typedef:has_adapter?}}{{!
+}}{{^typedef:has_adapter?}}{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}{{/typedef:has_adapter?}}
+{{/program:typedefs}}
+{{/program:typedefs?}}
+{{#program:services?}}
+{{#program:services}}
+
+{{> types/service_arg_types }}
+
+{{/program:services}}
+
+
+_fbthrift_python_types.fill_specs(
+    {{#program:services}}
+    {{> types/service_arg_type_list}}
+
+    {{/program:services}}
+)
+{{/program:services?}}

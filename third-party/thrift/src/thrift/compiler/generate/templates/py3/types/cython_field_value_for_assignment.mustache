@@ -1,0 +1,59 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Called specifically from types.pyx when initializing the individual attributes
+on a struct.
+
+}}{{#type:iobuf?}}{{!
+  }}deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()){{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+  }}(<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone(){{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}{{> types/cython_cpp_type}}(cmove(<string>_fbthrift_value)){{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{#field:reference?}}{{!
+  }}{{#field:unique_ref?}}{{!
+    For unique references, we just make a copy of the target object - it's not
+    especially efficient but there isn't much else we can do from a shared ptr
+    }}make_unique[{{> types/cython_cpp_type}}](deref({{> types/cython_cast_or_create_python_type}}._cpp_obj)){{!
+  }}{{/field:unique_ref?}}{{!
+  }}{{#field:shared_ref?}}{{!
+    }}{{> types/cython_cast_or_create_python_type}}._cpp_obj{{!
+  }}{{/field:shared_ref?}}{{!
+  }}{{#field:shared_const_ref?}}{{!
+    }}const_pointer_cast({{> types/cython_cast_or_create_python_type}}._cpp_obj){{!
+  }}{{/field:shared_const_ref?}}{{!
+}}{{/field:reference?}}{{^field:reference?}}{{!
+}}{{#type:base?}}{{!
+  }}{{#type:string?}}cmove(bytes_to_string({{/type:string?}}{{!
+  }}{{#type:binary?}}cmove(bytes_to_string({{/type:binary?}}{{!
+  }}_fbthrift_value{{!
+  }}{{#type:string?}}.encode('utf-8'))){{/type:string?}}{{!
+  }}{{#type:binary?}})){{/type:binary?}}{{!
+}}{{/type:base?}}{{!
+}}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>_fbthrift_value{{/type:enum?}}{{!
+}}{{#type:struct?}}{{!
+    }}deref((<{{> types/cython_python_type }}?> _fbthrift_value)._cpp_obj){{!
+}}{{/type:struct?}}{{!
+}}{{#type:container?}}{{!
+    }}deref({{> types/cython_python_type }}(_fbthrift_value)._cpp_obj){{!
+}}{{/type:container?}}{{/field:reference?}}{{!
+}}{{/type:hasCustomTypeBehavior?}}

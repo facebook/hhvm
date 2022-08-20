@@ -1,0 +1,81 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#type:void?%><%!
+%>folly::exception_wrapper <% > service_common/client_class_name%>::recv_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
+<%/type:void?%>
+<%^type:void?%>
+folly::exception_wrapper <% > service_common/client_class_name%>::recv_wrapped_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state) {
+<%/type:void?%>
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.hasResponseBuffer()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
+  <%#type:sink?%>
+  <%^function:sink_exceptions?%>
+  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
+  <%/function:sink_exceptions?%>
+  <%#function:sink_exceptions?%>
+  struct ExMapType {
+    bool operator()(typename result::SinkPResultType& res, folly::exception_wrapper ew) {
+      <%#function:sink_exceptions%>
+      if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
+            res.get<<%field:index_plus_one%>>().ref() = e;
+            res.setIsSet(<%field:index_plus_one%>, true);
+          })) {
+        return true;
+      }
+      <%/function:sink_exceptions%>
+      return false;
+    }
+  };
+  <%/function:sink_exceptions?%>
+  <%/type:sink?%>
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      <%#type:sink?%>
+      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+          &reader, state<%^type:void?%>, state.extractSink(), _return<%/type:void?%>);
+      <%/type:sink?%>
+      <%^type:sink?%>
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state<%^type:void?%>, _return<%/type:void?%>);
+      <%/type:sink?%>
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      <%#type:sink?%>
+      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+          &reader, state<%^type:void?%>, state.extractSink(), _return<%/type:void?%>);
+      <%/type:sink?%>
+      <%^type:sink?%>
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state<%^type:void?%>, _return<%/type:void?%>);
+      <%/type:sink?%>
+    }
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}

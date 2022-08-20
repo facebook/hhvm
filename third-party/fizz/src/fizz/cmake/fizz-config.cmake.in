@@ -1,0 +1,35 @@
+#  Copyright (c) 2018, Facebook, Inc.
+#  All rights reserved.
+#
+#  This source code is licensed under the BSD-style license found in the
+#  LICENSE file in the root directory of this source tree.
+#
+# CMake package configuration file for fizz
+#
+# Defines the target "fizz::fizz"
+# Add this to your target_link_libraries() call to depend on fizz::fizz.
+#
+# Also sets the variables FIZZ_INCLUDE_DIR and FIZZ_LIBRARIES.
+# However, in most cases using the fizz::fizz target is sufficient,
+# and you won't need these variables.
+#
+
+@PACKAGE_INIT@
+
+set_and_check(FIZZ_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set_and_check(FIZZ_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
+
+if (NOT TARGET fizz::fizz)
+  include("${FIZZ_CMAKE_DIR}/fizz-targets.cmake")
+endif()
+
+set(FIZZ_LIBRARIES fizz::fizz)
+
+include(CMakeFindDependencyMacro)
+find_dependency(Sodium)
+find_dependency(folly CONFIG)
+find_dependency(ZLIB)
+
+if (NOT fizz_FIND_QUIETLY)
+  message(STATUS "Found fizz: ${PACKAGE_PREFIX_DIR}")
+endif()

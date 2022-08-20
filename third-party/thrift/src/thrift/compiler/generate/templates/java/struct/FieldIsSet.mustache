@@ -1,0 +1,52 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+/** don't use this method for new code, it's here to make migrating to swift easier */
+@Deprecated
+public boolean fieldIsSet{{field:javaCapitalName}}() {
+    {{#field:isPrimitive?}}
+    {{#field:optional?}}
+    return this.{{field:javaName}} != null;
+    {{/field:optional?}}
+    {{^field:optional?}}
+    return __isset_bit_vector.get(_{{field:javaAllCapsName}});
+    {{/field:optional?}}
+    {{/field:isPrimitive?}}
+    {{^field:isPrimitive?}}
+    return this.{{field:javaName}} != null;
+    {{/field:isPrimitive?}}
+}
+{{!
+
+}}{{#struct:asBean?}}{{!
+}}/** don't use this method for new code, it's here to make migrating to swift easier */
+@Deprecated
+public void unset{{field:javaCapitalName}}() {
+    {{#field:isPrimitive?}}
+    {{#field:optional?}}
+    this.{{field:javaName}} = null;
+    {{/field:optional?}}
+    {{^field:optional?}}
+    __isset_bit_vector.clear(_{{field:javaAllCapsName}});
+    {{/field:optional?}}
+    {{/field:isPrimitive?}}
+    {{^field:isPrimitive?}}
+    this.{{field:javaName}} = null;
+    {{/field:isPrimitive?}}
+}{{!
+}}{{/struct:asBean?}}

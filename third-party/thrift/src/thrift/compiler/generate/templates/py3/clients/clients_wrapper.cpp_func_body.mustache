@@ -1,0 +1,17 @@
+folly::Promise<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> _promise;
+auto _future = _promise.getFuture();
+{{^function:oneway?}}
+auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>>(
+  std::move(_promise), rpcOptions, client->recv_wrapped_{{function:cppName}}, channel_);
+{{/function:oneway?}}
+{{#function:oneway?}}
+{{! oneway functions have no recv they are special cased}}
+auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
+  std::move(_promise), channel_);
+{{/function:oneway?}}
+client->{{function:cppName}}(
+  rpcOptions,
+  std::move(callback){{#function:args}},
+  arg_{{field:py_name}}{{/function:args}}
+);
+return _future;

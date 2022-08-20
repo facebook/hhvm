@@ -1,0 +1,40 @@
+Thrift PHP Software Library
+
+License
+=======
+
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations
+under the License.
+
+Using Thrift with Hack
+=====================
+
+The Hack library for Thrift requires HHVM, and an autoloader (or manually
+constructed require_once calls). To use Thrift in your Hack or PHP project,
+just copy all of thrift.lib/hack/src into your codebase.
+
+When you generate a Thrift package using the compiler, it makes no assumptions
+about where your generated code will live. When using Thrift, make sure you
+have an autoloader set up or that you require_once all necessary files.
+
+Dependencies
+============
+
+HHVM
+
+  At the time of writing HHVM provides the only implementation of the Hack
+  language.

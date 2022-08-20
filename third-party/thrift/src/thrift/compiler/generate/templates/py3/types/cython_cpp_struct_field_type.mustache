@@ -1,0 +1,31 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is used to declare a cython type that is referring to or wrapping a
+c++ object specifically in the context of a field on a struct, which means
+it has to cope with the fields being annotated as cpp.ref or similar. Most
+of this is done in CythonCppType; this file just handles references and other
+wrappers.
+
+}}{{#field:unique_ref?}}unique_ptr[{{/field:unique_ref?}}{{!
+}}{{#field:shared_ref?}}shared_ptr[{{/field:shared_ref?}}{{!
+}}{{#field:shared_const_ref?}}shared_ptr[const {{/field:shared_const_ref?}}{{!
+}}{{> types/cython_cpp_type}}{{!
+}}{{#field:unique_ref?}}]{{/field:unique_ref?}}{{!
+}}{{#field:shared_ref?}}]{{/field:shared_ref?}}{{!
+}}{{#field:shared_const_ref?}}]{{/field:shared_const_ref?}}

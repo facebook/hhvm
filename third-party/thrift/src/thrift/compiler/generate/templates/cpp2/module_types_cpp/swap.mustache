@@ -1,0 +1,49 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%!
+
+Form:
+void swap(Struct& a, Struct& b) {
+  using ::std::swap;
+  ...;
+  swap(a.element, b.element);
+}
+
+%>void swap(FOLLY_MAYBE_UNUSED <%struct:cpp_underlying_name%>& a, FOLLY_MAYBE_UNUSED <%struct:cpp_underlying_name%>& b) {
+  using ::std::swap;
+<%#struct:lazy_fields?%>
+  const auto relaxed = std::memory_order_relaxed;
+  swap(a.__fbthrift_protocol_, b.__fbthrift_protocol_);
+  swap(a.__fbthrift_serializedData_, b.__fbthrift_serializedData_);
+<%/struct:lazy_fields?%>
+<%#struct:fields_in_layout_order%>
+  swap(a.<%field:cpp_storage_name%>, b.<%field:cpp_storage_name%>);
+<%#field:lazy?%>
+  a.__fbthrift_isDeserialized_.<%field:cpp_name%>.store(b.__fbthrift_isDeserialized_.<%field:cpp_name%>.exchange(a.__fbthrift_isDeserialized_.<%field:cpp_name%>.load(relaxed), relaxed), relaxed);
+<%/field:lazy?%>
+<%/struct:fields_in_layout_order%>
+<%#struct:isset_fields?%>
+  swap(a.__isset, b.__isset);
+<%/struct:isset_fields?%>
+<%#struct:cpp_allocator%>
+<%^struct:cpp_allocator_via%>
+  ::apache::thrift::detail::swap_allocators(a.__fbthrift_alloc, b.__fbthrift_alloc);
+<%/struct:cpp_allocator_via%>
+<%/struct:cpp_allocator%>
+}
+<%!
+%>

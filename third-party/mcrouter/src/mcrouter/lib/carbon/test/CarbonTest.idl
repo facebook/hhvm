@@ -1,0 +1,205 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace carbon::test;
+thrift_namespace carbon.test.thrift;
+
+import "mcrouter/lib/network/Common.idl"
+
+include "folly/container/F14Map.h"
+include "folly/container/F14Set.h"
+
+request TestRequest {
+  id: 3;
+  name: "test";
+  reply: TestReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: bool dummy2;
+  3: bool testBool;
+  4: uint8_t testChar;
+  5: int8_t testInt8;
+  6: int16_t testInt16;
+  7: int32_t testInt32;
+  8: int64_t testInt64;
+  9: uint8_t testUInt8;
+  10: uint16_t testUInt16;
+  11: uint32_t testUInt32;
+  12: uint64_t testUInt64;
+  13: float testFloat;
+  14: double testDouble;
+  15: std::string testShortString;
+  16: std::string testLongString;
+  17: folly::IOBuf testIobuf;
+  19: std::vector<std::string> testList;
+  20: optional std::string testOptionalString;
+  21: optional folly::IOBuf testOptionalIobuf;
+  22: bool dummy22;
+  23: bool dummy23;
+  24: std::vector<std::vector<uint64_t>> testNestedVec;
+  25: std::unordered_map<std::string, std::string> testUMap;
+  26: std::map<double, double> testMap;
+  27: std::map<std::string, std::vector<uint16_t>> testComplexMap;
+  28: std::unordered_set<std::string> testUSet;
+  29: std::set<uint64_t> testSet;
+  30: optional bool testOptionalBool;
+  31: std::string dummy31;
+  32: std::vector<folly::IOBuf> testIOBufList;
+  33: folly::F14FastMap<std::string, std::string> testF14FastMap;
+  34: folly::F14NodeMap<std::string, std::string> testF14NodeMap;
+  35: folly::F14ValueMap<std::string, std::string> testF14ValueMap;
+  36: folly::F14VectorMap<std::string, std::string> testF14VectorMap;
+  37: folly::F14FastSet<std::string> testF14FastSet;
+  38: folly::F14NodeSet<std::string> testF14NodeSet;
+  39: folly::F14ValueSet<std::string> testF14ValueSet;
+  40: folly::F14VectorSet<std::string> testF14VectorSet;
+  41: optional std::string testOptionalKeywordString;
+  42: optional folly::IOBuf testOptionalKeywordIobuf;
+  43: optional bool testOptionalKeywordBool;
+} (thrift_comparator_mode: none);
+
+reply TestReply {
+  1: Result result;
+  2: int32_t valInt32;
+  3: int64_t valInt64;
+};
+
+request TestRequestStringKey {
+  id: 4;
+  name: "testStringKey";
+  reply: TestReplyStringKey;
+
+  1: carbon::Keys<std::string> key;
+};
+
+reply TestReplyStringKey {
+  1: Result result;
+};
+
+struct TestOptionalBool {
+  1: optional bool optionalBool;
+};
+
+union TestUnion {
+  1: uint64_t a;
+  2: uint32_t b;
+  3: uint16_t c;
+};
+
+struct TestF14Containers {
+  1: folly::F14FastMap<std::string, int64_t> fastMap;
+  2: folly::F14NodeMap<std::string, int64_t> nodeMap;
+  3: folly::F14ValueMap<std::string, int64_t> valueMap;
+  4: folly::F14VectorMap<std::string, int64_t> vectorMap;
+  5: folly::F14FastSet<int64_t> fastSet;
+  6: folly::F14FastSet<int64_t> nodeSet;
+  7: folly::F14FastSet<int64_t> valueSet;
+  8: folly::F14FastSet<int64_t> vectorSet;
+};
+
+struct TestStdContainers {
+  1: std::unordered_map<std::string, int64_t> fastMap;
+  2: std::unordered_map<std::string, int64_t> nodeMap;
+  3: std::unordered_map<std::string, int64_t> valueMap;
+  4: std::unordered_map<std::string, int64_t> vectorMap;
+  5: std::unordered_set<int64_t> fastSet;
+  6: std::unordered_set<int64_t> nodeSet;
+  7: std::unordered_set<int64_t> valueSet;
+  8: std::unordered_set<int64_t> vectorSet;
+};
+
+enum EnumUInt32 : uint32_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+enum EnumUInt16 : uint16_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+enum EnumUInt8 : uint8_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+enum EnumInt32 : int32_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+enum EnumInt16 : int16_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+enum EnumInt8 : int8_t {
+  AAA = 0,
+  BBB = 1,
+  CCC = 2,
+};
+
+struct StructWithEnumUInt32 {
+  1: EnumUInt32 testEnum;
+};
+
+struct StructWithEnumUInt16 {
+  1: EnumUInt16 testEnum;
+};
+
+struct StructWithEnumUInt8 {
+  1: EnumUInt8 testEnum;
+};
+
+struct StructWithEnumInt32 {
+  1: EnumInt32 testEnum;
+};
+
+struct StructWithEnumInt16 {
+  1: EnumInt16 testEnum;
+};
+
+struct StructWithEnumInt8 {
+  1: EnumInt8 testEnum;
+};
+
+struct StructWithOptionalEnumUInt32 {
+  1: optional EnumUInt32 testEnum;
+  2: optional EnumUInt32 testEmptyEnum;
+};
+
+struct StructWithOptionalEnumUInt16 {
+  1: optional EnumUInt16 testEnum;
+  2: optional EnumUInt16 testEmptyEnum;
+};
+
+struct StructWithOptionalEnumUInt8 {
+  1: optional EnumUInt8 testEnum;
+  2: optional EnumUInt8 testEmptyEnum;
+};
+
+struct StructWithOptionalEnumInt32 {
+  1: optional EnumInt32 testEnum;
+  2: optional EnumInt32 testEmptyEnum;
+};
+
+struct StructWithOptionalEnumInt16 {
+  1: optional EnumInt16 testEnum;
+  2: optional EnumInt16 testEmptyEnum;
+};
+
+struct StructWithOptionalEnumInt8 {
+  1: optional EnumInt8 testEnum;
+  2: optional EnumInt8 testEmptyEnum;
+};
+
+service {
+  enable_shutdown: true;
+};

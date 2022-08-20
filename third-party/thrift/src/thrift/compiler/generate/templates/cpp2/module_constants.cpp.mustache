@@ -1,0 +1,66 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+<%#program:constants?%>
+
+#include "<%program:include_prefix%><%program:name%>_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+<%#program:thrift_includes%>
+  <%#program:constants?%>
+#include "<%program:include_prefix%><%program:name%>_constants.h"
+  <%/program:constants?%>
+<%/program:thrift_includes%>
+
+<% > common/namespace_cpp2_begin%>
+
+
+<%#program:constants%><%#constant:type%><%#constant:value%>
+<%^constant:cpp_adapter%>
+  <%^type:resolves_to_container_or_struct?%>
+    <%#type:string?%>
+constexpr char const * const <%program:name%>_constants::<%constant:name%>_;
+
+    <%/type:string?%>
+    <%^type:string?%>
+constexpr <%type:cpp_type%> const <%program:name%>_constants::<%constant:name%>_;
+
+    <%/type:string?%>
+  <%/type:resolves_to_container_or_struct?%>
+  <%#type:resolves_to_container_or_struct?%>
+    <%#value:enable_referencing%>
+<%type:cpp_type%> const& <%program:name%>_constants::<%constant:name%>() {
+  static folly::Indestructible<<%type:cpp_type%>> const instance<%^value:empty_container?%>(<% > common/iterate_const_values%>)<%/value:empty_container?%>;
+  return *instance;
+}
+
+    <%/value:enable_referencing%>
+  <%/type:resolves_to_container_or_struct?%>
+<%/constant:cpp_adapter%>
+<%#constant:cpp_adapter%>
+const <%constant:cpp_type%>& <%program:name%>_constants::<%constant:name%>() {
+  static const folly::Indestructible<<%constant:cpp_type%>> instance(
+      <%constant:cpp_adapter%>::fromThrift(<%type:cpp_type%>(<% > common/iterate_const_values%>)<%#constant:has_extra_arg?%>,
+                                           <%#constant:extra_arg%><%#constant:extra_arg_type%><% > common/iterate_const_values%><%/constant:extra_arg_type%><%/constant:extra_arg%>,
+                                           "<%constant:uri%>"<%/constant:has_extra_arg?%>));
+  return *instance;
+}
+<%/constant:cpp_adapter%>
+<%/constant:value%><%/constant:type%><%/program:constants%>
+<% > common/namespace_cpp2_end%>
+<%/program:constants?%>

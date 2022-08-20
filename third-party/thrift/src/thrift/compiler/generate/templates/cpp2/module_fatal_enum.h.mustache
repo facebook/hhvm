@@ -1,0 +1,139 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#pragma once
+
+#include "<%program:include_prefix%><%program:name%>_types.h"
+#include "<%program:include_prefix%><%program:name%>_fatal.h"
+
+#include <fatal/type/enum.h>
+
+#include <type_traits>
+
+<% > common/namespace_cpp2_begin%>
+
+
+namespace __fbthrift_refl {
+namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
+
+<%#program:enums%>
+class <%enum:cpp_name%>_enum_traits {
+ public:
+  using type = <% > common/namespace_cpp2%><%enum:cpp_name%>;
+
+ private:
+  <%#enum:values%>
+  struct __fbthrift_value_<%enum_value:cpp_name%> {
+    using name = __fbthrift_strings_<%program:name%>::<%enum_value:name_hash%>;
+    using value = std::integral_constant<type, type::<%enum_value:cpp_name%>>;
+    <%#enum_value:fatal_annotations?%>
+    class annotations {
+      struct __fbthrift_keys {
+        <%#enum_value:fatal_annotations%>
+        using <%annotation:safe_key%> = __fbthrift_strings_<%program:name%>::<%annotation:safe_key%>;
+        <%/enum_value:fatal_annotations%>
+      };
+      struct __fbthrift_values {
+        <%#enum_value:fatal_annotations%>
+        using <%annotation:safe_key%> = <%annotation:fatal_string%>;
+        <%/enum_value:fatal_annotations%>
+      };
+     public:
+      using keys = __fbthrift_keys;
+      using values = __fbthrift_values;
+      using map = ::fatal::list<
+        <%#enum_value:fatal_annotations%>
+        ::apache::thrift::annotation<keys::<%annotation:safe_key%>, values::<%annotation:safe_key%>><%^last?%>,<%/last?%>
+        <%/enum_value:fatal_annotations%>
+      >;
+    };
+    <%/enum_value:fatal_annotations?%>
+    <%^enum_value:fatal_annotations?%>
+    using annotations = __fbthrift_refl_impl::no_annotations;
+    <%/enum_value:fatal_annotations?%>
+  };
+
+  <%/enum:values%>
+  struct __fbthrift_member {
+    <%#enum:values%>
+    using <%enum_value:cpp_name%> = __fbthrift_value_<%enum_value:cpp_name%>;
+    <%/enum:values%>
+  };
+
+ public:
+  using name = __fbthrift_strings_<%program:name%>::<%enum:name%>;
+  using member = __fbthrift_member;
+  using fields = ::fatal::list<
+      <%#enum:values%>
+      member::<%enum_value:cpp_name%><%^last?%>,<%/last?%>
+      <%/enum:values%>
+  >;
+
+  <%#enum:fatal_annotations?%>
+  class annotations {
+    struct __fbthrift_keys {
+      <%#enum:fatal_annotations%>
+      using <%annotation:safe_key%> = __fbthrift_strings_<%program:name%>::<%annotation:safe_key%>;
+      <%/enum:fatal_annotations%>
+    };
+
+    <%! Declared with __fbthrift_ prefix, so C++ name will not conflict with IDL names. %>
+    struct __fbthrift_values {
+      <%#enum:fatal_annotations%>
+      using <%annotation:safe_key%> = <%annotation:fatal_string%>;
+      <%/enum:fatal_annotations%>
+    };
+
+   public:
+    using keys = __fbthrift_keys;
+    using values = __fbthrift_values;
+    using map = ::fatal::list<
+      <%#enum:fatal_annotations%>
+      ::apache::thrift::annotation<keys::<%annotation:safe_key%>, values::<%annotation:safe_key%>><%^last?%>,<%/last?%>
+      <%/enum:fatal_annotations%>
+    >;
+  };
+
+  <%/enum:fatal_annotations?%>
+  <%^enum:fatal_annotations?%>
+  using annotations = __fbthrift_refl_impl::no_annotations;
+
+  <%/enum:fatal_annotations?%>
+  static char const *to_string(type e, char const *fallback) {
+    switch (e) {
+      <%#enum:values%>
+      case type::<%enum_value:cpp_name%>: return "<%enum_value:cpp_name%>";
+      <%/enum:values%>
+      default: return fallback;
+    }
+  }
+};
+
+<%/program:enums%>
+} // __fbthrift_refl
+
+<%#program:enums%>
+FATAL_REGISTER_ENUM_TRAITS(
+  __fbthrift_refl::<%enum:cpp_name%>_enum_traits,
+  ::apache::thrift::detail::type_common_metadata_impl<
+      <%program:name%>_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::<%enum:cpp_name%>_enum_traits::annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(<%enum:legacy_type_id%>ull)
+  >
+);
+<%/program:enums%>
+<% > common/namespace_cpp2_end%>

@@ -1,0 +1,90 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{> common/auto_generated_py}}
+cimport cython as __cython
+from cython.operator cimport dereference as deref
+from libcpp.memory cimport make_unique, unique_ptr, shared_ptr
+from thrift.py3.types cimport assign_unique_ptr, assign_shared_ptr, assign_shared_const_ptr
+
+cimport thrift.py3.types
+from thrift.py3.types cimport (
+    reset_field as __reset_field,
+    StructFieldsSetter as __StructFieldsSetter
+)
+
+{{#program:structs?}}
+from thrift.py3.types cimport const_pointer_cast
+{{/program:structs?}}
+
+{{#program:structs}}
+{{^struct:union?}}
+
+@__cython.auto_pickle(False)
+cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __{{struct:name}}_FieldsSetter _fbthrift_create({{> types/current_module_types}}.c{{struct:name}}* struct_cpp_obj):
+        cdef __{{struct:name}}_FieldsSetter __fbthrift_inst = __{{struct:name}}_FieldsSetter.__new__(__{{struct:name}}_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        {{#struct:py3_fields}}
+        __fbthrift_inst._setters[__cstring_view(<const char*>"{{field:py_name}}")] = __{{struct:name}}_FieldsSetter._set_field_{{field:index}}
+        {{/struct:py3_fields}}
+        return __fbthrift_inst
+
+    cdef void set_field(__{{struct:name}}_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __{{struct:name}}_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+    {{#struct:py3_fields}}
+    {{#field:type}}
+
+    cdef void _set_field_{{field:index}}(self, _fbthrift_value) except *:
+        # for field {{field:py_name}}
+        if _fbthrift_value is None:
+            __reset_field[{{> types/current_module_types}}.c{{struct:name}}](deref(self._struct_cpp_obj), {{field:index}})
+            return
+        {{^type:container?}}
+        {{#type:enum?}}
+        if not isinstance(_fbthrift_value, {{> types/python_type}}):
+            raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{> types/python_type}} }.')
+        {{/type:enum?}}
+        {{^type:enum?}}
+        if not isinstance(_fbthrift_value, {{> types/python_is_instance_type}}):
+            raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+        {{#type:integer?}}
+        {{! inject cython int overflow checks }}
+        _fbthrift_value = <{{> types/cython_python_type}}> _fbthrift_value
+        {{/type:integer?}}
+        {{/type:enum?}}
+        {{/type:container?}}
+        {{#field:has_ref_accessor?}}
+        deref(self._struct_cpp_obj).{{field:py_name}}_ref().assign({{> types/cython_field_value_for_assignment}})
+        {{/field:has_ref_accessor?}}
+        {{^field:has_ref_accessor?}}
+        assign_{{#field:unique_ref?}}unique{{/field:unique_ref?}}{{!
+           }}{{#field:shared_ref?}}shared{{/field:shared_ref?}}{{!
+           }}{{#field:shared_const_ref?}}shared_const{{/field:shared_const_ref?}}{{!
+           }}_ptr[{{> types/cython_cpp_type}}](deref(self._struct_cpp_obj).{{field:py_name}}_ref(), {{> types/cython_field_value_for_assignment}})
+        {{/field:has_ref_accessor?}}
+    {{/field:type}}
+    {{/struct:py3_fields}}
+
+{{/struct:union?}}
+{{/program:structs}}

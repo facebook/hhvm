@@ -1,0 +1,308 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "enumerations" : {
+    "Metasyntactic" : {
+      "lineno" : 26,
+      "constants" : {
+        "FOO" : 1,
+        "BAR" : 2,
+        "BAZ" : 3,
+        "BAX" : 4,
+        "Unspecified" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 26,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 31,
+          "column" : 2
+        }
+      }
+    },
+    "MyEnum1" : {
+      "lineno" : 40,
+      "constants" : {
+        "ME1_1" : 1,
+        "ME1_2" : 2,
+        "ME1_3" : 3,
+        "ME1_5" : 5,
+        "ME1_6" : 6,
+        "ME1_0" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 47,
+          "column" : 2
+        }
+      }
+    },
+    "MyEnum2" : {
+      "lineno" : 49,
+      "constants" : {
+        "ME2_0" : 0,
+        "ME2_1" : 1,
+        "ME2_2" : 2
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 54,
+          "column" : 2
+        }
+      }
+    },
+    "MyEnum3" : {
+      "lineno" : 56,
+      "constants" : {
+        "ME3_0" : 0,
+        "ME3_1" : 1,
+        "ME3_N2" : -2,
+        "ME3_N1" : -1,
+        "ME3_9" : 9,
+        "ME3_10" : 10
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 56,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 63,
+          "column" : 2
+        }
+      }
+    },
+    "MyEnum4" : {
+      "lineno" : 65,
+      "constants" : {
+        "ME4_A" : 2147483645,
+        "ME4_B" : 2147483646,
+        "ME4_C" : 2147483647,
+        "ME4_D" : -2147483648,
+        "Unspecified" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 65,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 70,
+          "column" : 2
+        }
+      }
+    },
+    "MyBitmaskEnum1" : {
+      "lineno" : 79,
+      "constants" : {
+        "ONE" : 1,
+        "TWO" : 2,
+        "FOUR" : 4,
+        "Unspecified" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 79,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 83,
+          "column" : 16
+        }
+      }
+    },
+    "MyBitmaskEnum2" : {
+      "lineno" : 85,
+      "constants" : {
+        "ONE" : 1,
+        "TWO" : 2,
+        "FOUR" : 4,
+        "Unspecified" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 85,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 90,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "structs" : {
+    "SomeStruct" : {
+      "lineno" : 33,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "reasonable" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Metasyntactic",
+          "required" : true,
+          "default_value" : 1,
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 37
+            }
+          }
+        },
+        "fine" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Metasyntactic",
+          "required" : true,
+          "default_value" : 2,
+          "source_range" : {
+            "begin" : {
+              "line" : 35,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 35,
+              "column" : 29
+            }
+          }
+        },
+        "questionable" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Metasyntactic",
+          "required" : true,
+          "default_value" : -1,
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 38
+            }
+          }
+        },
+        "tags" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "default_value" : [  ],
+          "source_range" : {
+            "begin" : {
+              "line" : 37,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 37,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 33,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 2
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 72,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "me2_3" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum2",
+          "required" : true,
+          "default_value" : 3,
+          "source_range" : {
+            "begin" : {
+              "line" : 73,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 73,
+              "column" : 24
+            }
+          }
+        },
+        "me3_n3" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum3",
+          "required" : true,
+          "default_value" : -3,
+          "source_range" : {
+            "begin" : {
+              "line" : 74,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 74,
+              "column" : 26
+            }
+          }
+        },
+        "me1_t1" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum1",
+          "required" : true,
+          "default_value" : 1,
+          "source_range" : {
+            "begin" : {
+              "line" : 75,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 75,
+              "column" : 25
+            }
+          }
+        },
+        "me1_t2" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum1",
+          "required" : true,
+          "default_value" : 1,
+          "source_range" : {
+            "begin" : {
+              "line" : 76,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 76,
+              "column" : 37
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 72,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 77,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

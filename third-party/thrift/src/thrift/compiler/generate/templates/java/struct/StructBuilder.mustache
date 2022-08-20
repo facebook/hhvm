@@ -1,0 +1,104 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+public static class Builder {
+    {{#struct:enableIsSet?}}
+    private final BitSet __optional_isset = new BitSet();
+    {{/struct:enableIsSet?}}
+
+    {{#struct:fields}}
+    {{^field:value}}
+    {{#field:terse?}}
+    {{#field:hasAdapter?}}
+    private {{> FieldType}} {{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift(com.facebook.thrift.protocol.ByteBufIntrinsicDefaultTProtocol.getInstance());
+    private static {{> FieldType}} {{field:javaAllCapsName}}_INTRINSIC_DEFAULT = _{{field:javaName}}_Adapter.fromThrift(com.facebook.thrift.protocol.ByteBufIntrinsicDefaultTProtocol.getInstance());
+    {{/field:hasAdapter?}}
+    {{^field:hasAdapter?}}
+    {{#field:isObject?}}
+    private {{> FieldType}} {{field:javaName}} = {{> FieldType}}.defaultInstance();
+    {{/field:isObject?}}
+    {{^field:isObject?}}
+    private {{> FieldType}} {{field:javaName}} = {{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}};
+    {{/field:isObject?}}
+    {{/field:hasAdapter?}}
+    {{/field:terse?}}
+    {{^field:terse?}}
+    private {{> FieldType}} {{field:javaName}} = {{field:javaDefaultValue}};
+    {{/field:terse?}}
+    {{/field:value}}{{!
+    }}{{#field:value}}
+    private {{> FieldType}} {{field:javaName}} = {{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}};
+    {{/field:value}}
+    {{/struct:fields}}
+
+    {{#struct:fields}}
+    {{#field:isSensitive?}}
+    @org.apache.thrift.annotations.Sensitive
+    {{/field:isSensitive?}}
+    {{> ThriftFieldAnnotation}}{{#field:javaAnnotation?}} @{{field:javaAnnotation}}{{/field:javaAnnotation?}}
+    public Builder {{> SetterName}}({{> FieldType}} {{field:javaName}}) {
+        this.{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+
+    public {{> FieldType}} {{> GetterName}}() { return {{field:javaName}}; }
+
+    {{/struct:fields}}{{!
+
+    }}public Builder() { }
+    public Builder({{struct:javaCapitalName}} other) {
+        {{#struct:fields}}
+        this.{{field:javaName}} = other.{{field:javaName}};
+        {{/struct:fields}}
+    }
+
+    @ThriftConstructor
+    public {{struct:javaCapitalName}} build() {
+       {{^struct:isBigStruct?}}{{^struct:asBean?}}
+        {{struct:javaCapitalName}} result = new {{struct:javaCapitalName}} (
+            {{#struct:fields}}
+            this.{{field:javaName}}{{^last?}},{{/last?}}
+            {{/struct:fields}}
+        );
+        {{#struct:enableIsSet?}}
+        result.__isset_bit_vector.or(__optional_isset);
+        {{/struct:enableIsSet?}}
+        return result;
+        {{/struct:asBean?}}{{#struct:asBean?}}
+        {{struct:javaCapitalName}} result = new {{struct:javaCapitalName}}();
+        {{#struct:fields}}
+        result.{{field:javaName}} = this.{{field:javaName}};
+        {{/struct:fields}}
+        {{#struct:enableIsSet?}}
+        result.__isset_bit_vector.or(__optional_isset);
+        {{/struct:enableIsSet?}}
+        return result;
+        {{/struct:asBean?}}{{/struct:isBigStruct?}}{{!
+        }}{{#struct:isBigStruct?}}
+        {{struct:javaCapitalName}} o{{struct:javaCapitalName}} = new {{struct:javaCapitalName}}();
+        {{#struct:fields}}
+        o{{struct:javaCapitalName}}.{{field:javaName}} = this.{{field:javaName}};
+        {{/struct:fields}}
+        {{#struct:enableIsSet?}}
+        o{{struct:javaCapitalName}}.__isset_bit_vector.or(__optional_isset);
+        {{/struct:enableIsSet?}}
+        return o{{struct:javaCapitalName}};
+        {{/struct:isBigStruct?}}{{!
+        }}
+    }
+}
+{{! terminate with newline }}

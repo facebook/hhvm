@@ -1,0 +1,62 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is used to declare a cython type that is referring to or wrapping a
+c++ object. Most of the values are direct references to variables imported
+from libcpp and friends. Structs are the special case, as they refer to the
+struct by name as defined in the pxd file, with a 'c' prefix.
+
+Structs and enums will be namespaced appropriately if they are either defined
+in a different thrift file, or defined in the same thrift file but this is
+in the client or server source rather than the type definition source.
+
+Note that you almost never want to include this file directly - use CythonCppType
+instead to use a custom type override when appropriate (from the cpp.type
+annotation).
+
+}}{{#type:bool?}}cbool{{/type:bool?}}{{!
+}}{{#type:byte?}}cint8_t{{/type:byte?}}{{!
+}}{{#type:i16?}}cint16_t{{/type:i16?}}{{!
+}}{{#type:i32?}}cint32_t{{/type:i32?}}{{!
+}}{{#type:i64?}}cint64_t{{/type:i64?}}{{!
+}}{{#type:double?}}double{{/type:double?}}{{!
+}}{{#type:float?}}float{{/type:float?}}{{!
+}}{{#type:string?}}string{{/type:string?}}{{!
+}}{{#type:binary?}}string{{/type:binary?}}{{!
+}}{{#type:struct}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+  }}c{{struct:name}}{{!
+}}{{/type:struct}}{{!
+}}{{#type:container?}}{{^type:defaultTemplate?}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+}}{{/type:defaultTemplate?}}{{/type:container?}}{{!
+}}{{#type:list?}}{{type:cythonTemplate}}[{{!
+  }}{{#type:list_elem_type}}{{> types/cython_cpp_type}}{{/type:list_elem_type}}{{!
+}}]{{/type:list?}}{{!
+}}{{#type:set?}}{{type:cythonTemplate}}[{{!
+  }}{{#type:set_elem_type}}{{> types/cython_cpp_type}}{{/type:set_elem_type}}{{!
+}}]{{/type:set?}}{{!
+}}{{#type:map?}}{{type:cythonTemplate}}[{{!
+  }}{{#type:key_type}}{{> types/cython_cpp_type}}{{/type:key_type}},{{!
+  }}{{#type:value_type}}{{> types/cython_cpp_type}}{{/type:value_type}}{{!
+}}]{{/type:map?}}{{!
+}}{{#type:enum}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+  }}c{{enum:name}}{{!
+}}{{/type:enum}}{{!
+}}{{#type:void?}}cFollyUnit{{/type:void?}}

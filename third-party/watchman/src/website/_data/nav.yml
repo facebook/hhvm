@@ -1,0 +1,15 @@
+- title: Docs
+  href: /watchman/docs/install.html
+  category: docs
+
+- title: Support
+  href: /watchman/support.html
+  category: support
+
+#- title: Blog
+#  href: blog/
+#  category: blog
+
+- title: GitHub
+  href: http://github.com/facebook/watchman
+  category: github

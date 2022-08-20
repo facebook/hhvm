@@ -1,0 +1,644 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "ThriftdocTest",
+  "namespaces": {
+    "cpp": "thrift.test",
+    "java": "thrift.test",
+    "json": "thrift.test.doc",
+    "py": "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
+  },
+  "constants": {
+      "INT32CONSTANT": {
+        "name": "INT32CONSTANT",
+        "type": "i32",
+        "value": 9853,
+        "docstring": "You can document constants now too.  Yeehaw!\n",
+        "lineno": 83
+      },
+      "INT16CONSTANT": {
+        "name": "INT16CONSTANT",
+        "type": "i16",
+        "value": 1616,
+        "lineno": 84
+      },
+      "MAPCONSTANT": {
+        "name": "MAPCONSTANT",
+        "type": "map<string, string>",
+        "value": {"hello": "world", "goodnight": "moon"},
+        "docstring": "Everyone get in on the docu-action!\n",
+        "lineno": 86
+      },
+      "BOOLCONSTANT": {
+        "name": "BOOLCONSTANT",
+        "type": "bool",
+        "value": true,
+        "docstring": "A bool constant, experimental will render it as string\n",
+        "lineno": 254
+      },
+      "SIMPLE_LIST": {
+        "name": "SIMPLE_LIST",
+        "type": "list<i32>",
+        "value": [42, 73],
+        "docstring": "Simple list\n",
+        "lineno": 259
+      },
+      "COMPLICATED_LIST": {
+        "name": "COMPLICATED_LIST",
+        "type": "list<list<string>>",
+        "value": [["Rick", "Morty"], ["Brian", "Stewie"]],
+        "docstring": "Complicated list\n",
+        "lineno": 264
+      },
+      "SIMPLE_MAP": {
+        "name": "SIMPLE_MAP",
+        "type": "map<string, string>",
+        "value": {"Rick": "Genius", "Morty": "Not realy"},
+        "docstring": "Simple map\n",
+        "lineno": 272
+      },
+      "COMPLICATED_MAP": {
+        "name": "COMPLICATED_MAP",
+        "type": "map<string, list<string>>",
+        "value": {"Witcher": ["Geralt", "Yennefer"], "1984": ["2+2=5"]},
+        "docstring": "Complicated map\n",
+        "lineno": 277
+      },
+      "MULTI_LINE_STR": {
+        "name": "MULTI_LINE_STR",
+        "type": "string",
+        "value": "Line 1\nLine 2\n...\\\nLast",
+        "docstring": "String const split on multiple lines by '\\'\n",
+        "lineno": 285
+      },
+      "WEIRD_STR": {
+        "name": "WEIRD_STR",
+        "type": "string",
+        "value": "How much is 15\\u00c2\\u00b0C in \\\\ F",
+        "docstring": "String with escapes an unicodes.\nBasic testing of https://www.ietf.org/rfc/rfc4627.txt\n",
+        "lineno": 294
+      }
+  },
+  "enumerations" :
+  {
+      "NoDoc" : {
+        "name" : "NoDoc",
+        "constants" : {
+          "NO" : {
+            "name" : "NO",
+            "lineno" : 37,
+            "value" : 1
+          },
+          "DOC" : {
+            "name" : "DOC",
+            "lineno" : 38,
+            "value" : 2
+          }
+        },
+        "lineno" : 36
+      },
+      "Numberz" : {
+        "name" : "Numberz",
+        "constants" : {
+          "ONE" : {
+            "name" : "ONE",
+            "docstring" : "This is how to document a parameter\n",
+            "lineno" : 44,
+            "value" : 1
+          },
+          "TWO" : {
+            "name" : "TWO",
+            "docstring" : "And this is a doc for a parameter that has no specific value assigned\n",
+            "lineno" : 47,
+            "value" : 2
+          },
+          "THREE" : {
+            "name" : "THREE",
+            "lineno" : 49,
+            "value" : 3
+          },
+          "FIVE" : {
+            "name" : "FIVE",
+            "lineno" : 50,
+            "value" : 5
+          },
+          "SIX" : {
+            "name" : "SIX",
+            "lineno" : 51,
+            "value" : 6
+          },
+          "EIGHT" : {
+            "name" : "EIGHT",
+            "lineno" : 52,
+            "value" : 8
+          }
+        },
+        "docstring" : "Some doc text goes here.  Wow I am [nesting these] (no more nesting.)\n",
+        "lineno" : 42
+      }
+      },
+  "structs" :
+  {
+      "DefaultValue" : {
+        "name" : "DefaultValue",
+        "docstring" : "Test JSON \"escaping\" (e.g., forwardslash /, backwardslash \\, tab , newline)\nand some default values\n",
+        "fields" : {
+          "map_two" : {
+            "name" : "map_two",
+            "default_value" : {"\"list1\"" : [1,2,3],"\"list2\"" : [4,5,6]},
+            "key" : 2,
+            "lineno" : 64,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+}
+}
+          },
+          "map_three" : {
+            "name" : "map_three",
+            "default_value" : {"1" : {"\"a\"" : "one"}},
+            "key" : 3,
+            "lineno" : 65,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "string"
+}
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 62
+      },
+      "Xtruct" : {
+        "name" : "Xtruct",
+        "docstring" : "And this is where you would document a struct\n",
+        "fields" : {
+          "string_thing" : {
+            "name" : "string_thing",
+            "default_value" : "",
+            "docstring" : "And the members of a struct\n",
+            "key" : 1,
+            "lineno" : 71,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "byte_thing" : {
+            "name" : "byte_thing",
+            "docstring" : "doct text goes before a comma\n",
+            "key" : 4,
+            "lineno" : 74,
+            "required" : "opt-in-req-out",
+            "type" : "byte"
+          },
+          "i32_thing" : {
+            "name" : "i32_thing",
+            "key" : 9,
+            "lineno" : 76,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "i64_thing" : {
+            "name" : "i64_thing",
+            "key" : 11,
+            "lineno" : 77,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 69
+      },
+      "Xtruct2" : {
+        "name" : "Xtruct2",
+        "fields" : {
+          "byte_thing" : {
+            "name" : "byte_thing",
+            "key" : 1,
+            "lineno" : 89,
+            "required" : "opt-in-req-out",
+            "type" : "byte"
+          },
+          "struct_thing" : {
+            "name" : "struct_thing",
+            "key" : 2,
+            "lineno" : 90,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "Xtruct"
+}
+          },
+          "i32_thing" : {
+            "name" : "i32_thing",
+            "key" : 3,
+            "lineno" : 91,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 88
+      },
+      "Insanity" : {
+        "name" : "Insanity",
+        "docstring" : "Struct insanity\n",
+        "fields" : {
+          "userMap" : {
+            "name" : "userMap",
+            "docstring" : "This is doc for field 1\n",
+            "key" : 1,
+            "lineno" : 97,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : {
+  "type" : "enum",
+  "name" : "Numberz"
+},
+  "value_type" : "i64"
+}
+          },
+          "xtructs" : {
+            "name" : "xtructs",
+            "docstring" : "And this is doc for field 2\n",
+            "key" : 2,
+            "lineno" : 100,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "Xtruct"
+}
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 95
+      },
+      "Xception" : {
+        "name" : "Xception",
+        "fields" : {
+          "errorCode" : {
+            "name" : "errorCode",
+            "key" : 1,
+            "lineno" : 104,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "message" : {
+            "name" : "message",
+            "key" : 2,
+            "lineno" : 105,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 103
+      },
+      "Xception2" : {
+        "name" : "Xception2",
+        "fields" : {
+          "errorCode" : {
+            "name" : "errorCode",
+            "key" : 1,
+            "lineno" : 109,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "struct_thing" : {
+            "name" : "struct_thing",
+            "key" : 2,
+            "lineno" : 110,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "Xtruct"
+}
+          }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 108
+      },
+      "EmptyStruct" : {
+        "name" : "EmptyStruct",
+        "docstring" : "",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 117
+      },
+      "OneField" : {
+        "name" : "OneField",
+        "fields" : {
+          "field" : {
+            "name" : "field",
+            "key" : 1,
+            "lineno" : 120,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "EmptyStruct"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 119
+      }
+      },
+  "services" :
+  {
+      "ThriftTest" : {
+        "name" : "ThriftTest",
+        "lineno" : 124,
+        "docstring" : "This is where you would document a Service\n",
+        "functions" : {
+          "testVoid" : {
+            "name" : "testVoid",
+            "docstring" : "And this is how you would document functions in a service\n",
+            "returnType" : "void",
+            "lineno" : 126
+          },
+          "testString" : {
+            "name" : "testString",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "string",
+                "key" : 1,
+                "lineno" : 127,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "string",
+            "lineno" : 127
+          },
+          "testByte" : {
+            "name" : "testByte",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "byte",
+                "key" : 1,
+                "lineno" : 128,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "byte",
+            "lineno" : 128
+          },
+          "testI32" : {
+            "name" : "testI32",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "i32",
+                "key" : 1,
+                "lineno" : 129,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "i32",
+            "lineno" : 129
+          },
+          "testI64" : {
+            "name" : "testI64",
+            "docstring" : "Like this one\n",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 132,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "i64",
+            "lineno" : 132
+          },
+          "testDouble" : {
+            "name" : "testDouble",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "double",
+                "key" : 1,
+                "lineno" : 133,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "double",
+            "lineno" : 133
+          },
+          "testStruct" : {
+            "name" : "testStruct",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "struct",
+  "name" : "Xtruct"
+},
+                "key" : 1,
+                "lineno" : 134,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "struct",
+  "name" : "Xtruct"
+},
+            "lineno" : 134
+          },
+          "testNest" : {
+            "name" : "testNest",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "struct",
+  "name" : "Xtruct2"
+},
+                "key" : 1,
+                "lineno" : 135,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "struct",
+  "name" : "Xtruct2"
+},
+            "lineno" : 135
+          },
+          "testMap" : {
+            "name" : "testMap",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : "i32"
+},
+                "key" : 1,
+                "lineno" : 136,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : "i32"
+},
+            "lineno" : 136
+          },
+          "testSet" : {
+            "name" : "testSet",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "set",
+  "inner_type" : "i32"
+},
+                "key" : 1,
+                "lineno" : 137,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "set",
+  "inner_type" : "i32"
+},
+            "lineno" : 137
+          },
+          "testList" : {
+            "name" : "testList",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "list",
+  "inner_type" : "i32"
+},
+                "key" : 1,
+                "lineno" : 138,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "list",
+  "inner_type" : "i32"
+},
+            "lineno" : 138
+          },
+          "testEnum" : {
+            "name" : "testEnum",
+            "docstring" : "This is an example of a function with params documented\n",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : {
+  "type" : "enum",
+  "name" : "Numberz"
+},
+                "docstring" : "This param is a thing\n",
+                "key" : 1,
+                "lineno" : 143,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "enum",
+  "name" : "Numberz"
+},
+            "lineno" : 141
+          },
+          "testTypedef" : {
+            "name" : "testTypedef",
+            "args" : {
+              "thing": {
+                "name" : "thing",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 146,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "i64",
+            "lineno" : 146
+          },
+          "testMapMap" : {
+            "name" : "testMapMap",
+            "args" : {
+              "hello": {
+                "name" : "hello",
+                "type" : "i32",
+                "key" : 1,
+                "lineno" : 148,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : "i32"
+}
+},
+            "lineno" : 148
+          },
+          "testInsanity" : {
+            "name" : "testInsanity",
+            "args" : {
+              "argument": {
+                "name" : "argument",
+                "type" : {
+  "type" : "struct",
+  "name" : "Insanity"
+},
+                "key" : 1,
+                "lineno" : 151,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : {
+  "type" : "map",
+  "key_type" : "i64",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : {
+  "type" : "enum",
+  "name" : "Numberz"
+},
+  "value_type" : {
+  "type" : "struct",
+  "name" : "Insanity"
+}
+}
+},
+            "lineno" : 151
+          }
+        }
+      }
+      },
+  "source_path" : "src/ThriftdocTest",
+  "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
+}

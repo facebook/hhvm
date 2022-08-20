@@ -1,0 +1,265 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Generates a top-level file to be imported in the user's service code. It provides
+wrappers for each of the service handlers that the user is then able to extend.
+
+The generated file is pretty big, but the bulk of the generation is done inside
+the services/promise and services/callback partials.
+
+}}
+{{> common/auto_generated_py}}
+
+cimport cython
+from typing import AsyncIterator
+from cpython.version cimport PY_VERSION_HEX
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+)
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.string cimport string
+from libcpp cimport bool as cbool
+from cpython cimport bool as pbool
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap
+from libcpp.utility cimport move as cmove
+from libcpp.pair cimport pair
+from cython.operator cimport dereference as deref
+from cpython.ref cimport PyObject
+from thrift.py3.exceptions cimport (
+    cTApplicationException,
+    ApplicationError as __ApplicationError,
+    cTApplicationExceptionType__UNKNOWN)
+from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
+from thrift.py3.server import RequestContext
+from folly cimport (
+  cFollyPromise,
+  cFollyUnit,
+  c_unit,
+)
+from thrift.py3.common cimport (
+    cThriftServiceMetadataResponse as __fbthrift_cThriftServiceMetadataResponse,
+    ServiceMetadata,
+    MetadataBox as __MetadataBox,
+)
+
+from thrift.py3.server cimport THRIFT_REQUEST_CONTEXT as __THRIFT_REQUEST_CONTEXT
+
+cimport folly.futures
+from folly.executor cimport get_executor
+cimport folly.iobuf as _fbthrift_iobuf
+import folly.iobuf as _fbthrift_iobuf
+from folly.iobuf cimport move as move_iobuf
+from folly.memory cimport to_shared_ptr as __to_shared_ptr
+
+{{#program:has_stream?}}
+from thrift.py3.std_libcpp cimport optional
+from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
+{{/program:has_stream?}}
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+{{#program:includeNamespaces}}
+{{#hasServices?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}services as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}services
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}services as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}services
+{{/hasServices?}}
+{{#hasTypes?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{/program:includeNamespaces}}
+
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.services_reflection as _services_reflection
+
+import asyncio
+import functools
+import sys
+import traceback
+import types as _py_types
+
+{{#program:services}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.services_wrapper cimport c{{service:name}}Interface
+{{/program:services}}
+{{#program:stream_types}}
+cdef class ServerPublisher_{{> types/cython_cpp_type_ident}}(ServerPublisher):
+    cdef unique_ptr[cServerStreamPublisher[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}]] cPublisher
+
+    def complete(ServerPublisher self):
+        cmove(deref(self.cPublisher)).complete()
+
+    # Calling this send instead of the wrapped method name of next because next is
+    # a python keyword and makes the linter complain
+    def send(ServerPublisher self, {{> types/cython_python_type}} item):
+        deref(self.cPublisher).next(<{{> types/cython_cpp_type}}?>{{> types/cython_python_to_cpp_item}})
+
+    @staticmethod
+    cdef _fbthrift_create(cServerStreamPublisher[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}] cPublisher):
+        cdef ServerPublisher_{{> types/cython_cpp_type_ident}} inst = ServerPublisher_{{> types/cython_cpp_type_ident}}.__new__(ServerPublisher_{{> types/cython_cpp_type_ident}})
+        inst.cPublisher = make_unique[cServerStreamPublisher[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}]](cmove(cPublisher))
+        return inst
+
+cdef class ServerStream_{{> types/cython_cpp_type_ident}}(ServerStream):
+    cdef unique_ptr[cServerStream[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}]] cStream
+
+    @staticmethod
+    cdef _fbthrift_create(cServerStream[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}] cStream):
+        cdef ServerStream_{{> types/cython_cpp_type_ident}} inst = ServerStream_{{> types/cython_cpp_type_ident}}.__new__(ServerStream_{{> types/cython_cpp_type_ident}})
+        inst.cStream = make_unique[cServerStream[{{!
+            }}{{> types/cython_cpp_type}}{{!
+        }}]](cmove(cStream))
+        return inst
+{{/program:stream_types}}
+
+{{#program:services}}
+{{#service:supportedFunctions}}
+{{#function:return_type}}
+{{#type:streamresponse?}}
+{{#type:stream_elem_type}}
+async def runGenerator_{{service:name}}_{{function:name}}(object generator, Promise_{{> types/cython_cpp_type_ident}}_Stream promise):
+    try:
+        item = await generator.asend(None)
+    except StopAsyncIteration:
+        promise.cPromise.setValue(optional[{{> types/cython_cpp_type}}]())
+    {{#function:stream_exceptions}}
+    {{#field:type}}
+    except {{> types/cython_python_type}} as ex:
+        promise.cPromise.setException(deref((<{{> types/cython_python_type}}> ex)._cpp_obj))
+    {{/field:type}}
+    {{/function:stream_exceptions}}
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in {{service:name.}}{{function:name}}:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler {{service:name.}}{{function:name}}:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(optional[{{> types/cython_cpp_type}}](<{{> types/cython_cpp_type}}?>{{> types/cython_python_to_cpp_item}}))
+
+cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, cFollyPromise[optional[{{> types/cython_cpp_type}}]] cPromise):
+    cdef Promise_{{> types/cython_cpp_type_ident}}_Stream __promise = Promise_{{> types/cython_cpp_type_ident}}_Stream._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        runGenerator_{{service:name}}_{{function:name}}(
+            generator,
+            __promise
+        )
+    )
+{{/type:stream_elem_type}}
+{{/type:streamresponse?}}
+{{/function:return_type}}
+{{/service:supportedFunctions}}
+{{/program:services}}
+{{> services/promise}}
+{{> stream/stream_promises}}
+
+{{#program:services}}
+cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
+{{#service:annotations}}
+    {{> common/annotation}}
+    {{#last?}}
+
+    {{/last?}}
+{{/service:annotations}}
+})
+
+
+@cython.auto_pickle(False)
+cdef class {{service:name}}Interface(
+    {{#service:extends}}{{#service:externalProgram?}}
+    _{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
+        }}{{service:programName}}_services.{{/service:externalProgram?}}{{service:name}}Interface
+    {{/service:extends}}
+    {{^service:extends?}}
+    ServiceInterface
+    {{/service:extends?}}
+):
+    annotations = _{{service:name}}_annotations
+
+    def __cinit__(self):
+        self._cpp_obj = c{{service:name}}Interface(
+            <PyObject *> self,
+            get_executor()
+        )
+{{#service:supportedFunctions}}
+
+    async def {{function:name}}(
+            self{{#function:args}},
+            {{field:py_name}}{{/function:args}}):
+        raise NotImplementedError("async def {{function:name}} is not implemented")
+    {{#function:return_type}}
+    {{#type:streamresponse?}}
+
+    @staticmethod
+    def createPublisher_{{function:name}}(callback=None):
+        {{#type:stream_elem_type}}
+        cdef unique_ptr[pair[cServerStream[{{> types/cython_cpp_type}}], {{!
+        }}cServerStreamPublisher[{{> types/cython_cpp_type}}]]] streams = {{!
+        }}make_unique[pair[cServerStream[{{> types/cython_cpp_type}}], {{!
+        }}cServerStreamPublisher[{{> types/cython_cpp_type}}]]]({{!
+        }}cServerStream[{{> types/cython_cpp_type}}].createPublisher(pythonFuncToCppFunc(callback)))
+
+        return (ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).first)), {{!
+        }}ServerPublisher_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).second)))
+        {{/type:stream_elem_type}}
+    {{/type:streamresponse?}}
+    {{/function:return_type}}
+{{/service:supportedFunctions}}
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__{{service:name}}(for_clients=False)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.c{{service:cpp_name}}SvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "{{program:name}}.{{service:name}}"
+
+{{/program:services}}
+
+{{> services/callback}}

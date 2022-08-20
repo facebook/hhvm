@@ -1,0 +1,105 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+#[derive({{!
+    }}{{#struct:copy?}}Copy, {{/struct:copy?}}{{!
+    }}Clone, PartialEq{{!
+    }}{{#struct:ord?}}, Eq, PartialOrd, Ord, Hash{{/struct:ord?}}{{!
+    }}{{#struct:union?}}, Debug{{/struct:union?}}{{!
+    }}{{#struct:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/struct:serde?}}{{!
+    }}{{#struct:exception?}}{{#struct:union?}}, ::thiserror::Error{{/struct:union?}}{{/struct:exception?}}{{!
+    }}{{#struct:derive}}, {{.}}{{/struct:derive}}{{!
+}})]
+{{#struct:docs?}}
+#[doc = {{struct:docs}}]
+{{/struct:docs?}}{{!
+}}{{^struct:union?}}
+pub struct {{struct:rust_name}} {{>lib/block}}{{!
+}}{{#struct:fields}}{{!
+    }}{{#struct:serde?}}{{#field:rename?}}
+    #[serde(rename = "{{field:name}}")]{{!
+    }}{{/field:rename?}}{{^field:optional?}}
+    #[serde(default)]{{!
+    }}{{/field:optional?}}{{!
+    }}{{#field:optional?}}{{#struct:serde?}}{{#program:skip_none_serialization?}}
+    #[serde(skip_serializing_if = "Option::is_none")]{{!
+    }}{{/program:skip_none_serialization?}}{{/struct:serde?}}{{/field:optional?}}{{!
+    }}{{/struct:serde?}}{{#field:docs?}}
+    #[doc = {{field:docs}}]{{!
+    }}{{/field:docs?}}
+    pub {{field:rust_name}}: {{>lib/fieldtype}},{{!
+}}{{/struct:fields}}{{!
+}}{{^struct:exhaustive?}}
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]{{!
+    }}{{#struct:serde?}}
+    #[serde(skip, default = "self::dot_dot::default_for_serde_deserialize")]{{!
+    }}{{/struct:serde?}}
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,{{!
+}}{{/struct:exhaustive?}}
+}
+{{#struct:exception?}}
+
+impl ::fbthrift::ExceptionInfo for {{struct:rust_name}} {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for {{struct:rust_name}} {}
+
+impl ::std::fmt::Display for {{struct:rust_name}} {{>lib/block}}
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, {{!
+            }}{{#struct:has_exception_message?}}{{!
+                }}{{#struct:is_exception_message_optional?}}{{!
+                    }}"{{struct:rust_name}}: {:?}: {:?}", self.{{struct:exception_message}}, self{{!
+                }}{{/struct:is_exception_message_optional?}}{{!
+                }}{{^struct:is_exception_message_optional?}}{{!
+                    }}"{{struct:rust_name}}: {}: {:?}", self.{{struct:exception_message}}, self{{!
+                }}{{/struct:is_exception_message_optional?}}{{!
+            }}{{/struct:has_exception_message?}}{{!
+            }}{{^struct:has_exception_message?}}{{!
+                }}"{:?}", self{{!
+            }}{{/struct:has_exception_message?}}{{!
+        }})
+    }
+}
+{{/struct:exception?}}
+{{/struct:union?}}
+{{#struct:union?}}
+pub enum {{struct:rust_name}} {{>lib/block}}{{!
+}}{{#struct:fields}}
+    {{#field:docs?}}
+    #[doc = {{field:docs}}]
+    {{/field:docs?}}
+    {{#struct:exception?}}
+    #[error("{0:?}")]
+    {{/struct:exception?}}
+    {{field:rust_name}}({{>lib/fieldtype}}),{{!
+}}{{/struct:fields}}
+    UnknownField(::std::primitive::i32),
+}
+{{/struct:union?}}
+{{!newline}}

@@ -1,0 +1,221 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+<%#service:functions%><%#function:return_type%>
+<%#function:starts_interaction?%>
+  <%type:name%> <%function:cpp_name%>();
+<%/function:starts_interaction?%><%^function:starts_interaction?%>
+<%^function:returns_sink?%>
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+  virtual void <%function:cpp_name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_client%>);
+  virtual<%/function:creates_interaction?%><%/service:reduced_client?%> void <%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);
+<%/function:returns_sink?%>
+ protected:
+  void <%function:cpp_name%>Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>, bool stealRpcOptions = false);
+ public:
+<%^function:returns_sink?%>
+
+<%^function:sync_returns_by_outparam?%>
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%><% > types/return_type_client%> sync_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%><% > types/return_type_client%> sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%/function:sync_returns_by_outparam?%>
+<%#function:sync_returns_by_outparam?%>
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(<%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
+<%/function:sync_returns_by_outparam?%>
+
+<%^service:reduced_client?%><%^function:creates_interaction?%><%^type:streamresponse?%>
+  virtual folly::Future<<% > types/return_type_client_lift_unit%>> future_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
+<%/type:streamresponse?%><%/function:creates_interaction?%><%/service:reduced_client?%>
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>folly::SemiFuture<<% > types/return_type_client_lift_unit%>> semifuture_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
+<%^service:reduced_client?%><%^function:creates_interaction?%><%^type:streamresponse?%>
+  virtual folly::Future<<% > types/return_type_client_lift_unit%>> future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%/type:streamresponse?%><%/function:creates_interaction?%><%/service:reduced_client?%>
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>folly::SemiFuture<<% > types/return_type_client_lift_unit%>> semifuture_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%#function:creates_interaction?%>
+  std::pair<
+    apache::thrift::Client<<%service:parent_service_qualified_name%>>::<%function:created_interaction%>,
+    folly::SemiFuture<<%^type:void?%><% > types/return_type_client_no_handle%><%/type:void?%><%#type:void?%>folly::Unit<%/type:void?%>>
+  > eager_semifuture_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%/function:creates_interaction?%>
+<%^function:oneway?%>
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+<%^type:streamresponse?%>
+  virtual folly::Future<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%/type:streamresponse?%>
+  virtual folly::SemiFuture<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+<%#type:sync_methods_return_try?%>
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<<% > types/return_type_client%>>> sync_complete_<%function:cpp_name%>(
+      apache::thrift::RpcOptions&& rpcOptions<%function:comma%> <% > service_common/function_param_list_client%>);
+<%/type:sync_methods_return_try?%>
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:oneway?%>
+
+#if FOLLY_HAS_COROUTINES
+  <%!
+  Coroutine functions are inline templates to prevent compile time and binary size regression
+  %>
+#if __clang__
+  template <int = 0>
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>) {
+    return co_<%function:cpp_name%><false>(nullptr<%function:comma%><% > service_common/param_list%>);
+  }
+  template <int = 0>
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
+    return co_<%function:cpp_name%><true>(&rpcOptions<%function:comma%><% > service_common/param_list%>);
+  }
+#else
+  <%!
+  GCC coroutines implementation is less stable and results in ICE compiling the code below.
+  Use semifuture_ implementation instead.
+  %>
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>) {
+    <%^type:void?%>co_return <%/type:void?%>co_await folly::coro::detachOnCancel(semifuture_<%function:cpp_name%>(<% > service_common/param_list%>));
+  }
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
+    <%^type:void?%>co_return <%/type:void?%>co_await folly::coro::detachOnCancel(semifuture_<%function:cpp_name%>(rpcOptions<%function:comma%><% > service_common/param_list%>));
+  }
+#endif
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(apache::thrift::RpcOptions* rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<<%#function:oneway?%>true<%/function:oneway?%><%^function:oneway?%>false<%/function:oneway?%>> callback(&returnState, co_await folly::coro::co_current_executor);
+    <%^function:oneway?%>
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    <%/function:oneway?%>
+    auto [ctx, header] = <%function:cpp_name%>Ctx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<<%#function:oneway?%>true<%/function:oneway?%><%^function:oneway?%>false<%/function:oneway?%>>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+  <%^function:returns_stream?%>
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+  <%/function:returns_stream?%><%#function:returns_stream?%>
+    auto wrappedCallback = apache::thrift::createStreamClientCallback(
+        apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+  <%/function:returns_stream?%>
+  <%#function:creates_interaction?%>
+    <%function:created_interaction%> handle(channel_, "<%function:created_interaction%>");
+  <%/function:creates_interaction?%>
+    if constexpr (hasRpcOptions) {
+      <%function:cpp_name%>Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+    } else {
+      <%function:cpp_name%>Impl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+  <%^function:oneway?%>
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    <%#type:void?%>
+    if (auto ew = recv_wrapped_<%function:cpp_name%>(returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    <%/type:void?%>
+    <%^type:void?%>
+    <% > types/return_type_client_no_handle%> _return;
+    if (auto ew = recv_wrapped_<%function:cpp_name%>(_return, returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    <%/type:void?%>
+  <%^function:creates_interaction?%>
+    <%^type:void?%>
+    co_return _return;
+    <%/type:void?%>
+  <%/function:creates_interaction?%>
+  <%#function:creates_interaction?%>
+    <%^type:void?%>
+    co_return std::make_pair(std::move(handle), std::move(_return));
+    <%/type:void?%>
+    <%#type:void?%>
+    co_return handle;
+    <%/type:void?%>
+  <%/function:creates_interaction?%>
+  <%/function:oneway?%>
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+<%^type:streamresponse?%>
+  virtual void <%function:cpp_name%>(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);
+<%/type:streamresponse?%>
+
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:returns_sink?%><%#function:returns_sink?%>
+#if FOLLY_HAS_COROUTINES
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
+  folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
+#endif // FOLLY_HAS_COROUTINES
+<%/function:returns_sink?%>
+
+<%#type:void?%>
+<%^function:oneway?%>
+  static folly::exception_wrapper recv_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+  static void recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+  // Mock friendly virtual instance method
+  virtual void recv_instance_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:oneway?%>
+<%/type:void?%>
+<%^type:void?%>
+  static folly::exception_wrapper recv_wrapped_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%^function:sync_returns_by_outparam?%>
+  static <% > types/return_type_client_no_handle%> recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+  // Mock friendly virtual instance method
+  virtual <% > types/return_type_client_no_handle%> recv_instance_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:sync_returns_by_outparam?%><%#function:sync_returns_by_outparam?%>
+  static void recv_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+  // Mock friendly virtual instance method
+  virtual void recv_instance_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:sync_returns_by_outparam?%>
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+  virtual folly::exception_wrapper recv_instance_wrapped_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/type:void?%>
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void <%function:cpp_name%>T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);
+  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> <%function:cpp_name%>Ctx(apache::thrift::RpcOptions* rpcOptions);
+ public:
+<%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>

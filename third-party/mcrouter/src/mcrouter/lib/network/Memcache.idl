@@ -1,0 +1,520 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace facebook::memcache;
+thrift_namespace facebook.memcache.thrift;
+
+import "mcrouter/lib/network/Common.idl"
+
+struct MemcacheRequestCommon {
+  # Latency to be injected on this request prior to forwarding the request to
+  # a remote host.
+  1: optional uint64_t beforeLatencyUs;
+  # Latency to be injected on this request after receiving a reply for the
+  # request from a remote host
+  2: optional uint64_t afterLatencyUs;
+  # when the request is routed using bucketized routing
+  # this bucketId serves as the routing key
+  3: optional std::string bucketId;
+};
+
+request McGetRequest with 1: MemcacheRequestCommon {
+  id: 1;
+  name: "get";
+  thrift_method: mcGet;
+  reply: McGetReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
+};
+
+reply McGetReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: optional folly::IOBuf value;
+  3: uint64_t flags;
+  4: std::string message;
+  5: int16_t appSpecificErrorCode;
+};
+
+request McSetRequest with 1: MemcacheRequestCommon {
+  id: 2;
+  name: "set";
+  thrift_method: mcSet;
+  reply: McSetReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+};
+
+reply McSetReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: uint64_t flags;
+  3: folly::IOBuf value;
+  4: std::string message;
+  5: int16_t appSpecificErrorCode;
+};
+
+request McDeleteRequest with 1: MemcacheRequestCommon {
+  id: 3;
+  name: "delete";
+  thrift_method: mcDelete;
+  reply: McDeleteReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
+  3: int32_t exptime;
+  4: folly::IOBuf value;
+  5: std::unordered_map <std::string, uint64_t> attributes;
+};
+
+reply McDeleteReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: uint64_t flags;
+  3: folly::IOBuf value;
+  4: std::string message;
+  5: int16_t appSpecificErrorCode;
+};
+
+request McLeaseGetRequest with 1: MemcacheRequestCommon {
+  id: 4;
+  name: "lease-get";
+  thrift_method: mcLeaseGet;
+  reply: McLeaseGetReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
+};
+
+reply McLeaseGetReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: int64_t leaseToken;
+  3: optional folly::IOBuf value;
+  4: uint64_t flags;
+  5: std::string message;
+  6: int16_t appSpecificErrorCode;
+};
+
+request McLeaseSetRequest with 1: MemcacheRequestCommon {
+  id: 5;
+  name: "lease-set";
+  thrift_method: mcLeaseSet;
+  reply: McLeaseSetReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+  5: int64_t leaseToken;
+};
+
+reply McLeaseSetReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McAddRequest with 1: MemcacheRequestCommon {
+  id: 6;
+  name: "add";
+  thrift_method: mcAdd;
+  reply: McAddReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+};
+
+reply McAddReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McReplaceRequest with 1: MemcacheRequestCommon {
+  id: 7;
+  name: "replace";
+  thrift_method: mcReplace;
+  reply: McReplaceReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+};
+
+reply McReplaceReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McGetsRequest with 1: MemcacheRequestCommon {
+  id: 8;
+  name: "gets";
+  thrift_method: mcGets;
+  reply: McGetsReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
+};
+
+reply McGetsReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: uint64_t casToken;
+  3: optional folly::IOBuf value;
+  4: uint64_t flags;
+  5: std::string message;
+  6: int16_t appSpecificErrorCode;
+};
+
+request McCasRequest with 1: MemcacheRequestCommon {
+  id: 9;
+  name: "cas";
+  thrift_method: mcCas;
+  reply: McCasReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+  5: uint64_t casToken;
+};
+
+reply McCasReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McIncrRequest with 1: MemcacheRequestCommon {
+  id: 10;
+  name: "incr";
+  thrift_method: mcIncr;
+  reply: McIncrReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int64_t delta;
+};
+
+reply McIncrReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: int64_t delta;
+  3: std::string message;
+  4: int16_t appSpecificErrorCode;
+};
+
+request McDecrRequest with 1: MemcacheRequestCommon {
+  id: 11;
+  name: "decr";
+  thrift_method: mcDecr;
+  reply: McDecrReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int64_t delta;
+};
+
+reply McDecrReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: int64_t delta;
+  3: std::string message;
+  4: int16_t appSpecificErrorCode;
+};
+
+request McMetagetRequest with 1: MemcacheRequestCommon {
+  id: 12;
+  name: "metaget";
+  thrift_method: mcMetaget;
+  reply: McMetagetReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McMetagetReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: int32_t age; # can be -1
+  3: int32_t exptime;
+  4: int16_t ipv;
+  5: std::string ipAddress;
+  6: std::string message;
+  7: int16_t appSpecificErrorCode;
+};
+
+request McAppendRequest with 1: MemcacheRequestCommon {
+  id: 14;
+  name: "append";
+  thrift_method: mcAppend;
+  reply: McAppendReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+};
+
+reply McAppendReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McPrependRequest with 1: MemcacheRequestCommon {
+  id: 15;
+  name: "prepend";
+  thrift_method: mcPrepend;
+  reply: McPrependReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+  3: uint64_t flags;
+  4: folly::IOBuf value;
+};
+
+reply McPrependReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McTouchRequest with 1: MemcacheRequestCommon {
+  id: 16;
+  name: "touch";
+  thrift_method: mcTouch;
+  reply: McTouchReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t exptime;
+};
+
+reply McTouchReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McFlushReRequest with 1: MemcacheRequestCommon {
+  id: 21;
+  name: "flushre";
+  thrift_method: mcFlushRe;
+  reply: McFlushReReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McFlushReReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McFlushAllRequest with 1: MemcacheRequestCommon {
+  id: 22;
+  name: "flushall";
+  thrift_method: mcFlushAll;
+  reply: McFlushAllReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int32_t delay;
+};
+
+reply McFlushAllReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McGatRequest with 1: MemcacheRequestCommon {
+  id: 23;
+  name: "gat";
+  thrift_method: mcGat;
+  reply: McGatReply;
+
+  1: int32_t exptime;
+  2: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McGatReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: optional folly::IOBuf value;
+  3: uint64_t flags;
+  4: std::string message;
+  5: int16_t appSpecificErrorCode;
+};
+
+request McGatsRequest with 1: MemcacheRequestCommon {
+  id: 24;
+  name: "gats";
+  thrift_method: mcGats;
+  reply: McGatsReply;
+
+  1: int32_t exptime;
+  2: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McGatsReply {
+  throws: {
+    1: facebook::memcache::CarbonResultBusy carbonResultBusy;
+    2: facebook::memcache::CarbonResultRemoteError carbonResultRemoteError;
+  };
+
+  1: Result result;
+  2: uint64_t casToken;
+  3: optional folly::IOBuf value;
+  4: uint64_t flags;
+  5: std::string message;
+  6: int16_t appSpecificErrorCode;
+};
+
+service {
+  additional_requests: [];
+  on_reply_logger: facebook::memcache::mcrouter::AdditionalProxyRequestLogger;
+  enable_shutdown: false;
+  stats: {
+    McDeleteRequest,
+    McGetRequest,
+    McSetRequest,
+    McGetsRequest,
+    McCasRequest,
+    McMetagetRequest,
+    McAddRequest,
+    McReplaceRequest,
+    McAppendRequest,
+    McPrependRequest,
+    McIncrRequest,
+    McDecrRequest,
+    McFlushReRequest,
+    McFlushAllRequest,
+    McTouchRequest,
+    McGatRequest,
+    McGatsRequest,
+    # For backwards compatibility in stats names
+    lease_get: [
+      McLeaseGetRequest
+    ],
+    lease_set: [
+      McLeaseSetRequest
+    ]
+  };
+  routing_groups: {
+    get: [
+      McGetRequest,
+      McGetsRequest,
+      McMetagetRequest,
+      McLeaseGetRequest,
+      McGatRequest,
+      McGatsRequest
+    ],
+    update: [
+      McSetRequest,
+      McAddRequest,
+      McReplaceRequest,
+      McLeaseSetRequest,
+      McAppendRequest,
+      McPrependRequest,
+      McCasRequest
+    ],
+    delete: [
+      McDeleteRequest
+    ],
+    arithmetic: [
+      McIncrRequest,
+      McDecrRequest
+    ]
+  };
+  gen_client_tool: true;
+  disable_fb303: true;
+};

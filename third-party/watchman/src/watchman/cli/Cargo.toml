@@ -1,0 +1,13 @@
+[package]
+name = "watchmanctl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+structopt = "0.3"
+watchman_client = { path = "../rust/watchman_client" }
+ahash = "0.3"
+serde = "1.0"
+jwalk = "0.6"
+tokio = { version = "1.5", features = ["rt-multi-thread"] }

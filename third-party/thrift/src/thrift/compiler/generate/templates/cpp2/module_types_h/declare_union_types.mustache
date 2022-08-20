@@ -1,0 +1,48 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#program:unions?%>
+
+namespace apache { namespace thrift {
+<%#program:structs%><%#struct:union?%>
+
+template <> struct TEnumDataStorage<<%struct:cpp_fullname%>::Type>;
+
+template <> struct TEnumTraits<<%struct:cpp_fullname%>::Type> {
+  using type = <%struct:cpp_fullname%>::Type;
+
+  static constexpr std::size_t const size = <%struct:num_union_members%>;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
+<%/struct:union?%><%/program:structs%>
+}} // apache::thrift
+<%/program:unions?%>

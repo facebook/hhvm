@@ -1,0 +1,41 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+RECIPES_DIR := ./recipes
+
+all: .folly-done .fizz-done .wangle-done .fmt-done .fbthrift-done .gtest-done
+	${RECIPES_DIR}/mcrouter.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+mcrouter:
+	${RECIPES_DIR}/mcrouter.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+deps: .folly-done .fizz-done .wangle-done .fmt-done .fbthrift-done .gtest-done
+	touch $@
+
+.folly-done: .fmt-done
+	${RECIPES_DIR}/folly.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.fizz-done: .folly-done
+	${RECIPES_DIR}/fizz.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.wangle-done: .folly-done .fizz-done
+	${RECIPES_DIR}/wangle.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.fmt-done:
+	${RECIPES_DIR}/fmtlib.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.fbthrift-done: .folly-done .fizz-done .wangle-done .fmt-done
+	${RECIPES_DIR}/fbthrift.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.gtest-done:
+	${RECIPES_DIR}/gtest.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@

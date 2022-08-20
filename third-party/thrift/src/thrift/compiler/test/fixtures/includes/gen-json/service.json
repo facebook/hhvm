@@ -1,0 +1,108 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "service",
+  "typedefs" : {
+    "IncludesIncluded" : {
+      "lineno" : 32,
+      "type_enum" : "STRUCT",
+      "spec_args" : "includes.Included",
+      "source_range" : {
+        "begin" : {
+          "line" : 32,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 32,
+          "column" : 43
+        }
+      }
+    },
+    "IncludesTransitiveFoo" : {
+      "lineno" : 34,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "includes.TransitiveFoo",
+      "source_range" : {
+        "begin" : {
+          "line" : 34,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 34,
+          "column" : 53
+        }
+      }
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 22,
+      "functions" : {
+        "MyService.query" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "module.MyStruct"
+            },
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "includes.Included"
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 59
+            }
+          }
+        },
+        "MyService.has_arg_docs" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "module.MyStruct"
+            },
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "includes.Included"
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 25,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 28,
+              "column" : 4
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 29,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

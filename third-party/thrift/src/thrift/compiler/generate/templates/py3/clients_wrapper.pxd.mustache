@@ -1,0 +1,142 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.pyx classes.
+
+}}
+{{> common/auto_generated_py}}
+
+from cpython.ref cimport PyObject
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+)
+from libcpp cimport bool as cbool
+from libcpp.map cimport map as cmap, pair as cpair
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.set cimport set as cset
+from libcpp.string cimport string
+from libcpp.vector cimport vector
+
+from folly cimport cFollyFuture, cFollyTry, cFollyUnit
+cimport folly.iobuf as _fbthrift_iobuf
+from thrift.py3.common cimport cRpcOptions
+from thrift.py3.client cimport cClientWrapper
+
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+{{#program:has_stream?}}
+from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
+{{/program:has_stream?}}
+
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{#hasServices?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients_wrapper as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}clients_wrapper
+{{/hasServices?}}
+{{/program:includeNamespaces}}
+
+{{#program:services}}
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
+    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+  cdef cppclass c{{service:name}}AsyncClient {{!
+    }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+    }}{{service:cpp_name}}AsyncClient":
+      pass
+
+{{#service:interactions}}
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
+    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+  cdef cppclass c{{service:parent_service_name}}AsyncClient_{{service:name}} {{!
+    }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+    }}{{service:parent_service_name}}AsyncClient::{{service:name}}":
+      pass
+
+{{/service:interactions}}
+cdef extern from "<utility>" namespace "std":
+  cdef unique_ptr[c{{service:name}}ClientWrapper] move(unique_ptr[c{{service:name}}ClientWrapper])
+
+{{/program:services}}
+cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
+  cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
+    pass
+
+cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrapper.h"{{!
+    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":{{!
+    }}{{^program:services}}
+  pass{{/program:services}}{{#program:services}}
+  cdef cppclass c{{service:name}}ClientWrapper "{{!
+  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{service:name}}ClientWrapper"{{!
+  }}{{#service:extends}}({{!
+    }}{{#service:externalProgram?}}{{!
+    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
+    }}{{service:programName}}_clients_wrapper.{{!
+    }}{{/service:externalProgram?}}c{{service:name}}ClientWrapper{{!
+  }}){{/service:extends}}:
+    {{^service:extends?}}
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+    {{/service:extends?}}
+
+    {{#service:supportedFunctions}}
+    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cppName}}(cRpcOptions, {{#function:args}}
+      {{#field:type}}{{> types/cython_cpp_type}}{{/field:type}} arg_{{field:py_name}},{{/function:args}})
+    {{/service:supportedFunctions}}
+    {{!
+      If this is an empty service definition that extends another service with no interactions
+      Then we need to put pass, otherwise cython will complain about the
+      empty cppclass body
+    }}
+    {{^service:supportedFunctions}}
+    {{^service:interactions}}
+    {{#service:extends?}}
+    pass
+    {{/service:extends?}}
+    {{/service:interactions}}
+    {{/service:supportedFunctions}}
+    {{#service:interactions}}
+    cFollyFuture[unique_ptr[cClientWrapper]]& create{{service:name}}()
+    {{/service:interactions}}
+
+  {{#service:interactions}}
+  cdef cppclass c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
+  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{service:parent_service_name}}ClientWrapper{{!
+  }}::{{service:name}}InteractionWrapper"(cClientWrapper):
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    {{#service:supportedFunctions}}
+    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cppName}}(cRpcOptions, {{#function:args}}
+      {{#field:type}}{{> types/cython_cpp_type}}{{/field:type}} arg_{{field:py_name}},{{/function:args}})
+    {{/service:supportedFunctions}}
+    {{!
+      If this is an empty service definition that extends another service
+      Then we need to put pass, otherwise cython will complain about the
+      empty cppclass body
+    }}
+    {{^service:supportedFunctions}}
+    {{#service:extends?}}
+    pass
+    {{/service:extends?}}
+    {{/service:supportedFunctions}}
+
+  {{/service:interactions}}
+{{/program:services}}

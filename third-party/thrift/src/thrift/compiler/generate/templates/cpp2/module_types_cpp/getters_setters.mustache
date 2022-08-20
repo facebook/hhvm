@@ -1,0 +1,40 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:fields?%><%#struct:fields%><%#field:type%><%#type:resolves_to_container_or_struct?%>
+<%#field:has_deprecated_accessors?%>
+<%#field:optional?%>
+const <%type:cpp_type%>* <%struct:cpp_underlying_name%>::get_<%field:cpp_name%>() const& {
+  return <%field:cpp_name%>_ref().has_value() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
+}
+
+<%type:cpp_type%>* <%struct:cpp_underlying_name%>::get_<%field:cpp_name%>() & {
+  return <%field:cpp_name%>_ref().has_value() ? std::addressof(<%field:cpp_storage_name%>) : nullptr;
+}
+
+<%/field:optional?%>
+<%^field:optional?%>
+const <%type:cpp_type%>& <%struct:cpp_underlying_name%>::get_<%field:cpp_name%>() const& {
+  return <%field:cpp_storage_name%>;
+}
+
+<%type:cpp_type%> <%struct:cpp_underlying_name%>::get_<%field:cpp_name%>() && {
+  return std::move(<%field:cpp_storage_name%>);
+}
+
+<%/field:optional?%>
+<%/field:has_deprecated_accessors?%>
+<%/type:resolves_to_container_or_struct?%><%/field:type%><%/struct:fields%><%/struct:fields?%>

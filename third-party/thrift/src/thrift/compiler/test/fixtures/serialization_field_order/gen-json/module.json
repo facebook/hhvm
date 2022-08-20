@@ -1,0 +1,130 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "structs" : {
+    "Foo" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field1" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 17
+            }
+          }
+        },
+        "field2" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 25,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 25,
+              "column" : 17
+            }
+          }
+        },
+        "field3" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 26,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 26,
+              "column" : 17
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 27,
+          "column" : 2
+        }
+      }
+    },
+    "Foo2" : {
+      "lineno" : 29,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field1" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 30,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 30,
+              "column" : 17
+            }
+          }
+        },
+        "field2" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 31,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 31,
+              "column" : 17
+            }
+          }
+        },
+        "field3" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 32,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 32,
+              "column" : 17
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 29,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 33,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

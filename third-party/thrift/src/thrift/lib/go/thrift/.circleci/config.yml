@@ -1,0 +1,15 @@
+  version: 2
+  jobs:
+    build:
+      docker:
+        - image: circleci/golang
+      steps:
+        - checkout
+        - run:
+            name: vet
+            command: |
+              go vet
+        - run:
+            name: test
+            command: |
+              go test ./...

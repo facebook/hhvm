@@ -1,0 +1,37 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+
+
+}}{{!
+
+Used to turn a thrift type into a gen_metadata call
+
+}}{{!
+}}{{#type:list?}}{{#type:list_elem_type}}{{> metadata/recursive_call }}{{/type:list_elem_type}}{{/type:list?}}{{!
+}}{{#type:set?}}{{#type:set_elem_type}}{{> metadata/recursive_call }}{{/type:set_elem_type}}{{/type:set?}}{{!
+}}{{#type:map?}}{{#type:key_type}}{{> metadata/recursive_call }}{{/type:key_type}} # key
+    {{#type:value_type}}{{> metadata/recursive_call }}{{/type:value_type}} # val {{/type:map?}}{{!
+}}{{#type:streamresponse?}}{{#type:stream_elem_type}}{{> metadata/recursive_call }}{{/type:stream_elem_type}} # elem
+    {{#type:stream_first_response_type}}{{> metadata/recursive_call }}{{/type:stream_first_response_type}} # response {{/type:streamresponse?}}{{!
+}}{{#type:sink?}}{{#type:sink_elem_type}}{{> metadata/recursive_call }}{{/type:sink_elem_type}} # elem
+    {{#type:sink_final_response_type}}{{> metadata/recursive_call }}{{/type:sink_final_response_type}} # final response
+    {{#type:sink_first_response_type}}{{> metadata/recursive_call }}{{/type:sink_first_response_type}} # first response {{/type:sink?}}{{!
+}}{{#type:struct?}}{{#type:struct}}new_struct = {{#type:external_program?}}{{type:metadata_path}}.{{/type:external_program?}}{{!
+  }}_fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}(new_struct){{/type:struct}}{{/type:struct?}}{{!
+}}{{#type:enum?}}{{#type:enum}}new_struct = {{#type:external_program?}}{{type:metadata_path}}.{{/type:external_program?}}{{!
+  }}_fbthrift_gen_metadata_enum_{{enum:name}}(new_struct){{/type:enum}}{{/type:enum?}}{{!
+}}

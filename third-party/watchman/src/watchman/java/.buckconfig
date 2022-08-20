@@ -1,0 +1,32 @@
+[java]
+  src_roots = java, test
+  source_level = 6
+  target_level = 6
+  jar_spool_mode = direct_to_jar
+
+[project]
+  ide = intellij
+  allow_symlinks = forbid
+  watchman_query_timeout_ms = 1000
+  initial_targets = //watchman
+  ignore = .git, .buckd, .idea, buck-out, buck-cache, \
+           **/.DS_Store, **/**.orig, \
+           *___jb_bak___*, \
+           *___jb_tmp___*, \
+           *___jb_old___*, \
+           **/*.swp, \
+           **/*~
+  parallel_parsing = true
+
+[build]
+  thread_core_ratio = 0.75
+  thread_core_ratio_min_threads = 1
+
+[cache]
+  mode = dir
+  dir = buck-cache
+  dir_max_size = 100MB
+
+[test]
+  timeout = 60000
+

@@ -1,0 +1,42 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%^type:resolves_to_complex_return?%>
+<% > types/return_type_client%> <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
+<%#type:void?%>
+  recv_<%function:cpp_name%>(state);
+<%/type:void?%>
+<%^type:void?%>
+  return recv_<%function:cpp_name%>(state);
+<%/type:void?%>
+}
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+void <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%>(<%type:cpp_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_<%function:cpp_name%>(_return, state);
+}
+<%/type:resolves_to_complex_return?%>
+
+<%#type:void?%>
+folly::exception_wrapper <% > service_common/client_class_name%>::recv_instance_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_<%function:cpp_name%>(state);
+}
+<%/type:void?%>
+<%^type:void?%>
+folly::exception_wrapper <% > service_common/client_class_name%>::recv_instance_wrapped_<%function:cpp_name%>(<% > types/return_type_client%>& _return, ::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_<%function:cpp_name%>(_return, state);
+}
+<%/type:void?%>

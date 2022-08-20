@@ -1,0 +1,22 @@
+{
+  "pools": {
+    "A.gut": {
+      "servers": [ "localhost:12345" ]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": [
+      {
+        "type": "ErrorRoute",
+        "enable_logging": false,
+        "result": "mc_res_busy"
+      },
+      "PoolRoute|A.gut"
+    ],
+    "failover_limit": {
+      "rate": 0.2,
+      "burst": 9.8
+    }
+  }
+}

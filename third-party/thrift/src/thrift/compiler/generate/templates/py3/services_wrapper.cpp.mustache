@@ -1,0 +1,110 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is a top level C++ file that generates an implementation of the C++
+Services interface. That implementation keeps a pointer to a Pyobject, which
+is supposed to be the Python handler for that service, as written by the end
+user. The life cycle of the handler is managed by the thrift server.
+It has lightweight wrappers of each service method (which accept futures)
+that pass the python object and a promise return code into the functions
+defined in ServicesCallbacks, along with appropriate arguments.
+
+}}
+{{> common/auto_generated_c}}
+
+#include <{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h>
+#include <{{program:includePrefix}}gen-py3/{{program:name}}/services_api.h>
+#include <thrift/lib/cpp2/async/AsyncProcessor.h>
+
+{{#program:cppNamespaces}}namespace {{value}} {
+{{/program:cppNamespaces}}
+{{#program:services}}
+
+{{^service:extends?}}
+{{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
+  {
+    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__services();
+  }
+
+{{/service:extends?}}
+{{#service:extends?}}
+{{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
+  : {{#service:extends}}::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}Wrapper(obj, exc){{/service:extends}}
+  {
+    import_{{#program:py3Namespaces}}{{value}}__{{/program:py3Namespaces}}{{program:name}}__services();
+  }
+{{/service:extends?}}
+
+{{#service:supportedFunctions}}
+void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cppName}}(
+  {{> services/cpp_handler_callback_type}} callback{{#function:args}}
+    , {{#field:type}}{{!
+            }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!
+            }}{{#function:stack_arguments?}}{{> types/cpp_stack_arg_type}}{{/function:stack_arguments?}}{{!
+        }}{{/field:type}} {{field:cppName}}{{#last?}}
+{{/last?}}{{/function:args}}) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback){{#function:args}},
+     {{#field:type}}{{> services/cpp_field_capture}}{{/field:type}}{{/function:args}}
+    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<{{!
+            }}{{#function:return_type}}{{> services/cpp_return_type}}{{/function:return_type}}>();
+        call_cy_{{service:name}}_{{function:name}}(
+            this->if_object,
+            ctx,
+            std::move(promise){{#function:args}}{{#field:type}},
+            {{> services/cpp_pass_field}}
+{{/field:type}}{{/function:args}}
+        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<{{!
+            }}{{#function:return_type}}{{> services/cpp_return_type}}{{/function:return_type}}>&& t) {
+          (void)t;
+          {{^function:oneway?}}callback->complete(std::move(t));{{/function:oneway?}}
+        });
+    });
+}
+{{/service:supportedFunctions}}
+{{#service:interactions}}
+std::unique_ptr<{{service:parent_service_cpp_name}}SvIf::{{service:name}}If> {{service:parent_service_name}}Wrapper::create{{service:name}}() {
+  throw std::runtime_error("Py3 server doesn't support interactions.");
+}
+{{/service:interactions}}
+std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<{{service:name}}Wrapper>(if_object, exc);
+}
+{{#service:lifecycleFunctions}}
+folly::SemiFuture<folly::Unit> {{service:name}}Wrapper::semifuture_{{function:cppName}}() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_{{service:name}}_{{function:cppName}}(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
+{{/service:lifecycleFunctions}}
+{{^last?}}
+
+{{/last?}}
+{{/program:services}}{{!
+}}{{#program:cppNamespaces}}
+} // namespace {{value}}
+{{/program:cppNamespaces}}

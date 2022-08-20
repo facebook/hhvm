@@ -1,0 +1,18 @@
+{
+  "pools": {
+    "A": {
+      "servers": ["localhost:11130"]
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "A",
+    "slow_warmup": {
+      "failoverTarget": "ErrorRoute",
+      "settings": {
+        "enable_threshold": 0.7,
+        "disable_threshold": 0.9
+      }
+    }
+  }
+}

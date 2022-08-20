@@ -1,0 +1,44 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+defines how a variable in a field should be passed into another c++ function
+from the current function. ie, when calling some_func(a, b, c), the variables
+a, b, and c would be written using this file. Most variables can be passed
+as themselves by value, but the complex types are unique_ptr values and
+need to be moved to the called function.
+
+}}{{#type:bool?}}{{field:cppName}}{{/type:bool?}}{{!
+}}{{#type:byte?}}{{field:cppName}}{{/type:byte?}}{{!
+}}{{#type:i16?}}{{field:cppName}}{{/type:i16?}}{{!
+}}{{#type:i32?}}{{field:cppName}}{{/type:i32?}}{{!
+}}{{#type:i64?}}{{field:cppName}}{{/type:i64?}}{{!
+}}{{#type:double?}}{{field:cppName}}{{/type:double?}}{{!
+}}{{#type:float?}}{{field:cppName}}{{/type:float?}}{{!
+}}{{#type:string?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:string?}}{{!
+}}{{#type:binary?}}{{field:cppName}} = {{!
+    }}{{^type:iobufRef?}}std::move({{field:cppName}}){{/type:iobufRef?}}{{!
+    }}{{#type:iobufRef?}}{{!
+        }}{{#function:stack_arguments?}}{{field:cppName}}->clone(){{/function:stack_arguments?}}{{!
+        }}{{^function:stack_arguments?}}std::move({{field:cppName}}){{/function:stack_arguments?}}{{!
+    }}{{/type:iobufRef?}}{{!
+}}{{/type:binary?}}{{!
+}}{{#type:struct?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:struct?}}{{!
+}}{{#type:list?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:list?}}{{!
+}}{{#type:set?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:set?}}{{!
+}}{{#type:map?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:map?}}{{!
+}}{{#type:enum?}}{{field:cppName}}{{/type:enum?}}

@@ -1,0 +1,12 @@
+android src/module.thrift
+py src/module.thrift
+php:lazy_constants=1 src/module.thrift
+hack:typedef,lazy_constants=1 src/module.thrift
+go src/module.thrift
+mstch_cpp2 src/module.thrift
+mstch_rust src/module.thrift
+mstch_java src/module.thrift
+mstch_pyi src/module.thrift
+mstch_py3 src/module.thrift
+json src/module.thrift
+mstch_python src/module.thrift

@@ -1,0 +1,74 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:no_deprecated_tag_incompatible_and_thrift_uri?%>
+  static constexpr std::size_t __fbthrift_field_size_v = <%struct:fields_size%>;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void<%#struct:fields%>,
+                                                   ::apache::thrift::field_id<<%field:key%>><%/struct:fields%>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void<%#struct:fields%>,
+                                                         <%field:type_tag%><%/struct:fields%>>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void<%#struct:fields%>,
+                                                      ::apache::thrift::tag::<%field:cpp_name%><%/struct:fields%>>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    <%#struct:fields%>
+    template<> static constexpr int value<::apache::thrift::field_id<<%field:key%>>> = <%field:ordinal%>;
+    template<> static constexpr int value<::apache::thrift::tag::<%field:cpp_name%>> = <%field:ordinal%>;
+    <%/struct:fields%>
+#else
+<%! Build speed wise, function overload is much slower than explicit template specialization %>
+<%! TODO(ytj): Remove #else branch when gcc fixed bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282 %>
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    <%#struct:fields%>
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<<%field:key%>>>) { return <%field:ordinal%>; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::<%field:cpp_name%>>) { return <%field:ordinal%>; }
+    <%/struct:fields%>
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+<%! For non-unique field data, such as type tag, we can have same type tag for multiple fields.
+    In that case, we can not use template specialization since we can not specialize the same type twice.
+    Usually, this is handled by scanning all types to check whether there are duplicates,
+    e.g., https://github.com/llvm/llvm-project/blob/llvmorg-14.0.5/libcxx/include/tuple#L1218.
+    However, the build speed is much faster if we use partial specialization like this instead. %>
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    <%#struct:fields%>
+    template<class T> struct Impl<<%field:type_tag%>, T, std::enable_if_t<sizeof(T) != -<%field:ordinal%>>> { static constexpr int value = <%field:ordinal%>; };
+    <%/struct:fields%>
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+<%/struct:no_deprecated_tag_incompatible_and_thrift_uri?%>

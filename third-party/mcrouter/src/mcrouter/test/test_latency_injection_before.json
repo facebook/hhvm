@@ -1,0 +1,13 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "127.0.0.1:11610" ],
+      "protocol": "caret"
+    }
+  },
+  "route": {
+    "type": "LatencyInjectionRoute",
+    "child": "PoolRoute|A",
+    "before_latency_ms": 2000
+  }
+}

@@ -1,0 +1,25 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#type:sink?}}{{!
+    }}{{#type:sink_has_first_response?}}reactor.core.publisher.Flux<com.facebook.thrift.model.StreamResponse<{{!
+    }}{{#type:sink_first_response_type}}{{ >BoxedType}}{{/type:sink_first_response_type}},{{!
+    }}{{#type:sink_final_response_type}}{{ >BoxedType}}{{/type:sink_final_response_type}}>>{{!
+    }}{{/type:sink_has_first_response?}}{{!
+    }}{{^type:sink_has_first_response?}}{{!
+    }}{{#type:sink_final_response_type}}reactor.core.publisher.Mono<{{ >BoxedType}}>{{/type:sink_final_response_type}}{{!
+    }}{{/type:sink_has_first_response?}}{{!
+}}{{/type:sink?}}

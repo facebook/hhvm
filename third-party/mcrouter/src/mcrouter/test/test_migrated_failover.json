@@ -1,0 +1,33 @@
+{
+  "pools": {
+    "A-old": {
+      "servers": [ "127.0.0.1:11610" ]
+    },
+    "A-new": {
+      "servers": [ "127.0.0.1:11611" ]
+    },
+    "B-old": {
+      "servers": [ "127.0.0.1:11612" ]
+    },
+    "B-new": {
+      "servers": [ "127.0.0.1:11613" ]
+    }
+  },
+  "route": {
+    "type": "FailoverWithExptimeRoute",
+    "normal": {
+      "type": "MigrateRoute",
+      "from": "PoolRoute|A-old",
+      "to": "PoolRoute|A-new",
+      "start_time": 0,
+      "interval": 120
+    },
+    "failover": {
+      "type": "MigrateRoute",
+      "from": "PoolRoute|B-old",
+      "to": "PoolRoute|B-new",
+      "start_time": 0,
+      "interval": 120
+    }
+  }
+}

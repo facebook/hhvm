@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+javafoundations/scripts/create-idea-project \
+--mode-files "mac" \
+--project-root=thrift/lib/java \
+//thrift/lib/java/benchmarks:benchmarks \
+//thrift/lib/java/common:common \
+//thrift/lib/java/common:common-test \
+//thrift/lib/java/guice:guice \
+//thrift/lib/java/guice:guice-test \
+//thrift/lib/java/runtime:runtime \
+//thrift/lib/java/runtime:runtime-test \
+//thrift/lib/java/example/ping:ping-lib \
+//thrift/lib/java/example/ping:ping-server \
+//thrift/lib/java/example/ping:ping-client \
+//thrift/lib/java/facebook/service-framework:service-framework \
+//thrift/lib/java/facebook/service-framework:service-framework-test \
+--verbose \
+--non-interactive

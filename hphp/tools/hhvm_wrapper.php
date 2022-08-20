@@ -7,7 +7,8 @@ function my_option_map(): OptionInfoMap {
   return Map {
 'help'            => Pair { 'h', 'Print help message' },
 'bin:'            => Pair { 'b', 'Use a specific HHVM binary' },
-'gdb'             => Pair { 'g', 'Run the whole command in agdb' },
+'gdb'             => Pair { 'g', 'Run the whole command in gdb' },
+'lldb'            => Pair { 'l', 'Run the whole command in lldb' },
 'server'          => Pair { '',  'Run a server, port 80, pwd as the root' },
 'interp'          => Pair { 'i', 'Disable the JIT compiler' },
 'opt-ir'          => Pair { 'o', 'Disable debug assertions in IR output' },
@@ -342,6 +343,9 @@ function run_hhvm(OptionMap $opts): void {
     create_repo($opts);
     exit(0);
   }
+  if ($opts->containsKey('gdb') && $opts->containsKey('lldb')) {
+      error('Can only specify a single debugger');
+  }
   if ($opts->containsKey('repo')) {
     $flags = repo_auth_flags($flags, (string) $opts['repo']);
   } else if ($opts->containsKey('compile')) {
@@ -353,7 +357,11 @@ function run_hhvm(OptionMap $opts): void {
   }
 
   $pfx = determine_trace_env($opts);
-  $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
+  if ($opts->containsKey('gdb')) {
+    $pfx .= 'gdb --args ';
+  } else if ($opts->containsKey('lldb')) {
+    $pfx .= 'lldb -- ';
+  }
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }

@@ -2335,7 +2335,7 @@ and has_dispose_method env has_await p e ty =
   in
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
-    call ~expected:None p env tfty [] None
+    call ~expected:None ~expr_pos:p ~recv_pos:obj_pos env tfty [] None
   in
   env
 
@@ -3599,7 +3599,7 @@ and expr_
     in
     Option.iter ty_err_opt ~f:Errors.add_typing_error;
     let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
-      call ~expected:None p env tfty [] None
+      call ~expected:None ~expr_pos:p ~recv_pos:p env tfty [] None
     in
     make_result env p (Aast.Clone te) ty
   | This ->
@@ -4660,7 +4660,7 @@ and expr_
     let env = Env.set_readonly env true in
     let (env, te, rty) = expr ~is_using_clause env e in
     make_result env p (Aast.ReadonlyExpr te) rty
-  | New ((_, pos, c), explicit_targs, el, unpacked_element, ()) ->
+  | New (((_, pos, _) as cid), explicit_targs, el, unpacked_element, ()) ->
     let env = might_throw env in
     let ( env,
           tc,
@@ -4677,7 +4677,7 @@ and expr_
         ~check_not_abstract:true
         pos
         env
-        c
+        cid
         explicit_targs
         (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) el)
         unpacked_element
@@ -5928,7 +5928,7 @@ and new_object
     ~is_using_clause
     p
     env
-    cid
+    ((_, _, cid_) as cid)
     explicit_targs
     el
     unpacked_element =
@@ -5939,7 +5939,7 @@ and new_object
       new $classname();
    *)
   let (env, tal, tcid, classes) =
-    instantiable_cid ~exact:Exact p env cid explicit_targs
+    instantiable_cid ~exact:Exact p env cid_ explicit_targs
   in
   let allow_abstract_bound_generic =
     match tcid with
@@ -5952,20 +5952,20 @@ and new_object
     if
       check_not_abstract
       && Cls.abstract class_info
-      && (not (requires_consistent_construct cid))
+      && (not (requires_consistent_construct cid_))
       && not allow_abstract_bound_generic
     then
       uninstantiable_error
         env
         p
-        cid
+        cid_
         (Cls.pos class_info)
         (Cls.name class_info)
         p
         c_ty;
     let (env, obj_ty_, params) =
       let (env, c_ty) = Env.expand_type env c_ty in
-      match (cid, tal, get_class_type c_ty) with
+      match (cid_, tal, get_class_type c_ty) with
       (* Explicit type arguments *)
       | (CI _, _ :: _, Some (_, _, tyl)) -> (env, get_node c_ty, tyl)
       | (_, _, class_type_opt) ->
@@ -5997,7 +5997,7 @@ and new_object
     let r_witness = Reason.Rwitness p in
     let obj_ty = mk (r_witness, obj_ty_) in
     let c_ty =
-      match cid with
+      match cid_ with
       | CIstatic
       | CIexpr _ ->
         mk (r_witness, get_node c_ty)
@@ -6011,7 +6011,7 @@ and new_object
       else if check_parent then
         (env, c_ty)
       else
-        ExprDepTy.make env ~cid c_ty
+        ExprDepTy.make env ~cid:cid_ c_ty
     in
     (* Set variance according to type of `new` expression now. Lambda arguments
      * to the constructor might depend on it, and `call_construct` only uses
@@ -6025,7 +6025,7 @@ and new_object
       should_forget_fakes_acc || should_forget_fakes
     in
     (if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
-      match cid with
+      match cid_ with
       | CIstatic ->
         let (class_pos, class_name) = cname in
         Errors.add_typing_error
@@ -6041,7 +6041,7 @@ and new_object
             @@ Primary.New_inconsistent_construct
                  { pos = p; class_name; class_pos; kind = `classname })
       | _ -> ());
-    match cid with
+    match cid_ with
     | CIparent ->
       let (env, ctor_fty) =
         match fst (Cls.construct class_info) with
@@ -6145,7 +6145,7 @@ and new_object
     else if check_parent then
       (env, ty)
     else
-      ExprDepTy.make env ~cid ty
+      ExprDepTy.make env ~cid:cid_ ty
   in
   ( env,
     tcid,
@@ -6166,7 +6166,7 @@ and attributes_check_def env kind attrs =
         ~is_using_clause:false
         attr_pos
         env
-        (Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
+        ((), attr_pos, Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
         []
         (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
         (* list of attr parameter literals *)
@@ -6610,7 +6610,7 @@ and arraykey_value
 
   (env, (te, ty))
 
-and check_parent_construct pos env el unpacked_element env_parent =
+and check_parent_construct pos recv_pos env el unpacked_element env_parent =
   let check_not_abstract = false in
   let ((env, ty_err_opt), env_parent) =
     Phase.localize_no_subst env ~ignore_errors:true env_parent
@@ -6631,7 +6631,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
       ~is_using_clause:false
       pos
       env
-      CIparent
+      ((), recv_pos, CIparent)
       []
       el
       unpacked_element
@@ -6664,9 +6664,10 @@ and check_parent_construct pos env el unpacked_element env_parent =
     fty,
     should_forget_fakes )
 
-and call_parent_construct pos env el unpacked_element =
+and call_parent_construct pos recv_pos env el unpacked_element =
   match Env.get_parent_ty env with
-  | Some parent -> check_parent_construct pos env el unpacked_element parent
+  | Some parent ->
+    check_parent_construct pos recv_pos env el unpacked_element parent
   | None ->
     (* continue here *)
     let ty = Typing_utils.mk_tany env pos in
@@ -6690,7 +6691,7 @@ and call_parent_construct pos env el unpacked_element =
                 @@ Primary.Trait_parent_construct_inconsistent
                      { pos; decl_pos = Cls.pos c })
           | _ -> ());
-          check_parent_construct pos env el unpacked_element parent_ty)
+          check_parent_construct pos recv_pos env el unpacked_element parent_ty)
       | Some _self_tc ->
         Errors.add_typing_error
           Typing_error.(primary @@ Primary.Undefined_parent pos);
@@ -6756,7 +6757,7 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call ~expected ~expr_pos:p ~recv_pos:(fst id) env fty el unpacked_element
     in
     let result =
       make_call
@@ -6817,7 +6818,7 @@ and dispatch_call
     Option.iter ty_err_opt ~f:Errors.add_typing_error;
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let result =
       make_call
@@ -6893,7 +6894,14 @@ and dispatch_call
             let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
             check_disposable_in_return env fty;
             let (env, (tel, _, ty, _should_forget_fakes)) =
-              call ~expected p env fty el unpacked_element
+              call
+                ~expected
+                ~expr_pos:p
+                ~recv_pos:fpos
+                env
+                fty
+                el
+                unpacked_element
             in
             (* construct the `Hole` using default value and type arguments
                if necessary *)
@@ -7177,7 +7185,7 @@ and dispatch_call
     when String.equal construct SN.Members.__construct ->
     let (env, tel, typed_unpack_element, ty, pty, ctor_fty, should_forget_fakes)
         =
-      call_parent_construct p env el unpacked_element
+      call_parent_construct p pos env el unpacked_element
     in
     let result =
       make_call
@@ -7252,7 +7260,15 @@ and dispatch_call
     Option.iter ty_err_opt ~f:Errors.add_typing_error;
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~nullsafe ~expected p env tfty el unpacked_element
+      call
+        ~nullsafe
+        ~expected
+        ~expr_pos:p
+        ~recv_pos:pos_id
+        env
+        tfty
+        el
+        unpacked_element
     in
     let result =
       make_call
@@ -7354,7 +7370,16 @@ and dispatch_call
     check_disposable_in_return env method_ty;
     let (env, (typed_params, typed_unpack_element, ret_ty, should_forget_fakes))
         =
-      call ~nullsafe ~expected ?in_await p env method_ty el unpacked_element
+      call
+        ~nullsafe
+        ~expected
+        ?in_await
+        ~expr_pos:p
+        ~recv_pos:fpos
+        env
+        method_ty
+        el
+        unpacked_element
     in
     (* If the call is nullsafe AND the receiver is nullable,
        make the return type nullable too *)
@@ -7393,7 +7418,7 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let result =
       make_call
@@ -7417,7 +7442,7 @@ and dispatch_call
     in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let result =
       make_call
@@ -8264,9 +8289,10 @@ and class_expr
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     x
 
-and call_construct p env class_ params el unpacked_element cid cid_ty =
+and call_construct
+    p env class_ params el unpacked_element (_, cid_pos, cid_) cid_ty =
   let cid_ty =
-    if Nast.equal_class_id_ cid CIparent then
+    if Nast.equal_class_id_ cid_ CIparent then
       MakeType.this (Reason.Rwitness p)
     else
       cid_ty
@@ -8364,7 +8390,14 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
         (env, ty)
     in
     let (env, (tel, typed_unpack_element, _ty, should_forget_fakes)) =
-      call ~expected:None p env m el unpacked_element
+      call
+        ~expected:None
+        ~expr_pos:p
+        ~recv_pos:cid_pos
+        env
+        m
+        el
+        unpacked_element
     in
     (env, tel, typed_unpack_element, m, should_forget_fakes)
 
@@ -8398,7 +8431,8 @@ and call
     ?(nullsafe : Pos.t option = None)
     ?in_await
     ?(dynamic_func : dyn_func_kind option)
-    pos
+    ~(expr_pos : Pos.t)
+    ~(recv_pos : Pos.t)
     env
     fty
     (el : (Ast_defs.param_kind * Nast.expr) list)
@@ -8411,7 +8445,7 @@ and call
   Typing_log.(
     log_with_level env "typing" ~level:1 (fun () ->
         log_types
-          (Pos_or_decl.of_raw_pos pos)
+          (Pos_or_decl.of_raw_pos expr_pos)
           env
           [
             Log_head
@@ -8449,13 +8483,13 @@ and call
       fty
   in
   if List.is_empty tyl then begin
-    bad_call env pos fty;
+    bad_call env expr_pos fty;
     let (env, ty_err_opt) =
       call_untyped_unpack env (get_pos fty) unpacked_element
     in
     let should_forget_fakes = true in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
-    (env, ([], None, err_witness env pos, should_forget_fakes))
+    (env, ([], None, err_witness env expr_pos, should_forget_fakes))
   end else
     let (env, fty) =
       Typing_intersection.intersect_list env (get_reason fty) tyl
@@ -8468,7 +8502,7 @@ and call
         Typing_solver.expand_type_and_solve
           ~description_of_expected:"a function value"
           env
-          pos
+          expr_pos
           fty
     in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
@@ -8480,7 +8514,8 @@ and call
         ~nullsafe
         ?in_await
         ?dynamic_func:(to_like_function dynamic_func)
-        pos
+        ~expr_pos
+        ~recv_pos
         env
         ty
         el
@@ -8488,7 +8523,7 @@ and call
     | _ ->
       (match deref efty with
       | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
-        let ty = MakeType.dynamic (Reason.Rdynamic_call pos) in
+        let ty = MakeType.dynamic (Reason.Rdynamic_call expr_pos) in
         let el =
           (* Need to check that the type of the unpacked_element can be,
            * coerced to dynamic, just like all of the other arguments, in addition
@@ -8503,7 +8538,7 @@ and call
         let expected_arg_ty =
           ExpectedTy.make
             ~coerce:(Some Typing_logic.CoerceToDynamic)
-            pos
+            expr_pos
             Reason.URparam
             ty
         in
@@ -8540,7 +8575,7 @@ and call
                   env
                   e_ty
                   ty
-                @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
+                @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
               in
               let ty_mismatch_opt = mk_ty_mismatch_opt e_ty ty ty_err_opt in
               ((env, ty_err_opt), (pk, hole_on_ty_mismatch ~ty_mismatch_opt te)))
@@ -8564,7 +8599,10 @@ and call
         in
         let expected_arg_ty =
           (* Note: We ought to be using 'mixed' here *)
-          ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
+          ExpectedTy.make
+            expr_pos
+            Reason.URparam
+            (Typing_utils.mk_tany env expr_pos)
         in
         let (env, tel) =
           List.map_env env el ~f:(fun env (pk, elt) ->
@@ -8577,7 +8615,7 @@ and call
                   | Tdynamic ->
                     let (env, ty_err_opt) =
                       Typing_coercion.coerce_type
-                        pos
+                        expr_pos
                         Reason.URparam
                         env
                         ty
@@ -8609,10 +8647,10 @@ and call
         let ty =
           match ty with
           | Tprim Tnull -> mk (r, Tprim Tnull)
-          | Tdynamic -> MakeType.dynamic (Reason.Rdynamic_call pos)
+          | Tdynamic -> MakeType.dynamic (Reason.Rdynamic_call expr_pos)
           | Terr
           | Tany _ ->
-            Typing_utils.mk_tany env pos
+            Typing_utils.mk_tany env expr_pos
           | Tunion []
           | _ (* _ should not happen! *) ->
             mk (r, Tunion [])
@@ -8626,7 +8664,8 @@ and call
           ~nullsafe
           ?in_await
           ?dynamic_func
-          pos
+          ~expr_pos
+          ~recv_pos
           env
           ty
           el
@@ -8639,7 +8678,8 @@ and call
                 ~nullsafe
                 ?in_await
                 ?dynamic_func
-                pos
+                ~expr_pos
+                ~recv_pos
                 env
                 ty
                 el
@@ -8666,7 +8706,8 @@ and call
                 ~nullsafe
                 ?in_await
                 ?dynamic_func
-                pos
+                ~expr_pos
+                ~recv_pos
                 env
                 ty
                 el
@@ -8900,14 +8941,14 @@ and call
             let env_capability =
               Env.get_local_check_defined
                 env
-                (pos, Typing_coeffects.capability_id)
+                (expr_pos, Typing_coeffects.capability_id)
             in
             let base_error =
               Typing_error.Primary.(
                 Coeffect
                   (Coeffect.Call_coeffect
                      {
-                       pos;
+                       pos = recv_pos;
                        available_incl_unsafe =
                          Typing_coeffects.pretty env env_capability;
                        available_pos = Typing_defs.get_pos env_capability;
@@ -8915,7 +8956,7 @@ and call
                        required = Typing_coeffects.pretty env capability;
                      }))
             in
-            Type.sub_type pos Reason.URnone env env_capability capability
+            Type.sub_type expr_pos Reason.URnone env env_capability capability
             @@ Typing_error.Callback.always base_error
         in
         let should_forget_fakes =
@@ -9011,7 +9052,7 @@ and call
                    as expected type *)
                 let ty_expect =
                   MakeType.nothing
-                  @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos pos)
+                  @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos expr_pos)
                 in
                 (env, mk_hole te ~ty_have:ty ~ty_expect)
               | None ->
@@ -9085,7 +9126,7 @@ and call
          * unpacked array consumes 1 or many parameters, it is nonsensical to say
          * that not enough args were passed in (so we don't do the min check).
          *)
-        let () = check_arity ~did_unpack pos pos_def ft arity in
+        let () = check_arity ~did_unpack expr_pos pos_def ft arity in
         (* Variadic params cannot be inout so we can stop early *)
         let env = wfold_left2 inout_write_back env non_variadic_ft_params el in
         let ret =
@@ -9185,11 +9226,14 @@ and call
           (env, fun_type, return_ty)
         in
         let (env, fun_type, return_ty) =
-          mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
+          mk_function_supertype
+            env
+            expr_pos
+            (type_of_el, type_of_unpacked_element)
         in
         let (env, ty_err_opt) =
           Type.sub_type
-            pos
+            expr_pos
             Reason.URnone
             env
             efty
@@ -9233,7 +9277,8 @@ and call
               ~nullsafe
               ?in_await
               ?dynamic_func
-              pos
+              ~expr_pos
+              ~recv_pos
               env
               ty
               el
@@ -9246,7 +9291,8 @@ and call
                   ~nullsafe
                   ?in_await
                   ?dynamic_func
-                  pos
+                  ~expr_pos
+                  ~recv_pos
                   env
                   ty
                   el
@@ -9257,23 +9303,33 @@ and call
                   ~nullsafe
                   ?in_await
                   ?dynamic_func
-                  pos
+                  ~expr_pos
+                  ~recv_pos
                   env
                   ty
                   el
                   unpacked_element)
         end
       | _ ->
-        bad_call env pos efty;
+        bad_call env expr_pos efty;
         let (env, ty_err_opt) =
           call_untyped_unpack env (get_pos efty) unpacked_element
         in
         let should_forget_fakes = true in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
-        (env, ([], None, err_witness env pos, should_forget_fakes)))
+        (env, ([], None, err_witness env expr_pos, should_forget_fakes)))
 
 and call_supportdyn
-    ~expected ~nullsafe ?in_await ?dynamic_func pos env ty el unpacked_element =
+    ~expected
+    ~nullsafe
+    ?in_await
+    ?dynamic_func
+    ~expr_pos
+    ~recv_pos
+    env
+    ty
+    el
+    unpacked_element =
   let (env, ty) = Env.expand_type env ty in
   match deref ty with
   | (_, Tfun _) ->
@@ -9282,7 +9338,8 @@ and call_supportdyn
       ~nullsafe
       ?in_await
       ?dynamic_func:(Some Supportdyn_function)
-      pos
+      ~expr_pos
+      ~recv_pos
       env
       ty
       el
@@ -9293,7 +9350,8 @@ and call_supportdyn
       ~nullsafe
       ?in_await
       ?dynamic_func
-      pos
+      ~expr_pos
+      ~recv_pos
       env
       (MakeType.dynamic r)
       el
@@ -9510,7 +9568,15 @@ and type_param env t =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function
-    make_call fpos p env class_id method_id el unpacked_element f =
+    make_call
+    fpos
+    p
+    env
+    ((_, cid_pos, _) as class_id)
+    method_id
+    el
+    unpacked_element
+    f =
   let (env, _tal, tcid, ty) = class_expr env [] class_id in
   let (env, (fty, tal)) =
     class_get
@@ -9523,7 +9589,14 @@ and overload_function
       class_id
   in
   let (env, (tel, typed_unpack_element, res, should_forget_fakes)) =
-    call ~expected:None p env fty el unpacked_element
+    call
+      ~expected:None
+      ~expr_pos:p
+      ~recv_pos:cid_pos
+      env
+      fty
+      el
+      unpacked_element
   in
   let (env, ty) = f env fty res el tel in
   let (env, fty) = Env.expand_type env fty in

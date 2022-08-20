@@ -1,22 +1,22 @@
-File "leak_safe_caller.php", line 12, characters 3-19:
+File "leak_safe_caller.php", line 12, characters 3-17:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_caller.php", line 11, characters 23-31:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "leak_safe_caller.php", line 20, characters 28-34:
   But the function being called requires the capability AccessGlobals
-File "leak_safe_caller.php", line 14, characters 3-14:
+File "leak_safe_caller.php", line 14, characters 3-12:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_caller.php", line 11, characters 23-31:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "leak_safe_caller.php", line 21, characters 23-27:
   But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-File "leak_safe_caller.php", line 16, characters 3-17:
+File "leak_safe_caller.php", line 16, characters 3-15:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_caller.php", line 11, characters 23-31:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "leak_safe_caller.php", line 22, characters 10-22:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "leak_safe_caller.php", line 17, characters 3-14:
+File "leak_safe_caller.php", line 17, characters 3-12:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_caller.php", line 11, characters 23-31:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}

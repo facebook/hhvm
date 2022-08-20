@@ -4,7 +4,7 @@ File "custom_function.php", line 10, characters 25-29:
 Expected constant expression for initializer (Parsing[1002])
 File "custom_function.php", line 10, characters 25-29:
 Illegal constant value (Naming[2023])
-File "custom_function.php", line 6, characters 28-32:
+File "custom_function.php", line 6, characters 28-30:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "custom_function.php", line 6, characters 28-32:
   From this declaration, the context of this function body provides the capability set {}

@@ -1,4 +1,4 @@
-File "readonly_globals.php", line 5, characters 8-26:
+File "readonly_globals.php", line 5, characters 8-20:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "readonly_globals.php", line 3, characters 43-47:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}

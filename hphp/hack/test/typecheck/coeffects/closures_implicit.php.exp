@@ -1,16 +1,16 @@
-File "closures_implicit.php", line 9, characters 24-40:
+File "closures_implicit.php", line 9, characters 24-38:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 6, characters 23-27:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
   File "closures_implicit.php", line 4, characters 28-35:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "closures_implicit.php", line 26, characters 10-21:
+File "closures_implicit.php", line 26, characters 10-19:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 24, characters 30-38:
   From this declaration, the context of this function body provides the capability Unrelated
   File "closures_implicit.php", line 6, characters 23-27:
   But the function being called requires the capability set {Rx, WriteProperty}
-File "closures_implicit.php", line 30, characters 12-30:
+File "closures_implicit.php", line 30, characters 12-28:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 28, characters 6-10:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}

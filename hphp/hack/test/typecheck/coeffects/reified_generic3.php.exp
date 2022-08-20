@@ -1,4 +1,4 @@
-File "reified_generic3.php", line 29, characters 3-24:
+File "reified_generic3.php", line 29, characters 3-3:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "reified_generic3.php", line 26, characters 16-17:
   From this declaration, the context of this function body provides the capability set {}

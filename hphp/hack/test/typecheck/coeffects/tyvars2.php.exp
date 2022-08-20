@@ -1,4 +1,4 @@
-File "tyvars2.php", line 11, characters 3-28:
+File "tyvars2.php", line 11, characters 3-15:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "tyvars2.php", line 9, characters 18-19:
   From this declaration, the context of this function body provides the capability set {}

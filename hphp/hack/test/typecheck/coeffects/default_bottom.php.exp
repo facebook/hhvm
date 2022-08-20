@@ -1,4 +1,4 @@
-File "default_bottom.php", line 6, characters 3-10:
+File "default_bottom.php", line 6, characters 3-8:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "default_bottom.php", line 5, characters 16-17:
   From this declaration, the context of this function body provides the capability set {}

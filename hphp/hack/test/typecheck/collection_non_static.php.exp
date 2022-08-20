@@ -1,6 +1,6 @@
 File "collection_non_static.php", line 8, characters 38-42:
 Expected constant expression for initializer (Parsing[1002])
-File "collection_non_static.php", line 8, characters 38-42:
+File "collection_non_static.php", line 8, characters 38-40:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "collection_non_static.php", line 8, characters 29-47:
   From this declaration, the context of this function body provides the capability set {}

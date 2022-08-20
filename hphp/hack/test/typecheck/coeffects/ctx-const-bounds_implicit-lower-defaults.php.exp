@@ -1,4 +1,4 @@
-File "ctx-const-bounds_implicit-lower-defaults.php", line 9, characters 3-9:
+File "ctx-const-bounds_implicit-lower-defaults.php", line 9, characters 7-7:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "ctx-const-bounds_implicit-lower-defaults.php", line 8, characters 10-33:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

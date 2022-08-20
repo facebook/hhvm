@@ -1,6 +1,6 @@
 File "call_in_static_darray.php", line 7, characters 52-57:
 Expected constant expression for initializer (Parsing[1002])
-File "call_in_static_darray.php", line 7, characters 52-57:
+File "call_in_static_darray.php", line 7, characters 52-55:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "call_in_static_darray.php", line 7, characters 38-58:
   From this declaration, the context of this function body provides the capability set {}

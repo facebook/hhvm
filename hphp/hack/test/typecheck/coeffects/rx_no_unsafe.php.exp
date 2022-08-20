@@ -1,10 +1,10 @@
-File "rx_no_unsafe.php", line 10, characters 3-13:
+File "rx_no_unsafe.php", line 10, characters 3-11:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "rx_no_unsafe.php", line 8, characters 18-22:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
   File "rx_no_unsafe.php", line 4, characters 22-29:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "rx_no_unsafe.php", line 14, characters 3-9:
+File "rx_no_unsafe.php", line 14, characters 3-7:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "rx_no_unsafe.php", line 13, characters 19-20:
   From this declaration, the context of this function body provides the capability set {}

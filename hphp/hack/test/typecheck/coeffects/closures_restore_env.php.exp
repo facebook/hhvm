@@ -1,4 +1,4 @@
-File "closures_restore_env.php", line 21, characters 3-10:
+File "closures_restore_env.php", line 21, characters 3-8:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "closures_restore_env.php", line 17, characters 22-23:
   From this declaration, the context of this function body provides the capability set {}

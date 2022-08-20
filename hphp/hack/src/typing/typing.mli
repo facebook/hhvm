@@ -62,7 +62,8 @@ val call :
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
   ?dynamic_func:dyn_func_kind ->
-  Pos.t ->
+  expr_pos:Pos.t ->
+  recv_pos:Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   (Ast_defs.param_kind * Nast.expr) list ->

@@ -1,64 +1,64 @@
-File "cipp.php", line 6, characters 3-24:
+File "cipp.php", line 6, characters 3-22:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 5, characters 25-29:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 12, characters 33-45:
   But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-File "cipp.php", line 7, characters 3-22:
+File "cipp.php", line 7, characters 3-20:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 5, characters 25-29:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 19, characters 31-41:
   But the function being called requires the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
-File "cipp.php", line 8, characters 3-19:
+File "cipp.php", line 8, characters 3-17:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 5, characters 25-29:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 27, characters 28-40:
   But the function being called requires the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
-File "cipp.php", line 9, characters 3-12:
+File "cipp.php", line 9, characters 3-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 5, characters 25-29:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 34, characters 10-17:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "cipp.php", line 15, characters 3-19:
+File "cipp.php", line 15, characters 3-17:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 12, characters 33-45:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
   File "cipp.php", line 27, characters 28-40:
   But the function being called requires the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
-File "cipp.php", line 16, characters 3-12:
+File "cipp.php", line 16, characters 3-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 12, characters 33-45:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
   File "cipp.php", line 34, characters 10-17:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "cipp.php", line 23, characters 3-19:
+File "cipp.php", line 23, characters 3-17:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 19, characters 31-41:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
   File "cipp.php", line 27, characters 28-40:
   But the function being called requires the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
-File "cipp.php", line 29, characters 3-24:
+File "cipp.php", line 29, characters 3-22:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 27, characters 28-40:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 12, characters 33-45:
   But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-File "cipp.php", line 30, characters 3-22:
+File "cipp.php", line 30, characters 3-20:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 27, characters 28-40:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 19, characters 31-41:
   But the function being called requires the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
-File "cipp.php", line 31, characters 3-12:
+File "cipp.php", line 31, characters 3-10:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 27, characters 28-40:
   From this declaration, the context of this function body provides the capability set {ImplicitPolicyOf<A>, ReadGlobals, System, WriteProperty}
   File "cipp.php", line 34, characters 10-17:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "cipp.php", line 39, characters 3-19:
+File "cipp.php", line 39, characters 3-17:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "cipp.php", line 34, characters 10-17:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

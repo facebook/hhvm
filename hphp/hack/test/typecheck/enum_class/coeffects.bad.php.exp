@@ -4,7 +4,7 @@ This call is not allowed because its capabilities are incompatible with the cont
   From this declaration, the context of this function body provides the capability WriteProperty
   File "coeffects.bad.php", line 10, characters 19-29:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "coeffects.bad.php", line 47, characters 12-16:
+File "coeffects.bad.php", line 47, characters 12-14:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "coeffects.bad.php", line 47, characters 12-16:
   From this declaration, the context of this function body provides the capability WriteProperty

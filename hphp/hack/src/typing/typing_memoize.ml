@@ -139,7 +139,15 @@ let check_param : policy_sharded:bool -> env -> Nast.fun_param -> unit =
               ty
           in
           Option.iter ty_err_opt ~f:Errors.add_typing_error;
-          ignore (Typing.call ~expected:None pos env tfty [] None)
+          ignore
+            (Typing.call
+               ~expected:None
+               ~expr_pos:pos
+               ~recv_pos:pos
+               env
+               tfty
+               []
+               None)
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Taccess _ -> ()

@@ -1,4 +1,4 @@
-File "leak_safe_callee.php", line 26, characters 3-10:
+File "leak_safe_callee.php", line 26, characters 3-8:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_callee.php", line 23, characters 51-76:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty}

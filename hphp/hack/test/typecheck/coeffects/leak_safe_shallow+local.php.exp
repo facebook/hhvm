@@ -1,22 +1,22 @@
-File "leak_safe_shallow+local.php", line 10, characters 5-23:
+File "leak_safe_shallow+local.php", line 10, characters 5-21:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_shallow+local.php", line 9, characters 28-36:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "leak_safe_shallow+local.php", line 33, characters 30-44:
   But the function being called requires the capability set {ReadGlobals, SystemLocal, WriteProperty}
-File "leak_safe_shallow+local.php", line 29, characters 5-21:
+File "leak_safe_shallow+local.php", line 29, characters 5-19:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_shallow+local.php", line 28, characters 36-52:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty}
   File "leak_safe_shallow+local.php", line 16, characters 28-40:
   But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-File "leak_safe_shallow+local.php", line 30, characters 5-15:
+File "leak_safe_shallow+local.php", line 30, characters 5-13:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_shallow+local.php", line 28, characters 36-52:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty}
   File "leak_safe_shallow+local.php", line 5, characters 22-28:
   But the function being called requires the capability AccessGlobals
-File "leak_safe_shallow+local.php", line 41, characters 5-25:
+File "leak_safe_shallow+local.php", line 41, characters 5-23:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "leak_safe_shallow+local.php", line 40, characters 35-56:
   From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty}

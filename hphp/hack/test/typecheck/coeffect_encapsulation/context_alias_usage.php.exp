@@ -1,4 +1,4 @@
-File "context_alias_usage.php--g.php", line 5, characters 3-20:
+File "context_alias_usage.php--g.php", line 5, characters 3-18:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "context_alias_usage.php--g.php", line 4, characters 21-21:
   From this declaration, the context of this function body provides the capability X

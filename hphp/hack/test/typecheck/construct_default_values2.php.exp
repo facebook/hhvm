@@ -1,8 +1,8 @@
-File "construct_default_values2.php", line 12, characters 14-28:
+File "construct_default_values2.php", line 12, characters 21-21:
+Read access to `$this->b` before initialization (Typing[4083])
+File "construct_default_values2.php", line 12, characters 24-26:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "construct_default_values2.php", line 12, characters 9-10:
   From this declaration, the context of this function body provides the capability AccessGlobals
   File "construct_default_values2.php", line 5, characters 19-21:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-File "construct_default_values2.php", line 12, characters 21-21:
-Read access to `$this->b` before initialization (Typing[4083])

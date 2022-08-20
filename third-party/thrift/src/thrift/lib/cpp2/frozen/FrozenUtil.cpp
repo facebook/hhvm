@@ -21,9 +21,9 @@
 #include <folly/Conv.h>
 
 // clang-format off
-DEFINE_bool(thrift_frozen_util_disable_mlock, false,
+FOLLY_GFLAGS_DEFINE_bool(thrift_frozen_util_disable_mlock, false,
     "Don't mlock() files mmaped by mapFrozen() call.");
-DEFINE_bool(thrift_frozen_util_mlock_on_fault, false,
+FOLLY_GFLAGS_DEFINE_bool(thrift_frozen_util_mlock_on_fault, false,
     "Use mlock2(MLOCK_ONFAULT) instead of mlock().");
 // clang-format on
 

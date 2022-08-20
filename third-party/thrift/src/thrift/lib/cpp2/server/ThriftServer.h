@@ -69,8 +69,8 @@
 #include <wangle/ssl/SSLContextConfig.h>
 #include <wangle/ssl/TLSCredProcessor.h>
 
-DECLARE_bool(thrift_abort_if_exceeds_shutdown_deadline);
-DECLARE_string(service_identity);
+FOLLY_GFLAGS_DECLARE_bool(thrift_abort_if_exceeds_shutdown_deadline);
+FOLLY_GFLAGS_DECLARE_string(service_identity);
 
 THRIFT_FLAG_DECLARE_bool(dump_snapshot_on_long_shutdown);
 THRIFT_FLAG_DECLARE_bool(alpn_allow_mismatch);

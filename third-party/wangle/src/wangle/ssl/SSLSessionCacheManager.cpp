@@ -41,7 +41,10 @@ const int MIN_SESSION_ID_LENGTH = 16;
 
 } // namespace
 
-DEFINE_bool(dcache_unit_test, false, "All VIPs share one session cache");
+FOLLY_GFLAGS_DEFINE_bool(
+    dcache_unit_test,
+    false,
+    "All VIPs share one session cache");
 
 namespace wangle {
 

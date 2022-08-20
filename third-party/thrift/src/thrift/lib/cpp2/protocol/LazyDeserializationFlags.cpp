@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/LazyDeserializationFlags.h>
 
-DEFINE_bool(
+FOLLY_GFLAGS_DEFINE_bool(
     thrift_enable_lazy_deserialization,
     true,
     "Whether to enable lazy deserialization");

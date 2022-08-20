@@ -19,7 +19,7 @@
 #include <folly/AtomicLinkedList.h>
 #include <folly/logging/xlog.h>
 
-DEFINE_uint32(
+FOLLY_GFLAGS_DEFINE_uint32(
     thrift_server_request_debug_log_entries_max,
     10000,
     "A limit specifying how many log entries can be in memory per request.");

@@ -18,7 +18,7 @@ namespace folly {
 class IOBuf;
 }
 
-DECLARE_int64(zlib_compressor_buffer_growth);
+FOLLY_GFLAGS_DECLARE_int64(zlib_compressor_buffer_growth);
 
 namespace proxygen {
 

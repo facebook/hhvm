@@ -19,7 +19,7 @@
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 
 THRIFT_FLAG_DEFINE_bool(experimental_use_resource_pools, false);
-DEFINE_bool(
+FOLLY_GFLAGS_DEFINE_bool(
     thrift_experimental_use_resource_pools,
     false,
     "Use experimental resource pools");

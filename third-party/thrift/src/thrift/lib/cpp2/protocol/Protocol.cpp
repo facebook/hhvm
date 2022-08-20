@@ -18,7 +18,7 @@
 
 #include <folly/portability/GFlags.h>
 
-DEFINE_int32(
+FOLLY_GFLAGS_DEFINE_int32(
     thrift_protocol_max_depth,
     15000,
     "How many nested struct/list/set/map are allowed");

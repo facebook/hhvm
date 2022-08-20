@@ -25,8 +25,8 @@
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
-DECLARE_bool(thrift_cpp2_debug_skip_list_indices);
-DECLARE_int64(thrift_cpp2_debug_string_limit);
+FOLLY_GFLAGS_DECLARE_bool(thrift_cpp2_debug_skip_list_indices);
+FOLLY_GFLAGS_DECLARE_int64(thrift_cpp2_debug_string_limit);
 
 namespace apache {
 namespace thrift {

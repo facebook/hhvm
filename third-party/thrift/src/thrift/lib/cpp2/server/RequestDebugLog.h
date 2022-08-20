@@ -22,7 +22,7 @@
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 
-DECLARE_uint32(thrift_server_request_debug_log_entries_max);
+FOLLY_GFLAGS_DECLARE_uint32(thrift_server_request_debug_log_entries_max);
 
 namespace apache {
 namespace thrift {

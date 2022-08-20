@@ -18,7 +18,7 @@
 #include <folly/portability/GFlags.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 
-DECLARE_bool(thrift_enable_lazy_deserialization);
+FOLLY_GFLAGS_DECLARE_bool(thrift_enable_lazy_deserialization);
 
 namespace apache {
 namespace thrift {

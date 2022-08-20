@@ -1,0 +1,51 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python classes for Thrift clients
+}}
+{{> common/auto_generated_py}}
+
+import typing as _typing
+
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+import folly.iobuf as _fbthrift_iobuf
+from {{program:base_library_package}}.client import (
+    AsyncClient as _fbthrift_python_AsyncClient,
+    SyncClient as _fbthrift_python_SyncClient,
+    Client as _fbthrift_python_Client,
+)
+import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
+import {{program:base_library_package}}.types as _fbthrift_python_types
+import {{program:module_path}}.thrift_types
+import {{program:module_path}}.thrift_metadata
+{{#program:include_namespaces}}
+{{#has_types?}}
+import {{included_module_path}}.thrift_types
+{{/has_types?}}
+{{#has_services?}}
+import {{included_module_path}}.thrift_clients
+{{/has_services?}}
+{{/program:include_namespaces}}
+{{#program:services?}}
+{{#program:services}}
+
+class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{service:name}}.Sync"]):
+    {{> clients/client_body }}
+
+
+{{/program:services}}
+{{/program:services?}}

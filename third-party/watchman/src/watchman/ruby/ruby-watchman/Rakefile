@@ -1,0 +1,54 @@
+# Copyright (c) Meta Platforms, Inc. All Rights Reserved.
+
+require 'rubygems'
+require 'rake/clean'
+require 'rspec/core/rake_task'
+require File.expand_path('lib/ruby-watchman/version.rb', File.dirname(__FILE__))
+
+CLEAN.include Rake::FileList['*.gem', '**/*.so', '**/*.bundle', '**/*.o', '**/mkmf.log', '**/Makefile']
+
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :all
+
+desc 'Build and run specs'
+task :all => [:make, :spec]
+
+file 'ext/ruby-watchman/Makefile' => %w[
+  ext/ruby-watchman/depend
+  ext/ruby-watchman/extconf.rb
+] do
+  Dir.chdir('ext/ruby-watchman') { ruby './extconf.rb' }
+end
+
+desc 'Build extension'
+task :make => %w[
+  ext/ruby-watchman/Makefile
+  ext/ruby-watchman/watchman.c
+  ext/ruby-watchman/watchman.h
+] do
+  Dir.chdir('ext/ruby-watchman') { system 'make' }
+end
+EXT_FILE = "ext/ruby-watchman/ext.#{RbConfig::CONFIG['DLEXT']}"
+file EXT_FILE => :make
+
+GEM_FILE_DEPENDENCIES = Dir[
+  'ext/ruby-watchman/**/*.{c,h,rb}',
+  'ext/ruby-watchman/depend',
+  'lib/**/*.rb',
+  'spec/**/*.rb'
+] + [EXT_FILE] # not actually included in gem, but we want to be sure it builds
+
+GEM_FILE = "ruby-watchman-#{RubyWatchman::VERSION}.gem"
+
+file GEM_FILE => GEM_FILE_DEPENDENCIES do
+  system 'gem build ruby-watchman.gemspec'
+end
+
+desc 'Build gem ("gem build")'
+task :build => GEM_FILE
+
+desc 'Publish gem ("gem push")'
+task :push => :build do
+  system "gem push #{GEM_FILE}"
+end

@@ -1,0 +1,127 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#value:type}}{{!
+}}{{#value:newtype?}}{{!
+    }}{{type:package}}::types::{{type:rust_name}}({{!
+        }}{{#value:inner}}{{>lib/value}}{{/value:inner}}{{!
+    }}){{!
+}}{{/value:newtype?}}{{!
+}}{{#value:bool?}}{{value:bool_value}}{{/value:bool?}}{{!
+}}{{#value:integer?}}{{value:integer_value}}{{/value:integer?}}{{!
+}}{{#value:floatingPoint?}}{{value:floatingPointValue}}{{/value:floatingPoint?}}{{!
+}}{{#value:string?}}{{!
+    }}{{#value:empty?}}::std::string::String::new(){{/value:empty?}}{{!
+    }}{{^value:empty?}}{{value:quoted}}.to_owned(){{/value:empty?}}{{!
+}}{{/value:string?}}{{!
+}}{{#value:binary?}}{{!
+    }}{{#value:empty?}}{{!
+        }}{{#type:rust}}<::{{type:rust}}>::new(){{/type:rust}}{{!
+        }}{{^type:rust}}::std::vec::Vec::new(){{/type:rust}}{{!
+    }}{{/value:empty?}}{{!
+    }}{{^value:empty?}}{{value:quoted}}.as_bytes().into(){{/value:empty?}}{{!
+}}{{/value:binary?}}{{!
+}}{{#value:list?}}{{!
+    }}{{#value:empty?}}::std::vec::Vec::new(){{/value:empty?}}{{!
+    }}{{^value:empty?}}{{!
+        }}vec![{{!
+        }}{{#value:list_elements}}
+        {{value:indent}}{{>lib/value}},{{!
+        }}{{/value:list_elements}}
+        {{value:indent}}]{{!
+    }}{{/value:empty?}}{{!
+}}{{/value:list?}}{{!
+}}{{#value:set?}}{{!
+    }}{{#value:empty?}}{{!
+        }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
+        }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
+        }}::new(){{!
+    }}{{/value:empty?}}{{!
+    }}{{^value:empty?}}{{!
+        }}{
+            {{value:indent}}let mut set = {{!
+                }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
+                }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
+            }}::new();{{!
+            }}{{#value:setMembers}}
+        {{value:indent}}set.insert({{!
+            }}{{#value:floatingPoint?}}{{!
+                }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
+            }}{{/value:floatingPoint?}}{{!
+            }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
+        }});{{!
+            }}{{/value:setMembers}}
+            {{value:indent}}set
+        {{value:indent}}}{{!
+    }}{{/value:empty?}}{{!
+}}{{/value:set?}}{{!
+}}{{#value:map?}}{{!
+    }}{{#value:empty?}}{{!
+        }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
+        }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
+        }}::new(){{!
+    }}{{/value:empty?}}{{!
+    }}{{^value:empty?}}{{!
+        }}{
+            {{value:indent}}let mut map = {{!
+                }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
+                }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
+            }}::new();{{!
+            }}{{#value:mapEntries}}
+            {{value:indent}}map.insert({{!
+                }}{{#entry:key}}{{!
+                    }}{{#value:floatingPoint?}}{{!
+                        }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
+                    }}{{/value:floatingPoint?}}{{!
+                    }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
+                }}{{/entry:key}}, {{!
+                }}{{#entry:value}}{{>lib/value}}{{/entry:value}}{{!
+            }});{{!
+            }}{{/value:mapEntries}}
+            {{value:indent}}map
+        {{value:indent}}}{{!
+    }}{{/value:empty?}}{{!
+}}{{/value:map?}}{{!
+}}{{#value:struct?}}{{!
+    }}{{>lib/type}} {{>lib/block}}{{!
+        }}{{#value:structFields}}
+            {{value:indent}}{{field:rust_name}}: {{!
+            }}{{#field:value}}{{>lib/fieldvalue}}{{/field:value}}{{!
+            }}{{^field:value}}::std::default::Default::default(){{/field:value}}{{!
+            }},{{!
+        }}{{/value:structFields}}{{!
+        }}{{^value:exhaustive?}}
+            {{value:indent}}..::std::default::Default::default(){{!
+        }}{{/value:exhaustive?}}
+        {{value:indent}}}{{!
+}}{{/value:struct?}}{{!
+}}{{#value:union?}}{{!
+    }}{{#value:unionVariant}}{{!
+        }}{{>lib/type}}::{{value:unionVariant}}({{!
+            }}{{#value:unionValue}}{{>lib/value}}{{/value:unionValue}}{{!
+        }}){{!
+    }}{{/value:unionVariant}}{{!
+    }}{{^value:unionVariant}}{{!
+        }}{{>lib/type}}::default(){{!
+    }}{{/value:unionVariant}}{{!
+}}{{/value:union?}}{{!
+}}{{#value:enum?}}{{!
+    }}{{value:enumPackage}}::types::{{value:enumName}}{{!
+    }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
+    }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
+}}{{/value:enum?}}{{!
+}}{{/value:type}}{{!
+}}

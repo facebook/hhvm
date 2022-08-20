@@ -1,0 +1,103 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+# TODO: Move to carbon namespace and remove 'Mc' prefixes.
+namespace facebook::memcache;
+thrift_namespace facebook.memcache.thrift;
+
+exception CarbonResultBusy {
+  1: std::string message;
+};
+
+exception CarbonResultRemoteError {
+  1: std::string message;
+};
+
+request McVersionRequest {
+  id: 13;
+  name: "version";
+  reply: McVersionReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McVersionReply {
+  1: Result result;
+  2: folly::IOBuf value;
+  3: std::string message;
+  4: int16_t appSpecificErrorCode;
+};
+
+request McStatsRequest {
+  id: 17;
+  name: "stats";
+  reply: McStatsReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McStatsReply {
+  1: Result result;
+  2: std::string message;
+  3: std::vector<std::string> stats;
+  4: int16_t appSpecificErrorCode;
+};
+
+request McShutdownRequest {
+  id: 18;
+  name: "shutdown";
+  reply: McShutdownReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McShutdownReply {
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McQuitRequest {
+  id: 19;
+  name: "quit";
+  reply: McQuitReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McQuitReply {
+  1: Result result;
+  2: std::string message;
+  3: int16_t appSpecificErrorCode;
+};
+
+request McExecRequest {
+  id: 20;
+  name: "exec";
+  reply: McExecReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+};
+
+reply McExecReply {
+  1: Result result;
+  2: std::string response;
+  3: std::string message;
+  4: int16_t appSpecificErrorCode;
+};
+
+# Unlike other request types, this message is used for out-of-band communication
+# from the server side.
+request GoAwayAcknowledgement {
+  id: 21;
+  name: "goaway";
+  reply: GoAwayRequest;
+};
+
+reply GoAwayRequest {
+  # result is not used, but needed for McServerRequestContext
+  1: Result result;
+  2: std::string reason;
+};

@@ -1,0 +1,724 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "enumerations" : {
+    "MyEnum" : {
+      "lineno" : 25,
+      "constants" : {
+        "MyValue1" : 0,
+        "MyValue2" : 1
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 28,
+          "column" : 2
+        }
+      }
+    },
+    "HackEnum" : {
+      "lineno" : 61,
+      "constants" : {
+        "Value1" : 0,
+        "Value2" : 1
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 61,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 66,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "structs" : {
+    "MyStruct" : {
+      "lineno" : 30,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "MyIntField" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 31,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 31,
+              "column" : 21
+            }
+          }
+        },
+        "MyStringField" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 32,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 32,
+              "column" : 27
+            }
+          }
+        },
+        "MyDataField" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyDataItem",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 29
+            }
+          }
+        },
+        "myEnum" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 35,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 35,
+              "column" : 20
+            }
+          }
+        },
+        "oneway" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 18
+            }
+          }
+        },
+        "readonly" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 37,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 37,
+              "column" : 20
+            }
+          }
+        },
+        "idempotent" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 38,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 38,
+              "column" : 22
+            }
+          }
+        },
+        "floatSet" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "FLOAT", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 39,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 40,
+              "column" : 26
+            }
+          }
+        },
+        "no_hack_codegen_field" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 41,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 42,
+              "column" : 35
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 30,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 43,
+          "column" : 2
+        }
+      }
+    },
+    "MyDataItem" : {
+      "lineno" : 45,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 45,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 21
+        }
+      }
+    },
+    "MyUnion" : {
+      "lineno" : 47,
+      "is_exception" : false,
+      "is_union" : true,
+      "fields" : {
+        "myEnum" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 48,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 48,
+              "column" : 20
+            }
+          }
+        },
+        "myStruct" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyStruct",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 49,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 49,
+              "column" : 24
+            }
+          }
+        },
+        "myDataItem" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyDataItem",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 50,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 50,
+              "column" : 28
+            }
+          }
+        },
+        "floatSet" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "FLOAT", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 51,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 52,
+              "column" : 26
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 47,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 53,
+          "column" : 2
+        }
+      }
+    },
+    "ReservedKeyword" : {
+      "lineno" : 55,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "reserved_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 57,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 58,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 55,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 59,
+          "column" : 2
+        }
+      }
+    },
+    "UnionToBeRenamed" : {
+      "lineno" : 68,
+      "is_exception" : false,
+      "is_union" : true,
+      "fields" : {
+        "reserved_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 70,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 71,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 68,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 72,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "FooService" : {
+      "lineno" : 74,
+      "functions" : {
+        "FooService.simple_rpc" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 76,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 76,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 74,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 77,
+          "column" : 2
+        }
+      }
+
+    },
+    "FB303Service" : {
+      "lineno" : 79,
+      "functions" : {
+        "FB303Service.simple_rpc" : {
+          "return_type" : {
+            "type_enum" : "STRUCT",
+            "spec_args" : "ReservedKeyword"
+          },
+          "args" : [
+            {
+              "type_enum" : "I32",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 80,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 84,
+              "column" : 4
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 79,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 85,
+          "column" : 2
+        }
+      }
+
+    },
+    "MyService" : {
+      "lineno" : 87,
+      "functions" : {
+        "MyService.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 88,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 88,
+              "column" : 14
+            }
+          }
+        },
+        "MyService.getRandomData" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 89,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 89,
+              "column" : 25
+            }
+          }
+        },
+        "MyService.sink" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 90,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 90,
+              "column" : 25
+            }
+          }
+        },
+        "MyService.putDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 92,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 92,
+              "column" : 46
+            }
+          }
+        },
+        "MyService.hasDataById" : {
+          "return_type" : {
+            "type_enum" : "BOOL",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 93,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 93,
+              "column" : 39
+            }
+          }
+        },
+        "MyService.getDataById" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 94,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 94,
+              "column" : 41
+            }
+          }
+        },
+        "MyService.deleteDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 95,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 95,
+              "column" : 44
+            }
+          }
+        },
+        "MyService.lobDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 96,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 96,
+              "column" : 53
+            }
+          }
+        },
+        "MyService.invalid_return_for_hack" : {
+          "return_type" : {
+            "type_enum" : "SET",
+            "spec_args" : { "type_enum" : "FLOAT", "spec_args" : null} 
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 98,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 99,
+              "column" : 39
+            }
+          }
+        },
+        "MyService.rpc_skipped_codegen" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 101,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 102,
+              "column" : 29
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 87,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 103,
+          "column" : 2
+        }
+      }
+
+    },
+    "DbMixedStackArguments" : {
+      "lineno" : 105,
+      "functions" : {
+        "DbMixedStackArguments.getDataByKey0" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 106,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 106,
+              "column" : 38
+            }
+          }
+        },
+        "DbMixedStackArguments.getDataByKey1" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 107,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 107,
+              "column" : 38
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 105,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 108,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

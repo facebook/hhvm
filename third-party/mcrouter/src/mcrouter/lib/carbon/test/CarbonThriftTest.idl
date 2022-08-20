@@ -1,0 +1,114 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace carbon::test;
+thrift_namespace carbon.test.thrift;
+
+import "mcrouter/lib/network/Common.idl"
+cpp2_include "<mcrouter/lib/carbon/test/Timestamp.h>"
+
+thrift_typedef i64 (
+  cpp.adapter = "carbon::test::TimestampAdapter"
+) CustomAdapterTypeI64;
+
+thrift_typedef binary (
+  cpp.adapter = "::carbon::test::DummyPairAdapter<::carbon::test::Timestamp, uint32_t>",
+  cpp.type = "::folly::IOBuf"
+) CustomAdapterTypeBinary;
+
+enum MyEnum : int32_t {
+  A = 0,
+  B = 1,
+  C = 2,
+};
+
+union TestUnionThrift {
+  1: uint64_t a;
+  2: uint32_t b;
+  3: uint16_t c;
+};
+
+struct TinyStruct {
+  1: int64_t foo;
+};
+
+struct MyBaseStruct {
+  1: int64_t baseInt64Member;
+};
+
+struct MySimpleStruct with 1: MyBaseStruct {
+  1: int32_t int32Member;
+  2: std::string stringMember;
+  3: MyEnum enumMember;
+  4: std::vector<std::string> vectorMember;
+};
+
+request ThriftTestRequest with 1: MySimpleStruct as Base, 2: TinyStruct  {
+  id: 2;
+  name: "test";
+  reply: ThriftTestReply;
+  1: carbon::Keys<folly::IOBuf> key;
+  2: bool testBool;
+  3: int8_t testInt8;
+};
+
+reply ThriftTestReply {
+  1: Result result;
+  2: std::string message;
+};
+
+request DummyThriftRequest {
+  id: 1;
+  name: "thrift_test";
+  reply: DummyThriftReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: bool testBool;
+  3: int8_t testInt8;
+  4: int16_t testInt16;
+  5: int32_t testInt32;
+  6: int64_t testInt64;
+  7: uint8_t testUInt8;
+  8: uint16_t testUInt16;
+  9: uint32_t testUInt32;
+  10: uint64_t testUInt64;
+  11: float testFloat;
+  12: double testDouble;
+  13: std::string testShortString;
+  14: std::string testLongString;
+  15: folly::IOBuf testIobuf;
+  16: std::vector<std::string> testList;
+  17: optional bool testOptionalKeywordBool;
+  18: optional std::string testOptionalKeywordString;
+  19: optional folly::IOBuf testOptionalKeywordIobuf;
+};
+
+reply DummyThriftReply {
+  1: Result result;
+  2: std::string message;
+};
+
+request CustomRequest {
+  id: 3;
+  name: "customRequest";
+  reply: CustomReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: int8_t testInt8;
+  3: Timestamp timestamp thrift_cpp_indirection i64;
+  4: optional CustomAdapterTypeI64 customAdapterTypeI64 thrift_cpp_adapter;
+  5: CustomAdapterTypeBinary customAdapterTypeBinary thrift_cpp_adapter;
+};
+
+reply CustomReply {
+  1: Result result;
+  2: int32_t valInt32;
+};
+
+service {
+  enable_shutdown: true;
+  gen_client_tool: false;
+  thrift_tm_thread: true;
+};

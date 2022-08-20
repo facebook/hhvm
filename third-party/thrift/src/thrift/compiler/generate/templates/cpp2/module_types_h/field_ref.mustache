@@ -1,0 +1,149 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:fields%>
+<%#field:use_field_ref?%>
+
+<%^struct:legacy_api?%>
+ private:
+<%/struct:legacy_api?%>
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&> <%field:cpp_name%>_ref() const& {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&&> <%field:cpp_name%>_ref() const&& {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&> <%field:cpp_name%>_ref() & {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&&> <%field:cpp_name%>_ref() && {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+<%^struct:legacy_api?%>
+ public:
+<%/struct:legacy_api?%>
+<%#field:eligible_for_storage_name_mangling?%>
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&> <%field:cpp_name%>() const& {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&&> <%field:cpp_name%>() const&& {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&> <%field:cpp_name%>() & {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&&> <%field:cpp_name%>() && {
+<% > module_types_h/field_interceptor%>
+    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+  }
+<%/field:eligible_for_storage_name_mangling?%>
+<%/field:use_field_ref?%>
+<%^field:use_field_ref?%>
+<%^struct:legacy_api?%>
+ private:
+<%/struct:legacy_api?%>
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> T& <%field:cpp_name%>_ref() & {
+<% > module_types_h/field_interceptor%>
+    return <% > common/field_value%>;
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> const T& <%field:cpp_name%>_ref() const& {
+<% > module_types_h/field_interceptor%>
+    return <% > common/field_value%>;
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> T&& <%field:cpp_name%>_ref() && {
+<% > module_types_h/field_interceptor%>
+    return static_cast<T&&>(<% > common/field_value%>);
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  <%field:cpp_accessor_attribute%> const T&& <%field:cpp_name%>_ref() const&& {
+<% > module_types_h/field_interceptor%>
+    return static_cast<const T&&>(<% > common/field_value%>);
+  }
+<%^struct:legacy_api?%>
+ public:
+<%/struct:legacy_api?%>
+<%#field:eligible_for_storage_name_mangling?%>
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE T& <%field:cpp_name%>() & {
+<% > module_types_h/field_interceptor%>
+    return <% > common/field_value%>;
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE const T& <%field:cpp_name%>() const& {
+<% > module_types_h/field_interceptor%>
+    return <% > common/field_value%>;
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE T&& <%field:cpp_name%>() && {
+<% > module_types_h/field_interceptor%>
+    return static_cast<T&&>(<% > common/field_value%>);
+  }
+
+  template <typename ..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE const T&& <%field:cpp_name%>() const&& {
+<% > module_types_h/field_interceptor%>
+    return static_cast<const T&&>(<% > common/field_value%>);
+  }
+<%/field:eligible_for_storage_name_mangling?%>
+<%/field:use_field_ref?%>
+<%/struct:fields%>
+<%#struct:mixin_fields%>
+<%^struct:legacy_api?%>
+ private:
+<%/struct:legacy_api?%>
+  FOLLY_ERASE auto <%mixin:field_name%>_ref() &       { return <%mixin:name%>_ref()-><%mixin:accessor%>(); }
+  FOLLY_ERASE auto <%mixin:field_name%>_ref() const&  { return <%mixin:name%>_ref()-><%mixin:accessor%>(); }
+  FOLLY_ERASE auto <%mixin:field_name%>_ref() &&      { return std::move(*<%mixin:name%>_ref()).<%mixin:accessor%>(); }
+  FOLLY_ERASE auto <%mixin:field_name%>_ref() const&& { return std::move(*<%mixin:name%>_ref()).<%mixin:accessor%>(); }
+<%^struct:legacy_api?%>
+ public:
+<%/struct:legacy_api?%>
+  FOLLY_ERASE auto <%mixin:field_name%>() &           { return <%mixin:field_name%>_ref(); }
+  FOLLY_ERASE auto <%mixin:field_name%>() const&      { return <%mixin:field_name%>_ref(); }
+  FOLLY_ERASE auto <%mixin:field_name%>() &&          { return std::move(*this).<%mixin:field_name%>_ref(); }
+  FOLLY_ERASE auto <%mixin:field_name%>() const&&     { return std::move(*this).<%mixin:field_name%>_ref(); }
+<%/struct:mixin_fields%>

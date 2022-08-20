@@ -1,0 +1,985 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "constants" : {
+    "myStruct" : {
+      "lineno" : 64,
+      "value" : { "major" : 42, "package" : "package", "my_enum" : 2 },
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "source_range" : {
+        "begin" : {
+          "line" : 64,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 68,
+          "column" : 3
+        }
+      }
+    }
+  },
+  "enumerations" : {
+    "MyEnum" : {
+      "lineno" : 22,
+      "annotations" : {
+        "cpp.name" : {
+          "value" : "YourEnum",
+          "source_range" : {
+            "begin" : {
+              "line" : 26,
+              "column" : 4
+            },
+            "end" : {
+              "line" : 26,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "constants" : {
+        "MyValue1" : 0,
+        "MyValue2" : 1,
+        "DOMAIN" : 2
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 26,
+          "column" : 26
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "MyId" : {
+      "lineno" : 28,
+      "type_enum" : "I16",
+      "spec_args" : null,
+      "structured_annotations" : {
+        "cpp.StrongType" : {  }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 29,
+          "column" : 17
+        }
+      }
+    }
+  },
+  "structs" : {
+    "MyStructNestedAnnotation" : {
+      "lineno" : 31,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 32,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 32,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 31,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 33,
+          "column" : 2
+        }
+      }
+    },
+    "MyUnion" : {
+      "lineno" : 35,
+      "is_exception" : false,
+      "is_union" : true,
+      "annotations" : {
+        "cpp.name" : {
+          "value" : "YourUnion",
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 19
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 41
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "cpp.Adapter" : { "name" : "StaticCast" }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 35,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 36,
+          "column" : 42
+        }
+      }
+    },
+    "MyException" : {
+      "lineno" : 37,
+      "is_exception" : true,
+      "is_union" : false,
+      "annotations" : {
+        "cpp.name" : {
+          "value" : "YourException",
+          "source_range" : {
+            "begin" : {
+              "line" : 38,
+              "column" : 32
+            },
+            "end" : {
+              "line" : 38,
+              "column" : 58
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "cpp.Adapter" : { "name" : "StaticCast" }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 37,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 59
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 41,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "android.generate_builder" : {
+          "value" : "1",
+          "source_range" : {
+            "begin" : {
+              "line" : 58,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 58,
+              "column" : 27
+            }
+          }
+        }
+,
+        "cpp.internal.deprecated._data.method" : {
+          "value" : "1",
+          "source_range" : {
+            "begin" : {
+              "line" : 59,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 59,
+              "column" : 39
+            }
+          }
+        }
+,
+        "cpp.name" : {
+          "value" : "YourStruct",
+          "source_range" : {
+            "begin" : {
+              "line" : 57,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 57,
+              "column" : 26
+            }
+          }
+        }
+,
+        "hack.attributes" : {
+          "value" : "\\SomeClass(\\AnotherClass::class)",
+          "source_range" : {
+            "begin" : {
+              "line" : 61,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 61,
+              "column" : 55
+            }
+          }
+        }
+,
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
+          "source_range" : {
+            "begin" : {
+              "line" : 60,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 60,
+              "column" : 98
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "cpp.Adapter" : { "name" : "StaticCast" }
+      },
+      "fields" : {
+        "major" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "cpp.name" : {
+              "value" : "majorVer",
+              "source_range" : {
+                "begin" : {
+                  "line" : 44,
+                  "column" : 17
+                },
+                "end" : {
+                  "line" : 44,
+                  "column" : 38
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 44,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 44,
+              "column" : 40
+            }
+          }
+        },
+        "package" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.swift.name" : {
+              "value" : "_package",
+              "source_range" : {
+                "begin" : {
+                  "line" : 46,
+                  "column" : 22
+                },
+                "end" : {
+                  "line" : 46,
+                  "column" : 50
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 46,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 46,
+              "column" : 52
+            }
+          }
+        },
+        "annotation_with_quote" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "go.tag" : {
+              "value" : "tag:\"somevalue\"",
+              "source_range" : {
+                "begin" : {
+                  "line" : 48,
+                  "column" : 36
+                },
+                "end" : {
+                  "line" : 48,
+                  "column" : 62
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 48,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 48,
+              "column" : 64
+            }
+          }
+        },
+        "class_" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.swift.name" : {
+              "value" : "class_",
+              "source_range" : {
+                "begin" : {
+                  "line" : 49,
+                  "column" : 21
+                },
+                "end" : {
+                  "line" : 49,
+                  "column" : 47
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 49,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 49,
+              "column" : 49
+            }
+          }
+        },
+        "annotation_with_trailing_comma" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "custom" : {
+              "value" : "test",
+              "source_range" : {
+                "begin" : {
+                  "line" : 50,
+                  "column" : 45
+                },
+                "end" : {
+                  "line" : 50,
+                  "column" : 60
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 50,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 50,
+              "column" : 62
+            }
+          }
+        },
+        "empty_annotations" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 51,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 51,
+              "column" : 34
+            }
+          }
+        },
+        "my_enum" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 52,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 52,
+              "column" : 21
+            }
+          }
+        },
+        "cpp_type_annotation" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 53,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 53,
+              "column" : 78
+            }
+          }
+        },
+        "my_union" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyUnion",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 54,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 54,
+              "column" : 23
+            }
+          }
+        },
+        "my_id" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "MyId",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 55,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 55,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 41,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 62,
+          "column" : 2
+        }
+      }
+    },
+    "SecretStruct" : {
+      "lineno" : 93,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "id" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 94,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 94,
+              "column" : 13
+            }
+          }
+        },
+        "password" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.sensitive" : {
+              "value" : "1",
+              "source_range" : {
+                "begin" : {
+                  "line" : 95,
+                  "column" : 23
+                },
+                "end" : {
+                  "line" : 95,
+                  "column" : 37
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 95,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 95,
+              "column" : 39
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 93,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 96,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 70,
+      "functions" : {
+        "MyService.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [
+            "MyException"
+          ],
+          "source_range" : {
+            "begin" : {
+              "line" : 71,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 71,
+              "column" : 47
+            }
+          }
+        },
+        "MyService.getRandomData" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 72,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 72,
+              "column" : 25
+            }
+          }
+        },
+        "MyService.hasDataById" : {
+          "return_type" : {
+            "type_enum" : "BOOL",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 73,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 73,
+              "column" : 30
+            }
+          }
+        },
+        "MyService.getDataById" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 74,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 74,
+              "column" : 32
+            }
+          }
+        },
+        "MyService.putDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null,
+              "structured_annotations" : {
+                "MyStructNestedAnnotation" : { "name" : "argument" }
+              }
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 75,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 79,
+              "column" : 4
+            }
+          }
+        },
+        "MyService.lobDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null,
+              "annotations" : {
+                "cpp.name" : {
+                  "value" : "dataStr",
+                  "source_range" : {
+                    "begin" : {
+                      "line" : 80,
+                      "column" : 54
+                    },
+                    "end" : {
+                      "line" : 80,
+                      "column" : 74
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 80,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 80,
+              "column" : 76
+            }
+          }
+        },
+        "MyService.doNothing" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "annotations" : {
+            "cpp.name" : {
+              "value" : "cppDoNothing",
+              "source_range" : {
+                "begin" : {
+                  "line" : 81,
+                  "column" : 21
+                },
+                "end" : {
+                  "line" : 81,
+                  "column" : 46
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 81,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 81,
+              "column" : 47
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 70,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 82,
+          "column" : 2
+        }
+      }
+
+    },
+    "MyServicePrioParent" : {
+      "lineno" : 84,
+      "annotations" : {
+        "priority" : {
+          "value" : "HIGH",
+          "source_range" : {
+            "begin" : {
+              "line" : 87,
+              "column" : 4
+            },
+            "end" : {
+              "line" : 87,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "functions" : {
+        "MyServicePrioParent.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "annotations" : {
+            "priority" : {
+              "value" : "IMPORTANT",
+              "source_range" : {
+                "begin" : {
+                  "line" : 85,
+                  "column" : 16
+                },
+                "end" : {
+                  "line" : 85,
+                  "column" : 38
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 85,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 85,
+              "column" : 39
+            }
+          }
+        },
+        "MyServicePrioParent.pong" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "annotations" : {
+            "priority" : {
+              "value" : "HIGH_IMPORTANT",
+              "source_range" : {
+                "begin" : {
+                  "line" : 86,
+                  "column" : 16
+                },
+                "end" : {
+                  "line" : 86,
+                  "column" : 43
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 86,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 86,
+              "column" : 44
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 84,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 87,
+          "column" : 22
+        }
+      }
+
+    },
+    "MyServicePrioChild" : {
+      "extends" : {
+        "type_enum" : "SERVICE",
+        "spec_args" : "MyServicePrioParent"
+      },
+      "lineno" : 89,
+      "functions" : {
+        "MyServicePrioChild.pang" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "annotations" : {
+            "priority" : {
+              "value" : "BEST_EFFORT",
+              "source_range" : {
+                "begin" : {
+                  "line" : 90,
+                  "column" : 16
+                },
+                "end" : {
+                  "line" : 90,
+                  "column" : 40
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 90,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 90,
+              "column" : 41
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 89,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 91,
+          "column" : 2
+        }
+      }
+
+    },
+    "BadService" : {
+      "lineno" : 102,
+      "annotations" : {
+        "cpp.name" : {
+          "value" : "GoodService",
+          "source_range" : {
+            "begin" : {
+              "line" : 105,
+              "column" : 4
+            },
+            "end" : {
+              "line" : 105,
+              "column" : 28
+            }
+          }
+        }
+      },
+      "functions" : {
+        "BadService.createBadInteraction" : {
+          "return_type" : {
+            "type_enum" : "SERVICE",
+            "spec_args" : "BadInteraction"
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 103,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 103,
+              "column" : 27
+            }
+          }
+        },
+        "BadService.bar" : {
+          "return_type" : {
+            "type_enum" : "I32",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 104,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 104,
+              "column" : 12
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 102,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 105,
+          "column" : 29
+        }
+      }
+
+    }
+  }
+}

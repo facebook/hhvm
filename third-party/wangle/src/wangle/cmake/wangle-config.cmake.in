@@ -1,0 +1,25 @@
+#
+# CMake package configuration file for wangle
+#
+# Defines the target "wangle::wangle"
+# Add this to your target_link_libraries() call to depend on wangle.
+#
+# Also sets the variables WANGLE_INCLUDE_DIR and WANGLE_LIBRARIES.
+# However, in most cases using the wangle::wangle target is sufficient,
+# and you won't need these variables.
+#
+
+@PACKAGE_INIT@
+
+set_and_check(WANGLE_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set_and_check(WANGLE_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
+
+if (NOT TARGET wangle::wangle)
+  include("${WANGLE_CMAKE_DIR}/wangle-targets.cmake")
+endif()
+
+set(WANGLE_LIBRARIES wangle::wangle)
+
+if (NOT wangle_FIND_QUIETLY)
+  message(STATUS "Found wangle: ${PACKAGE_PREFIX_DIR}")
+endif()

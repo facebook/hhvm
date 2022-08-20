@@ -1,0 +1,33 @@
+{
+  "pools": {
+    "A-new": {
+      "servers": [ "localhost:12345" ]
+    },
+    "A-old": {
+      "servers": [ "localhost:12346" ]
+    },
+    "B-new": {
+      "servers": [ "localhost:12347" ]
+    },
+    "B-old": {
+      "servers": [ "localhost:12348" ]
+    }
+  },
+  "route": {
+    "type": "FailoverWithExptimeRoute",
+    "failover": {
+      "type": "MigrateRoute",
+      "from": "PoolRoute|B-old",
+      "to": "PoolRoute|B-new",
+      "start_time": START_TIME,
+      "interval": 4
+    },
+    "normal": {
+      "type": "MigrateRoute",
+      "from": "PoolRoute|A-old",
+      "to": "PoolRoute|A-new",
+      "start_time": START_TIME,
+      "interval": 4
+    }
+  }
+}

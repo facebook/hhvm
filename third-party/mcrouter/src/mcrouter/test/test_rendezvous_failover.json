@@ -1,0 +1,34 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "localhost:5001",
+                   "localhost:5002",
+                   "localhost:5003",
+                   "localhost:5004",
+                   "localhost:5005"]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "children": ["PoolRoute|A.wildcard",
+                {
+                  "type":"Pool",
+                  "name":"failover-test.pool.name",
+                  "protocol":"caret",
+                  "servers": [ "localhost:5001",
+                               "localhost:5002",
+                               "localhost:5003",
+                               "localhost:5004",
+                               "localhost:5005"]
+                }
+    ],
+    "failover_policy": {
+        "type": "RendezvousPolicy",
+        "tags":  [ "localhost:5001",
+                   "localhost:5002",
+                   "localhost:5003",
+                   "localhost:5004",
+                   "localhost:5005"]
+    }
+  }
+}

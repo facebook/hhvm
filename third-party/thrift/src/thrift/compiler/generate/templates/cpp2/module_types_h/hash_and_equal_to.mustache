@@ -1,0 +1,35 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>// BEGIN hash_and_equal_to
+<%#program:cpp_declare_hash?%>
+namespace std {
+<%#program:structs%>
+<%#struct:cpp_declare_hash%>
+
+template<> struct hash<typename <%struct:cpp_fullname%>> {
+  size_t operator()(const <%struct:cpp_fullname%>&) const;
+};
+<%#struct:cpp_declare_equal_to%>
+template<> struct equal_to<typename <%struct:cpp_fullname%>> {
+  bool operator()(const <%struct:cpp_fullname%>&,const <%struct:cpp_fullname%>&) const;
+};
+<%/struct:cpp_declare_equal_to%>
+<%/struct:cpp_declare_hash%>
+<%/program:structs%>
+} // std
+<%/program:cpp_declare_hash?%>
+// END hash_and_equal_to

@@ -1,0 +1,219 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
+#include "<%program:include_prefix%><%program:name%>_metadata.h"
+
+// some of these functions can be so large that the compiler gives up optimizing
+// them - and issues a warning which may be treated as an error!
+//
+// these functions are so rarely called that it is probably okay for them not to
+// be optimized in practice
+FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
+
+namespace apache {
+namespace thrift {
+namespace detail {
+namespace md {
+using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
+using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
+using ThriftType = ::apache::thrift::metadata::ThriftType;
+using ThriftService = ::apache::thrift::metadata::ThriftService;
+using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+
+<%#program:enums%>
+void EnumMetadata<<% > common/namespace_cpp2%><%enum:cpp_name%>>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.enums()->emplace("<%program:name%>.<%enum:name%>", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "<%program:name%>.<%enum:name%>";
+  using EnumTraits = TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+  }
+<%#enum:structured_annotations%>
+<%#structured_annotation:const_struct?%>
+  enum_metadata.structured_annotations()->push_back(<% > metadata/const_struct%>);
+<%/structured_annotation:const_struct?%>
+<%/enum:structured_annotations%>
+}
+<%/program:enums%>
+
+<%#program:structs%>
+<%#program:unstructured_annotations_in_metadata?%>
+void StructMetadata<<%struct:cpp_fullname%>>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
+  <%#struct:fields%>
+  thriftStruct.fields()[<%field:index%>].unstructured_annotations() = <% > metadata/unstructured_field_gen%>;
+  <%/struct:fields%>
+}
+<%/program:unstructured_annotations_in_metadata?%>
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<<%struct:cpp_fullname%>>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("<%program:name%>.<%struct:name%>", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& <%struct:metadata_name%> = res.first->second;
+  <%struct:metadata_name%>.name() = "<%program:name%>.<%struct:name%>";
+  <%struct:metadata_name%>.is_union() = <%struct:union?%>;
+<%#struct:fields?%>
+  static const auto* const
+  <%struct:metadata_name%>_fields = new std::array<EncodedThriftField, <%struct:fields_size%>>{{
+<%#struct:fields%>
+    <% > metadata/field_gen%>
+<%/struct:fields%>
+  }};
+  for (const auto& f : *<%struct:metadata_name%>_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    <%struct:metadata_name%>.fields()->push_back(std::move(field));
+  }
+  <%#program:unstructured_annotations_in_metadata?%>
+  StructMetadata::unstructured_annotations(<%struct:metadata_name%>);
+  <%/program:unstructured_annotations_in_metadata?%>
+<%/struct:fields?%>
+<%#struct:structured_annotations%>
+<%#structured_annotation:const_struct?%>
+  <%struct:metadata_name%>.structured_annotations()->push_back(<% > metadata/const_struct%>);
+<%/structured_annotation:const_struct?%>
+<%/struct:structured_annotations%>
+  return res.first->second;
+}
+<%/program:structs%>
+
+<%#program:structs%>
+<%#struct:exception?%>
+void ExceptionMetadata<<%struct:cpp_fullname%>>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.exceptions()->emplace("<%program:name%>.<%struct:name%>", ::apache::thrift::metadata::ThriftException{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftException& <%struct:metadata_name%> = res.first->second;
+  <%struct:metadata_name%>.name() = "<%program:name%>.<%struct:name%>";
+<%#struct:fields?%>
+  static const auto* const
+  <%struct:metadata_name%>_fields = new std::array<EncodedThriftField, <%struct:fields_size%>>{{
+<%#struct:fields%>
+    <% > metadata/field_gen%>
+<%/struct:fields%>
+  }};
+  for (const auto& f : *<%struct:metadata_name%>_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    <%struct:metadata_name%>.fields()->push_back(std::move(field));
+  }
+<%/struct:fields?%>
+<%#struct:structured_annotations%>
+<%#structured_annotation:const_struct?%>
+  <%struct:metadata_name%>.structured_annotations()->push_back(<% > metadata/const_struct%>);
+<%/structured_annotation:const_struct?%>
+<%/struct:structured_annotations%>
+}
+<%/struct:exception?%>
+<%/program:structs%>
+<%#program:services%>
+<%#service:functions%><%^function:starts_interaction?%>
+void ServiceMetadata<::<% > service_common/service_class_name%>>::gen_<%function:cpp_name%>(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "<%function:name%>";
+<%#function:return_type%>
+  auto func_ret_type = <% > metadata/type_gen%>;
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+<%/function:return_type%>
+<%#function:args%>
+  <% > metadata/func_field_gen%>
+func.arguments()->push_back(std::move(<% > metadata/func_field_name%>));
+<%/function:args%>
+<%#function:exceptions%>
+  <% > metadata/func_field_gen%>
+func.exceptions()->push_back(std::move(<% > metadata/func_field_name%>));
+<%#field:type%>
+<%#type:struct?%>
+  ExceptionMetadata<<%type:cpp_fullname%>>::gen(metadata);
+<%/type:struct?%>
+<%/field:type%>
+<%/function:exceptions%>
+  func.is_oneway() = <%function:oneway?%>;
+<%#function:structured_annotations%>
+<%#structured_annotation:const_struct?%>
+  func.structured_annotations()->push_back(<% > metadata/const_struct%>);
+<%/structured_annotation:const_struct?%>
+<%/function:structured_annotations%>
+  service.functions()->push_back(std::move(func));
+}
+<%/function:starts_interaction?%><%/service:functions%>
+
+void ServiceMetadata<::<% > service_common/service_class_name%>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::<% > service_common/service_class_name%>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService <%service:metadata_name%>;
+  <%service:metadata_name%>.name() = "<%program:name%>.<%service:name%>";
+<%#service:functions?%>
+  static const ThriftFunctionGenerator functions[] = {
+<%#service:functions%><%^function:starts_interaction?%>
+    ServiceMetadata<::<% > service_common/service_class_name%>>::gen_<%function:cpp_name%>,
+<%/function:starts_interaction?%><%/service:functions%>
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, <%service:metadata_name%>);
+  }
+<%/service:functions?%>
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+<%#service:extends?%>
+  <%service:metadata_name%>.parent() = "<%#service:extends%><%service:program_name%>.<%service:name%><%/service:extends%>";
+<%#service:extends%>
+  ServiceMetadata<::<% > service_common/service_class_name%>>::genRecurse(metadata, services);
+<%/service:extends%>
+<%/service:extends?%>
+<%#service:structured_annotations%>
+<%#structured_annotation:const_struct?%>
+  <%service:metadata_name%>.structured_annotations()->push_back(<% > metadata/const_struct%>);
+<%/structured_annotation:const_struct?%>
+<%/service:structured_annotations%>
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("<%program:name%>.<%service:name%>", std::move(<%service:metadata_name%>));
+  context.service_name() = "<%program:name%>.<%service:name%>";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "<%program:name%>";
+  context.module() = std::move(module);
+  return &context;
+}
+<%/program:services%>
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

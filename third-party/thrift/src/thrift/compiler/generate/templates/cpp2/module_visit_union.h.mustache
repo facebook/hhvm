@@ -1,0 +1,54 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#pragma once
+
+#include "<%program:include_prefix%><%program:name%>_metadata.h"
+#include <thrift/lib/cpp2/visitation/visit_union.h>
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+<%#program:structs%>
+<%#struct:union?%>
+template <>
+struct VisitUnion<<%struct:cpp_fullname%>> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    <%#struct:fields%>
+    case Union::Type::<%field:cpp_name%>:
+      return f(<%field:index%>, *static_cast<T&&>(t).<%field:cpp_name%>_ref());
+    <%/struct:fields%>
+    case Union::Type::__EMPTY__:
+      <%#struct:fields%><%#first?%>
+      return decltype(f(<%field:index%>, *static_cast<T&&>(t).<%field:cpp_name%>_ref()))();
+      <%/first?%><%/struct:fields%>
+      <%^struct:fields%>
+      (void)0;
+      <%/struct:fields%>
+    }
+  }
+};
+<%/struct:union?%>
+<%/program:structs%>
+} // namespace detail
+} // namespace thrift
+} // namespace apache

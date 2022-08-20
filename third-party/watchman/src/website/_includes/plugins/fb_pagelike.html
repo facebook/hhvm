@@ -1,0 +1,20 @@
+<div class="fb-page pluginBlock" data-href="https://www.facebook.com/{{ include.button_href }}" data-hide-cover="false" data-show-facepile="false" data-show-posts="false">
+  <div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/{{ include.button_href }}"><a href="https://www.facebook.com/{{ include.button_href }}">{{ include.button_text }}</a></blockquote></div>
+</div>
+<script>
+  window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '{{ site.fbappid }}',
+    xfbml      : true,
+    version    : 'v2.3'
+  });
+  };
+
+  (function(d, s, id){
+   var js, fjs = d.getElementsByTagName(s)[0];
+   if (d.getElementById(id)) {return;}
+   js = d.createElement(s); js.id = id;
+   js.src = "//connect.facebook.net/en_US/sdk.js";
+   fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>

@@ -1,0 +1,306 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Wraps structs and exceptions defined in the thrift interface file and implemented
+in the cpp2 generated code. This file just exposes the C++ classes and attributes
+to Cython. The Pythonic wrappers of the individual structs and fields are
+implemented in the Struct.pyx file.
+
+}}
+{{> common/auto_generated_py}}
+
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+    uint32_t as cuint32_t,
+)
+from libcpp.string cimport string
+from libcpp cimport bool as cbool, nullptr, nullptr_t
+from cpython cimport bool as pbool
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.utility cimport move as cmove
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap, pair as cpair
+from thrift.py3.exceptions cimport cTException
+cimport folly.iobuf as _fbthrift_iobuf
+cimport thrift.py3.exceptions
+cimport thrift.py3.types
+from thrift.py3.types cimport (
+    bstring,
+    bytes_to_string,
+    field_ref as __field_ref,
+    optional_field_ref as __optional_field_ref,
+    required_field_ref as __required_field_ref,
+    terse_field_ref as __terse_field_ref,
+    union_field_ref as __union_field_ref,
+    get_union_field_value as __get_union_field_value,
+)
+from thrift.py3.common cimport (
+    RpcOptions as __RpcOptions,
+    Protocol as __Protocol,
+    cThriftMetadata as __fbthrift_cThriftMetadata,
+    MetadataBox as __MetadataBox,
+)
+from folly.optional cimport cOptional as __cOptional
+{{#program:has_stream?}}
+from folly cimport cFollyTry
+from cpython.ref cimport PyObject
+from thrift.py3.stream cimport (
+    ClientBufferedStream, cClientBufferedStream, cClientBufferedStreamWrapper,
+    ResponseAndClientBufferedStream, cResponseAndClientBufferedStream,
+    ServerStream, cServerStream, ResponseAndServerStream
+)
+{{/program:has_stream?}}
+{{#program:includeNamespaces}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/program:includeNamespaces}}
+
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_fields as _fbthrift_types_fields
+
+cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/types.h":
+  pass
+
+{{#program:cppIncludes}}
+cdef extern from "{{.}}":
+  pass
+{{/program:cppIncludes}}{{!
+}}{{#program:customTemplates}}
+{{> types/custom_template}}
+{{/program:customTemplates}}{{!
+}}{{#program:customTypes}}
+{{> types/custom_type}}
+{{/program:customTypes}}
+
+{{#program:enums}}
+{{#first?}}
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass EnumMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
+}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+{{/first?}}
+    cdef cppclass c{{enum:name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
+        pass
+
+{{/program:enums}}
+
+
+{{> types/enum_defs }}
+
+{{#program:structs}}
+{{#first?}}
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass ExceptionMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass StructMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_types_custom_protocol.h"{{!
+}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+{{/first?}}
+    {{#struct:union?}}
+    cdef enum c{{struct:name}}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
+        c{{struct:name}}__type___EMPTY__ "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::__EMPTY__",
+    {{#struct:py3_fields}}
+        c{{struct:name}}__type_{{field:py_name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::{{field:cppName}}",
+    {{/struct:py3_fields}}
+    {{/struct:union?}}
+
+    cdef cppclass c{{struct:name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
+        c{{struct:name}}() except +
+        {{^struct:cpp_noncopyable?}}
+        c{{struct:name}}(const c{{struct:name}}&) except +
+        {{/struct:cpp_noncopyable?}}
+        {{^struct:cpp_noncomparable}}
+        bint operator==(c{{struct:name}}&)
+        bint operator!=(c{{struct:name}}&)
+        {{#struct:is_struct_orderable?}}
+        bint operator<(c{{struct:name}}&)
+        bint operator>(c{{struct:name}}&)
+        bint operator<=(c{{struct:name}}&)
+        bint operator>=(c{{struct:name}}&)
+        {{/struct:is_struct_orderable?}}
+        {{/struct:cpp_noncomparable}}
+    {{^struct:union?}}
+    {{#struct:fields_and_mixin_fields}}
+        {{#field:has_ref_accessor?}}
+        {{#field:optional?}}
+        __optional_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{/field:optional?}}
+        {{#field:required?}}
+        __required_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{/field:required?}}
+        {{#field:opt_in_req_out?}}
+        __field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{/field:opt_in_req_out?}}
+        {{#field:terse?}}
+        __terse_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{/field:terse?}}
+        {{/field:has_ref_accessor?}}
+        {{^field:has_ref_accessor?}}
+        {{#field:reference?}}
+        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}} {{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{/field:reference?}}
+        {{/field:has_ref_accessor?}}
+    {{/struct:fields_and_mixin_fields}}
+    {{/struct:union?}}
+    {{#struct:union?}}
+        c{{struct:name}}__type getType() const
+    {{#struct:py3_fields}}
+        {{^field:has_ref_api?}}
+        __union_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            }}{{field:py_name}}_ref"{{> types/field_cppname}}_ref" ()
+        {{/field:has_ref_api?}}{{!
+        }}{{#field:has_ref_api?}}
+        {{#field:type}}const {{> types/cython_cpp_struct_field_type}}& get_{{field:py_name}} "get_{{field:cppName}}" () const{{/field:type}}
+        {{! Note that the set methods don't take in a shared/unique_ptr, they just take in an object ref,
+            but they return the appropriate ptr }}
+        {{#field:type}}{{> types/cython_cpp_struct_field_type}}& set_{{field:py_name}} "set_{{field:cppName}}" (const {{> types/cython_cpp_type}}&){{/field:type}}
+        {{/field:has_ref_api?}}
+    {{/struct:py3_fields}}{{/struct:union?}}
+
+{{/program:structs}}
+
+{{#program:structs}}
+{{#struct:union?}}
+cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
+    pass
+
+
+{{/struct:union?}}
+
+
+cdef class {{struct:name}}({{> types/python_struct_class}}):
+    cdef shared_ptr[c{{struct:name}}] _cpp_obj
+    {{^struct:union?}}
+    cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
+    {{#struct:fields_and_mixin_fields}}
+    cdef inline object {{field:py_name}}_impl(self)
+    {{/struct:fields_and_mixin_fields}}
+    {{!Memoized Python wrappers of struct fields, created lazily}}
+    {{#struct:py3_fields}}
+    {{#field:type}}{{#type:struct}}
+    cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
+    {{/type:struct}}{{#type:container?}}
+    cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
+    {{/type:container?}}{{#type:enum?}}
+    cdef object __fbthrift_cached_{{field:py_name}}
+    {{/type:enum?}}{{#type:iobuf?}}
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_{{field:py_name}}
+    {{/type:iobuf?}}{{#type:iobufRef?}}
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_{{field:py_name}}
+    {{/type:iobufRef?}}{{/field:type}}
+    {{/struct:py3_fields}}{{/struct:union?}}
+    {{#struct:union?}}
+    cdef readonly __{{struct:name}}Type type
+    cdef readonly object value
+    cdef _load_cache({{struct:name}} self)
+    {{/struct:union?}}
+    {{#struct:union?}}
+
+    @staticmethod
+    cdef unique_ptr[c{{struct:name}}] _make_instance(
+        c{{struct:name}}* base_instance{{^struct:union?}},
+        bint* __isNOTSET{{/struct:union?}}{{#struct:py3_fields}},
+        {{#field:type}}{{!
+            }}{{#type:cythonTypeNoneable?}}{{!
+                }}{{> types/cython_python_type}} {{!
+            }}{{/type:cythonTypeNoneable?}}{{!
+            }}{{^type:cythonTypeNoneable?}}{{!
+                }}object {{!
+            }}{{/type:cythonTypeNoneable?}}{{!
+            }}{{field:py_name}}{{!
+        }}{{/field:type}}{{/struct:py3_fields}}
+    ) except *
+    {{/struct:union?}}
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[c{{struct:name}}])
+
+{{/program:structs}}
+
+{{#program:containerTypes}}
+cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!
+        }}{{#type:list?}}List{{/type:list?}}{{!
+        }}{{#type:set?}}Set{{/type:set?}}{{!
+        }}{{#type:map?}}Map{{/type:map?}}{{!
+        }}):
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[{{> types/cython_cpp_type}}])
+    @staticmethod
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _make_instance(object items) except *
+
+{{/program:containerTypes}}
+
+{{#program:constants}}
+{{#first?}}
+cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_constants.h"{{!
+}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+{{/first?}}
+    {{#constant:type}}
+    cdef {{^type:string?}}{{> types/cython_cpp_type}}{{/type:string?}}{{#type:string?}}const char*{{/type:string?}} {{!
+    }}c{{constant:name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{program:name}}_constants::{{constant:name}}"{{!
+    }}{{#type:struct?}}(){{/type:struct?}}{{#type:string?}}(){{/type:string?}}{{#type:binary?}}(){{/type:binary?}}{{#type:container?}}(){{/type:container?}}{{#type:enum?}}(){{/type:enum?}}
+{{/constant:type}}{{/program:constants}}
+{{#program:has_stream?}}{{! check if it's a stream case and if not short-circuit it to save get stream_types calls }}
+
+{{#program:stream_types}}
+cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
+    cdef unique_ptr[cClientBufferedStreamWrapper[{{ > types/cython_cpp_type}}]] _gen
+
+    @staticmethod
+    cdef _fbthrift_create(cClientBufferedStream[{{ > types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options)
+
+    @staticmethod
+    cdef void callback(
+        cFollyTry[__cOptional[{{ > types/cython_cpp_type}}]]&& res,
+        PyObject* userdata,
+    )
+
+cdef class ServerStream__{{type:flat_name}}(ServerStream):
+    pass
+
+{{/program:stream_types}}
+{{#program:response_and_stream_types}}
+
+cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
+    cdef ClientBufferedStream__{{#type:stream_elem_type}}{{type:flat_name}}{{/type:stream_elem_type}} _stream
+    cdef {{#type:stream_first_response_type}}{{ > types/cython_python_type}}{{/type:stream_first_response_type}} _response
+
+    @staticmethod
+    cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
+        }}{{#type:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/type:stream_first_response_type}}, {{!
+        }}{{#type:stream_elem_type}}{{ > types/cython_cpp_type}}{{/type:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
+
+
+cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
+    pass
+
+{{/program:response_and_stream_types}}
+{{/program:has_stream?}}

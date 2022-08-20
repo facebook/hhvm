@@ -1,0 +1,90 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > common/namespace_cpp2_begin%>
+
+<% > service_common/typedefs%>
+<% > common/namespace_cpp2_end%>
+
+<% > service_async_client_cpp/templated_received%>
+
+
+<%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
+<% > service_async_client_cpp/function_implementation%>
+
+
+<%^function:returns_sink?%>
+<% > service_async_client_cpp/sync_functions%>
+
+<% > service_async_client_cpp/future_functions%>
+
+<%^service:reduced_client?%><%^function:creates_interaction?%><%^type:streamresponse?%>
+void apache::thrift::Client<<%service:qualified_name%>>::<%function:cpp_name%>(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback<%function:comma%><% > service_common/function_param_list_client%>) {
+  <%function:cpp_name%>(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback))<%function:comma%><% > service_common/param_list%>);
+}
+<%/type:streamresponse?%><%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:returns_sink?%>
+
+<% > service_async_client_cpp/coroutine_functions%>
+
+<%^function:oneway?%>
+<% > service_async_client_cpp/received_wrapped%>
+
+
+<% > service_async_client_cpp/received%>
+
+
+<%^service:reduced_client?%><%^function:creates_interaction?%>
+<% > service_async_client_cpp/received_instance%>
+<%/function:creates_interaction?%><%/service:reduced_client?%>
+
+<%/function:oneway?%>
+<%/function:starts_interaction?%><%#function:starts_interaction?%>
+apache::thrift::Client<<%service:parent_service_qualified_name%>>::<%type:name%> apache::thrift::Client<<%service:qualified_name%>>::<%function:cpp_name%>() {
+  return <%type:name%>(channel_, "<%type:name%>");
+}
+<%/function:starts_interaction?%>
+<%/function:return_type%><%/service:functions%>
+
+<%#service:interactions%>
+
+<% > common/namespace_cpp2_begin%>
+
+<% > service_common/typedefs%>
+<% > common/namespace_cpp2_end%>
+
+<% > service_async_client_cpp/templated_received%>
+
+<%#service:functions%><%#function:return_type%>
+<% > service_async_client_cpp/function_implementation%>
+
+<%^function:returns_sink?%>
+<% > service_async_client_cpp/sync_functions%>
+
+<% > service_async_client_cpp/future_functions%>
+<%/function:returns_sink?%>
+
+<% > service_async_client_cpp/coroutine_functions%>
+
+<%^function:oneway?%>
+<% > service_async_client_cpp/received_wrapped%>
+
+<% > service_async_client_cpp/received%>
+<%/function:oneway?%>
+
+<%/function:return_type%><%/service:functions%>
+
+<%/service:interactions%>

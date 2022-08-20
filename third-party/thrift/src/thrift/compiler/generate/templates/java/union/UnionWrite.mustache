@@ -1,0 +1,52 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+public void write0(TProtocol oprot) throws TException {
+  if (this.id != 0 && this.value == null ){
+     return;
+  }
+  oprot.writeStructBegin(STRUCT_DESC);
+  switch (this.id) {
+  {{#struct:fields}}
+  case _{{field:javaAllCapsName}}: {
+    oprot.writeFieldBegin({{field:javaTFieldName}});
+    {{#field:isContainer?}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = ({{> FieldType}})this.value;
+    {{/field:isContainer?}}{{!
+
+    }}{{#type:typedef_type}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = ({{> FieldType}})this.value;
+    {{/type:typedef_type}}{{!
+
+    }}{{^field:isContainer?}}{{^type:typedef_type}}
+    {{> FieldType}} {{field:javaName}} = ({{> FieldType}})this.value;
+    {{/type:typedef_type}}{{/field:isContainer?}}{{!
+
+    }}{{#field:type}}
+    {{field:nestedDepth++}}{{> WriteType }}{{field:nestedDepth--}}
+    {{/field:type}}
+    oprot.writeFieldEnd();
+    break;
+  }
+  {{/struct:fields}}
+  default:
+      // ignore unknown field
+  }
+  oprot.writeFieldStop();
+  oprot.writeStructEnd();
+}
+{{! terminate with newline }}

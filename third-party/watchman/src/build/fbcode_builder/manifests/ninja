@@ -1,0 +1,29 @@
+[manifest]
+name = ninja
+
+[debs]
+ninja-build
+
+[homebrew]
+ninja
+
+[rpms]
+ninja-build
+
+[download.os=windows]
+url = https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+sha256 = bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
+
+[build.os=windows]
+builder = nop
+
+[install.files.os=windows]
+ninja.exe = bin/ninja.exe
+
+[download.not(os=windows)]
+url = https://github.com/ninja-build/ninja/archive/v1.10.2.tar.gz
+sha256 = ce35865411f0490368a8fc383f29071de6690cbadc27704734978221f25e2bed
+
+[build.not(os=windows)]
+builder = ninja_bootstrap
+subdir = ninja-1.10.2

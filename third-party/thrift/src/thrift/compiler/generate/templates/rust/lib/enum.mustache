@@ -1,0 +1,152 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#enum:docs?}}
+#[doc = {{enum:docs}}]
+{{/enum:docs?}}
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash{{!
+    }}{{#enum:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/enum:serde?}}{{!
+}})]
+pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
+
+impl {{enum:rust_name}} {{>lib/block}}{{!
+    }}{{#enum:values}}
+    {{#enum_value:docs?}}
+    #[doc = {{enum_value:docs}}]
+    {{/enum_value:docs?}}
+    pub const {{enum_value:rust_name}}: Self = {{!
+        }}{{enum:rust_name}}({{enum_value:value}}i32);{{!
+    }}{{/enum:values}}
+}
+
+impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
+    fn enumerate() -> &'static [({{enum:rust_name}}, &'static str)] {
+        &[
+            {{#enum:values}}
+            ({{enum:rust_name}}::{{enum_value:rust_name}}, "{{enum_value:name}}"),
+            {{/enum:values}}
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+            {{#enum:values}}
+            "{{enum_value:name}}",
+            {{/enum:values}}
+        ]
+    }
+
+    fn variant_values() -> &'static [{{enum:rust_name}}] {
+        &[
+            {{#enum:values}}
+            {{enum:rust_name}}::{{enum_value:rust_name}},
+            {{/enum:values}}
+        ]
+    }
+}
+
+impl ::std::default::Default for {{enum:rust_name}} {
+    fn default() -> Self {
+        {{enum:rust_name}}(::fbthrift::__UNKNOWN_ID)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a {{enum:rust_name}}> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a {{enum:rust_name}}) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<{{enum:rust_name}}> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: {{enum:rust_name}}) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for {{enum:rust_name}} {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for {{enum:rust_name}} {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {{>lib/block}}
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            {{#enum:variants_by_number}}
+            ("{{enum_value:name}}", {{enum_value:value}}),
+            {{/enum:variants_by_number}}
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for {{enum:rust_name}} {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "{{enum:name}}::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for {{enum:rust_name}} {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            {{#enum:variants_by_name}}
+            ("{{enum_value:name}}", {{enum_value:value}}),
+            {{/enum:variants_by_name}}
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "{{enum:name}}").map({{enum:rust_name}})
+    }
+}
+
+impl ::fbthrift::GetTType for {{enum:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+{{!newline}}
+{{#enum:thrift_uri}}
+
+impl ::fbthrift::GetUri for self::{{enum:rust_name}} {
+    fn uri() -> &'static str {
+        "{{enum:thrift_uri}}"
+    }
+}
+{{/enum:thrift_uri}}
+
+impl<P> ::fbthrift::Serialize<P> for {{enum:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for {{enum:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok({{enum:rust_name}}::from(p.read_i32()?))
+    }
+}
+{{!newline}}

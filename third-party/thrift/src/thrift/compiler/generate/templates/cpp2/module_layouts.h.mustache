@@ -1,0 +1,79 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+<% > Autogen%>
+#pragma once
+
+#include <thrift/lib/cpp2/frozen/Frozen.h>
+#include "<%program:include_prefix%><%program:name%>_types.h"
+<%#program:thrift_includes%>
+#include "<%program:include_prefix%><%program:name%>_layouts.h"
+<%/program:thrift_includes%>
+namespace apache { namespace thrift { namespace frozen {
+
+<%#program:structs%>
+<%#struct:cpp_frozen2_exclude?%>
+FROZEN_EXCLUDE_TYPE(<%struct:cpp_fullname%>)
+<%/struct:cpp_frozen2_exclude?%>
+<%/program:structs%>
+
+<%#program:structs%>
+<%^struct:cpp_frozen2_exclude?%>
+<%^struct:union?%>
+FROZEN_TYPE(<%struct:cpp_fullname%>,<%!
+%><%#struct:fields%>
+  FROZEN_FIELD<% > common/field_suffix%>(<%field:cpp_name%>, <%field:key%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
+%><%/struct:fields%>
+  FROZEN_VIEW(<%!
+%><%#struct:fields%>
+    FROZEN_VIEW_FIELD<% > common/field_suffix%>(<%field:cpp_name%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
+%><%/struct:fields%>)
+  FROZEN_SAVE_INLINE(<%!
+%><%#struct:fields%>
+    FROZEN_SAVE_FIELD(<%field:cpp_name%>)<%!
+%><%/struct:fields%>)
+  FROZEN_LOAD_INLINE(<%!
+%><%#struct:fields%>
+    FROZEN_LOAD_FIELD(<%field:cpp_name%>, <%field:key%>)<%!
+%><%/struct:fields%>));
+<%/struct:union?%>
+<%#struct:union?%>
+FROZEN_TYPE(<%struct:cpp_fullname%>,<%!
+%>
+  FROZEN_FIELD(type_, 0, <%struct:cpp_fullname%>::Type)<%!
+%><%#struct:fields%>
+  FROZEN_FIELD<% > common/frozen2_union_field_suffix%>(<%field:cpp_name%>, <%field:key%>, <%#field:type%><%field:cpp_storage_type%><%/field:type%>)<%!
+%><%/struct:fields%>
+<% > module_layouts_h/frozen_view_union%>
+  FROZEN_SAVE_INLINE(<%!
+%>
+    FROZEN_SAVE_FIELD(type_)<%!
+%><%#struct:fields%>
+    FROZEN_SAVE_FIELD(<%field:cpp_name%>)<%!
+%><%/struct:fields%>)
+  FROZEN_LOAD_INLINE(<%!
+%>
+    FROZEN_LOAD_FIELD(type_, 0)<%!
+%><%#struct:fields%>
+    FROZEN_LOAD_FIELD(<%field:cpp_name%>, <%field:key%>)<%!
+%><%/struct:fields%>));
+<%/struct:union?%>
+
+<%/struct:cpp_frozen2_exclude?%>
+<%/program:structs%>
+}}} // apache::thrift::frozen
+<%!%>

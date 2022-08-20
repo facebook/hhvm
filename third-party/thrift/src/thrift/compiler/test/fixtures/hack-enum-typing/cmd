@@ -1,0 +1,1 @@
+hack:server=1,enum_extratype=1,enum_transparenttype=1 src/module.thrift

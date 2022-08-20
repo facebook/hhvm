@@ -1,0 +1,21 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "localhost:12345" ]
+    },
+    "B.wildcard": {
+      "servers": [ "localhost:12346" ]
+    },
+    "C.wildcard": {
+      "servers": [ "localhost:12347" ]
+    }
+  },
+  "route": {
+    "type": "AllSyncRoute",
+    "children": [
+      "PoolRoute|A.wildcard",
+      "PoolRoute|B.wildcard",
+      "PoolRoute|C.wildcard"
+    ]
+  }
+}

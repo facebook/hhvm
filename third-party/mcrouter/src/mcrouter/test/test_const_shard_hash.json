@@ -1,0 +1,15 @@
+{
+  "pools": {
+    "A-foo": {
+      "servers": [
+        "127.0.0.1:11610",
+        "127.0.0.1:11611"
+      ]
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "A-foo",
+    "hash": "ConstShard"
+  }
+}

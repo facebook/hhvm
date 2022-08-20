@@ -1,0 +1,57 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Included from CythonServices.pyx, it defines a Python wrapper for each type
+of C++ promise that needs to be returned to C++. Cython doesn't support
+templating on Python classes. This file is necessary primarily because the
+cPromise shared_ptr needs to point to a promise that wraps a specific return
+type in C++. The Python wrapper then gets passed into a coroutine where the
+promise can have it's value set after the handler coroutine has finished
+executing.
+
+}}
+
+{{#program:unique_functions_by_return_type}}
+{{#function:return_type}}
+
+@cython.auto_pickle(False)
+cdef class {{> services/promise_name}}:
+    cdef cFollyPromise[{{!
+            }}{{> services/cython_return_type_cpp_type}}{{!
+        }}]* cPromise
+
+    def __cinit__(self):
+        self.cPromise = new cFollyPromise[{{!
+            }}{{> services/cython_return_type_cpp_type}}{{!
+        }}](cFollyPromise[{{!
+            }}{{> services/cython_return_type_cpp_type}}{{!
+        }}].makeEmpty())
+
+    def __dealloc__(self):
+        del self.cPromise
+
+    @staticmethod
+    cdef _fbthrift_create(cFollyPromise[{{!
+            }}{{> services/cython_return_type_cpp_type}}{{!
+        }}] cPromise):
+        cdef {{> services/promise_name}} inst = {{> services/promise_name}}.__new__({{!
+        }}{{> services/promise_name}})
+        inst.cPromise[0] = cmove(cPromise)
+        return inst
+{{/function:return_type}}
+{{/program:unique_functions_by_return_type}}

@@ -1,0 +1,67 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>class <%service:cpp_name%>AsyncProcessor : public <%#service:extends%><% > common/namespace_cpp2%><%service:cpp_name%>AsyncProcessor<%/service:extends%><%^service:extends%>::apache::thrift::GeneratedAsyncProcessor<%/service:extends%> {
+ public:
+  const char* getServiceName() override;
+  void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
+<%#service:extends%>
+  using BaseAsyncProcessor = <% > common/namespace_cpp2%><%service:cpp_name%>AsyncProcessor;
+<%/service:extends%>
+<%^service:extends%>
+  using BaseAsyncProcessor = void;
+<%/service:extends%>
+ protected:
+  ::apache::thrift::ServiceHandler<<%service:qualified_name%>>* iface_;
+ public:
+  // This is implemented in case the corresponding AsyncProcessorFactory did not implement createMethodMetadata.
+  // This can happen if the service is using a custom AsyncProcessorFactory but re-using the same AsyncProcessor.
+  void processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+  // By default, this overload will be called for generated services
+  void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+  void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
+ public:
+  using ProcessFuncs = GeneratedAsyncProcessor::ProcessFuncs<<%service:cpp_name%>AsyncProcessor>;
+  using ProcessMap = GeneratedAsyncProcessor::ProcessMap<ProcessFuncs>;
+<%#service:interactions?%>
+  using InteractionConstructor = GeneratedAsyncProcessor::InteractionConstructor<<%service:cpp_name%>AsyncProcessor>;
+  using InteractionConstructorMap = GeneratedAsyncProcessor::InteractionConstructorMap<InteractionConstructor>;
+<%/service:interactions?%>
+  static const <%service:cpp_name%>AsyncProcessor::ProcessMap& getOwnProcessMap();
+<%#service:interactions?%>
+  static const <%service:cpp_name%>AsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+<%/service:interactions?%>
+ private:
+  static const <%service:cpp_name%>AsyncProcessor::ProcessMap kOwnProcessMap_;
+<%#service:interactions?%>
+  static const <%service:cpp_name%>AsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
+<%/service:interactions?%>
+ private:
+<%#service:functions%>
+<% > service_h/async_processor_per_function%>
+<%/service:functions%>
+<%#service:interactions%><%#service:functions%>
+<% > service_h/async_processor_per_function%>
+<%/service:functions%><%/service:interactions%>
+ public:
+  <%service:cpp_name%>AsyncProcessor(::apache::thrift::ServiceHandler<<%service:qualified_name%>>* iface) :
+<%#service:extends%>
+      <% > common/namespace_cpp2%><%service:cpp_name%>AsyncProcessor(iface),
+<%/service:extends%>
+      iface_(iface) {}
+  ~<%service:cpp_name%>AsyncProcessor() override {}
+};

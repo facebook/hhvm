@@ -1,0 +1,137 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Thrift python client body definition, which is shared between normal clients and interaction clients
+
+}}@staticmethod
+def __get_thrift_name__() -> str:
+    return "{{program:name}}.{{service:name}}"
+
+@staticmethod
+def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+    return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+
+class Async({{#service:extends}}{{!
+    }}{{> services/client_module_path}}.Async{{!
+}}{{/service:extends}}{{^service:extends?}}{{!
+    }}_fbthrift_python_AsyncClient{{!
+}}{{/service:extends?}}):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{service:name}}"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+    {{#service:supported_functions}}
+
+    async def {{function:name}}(
+        self{{#function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
+    ) -> {{#function:return_type}}{{!
+        }}{{#type:streamresponse?}}{{> clients/stream_response_class_name}}{{/type:streamresponse?}}{{!
+        }}{{^type:streamresponse?}}{{> types/pep484_type}}{{/type:streamresponse?}}{{!
+    }}{{/function:return_type}}:
+        _fbthrift_resp = await self._send_request(
+            "{{service:name}}",
+            "{{function:name}}",
+            {{> types/function_args_type}}({{#function:args}}
+                {{field:py_name}}={{field:py_name}},{{/function:args}}),
+            {{> types/function_return_type}},
+        )
+        {{#function:returns_stream?}}
+        _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+        {{/function:returns_stream?}}
+        {{^function:returns_stream?}}{{^function:void?}}
+        # shortcut to success path for non-void returns
+        if _fbthrift_resp.success is not None:
+            return _fbthrift_resp.success
+        {{/function:void?}}{{/function:returns_stream?}}
+        {{#function:return_type}}
+        {{#type:stream_has_first_response?}}
+        if _fbthrift_resp.success is not None:
+            return _fbthrift_resp.success, _fbthrift_stream
+        {{/type:stream_has_first_response?}}
+        {{#function:exceptions}}
+        if _fbthrift_resp.{{field:py_name}} is not None:
+            raise _fbthrift_resp.{{field:py_name}}
+        {{/function:exceptions}}
+        {{#type:streamresponse?}}
+        {{^type:stream_has_first_response?}}
+        return _fbthrift_stream
+        {{/type:stream_has_first_response?}}
+        {{/type:streamresponse?}}
+        {{#type:with_regular_response?}}
+        raise _fbthrift_python_exceptions.ApplicationError(
+            _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+            "Empty Response",
+        )
+        {{/type:with_regular_response?}}
+        {{/function:return_type}}
+    {{/service:supported_functions}}
+
+    {{#service:interactions}}
+    def create{{service:name}}(
+        self #{{service:parent_service_name}}
+    ) -> {{service:parent_service_name}}.Async:
+        return self._create_interaction("{{service:name}}", {{service:parent_service_name}}.Async)  # type: ignore
+
+    {{/service:interactions}}
+class Sync({{#service:extends}}{{!
+    }}{{> services/client_module_path}}.Sync{{!
+}}{{/service:extends}}{{^service:extends?}}{{!
+    }}_fbthrift_python_SyncClient{{!
+}}{{/service:extends?}}):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{service:name}}"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+    {{#service:supported_functions}}
+    {{^function:async_only?}}
+
+    def {{function:name}}(
+        self{{#function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
+    ) -> {{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}:
+        _fbthrift_resp = self._send_request(
+            "{{service:name}}",
+            "{{function:name}}",
+            {{> types/function_args_type}}({{#function:args}}
+                {{field:py_name}}={{field:py_name}},{{/function:args}}),
+            {{> types/function_return_type}},
+        )
+        {{#function:return_type}}{{^type:void?}}
+        # shortcut to success path for non-void returns
+        if _fbthrift_resp.success is not None:
+            return _fbthrift_resp.success
+        {{/type:void?}}{{/function:return_type}}
+        {{#function:exceptions}}
+        if _fbthrift_resp.{{field:py_name}} is not None:
+            raise _fbthrift_resp.{{field:py_name}}
+        {{/function:exceptions}}
+        {{#function:return_type}}{{^type:void?}}
+        raise _fbthrift_python_exceptions.ApplicationError(
+            _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+            "Empty Response",
+        )
+        {{/type:void?}}{{/function:return_type}}
+    {{/function:async_only?}}
+    {{/service:supported_functions}}

@@ -1,0 +1,1017 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "constants" : {
+    "var1" : {
+      "lineno" : 195,
+      "value" : 10,
+      "type_enum" : "I32",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 195,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 196,
+          "column" : 21
+        }
+      }
+    },
+    "var2" : {
+      "lineno" : 198,
+      "value" : "20",
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 198,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 199,
+          "column" : 26
+        }
+      }
+    },
+    "var3" : {
+      "lineno" : 206,
+      "value" : { "field" : 30, "set_string" : [ "10", "20" ] },
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "source_range" : {
+        "begin" : {
+          "line" : 206,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 207,
+          "column" : 71
+        }
+      }
+    },
+    "var4" : {
+      "lineno" : 209,
+      "value" : 40,
+      "type_enum" : "I32",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 209,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 210,
+          "column" : 21
+        }
+      }
+    },
+    "var5" : {
+      "lineno" : 212,
+      "value" : "50",
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 212,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 213,
+          "column" : 26
+        }
+      }
+    },
+    "var6" : {
+      "lineno" : 215,
+      "value" : { "field" : 60, "set_string" : [ "30", "40" ] },
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "source_range" : {
+        "begin" : {
+          "line" : 215,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 216,
+          "column" : 71
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "SetWithAdapter" : {
+      "lineno" : 29,
+      "type_enum" : "SET",
+      "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 29,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 31,
+          "column" : 64
+        }
+      }
+    },
+    "StringWithAdapter" : {
+      "lineno" : 32,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 32,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 34,
+          "column" : 62
+        }
+      }
+    },
+    "ListWithElemAdapter" : {
+      "lineno" : 35,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "StringWithAdapter"} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 35,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 35,
+          "column" : 52
+        }
+      }
+    },
+    "ListWithElemAdapter_withAdapter" : {
+      "lineno" : 36,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ListWithElemAdapter",
+      "source_range" : {
+        "begin" : {
+          "line" : 36,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 60
+        }
+      }
+    },
+    "MyI64" : {
+      "lineno" : 40,
+      "type_enum" : "I64",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 18
+        }
+      }
+    },
+    "DoubleTypedefI64" : {
+      "lineno" : 47,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "MyI64",
+      "source_range" : {
+        "begin" : {
+          "line" : 47,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 47,
+          "column" : 31
+        }
+      }
+    },
+    "MyI32" : {
+      "lineno" : 49,
+      "type_enum" : "I32",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 51,
+          "column" : 18
+        }
+      }
+    },
+    "FooWithAdapter" : {
+      "lineno" : 104,
+      "type_enum" : "STRUCT",
+      "spec_args" : "Foo",
+      "source_range" : {
+        "begin" : {
+          "line" : 104,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 106,
+          "column" : 27
+        }
+      }
+    },
+    "StructWithAdapter" : {
+      "lineno" : 164,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "Bar",
+      "source_range" : {
+        "begin" : {
+          "line" : 164,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 166,
+          "column" : 59
+        }
+      }
+    },
+    "UnionWithAdapter" : {
+      "lineno" : 168,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "Baz",
+      "source_range" : {
+        "begin" : {
+          "line" : 168,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 170,
+          "column" : 58
+        }
+      }
+    },
+    "AdaptedA" : {
+      "lineno" : 175,
+      "type_enum" : "STRUCT",
+      "spec_args" : "A",
+      "source_range" : {
+        "begin" : {
+          "line" : 175,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 176,
+          "column" : 19
+        }
+      }
+    }
+  },
+  "structs" : {
+    "Foo" : {
+      "lineno" : 53,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "intField" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 54,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 56,
+              "column" : 48
+            }
+          }
+        },
+        "optionalIntField" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 57,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 59,
+              "column" : 65
+            }
+          }
+        },
+        "intFieldWithDefault" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : 13,
+          "source_range" : {
+            "begin" : {
+              "line" : 60,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 64
+            }
+          }
+        },
+        "setField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "SetWithAdapter",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 63,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 63,
+              "column" : 30
+            }
+          }
+        },
+        "optionalSetField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "SetWithAdapter",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 64,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 64,
+              "column" : 47
+            }
+          }
+        },
+        "mapField" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 65,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 69,
+              "column" : 14
+            }
+          }
+        },
+        "optionalMapField" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter"} } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 70,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 75,
+              "column" : 51
+            }
+          }
+        },
+        "binaryField" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 76,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 78,
+              "column" : 54
+            }
+          }
+        },
+        "longField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "MyI64",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 79,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 79,
+              "column" : 22
+            }
+          }
+        },
+        "adaptedLongField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "MyI64",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 80,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 82,
+              "column" : 30
+            }
+          }
+        },
+        "doubleAdaptedField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "DoubleTypedefI64",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 83,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 83,
+              "column" : 43
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 53,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 86,
+          "column" : 2
+        }
+      }
+    },
+    "Baz" : {
+      "lineno" : 88,
+      "is_exception" : false,
+      "is_union" : true,
+      "fields" : {
+        "intField" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 89,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 91,
+              "column" : 48
+            }
+          }
+        },
+        "setField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "SetWithAdapter",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 92,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 92,
+              "column" : 30
+            }
+          }
+        },
+        "mapField" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "TYPEDEF", "spec_args" : "ListWithElemAdapter_withAdapter"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 93,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 97,
+              "column" : 14
+            }
+          }
+        },
+        "binaryField" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 98,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 100,
+              "column" : 54
+            }
+          }
+        },
+        "longField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "MyI64",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 101,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 101,
+              "column" : 22
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 88,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 102,
+          "column" : 2
+        }
+      }
+    },
+    "Bar" : {
+      "lineno" : 108,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "structField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Foo",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 109,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 111,
+              "column" : 51
+            }
+          }
+        },
+        "optionalStructField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Foo",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 112,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 114,
+              "column" : 68
+            }
+          }
+        },
+        "structListField" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "FooWithAdapter"} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 115,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 115,
+              "column" : 72
+            }
+          }
+        },
+        "optionalStructListField" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "FooWithAdapter"} ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 116,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 118,
+              "column" : 29
+            }
+          }
+        },
+        "unionField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Baz",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 119,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 121,
+              "column" : 50
+            }
+          }
+        },
+        "optionalUnionField" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Baz",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 122,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 124,
+              "column" : 67
+            }
+          }
+        },
+        "adaptedStructField" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "DirectlyAdapted",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 125,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 125,
+              "column" : 41
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 108,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 126,
+          "column" : 2
+        }
+      }
+    },
+    "DirectlyAdapted" : {
+      "lineno" : 128,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 134,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 134,
+              "column" : 16
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 128,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 135,
+          "column" : 2
+        }
+      }
+    },
+    "StructWithFieldAdapter" : {
+      "lineno" : 137,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 138,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 140,
+              "column" : 16
+            }
+          }
+        },
+        "shared_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 141,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 143,
+              "column" : 23
+            }
+          }
+        },
+        "opt_shared_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 144,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 146,
+              "column" : 36
+            }
+          }
+        },
+        "opt_boxed_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 147,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 149,
+              "column" : 35
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 137,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 150,
+          "column" : 2
+        }
+      }
+    },
+    "TerseAdaptedFields" : {
+      "lineno" : 152,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "int_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 153,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 155,
+              "column" : 20
+            }
+          }
+        },
+        "string_field" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 156,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 158,
+              "column" : 26
+            }
+          }
+        },
+        "set_field" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 159,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 161,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 152,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 162,
+          "column" : 2
+        }
+      }
+    },
+    "B" : {
+      "lineno" : 172,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "a" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "A",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 173,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 173,
+              "column" : 17
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 172,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 174,
+          "column" : 2
+        }
+      }
+    },
+    "A" : {
+      "lineno" : 177,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 177,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 177,
+          "column" : 12
+        }
+      }
+    },
+    "Config" : {
+      "lineno" : 188,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "path" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 192,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 192,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 188,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 193,
+          "column" : 2
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 201,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 202,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 202,
+              "column" : 16
+            }
+          }
+        },
+        "set_string" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "SetWithAdapter",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 203,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 203,
+              "column" : 32
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 201,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 204,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "Service" : {
+      "lineno" : 179,
+      "functions" : {
+        "Service.func" : {
+          "return_type" : {
+            "type_enum" : "TYPEDEF",
+            "spec_args" : "MyI32"
+          },
+          "args" : [
+            {
+              "type_enum" : "TYPEDEF",
+              "spec_args" : "StringWithAdapter"
+            },
+            {
+              "type_enum" : "STRING",
+              "spec_args" : null
+            },
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "Foo"
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 180,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 185,
+              "column" : 4
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 179,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 186,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

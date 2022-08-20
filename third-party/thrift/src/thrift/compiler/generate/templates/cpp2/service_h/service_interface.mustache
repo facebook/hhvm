@@ -1,0 +1,58 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+<% > common/namespace_cpp2_begin%>
+
+class <%service:cpp_name%>;
+class <%service:cpp_name%>AsyncProcessor;
+
+<% > service_h/service_info_holder%>
+
+<% > common/namespace_cpp2_end%>
+
+
+namespace apache::thrift {
+template <>
+class ServiceHandler<<%service:qualified_name%>> : <%#service:extends%>virtual public <% > common/namespace_cpp2%><%service:cpp_name%>SvIf<%/service:extends%><%^service:extends%>public apache::thrift::ServerInterface<%/service:extends%> {
+ public:
+  std::string_view getGeneratedName() const override { return "<%service:name%>"; }
+<%#service:thrift_uri%>
+
+  static const char* __fbthrift_thrift_uri() {
+    return "<%service:thrift_uri%>";
+  }
+<%/service:thrift_uri%>
+
+  typedef <%service:qualified_name%>AsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+  CreateMethodMetadataResult createMethodMetadata() override;
+ private:
+  std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
+ public:
+<%#service:interactions%>
+<% > service_h/interaction_service_interface%>
+<%/service:interactions%>
+
+<% > service_h/service_interface_functions%>
+};
+
+} // namespace apache::thrift
+
+<% > common/namespace_cpp2_begin%>
+
+using <%service:cpp_name%>SvIf [[deprecated("Use apache::thrift::ServiceHandler<<%service:cpp_name%>> instead")]] = ::apache::thrift::ServiceHandler<<%service:cpp_name%>>;
+<% > common/namespace_cpp2_end%>

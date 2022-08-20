@@ -1,0 +1,57 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+@charset "utf-8";
+
+
+
+// Our variables
+$base-font-family:  "Segoe UI", Helvetica, sans-serif;
+$header-font-family:  "Gotham Rounded A", "Gotham Rounded B", 'Helvetica Neue', Arial, sans-serif;
+$base-font-size:    16px;
+$small-font-size:   $base-font-size * 0.875;
+$base-line-height:  1.4em;
+
+$spacing-unit:      12px;
+
+$text:              {{ site.color.bodytext }};
+$header-text:       {{ site.color.headertext }};
+$primary-bg:        {{ site.color.primary }};
+$secondary-bg:      {{ site.color.secondary }};
+$light-color:       {{ site.color.light }};
+$light-text-color:  {{ site.color.lighttext }};
+$nav-bg:            {{ site.color.nav }};
+$nav-text:          {{ site.color.navtext }};
+$footer-bg:         #1F242A;
+$link-color:        {{ site.color.link }};
+$code-bg:           #f0f0f0;
+
+$header-height: 34px;
+$header-ptop: 10px;
+$header-pbot: 8px;
+
+// Width of the content area
+$content-width:     900px;
+
+// Using media queries with like this:
+// @include media-query($on-palm) {
+//     .wrapper {
+//         padding-right: $spacing-unit / 2;
+//         padding-left: $spacing-unit / 2;
+//     }
+// }
+@mixin media-query($device) {
+    @media screen and (max-width: $device) {
+        @content;
+    }
+}
+
+
+
+// Import partials from `sass_dir` (defaults to `_sass`)
+@import
+        "reset",
+        "base",
+        "slideshow",
+        "syntax-highlighting"
+;

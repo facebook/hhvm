@@ -1,0 +1,49 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+%><%#field:cpp_ref?%><%!
+    %><% > field/member%> && <%!
+%><%/field:cpp_ref?%><%!
+  // TODO(dokwon): Remove this after removing all deprecated_tag_incompatible thrift_cpp2_option.
+%><%^struct:no_deprecated_tag_incompatible_and_thrift_uri?%><%!
+  %><%#field:cpp_first_adapter%><%!
+    // Must use == operator, and check against the default constructor (ignoring any IDL-specified default).
+    %><% >  module_types_tcc/field_ref %> == <%field:cpp_type%>()<%!
+  %><%/field:cpp_first_adapter%><%!
+  %><%^field:cpp_first_adapter%><%!
+  %><%#type:resolves_to_container?%><%!
+    %><% > field/member%><%#field:cpp_ref?%>-><%/field:cpp_ref?%><%^field:cpp_ref?%>.<%/field:cpp_ref?%>empty()<%!
+  %><%/type:resolves_to_container?%><%!
+  %><%#type:struct?%><%!
+    %>::apache::thrift::empty(<% > module_types_tcc/pm_value%>)<%!
+  %><%/type:struct?%><%!
+  %><%#field:raw_string_or_binary?%><%!
+    %>apache::thrift::StringTraits<<% > types/indirected_string_type%>>::isEmpty(<% >  module_types_tcc/field_ref %>)<%!
+  %><%/field:raw_string_or_binary?%><%!
+  %><%^type:resolves_to_container?%><%^field:raw_string_or_binary?%><%^type:struct?%><%!
+    %><% >  module_types_tcc/field_ref %> == <% > field/intrinsic_default%><%!
+  %><%/type:struct?%><%/field:raw_string_or_binary?%><%/type:resolves_to_container?%><%!
+  %><%/field:cpp_first_adapter%><%!
+%><%/struct:no_deprecated_tag_incompatible_and_thrift_uri?%><%!
+%><%#struct:no_deprecated_tag_incompatible_and_thrift_uri?%><%!
+  // Note: All adapted fields need to use field tag.
+  %><%#field:cpp_first_adapter%><%!
+    %>::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<<%struct:cpp_underlying_name%>, ::apache::thrift::field_id<<%field:key%>>>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
+  %><%/field:cpp_first_adapter%><%!
+  %><%^field:cpp_first_adapter%><%!
+    %>::apache::thrift::op::isEmpty<<%field:type_tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
+  %><%/field:cpp_first_adapter%><%!
+%><%/struct:no_deprecated_tag_incompatible_and_thrift_uri?%><%!
+%>

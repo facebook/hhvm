@@ -1,0 +1,45 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Trivial mapping to type annotation field types. Depends on an import in the
+form:
+
+  import typing as __T
+
+Recursive.
+
+}}{{#type:adapter}}{{.}}.Type{{/type:adapter}}{{!
+}}{{^type:adapter}}{{!
+  }}{{#type:void?}}None{{/type:void?}}{{!
+  }}{{#type:bool?}}bool{{/type:bool?}}{{!
+  }}{{#type:byte?}}int{{/type:byte?}}{{!
+  }}{{#type:i16?}}int{{/type:i16?}}{{!
+  }}{{#type:i32?}}int{{/type:i32?}}{{!
+  }}{{#type:i64?}}int{{/type:i64?}}{{!
+  }}{{#type:float?}}float{{/type:float?}}{{!
+  }}{{#type:double?}}float{{/type:double?}}{{!
+  }}{{#type:string?}}str{{/type:string?}}{{!
+  }}{{#type:binary?}}bytes{{/type:binary?}}{{!
+  }}{{#type:struct}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{struct:name}}{{/type:struct}}{{!
+  }}{{#type:list?}}__T.List[{{#type:list_elem_type}}{{> common/FieldType}}{{/type:list_elem_type}}]{{/type:list?}}{{!
+  }}{{#type:set?}}__T.Set[{{#type:set_elem_type}}{{> common/FieldType}}{{/type:set_elem_type}}]{{/type:set?}}{{!
+  }}{{#type:map?}}__T.Dict[{{#type:key_type}}{{> common/FieldType}}{{/type:key_type}},{{!
+  }} {{#type:value_type}}{{> common/FieldType}}{{/type:value_type}}]{{/type:map?}}{{!
+  }}{{#type:enum}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}{{/type:enum}}{{!
+  }}{{#type:typedef?}}{{#type:typedef_type}}{{> common/FieldType}}{{/type:typedef_type}}{{/type:typedef?}}{{!
+}}{{/type:adapter}}

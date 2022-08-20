@@ -1,0 +1,73 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>template <class Protocol_>
+uint32_t <%struct:cpp_underlying_name%>::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("<%struct:name%>");
+  switch(this->getType()) {
+<%#struct:fields%>
+<% > module_types_tcc/serialize_field_size%>
+<%/struct:fields%>
+    case <%struct:cpp_underlying_name%>::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t <%struct:cpp_underlying_name%>::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("<%struct:name%>");
+  switch(this->getType()) {
+<%#struct:fields%>
+<% > module_types_tcc/serialize_field_size_zc%>
+<%/struct:fields%>
+    case <%struct:cpp_underlying_name%>::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+<%^program:tablebased?%>
+template <class Protocol_>
+uint32_t <%struct:cpp_underlying_name%>::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("<%struct:name%>");
+  switch(this->getType()) {
+<%#struct:fields%>
+<% > module_types_tcc/serialize_field%>
+<%/struct:fields%>
+    case <%struct:cpp_underlying_name%>::Type::__EMPTY__:;
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+<%/program:tablebased?%>
+<%#program:tablebased?%>
+template <class Protocol_>
+uint32_t <%struct:cpp_underlying_name%>::write(Protocol_* iprot) const {
+  return ::apache::thrift::detail::write(
+    iprot,
+    ::apache::thrift::detail::toStructInfo(
+      <% > common/namespace_cpp2%>__fbthrift_struct_info_<%struct:cpp_underlying_name%>
+    ),
+    this);
+}
+<%/program:tablebased?%>
+<%!
+%>

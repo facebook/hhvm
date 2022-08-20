@@ -1,0 +1,39 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Pxd file to expose the interface defined in ServicesWrapper.h to the pyx files.
+
+}}
+{{> common/auto_generated_py}}
+
+from cpython.ref cimport PyObject
+from libcpp.memory cimport shared_ptr
+from thrift.py3.server cimport cAsyncProcessorFactory
+from folly cimport cFollyExecutor
+
+
+cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/services_wrapper.h"{{!
+}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+{{#program:services}}
+    shared_ptr[cAsyncProcessorFactory] c{{service:name}}Interface {{!
+      }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+      }}{{service:name}}Interface"(PyObject *if_object, cFollyExecutor* Q) except *
+{{/program:services}}
+{{^program:services}}
+    pass
+{{/program:services}}

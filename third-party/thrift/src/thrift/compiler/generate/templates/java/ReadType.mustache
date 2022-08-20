@@ -1,0 +1,94 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#type:typedef?}}{{!
+    }}{{#field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift(oprot);{{/field:hasAdapter?}}{{!
+    }}{{^field:hasAdapter?}}{{!
+      }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+      }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+      }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+    }}{{/field:hasAdapter?}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+}}{{#type:set?}}{{> ReadTypeContainer}}{{/type:set?}}{{!
+
+}}{{#type:list?}}{{> ReadTypeContainer}}{{/type:list?}}{{!
+
+}}{{#type:map?}}{{> ReadTypeContainer}}{{/type:map?}}{{!
+
+}}{{#type:struct?}}{{!
+}}{{#field:isNested?}}{{> BoxedType}}.read0(oprot){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:isNested?}}{{!
+}}{{/type:struct?}}{{!
+
+}}{{#type:enum?}}{{!
+}}{{#field:isNested?}}{{> BoxedType}}.fromInteger(oprot.readI32()){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{> FieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
+}}{{/type:enum?}}{{!
+
+}}{{#type:binary?}}{{!
+}}{{#field:isNested?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:isNested?}}{{!
+}}{{/type:binary?}}{{!
+
+}}{{#type:string?}}{{!
+}}{{#field:isNested?}}{{!
+  }}{{#type:isBinaryString?}}oprot.readBinary().array(){{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}oprot.readString(){{/type:isBinaryString?}}{{!
+}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{!
+  }}{{#type:isBinaryString?}}oprot.readBinary();{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}oprot.readString();{{/type:isBinaryString?}}{{!
+}}{{/field:isNested?}}{{!
+}}{{/type:string?}}{{!
+
+}}{{#type:bool?}}{{!
+}}{{#field:isNested?}}oprot.readBool(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readBool();{{/field:isNested?}}{{!
+}}{{/type:bool?}}{{!
+
+}}{{#type:byte?}}{{!
+}}{{#field:isNested?}}oprot.readByte(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readByte();{{/field:isNested?}}{{!
+}}{{/type:byte?}}{{!
+
+}}{{#type:i16?}}{{!
+}}{{#field:isNested?}}oprot.readI16(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI16();{{/field:isNested?}}{{!
+}}{{/type:i16?}}{{!
+
+}}{{#type:i32?}}{{!
+}}{{#field:isNested?}}oprot.readI32(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI32();{{/field:isNested?}}{{!
+}}{{/type:i32?}}{{!
+
+}}{{#type:i64?}}{{!
+}}{{#field:isNested?}}oprot.readI64(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI64();{{/field:isNested?}}{{!
+}}{{/type:i64?}}{{!
+
+}}{{#type:float?}}{{!
+}}{{#field:isNested?}}oprot.readFloat(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readFloat();{{/field:isNested?}}{{!
+}}{{/type:float?}}{{!
+
+}}{{#type:double?}}{{!
+}}{{#field:isNested?}}oprot.readDouble(){{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readDouble();{{/field:isNested?}}{{!
+}}{{/type:double?}}{{!
+
+}}{{/type:typedef?}}{{!
+}}

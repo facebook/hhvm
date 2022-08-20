@@ -1,0 +1,53 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%!
+
+For all terse fields except for a terse struct field, they are cleared to their
+intrinsic default values. For a terse struct fields, only nested terse fields
+are cleared to their instrinic default values.
+
+%><%#field:type%>
+<%#type:resolves_to_base_or_enum?%>
+<% > module_types_cpp/clear_fields%>
+<%/type:resolves_to_base_or_enum?%>
+<%#type:resolves_to_container?%>
+<% > module_types_cpp/clear_fields%>
+<%/type:resolves_to_container?%>
+<%#type:non_empty_struct?%>
+<%^field:cpp_ref?%>
+<%#field:cpp_first_adapter%>
+  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(<%field:cpp_storage_name%>, *this);
+<%/field:cpp_first_adapter%>
+<%^field:cpp_first_adapter%>
+  ::apache::thrift::detail::st::clear_terse_fields(<% > field/member%>);
+<%/field:cpp_first_adapter%>
+<%/field:cpp_ref?%>
+<%#field:cpp_ref?%>
+<%^field:optional?%>
+<%#field:cpp_ref_unique?%>
+  if (<% > field/member%>) ::apache::thrift::detail::st::clear_terse_fields(*<% > field/member%>);
+<%/field:cpp_ref_unique?%>
+<%^field:cpp_ref_unique?%>
+  if (<% > field/member%>) <% > field/member%> = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
+<%/field:cpp_ref_unique?%>
+<%/field:optional?%>
+<%#field:optional?%>
+  <% > field/member%>.reset();
+<%/field:optional?%>
+<%/field:cpp_ref?%>
+<%/type:non_empty_struct?%>
+<%/field:type%>

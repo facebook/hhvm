@@ -1,0 +1,55 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#pragma once
+
+#include <thrift/lib/cpp2/gen/client_h.h>
+
+#include "<%service:include_prefix%><%service:program_name%>_types.h"
+<%#service:extends%>
+#if __has_include("<%service:include_prefix%><%service:name%>AsyncClient.h")
+#include "<%service:include_prefix%><%service:name%>AsyncClient.h"
+#else
+#include "<%service:include_prefix%><%service:program_name%>_clients.h"
+#endif
+<%/service:extends%>
+<%#service:thrift_includes%>
+#include "<%program:include_prefix%><%program:name%>_types.h"
+<%/service:thrift_includes%>
+<%#service:cpp_includes%>
+#include <%cpp_include%>
+<%/service:cpp_includes%>
+<%#service:sinks?%>
+#include <thrift/lib/cpp2/async/ClientSinkBridge.h>
+#include <thrift/lib/cpp2/async/Sink.h>
+<%/service:sinks?%>
+<%#service:streams?%>
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+<%/service:streams?%>
+<%#service:interactions?%>
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientSinkBridge.h>
+#include <thrift/lib/cpp2/async/Sink.h>
+<%/service:interactions?%>
+
+namespace apache { namespace thrift {
+  class Cpp2RequestContext;
+  namespace detail { namespace ac { struct ClientRequestContext; }}
+  namespace transport { class THeader; }
+}}
+
+<% > service_h/async_client%>

@@ -1,0 +1,39 @@
+{
+  "pools": {
+    "A": {
+      "servers": [
+        "localhost:11130",
+        "localhost:11131"
+      ]
+    },
+    "B": {
+      "servers": [
+        "localhost:11132",
+        "localhost:11133"
+      ]
+    }
+  },
+  "named_handles": [
+    {
+      "type": "FailoverRoute",
+      "name": "childA",
+      "enable_lease_pairing": true,
+      "children": "Pool|A"
+    },
+    {
+      "type": "FailoverRoute",
+      "name": "childB",
+      "enable_lease_pairing": true,
+      "children": "Pool|B"
+    }
+  ],
+  "route": {
+    "type": "FailoverRoute",
+    "name": "parent",
+    "enable_lease_pairing": true,
+    "children": [
+      "childA",
+      "childB"
+    ]
+  }
+}

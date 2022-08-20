@@ -1,0 +1,10 @@
+android:annotate src/module.thrift
+go src/module.thrift
+java_deprecated src/module.thrift
+php src/module.thrift
+hack src/module.thrift
+mstch_cpp2 src/module.thrift
+mstch_rust src/module.thrift
+mstch_java src/module.thrift
+json src/module.thrift
+mstch_py3 src/module.thrift

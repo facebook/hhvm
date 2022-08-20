@@ -1,0 +1,141 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Python wrappers of the structs defined in the services files. This file is
+compiled into it's own module to be included by clients and services and
+end-user code. It's one of the more complicated files, as it has to map
+Pythonic APIs to C++ objects and back.
+
+One of the nastier things in this file is the definition of containers.
+A separate container wrapper has to be defined for each type of contained
+attribute because Cython can't template C++ classes. So, for example, we need
+a List__int16 or a List__string or a Map__string_mystruct instance for each
+container/type combination. Consider that containers can contain other containers
+or structs that contain containers and you realize how messy this can get.
+Further, we'd prefer to have the end user freed from having to know about these
+container types, so we'll need to define factories for them based on what they
+want to include.
+
+}}
+{{> common/auto_generated_py}}
+
+
+import folly.iobuf as _fbthrift_iobuf
+
+from thrift.py3.reflection cimport (
+    NumberType as __NumberType,
+    StructType as __StructType,
+    Qualifier as __Qualifier,
+)
+
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{/program:includeNamespaces}}
+
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+
+from thrift.py3.types cimport (
+    constant_shared_ptr,
+    default_inst,
+)
+
+
+{{#program:structs}}
+cdef __StructSpec get_reflection__{{struct:name}}():
+    {{^struct:union?}}
+    {{! Wrap the defaults object so we can query its getters for the fields;
+        we can only do this for regular structs though }}
+    cdef _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}} defaults = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}._fbthrift_create(
+        constant_shared_ptr[_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.c{{struct:name}}](
+            default_inst[_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.c{{struct:name}}]()
+        )
+    )
+    {{/struct:union?}}
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="{{struct:name}}",
+        kind=__StructType.{{!
+            }}{{#struct:exception?}}EXCEPTION{{/struct:exception?}}{{!
+            }}{{#struct:union?}}UNION{{/struct:union?}}{{!
+            }}{{#struct:plain?}}STRUCT{{/struct:plain?}},
+        annotations={
+            {{#struct:annotations}}
+            {{> common/annotation }}
+            {{/struct:annotations}}
+        },
+    )
+{{#struct:py3_fields}}
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id={{field:key}},
+            name="{{field:name}}",
+            type={{#field:type}}{{> types/python_type}}{{/field:type}},
+            kind={{#field:type}}{{> types/thrift_number_type}}{{/field:type}},
+            qualifier=__Qualifier.{{!
+                }}{{#field:required?}}REQUIRED{{/field:required?}}{{!
+                }}{{^field:required?}}{{!
+                }}{{#field:optional?}}OPTIONAL{{/field:optional?}}{{!
+                }}{{^field:optional?}}UNQUALIFIED{{/field:optional?}}{{!
+                }}{{/field:required?}},
+            default={{!
+            }}{{^struct:union?}}{{!
+                }}{{#field:value}}defaults.{{field:name}}{{/field:value}}{{!
+                }}{{^field:value}}None{{/field:value}}{{!
+            }}{{/struct:union?}}{{!
+            }}{{#struct:union?}}None{{/struct:union?}},
+            annotations={
+                {{#field:annotations}}
+                {{> common/annotation }}
+                {{/field:annotations}}
+            },
+        ),
+    )
+{{/struct:py3_fields}}
+    return spec
+{{/program:structs}}
+{{#program:containerTypes}}
+{{#type:list?}}
+cdef __ListSpec get_reflection__{{type:flat_name}}():
+    {{#type:list_elem_type}}
+    return __ListSpec._fbthrift_create(
+        value={{> types/python_type}},
+        kind={{> types/thrift_number_type}},
+    )
+    {{/type:list_elem_type}}
+{{/type:list?}}
+{{#type:set?}}
+cdef __SetSpec get_reflection__{{type:flat_name}}():
+    {{#type:set_elem_type}}
+    return __SetSpec._fbthrift_create(
+        value={{> types/python_type}},
+        kind={{> types/thrift_number_type}},
+     )
+    {{/type:set_elem_type}}
+{{/type:set?}}
+{{#type:map?}}
+cdef __MapSpec get_reflection__{{type:flat_name}}():
+    return __MapSpec._fbthrift_create(
+        key={{#type:key_type}}{{> types/python_type}}{{/type:key_type}},
+        key_kind={{#type:key_type}}{{> types/thrift_number_type}}{{/type:key_type}},
+        value={{#type:value_type}}{{> types/python_type}}{{/type:value_type}},
+        value_kind={{#type:value_type}}{{> types/thrift_number_type}}{{/type:value_type}},
+    )
+{{/type:map?}}
+
+{{/program:containerTypes}}

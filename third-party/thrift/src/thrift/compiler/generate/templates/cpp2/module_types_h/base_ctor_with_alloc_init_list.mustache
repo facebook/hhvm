@@ -1,0 +1,32 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+
+%><%! --------------- Empty constractor, with 1 allocator,
+    copied from alloc_extended_ctors.mustache ctor(const allocator_type& alloc)
+%><%struct:cpp_underlying_name%>() :
+    __fbthrift_alloc(allocator_type()),
+<%#struct:fields_in_layout_order%>
+    <%field:cpp_storage_name%>(<%!
+    %><%#field:type%><%!
+      %><%#field:cpp_ref?%><%!
+        %><% > module_types_h/smart_ptr_constructor%><%!
+      %><%/field:cpp_ref?%><%!
+      %><%^field:cpp_ref?%><%!
+        %><%#type:cpp_use_allocator?%>__fbthrift_alloc<%/type:cpp_use_allocator?%><%!
+      %><%/field:cpp_ref?%><%!
+    %>)<%/field:type%><% > common/comma_newline%><%!
+%><%/struct:fields_in_layout_order%>

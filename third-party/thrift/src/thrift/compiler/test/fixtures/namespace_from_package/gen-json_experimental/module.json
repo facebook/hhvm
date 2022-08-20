@@ -1,0 +1,54 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "namespaces": {
+    "go": "namespace_from_package.module",
+    "hs": "DefaultNamespace.module",
+    "java": "dev.test.namespace_from_package.module_deprecated",
+    "py": "namespace_from_package.module",
+    "py.asyncio": "test.namespace_from_package.module",
+    "rust": "test.namespace_from_package.module"
+  },  "structs" :
+  {
+      "Foo" : {
+        "name" : "Foo",
+        "fields" : {
+          "MyInt" : {
+            "name" : "MyInt",
+            "key" : 1,
+            "lineno" : 32,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 31
+      }
+      },
+  "services" :
+  {
+      "TestService" : {
+        "name" : "TestService",
+        "lineno" : 35,
+        "functions" : {
+          "init" : {
+            "name" : "init",
+            "args" : {
+              "int1": {
+                "name" : "int1",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 36,
+                "required" : "opt-in-req-out"
+              }
+            },
+            "returnType" : "i64",
+            "lineno" : 36
+          }
+        }
+      }
+      },
+  "source_path" : "src/module",
+  "py_namespace" : "namespace_from_package.module"
+}

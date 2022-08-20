@@ -1,0 +1,37 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:fields%><%#field:type%>
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> <%field:cpp_name%>_ref() const& {
+    return {value_.<%field:cpp_name%>, type_, folly::to_underlying(Type::<%field:cpp_name%>), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> <%field:cpp_name%>_ref() const&& {
+    return {std::move(value_.<%field:cpp_name%>), type_, folly::to_underlying(Type::<%field:cpp_name%>), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> <%field:cpp_name%>_ref() & {
+    return {value_.<%field:cpp_name%>, type_, folly::to_underlying(Type::<%field:cpp_name%>), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = <%field:cpp_storage_type%>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> <%field:cpp_name%>_ref() && {
+    return {std::move(value_.<%field:cpp_name%>), type_, folly::to_underlying(Type::<%field:cpp_name%>), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+<%/field:type%><%/struct:fields%>

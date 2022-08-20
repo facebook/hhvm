@@ -1,0 +1,60 @@
+#
+# CMake package configuration file for fbthrift
+#
+# Defines the target "FBThrift::thriftcpp2"
+# Add this to your target_link_libraries() call to depend on thrift.
+#
+# Note that fbthrift depends on the wangle::wangle target.  This should
+# be found by calling find_package(wangle CONFIG) before finding fbthrift.
+#
+# This also defines the following variables
+# FBTHRIFT_COMPILER - The path to the thrift compiler
+#
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Save the PACKAGE_PREFIX_DIR in a separate variable.  find_dependency() calls
+# below can replace PACKAGE_PREFIX_DIR with the prefix of the dependency that
+# was searched for.
+set(FBTHRIFT_PREFIX_DIR "${PACKAGE_PREFIX_DIR}")
+
+set_and_check(FBTHRIFT_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
+set_and_check(FBTHRIFT_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
+if (WIN32)
+  set_and_check(FBTHRIFT_COMPILER "@PACKAGE_BIN_INSTALL_DIR@/thrift1.exe")
+else()
+  set_and_check(FBTHRIFT_COMPILER "@PACKAGE_BIN_INSTALL_DIR@/thrift1")
+endif()
+
+find_dependency(ZLIB REQUIRED)
+
+if (NOT TARGET FBThrift::thriftcpp2)
+  include("${FBTHRIFT_CMAKE_DIR}/FBThriftTargets.cmake")
+endif()
+
+#
+# Component definitions
+# The FBThrift_XXX_FOUND variables below define package components that
+# can be checked by callers using "find_package(FBThrift COMPONENTS XXX)"
+# e.g., "find_package(FBThrift COMPONENTS py)"
+#
+
+# We always build the cpp2 generator and its libraries
+set(FBThrift_cpp2_FOUND True)
+
+# Set FBThrift_py_FOUND if we built the thrift/lib/py library that supports
+# the output from the thrift compiler's "py" generator.
+# (Note that this generator is deprecated in favor of the "py3" generator,)
+set(FBThrift_py_FOUND @thriftpy@)
+if(FBThrift_py_FOUND)
+  find_dependency(python-six)
+endif()
+
+set(FBThrift_FOUND True)
+check_required_components(FBThrift)
+
+if (FBThrift_FOUND AND NOT FBThrift_FIND_QUIETLY)
+    message(STATUS "Found FBThrift: ${FBTHRIFT_PREFIX_DIR}")
+endif()

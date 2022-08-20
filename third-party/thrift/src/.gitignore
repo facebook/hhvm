@@ -1,0 +1,49 @@
+*~
+
+# autoreconf artifacts
+Makefile.in
+/thrift/aclocal.m4
+/thrift/autom4te.cache/
+/thrift/build-aux/
+/thrift/config.guess
+/thrift/config.hin
+/thrift/configure
+
+# Configure artifacts
+# Can't include all Makefiles, since some are non-autoconf
+.deps
+.dirstamp
+_configs.sed
+/thrift/Makefile
+/thrift/compiler/Makefile
+/thrift/config.h
+/thrift/lib/cpp/thrift_config.h
+/thrift/config.log
+/thrift/config.status
+/thrift/lib/Makefile
+/thrift/lib/cpp/Makefile
+/thrift/lib/cpp2/Makefile
+/thrift/lib/cpp2/test/Makefile
+/thrift/lib/thrift/Makefile
+/thrift/libtool
+/thrift/stamp-h1
+/thrift/m4/libtool.m4
+/thrift/m4/lt*
+
+# Build artifacts
+.libs
+*.o
+*.lo
+*.a
+*.la
+*.pyc
+gen-cpp
+gen-cpp2
+/thrift/.python-local/
+
+/thrift/compiler/location.hh
+/thrift/compiler/position.hh
+/thrift/compiler/thrifty.hh
+/thrift/compiler/thrift1
+/thrift/compiler/thriftl.cc
+/thrift/compiler/thrifty.cc

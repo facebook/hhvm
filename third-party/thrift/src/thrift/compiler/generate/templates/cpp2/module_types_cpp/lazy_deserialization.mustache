@@ -1,0 +1,61 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:lazy_fields?%>
+<%#struct:fields%>
+<%#field:type%>
+<%#field:lazy?%>
+const <%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::__fbthrift_read_field_<%field:cpp_name%>() const {
+  const auto isDeserialized = __fbthrift_isDeserialized_.<%field:cpp_name%>.load(std::memory_order_relaxed);
+  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
+    __fbthrift_read_field_<%field:cpp_name%>_slow();
+  }
+  return <%field:cpp_storage_name%>;
+}
+
+<%field:cpp_storage_type%>& <%struct:cpp_underlying_name%>::__fbthrift_read_field_<%field:cpp_name%>() {
+  const auto isDeserialized = __fbthrift_isDeserialized_.<%field:cpp_name%>.load(std::memory_order_relaxed);
+  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
+    __fbthrift_read_field_<%field:cpp_name%>_slow();
+  } else if (isDeserialized & ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+    __fbthrift_isDeserialized_.<%field:cpp_name%> = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
+  }
+  return <%field:cpp_storage_name%>;
+}
+
+void <%struct:cpp_underlying_name%>::__fbthrift_read_field_<%field:cpp_name%>_slow() const {
+  auto lock = folly::make_unique_lock(__fbthrift_deserializationMutex_);
+  if (__fbthrift_isDeserialized_.<%field:cpp_name%> & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
+    return;
+  }
+  switch (__fbthrift_protocol_) {
+    case ::apache::thrift::protocol::T_COMPACT_PROTOCOL:
+      __fbthrift_read_field_<%field:cpp_name%>_impl<::apache::thrift::CompactProtocolReader>();
+      break;
+    case ::apache::thrift::protocol::T_BINARY_PROTOCOL:
+      __fbthrift_read_field_<%field:cpp_name%>_impl<::apache::thrift::BinaryProtocolReader>();
+      break;
+    default:
+      CHECK(false) << int(__fbthrift_protocol_);
+  }
+  __fbthrift_serializedData_.<%field:cpp_name%> = {};
+  __fbthrift_isDeserialized_.<%field:cpp_name%> = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
+}
+
+<%/field:lazy?%>
+<%/field:type%>
+<%/struct:fields%>
+<%/struct:lazy_fields?%>

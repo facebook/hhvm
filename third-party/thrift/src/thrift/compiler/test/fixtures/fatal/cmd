@@ -1,0 +1,2 @@
+#cpp2:fatal src/module.thrift
+mstch_cpp2:reflection src/module.thrift

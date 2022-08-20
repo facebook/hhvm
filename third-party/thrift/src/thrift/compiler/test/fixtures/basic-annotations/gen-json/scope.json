@@ -1,0 +1,641 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "scope",
+  "typedefs" : {
+    "Enum" : {
+      "lineno" : 69,
+      "type_enum" : "STRUCT",
+      "spec_args" : "FbthriftInternalEnum",
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "",
+          "source_range" : {
+            "begin" : {
+              "line" : 69,
+              "column" : 36
+            },
+            "end" : {
+              "line" : 69,
+              "column" : 51
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 69,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 69,
+          "column" : 52
+        }
+      }
+    }
+  },
+  "structs" : {
+    "Program" : {
+      "lineno" : 39,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Program",
+          "source_range" : {
+            "begin" : {
+              "line" : 39,
+              "column" : 20
+            },
+            "end" : {
+              "line" : 39,
+              "column" : 73
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 39,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 39,
+          "column" : 74
+        }
+      }
+    },
+    "Struct" : {
+      "lineno" : 40,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Struct",
+          "source_range" : {
+            "begin" : {
+              "line" : 40,
+              "column" : 19
+            },
+            "end" : {
+              "line" : 40,
+              "column" : 71
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 40,
+          "column" : 72
+        }
+      }
+    },
+    "Union" : {
+      "lineno" : 41,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Union",
+          "source_range" : {
+            "begin" : {
+              "line" : 41,
+              "column" : 18
+            },
+            "end" : {
+              "line" : 41,
+              "column" : 69
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 41,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 41,
+          "column" : 70
+        }
+      }
+    },
+    "Exception" : {
+      "lineno" : 42,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Exception",
+          "source_range" : {
+            "begin" : {
+              "line" : 42,
+              "column" : 22
+            },
+            "end" : {
+              "line" : 42,
+              "column" : 77
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 42,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 42,
+          "column" : 78
+        }
+      }
+    },
+    "Field" : {
+      "lineno" : 43,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Field",
+          "source_range" : {
+            "begin" : {
+              "line" : 43,
+              "column" : 18
+            },
+            "end" : {
+              "line" : 43,
+              "column" : 69
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 43,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 43,
+          "column" : 70
+        }
+      }
+    },
+    "Typedef" : {
+      "lineno" : 44,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Typedef",
+          "source_range" : {
+            "begin" : {
+              "line" : 44,
+              "column" : 20
+            },
+            "end" : {
+              "line" : 44,
+              "column" : 73
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 44,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 44,
+          "column" : 74
+        }
+      }
+    },
+    "Service" : {
+      "lineno" : 45,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Service",
+          "source_range" : {
+            "begin" : {
+              "line" : 45,
+              "column" : 20
+            },
+            "end" : {
+              "line" : 45,
+              "column" : 73
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 45,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 74
+        }
+      }
+    },
+    "Interaction" : {
+      "lineno" : 46,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Interaction",
+          "source_range" : {
+            "begin" : {
+              "line" : 47,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 47,
+              "column" : 60
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 46,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 48,
+          "column" : 2
+        }
+      }
+    },
+    "Function" : {
+      "lineno" : 49,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TFunction",
+          "source_range" : {
+            "begin" : {
+              "line" : 51,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 51,
+              "column" : 26
+            }
+          }
+        }
+,
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Function",
+          "source_range" : {
+            "begin" : {
+              "line" : 50,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 50,
+              "column" : 57
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 52,
+          "column" : 2
+        }
+      }
+    },
+    "EnumValue" : {
+      "lineno" : 53,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/EnumValue",
+          "source_range" : {
+            "begin" : {
+              "line" : 53,
+              "column" : 22
+            },
+            "end" : {
+              "line" : 53,
+              "column" : 77
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 53,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 53,
+          "column" : 78
+        }
+      }
+    },
+    "Const" : {
+      "lineno" : 54,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TConst",
+          "source_range" : {
+            "begin" : {
+              "line" : 56,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 56,
+              "column" : 23
+            }
+          }
+        }
+,
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Const",
+          "source_range" : {
+            "begin" : {
+              "line" : 55,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 55,
+              "column" : 54
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 54,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 57,
+          "column" : 2
+        }
+      }
+    },
+    "Schema" : {
+      "lineno" : 62,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Schema",
+          "source_range" : {
+            "begin" : {
+              "line" : 62,
+              "column" : 19
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 71
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 62,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 62,
+          "column" : 72
+        }
+      }
+    },
+    "FbthriftInternalEnum" : {
+      "lineno" : 66,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Enum",
+          "source_range" : {
+            "begin" : {
+              "line" : 67,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 67,
+              "column" : 53
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 66,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 68,
+          "column" : 2
+        }
+      }
+    },
+    "Transitive" : {
+      "lineno" : 94,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/Transitive",
+          "source_range" : {
+            "begin" : {
+              "line" : 94,
+              "column" : 23
+            },
+            "end" : {
+              "line" : 94,
+              "column" : 79
+            }
+          }
+        }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 94,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 94,
+          "column" : 80
+        }
+      }
+    },
+    "Structured" : {
+      "lineno" : 96,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Struct" : {  },
+        "Union" : {  },
+        "Exception" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 96,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 100,
+          "column" : 21
+        }
+      }
+    },
+    "Interface" : {
+      "lineno" : 102,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "hack.name" : {
+          "value" : "TInterface",
+          "source_range" : {
+            "begin" : {
+              "line" : 105,
+              "column" : 22
+            },
+            "end" : {
+              "line" : 105,
+              "column" : 46
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "Service" : {  },
+        "Interaction" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 102,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 105,
+          "column" : 47
+        }
+      }
+    },
+    "RootDefinition" : {
+      "lineno" : 107,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Structured" : {  },
+        "Interface" : {  },
+        "Typedef" : {  },
+        "FbthriftInternalEnum" : {  },
+        "Const" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 107,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 113,
+          "column" : 25
+        }
+      }
+    },
+    "Definition" : {
+      "lineno" : 115,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "RootDefinition" : {  },
+        "Field" : {  },
+        "Function" : {  },
+        "EnumValue" : {  },
+        "Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 115,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 120,
+          "column" : 21
+        }
+      }
+    }
+  }
+}

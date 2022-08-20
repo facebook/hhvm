@@ -1,0 +1,206 @@
+/*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package protobuf;
+
+option cc_enable_arenas = true;
+
+message Empty {}
+
+message SmallInt {
+  int32 smallint = 1;
+}
+
+message BigInt {
+  int64 bigint = 1;
+}
+
+message SmallString {
+  string smallstr = 1;
+}
+
+message BigString {
+  string bigstr = 1;
+}
+
+message Mixed {
+  int32 i32 = 1;
+  int64 i64 = 2;
+  bool b = 3;
+  string s = 4;
+}
+
+message SmallListInt {
+  repeated int32 lst = 1 [ packed = true ];
+}
+
+message BigListInt {
+  repeated int32 lst = 1 [ packed = true ];
+}
+
+message BigListMixed {
+  repeated Mixed lst = 1;
+}
+
+message LargeListMixed {
+  repeated Mixed lst = 1;
+}
+
+message LargeMapInt {
+  map<int32, int32> m = 1;
+}
+
+message NestedMap {
+  message NestedMap1 { map<int32, int32> m = 1; }
+  message NestedMap2 { map<int32, NestedMap1> m = 1; }
+  message NestedMap3 { map<int32, NestedMap2> m = 1; }
+  message NestedMap4 { map<int32, NestedMap3> m = 1; }
+  map<int32, NestedMap4> m = 1;
+}
+
+message LargeMixed {
+  int32 var0 = 1;
+  int64 var1 = 2;
+  bool var2 = 3;
+  string var3 = 4;
+  int32 var4 = 5;
+  int64 var5 = 6;
+  bool var6 = 7;
+  string var7 = 8;
+  int32 var8 = 9;
+  int64 var9 = 10;
+  bool var10 = 11;
+  string var11 = 12;
+  int32 var12 = 13;
+  int64 var13 = 14;
+  bool var14 = 15;
+  string var15 = 16;
+  int32 var16 = 17;
+  int64 var17 = 18;
+  bool var18 = 19;
+  string var19 = 20;
+  int32 var20 = 21;
+  int64 var21 = 22;
+  bool var22 = 23;
+  string var23 = 24;
+  int32 var24 = 25;
+  int64 var25 = 26;
+  bool var26 = 27;
+  string var27 = 28;
+  int32 var28 = 29;
+  int64 var29 = 30;
+  bool var30 = 31;
+  string var31 = 32;
+  int32 var32 = 33;
+  int64 var33 = 34;
+  bool var34 = 35;
+  string var35 = 36;
+  int32 var36 = 37;
+  int64 var37 = 38;
+  bool var38 = 39;
+  string var39 = 40;
+  int32 var40 = 41;
+  int64 var41 = 42;
+  bool var42 = 43;
+  string var43 = 44;
+  int32 var44 = 45;
+  int64 var45 = 46;
+  bool var46 = 47;
+  string var47 = 48;
+  int32 var48 = 49;
+  int64 var49 = 50;
+  bool var50 = 51;
+  string var51 = 52;
+  int32 var52 = 53;
+  int64 var53 = 54;
+  bool var54 = 55;
+  string var55 = 56;
+  int32 var56 = 57;
+  int64 var57 = 58;
+  bool var58 = 59;
+  string var59 = 60;
+  int32 var60 = 61;
+  int64 var61 = 62;
+  bool var62 = 63;
+  string var63 = 64;
+  int32 var64 = 65;
+  int64 var65 = 66;
+  bool var66 = 67;
+  string var67 = 68;
+  int32 var68 = 69;
+  int64 var69 = 70;
+  bool var70 = 71;
+  string var71 = 72;
+  int32 var72 = 73;
+  int64 var73 = 74;
+  bool var74 = 75;
+  string var75 = 76;
+  int32 var76 = 77;
+  int64 var77 = 78;
+  bool var78 = 79;
+  string var79 = 80;
+  int32 var80 = 81;
+  int64 var81 = 82;
+  bool var82 = 83;
+  string var83 = 84;
+  int32 var84 = 85;
+  int64 var85 = 86;
+  bool var86 = 87;
+  string var87 = 88;
+  int32 var88 = 89;
+  int64 var89 = 90;
+  bool var90 = 91;
+  string var91 = 92;
+  int32 var92 = 93;
+  int64 var93 = 94;
+  bool var94 = 95;
+  string var95 = 96;
+  int32 var96 = 97;
+  int64 var97 = 98;
+  bool var98 = 99;
+  string var99 = 100;
+}
+
+message MixedInt {
+  int32 var1 = 1;
+  int32 var2 = 2;
+  int32 var3 = 3;
+  int32 var4 = 4;
+  int32 var5 = 5;
+  int32 var6 = 6;
+  int32 var7 = 7;
+  int32 var8 = 8;
+  int32 var9 = 9;
+  int32 varx = 10;
+  int32 vary = 11;
+  int32 varz = 12;
+}
+
+message ComplexStruct {
+  Empty var0 = 1;
+  SmallInt var1 = 2;
+  BigInt var2 = 4;
+  SmallString var3 = 7;
+  BigString var4 = 11;
+  Mixed var5 = 16;
+  SmallListInt var6 = 22;
+  BigListInt var7 = 29;
+  LargeListMixed var8 = 37;
+  LargeMapInt var9 = 46;
+  LargeMixed var10 = 56;
+  NestedMap var11 = 67;
+}

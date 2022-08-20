@@ -1,0 +1,4 @@
+mstch_cpp2:single_file_service src/module.thrift
+mstch_cpp2:single_file_service src/module_structs.thrift
+mstch_py3:single_file_service src/module.thrift
+mstch_py3:single_file_service src/module_structs.thrift

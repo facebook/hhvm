@@ -1,0 +1,260 @@
+/*
+ * Trace Event Meta Data Fields, please follow the pattern when you add new one.
+ */
+
+/* ---- Error Fields ---- */
+ErrorStage, "error_stage"
+Error, "error_description"
+ProxygenError, "proxygen_error"
+HTTPStatus, "http_status"
+DirectionError, "error_direction"
+CodecError, "codec_error"
+
+/* ---- Used in TotalRequest ---- */
+CallPath, "call_path"
+
+/* ---- Used in RequestExchange ---- */
+Uri, "uri"
+IsSecure, "is_secure"
+UsingProxy, "using_proxy"
+StatusCode, "status_code"
+Protocol, "protocol"
+SecurityProtocol, "security_protocol"
+ReplaySafe, "replay_safe"
+LocalAddr, "local_addr"
+LocalPort, "local_port"
+ContentType, "content_type"
+ReqHeaderSize, "request_header_size"
+ReqHeaderCompSize, "request_header_compressed_size"
+ReqBodySize, "request_body_size"
+RspHeaderSize, "response_header_size"
+RspHeaderCompSize, "response_header_compressed_size"
+RedirectLocation, "redirect_location"
+NumRedirects, "num_redirects"
+RedirectResponseCode, "redirect_response_code"
+NumZeroRttRetries, "num_retries"
+UsingHTTP2, "using_http2"
+FirstBodyByteFlushedRatio, "first_body_byte_flushed_ratio"
+LastBodyByteFlushedRatio, "last_body_byte_flushed_ratio"
+FlowControlPauses, "flow_control_pauses"
+HTTPMethod, "http_method"
+RangeRequest, "range_request"
+RequestSendTime, "wire request time in liger epoch"
+
+/* ---- Used in ResponseBodyRead ---- */
+RspIntvlAvg, "response_interval_average"
+RspIntvlStdDev, "response_interval_stddev"
+RspNumOnBody, "response_number_on_body"
+ServerQuality, "response_server_quality"
+ServerRtt, "server_rtt"
+RecvToAck, "flow_control_recv_to_ack"
+ServerRtx, "server_rtx"
+ServerCwnd, "server_cwnd"
+ServerMss, "server_mss"
+ServerTotalBytesWritten, "server_tbw"
+
+/* ---- Used in PreConnect ---- */
+NewConnection, "new_connection"
+IsWaitingForNewConn, "waiting_for_new_connection"
+NewConnTimeout, "new_conn_timeout"
+InFlightConns, "in_flight_conns"
+CachedSessions, "cached_sessions"
+CachedActiveSessions, "cached_active_sessions"
+ConnsStarted, "conns_started"
+RequestsWaited, "requests_waited"
+TotalRequestsWaited, "total_requests_waited",
+TotalConnsStarted, "total_conns_started",
+TotalBackupConnsStarted, "total_backup_conns_started",
+SessionCacheHitType, "session_cache_hit_type"
+PerDomainLimit, "per_domain_limit"
+DynamicDomainLimitRatio, "dynamic_domain_limit_ratio"
+LoadBalancing, "load_balancing"
+MaxConnectionRetryCount, "max_connection_retry_count"
+MaxIdleHTTPSessions, "max_idle_http_sessions"
+MaxIdleHTTP2Sessions, "max_idle_http2_sessions"
+ConnRoutingStale, "connection_routing_stale"
+AltSvcHost, "alt_svc_host"
+InjectedSocket, "injected_socket"
+
+/* ---- Used in TcpConnect ---- */
+ServerAddr, "server_address"
+ServerPort, "server_port"
+CachedFamily, "cached_family"
+
+/* ---- Used in PostConnect ---- */
+NewSession, "new_session"
+NumWaiting, "num_waiting"
+
+/* ---- Used in DnsResolution and DNSCache ---- */
+HostName, "host_name"
+IpAddr, "ip_address"
+Port, "port"
+CNameRedirects, "cname_redirects"
+CanonicalName, "canonical_name"
+NumberResolvers, "number_resolvers"
+ResolversSerialized, "resolvers_serialized"
+RequestFamily, "request_family"
+NumberAnswers, "number_answers"
+NumberDNSRetries, "number_retries"
+ResolvedSuccess, "resolved_success"
+
+/* ---- Used in DNSCache only ---- */
+DNSCacheHit, "dns_cache_hit"
+DNSCacheStale, "dns_cache_stale"
+DNSPreconnectDomain, "dns_preconnect_domain"
+
+/* ---- Used in TlsSetup ---- */
+TLSReused, "tls_reused"
+TLSCacheHit, "tls_cache_hit"
+CipherName, "cipher_name"
+TLSVersion, "ssl_version"
+OpenSSLVersion, "openssl_version"
+TLSCachePersistence, "tls_cache_persistence"
+
+/* ----- Used in TLSCachedInfo ---- */
+TLSCachedInfoHit, "tls_cached_info_cert_cache_hit"
+
+/* ---- Used in Decompression ---- */
+RspBodySize, "response_body_size"
+RspBodyCompSize, "response_body_compressed_size"
+CompressionType, "compression_type"
+CompressionDictSuccess, "compression_dict_success"
+CompressionDictError, "compression_dict_error"
+CompressionDictID, "compression_dict_id"
+
+/* ---- Used in CertVerification ---- */
+VerifiedSuccess, "verified_success"
+VerifiedChain, "verified_chain"
+VerifiedTime, "verified_time"
+VerifiedServerAddress, "verified_server_address"
+VerifiedProxyAddress, "verified_proxy_address"
+VerifiedError, "verified_error"
+VerifiedReason, "verified_reason"
+VerifiedHostname, "verified_hostname"
+VerifiedMatchedCommonName, "verified_matchedCommonName"
+VerifiedMatchedSubjectAltName, "verified_matchedSubjectAltName"
+VerifiedNameMatched, "verified_nameMatched"
+VerifiedHostnameFailMessage, "verified_hostnameFailMessage"
+
+/* ---- Used in Cert Signature Algorithm Verification ---- */
+SignatureAlgorithmCertSHA1, "signature_algorithm_verified_cert_sha1"
+
+/* ---- Used in Cert Failure Verification ---- */
+FailureVerifiedCertDepthInChain, "failure_verified_cert_depth_in_chain"
+VerifiedChainFailuresOverridden, "verified_chain_failures_overridden"
+VerifiedChainFailureVerificationTime, "verified_chain_failure_verification_time"
+
+/* ---- Used in Cert Pinning ---- */
+PinningReason, "verified_pinning_reason"
+PinningRequiredHash, "verified_pinning_required_hash"
+PinningUserHash, "verified_pinning_user_hash"
+PinningExcludedHash, "verified_pinning_excluded_hash"
+PinningRequiredFound, "verified_pinning_required_found"
+PinningUserInstalledFound, "verified_pinning_user_installed_found"
+PinningUserInstalledCount, "verified_pinning_user_installed_count"
+PinningExcludedFound, "verified_pinning_excluded_found"
+PinningTimePin, "verified_pinning_time_pin"
+PinningHost, "verified_pinning_host"
+PinningSuccess, "verified_pinning_success"
+VerifiedTimeMerge, "verified_time_merge"
+
+/* ---- Used in Cert Revocation ---- */
+RevokeReason, "verified_revoke_reason"
+RevokeSuccess, "verified_revoke_success"
+
+/* ---- Used in ProxyConnect ---- */
+ProxyHost, "proxy_host"
+ProxyPort, "proxy_port"
+ProxyRespStatus, "proxy_response_status"
+ProxyRespBody, "proxy_response_body"
+ProxyUpstreamDest, "proxy_upstream_dest"
+
+/* ---- Used in Scheduling ---- */
+SchedulerType, "scheduler_type"
+InitialPriority, "initial_priority"
+SizeOfQueue, "size_of_queue"
+
+/* ---- Used in NetworkChange ---- */
+PreviousState, "previous_state"
+CurrentState, "current_state"
+NetworkID, "network_id"
+
+/* ---- Used in MultiConnector ---- */
+NumConnAttempts, "number_conn_attempts"
+AttemptAddrs, "attempt_addresses"
+AttemptAddrFamily, "attempt_address_family"
+SucceededConnTime, "succeeded_conn_time"
+
+/* ---- Used in FBLigerProtocol ---- */
+RequestID, "request_id"
+HumanReadableName, "human_readable_name"
+
+/* ---- Used in SessionTransactions ---- */
+CurrentTransactions, "current_txns"
+HistoricalMaximumTransactions, "historical_max_txns"
+NumberTransactionsServed, "number_txns_served"
+
+/* ---- TCP Info --- */
+Cwnd, "cwnd"
+CwndBytes, "cwnd_bytes"
+TotalRetx, "total_retx"
+InflightPacketLoss, "inflight_packet_loss"
+RTT, "rtt"
+RTTVar, "rtt_variance"
+RTO, "rto"
+MSS, "sending_mss"
+MTU, "mtu"
+RcvWnd, "recv_window"
+UpstreamCapacity, "upstream_capacity"
+
+/* ---- Used in ConnInfo ----*/
+ReqsSucceed, "reqs_succeed"
+ReqsFailed, "reqs_failed"
+TTFB, "ttfb"
+TTLB, "ttlb"
+ConnLifeSpan, "connection_life_span"
+EgressBuffered, "egress_buffered"
+
+/* ---- Used in ZeroSetup ---- */
+SCFGCacheHit, "zero_scfg_cache_hit"
+SCFGExpired, "zero_scfg_expired"
+ZeroAEAD, "zero_aead"
+ZeroKex, "zero_kex"
+ZeroVersion, "zero_version"
+ZeroRttEnabled, "zero_rtt_enabled"
+ZeroFallbackEnabled, "zero_fallback_enabled"
+
+/* --- Used in ZeroVerification --- */
+ZeroVerifiedSuccess, "zero_verified_success"
+ZeroVerifiedError, "zero_verified_error"
+
+/* --- Used in ZeroConnector -- */
+TFOAttempted, "tfo_attempted"
+TFOFinished, "tfo_finished"
+
+/* --- Used in MQTT Client --- */
+MQTTConnAttempts, "mqtt_conn_attempts"
+IsForeground, "is_foreground"
+MQTTBytesWritten, "mqtt_bytes_written"
+MQTTBytesRead, "mqtt_bytes_read"
+RawBytesWritten, "raw_bytes_written"
+RawBytesRead, "raw_bytes_read"
+EventLoopTimeAvg, "event_loop_time_avg"
+TransportType, "transport_type"
+
+/* --- Used in MQTTMessage --- */
+MQTTMsgRemainingLength, "mqtt_msg_remaining_length"
+MsgType, "msg_type"
+IsMsgRecv, "is_msg_received"lishV
+ConnectReturnCode, "connect_return_code"
+MQTTMsgBytes, "mqtt_msg_bytes"
+MsgTopic, "msg_topic"
+QoS, "qos"
+
+/* ---- Used in Push ----*/
+IsPushRequest, "is_push_request"
+PushConnectedInFlight, "push_connected_in_flight"
+PushOrphaned, "push_orphaned"
+
+/* ---- Used in analytics logging ----*/
+AnalyticsTags, "analytics_tags"

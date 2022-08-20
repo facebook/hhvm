@@ -1,0 +1,24 @@
+[manifest]
+name = sqlite3
+
+[debs]
+libsqlite3-dev
+
+[homebrew]
+sqlite
+
+[rpms]
+sqlite-devel
+sqlite-libs
+
+[download]
+url = https://sqlite.org/2019/sqlite-amalgamation-3280000.zip
+sha256 = d02fc4e95cfef672b45052e221617a050b7f2e20103661cda88387349a9b1327
+
+[dependencies]
+cmake
+ninja
+
+[build]
+builder = sqlite
+subdir = sqlite-amalgamation-3280000

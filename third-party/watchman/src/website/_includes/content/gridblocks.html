@@ -1,0 +1,6 @@
+<div class="gridBlock">
+{% for item in {{include.data_source}} %}
+  {% include content/items/gridblock.html item=item gridtype=include.grid_type %}
+  {% cycle '', '<div class="gridClear"></div>' %}
+{% endfor %}
+</div>

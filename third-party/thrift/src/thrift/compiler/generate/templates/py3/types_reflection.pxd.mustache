@@ -1,0 +1,56 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Python wrappers of the structs defined in the services files. This file is
+compiled into it's own module to be included by clients and services and
+end-user code. It's one of the more complicated files, as it has to map
+Pythonic APIs to C++ objects and back.
+
+One of the nastier things in this file is the definition of containers.
+A separate container wrapper has to be defined for each type of contained
+attribute because Cython can't template C++ classes. So, for example, we need
+a List__int16 or a List__string or a Map__string_mystruct instance for each
+container/type combination. Consider that containers can contain other containers
+or structs that contain containers and you realize how messy this can get.
+Further, we'd prefer to have the end user freed from having to know about these
+container types, so we'll need to define factories for them based on what they
+want to include.
+
+}}
+{{> common/auto_generated_py}}
+
+
+from thrift.py3.reflection cimport (
+    StructSpec as __StructSpec,
+    ListSpec as __ListSpec,
+    SetSpec as __SetSpec,
+    MapSpec as __MapSpec,
+    FieldSpec as __FieldSpec,
+)
+{{#program:structs}}
+
+cdef __StructSpec get_reflection__{{struct:name}}()
+{{/program:structs}}
+{{#program:containerTypes}}
+
+cdef {{!
+  }}{{#type:list?}}__ListSpec{{/type:list?}}{{!
+  }}{{#type:set?}}__SetSpec{{/type:set?}}{{!
+  }}{{#type:map?}}__MapSpec{{/type:map?}}{{!
+  }} get_reflection__{{type:flat_name}}()
+{{/program:containerTypes}}

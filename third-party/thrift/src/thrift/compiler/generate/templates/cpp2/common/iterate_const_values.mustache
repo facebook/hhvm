@@ -1,0 +1,48 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%!
+
+Base Types:
+
+%><%^value:container?%><%!
+  %><%^type:struct?%><%!
+    %><%#value:string?%><%!
+      %>apache::thrift::StringTraits<<% > types/indirected_string_type%>>::fromStringLiteral(<% > common/const_value%>)<%!
+    %><%/value:string?%><%!
+    %><%^value:string?%><% > common/const_value%><%/value:string?%><%!
+  %><%/type:struct?%><%!
+%><%/value:container?%><%!
+Reference other constants:
+%><%#type:resolves_to_container_or_struct?%><%!
+  %><%#value:enable_referencing?%><%!
+    %><%#value:referenceable?%><%!
+      %><%#value:owning_const%><%!
+        %><%#constant:program%><%!
+          %><%#program:namespace_cpp2%>::<%namespace:name%><%#last?%>::<%/last?%><%/program:namespace_cpp2%><%program:name%>_constants::<%constant:name%>()<%!
+        %><%/constant:program%><%!
+      %><%/value:owning_const%><%!
+    %><%/value:referenceable?%><%!
+  %><%/value:enable_referencing?%><%!
+%><%/type:resolves_to_container_or_struct?%><%!
+%><%^value:enable_referencing?%><%!
+  %><% > common/iterate_const_values_non_referenceable%><%!
+%><%/value:enable_referencing?%><%!
+%><%#value:enable_referencing?%><%!
+  %><%^value:referenceable?%><%!
+    %><% > common/iterate_const_values_non_referenceable%><%!
+  %><%/value:referenceable?%><%!
+%><%/value:enable_referencing?%>

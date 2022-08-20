@@ -1,0 +1,120 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  Note:
+
+  This template works by simultaneously traversing the `type` and `value` maps
+  so that the type of the constant is known. Before including this template,
+  open constant:type and constant:value. On recursive calls, make sure to open
+  the next subtree's :type and :value elements as well. See the section titled
+  'Map Constants' for an example.
+
+
+}}{{#type:typedef?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> DefaultValueContainer}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> DefaultValueContainer}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> DefaultValueContainer}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+}}{{#type:map?}}{{!
+    }}{{^type:javaType}}{{> BoxedType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}}new Hash{{> BoxedType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{#type:javaType}}{{type:javaType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}} new {{type:javaType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{!
+
+    }}{{#value:map_elements}}
+        { {{field:setIsNested}}{{!
+        }}{{#element:key}}{{#type:key_type}}{{!
+
+        }}{{#type:isContainer?}}{{> Type}} _key{{field:nestedDepth}};{{type:setIsMapKey}}
+        {{field:nestedDepth++}}{{> DefaultValueContainer}}{{field:nestedDepth--}}
+        {{/type:isContainer?}}{{!
+        }}{{^type:isContainer?}}{{> Type}} _key{{field:nestedDepth}} = {{> DefaultValue}};{{!
+        }}{{/type:isContainer?}}{{/type:key_type}}{{!
+        }}{{/element:key}}{{!
+
+        }}{{#element:value}}{{#type:value_type}}{{!
+        }}{{#type:isContainer?}}{{type:setIsMapValue}}
+        {{> Type}} _val{{field:nestedDepth}};
+        {{field:nestedDepth++}}{{> DefaultValueContainer}}{{field:nestedDepth--}}{{!
+        }}{{/type:isContainer?}}{{!
+        }}{{^type:isContainer?}}
+        {{> Type}} _val{{field:nestedDepth}} = {{> DefaultValue}};{{!
+        }}{{/type:isContainer?}}{{/type:value_type}}{{/element:value}}{{!
+
+        }}
+        _objRef{{field:nestedDepth}}.put(_key{{field:nestedDepth}}, _val{{field:nestedDepth}}); }{{!
+        }}{{/value:map_elements}}{{!
+        }}{{!
+        }}{{^field:isFirstDepth?}}
+        {{#type:isMapKey?}}_key{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapKey?}}{{!
+        }}{{#type:isMapValue?}}_val{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapValue?}}{{!
+        }}{{^type:isMapKey?}}{{^type:isMapValue?}}_objRef{{field:prevNestedDepth}}.add(_objRef{{field:nestedDepth}});
+        {{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+        }}{{/field:isFirstDepth?}}{{!
+}}{{/type:map?}}{{!
+
+    List constants
+  }}{{#type:list?}}{{!
+      }}{{^type:javaType}}{{> BoxedType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}}new Array{{> BoxedType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{#type:javaType}}{{type:javaType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}} new {{type:javaType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{!
+
+      }}{{#value:list_elements}}
+        { {{field:setIsNested}}{{!
+        }}{{#type:list_elem_type}}{{!
+        }}{{#type:isContainer?}}{{field:nestedDepth++}}{{> DefaultValueContainer}}{{field:nestedDepth--}}{{/type:isContainer?}}{{!
+        }}{{^type:isContainer?}}_objRef{{field:nestedDepth}}.add({{> DefaultValue}});{{/type:isContainer?}}{{!
+        }}{{/type:list_elem_type}} }{{/value:list_elements}}{{!
+        }}{{!
+        }}{{^field:isFirstDepth?}}
+        {{#type:isMapKey?}}_key{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapKey?}}{{!
+        }}{{#type:isMapValue?}}_val{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapValue?}}{{!
+        }}{{^type:isMapKey?}}{{^type:isMapValue?}}_objRef{{field:prevNestedDepth}}.add(_objRef{{field:nestedDepth}});
+        {{/type:isMapValue?}}{{/type:isMapKey?}}
+      {{/field:isFirstDepth?}}{{!
+}}{{/type:list?}}{{!
+    Set constants
+}}{{#type:set?}}{{!
+
+      }}{{^type:javaType}}{{> BoxedType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}}new Hash{{> BoxedType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{#type:javaType}}{{type:javaType}} _objRef{{field:nestedDepth}} = {{#field:isFirstDepth?}}this.{{field:javaName}};{{/field:isFirstDepth?}}{{!
+      }}{{^field:isFirstDepth?}} new {{type:javaType}}();{{/field:isFirstDepth?}}{{/type:javaType}}{{!
+      }}{{!
+
+      }}{{#value:list_elements}}
+        { {{field:setIsNested}}{{!
+        }}{{#type:set_elem_type}}{{!
+        }}{{#type:isContainer?}}{{field:nestedDepth++}}{{> DefaultValueContainer}}{{field:nestedDepth--}}{{/type:isContainer?}}{{!
+        }}{{^type:isContainer?}}_objRef{{field:nestedDepth}}.add({{> DefaultValue}});{{/type:isContainer?}}{{!
+        }}{{/type:set_elem_type}} }{{/value:list_elements}}{{!
+        }}{{!
+
+        }}{{^field:isFirstDepth?}}
+        {{#type:isMapKey?}}_key{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapKey?}}{{!
+        }}{{#type:isMapValue?}}_val{{field:prevNestedDepth}} = _objRef{{field:nestedDepth}};{{/type:isMapValue?}}{{!
+        }}{{^type:isMapKey?}}{{^type:isMapValue?}}_objRef{{field:prevNestedDepth}}.add(_objRef{{field:nestedDepth}});
+        {{/type:isMapValue?}}{{/type:isMapKey?}}
+        {{/field:isFirstDepth?}}{{!
+
+}}{{/type:set?}}{{!
+}}{{/type:typedef?}}

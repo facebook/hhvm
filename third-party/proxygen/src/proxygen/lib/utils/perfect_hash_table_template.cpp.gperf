@@ -1,0 +1,75 @@
+%{
+// Copyright 2015-present Facebook.  All rights reserved.
+
+#include "%%header%%"
+#include <cstring>
+#include <folly/String.h>
+#include <glog/logging.h>
+
+namespace proxygen {
+
+%}
+
+%language=C++
+%compare-lengths
+%ignore-case
+%struct-type
+%readonly-tables
+%global-table
+%enum
+%define class-name %%name_internal%%
+
+struct %%name_container%% { const char* name; %%name_enum%% code; };
+
+// Placeholder for the gen script to insert enum values alongside '%%'
+// separators separating declarations, keywords, and functions.
+// Note am currently unable to prevent this comment from being present in the
+// output file.
+%%%%%
+
+%%name_enum%% %%name%%::hash(const char* name, size_t len) {
+  const %%name_container%%* match =
+    %%name_internal%%::in_word_set(name, len);
+  return (match == nullptr) ? %%enum_other%% : match->code;
+}
+
+std::string* %%name%%::initNames(
+    %%table_type_name%% type) {
+  auto names = new std::string[%%name%%::num_codes];
+  const uint8_t OFFSET = 2; // first 2 values are reserved for special cases
+  for (uint64_t j = 0; j < %%name%%::num_codes - OFFSET; ++j) {
+    uint8_t code = wordlist[j].code;
+    DCHECK_EQ(names[code], std::string());
+    // this would mean a duplicate code in the .gperf file
+    names[code] = wordlist[j].name;
+    if (type == %%table_type_name%%::TABLE_LOWERCASE) {
+      folly::toLowerAscii(const_cast<char*>(names[code].data()),
+          names[code].size());
+    }
+  }
+  return names;
+}
+
+const std::string* %%name%%::getPointerToTable(
+    %%table_type_name%% type) {
+  // The actual  tables are static and initialized here in source
+  // so as to prevent duplicate initializations that could occur through the
+  // use of inline semantics or compilation unit referencing if defined in a
+  // header
+  switch(type) {
+    case %%table_type_name%%::TABLE_CAMELCASE:
+      static const std::string* camelcaseTable = initNames(type);
+      return camelcaseTable;
+    case %%table_type_name%%::TABLE_LOWERCASE:
+      static const std::string* lowercaseTable = initNames(type);
+      return lowercaseTable;
+    default:
+      // Controlled abort here so its clear from a crash stack this method
+      // was called with a table type for which there is no current
+      // implementation
+      CHECK(false);
+      return nullptr;
+  }
+}
+
+} // proxygen

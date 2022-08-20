@@ -1,0 +1,201 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python typestubs for Thrift types
+}}
+{{> common/auto_generated_py}}
+
+import typing as _typing
+
+{{#program:enums?}}
+import enum
+
+{{/program:enums?}}{{^program:enums?}}{{#program:unions?}}
+import enum
+
+{{/program:unions?}}{{/program:enums?}}
+import folly.iobuf as _fbthrift_iobuf
+import {{program:base_library_package}}.types as _fbthrift_python_types
+import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
+{{#program:include_namespaces}}
+{{#has_types?}}
+
+import {{included_module_path}}.thrift_types
+{{/has_types?}}
+{{/program:include_namespaces}}
+{{#program:adapter_type_hint_modules}}
+import {{module_path}}
+{{/program:adapter_type_hint_modules}}
+{{#program:enums}}
+
+
+class {{enum:name}}(_fbthrift_python_types.Enum, enum.{{!
+        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+        }}{{^enum:flags?}}Enum{{/enum:flags?}}):
+    {{#enum:values}}
+    {{enum_value:py_name}}: {{enum:name}} = ...
+    {{/enum:values}}
+    {{#enum:legacy_api?}}
+    def _to_python(self) -> {{enum:name}}: ...
+    def _to_py3(self) -> "{{program:module_path}}.types.{{enum:name}}": ...  # type: ignore
+    def _to_py_deprecated(self) -> int: ...
+    {{/enum:legacy_api?}}
+{{/program:enums}}
+{{#program:structs}}
+
+
+class {{> structs/unadapted_name}}({{!
+        }}{{#struct:union?}}_fbthrift_python_types.Union{{/struct:union?}}{{!
+        }}{{^struct:union?}}{{!
+        }}{{#struct:exception?}}_fbthrift_python_exceptions.GeneratedError{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}_fbthrift_python_types.Struct{{/struct:exception?}}{{!
+        }}{{/struct:union?}}{{!
+        }}):
+    {{#struct:fields_and_mixin_fields}}
+    {{field:py_name}}: _typing.Final[{{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
+            }}{{> fields/adapted_type}}{{!
+            }}{{#field:optional?}}]{{/field:optional?}}] = ...
+    {{/struct:fields_and_mixin_fields}}
+    def __init__(
+        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_and_mixin_fields}},
+        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_and_mixin_fields}}
+    ) -> None: ...
+
+    {{#struct:plain?}}
+    def __call__(
+        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_and_mixin_fields}},
+        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_and_mixin_fields}}
+    ) -> {{> structs/unadapted_name}}: ...
+    {{/struct:plain?}}
+    {{#struct:union?}}
+
+    class Type(enum.Enum):
+        EMPTY: {{> structs/unadapted_name}}.Type = ...
+    {{#struct:fields_and_mixin_fields}}
+        {{field:py_name}}: {{> structs/unadapted_name}}.Type = ...
+    {{/struct:fields_and_mixin_fields}}
+
+    @classmethod
+    def fromValue(cls, value: {{ > types/field_value_pep484_union_type}}) -> {{> structs/unadapted_name}}: ...
+    value: _typing.Final[{{ > types/field_value_pep484_union_type}}]
+    type: Type
+    def get_type(self) -> Type:...
+    {{/struct:union?}}
+    {{^struct:union?}}
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_and_mixin_fields}}None{{/struct:fields_and_mixin_fields}}{{!
+        }}{{#struct:fields_and_mixin_fields}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
+        }}{{/struct:fields_and_mixin_fields}}]]]: ...
+    {{/struct:union?}}
+    {{#struct:legacy_api?}}
+    def _to_python(self) -> {{> structs/unadapted_name}}: ...
+    def _to_py3(self) -> "{{program:module_path}}.types.{{> structs/unadapted_name}}": ...  # type: ignore
+    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
+    {{/struct:legacy_api?}}
+{{#struct:has_adapter?}}
+{{struct:name}} = {{struct:adapter_type_hint}}
+{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}
+{{#program:constants?}}
+
+{{#program:constants}}
+
+{{constant:name}}: {{#constant:type}}{{!
+    }}{{> types/typedef_const_pep484_type}}{{!
+}}{{/constant:type}} = ...
+{{/program:constants}}
+{{/program:constants?}}
+{{#program:typedefs?}}
+
+{{#program:typedefs}}
+{{typedef:name}} = {{#typedef:has_adapter?}}{{typedef:adapter_type_hint}}{{/typedef:has_adapter?}}{{!
+}}{{^typedef:has_adapter?}}{{#typedef:type}}{{> types/typedef_const_pep484_type}}{{/typedef:type}}{{/typedef:has_adapter?}}
+{{/program:typedefs}}
+{{/program:typedefs?}}
+{{/program:services?}}
+{{#program:services}}
+{{#service:supported_functions}}
+
+
+class {{> types/function_args_type}}(_fbthrift_python_types.Struct):
+    {{#function:args}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}] = ...
+    {{/function:args}}
+
+    def __init__(
+        self,{{#function:args?}} *{{/function:args?}}{{#function:args}},
+        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{/function:args}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None{{#function:args}}, {{!
+            }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
+        }}{{/function:args}}]]]: ...
+{{^function:oneway?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types.Struct):
+   {{#function:regular_response_type}}
+    success: _typing.Final[{{ >types/pep484_type }}]
+   {{/function:regular_response_type}}
+    {{#function:exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:exceptions}}
+
+    def __init__(
+        self, *, success: _typing.Optional[{{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
+        }}{{#function:exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:exceptions}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}},
+            {{#function:exceptions}}
+            {{#field:type}}{{> types/pep484_type}}{{/field:type}},
+            {{/function:exceptions}}
+        ]]]: ...
+{{/function:oneway?}}
+{{#function:returns_stream?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[{{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}}]):
+    {{#function:stream_exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:stream_exceptions}}
+
+    def __init__(
+        self, *, success: _typing.Optional[{{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}}] = ...{{!
+        }}{{#function:stream_exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:stream_exceptions}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}},
+            {{#function:stream_exceptions}}
+            {{#field:type}}{{> types/pep484_type}}{{/field:type}},
+            {{/function:stream_exceptions}}
+        ]]]: ...
+{{/function:returns_stream?}}
+{{/service:supported_functions}}
+{{/program:services}}
+{{/program:services?}}

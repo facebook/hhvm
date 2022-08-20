@@ -1,0 +1,3 @@
+hack:typedef src/module.thrift
+hack:typedef src/include.thrift
+hack:typedef src/php_module.thrift

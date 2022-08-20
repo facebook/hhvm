@@ -1,0 +1,165 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "DemoWidgetDocs",
+  "namespaces": {
+    "php": "thrift_php_demo",
+    "py": "thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs"
+  },
+  "enumerations" :
+  {
+      "WidgetType" : {
+        "name" : "WidgetType",
+        "constants" : {
+          "FROB" : {
+            "name" : "FROB",
+            "docstring" : "Any small device or object (usually hand-sized) which can be manipulated.\n",
+            "lineno" : 28,
+            "value" : 1
+          },
+          "KNOB" : {
+            "name" : "KNOB",
+            "docstring" : "The kind that you can use to open a door.\n",
+            "lineno" : 30,
+            "value" : 2
+          },
+          "BOB" : {
+            "name" : "BOB",
+            "docstring" : "An actual person named Bob.\n",
+            "lineno" : 32,
+            "value" : 3
+          },
+          "JOB" : {
+            "name" : "JOB",
+            "docstring" : "Comments should work inline, too\n",
+            "lineno" : 33,
+            "value" : 4
+          },
+          "ROB" : {
+            "name" : "ROB",
+            "docstring" : "C++ style comments, also\nand support for multiline\n",
+            "lineno" : 34,
+            "value" : 5
+          }
+        },
+        "docstring" : "What kinds of widgets can we buy and sell?\n",
+        "lineno" : 25
+      }
+      },
+  "structs" :
+  {
+      "WidgetRequisition" : {
+        "name" : "WidgetRequisition",
+        "docstring" : "We are looking to buy / sell some quantity of widgets,\nsubject to price and quantity constraints.\n\n@should min(abs(minWidgets), abs(maxWidgets)) * minPrice <= budget,\n        'Your requisition can never be satisfied'\n",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "key" : 1,
+            "lineno" : 46,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "WidgetType"
+}
+          },
+          "budgetCents" : {
+            "name" : "budgetCents",
+            "docstring" : "How much can we spend on this order of widgets?\n@must _ > 0\n",
+            "key" : 2,
+            "lineno" : 51,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "minWidgets" : {
+            "name" : "minWidgets",
+            "docstring" : "Negative quantities represent sale requisitions.\n",
+            "key" : 3,
+            "lineno" : 53,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "maxWidgets" : {
+            "name" : "maxWidgets",
+            "docstring" : "@must minWidgets <= _\n",
+            "key" : 4,
+            "lineno" : 55,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "minPriceCents" : {
+            "name" : "minPriceCents",
+            "default_value" : 0,
+            "docstring" : "A lower limit on the price makes sense if our logistics are not set\nup to handle massive quantities of cheap stuff.\n@must _ >= 0\n",
+            "key" : 5,
+            "lineno" : 60,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "maxPriceCents" : {
+            "name" : "maxPriceCents",
+            "docstring" : "Our physical security can't deal with high-value items.\n@must minPrice <= _\n",
+            "key" : 6,
+            "lineno" : 64,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 45
+      },
+      "WidgetOrder" : {
+        "name" : "WidgetOrder",
+        "docstring" : "Once a WidgetRequisition is fulfilled, it becomes an order.\n\n@must abs(numWidgets) * priceCents <= requisition.budget, 'Over budget'\n@must requisition.minWidgets <= numWidgets and\n      numWidgets <= requisition.maxWidgets\n@must requisition.minPriceCents <= priceCents and\n      priceCents <= requisition.maxPriceCents\n",
+        "fields" : {
+          "requisition" : {
+            "name" : "requisition",
+            "docstring" : "The requisition that generated this order.\n",
+            "key" : 1,
+            "lineno" : 77,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "WidgetRequisition"
+}
+          },
+          "numWidgets" : {
+            "name" : "numWidgets",
+            "docstring" : "Negative quantities represent sale orders.\n",
+            "key" : 2,
+            "lineno" : 79,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "priceCents" : {
+            "name" : "priceCents",
+            "docstring" : "@must _ >= 0\n",
+            "key" : 3,
+            "lineno" : 81,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "numComments" : {
+            "name" : "numComments",
+            "docstring" : "count of comments\n",
+            "key" : 4,
+            "lineno" : 82,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+          },
+          "comments" : {
+            "name" : "comments",
+            "docstring" : "all comments\nmay support multiline\n",
+            "key" : 5,
+            "lineno" : 83,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 75
+      }
+      },
+  "source_path" : "src/DemoWidgetDocs",
+  "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs"
+}

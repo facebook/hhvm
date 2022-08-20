@@ -1,0 +1,243 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "namespaces": {
+    "java.swift": "test.fixtures.sink"
+  },  "structs" :
+  {
+      "InitialResponse" : {
+        "name" : "InitialResponse",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 20,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 19
+      },
+      "FinalResponse" : {
+        "name" : "FinalResponse",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 24,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
+      },
+      "SinkPayload" : {
+        "name" : "SinkPayload",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 28,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 27
+      },
+      "CompatibleWithKeywordSink" : {
+        "name" : "CompatibleWithKeywordSink",
+        "fields" : {
+          "sink" : {
+            "name" : "sink",
+            "key" : 1,
+            "lineno" : 33,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 31
+      },
+      "InitialException" : {
+        "name" : "InitialException",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 37,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 36
+      },
+      "SinkException1" : {
+        "name" : "SinkException1",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 41,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 40
+      },
+      "SinkException2" : {
+        "name" : "SinkException2",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 45,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+          }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 44
+      }
+      },
+  "services" :
+  {
+      "SinkService" : {
+        "name" : "SinkService",
+        "lineno" : 48,
+        "functions" : {
+          "method" : {
+            "name" : "method",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 49
+          },
+          "methodAndReponse" : {
+            "name" : "methodAndReponse",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "first_response_type" : {
+  "type" : "struct",
+  "name" : "InitialResponse"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 50
+          },
+          "methodThrow" : {
+            "name" : "methodThrow",
+            "exceptions" : {
+              "ex" : {
+                "name": "ex",
+                "type" : {
+  "type" : "struct",
+  "name" : "InitialException"
+}
+              }
+            },
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 51
+          },
+          "methodSinkThrow" : {
+            "name" : "methodSinkThrow",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 54
+          },
+          "methodFinalThrow" : {
+            "name" : "methodFinalThrow",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 58
+          },
+          "methodBothThrow" : {
+            "name" : "methodBothThrow",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 62
+          },
+          "methodFast" : {
+            "name" : "methodFast",
+            "returnType" : {
+  "type" : "sink",
+  "inner_type" : {
+  "type" : "struct",
+  "name" : "SinkPayload"
+},
+  "final_response_type" : {
+  "type" : "struct",
+  "name" : "FinalResponse"
+}
+},
+            "lineno" : 66
+          }
+        }
+      }
+      },
+  "source_path" : "src/module",
+  "py_namespace" : ""
+}

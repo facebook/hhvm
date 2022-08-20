@@ -1,0 +1,60 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is a template for creating compiled Enum and Flag pyx information
+
+}}
+
+{{#program:structs}}
+{{#struct:union?}}
+
+cdef __UnionTypeEnumData __{{struct:name}}_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[c{{struct:name}}](),
+    __{{struct:name}}Type,
+)
+
+
+@__cython.internal
+@__cython.auto_pickle(False)
+cdef class __{{struct:name}}_Union_TypeMeta(thrift.py3.types.EnumMeta):
+    def _fbthrift_get_by_value(cls, int value):
+        return __{{struct:name}}_union_type_enum_data.get_by_value(value)
+
+    def _fbthrift_get_all_names(cls):
+        return __{{struct:name}}_union_type_enum_data.get_all_names()
+
+    def __len__(cls):
+        return __{{struct:name}}_union_type_enum_data.size()
+
+    def __getattribute__(cls, str name not None):
+        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
+            return super().__getattribute__(name)
+        return __{{struct:name}}_union_type_enum_data.get_by_name(name)
+
+
+@__cython.final
+@__cython.auto_pickle(False)
+cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
+    cdef get_by_name(self, str name):
+        return __{{struct:name}}_union_type_enum_data.get_by_name(name)
+
+
+__SetMetaClass(<PyTypeObject*> __{{struct:name}}Type, <PyTypeObject*> __{{struct:name}}_Union_TypeMeta)
+
+{{/struct:union?}}
+{{/program:structs}}

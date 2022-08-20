@@ -1,0 +1,64 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+public static com.facebook.thrift.payload.Reader<{{struct:javaCapitalName}}> asReader() {
+  return {{struct:javaCapitalName}}::read0;
+}
+
+public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TException {
+  TField __field;
+  oprot.readStructBegin({{struct:javaCapitalName}}.NAMES_TO_IDS, {{struct:javaCapitalName}}.THRIFT_NAMES_TO_IDS, {{struct:javaCapitalName}}.FIELD_METADATA);
+  {{struct:javaCapitalName}}.Builder builder = new {{struct:javaCapitalName}}.Builder();
+  {{#struct:fields}}
+  {{#field:terse?}}
+  {{#field:value}}  
+  {{#field:hasAdapter?}}
+  {{^field:isObject?}}builder.{{> SetterName}}(Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT);{{/field:isObject?}}
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
+  {{^field:isObject?}}builder.{{> SetterName}}({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}});{{/field:isObject?}}
+  {{/field:hasAdapter?}}
+  {{/field:value}}
+  {{/field:terse?}}  
+  {{/struct:fields}}
+  while (true) {
+    __field = oprot.readFieldBegin();
+    if (__field.type == TType.STOP) { break; }
+    switch (__field.id) {
+    {{#struct:fields}}
+    case _{{field:javaAllCapsName}}:
+      if (__field.type == TType.{{#field:type}}{{> TType}}{{/field:type}}) {
+        {{#field:type}}
+        {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
+        {{/field:type}}
+        builder.{{> SetterName}}({{field:javaName}});
+      } else {
+        TProtocolUtil.skip(oprot, __field.type);
+      }
+      break;
+    {{/struct:fields}}
+    default:
+      TProtocolUtil.skip(oprot, __field.type);
+      break;
+    }
+    oprot.readFieldEnd();
+  }
+  oprot.readStructEnd();
+  return builder.build();
+}
+{{! terminate with newline }}

@@ -1,0 +1,71 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>
+  explicit <%struct:cpp_underlying_name%>(const allocator_type& alloc) noexcept :
+<%^struct:cpp_allocator_via%>
+    __fbthrift_alloc(alloc),
+<%/struct:cpp_allocator_via%>
+<%#struct:fields_in_layout_order%>
+    <%field:cpp_storage_name%>(<%!
+      %><%#field:type%><%!
+    %><%#field:cpp_ref?%><%!
+%><%#field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>folly::allocate_unique<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_unique<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><%^field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>std::allocate_shared<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_shared<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><<%type:cpp_type%>>(<%#field:value%><% > field/default%><%/field:value%><%#type:cpp_use_allocator?%>alloc<%/type:cpp_use_allocator?%>)<%/field:cpp_ref?%><%!
+%><%^field:cpp_ref?%><%#type:cpp_use_allocator?%>alloc<%/type:cpp_use_allocator?%><%/field:cpp_ref?%><%!
+    %>)<%/field:type%><%^last?%>,<%/last?%><%#last?%> {}<%/last?%>
+<%/struct:fields_in_layout_order%>
+
+  explicit <%struct:cpp_underlying_name%>(const <%struct:cpp_underlying_name%>& other, const allocator_type& alloc) :
+<%^struct:cpp_allocator_via%>
+    __fbthrift_alloc(alloc),
+<%/struct:cpp_allocator_via%>
+<%#struct:fields_in_layout_order%>
+    <%field:cpp_storage_name%>(<%!
+      %><%#field:type%><%!
+    %><%#field:cpp_ref?%><%!
+%><%#field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>folly::allocate_unique<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_unique<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><%^field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>std::allocate_shared<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_shared<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><<%type:cpp_type%>>(<%#type:cpp_use_allocator?%>alloc, <%/type:cpp_use_allocator?%>*other.<%field:cpp_storage_name%>)<%/field:cpp_ref?%><%!
+%><%^field:cpp_ref?%>other.<%field:cpp_storage_name%><%#type:cpp_use_allocator?%>, alloc<%/type:cpp_use_allocator?%><%/field:cpp_ref?%><%!
+    %>)<%/field:type%><%^last?%>,<%/last?%><%#last?%><%#struct:isset_fields?%>,<%/struct:isset_fields?%><%/last?%>
+<%/struct:fields_in_layout_order%>
+<%^struct:isset_fields?%> {}
+<%/struct:isset_fields?%>
+<%#struct:isset_fields?%>
+    __isset(other.__isset) {}
+<%/struct:isset_fields?%>
+
+  explicit <%struct:cpp_underlying_name%>(<%struct:cpp_underlying_name%>&& other, const allocator_type& alloc) :
+<%^struct:cpp_allocator_via%>
+    __fbthrift_alloc(alloc),
+<%/struct:cpp_allocator_via%>
+<%#struct:fields_in_layout_order%>
+    <%field:cpp_storage_name%>(<%!
+      %><%#field:type%><%!
+    %><%#field:cpp_ref?%><%!
+%><%#field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>folly::allocate_unique<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_unique<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><%^field:cpp_ref_unique?%><%#type:cpp_use_allocator?%>std::allocate_shared<%/type:cpp_use_allocator?%><%^type:cpp_use_allocator?%>std::make_shared<%/type:cpp_use_allocator?%><%/field:cpp_ref_unique?%><%!
+%><<%type:cpp_type%>>(<%#type:cpp_use_allocator?%>alloc, <%/type:cpp_use_allocator?%>std::move(*other.<%field:cpp_storage_name%>))<%/field:cpp_ref?%><%!
+%><%^field:cpp_ref?%>std::move(other.<%field:cpp_storage_name%>)<%#type:cpp_use_allocator?%>, alloc<%/type:cpp_use_allocator?%><%/field:cpp_ref?%><%!
+    %>)<%/field:type%><%^last?%>,<%/last?%><%#last?%><%#struct:isset_fields?%>,<%/struct:isset_fields?%><%/last?%>
+<%/struct:fields_in_layout_order%>
+<%^struct:isset_fields?%> {}
+<%/struct:isset_fields?%>
+<%#struct:isset_fields?%>
+    __isset(other.__isset) {}
+<%/struct:isset_fields?%>

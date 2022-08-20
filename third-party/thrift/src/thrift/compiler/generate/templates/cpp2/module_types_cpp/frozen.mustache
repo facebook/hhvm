@@ -1,0 +1,77 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#program:frozen?%>
+namespace apache { namespace thrift {
+template<>
+size_t Freezer<<%struct:cpp_fullname%>, void>::extraSizeImpl(
+    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src) {
+  return 0<%!
+%><%#struct:fields%><%!
+%><%#field:type%><%!
+%><%^type:bool?%>
+    + extraSize(src.<% > module_types_cpp/field_value_ref%>)<%!
+%><%/type:bool?%><%!
+%><%/field:type%><%!
+%><%/struct:fields%>;
+}
+
+template<>
+void Freezer<<%struct:cpp_fullname%>, void>::freezeImpl(
+    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::ThawedType& src,
+    FOLLY_MAYBE_UNUSED Freezer<<%struct:cpp_fullname%>, void>::FrozenType& dst,
+    FOLLY_MAYBE_UNUSED byte*& buffer) {
+<%#struct:fields%>
+<%#field:type%>
+<%#type:bool?%>
+  dst.<%field:cpp_name%> = src.<% > module_types_cpp/field_value_ref%>;
+<%/type:bool?%>
+<%^type:bool?%>
+  freeze(src.<% > module_types_cpp/field_value_ref%>, dst.<%field:cpp_name%>, buffer);
+<%/type:bool?%>
+<%^field:required?%>
+<%^field:cpp_ref?%>
+  dst.__isset.<%field:cpp_name%> = src.<%field:cpp_name%>_ref().has_value();
+<%/field:cpp_ref?%>
+<%/field:required?%>
+<%/field:type%>
+<%/struct:fields%>
+}
+
+template<>
+void Freezer<<%struct:cpp_fullname%>, void>::thawImpl(
+    FOLLY_MAYBE_UNUSED const Freezer<<%struct:cpp_fullname%>, void>::FrozenType& src,
+    FOLLY_MAYBE_UNUSED Freezer<<%struct:cpp_fullname%>, void>::ThawedType& dst) {
+<%#struct:fields%>
+<%#field:type%>
+<%#type:bool?%>
+  dst.<%field:cpp_name%>_ref() = src.<%field:cpp_name%>;
+<%/type:bool?%>
+<%^type:bool?%>
+  thaw(src.<%field:cpp_name%>, dst.<%field:cpp_name%>_ref()<%^field:cpp_ref?%>.ensure()<%/field:cpp_ref?%>);
+<%/type:bool?%>
+<%^field:required?%>
+<%^field:cpp_ref?%>
+  if (!src.__isset.<%field:cpp_name%>) {
+    ::apache::thrift::unset_unsafe_deprecated(dst.<%field:cpp_name%>_ref());
+  }
+<%/field:cpp_ref?%>
+<%/field:required?%>
+<%/field:type%>
+<%/struct:fields%>
+}
+}} // apache::thrift
+<%/program:frozen?%>

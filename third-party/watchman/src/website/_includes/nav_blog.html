@@ -1,0 +1,76 @@
+<nav class='toc' id="blog_nav"></nav>
+<script>
+  {% assign posts = site.posts limit 10 %}
+  var blognavData = [
+    {% for post in posts %}
+    {
+      key : "{{ site.baseurl }}{{ post.url }}",
+      title : "{{ post.title }}",
+      url : "{{ site.baseurl }}{{ post.url }}",
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ];
+</script>
+<script type="text/javascript">  
+var BlogNav = React.createClass({displayName: "BlogNav",
+  getInitialState: function() {
+    return {
+      toggleActive: false,
+    };
+  },
+  getDefaultProps: function() {
+    return {
+      currentDoc: "{{ page.title }}",
+      data: blognavData,
+    }
+  },
+  handleSlide: function(id) {
+    this.setState({
+      toggleActive: !this.state.toggleActive,
+    });
+  },
+  render: function() {
+    var classes = React.addons.classSet({
+      'navToggle': true,
+      'navToggleActive': this.state.toggleActive,
+    });
+    var navClasses = React.addons.classSet({
+      'toggleNav': true,
+      'toggleNavActive': this.state.toggleActive,
+    });
+    return (
+      React.createElement("div", {className: navClasses}, 
+        React.createElement("section", null, 
+          React.createElement("h3", null, "Recent Posts"), 
+          React.createElement("ul", null, 
+            this.props.data.map(this.renderNavItems), 
+            React.createElement("li", null, React.createElement("a", {href: "/blog/all.html"}, "All posts"))
+          )
+        ), 
+        React.createElement("div", {className: classes, onClick: this.handleSlide}, React.createElement("i", {className: "fa fa-chevron-circle-down"}))
+      )
+    );
+  },
+  renderNavItems: function(child, index) {
+    var itemClasses = React.addons.classSet({
+      'navListItem': true,
+      'navListItemActive': this.props.currentDoc === child.title,
+    });
+    var classes = React.addons.classSet({
+      'navItem': true,
+      'navItemActive': this.props.currentDoc === child.title,
+    });
+    return (
+      React.createElement("li", {className: itemClasses, key: index}, React.createElement("a", {className: classes, href: child.url},  child.title))
+    );
+  },
+});
+
+function blogNavRender(blognavData) {
+  React.render(
+    React.createElement(BlogNav, {data: blognavData}),
+    document.getElementById('blog_nav')
+  );
+}
+// blogNavRender(blognavData); FIXME: uncomment when we have blog posts
+</script>

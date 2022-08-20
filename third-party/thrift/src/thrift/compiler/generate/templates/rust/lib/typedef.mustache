@@ -1,0 +1,38 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#typedef:docs?}}
+#[doc = {{typedef:docs}}]
+{{/typedef:docs?}}{{!
+}}{{^typedef:newtype?}}
+pub type {{typedef:rust_name}} = {{#typedef:type}}{{>lib/type}}{{/typedef:type}};
+{{/typedef:newtype?}}
+{{#typedef:newtype?}}
+#[derive({{!
+    }}Default, {{!
+    }}{{#typedef:copy?}}Copy, {{/typedef:copy?}}{{!
+    }}Clone, Debug, PartialEq{{!
+    }}{{#typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/typedef:ord?}}{{!
+    }}{{#typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/typedef:serde?}}{{!
+}})]
+pub struct {{typedef:rust_name}}(pub {{!
+  }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{/typedef:rust_type}}{{!
+  }}{{^typedef:rust_type}}{{#typedef:type}}{{>lib/type}}{{/typedef:type}}{{/typedef:rust_type}}{{!
+}});
+{{/typedef:newtype?}}
+{{!newline}}

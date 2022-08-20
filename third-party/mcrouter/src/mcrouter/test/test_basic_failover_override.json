@@ -1,0 +1,18 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "localhost:12345" ]
+    },
+    "B.wildcard": {
+      "servers": [ "localhost:12346" ]
+    }
+  },
+  "route": {
+    "type": "FailoverWithExptimeRoute",
+    "failover": "PoolRoute|B.wildcard",
+    "normal": "PoolRoute|A.wildcard",
+    "failover_errors": {
+      "updates": []
+    }
+  }
+}

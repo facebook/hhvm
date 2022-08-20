@@ -1,0 +1,42 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#type:typedef?}}{{!
+    }}{{#type:typedef_type}}{{> TypeReader }}{{/type:typedef_type}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+    }}{{#type:list?}}Readers.listReader({{!
+        }}{{#type:list_elem_type}}{{> TypeReader }}{{/type:list_elem_type}}{{
+    }}){{/type:list?}}{{
+    }}{{#type:map?}}Readers.mapReader({{!
+        }}{{#type:key_type}}{{> TypeReader }}{{/type:key_type}},{{#type:value_type}}{{> TypeReader }}{{/type:value_type}}{{
+    }}){{/type:map?}}{{
+    }}{{#type:set?}}Readers.setReader({{!
+        }}{{#type:set_elem_type}}{{> TypeReader }}{{/type:set_elem_type}}{{
+    }}){{/type:set?}}{{
+    }}{{#type:struct?}}Readers.wrap({{> BoxedType}}.asReader()){{/type:struct?}}{{!
+    }}{{#type:enum?}}Readers.wrap({{> BoxedType}}.asReader()){{/type:enum?}}{{!
+    }}{{#type:binary?}}Readers.binaryReader(){{/type:binary?}}{{!
+    }}{{#type:string?}}Readers.stringReader(){{/type:string?}}{{!
+    }}{{#type:bool?}}Readers.booleanReader(){{/type:bool?}}{{!
+    }}{{#type:byte?}}Readers.byteReader(){{/type:byte?}}{{!
+    }}{{#type:i16?}}Readers.i16Reader(){{/type:i16?}}{{!
+    }}{{#type:i32?}}Readers.i32Reader(){{/type:i32?}}{{!
+    }}{{#type:i64?}}Readers.i64Reader(){{/type:i64?}}{{!
+    }}{{#type:float?}}Readers.floatReader(){{/type:float?}}{{!
+    }}{{#type:double?}}Readers.doubleReader(){{/type:double?}}{{!
+}}{{!
+}}{{/type:typedef?}}

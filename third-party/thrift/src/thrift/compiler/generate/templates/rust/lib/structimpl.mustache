@@ -1,0 +1,162 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{^struct:union?}}
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::{{struct:rust_name}} {
+    fn default() -> Self {
+        Self {{>lib/block}}{{!
+        }}{{#struct:fields}}
+            {{field:rust_name}}: {{!
+                }}{{#field:default}}{{!
+                    }}{{>lib/fieldvalue}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
+                    }}{{#field:optional?}}{{!
+                        }}::std::option::Option::None{{!
+                    }}{{/field:optional?}}{{!
+                    }}{{^field:optional?}}{{!
+                        }}::std::default::Default::default(){{!
+                    }}{{/field:optional?}}{{!
+                }}{{/field:default}}{{!
+            }},{{!
+        }}{{/struct:fields}}{{!
+        }}{{^struct:exhaustive?}}
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),{{!
+        }}{{/struct:exhaustive?}}
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::{{struct:rust_name}} {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("{{struct:rust_name}}"){{!
+            }}{{#struct:fields}}
+            .field("{{field:rust_name}}", &self.{{field:rust_name}}){{!
+            }}{{/struct:fields}}
+            .finish()
+    }
+}
+
+{{! Avoid needing to raise the recursion_limit for the trait solver to
+    figure out autotrait impls for deeply nested data structures.
+    These unsafe impls are fine because all possible field types we allow
+    (primitives, string, vec, maps, sets) are Send and Sync. }}
+unsafe impl ::std::marker::Send for self::{{struct:rust_name}} {}
+unsafe impl ::std::marker::Sync for self::{{struct:rust_name}} {}
+
+impl ::fbthrift::GetTType for self::{{struct:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+{{!newline}}
+{{#struct:thrift_uri}}
+
+impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
+    fn uri() -> &'static str {
+        "{{struct:thrift_uri}}"
+    }
+}
+{{/struct:thrift_uri}}
+
+impl<P> ::fbthrift::Serialize<P> for self::{{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("{{struct:name}}");{{!
+        }}{{#struct:fields}}{{!
+        }}{{#field:optional?}}
+        if let ::std::option::Option::Some(some) = &self.{{field:rust_name}} {
+            p.write_field_begin({{!
+                }}"{{field:name}}", {{!
+                }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
+                }}{{field:key}}{{!
+            }});
+            {{#field:type}}{{>lib/write}}{{/field:type}}(some, p);
+            p.write_field_end();
+        }{{!
+        }}{{/field:optional?}}{{!
+        }}{{^field:optional?}}
+        p.write_field_begin({{!
+            }}"{{field:name}}", {{!
+            }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
+            }}{{field:key}}{{!
+        }});
+        {{#field:type}}{{>lib/write}}{{/field:type}}(&self.{{field:rust_name}}, p);
+        p.write_field_end();{{!
+        }}{{/field:optional?}}{{!
+        }}{{/struct:fields}}
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::{{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            {{#struct:fields_by_name}}
+            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+            {{/struct:fields_by_name}}
+        ];
+        {{#struct:fields}}
+        let mut field_{{field:name}} = ::std::option::Option::None;
+        {{/struct:fields}}
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,{{!
+                }}{{#struct:fields}}
+                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
+                    }}field_{{field:name}} = ::std::option::Option::Some({{#field:type}}{{>lib/read}}{{/field:type}}(p)?),{{!
+                }}{{/struct:fields}}
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {{>lib/block}}{{!
+            }}{{#struct:fields}}
+            {{field:rust_name}}: field_{{field:name}}{{!
+                }}{{^field:optional?}}{{!
+                    }}{{#field:default}}{{!
+                        }}{{#value:simpleLiteral?}}{{!
+                            }}.unwrap_or({{>lib/value}}){{!
+                        }}{{/value:simpleLiteral?}}{{!
+                        }}{{^value:simpleLiteral?}}{{!
+                            }}.unwrap_or_else(|| {{>lib/value}}){{!
+                        }}{{/value:simpleLiteral?}}{{!
+                    }}{{/field:default}}{{!
+                    }}{{^field:default}}{{!
+                        }}.unwrap_or_default(){{!
+                    }}{{/field:default}}{{!
+                }}{{/field:optional?}}{{!
+            }},{{!
+            }}{{/struct:fields}}{{!
+            }}{{^struct:exhaustive?}}
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),{{!
+            }}{{/struct:exhaustive?}}
+        })
+    }
+}
+{{/struct:union?}}
+{{!newline}}

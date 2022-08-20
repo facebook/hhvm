@@ -1,0 +1,41 @@
+{% assign doc_groups = site.docs | group_by: "section" %}
+{% for group in doc_groups %}
+  {% assign gindex = forloop.index0 %}
+  {% assign gitems = group.items | sort: "id" %}
+  {% for doc_hash in gitems %}
+    {% if doc_hash.id == page.id %}
+      {% assign index = forloop.index0 %}
+      {% assign groupindex = gindex %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  {% if index %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+{% if index %}
+  <div class="docPagination">
+    {% assign next = index | plus: 1 %}{% assign prev = index | minus: 1 %}
+    {% assign nextgroup = groupindex | plus: 1 %}{% assign prevgroup = groupindex | minus: 1 %}
+    {% assign groupitems = doc_groups[groupindex].items | sort: "id" %}
+    {% if doc_groups[prevgroup].items %}
+      {% assign prevgroupitems = doc_groups[prevgroup].items | sort: "id" %}
+    {% endif %}
+    {% if doc_groups[nextgroup].items %}
+      {% assign nextgroupitems = doc_groups[nextgroup].items | sort: "id" %}
+    {% endif %}
+    {% assign prevdoc = groupitems[prev] %}{% assign nextdoc = groupitems[next] %}
+    {% if prevdoc and prev >= 0 %}
+    <div class="pager pagingPrevious"><a href="{{ site.baseurl }}/{{ prevdoc.permalink }}">&lsaquo; <span class="pagerLabel">Previous</span><span class="pagerTitle">{{ prevdoc.title }}</span></a></div>
+    {% elsif prevgroupitems and prevgroup >= 0 %}
+      {% assign prevdoc = prevgroupitems.last %}
+    <div class="pager pagingPrevious"><a href="{{ site.baseurl }}/{{ prevdoc.permalink }}">&lsaquo; <span class="pagerLabel">Previous</span><span class="pagerTitle">{{ prevdoc.title }}</span></a></div>
+    {% endif %}
+    {% if nextdoc %}
+    <div class="pager pagingNext"><a href="{{ site.baseurl }}/{{ nextdoc.permalink }}"><span class="pagerTitle">{{ nextdoc.title }}</span><span class="pagerLabel">Next</span> &rsaquo;</a></div>
+    {% elsif nextgroupitems %}
+      {% assign nextdoc = nextgroupitems.first %}
+    <div class="pager pagingNext"><a href="{{ site.baseurl }}/{{ nextdoc.permalink }}"><span class="pagerTitle">{{ nextdoc.title }}</span><span class="pagerLabel">Next</span> &rsaquo;</a></div>
+    {% endif %}
+  </div>
+{% endif %}

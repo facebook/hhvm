@@ -1,0 +1,7 @@
+go src/module.thrift
+java_deprecated src/module.thrift
+hack:server=1,shapes=1,shapes_allow_unknown_fields=1 src/module.thrift
+mstch_cpp2 src/module.thrift
+mstch_rust src/module.thrift
+mstch_java src/module.thrift
+mstch_py3 src/module.thrift

@@ -1,0 +1,169 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "hack",
+  "namespaces": {
+    "go": "thrift.annotation.hack",
+    "hs2": "facebook.thrift.annotation.hack",
+    "java": "com.facebook.thrift.annotation.java_deprecated",
+    "py": "thrift.annotation.hack",
+    "py.asyncio": "facebook_thrift_asyncio.annotation.hack"
+  },  "structs" :
+  {
+      "FieldWrapper" : {
+        "name" : "FieldWrapper",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 38,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 35
+      },
+      "Wrapper" : {
+        "name" : "Wrapper",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 54,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "underlyingName" : {
+            "name" : "underlyingName",
+            "key" : 2,
+            "lineno" : 61,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "extraNamespace" : {
+            "name" : "extraNamespace",
+            "default_value" : "thrift_adapted_types",
+            "key" : 3,
+            "lineno" : 62,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 49
+      },
+      "Adapter" : {
+        "name" : "Adapter",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 78,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 74
+      },
+      "SkipCodegen" : {
+        "name" : "SkipCodegen",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 84,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 81
+      },
+      "Name" : {
+        "name" : "Name",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 92,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "reason" : {
+            "name" : "reason",
+            "key" : 2,
+            "lineno" : 93,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 91
+      },
+      "UnionEnumAttributes" : {
+        "name" : "UnionEnumAttributes",
+        "fields" : {
+          "attributes" : {
+            "name" : "attributes",
+            "key" : 1,
+            "lineno" : 99,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "string"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 97
+      },
+      "StructTrait" : {
+        "name" : "StructTrait",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 105,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 103
+      },
+      "Attributes" : {
+        "name" : "Attributes",
+        "fields" : {
+          "attributes" : {
+            "name" : "attributes",
+            "key" : 1,
+            "lineno" : 110,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "string"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 109
+      },
+      "StructAsTrait" : {
+        "name" : "StructAsTrait",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 113
+      }
+      },
+  "source_path" : "thrift/annotation/hack",
+  "py_namespace" : "thrift.annotation.hack"
+}

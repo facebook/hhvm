@@ -1,0 +1,5 @@
+- type: button
+  href: docs/install.html
+  text: Get Started
+
+- type: github_star

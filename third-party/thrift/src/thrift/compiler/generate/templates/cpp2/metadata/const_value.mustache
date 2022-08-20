@@ -1,0 +1,27 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#value:const_struct?%>cvStruct(<%!
+%><%#value:const_struct_type%><%#type:struct%>"<%type:program_name%>.<%struct:name%>"<%/type:struct%><%/value:const_struct_type%>, <%!
+%>{<%#value:const_struct%>{"<%constant:name%>", <%#constant:value%><% > metadata/const_value%><%/constant:value%>}<%^last?%>, <%/last?%><%!
+%><%/value:const_struct%>}<%!
+%>)<%/value:const_struct?%><%^value:const_struct?%><%!
+%><%#value:bool?%>cvBool(<%value:bool_value%>)<%/value:bool?%><%!
+%><%#value:integer?%>cvInteger(<%value:integer_value%>)<%/value:integer?%><%!
+%><%#value:double?%>cvDouble(<%value:double_value%>)<%/value:double?%><%!
+%><%#value:string?%>cvString(R"(<%value:string_value%>)")<%/value:string?%><%!
+%><%#value:map?%>cvMap({<%#value:map_elements%>cvPair(<%#element:key%><% > metadata/const_value%><%/element:key%>, <%#element:value%><% > metadata/const_value%><%/element:value%>)<%^last?%>, <%/last?%><%/value:map_elements%>})<%/value:map?%><%!
+%><%#value:list?%>cvList({<%#value:list_elements%><% > metadata/const_value%><%^last?%>, <%/last?%><%/value:list_elements%>})<%/value:list?%><%/value:const_struct?%>

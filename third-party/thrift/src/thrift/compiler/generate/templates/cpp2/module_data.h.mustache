@@ -1,0 +1,55 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#pragma once
+
+#include <thrift/lib/cpp2/gen/module_data_h.h>
+
+#include "<%program:include_prefix%><%program:name%>_types.h"
+
+namespace apache { namespace thrift {
+<%#program:enums%>
+
+template <> struct TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>> {
+  using type = <% > common/namespace_cpp2%><%enum:cpp_name%>;
+  static constexpr const std::size_t size = <%enum:size%>;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
+};
+<%/program:enums%>
+<%#program:structs%>
+<%#struct:union?%>
+
+template <> struct TEnumDataStorage<<%struct:cpp_fullname%>::Type> {
+  using type = <%struct:cpp_fullname%>::Type;
+  static constexpr const std::size_t size = <%struct:num_union_members%>;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
+};
+<%/struct:union?%>
+<%/program:structs%>
+<%#program:structs%>
+
+template <> struct TStructDataStorage<<%struct:cpp_fullname%>> {
+  static constexpr const std::size_t fields_size = <%struct:fields_size%>;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+};
+<%/program:structs%>
+
+}} // apache::thrift

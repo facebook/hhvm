@@ -1,0 +1,187 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+    use ref_cast::RefCast;
+
+    #[derive(RefCast)]
+    #[repr(transparent)]
+    pub(crate) struct LocalImpl<T>(T);
+
+    #[allow(unused)]
+    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    where
+        LocalImpl<T>: ::fbthrift::Serialize<P>,
+        P: ::fbthrift::ProtocolWriter,
+    {
+        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+    }
+
+    #[allow(unused)]
+    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    where
+        LocalImpl<T>: ::fbthrift::Deserialize<P>,
+        P: ::fbthrift::ProtocolReader,
+    {
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        ::std::result::Result::Ok(value.0)
+    }{{!
+
+}}{{#program:nonstandardTypes}}{{!
+    }}{{#type:set?}}
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            p.write_set_begin(
+                <{{#type:set_elem_type}}{{>lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE,
+                self.0.len(),
+            );
+            for v in &self.0 {
+                p.write_set_value_begin();
+                {{#type:set_elem_type}}{{>lib/write}}{{/type:set_elem_type}}(v, p);
+            }
+            p.write_set_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            let (_elem_ty, len) = p.read_set_begin()?;
+            let mut set = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
+
+            if let Some(0) = len {
+                return Ok(LocalImpl(set));
+            }
+
+            let mut idx = 0;
+            loop {
+                let more = p.read_set_value_begin()?;
+                if !more {
+                    break;
+                }
+                {{#type:set_elem_type}}let v: {{>lib/type}} = {{>lib/read}}(p){{/type:set_elem_type}}?;
+                p.read_set_value_end()?;
+                set.insert(v);
+
+                idx += 1;
+                if ::fbthrift::protocol::should_break(len, more, idx) {
+                    break;
+                }
+            }
+            p.read_set_end()?;
+            ::std::result::Result::Ok(LocalImpl(set))
+        }
+    }{{!
+    }}{{/type:set?}}{{!
+
+    }}{{#type:map?}}
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            p.write_map_begin(
+                <{{#type:key_type}}{{>lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:value_type}}{{>lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE,
+                self.0.len(),
+            );
+            for (k, v) in &self.0 {
+                p.write_map_key_begin();
+                {{#type:key_type}}{{>lib/write}}{{/type:key_type}}(k, p);
+                p.write_map_value_begin();
+                {{#type:value_type}}{{>lib/write}}{{/type:value_type}}(v, p);
+            }
+            p.write_map_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            let (_key_ty, _val_ty, len) = p.read_map_begin()?;
+            let mut map = <{{>lib/type}}>::with_capacity(len.unwrap_or_default());
+
+            if let Some(0) = len {
+                return Ok(LocalImpl(map));
+            }
+
+            let mut idx = 0;
+            loop {
+                let more = p.read_map_key_begin()?;
+                if !more {
+                    break;
+                }
+                {{#type:key_type}}let k: {{>lib/type}} = {{>lib/read}}(p){{/type:key_type}}?;
+                p.read_map_value_begin()?;
+                {{#type:value_type}}let v: {{>lib/type}} = {{>lib/read}}(p){{/type:value_type}}?;
+                p.read_map_value_end()?;
+                map.insert(k, v);
+
+                idx += 1;
+                if ::fbthrift::protocol::should_break(len, more, idx) {
+                    break;
+                }
+            }
+            p.read_map_end()?;
+            ::std::result::Result::Ok(LocalImpl(map))
+        }
+    }{{!
+    }}{{/type:map?}}{{!
+
+    }}{{#type:binary?}}
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            self.0.as_slice().write(p)
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<{{>lib/rawtype}}>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            p.read_binary()
+        }
+    }
+
+    impl ::fbthrift::binary_type::BinaryType for LocalImpl<{{>lib/rawtype}}> {
+        fn with_capacity(capacity: usize) -> Self {
+            LocalImpl(<{{>lib/rawtype}}>::with_capacity(capacity))
+        }
+        fn extend_from_slice(&mut self, other: &[u8]) {
+            self.0.extend_from_slice(other)
+        }
+        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+            LocalImpl(::std::convert::Into::into(vec))
+        }
+    }{{!
+    }}{{/type:binary?}}{{!
+}}{{/program:nonstandardTypes}}
+{{!newline}}

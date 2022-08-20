@@ -1,0 +1,3 @@
+mstch_cpp2:frozen2 src/module.thrift
+mstch_cpp2:frozen2 src/include1.thrift
+mstch_cpp2:frozen2 src/include2.thrift

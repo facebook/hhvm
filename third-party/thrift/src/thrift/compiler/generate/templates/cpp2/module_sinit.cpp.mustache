@@ -1,0 +1,46 @@
+<%!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+
+<% > common/namespace_cpp2_begin%>
+
+<%#program:any?%>
+// Call all static init functions.
+//
+// If this file is always linked (e.g. link_whole), it will force
+// static linking to include the intialization logic.
+<%#program:structs%>
+<%#struct:any?%>
+void __fbthrift_static_init_<%struct:cpp_underlying_name%>();
+<%/struct:any?%>
+<%/program:structs%>
+namespace {
+struct StaticInit {
+  StaticInit() {
+    <%#program:structs%>
+    <%#struct:any?%>
+    __fbthrift_static_init_<%struct:cpp_underlying_name%>();
+    <%/struct:any?%>
+    <%/program:structs%>
+  }
+};
+
+StaticInit staticInit;
+}
+<%/program:any?%>
+
+<% > common/namespace_cpp2_end%>

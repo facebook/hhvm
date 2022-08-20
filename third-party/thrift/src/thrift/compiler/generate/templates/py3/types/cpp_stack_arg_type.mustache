@@ -1,0 +1,30 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Used when a cpp type is passed as an argument with stack_arguments on
+complex types are passed in as const refs.
+
+}}{{#type:string?}}const {{/type:string?}}{{!
+}}{{#type:binary?}}const {{/type:binary?}}{{!
+}}{{#type:struct}}const {{/type:struct}}{{!
+}}{{#type:container?}}const {{/type:container?}}{{!
+}}{{> types/cpp_value_type}}{{!
+}}{{#type:string?}}&{{/type:string?}}{{!
+}}{{#type:binary?}}&{{/type:binary?}}{{!
+}}{{#type:struct}}&{{/type:struct}}{{!
+}}{{#type:container?}}&{{/type:container?}}

@@ -1,0 +1,49 @@
+<%={{ }}=%>
+{{#program:structs}}
+  "{{struct:name}}" : {
+    "name" : "{{struct:name}}",
+    {{#struct:docstring?}}
+    "docstring" : {{struct:docstring}},
+    {{/struct:docstring?}}
+    {{#struct:fields?}}
+    "fields" : {
+      {{#struct:fields}}
+      "{{field:name}}" : {
+        "name" : "{{field:name}}",
+        {{#field:value}}
+        "default_value" : {{> const_value}},
+        {{/field:value}}
+        {{#field:docstring?}}
+        "docstring" : {{field:docstring}},
+        {{/field:docstring?}}
+        "key" : {{field:key}},
+        "lineno" : {{field:lineno}},
+        {{#field:required?}}
+        "required" : "required",
+        {{/field:required?}}
+        {{#field:optional?}}
+        "required" : "optional",
+        {{/field:optional?}}
+        {{#field:opt_in_req_out?}}
+        "required" : "opt-in-req-out",
+        {{/field:opt_in_req_out?}}
+        "type" : {{#field:type}}{{> Types}}{{/field:type}}
+      }{{^last?}},{{/last?}}
+      {{/struct:fields}}
+    },
+    {{/struct:fields?}}
+    {{#struct:plain?}}
+    "is_exception" : false,
+    "is_union" : false,
+    {{/struct:plain?}}
+    {{#struct:exception?}}
+    "is_exception" : true,
+    "is_union" : false,
+    {{/struct:exception?}}
+    {{#struct:union?}}
+    "is_exception" : false,
+    "is_union" : true,
+    {{/struct:union?}}
+    "lineno" : {{struct:lineno}}
+  }{{^last?}},{{/last?}}
+{{/program:structs}}

@@ -1,0 +1,120 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+public void write0(TProtocol oprot) throws TException {
+  oprot.writeStructBegin(STRUCT_DESC);
+  {{#struct:hasTerseField?}}
+  int structStart = 0;
+  int pos = 0;
+  com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+  {{/struct:hasTerseField?}}
+  {{#struct:fields_in_serialization_order}}
+  {{#field:isNullableOrOptionalNotEnum?}}
+  {{#field:terse?}}  
+  java.util.Objects.requireNonNull(this.{{field:javaName}}, "{{field:javaName}} must not be null");
+  {{#field:isObject?}}structStart = p.mark();{{/field:isObject?}}
+  {{^field:isObject?}}
+  {{#field:hasAdapter?}}
+  if (!_{{field:javaName}}_Adapter.equals(this.{{field:javaName}}, Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT)) {
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}})) {
+  {{/field:hasAdapter?}}
+  {{/field:isObject?}}
+    oprot.writeFieldBegin({{field:javaTFieldName}});
+    {{#field:isContainer?}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{/field:isContainer?}}{{!
+
+    }}{{#type:typedef_type}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{/type:typedef_type}}{{!
+
+    }}{{#field:type}}
+    {{#field:isObject?}}
+    pos = p.mark();
+    {{/field:isObject?}}    
+    {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+    {{/field:type}}{{!
+    }}
+    {{#field:isObject?}}
+    if (p.mark() - pos > p.getEmptyStructSize()) {
+      p.writeFieldEnd();    
+    } else {
+      p.rollback(structStart);
+    }    
+    {{/field:isObject?}}    
+    {{^field:isObject?}}
+    oprot.writeFieldEnd();
+    {{/field:isObject?}}    
+  {{^field:isObject?}}
+  }
+  {{/field:isObject?}}
+  {{/field:terse?}}
+  {{^field:terse?}}
+  if (this.{{field:javaName}} != null) {
+    oprot.writeFieldBegin({{field:javaTFieldName}});
+    {{#field:isContainer?}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{/field:isContainer?}}{{!
+
+    }}{{#type:typedef_type}}
+    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{/type:typedef_type}}{{!
+
+    }}{{#field:type}}
+    {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+    {{/field:type}}{{!
+    }}oprot.writeFieldEnd();
+  }
+  {{/field:terse?}}  
+  {{/field:isNullableOrOptionalNotEnum?}}{{!
+
+  }}{{^field:isNullableOrOptionalNotEnum?}}
+  {{#field:terse?}}
+  {{#field:isEnum?}}
+  java.util.Objects.requireNonNull(this.{{field:javaName}}, "{{field:javaName}} must not be null");
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}}.getValue())) {
+  {{/field:isEnum?}}
+  {{^field:isEnum?}}
+  {{#field:hasAdapter?}}
+  if (!_{{field:javaName}}_Adapter.equals(this.{{field:javaName}}, Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT)) {
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}})) {
+  {{/field:hasAdapter?}}
+  {{/field:isEnum?}}
+    oprot.writeFieldBegin({{field:javaTFieldName}});
+    {{#field:type}}
+    {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+    {{/field:type}}{{!
+    }}oprot.writeFieldEnd();
+  };
+  {{/field:terse?}}
+  {{^field:terse?}}
+  oprot.writeFieldBegin({{field:javaTFieldName}});
+  {{#field:type}}
+  {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+  {{/field:type}}{{!
+  }}oprot.writeFieldEnd();
+  {{/field:terse?}}  
+  {{/field:isNullableOrOptionalNotEnum?}}
+  {{/struct:fields_in_serialization_order}}
+  oprot.writeFieldStop();
+  oprot.writeStructEnd();
+}
+{{! terminate with newline }}

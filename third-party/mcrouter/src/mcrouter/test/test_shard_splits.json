@@ -1,0 +1,32 @@
+{
+  "pools": {
+    "A": {
+      "servers": [
+        "127.0.0.1:11610",
+        "127.0.0.1:11611",
+        "127.0.0.1:11612"
+      ]
+    }
+  },
+  "route": {
+    "type": "PrefixSelectorRoute",
+    "policies": {
+      "a": {
+        "type": "PoolRoute",
+        "pool": "A",
+        "shard_splits": {
+          "1": 3,
+          "2": 10000
+        }
+      },
+      "b": {
+        "type": "PoolRoute",
+        "pool": "A",
+        "shard_splits": {
+          "1": 2,
+          "2": 1
+        }
+      }
+    }
+  }
+}

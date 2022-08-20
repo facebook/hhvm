@@ -1,0 +1,889 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Python wrappers of the structs defined in the services files. This file is
+compiled into it's own module to be included by clients and services and
+end-user code. It's one of the more complicated files, as it has to map
+Pythonic APIs to C++ objects and back.
+
+One of the nastier things in this file is the definition of containers.
+A separate container wrapper has to be defined for each type of contained
+attribute because Cython can't template C++ classes. So, for example, we need
+a List__int16 or a List__string or a Map__string_mystruct instance for each
+container/type combination. Consider that containers can contain other containers
+or structs that contain containers and you realize how messy this can get.
+Further, we'd prefer to have the end user freed from having to know about these
+container types, so we'll need to define factories for them based on what they
+want to include.
+
+}}
+{{> common/auto_generated_py}}
+cimport cython as __cython
+from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.string cimport string
+from libcpp cimport bool as cbool
+from libcpp.iterator cimport inserter as cinserter
+from cpython cimport bool as pbool
+from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
+import thrift.py3.types
+cimport thrift.py3.types
+cimport thrift.py3.exceptions
+from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
+from thrift.py3.types cimport (
+    cSetOp as __cSetOp,
+    richcmp as __richcmp,
+    set_op as __set_op,
+    setcmp as __setcmp,
+    list_index as __list_index,
+    list_count as __list_count,
+    list_slice as __list_slice,
+    list_getitem as __list_getitem,
+    set_iter as __set_iter,
+    map_iter as __map_iter,
+    map_contains as __map_contains,
+    map_getitem as __map_getitem,
+    reference_shared_ptr as __reference_shared_ptr,
+    get_field_name_by_index as __get_field_name_by_index,
+    reset_field as __reset_field,
+    translate_cpp_enum_to_python,
+    SetMetaClass as __SetMetaClass,
+    const_pointer_cast,
+    constant_shared_ptr,
+    NOTSET as __NOTSET,
+    EnumData as __EnumData,
+    EnumFlagsData as __EnumFlagsData,
+    UnionTypeEnumData as __UnionTypeEnumData,
+    createEnumDataForUnionType as __createEnumDataForUnionType,
+)
+cimport thrift.py3.std_libcpp as std_libcpp
+cimport thrift.py3.serializer as serializer
+import folly.iobuf as _fbthrift_iobuf
+from folly.optional cimport cOptional
+from folly.memory cimport to_shared_ptr as __to_shared_ptr
+from folly.range cimport Range as __cRange
+
+import sys
+from collections.abc import Sequence, Set, Mapping, Iterable
+import weakref as __weakref
+import builtins as _builtins
+{{#program:has_stream?}}
+import asyncio
+from folly.coro cimport bridgeCoroTaskWith
+{{/program:has_stream?}}
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{/program:includeNamespaces}}
+
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection as _types_reflection
+
+{{> types/enum }}
+{{> types/union_type_enum }}
+
+{{#program:structs}}
+{{^struct:union?}}
+@__cython.auto_pickle(False)
+cdef class {{struct:name}}({{> types/python_struct_class}}):
+    def __init__({{struct:name}} self,{{#struct:exception?}} *args,{{/struct:exception?}} **kwargs):
+        self._cpp_obj = make_shared[c{{struct:name}}]()
+        self._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__({{#struct:exception?}} *args, {{/struct:exception?}}**kwargs)
+    {{^struct:exception?}}
+    {{^struct:cpp_noncopyable?}}
+
+    def __call__({{struct:name}} self, **kwargs):
+        {{^struct:py3_fields?}}
+        return self
+        {{/struct:py3_fields?}}
+        {{#struct:py3_fields?}}
+        if not kwargs:
+            return self
+        cdef {{struct:name}} __fbthrift_inst = {{struct:name}}.__new__({{struct:name}})
+        __fbthrift_inst._cpp_obj = make_shared[c{{struct:name}}](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+        {{/struct:py3_fields?}}
+    {{/struct:cpp_noncopyable?}}
+    {{/struct:exception?}}
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("{{struct:name}}", {
+        {{#struct:py3_fields}}
+        {{#field:has_ref_accessor?}}
+        {{^field:terse?}}
+          "{{field:py_name}}": deref(self._cpp_obj).{{field:py_name}}_ref().has_value(),
+        {{/field:terse?}}
+        {{/field:has_ref_accessor?}}
+        {{/struct:py3_fields}}
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[c{{struct:name}}] cpp_obj):
+        __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}}{{#struct:exception?}}, (<bytes>deref(cpp_obj).what()).decode('utf-8'){{/struct:exception?}})
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        {{#struct:exception?}}
+        _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
+        {{/struct:exception?}}
+        return __fbthrift_inst
+
+    {{#struct:fields_and_mixin_fields}}
+    cdef inline {{field:py_name}}_impl(self):
+        {{#field:optional?}}
+        {{^field:hasDefaultValue?}}
+        {{#field:has_ref_accessor?}}
+        {{^field:terse?}}
+        if not deref(self._cpp_obj).{{field:py_name}}_ref().has_value():
+            return None
+        {{/field:terse?}}
+        {{/field:has_ref_accessor?}}
+        {{/field:hasDefaultValue?}}
+        {{/field:optional?}}
+        {{#field:type}}
+
+        {{> types/cython_struct_getter}}
+
+        {{/field:type}}
+
+    @property
+    def {{field:py_name}}(self):
+        return self.{{field:py_name}}_impl()
+
+    {{/struct:fields_and_mixin_fields}}
+
+    def __hash__({{struct:name}} self):
+        return super().__hash__()
+
+    def __repr__({{struct:name}} self):
+        return super().__repr__()
+
+    def __str__({{struct:name}} self):
+        {{^struct:exception?}}
+        return super().__str__()
+        {{/struct:exception?}}
+        {{#struct:exception?}}
+        {{#struct:exception_message?}}
+        field = self.{{struct:exception_message}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+        {{/struct:exception_message?}}
+        {{^struct:exception_message?}}
+        return super().__str__()
+        {{/struct:exception_message?}}
+        {{/struct:exception?}}
+
+
+{{/struct:union?}}{{!
+}}{{#struct:union?}}
+
+
+@__cython.auto_pickle(False)
+cdef class {{struct:name}}(thrift.py3.types.Union):
+    Type = __{{struct:name}}Type
+
+    def __init__(
+        self, *{{#struct:py3_fields}},
+        {{#field:type}}{{!
+            }}{{#type:cythonTypeNoneable?}}{{!
+                }}{{> types/cython_python_type}} {{!
+            }}{{/type:cythonTypeNoneable?}}{{!
+        }}{{/field:type}}{{!
+            }}{{field:py_name}}=None{{!
+        }}{{/struct:py3_fields}}
+    ):
+        {{#struct:py3_fields}}
+        {{#field:type}}
+        {{^type:cythonTypeNoneable?}}
+        {{^type:container?}}
+        if {{field:py_name}} is not None:
+            if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
+                raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            {{#type:integer?}}
+            {{! inject cython int overflow checks }}
+            {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
+            {{/type:integer?}}
+
+        {{/type:container?}}
+        {{/type:cythonTypeNoneable?}}
+        {{/field:type}}
+        {{/struct:py3_fields}}
+        self._cpp_obj = __to_shared_ptr(cmove({{struct:name}}._make_instance(
+          NULL,{{#struct:py3_fields}}
+          {{field:py_name}},{{/struct:py3_fields}}
+        )))
+        self._load_cache()
+
+    @staticmethod
+    def fromValue(value):
+        if value is None:
+            return {{struct:name}}()
+        {{! We do this with strict types first, then we will do int to float conversion}}
+        {{#struct:py3_fields}}
+        {{#field:type}}
+        if isinstance(value, {{> types/python_type}}):
+            {{#type:number?}}
+            if not isinstance(value, pbool):
+                try:
+                    {{#type:integer?}}
+                    {{! Cython does OverflowError checking for us }}
+                    <{{> types/cython_python_type}}> value
+                    {{/type:integer?}}
+                    {{#type:float?}}
+                    {{! This will probably fail most of the time
+                        if it does then when we try again to use floating point
+                        below it will just accept the loss of precision,
+                        or just maybe there is a double field comming up }}
+                    if <{{> types/cython_python_type}}>value != value:
+                        raise OverflowError
+                    {{/type:float?}}
+                    return {{struct:name}}({{field:py_name}}=value)
+                except OverflowError:
+                    pass
+            {{/type:number?}}
+            {{^type:number?}}
+            return {{struct:name}}({{field:py_name}}=value)
+            {{/type:number?}}
+        {{/field:type}}
+        {{/struct:py3_fields}}
+        {{#struct:py3_fields}}
+        {{#field:type}}
+        {{#type:floating_point?}}
+        if isinstance(value, {{> types/python_is_instance_type}}):
+            try:
+                <{{> types/cython_python_type}}> value
+                return {{struct:name}}({{field:py_name}}=value)
+            except OverflowError:
+                pass
+        {{/type:floating_point?}}
+        {{/field:type}}
+        {{/struct:py3_fields}}
+        raise ValueError(f"Unable to derive correct union field for value: {value}")
+
+    @staticmethod
+    cdef unique_ptr[c{{struct:name}}] _make_instance(
+        c{{struct:name}}* base_instance{{#struct:py3_fields}},
+        {{#field:type}}{{!
+            }}{{#type:cythonTypeNoneable?}}{{!
+                }}{{> types/cython_python_type}} {{!
+            }}{{/type:cythonTypeNoneable?}}{{!
+            }}{{^type:cythonTypeNoneable?}}{{!
+                }}object {{!
+            }}{{/type:cythonTypeNoneable?}}{{!
+            }}{{field:py_name}}{{!
+        }}{{/field:type}}{{/struct:py3_fields}}
+    ) except *:
+        cdef unique_ptr[c{{struct:name}}] c_inst = make_unique[c{{struct:name}}]()
+        cdef bint any_set = False
+        {{#struct:py3_fields}}{{#field:type}}
+        if {{field:py_name}} is not None:
+            if any_set:
+                raise TypeError("At most one field may be set when initializing a union")
+            {{> types/cython_union_assign_field}}
+
+            any_set = True
+        {{/field:type}}{{/struct:py3_fields}}
+        # in C++ you don't have to call move(), but this doesn't translate
+        # into a C++ return statement, so you do here
+        return cmove(c_inst)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[c{{struct:name}}] cpp_obj):
+        __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}})
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._load_cache()
+        return __fbthrift_inst
+
+    {{#struct:py3_fields}}
+    @property
+    def {{field:py_name}}(self):
+        if self.type.value != {{field:key}}:
+            {{! TODO: python 3.10 adds some more fields to AttributeError, those should be added here at some point }}
+            raise AttributeError(f'Union contains a value of type {self.type.name}, not {{field:py_name}}')
+        return self.value
+
+    {{/struct:py3_fields}}
+
+    def __hash__({{struct:name}} self):
+        return  super().__hash__()
+
+    cdef _load_cache({{struct:name}} self):
+        self.type = {{struct:name}}.Type(<int>(deref(self._cpp_obj).getType()))
+        cdef int type = self.type.value
+        if type == 0:    # Empty
+            self.value = None
+        {{#struct:py3_fields}}
+        elif type == {{field:key}}:
+            {{#field:type}}
+            {{> types/cython_union_getter}}
+            {{/field:type}}
+
+        {{/struct:py3_fields}}
+
+{{/struct:union?}}
+    {{! Below are some things that are common to structs and unions: }}
+    def __copy__({{struct:name}} self):
+        {{#struct:cpp_noncopyable?}}
+        raise TypeError("{{struct:name}} is noncopyable")
+        {{/struct:cpp_noncopyable?}}
+        {{^struct:cpp_noncopyable?}}
+        cdef shared_ptr[c{{struct:name}}] cpp_obj = make_shared[c{{struct:name}}](
+            deref(self._cpp_obj)
+        )
+        return {{struct:name}}._fbthrift_create(cmove(cpp_obj))
+        {{/struct:cpp_noncopyable?}}
+    {{#struct:cpp_noncomparable}}
+
+    def __eq__({{struct:name}} self, other):
+        return isinstance(other, {{struct:name}}) and self._fbthrift_noncomparable_eq(other)
+    {{/struct:cpp_noncomparable}}
+    {{^struct:is_struct_orderable?}}
+
+    def __eq__({{struct:name}} self, other):
+        if not isinstance(other, {{struct:name}}):
+            return False
+        return deref(self._cpp_obj.get()) == deref((<{{struct:name}}>other)._cpp_obj.get())
+
+    def __ne__({{struct:name}} self, other):
+        if not isinstance(other, {{struct:name}}):
+            return True
+        return deref(self._cpp_obj) != deref((<{{struct:name}}>other)._cpp_obj)
+    {{/struct:is_struct_orderable?}}
+    {{^struct:cpp_noncomparable}}
+    {{#struct:is_struct_orderable?}}
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[c{{struct:name}}](
+            self._cpp_obj,
+            (<{{struct:name}}>other)._cpp_obj,
+            op,
+        ) if r is None else r
+    {{/struct:is_struct_orderable?}}
+    {{/struct:cpp_noncomparable}}
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__{{struct:name}}()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        {{#struct:exception?}}
+        ExceptionMetadata[c{{struct:name}}].gen(meta)
+        {{/struct:exception?}}
+        {{^struct:exception?}}
+        StructMetadata[c{{struct:name}}].gen(meta)
+        {{/struct:exception?}}
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "{{program:name}}.{{struct:name}}"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[c{{struct:name}}](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return {{struct:size}}
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize({{struct:name}} self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[c{{struct:name}}](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize({{struct:name}} self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        {{!
+            This is a special case, we need to construct an empty _cpp_obj because
+            thrift.py3.serializer.deserialize will just call __new__ to skip
+            all of our runtime type checks. We do it like this because
+            thrift.py3.serializer.deserialize does not have enough type information
+            to call the staticmethod ._fbthrift_create()
+        }}
+        self._cpp_obj = make_shared[c{{struct:name}}]()
+        with nogil:
+            needed = serializer.cdeserialize[c{{struct:name}}](buf, self._cpp_obj.get(), proto)
+        {{#struct:union?}}
+        # force a cache reload since the underlying data's changed
+        self._load_cache()
+        {{/struct:union?}}
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        {{!TODO: accommodate root_module_prefix}}
+        python_types = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.{{struct:name}}, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+{{/program:structs}}
+{{#program:containerTypes}}
+@__cython.auto_pickle(False)
+cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!
+        }}{{#type:list?}}List{{/type:list?}}{{!
+        }}{{#type:set?}}Set{{/type:set?}}{{!
+        }}{{#type:map?}}Map{{/type:map?}}{{!
+        }}):
+    def __init__(self, items=None):
+        if isinstance(items, {{> types/cython_python_type}}):
+            self._cpp_obj = (<{{> types/cython_python_type}}> items)._cpp_obj
+        else:
+            self._cpp_obj = {{> types/cython_python_type}}._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[{{> types/cython_cpp_type}}] c_items):
+        __fbthrift_inst = <{{> types/cython_python_type}}>{{> types/cython_python_type}}.__new__({{> types/cython_python_type}})
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__({{> types/cython_python_type}} self):
+        cdef shared_ptr[{{> types/cython_cpp_type}}] cpp_obj = make_shared[{{> types/cython_cpp_type}}](
+            deref(self._cpp_obj)
+        )
+        return {{> types/cython_python_type}}._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+{{#type:list?}}
+    @staticmethod
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _make_instance(object items) except *:
+        cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
+        if items is not None:
+            {{#type:containerOfString?}}
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+            {{/type:containerOfString?}}
+            for item in items:
+                {{#type:list_elem_type}}
+                {{#type:container?}}
+                if item is None:
+                    raise TypeError("None is not of the type {{> types/pep484_type}}")
+                if not isinstance(item, {{> types/python_type}}):
+                    item = {{> types/python_type}}(item)
+                {{/type:container?}}
+                {{^type:container?}}
+                if not isinstance(item, {{> types/python_is_instance_type}}):
+                    raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+                {{#type:integer?}}
+                {{! inject cython int overflow checks }}
+                item = <{{> types/cython_python_type}}> item
+                {{/type:integer?}}
+                {{/type:container?}}
+                deref(c_inst).push_back({{> types/cython_python_to_cpp_item}})
+                {{/type:list_elem_type}}
+        return c_inst
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        return {{> types/cython_python_type}}._fbthrift_create(
+            __list_slice[{{> types/cython_cpp_type}}](self._cpp_obj, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        {{#type:list_elem_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        __list_getitem(self._cpp_obj, index, citem)
+        return {{> types/container_cython_cpp_to_python_item}}
+        {{/type:list_elem_type}}
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        {{#type:list_elem_type}}
+        if isinstance(item, {{> types/python_type}}):
+            return item
+        {{#type:container?}}
+        try:
+            return {{> types/python_type}}(item)
+        except:
+            pass
+        {{/type:container?}}
+        {{/type:list_elem_type}}
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        {{#type:list_elem_type}}
+        cdef {{>types/cython_cpp_type}} citem = {{> types/cython_python_to_cpp_item}}
+        {{/type:list_elem_type}}
+        cdef std_libcpp.optional[size_t] found = __list_index[{{> types/cython_cpp_type}}](self._cpp_obj, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        {{#type:list_elem_type}}
+        cdef {{>types/cython_cpp_type}} citem = {{> types/cython_python_to_cpp_item}}
+        {{/type:list_elem_type}}
+        return __list_count[{{>types/cython_cpp_type}}](self._cpp_obj, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+
+
+Sequence.register({{> types/cython_python_type}})
+{{/type:list?}}
+{{#type:set?}}
+    @staticmethod
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _make_instance(object items) except *:
+        cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
+        if items is not None:
+            {{#type:containerOfString?}}
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+            {{/type:containerOfString?}}
+            for item in items:
+                {{#type:set_elem_type}}
+                {{#type:container?}}
+                if item is None:
+                    raise TypeError("None is not of type {{> types/pep484_type}}")
+                if not isinstance(item, {{> types/python_type}}):
+                    item = {{> types/python_type}}(item)
+                {{/type:container?}}
+                {{^type:container?}}
+                if not isinstance(item, {{> types/python_is_instance_type}}):
+                    raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+                {{#type:integer?}}
+                {{! inject cython int overflow checks }}
+                item = <{{> types/cython_python_type}}> item
+                {{/type:integer?}}
+                {{/type:container?}}
+                deref(c_inst).insert({{> types/cython_python_to_cpp_item}})
+                {{/type:set_elem_type}}
+        return c_inst
+
+    def __contains__(self, item):
+        if not self or item is None:
+            return False
+        {{#type:set_elem_type}}
+        {{#type:container?}}
+        try:
+            if not isinstance(item, {{> types/python_type}}):
+                item = {{> types/python_type}}(item)
+        except Exception:
+            return False
+        {{/type:container?}}
+        if not isinstance(item, {{> types/python_type}}):
+            return False
+        return pbool(deref(self._cpp_obj).count({{> types/cython_python_to_cpp_item}}))
+        {{/type:set_elem_type}}
+
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __set_iter[{{> types/cython_cpp_type}}] itr = __set_iter[{{> types/cython_cpp_type}}](self._cpp_obj)
+        {{#type:set_elem_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNext(self._cpp_obj, citem)
+            yield {{> types/container_cython_cpp_to_python_item}}
+        {{/type:set_elem_type}}
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __richcmp__(self, other, int op):
+        if isinstance(other, {{> types/cython_python_type}}):
+            # C level comparisons
+            return __setcmp(
+                self._cpp_obj,
+                (<{{> types/cython_python_type}}> other)._cpp_obj,
+                op,
+            )
+        return self._fbthrift_py_richcmp(other, op)
+
+    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
+        if not isinstance(other, {{> types/cython_python_type}}):
+            other = {{> types/cython_python_type}}(other)
+        cdef shared_ptr[{{> types/cython_cpp_type}}] result
+        return {{> types/cython_python_type}}._fbthrift_create(__set_op[{{> types/cython_cpp_type}}](
+            self._cpp_obj,
+            (<{{> types/cython_python_type}}>other)._cpp_obj,
+            op,
+        ))
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+
+
+Set.register({{> types/cython_python_type}})
+{{/type:set?}}
+{{#type:map?}}
+    @staticmethod
+    cdef shared_ptr[{{> types/cython_cpp_type}}] _make_instance(object items) except *:
+        cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
+        if items is not None:
+            for key, item in items.items():
+                {{#type:key_type}}
+                {{#type:container?}}
+                if key is None:
+                    raise TypeError("None is not of type {{> types/pep484_type}}")
+                if not isinstance(key, {{> types/python_type}}):
+                    key = {{> types/python_type}}(key)
+                {{/type:container?}}
+                {{^type:container?}}
+                if not isinstance(key, {{> types/python_is_instance_type}}):
+                    raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
+                {{#type:integer?}}
+                {{! inject cython int overflow checks }}
+                key = <{{> types/cython_python_type}}> key
+                {{/type:integer?}}
+                {{/type:container?}}
+                {{/type:key_type}}
+                {{#type:value_type}}
+                {{#type:container?}}
+                if item is None:
+                    raise TypeError("None is not of type {{> types/pep484_type}}")
+                if not isinstance(item, {{> types/python_type}}):
+                    item = {{> types/python_type}}(item)
+                {{/type:container?}}
+                {{^type:container?}}
+                if not isinstance(item, {{> types/python_is_instance_type}}):
+                    raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+                {{#type:integer?}}
+                {{! inject cython int overflow checks }}
+                item = <{{> types/cython_python_type}}> item
+                {{/type:integer?}}
+                {{/type:container?}}
+                {{/type:value_type}}
+
+                deref(c_inst)[{{!
+                    }}{{#type:key_type}}{{> types/cython_python_to_cpp_key}}{{/type:key_type}}{{!
+                    }}] = {{!
+                    }}{{#type:value_type}}{{> types/cython_python_to_cpp_item}}{{/type:value_type}}
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        {{#type:key_type}}
+        if isinstance(key, {{> types/python_type}}):
+            return key
+        {{#type:container?}}
+        try:
+            return {{> types/python_type}}(key)
+        except:
+            pass
+        {{/type:container?}}
+        {{/type:key_type}}
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        {{#type:key_type}}
+        cdef {{> types/cython_cpp_type}} ckey = {{> types/cython_python_to_cpp_key}}
+        {{/type:key_type}}
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        {{#type:value_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return {{> types/container_cython_cpp_to_python_item}}
+        {{/type:value_type}}
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self._cpp_obj)
+        {{#type:key_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield {{> types/container_cython_cpp_to_python_item}}
+        {{/type:key_type}}
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        {{#type:key_type}}
+        cdef {{> types/cython_cpp_type}} ckey = {{> types/cython_python_to_cpp_key}}
+        {{/type:key_type}}
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self._cpp_obj)
+        {{#type:value_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield {{> types/container_cython_cpp_to_python_item}}
+        {{/type:value_type}}
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self._cpp_obj)
+        {{#type:key_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} ckey{{> types/type_default_value}}
+        {{/type:key_type}}
+        {{#type:value_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        {{/type:value_type}}
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield ({{!
+              }}{{#type:key_type}}{{!
+              }}{{> types/container_cython_cpp_to_python_key}}{{!
+              }}{{/type:key_type}}, {{!
+              }}{{#type:value_type}}{{!
+              }}{{> types/container_cython_cpp_to_python_item}}{{!
+              }}{{/type:value_type}})
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__{{> types/cython_python_type}}()
+
+Mapping.register({{> types/cython_python_type}})
+{{/type:map?}}
+
+{{/program:containerTypes}}{{!
+}}{{#program:constants}}
+{{#constant:value}}{{> types/constant_value}}{{/constant:value}}{{/program:constants}}{{!
+}}{{#program:typedefs}}
+{{typedef:name}} = {{#typedef:type}}{{> types/python_type}}{{/typedef:type}}
+{{/program:typedefs}}
+{{#program:has_stream?}}
+
+{{#program:stream_types}}
+cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
+
+    @staticmethod
+    cdef _fbthrift_create(cClientBufferedStream[{{ > types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options):
+        __fbthrift_inst = ClientBufferedStream__{{type:flat_name}}(rpc_options)
+        __fbthrift_inst._gen = make_unique[cClientBufferedStreamWrapper[{{> types/cython_cpp_type}}]](c_obj)
+        return __fbthrift_inst
+
+    @staticmethod
+    cdef void callback(
+        cFollyTry[__cOptional[{{> types/cython_cpp_type}}]]&& result,
+        PyObject* userdata,
+    ):
+        cdef __cOptional[{{> types/cython_cpp_type}}] opt_val
+        cdef {{> types/cython_cpp_type}} _value
+        stream, pyfuture, rpc_options = <object> userdata
+        if {{#program:stream_exceptions}}{{!
+        }}result.hasException[{{> types/cython_cpp_type}}]():
+            pyfuture.set_exception({{!
+            }}{{> types/cython_python_type}}._fbthrift_create({{!
+            }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()){{!
+            }}))
+        elif {{/program:stream_exceptions}}{{!
+        }}result.hasException():
+            pyfuture.set_exception(
+                thrift.py3.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)
+            )
+        else:
+            opt_val = result.value()
+            if opt_val.has_value():
+                try:
+                    _value = opt_val.value()
+                    pyfuture.set_result({{> stream/cython_cpp_value_to_python_value}})
+                except Exception as ex:
+                    pyfuture.set_exception(ex.with_traceback(None))
+            else:
+                pyfuture.set_exception(StopAsyncIteration())
+
+    def __anext__(self):
+        __loop = asyncio.get_event_loop()
+        __future = __loop.create_future()
+        # to avoid "Future exception was never retrieved" error at SIGINT
+        __future.add_done_callback(lambda x: x.exception())
+        __userdata = (self, __future, self._rpc_options)
+        bridgeCoroTaskWith[__cOptional[{{> types/cython_cpp_type}}]](
+            self._executor,
+            deref(self._gen).getNext(),
+            ClientBufferedStream__{{type:flat_name}}.callback,
+            <PyObject *>__userdata,
+        )
+        return asyncio.shield(__future)
+
+cdef class ServerStream__{{type:flat_name}}(ServerStream):
+    pass
+
+{{/program:stream_types}}
+{{#program:response_and_stream_types}}
+cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
+
+    @staticmethod
+    cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
+            }}{{#type:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/type:stream_first_response_type}}, {{!
+            }}{{#type:stream_elem_type}}{{ > types/cython_cpp_type}}{{/type:stream_elem_type}}]& c_obj, __RpcOptions rpc_options):
+        __fbthrift_inst = ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}()
+        __fbthrift_inst._stream = ClientBufferedStream__{{#type:stream_elem_type}}{{type:flat_name}}{{/type:stream_elem_type}}._fbthrift_create(
+            c_obj.stream, rpc_options,
+        )
+{{#type:stream_first_response_type}}
+        cdef {{> types/cython_cpp_type}} _value = c_obj.response
+        __fbthrift_inst._response = {{> stream/cython_cpp_value_to_python_value}}
+{{/type:stream_first_response_type}}
+        return __fbthrift_inst
+
+    def __iter__(self):
+        yield self._response
+        yield self._stream
+
+cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
+    pass
+
+{{/program:response_and_stream_types}}
+{{/program:has_stream?}}

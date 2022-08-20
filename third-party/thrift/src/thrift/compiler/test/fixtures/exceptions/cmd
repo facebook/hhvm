@@ -1,0 +1,9 @@
+java_deprecated src/module.thrift
+go src/module.thrift
+hack src/module.thrift
+mstch_cpp2 src/module.thrift
+mstch_rust src/module.thrift
+mstch_java src/module.thrift
+mstch_py3 src/module.thrift
+py src/module.thrift
+mstch_python src/module.thrift

@@ -1,0 +1,2 @@
+mstch_cpp2 src/simple.thrift
+mstch_cpp2:terse_writes src/terse_writes.thrift

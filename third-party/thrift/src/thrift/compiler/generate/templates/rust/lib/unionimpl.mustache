@@ -1,0 +1,105 @@
+{{!
+
+  Copyright (c) Facebook, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#struct:union?}}
+impl ::std::default::Default for {{struct:rust_name}} {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for {{struct:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+{{!newline}}
+{{#struct:thrift_uri}}
+
+impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
+    fn uri() -> &'static str {
+        "{{struct:thrift_uri}}"
+    }
+}
+{{/struct:thrift_uri}}
+
+impl<P> ::fbthrift::Serialize<P> for {{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("{{struct:name}}");
+        match self {{>lib/block}}{{!
+            }}{{#struct:fields}}
+            {{struct:rust_name}}::{{field:rust_name}}(inner) => {
+                p.write_field_begin({{!
+                    }}"{{field:name}}", {{!
+                    }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
+                    }}{{field:key}}{{!
+                }});
+                {{#field:type}}{{>lib/write}}{{/field:type}}(inner, p);
+                p.write_field_end();
+            }{{!
+            }}{{/struct:fields}}
+            {{struct:rust_name}}::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for {{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            {{#struct:fields_by_name}}
+            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+            {{/struct:fields_by_name}}
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let {{#struct:fields?}}mut {{/struct:fields?}}once = false;
+        let {{#struct:fields?}}mut {{/struct:fields?}}alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,{{!
+                }}{{#struct:fields}}
+                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some({{struct:rust_name}}::{{field:rust_name}}({{#field:type}}{{>lib/read}}{{/field:type}}(p)?));
+                }{{!
+                }}{{/struct:fields}}
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                    format!(
+                        "unwanted extra union {} field ty {:?} id {}",
+                        "{{struct:name}}",
+                        badty,
+                        badid,
+                    ),
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+{{/struct:union?}}
+{{!newline}}

@@ -1,0 +1,194 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "cpp",
+  "namespaces": {
+    "go": "thrift.annotation.cpp",
+    "java": "com.facebook.thrift.annotation.cpp_deprecated",
+    "py": "thrift.annotation.cpp",
+    "py.asyncio": "facebook_thrift_asyncio.annotation.cpp"
+  },
+  "enumerations" :
+  {
+      "RefType" : {
+        "name" : "RefType",
+        "constants" : {
+          "Unique" : {
+            "name" : "Unique",
+            "lineno" : 28,
+            "value" : 0
+          },
+          "Shared" : {
+            "name" : "Shared",
+            "lineno" : 29,
+            "value" : 1
+          },
+          "SharedMutable" : {
+            "name" : "SharedMutable",
+            "lineno" : 30,
+            "value" : 2
+          }
+        },
+        "lineno" : 27
+      }
+      },
+  "structs" :
+  {
+      "Ref" : {
+        "name" : "Ref",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "key" : 1,
+            "lineno" : 35,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "RefType"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 33
+      },
+      "Lazy" : {
+        "name" : "Lazy",
+        "fields" : {
+          "ref" : {
+            "name" : "ref",
+            "default_value" : 0,
+            "key" : 1,
+            "lineno" : 41,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 38
+      },
+      "DisableLazyChecksum" : {
+        "name" : "DisableLazyChecksum",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 44
+      },
+      "Adapter" : {
+        "name" : "Adapter",
+        "docstring" : "An annotation that applies a C++ adapter to typedef, field, or struct.\n\nFor example:\n\n  @cpp.Adapter{name = \"IdAdapter\"}\n  typedef i64 MyI64;\n\nHere the type `MyI64` has the C++ adapter `IdAdapter`.\n\n  struct User {\n    @cpp.Adapter{name = \"IdAdapter\"}\n    1: i64 id;\n  }\n\nHere the field `id` has the C++ adapter `IdAdapter`.\n",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "docstring" : "The name of a C++ adapter type used to convert between Thrift and native\nC++ representation.\n\nThe adapter can be either a Type or Field adapter, providing either of the following APIs:\n\n    struct ThriftTypeAdapter {\n      static AdaptedType fromThrift(ThriftType thrift);\n      static {const ThriftType& | ThriftType} toThrift(const AdaptedType& native);\n    };\n\n    struct ThriftFieldAdapter {\n      // Context is an instantiation of apache::thrift::FieldContext\n      template <class Context>\n      static void construct(AdaptedType& field, Context ctx);\n\n      template <class Context>\n      static AdaptedType fromThriftField(ThriftType value, Context ctx);\n\n      template <class Context>\n      static {const ThriftType& | ThriftType} toThrift(const AdaptedType& adapted, Context ctx);\n    };\n",
+            "key" : 1,
+            "lineno" : 92,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "adaptedType" : {
+            "name" : "adaptedType",
+            "docstring" : "It is sometimes necessary to specify AdaptedType here (in case the codegen would\nhave a circular depdenceny, which will cause the C++ build to fail).\n",
+            "key" : 2,
+            "lineno" : 98,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "underlyingName" : {
+            "name" : "underlyingName",
+            "docstring" : "When applied directly to a type (as opposed to on a typedef) the IDL name of the\ntype will refer to the adapted type in C++ and the underlying thrift struct will be\ngenerated in a nested namespace and/or with a different name. By default the struct\nwill be generated in a nested 'detail' namespace with the same name,\nbut both of these can be changed by setting these fields.\nEmpty string disables the nested namespace and uses the IDL name for the struct.\n",
+            "key" : 3,
+            "lineno" : 108,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "extraNamespace" : {
+            "name" : "extraNamespace",
+            "default_value" : "detail",
+            "key" : 4,
+            "lineno" : 109,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "moveOnly" : {
+            "name" : "moveOnly",
+            "docstring" : "Must set to true when adapted type is not copyable.\n",
+            "key" : 5,
+            "lineno" : 112,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 64
+      },
+      "PackIsset" : {
+        "name" : "PackIsset",
+        "fields" : {
+          "atomic" : {
+            "name" : "atomic",
+            "default_value" : 1,
+            "key" : 1,
+            "lineno" : 117,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 115
+      },
+      "MinimizePadding" : {
+        "name" : "MinimizePadding",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 120
+      },
+      "TriviallyRelocatable" : {
+        "name" : "TriviallyRelocatable",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 123
+      },
+      "ScopedEnumAsUnionType" : {
+        "name" : "ScopedEnumAsUnionType",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 126
+      },
+      "StrongType" : {
+        "name" : "StrongType",
+        "docstring" : "Indicates a typedef should be 'strong', and require an explicit cast to\nthe underlying type.\n\nCurrently only works for integer typedefs, for example:\n\n    @cpp.StrongType\n    typedef i32 MyId;\n\nWill cause an enum class to be used instead of a typedef in the genearte code, for example:\n\n    enum class MyId : ::std::int32_t {};\n\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 143
+      },
+      "FieldInterceptor" : {
+        "name" : "FieldInterceptor",
+        "docstring" : "An annotation that intercepts field access with C++ field interceptor.\nUse with *caution* since this may introduce substantial performance overhead on each field access.\n\nFor example:\n\n    struct Foo {\n      @cpp.FieldInterceptor{name = \"MyFieldInterceptor\"}\n      1: i64 id;\n    }\n\nThe field interceptor `MyFieldInterceptor` will intercept with `interceptThriftFieldAccess`\nwhen the field `id` is accessed.\n",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "docstring" : "The name of a field interceptor.\n\nThe field interceptor provides the following API:\n\n    struct ThriftFieldInterceptor {\n      template <typename T, typename Struct, int16_t FieldId>\n      static void interceptThriftFieldAccess(T&& field,\n                                             apache::thrift::FieldContext<Struct, FieldId>&& ctx);\n    };\n\nThe field interceptor intercepts with the field value and the field context.\nIt enforces an easily searchable function name `interceptThriftFieldAccess`.\n",
+            "key" : 1,
+            "lineno" : 178,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "noinline" : {
+            "name" : "noinline",
+            "docstring" : "Setting to true makes compiler not inline and erase function signature for\nthe intercepting field accessor.\n",
+            "key" : 2,
+            "lineno" : 184,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 161
+      }
+      },
+  "source_path" : "thrift/annotation/cpp",
+  "py_namespace" : "thrift.annotation.cpp"
+}

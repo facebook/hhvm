@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Thrift Declarations in {{program:name}}</title>
+    <style type="text/css">
+      body {
+        font-family: Helvetica;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Thrift Declarations</h1>
+
+    <h2>Structs</h2>
+    {{#program:structs}}
+    <h3>{{struct:name}}</h3>
+
+    <h4>Fields</h4>
+    <ul>
+      {{#struct:fields}}
+      <li><code>{{field:key}}: {{field:type}} {{field:name}}</code></li>
+      {{/struct:fields}}
+    </ul>
+    <hr />
+    {{/program:structs}}
+
+    <h2>Services</h2>
+    {{#program:services}}
+    <h3>{{service:name}}</h3>
+
+    <h4>Functions</h4>
+    <ul>
+    {{#service:functions}}
+    <li>{{function:name}}</li>
+    {{/service:functions}}
+    </ul>
+
+    {{/program:services}}
+
+  </body>
+</html>

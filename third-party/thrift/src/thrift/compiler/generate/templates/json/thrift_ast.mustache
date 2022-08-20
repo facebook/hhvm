@@ -1,0 +1,47 @@
+<%={{ }}=%>
+{
+  "__fbthrift": "@{{%!%}}generated",
+  "thrift_module" : "{{program:name}}",{{%!
+  %}}{{#program:namespaces?}}
+  "namespaces": {
+    {{#program:namespaces}}
+    "{{key}}": "{{value}}"{{^last?}},{{/last?}}
+    {{/program:namespaces}}
+  },{{/program:namespaces?}}{{#program:docstring?}}
+  "global_docstring": {{program:docstring}},{{/program:docstring?}}{{%!
+  %}}{{#program:constants?}}
+  "constants": {
+      {{#program:constants}}
+      {{#constant:type}}{{#constant:value}}
+      "{{constant:name}}": {
+        "name": "{{constant:name}}",
+        "type": "{{value:type_name}}",
+        "value": {{value:string_value_any}},{{%!
+        %}}{{#value:docstring?}}
+        "docstring": {{value:docstring}},{{/value:docstring?}}
+        "lineno": {{value:lineno}}
+      }{{/constant:value}}{{/constant:type}}{{^last?}},{{/last?}}
+      {{/program:constants}}
+  },{{/program:constants?}}{{%!
+  %}}{{#program:enums?}}
+  "enumerations" :
+  {
+    {{> enums}}
+  },
+  {{/program:enums?}}
+  {{#program:structs?}}
+  "structs" :
+  {
+    {{> structs}}
+  },
+  {{/program:structs?}}
+  {{#program:services?}}
+  "services" :
+  {
+    {{> services}}
+  },
+  {{/program:services?}}
+  {{! rearrange to avoid trailing comma issue}}
+  "source_path" : "{{program:normalized_include_prefix}}{{program:name}}",
+  "py_namespace" : "{{program:py_namespace}}"
+}

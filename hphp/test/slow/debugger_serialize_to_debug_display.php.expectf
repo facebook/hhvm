@@ -6,9 +6,7 @@ Warning: D::__toDebugDisplay() threw PHP exception of class Exception with messa
 string(12) "O:1:"D":0:{}"
 ==== E ====
 
-Warning: Property 'Error::message' declared as type string, float assigned in %s/test/slow/debugger_serialize_to_debug_display.php on line 12
-
-Warning: E::__toDebugDisplay() threw PHP exception of class Error with non-string message in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
+Warning: E::__toDebugDisplay() threw PHP exception of class Error with message 'err' in %s/test/slow/debugger_serialize_to_debug_display.php on line 22
 string(12) "O:1:"E":0:{}"
 ==== F ====
 

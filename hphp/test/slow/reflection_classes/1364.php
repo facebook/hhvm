@@ -7,7 +7,7 @@ class C1 {
   public static int $sField;
 }
 class C2 extends C1 {
-  public int $field;
+  public string $field;
   private int $pField;
 }
 trait T {

@@ -173,7 +173,7 @@ Examples:
   % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
 
   # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
-  % {$argv[0]} test/quick -r --compiler-args '--parse-on-demand=false'
+  % {$argv[0]} test/quick -r --compiler-args '--log=4'
 
   # All quick tests except debugger
   % {$argv[0]} -e debugger test/quick

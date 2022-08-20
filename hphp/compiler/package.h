@@ -66,7 +66,6 @@ struct UnitIndex final {
 
 struct Package {
   Package(const std::string& root,
-          bool parseOnDemand,
           coro::TicketExecutor& executor,
           extern_worker::Client& client);
 
@@ -290,8 +289,6 @@ private:
   folly_concurrent_hash_map_simd<std::string, bool> m_seenFiles;
 
   std::atomic<bool> m_failed;
-
-  bool m_parseOnDemand;
 
   std::atomic<size_t> m_total;
   Optional<std::chrono::microseconds> m_inputMicros;

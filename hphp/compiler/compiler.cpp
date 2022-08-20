@@ -104,7 +104,6 @@ struct CompilerOptions {
   std::vector<std::string> cmodules;
   std::string push_phases;
   std::string matched_overrides;
-  bool parseOnDemand;
   int logLevel;
   std::string filecache;
   bool coredump;
@@ -159,6 +158,9 @@ void applyBuildOverrides(IniSetting::Map& ini,
   }
 }
 
+// Parse queryStr as a JSON-encoded watchman query expression, adding the the
+// directories specified in the query to package. Only supports 'expression'
+// queries and the 'dirname' term.
 bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
   try {
     auto query = folly::parseJson(queryStr);
@@ -533,12 +535,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "directories to exclude from the input")
     ("exclude-file",
      value<std::vector<std::string>>(&po.excludeFiles)->composing(),
-     "files to exclude from the input, even if parse-on-demand finds it")
+     "files to exclude from the input, even if referenced by included files")
     ("exclude-pattern",
      value<std::vector<std::string>>(&po.excludePatterns)->composing(),
      "regex (in 'find' command's regex command line option format) of files "
-     "or directories to exclude from the input, even if parse-on-demand finds "
-     "it")
+     "or directories to exclude from the input, even if referenced by "
+     "included files")
     ("exclude-static-pattern",
      value<std::vector<std::string>>(&po.excludeStaticPatterns)->composing(),
      "regex (in 'find' command's regex command line option format) of files "
@@ -553,8 +555,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<std::vector<std::string>>(&po.cmodules)->composing(),
      "extra directories for static files without exclusion checking")
-    ("parse-on-demand", value<bool>(&po.parseOnDemand)->default_value(true),
-     "whether to parse files that are not specified from command line")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "config file name")
@@ -893,12 +893,12 @@ bool computeIndex(
     insert(meta.constants, index.constants, "constant");
   };
 
-  Package indexPackage{po.inputDir, false, executor, client};
+  Package indexPackage{po.inputDir, executor, client};
   Timer indexTimer(Timer::WallTime, "indexing");
 
   auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
   auto const queryStr = repoFlags.autoloadQuery();
-  if (!queryStr.empty() && po.parseOnDemand) {
+  if (!queryStr.empty()) {
     // Index the files specified by Autoload.Query
     if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return false;
   } else {
@@ -1054,7 +1054,6 @@ bool process(const CompilerOptions &po) {
 
   auto package = std::make_unique<Package>(
     po.inputDir,
-    po.parseOnDemand,
     *executor,
     *client
   );

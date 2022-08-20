@@ -36,7 +36,7 @@ supported as an interpreter mode.
 
 = IncludeRoots
 
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Only needed when --input-list is not used.
 In this case, compiler needs to understand every single include. Currently it
 only understands these formats (compiler/analysis/dependency_graph.cpp),
 
@@ -59,9 +59,9 @@ resolve file paths at compilation time. It will look like this,
 
 = AutoloadRoots
 
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Only needed when --input-list is not used.
 In this case, compiler needs to understand all autoloads to find a class file.
-It will look like this,
+It will look like this:
 
   AutoloadRoots {
     * {
@@ -80,7 +80,7 @@ specify all class files explicitly. Then this option isn't needed.
 
 = IncludeSearchPaths
 
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Only needed when --input-list is not used.
 Specifies more paths to search for include files. For example,
 
   IncludeSearchPaths {

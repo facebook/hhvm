@@ -63,12 +63,10 @@ const StaticString s_EntryPoint("__EntryPoint");
 ///////////////////////////////////////////////////////////////////////////////
 
 Package::Package(const std::string& root,
-                 bool parseOnDemand,
                  coro::TicketExecutor& executor,
                  extern_worker::Client& client)
   : m_root{root}
   , m_failed{false}
-  , m_parseOnDemand{parseOnDemand}
   , m_total{0}
   , m_fileCache{std::make_shared<FileCache>()}
   , m_executor{executor}
@@ -997,8 +995,6 @@ void Package::resolveOnDemand(FileAndSizeVec& out,
                               const SymbolRefs& symbolRefs,
                               const UnitIndex& index,
                               bool report) {
-  if (!m_parseOnDemand) return;
-
   auto const& onPath = [&] (const StringData* rpath_str) {
     if (rpath_str->empty()) return;
     auto rpath = rpath_str->toCppString();

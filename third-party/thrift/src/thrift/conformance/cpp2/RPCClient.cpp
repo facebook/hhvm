@@ -129,6 +129,22 @@ StreamChunkTimeoutClientTestResult streamChunkTimeoutTest(
   return result;
 }
 
+StreamInitialResponseClientTestResult streamInitialResponseTest(
+    const StreamInitialResponseClientInstruction& instruction) {
+  auto client = createClient();
+  StreamInitialResponseClientTestResult testResult;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto result =
+        co_await client->co_streamInitialResponse(*instruction.request());
+    testResult.initialResponse() = std::move(result.response);
+    auto gen = std::move(result.stream).toAsyncGenerator();
+    while (auto val = co_await gen.next()) {
+      testResult.streamPayloads()->push_back(std::move(*val));
+    }
+  }());
+  return testResult;
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -184,6 +200,10 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::streamChunkTimeout:
       result.set_streamChunkTimeout(
           streamChunkTimeoutTest(*clientInstruction.streamChunkTimeout_ref()));
+      break;
+    case ClientInstruction::Type::streamInitialResponse:
+      result.set_streamInitialResponse(streamInitialResponseTest(
+          *clientInstruction.streamInitialResponse_ref()));
       break;
     case ClientInstruction::Type::sinkBasic:
       result.set_sinkBasic(sinkBasicTest(*clientInstruction.sinkBasic_ref()));

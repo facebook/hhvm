@@ -59,6 +59,26 @@ apache::thrift::ServerStream<Response> RPCServerConformanceHandler::streamBasic(
   }
 }
 
+apache::thrift::ResponseAndServerStream<Response, Response>
+RPCServerConformanceHandler::streamInitialResponse(
+    std::unique_ptr<Request> req) {
+  result_.streamInitialResponse_ref().emplace().request() = *req;
+  auto stream =
+      folly::coro::co_invoke([&]() -> folly::coro::AsyncGenerator<Response&&> {
+        for (auto& payload : *testCase_->serverInstruction()
+                                  ->streamInitialResponse_ref()
+                                  ->streamPayloads()) {
+          co_yield std::move(payload);
+        }
+      });
+
+  return {
+      *testCase_->serverInstruction()
+           ->streamInitialResponse_ref()
+           ->initialResponse(),
+      std::move(stream)};
+}
+
 // =================== Sink ===================
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkBasic(std::unique_ptr<Request> req) {

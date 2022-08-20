@@ -40,6 +40,9 @@ class RPCServerConformanceHandler
   apache::thrift::ServerStream<Response> streamBasic(
       std::unique_ptr<Request> req) override;
 
+  apache::thrift::ResponseAndServerStream<Response, Response>
+  streamInitialResponse(std::unique_ptr<Request> req) override;
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override;

@@ -126,6 +126,22 @@ StreamBasicClientTestResult runStreamBasic(
       }());
 }
 
+StreamInitialResponseClientTestResult runStreamInitialResponse(
+    RPCConformanceServiceAsyncClient& client,
+    const StreamInitialResponseClientInstruction& instruction) {
+  StreamInitialResponseClientTestResult testResult;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto result =
+        co_await client.co_streamInitialResponse(*instruction.request());
+    testResult.initialResponse() = std::move(result.response);
+    auto gen = std::move(result.stream).toAsyncGenerator();
+    while (auto val = co_await gen.next()) {
+      testResult.streamPayloads()->push_back(std::move(*val));
+    }
+  }());
+  return testResult;
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult runSinkBasic(
     RPCConformanceServiceAsyncClient& client,
@@ -175,6 +191,10 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::streamBasic:
       result.set_streamBasic(
           runStreamBasic(client, *clientInstruction.streamBasic_ref()));
+      break;
+    case ClientInstruction::Type::streamInitialResponse:
+      result.set_streamInitialResponse(runStreamInitialResponse(
+          client, *clientInstruction.streamInitialResponse_ref()));
       break;
     case ClientInstruction::Type::sinkBasic:
       result.set_sinkBasic(

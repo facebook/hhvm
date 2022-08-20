@@ -100,6 +100,25 @@ class ConformanceVerificationServer
                                        ->chunkTimeoutMs()));
   }
 
+  apache::thrift::ResponseAndServerStream<Response, Response>
+  streamInitialResponse(std::unique_ptr<Request> req) override {
+    serverResult_.streamInitialResponse_ref().emplace().request() = *req;
+    auto stream = folly::coro::co_invoke(
+        [&]() -> folly::coro::AsyncGenerator<Response&&> {
+          for (auto payload : *testCase_.serverInstruction()
+                                   ->streamInitialResponse_ref()
+                                   ->streamPayloads()) {
+            co_yield std::move(payload);
+          }
+        });
+
+    return {
+        *testCase_.serverInstruction()
+             ->streamInitialResponse_ref()
+             ->initialResponse(),
+        std::move(stream)};
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {

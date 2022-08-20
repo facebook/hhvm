@@ -51,6 +51,7 @@ union ServerTestResult {
   4: RequestResponseUndeclaredExceptionServerTestResult requestResponseUndeclaredException;
   100: StreamBasicServerTestResult streamBasic;
   101: StreamChunkTimeoutServerTestResult streamChunkTimeout;
+  102: StreamInitialResponseServerTestResult streamInitialResponse;
   200: SinkBasicServerTestResult sinkBasic;
 }
 
@@ -61,6 +62,7 @@ union ClientTestResult {
   4: RequestResponseUndeclaredExceptionClientTestResult requestResponseUndeclaredException;
   100: StreamBasicClientTestResult streamBasic;
   101: StreamChunkTimeoutClientTestResult streamChunkTimeout;
+  102: StreamInitialResponseClientTestResult streamInitialResponse;
   200: SinkBasicClientTestResult sinkBasic;
 }
 
@@ -83,6 +85,10 @@ struct StreamBasicServerTestResult {
 }
 
 struct StreamChunkTimeoutServerTestResult {
+  1: Request request;
+}
+
+struct StreamInitialResponseServerTestResult {
   1: Request request;
 }
 
@@ -116,6 +122,11 @@ struct StreamChunkTimeoutClientTestResult {
   2: bool chunkTimeoutException;
 }
 
+struct StreamInitialResponseClientTestResult {
+  1: list<Response> streamPayloads;
+  2: Response initialResponse;
+}
+
 struct SinkBasicClientTestResult {
   1: Response finalResponse;
 }
@@ -127,6 +138,7 @@ union ClientInstruction {
   4: RequestResponseUndeclaredExceptionClientInstruction requestResponseUndeclaredException;
   100: StreamBasicClientInstruction streamBasic;
   101: StreamChunkTimeoutClientInstruction streamChunkTimeout;
+  102: StreamInitialResponseClientInstruction streamInitialResponse;
   200: SinkBasicClientInstruction sinkBasic;
 }
 
@@ -137,6 +149,7 @@ union ServerInstruction {
   4: RequestResponseUndeclaredExceptionServerInstruction requestResponseUndeclaredException;
   100: StreamBasicServerInstruction streamBasic;
   101: StreamChunkTimeoutServerInstruction streamChunkTimeout;
+  102: StreamInitialResponseServerInstruction streamInitialResponse;
   200: SinkBasicServerInstruction sinkBasic;
 }
 
@@ -161,6 +174,10 @@ struct StreamBasicClientInstruction {
 struct StreamChunkTimeoutClientInstruction {
   1: Request request;
   2: i32 chunkTimeoutMs;
+}
+
+struct StreamInitialResponseClientInstruction {
+  1: Request request;
 }
 
 struct SinkBasicClientInstruction {
@@ -193,6 +210,11 @@ struct StreamChunkTimeoutServerInstruction {
   2: i32 chunkTimeoutMs;
 }
 
+struct StreamInitialResponseServerInstruction {
+  1: list<Response> streamPayloads;
+  2: Response initialResponse;
+}
+
 struct SinkBasicServerInstruction {
   1: Response finalResponse;
   2: i64 bufferSize;
@@ -218,6 +240,7 @@ service RPCConformanceService {
   // =================== Stream ===================
   stream<Response> streamBasic(1: Request req);
   stream<Response> streamChunkTimeout(1: Request req);
+  Response, stream<Response> streamInitialResponse(1: Request req);
 
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);

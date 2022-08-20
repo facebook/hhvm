@@ -335,6 +335,51 @@ Test createStreamFragmentationTest() {
   return ret;
 }
 
+Test createStreamInitialResponseTest() {
+  Test ret;
+  ret.name() = "StreamInitialResponseTest";
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamInitialResponse/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction_ref()
+      .emplace()
+      .streamInitialResponse_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  auto& serverInstruction = rpcTest.serverInstruction_ref()
+                                .emplace()
+                                .streamInitialResponse_ref()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+  serverInstruction.initialResponse().emplace().data() = "world";
+
+  auto& clientTestResult = rpcTest.clientTestResult_ref()
+                               .emplace()
+                               .streamInitialResponse_ref()
+                               .emplace();
+  clientTestResult.streamPayloads().copy_from(
+      serverInstruction.streamPayloads());
+  clientTestResult.initialResponse().emplace().data() = "world";
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .streamInitialResponse_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Sink ===================
 Test createSinkBasicTest() {
   Test ret;
@@ -457,6 +502,7 @@ void addCommonRPCTests(TestSuite& suite) {
   // =================== Stream ===================
   suite.tests()->push_back(createStreamBasicTest());
   suite.tests()->push_back(createStreamFragmentationTest());
+  suite.tests()->push_back(createStreamInitialResponseTest());
   // =================== Sink ===================
   suite.tests()->push_back(createSinkBasicTest());
   suite.tests()->push_back(createSinkFragmentationTest());

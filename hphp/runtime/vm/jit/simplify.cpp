@@ -267,14 +267,18 @@ DEBUG_ONLY bool validate(const State& env,
 
     assert_last(
       IMPLIES(last->next(), last->next() == origInst->next() ||
-                            last->next() == origInst->taken()),
+                            last->next() == ultimateDst(origInst->next()) ||
+                            last->next() == origInst->taken() ||
+                            last->next() == ultimateDst(origInst->taken())),
       "Last instruction of simplified stream has next edge not reachable from "
       "the input instruction"
     );
 
     assert_last(
       IMPLIES(last->taken(), last->taken() == origInst->next() ||
-                             last->taken() == origInst->taken()),
+                             last->taken() == ultimateDst(origInst->next()) ||
+                             last->taken() == origInst->taken() ||
+                             last->taken() == ultimateDst(origInst->taken())),
       "Last instruction of simplified stream has taken edge not reachable "
       "from the input instruction"
     );
@@ -308,8 +312,10 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckMissingKeyInArrLike,
                    CheckDictOffset,
                    CheckKeysetOffset));
-  if (inst->next() != nullptr && inst->next() == inst->taken()) {
-    return gen(env, Jmp, inst->next());
+  assertx(inst->taken() != nullptr);
+  if (inst->next() != nullptr &&
+      ultimateDst(inst->next()) == ultimateDst(inst->taken())) {
+    return gen(env, Jmp, ultimateDst(inst->next()));
   }
   if (inst->taken() && inst->taken()->isUnreachable()) {
     return gen(env, Nop);
@@ -2488,14 +2494,21 @@ SSATmp* simplifyInitObjMemoSlots(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
   auto const srcType = inst->src(0)->type();
+  assertx(inst->taken() != nullptr);
 
-  if (!srcType.maybe(typeParam) || inst->next() == inst->taken() ||
-      (inst->next() && inst->next()->isUnreachable())) {
+  if (!srcType.maybe(typeParam) ||
+      (inst->next() != nullptr && inst->next()->isUnreachable())) {
     /*
      * Convert the check into a Jmp.  The dest of the CheckType (which would've
      * been Bottom) is now never going to be defined, so we return a Bottom.
      */
     gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+
+  if (inst->next() != nullptr &&
+      ultimateDst(inst->next()) == ultimateDst(inst->taken())) {
+    gen(env, Jmp, ultimateDst(inst->taken()));
     return cns(env, TBottom);
   }
 
@@ -2546,10 +2559,17 @@ SSATmp* simplifyCheckMBase(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
+  assertx(inst->taken() != nullptr);
 
-  if (type <= TNullptr || inst->next() == inst->taken() ||
-      (inst->next() && inst->next()->isUnreachable())) {
+  if (type <= TNullptr ||
+      (inst->next() != nullptr && inst->next()->isUnreachable())) {
     gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+
+  if (inst->next() != nullptr &&
+      ultimateDst(inst->next()) == ultimateDst(inst->taken())) {
+    gen(env, Jmp, ultimateDst(inst->taken()));
     return cns(env, TBottom);
   }
 
@@ -2595,10 +2615,12 @@ SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
 
 SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
   assertx(inst->is(JmpZero, JmpNZero));
+  assertx(inst->taken() != nullptr);
+
   // Both ways go to the same block.
-  if (inst->taken() == inst->next()) {
-    assertx(inst->taken() != nullptr);
-    return gen(env, Jmp, inst->taken());
+  if (inst->next() != nullptr &&
+      ultimateDst(inst->next()) == ultimateDst(inst->taken())) {
+    return gen(env, Jmp, ultimateDst(inst->taken()));
   }
 
   if (inst->taken() && inst->taken()->isUnreachable()) {

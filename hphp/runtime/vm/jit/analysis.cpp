@@ -54,6 +54,25 @@ SSATmp* canonical(SSATmp* value) {
 
 //////////////////////////////////////////////////////////////////////
 
+Block* ultimateDst(Block* blk) {
+  if (blk == nullptr) return nullptr;
+
+  auto constexpr kMaxSteps = 10;
+
+  for (auto i = 0; i < kMaxSteps; ++i) {
+    if (blk->empty()) return blk;
+    auto jmp = blk->begin();
+    if (!jmp->is(Jmp) || jmp->numSrcs() != 0 || jmp->taken() == nullptr) {
+      return blk;
+    }
+    blk = jmp->taken();
+  }
+
+  return blk;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 Block* findDefiningBlock(const SSATmp* t, const IdomVector& idoms) {
   assertx(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();

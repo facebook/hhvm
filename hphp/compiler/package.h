@@ -259,11 +259,12 @@ private:
     FileAndSizeVec m_ungrouped;
   };
 
-  // Partition all files specified for this package into groups,
-  // excluding files according to options. If exclude_dirs is false,
-  // ignore Option::PackageExcludeDirs, in support of parseOnDemand.
-  coro::Task<Groups> groupAll(bool exclude_dirs);
-  coro::Task<GroupResult> groupDirectories(std::string, bool exclude_dirs);
+  // Partition all files specified for this package into groups.
+  // If filterFiles/Dirs==true, ignore excluded files and/or directories
+  // according to options.
+  coro::Task<Groups> groupAll(bool filterFiles, bool filterDirs);
+  coro::Task<GroupResult>
+  groupDirectories(std::string, bool filterFiles, bool filterDirs);
   void groupFiles(Groups&, FileAndSizeVec);
 
   coro::Task<void> prepareInputs(Group,

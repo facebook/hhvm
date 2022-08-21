@@ -476,8 +476,9 @@ Package::parseRun(const std::string& content,
 
 // Given the path of a directory, find all (relevant) files in that
 // directory (and sub-directories), and attempt to group them.
-coro::Task<Package::GroupResult>
-Package::groupDirectories(std::string path, bool exclude_dirs) {
+coro::Task<Package::GroupResult> Package::groupDirectories(
+  std::string path, bool filterFiles, bool filterDirs
+) {
   // We're not going to be blocking on I/O here, so make sure we're
   // running on the thread pool.
   HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
@@ -489,9 +490,11 @@ Package::groupDirectories(std::string path, bool exclude_dirs) {
     m_root, path, /* php */ true,
     [&] (const std::string& name, bool dir, size_t size) {
       if (!dir) {
-        if (Option::PackageExcludeFiles.count(name) ||
-            Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
-          return false;
+        if (filterFiles) {
+          if (Option::PackageExcludeFiles.count(name) ||
+              Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
+            return false;
+          }
         }
 
         if (!name.empty()) {
@@ -503,7 +506,7 @@ Package::groupDirectories(std::string path, bool exclude_dirs) {
         }
         return true;
       }
-      if (exclude_dirs && Option::PackageExcludeDirs.count(name)) {
+      if (filterDirs && Option::PackageExcludeDirs.count(name)) {
         // Only skip excluded dirs when requested.
         return false;
       }
@@ -518,7 +521,7 @@ Package::groupDirectories(std::string path, bool exclude_dirs) {
       }
 
       // Process the directory as a new job
-      dirs.emplace_back(groupDirectories(name, exclude_dirs));
+      dirs.emplace_back(groupDirectories(name, filterFiles, filterDirs));
 
       // Don't iterate the directory in this job.
       return false;
@@ -619,14 +622,14 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroups(
   HPHP_CORO_MOVE_RETURN(ondemand);
 }
 
-coro::Task<Package::Groups> Package::groupAll(bool exclude_dirs) {
-  Timer timer{
-    Timer::WallTime,
-    exclude_dirs ? "finding parse inputs" : "finding index inputs"
-  };
+coro::Task<Package::Groups>
+Package::groupAll(bool filterFiles, bool filterDirs) {
+  Timer timer{Timer::WallTime, "finding inputs"};
   std::vector<coro::Task<GroupResult>> tasks;
   for (auto& dir : m_directories) {
-    tasks.emplace_back(groupDirectories(std::move(dir), exclude_dirs));
+    tasks.emplace_back(
+      groupDirectories(std::move(dir), filterFiles, filterDirs)
+    );
   }
 
   // Gather together all top level files
@@ -683,7 +686,7 @@ coro::Task<Package::Groups> Package::groupAll(bool exclude_dirs) {
 coro::Task<void>
 Package::parseAll(const ParseCallback& callback, const UnitIndex& index) {
   // Find the initial set of groups
-  auto groups = HPHP_CORO_AWAIT(groupAll(true));
+  auto groups = HPHP_CORO_AWAIT(groupAll(true, true));
 
   // Parse the "main" round and get any ondemand files
   FileAndSizeVec ondemand;
@@ -1182,8 +1185,13 @@ coro::Task<bool> Package::index(const IndexCallback& callback) {
 }
 
 coro::Task<void> Package::indexAll(const IndexCallback& callback) {
-  // Find the indexing groups
-  auto groups = HPHP_CORO_AWAIT(groupAll(false));
+  // If EnableDecl==true, all source files should be included in the
+  // index, not just ondemand-eligible files.
+  auto const filterFiles = !RO::EvalEnableDecl;
+  auto const filterDirs = false;
+
+  // Compute the groups to index
+  auto groups = HPHP_CORO_AWAIT(groupAll(filterFiles, filterDirs));
   Logger::FInfo("indexing {:,} groups", groups.size());
 
   // Index all files

@@ -411,18 +411,9 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
 PreClassEmitter* UnitEmitter::newPreClassEmitter(
   const std::string& name
 ) {
-  auto pce = new PreClassEmitter(*this, m_pceVec.size(), name);
-  m_pceVec.push_back(pce);
+  auto pce = new PreClassEmitter(*this, name);
+  m_pceVec.emplace_back(pce);
   return pce;
-}
-
-Id UnitEmitter::pceId(folly::StringPiece clsName) {
-  Id id = 0;
-  for (auto p : m_pceVec) {
-    if (p->name()->slice() == clsName) return id;
-    id++;
-  }
-  return -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -603,7 +594,11 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
   for (auto const& pce : m_pceVec) {
-    u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
+    auto const preCls = pce->create(*u);
+    u->m_preClasses.emplace_back(PreClassPtr{preCls});
+    auto const DEBUG_ONLY emplaced =
+      u->m_nameToPreClass.emplace(preCls->name(), PreClassPtr{preCls});
+    assertx(emplaced.second);
   }
   for (auto const& te : m_typeAliases) {
     u->m_typeAliases.push_back(te->create(*u));
@@ -872,7 +867,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           sd(name);
           auto pce = newPreClassEmitter(name);
           pce->serdeMetaData(sd);
-          assertx(pce->id() == i);
           serdeMethods(pce);
         },
         [&] (auto& sd, PreClassEmitter* pce) {

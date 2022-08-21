@@ -19,8 +19,8 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
     pub(crate) fn init_from_bodies(
         &mut self,
         value_builder: &mut ValueBuilder,
-        a: &'a Body<'arena, 'a>,
-        b: &'a Body<'arena, 'a>,
+        a: &'a Body<'arena>,
+        b: &'a Body<'arena>,
     ) {
         let mut a_state = State::new(a, "A");
         let mut b_state = State::new(b, "B");

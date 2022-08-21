@@ -84,12 +84,14 @@ struct ParseUnitState {
                 > srcLocInfo;
 
   /*
-   * Map from Closure index to the function(s) containing their
-   * associated CreateCl opcode(s).
+   * Map from Closure name to the function containing the Closure's
+   * associated CreateCl opcode.
    */
   hphp_fast_map<
-    int32_t,
-    hphp_fast_set<php::Func*>
+    SString,
+    php::Func*,
+    string_data_hash,
+    string_data_isame
   > createClMap;
 
   struct SrcLocHash {
@@ -299,7 +301,15 @@ void populate_block(ParseUnitState& puState,
 
   auto createcl = [&] (const Bytecode& b) {
     sawCreateCl = true;
-    puState.createClMap[b.CreateCl.arg2].insert(&func);
+    auto const [existing, emplaced] =
+      puState.createClMap.emplace(b.CreateCl.str2, &func);
+    always_assert_flog(
+      emplaced || existing->second == &func,
+      "Closure {} used in CreateCl by two different functions '{}' and '{}'",
+      b.CreateCl.str2,
+      func_fullname(*existing->second),
+      func_fullname(func)
+    );
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -878,7 +888,6 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->attrs              = static_cast<Attr>((pce.attrs() & ~AttrNoOverride) |
                                               AttrUnique | AttrPersistent);
   ret->userAttributes     = pce.userAttributes();
-  ret->id                 = pce.id();
   ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
                             ret->userAttributes.end();
   ret->hasConstProp       = false;
@@ -1020,30 +1029,12 @@ LSString find_closure_context(const ParseUnitState& puState,
 void assign_closure_context(const ParseUnitState& puState,
                             php::Class* clo) {
   if (clo->closureContextCls) return;
-
-  auto clIt = puState.createClMap.find(clo->id);
+  auto const clIt = puState.createClMap.find(clo->name);
   if (clIt == end(puState.createClMap)) {
     // Unused closure class.  Technically not prohibited by the spec.
     return;
   }
-
-  /*
-   * Any route to the closure context must yield the same class, or
-   * things downstream won't understand.  We try every route and
-   * assert they are all the same here.
-   *
-   * See bytecode.specification for CreateCl for the relevant
-   * invariants.
-   */
-  always_assert(!clIt->second.empty());
-  auto it = begin(clIt->second);
-  auto const representative = find_closure_context(puState, *it);
-  if (debug) {
-    for (++it; it != end(clIt->second); ++it) {
-      assertx(find_closure_context(puState, *it) == representative);
-    }
-  }
-  clo->closureContextCls = representative;
+  clo->closureContextCls = find_closure_context(puState, clIt->second);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1126,8 +1117,8 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
 
   ParseUnitState puState;
 
-  for (size_t i = 0; i < ue.numPreClasses(); ++i) {
-    auto cls = parse_class(puState, ret.unit.get(), *ue.pce(i));
+  for (auto const pce : ue.preclasses()) {
+    auto cls = parse_class(puState, ret.unit.get(), *pce);
     ret.unit->classes.emplace_back(cls->name);
     ret.classes.emplace_back(std::move(cls));
   }
@@ -1162,6 +1153,15 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
   }
 
   if (debug) {
+    // Make sure all closures in our createClMap (which are just
+    // strings) actually exist in this unit (CreateCls should not be
+    // referring to classes outside of their unit).
+    hphp_fast_set<SString, string_data_hash, string_data_isame> classes;
+    for (auto const& c : ret.classes) classes.emplace(c->name);
+    for (auto const [name, _] : puState.createClMap) {
+      always_assert(classes.count(name));
+    }
+
     for (auto const& f : ret.funcs)   always_assert(check(*f));
     for (auto const& c : ret.classes) always_assert(check(*c));
   }

@@ -434,8 +434,6 @@ struct CaptureState {
 /// ReadOnlyState is split from State because it can be a simple ref in
 /// ClosureVisitor.
 struct ReadOnlyState<'a> {
-    /// How many existing classes are there?
-    class_count: usize,
     // Empty namespace as constructed by parser
     empty_namespace: RcOc<namespace_env::Env>,
     /// For debugger eval
@@ -552,7 +550,6 @@ fn make_closure_name(scope: &Scope<'_, '_>, state: &State<'_>) -> String {
 }
 
 fn make_closure(
-    class_num: usize,
     p: Pos,
     scope: &Scope<'_, '_>,
     state: &State<'_>,
@@ -647,7 +644,7 @@ fn make_closure(
     };
 
     // TODO(hrust): can we reconstruct fd here from the scratch?
-    fd.name = Id(p.clone(), class_num.to_string());
+    fd.name = cd.name.clone();
     (fd, cd)
 }
 
@@ -1431,7 +1428,6 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         let fun_tparams = scope.fun_tparams().to_vec(); // hiddden .clone()
         let class_tparams = scope.class_tparams().to_vec(); // hiddden .clone()
-        let class_num = state.closures.len() + self.ro_state.class_count;
 
         let is_static = if is_long_lambda {
             // long lambdas are never static
@@ -1448,7 +1444,6 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         let pos = fd.span.clone();
         let lambda_vars_clone = lambda_vars.clone();
         let (inline_fundef, cd) = make_closure(
-            class_num,
             pos,
             scope,
             state,
@@ -1714,11 +1709,10 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     defs: &mut Vec<Def>,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {
-    let class_count = prepare_defs(defs);
+    prepare_defs(defs);
 
     let mut scope = Scope::toplevel(defs.as_slice())?;
     let ro_state = ReadOnlyState {
-        class_count,
         empty_namespace: RcOc::clone(&namespace_env),
         for_debugger_eval: e.for_debugger_eval,
         options: e.options(),

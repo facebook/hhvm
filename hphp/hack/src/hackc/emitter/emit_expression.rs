@@ -784,9 +784,6 @@ fn emit_lambda<'a, 'arena, 'decl>(
     // Closure conversion puts the class number used for CreateCl in the "name"
     // of the function definition
     let fndef_name = &(fndef.name).1;
-    let cls_num = fndef_name
-        .parse::<isize>()
-        .map_err(|err| Error::unrecoverable(err.to_string()))?;
     let explicit_use = e.global_state().explicit_use_set.contains(fndef_name);
     let is_in_lambda = env.scope.is_in_lambda();
     Ok(InstrSeq::gather(vec![
@@ -821,7 +818,10 @@ fn emit_lambda<'a, 'arena, 'decl>(
                 })
                 .collect::<Result<Vec<_>>>()?,
         ),
-        instr::create_cl(ids.len() as u32, cls_num as u32),
+        instr::create_cl(
+            ids.len() as u32,
+            hhbc::ClassName::from_raw_string(e.alloc, fndef_name),
+        ),
     ]))
 }
 

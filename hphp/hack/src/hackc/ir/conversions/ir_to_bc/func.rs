@@ -38,7 +38,6 @@ pub(crate) fn convert_func<'a>(
     alloc: &'a bumpalo::Bump,
     mut func: ir::Func<'a>,
     strings: &StringInterner<'a>,
-    builder: &HackCUnitBuilder<'a>,
 ) -> hhbc::HhasBody<'a> {
     // Compute liveness and implicit block parameters.
 
@@ -59,7 +58,7 @@ pub(crate) fn convert_func<'a>(
     // Now emit the instructions.
     trace!("-- emit instrs");
     let mut labeler = emitter::Labeler::new(&func);
-    let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings, builder);
+    let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings);
 
     let return_type_info = crate::types::convert(&func.return_type);
 
@@ -132,7 +131,7 @@ pub(crate) fn convert_function<'a>(
 ) {
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
-    let body = convert_func(alloc, function.func, strings, unit);
+    let body = convert_func(alloc, function.func, strings);
     let attributes = convert::convert_attributes(alloc, function.attributes);
     let hhas_func = hhbc::HhasFunction {
         attributes,
@@ -150,10 +149,9 @@ pub(crate) fn convert_method<'a>(
     alloc: &'a bumpalo::Bump,
     method: ir::Method<'a>,
     strings: &StringInterner<'a>,
-    builder: &HackCUnitBuilder<'a>,
 ) -> HhasMethod<'a> {
     trace!("convert_method {}", method.name.as_bstr());
-    let body = convert_func(alloc, method.func, strings, builder);
+    let body = convert_func(alloc, method.func, strings);
     let attributes = convert::convert_attributes(alloc, method.attributes);
     hhbc::HhasMethod {
         attributes,

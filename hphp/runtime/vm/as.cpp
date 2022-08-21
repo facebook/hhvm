@@ -3259,8 +3259,8 @@ void parse(AsmState& as) {
 
   if (RuntimeOption::EvalAssemblerFoldDefaultValues) {
     for (auto& fe : as.ue->fevec()) fixup_default_values(as, fe.get());
-    for (size_t n = 0; n < as.ue->numPreClasses(); ++n) {
-      for (auto fe : as.ue->pce(n)->methods()) fixup_default_values(as, fe);
+    for (auto const pce : as.ue->preclasses()) {
+      for (auto fe : pce->methods()) fixup_default_values(as, fe);
     }
   }
 }

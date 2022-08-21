@@ -5304,7 +5304,7 @@ void in(ISS& env, const bc::ParentCls&) {
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
-  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.arg2);
+  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
 
   /*
    * Every closure should have a unique allocation site, but we may see it

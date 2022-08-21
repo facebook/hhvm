@@ -73,7 +73,9 @@ struct BlockInfo {
 };
 
 struct FuncChecker {
-  FuncChecker(const FuncEmitter* func, ErrorMode mode);
+  FuncChecker(const FuncEmitter* func,
+              ErrorMode mode,
+              StringToStringIMap& createCls);
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
@@ -164,6 +166,7 @@ struct FuncChecker {
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
   Id m_last_rpo_id; // rpo_id of the last block visited
+  StringToStringIMap& m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -211,14 +214,16 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   return true;
 }
 
-bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
+bool checkFunc(const FuncEmitter* func,
+               StringToStringIMap& createCls,
+               ErrorMode mode) {
   if (mode == kVerbose) {
     pretty_print(func, std::cout);
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
   }
-  FuncChecker v(func, mode);
+  FuncChecker v{func, mode, createCls};
   return v.checkInfo() &&
          v.checkDef() &&
          v.checkOffsets() &&
@@ -270,11 +275,14 @@ bool mayTakeExnEdges(Op op) {
   }
 }
 
-FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
+FuncChecker::FuncChecker(const FuncEmitter* f,
+                         ErrorMode mode,
+                         StringToStringIMap& createCls)
 : m_func(f)
 , m_graph(0)
 , m_instrs(m_arena, f->bcPos() + 1)
 , m_errmode(mode)
+, m_createCls(createCls)
 {}
 
 FuncChecker::~FuncChecker() {
@@ -1190,16 +1198,27 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
     case Op::CreateCl: {
-      auto const id = getImm(pc, 1).u_IVA;
-      if (id >= unit()->numPreClasses()) {
-        ferror("CreateCl must reference a closure defined in the same "
-               "unit\n");
+      auto const name = m_func->ue().lookupLitstrCopy(getImm(pc, 1).u_SA);
+      auto const preCls = [&] () -> const PreClassEmitter* {
+        for (auto const pce : unit()->preclasses()) {
+          if (pce->name()->isame(name.get())) return pce;
+        }
+        return nullptr;
+      }();
+      if (!preCls) {
+        ferror("CreateCl references non-existent class {}\n", name);
         return false;
       }
-      auto const preCls = unit()->pce(id);
-      if (preCls->parentName()->toCppString() != std::string("Closure")) {
-        ferror("CreateCl references non-closure class {} ({})\n",
-               preCls->name(), id);
+      if (!preCls->parentName() ||
+          preCls->parentName()->toCppString() != "Closure") {
+        ferror("CreateCl references non-closure class {}\n", preCls->name());
+        return false;
+      }
+      auto const [existing, emplaced] =
+        m_createCls.emplace(preCls->name(), m_func->name);
+      if (!emplaced && !existing->second->isame(m_func->name)) {
+        ferror("Closure {} referenced in multiple funcs {} and {}\n",
+               preCls->name(), existing->second, m_func->name);
         return false;
       }
       auto const numBound = getImm(pc, 0).u_IVA;

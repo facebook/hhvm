@@ -710,13 +710,6 @@ struct Index {
   const php::Unit* lookup_class_unit(const php::Class&) const;
 
   /*
-   * Obtain a pointer to the class defined in the given unit with the
-   * given Id.
-   */
-  const php::Class* lookup_unit_class(const php::Unit&, Id) const;
-  php::Class* lookup_unit_class_mutable(php::Unit&, Id);
-
-  /*
    * Obtain a pointer to the class which defines the given class
    * constant.
    */
@@ -743,6 +736,8 @@ struct Index {
    */
   void for_each_unit_class(const php::Unit&,
                            std::function<void(const php::Class&)>) const;
+  void for_each_unit_class_mutable(php::Unit&,
+                                   std::function<void(php::Class&)>);
 
   /*
    * Find all the closures created inside the context of a given
@@ -814,7 +809,7 @@ struct Index {
    * closure.
    */
   std::pair<res::Class, const php::Class*>
-    resolve_closure_class(Context ctx, int32_t idx) const;
+    resolve_closure_class(Context ctx, SString name) const;
 
   /*
    * Return a resolved class for a builtin class.

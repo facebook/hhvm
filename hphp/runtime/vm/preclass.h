@@ -302,8 +302,7 @@ public:
   // Construction and destruction.
 
   PreClass(Unit* unit, int line1, int line2, const StringData* n,
-           Attr attrs, const StringData* parent, const StringData* docComment,
-           Id id);
+           Attr attrs, const StringData* parent, const StringData* docComment);
   ~PreClass();
 
   void atomicRelease();
@@ -319,7 +318,6 @@ public:
   NamedEntity*      namedEntity()  const { return m_namedEntity; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
-  Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
   const StringData* parent()       const { return m_parent; }
@@ -462,7 +460,6 @@ private:
   LowPtr<NamedEntity> m_namedEntity;
   int m_line1;
   int m_line2;
-  Id m_id;
   Attr m_attrs;
   LowStringPtr m_name;
   LowStringPtr m_parent;

@@ -197,7 +197,7 @@ struct PreClassEmitter {
   using PropMap = IndexedStringMap<Prop, Slot>;
   using ConstMap = IndexedStringMap<Const, Slot>;
 
-  PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name);
+  PreClassEmitter(UnitEmitter& ue, const std::string& name);
   ~PreClassEmitter();
 
   void init(int line1, int line2, Attr attrs,
@@ -209,7 +209,6 @@ struct PreClassEmitter {
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
-  Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
   bool hasMethod(const StringData* name) const {
@@ -310,7 +309,6 @@ struct PreClassEmitter {
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
   TypeConstraint m_enumBaseTy;
-  Id m_id;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
 

@@ -2302,19 +2302,16 @@ struct ClsPreResolveUpdates {
   > closures;
   CompactVector<php::Class*> newClosures;
   CompactVector<
-    std::tuple<std::unique_ptr<php::Class>, php::Unit*, uint32_t>
+    std::tuple<std::unique_ptr<php::Class>, php::Unit*>
   > newClasses;
   CompactVector<php::Func*> newMethods;
-
-  uint32_t nextClassId = 0;
 };
 
 // Keep track of order of closure creation to make the logic more
 // deterministic.
 struct ClonedClosureMap {
   using Tuple = std::tuple<const php::Class*,
-                           std::unique_ptr<php::Class>,
-                           uint32_t>;
+                           std::unique_ptr<php::Class>>;
 
   bool empty() const { return ordered.empty(); }
 
@@ -2328,11 +2325,10 @@ struct ClonedClosureMap {
   }
 
   bool emplace(const php::Class* cls,
-               std::unique_ptr<php::Class> clo,
-               uint32_t id) {
+               std::unique_ptr<php::Class> clo) {
     auto const inserted = map.emplace(cls, ordered.size()).second;
     if (!inserted) return false;
-    ordered.emplace_back(cls, std::move(clo), id);
+    ordered.emplace_back(cls, std::move(clo));
     return true;
   }
 
@@ -3159,6 +3155,21 @@ std::unique_ptr<php::Func> clone_meth_helper(
   ClonedClosureMap& clonedClosures
 );
 
+// The existing closure's name is already unique. By appending the
+// name of the new context, we ensure the new closure's name is also
+// unique (any given closure can only be cloned into a class once).
+SString rename_closure(const php::Class* closure,
+                       const php::Class* newContext) {
+  auto n = closure->name->slice();
+  auto const p = n.find(';');
+  if (p != std::string::npos) n = n.subpiece(0, p);
+  return makeStaticString(
+    folly::sformat(
+      "{};{}", n, newContext->name
+    )
+  );
+}
+
 std::unique_ptr<php::Class> clone_closure(IndexData& index,
                                           const php::Class* newContext,
                                           php::Class* cls,
@@ -3178,6 +3189,8 @@ std::unique_ptr<php::Class> clone_closure(IndexData& index,
                                   clonedClosures);
     if (!cloneMeth) return nullptr;
   }
+  clone->name = rename_closure(clone.get(), newContext);
+  updates.newClosures.emplace_back(clone.get());
   return clone;
 }
 
@@ -3206,54 +3219,49 @@ std::unique_ptr<php::Func> clone_meth_helper(
 
   if (!origMeth->hasCreateCl) return cloneMeth;
 
-  auto const origUnit = index.units.at(origMeth->unit);
+  auto const onClosure = [&] (LSString& closureName) {
+    auto const cls = index.classes.at(closureName);
+    assertx(is_closure(*cls));
 
-  auto const recordClosure = [&] (uint32_t& clsId) {
-    auto const cls = index.classes.at(origUnit->classes[clsId]);
-    auto it = clonedClosures.find(cls);
-    if (it == clonedClosures.end()) {
-      auto cloned = clone_closure(
-        index,
-        newContext->closureContextCls
-          ? index.classes.at(newContext->closureContextCls)
-          : newContext,
-        cls,
-        preResolveUpdates,
-        clonedClosures
-      );
-      if (!cloned) return false;
-      clsId = preResolveUpdates.nextClassId++;
-      always_assert(clonedClosures.emplace(cls, std::move(cloned), clsId));
-    } else {
-      clsId = std::get<2>(*it);
+    // CreateCls are allowed to refer to the same closure within the
+    // same func. If this is a duplicate, use the already cloned
+    // closure name.
+    auto const it = clonedClosures.find(cls);
+    if (it != clonedClosures.end()) {
+      closureName = std::get<1>(*it)->name;
+      return true;
     }
+
+    // Otherwise clone the closure (which gives it a new name), and
+    // update the name in the CreateCl to match.
+    auto cloned = clone_closure(
+      index,
+      newContext->closureContextCls
+        ? index.classes.at(newContext->closureContextCls)
+        : newContext,
+      cls,
+      preResolveUpdates,
+      clonedClosures
+    );
+    if (!cloned) return false;
+    closureName = cloned->name;
+    always_assert(clonedClosures.emplace(cls, std::move(cloned)));
     return true;
   };
 
   auto mf = php::WideFunc::mut(cloneMeth.get());
-  hphp_fast_map<size_t, hphp_fast_map<size_t, uint32_t>> updates;
-
   for (size_t bid = 0; bid < mf.blocks().size(); bid++) {
-    auto const b = mf.blocks()[bid].get();
+    auto const b = mf.blocks()[bid].mutate();
     for (size_t ix = 0; ix < b->hhbcs.size(); ix++) {
-      auto const& bc = b->hhbcs[ix];
+      auto& bc = b->hhbcs[ix];
       switch (bc.op) {
         case Op::CreateCl: {
-          auto clsId = bc.CreateCl.arg2;
-          if (!recordClosure(clsId)) return nullptr;
-          updates[bid][ix] = clsId;
+          if (!onClosure(bc.CreateCl.str2)) return nullptr;
           break;
         }
         default:
           break;
       }
-    }
-  }
-
-  for (auto const& elm : updates) {
-    auto const blk = mf.blocks()[elm.first].mutate();
-    for (auto const& ix : elm.second) {
-      blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
     }
   }
 
@@ -3386,26 +3394,6 @@ bool merge_cinits(IndexData& index,
     }
   }
   return true;
-}
-
-void rename_closure(const IndexData& index,
-                    php::Class* cls,
-                    ClsPreResolveUpdates& updates,
-                    size_t idx) {
-  auto n = cls->name->slice();
-  auto const p = n.find(';');
-  if (p != std::string::npos) {
-    n = n.subpiece(0, p);
-  }
-  auto const newName = makeStaticString(
-    folly::sformat(
-      "{};{}-{}",
-      n, idx+1, string_sha1(cls->unit->slice())
-    )
-  );
-  always_assert(!index.classes.count(newName));
-  cls->name = newName;
-  updates.newClosures.emplace_back(cls);
 }
 
 void preresolve(IndexData&,
@@ -3568,16 +3556,14 @@ void flatten_traits(IndexData& index,
 
     if (!clonedClosures.empty()) {
       auto& closures = updates.closures[cls];
-      for (auto& [orig, clo, idx] : clonedClosures) {
-        rename_closure(index, clo.get(), updates, idx);
+      for (auto& [orig, clo] : clonedClosures) {
         ITRACE(5, "  - closure {} as {}\n", orig->name, clo->name);
-        assertx(clo->closureContextCls == cls->name);
+        assertx(clo->closureContextCls->isame(cls->name));
         assertx(clo->unit == cls->unit);
         closures.emplace_back(clo.get());
         updates.newClasses.emplace_back(
           std::move(clo),
-          const_cast<php::Unit*>(index.units.at(cls->unit)),
-          idx
+          const_cast<php::Unit*>(index.units.at(cls->unit))
         );
         preresolve(index, closures.back(), updates);
       }
@@ -5471,7 +5457,11 @@ void commitPreResolveUpdates(IndexData& index,
     },
     [&] {
       for (auto& u : updates) {
-        for (auto c : u.newClosures) index.classes.emplace(c->name, c);
+        for (auto c : u.newClosures) {
+          // Any closure we create should have a globally unique name
+          auto const DEBUG_ONLY emplaced = index.classes.emplace(c->name, c);
+          assertx(emplaced.second);
+        }
       }
     },
     [&] {
@@ -5479,9 +5469,7 @@ void commitPreResolveUpdates(IndexData& index,
         for (auto& p : u.newClasses) {
           auto& cls = std::get<0>(p);
           auto unit = std::get<1>(p);
-          auto const idx = std::get<2>(p);
-          if (unit->classes.size() <= idx) unit->classes.resize(idx+1);
-          unit->classes[idx] = cls->name;
+          unit->classes.emplace_back(cls->name);
           index.program->classes.emplace_back(std::move(cls));
         }
       }
@@ -5574,7 +5562,6 @@ void preresolveTypes(IndexData& index, ClassInfoData& cid) {
           // modify it in preresolve because other threads might also
           // be accessing it.
           ClsPreResolveUpdates updates;
-          updates.nextClassId = group.first->classes.size();
           for (auto const t : group.second) {
             preresolve(index, t, updates);
           }
@@ -5808,16 +5795,6 @@ const php::Unit* Index::lookup_class_unit(const php::Class& cls) const {
   return m_data->units.at(cls.unit);
 }
 
-const php::Class* Index::lookup_unit_class(const php::Unit& unit, Id id) const {
-  assertx(id < unit.classes.size());
-  return m_data->classes.at(unit.classes[id]);
-}
-
-php::Class* Index::lookup_unit_class_mutable(php::Unit& unit, Id id) {
-  assertx(id < unit.classes.size());
-  return m_data->classes.at(unit.classes[id]);
-}
-
 const php::Class* Index::lookup_const_class(const php::Const& cns) const {
   return m_data->classes.at(cns.cls);
 }
@@ -5841,6 +5818,13 @@ void Index::for_each_unit_func_mutable(php::Unit& unit,
 void Index::for_each_unit_class(
     const php::Unit& unit,
     std::function<void(const php::Class&)> f) const {
+  for (auto const cls : unit.classes) {
+    f(*m_data->classes.at(cls));
+  }
+}
+
+void Index::for_each_unit_class_mutable(php::Unit& unit,
+                                        std::function<void(php::Class&)> f) {
   for (auto const cls : unit.classes) {
     f(*m_data->classes.at(cls));
   }
@@ -6535,15 +6519,23 @@ Index::ConstraintResolution Index::resolve_named_type(
 }
 
 std::pair<res::Class, const php::Class*>
-Index::resolve_closure_class(Context ctx, int32_t idx) const {
-  auto const cls = lookup_unit_class(*ctx.unit, idx);
+Index::resolve_closure_class(Context ctx, SString name) const {
+  auto const it = m_data->classes.find(name);
+  always_assert_flog(
+    it != m_data->classes.end(),
+    "Unknown closure class `{}`",
+    name
+  );
+  auto const cls = it->second;
+  assertx(cls->unit == ctx.unit->filename);
+  assertx(is_closure(*cls));
   auto const rcls = resolve_class(cls);
 
   // Closure classes must be unique and defined in the unit that uses
   // the CreateCl opcode, so resolution must succeed.
   always_assert_flog(
     rcls.resolved(),
-    "A Closure class ({}) failed to resolve",
+    "A closure class ({}) failed to resolve",
     cls->name
   );
 

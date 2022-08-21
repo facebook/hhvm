@@ -208,10 +208,21 @@ inline size_t Unit::numArrays() const {
 ///////////////////////////////////////////////////////////////////////////////
 // PreClasses
 
-inline PreClass* Unit::lookupPreClassId(Id id) const {
-  assertx(id < Id(m_preClasses.size()));
-  return m_preClasses[id].get();
+inline PreClass* Unit::lookupPreClass(const StringData* name) const {
+  auto const it = m_nameToPreClass.find(name);
+  return it == m_nameToPreClass.end() ? nullptr : it->second.get();
 }
+
+inline folly::Range<PreClassPtr*> Unit::preclasses() {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Metadata
 
 inline const Constant* Unit::lookupConstantId(Id id) const {
   assertx(id < Id(m_constants.size()));
@@ -226,14 +237,6 @@ inline const Module* Unit::lookupModuleId(Id id) const {
 inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
   assertx(id < Id(m_typeAliases.size()));
   return &m_typeAliases[id];
-}
-
-inline folly::Range<PreClassPtr*> Unit::preclasses() {
-  return { m_preClasses.data(), m_preClasses.size() };
-}
-
-inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
-  return { m_preClasses.data(), m_preClasses.size() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

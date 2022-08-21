@@ -236,7 +236,7 @@ namespace HPHP {
   O(HasReifiedParent, NA,              ONE(CV),         ONE(CV),    NF) \
   O(CheckClsRGSoft,  NA,               ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,IVA),     CUMANY,          ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CUMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \

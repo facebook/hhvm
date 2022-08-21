@@ -4757,9 +4757,11 @@ OPTBLD_INLINE void iopParentCls() {
   vmStack().pushClass(parent);
 }
 
-OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
+OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, const StringData* name) {
   auto const func = vmfp()->func();
-  auto const preCls = func->unit()->lookupPreClassId(clsIx);
+  auto const preCls = func->unit()->lookupPreClass(name);
+  assertx(preCls);
+  assertx(preCls->attrs() & AttrIsClosureClass);
   auto const c = Class::defClosure(preCls, true);
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));

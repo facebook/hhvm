@@ -28,7 +28,6 @@ use ir::BlockIdMap;
 use ir::LocalId;
 use log::trace;
 
-use crate::convert::HackCUnitBuilder;
 use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
 
@@ -37,9 +36,8 @@ pub(crate) fn emit_func<'a>(
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
     strings: &StringInterner<'a>,
-    builder: &HackCUnitBuilder<'a>,
 ) -> (InstrSeq<'a>, Vec<Str<'a>>) {
-    let mut ctx = InstrEmitter::new(alloc, func, labeler, strings, builder);
+    let mut ctx = InstrEmitter::new(alloc, func, labeler, strings);
 
     // Collect the Blocks, grouping them into TryCatch sections.
     let root = crate::ex_frame::collect_tc_sections(func);
@@ -153,7 +151,6 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     strings: &'b StringInterner<'a>,
     named_locals: IndexMap<LocalId, hhbc::Local>,
     unnamed_locals: HashMap<LocalId, hhbc::Local>,
-    builder: &'b HackCUnitBuilder<'a>,
 }
 
 fn convert_indexes_to_bools<'a>(
@@ -179,14 +176,12 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
         strings: &'b StringInterner<'a>,
-        builder: &'b HackCUnitBuilder<'a>,
     ) -> Self {
         let (named_locals, unnamed_locals) = Self::prealloc_locals(func);
 
         Self {
             alloc,
             block_entry_edges: compute_block_entry_edges(func),
-            builder,
             func,
             instrs: Vec::new(),
             labeler,
@@ -488,13 +483,8 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 clsid,
                 ..
             } => {
-                let clsidx = self
-                    .builder
-                    .class_order
-                    .iter()
-                    .position(|c| *c == clsid)
-                    .unwrap() as u32;
-                Opcode::CreateCl(operands.len() as u32, clsidx)
+                let class = clsid.to_hhbc(self.alloc, self.strings);
+                Opcode::CreateCl(operands.len() as u32, class)
             }
             Hhbc::CreateCont(_) => Opcode::CreateCont,
             Hhbc::Div(..) => Opcode::Div,

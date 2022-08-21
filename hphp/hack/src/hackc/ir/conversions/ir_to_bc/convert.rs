@@ -6,7 +6,6 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
-use itertools::Itertools;
 
 /// Convert an ir::Unit to a HackCUnit
 ///
@@ -15,9 +14,7 @@ use itertools::Itertools;
 /// when converting functions and methods (see `convert_func` in func.rs).
 ///
 pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::HackCUnit<'a> {
-    let class_order = ir_unit.classes.iter().map(|cls| cls.name).collect_vec();
-
-    let mut unit = HackCUnitBuilder::new_in(alloc, class_order);
+    let mut unit = HackCUnitBuilder::new_in(alloc);
 
     unit.adata = Slice::fill_iter(
         alloc,
@@ -85,16 +82,14 @@ pub(crate) struct HackCUnitBuilder<'a> {
     pub adata: Slice<'a, hhbc::HhasAdata<'a>>,
     pub functions: bumpalo::collections::Vec<'a, hhbc::HhasFunction<'a>>,
     pub classes: bumpalo::collections::Vec<'a, hhbc::HhasClass<'a>>,
-    pub class_order: Vec<ir::ClassId>,
 }
 
 impl<'a> HackCUnitBuilder<'a> {
-    fn new_in(alloc: &'a bumpalo::Bump, class_order: Vec<ir::ClassId>) -> Self {
+    fn new_in(alloc: &'a bumpalo::Bump) -> Self {
         Self {
             adata: Slice::empty(),
             classes: bumpalo::collections::Vec::new_in(alloc),
             functions: bumpalo::collections::Vec::new_in(alloc),
-            class_order,
         }
     }
 

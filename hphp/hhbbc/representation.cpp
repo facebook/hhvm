@@ -166,7 +166,6 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
   sd(name)
     (srcInfo)
     (attrs)
-    (id)
     (unit)
     (parentName)
     (closureContextCls)

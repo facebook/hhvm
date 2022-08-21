@@ -30,8 +30,8 @@ namespace HPHP {
 void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   auto unitSn = ue.m_sn;
   assertx(unitSn != -1 && "unitSn is invalid");
-  for (size_t n = 0; n < ue.numPreClasses(); ++n) {
-    auto pce = ue.pce(n);
+
+  for (auto const pce : ue.preclasses()) {
     if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
       m_types.emplace(pce->name(), unitSn);
     }

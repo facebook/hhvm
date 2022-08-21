@@ -255,7 +255,7 @@ mod fixups {
             ],
             "CreateCl" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("NumParams")),
-                replace_imm("arg2", ImmType::IVA, ImmType::OA("ClassNum")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassName")),
             ],
             "FCallClsMethodM" => vec![
                 replace_imm("str4", ImmType::SA, ImmType::OAL("MethodName")),

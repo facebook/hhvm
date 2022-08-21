@@ -523,11 +523,6 @@ struct Class : ClassBase {
   Attr attrs;
 
   /*
-   * The id used to reference the class within its unit
-   */
-  int32_t id;
-
-  /*
    * Which unit defined this class.
    */
   LSString unit;

@@ -5,8 +5,6 @@ use anyhow::Context;
 use anyhow::Result;
 use ffi::Str;
 use hash::HashMap;
-use hhbc::ClassNum;
-use hhbc::HackCUnit;
 use hhbc::HhasBody;
 use hhbc::Instruct;
 use hhbc::Label;
@@ -51,14 +49,12 @@ use crate::work_queue::WorkQueue;
 pub(crate) fn compare_bodies<'arena>(
     path: &CodePath<'_>,
     body_a: &'arena HhasBody<'arena>,
-    unit_a: &HackCUnit<'arena>,
     body_b: &'arena HhasBody<'arena>,
-    unit_b: &HackCUnit<'arena>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 
-    let a = Body::new(body_a, unit_a);
-    let b = Body::new(body_b, unit_b);
+    let a = Body::new(body_a);
+    let b = Body::new(body_b);
 
     let mut value_builder = ValueBuilder::new();
     work_queue.init_from_bodies(&mut value_builder, &a, &b);
@@ -102,17 +98,16 @@ pub(crate) fn compare_bodies<'arena>(
     Ok(())
 }
 
-pub(crate) struct Body<'arena, 'a> {
+pub(crate) struct Body<'arena> {
     pub(crate) hhas_body: &'arena HhasBody<'arena>,
     pub(crate) label_to_ip: HashMap<Label, InstrPtr>,
     /// Mapping from InstrPtr to the InstrPtr of its catch block.
     try_catch: HashMap<InstrPtr, InstrPtr>,
-    pub(crate) unit: &'a HackCUnit<'arena>,
     ip_to_loc: IdVec<InstrPtr, Rc<SrcLoc>>,
 }
 
-impl<'arena, 'a> Body<'arena, 'a> {
-    fn new(hhas_body: &'arena HhasBody<'arena>, unit: &'a HackCUnit<'arena>) -> Self {
+impl<'arena> Body<'arena> {
+    fn new(hhas_body: &'arena HhasBody<'arena>) -> Self {
         let (label_to_ip, ip_to_loc) = Self::compute_per_instr_info(hhas_body);
         let try_catch = Self::compute_try_catch(hhas_body);
         Body {
@@ -120,15 +115,7 @@ impl<'arena, 'a> Body<'arena, 'a> {
             label_to_ip,
             ip_to_loc,
             try_catch,
-            unit,
         }
-    }
-
-    pub(crate) fn get_class_name(&self, num: ClassNum) -> String {
-        self.unit.classes[num as usize]
-            .name
-            .unsafe_as_str()
-            .to_string()
     }
 
     pub(crate) fn lookup_catch(&self, ip: InstrPtr) -> InstrPtr {

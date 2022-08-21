@@ -49,12 +49,8 @@ inline size_t UnitEmitter::numPreClasses() const {
   return m_pceVec.size();
 }
 
-inline PreClassEmitter* UnitEmitter::pce(Id preClassId) {
-  return m_pceVec[preClassId];
-}
-
-inline const PreClassEmitter* UnitEmitter::pce(Id preClassId) const {
-  return m_pceVec[preClassId];
+inline folly::Range<PreClassEmitter* const*> UnitEmitter::preclasses() const {
+  return { m_pceVec.data(), m_pceVec.size() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

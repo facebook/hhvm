@@ -322,8 +322,10 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
-  auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
+void emitCreateCl(IRGS& env, uint32_t numParams, const StringData* name) {
+  auto const preCls = curFunc(env)->unit()->lookupPreClass(name);
+  assertx(preCls);
+  assertx(preCls->attrs() & AttrIsClosureClass);
   auto const templateCls = Class::defClosure(preCls, false);
   assertx(templateCls);
 

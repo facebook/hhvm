@@ -280,8 +280,7 @@ struct SymbolSets {
 
     add(units, path, path, "unit");
 
-    for (size_t n = 0; n < ue.numPreClasses(); ++n) {
-      auto pce = ue.pce(n);
+    for (auto const pce : ue.preclasses()) {
       pce->setAttrs(pce->attrs() | AttrUnique | AttrPersistent);
       if (pce->attrs() & AttrEnum) add(enums, pce->name(), path, "enum");
       add(classes, pce->name(), path, "class", typeAliases);

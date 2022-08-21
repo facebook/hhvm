@@ -13,7 +13,6 @@ use hash::HashSet;
 use hhbc::AdataId;
 use hhbc::BareThisOp;
 use hhbc::ClassName;
-use hhbc::ClassNum;
 use hhbc::CollectionType;
 use hhbc::ConstName;
 use hhbc::ContCheckOp;
@@ -163,7 +162,6 @@ macro_rules! print_with_display {
     };
 }
 
-print_with_display!(print_class_num, ClassNum);
 print_with_display!(print_num_params, NumParams);
 print_with_display!(print_stack_index, StackIndex);
 

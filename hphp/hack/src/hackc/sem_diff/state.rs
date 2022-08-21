@@ -7,7 +7,7 @@ use anyhow::Result;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
-use hhbc::ClassNum;
+use hhbc::ClassName;
 use hhbc::Dummy;
 use hhbc::FCallArgs;
 use hhbc::IncDecOp;
@@ -46,7 +46,7 @@ use crate::value::ValueBuilder;
 /// A State is an abstract interpreter over HHVM bytecode.
 #[derive(Clone)]
 pub(crate) struct State<'arena, 'a> {
-    body: &'a Body<'arena, 'a>,
+    body: &'a Body<'arena>,
     debug_name: &'static str,
     pub(crate) ip: InstrPtr,
     pub(crate) iterators: IterIdMap<IterState>,
@@ -55,7 +55,7 @@ pub(crate) struct State<'arena, 'a> {
 }
 
 impl<'arena, 'a> State<'arena, 'a> {
-    pub(crate) fn new(body: &'a Body<'arena, 'a>, debug_name: &'static str) -> Self {
+    pub(crate) fn new(body: &'a Body<'arena>, debug_name: &'static str) -> Self {
         Self {
             body,
             debug_name,
@@ -331,8 +331,8 @@ impl<'arena, 'a> State<'arena, 'a> {
                 | Opcode::BaseSC(..),
             ) => self.step_member_op(builder)?,
 
-            Instruct::Opcode(Opcode::CreateCl(num_params, class_num)) => {
-                self.step_create_cl(builder, num_params, class_num)?;
+            Instruct::Opcode(Opcode::CreateCl(num_params, classname)) => {
+                self.step_create_cl(builder, num_params, &classname)?;
             }
 
             Instruct::Opcode(
@@ -649,16 +649,15 @@ impl<'arena, 'a> State<'arena, 'a> {
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         num_params: NumParams,
-        class_num: ClassNum,
+        classname: &ClassName<'arena>,
     ) -> Result<()> {
         let mut inputs = self
             .stack_pop_n(num_params as usize)?
             .into_iter()
             .map(|v| self.reffy(v))
             .collect_vec();
-        let class_name = self.body.get_class_name(class_num);
-        inputs.push(Input::Class(class_name));
-        let instr = NodeInstr::Opcode(Opcode::CreateCl(num_params, 0));
+        inputs.push(Input::Class(classname.unsafe_into_string()));
+        let instr = NodeInstr::Opcode(Opcode::CreateCl(num_params, classname.clone()));
         let output = builder.compute_value(&instr, 0, &inputs);
         self.stack_push(output);
         Ok(())

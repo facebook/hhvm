@@ -239,8 +239,7 @@ UnitEmitterSerdeWrapper output(std::unique_ptr<UnitEmitter> ue) {
   meta.m_symbol_refs = std::move(ue->m_symbol_refs);
   meta.m_filepath = ue->m_filepath;
 
-  for (size_t n = 0; n < ue->numPreClasses(); ++n) {
-    auto pce = ue->pce(n);
+  for (auto const pce : ue->preclasses()) {
     if (pce->attrs() & AttrEnum) {
       meta.m_definitions.m_enums.emplace_back(pce->name());
     } else {

@@ -194,16 +194,9 @@ struct UnitEmitter {
   size_t numPreClasses() const;
 
   /*
-   * The PreClassEmitter for `preClassId'.
+   * All PreClassEmitters in the Unit.
    */
-  const PreClassEmitter* pce(Id preClassId) const;
-  PreClassEmitter* pce(Id preClassId);
-
-  /*
-   * The id for the pre-class named clsName, or -1 if
-   * there is no such pre-class
-   */
-  Id pceId(folly::StringPiece clsName);
+  folly::Range<PreClassEmitter* const*> preclasses() const;
 
   /*
    * Create a new PreClassEmitter and add it to all the PCE data structures.

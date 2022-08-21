@@ -167,7 +167,6 @@ pub mod instr {
     use hhbc::AdataId;
     use hhbc::BareThisOp;
     use hhbc::ClassName;
-    use hhbc::ClassNum;
     use hhbc::CollectionType;
     use hhbc::ConstName;
     use hhbc::ContCheckOp;

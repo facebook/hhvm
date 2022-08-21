@@ -2194,7 +2194,7 @@ fn assemble_instr<'arena>(
                         hhbc::Opcode::InstanceOfD,
                         "InstanceOfD",
                     ),
-                    b"CreateCl" => assemble_create_cl(&mut sl_lexer),
+                    b"CreateCl" => assemble_create_cl(alloc, &mut sl_lexer),
                     b"ResolveFunc" => assemble_resolve_func(
                         alloc,
                         &mut sl_lexer,
@@ -3584,11 +3584,14 @@ fn assemble_resolve_class<'arena>(
 
 /// Ex:
 /// CreateCl 0 1
-fn assemble_create_cl<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_create_cl<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "CreateCl")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::CreateCl(
         token_iter.expect_and_get_number()?,
-        token_iter.expect_and_get_number()?,
+        assemble_class_name_from_str(alloc, token_iter)?,
     )))
 }
 

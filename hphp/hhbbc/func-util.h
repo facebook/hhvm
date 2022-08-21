@@ -81,6 +81,8 @@ int dyn_call_error_level(const php::Func*);
  */
 bool has_coeffects_local(const php::Func*);
 
+std::string func_fullname(const php::Func&);
+
 //////////////////////////////////////////////////////////////////////
 
 }

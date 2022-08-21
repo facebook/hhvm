@@ -17,7 +17,7 @@
   NullUninit
   NullUninit
   CUGetL $x
-  CreateCl 1 0
+  CreateCl 1 "ClosureTest"
 
   FCallFunc <> 0 1 "" "" - ""
   Print

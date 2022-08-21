@@ -114,14 +114,14 @@ pub fn sem_diff_unit<'arena>(a_unit: &HackCUnit<'arena>, b_unit: &HackCUnit<'are
         &path.qualified("functions"),
         a_functions.as_arena_ref(),
         b_functions.as_arena_ref(),
-        |path, a, b| sem_diff_function(path, a, a_unit, b, b_unit),
+        sem_diff_function,
     )?;
 
     sem_diff_map_t(
         &path.qualified("classes"),
         a_classes.as_arena_ref(),
         b_classes.as_arena_ref(),
-        |path, a, b| sem_diff_class(path, a, a_unit, b, b_unit),
+        sem_diff_class,
     )?;
 
     Ok(())
@@ -161,9 +161,7 @@ fn sem_diff_attributes(
 fn sem_diff_body<'arena>(
     path: &CodePath<'_>,
     a: &'arena HhasBody<'arena>,
-    a_unit: &HackCUnit<'arena>,
     b: &'arena HhasBody<'arena>,
-    b_unit: &HackCUnit<'arena>,
 ) -> Result<()> {
     let HhasBody {
         body_instrs: _,
@@ -229,7 +227,7 @@ fn sem_diff_body<'arena>(
     // sem_diff_set_t(&path.qualified("decl_vars"), a_decl_vars, b_decl_vars)?;
 
     // This compares the instrs themselves.
-    crate::body::compare_bodies(path, a, a_unit, b, b_unit)
+    crate::body::compare_bodies(path, a, b)
 }
 
 fn sem_diff_param<'arena>(
@@ -279,9 +277,7 @@ fn sem_diff_param<'arena>(
 fn sem_diff_class<'arena>(
     path: &CodePath<'_>,
     a: &'arena HhasClass<'arena>,
-    a_unit: &HackCUnit<'arena>,
     b: &'arena HhasClass<'arena>,
-    b_unit: &HackCUnit<'arena>,
 ) -> Result<()> {
     let HhasClass {
         attributes: a_attributes,
@@ -383,7 +379,7 @@ fn sem_diff_class<'arena>(
         &path.qualified("methods"),
         a_methods,
         b_methods,
-        |path, a, b| sem_diff_method(path, a, a_unit, b, b_unit),
+        sem_diff_method,
     )?;
 
     Ok(())
@@ -429,9 +425,7 @@ fn sem_diff_fatal(
 fn sem_diff_function<'arena>(
     path: &CodePath<'_>,
     a: &'arena HhasFunction<'arena>,
-    a_unit: &HackCUnit<'arena>,
     b: &'arena HhasFunction<'arena>,
-    b_unit: &HackCUnit<'arena>,
 ) -> Result<()> {
     let HhasFunction {
         attributes: a_attributes,
@@ -454,7 +448,7 @@ fn sem_diff_function<'arena>(
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
-    sem_diff_body(&path.qualified("body"), a_body, a_unit, b_body, b_unit)?;
+    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
@@ -466,9 +460,7 @@ fn sem_diff_function<'arena>(
 fn sem_diff_method<'arena>(
     path: &CodePath<'_>,
     a: &'arena HhasMethod<'arena>,
-    a_unit: &HackCUnit<'arena>,
     b: &'arena HhasMethod<'arena>,
-    b_unit: &HackCUnit<'arena>,
 ) -> Result<()> {
     let HhasMethod {
         attributes: a_attributes,
@@ -493,7 +485,7 @@ fn sem_diff_method<'arena>(
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    sem_diff_body(&path.qualified("body"), a_body, a_unit, b_body, b_unit)?;
+    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;

@@ -4,17 +4,17 @@
   Int 1
   Int 1
   Int 1
-  CreateCl 3 0
+  CreateCl 3 "A"
   RetC
 }
 
 .function bar() {
-  CreateCl 0 1
+  CreateCl 0 "B"
   RetC
 }
 
 .function baz() {
-  CreateCl 0 2
+  CreateCl 0 "Blah"
   RetC
 }
 

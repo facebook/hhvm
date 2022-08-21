@@ -62,11 +62,9 @@ PreClassEmitter::Prop::~Prop() {
 // PreClassEmitter.
 
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
-                                 Id id,
                                  const std::string& n)
   : m_ue(ue)
-  , m_name(makeStaticString(n))
-  , m_id(id) {}
+  , m_name(makeStaticString(n)) {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
@@ -251,7 +249,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_name,
-    attrs, m_parent, m_docComment, m_id);
+    attrs, m_parent, m_docComment);
   pc->m_interfaces = m_interfaces;
   pc->m_includedEnums = m_enumIncludes;
   pc->m_usedTraits = m_usedTraits;

@@ -495,7 +495,7 @@ void write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
 void read_named_type(ProfDataDeserializer& ser);
 
 Class* read_class_internal(ProfDataDeserializer& ser) {
-  auto const id = read_raw<decltype(std::declval<PreClass*>()->id())>(ser);
+  auto const name = read_string(ser);
   auto const unit = read_unit(ser);
 
   read_container(ser,
@@ -510,7 +510,9 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
                    }
                  });
 
-  auto const preClass = unit->lookupPreClassId(id);
+  auto const preClass = unit->lookupPreClass(name);
+  assertx(preClass);
+
   if (preClass->attrs() & AttrEnum &&
       preClass->enumBaseTy().isUnresolved()) {
     read_named_type(ser);
@@ -1458,7 +1460,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   if (old) return write_id(ser, id);
 
   write_serialized_id(ser, id);
-  write_raw(ser, cls->preClass()->id());
+  write_string(ser, cls->preClass()->name());
   write_unit(ser, cls->preClass()->unit());
 
   jit::vector<const Class*> dependents;

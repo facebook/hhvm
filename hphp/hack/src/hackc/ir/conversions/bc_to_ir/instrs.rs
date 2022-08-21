@@ -1140,9 +1140,9 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             Action::None
         }
         Opcode::CnsE(id) => Action::Literal(Literal::Named(id)),
-        Opcode::CreateCl(num_args, clsidx) => {
+        Opcode::CreateCl(num_args, class) => {
             let operands = collect_args(ctx, num_args);
-            let clsid = ctx.unit.classes[clsidx as usize].name;
+            let clsid = ir::ClassId::from_hhbc(class, &mut ctx.unit.strings);
             Action::Push(Instr::Hhbc(Hhbc::CreateCl {
                 operands: operands.into(),
                 clsid,

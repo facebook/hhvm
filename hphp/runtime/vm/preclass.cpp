@@ -33,13 +33,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
-                   Attr attrs, const StringData* parent, const StringData* docComment,
-                   Id id)
+                   Attr attrs, const StringData* parent,
+                   const StringData* docComment)
   : m_unit(unit)
   , m_namedEntity(NamedEntity::get(n))
   , m_line1(line1)
   , m_line2(line2)
-  , m_id(id)
   , m_attrs(attrs)
   , m_name(n)
   , m_parent(parent)
@@ -104,9 +103,6 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
-  if (m_id != -1) {
-    out << " (ID " << m_id << ")";
-  }
   out << std::endl;
 
   for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {

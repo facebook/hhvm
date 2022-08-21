@@ -113,7 +113,7 @@ pub(crate) fn convert_class<'a>(
             alloc,
             methods
                 .into_iter()
-                .map(|method| crate::func::convert_method(alloc, method, strings, unit)),
+                .map(|method| crate::func::convert_method(alloc, method, strings)),
         ),
         name,
         properties: Slice::fill_iter(alloc, properties.iter().cloned()),

@@ -59,11 +59,6 @@ const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-struct PceInfo {
-  PreClassEmitter* pce;
-  Id origId;
-};
-
 struct EmitUnitState {
   explicit EmitUnitState(const Index& index, const php::Unit* unit) :
       index(index), unit(unit) {}
@@ -82,8 +77,15 @@ struct EmitUnitState {
    * While emitting bytecode, we keep track of the classes and funcs
    * we emit.
    */
-  std::vector<Offset>  classOffsets;
-  std::vector<PceInfo> pceInfo;
+  std::vector<std::pair<php::Class*, PreClassEmitter*>> pces;
+
+  /*
+   * Whether a closure in a CreateCl opcode has been seen before
+   * (CreateCls within the same func are allowed to refer to the same
+   * closure, so we must avoid creating duplicate PreClassEmitters for
+   * them).
+   */
+  hphp_fast_set<const php::Class*> seenClosures;
 };
 
 /*
@@ -111,12 +113,13 @@ template<Op op, typename F, typename Bc>
 std::enable_if_t<std::remove_reference_t<Bc>::op != op>
 caller(F&&, Bc&&) {}
 
-Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto cls = euState.unit->classes[id];
-  euState.pceInfo.push_back(
-    { ue.newPreClassEmitter(cls->toCppString()), id }
+void recordClass(EmitUnitState& euState,
+                 UnitEmitter& ue,
+                 php::Class& cls) {
+  euState.pces.emplace_back(
+    &cls,
+    ue.newPreClassEmitter(cls.name->toCppString())
   );
-  return euState.pceInfo.back().pce->id();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -392,19 +395,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 
     auto const ret_assert = [&] { assertx(currentStackDepth == inst.numPop()); };
 
-    auto const createcl  = [&] (auto& data) {
-      auto& id = data.arg2;
-      if (euState.classOffsets[id] != kInvalidOffset) {
-        for (auto const& elm : euState.pceInfo) {
-          if (elm.origId == id) {
-            id = elm.pce->id();
-            return;
-          }
-        }
-        always_assert(false);
-      }
-      euState.classOffsets[id] = startOffset;
-      id = recordClass(euState, ue, id);
+    auto const createcl = [&] (auto const& data) {
+      auto [_, cls] = euState.index.resolve_closure_class(
+        Context { euState.unit, nullptr, nullptr },
+        data.str2
+      );
+      assertx(cls->unit == euState.unit->filename);
+      // Skip closures we've already recorded
+      if (!euState.seenClosures.emplace(cls).second) return;
+      recordClass(euState, ue, const_cast<php::Class&>(*cls));
     };
 
     auto const emit_lar  = [&](const LocalRange& range) {
@@ -1062,7 +1061,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
 }
 
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
-                Offset offset, php::Class& cls) {
+                php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
   assertx(cls.attrs & AttrUnique);
   assertx(cls.attrs & AttrPersistent);
@@ -1279,7 +1278,6 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   }
 
   EmitUnitState state { index, &unit };
-  state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 
   // Go thought all constants and see if they still need their
   // matching 86cinit func. In repo mode we are able to optimize away
@@ -1287,58 +1285,36 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   // should not emit them.
   hphp_fast_set<const StringData*> const_86cinit_funcs;
   for (size_t id = 0; id < unit.constants.size(); ++id) {
-    auto& c = unit.constants[id];
+    auto const& c = unit.constants[id];
     if (type(c->val) != KindOfUninit) {
       const_86cinit_funcs.emplace(Constant::funcNameFromName(c->name));
     }
   }
 
-  /*
-   * Top level funcs are always defined when the unit is loaded, and
-   * don't have a DefFunc bytecode. Process them up front.
-   */
+  index.for_each_unit_class_mutable(
+    unit,
+    [&] (php::Class& c) {
+      // No reason to include closures unless there's a reachable
+      // CreateCl.
+      if (is_closure(c)) return;
+      recordClass(state, *ue, c);
+    }
+  );
+
   index.for_each_unit_func_mutable(
     unit,
     [&] (php::Func& f) {
-      if (const_86cinit_funcs.find(f.name) != const_86cinit_funcs.end()) {
-        return;
-      }
+      if (const_86cinit_funcs.count(f.name)) return;
       auto fe = ue->newFuncEmitter(f.name);
       emit_func(state, *ue, *fe, f);
     }
   );
 
-  /*
-   * Find any top-level classes that need to be included due to
-   * hoistability.
-   */
-  {
-    size_t nextId = 0;
-    index.for_each_unit_class(
-      unit,
-      [&] (const php::Class& c) {
-        auto const id = nextId++;
-        if (state.classOffsets[id] != kInvalidOffset) return;
-        // Closures are AlwaysHoistable; but there's no need to include
-        // them unless there's a reachable CreateCl.
-        if (is_closure(c)) return;
-        recordClass(state, *ue, id);
-      }
-    );
-  }
-
-  size_t pceId = 0;
-  // Note that state.pceInfo can grow inside the loop
-  while (pceId < state.pceInfo.size()) {
-    auto const& pceInfo = state.pceInfo[pceId++];
-    auto const id = pceInfo.origId;
-    emit_class(
-      state,
-      *ue,
-      pceInfo.pce,
-      state.classOffsets[id],
-      *index.lookup_unit_class_mutable(unit, id)
-    );
+  // Note that state.pces can grow inside the loop due to discovering
+  // more closures.
+  for (size_t idx = 0; idx < state.pces.size(); ++idx) {
+    auto const [cls, pce] = state.pces[idx];
+    emit_class(state, *ue, pce, *cls);
   }
 
   for (size_t id = 0; id < unit.typeAliases.size(); ++id) {

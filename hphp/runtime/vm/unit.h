@@ -384,7 +384,8 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // PreClasses.
 
-  PreClass* lookupPreClassId(Id id) const;
+  PreClass* lookupPreClass(const StringData*) const;
+
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
 
@@ -561,6 +562,13 @@ private:
   /*
    * The remaining fields are cold, and arbitrarily ordered.
    */
+
+  hphp_fast_map<
+    const StringData*,
+    PreClassPtr,
+    string_data_hash,
+    string_data_isame
+  > m_nameToPreClass; // Lookup PreClass by name
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   SHA1 m_sha1;

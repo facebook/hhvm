@@ -1361,8 +1361,8 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   });
 
   for (auto& fe : ts.ue->fevec()) fixup_default_values(ts, fe.get());
-  for (size_t n = 0; n < ts.ue->numPreClasses(); ++n) {
-    for (auto fe : ts.ue->pce(n)->methods()) fixup_default_values(ts, fe);
+  for (auto const pce : ts.ue->preclasses()) {
+    for (auto fe : pce->methods()) fixup_default_values(ts, fe);
   }
 }
 }

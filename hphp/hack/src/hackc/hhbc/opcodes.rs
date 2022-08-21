@@ -12,7 +12,6 @@ use crate::hhbc_ast::NUM_ACT_REC_CELLS;
 use crate::AdataId;
 use crate::BareThisOp;
 use crate::ClassName;
-use crate::ClassNum;
 use crate::CollectionType;
 use crate::ConstName;
 use crate::ContCheckOp;

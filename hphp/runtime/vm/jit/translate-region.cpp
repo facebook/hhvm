@@ -99,7 +99,7 @@ BlockIdToIRBlockMap createBlockMap(irgen::IRGS& irgs,
     ret[id] = iBlock;
     FTRACE(1,
            "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
-           id, iBlock->id(), rBlock->start().offset());
+           id, iBlock->id(), rBlock->start().printableOffset());
   }
 
   return ret;
@@ -122,7 +122,7 @@ void setIRBlock(irgen::IRGS& irgs,
 
   assertx(!irb.hasBlock(sk));
   FTRACE(3, "  setIRBlock: blockId {}, offset {} => IR Block {}\n",
-         blockId, sk.offset(), iit->second->id());
+         blockId, sk.printableOffset(), iit->second->id());
   irb.setBlock(sk, iit->second);
 }
 

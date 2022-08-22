@@ -18,7 +18,6 @@ use hhbc::Class;
 use hhbc::Constant;
 use hhbc::FatalOp;
 use hhbc::Function;
-use hhbc::HackCUnit;
 use hhbc::Instruct;
 use hhbc::Method;
 use hhbc::Module;
@@ -30,6 +29,7 @@ use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Typedef;
+use hhbc::Unit;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub(crate) struct CmpError {
@@ -932,8 +932,8 @@ fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_unit(a_unit: &HackCUnit<'_>, b_unit: &HackCUnit<'_>) -> Result<()> {
-    let HackCUnit {
+fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
+    let Unit {
         adata: a_adata,
         functions: a_functions,
         classes: a_classes,
@@ -945,7 +945,7 @@ fn cmp_unit(a_unit: &HackCUnit<'_>, b_unit: &HackCUnit<'_>) -> Result<()> {
         constants: a_constants,
         fatal: a_fatal,
     } = a_unit;
-    let HackCUnit {
+    let Unit {
         adata: b_adata,
         functions: b_functions,
         classes: b_classes,
@@ -1003,6 +1003,6 @@ fn cmp_unit(a_unit: &HackCUnit<'_>, b_unit: &HackCUnit<'_>) -> Result<()> {
 
 /// Fancy version of `PartialEq::eq(a, b)` which also tries to report exactly
 /// where the mismatch occurred.
-pub(crate) fn cmp_hack_c_unit(a: &HackCUnit<'_>, b: &HackCUnit<'_>) -> Result<()> {
+pub(crate) fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result<()> {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }

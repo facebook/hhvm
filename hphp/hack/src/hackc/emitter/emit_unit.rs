@@ -43,7 +43,7 @@ use ffi::Maybe::*;
 use ffi::Slice;
 use ffi::Str;
 use hhbc::FatalOp;
-use hhbc::HackCUnit;
+use hhbc::Unit;
 use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::namespace_env;
@@ -57,10 +57,10 @@ pub fn emit_fatal_unit<'arena>(
     op: FatalOp,
     pos: Pos,
     msg: impl AsRef<str> + 'arena,
-) -> Result<HackCUnit<'arena>> {
-    Ok(HackCUnit {
+) -> Result<Unit<'arena>> {
+    Ok(Unit {
         fatal: Just((op, pos.into(), Str::new_str(alloc, msg.as_ref())).into()),
-        ..HackCUnit::default()
+        ..Unit::default()
     })
 }
 
@@ -69,7 +69,7 @@ pub fn emit_unit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<namespace_env::Env>,
     tast: &'a ast::Program,
-) -> Result<HackCUnit<'arena>> {
+) -> Result<Unit<'arena>> {
     let result = emit_unit_(emitter, namespace, tast);
     match result {
         Err(e) => match e.into_kind() {
@@ -86,7 +86,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<namespace_env::Env>,
     prog: &'a ast::Program,
-) -> Result<HackCUnit<'arena>> {
+) -> Result<Unit<'arena>> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
@@ -103,7 +103,7 @@ fn emit_unit_<'a, 'arena, 'decl>(
     let symbol_refs = emitter.finish_symbol_refs();
     let fatal = Nothing;
 
-    Ok(HackCUnit {
+    Ok(Unit {
         classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
         modules: Slice::fill_iter(emitter.alloc, modules.into_iter()),
         functions: Slice::fill_iter(emitter.alloc, functions.into_iter()),

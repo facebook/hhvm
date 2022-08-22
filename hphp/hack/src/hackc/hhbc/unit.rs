@@ -22,7 +22,7 @@ use crate::Typedef;
 
 #[derive(Default, Debug, Serialize)]
 #[repr(C)]
-pub struct HackCUnit<'arena> {
+pub struct Unit<'arena> {
     pub adata: Slice<'arena, Adata<'arena>>,
     pub functions: Slice<'arena, Function<'arena>>,
     pub classes: Slice<'arena, Class<'arena>>,

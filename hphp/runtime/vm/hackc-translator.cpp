@@ -1317,7 +1317,7 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   });
 }
 
-void translate(TranslationState& ts, const HackCUnit& unit) {
+void translate(TranslationState& ts, const hhbc::Unit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
   auto adata = range(unit.adata);
   for (auto const& d : adata) {
@@ -1368,7 +1368,7 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
 }
 
 std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
-  const HackCUnit& unit,
+  const hhbc::Unit& unit,
   const char* filename,
 	const SHA1& sha1,
 	const SHA1& bcSha1,

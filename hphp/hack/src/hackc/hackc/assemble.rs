@@ -47,7 +47,7 @@ pub struct Opts {
     #[clap(short = 'o')]
     output_file: Option<PathBuf>,
 
-    /// The input hhas file(s) to assemble back to HackCUnit
+    /// The input hhas file(s) to assemble back to hhbc::Unit
     #[clap(flatten)]
     files: FileOpts,
 
@@ -72,7 +72,7 @@ pub fn run(mut opts: Opts) -> Result<()> {
         .collect()
 }
 
-/// Assemble the hhas in a given file to a HackCUnit. Then use bytecode printer
+/// Assemble the hhas in a given file to a hhbc::Unit. Then use bytecode printer
 /// to write the hhas representation of that HCU to output.
 pub fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     let alloc = Bump::default();
@@ -93,12 +93,12 @@ pub fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     }
 }
 
-/// Assembles the hhas within f to a HackCUnit
+/// Assembles the hhas within f to a hhbc::Unit
 pub fn assemble<'arena>(
     alloc: &'arena Bump,
     f: &Path,
     opts: &Opts,
-) -> Result<(hhbc::HackCUnit<'arena>, PathBuf)> {
+) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
     assemble_from_bytes(alloc, &s, opts.print_toks)
 }
@@ -108,7 +108,7 @@ pub fn assemble_from_bytes<'arena>(
     alloc: &'arena Bump,
     s: &[u8],
     print_toks: bool,
-) -> Result<(hhbc::HackCUnit<'arena>, PathBuf)> {
+) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
     if print_toks {
         print_tokens(s);
     }
@@ -126,7 +126,7 @@ pub fn assemble_from_bytes<'arena>(
 fn assemble_from_toks<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<(hhbc::HackCUnit<'arena>, PathBuf)> {
+) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
     let mut funcs = Vec::new();
     let mut classes = Vec::new();
     let mut adatas = Vec::new();
@@ -229,7 +229,7 @@ fn assemble_from_toks<'arena>(
             )
         }
     }
-    let hcu = hhbc::HackCUnit {
+    let hcu = hhbc::Unit {
         adata: Slice::fill_iter(alloc, adatas.into_iter()),
         functions: Slice::fill_iter(alloc, funcs.into_iter()),
         classes: Slice::fill_iter(alloc, classes.into_iter()),

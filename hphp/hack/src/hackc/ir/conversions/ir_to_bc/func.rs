@@ -11,7 +11,7 @@ use ir::string_intern::StringInterner;
 use log::trace;
 
 use crate::convert;
-use crate::convert::HackCUnitBuilder;
+use crate::convert::UnitBuilder;
 use crate::emitter;
 use crate::pusher;
 
@@ -125,7 +125,7 @@ pub(crate) fn convert_func<'a>(
 
 pub(crate) fn convert_function<'a>(
     alloc: &'a bumpalo::Bump,
-    unit: &mut HackCUnitBuilder<'a>,
+    unit: &mut UnitBuilder<'a>,
     function: ir::Function<'a>,
     strings: &StringInterner<'a>,
 ) {

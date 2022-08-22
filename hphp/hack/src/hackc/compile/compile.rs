@@ -21,7 +21,7 @@ use env::emitter::Emitter;
 use error::Error;
 use error::ErrorKind;
 use hhbc::FatalOp;
-use hhbc::HackCUnit;
+use hhbc::Unit;
 use hhvm_options::HhvmConfig;
 use ocamlrep::rc::RcOc;
 use options::Arg;
@@ -452,7 +452,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
-) -> Result<HackCUnit<'arena>, Error> {
+) -> Result<Unit<'arena>, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
     let result = rewrite_program::rewrite_program(emitter, ast, RcOc::clone(&namespace_env));
@@ -480,7 +480,7 @@ pub fn unit_from_text<'arena, 'decl>(
     native_env: &NativeEnv<'_>,
     decl_provider: Option<&'decl dyn DeclProvider>,
     profile: &mut Profile,
-) -> Result<HackCUnit<'arena>> {
+) -> Result<Unit<'arena>> {
     let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
     emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)
 }
@@ -488,7 +488,7 @@ pub fn unit_from_text<'arena, 'decl>(
 pub fn unit_to_string(
     native_env: &NativeEnv<'_>,
     writer: &mut dyn std::io::Write,
-    program: &HackCUnit<'_>,
+    program: &Unit<'_>,
     profile: &mut Profile,
 ) -> Result<()> {
     if native_env.flags.contains(EnvFlags::DUMP_IR) {
@@ -524,7 +524,7 @@ fn emit_unit_from_ast<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     namespace: RcOc<NamespaceEnv>,
     ast: &mut ast::Program,
-) -> Result<HackCUnit<'arena>, Error> {
+) -> Result<Unit<'arena>, Error> {
     emit_unit(emitter, namespace, ast)
 }
 
@@ -533,7 +533,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
     namespace_env: RcOc<NamespaceEnv>,
     ast: &mut ast::Program,
     profile: &mut Profile,
-) -> Result<HackCUnit<'arena>, Error> {
+) -> Result<Unit<'arena>, Error> {
     match &emitter.decl_provider {
         // T128303794
         None => (),
@@ -555,7 +555,7 @@ fn emit_unit_from_text<'arena, 'decl>(
     flags: EnvFlags,
     source_text: SourceText<'_>,
     profile: &mut Profile,
-) -> Result<HackCUnit<'arena>> {
+) -> Result<Unit<'arena>> {
     profile.log_enabled = emitter.options().log_extern_compiler_perf();
     let type_directed = emitter.decl_provider.is_some();
 
@@ -609,7 +609,7 @@ fn emit_fatal<'arena>(
     fatal_op: FatalOp,
     pos: Pos,
     msg: impl AsRef<str> + 'arena,
-) -> Result<HackCUnit<'arena>, Error> {
+) -> Result<Unit<'arena>, Error> {
     emit_unit::emit_fatal_unit(alloc, fatal_op, pos, msg)
 }
 

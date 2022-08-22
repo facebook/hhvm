@@ -5,19 +5,19 @@
 
 use ffi::Maybe;
 use hash::HashMap;
-use hhbc::HackCUnit;
+use hhbc::Unit;
 use hhvm_hhbc_defs_ffi as hhvm_ffi;
 
-/// Convert a HackCUnit to an ir::Unit.
+/// Convert a hhbc::Unit to an ir::Unit.
 ///
-/// Most of the outer structure of the HackCUnit maps 1:1 with ir::Unit. As a
+/// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the bytecode to IR
 /// when converting functions and methods (see `convert_body` in func.rs).
 ///
-/// NOTE: HackCUnit has to be by-ref because it unfortunately contains a bunch
+/// NOTE: hhbc::Unit has to be by-ref because it unfortunately contains a bunch
 /// of ffi::Slice<T> which cannot own T.
 ///
-pub fn bc_to_ir<'a>(unit: &'_ HackCUnit<'a>) -> ir::Unit<'a> {
+pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
     let mut strings = ir::StringInterner::default();
 
     let adata: HashMap<_, _> = unit.adata.iter().map(|a| (a.id, a.value.clone())).collect();

@@ -83,7 +83,7 @@ struct CompileException : Exception {
   throw CompileException("{}: {}", what, folly::errnoStr(errno));
 }
 
-CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::HackCUnit& unit,
+CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& unit,
                                                     const char* filename,
 	                                                  const SHA1& sha1,
 	                                                  const SHA1& bcSha1,
@@ -233,7 +233,7 @@ CompilerResult hackc_compile(
                                            mode);
 
   if (RO::EvalTranslateHackC) {
-    rust::Box<HackCUnitWrapper> unit_wrapped =
+    rust::Box<UnitWrapper> unit_wrapped =
       hackc_compile_unit_from_text_cpp_ffi(native_env, code);
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
@@ -245,7 +245,7 @@ CompilerResult hackc_compile(
       return boost::get<std::string>(res);
     }();
 
-    const hackc::hhbc::HackCUnit* unit = hackCUnitRaw(unit_wrapped);
+    const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
     auto hackCResult = unitEmitterFromHackCUnitHandleErrors
       (*unit, filename, sha1, bcSha1, nativeFuncs, internal_error, mode
     );

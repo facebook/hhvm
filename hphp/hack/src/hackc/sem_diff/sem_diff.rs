@@ -8,18 +8,18 @@ use hhbc::Class;
 use hhbc::Constant;
 use hhbc::FatalOp;
 use hhbc::Function;
-use hhbc::HackCUnit;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
 use hhbc::Pos;
 use hhbc::SymbolRefs;
 use hhbc::Typedef;
+use hhbc::Unit;
 
 use crate::code_path::CodePath;
 use crate::helpers::*;
 
-/// Compare two HackCUnits semantically.
+/// Compare two hhbc::Units semantically.
 ///
 /// For a semantic comparison we don't care about any bytecode differences as
 /// long as:
@@ -32,13 +32,13 @@ use crate::helpers::*;
 ///
 ///   3. An exception thrown from an instruction will be handled the same way
 ///
-/// In general most of the HackCUnit is compared using Eq - although structs are
+/// In general most of the hhbc::Unit is compared using Eq - although structs are
 /// destructured so an error can report where the difference occurred.
 ///
 /// The "interesting" bit happens in `body::compare_bodies()`.
 ///
-pub fn sem_diff_unit<'arena>(a_unit: &HackCUnit<'arena>, b_unit: &HackCUnit<'arena>) -> Result<()> {
-    let HackCUnit {
+pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Result<()> {
+    let Unit {
         adata: a_adata,
         functions: a_functions,
         classes: a_classes,
@@ -50,7 +50,7 @@ pub fn sem_diff_unit<'arena>(a_unit: &HackCUnit<'arena>, b_unit: &HackCUnit<'are
         constants: a_constants,
         fatal: a_fatal,
     } = a_unit;
-    let HackCUnit {
+    let Unit {
         adata: b_adata,
         functions: b_functions,
         classes: b_classes,
@@ -63,7 +63,7 @@ pub fn sem_diff_unit<'arena>(a_unit: &HackCUnit<'arena>, b_unit: &HackCUnit<'are
         fatal: b_fatal,
     } = b_unit;
 
-    let path = CodePath::name("HackCUnit");
+    let path = CodePath::name("Unit");
 
     sem_diff_map_t(&path.qualified("adata"), a_adata, b_adata, sem_diff_eq)?;
 

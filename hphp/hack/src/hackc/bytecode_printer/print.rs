@@ -29,7 +29,6 @@ use hhbc::FCallArgs;
 use hhbc::FatalOp;
 use hhbc::Function;
 use hhbc::FunctionName;
-use hhbc::HackCUnit;
 use hhbc::IncludePath;
 use hhbc::Instruct;
 use hhbc::Label;
@@ -47,6 +46,7 @@ use hhbc::TypeConstant;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Typedef;
+use hhbc::Unit;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -80,7 +80,7 @@ macro_rules! write_if {
     };
 }
 
-fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
+fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -127,7 +127,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
+fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let Pos {
@@ -1157,7 +1157,7 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
 pub fn external_print_unit(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    prog: &HackCUnit<'_>,
+    prog: &Unit<'_>,
 ) -> std::result::Result<(), Error> {
     print_unit(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;

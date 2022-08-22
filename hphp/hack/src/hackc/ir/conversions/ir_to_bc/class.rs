@@ -10,12 +10,12 @@ use ir::class::TraitReqKind;
 use ir::string_intern::StringInterner;
 
 use crate::convert;
-use crate::convert::HackCUnitBuilder;
+use crate::convert::UnitBuilder;
 use crate::types;
 
 pub(crate) fn convert_class<'a>(
     alloc: &'a bumpalo::Bump,
-    unit: &mut HackCUnitBuilder<'a>,
+    unit: &mut UnitBuilder<'a>,
     class: ir::Class<'a>,
     strings: &StringInterner<'a>,
 ) {

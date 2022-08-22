@@ -199,7 +199,7 @@ impl IrOpts {
 
 #[derive(Clone, Parser, Debug)]
 enum Mode {
-    /// Compile files and save the resulting HHAS and interior HackCUnit. Assemble the HHAS files and save the resulting HCU. Compare HCUs.
+    /// Compile files and save the resulting HHAS and interior hhbc::Unit. Assemble the HHAS files and save the resulting Unit. Compare Unit.
     Assemble(AssembleOpts),
     Ir(IrOpts),
 }
@@ -237,7 +237,7 @@ fn compile_php_file<'a, 'arena>(
     content: Vec<u8>,
     single_file_opts: &'a SingleFileOpts,
     profile: &mut compile::Profile,
-) -> Result<(compile::NativeEnv<'a>, hhbc::HackCUnit<'arena>)> {
+) -> Result<(compile::NativeEnv<'a>, hhbc::Unit<'arena>)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = crate::compile::native_env(filepath, single_file_opts);

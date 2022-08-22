@@ -20,7 +20,7 @@ use cxx::CxxString;
 use decl_provider::DeclProvider;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
-use hhbc::HackCUnit;
+use hhbc::Unit;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
@@ -131,7 +131,7 @@ pub mod compile_ffi {
     extern "Rust" {
         type DeclsHolder;
         type DeclParserOptions;
-        type HackCUnitWrapper;
+        type UnitWrapper;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -141,11 +141,11 @@ pub mod compile_ffi {
             enable_ir: bool,
         ) -> u8;
 
-        /// Compile Hack source code to a HackCUnit or an error.
+        /// Compile Hack source code to a Unit or an error.
         unsafe fn hackc_compile_unit_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
-        ) -> Result<Box<HackCUnitWrapper>>;
+        ) -> Result<Box<UnitWrapper>>;
 
         /// Compile Hack source code to either HHAS or an error.
         fn hackc_compile_from_text_cpp_ffi(
@@ -165,7 +165,7 @@ pub mod compile_ffi {
             text: &CxxString,
         ) -> DeclResult;
 
-        fn hash_unit(unit: &HackCUnitWrapper) -> [u8; 20];
+        fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
         fn hackc_type_exists(decls: &DeclResult, symbol: &str) -> bool;
@@ -196,7 +196,7 @@ pub struct DeclsHolder {
 
 pub struct DeclParserOptions(direct_decl_parser::DeclParserOptions);
 
-pub struct HackCUnitWrapper(HackCUnit<'static>, bumpalo::Bump);
+pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -244,7 +244,7 @@ impl compile_ffi::NativeEnv {
     }
 }
 
-fn hash_unit(HackCUnitWrapper(unit, _): &HackCUnitWrapper) -> [u8; 20] {
+fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
     let mut hasher = Sha1::new();
     let w = std::io::BufWriter::new(&mut hasher);
     bincode::serialize_into(w, unit).unwrap();
@@ -349,7 +349,7 @@ fn hackc_verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
 fn hackc_compile_unit_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
-) -> Result<Box<HackCUnitWrapper>, String> {
+) -> Result<Box<UnitWrapper>, String> {
     let bump = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
@@ -378,7 +378,7 @@ fn hackc_compile_unit_from_text_cpp_ffi(
             .map(|provider| provider as &dyn DeclProvider),
         &mut Default::default(),
     )
-    .map(|unit| Box::new(HackCUnitWrapper(unit, bump)))
+    .map(|unit| Box::new(UnitWrapper(unit, bump)))
     .map_err(|e| e.to_string())
 }
 

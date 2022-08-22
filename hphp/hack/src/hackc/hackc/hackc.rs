@@ -103,7 +103,7 @@ struct FileOpts {
 
 #[derive(Parser, Debug)]
 enum Command {
-    /// Assemble HHAS file(s) into HackCUnit. Prints those HCUs' HHAS representation.
+    /// Assemble HHAS file(s) into Unit. Prints those HCUs' HHAS representation.
     Assemble(assemble::Opts),
 
     /// Compute bincode-serialized decls for a set of Hack source files.

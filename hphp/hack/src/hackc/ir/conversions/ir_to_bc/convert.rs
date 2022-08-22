@@ -7,14 +7,14 @@ use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
 
-/// Convert an ir::Unit to a HackCUnit
+/// Convert an ir::Unit to a hhbc::Unit
 ///
-/// Most of the outer structure of the HackCUnit maps 1:1 with ir::Unit. As a
+/// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
 /// result the "interesting" work is in the conversion of the IR to bytecode
 /// when converting functions and methods (see `convert_func` in func.rs).
 ///
-pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::HackCUnit<'a> {
-    let mut unit = HackCUnitBuilder::new_in(alloc);
+pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
+    let mut unit = UnitBuilder::new_in(alloc);
 
     unit.adata = Slice::fill_iter(
         alloc,
@@ -78,13 +78,13 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Ha
     unit
 }
 
-pub(crate) struct HackCUnitBuilder<'a> {
+pub(crate) struct UnitBuilder<'a> {
     pub adata: Slice<'a, hhbc::Adata<'a>>,
     pub functions: bumpalo::collections::Vec<'a, hhbc::Function<'a>>,
     pub classes: bumpalo::collections::Vec<'a, hhbc::Class<'a>>,
 }
 
-impl<'a> HackCUnitBuilder<'a> {
+impl<'a> UnitBuilder<'a> {
     fn new_in(alloc: &'a bumpalo::Bump) -> Self {
         Self {
             adata: Slice::empty(),
@@ -93,8 +93,8 @@ impl<'a> HackCUnitBuilder<'a> {
         }
     }
 
-    fn finish(self) -> hhbc::HackCUnit<'a> {
-        hhbc::HackCUnit {
+    fn finish(self) -> hhbc::Unit<'a> {
+        hhbc::Unit {
             adata: self.adata,
             functions: self.functions.into_bump_slice().into(),
             classes: self.classes.into_bump_slice().into(),

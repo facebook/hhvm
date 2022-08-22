@@ -431,8 +431,13 @@ let rec expand ctx env root =
 
     (* Ignore seen bounds to avoid infinite loops *)
     let upper_bounds =
-      TySet.elements
-        (TySet.diff (Env.get_upper_bounds env s tyargs) ctx.generics_seen)
+      let ub = Env.get_upper_bounds env s tyargs in
+      TySet.filter
+        (fun ty ->
+          (* Also ignore ~T if we've seen T *)
+          not (TySet.mem (Typing_utils.strip_dynamic env ty) ctx.generics_seen))
+        ub
+      |> TySet.elements
     in
     (* TODO: should we be taking the intersection of the errors? *)
     let ((env, ty_err_opt), resl) =

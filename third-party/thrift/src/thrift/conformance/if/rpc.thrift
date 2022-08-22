@@ -53,6 +53,7 @@ union ServerTestResult {
   100: StreamBasicServerTestResult streamBasic;
   101: StreamChunkTimeoutServerTestResult streamChunkTimeout;
   102: StreamInitialResponseServerTestResult streamInitialResponse;
+  103: StreamCreditTimeoutServerTestResult streamCreditTimeout;
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
 }
@@ -66,6 +67,7 @@ union ClientTestResult {
   100: StreamBasicClientTestResult streamBasic;
   101: StreamChunkTimeoutClientTestResult streamChunkTimeout;
   102: StreamInitialResponseClientTestResult streamInitialResponse;
+  103: StreamCreditTimeoutClientTestResult streamCreditTimeout;
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
 }
@@ -97,6 +99,10 @@ struct StreamChunkTimeoutServerTestResult {
 }
 
 struct StreamInitialResponseServerTestResult {
+  1: Request request;
+}
+
+struct StreamCreditTimeoutServerTestResult {
   1: Request request;
 }
 
@@ -145,6 +151,10 @@ struct StreamInitialResponseClientTestResult {
   2: Response initialResponse;
 }
 
+struct StreamCreditTimeoutClientTestResult {
+  1: bool creditTimeoutException;
+}
+
 struct SinkBasicClientTestResult {
   1: Response finalResponse;
 }
@@ -162,6 +172,7 @@ union ClientInstruction {
   100: StreamBasicClientInstruction streamBasic;
   101: StreamChunkTimeoutClientInstruction streamChunkTimeout;
   102: StreamInitialResponseClientInstruction streamInitialResponse;
+  103: StreamCreditTimeoutClientInstruction streamCreditTimeout;
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
 }
@@ -175,6 +186,7 @@ union ServerInstruction {
   100: StreamBasicServerInstruction streamBasic;
   101: StreamChunkTimeoutServerInstruction streamChunkTimeout;
   102: StreamInitialResponseServerInstruction streamInitialResponse;
+  103: StreamCreditTimeoutServerInstruction streamCreditTimeout;
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
 }
@@ -210,6 +222,11 @@ struct StreamChunkTimeoutClientInstruction {
 
 struct StreamInitialResponseClientInstruction {
   1: Request request;
+}
+
+struct StreamCreditTimeoutClientInstruction {
+  1: Request request;
+  2: i64 creditTimeoutMs;
 }
 
 struct SinkBasicClientInstruction {
@@ -257,6 +274,11 @@ struct StreamInitialResponseServerInstruction {
   2: Response initialResponse;
 }
 
+struct StreamCreditTimeoutServerInstruction {
+  1: list<Response> streamPayloads;
+  2: i64 streamExpireTime;
+}
+
 struct SinkBasicServerInstruction {
   1: Response finalResponse;
   2: i64 bufferSize;
@@ -289,6 +311,7 @@ service RPCConformanceService {
   stream<Response> streamBasic(1: Request req);
   stream<Response> streamChunkTimeout(1: Request req);
   Response, stream<Response> streamInitialResponse(1: Request req);
+  stream<Response> streamCreditTimeout(1: Request req);
 
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);

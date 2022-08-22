@@ -16,6 +16,7 @@
 
 #include <thrift/conformance/rpcclient/GTestHarnessRPCClient.h>
 
+#include <chrono>
 #include <memory>
 #include <stdexcept>
 
@@ -29,6 +30,7 @@
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/server/BaseThriftServer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 namespace apache::thrift::conformance {
@@ -131,6 +133,16 @@ class ConformanceVerificationServer
         std::move(stream)};
   }
 
+  apache::thrift::ServerStream<Response> streamCreditTimeout(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamCreditTimeout_ref().emplace().request() = *req;
+    for (auto payload : *testCase_.serverInstruction()
+                             ->streamCreditTimeout_ref()
+                             ->streamPayloads()) {
+      co_yield std::move(payload);
+    }
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {
@@ -180,6 +192,13 @@ class RPCClientConformanceTest : public testing::Test {
         std::string(clientCmd),
         "--port",
         folly::to<std::string>(server_.getPort())});
+    if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
+      server_.getThriftServer().setStreamExpireTime(
+          std::chrono::milliseconds{*testCase_.rpc_ref()
+                                         ->serverInstruction()
+                                         ->streamCreditTimeout_ref()
+                                         ->streamExpireTime()});
+    }
   }
 
  protected:

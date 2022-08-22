@@ -453,6 +453,48 @@ Test createStreamSubsequentCreditsTest() {
   return ret;
 }
 
+Test createStreamCreditTimeoutTest() {
+  Test ret;
+  ret.name() = "StreamCreditTimeoutTest";
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamCreditTimeout/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction_ref()
+                                .emplace()
+                                .streamCreditTimeout_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  clientInstruction.creditTimeoutMs() = 100;
+
+  auto& serverInstruction = rpcTest.serverInstruction_ref()
+                                .emplace()
+                                .streamCreditTimeout_ref()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+  serverInstruction.streamExpireTime() = 10;
+
+  auto& clientTestResult = rpcTest.clientTestResult_ref()
+                               .emplace()
+                               .streamCreditTimeout_ref()
+                               .emplace();
+  clientTestResult.creditTimeoutException() = true;
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .streamCreditTimeout_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Sink ===================
 Test createSinkBasicTest() {
   Test ret;
@@ -643,6 +685,7 @@ TestSuite createRPCClientTestSuite() {
   suite.tests()->push_back(createRequestResponseTimeoutTest());
   // =================== Stream ===================
   suite.tests()->push_back(createStreamChunkTimeoutTest());
+  suite.tests()->push_back(createStreamCreditTimeoutTest());
   return suite;
 }
 

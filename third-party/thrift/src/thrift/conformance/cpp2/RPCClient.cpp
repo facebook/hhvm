@@ -20,6 +20,7 @@
 
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Sleep.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 
@@ -168,6 +169,31 @@ StreamInitialResponseClientTestResult streamInitialResponseTest(
   return testResult;
 }
 
+StreamCreditTimeoutClientTestResult streamCreditTimeoutTest(
+    const StreamCreditTimeoutClientInstruction& instruction) {
+  auto client = createClient();
+  StreamCreditTimeoutClientTestResult result;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto gen = (co_await client->co_streamCreditTimeout(
+                    RpcOptions().setChunkBufferSize(0), *instruction.request()))
+                   .toAsyncGenerator();
+    try {
+      co_await gen.next();
+      // Sleep longer than the stream expiration time, so that the server
+      // will run out of credit and throw a credit timeout.
+      co_await folly::coro::sleep(
+          std::chrono::milliseconds{*instruction.creditTimeoutMs()});
+      co_await gen.next();
+    } catch (const TApplicationException& e) {
+      if (e.getType() ==
+          TApplicationException::TApplicationExceptionType::TIMEOUT) {
+        result.creditTimeoutException() = true;
+      }
+    }
+  }());
+  return result;
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -231,6 +257,10 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::streamInitialResponse:
       result.set_streamInitialResponse(streamInitialResponseTest(
           *clientInstruction.streamInitialResponse_ref()));
+      break;
+    case ClientInstruction::Type::streamCreditTimeout:
+      result.set_streamCreditTimeout(streamCreditTimeoutTest(
+          *clientInstruction.streamCreditTimeout_ref()));
       break;
     case ClientInstruction::Type::sinkBasic:
       result.set_sinkBasic(sinkBasicTest(*clientInstruction.sinkBasic_ref()));

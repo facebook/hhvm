@@ -942,6 +942,7 @@ dependencies = [
  "arena_deserializer",
  "bincode",
  "bumpalo",
+ "direct_decl_parser",
  "hash",
  "oxidized_by_ref",
  "sha-1",

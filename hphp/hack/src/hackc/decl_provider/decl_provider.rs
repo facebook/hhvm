@@ -5,9 +5,19 @@
 // LICENSE file in the "hack" directory of this source tree.
 mod memo_provider;
 
+use std::io::BufReader;
+use std::io::BufWriter;
+use std::io::Read;
+use std::io::Write;
+use std::path::PathBuf;
+
+use arena_deserializer::serde::Deserialize;
+use arena_deserializer::ArenaDeserializer;
 use bincode::Options;
+use direct_decl_parser::Decls;
+use direct_decl_parser::ParsedFile;
+use hash::IndexMap;
 pub use memo_provider::MemoProvider;
-use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::Decl;
@@ -90,7 +100,6 @@ pub trait DeclProvider: std::fmt::Debug {
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
 pub fn serialize_decls(decls: &Decls<'_>) -> Result<Vec<u8>, bincode::Error> {
-    use std::io::Write;
     let mut blob = Vec::new();
     bincode::options()
         .with_native_endian()
@@ -106,7 +115,6 @@ pub fn deserialize_decls<'a>(
     arena: &'a bumpalo::Bump,
     data: &[u8],
 ) -> Result<Decls<'a>, bincode::Error> {
-    use arena_deserializer::serde::Deserialize;
     let (data, hash) = split_serialized_decls(data);
     debug_assert!({
         let mut digest = Sha1::new();
@@ -119,6 +127,8 @@ pub fn deserialize_decls<'a>(
     Decls::deserialize(de)
 }
 
+/// Separate the raw serialized decls from the content hash suffixed by serialize_decls().
+/// Returns (data, content_hash).
 fn split_serialized_decls(data: &[u8]) -> (&[u8], &[u8]) {
     assert!(data.len() >= Sha1::output_size());
     let split = data.len() - Sha1::output_size();
@@ -167,4 +177,24 @@ pub fn find_module_decl<'a>(decls: &Decls<'a>, needle: &str) -> Result<&'a Modul
         .modules()
         .find_map(|(name, decl)| if needle == name { Some(decl) } else { None })
         .ok_or(Error::NotFound)
+}
+
+pub fn serialize_batch_decls(
+    w: impl Write,
+    parsed_files: &IndexMap<PathBuf, ParsedFile<'_>>,
+) -> Result<(), bincode::Error> {
+    let mut w = BufWriter::new(w);
+    bincode::options()
+        .with_native_endian()
+        .serialize_into(&mut w, &parsed_files)
+}
+
+pub fn deserialize_batch_decls<'a>(
+    r: impl Read,
+    arena: &'a bumpalo::Bump,
+) -> Result<IndexMap<PathBuf, ParsedFile<'a>>, bincode::Error> {
+    let r = BufReader::new(r);
+    let mut de = bincode::de::Deserializer::with_reader(r, bincode::options().with_native_endian());
+    let de = ArenaDeserializer::new(arena, &mut de);
+    IndexMap::deserialize(de)
 }

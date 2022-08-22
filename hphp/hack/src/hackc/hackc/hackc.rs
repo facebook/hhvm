@@ -5,6 +5,7 @@ mod assemble;
 mod cmp_unit;
 mod compile;
 mod crc;
+mod decls;
 mod expr_trees;
 mod facts;
 mod parse;
@@ -105,6 +106,9 @@ enum Command {
     /// Assemble HHAS file(s) into HackCUnit. Prints those HCUs' HHAS representation.
     Assemble(assemble::Opts),
 
+    /// Compute bincode-serialized decls for a set of Hack source files.
+    BinaryDecls(decls::Opts),
+
     /// Compile one Hack source file or a list of files to HHAS
     Compile(compile::Opts),
 
@@ -112,11 +116,14 @@ enum Command {
     /// input file.
     Crc(crc::Opts),
 
+    /// Compute JSON-serialized decls for a set of Hack source files.
+    JsonDecls(decls::Opts),
+
     /// Print the source code with expression tree literals desugared.
     /// Best effort debugging tool.
     DesugarExprTrees(expr_trees::Opts),
 
-    /// Compute facts for a set of files.
+    /// Compute JSON facts for a set of Hack source files.
     Facts(facts::Opts),
 
     /// Render the source text parse tree for each given file.
@@ -252,6 +259,8 @@ fn main() -> Result<()> {
 
     match opts.command.take() {
         Some(Command::Assemble(opts)) => assemble::run(opts),
+        Some(Command::BinaryDecls(decls_opts)) => decls::binary_decls(opts, decls_opts),
+        Some(Command::JsonDecls(decls_opts)) => decls::json_decls(opts, decls_opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),

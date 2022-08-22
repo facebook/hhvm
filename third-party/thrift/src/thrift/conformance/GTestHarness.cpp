@@ -197,42 +197,42 @@ ClientTestResult runClientSteps(
   ClientTestResult result;
   switch (clientInstruction.getType()) {
     case ClientInstruction::Type::requestResponseBasic:
-      result.set_requestResponseBasic(runRequestResponseBasic(
-          client, *clientInstruction.requestResponseBasic_ref()));
+      result.requestResponseBasic_ref() = runRequestResponseBasic(
+          client, *clientInstruction.requestResponseBasic_ref());
       break;
     case ClientInstruction::Type::requestResponseDeclaredException:
-      result.set_requestResponseDeclaredException(
+      result.requestResponseDeclaredException_ref() =
           runRequestResponseDeclaredException(
               client,
-              *clientInstruction.requestResponseDeclaredException_ref()));
+              *clientInstruction.requestResponseDeclaredException_ref());
       break;
     case ClientInstruction::Type::requestResponseUndeclaredException:
-      result.set_requestResponseUndeclaredException(
+      result.requestResponseUndeclaredException_ref() =
           runRequestResponseUndeclaredException(
               client,
-              *clientInstruction.requestResponseUndeclaredException_ref()));
+              *clientInstruction.requestResponseUndeclaredException_ref());
       break;
     case ClientInstruction::Type::requestResponseNoArgVoidResponse:
-      result.set_requestResponseNoArgVoidResponse(
+      result.requestResponseNoArgVoidResponse_ref() =
           runRequestResponseNoArgVoidResponse(
               client,
-              *clientInstruction.requestResponseNoArgVoidResponse_ref()));
+              *clientInstruction.requestResponseNoArgVoidResponse_ref());
       break;
     case ClientInstruction::Type::streamBasic:
-      result.set_streamBasic(
-          runStreamBasic(client, *clientInstruction.streamBasic_ref()));
+      result.streamBasic_ref() =
+          runStreamBasic(client, *clientInstruction.streamBasic_ref());
       break;
     case ClientInstruction::Type::streamInitialResponse:
-      result.set_streamInitialResponse(runStreamInitialResponse(
-          client, *clientInstruction.streamInitialResponse_ref()));
+      result.streamInitialResponse_ref() = runStreamInitialResponse(
+          client, *clientInstruction.streamInitialResponse_ref());
       break;
     case ClientInstruction::Type::sinkBasic:
-      result.set_sinkBasic(
-          runSinkBasic(client, *clientInstruction.sinkBasic_ref()));
+      result.sinkBasic_ref() =
+          runSinkBasic(client, *clientInstruction.sinkBasic_ref());
       break;
     case ClientInstruction::Type::sinkChunkTimeout:
-      result.set_sinkChunkTimeout(runSinkChunkTimeout(
-          client, *clientInstruction.sinkChunkTimeout_ref()));
+      result.sinkChunkTimeout_ref() = runSinkChunkTimeout(
+          client, *clientInstruction.sinkChunkTimeout_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

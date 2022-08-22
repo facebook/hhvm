@@ -16,10 +16,12 @@
 
 #include <thrift/conformance/GTestHarness.h>
 
+#include <chrono>
 #include <stdexcept>
 
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Sleep.h>
 #include <thrift/conformance/RpcStructComparator.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_types.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -164,6 +166,31 @@ SinkBasicClientTestResult runSinkBasic(
       }());
 }
 
+SinkChunkTimeoutClientTestResult runSinkChunkTimeout(
+    RPCConformanceServiceAsyncClient& client,
+    const SinkChunkTimeoutClientInstruction& instruction) {
+  SinkChunkTimeoutClientTestResult result;
+  try {
+    folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+      auto sink = co_await client.co_sinkChunkTimeout(*instruction.request());
+      auto finalResponse =
+          co_await sink.sink([&]() -> folly::coro::AsyncGenerator<Request&&> {
+            for (auto payload : *instruction.sinkPayloads()) {
+              co_yield std::move(payload);
+            }
+            co_await folly::coro::sleep(
+                std::chrono::milliseconds{*instruction.chunkTimeoutMs()});
+          }());
+    }());
+  } catch (const apache::thrift::TApplicationException& e) {
+    if (e.getType() ==
+        TApplicationException::TApplicationExceptionType::TIMEOUT) {
+      result.chunkTimeoutException() = true;
+    }
+  }
+  return result;
+}
+
 ClientTestResult runClientSteps(
     Client<RPCConformanceService>& client,
     const ClientInstruction& clientInstruction) {
@@ -202,6 +229,10 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::sinkBasic:
       result.set_sinkBasic(
           runSinkBasic(client, *clientInstruction.sinkBasic_ref()));
+      break;
+    case ClientInstruction::Type::sinkChunkTimeout:
+      result.set_sinkChunkTimeout(runSinkChunkTimeout(
+          client, *clientInstruction.sinkChunkTimeout_ref()));
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

@@ -16,9 +16,13 @@
 
 #include <thrift/conformance/rpcserver/RPCServerConformanceHandler.h>
 
+#include <chrono>
+#include <exception>
+
 #include <folly/experimental/coro/AsyncGenerator.h>
 
 namespace apache::thrift::conformance {
+using apache::thrift::transport::TTransportException;
 
 // =================== Request-Response ===================
 void RPCServerConformanceHandler::requestResponseBasic(
@@ -95,6 +99,32 @@ RPCServerConformanceHandler::sinkBasic(std::unique_ptr<Request> req) {
       },
       static_cast<uint64_t>(
           *testCase_->serverInstruction()->sinkBasic_ref()->bufferSize())};
+}
+
+apache::thrift::SinkConsumer<Request, Response>
+RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
+  result_.sinkChunkTimeout_ref().emplace().request() = *req;
+  return apache::thrift::SinkConsumer<Request, Response>{
+      [&](folly::coro::AsyncGenerator<Request&&> gen)
+          -> folly::coro::Task<Response> {
+        try {
+          while (auto item = co_await gen.next()) {
+            result_.sinkChunkTimeout_ref()->sinkPayloads()->push_back(
+                std::move(*item));
+          }
+        } catch (const apache::thrift::TApplicationException& e) {
+          if (e.getType() ==
+              TApplicationException::TApplicationExceptionType::TIMEOUT) {
+            result_.sinkChunkTimeout_ref()->chunkTimeoutException() = true;
+          }
+        }
+        co_return *testCase_->serverInstruction()
+            ->sinkChunkTimeout_ref()
+            ->finalResponse();
+      }}
+      .setChunkTimeout(std::chrono::milliseconds{*testCase_->serverInstruction()
+                                                      ->sinkChunkTimeout_ref()
+                                                      ->chunkTimeoutMs()});
 }
 
 } // namespace apache::thrift::conformance

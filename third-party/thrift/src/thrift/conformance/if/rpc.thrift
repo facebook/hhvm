@@ -53,6 +53,7 @@ union ServerTestResult {
   101: StreamChunkTimeoutServerTestResult streamChunkTimeout;
   102: StreamInitialResponseServerTestResult streamInitialResponse;
   200: SinkBasicServerTestResult sinkBasic;
+  201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
 }
 
 union ClientTestResult {
@@ -64,6 +65,7 @@ union ClientTestResult {
   101: StreamChunkTimeoutClientTestResult streamChunkTimeout;
   102: StreamInitialResponseClientTestResult streamInitialResponse;
   200: SinkBasicClientTestResult sinkBasic;
+  201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -95,6 +97,12 @@ struct StreamInitialResponseServerTestResult {
 struct SinkBasicServerTestResult {
   1: Request request;
   2: list<Request> sinkPayloads;
+}
+
+struct SinkChunkTimeoutServerTestResult {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+  3: bool chunkTimeoutException;
 }
 
 struct RequestResponseBasicClientTestResult {
@@ -131,6 +139,10 @@ struct SinkBasicClientTestResult {
   1: Response finalResponse;
 }
 
+struct SinkChunkTimeoutClientTestResult {
+  1: bool chunkTimeoutException;
+}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -140,6 +152,7 @@ union ClientInstruction {
   101: StreamChunkTimeoutClientInstruction streamChunkTimeout;
   102: StreamInitialResponseClientInstruction streamInitialResponse;
   200: SinkBasicClientInstruction sinkBasic;
+  201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
 }
 
 union ServerInstruction {
@@ -151,6 +164,7 @@ union ServerInstruction {
   101: StreamChunkTimeoutServerInstruction streamChunkTimeout;
   102: StreamInitialResponseServerInstruction streamInitialResponse;
   200: SinkBasicServerInstruction sinkBasic;
+  201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -184,6 +198,12 @@ struct StreamInitialResponseClientInstruction {
 struct SinkBasicClientInstruction {
   1: Request request;
   2: list<Request> sinkPayloads;
+}
+
+struct SinkChunkTimeoutClientInstruction {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+  3: i32 chunkTimeoutMs;
 }
 
 struct RequestResponseBasicServerInstruction {
@@ -221,6 +241,11 @@ struct SinkBasicServerInstruction {
   2: i64 bufferSize;
 }
 
+struct SinkChunkTimeoutServerInstruction {
+  1: Response finalResponse;
+  2: i32 chunkTimeoutMs;
+}
+
 service RPCConformanceService {
   // =================== Conformance framework - Only for Server Tests ===================
   void sendTestCase(1: RpcTestCase testCase);
@@ -245,4 +270,5 @@ service RPCConformanceService {
 
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);
+  sink<Request, Response> sinkChunkTimeout(1: Request req);
 }

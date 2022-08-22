@@ -528,6 +528,47 @@ Test createSinkSubsequentCreditsTest() {
   return ret;
 }
 
+Test createSinkChunkTimeoutTest() {
+  Test ret;
+  ret.name() = "SinkChunkTimeoutTest";
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "SinkChunkTimeout/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction_ref()
+                                .emplace()
+                                .sinkChunkTimeout_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+  clientInstruction.chunkTimeoutMs() = 150;
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .sinkChunkTimeout_ref()
+      .emplace()
+      .chunkTimeoutException() = true;
+
+  auto& serverInstruction = rpcTest.serverInstruction_ref()
+                                .emplace()
+                                .sinkChunkTimeout_ref()
+                                .emplace();
+  serverInstruction.finalResponse().emplace().data() = "world";
+  serverInstruction.chunkTimeoutMs() = 100;
+
+  auto& serverResult =
+      rpcTest.serverTestResult_ref().emplace().sinkChunkTimeout_ref().emplace();
+  serverResult.request().emplace().data() = "hello";
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+  serverResult.chunkTimeoutException() = true;
+
+  return ret;
+}
+
 void addCommonRPCTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
@@ -552,6 +593,8 @@ TestSuite createRPCServerTestSuite() {
   TestSuite suite;
   suite.name() = "ThriftRPCServerTest";
   addCommonRPCTests(suite);
+  // =================== Sink ===================
+  suite.tests()->push_back(createSinkChunkTimeoutTest());
   return suite;
 }
 

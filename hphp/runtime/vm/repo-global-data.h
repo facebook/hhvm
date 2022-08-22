@@ -213,7 +213,7 @@ struct RepoGlobalData {
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)
       (DiamondTraitMethods)
-      (EvalCoeffectEnforcementLevels)
+      (EvalCoeffectEnforcementLevels, std::less<std::string>{})
       (SourceRootForFileBC)
       (EmitBespokeTypeStructures)
       ;

@@ -140,7 +140,7 @@ struct Options {
   int ExternWorkerThrottleBaseWaitMSecs = -1;
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(TraceFunctions)
+    sd(TraceFunctions, string_lessi{}, std::less<std::string>{})
       (analyzeFuncWideningLimit)
       (analyzeClassWideningLimit)
       (returnTypeRefineLimit)

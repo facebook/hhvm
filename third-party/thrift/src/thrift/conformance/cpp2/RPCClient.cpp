@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <exception>
 #include <glog/logging.h>
 #include <folly/init/Init.h>
 
@@ -85,6 +86,25 @@ requestResponseNoArgVoidResponseTest(
   RequestResponseNoArgVoidResponseClientTestResult result;
   auto client = createClient();
   client->sync_requestResponseNoArgVoidResponse();
+  return result;
+}
+
+RequestResponseTimeoutClientTestResult runRequestResponseTimeoutTest(
+    const RequestResponseTimeoutClientInstruction& instruction) {
+  RequestResponseTimeoutClientTestResult result;
+  Response response;
+  apache::thrift::RpcOptions rpcOptions{};
+  rpcOptions.setTimeout(std::chrono::milliseconds{*instruction.timeoutMs()});
+  auto client = createClient();
+  try {
+    client->sync_requestResponseTimeout(
+        rpcOptions, response, *instruction.request());
+  } catch (const TTransportException& e) {
+    if (e.getType() ==
+        TTransportException::TTransportExceptionType::TIMED_OUT) {
+      result.timeoutException() = true;
+    }
+  }
   return result;
 }
 
@@ -195,6 +215,10 @@ int main(int argc, char** argv) {
       result.set_requestResponseNoArgVoidResponse(
           requestResponseNoArgVoidResponseTest(
               *clientInstruction.requestResponseNoArgVoidResponse_ref()));
+      break;
+    case ClientInstruction::Type::requestResponseTimeout:
+      result.set_requestResponseTimeout(runRequestResponseTimeoutTest(
+          *clientInstruction.requestResponseTimeout_ref()));
       break;
     case ClientInstruction::Type::streamBasic:
       result.set_streamBasic(

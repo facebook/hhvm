@@ -49,6 +49,7 @@ union ServerTestResult {
   2: RequestResponseDeclaredExceptionServerTestResult requestResponseDeclaredException;
   3: RequestResponseNoArgVoidResponseServerTestResult requestResponseNoArgVoidResponse;
   4: RequestResponseUndeclaredExceptionServerTestResult requestResponseUndeclaredException;
+  5: RequestResponseTimeoutServerTestResult requestResponseTimeout;
   100: StreamBasicServerTestResult streamBasic;
   101: StreamChunkTimeoutServerTestResult streamChunkTimeout;
   102: StreamInitialResponseServerTestResult streamInitialResponse;
@@ -61,6 +62,7 @@ union ClientTestResult {
   2: RequestResponseDeclaredExceptionClientTestResult requestResponseDeclaredException;
   3: RequestResponseNoArgVoidResponseClientTestResult requestResponseNoArgVoidResponse;
   4: RequestResponseUndeclaredExceptionClientTestResult requestResponseUndeclaredException;
+  5: RequestResponseTimeoutClientTestResult requestResponseTimeout;
   100: StreamBasicClientTestResult streamBasic;
   101: StreamChunkTimeoutClientTestResult streamChunkTimeout;
   102: StreamInitialResponseClientTestResult streamInitialResponse;
@@ -81,6 +83,10 @@ struct RequestResponseUndeclaredExceptionServerTestResult {
 }
 
 struct RequestResponseNoArgVoidResponseServerTestResult {}
+
+struct RequestResponseTimeoutServerTestResult {
+  1: Request request;
+}
 
 struct StreamBasicServerTestResult {
   1: Request request;
@@ -121,6 +127,10 @@ struct RequestResponseUndeclaredExceptionClientTestResult {
   1: string exceptionMessage;
 }
 
+struct RequestResponseTimeoutClientTestResult {
+  1: bool timeoutException;
+}
+
 struct StreamBasicClientTestResult {
   1: list<Response> streamPayloads;
 }
@@ -148,6 +158,7 @@ union ClientInstruction {
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
   3: RequestResponseNoArgVoidResponseClientInstruction requestResponseNoArgVoidResponse;
   4: RequestResponseUndeclaredExceptionClientInstruction requestResponseUndeclaredException;
+  5: RequestResponseTimeoutClientInstruction requestResponseTimeout;
   100: StreamBasicClientInstruction streamBasic;
   101: StreamChunkTimeoutClientInstruction streamChunkTimeout;
   102: StreamInitialResponseClientInstruction streamInitialResponse;
@@ -160,6 +171,7 @@ union ServerInstruction {
   2: RequestResponseDeclaredExceptionServerInstruction requestResponseDeclaredException;
   3: RequestResponseNoArgVoidResponseServerInstruction requestResponseNoArgVoidResponse;
   4: RequestResponseUndeclaredExceptionServerInstruction requestResponseUndeclaredException;
+  5: RequestResponseTimeoutServerInstruction requestResponseTimeout;
   100: StreamBasicServerInstruction streamBasic;
   101: StreamChunkTimeoutServerInstruction streamChunkTimeout;
   102: StreamInitialResponseServerInstruction streamInitialResponse;
@@ -180,6 +192,11 @@ struct RequestResponseUndeclaredExceptionClientInstruction {
 }
 
 struct RequestResponseNoArgVoidResponseClientInstruction {}
+
+struct RequestResponseTimeoutClientInstruction {
+  1: Request request;
+  2: i32 timeoutMs;
+}
 
 struct StreamBasicClientInstruction {
   1: Request request;
@@ -222,6 +239,10 @@ struct RequestResponseUndeclaredExceptionServerInstruction {
 
 struct RequestResponseNoArgVoidResponseServerInstruction {}
 
+struct RequestResponseTimeoutServerInstruction {
+  1: i32 timeoutMs;
+}
+
 struct StreamBasicServerInstruction {
   1: list<Response> streamPayloads;
 }
@@ -262,6 +283,7 @@ service RPCConformanceService {
   );
   void requestResponseUndeclaredException(1: Request req);
   void requestResponseNoArgVoidResponse();
+  Response requestResponseTimeout(1: Request req);
 
   // =================== Stream ===================
   stream<Response> streamBasic(1: Request req);

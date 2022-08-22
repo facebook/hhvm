@@ -22,6 +22,7 @@
 #include <fmt/core.h>
 #include <folly/Subprocess.h>
 #include <folly/experimental/coro/AsyncGenerator.h>
+#include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/futures/Future.h>
 #include <thrift/conformance/RpcStructComparator.h>
@@ -74,6 +75,17 @@ class ConformanceVerificationServer
 
   void requestResponseNoArgVoidResponse() override {
     serverResult_.requestResponseNoArgVoidResponse_ref().emplace();
+  }
+
+  void requestResponseTimeout(
+      Response&, std::unique_ptr<Request> req) override {
+    serverResult_.requestResponseTimeout_ref().emplace().request() = *req;
+    folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+      co_await folly::coro::sleep(
+          std::chrono::milliseconds(*testCase_.serverInstruction()
+                                         ->requestResponseTimeout_ref()
+                                         ->timeoutMs()));
+    }());
   }
 
   // =================== Stream ===================

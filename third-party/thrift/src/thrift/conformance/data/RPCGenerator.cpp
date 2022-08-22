@@ -171,6 +171,43 @@ Test createRequestResponseNoArgVoidResponse() {
   return ret;
 }
 
+Test createRequestResponseTimeoutTest() {
+  Test ret;
+  ret.name() = "RequestResponseTimeoutTest";
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "RequestResponseTimeout/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction_ref()
+                                .emplace()
+                                .requestResponseTimeout_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  clientInstruction.timeoutMs() = 100;
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .requestResponseTimeout_ref()
+      .emplace()
+      .timeoutException() = true;
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .requestResponseTimeout_ref()
+      .emplace()
+      .timeoutMs() = 150;
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .requestResponseTimeout_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 Test createRequestResponseFragmentationTest() {
   Test ret;
   ret.name() = "RequestResponseFragmentationTest";
@@ -602,6 +639,8 @@ TestSuite createRPCClientTestSuite() {
   TestSuite suite;
   suite.name() = "ThriftRPCClientTest";
   addCommonRPCTests(suite);
+  // =================== Request-Response ===================
+  suite.tests()->push_back(createRequestResponseTimeoutTest());
   // =================== Stream ===================
   suite.tests()->push_back(createStreamChunkTimeoutTest());
   return suite;

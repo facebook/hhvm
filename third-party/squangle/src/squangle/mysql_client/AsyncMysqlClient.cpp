@@ -286,16 +286,17 @@ AsyncConnection::~AsyncConnection() {
   if (mysql_connection_ && conn_dying_callback_ && needToCloneConnection_ &&
       isReusable() && !inTransaction() &&
       getConnectionOptions().isEnableResetConnBeforeClose()) {
-    // We clone this Connection object to send COM_RESET_CONNECTION command
-    // via the connection before returning it to the connection pool.
-    // The callback function points to recycleMysqlConnection(), which is
-    // responsible for recyclining the connection.
-    // This object's callback is set to null and the cloned object's
-    // callback instead points to the original callback function, which will
-    // be called after COM_RESET_CONNECTION.
+    if (getConnectionOptions().isEnableDelayedResetConn()) {
+      mysql_connection_->setNeedResetBeforeReuse();
+    } else if (!isInEventBaseThread()) {
+      // We clone this Connection object to send COM_RESET_CONNECTION command
+      // via the connection before returning it to the connection pool.
+      // The callback function points to recycleMysqlConnection(), which is
+      // responsible for recyclining the connection.
+      // This object's callback is set to null and the cloned object's
+      // callback instead points to the original callback function, which will
+      // be called after COM_RESET_CONNECTION.
 
-    // TODO: just set NeedResetBeforeReuse in any case
-    if (!isInEventBaseThread()) {
       auto connHolder = stealMysqlConnectionHolder(true);
       auto conn = std::make_unique<AsyncConnection>(
           client(), *getKey(), std::move(connHolder));
@@ -313,8 +314,6 @@ AsyncConnection::~AsyncConnection() {
           })) {
         resetOp->wait();
       }
-    } else if (getConnectionOptions().isEnableDelayedResetConn()) {
-      mysql_connection_->setNeedResetBeforeReuse();
     }
   }
 }

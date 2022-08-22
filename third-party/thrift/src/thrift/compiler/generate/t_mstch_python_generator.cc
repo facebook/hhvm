@@ -892,7 +892,6 @@ class python_mstch_const_value : public mstch_const_value {
             {"value:py3_string_value", &python_mstch_const_value::string_value},
             {"value:py3_enum_value_name",
              &python_mstch_const_value::py3_enum_value_name},
-            {"value:py3_string?", &python_mstch_const_value::is_string},
             {"value:py3_binary?", &python_mstch_const_value::is_binary},
             {"value:const_enum_type",
              &python_mstch_const_value::const_enum_type},
@@ -905,11 +904,6 @@ class python_mstch_const_value : public mstch_const_value {
             {"value:map_key_type", &python_mstch_const_value::map_key_type},
             {"value:map_val_type", &python_mstch_const_value::map_val_type},
         });
-  }
-  mstch::node is_string() {
-    auto& ttype = const_value_->ttype();
-    return type_ == cv::CV_STRING && ttype &&
-        ttype->get_true_type()->is_string();
   }
 
   mstch::node is_binary() {

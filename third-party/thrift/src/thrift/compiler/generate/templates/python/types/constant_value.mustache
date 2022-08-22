@@ -34,8 +34,9 @@ file.
     }}{{/value:value_for_bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
-}}{{#value:py3_string?}}{{value:py3_string_value}}{{/value:py3_string?}}{{!
-}}{{#value:py3_binary?}}b{{value:py3_string_value}}{{/value:py3_binary?}}{{!
+}}{{#value:string?}}{{!
+    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}{{value:py3_string_value}}{{!
+}}{{/value:string?}}{{!
 }}{{#value:const_struct?}}{{!
     }}{{#value:const_struct_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!

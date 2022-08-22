@@ -195,7 +195,7 @@ struct RequestResponseNoArgVoidResponseClientInstruction {}
 
 struct RequestResponseTimeoutClientInstruction {
   1: Request request;
-  2: i32 timeoutMs;
+  2: i64 timeoutMs;
 }
 
 struct StreamBasicClientInstruction {
@@ -205,7 +205,7 @@ struct StreamBasicClientInstruction {
 
 struct StreamChunkTimeoutClientInstruction {
   1: Request request;
-  2: i32 chunkTimeoutMs;
+  2: i64 chunkTimeoutMs;
 }
 
 struct StreamInitialResponseClientInstruction {
@@ -220,7 +220,7 @@ struct SinkBasicClientInstruction {
 struct SinkChunkTimeoutClientInstruction {
   1: Request request;
   2: list<Request> sinkPayloads;
-  3: i32 chunkTimeoutMs;
+  3: i64 chunkTimeoutMs;
 }
 
 struct RequestResponseBasicServerInstruction {
@@ -240,7 +240,7 @@ struct RequestResponseUndeclaredExceptionServerInstruction {
 struct RequestResponseNoArgVoidResponseServerInstruction {}
 
 struct RequestResponseTimeoutServerInstruction {
-  1: i32 timeoutMs;
+  1: i64 timeoutMs;
 }
 
 struct StreamBasicServerInstruction {
@@ -249,7 +249,7 @@ struct StreamBasicServerInstruction {
 
 struct StreamChunkTimeoutServerInstruction {
   1: list<Response> streamPayloads;
-  2: i32 chunkTimeoutMs;
+  2: i64 chunkTimeoutMs;
 }
 
 struct StreamInitialResponseServerInstruction {
@@ -264,7 +264,7 @@ struct SinkBasicServerInstruction {
 
 struct SinkChunkTimeoutServerInstruction {
   1: Response finalResponse;
-  2: i32 chunkTimeoutMs;
+  2: i64 chunkTimeoutMs;
 }
 
 service RPCConformanceService {

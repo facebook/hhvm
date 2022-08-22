@@ -1,8 +1,10 @@
 # How to run the website locally (Docker)
 
 ```bash
-docker run --rm -p 4000:4000 --volume="$PWD:/srv/jekyll" -it jekyll/jekyll jekyll serve
+docker run --rm -p 4000:4000 --volume="$PWD:/srv/jekyll" -it jekyll/jekyll:3 jekyll serve -w
 ```
+
+Then load http://localhost:4000/watchman/
 
 # How to run the website locally (local ruby)
 

@@ -237,6 +237,10 @@ inline bool RefId::operator!=(const RefId& o) const {
   return !(*this == o);
 }
 
+inline bool RefId::operator<(const RefId& o) const {
+  return std::tie(m_size, m_id) < std::tie(o.m_size, o.m_id);
+}
+
 inline std::string RefId::toString() const {
   return folly::sformat("{}:{}", m_id, m_size);
 }

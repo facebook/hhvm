@@ -875,14 +875,20 @@ bool computeIndex(
     extern_worker::Client& client,
     UnitIndex& index
 ) {
-  auto const onIndex = [&] (std::string&& rpath, Package::IndexMeta&& meta) {
-    auto const interned_rpath = makeStaticString(rpath);
+  auto const onIndex = [&] (
+      std::string rpath,
+      Package::IndexMeta meta,
+      Ref<Package::UnitDecls> declsRef
+  ) {
+    auto locations = std::make_shared<UnitIndex::Locations>(
+        std::move(rpath), std::move(declsRef)
+    );
     auto insert = [&](auto const& names, auto& map, const char* kind) {
       for (auto name : names) {
-        auto const ret = map.emplace(name, interned_rpath);
+        auto const ret = map.emplace(name, locations);
         if (!ret.second) {
           Logger::FWarning("Duplicate {} {} in {} and {}",
-              kind, name, ret.first->first, interned_rpath
+              kind, name, ret.first->first, locations->rpath
           );
         }
       }
@@ -890,6 +896,7 @@ bool computeIndex(
     insert(meta.types, index.types, "type");
     insert(meta.funcs, index.funcs, "function");
     insert(meta.constants, index.constants, "constant");
+    insert(meta.modules, index.modules, "module");
   };
 
   Package indexPackage{po.inputDir, executor, client};
@@ -909,10 +916,11 @@ bool computeIndex(
 
   logPhaseStats("index", indexPackage, client, sample,
                 indexTimer.getMicroSeconds());
-  Logger::FInfo("index size: types={:,} funcs={:,} constants={:,}",
+  Logger::FInfo("index size: types={:,} funcs={:,} constants={:,} modules={:,}",
       index.types.size(),
       index.funcs.size(),
-      index.constants.size()
+      index.constants.size(),
+      index.modules.size()
   );
   client.resetStats();
 
@@ -935,8 +943,9 @@ struct ParseJob {
   }
 
   static UnitEmitterSerdeWrapper run(const std::string& contents,
-                                     const RepoOptionsFlags& flags) {
-    return Package::parseRun(contents, flags);
+                                     const RepoOptionsFlags& flags,
+                                     Variadic<Package::UnitDecls> decls) {
+    return Package::parseRun(contents, flags, std::move(decls.vals));
   }
 };
 
@@ -960,8 +969,9 @@ struct ParseForHHBBCJob {
   }
 
   static Variadic<WPI::Value> run(const std::string& contents,
-                                  const RepoOptionsFlags& flags) {
-    auto wrapper = Package::parseRun(contents, flags);
+                                  const RepoOptionsFlags& flags,
+                                  Variadic<Package::UnitDecls> decls) {
+    auto wrapper = Package::parseRun(contents, flags, std::move(decls.vals));
     if (!wrapper.m_ue) return {};
 
     std::vector<WPI::Value> values;
@@ -1148,7 +1158,7 @@ bool process(const CompilerOptions &po) {
                            Ref<Package::FileMetaVec> fileMetas,
                            std::vector<Package::FileData> files,
                            bool optimistic)
-    -> coro::Task<Package::ParseMetaVec> {
+    -> coro::Task<std::pair<bool,Package::ParseMetaVec>> {
     if (RO::EvalUseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
       // key/values.
@@ -1171,6 +1181,12 @@ bool process(const CompilerOptions &po) {
       auto [parseMetas, inputKeys] =
         HPHP_CORO_AWAIT(client->load(std::move(metaRefs)));
 
+      // Stop now if the index contains any missing decls.
+      // parseRun() will retry this job with additional inputs.
+      if (index.containsAnyMissing(parseMetas)) {
+        HPHP_CORO_RETURN(std::make_pair(true, parseMetas));
+      }
+
       // We don't have unit-emitters to do uniqueness checking, but
       // the parse metadata has the definitions we can use instead.
       for (auto const& p : parseMetas) {
@@ -1189,7 +1205,7 @@ bool process(const CompilerOptions &po) {
       }
       always_assert(keyIdx == numKeys);
 
-      HPHP_CORO_MOVE_RETURN(parseMetas);
+      HPHP_CORO_RETURN(std::make_pair(false, parseMetas));
     }
 
     // Otherwise, do a "normal" (non-HHBBC parse job), load the
@@ -1211,11 +1227,17 @@ bool process(const CompilerOptions &po) {
       client->load(std::move(metaRefs))
     ));
 
+    // Stop now if the index contains any missing decls.
+    // parseRun() will retry this job with additional inputs.
+    if (index.containsAnyMissing(parseMetas)) {
+      HPHP_CORO_RETURN(std::make_pair(true, parseMetas));
+    }
+
     for (auto& wrapper : wrappers) {
       if (!wrapper.m_ue) continue;
       emit(std::move(wrapper.m_ue));
     }
-    HPHP_CORO_MOVE_RETURN(parseMetas);
+    HPHP_CORO_RETURN(std::make_pair(false, parseMetas));
   };
 
   {
@@ -1230,10 +1252,10 @@ bool process(const CompilerOptions &po) {
 
     logPhaseStats("parse", *package, *client, sample,
                   parseTimer.getMicroSeconds());
-  }
 
-  // We don't need the ondemand/autoload index after this point.
-  index.clear();
+    // We don't need the ondemand/autoload index after this point.
+    index.clear();
+  }
 
   std::thread fileCache{
     [&, package = std::move(package)] () mutable {

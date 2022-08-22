@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+struct DeclProvider;
+
 namespace HPHP {
 
 namespace Native {
@@ -141,5 +143,18 @@ using UnitEmitterCacheHook =
     const Native::FuncTable&
   );
 extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
+
+// Invoke hackc directly without any caching.
+std::unique_ptr<UnitEmitter> compile_unit(
+  const char* code,
+  const char* filename,
+  const SHA1& sha1,
+  const Native::FuncTable& nativeFuncs,
+  bool isSystemLib,
+  bool forDebuggerEval,
+  const RepoOptionsFlags& options,
+  CompileAbortMode mode,
+  DeclProvider* provider
+);
 
 }

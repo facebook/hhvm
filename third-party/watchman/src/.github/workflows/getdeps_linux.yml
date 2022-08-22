@@ -49,8 +49,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests lz4
     - name: Fetch snappy
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests snappy
-    - name: Fetch pcre
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests pcre
+    - name: Fetch pcre2
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests pcre2
     - name: Fetch zlib
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests zlib
     - name: Fetch bz2
@@ -61,26 +61,26 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests automake
     - name: Fetch libtool
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libtool
-    - name: Fetch bison
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests bison
     - name: Fetch libsodium
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libsodium
-    - name: Fetch xz
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests xz
-    - name: Fetch folly
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests folly
-    - name: Fetch fizz
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch libffi
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libffi
     - name: Fetch ncurses
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests ncurses
     - name: Fetch python
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests python
+    - name: Fetch xz
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests xz
+    - name: Fetch folly
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests folly
+    - name: Fetch fizz
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch wangle
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests wangle
     - name: Fetch fbthrift
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fbthrift
+    - name: Fetch edencommon
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests edencommon
     - name: Fetch fb303
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fb303
     - name: Build boost
@@ -111,8 +111,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests lz4
     - name: Build snappy
       run: python3 build/fbcode_builder/getdeps.py build --no-tests snappy
-    - name: Build pcre
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests pcre
+    - name: Build pcre2
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests pcre2
     - name: Build zlib
       run: python3 build/fbcode_builder/getdeps.py build --no-tests zlib
     - name: Build bz2
@@ -123,26 +123,26 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests automake
     - name: Build libtool
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libtool
-    - name: Build bison
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests bison
     - name: Build libsodium
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libsodium
-    - name: Build xz
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests xz
-    - name: Build folly
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests folly
-    - name: Build fizz
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests fizz
     - name: Build libffi
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libffi
     - name: Build ncurses
       run: python3 build/fbcode_builder/getdeps.py build --no-tests ncurses
     - name: Build python
       run: python3 build/fbcode_builder/getdeps.py build --no-tests python
+    - name: Build xz
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests xz
+    - name: Build folly
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests folly
+    - name: Build fizz
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests fizz
     - name: Build wangle
       run: python3 build/fbcode_builder/getdeps.py build --no-tests wangle
     - name: Build fbthrift
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fbthrift
+    - name: Build edencommon
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests edencommon
     - name: Build fb303
       run: python3 build/fbcode_builder/getdeps.py build --no-tests fb303
     - name: Build watchman

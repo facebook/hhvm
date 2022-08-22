@@ -22,8 +22,6 @@ jobs:
     - name: Disable autocrlf
       run: git config --system core.autocrlf false
     - uses: actions/checkout@v2
-    - name: Fetch bison
-      run: python build/fbcode_builder/getdeps.py fetch --no-tests bison
     - name: Fetch libsodium
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libsodium
     - name: Fetch ninja
@@ -64,8 +62,6 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch wangle
       run: python build/fbcode_builder/getdeps.py fetch --no-tests wangle
-    - name: Build bison
-      run: python build/fbcode_builder/getdeps.py build --no-tests bison
     - name: Build libsodium
       run: python build/fbcode_builder/getdeps.py build --no-tests libsodium
     - name: Build ninja

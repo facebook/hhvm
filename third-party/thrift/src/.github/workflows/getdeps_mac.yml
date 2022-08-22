@@ -51,8 +51,6 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests automake
     - name: Fetch libtool
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libtool
-    - name: Fetch bison
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests bison
     - name: Fetch libsodium
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libsodium
     - name: Fetch xz
@@ -99,8 +97,6 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests automake
     - name: Build libtool
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libtool
-    - name: Build bison
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests bison
     - name: Build libsodium
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libsodium
     - name: Build xz

@@ -51,22 +51,20 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests automake
     - name: Fetch libtool
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libtool
-    - name: Fetch bison
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests bison
     - name: Fetch libsodium
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libsodium
-    - name: Fetch xz
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests xz
-    - name: Fetch folly
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests folly
-    - name: Fetch fizz
-      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch libffi
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests libffi
     - name: Fetch ncurses
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests ncurses
     - name: Fetch python
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests python
+    - name: Fetch xz
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests xz
+    - name: Fetch folly
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests folly
+    - name: Fetch fizz
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests fizz
     - name: Fetch wangle
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests wangle
     - name: Build ninja
@@ -105,26 +103,24 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests automake
     - name: Build libtool
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libtool
-    - name: Build bison
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests bison
     - name: Build libsodium
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libsodium
-    - name: Build xz
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests xz
-    - name: Build folly
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests folly
-    - name: Build fizz
-      run: python3 build/fbcode_builder/getdeps.py build --no-tests fizz
     - name: Build libffi
       run: python3 build/fbcode_builder/getdeps.py build --no-tests libffi
     - name: Build ncurses
       run: python3 build/fbcode_builder/getdeps.py build --no-tests ncurses
     - name: Build python
       run: python3 build/fbcode_builder/getdeps.py build --no-tests python
+    - name: Build xz
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests xz
+    - name: Build folly
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests folly
+    - name: Build fizz
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests fizz
     - name: Build wangle
       run: python3 build/fbcode_builder/getdeps.py build --no-tests wangle
     - name: Build fbthrift
-      run: python3 build/fbcode_builder/getdeps.py build --allow-system-packages --src-dir=. fbthrift  --project-install-prefix fbthrift:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py build --src-dir=. fbthrift  --project-install-prefix fbthrift:/usr/local
     - name: Copy artifacts
       run: python3 build/fbcode_builder/getdeps.py fixup-dyn-deps --strip --src-dir=. fbthrift _artifacts/linux  --project-install-prefix fbthrift:/usr/local --final-install-prefix /usr/local
     - uses: actions/upload-artifact@v2

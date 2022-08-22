@@ -17,11 +17,16 @@
 namespace py3 thrift.python.test
 
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/scope.thrift"
 
 @python.Adapter{
   name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
   typeHint = "datetime.datetime",
 }
+@scope.Transitive
+struct AsDatetime {}
+
+@AsDatetime
 typedef i32 Datetime
 
 @python.Adapter{
@@ -39,16 +44,10 @@ struct Baz {
 }
 
 struct Foo {
-  @python.Adapter{
-    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
-    typeHint = "datetime.datetime",
-  }
+  @AsDatetime
   1: i32 created_at;
   2: Datetime updated_at;
-  @python.Adapter{
-    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
-    typeHint = "datetime.datetime",
-  }
+  @AsDatetime
   3: AdaptedInt another_time;
   4: list<AdaptedInt> int_list;
   5: set<AdaptedInt> int_set;
@@ -63,9 +62,6 @@ struct Foo {
 
 union Bar {
   1: string baz;
-  @python.Adapter{
-    name = "thrift.python.test.adapters.datetime.DatetimeAdapter",
-    typeHint = "datetime.datetime",
-  }
+  @AsDatetime
   2: i32 ts;
 }

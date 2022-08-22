@@ -267,11 +267,6 @@ public class SimpleThriftClientTest {
     sendNBlockingPingPongs(1000);
   }
 
-  @Test
-  public void test10_000BlockingPingPongs() {
-    sendNBlockingPingPongs(10_000);
-  }
-
   private void sendNBlockingPingPongs(int n) {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =

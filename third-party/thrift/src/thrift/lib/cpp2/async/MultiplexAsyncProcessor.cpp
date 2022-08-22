@@ -53,7 +53,9 @@ struct MetadataImpl final : public AsyncProcessorFactory::MethodMetadata {
       std::shared_ptr<const AsyncProcessorFactory::MethodMetadata>&& inner)
       : MethodMetadata(*inner),
         sourceIndex(sourceIndex),
-        inner(std::move(inner)) {}
+        inner(std::move(inner)) {
+    CHECK(this->inner != nullptr);
+  }
 };
 
 MultiplexAsyncProcessorFactory::CompositionMetadata computeCompositionMetadata(

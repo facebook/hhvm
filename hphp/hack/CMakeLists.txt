@@ -141,7 +141,6 @@ set(RUST_OPCODES "${RUST_OPCODES_DIR}/opcodes.rs")
 
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
-  "${HHBC_PREFIX}/hhbc/unit.rs"
   "${HHBC_PREFIX}/hhbc/adata.rs"
   "${HHBC_PREFIX}/hhbc/attribute.rs"
   "${HHBC_PREFIX}/hhbc/body.rs"
@@ -149,6 +148,8 @@ set(HHBC_AST_SRCS
   "${HHBC_PREFIX}/hhbc/coeffects.rs"
   "${HHBC_PREFIX}/hhbc/constant.rs"
   "${HHBC_PREFIX}/hhbc/function.rs"
+  "${HHBC_PREFIX}/hhbc/id.rs"
+  "${HHBC_PREFIX}/hhbc/instruct.rs"
   "${HHBC_PREFIX}/hhbc/method.rs"
   "${HHBC_PREFIX}/hhbc/module.rs"
   "${HHBC_PREFIX}/hhbc/param.rs"
@@ -158,10 +159,9 @@ set(HHBC_AST_SRCS
   "${HHBC_PREFIX}/hhbc/types.rs"
   "${HHBC_PREFIX}/hhbc/type_const.rs"
   "${HHBC_PREFIX}/hhbc/typedef.rs"
-  "${HHBC_PREFIX}/hhbc/hhbc_ast.rs"
-  "${HHBC_PREFIX}/hhbc/hhbc_ast_ffi_cbindgen.rs"  # Not in a crate.
-  "${HHBC_PREFIX}/hhbc/hhbc_id.rs"
   "${HHBC_PREFIX}/hhbc/typed_value.rs"
+  "${HHBC_PREFIX}/hhbc/unit.rs"
+  "${HHBC_PREFIX}/hhbc/unit_cbindgen.rs"  # Not in a crate.
   "${RUST_OPCODES}"
 )
 

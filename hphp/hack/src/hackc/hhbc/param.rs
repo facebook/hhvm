@@ -10,9 +10,9 @@ use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
 
-use crate::hhbc_ast::Label;
 use crate::Attribute;
 use crate::Constraint;
+use crate::Label;
 use crate::TypeInfo;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

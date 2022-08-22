@@ -9,7 +9,7 @@ use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
 
-use crate::hhbc_ast::Instruct;
+use crate::Instruct;
 use crate::Param;
 use crate::TypeInfo;
 

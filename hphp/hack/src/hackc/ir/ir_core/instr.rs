@@ -164,8 +164,8 @@ pub enum Terminator {
     // - Then you have a slice of operands like every other instruction, no more
     //   special case.
     // Reason to not make a list:
-    // - Lowering to hhbc_ast will be harder because the locals may not be
-    //   contiguous the way hhbc_ast needs them.
+    // - Lowering to hhbc will be harder because the locals may not be
+    //   contiguous the way hhbc needs them.
     #[has_operands(none)]
     MemoGet(MemoGet),
     #[has_operands(none)]

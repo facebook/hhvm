@@ -8,12 +8,12 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
-use crate::hhbc_ast::Visibility;
 use crate::Attribute;
 use crate::Body;
 use crate::Coeffects;
 use crate::MethodName;
 use crate::Span;
+use crate::Visibility;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]

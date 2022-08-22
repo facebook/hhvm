@@ -26,7 +26,12 @@
 
 namespace apache::thrift {
 namespace {
+
 using namespace test::patch;
+
+static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
+              ::apache::thrift::op::detail::FieldPatchAdapter,
+              MyStructFieldPatch>::value);
 
 using ListPatch = std::decay_t<
     decltype(std::declval<MyStructFieldPatch>()->optListVal()->ensure())>;

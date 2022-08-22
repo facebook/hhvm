@@ -44,8 +44,12 @@ class Wrap {
   explicit Wrap(const underlying_type& data) : data_(data) {}
   explicit Wrap(underlying_type&& data) noexcept : data_(std::move(data)) {}
 
+  FOLLY_NODISCARD underlying_type& toThrift() & { return data_; }
   FOLLY_NODISCARD const underlying_type& toThrift() const& { return data_; }
   FOLLY_NODISCARD underlying_type&& toThrift() && { return std::move(data_); }
+  FOLLY_NODISCARD const underlying_type&& toThrift() const&& {
+    return std::move(data_);
+  }
 
   void reset() { op::clear<underlying_tag>(data_); }
   bool empty() const {

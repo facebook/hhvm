@@ -29,7 +29,7 @@ TEST(TestGeneratorTest, RoundTripSuite) {
   auto suite = createCompatibilitySuite();
 
   constexpr size_t kNumProtocols = 2;
-  constexpr size_t kNumTypes = 8;
+  constexpr size_t kNumTypes = 9;
   EXPECT_EQ(suite.name(), "CompatibilityTest");
 
   // type tag dependent tests (kNumProtocols * kNumTypes) + type tag independent

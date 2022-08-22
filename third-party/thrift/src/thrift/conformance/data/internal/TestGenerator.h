@@ -36,6 +36,7 @@ using PrimaryTypeTags = boost::mp11::mp_list<
     type::byte_t,
     type::i16_t,
     type::i32_t,
+    type::i64_t,
     type::float_t,
     type::double_t,
     type::string_t,

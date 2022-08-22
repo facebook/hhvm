@@ -28,7 +28,7 @@ namespace apache::thrift::conformance::data {
 TEST(TestGeneratorTest, RoundTripSuite) {
   auto suite = createRoundTripSuite();
   constexpr size_t kNumProtocols = 2;
-  constexpr size_t kNumTypes = 8;
+  constexpr size_t kNumTypes = 9;
   EXPECT_EQ(*suite.name(), "RoundTripTest");
   ASSERT_EQ(suite.tests()->size(), kNumProtocols * kNumTypes);
   EXPECT_EQ(*suite.tests()->at(0 * kNumTypes).name(), "Binary");

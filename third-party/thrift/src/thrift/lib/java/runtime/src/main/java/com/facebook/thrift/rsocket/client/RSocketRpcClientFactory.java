@@ -31,6 +31,10 @@ import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
 public class RSocketRpcClientFactory implements RpcClientFactory {
+  private static final int MAX_FRAME_SIZE =
+      Integer.parseInt(
+          System.getProperty("thrift.rsocket-max-frame-size", String.valueOf((1 << 24) - 1)));
+
   static {
     ReactorHooks.init();
   }
@@ -57,6 +61,7 @@ public class RSocketRpcClientFactory implements RpcClientFactory {
           new ReactorClientTransport(socketAddress, this.config, ThriftTransportType.RSOCKET);
 
       return connector
+          .fragment(MAX_FRAME_SIZE)
           .payloadDecoder(PayloadDecoder.ZERO_COPY)
           .connect(transport)
           .map(RSocketRpcClient::new);

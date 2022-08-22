@@ -174,7 +174,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TestBody() override {
     // Wait for client to fetch test case
     bool getTestReceived =
-        handler_->getTestReceived().wait(std::chrono::seconds(1));
+        handler_->getTestReceived().wait(std::chrono::seconds(5));
     EXPECT_EQ(conforming_, getTestReceived);
 
     // End test if client was unable to fetch test case
@@ -209,7 +209,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TearDown() override {
     clientProcess_.sendSignal(SIGINT);
     clientProcess_.waitOrTerminateOrKill(
-        std::chrono::seconds(1), std::chrono::seconds(1));
+        std::chrono::seconds(5), std::chrono::seconds(5));
   }
 
  private:

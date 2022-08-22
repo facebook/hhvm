@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.meta.thrift.conformance.server;
+package com.meta.thrift.conformance.data.server;
 
 import com.facebook.thrift.any.LazyAny;
 import com.facebook.thrift.client.RpcOptions;

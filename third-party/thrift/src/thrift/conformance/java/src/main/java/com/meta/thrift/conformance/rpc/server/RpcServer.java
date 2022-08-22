@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.meta.thrift.conformance.server;
+package com.meta.thrift.conformance.rpc.server;
 
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.server.RpcServerHandler;
@@ -22,17 +22,17 @@ import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.util.RpcServerUtils;
 import com.facebook.thrift.util.TransportType;
 import java.net.InetSocketAddress;
-import org.apache.thrift.conformance.ConformanceService;
+import org.apache.thrift.conformance.RPCConformanceService;
 
-public class ConformanceServer {
+public class RpcServer {
 
   public static void main(String[] args) {
     RpcServerHandler handler =
-        ConformanceService.serverHandlerBuilder(new ConformanceServiceImpl()).build();
+        RPCConformanceService.serverHandlerBuilder(new RpcServerConformanceHandler()).build();
 
     ServerTransport transport =
         RpcServerUtils.createServerTransport(
-                new ThriftServerConfig().setPort(0), TransportType.THEADER, handler)
+                new ThriftServerConfig().setPort(0), TransportType.RSOCKET, handler)
             .block();
 
     // Conformance test runner starts multiple instances of server

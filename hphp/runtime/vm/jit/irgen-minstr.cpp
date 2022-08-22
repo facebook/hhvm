@@ -1319,9 +1319,6 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
 void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
                        Type baseType, SSATmp* value) {
   assertx(baseType <= TVec);
-  auto const maybeCyclic = value->type().maybe(baseType);
-
-  if (maybeCyclic) gen(env, IncRef, value);
 
   static const StaticString s_ArrayCOW{"NewElemVecCOW"};
   auto const profile = TargetProfile<COWProfile>{
@@ -1357,7 +1354,7 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
     );
   }
 
-  if (!maybeCyclic) gen(env, IncRef, value);
+  gen(env, IncRef, value);
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {

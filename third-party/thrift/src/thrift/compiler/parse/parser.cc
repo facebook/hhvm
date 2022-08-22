@@ -96,11 +96,7 @@ class parser {
 
   // The parse methods are ordered top down from the most general to concrete.
 
-  // program: statement_list
-  //
-  // statement_list:
-  //   statement_list statement_annotated comma_or_semicolon_optional
-  // | /* empty */
+  // program: statement*
   bool parse_program() {
     consume_token();
     try {
@@ -117,18 +113,14 @@ class parser {
     return true;
   }
 
-  // statement_annotated:
-  //   statement_attrs statement annotations
-  //
   // statement:
-  //     /* program_doc_text (empty) */ header
-  //   | definition
+  //   statement_attrs (header | definition) annotations comma_or_semicolon?
   std::unique_ptr<t_named> parse_statement() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
     auto stmt = parse_header_or_definition();
     auto annotations = parse_annotations();
-    parse_comma_or_semicolon_optional();
+    try_parse_comma_or_semicolon();
     switch (stmt.type) {
       case t_statement_type::standard_header:
         actions_.on_standard_header(std::move(attrs), std::move(annotations));
@@ -155,9 +147,7 @@ class parser {
     /* implicit */ statement(std::unique_ptr<Named> n) : def(std::move(n)) {}
   };
 
-  // header:
-  //     include_or_package
-  //   | namespace
+  // header: program_doctext? (include_or_package | namespace)
   //
   // definition:
   //     service
@@ -239,9 +229,7 @@ class parser {
     return t_statement_type::standard_header;
   }
 
-  // namespace:
-  //     "namespace" identifier identifier
-  //   | "namespace" identifier string_literal
+  // namespace: "namespace" identifier (identifier | string_literal)
   void parse_namespace() {
     assert(token_.kind == tok::kw_namespace);
     actions_.on_program_doctext();
@@ -253,11 +241,7 @@ class parser {
     return actions_.on_namespace(language, ns);
   }
 
-  // statement_attrs: /* capture_doc_text (empty) */ structured_annotations
-  //
-  // structured_annotations:
-  //     structured_annotations structured_annotation
-  //   | /* empty */
+  // statement_attrs: doctext? structured_annotation*
   std::unique_ptr<t_def_attrs> parse_statement_attrs() {
     auto doc = actions_.on_doctext();
     auto annotations = std::unique_ptr<t_struct_annotations>();
@@ -270,17 +254,14 @@ class parser {
     return actions_.on_statement_attrs(std::move(doc), std::move(annotations));
   }
 
-  // inline_doc_optional: inline_doc | /* empty */
-  boost::optional<doc> parse_inline_doc_optional() {
+  boost::optional<doc> try_parse_inline_doc() {
     auto loc = token_.range.begin;
     return token_.kind == tok::inline_doc
         ? actions_.on_inline_doc(loc, consume_token().string_value())
         : boost::optional<doc>();
   }
 
-  // structured_annotation:
-  //     "@" const_struct
-  //   | "@" const_struct_type
+  // structured_annotation: "@" (const_struct | const_struct_type)
   std::unique_ptr<t_const> parse_structured_annotation() {
     auto range = track_range();
     if (!try_consume_token('@')) {
@@ -295,18 +276,13 @@ class parser {
     return actions_.on_structured_annotation(range, std::move(const_value));
   }
 
-  // annotations:
-  //     "(" annotation_list comma_or_semicolon_optional ")"
-  //   | "(" ")"
-  //   | /* empty */
+  // annotations: "(" annotation_list? ")"
   //
   // annotation_list:
-  //     annotation_list comma_or_semicolon annotation
-  //   | annotation
+  //   (annotation comma_or_semicolon)* annotation comma_or_semicolon?
   //
-  // annotation: identifier "=" int_or_literal | identifier
-  //
-  // int_or_literal: string_literal | bool_constant | integer
+  // annotation: identifier ("=" annotation_value)?
+  // annotation_value: bool_constant | integer | string_literal
   std::unique_ptr<t_annotations> parse_annotations() {
     if (!try_consume_token('(')) {
       return {};
@@ -331,7 +307,7 @@ class parser {
         }
       }
       annotations->strings[std::move(key)] = {range, std::move(value)};
-      if (!parse_comma_or_semicolon_optional()) {
+      if (!try_parse_comma_or_semicolon()) {
         break;
       }
     }
@@ -339,9 +315,8 @@ class parser {
     return annotations;
   }
 
-  // service: "service" identifier extends "{" function_list "}"
-  //
-  // extends: "extends" identifier | /* empty */
+  // service: "service" identifier extends? "{" function_or_performs* "}"
+  // extends: "extends" identifier
   std::unique_ptr<t_service> parse_service() {
     auto range = track_range();
     expect_and_consume(tok::kw_service);
@@ -355,7 +330,7 @@ class parser {
         range, std::move(name), std::move(base), std::move(functions));
   }
 
-  // interaction: "interaction" identifier "{" function_list "}"
+  // interaction: "interaction" identifier "{" function_or_performs* "}"
   std::unique_ptr<t_interaction> parse_interaction() {
     auto range = track_range();
     expect_and_consume(tok::kw_interaction);
@@ -365,26 +340,23 @@ class parser {
         range, std::move(name), std::move(functions));
   }
 
-  // function_list:
-  //     function_list function comma_or_semicolon_optional
-  //   | function_list performs comma_or_semicolon
-  //   | /* empty */
-  //
-  // performs: "performs" field_type
+  // function_or_performs:
+  //     function comma_or_semicolon?
+  //   | "performs" field_type comma_or_semicolon
   std::unique_ptr<t_function_list> parse_braced_function_list() {
     expect_and_consume('{');
     auto functions = std::make_unique<t_function_list>();
     while (token_.kind != '}') {
       if (token_.kind != tok::kw_performs) {
         functions->emplace_back(parse_function());
-        parse_comma_or_semicolon_optional();
+        try_parse_comma_or_semicolon();
         continue;
       }
       // Parse performs.
       auto range = track_range();
       consume_token();
       auto type = parse_field_type();
-      if (!parse_comma_or_semicolon_optional()) {
+      if (!try_parse_comma_or_semicolon()) {
         report_expected("`,` or `;`");
       }
       functions->emplace_back(actions_.on_performs(range, type));
@@ -395,9 +367,9 @@ class parser {
 
   // function:
   //   statement_attrs function_qualifier
-  //     return_type identifier "(" field_list ")" maybe_throws annotations
+  //     return_type identifier? "(" field* ")" throws? annotations
   //
-  // function_qualifier: "oneway" | "idempotent" | "readonly" | /* empty */
+  // function_qualifier: "oneway" | "idempotent" | "readonly"
   std::unique_ptr<t_function> parse_function() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
@@ -430,7 +402,7 @@ class parser {
     auto params = parse_field_list(')');
     expect_and_consume(')');
 
-    auto throws = parse_throws();
+    auto throws = try_parse_throws();
     auto annotations = parse_annotations();
     return actions_.on_function(
         range,
@@ -444,21 +416,19 @@ class parser {
         std::move(annotations));
   }
 
-  // return_type:
-  //     return_type_element
-  //   | return_type "," return_type_element
+  // return_type: (return_type_element ",")* return_type_element
   //
   // return_type_element:
   //     field_type | stream_return_type | sink_return_type | "void"
   //
-  // stream_return_type: "stream" "<" field_type maybe_throws ">"
-  //
-  // sink_return_type: "sink" "<" sink_field_type "," sink_field_type ">"
+  // stream_return_type: "stream" "<" type_throws_spec ">"
+  // sink_return_type: "sink" "<" type_throws_spec "," type_throws_spec ">"
+  // type_throws_spec: field_type throws?
   std::vector<t_type_ref> parse_return_type() {
     auto return_type = std::vector<t_type_ref>();
     auto parse_type_throws = [this]() -> type_throws_spec {
       auto type = parse_field_type();
-      auto throws = parse_throws();
+      auto throws = try_parse_throws();
       return {std::move(type), std::move(throws)};
     };
     do {
@@ -496,8 +466,8 @@ class parser {
     return return_type;
   }
 
-  // maybe_throws: "throws" "(" field_list ")" | /* empty */
-  std::unique_ptr<t_throws> parse_throws() {
+  // throws: "throws" "(" field* ")"
+  std::unique_ptr<t_throws> try_parse_throws() {
     if (!try_consume_token(tok::kw_throws)) {
       return {};
     }
@@ -516,7 +486,7 @@ class parser {
     return actions_.on_typedef(range, std::move(type), std::move(name));
   }
 
-  // struct: "struct" identifier "{" field_list "}"
+  // struct: "struct" identifier "{" field* "}"
   std::unique_ptr<t_struct> parse_struct() {
     auto range = track_range();
     expect_and_consume(tok::kw_struct);
@@ -525,7 +495,7 @@ class parser {
     return actions_.on_struct(range, std::move(name), std::move(fields));
   }
 
-  // union: "union" identifier "{" field_list "}"
+  // union: "union" identifier "{" field* "}"
   std::unique_ptr<t_union> parse_union() {
     auto range = track_range();
     expect_and_consume(tok::kw_union);
@@ -535,12 +505,12 @@ class parser {
   }
 
   // exception:
-  //   error_safety error_kind error_blame
-  //     "exception" identifier "{" field_list "}"
+  //   error_safety? error_kind? error_blame?
+  //     "exception" identifier "{" field* "}"
   //
-  // error_safety: "safe" | /* empty */
-  // error_kind: "transient" | "stateful" | "permanent" | /* empty */
-  // error_blame: "client" | "server" | /* empty */
+  // error_safety: "safe"
+  // error_kind: "transient" | "stateful" | "permanent"
+  // error_blame: "client" | "server"
   std::unique_ptr<t_exception> parse_exception() {
     auto range = track_range();
     auto safety = try_consume_token(tok::kw_safe) ? t_error_safety::safe
@@ -582,9 +552,6 @@ class parser {
     return fields;
   }
 
-  // field_list:
-  //     field_list field comma_or_semicolon_optional inline_doc_optional
-  //   | /* empty */
   t_field_list parse_field_list(token_kind delimiter) {
     auto fields = t_field_list();
     while (token_.kind != delimiter) {
@@ -594,14 +561,12 @@ class parser {
   }
 
   // field:
-  //   statement_attrs field_id field_qualifier field_type identifier
-  //     field_value annotations
+  //   statement_attrs field_id? field_qualifier? field_type identifier
+  //     field_value? annotations comma_or_semicolon? inline_doc?
   //
-  // field_id: integer ":" | /* empty */
-  //
-  // field_qualifier: "required" | "optional" | /* empty */
-  //
-  // field_value: "=" const_value | /* empty */
+  // field_id: integer ":"
+  // field_qualifier: "required" | "optional"
+  // field_value: "=" const_value
   std::unique_ptr<t_field> parse_field() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
@@ -632,8 +597,8 @@ class parser {
     }
 
     auto annotations = parse_annotations();
-    parse_comma_or_semicolon_optional();
-    auto doc = parse_inline_doc_optional();
+    try_parse_comma_or_semicolon();
+    auto doc = try_parse_inline_doc();
     return actions_.on_field(
         range,
         std::move(attrs),
@@ -647,10 +612,7 @@ class parser {
         std::move(doc));
   }
 
-  // field_type:
-  //     tok::identifier annotations
-  //   | base_type annotations
-  //   | container_type annotations
+  // field_type: (tok::identifier | base_type | container_type) annotations
   //
   // container_type: list_type | set_type | map_type
   //
@@ -740,12 +702,7 @@ class parser {
     return base_type;
   }
 
-  // enum: "enum" identifier "{" enum_value_list "}"
-  //
-  // enum_value_list:
-  //     enum_value_list enum_value comma_or_semicolon_optional
-  //       inline_doc_optional
-  //   | /* empty */
+  // enum: "enum" identifier "{" enum_value* "}"
   std::unique_ptr<t_enum> parse_enum() {
     auto range = track_range();
     expect_and_consume(tok::kw_enum);
@@ -759,9 +716,9 @@ class parser {
     return actions_.on_enum(range, std::move(name), std::move(values));
   }
 
-  // enum_value_annotated:
-  //     statement_attrs identifier annotations
-  //   | statement_attrs identifier "=" integer annotations
+  // enum_value:
+  //   statement_attrs identifier ("=" integer)? annotations
+  //     comma_or_semicolon? inline_doc?
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
@@ -771,8 +728,8 @@ class parser {
         ? boost::optional<int64_t>(parse_integer())
         : boost::none;
     auto annotations = parse_annotations();
-    parse_comma_or_semicolon_optional();
-    auto doc = parse_inline_doc_optional();
+    try_parse_comma_or_semicolon();
+    auto doc = try_parse_inline_doc();
     return actions_.on_enum_value(
         range,
         std::move(attrs),
@@ -795,8 +752,9 @@ class parser {
   }
 
   // const_value:
-  //     bool_constant | integer | double | string_literal
-  //   | identifier | const_list | const_map | const_struct
+  //     bool_constant | integer | float | string_literal
+  //   | const_list | const_map | const_struct
+  //   | identifier
   std::unique_ptr<t_const_value> parse_const_value() {
     auto range = track_range();
     auto s = sign::plus;
@@ -811,14 +769,14 @@ class parser {
         if (token_.kind == tok::int_constant) {
           return actions_.on_int_const(range, parse_integer(s));
         } else if (token_.kind == tok::float_constant) {
-          return actions_.on_double_const(parse_double(s));
+          return actions_.on_double_const(parse_float(s));
         }
         report_expected("number");
         break;
       case tok::int_constant:
         return actions_.on_int_const(range, parse_integer());
       case tok::float_constant:
-        return actions_.on_double_const(parse_double());
+        return actions_.on_double_const(parse_float());
       case tok::string_literal:
         return actions_.on_string_literal(consume_token().string_value());
       case to_tok('['):
@@ -836,19 +794,16 @@ class parser {
     report_expected("constant");
   }
 
-  // const_list:
-  //     "[" const_list_contents comma_or_semicolon_optional "]"
-  //   | "[" "]"
+  // const_list: "[" const_list_contents? "]"
   //
   // const_list_contents:
-  //     const_list_contents comma_or_semicolon const_value
-  //   | const_value
+  //   (const_value comma_or_semicolon)* const_value comma_or_semicolon?
   std::unique_ptr<t_const_value> parse_const_list() {
     expect_and_consume('[');
     auto list = actions_.on_const_list();
     while (token_.kind != ']') {
       list->add_list(parse_const_value());
-      if (!parse_comma_or_semicolon_optional()) {
+      if (!try_parse_comma_or_semicolon()) {
         break;
       }
     }
@@ -856,13 +811,11 @@ class parser {
     return list;
   }
 
-  // const_map:
-  //     "{" const_map_contents comma_or_semicolon_optional "}"
-  //   | "{" "}"
+  // const_map: "{" const_map_contents? "}"
   //
   // const_map_contents:
-  //     const_map_contents CommaOrSemicolon const_value ":" const_value
-  //   | const_value ":" const_value
+  //   (const_value ":" const_value comma_or_semicolon)
+  //    const_value ":" const_value comma_or_semicolon?
   std::unique_ptr<t_const_value> parse_const_map() {
     expect_and_consume('{');
     auto map = actions_.on_const_map();
@@ -871,7 +824,7 @@ class parser {
       expect_and_consume(':');
       auto value = parse_const_value();
       map->add_map(std::move(key), std::move(value));
-      if (!parse_comma_or_semicolon_optional()) {
+      if (!try_parse_comma_or_semicolon()) {
         break;
       }
     }
@@ -879,13 +832,11 @@ class parser {
     return map;
   }
 
-  // const_struct:
-  //     identifier "{" const_struct_contents comma_or_semicolon_optional "}"
-  //   | identifier "{" "}"
+  // const_struct: identifier "{" const_struct_contents? "}"
   //
   // const_struct_contents:
-  //     const_struct_contents comma_or_semicolon identifier "=" const_value
-  //   | identifier "=" const_value
+  //   (identifier "=" const_value comma_or_semicolon)*
+  //    identifier "=" const_value comma_or_semicolon?
   std::unique_ptr<t_const_value> parse_const_struct_body(
       source_range range, std::string id) {
     expect_and_consume('{');
@@ -895,7 +846,7 @@ class parser {
       expect_and_consume('=');
       auto value = parse_const_value();
       map->add_map(std::move(key), std::move(value));
-      if (!parse_comma_or_semicolon_optional()) {
+      if (!try_parse_comma_or_semicolon()) {
         break;
       }
     }
@@ -903,10 +854,7 @@ class parser {
     return map;
   }
 
-  // integer:
-  //     int_constant
-  //   | "+" int_constant
-  //   | "-" int_constant
+  // integer: ("+" | "-")? int_constant
   boost::optional<int64_t> try_parse_integer(sign s = sign::plus) {
     switch (token_.kind) {
       case to_tok('-'):
@@ -932,11 +880,8 @@ class parser {
     report_expected("integer");
   }
 
-  // double:
-  //     float_constant
-  //   | "+" float_constant
-  //   | "-" float_constant
-  double parse_double(sign s = sign::plus) {
+  // float: ("+" | "-")? float_constant
+  double parse_float(sign s = sign::plus) {
     switch (token_.kind) {
       case to_tok('-'):
         s = sign::minus;
@@ -954,7 +899,7 @@ class parser {
       default:
         break;
     }
-    report_expected("double");
+    report_expected("floating-point number");
   }
 
   // identifier:
@@ -1006,9 +951,8 @@ class parser {
     report_expected("identifier");
   }
 
-  // comma_or_semicolon_optional: comma_or_semicolon | /* empty */
   // comma_or_semicolon: ","  | ";"
-  bool parse_comma_or_semicolon_optional() {
+  bool try_parse_comma_or_semicolon() {
     return try_consume_token(',') || try_consume_token(';');
   }
 

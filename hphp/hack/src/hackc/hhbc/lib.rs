@@ -53,7 +53,6 @@ pub use hhbc_ast::MemberKey;
 pub use hhbc_ast::NumParams;
 pub use hhbc_ast::Pseudo;
 pub use hhbc_ast::RepoAuthType;
-pub use hhbc_ast::SrcLoc;
 pub use hhbc_ast::StackIndex;
 pub use hhbc_ast::Targets;
 pub use hhbc_ast::Visibility;

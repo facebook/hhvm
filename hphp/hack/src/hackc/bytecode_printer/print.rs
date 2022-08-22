@@ -36,10 +36,10 @@ use hhbc::Method;
 use hhbc::MethodFlags;
 use hhbc::Module;
 use hhbc::Param;
-use hhbc::Pos;
 use hhbc::Property;
 use hhbc::Pseudo;
 use hhbc::Span;
+use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::TraitReqKind;
 use hhbc::TypeConstant;
@@ -130,7 +130,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
 fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
-        let Pos {
+        let SrcLoc {
             line_begin,
             line_end,
             col_begin,

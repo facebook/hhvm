@@ -65,13 +65,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
                 ir::FatalOp::Runtime(..) => hhbc::FatalOp::Runtime,
                 ir::FatalOp::RuntimeOmitFrame(..) => hhbc::FatalOp::RuntimeOmitFrame,
             };
-            let pos = hhbc::Pos {
-                line_begin: loc.line_begin as usize,
-                col_begin: loc.col_begin as usize,
-                line_end: loc.line_end as usize,
-                col_end: loc.col_end as usize,
-            };
-            unit.fatal = Maybe::Just(ffi::Triple(op, pos, *msg))
+            unit.fatal = Maybe::Just(ffi::Triple(op, *loc, *msg))
         }
     }
 

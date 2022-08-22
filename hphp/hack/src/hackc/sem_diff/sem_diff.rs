@@ -11,7 +11,7 @@ use hhbc::Function;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
-use hhbc::Pos;
+use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::Typedef;
 use hhbc::Unit;
@@ -405,8 +405,8 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
 
 fn sem_diff_fatal(
     path: &CodePath<'_>,
-    a: &Triple<FatalOp, Pos, Str<'_>>,
-    b: &Triple<FatalOp, Pos, Str<'_>>,
+    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
+    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
 ) -> Result<()> {
     sem_diff_eq(&path.index(0), &a.0, &b.0)?;
     sem_diff_eq(&path.index(1), &a.1, &b.1)?;

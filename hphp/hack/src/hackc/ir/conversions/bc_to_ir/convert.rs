@@ -76,21 +76,13 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
         }
     }
 
-    if let Maybe::Just(ffi::Triple(op, pos, msg)) = unit.fatal {
-        let loc = ir::SrcLoc {
-            line_begin: pos.line_begin as isize,
-            col_begin: pos.col_begin as isize,
-            line_end: pos.line_end as isize,
-            col_end: pos.col_end as isize,
-        };
-
-        let fatal = match op {
+    if let Maybe::Just(ffi::Triple(op, loc, msg)) = unit.fatal {
+        ir_unit.fatal = match op {
             hhvm_ffi::ffi::FatalOp::Parse => ir::FatalOp::Parse(loc, msg),
             hhvm_ffi::ffi::FatalOp::Runtime => ir::FatalOp::Runtime(loc, msg),
             hhvm_ffi::ffi::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, msg),
             _ => panic!("bad FatalOp value"),
         };
-        ir_unit.fatal = fatal;
     }
 
     ir_unit

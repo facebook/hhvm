@@ -872,9 +872,9 @@ fn assemble_enum_ty<'arena>(
 fn assemble_fatal<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::Pos, Str<'arena>>> {
+) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::SrcLoc, Str<'arena>>> {
     token_iter.expect_is_str(Token::into_decl, ".fatal")?;
-    let pos = hhbc::Pos {
+    let loc = hhbc::SrcLoc {
         line_begin: token_iter.expect_and_get_number()?,
         col_begin: {
             token_iter.expect(Token::into_colon)?;
@@ -902,7 +902,7 @@ fn assemble_fatal<'arena>(
     token_iter.expect(Token::into_semicolon)?;
     Ok(ffi::Triple::from((
         fat_op,
-        pos,
+        loc,
         Str::new_slice(alloc, &msg),
     )))
 }
@@ -1269,9 +1269,9 @@ fn assemble_filepath(token_iter: &mut Lexer<'_>) -> Result<PathBuf> {
 /// Span ex: (2, 4)
 fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
     token_iter.expect(Token::into_open_paren)?;
-    let line_begin: usize = token_iter.expect_and_get_number()?;
+    let line_begin = token_iter.expect_and_get_number()?;
     token_iter.expect(Token::into_comma)?;
-    let line_end: usize = token_iter.expect_and_get_number()?;
+    let line_end = token_iter.expect_and_get_number()?;
     token_iter.expect(Token::into_close_paren)?;
     Ok(hhbc::Span {
         line_begin,

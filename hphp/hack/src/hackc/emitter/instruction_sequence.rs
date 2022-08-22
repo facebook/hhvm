@@ -462,10 +462,10 @@ pub mod instr {
         col_end: isize,
     ) -> InstrSeq<'a> {
         instr(Instruct::Pseudo(Pseudo::SrcLoc(SrcLoc {
-            line_begin,
-            line_end,
-            col_begin,
-            col_end,
+            line_begin: line_begin as i32,
+            line_end: line_end as i32,
+            col_begin: col_begin as i32,
+            col_end: col_end as i32,
         })))
     }
 }

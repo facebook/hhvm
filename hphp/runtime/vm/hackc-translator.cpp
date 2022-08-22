@@ -1350,7 +1350,7 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
-  maybeThen(unit.fatal, [&](Triple<FatalOp, hhbc::Pos, Str> fatal) {
+  maybeThen(unit.fatal, [&](Triple<FatalOp, hhbc::SrcLoc, Str> fatal) {
     auto const pos = fatal._1;
     auto const msg = toString(fatal._2);
     throw FatalUnitError(

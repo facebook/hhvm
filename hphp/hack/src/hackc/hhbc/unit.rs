@@ -16,7 +16,7 @@ use crate::Constant;
 use crate::FatalOp;
 use crate::Function;
 use crate::Module;
-use crate::Pos;
+use crate::SrcLoc;
 use crate::SymbolRefs;
 use crate::Typedef;
 
@@ -32,5 +32,5 @@ pub struct Unit<'arena> {
     pub module_use: Maybe<Str<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Slice<'arena, Constant<'arena>>,
-    pub fatal: Maybe<Triple<FatalOp, Pos, Str<'arena>>>,
+    pub fatal: Maybe<Triple<FatalOp, SrcLoc, Str<'arena>>>,
 }

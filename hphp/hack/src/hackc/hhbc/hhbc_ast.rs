@@ -12,6 +12,7 @@ use crate::typed_value::TypedValue;
 use crate::FCallArgsFlags;
 use crate::PropName;
 use crate::ReadonlyOp;
+use crate::SrcLoc;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -320,15 +321,6 @@ impl LocalRange {
         let end = start + self.len as usize;
         (start..end).map(Local::from_usize)
     }
-}
-
-#[derive(Clone, Debug, Hash, Eq, PartialEq, Default, Serialize)]
-#[repr(C)]
-pub struct SrcLoc {
-    pub line_begin: isize,
-    pub col_begin: isize,
-    pub line_end: isize,
-    pub col_end: isize,
 }
 
 /// These are HHAS pseudo-instructions that are handled in the HHAS parser and

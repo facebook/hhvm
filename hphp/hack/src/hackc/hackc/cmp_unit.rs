@@ -23,8 +23,8 @@ use hhbc::Method;
 use hhbc::Module;
 use hhbc::Opcode;
 use hhbc::Param;
-use hhbc::Pos;
 use hhbc::Property;
+use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -659,7 +659,10 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_fatal(a: &Triple<FatalOp, Pos, Str<'_>>, b: &Triple<FatalOp, Pos, Str<'_>>) -> Result<()> {
+fn cmp_fatal(
+    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
+    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
+) -> Result<()> {
     cmp_eq(&a.0, &b.0).indexed("0")?;
     cmp_eq(&a.1, &b.1).indexed("1")?;
     cmp_eq(&a.2, &b.2).indexed("2")?;

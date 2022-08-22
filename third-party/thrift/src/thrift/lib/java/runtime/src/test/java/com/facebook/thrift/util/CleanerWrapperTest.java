@@ -16,7 +16,10 @@
 
 package com.facebook.thrift.util;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,6 +46,22 @@ public class CleanerWrapperTest {
     CountDownLatch latch = new CountDownLatch(1);
     CleanerWrapper.create().register(new Object(), latch::countDown);
     System.gc();
-    latch.await();
+    boolean result = latch.await(10, TimeUnit.SECONDS);
+    Assert.assertTrue(result);
+  }
+
+  @Test
+  public void testRegisterWithTf() throws Exception {
+    if (System.getProperty("java.version").startsWith("1.8")) {
+      return;
+    }
+
+    CountDownLatch latch = new CountDownLatch(1);
+    ThreadFactory threadFactory =
+        new ThreadFactoryBuilder().setDaemon(true).setNameFormat("test-only-%d").build();
+    CleanerWrapper.create(threadFactory).register(new Object(), latch::countDown);
+    System.gc();
+    boolean result = latch.await(10, TimeUnit.SECONDS);
+    Assert.assertTrue(result);
   }
 }

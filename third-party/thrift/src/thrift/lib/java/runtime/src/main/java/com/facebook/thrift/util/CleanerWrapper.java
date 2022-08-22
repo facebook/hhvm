@@ -43,7 +43,7 @@ public class CleanerWrapper {
       MethodHandles.Lookup lookup = MethodHandles.lookup();
 
       Class<?> cleanerClass = Class.forName("java.lang.ref.Cleaner");
-      Class<?> cleanableClass = Class.forName("java.lang.ref.Cleaner.Cleanable");
+      Class<?> cleanableClass = Class.forName("java.lang.ref.Cleaner$Cleanable");
 
       create = lookup.findStatic(cleanerClass, "create", MethodType.methodType(cleanerClass));
       createWithTf =
@@ -74,7 +74,7 @@ public class CleanerWrapper {
 
     try {
       CleanerWrapper wrapper = new CleanerWrapper();
-      wrapper.cleaner = CREATE_WITH_TF.invokeExact(threadFactory);
+      wrapper.cleaner = CREATE_WITH_TF.invoke(threadFactory);
       return wrapper;
     } catch (Throwable t) {
       throw Exceptions.propagate(t);
@@ -88,7 +88,7 @@ public class CleanerWrapper {
 
     try {
       CleanerWrapper wrapper = new CleanerWrapper();
-      wrapper.cleaner = CREATE.invokeExact();
+      wrapper.cleaner = CREATE.invoke();
       return wrapper;
     } catch (Throwable t) {
       throw Exceptions.propagate(t);

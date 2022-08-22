@@ -18,12 +18,18 @@
 #include <exception>
 
 #include <fmt/core.h>
+#include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/lexer.h>
 #include <thrift/compiler/parse/parser.h>
 
 namespace apache {
 namespace thrift {
 namespace compiler {
+
+parser_actions::~parser_actions() = default;
+
 namespace {
 
 // A Thrift parser.
@@ -242,23 +248,23 @@ class parser {
   }
 
   // statement_attrs: doctext? structured_annotation*
-  std::unique_ptr<t_def_attrs> parse_statement_attrs() {
+  std::unique_ptr<stmt_attrs> parse_statement_attrs() {
     auto doc = actions_.on_doctext();
-    auto annotations = std::unique_ptr<t_struct_annotations>();
+    auto annotations = std::unique_ptr<node_list<t_const>>();
     while (auto annotation = parse_structured_annotation()) {
       if (!annotations) {
-        annotations = std::make_unique<t_struct_annotations>();
+        annotations = std::make_unique<node_list<t_const>>();
       }
       annotations->emplace_back(std::move(annotation));
     }
     return actions_.on_statement_attrs(std::move(doc), std::move(annotations));
   }
 
-  boost::optional<doc> try_parse_inline_doc() {
+  boost::optional<comment> try_parse_inline_doc() {
     auto loc = token_.range.begin;
     return token_.kind == tok::inline_doc
         ? actions_.on_inline_doc(loc, consume_token().string_value())
-        : boost::optional<doc>();
+        : boost::optional<comment>();
   }
 
   // structured_annotation: "@" (const_struct | const_struct_type)

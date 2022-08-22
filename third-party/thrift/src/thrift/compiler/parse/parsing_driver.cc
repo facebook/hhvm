@@ -55,7 +55,7 @@ class parsing_driver::lex_handler_impl : public lex_handler {
   // "pop-ing" it on the node as needed.
   void on_doc_comment(fmt::string_view text, source_location loc) override {
     driver_.clear_doctext();
-    driver_.doctext = doc{driver_.strip_doctext(text), loc};
+    driver_.doctext = comment{driver_.strip_doctext(text), loc};
   }
 };
 
@@ -67,8 +67,8 @@ parsing_driver::parsing_driver(
     : source_mgr_(&sm),
       lex_handler_(std::make_unique<lex_handler_impl>(*this)),
       lexer_(std::make_unique<lexer>(*lex_handler_, ctx, source())),
-      params(std::move(parse_params)),
-      ctx_(ctx) {
+      ctx_(ctx),
+      params_(std::move(parse_params)) {
   program_bundle =
       std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
   program = program_bundle->root_program();
@@ -126,8 +126,7 @@ void parsing_driver::parse_file() {
       src.start, diagnostic_level::info, "Scanning {} for includes\n", path);
   mode = parsing_mode::INCLUDES;
   try {
-    auto actions = parser_actions{*this};
-    if (!compiler::parse(*lexer_, actions, ctx_)) {
+    if (!compiler::parse(*lexer_, *this, ctx_)) {
       end_parsing("Parser error during include pass.");
     }
   } catch (const std::string& x) {
@@ -139,7 +138,7 @@ void parsing_driver::parse_file() {
   // Always enable allow_neg_field_keys when parsing included files.
   // This way if a thrift file has negative keys, --allow-neg-keys doesn't have
   // to be used by everyone that includes it.
-  auto old_params = params;
+  auto old_params = params_;
   auto old_program = program;
   for (auto included_program : includes) {
     circular_deps_.insert(path);
@@ -153,7 +152,7 @@ void parsing_driver::parse_file() {
 
     // This must be after the previous circular include check, since the emitted
     // error message above is supposed to reference the parent file name.
-    params.allow_neg_field_keys = true;
+    params_.allow_neg_field_keys = true;
     ctx_.end_visit(*old_program);
     program = included_program;
     parse_file();
@@ -163,7 +162,7 @@ void parsing_driver::parse_file() {
     (void)num_removed;
     assert(num_removed == 1);
   }
-  params = old_params;
+  params_ = old_params;
   program = old_program;
 
   // Parse the program file
@@ -178,8 +177,7 @@ void parsing_driver::parse_file() {
   ctx_.report(
       src.start, diagnostic_level::info, "Parsing {} for types\n", path);
   try {
-    auto actions = parser_actions{*this};
-    if (!compiler::parse(*lexer_, actions, ctx_)) {
+    if (!compiler::parse(*lexer_, *this, ctx_)) {
       end_parsing("Parser error during types pass.");
     }
   } catch (const std::string& x) {
@@ -220,7 +218,7 @@ std::string parsing_driver::find_include_file(
 
   // relative path, start searching
   // new search path with current dir global
-  std::vector<std::string> sp = params.incl_searchpath;
+  std::vector<std::string> sp = params_.incl_searchpath;
   sp.insert(sp.begin(), directory_name(program->path()));
   // iterate through paths
   std::vector<std::string>::iterator it;
@@ -260,7 +258,7 @@ void parsing_driver::clear_doctext() {
   doctext = boost::none;
 }
 
-boost::optional<doc> parsing_driver::pop_doctext() {
+boost::optional<comment> parsing_driver::pop_doctext() {
   return mode == parsing_mode::PROGRAM ? std::exchange(doctext, boost::none)
                                        : boost::none;
 }
@@ -416,7 +414,7 @@ void parsing_driver::set_annotations(
 
 void parsing_driver::set_attributes(
     t_named& node,
-    std::unique_ptr<t_def_attrs> attrs,
+    std::unique_ptr<stmt_attrs> attrs,
     std::unique_ptr<t_annotations> annots,
     const source_range& range) const {
   if (mode != parsing_mode::PROGRAM) {
@@ -436,7 +434,8 @@ void parsing_driver::set_attributes(
   set_annotations(&node, std::move(annots));
 }
 
-void parsing_driver::set_doctext(t_node& node, boost::optional<doc> doc) const {
+void parsing_driver::set_doctext(
+    t_node& node, boost::optional<comment> doc) const {
   if (!doc) {
     return;
   }
@@ -648,7 +647,7 @@ const t_type* parsing_driver::add_unnamed_typedef(
 }
 
 void parsing_driver::allocate_field_id(t_field_id& next_id, t_field& field) {
-  if (params.strict >= 192) {
+  if (params_.strict >= 192) {
     ctx_.error(
         field,
         "Implicit field keys are deprecated and not allowed with -strict");
@@ -673,7 +672,7 @@ void parsing_driver::maybe_allocate_field_id(
   // Check the explicitly provided id.
   if (field.id() <= 0) {
     // TODO(afuller): Move this validation to ast_validator.
-    if (params.allow_neg_field_keys) {
+    if (params_.allow_neg_field_keys) {
       /*
        * allow_neg_field_keys exists to allow users to add explicitly
        * specified id values to old .thrift files without breaking
@@ -716,7 +715,7 @@ void parsing_driver::maybe_allocate_field_id(
 
 std::unique_ptr<t_const_value> parsing_driver::to_const_value(
     source_location loc, int64_t value) {
-  if (mode == parsing_mode::PROGRAM && !params.allow_64bit_consts &&
+  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
       (value < INT32_MIN || value > INT32_MAX)) {
     warning(loc, "64-bit constant {} may not work in all languages", value);
   }
@@ -824,7 +823,7 @@ void parsing_driver::validate_header_location() {
 }
 
 void parsing_driver::validate_header_annotations(
-    std::unique_ptr<t_def_attrs> statement_attrs,
+    std::unique_ptr<stmt_attrs> statement_attrs,
     std::unique_ptr<t_annotations> annotations) {
   // Ideally the errors below have to be handled by a grammar, but it's not
   // expressive enough to avoid conflicts when doing so.
@@ -839,7 +838,7 @@ void parsing_driver::validate_header_annotations(
 }
 
 void parsing_driver::set_program_annotations(
-    std::unique_ptr<t_def_attrs> statement_attrs,
+    std::unique_ptr<stmt_attrs> statement_attrs,
     std::unique_ptr<t_annotations> annotations,
     const source_range& loc) {
   set_attributes(

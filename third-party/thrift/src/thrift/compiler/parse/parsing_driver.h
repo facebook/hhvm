@@ -37,31 +37,14 @@
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/parse/parser.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache {
 namespace thrift {
 namespace compiler {
 
-class lex_handler;
 class lexer;
-
-// Parsing only representations.
-struct t_annotations {
-  std::map<std::string, annotation_value> strings;
-  std::map<std::string, std::shared_ptr<const t_const>> objects;
-};
-
-struct doc {
-  std::string text;
-  source_location loc;
-};
-
-// TODO (partisan): Rename to t_stmt_attrs.
-struct t_def_attrs {
-  boost::optional<compiler::doc> doc;
-  std::unique_ptr<node_list<t_const>> struct_annotations;
-};
 
 enum class parsing_mode {
   INCLUDES = 1,
@@ -115,23 +98,390 @@ struct parsing_params {
   std::vector<std::string> incl_searchpath;
 };
 
-class parsing_driver {
- private:
-  source_manager* source_mgr_;
-  class lex_handler_impl;
-  std::unique_ptr<lex_handler_impl> lex_handler_;
-  std::unique_ptr<lexer> lexer_;
+class parsing_driver : public parser_actions {
+ public:
+  parsing_driver(
+      source_manager& sm,
+      diagnostic_context& ctx,
+      std::string path,
+      parsing_params parse_params);
+  ~parsing_driver() override;
 
-  // Returns the current source location, see lexer::location.
-  source_location location() const;
+  void on_program() override { clear_doctext(); }
+
+  void on_standard_header(
+      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<t_annotations> annotations) override {
+    validate_header_location();
+    validate_header_annotations(std::move(attrs), std::move(annotations));
+  }
+
+  void on_program_header(
+      source_range range,
+      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<t_annotations> annotations) override {
+    validate_header_location();
+    set_program_annotations(std::move(attrs), std::move(annotations), range);
+  }
+
+  void on_package(source_range range, std::string literal) override {
+    set_package(std::move(literal), range);
+  }
+
+  void on_include(source_range range, std::string literal) override {
+    add_include(std::move(literal), range);
+  }
+
+  void on_cpp_include(source_range, std::string literal) override {
+    if (mode == parsing_mode::PROGRAM) {
+      program->add_cpp_include(std::move(literal));
+    }
+  }
+
+  void on_hs_include(source_range, std::string) override {
+    // Do nothing. This syntax is handled by the hs compiler.
+  }
+
+  void on_namespace(std::string language, std::string ns) override {
+    if (mode == parsing_mode::PROGRAM) {
+      program->set_namespace(std::move(language), std::move(ns));
+    }
+  }
+
+  void on_definition(
+      source_range range,
+      t_named& def,
+      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<t_annotations> annotations) override {
+    set_parsed_definition();
+    set_attributes(def, std::move(attrs), std::move(annotations), range);
+  }
+
+  boost::optional<comment> on_doctext() override { return pop_doctext(); }
+
+  void on_program_doctext() override {
+    // When there is any doctext, assign it to the top-level program.
+    set_doctext(*program, pop_doctext());
+  }
+
+  comment on_inline_doc(source_location loc, std::string text) override {
+    return {strip_doctext(text), loc};
+  }
+
+  std::unique_ptr<stmt_attrs> on_statement_attrs(
+      boost::optional<comment> doc,
+      std::unique_ptr<node_list<t_const>> annotations) override {
+    return doc || annotations ? std::make_unique<stmt_attrs>(stmt_attrs{
+                                    std::move(doc), std::move(annotations)})
+                              : nullptr;
+  }
+
+  std::unique_ptr<t_const> on_structured_annotation(
+      source_range range, std::string name) override {
+    auto value = std::make_unique<t_const_value>();
+    value->set_map();
+    value->set_ttype(
+        new_type_ref(std::move(name), nullptr, range, /*is_const=*/true));
+    return new_struct_annotation(std::move(value), range);
+  }
+
+  std::unique_ptr<t_const> on_structured_annotation(
+      source_range range, std::unique_ptr<t_const_value> value) override {
+    return new_struct_annotation(std::move(value), range);
+  }
+
+  void on_statement(std::unique_ptr<t_named> stmt) override {
+    add_def(std::move(stmt));
+  }
+
+  std::unique_ptr<t_service> on_service(
+      source_range range,
+      std::string name,
+      const std::string& base_name,
+      std::unique_ptr<t_function_list> functions) override {
+    auto base = !base_name.empty() ? find_service(base_name) : nullptr;
+    auto service = std::make_unique<t_service>(program, std::move(name), base);
+    service->set_src_range(range);
+    set_functions(*service, std::move(functions));
+    service->set_lineno(get_lineno(range.begin));
+    return service;
+  }
+
+  std::unique_ptr<t_interaction> on_interaction(
+      source_range range,
+      std::string name,
+      std::unique_ptr<t_function_list> functions) override {
+    auto interaction =
+        std::make_unique<t_interaction>(program, std::move(name));
+    interaction->set_src_range(range);
+    set_functions(*interaction, std::move(functions));
+    interaction->set_lineno(get_lineno(range.begin));
+    return interaction;
+  }
+
+  std::unique_ptr<t_function> on_function(
+      source_range range,
+      std::unique_ptr<stmt_attrs> attrs,
+      t_function_qualifier qual,
+      std::vector<t_type_ref> return_type,
+      source_location name_loc,
+      std::string name,
+      t_field_list params,
+      std::unique_ptr<t_throws> throws,
+      std::unique_ptr<t_annotations> annotations) override {
+    auto function = std::make_unique<t_function>(
+        program, std::move(return_type), std::move(name));
+    function->set_qualifier(qual);
+    set_fields(function->params(), std::move(params));
+    function->set_exceptions(std::move(throws));
+    function->set_lineno(get_lineno(name_loc));
+    function->set_src_range(range);
+    // TODO: Leave the param list unnamed.
+    function->params().set_name(function->name() + "_args");
+    set_attributes(*function, std::move(attrs), std::move(annotations), range);
+    return function;
+  }
+
+  t_type_ref on_stream_return_type(type_throws_spec spec) override {
+    auto stream_response =
+        std::make_unique<t_stream_response>(std::move(spec.type));
+    stream_response->set_exceptions(std::move(spec.throws));
+    return new_type_ref(std::move(stream_response), {});
+  }
+
+  t_type_ref on_sink_return_type(
+      type_throws_spec sink_spec,
+      type_throws_spec final_response_spec) override {
+    auto sink = std::make_unique<t_sink>(
+        std::move(sink_spec.type), std::move(final_response_spec.type));
+    sink->set_sink_exceptions(std::move(sink_spec.throws));
+    sink->set_final_response_exceptions(std::move(final_response_spec.throws));
+    return new_type_ref(std::move(sink), {});
+  }
+
+  t_type_ref on_list_type(
+      t_type_ref element_type,
+      std::unique_ptr<t_annotations> annotations) override {
+    return new_type_ref(
+        std::make_unique<t_list>(std::move(element_type)),
+        std::move(annotations));
+  }
+
+  t_type_ref on_set_type(
+      t_type_ref key_type,
+      std::unique_ptr<t_annotations> annotations) override {
+    return new_type_ref(
+        std::make_unique<t_set>(std::move(key_type)), std::move(annotations));
+  }
+
+  t_type_ref on_map_type(
+      t_type_ref key_type,
+      t_type_ref value_type,
+      std::unique_ptr<t_annotations> annotations) override {
+    return new_type_ref(
+        std::make_unique<t_map>(std::move(key_type), std::move(value_type)),
+        std::move(annotations));
+  }
+
+  std::unique_ptr<t_function> on_performs(
+      source_range range, t_type_ref type) override {
+    std::string name = type.get_type() ? "create" + type.get_type()->get_name()
+                                       : "<interaction placeholder>";
+    auto function =
+        std::make_unique<t_function>(program, std::move(type), std::move(name));
+    function->set_lineno(get_lineno());
+    function->set_src_range(range);
+    function->set_is_interaction_constructor();
+    return function;
+  }
+
+  std::unique_ptr<t_throws> on_throws(t_field_list exceptions) override {
+    return new_throws(std::make_unique<t_field_list>(std::move(exceptions)));
+  }
+
+  std::unique_ptr<t_typedef> on_typedef(
+      source_range range, t_type_ref type, std::string name) override {
+    auto typedef_node =
+        std::make_unique<t_typedef>(program, std::move(name), std::move(type));
+    typedef_node->set_src_range(range);
+    typedef_node->set_lineno(get_lineno(range.begin));
+    return typedef_node;
+  }
+
+  std::unique_ptr<t_struct> on_struct(
+      source_range range, std::string name, t_field_list fields) override {
+    auto struct_node = std::make_unique<t_struct>(program, std::move(name));
+    struct_node->set_src_range(range);
+    set_fields(*struct_node, std::move(fields));
+    struct_node->set_lineno(get_lineno(range.begin));
+    return struct_node;
+  }
+
+  std::unique_ptr<t_union> on_union(
+      source_range range, std::string name, t_field_list fields) override {
+    auto union_node = std::make_unique<t_union>(program, std::move(name));
+    union_node->set_src_range(range);
+    set_fields(*union_node, std::move(fields));
+    union_node->set_lineno(get_lineno(range.begin));
+    return union_node;
+  }
+
+  std::unique_ptr<t_exception> on_exception(
+      source_range range,
+      t_error_safety safety,
+      t_error_kind kind,
+      t_error_blame blame,
+      std::string name,
+      t_field_list fields) override {
+    auto exception = std::make_unique<t_exception>(program, std::move(name));
+    exception->set_src_range(range);
+    exception->set_safety(safety);
+    exception->set_kind(kind);
+    exception->set_blame(blame);
+    set_fields(*exception, std::move(fields));
+    exception->set_lineno(get_lineno(range.begin));
+    return exception;
+  }
+
+  std::unique_ptr<t_field> on_field(
+      source_range range,
+      std::unique_ptr<stmt_attrs> attrs,
+      boost::optional<int64_t> id,
+      t_field_qualifier qual,
+      t_type_ref type,
+      source_location name_loc,
+      std::string name,
+      std::unique_ptr<t_const_value> value,
+      std::unique_ptr<t_annotations> annotations,
+      boost::optional<comment> doc) override {
+    auto field = std::make_unique<t_field>(
+        std::move(type),
+        std::move(name),
+        id ? to_field_id(range.begin, *id) : boost::optional<t_field_id>());
+    field->set_qualifier(qual);
+    if (mode == parsing_mode::PROGRAM) {
+      field->set_default_value(std::move(value));
+    }
+    field->set_lineno(get_lineno(name_loc));
+    field->set_src_range(range);
+    set_attributes(*field, std::move(attrs), std::move(annotations), range);
+    if (doc) {
+      set_doctext(*field, doc);
+    }
+    return field;
+  }
+
+  t_type_ref on_field_type(
+      const t_base_type& type,
+      std::unique_ptr<t_annotations> annotations) override {
+    return new_type_ref(type, std::move(annotations));
+  }
+
+  t_type_ref on_field_type(
+      source_range range,
+      std::string name,
+      std::unique_ptr<t_annotations> annotations) override {
+    return new_type_ref(std::move(name), std::move(annotations), range);
+  }
+
+  std::unique_ptr<t_enum> on_enum(
+      source_range range, std::string name, t_enum_value_list values) override {
+    auto enum_node = std::make_unique<t_enum>(program, std::move(name));
+    enum_node->set_values(std::move(values));
+    enum_node->set_lineno(get_lineno(range.begin));
+    return enum_node;
+  }
+
+  std::unique_ptr<t_enum_value> on_enum_value(
+      source_range range,
+      std::unique_ptr<stmt_attrs> attrs,
+      source_location name_loc,
+      std::string name,
+      int64_t* value,
+      std::unique_ptr<t_annotations> annotations,
+      boost::optional<comment> doc) override {
+    auto enum_value = std::make_unique<t_enum_value>(std::move(name));
+    set_attributes(
+        *enum_value, std::move(attrs), std::move(annotations), range);
+    if (value) {
+      enum_value->set_value(to_enum_value(range.begin, *value));
+    }
+    enum_value->set_lineno(get_lineno(name_loc));
+    if (doc) {
+      set_doctext(*enum_value, std::move(doc));
+    }
+    return enum_value;
+  }
+
+  std::unique_ptr<t_const> on_const(
+      source_range range,
+      t_type_ref type,
+      std::string name,
+      std::unique_ptr<t_const_value> value) override {
+    auto const_node = std::make_unique<t_const>(
+        program, std::move(type), std::move(name), std::move(value));
+    const_node->set_lineno(get_lineno(range.begin));
+    return const_node;
+  }
+
+  std::unique_ptr<t_const_value> on_bool_const(bool value) override {
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_bool(value);
+    return const_value;
+  }
+
+  std::unique_ptr<t_const_value> on_int_const(
+      source_location loc, int64_t value) override {
+    return to_const_value(loc, value);
+  }
+
+  std::unique_ptr<t_const_value> on_double_const(double value) override {
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_double(value);
+    return const_value;
+  }
+
+  std::unique_ptr<t_const_value> on_reference_const(
+      source_location loc, std::string name) override {
+    return copy_const_value(loc, std::move(name));
+  }
+
+  std::unique_ptr<t_const_value> on_string_literal(std::string value) override {
+    return std::make_unique<t_const_value>(std::move(value));
+  }
+
+  std::unique_ptr<t_const_value> on_const_list() override {
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_list();
+    return const_value;
+  }
+
+  std::unique_ptr<t_const_value> on_const_map() override {
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_map();
+    return const_value;
+  }
+
+  std::unique_ptr<t_const_value> on_const_struct(
+      source_range range, std::string name) override {
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_map();
+    const_value->set_ttype(
+        new_type_ref(std::move(name), nullptr, range, /*is_const=*/true));
+    return const_value;
+  }
+
+  int64_t on_integer(sign s, uint64_t value) override {
+    return to_int(value, s == sign::minus);
+  }
+
+  [[noreturn]] void on_error() override { end_parsing(); }
 
  public:
-  parsing_params params;
-
   /**
    * The last parsed doctext comment.
    */
-  boost::optional<doc> doctext;
+  boost::optional<comment> doctext;
 
   /**
    * The parsing pass that we are on. We do different things on each pass.
@@ -155,13 +505,6 @@ class parsing_driver {
    * A global map that holds a pointer to all programs already cached
    */
   std::map<std::string, t_program*> program_cache;
-
-  parsing_driver(
-      source_manager& sm,
-      diagnostic_context& ctx,
-      std::string path,
-      parsing_params parse_params);
-  ~parsing_driver();
 
   int get_lineno(source_location loc = {});
 
@@ -220,7 +563,7 @@ class parsing_driver {
   void clear_doctext();
 
   /** Returns any doctext previously pushed. */
-  boost::optional<doc> pop_doctext();
+  boost::optional<comment> pop_doctext();
 
   /**
    * Strips comment chars and aligns leading whitespace on multiline doctext.
@@ -228,7 +571,7 @@ class parsing_driver {
   std::string strip_doctext(fmt::string_view text);
 
   /** Updates doctext of given node. */
-  void set_doctext(t_node& node, boost::optional<doc> doctext) const;
+  void set_doctext(t_node& node, boost::optional<comment> doctext) const;
 
   /**
    * Cleans up text commonly found in doxygen-like comments.
@@ -276,7 +619,7 @@ class parsing_driver {
   // Populate the attributes on the given node.
   void set_attributes(
       t_named& node,
-      std::unique_ptr<t_def_attrs> attrs,
+      std::unique_ptr<stmt_attrs> attrs,
       std::unique_ptr<t_annotations> annots,
       const source_range& loc) const;
 
@@ -306,18 +649,24 @@ class parsing_driver {
   void set_parsed_definition();
   void validate_header_location();
   void validate_header_annotations(
-      std::unique_ptr<t_def_attrs> statement_attrs,
+      std::unique_ptr<stmt_attrs> statement_attrs,
       std::unique_ptr<t_annotations> annotations);
   void set_program_annotations(
-      std::unique_ptr<t_def_attrs> statement_attrs,
+      std::unique_ptr<stmt_attrs> statement_attrs,
       std::unique_ptr<t_annotations> annotations,
       const source_range& loc);
 
  private:
+  source_manager* source_mgr_;
+  class lex_handler_impl;
+  std::unique_ptr<lex_handler_impl> lex_handler_;
+  std::unique_ptr<lexer> lexer_;
+
   std::set<std::string> already_parsed_paths_;
   std::set<std::string> circular_deps_;
 
   diagnostic_context& ctx_;
+  parsing_params params_;
 
   std::unordered_set<std::string> programs_that_parsed_definition_;
 
@@ -357,6 +706,9 @@ class parsing_driver {
     }
     return value;
   }
+
+  // Returns the current source location, see lexer::location.
+  source_location location() const;
 };
 
 } // namespace compiler

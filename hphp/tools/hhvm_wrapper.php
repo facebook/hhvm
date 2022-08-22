@@ -280,10 +280,11 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   if ($echo_command) {
     echo "\n", $cmd, "\n";
   }
-  $return_var = -1;
-  system($cmd, inout $return_var);
+  $compile_rv = -1;
+  system($cmd, inout $compile_rv);
 
   $repo=$output_dir.'/hhvm.hhbc';
+  $return_var = -1;
   system("rm -f $hphp_out", inout $return_var);
   if ($echo_command !== true) {
     register_shutdown_function(
@@ -292,6 +293,9 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
         system("rm -fr $output_dir", inout $return_var);
       },
     );
+    if ($compile_rv !== 0) {
+      exit($compile_rv);
+    }
   }
 
   return $repo;

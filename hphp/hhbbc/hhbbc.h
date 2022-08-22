@@ -107,7 +107,7 @@ void whole_program(WholeProgramInput inputs,
                    std::unique_ptr<extern_worker::Client> client,
                    const EmitCallback& callback,
                    DisposeCallback dispose,
-                   Optional<StructuredLogEntry> sample = std::nullopt,
+                   StructuredLogEntry* sample,
                    int num_threads = 0);
 
 //////////////////////////////////////////////////////////////////////

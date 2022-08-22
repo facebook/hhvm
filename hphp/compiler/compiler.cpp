@@ -20,6 +20,7 @@
 #include "hphp/compiler/package.h"
 
 #include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/config.h"
@@ -785,38 +786,13 @@ void logPhaseStats(const std::string& phase, const Package& package,
 {
   auto const& stats = client.getStats();
   Logger::FInfo(
-    "  {}: total package files {:,}\n"
-    "  Execs: {:,} total, {:,} cache-hits, {:,} optimistically, {:,} fallback\n"
-    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({:,} bytes), {:,} fallback\n"
-    "  Cpu: {:,} usec usage, {:,} allocated cores\n"
-    "  Mem: {:,} max used, {:,} reserved\n"
-    "  {:,} downloads ({:,} bytes), {:,} throttles",
-    phase,
-    package.getTotalFiles(),
-    stats.execs.load(),
-    stats.execCacheHits.load(),
-    stats.optimisticExecs.load(),
-    stats.execFallbacks.load(),
-    stats.files.load(),
-    stats.filesRead.load(),
-    stats.filesQueried.load(),
-    stats.filesUploaded.load(),
-    stats.fileBytesUploaded.load(),
-    stats.fileFallbacks.load(),
-    stats.blobs.load(),
-    stats.blobsQueried.load(),
-    stats.blobsUploaded.load(),
-    stats.blobBytesUploaded.load(),
-    stats.blobFallbacks.load(),
-    stats.execCpuUsec.load(),
-    stats.execAllocatedCores.load(),
-    stats.execMaxUsedMem.load(),
-    stats.execReservedMem.load(),
-    stats.downloads.load(),
-    stats.bytesDownloaded.load(),
-    stats.throttles.load()
+    "{}",
+    stats.toString(
+      phase,
+      folly::sformat("total package files {:,}", package.getTotalFiles())
+    )
   );
+
   sample.setInt(phase + "_total_files", package.getTotalFiles());
 
   sample.setInt(phase + "_micros", micros);
@@ -833,36 +809,8 @@ void logPhaseStats(const std::string& phase, const Package& package,
     );
   }
 
-  sample.setInt(phase + "_total_execs", stats.execs.load());
-  sample.setInt(phase + "_cache_hits", stats.execCacheHits.load());
-  sample.setInt(phase + "_optimistically", stats.optimisticExecs.load());
-  sample.setInt(phase + "_fallbacks", stats.execFallbacks.load());
-
-  sample.setInt(phase + "_total_files", stats.files.load());
-  sample.setInt(phase + "_file_reads", stats.filesRead.load());
-  sample.setInt(phase + "_file_queries", stats.filesQueried.load());
-  sample.setInt(phase + "_file_stores", stats.filesUploaded.load());
-  sample.setInt(phase + "_file_stores_bytes", stats.fileBytesUploaded.load());
-  sample.setInt(phase + "_file_fallbacks", stats.fileFallbacks.load());
-
-  sample.setInt(phase + "_total_blobs", stats.blobs.load());
-  sample.setInt(phase + "_blob_queries", stats.blobsQueried.load());
-  sample.setInt(phase + "_blob_stores", stats.blobsUploaded.load());
-  sample.setInt(phase + "_blob_stores_bytes", stats.blobBytesUploaded.load());
-  sample.setInt(phase + "_blob_fallbacks", stats.blobFallbacks.load());
-
-  sample.setInt(phase + "_total_loads", stats.downloads.load());
-  sample.setInt(phase + "_total_loads_bytes", stats.bytesDownloaded.load());
-  sample.setInt(phase + "_throttles", stats.throttles.load());
-
-  sample.setInt(phase + "_exec_cpu_usec", stats.execCpuUsec.load());
-  sample.setInt(phase + "_exec_allocated_cores", stats.execAllocatedCores.load());
-  sample.setInt(phase + "_exec_max_used_mem", stats.execMaxUsedMem.load());
-  sample.setInt(phase + "_exec_reserved_mem", stats.execReservedMem.load());
-
-  sample.setStr(phase + "_fellback",
-    client.fellback() ? "true" : "false"
-  );
+  stats.logSample(phase, sample);
+  sample.setStr(phase + "_fellback", client.fellback() ? "true" : "false");
 }
 
 // Compute a UnitIndex by parsing decls for all autoload-eligible files.
@@ -1026,6 +974,7 @@ bool process(const CompilerOptions &po) {
   sample.setInt("parser_async_cleanup", Option::ParserAsyncCleanup);
   sample.setStr("push_phases", po.push_phases);
   sample.setStr("matched_overrides", po.matched_overrides);
+  sample.setStr("use_hphpc", "true");
   sample.setStr("use_hhbbc", RO::EvalUseHHBBC ? "true" : "false");
 
   // Track the unit-emitters created for system during
@@ -1057,6 +1006,7 @@ bool process(const CompilerOptions &po) {
     std::make_unique<Client>(executor->sticky(), makeExternWorkerOptions());
 
   sample.setStr("extern_worker_impl", client->implName());
+  sample.setStr("extern_worker_session", client->session());
 
   UnitIndex index;
   if (!computeIndex(po, sample, *executor, *client, index)) return false;
@@ -1070,11 +1020,6 @@ bool process(const CompilerOptions &po) {
   // Always used, but we can clear it early to save memory.
   Optional<SymbolSets> unique;
   unique.emplace();
-
-  Optional<RepoAutoloadMapBuilder> autoload;
-  Optional<RepoFileBuilder> repo;
-  std::atomic<uint32_t> nextSn{0};
-  std::mutex repoLock;
 
   // HHBBC specific state (if we're going to run it).
   Optional<WPI> hhbbcInputs;
@@ -1090,6 +1035,12 @@ bool process(const CompilerOptions &po) {
     );
   }
 
+  Optional<RepoAutoloadMapBuilder> autoload;
+  Optional<RepoFileBuilder> repo;
+  std::atomic<uint32_t> nextSn{0};
+  std::atomic<size_t> numUnits{0};
+  std::mutex repoLock;
+
   // Emit a fully processed unit (either processed by HHBBC or not).
   auto const emit = [&] (std::unique_ptr<UnitEmitter> ue) {
     assertx(ue);
@@ -1102,6 +1053,8 @@ bool process(const CompilerOptions &po) {
     }
 
     if (!Option::GenerateBinaryHHBC) return;
+
+    ++numUnits;
 
     if (!RO::EvalUseHHBBC) {
       // HHBBC assigns m_sn and the SHA1, but we have to do it ourself
@@ -1291,6 +1244,15 @@ bool process(const CompilerOptions &po) {
     };
   };
 
+  auto const logSample = [&] {
+    // Only log big builds.
+    if (numUnits >= RO::EvalHHBBCMinUnitsToLog) {
+      sample.force_init = true;
+      StructuredLog::log("hhvm_whole_program", sample);
+    }
+    return true;
+  };
+
   auto const finish = [&] {
     if (!Option::GenerateBinaryHHBC) return true;
     Timer _{Timer::WallTime, "finalizing repo"};
@@ -1298,6 +1260,7 @@ bool process(const CompilerOptions &po) {
     return true;
   };
   if (!RO::EvalUseHHBBC) {
+    logSample();
     dispose(std::move(executor), std::move(client));
     return finish();
   }
@@ -1320,16 +1283,24 @@ bool process(const CompilerOptions &po) {
 
   Timer timer{Timer::WallTime, "running HHBBC"};
   HphpSession session{Treadmill::SessionKind::HHBBC};
+
+  client->resetStats();
+  HHBBC::trace_time::register_client_stats(client->getStatsPtr());
+
   HHBBC::whole_program(
     std::move(*hhbbcInputs),
     std::move(executor),
     std::move(client),
     emit,
     dispose,
-    sample,
+    &sample,
     Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0
   );
-  return finish();
+
+  finish();
+  sample.setInt("hhbbc_micros", timer.getMicroSeconds());
+  logSample();
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

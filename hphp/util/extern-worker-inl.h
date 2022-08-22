@@ -296,6 +296,10 @@ inline const std::string& Client::implName() const {
   return m_impl->name();
 }
 
+inline std::string Client::session() const {
+  return m_impl->session();
+}
+
 inline bool Client::usingSubprocess() const {
   return m_impl->isSubprocess() || m_impl->isDisabled();
 }
@@ -317,7 +321,7 @@ coro::Task<T> Client::tryWithThrottling(const F& f) {
       Impl::tryWithThrottling<T>(
         m_options.m_throttleRetries,
         m_options.m_throttleBaseWait,
-        m_stats.throttles,
+        m_stats->throttles,
         f
       )
     )
@@ -386,8 +390,8 @@ coro::Task<T> Client::load(Ref<T> r) {
   assertx(result.size() == 1);
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
-  ++m_stats.downloads;
-  m_stats.bytesDownloaded += result[0].size();
+  ++m_stats->downloads;
+  m_stats->bytesDownloaded += result[0].size();
   HPHP_CORO_RETURN(unblobify<T>(std::move(result[0])));
 }
 
@@ -483,13 +487,13 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
 
       FTRACE(4, "{} blob #{} is {} bytes\n",
              requestId.tracePrefix(), idx, blob.size());
-      m_stats.bytesDownloaded += blob.size();
+      m_stats->bytesDownloaded += blob.size();
       // Turn it into the value.
       return unblobify<typename decltype(tag)::Type>(std::move(blob));
     }
   );
 
-  m_stats.downloads += (sizeof...(Ts) + 1);
+  m_stats->downloads += (sizeof...(Ts) + 1);
   HPHP_CORO_MOVE_RETURN(ret);
 }
 
@@ -557,14 +561,14 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
     }();
     FTRACE(4, "{} blob #{} is {} bytes\n",
            requestId.tracePrefix(), out.size(), blob.size());
-    m_stats.bytesDownloaded += blob.size();
+    m_stats->bytesDownloaded += blob.size();
     out.emplace_back(unblobify<T>(std::move(blob)));
   }
   assertx(out.size() == rs.size());
   assertx(mainIdx == mainBlobs.size());
   assertx(fallbackIdx == fallbackBlobs.size());
 
-  m_stats.downloads += rs.size();
+  m_stats->downloads += rs.size();
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -666,7 +670,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 
           FTRACE(4, "{} blob #{} is {} bytes\n",
                  requestId.tracePrefix(), idx, blob.size());
-          m_stats.bytesDownloaded += blob.size();
+          m_stats->bytesDownloaded += blob.size();
           return unblobify<typename decltype(tag)::Type>(std::move(blob));
         }
       )
@@ -674,7 +678,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   }
   assertx(out.size() == rs.size());
 
-  m_stats.downloads += (rs.size() * tupleSize);
+  m_stats->downloads += (rs.size() * tupleSize);
   HPHP_CORO_MOVE_RETURN(out);
 }
 
@@ -687,12 +691,12 @@ template <typename T>
 coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
 
-  ++m_stats.blobs;
+  ++m_stats->blobs;
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) ++m_stats.blobFallbacks;
+      if (isFallback) ++m_stats->blobFallbacks;
       auto blob = blobify(t);
       FTRACE(2, "{} blob is {} bytes\n", requestId.tracePrefix(), blob.size());
       return i.store(
@@ -720,12 +724,12 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
   FTRACE(2, "{} storing {} blobs\n",
          requestId.tracePrefix(), sizeof...(Ts) + 1);
 
-  m_stats.blobs += (sizeof...(Ts) + 1);
+  m_stats->blobs += (sizeof...(Ts) + 1);
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats.blobFallbacks += (sizeof...(Ts) + 1);
+      if (isFallback) m_stats->blobFallbacks += (sizeof...(Ts) + 1);
       BlobVec blobs{{ blobify(t), blobify(ts)... }};
       ONTRACE(4, [&] {
         for (auto const& b : blobs) {
@@ -793,12 +797,12 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
     optimistic ? " (optimistically)" : ""
   );
 
-  m_stats.blobs += ts.size();
+  m_stats->blobs += ts.size();
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats.blobFallbacks += ts.size();
+      if (isFallback) m_stats->blobFallbacks += ts.size();
       auto blobs = from(ts)
         | mapped([&] (const T& t) {
             auto blob = blobify(t);
@@ -845,12 +849,12 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
     optimistic ? " (optimistically)" : ""
   );
 
-  m_stats.blobs += (ts.size() * tupleSize);
+  m_stats->blobs += (ts.size() * tupleSize);
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats.blobFallbacks += (ts.size() * tupleSize);
+      if (isFallback) m_stats->blobFallbacks += (ts.size() * tupleSize);
       // Map each tuple to a vector of RefIds, then concat all of the
       // vectors together to get one flat list.
       auto blobs = from(ts)
@@ -916,7 +920,7 @@ Client::exec(const Job<C>& job,
          requestId.tracePrefix(), job.name(),
          inputs.size());
 
-  m_stats.execs += inputs.size();
+  m_stats->execs += inputs.size();
 
   // Return true if a Ref (or some container of them allowed as
   // inputs) came from the fallback implementation. If so, we'll force
@@ -1144,7 +1148,7 @@ Client::exec(const Job<C>& job,
   auto outputs = HPHP_CORO_AWAIT(coro::invoke(
     [&] () -> coro::Task<std::vector<RefValVec>> {
       if (useFallback) {
-        m_stats.execFallbacks += inputs.size();
+        m_stats->execFallbacks += inputs.size();
         auto configRefVals = toRefVals(config);
         auto inputsRefVals = from(inputs)
           | mapped(toRefVals)
@@ -1173,7 +1177,7 @@ Client::exec(const Job<C>& job,
                 // we need to make all of the inputs be from the
                 // fallback executor.
                 if (fallback) {
-                  m_stats.execFallbacks += inputs.size();
+                  m_stats->execFallbacks += inputs.size();
                   HPHP_CORO_AWAIT(makeAllFallback());
                 }
                 // Note we calculate the RefVals here within the
@@ -1267,7 +1271,7 @@ Client::exec(const Job<C>& job,
   };
 
   if (optimistic && supportsOptimistic()) {
-    m_stats.optimisticExecs += inputs.size();
+    m_stats->optimisticExecs += inputs.size();
   }
 
   if constexpr (hasFini) {

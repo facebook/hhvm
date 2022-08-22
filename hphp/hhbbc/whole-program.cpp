@@ -302,7 +302,8 @@ WorkItem work_item_for(const DependencyContext& d,
  */
 void analyze_iteratively(Index& index, AnalyzeMode mode) {
   trace_time tracer(mode == AnalyzeMode::ConstPass ?
-                    "analyze constants" : "analyze iteratively");
+                    "analyze constants" : "analyze iteratively",
+                    index.sample());
 
   // Counters, just for debug printing.
   std::atomic<uint32_t> total_funcs{0};
@@ -323,7 +324,7 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
     auto results = [&] {
       trace_time trace(
         "analyzing",
-        folly::format("round {} -- {} work items", round, work.size()).str()
+        folly::sformat("round {} -- {} work items", round, work.size())
       );
       return parallel::map(
         work,
@@ -443,7 +444,7 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
 }
 
 void prop_type_hint_pass(Index& index) {
-  trace_time tracer("optimize prop type-hints");
+  trace_time tracer("optimize prop type-hints", index.sample());
 
   auto const contexts = opt_prop_type_hints_contexts(index);
   parallel::for_each(
@@ -477,7 +478,7 @@ template<typename F>
 void final_pass(Index& index,
                 const StatsHolder& stats,
                 F emitUnit) {
-  trace_time final_pass("final pass");
+  trace_time final_pass("final pass", index.sample());
   index.freeze();
   auto const dump_dir = debug_dump_to();
   parallel::for_each(
@@ -687,9 +688,9 @@ void whole_program(WholeProgramInput inputs,
                    std::unique_ptr<Client> client,
                    const EmitCallback& callback,
                    DisposeCallback dispose,
-                   Optional<StructuredLogEntry> sample,
+                   StructuredLogEntry* sample,
                    int num_threads) {
-  trace_time tracer("whole program");
+  trace_time tracer("whole program", sample);
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
@@ -701,7 +702,8 @@ void whole_program(WholeProgramInput inputs,
     make_index_input(std::move(inputs)),
     std::move(executor),
     std::move(client),
-    std::move(dispose)
+    std::move(dispose),
+    sample
   };
 
   auto stats = allocate_stats();
@@ -743,17 +745,14 @@ void whole_program(WholeProgramInput inputs,
 
   print_stats(stats);
 
-  auto const numUnits = index.program().units.size();
-  index.cleanup_post_emit();
-
-  summarize_memory(sample.get_pointer());
-  if (sample && numUnits >= RO::EvalHHBBCMinUnitsToLog) {
-    // num_units includes systemlib, around 200 units. Only log big builds.
-    sample->setInt("num_units", numUnits);
-    sample->setInt(tracer.label(), tracer.elapsed_ms());
-    sample->force_init = true;
-    StructuredLog::log("hhvm_whole_program", *sample);
+  if (sample) {
+    sample->setInt("hhbbc_num_units", index.program().units.size());
+    sample->setInt("hhbbc_num_classes", index.program().classes.size());
+    sample->setInt("hhbbc_num_funcs", index.program().funcs.size());
   }
+
+  index.cleanup_post_emit();
+  summarize_memory(sample);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -327,8 +327,9 @@ Job<LoadRepoJob> s_loadRepoJob;
 // Load all UnitEmitters from the RepoFile and convert them into what
 // whole_program expects as input.
 WholeProgramInput load_repo(coro::TicketExecutor& executor,
-                            Client& client) {
-  trace_time timer("load repo");
+                            Client& client,
+                            StructuredLogEntry& sample) {
+  trace_time timer("load repo", &sample);
 
   SCOPE_EXIT { RepoFile::destroy(); };
   RepoFile::loadGlobalTables(false);
@@ -515,14 +516,38 @@ void compile_repo() {
     executor->sticky(),
     make_extern_worker_options()
   );
+  trace_time::register_client_stats(client->getStatsPtr());
 
-  auto inputs = load_repo(*executor, *client);
+  StructuredLogEntry sample;
+  sample.setStr("debug", debug ? "true" : "false");
+  sample.setStr("use_case", options.ExternWorkerUseCase);
+  sample.setInt("use_rich_client", options.ExternWorkerUseRichClient);
+  sample.setInt("use_zippy_rich_client", options.ExternWorkerUseZippyRichClient);
+  sample.setInt("use_p2p", options.ExternWorkerUseP2P);
+  sample.setInt("force_subprocess", options.ExternWorkerForceSubprocess);
+  sample.setInt("use_exec_cache", options.ExternWorkerUseExecCache);
+  sample.setInt("timeout_secs", options.ExternWorkerTimeoutSecs);
+  sample.setInt("cleanup", options.ExternWorkerCleanup);
+  sample.setInt("throttle_retries", options.ExternWorkerThrottleRetries);
+  sample.setInt("throttle_base_wait_ms",
+                options.ExternWorkerThrottleBaseWaitMSecs);
+  sample.setStr("working_dir", options.ExternWorkerWorkingDir);
+  sample.setStr("use_hphpc", "false");
+  sample.setStr("use_hhbbc", "true");
+  sample.setInt("hhbbc_thread_count", executor->numThreads());
+  sample.setInt("hhbbc_async_cleanup", options.ExternWorkerAsyncCleanup);
+  sample.setStr("extern_worker_impl", client->implName());
+  sample.setStr("extern_worker_session", client->session());
+
+  auto inputs = load_repo(*executor, *client, sample);
 
   RepoAutoloadMapBuilder autoload;
   RepoFileBuilder repo{output_repo};
   std::mutex repoLock;
+  std::atomic<size_t> numUnits{0};
 
   auto const emit = [&] (std::unique_ptr<UnitEmitter> ue) {
+    ++numUnits;
     autoload.addUnit(*ue);
     RepoFileBuilder::EncodedUE encoded{*ue};
     std::scoped_lock<std::mutex> _{repoLock};
@@ -554,11 +579,18 @@ void compile_repo() {
     std::move(executor),
     std::move(client),
     emit,
-    dispose
+    dispose,
+    &sample
   );
 
-  trace_time timer{"finalizing repo"};
+  trace_time timer{"finalizing repo", &sample};
   repo.finish(get_global_data(), autoload);
+
+  // Only log big builds.
+  if (numUnits >= RO::EvalHHBBCMinUnitsToLog) {
+    sample.force_init = true;
+    StructuredLog::log("hhvm_whole_program", sample);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

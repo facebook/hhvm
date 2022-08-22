@@ -120,19 +120,18 @@ void summarize_memory(StructuredLogEntry* sample) {
     sstrMb = s_maxSStringMb;
   }
 
-  Logger::Info("%s", folly::sformat(
-    "Max RSS at {}: {} Mb", phase, usageMb
-  ).c_str());
-  Logger::Info("%s", folly::sformat(
-    "Max low-mem at {}: {} Mb [{} Mb sstrings]", lowPhase, lowMb, sstrMb
-  ).c_str());
+  Logger::FInfo("Max RSS at {}: {} Mb", phase, usageMb);
+  Logger::FInfo(
+    "Max low-mem at {}: {} Mb [{} Mb sstrings]",
+    lowPhase, lowMb, sstrMb
+  );
 
   if (sample) {
-    sample->setStr("max_rss_phase", phase);
-    sample->setInt("max_rss", usageMb << 20);
-    sample->setStr("max_lowmem_phase", lowPhase);
-    sample->setInt("max_lowmem", lowMb << 20);
-    sample->setInt("max_sstr", sstrMb << 20);
+    sample->setStr("hhbbc_max_rss_phase", phase);
+    sample->setInt("hhbbc_max_rss_bytes", usageMb << 20);
+    sample->setStr("hhbbc_max_lowmem_phase", lowPhase);
+    sample->setInt("hhbbc_max_lowmem_bytes", lowMb << 20);
+    sample->setInt("hhbbc_max_sstr_bytes", sstrMb << 20);
   }
 }
 

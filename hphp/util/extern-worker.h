@@ -95,6 +95,12 @@
 
 //////////////////////////////////////////////////////////////////////
 
+namespace HPHP {
+struct StructuredLogEntry;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 namespace HPHP::extern_worker {
 
 //////////////////////////////////////////////////////////////////////
@@ -445,6 +451,9 @@ struct Client {
   // Return a descriptive string of the implementation currently in
   // use. Mainly for logging.
   const std::string& implName() const;
+  // Return an opaque string representing this particular usage of
+  // Client. Mainly for logging.
+  std::string session() const;
   // Return true if the implementation in use is the built-in
   // fork+exec implementation.
   bool usingSubprocess() const;
@@ -532,81 +541,87 @@ struct Client {
 
   // Statistics about the usage of this extern-worker.
   struct Stats {
-    // Files whose contents were read from disk (on EdenFS we might
-    // not have to actually read the file).
-    std::atomic<size_t> filesRead{0};
+    using Ptr = std::shared_ptr<Stats>;
 
-    // Total number of files and blobs we "stored" (they might have
-    // had to be uploaded).
-    std::atomic<size_t> files{0};
-    std::atomic<size_t> blobs{0};
+    #define STATS                                                       \
+      /* Files whose contents were read from disk (on EdenFS we might   \
+         not have to actually read the file). */                        \
+      X(filesRead)                                                      \
+      /* Total number of files and blobs we "stored" (they might have   \
+         had to be uploaded). */                                        \
+      X(files)                                                          \
+      X(blobs)                                                          \
+      /* Number of times we had to query the back-end if a file or blob \
+         is present. Using "optimistic" uploading, we might be able to  \
+         skip checking. */                                              \
+      X(filesQueried)                                                   \
+      X(blobsQueried)                                                   \
+      /* Number of files or blobs actually uploaded. */                 \
+      X(filesUploaded)                                                  \
+      X(blobsUploaded)                                                  \
+      /* Number of bytes for files or blobs actually uploaded. */       \
+      X(fileBytesUploaded)                                              \
+      X(blobBytesUploaded)                                              \
+      /* Number of times we fell back when uploading a file or blob. */ \
+      X(fileFallbacks)                                                  \
+      X(blobFallbacks)                                                  \
+      /* Number of blobs/bytes downloaded (because of a load call). */  \
+      X(downloads)                                                      \
+      X(bytesDownloaded)                                                \
+      /* Total number of execs attempted (per input). */                \
+      X(execs)                                                          \
+      /* Execs which hit the result cache */                            \
+      X(execCacheHits)                                                  \
+      /* Execs which fellback */                                        \
+      X(execFallbacks)                                                  \
+      X(execCpuUsec)                                                    \
+      X(execAllocatedCores)                                             \
+      X(execMaxUsedMem)                                                 \
+      X(execReservedMem)                                                \
+      /* Execs in optimistic mode which succeeded */                    \
+      X(optimisticExecs)                                                \
+      X(throttles)                                                      \
 
-    // Number of times we had to query the back-end if a file or blob
-    // is present. Using "optimistic" uploading, we might be able to
-    // skip checking.
-    std::atomic<size_t> filesQueried{0};
-    std::atomic<size_t> blobsQueried{0};
+    #define X(name) std::atomic<size_t> name{0};
+    STATS
+    #undef X
 
-    // Number of files or blobs actually uploaded.
-    std::atomic<size_t> filesUploaded{0};
-    std::atomic<size_t> blobsUploaded{0};
-
-    // Number of bytes for files or blobs actually uploaded.
-    std::atomic<size_t> fileBytesUploaded{0};
-    std::atomic<size_t> blobBytesUploaded{0};
-
-    // Number of times we fell back when uploading a file or blob.
-    std::atomic<size_t> fileFallbacks{0};
-    std::atomic<size_t> blobFallbacks{0};
-
-    // Number of blobs/bytes downloaded (because of a load call).
-    std::atomic<size_t> downloads{0};
-    std::atomic<size_t> bytesDownloaded{0};
-
-    // Total number of execs attempted (per input).
-    std::atomic<size_t> execs{0};
-    // Execs which hit the result cache
-    std::atomic<size_t> execCacheHits{0};
-    // Execs which fellback
-    std::atomic<size_t> execFallbacks{0};
-
-    std::atomic<size_t> execCpuUsec{0};
-    std::atomic<size_t> execAllocatedCores{0};
-    std::atomic<size_t> execMaxUsedMem{0};
-    std::atomic<size_t> execReservedMem{0};
-
-    // Execs in optimistic mode which succeeded
-    std::atomic<size_t> optimisticExecs{0};
-
-    std::atomic<size_t> throttles{0};
-
-    void reset() {
-      filesRead.store(0);
-      files.store(0);
-      blobs.store(0);
-      filesQueried.store(0);
-      blobsQueried.store(0);
-      filesUploaded.store(0);
-      blobsUploaded.store(0);
-      fileBytesUploaded.store(0);
-      blobBytesUploaded.store(0);
-      fileFallbacks.store(0);
-      blobFallbacks.store(0);
-      downloads.store(0);
-      bytesDownloaded.store(0);
-      execs.store(0);
-      execCacheHits.store(0);
-      execFallbacks.store(0);
-      execCpuUsec.store(0);
-      execAllocatedCores.store(0);
-      execMaxUsedMem.store(0);
-      execReservedMem.store(0);
-      optimisticExecs.store(0);
-      throttles.store(0);
+    // Make an independent copy of these Stats
+    Ptr copy() const {
+      auto c = std::make_shared<Stats>();
+      #define X(name) c->name = name.load();
+      STATS
+      #undef X
+      return c;
     }
+
+    // Make an independent copy of the difference between this Stats
+    // and another.
+    Ptr operator-(const Stats& o) const {
+      auto c = std::make_shared<Stats>();
+      #define X(name) c->name = name.load() - o.name.load();
+      STATS
+      #undef X
+      return c;
+    }
+
+    // Reset all Stats to 0
+    void reset() {
+      #define X(name) name.store(0);
+      STATS
+      #undef X
+    }
+    #undef STATS
+
+    std::string toString(const std::string& phase,
+                         const std::string& extra = {}) const;
+
+    void logSample(const std::string& phase,
+                   StructuredLogEntry& sample) const;
   };
-  const Stats& getStats() const { return m_stats; }
-  void resetStats() { m_stats.reset(); }
+  const Stats& getStats() const { return *m_stats; }
+  Stats::Ptr getStatsPtr() const { return m_stats; }
+  void resetStats() { m_stats->reset(); }
 
   // Synthetically force a fallback event when storing data or
   // executing a job, as if the implementation failed. This is for
@@ -621,7 +636,7 @@ private:
   std::unique_ptr<Impl> m_impl;
   LockFreeLazy<std::unique_ptr<Impl>> m_fallbackImpl;
   Options m_options;
-  Stats m_stats;
+  Stats::Ptr m_stats;
   bool m_forceFallback;
 
   template <typename T> coro::Task<Ref<T>> storeImpl(bool, T);
@@ -659,6 +674,8 @@ struct Client::Impl {
   // Name of the implementation. Mainly for logging.
   const std::string& name() const { return m_name; }
 
+  // Identifier for this session. Mainly for logging
+  virtual std::string session() const = 0;
   // Whether this is a the special subprocess impl. Its treated
   // specially when it comes to falling back.
   virtual bool isSubprocess() const = 0;
@@ -698,7 +715,7 @@ protected:
     : m_name{std::move(name)}
     , m_parent{parent} {}
 
-  Client::Stats& stats() { return m_parent.m_stats; }
+  Client::Stats& stats() { return *m_parent.m_stats; }
 
   template <typename T, typename F>
   static coro::Task<T> tryWithThrottling(size_t,

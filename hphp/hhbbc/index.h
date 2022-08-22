@@ -642,7 +642,8 @@ struct Index {
   Index(Input,
         std::unique_ptr<coro::TicketExecutor>,
         std::unique_ptr<extern_worker::Client>,
-        DisposeCallback);
+        DisposeCallback,
+        StructuredLogEntry*);
   ~Index();
 
   /*
@@ -692,6 +693,11 @@ struct Index {
    * stage.
    */
   void cleanup_post_emit();
+
+  /*
+   * Access the StructuredLogEntry that the Index is using (if any).
+   */
+  StructuredLogEntry* sample() const;
 
   /*
    * Access the php::Program this Index is analyzing.

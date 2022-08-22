@@ -268,4 +268,149 @@ void state_after(const char* when, const ParsedUnit& parsed) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template <typename Clock>
+std::string ts(typename Clock::time_point t) {
+  char snow[64];
+  auto tm = Clock::to_time_t(t);
+  ctime_r(&tm, snow);
+  // Eliminate trailing newline from ctime_r.
+  snow[24] = '\0';
+  return snow;
+}
+
+std::string format_bytes(size_t bytes) {
+  auto s = folly::prettyPrint(
+    bytes,
+    folly::PRETTY_BYTES
+  );
+  // prettyPrint sometimes inserts a trailing blank space
+  if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
+  return s;
+}
+
+std::string client_stats(const extern_worker::Client::Stats& stats) {
+  auto const usecs = [] (size_t t) {
+    auto s = prettyPrint(
+      double(t) / 1000000.0,
+      folly::PRETTY_TIME_HMS,
+      false
+    );
+    if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
+    return s;
+  };
+
+  auto const pct = [] (size_t a, size_t b) {
+    if (!b) return 0.0;
+    return double(a) / b * 100.0;
+  };
+
+  auto const allocatedCores = stats.execAllocatedCores.load();
+  auto const cpuUsecs = stats.execCpuUsec.load();
+
+  return folly::sformat(
+    "  Execs: {:,} total, {:,} cache-hits ({:.2f}%), {:,} fallbacks\n"
+    "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
+    "  Blobs: {:,} total, {:,} uploaded ({}), {:,} fallbacks\n"
+    "  {:,} downloads ({}), {:,} throttles\n",
+    stats.execs.load(),
+    stats.execCacheHits.load(),
+    pct(stats.execCacheHits.load(), stats.execs.load()),
+    stats.execFallbacks.load(),
+    usecs(cpuUsecs),
+    allocatedCores,
+    usecs(allocatedCores ? (cpuUsecs / allocatedCores) : 0),
+    format_bytes(stats.execMaxUsedMem.load()),
+    format_bytes(stats.execReservedMem.load()),
+    stats.blobs.load(),
+    stats.blobsUploaded.load(),
+    format_bytes(stats.blobBytesUploaded.load()),
+    stats.blobFallbacks.load(),
+    stats.downloads.load(),
+    format_bytes(stats.bytesDownloaded.load()),
+    stats.throttles.load()
+  );
+}
+
+extern_worker::Client::Stats::Ptr g_clientStats;
+
+}
+
+trace_time::trace_time(const char* what,
+                       std::string extra_,
+                       StructuredLogEntry* logEntry)
+  : what{what}
+  , start(clock::now())
+  , extra{std::move(extra_)}
+  , logEntry{logEntry}
+  , beforeRss{Process::GetMemUsageMb() * 1024 * 1024}
+{
+  if (g_clientStats) clientBefore = g_clientStats->copy();
+
+  profile_memory(what, "start", extra);
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
+  Trace::ftraceRelease(
+    "{}: {}: start{}\n"
+    "  RSS: {}\n",
+    ts<clock>(start),
+    what,
+    !extra.empty() ? folly::sformat(" ({})", extra) : extra,
+    format_bytes(Process::GetMemUsageMb() * 1024 * 1024)
+  );
+}
+
+trace_time::~trace_time() {
+  namespace C = std::chrono;
+  auto const end = clock::now();
+  auto const elapsed = C::duration_cast<C::milliseconds>(
+    end - start
+  );
+
+  auto const clientDiff = (g_clientStats && clientBefore)
+    ? (*g_clientStats - *clientBefore)
+    : nullptr;
+
+  profile_memory(what, "end", extra);
+
+  auto const afterRss = Process::GetMemUsageMb() * 1024 * 1024;
+
+  if (logEntry) {
+    auto phase = folly::sformat("hhbbc_{}", what);
+    while (true) {
+      auto const pos = phase.find_first_of(" :\"'");
+      if (pos == std::string::npos) break;
+      phase[pos] = '_';
+    }
+
+    logEntry->setInt(
+      phase + "_micros",
+      C::duration_cast<C::microseconds>(elapsed).count()
+    );
+    logEntry->setInt(phase + "_before_rss_bytes", beforeRss);
+    logEntry->setInt(phase + "_after_rss_bytes", afterRss);
+    logEntry->setInt(phase + "_rss_delta_bytes", afterRss - beforeRss);
+    if (clientDiff) clientDiff->logSample(phase, *logEntry);
+  }
+
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
+  Trace::ftraceRelease(
+    "{}: {}: {}ms elapsed\n"
+    "  RSS: {}\n{}",
+    ts<clock>(end), what, elapsed.count(),
+    format_bytes(afterRss),
+    clientDiff ? client_stats(*clientDiff) : ""
+  );
+}
+
+void trace_time::ignore_client_stats() {
+  clientBefore.reset();
+}
+
+void trace_time::register_client_stats(extern_worker::Client::Stats::Ptr p) {
+  g_clientStats = std::move(p);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

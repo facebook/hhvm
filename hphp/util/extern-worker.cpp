@@ -21,6 +21,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 #include <folly/FileUtil.h>
@@ -296,6 +297,8 @@ namespace {
 struct SubprocessImpl : public Client::Impl {
   SubprocessImpl(const Options&, Client&);
   ~SubprocessImpl() override;
+
+  std::string session() const override { return m_root.native(); }
 
   bool isSubprocess() const override { return true; }
   bool supportsOptimistic() const override { return false; }
@@ -701,6 +704,7 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
 Client::Client(folly::Executor::KeepAlive<> executor,
                const Options& options)
   : m_options{options}
+  , m_stats{std::make_shared<Stats>()}
   , m_forceFallback{false}
 {
   Timer _{"create impl"};
@@ -752,12 +756,12 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
     optimistic ? " (optimistically)" : ""
   );
 
-  ++m_stats.files;
+  ++m_stats->files;
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) ++m_stats.fileFallbacks;
+      if (isFallback) ++m_stats->fileFallbacks;
       return i.store(
         requestId,
         PathVec{path},
@@ -790,13 +794,13 @@ Client::storeFile(std::vector<fs::path> paths,
     }
   }());
 
-  m_stats.files += paths.size();
+  m_stats->files += paths.size();
 
   auto const DEBUG_ONLY size = paths.size();
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
-      if (isFallback) m_stats.fileFallbacks += paths.size();
+      if (isFallback) m_stats->fileFallbacks += paths.size();
       return i.store(requestId, paths, {}, optimistic);
     },
     wasFallback
@@ -840,6 +844,104 @@ void Client::Impl::throttleSleep(size_t retry,
   // is to slow down execution and using a coro sleep will just allow
   // a lot of other actions to run.
   std::this_thread::sleep_for(wait);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string Client::Stats::toString(const std::string& phase,
+                                    const std::string& extra) const {
+  auto const bytes = [] (size_t b) {
+    auto s = folly::prettyPrint(
+      b,
+      folly::PRETTY_BYTES
+    );
+    if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
+    return s;
+  };
+
+  auto const usecs = [] (size_t t) {
+    auto s = prettyPrint(
+      double(t) / 1000000.0,
+      folly::PRETTY_TIME_HMS,
+      false
+    );
+    if (!s.empty() && s[s.size()-1] == ' ') s.resize(s.size()-1);
+    return s;
+  };
+
+  auto const pct = [] (size_t a, size_t b) {
+    if (!b) return 0.0;
+    return double(a) / b * 100.0;
+  };
+
+  auto const allocatedCores = execAllocatedCores.load();
+  auto const cpuUsecs = execCpuUsec.load();
+
+  return folly::sformat(
+    "  {}:{}\n"
+    "  Execs: {:,} total, {:,} cache-hits ({:.2f}%), {:,} optimistically, {:,} fallback\n"
+    "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
+    "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
+    "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
+    "  Mem: {} max used, {} reserved\n"
+    "  {:,} downloads ({}), {:,} throttles",
+    phase,
+    extra.empty() ? "" : folly::sformat(" {}", extra),
+    execs.load(),
+    execCacheHits.load(),
+    pct(execCacheHits.load(), execs.load()),
+    optimisticExecs.load(),
+    execFallbacks.load(),
+    files.load(),
+    filesRead.load(),
+    filesQueried.load(),
+    filesUploaded.load(),
+    bytes(fileBytesUploaded.load()),
+    fileFallbacks.load(),
+    blobs.load(),
+    blobsQueried.load(),
+    blobsUploaded.load(),
+    bytes(blobBytesUploaded.load()),
+    blobFallbacks.load(),
+    usecs(cpuUsecs),
+    allocatedCores,
+    usecs(allocatedCores ? (cpuUsecs / allocatedCores) : 0),
+    bytes(execMaxUsedMem.load()),
+    bytes(execReservedMem.load()),
+    downloads.load(),
+    bytes(bytesDownloaded.load()),
+    throttles.load()
+  );
+}
+
+void Client::Stats::logSample(const std::string& phase,
+                              StructuredLogEntry& sample) const {
+  sample.setInt(phase + "_total_execs", execs.load());
+  sample.setInt(phase + "_cache_hits", execCacheHits.load());
+  sample.setInt(phase + "_optimistically", optimisticExecs.load());
+  sample.setInt(phase + "_fallbacks", execFallbacks.load());
+
+  sample.setInt(phase + "_total_files", files.load());
+  sample.setInt(phase + "_file_reads", filesRead.load());
+  sample.setInt(phase + "_file_queries", filesQueried.load());
+  sample.setInt(phase + "_file_stores", filesUploaded.load());
+  sample.setInt(phase + "_file_stores_bytes", fileBytesUploaded.load());
+  sample.setInt(phase + "_file_fallbacks", fileFallbacks.load());
+
+  sample.setInt(phase + "_total_blobs", blobs.load());
+  sample.setInt(phase + "_blob_queries", blobsQueried.load());
+  sample.setInt(phase + "_blob_stores", blobsUploaded.load());
+  sample.setInt(phase + "_blob_stores_bytes", blobBytesUploaded.load());
+  sample.setInt(phase + "_blob_fallbacks", blobFallbacks.load());
+
+  sample.setInt(phase + "_total_loads", downloads.load());
+  sample.setInt(phase + "_total_loads_bytes", bytesDownloaded.load());
+  sample.setInt(phase + "_throttles", throttles.load());
+
+  sample.setInt(phase + "_exec_cpu_usec", execCpuUsec.load());
+  sample.setInt(phase + "_exec_allocated_cores", execAllocatedCores.load());
+  sample.setInt(phase + "_exec_max_used_mem", execMaxUsedMem.load());
+  sample.setInt(phase + "_exec_reserved_mem", execReservedMem.load());
 }
 
 //////////////////////////////////////////////////////////////////////

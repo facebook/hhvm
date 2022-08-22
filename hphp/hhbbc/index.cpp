@@ -1921,6 +1921,8 @@ struct Index::IndexData {
   bool frozen{false};
   bool ever_frozen{false};
 
+  StructuredLogEntry* sample;
+
   std::unique_ptr<php::Program> program;
 
   ISStringToOneT<php::Class*>      classes;
@@ -3090,7 +3092,7 @@ bool add_func_to_index(IndexData& index, php::Func& func) {
 }
 
 void add_program_to_index(IndexData& index) {
-  trace_time timer{"add program to index"};
+  trace_time timer{"add program to index", index.sample};
 
   auto& program = *index.program;
   for (auto const& u : program.units) {
@@ -3734,7 +3736,7 @@ void compute_included_enums_list_rec(IndexData& index,
 }
 
 void compute_subclass_list(IndexData& index) {
-  trace_time _("compute subclass list");
+  trace_time _("compute subclass list", index.sample);
   auto fixupTraits = false;
   auto fixupEnums = false;
   auto const AnyEnum = AttrEnum | AttrEnumClass;
@@ -4125,7 +4127,7 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
 }
 
 void define_func_families(IndexData& index) {
-  trace_time tracer("define_func_families");
+  trace_time tracer("define_func_families", index.sample);
 
   // Calculate func families for classes:
   parallel::for_each(
@@ -4378,7 +4380,7 @@ Slot find_min_slot(const php::Class* iface,
  * the same class will share the same vtable slot.
  */
 void compute_iface_vtables(IndexData& index) {
-  trace_time tracer("compute interface vtables");
+  trace_time tracer("compute interface vtables", index.sample);
 
   ConflictGraph cg;
   std::vector<const php::Class*>             ifaces;
@@ -4486,7 +4488,7 @@ bool has_magic_method(const ClassInfo* cinfo, SString name) {
 }
 
 void find_magic_methods(IndexData& index) {
-  trace_time tracer("find magic methods");
+  trace_time tracer("find magic methods", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
     bool any = false;
@@ -4500,7 +4502,7 @@ void find_magic_methods(IndexData& index) {
 }
 
 void find_mocked_classes(IndexData& index) {
-  trace_time tracer("find mocked classes");
+  trace_time tracer("find mocked classes", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
     if (is_mock_class(cinfo->cls) && cinfo->parent) {
@@ -4522,7 +4524,7 @@ void find_mocked_classes(IndexData& index) {
 }
 
 void mark_const_props(IndexData& index) {
-  trace_time tracer("mark const props");
+  trace_time tracer("mark const props", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
     assertx(!cinfo->hasConstProp);
@@ -4553,7 +4555,7 @@ void mark_const_props(IndexData& index) {
 }
 
 void mark_has_reified_parent(IndexData& index) {
-  trace_time tracer("mark has reified parent");
+  trace_time tracer("mark has reified parent", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->cls->hasReifiedGenerics) {
@@ -4565,7 +4567,7 @@ void mark_has_reified_parent(IndexData& index) {
 }
 
 void mark_no_override_classes(IndexData& index) {
-  trace_time tracer("mark no override classes");
+  trace_time tracer("mark no override classes", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
     // We cleared all the NoOverride flags while building the
@@ -4578,7 +4580,7 @@ void mark_no_override_classes(IndexData& index) {
 }
 
 void mark_no_override_methods(IndexData& index) {
-  trace_time tracer("mark no override methods");
+  trace_time tracer("mark no override methods", index.sample);
 
   // We removed any AttrNoOverride flags from all methods while adding
   // the units to the index.  Now start by marking every
@@ -4659,7 +4661,7 @@ const StaticString s__Reified("__Reified");
  * reified classes that extend it.
  */
 void clean_86reifiedinit_methods(IndexData& index) {
-  trace_time tracer("clean 86reifiedinit methods");
+  trace_time tracer("clean 86reifiedinit methods", index.sample);
   hphp_fast_set<const php::Class*> needsinit;
 
   // Find all classes that still need their 86reifiedinit methods
@@ -5577,7 +5579,7 @@ void preresolveTypes(IndexData& index, ClassInfoData& cid) {
     commitPreResolveUpdates(index, cid, updates);
   }
 
-  trace_time trace("preresolve clear state");
+  trace_time trace("preresolve clear state", index.sample);
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
@@ -5590,11 +5592,12 @@ void preresolveTypes(IndexData& index, ClassInfoData& cid) {
 // just loading the data and adding them to a php::Program. The units
 // have already been constructed in extern-worker jobs.
 std::unique_ptr<php::Program>
-materialize_inputs(Index::Input input,
+materialize_inputs(const IndexData& index,
+                   Index::Input input,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<Client> client,
                    const DisposeCallback& dispose) {
-  trace_time tracer("materialize inputs");
+  trace_time tracer("materialize inputs", index.sample);
 
   // For speed, split up the unit loading into chunks.
   constexpr size_t kLoadChunkSize = 500;
@@ -5668,6 +5671,22 @@ materialize_inputs(Index::Input input,
   coro::wait(coro::collectRange(std::move(tasks)));
 
   // Done with any extern-worker stuff at this point (for now).
+  Logger::FInfo(
+    "{}",
+    client->getStats().toString(
+      "hhbbc",
+      folly::sformat(
+        "{:,} units, {:,} classes, {:,} funcs",
+        program->units.size(),
+        program->classes.size(),
+        program->funcs.size()
+      )
+    )
+  );
+  if (index.sample) {
+    client->getStats().logSample("hhbbc", *index.sample);
+    index.sample->setStr("hhbbc_fellback", client->fellback() ? "true" : "false");
+  }
   dispose(std::move(executor), std::move(client));
   return program;
 }
@@ -5696,12 +5715,16 @@ std::vector<SString> Index::Input::makeDeps(const php::Class& cls) {
 Index::Index(Input input,
              std::unique_ptr<coro::TicketExecutor> executor,
              std::unique_ptr<Client> client,
-             DisposeCallback dispose)
+             DisposeCallback dispose,
+             StructuredLogEntry* sample)
   : m_data{std::make_unique<IndexData>(this)}
 {
-  trace_time tracer("create index");
+  trace_time tracer("create index", sample);
+
+  m_data->sample = sample;
 
   m_data->program = materialize_inputs(
+    *m_data,
     std::move(input),
     std::move(executor),
     std::move(client),
@@ -5713,12 +5736,12 @@ Index::Index(Input input,
 
   ClassInfoData cid;
   {
-    trace_time build_class_info_data("build classinfo data");
+    trace_time build_class_info_data("build classinfo data", sample);
     buildTypeInfoData(*m_data, cid);
   }
 
   {
-    trace_time preresolve_classes("preresolve classes");
+    trace_time preresolve_classes("preresolve classes", sample);
     preresolveTypes(*m_data, cid);
   }
 
@@ -5750,7 +5773,7 @@ Index::Index(Input input,
 
   mark_no_override_classes(*m_data);
 
-  trace_time tracer_2("initialize return types");
+  trace_time tracer_2("initialize return types", sample);
   std::vector<const php::Func*> all_funcs;
   all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
   for (auto const fn : m_data->funcs) {
@@ -5773,6 +5796,10 @@ Index::~Index() {}
 
 const php::Program& Index::program() const {
   return *m_data->program;
+}
+
+StructuredLogEntry* Index::sample() const {
+  return m_data->sample;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5975,7 +6002,7 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
  * property.
  */
 void Index::rewrite_default_initial_values() const {
-  trace_time tracer("rewrite default initial values");
+  trace_time tracer("rewrite default initial values", m_data->sample);
 
   /*
    * Use dataflow across the whole program class hierarchy. Start from the
@@ -6126,7 +6153,7 @@ void Index::rewrite_default_initial_values() const {
 }
 
 void Index::preinit_bad_initial_prop_values() {
-  trace_time tracer("preinit bad initial prop values");
+  trace_time tracer("preinit bad initial prop values", m_data->sample);
   parallel::for_each(
     m_data->allClassInfos,
     [&] (std::unique_ptr<ClassInfo>& cinfo) {
@@ -6146,7 +6173,7 @@ void Index::preinit_bad_initial_prop_values() {
 }
 
 void Index::preresolve_type_structures() {
-  trace_time tracer("pre-resolve type-structures");
+  trace_time tracer("pre-resolve type-structures", m_data->sample);
 
   // First resolve and update type-aliases. We do this first because
   // the resolutions may help us resolve the type-constants below
@@ -8204,7 +8231,7 @@ void Index::use_class_dependencies(bool f) {
 }
 
 void Index::init_public_static_prop_types() {
-  trace_time tracer("init public static prop types");
+  trace_time tracer("init public static prop types", m_data->sample);
 
   for (auto const& cinfo : m_data->allClassInfos) {
     for (auto const& prop : cinfo->cls->properties) {
@@ -8791,27 +8818,30 @@ void Index::freeze() {
 #define CLEAR(x)                                \
   {                                             \
     trace_time _{"clearing " #x};               \
+    _.ignore_client_stats();                    \
     (x).clear();                                \
   }
 
 void Index::cleanup_pre_analysis() {
-  trace_time _{"cleanup pre analysis"};
+  trace_time _{"cleanup pre analysis", m_data->sample};
   CLEAR(m_data->methods);
 }
 
 void Index::cleanup_for_final() {
-  trace_time _{"cleanup for final"};
+  trace_time _{"cleanup for final", m_data->sample};
   CLEAR(m_data->dependencyMap);
 }
 
 void Index::cleanup_post_emit() {
-  trace_time _{"cleanup post emit"};
+  trace_time _{"cleanup post emit", m_data->sample};
   {
     trace_time t{"reset allClassInfos"};
+    t.ignore_client_stats();
     parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
   }
   {
     trace_time t{"reset funcInfo"};
+    t.ignore_client_stats();
     parallel::for_each(
       m_data->funcInfo,
       [] (auto& u) {
@@ -8822,6 +8852,7 @@ void Index::cleanup_post_emit() {
   }
   {
     trace_time t{"reset program"};
+    t.ignore_client_stats();
     parallel::for_each(m_data->program->units, [] (auto& u) { u.reset(); });
     parallel::for_each(m_data->program->classes, [] (auto& u) { u.reset(); });
     parallel::for_each(m_data->program->funcs, [] (auto& f) { f.reset(); });

@@ -483,7 +483,8 @@ Index make_index() {
     std::move(executor),
     std::move(client),
     [] (std::unique_ptr<coro::TicketExecutor>,
-        std::unique_ptr<Client>) {}
+        std::unique_ptr<Client>) {},
+    nullptr
   };
 }
 

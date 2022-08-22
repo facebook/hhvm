@@ -20,7 +20,7 @@ use serde::Serialize;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasCtxConstant<'arena> {
+pub struct CtxConstant<'arena> {
     pub name: Str<'arena>,
     pub recognized: Slice<'arena, Str<'arena>>,
     pub unrecognized: Slice<'arena, Str<'arena>>,
@@ -29,7 +29,7 @@ pub struct HhasCtxConstant<'arena> {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasCoeffects<'arena> {
+pub struct Coeffects<'arena> {
     pub static_coeffects: Slice<'arena, Ctx>,
     pub unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
     pub fun_param: Slice<'arena, usize>,
@@ -41,7 +41,7 @@ pub struct HhasCoeffects<'arena> {
     pub caller: bool,
 }
 
-impl<'arena> HhasCoeffects<'arena> {
+impl<'arena> Coeffects<'arena> {
     pub fn new(
         static_coeffects: Slice<'arena, Ctx>,
         unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
@@ -66,8 +66,8 @@ impl<'arena> HhasCoeffects<'arena> {
         }
     }
 
-    pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> HhasCoeffects<'arena> {
-        HhasCoeffects {
+    pub fn from_static_coeffects(alloc: &'arena Bump, scs: Vec<Ctx>) -> Coeffects<'arena> {
+        Coeffects {
             static_coeffects: Slice::from_vec(alloc, scs),
 
             ..Default::default()
@@ -122,7 +122,7 @@ impl<'arena> HhasCoeffects<'arena> {
                     let Hint(_, h_inner) = h;
                     match &**h_inner {
                         Hint_::Happly(Id(_, id), _) => {
-                            if let Some(c) = HhasCoeffects::from_type_static(h) {
+                            if let Some(c) = Coeffects::from_type_static(h) {
                                 static_coeffects.push(c)
                             } else {
                                 unenforced_static_coeffects.push(strip_ns(id.as_str()).to_string());
@@ -179,7 +179,7 @@ impl<'arena> HhasCoeffects<'arena> {
                 let Hint(_, h) = ctx;
                 match &**h {
                     Hint_::Happly(Id(_, id), _) => {
-                        if let Some(c) = HhasCoeffects::from_type_static(ctx) {
+                        if let Some(c) = Coeffects::from_type_static(ctx) {
                             static_coeffects.push(c)
                         } else {
                             unenforced_static_coeffects
@@ -256,14 +256,14 @@ impl<'arena> HhasCoeffects<'arena> {
             cc_param: Slice::from_vec(alloc, cc_param),
             cc_this: Slice::from_vec(alloc, cc_this),
             cc_reified: Slice::from_vec(alloc, cc_reified),
-            ..HhasCoeffects::default()
+            ..Coeffects::default()
         }
     }
 
     pub fn pure(alloc: &'arena bumpalo::Bump) -> Self {
         Self {
             static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
-            ..HhasCoeffects::default()
+            ..Coeffects::default()
         }
     }
 
@@ -285,12 +285,12 @@ impl<'arena> HhasCoeffects<'arena> {
     }
 
     pub fn inherit_to_child_closure(&self, alloc: &'arena bumpalo::Bump) -> Self {
-        let static_coeffects = HhasCoeffects::local_to_shallow(self.get_static_coeffects());
+        let static_coeffects = Coeffects::local_to_shallow(self.get_static_coeffects());
         if self.has_coeffect_rules() {
             Self {
                 static_coeffects: Slice::from_vec(alloc, static_coeffects),
                 closure_parent_scope: true,
-                ..HhasCoeffects::default()
+                ..Coeffects::default()
             }
         } else {
             Self {

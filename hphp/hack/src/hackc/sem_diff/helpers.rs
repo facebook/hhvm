@@ -13,61 +13,61 @@ pub(crate) trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::HhasAdata<'_> {
+impl MapName for hhbc::Adata<'_> {
     fn get_name(&self) -> &str {
         self.id.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasClass<'_> {
+impl MapName for hhbc::Class<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasConstant<'_> {
+impl MapName for hhbc::Constant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasCtxConstant<'_> {
+impl MapName for hhbc::CtxConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasFunction<'_> {
+impl MapName for hhbc::Function<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasMethod<'_> {
+impl MapName for hhbc::Method<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasModule<'_> {
+impl MapName for hhbc::Module<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasProperty<'_> {
+impl MapName for hhbc::Property<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasTypedef<'_> {
+impl MapName for hhbc::Typedef<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasTypeConstant<'_> {
+impl MapName for hhbc::TypeConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
@@ -79,7 +79,7 @@ impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::HhasTypeInfo<'_>>> {
+impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::TypeInfo<'_>>> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }

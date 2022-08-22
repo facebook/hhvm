@@ -10,21 +10,21 @@ use ffi::Str;
 use serde::Serialize;
 
 use crate::hhbc_ast::Instruct;
-use crate::HhasParam;
-use crate::HhasTypeInfo;
+use crate::Param;
+use crate::TypeInfo;
 
 #[derive(Debug, Default, Serialize)]
 #[repr(C)]
-pub struct HhasBody<'arena> {
+pub struct Body<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().
     pub body_instrs: Slice<'arena, Instruct<'arena>>,
     pub decl_vars: Slice<'arena, Str<'arena>>,
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
+    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>>,
     pub shadowed_tparams: Slice<'arena, Str<'arena>>,
-    pub params: Slice<'arena, HhasParam<'arena>>,
-    pub return_type_info: Maybe<HhasTypeInfo<'arena>>,
+    pub params: Slice<'arena, Param<'arena>>,
+    pub return_type_info: Maybe<TypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
 }

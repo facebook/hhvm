@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::HhasConstant;
+use hhbc::Constant;
 
-pub(crate) fn convert_constant<'a>(constant: &HhasConstant<'a>) -> ir::HackConstant<'a> {
-    let HhasConstant {
+pub(crate) fn convert_constant<'a>(constant: &Constant<'a>) -> ir::HackConstant<'a> {
+    let Constant {
         name,
         ref value,
         is_abstract,

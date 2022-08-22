@@ -8,12 +8,12 @@ use env::emitter::Emitter;
 use error::Result;
 use ffi::Slice;
 use ffi::Str;
+use hhbc::Attribute;
 use hhbc::ClassName;
+use hhbc::Coeffects;
+use hhbc::Function;
 use hhbc::FunctionName;
-use hhbc::HhasAttribute;
-use hhbc::HhasCoeffects;
-use hhbc::HhasFunction;
-use hhbc::HhasSpan;
+use hhbc::Span;
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -28,25 +28,24 @@ use crate::emit_memoize_helpers;
 pub fn emit_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     fd: &'a ast::FunDef,
-) -> Result<Vec<HhasFunction<'arena>>> {
+) -> Result<Vec<Function<'arena>>> {
     use ast_defs::FunKind;
-    use hhbc::HhasFunctionFlags;
+    use hhbc::FunctionFlags;
 
     let alloc = e.alloc;
     let f = &fd.fun;
     let original_id = FunctionName::from_ast_name(alloc, &f.name.1);
-    let mut flags = HhasFunctionFlags::empty();
+    let mut flags = FunctionFlags::empty();
     flags.set(
-        HhasFunctionFlags::ASYNC,
+        FunctionFlags::ASYNC,
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
-    let mut user_attrs: Vec<HhasAttribute<'arena>> =
-        emit_attribute::from_asts(e, &f.user_attributes)?;
+    let mut user_attrs: Vec<Attribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
     user_attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
     let memoized = user_attrs
         .iter()
         .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
-    flags.set(HhasFunctionFlags::MEMOIZE_IMPL, memoized);
+    flags.set(FunctionFlags::MEMOIZE_IMPL, memoized);
 
     let renamed_id = {
         if memoized {
@@ -94,8 +93,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     }
 
-    let mut coeffects =
-        HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
+    let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
     if is_meth_caller {
         coeffects = coeffects.with_caller(alloc)
     }
@@ -120,10 +118,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         use emit_body::Args as EmitBodyArgs;
         use emit_body::Flags as EmitBodyFlags;
         let mut body_flags = EmitBodyFlags::empty();
-        body_flags.set(
-            EmitBodyFlags::ASYNC,
-            flags.contains(HhasFunctionFlags::ASYNC),
-        );
+        body_flags.set(EmitBodyFlags::ASYNC, flags.contains(FunctionFlags::ASYNC));
         body_flags.set(EmitBodyFlags::NATIVE, native);
         body_flags.set(EmitBodyFlags::MEMOIZE, memoized);
         body_flags.set(
@@ -156,8 +151,8 @@ pub fn emit_function<'a, 'arena, 'decl>(
             },
         )?
     };
-    flags.set(HhasFunctionFlags::GENERATOR, is_gen);
-    flags.set(HhasFunctionFlags::PAIR_GENERATOR, is_pair_gen);
+    flags.set(FunctionFlags::GENERATOR, is_gen);
+    flags.set(FunctionFlags::PAIR_GENERATOR, is_pair_gen);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
             e,
@@ -170,10 +165,10 @@ pub fn emit_function<'a, 'arena, 'decl>(
         None
     };
     let attrs = emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized);
-    let normal_function = HhasFunction {
+    let normal_function = Function {
         attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
         name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
-        span: HhasSpan::from_pos(&f.span),
+        span: Span::from_pos(&f.span),
         coeffects,
         body,
         flags,
@@ -190,7 +185,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
 pub fn emit_functions_from_program<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<HhasFunction<'arena>>> {
+) -> Result<Vec<Function<'arena>>> {
     Ok(ast
         .iter()
         .filter_map(|d| d.as_fun().map(|f| emit_function(e, f)))

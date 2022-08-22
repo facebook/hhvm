@@ -2,19 +2,19 @@ use anyhow::Result;
 use ffi::Pair;
 use ffi::Str;
 use ffi::Triple;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Class;
+use hhbc::Constant;
 use hhbc::FatalOp;
+use hhbc::Function;
 use hhbc::HackCUnit;
-use hhbc::HhasAttribute;
-use hhbc::HhasBody;
-use hhbc::HhasClass;
-use hhbc::HhasConstant;
-use hhbc::HhasFunction;
-use hhbc::HhasMethod;
-use hhbc::HhasModule;
-use hhbc::HhasParam;
-use hhbc::HhasPos;
-use hhbc::HhasSymbolRefs;
-use hhbc::HhasTypedef;
+use hhbc::Method;
+use hhbc::Module;
+use hhbc::Param;
+use hhbc::Pos;
+use hhbc::SymbolRefs;
+use hhbc::Typedef;
 
 use crate::code_path::CodePath;
 use crate::helpers::*;
@@ -127,16 +127,12 @@ pub fn sem_diff_unit<'arena>(a_unit: &HackCUnit<'arena>, b_unit: &HackCUnit<'are
     Ok(())
 }
 
-fn sem_diff_attribute(
-    path: &CodePath<'_>,
-    a: &HhasAttribute<'_>,
-    b: &HhasAttribute<'_>,
-) -> Result<()> {
-    let HhasAttribute {
+fn sem_diff_attribute(path: &CodePath<'_>, a: &Attribute<'_>, b: &Attribute<'_>) -> Result<()> {
+    let Attribute {
         name: a_name,
         arguments: a_arguments,
     } = a;
-    let HhasAttribute {
+    let Attribute {
         name: b_name,
         arguments: b_arguments,
     } = b;
@@ -152,18 +148,18 @@ fn sem_diff_attribute(
 
 fn sem_diff_attributes(
     path: &CodePath<'_>,
-    a: &[HhasAttribute<'_>],
-    b: &[HhasAttribute<'_>],
+    a: &[Attribute<'_>],
+    b: &[Attribute<'_>],
 ) -> Result<()> {
     sem_diff_slice(path, a, b, sem_diff_attribute)
 }
 
 fn sem_diff_body<'arena>(
     path: &CodePath<'_>,
-    a: &'arena HhasBody<'arena>,
-    b: &'arena HhasBody<'arena>,
+    a: &'arena Body<'arena>,
+    b: &'arena Body<'arena>,
 ) -> Result<()> {
-    let HhasBody {
+    let Body {
         body_instrs: _,
         decl_vars: _,
         num_iters: a_num_iters,
@@ -175,7 +171,7 @@ fn sem_diff_body<'arena>(
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
     } = a;
-    let HhasBody {
+    let Body {
         body_instrs: _,
         decl_vars: _,
         num_iters: b_num_iters,
@@ -232,10 +228,10 @@ fn sem_diff_body<'arena>(
 
 fn sem_diff_param<'arena>(
     path: &CodePath<'_>,
-    a: &'arena HhasParam<'arena>,
-    b: &'arena HhasParam<'arena>,
+    a: &'arena Param<'arena>,
+    b: &'arena Param<'arena>,
 ) -> Result<()> {
-    let HhasParam {
+    let Param {
         name: a_name,
         is_variadic: a_is_variadic,
         is_inout: a_is_inout,
@@ -244,7 +240,7 @@ fn sem_diff_param<'arena>(
         type_info: a_type_info,
         default_value: a_default_value,
     } = a;
-    let HhasParam {
+    let Param {
         name: b_name,
         is_variadic: b_is_variadic,
         is_inout: b_is_inout,
@@ -276,10 +272,10 @@ fn sem_diff_param<'arena>(
 
 fn sem_diff_class<'arena>(
     path: &CodePath<'_>,
-    a: &'arena HhasClass<'arena>,
-    b: &'arena HhasClass<'arena>,
+    a: &'arena Class<'arena>,
+    b: &'arena Class<'arena>,
 ) -> Result<()> {
-    let HhasClass {
+    let Class {
         attributes: a_attributes,
         base: a_base,
         implements: a_implements,
@@ -298,7 +294,7 @@ fn sem_diff_class<'arena>(
         doc_comment: a_doc_comment,
         flags: a_flags,
     } = a;
-    let HhasClass {
+    let Class {
         attributes: b_attributes,
         base: b_base,
         implements: b_implements,
@@ -385,17 +381,13 @@ fn sem_diff_class<'arena>(
     Ok(())
 }
 
-fn sem_diff_constant(
-    path: &CodePath<'_>,
-    a: &HhasConstant<'_>,
-    b: &HhasConstant<'_>,
-) -> Result<()> {
-    let HhasConstant {
+fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
+    let Constant {
         name: a_name,
         value: a_value,
         is_abstract: a_is_abstract,
     } = a;
-    let HhasConstant {
+    let Constant {
         name: b_name,
         value: b_value,
         is_abstract: b_is_abstract,
@@ -413,8 +405,8 @@ fn sem_diff_constant(
 
 fn sem_diff_fatal(
     path: &CodePath<'_>,
-    a: &Triple<FatalOp, HhasPos, Str<'_>>,
-    b: &Triple<FatalOp, HhasPos, Str<'_>>,
+    a: &Triple<FatalOp, Pos, Str<'_>>,
+    b: &Triple<FatalOp, Pos, Str<'_>>,
 ) -> Result<()> {
     sem_diff_eq(&path.index(0), &a.0, &b.0)?;
     sem_diff_eq(&path.index(1), &a.1, &b.1)?;
@@ -424,10 +416,10 @@ fn sem_diff_fatal(
 
 fn sem_diff_function<'arena>(
     path: &CodePath<'_>,
-    a: &'arena HhasFunction<'arena>,
-    b: &'arena HhasFunction<'arena>,
+    a: &'arena Function<'arena>,
+    b: &'arena Function<'arena>,
 ) -> Result<()> {
-    let HhasFunction {
+    let Function {
         attributes: a_attributes,
         name: a_name,
         body: a_body,
@@ -436,7 +428,7 @@ fn sem_diff_function<'arena>(
         flags: a_flags,
         attrs: a_attrs,
     } = a;
-    let HhasFunction {
+    let Function {
         attributes: b_attributes,
         name: b_name,
         body: b_body,
@@ -459,10 +451,10 @@ fn sem_diff_function<'arena>(
 
 fn sem_diff_method<'arena>(
     path: &CodePath<'_>,
-    a: &'arena HhasMethod<'arena>,
-    b: &'arena HhasMethod<'arena>,
+    a: &'arena Method<'arena>,
+    b: &'arena Method<'arena>,
 ) -> Result<()> {
-    let HhasMethod {
+    let Method {
         attributes: a_attributes,
         visibility: a_visibility,
         name: a_name,
@@ -472,7 +464,7 @@ fn sem_diff_method<'arena>(
         flags: a_flags,
         attrs: a_attrs,
     } = a;
-    let HhasMethod {
+    let Method {
         attributes: b_attributes,
         visibility: b_visibility,
         name: b_name,
@@ -495,15 +487,15 @@ fn sem_diff_method<'arena>(
 
 fn sem_diff_module<'arena>(
     path: &CodePath<'_>,
-    a: &HhasModule<'arena>,
-    b: &HhasModule<'arena>,
+    a: &Module<'arena>,
+    b: &Module<'arena>,
 ) -> Result<()> {
-    let HhasModule {
+    let Module {
         attributes: a_attributes,
         name: a_name,
         span: a_span,
     } = a;
-    let HhasModule {
+    let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
@@ -517,16 +509,16 @@ fn sem_diff_module<'arena>(
 
 fn sem_diff_symbol_refs<'arena>(
     path: &CodePath<'_>,
-    a: &HhasSymbolRefs<'arena>,
-    b: &HhasSymbolRefs<'arena>,
+    a: &SymbolRefs<'arena>,
+    b: &SymbolRefs<'arena>,
 ) -> Result<()> {
-    let HhasSymbolRefs {
+    let SymbolRefs {
         includes: a_includes,
         constants: a_constants,
         functions: a_functions,
         classes: a_classes,
     } = a;
-    let HhasSymbolRefs {
+    let SymbolRefs {
         includes: b_includes,
         constants: b_constants,
         functions: b_functions,
@@ -562,10 +554,10 @@ fn sem_diff_symbol_refs<'arena>(
 
 fn sem_diff_typedef<'arena>(
     path: &CodePath<'_>,
-    a: &HhasTypedef<'arena>,
-    b: &HhasTypedef<'arena>,
+    a: &Typedef<'arena>,
+    b: &Typedef<'arena>,
 ) -> Result<()> {
-    let HhasTypedef {
+    let Typedef {
         name: a_name,
         attributes: a_attributes,
         type_info: a_type_info,
@@ -573,7 +565,7 @@ fn sem_diff_typedef<'arena>(
         span: a_span,
         attrs: a_attrs,
     } = a;
-    let HhasTypedef {
+    let Typedef {
         name: b_name,
         attributes: b_attributes,
         type_info: b_type_info,

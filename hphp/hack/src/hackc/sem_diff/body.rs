@@ -5,7 +5,6 @@ use anyhow::Context;
 use anyhow::Result;
 use ffi::Str;
 use hash::HashMap;
-use hhbc::HhasBody;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Local;
@@ -22,7 +21,7 @@ use crate::sequence::Sequence;
 use crate::value::ValueBuilder;
 use crate::work_queue::WorkQueue;
 
-/// Compare two `HhasBody`s to figure out if they are semantically equivalent.
+/// Compare two `hhbc::Body`s to figure out if they are semantically equivalent.
 ///
 /// We don't want to simply require the two bodies to match exactly - that's
 /// boring. Instead we allow their instruction sequences to drift and define
@@ -48,8 +47,8 @@ use crate::work_queue::WorkQueue;
 ///
 pub(crate) fn compare_bodies<'arena>(
     path: &CodePath<'_>,
-    body_a: &'arena HhasBody<'arena>,
-    body_b: &'arena HhasBody<'arena>,
+    body_a: &'arena hhbc::Body<'arena>,
+    body_b: &'arena hhbc::Body<'arena>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 
@@ -99,7 +98,7 @@ pub(crate) fn compare_bodies<'arena>(
 }
 
 pub(crate) struct Body<'arena> {
-    pub(crate) hhas_body: &'arena HhasBody<'arena>,
+    pub(crate) hhbc_body: &'arena hhbc::Body<'arena>,
     pub(crate) label_to_ip: HashMap<Label, InstrPtr>,
     /// Mapping from InstrPtr to the InstrPtr of its catch block.
     try_catch: HashMap<InstrPtr, InstrPtr>,
@@ -107,11 +106,11 @@ pub(crate) struct Body<'arena> {
 }
 
 impl<'arena> Body<'arena> {
-    fn new(hhas_body: &'arena HhasBody<'arena>) -> Self {
-        let (label_to_ip, ip_to_loc) = Self::compute_per_instr_info(hhas_body);
-        let try_catch = Self::compute_try_catch(hhas_body);
+    fn new(hhbc_body: &'arena hhbc::Body<'arena>) -> Self {
+        let (label_to_ip, ip_to_loc) = Self::compute_per_instr_info(hhbc_body);
+        let try_catch = Self::compute_try_catch(hhbc_body);
         Body {
-            hhas_body,
+            hhbc_body,
             label_to_ip,
             ip_to_loc,
             try_catch,
@@ -124,25 +123,25 @@ impl<'arena> Body<'arena> {
 
     pub(crate) fn local_name(&self, local: Local) -> Option<Str<'arena>> {
         let mut n = local.as_usize();
-        let p = self.hhas_body.params.len();
+        let p = self.hhbc_body.params.len();
         if n < p {
-            return Some(self.hhas_body.params[n].name);
+            return Some(self.hhbc_body.params[n].name);
         }
         n -= p;
-        let v = self.hhas_body.decl_vars.len();
+        let v = self.hhbc_body.decl_vars.len();
         if n < v {
-            return Some(self.hhas_body.decl_vars[n]);
+            return Some(self.hhbc_body.decl_vars[n]);
         }
         None
     }
 
     fn compute_per_instr_info(
-        hhas_body: &'arena HhasBody<'arena>,
+        hhbc_body: &'arena hhbc::Body<'arena>,
     ) -> (HashMap<Label, InstrPtr>, IdVec<InstrPtr, Rc<SrcLoc>>) {
         let mut label_to_ip = HashMap::default();
-        let mut ip_to_loc = Vec::with_capacity(hhas_body.body_instrs.len());
+        let mut ip_to_loc = Vec::with_capacity(hhbc_body.body_instrs.len());
         let mut cur_loc = Rc::new(SrcLoc::default());
-        for (ip, instr) in body_instrs(hhas_body) {
+        for (ip, instr) in body_instrs(hhbc_body) {
             match instr {
                 Instruct::Pseudo(Pseudo::SrcLoc(src_loc)) => cur_loc = Rc::new(src_loc.clone()),
                 Instruct::Pseudo(Pseudo::Label(label)) => {
@@ -156,11 +155,11 @@ impl<'arena> Body<'arena> {
     }
 
     /// Compute a mapping from InstrPtrs to their catch target.
-    fn compute_try_catch(hhas_body: &'arena HhasBody<'arena>) -> HashMap<InstrPtr, InstrPtr> {
+    fn compute_try_catch(hhbc_body: &'arena hhbc::Body<'arena>) -> HashMap<InstrPtr, InstrPtr> {
         let mut cur: Vec<InstrPtr> = Vec::new();
         let mut mapping: HashMap<InstrPtr, InstrPtr> = HashMap::default();
 
-        for (ip, instr) in body_instrs(hhas_body).rev() {
+        for (ip, instr) in body_instrs(hhbc_body).rev() {
             match instr {
                 Instruct::Pseudo(Pseudo::TryCatchBegin) => {
                     cur.pop();
@@ -186,9 +185,9 @@ impl<'arena> Body<'arena> {
 }
 
 fn body_instrs<'arena>(
-    hhas_body: &'arena HhasBody<'arena>,
+    hhbc_body: &'arena hhbc::Body<'arena>,
 ) -> impl Iterator<Item = (InstrPtr, &'arena Instruct<'arena>)> + DoubleEndedIterator {
-    hhas_body.body_instrs.iter().enumerate().map(|(i, instr)| {
+    hhbc_body.body_instrs.iter().enumerate().map(|(i, instr)| {
         let ip = InstrPtr::from_usize(i);
         (ip, instr)
     })

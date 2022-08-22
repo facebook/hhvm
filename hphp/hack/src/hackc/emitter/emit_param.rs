@@ -17,10 +17,10 @@ use ffi::Maybe;
 use ffi::Nothing;
 use ffi::Slice;
 use ffi::Str;
-use hhbc::HhasParam;
-use hhbc::HhasTypeInfo;
 use hhbc::Label;
 use hhbc::Local;
+use hhbc::Param;
+use hhbc::TypeInfo;
 use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
@@ -43,7 +43,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
     ast_params: &[a::FunParam],
-) -> Result<Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Vec<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
         .map(|param| from_ast(emitter, tparams, generate_defaults, scope, param))
@@ -59,13 +59,13 @@ pub fn from_asts<'a, 'arena, 'decl>(
 
 fn rename_params<'arena>(
     alloc: &'arena bumpalo::Bump,
-    mut params: Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>,
-) -> Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)> {
+    mut params: Vec<(Param<'arena>, Option<(Label, a::Expr)>)>,
+) -> Vec<(Param<'arena>, Option<(Label, a::Expr)>)> {
     fn rename<'arena>(
         alloc: &'arena bumpalo::Bump,
         names: &BTreeSet<Str<'arena>>,
         param_counts: &mut BTreeMap<Str<'arena>, usize>,
-        param: &mut HhasParam<'arena>,
+        param: &mut Param<'arena>,
     ) {
         match param_counts.get_mut(&param.name) {
             None => {
@@ -101,7 +101,7 @@ fn from_ast<'a, 'arena, 'decl>(
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
     param: &a::FunParam,
-) -> Result<Option<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Option<(Param<'arena>, Option<(Label, a::Expr)>)>> {
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
@@ -166,7 +166,7 @@ fn from_ast<'a, 'arena, 'decl>(
     };
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
-        HhasParam {
+        Param {
             name: Str::new_str(emitter.alloc, &param.name),
             is_variadic: param.is_variadic,
             is_inout: param.callconv.is_pinout(),
@@ -186,7 +186,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let setters = params
         .iter()
@@ -245,7 +245,7 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
 // Return None if it passes type check, otherwise return error msg
 fn default_type_check<'arena>(
     param_name: &str,
-    param_type_info: Option<&HhasTypeInfo<'arena>>,
+    param_type_info: Option<&TypeInfo<'arena>>,
     param_expr: Option<&a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(

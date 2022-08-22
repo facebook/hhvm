@@ -11,11 +11,11 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Slice;
-use hhbc::HhasAttribute;
-use hhbc::HhasCoeffects;
-use hhbc::HhasMethod;
-use hhbc::HhasMethodFlags;
-use hhbc::HhasSpan;
+use hhbc::Attribute;
+use hhbc::Coeffects;
+use hhbc::Method;
+use hhbc::MethodFlags;
+use hhbc::Span;
 use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
@@ -38,7 +38,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],
-) -> Result<Vec<HhasMethod<'arena>>> {
+) -> Result<Vec<Method<'arena>>> {
     methods
         .iter()
         .map(|m| from_ast(emitter, class, m))
@@ -48,7 +48,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
 pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     method: &'a ast::Method_,
-    user_attrs: &'a [HhasAttribute<'arena>],
+    user_attrs: &'a [Attribute<'arena>],
     visibility: &'a ast::Visibility,
     class: &'a ast::Class_,
     is_memoize_impl: bool,
@@ -85,7 +85,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a ast::Class_,
     method_: impl Into<Cow<'a, ast::Method_>>,
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let method_: Cow<'a, ast::Method_> = method_.into();
     let method = method_.as_ref();
     let is_memoize = method
@@ -183,7 +183,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         scope.items.push(ScopeItem::Lambda(Lambda {
             is_long: false,
             is_async,
-            coeffects: HhasCoeffects::default(),
+            coeffects: Coeffects::default(),
             pos: method.span.clone(),
         }))
     };
@@ -198,11 +198,11 @@ pub fn from_ast<'a, 'arena, 'decl>(
         let parent_coeffects = emitter
             .global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
-        parent_coeffects.map_or(HhasCoeffects::default(), |pc| {
+        parent_coeffects.map_or(Coeffects::default(), |pc| {
             pc.inherit_to_child_closure(emitter.alloc)
         })
     } else {
-        HhasCoeffects::from_ast(
+        Coeffects::from_ast(
             emitter.alloc,
             method.ctxs.as_ref(),
             &method.params,
@@ -301,18 +301,18 @@ pub fn from_ast<'a, 'arena, 'decl>(
         }
     };
     let span = if is_native_opcode_impl {
-        HhasSpan::default()
+        Span::default()
     } else {
-        HhasSpan::from_pos(&method.span)
+        Span::from_pos(&method.span)
     };
-    let mut flags = HhasMethodFlags::empty();
-    flags.set(HhasMethodFlags::IS_ASYNC, is_async);
-    flags.set(HhasMethodFlags::IS_GENERATOR, is_generator);
-    flags.set(HhasMethodFlags::IS_PAIR_GENERATOR, is_pair_generator);
-    flags.set(HhasMethodFlags::IS_CLOSURE_BODY, is_closure_body);
+    let mut flags = MethodFlags::empty();
+    flags.set(MethodFlags::IS_ASYNC, is_async);
+    flags.set(MethodFlags::IS_GENERATOR, is_generator);
+    flags.set(MethodFlags::IS_PAIR_GENERATOR, is_pair_generator);
+    flags.set(MethodFlags::IS_CLOSURE_BODY, is_closure_body);
 
     let attrs = get_attrs_for_method(emitter, method, &attributes, &visibility, class, is_memoize);
-    Ok(HhasMethod {
+    Ok(Method {
         attributes: Slice::fill_iter(emitter.alloc, attributes.into_iter()),
         visibility: Visibility::from(visibility),
         name,

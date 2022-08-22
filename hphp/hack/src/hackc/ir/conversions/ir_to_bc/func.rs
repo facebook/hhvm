@@ -6,7 +6,7 @@
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Triple;
-use hhbc::HhasMethod;
+use hhbc::Method;
 use ir::string_intern::StringInterner;
 use log::trace;
 
@@ -15,7 +15,7 @@ use crate::convert::HackCUnitBuilder;
 use crate::emitter;
 use crate::pusher;
 
-/// Convert an ir::Func to an HhasBody.
+/// Convert an ir::Func to an hhbc::Body.
 ///
 /// The conversion has three general phases: push, optimize, and emit.
 ///
@@ -38,7 +38,7 @@ pub(crate) fn convert_func<'a>(
     alloc: &'a bumpalo::Bump,
     mut func: ir::Func<'a>,
     strings: &StringInterner<'a>,
-) -> hhbc::HhasBody<'a> {
+) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
@@ -73,7 +73,7 @@ pub(crate) fn convert_func<'a>(
                 let label = labeler.lookup_bid(bid);
                 ffi::Pair(label, value)
             });
-            hhbc::HhasParam {
+            hhbc::Param {
                 name,
                 is_variadic: param.is_variadic,
                 is_inout: param.is_inout,
@@ -109,7 +109,7 @@ pub(crate) fn convert_func<'a>(
             .map(|name| name.to_hhbc(alloc, strings).as_ffi_str()),
     );
 
-    hhbc::HhasBody {
+    hhbc::Body {
         body_instrs: body_instrs.compact(alloc),
         decl_vars,
         doc_comment,
@@ -133,7 +133,7 @@ pub(crate) fn convert_function<'a>(
     trace!("convert_function {}", name.as_bstr());
     let body = convert_func(alloc, function.func, strings);
     let attributes = convert::convert_attributes(alloc, function.attributes);
-    let hhas_func = hhbc::HhasFunction {
+    let hhas_func = hhbc::Function {
         attributes,
         body,
         coeffects: convert_coeffects(alloc, &function.coeffects),
@@ -149,11 +149,11 @@ pub(crate) fn convert_method<'a>(
     alloc: &'a bumpalo::Bump,
     method: ir::Method<'a>,
     strings: &StringInterner<'a>,
-) -> HhasMethod<'a> {
+) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());
     let body = convert_func(alloc, method.func, strings);
     let attributes = convert::convert_attributes(alloc, method.attributes);
-    hhbc::HhasMethod {
+    hhbc::Method {
         attributes,
         name: method.name,
         body,
@@ -168,7 +168,7 @@ pub(crate) fn convert_method<'a>(
 fn convert_coeffects<'a>(
     alloc: &'a bumpalo::Bump,
     coeffects: &ir::Coeffects<'a>,
-) -> hhbc::HhasCoeffects<'a> {
+) -> hhbc::Coeffects<'a> {
     let static_coeffects = Slice::fill_iter(alloc, coeffects.static_coeffects.iter().copied());
     let unenforced_static_coeffects =
         Slice::fill_iter(alloc, coeffects.unenforced_static_coeffects.iter().copied());
@@ -195,7 +195,7 @@ fn convert_coeffects<'a>(
     let generator_this = coeffects.generator_this;
     let caller = coeffects.caller;
 
-    hhbc::HhasCoeffects::new(
+    hhbc::Coeffects::new(
         static_coeffects,
         unenforced_static_coeffects,
         fun_param,

@@ -96,14 +96,14 @@ pub fn bc_to_ir<'a>(unit: &'_ HackCUnit<'a>) -> ir::Unit<'a> {
     ir_unit
 }
 
-pub(crate) fn convert_attribute<'a>(attr: &hhbc::HhasAttribute<'a>) -> ir::Attribute<'a> {
+pub(crate) fn convert_attribute<'a>(attr: &hhbc::Attribute<'a>) -> ir::Attribute<'a> {
     ir::Attribute {
         name: attr.name,
         arguments: attr.arguments.as_ref().to_vec(),
     }
 }
 
-fn convert_symbol_refs<'a>(symbol_refs: &hhbc::HhasSymbolRefs<'a>) -> ir::unit::SymbolRefs<'a> {
+fn convert_symbol_refs<'a>(symbol_refs: &hhbc::SymbolRefs<'a>) -> ir::unit::SymbolRefs<'a> {
     // TODO: It would be nice if we could determine this stuff from the IR
     // instead of having to carry it along with the Unit.
 

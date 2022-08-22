@@ -6,7 +6,7 @@
 use ffi::Maybe;
 use ffi::Str;
 use hhbc::Constraint;
-use hhbc::HhasTypeInfo;
+use hhbc::TypeInfo;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use lazy_static::lazy_static;
 
@@ -14,9 +14,9 @@ lazy_static! {
     static ref BUILTIN_NAME_VOID: Str<'static> = Str::new(br"HH\void");
 }
 
-pub(crate) fn convert_type<'a>(ty: &HhasTypeInfo<'a>) -> ir::Type<'a> {
+pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>) -> ir::Type<'a> {
     if !ty.type_constraint.flags.is_empty() {
-        let inner = convert_type(&HhasTypeInfo {
+        let inner = convert_type(&TypeInfo {
             user_type: ty.user_type,
             type_constraint: Constraint {
                 name: ty.type_constraint.name,
@@ -50,7 +50,7 @@ pub(crate) fn convert_type<'a>(ty: &HhasTypeInfo<'a>) -> ir::Type<'a> {
     }
 }
 
-pub(crate) fn convert_maybe_type<'a>(ty: Maybe<&HhasTypeInfo<'a>>) -> ir::Type<'a> {
+pub(crate) fn convert_maybe_type<'a>(ty: Maybe<&TypeInfo<'a>>) -> ir::Type<'a> {
     match ty {
         Maybe::Just(ty) => convert_type(ty),
         Maybe::Nothing => ir::Type::None,

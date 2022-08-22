@@ -11,23 +11,23 @@ use ffi::Str;
 use serde::Serialize;
 
 use crate::hhbc_ast::Label;
+use crate::Attribute;
 use crate::Constraint;
-use crate::HhasAttribute;
-use crate::HhasTypeInfo;
+use crate::TypeInfo;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasParam<'arena> {
+pub struct Param<'arena> {
     pub name: Str<'arena>,
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
-    pub user_attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub type_info: Maybe<HhasTypeInfo<'arena>>,
+    pub user_attributes: Slice<'arena, Attribute<'arena>>,
+    pub type_info: Maybe<TypeInfo<'arena>>,
     pub default_value: Maybe<Pair<Label, Str<'arena>>>,
 }
 
-impl<'arena> HhasParam<'arena> {
+impl<'arena> Param<'arena> {
     pub fn replace_default_value_label(&mut self, new_label: Label) {
         if let Just(Pair(label, _)) = self.default_value.as_mut() {
             *label = new_label;

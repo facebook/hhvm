@@ -95,4 +95,4 @@ pub use typed_value::TypedValue;
 pub use typedef::*;
 pub use types::*;
 pub use unit::*;
-pub use xhp_attribute::HhasXhpAttribute;
+pub use xhp_attribute::XhpAttribute;

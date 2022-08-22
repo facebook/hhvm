@@ -7,19 +7,19 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
+use crate::Attribute;
 use crate::ClassName;
-use crate::HhasAttribute;
-use crate::HhasSpan;
-use crate::HhasTypeInfo;
+use crate::Span;
+use crate::TypeInfo;
 use crate::TypedValue;
 
 #[derive(Clone, Debug, Serialize)]
 #[repr(C)]
-pub struct HhasTypedef<'arena> {
+pub struct Typedef<'arena> {
     pub name: ClassName<'arena>,
-    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub type_info: HhasTypeInfo<'arena>,
+    pub attributes: Slice<'arena, Attribute<'arena>>,
+    pub type_info: TypeInfo<'arena>,
     pub type_structure: TypedValue<'arena>,
-    pub span: HhasSpan,
+    pub span: Span,
     pub attrs: Attr,
 }

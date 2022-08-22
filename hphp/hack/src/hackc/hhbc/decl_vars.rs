@@ -16,8 +16,8 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast::*;
 use oxidized::ast_defs;
 
-use crate::HhasParam;
 use crate::Label;
+use crate::Param;
 
 type SSet = std::collections::BTreeSet<String>;
 
@@ -207,7 +207,7 @@ where
 }
 
 pub fn from_ast<'arena>(
-    params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, Expr)>)],
     body: &[Stmt],
     explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {

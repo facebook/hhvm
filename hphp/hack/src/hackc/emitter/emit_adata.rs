@@ -8,8 +8,8 @@ use env::emitter::Emitter;
 use error::Error;
 use error::Result;
 use ffi::Str;
+use hhbc::Adata;
 use hhbc::ClassName;
-use hhbc::HhasAdata;
 use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
@@ -75,7 +75,7 @@ fn next_adata_id<'arena, 'decl>(
     let mut state = e.adata_state_mut();
     let id: &str = alloc.alloc_str(&format!("A_{}", state.array_identifier_counter));
     state.array_identifier_counter += 1;
-    state.adata.push(HhasAdata {
+    state.adata.push(Adata {
         id: id.into(),
         value: value.clone(),
     });

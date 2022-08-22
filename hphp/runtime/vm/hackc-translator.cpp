@@ -300,7 +300,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
 ///////////////////////////////////////////////////////////////////////////////
 // Field translaters
 
-void translateUserAttributes(Slice<HhasAttribute> attributes, UserAttributeMap& userAttrs) {
+void translateUserAttributes(Slice<hhbc::Attribute> attributes, UserAttributeMap& userAttrs) {
   Trace::Indent indent;
   auto attrs = range(attributes);
   for (auto const& attr : attrs) {
@@ -317,7 +317,7 @@ void translateUserAttributes(Slice<HhasAttribute> attributes, UserAttributeMap& 
 }
 
 template<bool isEnum=false>
-std::pair<const StringData*, TypeConstraint> translateTypeInfo(const HhasTypeInfo& t) {
+std::pair<const StringData*, TypeConstraint> translateTypeInfo(const hhbc::TypeInfo& t) {
   auto const user_type = maybeOrElse(t.user_type,
     [&](Str& s) {return toStaticString(s);},
     [&]() {return staticEmptyString();});
@@ -332,7 +332,7 @@ std::pair<const StringData*, TypeConstraint> translateTypeInfo(const HhasTypeInf
   return std::make_pair(user_type, TypeConstraint{type_name, flags});
 }
 
-void translateTypedef(TranslationState& ts, const HhasTypedef& t) {
+void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   UserAttributeMap userAttrs;
   translateUserAttributes(t.attributes, userAttrs);
   auto attrs = t.attrs;
@@ -389,19 +389,19 @@ void addConstant(TranslationState& ts,
                       isAbstract);
 }
 
-void translateClassConstant(TranslationState& ts, const HhasConstant& c) {
+void translateClassConstant(TranslationState& ts, const hhbc::Constant& c) {
   auto const name = toStaticString(c.name._0);
   auto const tv = maybe(c.value);
   addConstant<false>(ts, name, tv, c.is_abstract);
 }
 
-void translateTypeConstant(TranslationState& ts, const HhasTypeConstant& c) {
+void translateTypeConstant(TranslationState& ts, const hhbc::TypeConstant& c) {
   auto const name = toStaticString(c.name);
   auto const tv = maybe(c.initializer);
   addConstant<true>(ts, name, tv, c.is_abstract);
 }
 
-void translateCtxConstant(TranslationState& ts, const HhasCtxConstant& c) {
+void translateCtxConstant(TranslationState& ts, const hhbc::CtxConstant& c) {
   auto const name = toStaticString(c.name);
   bool isAbstract = c.is_abstract;
   auto coeffects = PreClassEmitter::Const::CoeffectsVec{};
@@ -422,7 +422,7 @@ void translateCtxConstant(TranslationState& ts, const HhasCtxConstant& c) {
   assertx(added);
 }
 
-void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperBoundMap& classUbs) {
+void translateProperty(TranslationState& ts, const hhbc::Property& p, const UpperBoundMap& classUbs) {
   UserAttributeMap userAttributes;
   translateUserAttributes(p.attributes, userAttributes);
 
@@ -469,7 +469,7 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
 }
 
 void translateClassBody(TranslationState& ts,
-                        const HhasClass& c,
+                        const hhbc::Class& c,
                         const UpperBoundMap& classUbs) {
   auto props = range(c.properties);
   for (auto const& p : props) {
@@ -489,7 +489,7 @@ void translateClassBody(TranslationState& ts,
   }
 }
 
-using TypeInfoPair = Pair<Str, Slice<HhasTypeInfo>>;
+using TypeInfoPair = Pair<Str, Slice<hhbc::TypeInfo>>;
 
 void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
   auto const& name = toStaticString(ub._0);
@@ -501,7 +501,7 @@ void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
   }
 }
 
-void translateEnumType(TranslationState& ts, const Maybe<HhasTypeInfo>& t) {
+void translateEnumType(TranslationState& ts, const Maybe<hhbc::TypeInfo>& t) {
   auto const tOpt = maybe(t);
   if (tOpt) {
     ts.pce->setEnumBaseTy(translateTypeInfo<true>(tOpt.value()).second);
@@ -986,7 +986,7 @@ void translateParameter(TranslationState& ts,
                         const UpperBoundMap& classUbs,
                         const TParamNameVec& shadowedTParams,
                         bool hasReifiedGenerics,
-                        const HhasParam& p) {
+                        const hhbc::Param& p) {
   FuncEmitter::ParamInfo param;
   translateUserAttributes(p.user_attributes, param.userAttributes);
   if (p.is_variadic) {
@@ -996,7 +996,7 @@ void translateParameter(TranslationState& ts,
   if (p.is_inout) param.setFlag(Func::ParamInfo::Flags::InOut);
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
   std::tie(param.userType, param.typeConstraint)  = maybeOrElse(p.type_info,
-      [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
+      [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
   upperBoundsHelper(ts, ubs, classUbs, shadowedTParams, param.upperBounds,
@@ -1010,7 +1010,7 @@ void translateParameter(TranslationState& ts,
 }
 
 void translateFunctionBody(TranslationState& ts,
-                           const HhasBody& b,
+                           const hhbc::Body& b,
                            const UpperBoundMap& ubs,
                            const UpperBoundMap& classUbs,
                            const TParamNameVec& shadowedTParams,
@@ -1063,7 +1063,7 @@ void translateFunctionBody(TranslationState& ts,
   ts.maxUnnamed = 0;
 }
 
-void translateCoeffects(TranslationState& ts, const HhasCoeffects& coeffects) {
+void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) {
   auto static_coeffects = range(coeffects.static_coeffects);
   for (auto const& c : static_coeffects) {
     auto const coeffectStr = CoeffectsConfig::fromHackCCtx(c);
@@ -1128,7 +1128,7 @@ void translateCoeffects(TranslationState& ts, const HhasCoeffects& coeffects) {
   }
 }
 
-void translateFunction(TranslationState& ts, const HhasFunction& f) {
+void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   UpperBoundMap ubs;
   auto upper_bounds = range(f.body.upper_bounds);
   for (auto const& u : upper_bounds) {
@@ -1145,15 +1145,15 @@ void translateFunction(TranslationState& ts, const HhasFunction& f) {
 
   ts.fe = ts.ue->newFuncEmitter(toStaticString(f.name._0));
   ts.fe->init(f.span.line_begin, f.span.line_end, attrs, nullptr);
-  ts.fe->isGenerator = (bool)(f.flags & HhasFunctionFlags_GENERATOR);
-  ts.fe->isAsync = (bool)(f.flags & HhasFunctionFlags_ASYNC);
-  ts.fe->isPairGenerator = (bool)(f.flags & HhasFunctionFlags_PAIR_GENERATOR);
+  ts.fe->isGenerator = (bool)(f.flags & hhbc::FunctionFlags_GENERATOR);
+  ts.fe->isAsync = (bool)(f.flags & hhbc::FunctionFlags_ASYNC);
+  ts.fe->isPairGenerator = (bool)(f.flags & hhbc::FunctionFlags_PAIR_GENERATOR);
   ts.fe->userAttributes = userAttrs;
 
   translateCoeffects(ts, f.coeffects);
 
   auto retTypeInfo = maybeOrElse(f.body.return_type_info,
-      [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
+      [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
   auto const hasReifiedGenerics =
@@ -1171,7 +1171,7 @@ void translateShadowedTParams(TParamNameVec& vec, const Slice<Str>& tpms) {
   }
 }
 
-void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBoundMap& classUbs) {
+void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBoundMap& classUbs) {
   UpperBoundMap ubs;
   auto upper_bounds = range(m.body.upper_bounds);
   for (auto const& u : upper_bounds) {
@@ -1187,10 +1187,10 @@ void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBound
   ts.fe = ts.ue->newMethodEmitter(toStaticString(m.name._0), ts.pce);
   ts.pce->addMethod(ts.fe);
   ts.fe->init(m.span.line_begin, m.span.line_end, attrs, nullptr);
-  ts.fe->isGenerator = (bool)(m.flags & HhasMethodFlags_IS_GENERATOR);
-  ts.fe->isAsync = (bool)(m.flags & HhasMethodFlags_IS_ASYNC);
-  ts.fe->isPairGenerator = (bool)(m.flags & HhasMethodFlags_IS_PAIR_GENERATOR);
-  ts.fe->isClosureBody = (bool)(m.flags & HhasMethodFlags_IS_CLOSURE_BODY);
+  ts.fe->isGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_GENERATOR);
+  ts.fe->isAsync = (bool)(m.flags & hhbc::MethodFlags_IS_ASYNC);
+  ts.fe->isPairGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_PAIR_GENERATOR);
+  ts.fe->isClosureBody = (bool)(m.flags & hhbc::MethodFlags_IS_CLOSURE_BODY);
 
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
@@ -1199,7 +1199,7 @@ void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBound
   translateCoeffects(ts, m.coeffects);
 
   auto retTypeInfo = maybeOrElse(m.body.return_type_info,
-    [&](HhasTypeInfo& ti) {return translateTypeInfo(ti);},
+    [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
     [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
   auto const hasReifiedGenerics =
@@ -1213,7 +1213,7 @@ void translateMethod(TranslationState& ts, const HhasMethod& m, const UpperBound
   translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
 }
 
-void translateClass(TranslationState& ts, const HhasClass& c) {
+void translateClass(TranslationState& ts, const hhbc::Class& c) {
   UpperBoundMap classUbs;
   auto upper_bounds = range(c.upper_bounds);
   for (auto const& u : upper_bounds) {
@@ -1272,7 +1272,7 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   translateClassBody(ts, c, classUbs);
 }
 
-void translateAdata(TranslationState& ts, const HhasAdata& ad) {
+void translateAdata(TranslationState& ts, const hhbc::Adata& ad) {
   auto const name = toString(ad.id);
   auto tv = toTypedValue(ad.value);
   auto arr = tv.m_data.parr;
@@ -1281,8 +1281,8 @@ void translateAdata(TranslationState& ts, const HhasAdata& ad) {
   ts.ue->mergeArray(arr);
 }
 
-void translateConstant(TranslationState& ts, const HhasConstant& c) {
-  Constant constant;
+void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
+  HPHP::Constant constant;
   constant.name = toStaticString(c.name._0);
   constant.attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
 
@@ -1294,7 +1294,7 @@ void translateConstant(TranslationState& ts, const HhasConstant& c) {
   // is evaluated at runtime. We store the callback in m_data.pcnt and invoke
   // on lookup. (see constant.cpp) It's used for things like STDERR.
   if (type(constant.val) == KindOfUninit) {
-    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
+    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(HPHP::Constant::get);
   }
   ts.ue->addConstant(constant);
 }
@@ -1304,11 +1304,11 @@ void translateModuleUse(TranslationState& ts, const Optional<Str>& name) {
   ts.ue->m_moduleName = toStaticString(name.value());
 }
 
-void translateModule(TranslationState& ts, const HhasModule& m) {
+void translateModule(TranslationState& ts, const hhbc::Module& m) {
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
 
-  ts.ue->addModule(Module{
+  ts.ue->addModule(HPHP::Module{
     toStaticString(m.name._0),
     static_cast<int>(m.span.line_begin),
     static_cast<int>(m.span.line_end),
@@ -1350,7 +1350,7 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
-  maybeThen(unit.fatal, [&](Triple<FatalOp, HhasPos, Str> fatal) {
+  maybeThen(unit.fatal, [&](Triple<FatalOp, hhbc::Pos, Str> fatal) {
     auto const pos = fatal._1;
     auto const msg = toString(fatal._2);
     throw FatalUnitError(

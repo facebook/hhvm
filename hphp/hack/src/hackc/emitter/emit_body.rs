@@ -19,14 +19,14 @@ use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::decl_vars;
+use hhbc::Body;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
-use hhbc::HhasBody;
-use hhbc::HhasParam;
-use hhbc::HhasTypeInfo;
 use hhbc::IsTypeOp;
 use hhbc::Label;
 use hhbc::Local;
+use hhbc::Param;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
@@ -85,7 +85,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     return_value: InstrSeq<'arena>,
     scope: Scope<'_, 'arena>,
     args: Args<'_, 'arena>,
-) -> Result<(HhasBody<'arena>, bool, bool)> {
+) -> Result<(Body<'arena>, bool, bool)> {
     let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
     let (is_generator, is_pair_generator) = generator::is_function_generator(body);
@@ -186,7 +186,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
 fn make_body_instrs<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     body: &[ast::Stmt],
     is_generator: bool,
@@ -228,7 +228,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
 fn make_header_content<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
@@ -263,7 +263,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     scope: &Scope<'a, 'arena>,
     immediate_tparams: &[ast::Tparam],
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &[ast::Stmt],
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
@@ -305,12 +305,9 @@ pub fn emit_return_type_info<'arena>(
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     match ret {
-        None => Ok(HhasTypeInfo::make(
-            Just("".into()),
-            hhbc::Constraint::default(),
-        )),
+        None => Ok(TypeInfo::make(Just("".into()), hhbc::Constraint::default())),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Return,
@@ -328,7 +325,7 @@ fn make_return_type_info<'arena>(
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
@@ -356,7 +353,7 @@ fn make_params<'a, 'arena, 'decl>(
     ast_params: &[ast::FunParam],
     scope: &Scope<'a, 'arena>,
     flags: Flags,
-) -> Result<Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>> {
+) -> Result<Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
@@ -368,13 +365,13 @@ pub fn make_body<'a, 'arena, 'decl>(
     decl_vars: Vec<Str<'arena>>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
-    upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
+    upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>>,
     shadowed_tparams: Vec<String>,
-    mut params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
-    return_type_info: Option<HhasTypeInfo<'arena>>,
+    mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
+    return_type_info: Option<TypeInfo<'arena>>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
-) -> Result<HhasBody<'arena>> {
+) -> Result<Body<'arena>> {
     if emitter
         .options()
         .hack_compiler_flags
@@ -428,7 +425,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
-    Ok(HhasBody {
+    Ok(Body {
         body_instrs: body_instrs.compact(alloc),
         decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter()),
         num_iters,
@@ -449,7 +446,7 @@ pub fn make_body<'a, 'arena, 'decl>(
 
 pub fn has_type_constraint<'a, 'arena>(
     env: &Env<'a, 'arena>,
-    ti: Option<&HhasTypeInfo<'_>>,
+    ti: Option<&TypeInfo<'_>>,
     ast_param: &ast::FunParam,
 ) -> (RGH::ReificationLevel, Option<ast::Hint>) {
     use RGH::ReificationLevel as L;
@@ -467,12 +464,12 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     tparams: &[ast::Tparam],
 ) -> Result<InstrSeq<'arena>> {
     let mut make_param_instr =
-        |param: &HhasParam<'arena>, ast_param: &ast::FunParam| -> Result<InstrSeq<'arena>> {
+        |param: &Param<'arena>, ast_param: &ast::FunParam| -> Result<InstrSeq<'arena>> {
             if param.is_variadic {
                 Ok(instr::empty())
             } else {
@@ -627,8 +624,8 @@ pub fn emit_deprecation_info<'a, 'arena>(
 fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
-    return_type_info: &HhasTypeInfo<'_>,
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
+    return_type_info: &TypeInfo<'_>,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
     default_dropthrough: Option<InstrSeq<'arena>>,
@@ -667,7 +664,7 @@ fn set_emit_statement_state<'arena, 'decl>(
 }
 
 fn emit_verify_out<'arena>(
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
 ) -> (usize, InstrSeq<'arena>) {
     let param_instrs: Vec<InstrSeq<'arena>> = params
         .iter()
@@ -678,7 +675,7 @@ fn emit_verify_out<'arena>(
                 Some(InstrSeq::gather(vec![
                     instr::c_get_l(local),
                     match p.type_info.as_ref() {
-                        Just(HhasTypeInfo { user_type, .. })
+                        Just(TypeInfo { user_type, .. })
                             if user_type.as_ref().map_or(true, |t| {
                                 !(t.unsafe_as_str().ends_with("HH\\mixed")
                                     || t.unsafe_as_str().ends_with("HH\\dynamic"))
@@ -705,7 +702,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>> {
+) -> Vec<Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);

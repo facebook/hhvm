@@ -6,13 +6,13 @@ use serde::Serialize;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasPos {
+pub struct Pos {
     pub line_begin: usize,
     pub line_end: usize,
     pub col_begin: usize,
     pub col_end: usize,
 }
-impl Default for HhasPos {
+impl Default for Pos {
     fn default() -> Self {
         let (line_begin, line_end, col_begin, col_end) = (1, 1, 0, 0);
         Self {
@@ -23,7 +23,7 @@ impl Default for HhasPos {
         }
     }
 }
-impl std::convert::From<oxidized::pos::Pos> for HhasPos {
+impl std::convert::From<oxidized::pos::Pos> for Pos {
     fn from(p: oxidized::pos::Pos) -> Self {
         let (line_begin, line_end, col_begin, col_end) = if p.is_none() || !p.is_valid() {
             (1, 1, 0, 0)
@@ -42,12 +42,12 @@ impl std::convert::From<oxidized::pos::Pos> for HhasPos {
 /// Span, emitted as prefix to classes and functions
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasSpan {
+pub struct Span {
     pub line_begin: usize,
     pub line_end: usize,
 }
 
-impl HhasSpan {
+impl Span {
     pub fn from_pos(pos: &oxidized::pos::Pos) -> Self {
         let (line_begin, line_end, _, _) = pos.info_pos_extended();
         Self {

@@ -10,24 +10,24 @@ use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::hhbc_ast::Visibility;
-use crate::HhasAttribute;
-use crate::HhasTypeInfo;
+use crate::Attribute;
 use crate::PropName;
+use crate::TypeInfo;
 use crate::TypedValue;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasProperty<'arena> {
+pub struct Property<'arena> {
     pub name: PropName<'arena>,
     pub flags: Attr,
-    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub visibility: Visibility,
     pub initial_value: Maybe<TypedValue<'arena>>,
-    pub type_info: HhasTypeInfo<'arena>,
+    pub type_info: TypeInfo<'arena>,
     pub doc_comment: Maybe<Str<'arena>>,
 }
 
-impl<'arena> HhasProperty<'arena> {
+impl<'arena> Property<'arena> {
     pub fn is_private(&self) -> bool {
         self.visibility == Visibility::Private
     }

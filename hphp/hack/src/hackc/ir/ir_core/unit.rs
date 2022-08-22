@@ -8,8 +8,8 @@ use hash::HashMap;
 pub use hhbc::ClassName;
 pub use hhbc::ConstName;
 pub use hhbc::FunctionName;
-pub use hhbc::HhasTypedef as Typedef;
 pub use hhbc::IncludePath;
+pub use hhbc::Typedef;
 
 use crate::literal::AdataId;
 use crate::string_intern::StringInterner;

@@ -8,7 +8,7 @@ use error::Error;
 use error::Result;
 use ffi::Maybe::Just;
 use ffi::Slice;
-use hhbc::HhasBody;
+use hhbc::Body;
 use hhbc::Local;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
@@ -26,7 +26,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     name: &ast::Sid,
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
-) -> Result<HhasBody<'arena>> {
+) -> Result<Body<'arena>> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()
@@ -39,7 +39,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
-            return_type_info.map(|rti| HhasBody {
+            return_type_info.map(|rti| Body {
                 body_instrs: Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect()),
                 params: Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0)),
                 return_type_info: Just(rti),

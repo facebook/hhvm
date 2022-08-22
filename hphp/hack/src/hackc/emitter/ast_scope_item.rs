@@ -5,7 +5,7 @@
 
 use std::rc::Rc;
 
-use hhbc::HhasCoeffects;
+use hhbc::Coeffects;
 use oxidized::ast;
 use oxidized::file_info;
 use oxidized::pos::Pos;
@@ -14,7 +14,7 @@ use oxidized::pos::Pos;
 pub struct Lambda<'arena> {
     pub is_long: bool,
     pub is_async: bool,
-    pub coeffects: HhasCoeffects<'arena>,
+    pub coeffects: Coeffects<'arena>,
     pub pos: Pos,
 }
 

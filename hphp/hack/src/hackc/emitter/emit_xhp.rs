@@ -8,8 +8,8 @@ use error::Error;
 use error::Result;
 use hack_macro::hack_expr;
 use hack_macro::hack_stmts;
-use hhbc::HhasMethod;
-use hhbc::HhasXhpAttribute;
+use hhbc::Method;
+use hhbc::XhpAttribute;
 use hhbc_string_utils as string_utils;
 use oxidized::ast::*;
 use oxidized::ast_defs;
@@ -48,9 +48,9 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
 pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
-    xal: &[HhasXhpAttribute<'_>],
+    xal: &[XhpAttribute<'_>],
     xual: &[Hint],
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let mut args = vec![(
         ParamKind::Pnormal,
         hack_expr!("parent::__xhpAttributeDeclaration()"),
@@ -102,7 +102,7 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
     let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
     from_xhp_attribute_declaration_method(
@@ -122,7 +122,7 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let category_arr = mk_expr(get_category_array(categories));
     let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
     from_xhp_attribute_declaration_method(
@@ -273,7 +273,7 @@ fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
 
 fn emit_xhp_attribute_array<'arena>(
     alloc: &'arena bumpalo::Bump,
-    xal: &[HhasXhpAttribute<'_>],
+    xal: &[XhpAttribute<'_>],
 ) -> Result<Expr> {
     fn hint_to_num(id: &str) -> usize {
         match id {
@@ -334,7 +334,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn inner_array<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
+        xa: &XhpAttribute<'_>,
     ) -> Result<Vec<Expr>> {
         let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
@@ -357,7 +357,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn emit_xhp_attribute<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
+        xa: &XhpAttribute<'_>,
     ) -> Result<(Expr, Expr)> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),
@@ -382,7 +382,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     static_: bool,
     visibility: Visibility,
     fb_ast: Block,
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     let meth = Method_ {
         span: pos.clone().unwrap_or_else(Pos::make_none),
         annotation: (),

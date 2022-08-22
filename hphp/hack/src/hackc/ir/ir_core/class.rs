@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::HhasProperty as Property;
-pub use hhbc::HhasSpan;
+pub use hhbc::Property;
+pub use hhbc::Span;
 pub use hhbc::TraitReqKind;
 
 use crate::Attr;
@@ -54,7 +54,7 @@ pub struct Class<'a> {
     pub name: ClassId,
     pub properties: Vec<Property<'a>>,
     pub requirements: Vec<(ClassId, TraitReqKind)>,
-    pub span: HhasSpan,
+    pub span: Span,
     pub type_constants: Vec<TypeConstant<'a>>,
 
     /// For class generics the upper bounds of each generic.

@@ -6,7 +6,7 @@
 pub mod ast_scope_item;
 use std::borrow::Cow;
 
-use hhbc::HhasCoeffects;
+use hhbc::Coeffects;
 use oxidized::ast;
 use oxidized::ast_defs::FunKind;
 use oxidized::ast_defs::Id;
@@ -180,14 +180,14 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         self.items.last().map_or(false, &ScopeItem::is_in_lambda)
     }
 
-    pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> HhasCoeffects<'arena> {
+    pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> Coeffects<'arena> {
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
-                    return HhasCoeffects::default();
+                    return Coeffects::default();
                 }
                 ScopeItem::Method(m) => {
-                    return HhasCoeffects::from_ast(
+                    return Coeffects::from_ast(
                         alloc,
                         m.get_ctxs(),
                         m.get_params(),
@@ -196,7 +196,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                     );
                 }
                 ScopeItem::Function(f) => {
-                    return HhasCoeffects::from_ast(
+                    return Coeffects::from_ast(
                         alloc,
                         f.get_ctxs(),
                         f.get_params(),
@@ -212,7 +212,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                 ScopeItem::Lambda(_) => {}
             }
         }
-        HhasCoeffects::default()
+        Coeffects::default()
     }
 
     pub fn has_function_attribute(&self, attr_name: impl AsRef<str>) -> bool {

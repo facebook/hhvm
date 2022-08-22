@@ -10,19 +10,19 @@ use env::Env;
 use error::Result;
 use ffi::Slice;
 use ffi::Str;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Coeffects;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
-use hhbc::HhasAttribute;
-use hhbc::HhasBody;
-use hhbc::HhasCoeffects;
-use hhbc::HhasFunction;
-use hhbc::HhasFunctionFlags;
-use hhbc::HhasParam;
-use hhbc::HhasSpan;
-use hhbc::HhasTypeInfo;
+use hhbc::Function;
+use hhbc::FunctionFlags;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::LocalRange;
+use hhbc::Param;
+use hhbc::Span;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
@@ -50,7 +50,7 @@ pub fn is_interceptable(opts: &Options) -> bool {
 pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     fd: &'a ast::FunDef,
-    user_attrs: &'a [HhasAttribute<'arena>],
+    user_attrs: &'a [Attribute<'arena>],
     is_memoize_impl: bool,
 ) -> Attr {
     let f = &fd.fun;
@@ -81,7 +81,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     renamed_id: &hhbc::FunctionName<'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     fd: &'a ast::FunDef,
-) -> Result<HhasFunction<'arena>> {
+) -> Result<Function<'arena>> {
     let alloc = emitter.alloc;
     let f = &fd.fun;
     emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
@@ -130,7 +130,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         should_emit_implicit_context,
         should_make_ic_inaccessible,
     )?;
-    let coeffects = HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
+    let coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
     let body = make_wrapper_body(
         emitter,
         env,
@@ -140,15 +140,15 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         body_instrs,
     )?;
 
-    let mut flags = HhasFunctionFlags::empty();
-    flags.set(HhasFunctionFlags::ASYNC, f.fun_kind.is_fasync());
+    let mut flags = FunctionFlags::empty();
+    flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let attrs = get_attrs_for_fun(emitter, fd, &attributes, false);
 
-    Ok(HhasFunction {
+    Ok(Function {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name: original_id,
         body,
-        span: HhasSpan::from_pos(&f.span),
+        span: Span::from_pos(&f.span),
         coeffects,
         flags,
         attrs,
@@ -160,7 +160,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
@@ -201,7 +201,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    hhas_params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     ast_params: &[ast::FunParam],
     renamed_id: hhbc::FunctionName<'arena>,
     is_async: bool,
@@ -387,11 +387,11 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 fn make_wrapper_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
-    return_type_info: HhasTypeInfo<'arena>,
-    params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
+    return_type_info: TypeInfo<'arena>,
+    params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     decl_vars: Vec<Str<'arena>>,
     body_instrs: InstrSeq<'arena>,
-) -> Result<HhasBody<'arena>> {
+) -> Result<Body<'arena>> {
     emit_body::make_body(
         emitter.alloc,
         emitter,

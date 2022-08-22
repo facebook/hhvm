@@ -23,7 +23,7 @@ use crate::FunctionName;
 /// a dedicated lookup function corresponding to each.
 #[derive(Default, Clone, Debug, Serialize)]
 #[repr(C)]
-pub struct HhasSymbolRefs<'arena> {
+pub struct SymbolRefs<'arena> {
     pub includes: Slice<'arena, IncludePath<'arena>>,
     pub constants: Slice<'arena, ConstName<'arena>>,
     pub functions: Slice<'arena, FunctionName<'arena>>,

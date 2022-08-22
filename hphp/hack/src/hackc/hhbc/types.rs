@@ -12,7 +12,7 @@ use serde::Serialize;
 /// Type info has additional optional user type
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasTypeInfo<'arena> {
+pub struct TypeInfo<'arena> {
     pub user_type: Maybe<Str<'arena>>,
     pub type_constraint: Constraint<'arena>,
 }
@@ -38,7 +38,7 @@ impl<'arena> Constraint<'arena> {
     }
 }
 
-impl<'arena> HhasTypeInfo<'arena> {
+impl<'arena> TypeInfo<'arena> {
     pub fn make(user_type: Maybe<Str<'arena>>, type_constraint: Constraint<'arena>) -> Self {
         Self {
             user_type,
@@ -46,8 +46,8 @@ impl<'arena> HhasTypeInfo<'arena> {
         }
     }
 
-    pub fn make_empty() -> HhasTypeInfo<'arena> {
-        HhasTypeInfo::make(Just("".into()), Constraint::default())
+    pub fn make_empty() -> TypeInfo<'arena> {
+        TypeInfo::make(Just("".into()), Constraint::default())
     }
 
     pub fn has_type_constraint(&self) -> bool {

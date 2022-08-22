@@ -10,7 +10,7 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Str;
 use hhbc::Constraint;
-use hhbc::HhasTypeInfo;
+use hhbc::TypeInfo;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use naming_special_names_rust::classes;
@@ -362,10 +362,10 @@ fn make_type_info<'arena>(
     h: &Hint,
     tc_name: Maybe<Str<'arena>>,
     tc_flags: TypeConstraintFlags,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = Constraint::make(tc_name, tc_flags);
-    Ok(HhasTypeInfo::make(
+    Ok(TypeInfo::make(
         Just(Str::new_str(alloc, &type_info_user_type)),
         type_info_type_constraint,
     ))
@@ -378,7 +378,7 @@ fn param_hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
@@ -422,7 +422,7 @@ pub fn hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> Result<HhasTypeInfo<'arena>> {
+) -> Result<TypeInfo<'arena>> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };
@@ -460,8 +460,8 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
-    ti: HhasTypeInfo<'arena>,
-) -> HhasTypeInfo<'arena> {
+    ti: TypeInfo<'arena>,
+) -> TypeInfo<'arena> {
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (Nothing, _) => (
             Just(String::from("HH\\void")),
@@ -480,7 +480,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
         },
     };
     let tc = Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
-    HhasTypeInfo::make(ti.user_type, tc)
+    TypeInfo::make(ti.user_type, tc)
 }
 
 fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> TypeConstraintFlags {

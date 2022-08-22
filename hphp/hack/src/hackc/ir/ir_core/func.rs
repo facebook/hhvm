@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
+pub use hhbc::FunctionFlags;
 pub use hhbc::FunctionName;
-pub use hhbc::HhasFunctionFlags as FunctionFlags;
-pub use hhbc::HhasMethodFlags as MethodFlags;
-pub use hhbc::HhasSpan;
+pub use hhbc::MethodFlags;
 pub use hhbc::MethodName;
+pub use hhbc::Span;
 pub use hhbc::Visibility;
 use newtype::newtype_int;
 use newtype::IdVec;
@@ -385,7 +385,7 @@ pub struct Function<'a> {
     pub flags: FunctionFlags,
     pub name: FunctionName<'a>,
     pub func: Func<'a>,
-    pub span: HhasSpan,
+    pub span: Span,
 }
 
 /// A Hack method contained within a Class.
@@ -397,7 +397,7 @@ pub struct Method<'a> {
     pub flags: MethodFlags,
     pub func: Func<'a>,
     pub name: MethodName<'a>,
-    pub span: HhasSpan,
+    pub span: Span,
     pub visibility: Visibility,
 }
 

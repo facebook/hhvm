@@ -12,24 +12,24 @@ use ffi::Str;
 use ffi::Triple;
 use hash::HashMap;
 use hash::HashSet;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Class;
+use hhbc::Constant;
 use hhbc::FatalOp;
+use hhbc::Function;
 use hhbc::HackCUnit;
-use hhbc::HhasAttribute;
-use hhbc::HhasBody;
-use hhbc::HhasClass;
-use hhbc::HhasConstant;
-use hhbc::HhasFunction;
-use hhbc::HhasMethod;
-use hhbc::HhasModule;
-use hhbc::HhasParam;
-use hhbc::HhasPos;
-use hhbc::HhasProperty;
-use hhbc::HhasSymbolRefs;
-use hhbc::HhasTypeInfo;
-use hhbc::HhasTypedef;
 use hhbc::Instruct;
+use hhbc::Method;
+use hhbc::Module;
 use hhbc::Opcode;
+use hhbc::Param;
+use hhbc::Pos;
+use hhbc::Property;
+use hhbc::SymbolRefs;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
+use hhbc::Typedef;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub(crate) struct CmpError {
@@ -112,61 +112,61 @@ trait MapName {
     fn get_name(&self) -> &str;
 }
 
-impl MapName for hhbc::HhasAdata<'_> {
+impl MapName for hhbc::Adata<'_> {
     fn get_name(&self) -> &str {
         self.id.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasClass<'_> {
+impl MapName for hhbc::Class<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasConstant<'_> {
+impl MapName for hhbc::Constant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasCtxConstant<'_> {
+impl MapName for hhbc::CtxConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasFunction<'_> {
+impl MapName for hhbc::Function<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasMethod<'_> {
+impl MapName for hhbc::Method<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasModule<'_> {
+impl MapName for hhbc::Module<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasProperty<'_> {
+impl MapName for hhbc::Property<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasTypedef<'_> {
+impl MapName for hhbc::Typedef<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
 }
 
-impl MapName for hhbc::HhasTypeConstant<'_> {
+impl MapName for hhbc::TypeConstant<'_> {
     fn get_name(&self) -> &str {
         self.name.unsafe_as_str()
     }
@@ -178,7 +178,7 @@ impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::HhasTypeInfo<'_>>> {
+impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::TypeInfo<'_>>> {
     fn get_name(&self) -> &str {
         self.0.unsafe_as_str()
     }
@@ -279,12 +279,12 @@ fn cmp_includes(
     Ok(())
 }
 
-fn cmp_attributes(a: &[HhasAttribute<'_>], b: &[HhasAttribute<'_>]) -> Result<()> {
+fn cmp_attributes(a: &[Attribute<'_>], b: &[Attribute<'_>]) -> Result<()> {
     cmp_set_t(a, b)
 }
 
-fn cmp_body(a: &HhasBody<'_>, b: &HhasBody<'_>) -> Result<()> {
-    let HhasBody {
+fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
+    let Body {
         body_instrs: a_body_instrs,
         decl_vars: a_decl_vars,
         num_iters: a_num_iters,
@@ -296,7 +296,7 @@ fn cmp_body(a: &HhasBody<'_>, b: &HhasBody<'_>) -> Result<()> {
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
     } = a;
-    let HhasBody {
+    let Body {
         body_instrs: b_body_instrs,
         decl_vars: b_decl_vars,
         num_iters: b_num_iters,
@@ -490,8 +490,8 @@ fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result<()> {
     )
 }
 
-fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
-    let HhasParam {
+fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result<()> {
+    let Param {
         name: a_name,
         is_variadic: a_is_variadic,
         is_inout: a_is_inout,
@@ -500,7 +500,7 @@ fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
         type_info: a_type_info,
         default_value: a_default_value,
     } = a;
-    let HhasParam {
+    let Param {
         name: b_name,
         is_variadic: b_is_variadic,
         is_inout: b_is_inout,
@@ -526,8 +526,8 @@ fn cmp_param(a: &HhasParam<'_>, b: &HhasParam<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_class(a: &HhasClass<'_>, b: &HhasClass<'_>) -> Result<()> {
-    let HhasClass {
+fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
+    let Class {
         attributes: a_attributes,
         base: a_base,
         implements: a_implements,
@@ -546,7 +546,7 @@ fn cmp_class(a: &HhasClass<'_>, b: &HhasClass<'_>) -> Result<()> {
         doc_comment: a_doc_comment,
         flags: a_flags,
     } = a;
-    let HhasClass {
+    let Class {
         attributes: b_attributes,
         base: b_base,
         implements: b_implements,
@@ -598,8 +598,8 @@ fn cmp_class(a: &HhasClass<'_>, b: &HhasClass<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_properties(a: &HhasProperty<'_>, b: &HhasProperty<'_>) -> Result<()> {
-    let HhasProperty {
+fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result<()> {
+    let Property {
         name: a_name,
         flags: a_flags,
         attributes: a_attributes,
@@ -608,7 +608,7 @@ fn cmp_properties(a: &HhasProperty<'_>, b: &HhasProperty<'_>) -> Result<()> {
         type_info: a_type_info,
         doc_comment: a_doc_comment,
     } = a;
-    let HhasProperty {
+    let Property {
         name: b_name,
         flags: b_flags,
         attributes: b_attributes,
@@ -637,13 +637,13 @@ fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Re
     }
 }
 
-fn cmp_constant(a: &HhasConstant<'_>, b: &HhasConstant<'_>) -> Result<()> {
-    let HhasConstant {
+fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
+    let Constant {
         name: a_name,
         value: a_value,
         is_abstract: a_is_abstract,
     } = a;
-    let HhasConstant {
+    let Constant {
         name: b_name,
         value: b_value,
         is_abstract: b_is_abstract,
@@ -659,10 +659,7 @@ fn cmp_constant(a: &HhasConstant<'_>, b: &HhasConstant<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_fatal(
-    a: &Triple<FatalOp, HhasPos, Str<'_>>,
-    b: &Triple<FatalOp, HhasPos, Str<'_>>,
-) -> Result<()> {
+fn cmp_fatal(a: &Triple<FatalOp, Pos, Str<'_>>, b: &Triple<FatalOp, Pos, Str<'_>>) -> Result<()> {
     cmp_eq(&a.0, &b.0).indexed("0")?;
     cmp_eq(&a.1, &b.1).indexed("1")?;
     cmp_eq(&a.2, &b.2).indexed("2")?;
@@ -692,8 +689,8 @@ fn cmp_static_coeffects(
     }
 }
 
-fn cmp_coeffects(a: &hhbc::HhasCoeffects<'_>, b: &hhbc::HhasCoeffects<'_>) -> Result<()> {
-    let hhbc::HhasCoeffects {
+fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result<()> {
+    let hhbc::Coeffects {
         static_coeffects: a_sc,
         unenforced_static_coeffects: a_usc,
         fun_param: a_fp,
@@ -705,7 +702,7 @@ fn cmp_coeffects(a: &hhbc::HhasCoeffects<'_>, b: &hhbc::HhasCoeffects<'_>) -> Re
         caller: a_c,
     } = a;
 
-    let hhbc::HhasCoeffects {
+    let hhbc::Coeffects {
         static_coeffects: b_sc,
         unenforced_static_coeffects: b_usc,
         fun_param: b_fp,
@@ -728,8 +725,8 @@ fn cmp_coeffects(a: &hhbc::HhasCoeffects<'_>, b: &hhbc::HhasCoeffects<'_>) -> Re
     Ok(())
 }
 
-fn cmp_function(a: &HhasFunction<'_>, b: &HhasFunction<'_>) -> Result<()> {
-    let HhasFunction {
+fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result<()> {
+    let Function {
         attributes: a_attributes,
         name: a_name,
         body: a_body,
@@ -738,7 +735,7 @@ fn cmp_function(a: &HhasFunction<'_>, b: &HhasFunction<'_>) -> Result<()> {
         flags: a_flags,
         attrs: a_attrs,
     } = a;
-    let HhasFunction {
+    let Function {
         attributes: b_attributes,
         name: b_name,
         body: b_body,
@@ -759,8 +756,8 @@ fn cmp_function(a: &HhasFunction<'_>, b: &HhasFunction<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_method(a: &HhasMethod<'_>, b: &HhasMethod<'_>) -> Result<()> {
-    let HhasMethod {
+fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result<()> {
+    let Method {
         attributes: a_attributes,
         visibility: a_visibility,
         name: a_name,
@@ -770,7 +767,7 @@ fn cmp_method(a: &HhasMethod<'_>, b: &HhasMethod<'_>) -> Result<()> {
         flags: a_flags,
         attrs: a_attrs,
     } = a;
-    let HhasMethod {
+    let Method {
         attributes: b_attributes,
         visibility: b_visibility,
         name: b_name,
@@ -791,13 +788,13 @@ fn cmp_method(a: &HhasMethod<'_>, b: &HhasMethod<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_module(a: &HhasModule<'_>, b: &HhasModule<'_>) -> Result<()> {
-    let HhasModule {
+fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result<()> {
+    let Module {
         attributes: a_attributes,
         name: a_name,
         span: a_span,
     } = a;
-    let HhasModule {
+    let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
@@ -833,14 +830,14 @@ fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result<(
     }
 }
 
-fn cmp_symbol_refs(a: &HhasSymbolRefs<'_>, b: &HhasSymbolRefs<'_>) -> Result<()> {
-    let HhasSymbolRefs {
+fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result<()> {
+    let SymbolRefs {
         includes: a_includes,
         constants: a_constants,
         functions: a_functions,
         classes: a_classes,
     } = a;
-    let HhasSymbolRefs {
+    let SymbolRefs {
         includes: b_includes,
         constants: b_constants,
         functions: b_functions,
@@ -895,12 +892,12 @@ fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Re
 }
 
 /// User_type isn't printed in typedef's typeinfo.
-fn cmp_typedef_typeinfo(a: &HhasTypeInfo<'_>, b: &HhasTypeInfo<'_>) -> Result<()> {
-    let HhasTypeInfo {
+fn cmp_typedef_typeinfo(a: &TypeInfo<'_>, b: &TypeInfo<'_>) -> Result<()> {
+    let TypeInfo {
         user_type: _a_user_type,
         type_constraint: a_constraint,
     } = a;
-    let HhasTypeInfo {
+    let TypeInfo {
         user_type: _b_user_type,
         type_constraint: b_constraint,
     } = b;
@@ -908,8 +905,8 @@ fn cmp_typedef_typeinfo(a: &HhasTypeInfo<'_>, b: &HhasTypeInfo<'_>) -> Result<()
     Ok(())
 }
 
-fn cmp_typedef(a: &HhasTypedef<'_>, b: &HhasTypedef<'_>) -> Result<()> {
-    let HhasTypedef {
+fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result<()> {
+    let Typedef {
         name: a_name,
         attributes: a_attributes,
         type_info: a_type_info,
@@ -917,7 +914,7 @@ fn cmp_typedef(a: &HhasTypedef<'_>, b: &HhasTypedef<'_>) -> Result<()> {
         span: a_span,
         attrs: a_attrs,
     } = a;
-    let HhasTypedef {
+    let Typedef {
         name: b_name,
         attributes: b_attributes,
         type_info: b_type_info,

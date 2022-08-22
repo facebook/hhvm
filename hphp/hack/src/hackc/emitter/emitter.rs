@@ -16,10 +16,10 @@ use hash::IndexSet;
 use hhbc::ClassName;
 use hhbc::ConstName;
 use hhbc::FunctionName;
-use hhbc::HhasSymbolRefs;
 use hhbc::IncludePath;
 use hhbc::IncludePathSet;
 use hhbc::Local;
+use hhbc::SymbolRefs;
 use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -216,7 +216,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn finish_symbol_refs(&mut self) -> HhasSymbolRefs<'arena> {
+    pub fn finish_symbol_refs(&mut self) -> SymbolRefs<'arena> {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas(self.alloc)
     }
@@ -266,8 +266,8 @@ struct SymbolRefsState<'arena> {
 }
 
 impl<'arena> SymbolRefsState<'arena> {
-    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> HhasSymbolRefs<'arena> {
-        HhasSymbolRefs {
+    fn to_hhas(self, alloc: &'arena bumpalo::Bump) -> SymbolRefs<'arena> {
+        SymbolRefs {
             includes: Slice::new(alloc.alloc_slice_fill_iter(self.includes.into_iter())),
             constants: Slice::new(alloc.alloc_slice_fill_iter(self.constants.into_iter())),
             functions: Slice::new(alloc.alloc_slice_fill_iter(self.functions.into_iter())),

@@ -8,9 +8,9 @@ use error::Error;
 use error::Result;
 use ffi::Maybe::*;
 use hhbc::Constraint;
-use hhbc::HhasProperty;
-use hhbc::HhasTypeInfo;
 use hhbc::InitPropOp;
+use hhbc::Property;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
 use hhbc_string_utils as string_utils;
@@ -42,7 +42,7 @@ pub struct FromAstArgs<'ast> {
 /// A Property and its initializer instructions
 #[derive(Debug)]
 pub struct PropAndInit<'a> {
-    pub prop: HhasProperty<'a>,
+    pub prop: Property<'a>,
     pub init: Option<InstrSeq<'a>>,
 }
 
@@ -83,7 +83,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     };
 
     let type_info = match args.typehint.as_ref() {
-        None => HhasTypeInfo::make_empty(),
+        None => TypeInfo::make_empty(),
         Some(th) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Property,
@@ -189,7 +189,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     hhas_property_flags.set(Attr::AttrIsReadonly, args.is_readonly);
     hhas_property_flags.add(Attr::from(args.visibility));
 
-    let prop = HhasProperty {
+    let prop = Property {
         name: pid,
         attributes: alloc.alloc_slice_fill_iter(attributes.into_iter()).into(),
         type_info,

@@ -7,14 +7,14 @@ use oxidized::ast;
 use oxidized::pos::Pos;
 
 #[derive(Debug)]
-pub struct HhasXhpAttribute<'a> {
+pub struct XhpAttribute<'a> {
     pub type_: Option<&'a ast::Hint>,
     pub class_var: &'a ast::ClassVar,
     pub tag: Option<ast::XhpAttrTag>,
     pub maybe_enum: Option<&'a (Pos, Vec<ast::Expr>)>,
 }
 
-impl<'a> HhasXhpAttribute<'a> {
+impl<'a> XhpAttribute<'a> {
     pub fn is_required(&self) -> bool {
         matches!(
             self.tag,

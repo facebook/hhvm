@@ -7,10 +7,10 @@ use env::emitter::Emitter;
 use env::LabelGen;
 use hash::HashMap;
 use hash::HashSet;
-use hhbc::HhasParam;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Opcode;
+use hhbc::Param;
 use hhbc::Pseudo;
 use instruction_sequence::InstrSeq;
 use oxidized::ast;
@@ -33,7 +33,7 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<La
 
 fn create_label_ref_map<'arena>(
     label_to_offset: &HashMap<Label, u32>,
-    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &[(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Label>, HashMap<u32, Label>) {
     let mut label_gen = LabelGen::new();
@@ -69,7 +69,7 @@ fn rewrite_params_and_body<'arena>(
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
-    params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &mut [(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let relabel = |id: Label| {
@@ -101,7 +101,7 @@ fn rewrite_params_and_body<'arena>(
 
 pub fn relabel_function<'arena>(
     alloc: &'arena bumpalo::Bump,
-    params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
+    params: &mut [(Param<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);

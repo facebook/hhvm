@@ -9,29 +9,29 @@ use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::hhbc_ast::Visibility;
-use crate::HhasAttribute;
-use crate::HhasBody;
-use crate::HhasCoeffects;
-use crate::HhasSpan;
+use crate::Attribute;
+use crate::Body;
+use crate::Coeffects;
 use crate::MethodName;
+use crate::Span;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct HhasMethod<'arena> {
-    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
+pub struct Method<'arena> {
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub visibility: Visibility,
     pub name: MethodName<'arena>,
-    pub body: HhasBody<'arena>,
-    pub span: HhasSpan,
-    pub coeffects: HhasCoeffects<'arena>,
-    pub flags: HhasMethodFlags,
+    pub body: Body<'arena>,
+    pub span: Span,
+    pub coeffects: Coeffects<'arena>,
+    pub flags: MethodFlags,
     pub attrs: Attr,
 }
 
 bitflags! {
     #[derive(Serialize)]
     #[repr(C)]
-    pub struct HhasMethodFlags: u16 {
+    pub struct MethodFlags: u16 {
         const IS_ASYNC = 1 << 0;
         const IS_GENERATOR = 1 << 1;
         const IS_PAIR_GENERATOR = 1 << 2;
@@ -39,8 +39,8 @@ bitflags! {
     }
 }
 
-impl HhasMethod<'_> {
+impl Method<'_> {
     pub fn is_closure_body(&self) -> bool {
-        self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
+        self.flags.contains(MethodFlags::IS_CLOSURE_BODY)
     }
 }

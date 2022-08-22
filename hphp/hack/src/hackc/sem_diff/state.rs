@@ -514,7 +514,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     }
 
     fn next_ip(&self, ip: InstrPtr) -> InstrPtr {
-        ip.next(self.body.hhas_body.body_instrs.len())
+        ip.next(self.body.hhbc_body.body_instrs.len())
     }
 
     fn step_base(
@@ -1144,7 +1144,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     pub(crate) fn instr_at(&self, ip: InstrPtr) -> Option<&'arena Instruct<'arena>> {
         ip.into_option().and_then(|ip| {
             let idx = ip.as_usize();
-            let instrs = self.body.hhas_body.body_instrs.as_arena_ref();
+            let instrs = self.body.hhbc_body.body_instrs.as_arena_ref();
             instrs.get(idx)
         })
     }
@@ -1195,8 +1195,8 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn is_decl_var(&self, local: &Local) -> bool {
         let idx = local.idx as usize;
-        let params_len = self.body.hhas_body.params.len();
-        let decl_vars_len = self.body.hhas_body.decl_vars.len();
+        let params_len = self.body.hhbc_body.params.len();
+        let decl_vars_len = self.body.hhbc_body.decl_vars.len();
         params_len <= idx && idx < params_len + decl_vars_len
     }
 }

@@ -6,14 +6,14 @@
 use ffi::Slice;
 use serde::Serialize;
 
+use crate::Attribute;
 use crate::ClassName;
-use crate::HhasAttribute;
-use crate::HhasSpan;
+use crate::Span;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct HhasModule<'arena> {
-    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
+pub struct Module<'arena> {
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub name: ClassName<'arena>,
-    pub span: HhasSpan,
+    pub span: Span,
 }

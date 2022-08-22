@@ -6,7 +6,7 @@
 use std::io::Result;
 use std::io::Write;
 
-use hhbc::HhasCoeffects;
+use hhbc::Coeffects;
 use write_bytes::write_bytes;
 use write_bytes::DisplayBytes;
 
@@ -18,7 +18,7 @@ use crate::write::fmt_separated_with;
 pub(crate) fn coeffects_to_hhas(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    coeffects: &HhasCoeffects<'_>,
+    coeffects: &Coeffects<'_>,
 ) -> Result<()> {
     let indent = FmtIndent(ctx);
 

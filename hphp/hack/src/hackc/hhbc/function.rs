@@ -8,30 +8,30 @@ use ffi::Slice;
 use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
+use crate::Attribute;
+use crate::Body;
+use crate::Coeffects;
 use crate::FunctionName;
-use crate::HhasAttribute;
-use crate::HhasBody;
-use crate::HhasCoeffects;
-use crate::HhasParam;
-use crate::HhasSpan;
+use crate::Param;
+use crate::Span;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct HhasFunction<'arena> {
-    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
+pub struct Function<'arena> {
+    pub attributes: Slice<'arena, Attribute<'arena>>,
     pub name: FunctionName<'arena>,
-    pub body: HhasBody<'arena>,
+    pub body: Body<'arena>,
 
-    pub span: HhasSpan,
-    pub coeffects: HhasCoeffects<'arena>,
-    pub flags: HhasFunctionFlags,
+    pub span: Span,
+    pub coeffects: Coeffects<'arena>,
+    pub flags: FunctionFlags,
     pub attrs: Attr,
 }
 
 bitflags! {
     #[derive(Serialize)]
     #[repr(C)]
-    pub struct HhasFunctionFlags: u8 {
+    pub struct FunctionFlags: u8 {
         const ASYNC =          1 << 0;
         const GENERATOR =      1 << 1;
         const PAIR_GENERATOR = 1 << 2;
@@ -39,24 +39,24 @@ bitflags! {
     }
 }
 
-impl<'arena> HhasFunction<'arena> {
+impl<'arena> Function<'arena> {
     pub fn is_async(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::ASYNC)
+        self.flags.contains(FunctionFlags::ASYNC)
     }
 
     pub fn is_generator(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::GENERATOR)
+        self.flags.contains(FunctionFlags::GENERATOR)
     }
 
     pub fn is_pair_generator(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::PAIR_GENERATOR)
+        self.flags.contains(FunctionFlags::PAIR_GENERATOR)
     }
 
     pub fn is_memoize_impl(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::MEMOIZE_IMPL)
+        self.flags.contains(FunctionFlags::MEMOIZE_IMPL)
     }
 
-    pub fn with_body<F, T>(&mut self, body: HhasBody<'arena>, f: F) -> T
+    pub fn with_body<F, T>(&mut self, body: Body<'arena>, f: F) -> T
     where
         F: FnOnce() -> T,
     {
@@ -66,7 +66,7 @@ impl<'arena> HhasFunction<'arena> {
         ret
     }
 
-    pub fn params(&self) -> &[HhasParam<'arena>] {
+    pub fn params(&self) -> &[Param<'arena>] {
         self.body.params.as_ref()
     }
 }

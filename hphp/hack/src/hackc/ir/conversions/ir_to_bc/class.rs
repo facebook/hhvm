@@ -94,7 +94,7 @@ pub(crate) fn convert_class<'a>(
         uses.into_iter().map(|use_| use_.to_hhbc(alloc, strings)),
     );
 
-    let class = hhbc::HhasClass {
+    let class = hhbc::Class {
         attributes: convert::convert_attributes(alloc, attributes),
         base,
         constants: Slice::fill_iter(
@@ -129,8 +129,8 @@ pub(crate) fn convert_class<'a>(
 fn convert_ctx_constant<'a>(
     alloc: &'a bumpalo::Bump,
     ctx: &ir::CtxConstant<'a>,
-) -> hhbc::HhasCtxConstant<'a> {
-    hhbc::HhasCtxConstant {
+) -> hhbc::CtxConstant<'a> {
+    hhbc::CtxConstant {
         name: ctx.name,
         recognized: Slice::fill_iter(alloc, ctx.recognized.iter().cloned()),
         unrecognized: Slice::fill_iter(alloc, ctx.unrecognized.iter().cloned()),
@@ -138,8 +138,8 @@ fn convert_ctx_constant<'a>(
     }
 }
 
-fn convert_type_constant<'a>(tc: &ir::TypeConstant<'a>) -> hhbc::HhasTypeConstant<'a> {
-    hhbc::HhasTypeConstant {
+fn convert_type_constant<'a>(tc: &ir::TypeConstant<'a>) -> hhbc::TypeConstant<'a> {
+    hhbc::TypeConstant {
         name: tc.name,
         initializer: tc.initializer.clone().into(),
         is_abstract: tc.is_abstract,

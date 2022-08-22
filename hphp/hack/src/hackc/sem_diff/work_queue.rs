@@ -27,10 +27,10 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
 
         // Also need to handle entrypoints for defaults!
         for (idx, (param_a, param_b)) in a
-            .hhas_body
+            .hhbc_body
             .params
             .iter()
-            .zip(b.hhas_body.params.iter())
+            .zip(b.hhbc_body.params.iter())
             .enumerate()
         {
             // Initialize parameter values

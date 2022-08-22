@@ -8,8 +8,8 @@ use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
 use hhbc::ClassName;
-use hhbc::HhasModule;
-use hhbc::HhasSpan;
+use hhbc::Module;
+use hhbc::Span;
 use oxidized::ast;
 
 use crate::emit_attribute;
@@ -18,11 +18,11 @@ pub fn emit_module<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_module: &'a ast::Module,
-) -> Result<HhasModule<'arena>> {
+) -> Result<Module<'arena>> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
     let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
-    let span = HhasSpan::from_pos(&ast_module.span);
-    Ok(HhasModule {
+    let span = Span::from_pos(&ast_module.span);
+    Ok(Module {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
         span,
@@ -33,7 +33,7 @@ pub fn emit_modules_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<HhasModule<'arena>>> {
+) -> Result<Vec<Module<'arena>>> {
     ast.iter()
         .filter_map(|def| {
             if let ast::Def::Module(md) = def {

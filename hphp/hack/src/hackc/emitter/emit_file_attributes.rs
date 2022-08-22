@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use env::emitter::Emitter;
 use error::Result;
-use hhbc::HhasAttribute;
+use hhbc::Attribute;
 use itertools::Itertools;
 use oxidized::ast;
 
@@ -13,14 +13,14 @@ use crate::emit_attribute::from_asts;
 fn emit_file_attributes<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     fa: &ast::FileAttribute,
-) -> Result<Vec<HhasAttribute<'arena>>> {
+) -> Result<Vec<Attribute<'arena>>> {
     from_asts(e, &fa.user_attributes[..])
 }
 
 pub fn emit_file_attributes_from_program<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     prog: &[ast::Def],
-) -> Result<Vec<HhasAttribute<'arena>>> {
+) -> Result<Vec<Attribute<'arena>>> {
     prog.iter()
         .filter_map(|node| {
             if let ast::Def::FileAttributes(fa) = node {

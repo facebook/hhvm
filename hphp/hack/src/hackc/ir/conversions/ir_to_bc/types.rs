@@ -6,7 +6,7 @@
 use ffi::Maybe;
 use ffi::Str;
 use hhbc::Constraint;
-use hhbc::HhasTypeInfo;
+use hhbc::TypeInfo;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use lazy_static::lazy_static;
 
@@ -14,10 +14,10 @@ lazy_static! {
     static ref BUILTIN_NAME_VOID: Str<'static> = Str::new(br"HH\void");
 }
 
-fn ir2bc<'a>(ty: &ir::Type<'a>) -> HhasTypeInfo<'a> {
+fn ir2bc<'a>(ty: &ir::Type<'a>) -> TypeInfo<'a> {
     use ir::Type;
     match ty {
-        Type::Empty => HhasTypeInfo {
+        Type::Empty => TypeInfo {
             user_type: Maybe::Just(ffi::Slice::empty()),
             type_constraint: Constraint {
                 name: Maybe::Nothing,
@@ -30,28 +30,28 @@ fn ir2bc<'a>(ty: &ir::Type<'a>) -> HhasTypeInfo<'a> {
             ty
         }
         Type::None => unreachable!(),
-        Type::User(name) => HhasTypeInfo {
+        Type::User(name) => TypeInfo {
             user_type: Maybe::Just(*name),
             type_constraint: Constraint {
                 name: Maybe::Just(*name),
                 flags: TypeConstraintFlags::NoFlags,
             },
         },
-        Type::UserNoConstraint(name) => HhasTypeInfo {
+        Type::UserNoConstraint(name) => TypeInfo {
             user_type: Maybe::Just(*name),
             type_constraint: Constraint {
                 name: Maybe::Nothing,
                 flags: TypeConstraintFlags::NoFlags,
             },
         },
-        Type::UserWithConstraint(name, constraint) => HhasTypeInfo {
+        Type::UserWithConstraint(name, constraint) => TypeInfo {
             user_type: Maybe::Just(*name),
             type_constraint: Constraint {
                 name: Maybe::Just(*constraint),
                 flags: TypeConstraintFlags::NoFlags,
             },
         },
-        Type::Void => HhasTypeInfo {
+        Type::Void => TypeInfo {
             user_type: Maybe::Just(*BUILTIN_NAME_VOID),
             type_constraint: Constraint {
                 name: Maybe::Nothing,
@@ -61,7 +61,7 @@ fn ir2bc<'a>(ty: &ir::Type<'a>) -> HhasTypeInfo<'a> {
     }
 }
 
-pub(crate) fn convert<'a>(ty: &ir::Type<'a>) -> Maybe<HhasTypeInfo<'a>> {
+pub(crate) fn convert<'a>(ty: &ir::Type<'a>) -> Maybe<TypeInfo<'a>> {
     if *ty == ir::Type::None {
         Maybe::Nothing
     } else {

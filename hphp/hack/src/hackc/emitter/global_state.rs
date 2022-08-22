@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::HhasCoeffects;
+use hhbc::Coeffects;
 use ocamlrep::rc::RcOc;
 use oxidized::ast_defs::Abstraction;
 use oxidized::ast_defs::ClassishKind;
@@ -34,7 +34,7 @@ pub struct GlobalState<'arena> {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
-    pub lambda_coeffects_of_scope: SMap<HhasCoeffects<'arena>>,
+    pub lambda_coeffects_of_scope: SMap<Coeffects<'arena>>,
 }
 
 impl<'arena> GlobalState<'arena> {
@@ -46,7 +46,7 @@ impl<'arena> GlobalState<'arena> {
         &self,
         class_name: &str,
         meth_name: &str,
-    ) -> Option<&HhasCoeffects<'arena>> {
+    ) -> Option<&Coeffects<'arena>> {
         let key = get_unique_id_for_method(class_name, meth_name);
         self.lambda_coeffects_of_scope.get(&key)
     }

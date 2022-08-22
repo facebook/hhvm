@@ -15,7 +15,7 @@ use crate::ConstName;
 
 #[derive(Debug, Serialize)]
 #[repr(C)]
-pub struct HhasConstant<'arena> {
+pub struct Constant<'arena> {
     pub name: ConstName<'arena>,
     pub value: Maybe<TypedValue<'arena>>,
     pub is_abstract: bool,

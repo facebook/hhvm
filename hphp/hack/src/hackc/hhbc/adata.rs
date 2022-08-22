@@ -10,12 +10,12 @@ use crate::typed_value::TypedValue;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasAdata<'arena> {
+pub struct Adata<'arena> {
     pub id: Str<'arena>,
     pub value: TypedValue<'arena>,
 }
 
-impl HhasAdata<'_> {
+impl Adata<'_> {
     pub const VEC_PREFIX: &'static str = "v";
     pub const DICT_PREFIX: &'static str = "D";
     pub const KEYSET_PREFIX: &'static str = "k";

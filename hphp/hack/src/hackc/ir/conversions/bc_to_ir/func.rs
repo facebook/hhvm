@@ -7,10 +7,10 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Str;
 use ffi::Triple;
-use hhbc::HhasBody;
-use hhbc::HhasFunction;
-use hhbc::HhasMethod;
-use hhbc::HhasParam;
+use hhbc::Body;
+use hhbc::Function;
+use hhbc::Method;
+use hhbc::Param;
 use ir::instr::Terminator;
 use ir::ClassIdMap;
 use ir::Instr;
@@ -21,8 +21,8 @@ use crate::context::Context;
 use crate::convert;
 use crate::types;
 
-/// Convert a HhasFunction to an ir::Function
-pub(crate) fn convert_function<'a>(unit: &mut ir::Unit<'a>, src: &HhasFunction<'a>) {
+/// Convert a hhbc::Function to an ir::Function
+pub(crate) fn convert_function<'a>(unit: &mut ir::Unit<'a>, src: &Function<'a>) {
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
     let func = convert_body(unit, &src.body);
@@ -48,8 +48,8 @@ pub(crate) fn convert_function<'a>(unit: &mut ir::Unit<'a>, src: &HhasFunction<'
     unit.functions.push(function);
 }
 
-/// Convert a HhasMethod to an ir::Method
-pub(crate) fn convert_method<'a>(unit: &mut ir::Unit<'a>, clsidx: usize, src: &HhasMethod<'a>) {
+/// Convert a hhbc::Method to an ir::Method
+pub(crate) fn convert_method<'a>(unit: &mut ir::Unit<'a>, clsidx: usize, src: &Method<'a>) {
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
     let func = convert_body(unit, &src.body);
@@ -79,9 +79,9 @@ pub(crate) fn convert_method<'a>(unit: &mut ir::Unit<'a>, clsidx: usize, src: &H
     unit.classes.get_mut(clsidx).unwrap().methods.push(method);
 }
 
-/// Convert a HhasBody to an ir::Func
-fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &HhasBody<'a>) -> ir::Func<'a> {
-    let HhasBody {
+/// Convert a hhbc::Body to an ir::Func
+fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
+    let Body {
         ref body_instrs,
         ref decl_vars,
         ref doc_comment,
@@ -188,7 +188,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &HhasBody<'a>) -> ir::Func<'a
     func
 }
 
-fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &HhasParam<'a>) -> ir::Param<'a> {
+fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Param<'a> {
     let default_value = match param.default_value {
         Maybe::Just(Pair(label, value)) => {
             let bid = ctx.target_from_label(label, 0);
@@ -217,7 +217,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &HhasParam<'a>) -> ir
     }
 }
 
-fn convert_coeffects<'a>(coeffects: &hhbc::HhasCoeffects<'a>) -> ir::Coeffects<'a> {
+fn convert_coeffects<'a>(coeffects: &hhbc::Coeffects<'a>) -> ir::Coeffects<'a> {
     ir::Coeffects {
         static_coeffects: coeffects.get_static_coeffects().to_vec(),
         unenforced_static_coeffects: coeffects.get_unenforced_static_coeffects().to_vec(),

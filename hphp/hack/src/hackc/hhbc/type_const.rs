@@ -11,7 +11,7 @@ use crate::typed_value::TypedValue;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub struct HhasTypeConstant<'arena> {
+pub struct TypeConstant<'arena> {
     pub name: Str<'arena>,
     pub initializer: Maybe<TypedValue<'arena>>,
     pub is_abstract: bool,

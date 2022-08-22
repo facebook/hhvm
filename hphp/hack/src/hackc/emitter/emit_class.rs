@@ -14,28 +14,28 @@ use ffi::Maybe;
 use ffi::Maybe::*;
 use ffi::Slice;
 use ffi::Str;
+use hhbc::Class;
 use hhbc::ClassName;
+use hhbc::Coeffects;
+use hhbc::Constant;
+use hhbc::CtxConstant;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::FatalOp;
-use hhbc::HhasClass;
-use hhbc::HhasCoeffects;
-use hhbc::HhasConstant;
-use hhbc::HhasCtxConstant;
-use hhbc::HhasMethod;
-use hhbc::HhasMethodFlags;
-use hhbc::HhasParam;
-use hhbc::HhasProperty;
-use hhbc::HhasSpan;
-use hhbc::HhasTypeConstant;
-use hhbc::HhasTypeInfo;
-use hhbc::HhasXhpAttribute;
 use hhbc::Local;
+use hhbc::Method;
+use hhbc::MethodFlags;
+use hhbc::Param;
+use hhbc::Property;
 use hhbc::ReadonlyOp;
+use hhbc::Span;
 use hhbc::SpecialClsRef;
 use hhbc::TraitReqKind;
+use hhbc::TypeConstant;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
+use hhbc::XhpAttribute;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
@@ -79,14 +79,14 @@ fn make_86method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     name: hhbc::MethodName<'arena>,
-    params: Vec<HhasParam<'arena>>,
+    params: Vec<Param<'arena>>,
     is_static: bool,
     visibility: Visibility,
     is_abstract: bool,
-    span: HhasSpan,
-    coeffects: HhasCoeffects<'arena>,
+    span: Span,
+    coeffects: Coeffects<'arena>,
     instrs: InstrSeq<'arena>,
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
 
@@ -97,7 +97,7 @@ fn make_86method<'arena, 'decl>(
     attrs.add(Attr::from(visibility));
 
     let attributes = vec![];
-    let flags = HhasMethodFlags::empty();
+    let flags = MethodFlags::empty();
     let method_decl_vars = vec![];
     let method_return_type = None;
     let method_doc_comment = None;
@@ -120,7 +120,7 @@ fn make_86method<'arena, 'decl>(
         method_env,
     )?;
 
-    Ok(HhasMethod {
+    Ok(Method {
         body,
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
@@ -184,7 +184,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tc: &'a ast::ClassTypeconstDef,
-) -> Result<HhasTypeConstant<'arena>> {
+) -> Result<TypeConstant<'arena>> {
     use ast::ClassTypeconst;
     let name = tc.name.1.to_string();
 
@@ -214,7 +214,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
         _ => true,
     };
 
-    Ok(HhasTypeConstant {
+    Ok(TypeConstant {
         name: Str::new_str(alloc, &name),
         initializer: Maybe::from(initializer),
         is_abstract,
@@ -224,7 +224,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
 fn from_ctx_constant<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     tc: &'a ast::ClassTypeconstDef,
-) -> Result<HhasCtxConstant<'arena>> {
+) -> Result<CtxConstant<'arena>> {
     use ast::ClassTypeconst;
     let name = tc.name.1.to_string();
     let (recognized, unrecognized) = match &tc.kind {
@@ -236,7 +236,7 @@ fn from_ctx_constant<'a, 'arena>(
             ..
         })
         | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
-            let x = HhasCoeffects::from_ctx_constant(hint);
+            let x = Coeffects::from_ctx_constant(hint);
             let r: Slice<'arena, Str<'_>> = Slice::from_vec(
                 alloc,
                 x.0.iter()
@@ -252,7 +252,7 @@ fn from_ctx_constant<'a, 'arena>(
         ClassTypeconst::TCConcrete(_) => false,
         _ => true,
     };
-    Ok(HhasCtxConstant {
+    Ok(CtxConstant {
         name: Str::new_str(alloc, &name),
         recognized,
         unrecognized,
@@ -308,7 +308,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     class_: &'a ast::Class_,
-) -> Result<Vec<(HhasConstant<'arena>, Option<InstrSeq<'arena>>)>> {
+) -> Result<Vec<(Constant<'arena>, Option<InstrSeq<'arena>>)>> {
     use oxidized::aast::ClassConstKind;
     class_
         .consts
@@ -346,7 +346,7 @@ fn from_class_elt_requirements<'a, 'arena>(
 fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
-) -> Result<Option<HhasTypeInfo<'arena>>> {
+) -> Result<Option<TypeInfo<'arena>>> {
     use hhbc::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
@@ -355,7 +355,7 @@ fn from_enum_type<'arena>(
         ));
         let type_info_type_constraint =
             Constraint::make(Nothing, TypeConstraintFlags::ExtendedHint);
-        Ok(HhasTypeInfo::make(
+        Ok(TypeInfo::make(
             type_info_user_type,
             type_info_type_constraint,
         ))
@@ -489,7 +489,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
-) -> Result<Option<HhasMethod<'arena>>> {
+) -> Result<Option<Method<'arena>>> {
     use hhbc::Constraint;
 
     let alloc = env.arena;
@@ -507,13 +507,13 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     } else {
         let tc = Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::NoFlags);
         let param_local = Local::new(0);
-        let params = vec![HhasParam {
+        let params = vec![Param {
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
             user_attributes: Slice::empty(),
-            type_info: Just(HhasTypeInfo::make(Just("HH\\varray".into()), tc)),
+            type_info: Just(TypeInfo::make(Just("HH\\varray".into()), tc)),
             default_value: Nothing,
         }];
 
@@ -528,8 +528,8 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             false, // is_static
             Visibility::Protected,
             false, // is_abstract
-            HhasSpan::from_pos(&ast_class.span),
-            HhasCoeffects::pure(alloc),
+            Span::from_pos(&ast_class.span),
+            Coeffects::pure(alloc),
             instrs,
         )?))
     }
@@ -541,10 +541,10 @@ fn make_init_method<'a, 'arena, 'decl, F>(
     properties: &mut [PropAndInit<'arena>],
     filter: F,
     name: &'static str,
-    span: HhasSpan,
-) -> Result<Option<HhasMethod<'arena>>>
+    span: Span,
+) -> Result<Option<Method<'arena>>>
 where
-    F: Fn(&HhasProperty<'arena>) -> bool,
+    F: Fn(&Property<'arena>) -> bool,
 {
     if properties
         .iter()
@@ -569,7 +569,7 @@ where
             Visibility::Private,
             false, // is_abstract
             span,
-            HhasCoeffects::pure(alloc),
+            Coeffects::pure(alloc),
             instrs,
         )?))
     } else {
@@ -581,7 +581,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
-) -> Result<HhasClass<'arena>> {
+) -> Result<Class<'arena>> {
     let namespace = &ast_class.namespace;
     validate_class_name(namespace, &ast_class.name)?;
     let mut env = Env::make_class_env(alloc, ast_class);
@@ -637,7 +637,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         .xhp_attrs
         .iter()
         .map(
-            |ast::XhpAttr(type_, class_var, tag, maybe_enum)| HhasXhpAttribute {
+            |ast::XhpAttr(type_, class_var, tag, maybe_enum)| XhpAttribute {
                 type_: type_.1.as_ref(),
                 class_var,
                 tag: *tag,
@@ -703,8 +703,8 @@ pub fn emit_class<'a, 'arena, 'decl>(
     } else {
         vec![]
     };
-    let span = HhasSpan::from_pos(&ast_class.span);
-    let mut additional_methods: Vec<HhasMethod<'arena>> = vec![];
+    let span = Span::from_pos(&ast_class.span);
+    let mut additional_methods: Vec<Method<'arena>> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.push(emit_xhp::from_category_declaration(
             emitter, ast_class, &cats,
@@ -731,9 +731,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
-    let pinit_filter = |p: &HhasProperty<'_>| !p.flags.is_static();
-    let sinit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && !p.flags.is_lsb();
-    let linit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && p.flags.is_lsb();
+    let pinit_filter = |p: &Property<'_>| !p.flags.is_static();
+    let sinit_filter = |p: &Property<'_>| p.flags.is_static() && !p.flags.is_lsb();
+    let linit_filter = |p: &Property<'_>| p.flags.is_static() && p.flags.is_lsb();
 
     let pinit_method = make_init_method(
         alloc,
@@ -762,7 +762,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let initialized_constants: Vec<_> = constants
         .iter_mut()
-        .filter_map(|(HhasConstant { ref name, .. }, instrs)| {
+        .filter_map(|(Constant { ref name, .. }, instrs)| {
             instrs
                 .take()
                 .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
@@ -773,7 +773,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     } else {
         let param_name = Str::new_str(alloc, "$constName");
         let param_local = Local::new(0);
-        let params = vec![HhasParam {
+        let params = vec![Param {
             name: param_name,
             is_variadic: false,
             is_inout: false,
@@ -828,7 +828,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             Visibility::Private,
             is_interface, /* is_abstract */
             span,
-            HhasCoeffects::default(),
+            Coeffects::default(),
             instrs,
         )?)
     };
@@ -853,11 +853,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let type_constants = tconsts
         .iter()
         .map(|x| from_type_constant(alloc, emitter, x))
-        .collect::<Result<Vec<HhasTypeConstant<'_>>>>()?;
+        .collect::<Result<Vec<TypeConstant<'_>>>>()?;
     let ctx_constants = ctxconsts
         .iter()
         .map(|x| from_ctx_constant(alloc, x))
-        .collect::<Result<Vec<HhasCtxConstant<'_>>>>()?;
+        .collect::<Result<Vec<CtxConstant<'_>>>>()?;
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {
@@ -903,7 +903,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     flags.set(Attr::AttrInternal, ast_class.internal);
 
     add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
-    Ok(HhasClass {
+    Ok(Class {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         base: Maybe::from(base),
         implements: Slice::fill_iter(alloc, implements.into_iter()),
@@ -928,7 +928,7 @@ pub fn emit_classes_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
-) -> Result<Vec<HhasClass<'arena>>> {
+) -> Result<Vec<Class<'arena>>> {
     ast.iter()
         .filter_map(|class| {
             if let ast::Def::Class(cd) = class {

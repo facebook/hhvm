@@ -6,7 +6,7 @@ use env::emitter::Emitter;
 use env::Env;
 use error::Error;
 use error::Result;
-use hhbc::HhasAttribute;
+use hhbc::Attribute;
 use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
@@ -17,14 +17,14 @@ use crate::emit_expression;
 pub fn from_asts<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     attrs: &[a::UserAttribute],
-) -> Result<Vec<HhasAttribute<'arena>>> {
+) -> Result<Vec<Attribute<'arena>>> {
     attrs.iter().map(|attr| from_ast(e, attr)).collect()
 }
 
 pub fn from_ast<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     attr: &a::UserAttribute,
-) -> Result<HhasAttribute<'arena>> {
+) -> Result<Attribute<'arena>> {
     let arguments = constant_folder::literals_from_exprs(
         &mut attr.params.clone(),
         e,
@@ -43,7 +43,7 @@ pub fn from_ast<'arena, 'decl>(
     } else {
         hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
     };
-    Ok(HhasAttribute {
+    Ok(Attribute {
         name: e.alloc.alloc_str(fully_qualified_id).into(),
         arguments: e.alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
     })
@@ -56,7 +56,7 @@ pub fn from_ast<'arena, 'decl>(
 pub fn add_reified_attribute<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[a::Tparam],
-) -> Option<HhasAttribute<'arena>> {
+) -> Option<Attribute<'arena>> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -85,7 +85,7 @@ pub fn add_reified_attribute<'arena>(
         arguments.push(TypedValue::Int(bool2i64(soft)));
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
-    Some(HhasAttribute {
+    Some(Attribute {
         name,
         arguments: arguments.into_bump_slice().into(),
     })
@@ -94,10 +94,10 @@ pub fn add_reified_attribute<'arena>(
 pub fn add_reified_parent_attribute<'a, 'arena>(
     env: &Env<'a, 'arena>,
     extends: &[a::Hint],
-) -> Option<HhasAttribute<'arena>> {
+) -> Option<Attribute<'arena>> {
     if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
         if emit_expression::has_non_tparam_generics(env, hl) {
-            return Some(HhasAttribute {
+            return Some(Attribute {
                 name: "__HasReifiedParent".into(),
                 arguments: ffi::Slice::empty(),
             });

@@ -16,37 +16,37 @@ use ffi::Slice;
 use ffi::Str;
 use ffi::Triple;
 use hash::HashSet;
+use hhbc::Adata;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Class;
 use hhbc::ClassName;
+use hhbc::Coeffects;
 use hhbc::ConstName;
+use hhbc::Constant;
+use hhbc::CtxConstant;
 use hhbc::FCallArgs;
 use hhbc::FatalOp;
+use hhbc::Function;
 use hhbc::FunctionName;
 use hhbc::HackCUnit;
-use hhbc::HhasAdata;
-use hhbc::HhasAttribute;
-use hhbc::HhasBody;
-use hhbc::HhasClass;
-use hhbc::HhasCoeffects;
-use hhbc::HhasConstant;
-use hhbc::HhasCtxConstant;
-use hhbc::HhasFunction;
-use hhbc::HhasMethod;
-use hhbc::HhasMethodFlags;
-use hhbc::HhasModule;
-use hhbc::HhasParam;
-use hhbc::HhasPos;
-use hhbc::HhasProperty;
-use hhbc::HhasSpan;
-use hhbc::HhasSymbolRefs;
-use hhbc::HhasTypeConstant;
-use hhbc::HhasTypeInfo;
-use hhbc::HhasTypedef;
 use hhbc::IncludePath;
 use hhbc::Instruct;
 use hhbc::Label;
+use hhbc::Method;
+use hhbc::MethodFlags;
+use hhbc::Module;
+use hhbc::Param;
+use hhbc::Pos;
+use hhbc::Property;
 use hhbc::Pseudo;
+use hhbc::Span;
+use hhbc::SymbolRefs;
 use hhbc::TraitReqKind;
+use hhbc::TypeConstant;
+use hhbc::TypeInfo;
 use hhbc::TypedValue;
+use hhbc::Typedef;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -130,7 +130,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
 fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
-        let HhasPos {
+        let Pos {
             line_begin,
             line_end,
             col_begin,
@@ -188,7 +188,7 @@ fn print_include_region(
 fn print_symbol_ref_regions<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    symbol_refs: &HhasSymbolRefs<'arena>,
+    symbol_refs: &SymbolRefs<'arena>,
 ) -> Result<()> {
     fn print_region<'a, T: 'a, F>(
         ctx: &Context<'_>,
@@ -241,14 +241,14 @@ fn print_symbol_ref_regions<'arena>(
     )
 }
 
-fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_>) -> Result<()> {
+fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &Adata<'_>) -> Result<()> {
     write_bytes!(w, ".adata {} = ", adata.id)?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write_all(b";")?;
     ctx.newline(w)
 }
 
-fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &HhasTypedef<'_>) -> Result<()> {
+fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b".alias ")?;
     print_special_and_user_attrs(
@@ -285,7 +285,7 @@ where
     })
 }
 
-fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_>) -> Result<()> {
+fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
@@ -348,11 +348,7 @@ fn print_requirement(
     }
 }
 
-fn print_type_constant(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    c: &HhasTypeConstant<'_>,
-) -> Result<()> {
+fn print_type_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &TypeConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
     write_bytes!(w, ".const {} isType", c.name)?;
     if c.is_abstract {
@@ -365,7 +361,7 @@ fn print_type_constant(
     w.write_all(b";")
 }
 
-fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<'_>) -> Result<()> {
+fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &CtxConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
     write_bytes!(w, ".ctx {}", c.name)?;
     if c.is_abstract {
@@ -383,7 +379,7 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<
     Ok(())
 }
 
-fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
+fn print_property_doc_comment(w: &mut dyn Write, p: &Property<'_>) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
         write_bytes!(w, r#""""{}""""#, escaper::escape_bstr(s.as_bstr()))?;
         w.write_all(b" ")?;
@@ -391,12 +387,12 @@ fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result
     Ok(())
 }
 
-fn print_property_type_info(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
+fn print_property_type_info(w: &mut dyn Write, p: &Property<'_>) -> Result<()> {
     print_type_info(w, &p.type_info)?;
     w.write_all(b" ")
 }
 
-fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<'_>) -> Result<()> {
+fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b"  .property ")?;
     print_special_and_user_attrs(
@@ -422,7 +418,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<
     }
 }
 
-fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasConstant<'_>) -> Result<()> {
+fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
     w.write_all(c.name.as_bstr())?;
@@ -440,7 +436,7 @@ fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasConstant<'_>) ->
     w.write_all(b";")
 }
 
-fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'_>) -> Result<()> {
+fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class<'_>) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write_all(b".enum_ty ")?;
@@ -462,7 +458,7 @@ fn print_doc_comment<'arena>(
     Ok(())
 }
 
-fn print_uses<'arena>(w: &mut dyn Write, c: &HhasClass<'arena>) -> Result<()> {
+fn print_uses<'arena>(w: &mut dyn Write, c: &Class<'arena>) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
@@ -493,11 +489,7 @@ fn print_shadowed_tparams<'arena>(
     write_bytes!(w, "{{{}}}", fmt_separated(", ", shadowed_tparams.as_ref()))
 }
 
-fn print_method_def(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    method_def: &HhasMethod<'_>,
-) -> Result<()> {
+fn print_method_def(ctx: &Context<'_>, w: &mut dyn Write, method_def: &Method<'_>) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
@@ -520,19 +512,16 @@ fn print_method_def(
     w.write_all(method_def.name.as_bstr())?;
     let dv_labels = find_dv_labels(&body.params);
     print_params(ctx, w, &body.params, &dv_labels)?;
-    if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
+    if method_def.flags.contains(MethodFlags::IS_GENERATOR) {
         w.write_all(b" isGenerator")?;
     }
-    if method_def.flags.contains(HhasMethodFlags::IS_ASYNC) {
+    if method_def.flags.contains(MethodFlags::IS_ASYNC) {
         w.write_all(b" isAsync")?;
     }
-    if method_def
-        .flags
-        .contains(HhasMethodFlags::IS_PAIR_GENERATOR)
-    {
+    if method_def.flags.contains(MethodFlags::IS_PAIR_GENERATOR) {
         w.write_all(b" isPairGenerator")?;
     }
-    if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
+    if method_def.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
         w.write_all(b" isClosureBody")?;
     }
     w.write_all(b" ")?;
@@ -548,7 +537,7 @@ fn print_method_def(
 fn print_class_def<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    class_def: &HhasClass<'arena>,
+    class_def: &Class<'arena>,
 ) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
@@ -607,7 +596,7 @@ fn print_class_def<'arena>(
 fn print_module_def<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    module_def: &HhasModule<'arena>,
+    module_def: &Module<'arena>,
 ) -> Result<()> {
     newline(w)?;
     w.write_all(b".module ")?;
@@ -722,22 +711,18 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
         TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, HhasAdata::VEC_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, Adata::VEC_PREFIX, None, values.as_ref())
         }
-        TypedValue::Dict(pairs) => print_adata_dict_collection_argument(
-            ctx,
-            w,
-            HhasAdata::DICT_PREFIX,
-            None,
-            pairs.as_ref(),
-        ),
+        TypedValue::Dict(pairs) => {
+            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, None, pairs.as_ref())
+        }
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, HhasAdata::KEYSET_PREFIX, None, values.as_ref())
+            print_adata_collection_argument(ctx, w, Adata::KEYSET_PREFIX, None, values.as_ref())
         }
     }
 }
 
-fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) -> Result<()> {
+fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute<'_>) -> Result<()> {
     let unescaped = a.name.as_bstr();
     let escaped = if a.name.starts_with(b"__") {
         Cow::Borrowed(unescaped)
@@ -748,18 +733,14 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) 
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
         escaped,
-        HhasAdata::VEC_PREFIX,
+        Adata::VEC_PREFIX,
         a.arguments.len()
     )?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 
-fn print_attributes<'a>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    al: &[HhasAttribute<'a>],
-) -> Result<()> {
+fn print_attributes<'a>(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'a>]) -> Result<()> {
     // Adjust for underscore coming before alphabet
     let al = al
         .iter()
@@ -771,11 +752,7 @@ fn print_attributes<'a>(
     )
 }
 
-fn print_file_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    al: &[HhasAttribute<'_>],
-) -> Result<()> {
+fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute<'_>]) -> Result<()> {
     if al.is_empty() {
         return Ok(());
     }
@@ -805,8 +782,8 @@ fn is_bareword_char(c: &u8) -> bool {
 fn print_body(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    body: &HhasBody<'_>,
-    coeffects: &HhasCoeffects<'_>,
+    body: &Body<'_>,
+    coeffects: &Coeffects<'_>,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_doc_comment(ctx, w, body.doc_comment.as_ref())?;
@@ -968,7 +945,7 @@ fn print_instr<'a, 'b>(
 
 /// Build a set containing the labels for param default-value initializers
 /// so they can be formatted as `DV123` instead of `L123`.
-fn find_dv_labels(params: &[HhasParam<'_>]) -> HashSet<Label> {
+fn find_dv_labels(params: &[Param<'_>]) -> HashSet<Label> {
     params
         .iter()
         .filter_map(|param| match &param.default_value {
@@ -981,7 +958,7 @@ fn find_dv_labels(params: &[HhasParam<'_>]) -> HashSet<Label> {
 fn print_params<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    params: &[HhasParam<'arena>],
+    params: &[Param<'arena>],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
@@ -992,7 +969,7 @@ fn print_params<'arena>(
 fn print_param<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    param: &HhasParam<'arena>,
+    param: &Param<'arena>,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
@@ -1045,7 +1022,7 @@ pub(crate) fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result
 fn print_param_user_attributes(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    param: &HhasParam<'_>,
+    param: &Param<'_>,
 ) -> Result<()> {
     match param.user_attributes.as_ref()[..] {
         [] => Ok(()),
@@ -1055,10 +1032,10 @@ fn print_param_user_attributes(
 
 fn print_span(
     w: &mut dyn Write,
-    &HhasSpan {
+    &Span {
         line_begin,
         line_end,
-    }: &HhasSpan,
+    }: &Span,
 ) -> Result<()> {
     write!(w, "({},{})", line_begin, line_end)
 }
@@ -1066,7 +1043,7 @@ fn print_span(
 fn print_special_and_user_attrs(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    users: &[HhasAttribute<'_>],
+    users: &[Attribute<'_>],
     attr_ctx: &AttrContext,
     attrs: &Attr,
 ) -> Result<()> {
@@ -1085,14 +1062,14 @@ fn print_special_and_user_attrs(
 
 fn print_upper_bounds<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
 fn print_upper_bound<'arena>(
     w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'_>>>,
+    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'_>>>,
 ) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", id)?;
@@ -1102,14 +1079,14 @@ fn print_upper_bound<'arena>(
 
 fn print_upper_bounds_<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
 fn print_upper_bound_<'arena>(
     w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
+    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>,
 ) -> Result<()> {
     paren(w, |w| {
         write_bytes!(w, "{} as ", id)?;
@@ -1117,7 +1094,7 @@ fn print_upper_bound_<'arena>(
     })
 }
 
-fn print_type_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
+fn print_type_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
     print_type_info_(w, false, ti)
 }
 
@@ -1125,7 +1102,7 @@ fn print_type_flags(w: &mut dyn Write, flag: TypeConstraintFlags) -> Result<()> 
     write!(w, "{}", type_flags_to_string_ffi(flag))
 }
 
-fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> Result<()> {
+fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo<'_>) -> Result<()> {
     let print_quote_str = |w: &mut dyn Write, opt: Option<&str>| {
         option_or(
             w,
@@ -1147,7 +1124,7 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> 
 
 // T125888411: User type not printed
 // T126391106: also -- no name and "" as a name both print as "", which is ambiguous for the assembler
-fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
+fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
     angle(w, |w| {
         write_bytes!(
             w,

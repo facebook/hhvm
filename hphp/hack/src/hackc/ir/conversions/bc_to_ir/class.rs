@@ -5,14 +5,14 @@
 
 use ffi::Pair;
 use ffi::Str;
-use hhbc::HhasClass;
+use hhbc::Class;
 use ir::class::TraitReqKind;
 use ir::Type;
 
 use crate::convert;
 use crate::types;
 
-pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &HhasClass<'a>) {
+pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
     let constants: Vec<ir::HackConstant<'a>> = cls
         .constants
         .as_ref()
@@ -101,7 +101,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &HhasClass<'a>) {
     });
 }
 
-fn convert_ctx_constant<'a>(ctx: &hhbc::HhasCtxConstant<'a>) -> ir::CtxConstant<'a> {
+fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> {
     ir::CtxConstant {
         name: ctx.name,
         recognized: ctx.recognized.iter().cloned().collect(),
@@ -110,7 +110,7 @@ fn convert_ctx_constant<'a>(ctx: &hhbc::HhasCtxConstant<'a>) -> ir::CtxConstant<
     }
 }
 
-fn convert_type_constant<'a>(tc: &hhbc::HhasTypeConstant<'a>) -> ir::TypeConstant<'a> {
+fn convert_type_constant<'a>(tc: &hhbc::TypeConstant<'a>) -> ir::TypeConstant<'a> {
     ir::TypeConstant {
         name: tc.name,
         initializer: tc.initializer.clone().into(),

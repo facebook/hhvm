@@ -30,6 +30,16 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
+void reset_field<::facebook::thrift::test::MyAnnotation>(
+    ::facebook::thrift::test::MyAnnotation& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.signature_ref().copy_from(default_inst<::facebook::thrift::test::MyAnnotation>().signature_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::facebook::thrift::test::Foo>(
     ::facebook::thrift::test::Foo& obj, uint16_t index) {
   switch (index) {
@@ -170,6 +180,16 @@ void reset_field<::facebook::thrift::test::MyStruct>(
       obj.set_string_ref().copy_from(default_inst<::facebook::thrift::test::MyStruct>().set_string_ref());
       return;
   }
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::test::MyAnnotation>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
 }
 
 template<>

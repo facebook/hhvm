@@ -20,6 +20,7 @@
 namespace apache {
 namespace thrift {
 namespace tag {
+struct signature;
 struct intField;
 struct optionalIntField;
 struct intFieldWithDefault;
@@ -57,6 +58,10 @@ struct field;
 struct set_string;
 } // namespace tag
 namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_signature
+#define APACHE_THRIFT_ACCESSOR_signature
+APACHE_THRIFT_DEFINE_ACCESSOR(signature);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_intField
 #define APACHE_THRIFT_ACCESSOR_intField
 APACHE_THRIFT_DEFINE_ACCESSOR(intField);
@@ -206,6 +211,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(set_string);
 // END declare_enums
 // BEGIN forward_declare
 namespace facebook { namespace thrift { namespace test {
+class MyAnnotation;
 class Foo;
 class Baz;
 namespace detail {
@@ -232,7 +238,7 @@ typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::std::set<::std
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::string> StringWithAdapter;
 typedef ::std::vector<::facebook::thrift::test::StringWithAdapter> ListWithElemAdapter;
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter> ListWithElemAdapter_withAdapter;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int64_t> MyI64;
+typedef ::std::int64_t MyI64;
 typedef ::facebook::thrift::test::MyI64 DoubleTypedefI64;
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int32_t> MyI32;
 
@@ -2213,6 +2219,174 @@ unsigned long A::read(Protocol_* iprot) {
 }
 
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter, ::facebook::thrift::test::A> AdaptedA;
+
+class MyAnnotation final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void,
+                                                   ::apache::thrift::field_id<1>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::string_t>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void,
+                                                      ::apache::thrift::tag::signature>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::tag::signature> = 1;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::signature>) { return 1; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = MyAnnotation;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  MyAnnotation() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg);
+
+  MyAnnotation(MyAnnotation&&) noexcept;
+
+  MyAnnotation(const MyAnnotation& src);
+
+
+  MyAnnotation& operator=(MyAnnotation&&) noexcept;
+  MyAnnotation& operator=(const MyAnnotation& src);
+ private:
+  ::std::string __fbthrift_field_signature;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const MyAnnotation&) const;
+  bool operator<(const MyAnnotation&) const;
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> signature_ref() const& {
+    return {this->__fbthrift_field_signature, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> signature_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_signature), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> signature_ref() & {
+    return {this->__fbthrift_field_signature, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> signature_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_signature), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> signature() const& {
+    return {this->__fbthrift_field_signature, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> signature() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_signature), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> signature() & {
+    return {this->__fbthrift_field_signature, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> signature() && {
+    return {static_cast<T&&>(this->__fbthrift_field_signature), __isset.at(0), __isset.bit(0)};
+  }
+
+  const ::std::string& get_signature() const& {
+    return __fbthrift_field_signature;
+  }
+
+  ::std::string get_signature() && {
+    return std::move(__fbthrift_field_signature);
+  }
+
+  template <typename T_MyAnnotation_signature_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.signature_ref() = BAR;` instead of `FOO.set_signature(BAR);`")]]
+  ::std::string& set_signature(T_MyAnnotation_signature_struct_setter&& signature_) {
+    signature_ref() = std::forward<T_MyAnnotation_signature_struct_setter>(signature_);
+    return __fbthrift_field_signature;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<MyAnnotation>;
+  friend void swap(MyAnnotation& a, MyAnnotation& b);
+};
+
+template <class Protocol_>
+unsigned long MyAnnotation::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
 
 class StructWithFieldAdapter final  {
  private:

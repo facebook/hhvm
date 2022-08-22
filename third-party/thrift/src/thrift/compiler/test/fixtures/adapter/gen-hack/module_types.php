@@ -21,6 +21,126 @@ type UnionWithAdapter = \Adapter2::THackType;
 type AdaptedA = \thrift\test\A;
 /**
  * Original thrift struct:-
+ * MyAnnotation
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/MyAnnotation'))>>
+class MyAnnotation implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'signature',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'signature' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'signature' => ?string,
+  );
+
+  const type TShape = shape(
+    'signature' => string,
+  );
+  const int STRUCTURAL_ID = 8000450631971332689;
+  /**
+   * Original thrift field:-
+   * 1: string signature
+   */
+  public string $signature;
+
+  public function __construct(?string $signature = null)[] {
+    $this->signature = $signature ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'signature'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyAnnotation';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MyAnnotation",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "signature",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+          shape(
+            "name" => "my.module.Adapter2",
+            "typeHint" => "my.another.module.AdaptedType2",
+          )
+        ),
+        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['signature'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'signature' => $this->signature,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'signature') !== null) {
+      $this->signature = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['signature']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * Foo
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo'))>>
@@ -710,10 +830,9 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
                 "name" => "my::Adapter1",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
-                "name" => "my.module.Adapter2",
-                "typeHint" => "my.another.module.AdaptedType2",
+                "signature" => "MyI64",
               )
             ),
           ],
@@ -738,10 +857,9 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
                 "name" => "my::Adapter1",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
-                "name" => "my.module.Adapter2",
-                "typeHint" => "my.another.module.AdaptedType2",
+                "signature" => "MyI64",
               )
             ),
           ],
@@ -1416,10 +1534,9 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
                 "name" => "my::Adapter1",
               )
             ),
-            '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+            '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
-                "name" => "my.module.Adapter2",
-                "typeHint" => "my.another.module.AdaptedType2",
+                "signature" => "MyI64",
               )
             ),
           ],
@@ -3052,6 +3169,12 @@ class Config implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "MyVarAdapter",
+          )
+        ),
+        '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
+          shape(
+            "name" => "my.ConfigAdapter",
+            "typeHint" => "my.ConfiguredVar",
           )
         ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(

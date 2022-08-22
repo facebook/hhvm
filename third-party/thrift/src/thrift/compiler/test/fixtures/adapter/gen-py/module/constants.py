@@ -25,7 +25,7 @@ import thrift.annotation.hack.ttypes
 import my
 
 
-from .ttypes import UTF8STRINGS, Foo, Baz, Bar, DirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, StructWithAdapter, UnionWithAdapter, AdaptedA
+from .ttypes import UTF8STRINGS, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, StructWithAdapter, UnionWithAdapter, AdaptedA
 
 var1 = 10
 

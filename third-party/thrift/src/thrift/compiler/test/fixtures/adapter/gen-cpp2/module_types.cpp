@@ -16,6 +16,106 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::test::MyAnnotation>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::MyAnnotation>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test {
+
+const char* MyAnnotation::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/MyAnnotation";
+}
+
+const folly::StringPiece MyAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyAnnotation>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+MyAnnotation::MyAnnotation(const MyAnnotation&) = default;
+MyAnnotation& MyAnnotation::operator=(const MyAnnotation&) = default;
+MyAnnotation::MyAnnotation(FOLLY_MAYBE_UNUSED MyAnnotation&& other) noexcept :
+    __fbthrift_field_signature(std::move(other.__fbthrift_field_signature)),
+    __isset(other.__isset) {
+}
+
+MyAnnotation& MyAnnotation::operator=(FOLLY_MAYBE_UNUSED MyAnnotation&& other) noexcept {
+    this->__fbthrift_field_signature = std::move(other.__fbthrift_field_signature);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg) :
+    __fbthrift_field_signature(std::move(signature__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyAnnotation::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_signature = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void MyAnnotation::__fbthrift_clear_terse_fields() {
+}
+
+bool MyAnnotation::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool MyAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.signature_ref() == rhs.signature_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.signature_ref() == rhs.signature_ref())) {
+    return lhs.signature_ref() < rhs.signature_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyAnnotation& a, FOLLY_MAYBE_UNUSED MyAnnotation& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_signature, b.__fbthrift_field_signature);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyAnnotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyAnnotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyAnnotation::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyAnnotation::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyAnnotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyAnnotation::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyAnnotation::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyAnnotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // facebook::thrift::test
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::test::Foo>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

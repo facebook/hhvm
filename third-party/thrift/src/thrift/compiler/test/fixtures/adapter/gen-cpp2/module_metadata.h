@@ -28,6 +28,11 @@ namespace detail {
 namespace md {
 
 template <>
+class StructMetadata<::facebook::thrift::test::MyAnnotation> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::facebook::thrift::test::Foo> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

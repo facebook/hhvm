@@ -18,6 +18,13 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct TccStructTraits<::facebook::thrift::test::MyAnnotation> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::facebook::thrift::test::Foo> {
   static void translateFieldName(
       folly::StringPiece _fname,
@@ -93,6 +100,124 @@ struct TccStructTraits<::facebook::thrift::test::MyStruct> {
 } // namespace apache
 
 namespace facebook { namespace thrift { namespace test {
+
+template <class Protocol_>
+void MyAnnotation::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_STRING))) {
+    goto _loop;
+  }
+_readField_signature:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_signature, _readState);
+    
+  }
+ this->__isset.set(0, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<MyAnnotation>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING))) {
+        goto _readField_signature;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t MyAnnotation::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("MyAnnotation");
+  {
+    xfer += prot_->serializedFieldSize("signature", apache::thrift::protocol::T_STRING, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_signature);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t MyAnnotation::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("MyAnnotation");
+  {
+    xfer += prot_->serializedFieldSize("signature", apache::thrift::protocol::T_STRING, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_signature);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t MyAnnotation::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("MyAnnotation");
+  bool previousFieldHasValue = true;
+  {
+    constexpr int16_t kPrevFieldId = 0;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 1, kPrevFieldId>(*prot_, "signature", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_signature);
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void MyAnnotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t MyAnnotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t MyAnnotation::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t MyAnnotation::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void MyAnnotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t MyAnnotation::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t MyAnnotation::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t MyAnnotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 template <class Protocol_>
 void Foo::readNoXfer(Protocol_* iprot) {

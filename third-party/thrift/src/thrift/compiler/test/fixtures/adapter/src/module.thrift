@@ -37,11 +37,17 @@ typedef list<StringWithAdapter> ListWithElemAdapter
 @cpp.Adapter{name = 'my::Adapter2'}
 typedef ListWithElemAdapter ListWithElemAdapter_withAdapter
 
-@cpp.Adapter{name = "my::Adapter1"}
 @python.Adapter{
   name = "my.module.Adapter2",
   typeHint = "my.another.module.AdaptedType2",
 }
+@scope.Transitive
+struct MyAnnotation {
+  1: string signature;
+}
+
+@cpp.Adapter{name = "my::Adapter1"}
+@MyAnnotation{signature = "MyI64"}
 typedef i64 MyI64
 
 typedef MyI64 DoubleTypedefI64
@@ -186,6 +192,7 @@ service Service {
 }
 
 @cpp.Adapter{name = "MyVarAdapter"}
+@python.Adapter{name = "my.ConfigAdapter", typeHint = "my.ConfiguredVar"}
 @scope.Transitive
 @thrift.Experimental
 struct Config {

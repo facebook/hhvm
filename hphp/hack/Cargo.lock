@@ -37,14 +37,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "adata_state"
-version = "0.0.0"
-dependencies = [
- "hash",
- "hhbc",
-]
-
-[[package]]
 name = "adler"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1161,7 +1153,6 @@ dependencies = [
 name = "emit_unit"
 version = "0.0.0"
 dependencies = [
- "adata_state",
  "ast_scope",
  "bitflags",
  "bstr",
@@ -1205,7 +1196,6 @@ checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 name = "env"
 version = "0.0.0"
 dependencies = [
- "adata_state",
  "ast_scope",
  "bitflags",
  "bumpalo",

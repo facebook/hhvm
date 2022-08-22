@@ -356,7 +356,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
         false,
     )?;
-    emit_adata::typed_value_to_instr(e, &tv)
+    emit_adata::typed_value_into_instr(e, tv)
 }
 
 pub struct SetRange {
@@ -1016,7 +1016,7 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match constant_folder::vec_to_typed_value(e, fields) {
         Ok(tv) => {
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, None, pos, instr)
         }
         Err(_) => {
@@ -1131,7 +1131,7 @@ fn emit_collection<'a, 'arena, 'decl>(
         false, /*force_class_const*/
     ) {
         Ok(tv) => {
-            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, transform_to_collection, pos, instr)
         }
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
@@ -3221,7 +3221,7 @@ fn emit_lit<'a, 'arena, 'decl>(
         .map_err(|_| Error::unrecoverable("expr_to_typed_value failed"))?;
     Ok(emit_pos_then(
         pos,
-        emit_adata::typed_value_to_instr(emitter, &tv)?,
+        emit_adata::typed_value_into_instr(emitter, tv)?,
     ))
 }
 

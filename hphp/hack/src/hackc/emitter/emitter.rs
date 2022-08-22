@@ -6,7 +6,6 @@
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 
-use adata_state::AdataState;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
 use ffi::Slice;
@@ -27,6 +26,7 @@ use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 
+use crate::adata_state::AdataState;
 use crate::ClassExpr;
 use crate::IterGen;
 use crate::LabelGen;
@@ -50,7 +50,7 @@ pub struct Emitter<'arena, 'decl> {
 
     pub alloc: &'arena bumpalo::Bump,
 
-    pub adata_state_: Option<AdataState<'arena>>,
+    pub adata_state: Option<AdataState<'arena>>,
     pub statement_state_: Option<StatementState<'arena>>,
     symbol_refs_state: SymbolRefsState<'arena>,
 
@@ -85,7 +85,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             iterator: Default::default(),
             named_locals: Default::default(),
 
-            adata_state_: None,
+            adata_state: None,
             statement_state_: None,
             symbol_refs_state: Default::default(),
             global_state_: None,
@@ -171,10 +171,10 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
 
     pub fn adata_state(&self) -> &AdataState<'arena> {
-        self.adata_state_.as_ref().expect("uninit'd adata_state")
+        self.adata_state.as_ref().expect("uninit'd adata_state")
     }
     pub fn adata_state_mut(&mut self) -> &mut AdataState<'arena> {
-        self.adata_state_.get_or_insert_with(Default::default)
+        self.adata_state.get_or_insert_with(Default::default)
     }
 
     pub fn statement_state(&self) -> &StatementState<'arena> {

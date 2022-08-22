@@ -169,6 +169,7 @@ struct RequestResponseNoArgVoidResponseClientInstruction {}
 
 struct StreamBasicClientInstruction {
   1: Request request;
+  2: i64 bufferSize;
 }
 
 struct StreamChunkTimeoutClientInstruction {

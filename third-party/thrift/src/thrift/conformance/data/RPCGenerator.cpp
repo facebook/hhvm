@@ -21,6 +21,7 @@ namespace apache::thrift::conformance::data {
 namespace {
 const uint32_t kMaxFrameSize = (1 << 24) - 1;
 const std::string kLargeData = std::string(kMaxFrameSize * 2, 'a');
+const uint64_t kDefaultBufferSize = 100;
 
 // =================== Request-Response ===================
 Test createRequestResponseBasicTest() {
@@ -220,13 +221,10 @@ Test createStreamBasicTest() {
   testCase.name() = "StreamBasic/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
-      .emplace()
-      .streamBasic_ref()
-      .emplace()
-      .request()
-      .emplace()
-      .data() = "hello";
+  auto& clientInstruction =
+      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  clientInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverInstruction =
       rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
@@ -305,13 +303,10 @@ Test createStreamFragmentationTest() {
   testCase.name() = "StreamFragmentation/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
-      .emplace()
-      .streamBasic_ref()
-      .emplace()
-      .request()
-      .emplace()
-      .data() = kLargeData;
+  auto& clientInstruction =
+      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+  clientInstruction.request().emplace().data() = kLargeData;
+  clientInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverInstruction =
       rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
@@ -408,7 +403,7 @@ Test createSinkBasicTest() {
   auto& serverInstruction =
       rpcTest.serverInstruction_ref().emplace().sinkBasic_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = "world";
-  serverInstruction.bufferSize() = 1000;
+  serverInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverResult =
       rpcTest.serverTestResult_ref().emplace().sinkBasic_ref().emplace();
@@ -442,7 +437,7 @@ Test createSinkFragmentationTest() {
   auto& serverInstruction =
       rpcTest.serverInstruction_ref().emplace().sinkBasic_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = kLargeData;
-  serverInstruction.bufferSize() = 1000;
+  serverInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverResult =
       rpcTest.serverTestResult_ref().emplace().sinkBasic_ref().emplace();

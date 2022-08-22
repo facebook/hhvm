@@ -92,9 +92,12 @@ requestResponseNoArgVoidResponseTest(
 StreamBasicClientTestResult streamBasicTest(
     StreamBasicClientInstruction& instruction) {
   auto client = createClient();
+  apache::thrift::RpcOptions rpcOptions{};
+  rpcOptions.setChunkBufferSize(*instruction.bufferSize());
   return folly::coro::blockingWait(
       [&]() -> folly::coro::Task<StreamBasicClientTestResult> {
-        auto gen = (co_await client->co_streamBasic(*instruction.request()))
+        auto gen = (co_await client->co_streamBasic(
+                        rpcOptions, *instruction.request()))
                        .toAsyncGenerator();
         StreamBasicClientTestResult result;
         while (auto val = co_await gen.next()) {

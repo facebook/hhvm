@@ -19,7 +19,7 @@ use namespace HH\Lib\C;
  * function for maximum flexibility, however this pattern is best avoided in favor
  * of creating semaphores with a more narrow process.
  *
- * Use `genWaitFor()` to retrieve a `Tout` from a `Tin`.
+ * Use `waitForAsync()` to retrieve a `Tout` from a `Tin`.
  */
 final class Semaphore<Tin, Tout> {
 

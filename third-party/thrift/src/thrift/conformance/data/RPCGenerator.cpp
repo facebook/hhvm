@@ -375,6 +375,47 @@ Test createStreamInitialResponseTest() {
   return ret;
 }
 
+Test createStreamSubsequentCreditsTest() {
+  // Same as StreamBasicTest but the chunk buffer size is smaller than the
+  // number of stream payloads, so the client must keep sending subsequent
+  // credits in order to receive all stream payloads.
+  Test ret;
+  ret.name() = "StreamSubsequentCreditsTest";
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamSubsequentCredits/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  clientInstruction.bufferSize() = 10;
+
+  auto& serverInstruction =
+      rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .streamBasic_ref()
+      .emplace()
+      .streamPayloads()
+      .copy_from(serverInstruction.streamPayloads());
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .streamBasic_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Sink ===================
 Test createSinkBasicTest() {
   Test ret;
@@ -448,9 +489,9 @@ Test createSinkFragmentationTest() {
 }
 
 Test createSinkSubsequentCreditsTest() {
-  // Same as SinkBasicTest but server buffer size is smaller than number of sink
-  // payloads, so server must keep sending subsequent credits in order to
-  // receive all sink payloads
+  // Same as SinkBasicTest but the server buffer size is smaller than the number
+  // of sink payloads, so the server must keep sending subsequent credits in
+  // order to receive all sink payloads.
   Test ret;
   ret.name() = "SinkSubsequentCreditsTest";
 
@@ -498,6 +539,7 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createStreamBasicTest());
   suite.tests()->push_back(createStreamFragmentationTest());
   suite.tests()->push_back(createStreamInitialResponseTest());
+  suite.tests()->push_back(createStreamSubsequentCreditsTest());
   // =================== Sink ===================
   suite.tests()->push_back(createSinkBasicTest());
   suite.tests()->push_back(createSinkFragmentationTest());

@@ -1,0 +1,3 @@
+-vEval.EnableDecl=true
+-vAutoload.Enabled=true
+-vLog.Level=None

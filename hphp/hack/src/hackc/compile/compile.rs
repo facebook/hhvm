@@ -534,8 +534,8 @@ fn check_readonly_and_emit<'arena, 'decl>(
     ast: &mut ast::Program,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>, Error> {
+    // TODO: T128303794 Experimental. Add more gating before emitter.decl_provider available in prod.
     match &emitter.decl_provider {
-        // T128303794
         None => (),
         Some(decl_provider) => {
             let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);

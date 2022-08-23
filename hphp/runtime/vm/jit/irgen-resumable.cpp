@@ -191,6 +191,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       for (uint32_t i = 0; i < func->numIterators(); ++i) {
         gen(env, KillIter, IterId{i}, fp(env));
       }
+      gen(env, StImplicitContextWH, wh);
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
         gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);
@@ -222,8 +223,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       );
     }();
 
-    gen(env, StImplicitContextWH, waitHandle);
-
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
       return;
@@ -240,12 +239,12 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     auto const waitHandle =
       gen(env, CreateAGWH, fp(env), resumeAddr(), suspendOff, child);
 
+    gen(env, StImplicitContextWH, waitHandle);
+
     // Call the suspend hook.
     suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
-
-    gen(env, StImplicitContextWH, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});

@@ -3,15 +3,48 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+//// Design:
+//// - This module is concerned with inserting `readonly`s where needed at *call sites*, for which it uses decls and inference.
+//// - For propagating `readonly`s within a function, there should be no change in the logic in ./readonly_check.rs as compared to what is in the parser today.
+//// - The code is biased toward speed of development to get signal about what we can infer.
+use std::borrow::Cow;
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+use std::env;
+
 use decl_provider::DeclProvider;
 use decl_provider::Error;
 use decl_provider::MemoProvider;
+use itertools::Itertools;
 use oxidized::aast;
 use oxidized::ast;
+use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::Pos;
+use oxidized::typing_defs::FunTypeFlags;
+use oxidized_by_ref::typing_kinding_defs::FunElt;
+
+use crate::subtype;
+use crate::tyx;
+use crate::tyx::Tyx;
 
 struct Infer<'arena, 'decl> {
     decl_provider: &'arena MemoProvider<'decl>,
+    stats: Stats,
+}
+
+#[derive(Debug, Default)]
+struct Stats {
+    original_readonlys: u64,
+    redundant_readonlys: u64,
+    added_readonlys: u64,
+}
+
+type Ctx = HashMap<String, Tyx>;
+
+#[derive(Copy, Clone, Debug, Default)]
+struct Where {
+    arg_of_readonly_expr: bool,
+    under_try: bool,
 }
 
 macro_rules! box_tup {
@@ -21,306 +54,473 @@ macro_rules! box_tup {
 }
 
 impl<'arena, 'decl> Infer<'arena, 'decl> {
-    fn infer_expr(&self, expr: &ast::Expr, in_readonly: bool) -> ast::Expr {
+    fn infer_expr(&mut self, expr: &ast::Expr, ctx: Ctx, where_: Where) -> (ast::Expr, Tyx, Ctx) {
         let aast::Expr(ex, pos, exp) = expr;
         use aast::Expr_::*;
+        let next_where = Where {
+            arg_of_readonly_expr: matches!(exp, ReadonlyExpr(_)),
+            under_try: where_.under_try,
+        };
 
-        let exp = match exp {
+        let (exp, ty, ctx) = match exp {
             Darray(box (ty_args_opt, kvs)) => {
-                let kvs = kvs
-                    .iter()
-                    .map(|(k, v)| {
-                        let k = self.infer_expr(k, false);
-                        let v = self.infer_expr(v, false);
-                        (k, v)
-                    })
-                    .collect();
-                Darray(box_tup!(ty_args_opt.clone(), kvs))
+                let mut kvs_out = Vec::with_capacity(kvs.len());
+                let mut ctx = ctx;
+                for (k, v) in kvs.iter() {
+                    let (k, _k_ty, k_ctx) = self.infer_expr(k, ctx, next_where);
+                    ctx = k_ctx;
+                    let (v, _v_ty, v_ctx) = self.infer_expr(v, ctx, next_where);
+                    ctx = v_ctx;
+                    kvs_out.push((k, v))
+                }
+                (
+                    Darray(box_tup!(ty_args_opt.clone(), kvs_out)),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             Varray(box (ty_args_opt, es)) => {
-                let es = self.infer_exprs(es, false);
-                Varray(box_tup!(ty_args_opt.clone(), es))
+                let mut es_out = Vec::with_capacity(es.len());
+                let mut ctx = ctx;
+                for e in es.iter() {
+                    let (e, _e_ty, e_ctx) = self.infer_expr(e, ctx, next_where);
+                    ctx = e_ctx;
+                    es_out.push(e)
+                }
+                (
+                    Varray(box_tup!(ty_args_opt.clone(), es_out)),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             Shape(fields) => {
-                let fields = fields
+                let field_values = fields.iter().map(|field| &field.1).cloned().collect_vec();
+                let (field_exprs, _field_tys, ctx) =
+                    self.infer_exprs(&field_values, ctx, next_where);
+                let fields: Vec<_> = fields
                     .iter()
-                    .map(|(name, e)| (name.clone(), self.infer_expr(e, false)))
+                    .map(|field| &field.0)
+                    .cloned()
+                    .zip(field_exprs)
                     .collect();
-                Shape(fields)
+
+                (Shape(fields), Tyx::Todo, ctx)
             }
             ValCollection(box (vc_kind, ty_var_opt, es)) => {
-                let es = self.infer_exprs(es, false);
-                ValCollection(box_tup!(vc_kind.clone(), ty_var_opt.clone(), es))
+                let (es, _tys, ctx) = self.infer_exprs(es, ctx, next_where);
+                (
+                    ValCollection(box_tup!(vc_kind.clone(), ty_var_opt.clone(), es)),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             KeyValCollection(box (kvc_kind, ty_var_opt, fields)) => {
-                let fields = fields
-                    .iter()
-                    .map(|ast::Field(e1, e2)| {
-                        ast::Field(self.infer_expr(e1, false), self.infer_expr(e2, false))
-                    })
-                    .collect();
-                KeyValCollection(box_tup!(kvc_kind.clone(), ty_var_opt.clone(), fields))
+                let mut fields_out = Vec::with_capacity(fields.len());
+                let mut ctx = ctx;
+                for ast::Field(k, v) in fields.iter() {
+                    let (k, _k_ty, k_ctx) = self.infer_expr(k, ctx, next_where);
+                    ctx = k_ctx;
+                    let (v, _v_ty, v_ctx) = self.infer_expr(v, ctx, next_where);
+                    ctx = v_ctx;
+                    fields_out.push(ast::Field(k, v))
+                }
+                (
+                    KeyValCollection(box_tup!(kvc_kind.clone(), ty_var_opt.clone(), fields_out)),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
-            Null => exp.clone(),
-            This => exp.clone(),
-            True => exp.clone(),
-            False => exp.clone(),
-            Omitted => exp.clone(),
-            Id(_b) => exp.clone(),
-            Lvar(_b) => exp.clone(),
-            Dollardollar(_b) => exp.clone(),
-            Clone(box e) => Clone(Box::new(self.infer_expr(e, false))),
+            This => (exp.clone(), Tyx::Todo, ctx),
+            Null | True | False => (exp.clone(), Tyx::Primitive, ctx),
+            Omitted => (exp.clone(), Tyx::GiveUp, ctx),
+            Id(box id) => {
+                let ty = self
+                    .get_fun_decl(id, pos)
+                    .map_or(Tyx::GiveUp, |ft| Tyx::Fun(Box::new(ft)));
+                (exp.clone(), ty, ctx)
+            }
+            Lvar(box ast::Lid(_, (_, var))) => {
+                let ty = ctx.get(var).cloned().unwrap_or(Tyx::GiveUp);
+                (exp.clone(), ty, ctx)
+            }
+            Dollardollar(_b) => (exp.clone(), Tyx::Todo, ctx),
+            Clone(box e) => {
+                let (e, ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Clone(Box::new(e)), ty, ctx)
+            }
             ArrayGet(box (arr, index_opt)) => {
-                let arr = self.infer_expr(arr, false);
-                let index_opt = index_opt
-                    .as_ref()
-                    .map(|index| self.infer_expr(index, false));
-                ArrayGet(box_tup!(arr, index_opt))
+                let (arr, _arr_ty, ctx) = self.infer_expr(arr, ctx, next_where);
+                let (index_opt, _index_ty_opt, ctx) =
+                    self.infer_expr_opt(index_opt.as_ref(), ctx, next_where);
+
+                (ArrayGet(box_tup!(arr, index_opt)), Tyx::Todo, ctx)
             }
-            ObjGet(box (e1, e2, og_null_flavor, prop_or_meth)) => {
-                let e1 = self.infer_expr(e1, false);
-                let e2 = self.infer_expr(e2, false);
-                ObjGet(box_tup!(
-                    e1,
-                    e2,
-                    og_null_flavor.clone(),
-                    prop_or_meth.clone()
-                ))
+            ObjGet(box (e1, e2, og_null_flavor, prop_or_method)) => {
+                let (e1, _e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
+                let (e2, _e2_ty, ctx) = self.infer_expr(e2, ctx, next_where);
+                (
+                    ObjGet(box_tup!(
+                        e1,
+                        e2,
+                        og_null_flavor.clone(),
+                        prop_or_method.clone()
+                    )),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             ClassGet(box (class_id, get_expr, prop_or_meth)) => {
                 use aast::ClassGetExpr;
-                let get_expr = match get_expr {
-                    ClassGetExpr::CGstring(_) => get_expr.clone(),
-                    ClassGetExpr::CGexpr(e) => ClassGetExpr::CGexpr(self.infer_expr(e, false)),
+                let (get_expr, _get_ty, ctx) = match get_expr {
+                    ClassGetExpr::CGstring(_) => (get_expr.clone(), Tyx::Todo, ctx),
+                    ClassGetExpr::CGexpr(e) => {
+                        let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                        (ClassGetExpr::CGexpr(e), Tyx::Todo, ctx)
+                    }
                 };
-                ClassGet(box_tup!(class_id.clone(), get_expr, prop_or_meth.clone()))
+                let class_get =
+                    ClassGet(box_tup!(class_id.clone(), get_expr, prop_or_meth.clone()));
+                (class_get, Tyx::Todo, ctx)
             }
-            ClassConst(_b) => exp.clone(),
+            ClassConst(_b) => (exp.clone(), Tyx::Todo, ctx),
             Call(box (e1, ty_args, params, expr2_opt)) => {
-                let e1 = self.infer_expr(e1, false);
-                let should_wrap = !in_readonly
-                    && match e1 {
-                        aast::Expr(pos, _, Id(box ref id)) => {
-                            let name = id.name();
-                            match self.decl_provider.func_decl(name) {
-                                Ok(func_decl) => {
-                                    use oxidized::typing_defs_flags::FunTypeFlags;
-                                    use oxidized_by_ref::typing_defs_core::Ty_::*;
-                                    match func_decl.type_.1 {
-                                        Tfun(ft) => {
-                                            ft.flags.contains(FunTypeFlags::RETURNS_READONLY)
-                                        }
-                                        _ => false,
-                                    }
-                                }
-                                Err(Error::NotFound) => false,
-                                Err(err @ Error::Bincode(_)) => {
-                                    panic!(
-                                        "Internal error when attempting to read the type of callable '{name}' at {:?}. {}",
-                                        pos, err
-                                    )
-                                }
-                            }
+                let (e1, e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
+                let (param_kinds, param_exprs): (Vec<ast::ParamKind>, Vec<ast::Expr>) =
+                    params.iter().cloned().unzip();
+                let (param_exprs, _param_tys, ctx) =
+                    self.infer_exprs(&param_exprs, ctx, next_where);
+                let (expr2_opt, _expr2_opt_ty, ctx) =
+                    self.infer_expr_opt(expr2_opt.as_ref(), ctx, next_where);
+                let params = param_kinds.into_iter().zip(param_exprs).collect();
+                let mut call = Call(box_tup!(e1, ty_args.clone(), params, expr2_opt));
+                match &e1_ty {
+                    Tyx::Fun(box ft) if returns_readonly(ft) => {
+                        if where_.arg_of_readonly_expr {
+                            self.stats.redundant_readonlys += 1;
+                        } else {
+                            call = readonly_wrap_expr_(pos.clone(), call);
+                            self.stats.added_readonlys += 1;
                         }
-                        _ => false,
-                    };
-                let params = params
-                    .iter()
-                    .map(|(kind, e)| (kind.clone(), self.infer_expr(e, false)))
-                    .collect();
-                let expr2_opt = expr2_opt
-                    .as_ref()
-                    .map(|expr_2| self.infer_expr(expr_2, false));
-                let call = Call(box_tup!(e1, ty_args.clone(), params, expr2_opt));
-                if should_wrap {
-                    readonly_wrap_expr_(pos.clone(), call)
-                } else {
-                    call
+                    }
+                    _ => (),
                 }
+                (call, Tyx::Todo, ctx)
             }
-            FunctionPointer(_b) => exp.clone(),
-            Int(_s) => exp.clone(),
-            Float(_s) => exp.clone(),
-            String(_bstring) => exp.clone(),
-            String2(exprs) => String2(self.infer_exprs(exprs, false)),
+            FunctionPointer(box (ptr, _ty_args)) => {
+                let ty = match ptr {
+                    aast::FunctionPtrId::FPId(id) => match self.get_fun_decl(id, pos) {
+                        Some(ft) => Tyx::Fun(Box::new(ft)),
+                        None => Tyx::GiveUp,
+                    },
+                    aast::FunctionPtrId::FPClassConst(_, _) => Tyx::Todo,
+                };
+                (exp.clone(), ty, ctx)
+            }
+            Int(_s) => (exp.clone(), Tyx::Todo, ctx),
+            Float(_s) => (exp.clone(), Tyx::Todo, ctx),
+            String(_bstring) => (exp.clone(), Tyx::Todo, ctx),
+            String2(es) => {
+                let (es, _tys, ctx) = self.infer_exprs(es, ctx, next_where);
+                (String2(es), Tyx::Todo, ctx)
+            }
             PrefixedString(box (str, e)) => {
-                PrefixedString(box_tup!(str.clone(), self.infer_expr(e, false)))
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (PrefixedString(box_tup!(str.clone(), e)), Tyx::Todo, ctx)
             }
             Yield(box field) => {
-                let field = self.infer_a_field(field);
-                Yield(Box::new(field))
+                let (field, _field_ty, ctx) = self.infer_a_field(field, ctx, next_where);
+                (Yield(Box::new(field)), Tyx::Todo, ctx)
             }
-            Await(e) => Await(Box::new(self.infer_expr(e, false))),
-            ReadonlyExpr(box e) => ReadonlyExpr(Box::new(self.infer_expr(e, true))),
-            Tuple(exprs) => Tuple(self.infer_exprs(exprs, false)),
-            List(exprs) => List(self.infer_exprs(exprs, false)),
-            Cast(box (hint, e)) => Cast(box_tup!(hint.clone(), self.infer_expr(e, false))),
-            Unop(box (unop, e)) => Unop(box_tup!(unop.clone(), self.infer_expr(e, false))),
-            Binop(box (bo, lhs, rhs)) => Binop(box_tup!(
-                bo.clone(),
-                self.infer_expr(lhs, false),
-                self.infer_expr(rhs, false),
-            )),
+            Await(e) => {
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Await(Box::new(e)), Tyx::Todo, ctx)
+            }
+            ReadonlyExpr(box e) => {
+                self.stats.original_readonlys += 1;
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (ReadonlyExpr(Box::new(e)), Tyx::Todo, ctx)
+            }
+            Tuple(exprs) => {
+                let (exprs, _tys, ctx) = self.infer_exprs(exprs, ctx, next_where);
+                (Tuple(exprs), Tyx::Todo, ctx)
+            }
+            List(exprs) => {
+                let (exprs, _tys, ctx) = self.infer_exprs(exprs, ctx, next_where);
+                (List(exprs), Tyx::Todo, ctx)
+            }
+            Cast(box (hint, e)) => {
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Cast(box_tup!(hint.clone(), e)), Tyx::Todo, ctx)
+            }
+            Unop(box (unop, e)) => {
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Unop(box_tup!(unop.clone(), e)), Tyx::Todo, ctx)
+            }
+            // Does not yet handle `list`
+            Binop(box (
+                eq @ Bop::Eq(bop_opt),
+                lhs @ ast::Expr(_, _, Lvar(box ast::Lid(_, (_, var_name)))),
+                rhs,
+            )) => {
+                let (rhs, r_ty, ctx) = self.infer_expr(rhs, ctx, next_where);
+                let (lhs, _l_ty, mut ctx) = self.infer_expr(lhs, ctx, next_where);
+                match bop_opt {
+                    None => {
+                        {
+                            let ty_to_insert = match ctx.get(var_name) {
+                                Some(existing_ty) if where_.under_try => {
+                                    subtype::join(Cow::Borrowed(existing_ty), Cow::Owned(r_ty))
+                                        .into_owned()
+                                }
+                                _ => r_ty,
+                            };
+                            ctx.insert(var_name.clone(), ty_to_insert);
+                        }
+                        (
+                            Binop(box_tup!(eq.clone(), lhs, rhs,)),
+                            Tyx::GiveUp, // hhvm doesn't actually allow assignments to be used as expressions
+                            ctx,
+                        )
+                    }
+                    // no special handling for `+=` etc. yet
+                    Some(_) => (Binop(box_tup!(eq.clone(), lhs, rhs,)), Tyx::GiveUp, ctx),
+                }
+            }
+            Binop(box (bo, lhs, rhs)) => {
+                let (lhs, _l_ty, ctx) = self.infer_expr(lhs, ctx, next_where);
+                let (rhs, _r_ty, ctx) = self.infer_expr(rhs, ctx, next_where);
+                (Binop(box_tup!(bo.clone(), lhs, rhs,)), Tyx::Todo, ctx)
+            }
             Pipe(box (lid, lhs, rhs)) => {
-                let lhs = self.infer_expr(lhs, false);
-                let rhs = self.infer_expr(rhs, false);
-                Pipe(box_tup!(lid.clone(), lhs, rhs))
+                let (lhs, _l_ty, ctx) = self.infer_expr(lhs, ctx, next_where);
+                let (rhs, _r_ty, ctx) = self.infer_expr(rhs, ctx, next_where);
+                (Pipe(box_tup!(lid.clone(), lhs, rhs)), Tyx::Todo, ctx)
             }
             Eif(box (e1, e2_opt, e3)) => {
-                let e1 = self.infer_expr(e1, false);
-                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2, false));
-                let e3 = self.infer_expr(e3, false);
-                Eif(box_tup!(e1, e2_opt, e3))
+                let (e1, _e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
+                let (e2_opt, _index_ty_opt, ctx) =
+                    self.infer_expr_opt(e2_opt.as_ref(), ctx, next_where);
+                let (e3, _e3_ty, ctx) = self.infer_expr(e3, ctx, next_where);
+                (Eif(box_tup!(e1, e2_opt, e3)), Tyx::Todo, ctx)
             }
-            Is(box (e, hint)) => Is(box_tup!(self.infer_expr(e, false), hint.clone())),
+            Is(box (e, hint)) => {
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Is(box_tup!(e, hint.clone())), Tyx::Todo, ctx)
+            }
             As(box (e, hint, is_nullable)) => {
-                let e = self.infer_expr(e, false);
-                As(box_tup!(e, hint.clone(), *is_nullable))
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (As(box_tup!(e, hint.clone(), *is_nullable)), Tyx::Todo, ctx)
             }
             Upcast(box (e, hint)) => {
-                let e = self.infer_expr(e, false);
-                Upcast(box_tup!(e, hint.clone()))
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Upcast(box_tup!(e, hint.clone())), Tyx::Todo, ctx)
             }
             New(box (class_id, ty_args, es, e_opt, ex)) => {
-                let es = self.infer_exprs(es, false);
-                let e_opt = e_opt.as_ref().map(|e| self.infer_expr(e, false));
-                New(box_tup!(
+                let (es, _es_tys, ctx) = self.infer_exprs(es, ctx, next_where);
+                let (e_opt, _e_ty_opt, ctx) = self.infer_expr_opt(e_opt.as_ref(), ctx, next_where);
+                let new = New(box_tup!(
                     class_id.clone(),
                     ty_args.clone(),
                     es,
                     e_opt,
                     ex.clone()
-                ))
+                ));
+                (new, Tyx::Todo, ctx)
             }
             Efun(box (fun, lids)) => {
-                let fun = self.infer_fun(fun);
-                Efun(box_tup!(fun, lids.clone()))
+                let (fun, _fun_ty, ctx) = self.infer_fun(fun, ctx, next_where);
+                (Efun(box_tup!(fun, lids.clone())), Tyx::Todo, ctx)
             }
             Lfun(box (fun, lid)) => {
-                let fun = self.infer_fun(fun);
-                Lfun(box_tup!(fun, lid.clone()))
+                let (fun, _fun_ty, ctx) = self.infer_fun(fun, ctx, next_where);
+                (Lfun(box_tup!(fun, lid.clone())), Tyx::Todo, ctx)
             }
             Xml(box (class_name, attrs, es)) => {
-                let es = self.infer_exprs(es, false);
-                let attrs: Vec<_> = attrs
-                    .iter()
-                    .map(|attr| {
-                        use ast::XhpAttribute;
-                        match attr {
-                            XhpAttribute::XhpSimple(ast::XhpSimple { name, type_, expr }) => {
-                                XhpAttribute::XhpSimple(ast::XhpSimple {
-                                    name: name.clone(),
-                                    type_: type_.clone(),
-                                    expr: self.infer_expr(expr, false),
-                                })
-                            }
-                            XhpAttribute::XhpSpread(e) => {
-                                XhpAttribute::XhpSpread(self.infer_expr(e, false))
-                            }
+                let (es, _tys, mut ctx) = self.infer_exprs(es, ctx, next_where);
+                use ast::XhpAttribute;
+                let mut attrs_out = Vec::with_capacity(attrs.len());
+                for attr in attrs.iter() {
+                    match attr {
+                        XhpAttribute::XhpSimple(ast::XhpSimple { name, type_, expr }) => {
+                            let (expr, _ty, expr_ctx) = self.infer_expr(expr, ctx, next_where);
+                            ctx = expr_ctx;
+                            attrs_out.push(XhpAttribute::XhpSimple(ast::XhpSimple {
+                                name: name.clone(),
+                                type_: type_.clone(),
+                                expr,
+                            }))
                         }
-                    })
-                    .collect();
-                Xml(box_tup!(class_name.clone(), attrs, es))
+                        XhpAttribute::XhpSpread(e) => {
+                            let (e, _ty, e_ctx) = self.infer_expr(e, ctx, next_where);
+                            ctx = e_ctx;
+                            attrs_out.push(XhpAttribute::XhpSpread(e))
+                        }
+                    }
+                }
+                let xml = Xml(box_tup!(class_name.clone(), attrs_out, es));
+                (xml, Tyx::Todo, ctx)
             }
-            Import(_b) => exp.clone(),
+            Import(_b) => (exp.clone(), Tyx::Todo, ctx),
             Collection(box (id, opt_ty_args, a_fields)) => {
-                let a_fields = a_fields
-                    .iter()
-                    .map(|a_field| self.infer_a_field(a_field))
-                    .collect();
-                Collection(box_tup!(id.clone(), opt_ty_args.clone(), a_fields))
+                let mut a_fields_out = Vec::with_capacity(a_fields.len());
+                let mut ctx = ctx;
+                for a_field in a_fields.iter() {
+                    let (a_field, _field_ty, field_ctx) =
+                        self.infer_a_field(a_field, ctx, next_where);
+                    ctx = field_ctx;
+                    a_fields_out.push(a_field);
+                }
+                (
+                    Collection(box_tup!(id.clone(), opt_ty_args.clone(), a_fields_out)),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
-            ExpressionTree(box et) => ExpressionTree(Box::new(ast::ExpressionTree {
-                hint: et.hint.clone(),
-                splices: et
-                    .splices
-                    .iter()
-                    .map(|splice| self.infer_stmt(splice))
-                    .collect(),
-                function_pointers: et
-                    .function_pointers
-                    .iter()
-                    .map(|fp| self.infer_stmt(fp))
-                    .collect(),
-                virtualized_expr: self.infer_expr(&et.virtualized_expr, false),
-                runtime_expr: self.infer_expr(&et.runtime_expr, false),
-                dollardollar_pos: et.dollardollar_pos.clone(),
-            })),
-            Lplaceholder(_b) => exp.clone(),
-            FunId(_b) => exp.clone(),
+            ExpressionTree(box et) => {
+                let (virtualized_expr, _virtualized_ty, ctx) =
+                    self.infer_expr(&et.virtualized_expr, ctx, next_where);
+                let (runtime_expr, _runtime_ty, ctx) =
+                    self.infer_expr(&et.runtime_expr, ctx, next_where);
+                let (splices, ctx) = self.infer_stmts(&et.splices, ctx, next_where);
+                let (function_pointers, ctx) =
+                    self.infer_stmts(&et.function_pointers, ctx, next_where);
+                let et = ExpressionTree(Box::new(ast::ExpressionTree {
+                    hint: et.hint.clone(),
+                    splices,
+                    function_pointers,
+                    virtualized_expr,
+                    runtime_expr,
+                    dollardollar_pos: et.dollardollar_pos.clone(),
+                }));
+                (et, Tyx::Todo, ctx)
+            }
+            // The runtime iuc treats $_ like a normal variable, but
+            // hh` doesn't allow such code:
+            // $_ = 3; echo $_; // prints `3`, doesn't type-check
+            // Soundly approximate by treating such code as ill-formed.
+            Lplaceholder(_b) => (exp.clone(), Tyx::GiveUp, ctx),
+            FunId(_b) => (exp.clone(), Tyx::Todo, ctx),
             MethodId(box (e, p_str)) => {
-                MethodId(box_tup!(self.infer_expr(e, false), p_str.clone()))
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (MethodId(box_tup!(e, p_str.clone())), Tyx::Todo, ctx)
             }
-            MethodCaller(_b) => exp.clone(),
-            SmethodId(_b) => exp.clone(),
+            MethodCaller(_b) => (exp.clone(), Tyx::Todo, ctx),
+            SmethodId(_b) => (exp.clone(), Tyx::Todo, ctx),
             Pair(box (ty_args, e1, e2)) => {
-                let e1 = self.infer_expr(e1, false);
-                let e2 = self.infer_expr(e2, false);
-                Pair(box_tup!(ty_args.clone(), e1, e2))
+                let (e1, _ty1, ctx) = self.infer_expr(e1, ctx, next_where);
+                let (e2, _ty2, ctx) = self.infer_expr(e2, ctx, next_where);
+                let pair = Pair(box_tup!(ty_args.clone(), e1, e2));
+                (pair, Tyx::Todo, ctx)
             }
             ETSplice(box e) => {
-                let e = self.infer_expr(e, false);
-                ETSplice(Box::new(e))
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (ETSplice(Box::new(e)), Tyx::Todo, ctx)
             }
-            EnumClassLabel(_b) => exp.clone(),
-            Hole(_b) => exp.clone(),
+            EnumClassLabel(_b) => (exp.clone(), Tyx::Todo, ctx),
+            Hole(_b) => (exp.clone(), Tyx::Todo, ctx),
         };
 
-        aast::Expr(ex.clone(), pos.clone(), exp)
+        let expr = aast::Expr(ex.clone(), pos.clone(), exp);
+        (expr, ty, ctx)
     }
 
-    fn infer_exprs(&self, exprs: &[ast::Expr], in_readonly: bool) -> Vec<ast::Expr> {
-        exprs
-            .iter()
-            .map(|expr| self.infer_expr(expr, in_readonly))
-            .collect()
+    fn infer_exprs(
+        &mut self,
+        exprs: &[ast::Expr],
+        mut ctx: Ctx,
+        where_: Where,
+    ) -> (Vec<ast::Expr>, Vec<Tyx>, Ctx) {
+        let mut es = Vec::with_capacity(exprs.len());
+        let mut tys = Vec::with_capacity(exprs.len());
+        for e in exprs.iter() {
+            let (e, ty, e_ctx) = self.infer_expr(e, ctx, where_);
+            ctx = e_ctx;
+            es.push(e);
+            tys.push(ty);
+        }
+        (es, tys, ctx)
     }
 
-    fn infer_stmt(&self, stmt: &ast::Stmt) -> ast::Stmt {
+    fn infer_expr_opt(
+        &mut self,
+        expr_opt: Option<&ast::Expr>,
+        ctx: Ctx,
+        where_: Where,
+    ) -> (Option<ast::Expr>, Option<Tyx>, Ctx) {
+        match expr_opt {
+            None => (None, None, ctx),
+            Some(e) => {
+                let (e, ty, ctx) = self.infer_expr(e, ctx, where_);
+                (Some(e), Some(ty), ctx)
+            }
+        }
+    }
+
+    fn infer_stmt(&mut self, stmt: &ast::Stmt, ctx: Ctx, where_: Where) -> (ast::Stmt, Ctx) {
         let aast::Stmt(pos, st) = stmt;
         use aast::Stmt_::*;
+        let next_where = Where {
+            arg_of_readonly_expr: false,
+            under_try: where_.under_try,
+        };
 
-        let new_stmt = match st {
-            Fallthrough => Fallthrough,
+        let (new_stmt, ctx) = match st {
+            Fallthrough => (Fallthrough, ctx),
             Expr(box expr) => {
-                let new_expr = self.infer_expr(expr, false);
-                Expr(Box::new(new_expr))
+                let (new_expr, _expr_ty, ctx) = self.infer_expr(expr, ctx, next_where);
+                (Expr(Box::new(new_expr)), ctx)
             }
-            Break => Break,
-            Continue => Continue,
-            Throw(box expr) => {
-                let new_expr = self.infer_expr(expr, false);
-                Throw(Box::new(new_expr))
+            Break => (Break, ctx),
+            Continue => (Continue, ctx),
+            Throw(box e) => {
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Throw(Box::new(e)), ctx)
             }
             Return(box opt_expr) => match opt_expr {
-                None => Return(Box::new(None)),
-                Some(expr) => {
-                    let new_expr = self.infer_expr(expr, false);
-                    Return(Box::new(Some(new_expr)))
+                None => (Return(Box::new(None)), ctx),
+                Some(e) => {
+                    let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                    (Return(Box::new(Some(e))), ctx)
                 }
             },
-            YieldBreak => YieldBreak,
+            YieldBreak => (YieldBreak, ctx),
             Awaitall(box (assigns, block)) => {
-                let assigns = assigns
+                let lid_opts: Vec<Option<ast::Lid>> = assigns
                     .iter()
-                    .map(|(lid, e)| (lid.clone(), self.infer_expr(e, false)))
+                    .map(|(lid_opt, _)| lid_opt)
+                    .cloned()
                     .collect();
-                let block = self.infer_stmts(block);
-                Awaitall(Box::new((assigns, block)))
+                let assigns_exprs: Vec<_> =
+                    assigns.iter().map(|(_, assign)| assign).cloned().collect();
+                let (assigns_exprs, _assigns_tys, ctx) =
+                    self.infer_exprs(&assigns_exprs, ctx, next_where);
+                let (block, ctx) = self.infer_stmts(block, ctx, next_where);
+                let assigns: Vec<_> = lid_opts
+                    .into_iter()
+                    .zip(assigns_exprs.into_iter())
+                    .collect();
+                let await_all = Awaitall(Box::new((assigns, block)));
+                (await_all, ctx)
             }
-            If(box (expr, stmt1, stmt2)) => {
-                let new_expr = self.infer_expr(expr, false);
-                If(box_tup!(new_expr, stmt1.clone(), stmt2.clone()))
+            If(box (expr, stmts1, stmts2)) => {
+                let (e, _e_ty, ctx) = self.infer_expr(expr, ctx, next_where);
+                let (stmts1, child_ctx_1) = self.infer_stmts(stmts1, ctx.clone(), next_where);
+                let (stmts2, child_ctx_2) = self.infer_stmts(stmts2, ctx.clone(), next_where);
+                let ctx = merge_ctxs(ctx, vec![child_ctx_1, child_ctx_2]);
+                let if_ = If(box_tup!(e, stmts1, stmts2));
+                (if_, ctx)
             }
             Do(box (stmts, e)) => {
-                let stmts = self.infer_stmts(stmts);
-                let e = self.infer_expr(e, false);
-                Do(box_tup!(stmts, e))
+                let (stmts, child_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let ctx = merge_ctxs(ctx, vec![child_ctx]);
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                (Do(box_tup!(stmts, e)), ctx)
             }
             While(box (cond, block)) => {
-                let cond = self.infer_expr(cond, false);
-                let block = self.infer_stmts(block);
-                While(box_tup!(cond, block))
+                let (cond, _cond_ty, ctx) = self.infer_expr(cond, ctx, next_where);
+                let (block, child_ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                let ctx = merge_ctxs(ctx, vec![child_ctx]);
+                (While(box_tup!(cond, block)), ctx)
             }
             Using(box ast::UsingStmt {
                 is_block_scoped,
@@ -329,112 +529,170 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 block,
             }) => {
                 let (pos, es) = exprs;
-                let es = self.infer_exprs(es, false);
-                let block = self.infer_stmts(block);
-                Using(Box::new(ast::UsingStmt {
+                let (es, _es_tys, ctx) = self.infer_exprs(es, ctx, next_where);
+                let (block, ctx) = self.infer_stmts(block, ctx, next_where);
+                let using = Using(Box::new(ast::UsingStmt {
                     is_block_scoped: *is_block_scoped,
                     has_await: *has_await,
                     exprs: (pos.clone(), es),
                     block,
-                }))
+                }));
+                (using, ctx)
             }
             For(box (e1s, e2_opt, e3s, stmts)) => {
-                let e1s = self.infer_exprs(e1s, false);
-                let e2_opt = e2_opt.as_ref().map(|e2| self.infer_expr(e2, false));
-                let e3s = self.infer_exprs(e3s, false);
-                let stmts = self.infer_stmts(stmts);
-                For(box_tup!(e1s, e2_opt, e3s, stmts))
+                let (e1s, _e1s_tys, ctx) = self.infer_exprs(e1s, ctx, next_where);
+                let (e2_opt, _e2_ty_opt, ctx) =
+                    self.infer_expr_opt(e2_opt.as_ref(), ctx, next_where);
+                let (e3s, _e3s_tys, e3s_ctx) = self.infer_exprs(e3s, ctx.clone(), next_where);
+                let (stmts, stmt_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let ctx = merge_ctxs(ctx, vec![e3s_ctx, stmt_ctx]);
+                let for_ = For(box_tup!(e1s, e2_opt, e3s, stmts));
+                (for_, ctx)
             }
             Switch(box (e, cases, default_opt)) => {
-                let e = self.infer_expr(e, false);
-                let cases = cases
-                    .iter()
-                    .map(|ast::Case(e, block)| {
-                        let e = self.infer_expr(e, false);
-                        let block = self.infer_stmts(block);
-                        ast::Case(e, block)
-                    })
-                    .collect();
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                let mut cases_out = Vec::with_capacity(cases.len());
+                let mut child_ctxs = Vec::with_capacity(cases.len());
+                for ast::Case(e, block) in cases {
+                    let (e, _e_ty, e_ctx) = self.infer_expr(e, ctx.clone(), next_where);
+                    let (block, child_ctx) = self.infer_stmts(block, e_ctx, next_where);
+                    cases_out.push(ast::Case(e, block));
+                    child_ctxs.push(child_ctx);
+                }
                 let default_opt = default_opt.as_ref().map(|ast::DefaultCase(pos, block)| {
-                    let block = self.infer_stmts(block);
+                    let (block, ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                    child_ctxs.push(ctx);
                     ast::DefaultCase(pos.clone(), block)
                 });
-                Switch(box_tup!(e, cases, default_opt))
+                let ctx = merge_ctxs(ctx, child_ctxs);
+                let switch = Switch(box_tup!(e, cases_out, default_opt));
+                (switch, ctx)
             }
             Foreach(box (e, as_, stmts)) => {
-                let e = self.infer_expr(e, false);
-                let as_ = self.infer_as_expr(as_);
-                let stmts = self.infer_stmts(stmts);
-
-                Foreach(box_tup!(e, as_, stmts))
+                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                let (as_, _as_ty, ctx) = self.infer_as_expr(as_, ctx, next_where);
+                let (stmts, child_ctx) = self.infer_stmts(stmts, ctx.clone(), next_where);
+                let ctx = merge_ctxs(ctx, vec![child_ctx]);
+                (Foreach(box_tup!(e, as_, stmts)), ctx)
             }
             Try(box (stmts, catches, finally)) => {
-                let stmts = self.infer_stmts(stmts);
-                let catches = catches
-                    .iter()
-                    .map(|ast::Catch(name, lid, block)| {
-                        ast::Catch(name.clone(), lid.clone(), self.infer_stmts(block))
-                    })
-                    .collect();
-                let finally = self.infer_stmts(finally);
-                Try(box_tup!(stmts, catches, finally))
+                let (stmts, ctx) = self.infer_stmts(
+                    stmts,
+                    ctx,
+                    Where {
+                        under_try: true,
+                        ..next_where
+                    },
+                );
+                let mut catches_out = Vec::with_capacity(catches.len());
+                let mut child_ctxs = Vec::with_capacity(catches.len());
+                for ast::Catch(name, lid, block) in catches.iter() {
+                    let (block, catch_ctx) = self.infer_stmts(block, ctx.clone(), next_where);
+                    let catch = ast::Catch(name.clone(), lid.clone(), block);
+                    catches_out.push(catch);
+                    child_ctxs.push(catch_ctx);
+                }
+                let (finally, finally_ctx) = self.infer_stmts(finally, ctx.clone(), next_where);
+                child_ctxs.push(finally_ctx);
+                let ctx = merge_ctxs(ctx, child_ctxs);
+                (Try(box_tup!(stmts, catches_out, finally)), ctx)
             }
-            Noop => st.clone(),
-            Block(stmts) => Block(self.infer_stmts(stmts)),
-            Markup(_) => st.clone(),
-            AssertEnv(b) => AssertEnv(b.clone()),
+            Noop => (Noop, ctx),
+            Block(stmts) => {
+                let (stmts, ctx) = self.infer_stmts(stmts, ctx, next_where);
+                (Block(stmts), ctx)
+            }
+            Markup(_) => (st.clone(), ctx),
+            AssertEnv(b) => (AssertEnv(b.clone()), ctx),
         };
-        ast::Stmt(pos.clone(), new_stmt)
+        (ast::Stmt(pos.clone(), new_stmt), ctx)
     }
 
-    fn infer_stmts(&self, stmts: &[ast::Stmt]) -> Vec<ast::Stmt> {
-        stmts.iter().map(|s| self.infer_stmt(s)).collect()
+    fn infer_stmts(
+        &mut self,
+        stmts: &[ast::Stmt],
+        mut ctx: Ctx,
+        where_: Where,
+    ) -> (Vec<ast::Stmt>, Ctx) {
+        let mut out = Vec::with_capacity(stmts.len());
+        for stmt in stmts.iter() {
+            let (s, s_ctx) = self.infer_stmt(stmt, ctx, where_);
+            out.push(s);
+            ctx = s_ctx;
+        }
+        (out, ctx)
     }
 
-    fn infer_a_field(&self, a_field: &ast::Afield) -> ast::Afield {
+    fn infer_a_field(
+        &mut self,
+        a_field: &ast::Afield,
+        ctx: Ctx,
+        where_: Where,
+    ) -> (ast::Afield, Tyx, Ctx) {
         match a_field {
-            aast::Afield::AFvalue(v) => aast::Afield::AFvalue(self.infer_expr(v, false)),
+            aast::Afield::AFvalue(v) => {
+                let (v, _v_ty, ctx) = self.infer_expr(v, ctx, where_);
+                let a_field = aast::Afield::AFvalue(v);
+                (a_field, Tyx::Todo, ctx)
+            }
             aast::Afield::AFkvalue(k, v) => {
-                aast::Afield::AFkvalue(self.infer_expr(k, false), self.infer_expr(v, false))
+                let (k, _k_ty, ctx) = self.infer_expr(k, ctx, where_);
+                let (v, _v_ty, ctx) = self.infer_expr(v, ctx, where_);
+                let a_field = aast::Afield::AFkvalue(k, v);
+                (a_field, Tyx::Todo, ctx)
             }
         }
     }
 
-    fn infer_as_expr(&self, as_: &ast::AsExpr) -> ast::AsExpr {
+    fn infer_as_expr(
+        &mut self,
+        as_: &ast::AsExpr,
+        ctx: Ctx,
+        where_: Where,
+    ) -> (ast::AsExpr, Tyx, Ctx) {
         use ast::AsExpr;
         match as_ {
-            AsExpr::AsV(e) => AsExpr::AsV(self.infer_expr(e, false)),
+            AsExpr::AsV(e) => {
+                let (e, _ty, ctx) = self.infer_expr(e, ctx, where_);
+                (AsExpr::AsV(e), Tyx::Todo, ctx)
+            }
             AsExpr::AsKv(k, v) => {
-                let k = self.infer_expr(k, false);
-                let v = self.infer_expr(v, false);
-                AsExpr::AsKv(k, v)
+                let (k, _k_ty, ctx) = self.infer_expr(k, ctx, where_);
+                let (v, _v_ty, ctx) = self.infer_expr(v, ctx, where_);
+                (AsExpr::AsKv(k, v), Tyx::Todo, ctx)
             }
-            AsExpr::AwaitAsV(pos, v) => AsExpr::AwaitAsV(pos.clone(), self.infer_expr(v, false)),
+            AsExpr::AwaitAsV(pos, v) => {
+                let (v, _v_ty, ctx) = self.infer_expr(v, ctx, where_);
+                (AsExpr::AwaitAsV(pos.clone(), v), Tyx::Todo, ctx)
+            }
             AsExpr::AwaitAsKv(pos, k, v) => {
-                let k = self.infer_expr(k, false);
-                let v = self.infer_expr(v, false);
-                AsExpr::AwaitAsKv(pos.clone(), k, v)
+                let (k, _k_ty, ctx) = self.infer_expr(k, ctx, where_);
+                let (v, _v_ty, ctx) = self.infer_expr(v, ctx, where_);
+                (AsExpr::AwaitAsKv(pos.clone(), k, v), Tyx::Todo, ctx)
             }
         }
     }
 
-    fn infer_fun(&self, fun: &ast::Fun_) -> ast::Fun_ {
-        ast::Fun_ {
-            body: ast::FuncBody {
-                fb_ast: self.infer_stmts(&fun.body.fb_ast),
-            },
+    fn infer_fun(&mut self, fun: &ast::Fun_, ctx: Ctx, where_: Where) -> (ast::Fun_, Tyx, Ctx) {
+        // it's safe to ignore any `use` clause, since we treat undefined variables as of unknown type
+        let (fb_ast, _) = self.infer_stmts(&fun.body.fb_ast, ctx.clone(), where_);
+        let fun = ast::Fun_ {
+            body: ast::FuncBody { fb_ast },
             ..fun.clone()
-        }
+        };
+        (fun, Tyx::Todo, ctx)
     }
 
-    fn infer_fun_def(&self, fun: &ast::FunDef) -> ast::FunDef {
+    fn infer_fun_def(&mut self, fun_def: &ast::FunDef) -> ast::FunDef {
+        let (fun, _fun_ty, _ctx) =
+            self.infer_fun(&fun_def.fun, Default::default(), Default::default());
         ast::FunDef {
-            fun: self.infer_fun(&fun.fun),
-            ..fun.clone()
+            fun,
+            ..fun_def.clone()
         }
     }
 
-    fn infer_class(&self, class: &ast::Class_) -> ast::Class_ {
+    fn infer_class(&mut self, class: &ast::Class_) -> ast::Class_ {
         let consts = class
             .consts
             .iter()
@@ -442,9 +700,18 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 use aast::ClassConstKind::*;
                 let kind = match &const_.kind {
                     CCAbstract(e_opt) => {
-                        CCAbstract(e_opt.as_ref().map(|e| self.infer_expr(e, false)))
+                        let (e_opt, _e_opt_ty, _ctx) = self.infer_expr_opt(
+                            e_opt.as_ref(),
+                            Default::default(),
+                            Default::default(),
+                        );
+                        CCAbstract(e_opt)
                     }
-                    CCConcrete(e) => CCConcrete(self.infer_expr(e, false)),
+                    CCConcrete(e) => {
+                        let (e, _e_ty, _ctx) =
+                            self.infer_expr(e, Default::default(), Default::default());
+                        CCConcrete(e)
+                    }
                 };
                 ast::ClassConst {
                     kind,
@@ -456,9 +723,9 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             .methods
             .iter()
             .map(|meth| {
-                let body = ast::FuncBody {
-                    fb_ast: self.infer_stmts(&meth.body.fb_ast),
-                };
+                let (fb_ast, _ctx) =
+                    self.infer_stmts(&meth.body.fb_ast, Default::default(), Default::default());
+                let body = ast::FuncBody { fb_ast };
                 ast::Method_ {
                     body,
                     ..meth.clone()
@@ -469,7 +736,8 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             .vars
             .iter()
             .map(|var| {
-                let expr = var.expr.as_ref().map(|e| self.infer_expr(e, false));
+                let (expr, _expr_ty, _ctx) =
+                    self.infer_expr_opt(var.expr.as_ref(), Default::default(), Default::default());
                 ast::ClassVar {
                     expr,
                     ..var.clone()
@@ -488,21 +756,25 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         td.clone()
     }
 
-    fn type_gconst(&self, gc: &ast::Gconst) -> ast::Gconst {
+    fn type_gconst(&mut self, gc: &ast::Gconst) -> ast::Gconst {
         // future-proofing: currently has no effect, since const expressions are limited
-        let value = self.infer_expr(&gc.value, false);
+        let (value, _v_ty, _ctx) =
+            self.infer_expr(&gc.value, Default::default(), Default::default());
         ast::Gconst {
             value,
             ..gc.clone()
         }
     }
 
-    fn infer_type_def(&self, d: &ast::Def) -> ast::Def {
+    fn infer_type_def(&mut self, d: &ast::Def) -> ast::Def {
         use aast::Def::*;
         match d {
             Fun(box fd) => Fun(Box::new(self.infer_fun_def(fd))),
             Class(box c_) => Class(Box::new(self.infer_class(c_))),
-            Stmt(box stmt) => Stmt(Box::new(self.infer_stmt(stmt))),
+            Stmt(box stmt) => {
+                let (stmt, _ctx) = self.infer_stmt(stmt, Default::default(), Default::default());
+                Stmt(Box::new(stmt))
+            }
             Typedef(box td) => Typedef(Box::new(self.infer_typedef(td))),
             Constant(box gconst) => Constant(Box::new(self.type_gconst(gconst))),
             Namespace(b) => Namespace(b.clone()),
@@ -513,19 +785,80 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
             SetModule(b) => SetModule(b.clone()),
         }
     }
+
+    fn get_fun_decl(&self, id: &ast::Id, pos: &Pos) -> Option<tyx::FunType> {
+        let name = id.name();
+        match self.decl_provider.func_decl(name) {
+            Ok(FunElt {
+                type_:
+                    oxidized_by_ref::typing_defs::Ty(_, oxidized_by_ref::typing_defs::Ty_::Tfun(ft)),
+                ..
+            }) => Some(tyx::FunType {
+                flags: ft.flags,
+                ret: Tyx::Todo,
+            }),
+            Ok(_) => None,
+            Err(Error::NotFound) => None,
+            Err(err @ Error::Bincode(_)) => {
+                panic!(
+                    "Internal error when attempting to read the type of callable '{name}' at {pos:?}. {err}"
+                )
+            }
+        }
+    }
+}
+
+fn merge_ctxs(mut parent: Ctx, children: Vec<Ctx>) -> Ctx {
+    for child in children {
+        for (var, ty) in child.into_iter() {
+            match parent.entry(var) {
+                Entry::Occupied(mut entry) => {
+                    let existing_ty = entry.get_mut();
+                    *existing_ty =
+                        subtype::join(Cow::Borrowed(existing_ty), Cow::Owned(ty)).into_owned();
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(ty);
+                }
+            }
+        }
+    }
+    parent
 }
 
 fn readonly_wrap_expr_(pos: Pos, expr_: ast::Expr_) -> ast::Expr_ {
     aast::Expr_::ReadonlyExpr(Box::new(ast::Expr((), pos, expr_)))
 }
 
+fn returns_readonly(ft: &tyx::FunType) -> bool {
+    ft.flags.contains(FunTypeFlags::RETURNS_READONLY)
+}
+
 /// # Panics
 /// Panics if a decl provider returns any error other than [`decl_provider::Error::NotFound`];
 pub fn infer(prog: &ast::Program, decl_provider: &'_ MemoProvider<'_>) -> ast::Program {
-    let infer = Infer { decl_provider };
-    ast::Program(
+    let mut infer = Infer {
+        decl_provider,
+        stats: Default::default(),
+    };
+    let res = ast::Program(
         prog.iter()
             .map(|def| infer.infer_type_def(def))
             .collect::<Vec<_>>(),
-    )
+    );
+    if env::var("HACKC_INTERNAL_LOG_READONLY_TDB_DIAGNOSTICS")
+        .map(|s| s.parse::<u8>().unwrap_or_default())
+        .unwrap_or_default()
+        == 1
+    {
+        let Stats {
+            original_readonlys,
+            redundant_readonlys,
+            added_readonlys,
+        } = infer.stats;
+        eprintln!(
+            "original_readonlys: {original_readonlys} redundant_readonlys: {redundant_readonlys} added_readonlys: {added_readonlys}",
+        );
+    }
+    res
 }

@@ -3528,6 +3528,7 @@ version = "0.0.0"
 dependencies = [
  "decl_provider",
  "hh_autoimport_rust",
+ "itertools 0.10.3",
  "lazy_static",
  "naming_special_names_rust",
  "oxidized",

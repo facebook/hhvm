@@ -268,7 +268,7 @@ void verifyTypeImpl(IRGS& env,
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(val->type() <= TObj);
-    if (onlyCheckNullability) return;
+    assertx(!onlyCheckNullability);
 
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
@@ -317,7 +317,31 @@ void verifyTypeImpl(IRGS& env,
   auto const computeAction = [&](DataType dt) {
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
     auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
-    return annotCompat(dt, tc.type(), name);
+    auto const action = annotCompat(dt, tc.type(), name);
+    if (action != AnnotAction::ObjectCheck) return action;
+
+    if (onlyCheckNullability) return AnnotAction::Pass;
+    if (tc.isThis()) return action;
+    assertx(tc.isObject() || tc.isUnresolved());
+
+    if (!genericValType.clsSpec()) return action;
+    auto const cls = genericValType.clsSpec().cls();
+
+    if (env.irb->constrainValue(genericVal, GuardConstraint(cls).setWeak())) {
+      // We would have to constrain a guard to get the `cls` value.
+      return action;
+    }
+
+    // Exact name match -- the type check will always pass.
+    auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+    if (cls->name()->same(clsName)) return AnnotAction::Pass;
+
+    if (auto const knownCls = lookupUniqueClass(env, clsName)) {
+      // Subclass of a unique class.
+      if (cls->classof(knownCls)) return AnnotAction::Pass;
+    }
+
+    return action;
   };
 
   if (genericValType.isKnownDataType()) {

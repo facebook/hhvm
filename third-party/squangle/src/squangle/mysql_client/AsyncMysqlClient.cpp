@@ -17,7 +17,7 @@
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/portability/GFlags.h>
+#include <gflags/gflags_declare.h>
 #include <folly/ssl/Init.h>
 #include <folly/system/ThreadName.h>
 

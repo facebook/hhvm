@@ -12,7 +12,7 @@
 
 #include <folly/Memory.h>
 #include <folly/experimental/StringKeyedUnorderedMap.h>
-#include <folly/portability/GFlags.h>
+#include <gflags/gflags.h>
 #include <folly/small_vector.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 #include <mysql_async.h>

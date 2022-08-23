@@ -98,20 +98,16 @@ Mask operator-(const Mask&, const Mask&); // subtract
 // This converts ident (field name type) to field id automatically which makes
 // FieldMask easier for end-users to construct and use.
 // Example:
-//   MaskBuilder<T> mask(MaskBuilderInit::all); // start with allMask
+//   MaskBuilder<T> mask(allMask()); // start with allMask
 //   mask.includes<ident1, ident2>(anotherMask);
 //   mask.excludes<ident3>(anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
-enum class MaskBuilderInit { all, none };
 
 template <typename T>
 struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
-  // Constructs a new MaskWrapper with allMask or noneMask.
-  explicit MaskBuilder(MaskBuilderInit init) {
-    data_ = init == MaskBuilderInit::all ? allMask() : noneMask();
-  }
+
   // Includes the field specified by the list of Idents with the given mask.
   // The field is t.ident1().ident2() ...
   // Throws runtime exception if the field doesn't exist.

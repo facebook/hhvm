@@ -23,7 +23,6 @@ using apache::thrift::protocol::allMask;
 using apache::thrift::protocol::asValueStruct;
 using apache::thrift::protocol::Mask;
 using apache::thrift::protocol::MaskBuilder;
-using apache::thrift::protocol::MaskBuilderInit;
 using apache::thrift::protocol::noneMask;
 using namespace apache::thrift::protocol::detail;
 
@@ -1003,7 +1002,7 @@ TEST(FieldMaskTest, EnsureSmartPointer) {
   {
     SmartPointerStruct obj;
     // mask = includes{1: excludes{}}
-    MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::none);
+    MaskBuilder<SmartPointerStruct> builder(noneMask());
     builder.includes<tag::unique>();
     protocol::ensure(builder.toThrift(), obj);
     assertPointerHasAllValues(obj.unique_ref());
@@ -1013,7 +1012,7 @@ TEST(FieldMaskTest, EnsureSmartPointer) {
   {
     SmartPointerStruct obj;
     // Mask includes unique.field_1 and boxed except for boxed.field_2.
-    MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::none);
+    MaskBuilder<SmartPointerStruct> builder(noneMask());
     builder.includes<tag::unique, tag::field_1>();
     builder.includes<tag::boxed>();
     builder.excludes<tag::boxed, tag::field_2>();
@@ -1162,7 +1161,7 @@ TEST(FieldMaskTest, SchemafulClearSmartPointer) {
     SmartPointerStruct obj;
     protocol::ensure(allMask(), obj);
     // mask = includes{1: excludes{}}
-    MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::none);
+    MaskBuilder<SmartPointerStruct> builder(noneMask());
     builder.includes<tag::unique>();
     protocol::clear(builder.toThrift(), obj);
     EXPECT_FALSE(bool(obj.unique_ref()));
@@ -1172,12 +1171,12 @@ TEST(FieldMaskTest, SchemafulClearSmartPointer) {
 
   {
     SmartPointerStruct obj;
-    MaskBuilder<SmartPointerStruct> setup(MaskBuilderInit::all);
+    MaskBuilder<SmartPointerStruct> setup(allMask());
     setup.excludes<tag::shared, tag::field_1>();
     protocol::ensure(setup.toThrift(), obj);
     // mask = excludes{1: includes{1: excludes{}},
     //                 3: excludes{}}
-    MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::all);
+    MaskBuilder<SmartPointerStruct> builder(allMask());
     builder.excludes<tag::unique, tag::field_1>();
     builder.excludes<tag::boxed>();
     protocol::clear(builder.toThrift(), obj);
@@ -1328,18 +1327,18 @@ TEST(FieldMaskTest, SchemafulCopySmartPointer) {
 TEST(FieldMaskTest, SchemafulCopySmartPointerAddField) {
   SmartPointerStruct src, dst;
   // src contains unique field except for unique.field_1 and box field.
-  MaskBuilder<SmartPointerStruct> setup(MaskBuilderInit::all);
+  MaskBuilder<SmartPointerStruct> setup(allMask());
   setup.excludes<tag::unique, tag::field_1>();
   setup.excludes<tag::shared>();
   protocol::ensure(setup.toThrift(), src);
   {
-    MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::none);
+    MaskBuilder<SmartPointerStruct> builder(noneMask());
     builder.includes<tag::unique, tag::field_1>();
     protocol::copy(builder.toThrift(), src, dst); // doesn't create object
     assertSmartPointerStructIsEmpty(dst);
   }
   {
-    MaskBuilder<SmartPointerStruct> builder2(MaskBuilderInit::none);
+    MaskBuilder<SmartPointerStruct> builder2(noneMask());
     builder2.includes<tag::boxed, tag::field_1>();
     protocol::copy(builder2.toThrift(), src, dst); // creates object
     EXPECT_FALSE(bool(dst.unique_ref()));
@@ -1353,12 +1352,12 @@ TEST(FieldMaskTest, SchemafulCopySmartPointerAddField) {
 TEST(FieldMaskTest, SchemafulCopySmartPointerRemoveField) {
   SmartPointerStruct src, dst;
   // dst contains unique field except for unique.field_1 and box field.
-  MaskBuilder<SmartPointerStruct> setup(MaskBuilderInit::all);
+  MaskBuilder<SmartPointerStruct> setup(allMask());
   setup.excludes<tag::unique, tag::field_1>();
   setup.excludes<tag::shared>();
   protocol::ensure(setup.toThrift(), dst);
 
-  MaskBuilder<SmartPointerStruct> builder(MaskBuilderInit::none);
+  MaskBuilder<SmartPointerStruct> builder(noneMask());
   builder.includes<tag::unique, tag::field_2>();
   builder.includes<tag::boxed, tag::field_1>();
   protocol::copy(builder.toThrift(), src, dst);
@@ -1663,7 +1662,7 @@ TEST(FieldMaskTest, LogicalOpIncludesExcludes) {
 
 TEST(FieldMaskTest, MaskBuilderSimple) {
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::none);
+    MaskBuilder<Foo> builder(noneMask());
     EXPECT_EQ(builder.toThrift(), noneMask());
     builder.excludes();
     EXPECT_EQ(builder.toThrift(), noneMask());
@@ -1673,7 +1672,7 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
     EXPECT_EQ(builder.toThrift(), allMask());
   }
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::all);
+    MaskBuilder<Foo> builder(allMask());
     EXPECT_EQ(builder.toThrift(), allMask());
     builder.includes();
     EXPECT_EQ(builder.toThrift(), allMask());
@@ -1687,7 +1686,7 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
   {
     // includes{1: excludes{},
     //          3: excludes{}}
-    MaskBuilder<Foo> builder(MaskBuilderInit::none);
+    MaskBuilder<Foo> builder(noneMask());
     builder.includes<tag::field1>();
     builder.includes<tag::field2>();
     Mask expected;
@@ -1697,14 +1696,14 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
     EXPECT_EQ(builder.toThrift(), expected);
   }
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::all);
+    MaskBuilder<Foo> builder(allMask());
     builder.includes<tag::field1>();
     builder.includes<tag::field2>();
     EXPECT_EQ(builder.toThrift(), allMask());
   }
   {
     // includes{1: excludes{}}
-    MaskBuilder<Foo> builder(MaskBuilderInit::none);
+    MaskBuilder<Foo> builder(noneMask());
     builder.includes<tag::field1>();
     builder.includes<tag::field1>(); // including twice is fine
     Mask expected;
@@ -1715,7 +1714,7 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
   // Test excludes
   {
     // excludes{3: excludes{}}
-    MaskBuilder<Foo> builder(MaskBuilderInit::all);
+    MaskBuilder<Foo> builder(allMask());
     builder.excludes<tag::field1>(noneMask());
     builder.excludes<tag::field2>();
     Mask expected;
@@ -1723,14 +1722,14 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
     EXPECT_EQ(builder.toThrift(), expected);
   }
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::none);
+    MaskBuilder<Foo> builder(noneMask());
     builder.excludes<tag::field1>();
     builder.excludes<tag::field2>();
     EXPECT_EQ(builder.toThrift(), noneMask());
   }
   {
     // excludes{3: excludes{}}
-    MaskBuilder<Foo> builder(MaskBuilderInit::all);
+    MaskBuilder<Foo> builder(allMask());
     builder.excludes<tag::field2>();
     builder.excludes<tag::field2>(); // excluding twice is fine
     Mask expected;
@@ -1740,13 +1739,13 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
 
   // Test includes and excludes
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::none);
+    MaskBuilder<Foo> builder(noneMask());
     builder.includes<tag::field2>();
     builder.excludes<tag::field2>(); // excluding the field we included
     EXPECT_EQ(builder.toThrift(), noneMask());
   }
   {
-    MaskBuilder<Foo> builder(MaskBuilderInit::all);
+    MaskBuilder<Foo> builder(allMask());
     builder.excludes<tag::field2>();
     builder.includes<tag::field2>(); // including the field we excluded
     EXPECT_EQ(builder.toThrift(), allMask());
@@ -1757,7 +1756,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   // Test includes
   {
     // includes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     builder.includes<tag::field_3, tag::field_1>();
     Mask expected;
     expected.includes_ref().emplace()[1].includes_ref().emplace()[1] =
@@ -1766,7 +1765,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // includes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     builder.includes<tag::field_3, tag::field_1>();
     builder.includes<tag::field_3, tag::field_1>(); // including twice is fine
     Mask expected;
@@ -1776,7 +1775,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // includes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     Mask nestedMask;
     nestedMask.includes_ref().emplace()[1] = allMask();
     builder.includes<tag::field_3>(nestedMask);
@@ -1789,7 +1788,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     // includes{1: includes{1: excludes{},
     //                      2: excludes{}},
     //          2: excludes{}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     builder.includes<tag::field_4>();
     builder.includes<tag::field_3, tag::field_1>();
     builder.includes<tag::field_3, tag::field_2>();
@@ -1803,7 +1802,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // includes{1: excludes{}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     builder.includes<tag::field_3, tag::field_1>();
     builder.includes<tag::field_3>();
     Mask expected;
@@ -1814,7 +1813,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   // Test excludes
   {
     // excludes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     builder.excludes<tag::field_3, tag::field_1>();
     Mask expected;
     expected.excludes_ref().emplace()[1].includes_ref().emplace()[1] =
@@ -1823,7 +1822,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // excludes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     builder.excludes<tag::field_3, tag::field_1>();
     builder.excludes<tag::field_3, tag::field_1>(); // excluding twice is fine
     Mask expected;
@@ -1833,7 +1832,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // excludes{1: includes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     Mask nestedMask;
     nestedMask.includes_ref().emplace()[1] = allMask();
     builder.excludes<tag::field_3>(nestedMask);
@@ -1846,7 +1845,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     // excludes{1: includes{1: excludes{},
     //                      2: excludes{}},
     //          2: excludes{}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     builder.excludes<tag::field_4>();
     builder.excludes<tag::field_3, tag::field_1>();
     builder.excludes<tag::field_3, tag::field_2>();
@@ -1860,7 +1859,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // excludes{1: excludes{}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     builder.excludes<tag::field_3, tag::field_1>();
     builder.excludes<tag::field_3>();
     Mask expected;
@@ -1871,7 +1870,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   // Test includes and excludes
   {
     // includes{1: excludes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::none);
+    MaskBuilder<Bar2> builder(noneMask());
     builder.includes<tag::field_3>();
     builder.excludes<tag::field_3, tag::field_1>();
     Mask expected;
@@ -1881,7 +1880,7 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   }
   {
     // excludes{1: excludes{1: excludes{}}}
-    MaskBuilder<Bar2> builder(MaskBuilderInit::all);
+    MaskBuilder<Bar2> builder(allMask());
     builder.excludes<tag::field_3>();
     builder.includes<tag::field_3, tag::field_1>();
     Mask expected;

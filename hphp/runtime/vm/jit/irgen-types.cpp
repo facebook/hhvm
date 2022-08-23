@@ -1346,11 +1346,11 @@ void verifyPropType(IRGS& env,
     };
 
     // For non-DataTypeSpecific values, verifyTypeImpl handles the different
-    // cases separately. However, our callers want a single coerced value,
-    // which we don't track, so we punt if we're going to split it up.
-    if (!val->type().isKnownDataType()) {
-      auto const updated = fallback(val, nullptr, tc->mayCoerce());
-      if (coerce && tc->mayCoerce()) *coerce = updated;
+    // cases separately. However, our callers want a single coerced value, which
+    // we don't track, so we use the fallback if we're going to split it up.
+    if (tc->mayCoerce() && !val->type().isKnownDataType()) {
+      auto const updated = fallback(val, nullptr, true /* mayCoerce */);
+      if (coerce) *coerce = updated;
       return;
     }
 
@@ -1359,13 +1359,16 @@ void verifyPropType(IRGS& env,
       *tc,
       false,
       [&] { // Get value to check
-        env.irb->constrainValue(val, DataTypeSpecific);
+        // Guard the type only if we may coerce, so that the most common
+        // non-coercion case is handled without using the fallback.
+        if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
         return val;
       },
       [&] { // Get the class representing `this' type
         return cls;
       },
       [&] (SSATmp* updated) { // Set the potentially coerced value
+        assertx(tc->mayCoerce());
         if (coerce) *coerce = updated;
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure

@@ -86,7 +86,7 @@ pub struct MyDataPatch {
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
     pub patchPrior: crate::types::MyDataFieldPatch,
-    #[doc = "Initlaize fields, using the given defaults. Applies third."]
+    #[doc = "Initialize fields, using the given defaults. Applies third."]
     pub ensure: crate::types::MyData,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyDataFieldPatch,
@@ -292,7 +292,7 @@ pub struct MyStructField22Patch {
     pub assign: ::std::option::Option<::std::collections::BTreeSet<::std::string::String>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
-    #[doc = "Removes entries, if present. Applies thrid."]
+    #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::collections::BTreeSet<::std::string::String>,
     #[doc = "Adds entries, if not already present. Applies fourth."]
     pub add: ::std::collections::BTreeSet<::std::string::String>,
@@ -366,7 +366,7 @@ pub struct MyStructPatch {
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
     pub patchPrior: crate::types::MyStructFieldPatch,
-    #[doc = "Initlaize fields, using the given defaults. Applies third."]
+    #[doc = "Initialize fields, using the given defaults. Applies third."]
     pub ensure: crate::types::MyStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyStructFieldPatch,

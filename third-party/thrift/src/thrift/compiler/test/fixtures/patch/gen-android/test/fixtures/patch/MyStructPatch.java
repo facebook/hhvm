@@ -45,7 +45,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
    */
   public final MyStructFieldPatch patchPrior;
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    */
   public final MyStruct ensure;
   /**
@@ -143,7 +143,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    */
   public MyStruct getEnsure() {
     return this.ensure;

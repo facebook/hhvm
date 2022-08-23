@@ -2074,7 +2074,7 @@ func (p *MyDataFieldPatch) String() string {
 //  - Assign: Assigns a value. If set, all other operations are ignored.
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
-//  - Ensure: Initlaize fields, using the given defaults. Applies third.
+//  - Ensure: Initialize fields, using the given defaults. Applies third.
 //  - Patch: Patches any set value, including newly set values. Applies last.
 type MyDataPatch struct {
   Assign *MyData `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -6262,7 +6262,7 @@ func (p *OptionalMyStructField21Patch) String() string {
 // Attributes:
 //  - Assign: Assigns a value. If set, all other operations are ignored.
 //  - Clear: Clears a value. Applies first.
-//  - Remove: Removes entries, if present. Applies thrid.
+//  - Remove: Removes entries, if present. Applies third.
 //  - Add: Adds entries, if not already present. Applies fourth.
 type MyStructField22Patch struct {
   Assign []string `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -7528,7 +7528,7 @@ func (p *OptionalMyStructField23Patch) String() string {
 //  - Assign: Assigns a value. If set, all other operations are ignored.
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
-//  - Ensure: Initlaize fields, using the given defaults. Applies third.
+//  - Ensure: Initialize fields, using the given defaults. Applies third.
 //  - Patch: Patches any set value, including newly set values. Applies last.
 type MyStructPatch struct {
   Assign *MyStruct `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`

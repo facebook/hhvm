@@ -321,7 +321,7 @@
           },
           "ensure" : {
             "name" : "ensure",
-            "docstring" : "Initlaize fields, using the given defaults. Applies third.\n",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 0,
             "required" : "opt-in-req-out",
@@ -1039,7 +1039,7 @@
           },
           "remove" : {
             "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies thrid.\n",
+            "docstring" : "Removes entries, if present. Applies third.\n",
             "key" : 7,
             "lineno" : 0,
             "required" : "opt-in-req-out",
@@ -1250,7 +1250,7 @@
           },
           "ensure" : {
             "name" : "ensure",
-            "docstring" : "Initlaize fields, using the given defaults. Applies third.\n",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
             "key" : 5,
             "lineno" : 0,
             "required" : "opt-in-req-out",

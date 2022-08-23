@@ -1834,7 +1834,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?\fixtures\patch\MyDataFieldPatch $patchPrior;
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
    * 5: struct module.MyData ensure
@@ -5827,7 +5827,7 @@ class MyStructField22Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
    */
   public bool $clear;
   /**
-   * Removes entries, if present. Applies thrid.
+   * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
    * 7: set<string> remove
@@ -6978,7 +6978,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?\fixtures\patch\MyStructFieldPatch $patchPrior;
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
    * 5: struct module.MyStruct ensure

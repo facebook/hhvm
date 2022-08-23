@@ -45,7 +45,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
    */
   public final MyDataFieldPatch patchPrior;
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    */
   public final MyData ensure;
   /**
@@ -143,7 +143,7 @@ public class MyDataPatch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
-   * Initlaize fields, using the given defaults. Applies third.
+   * Initialize fields, using the given defaults. Applies third.
    */
   public MyData getEnsure() {
     return this.ensure;

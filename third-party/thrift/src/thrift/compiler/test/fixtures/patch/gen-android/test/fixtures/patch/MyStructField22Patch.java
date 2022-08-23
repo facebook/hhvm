@@ -40,7 +40,7 @@ public class MyStructField22Patch implements TBase, java.io.Serializable, Clonea
    */
   public final Boolean clear;
   /**
-   * Removes entries, if present. Applies thrid.
+   * Removes entries, if present. Applies third.
    */
   public final Set<String> remove;
   /**
@@ -118,7 +118,7 @@ public class MyStructField22Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Removes entries, if present. Applies thrid.
+   * Removes entries, if present. Applies third.
    */
   public Set<String> getRemove() {
     return this.remove;

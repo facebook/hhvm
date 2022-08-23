@@ -1174,7 +1174,7 @@ class MyDataPatch:
    - assign: Assigns a value. If set, all other operations are ignored.
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
-   - ensure: Initlaize fields, using the given defaults. Applies third.
+   - ensure: Initialize fields, using the given defaults. Applies third.
    - patch: Patches any set value, including newly set values. Applies last.
   """
 
@@ -3404,7 +3404,7 @@ class MyStructField22Patch:
   Attributes:
    - assign: Assigns a value. If set, all other operations are ignored.
    - clear: Clears a value. Applies first.
-   - remove: Removes entries, if present. Applies thrid.
+   - remove: Removes entries, if present. Applies third.
    - add: Adds entries, if not already present. Applies fourth.
   """
 
@@ -4181,7 +4181,7 @@ class MyStructPatch:
    - assign: Assigns a value. If set, all other operations are ignored.
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
-   - ensure: Initlaize fields, using the given defaults. Applies third.
+   - ensure: Initialize fields, using the given defaults. Applies third.
    - patch: Patches any set value, including newly set values. Applies last.
   """
 

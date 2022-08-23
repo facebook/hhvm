@@ -159,7 +159,7 @@ struct PatchGen : StructGen {
     kPatchPriorId = 3, // Union, Struct, Map, List
     kPatchAfterId = 6, // Union, Struct, Map, List
 
-    // Initalizaiton ops.
+    // Initialization ops.
     kEnsureUnionId = 4, // Union
     kEnsureStructId = 5, // Struct
 
@@ -203,7 +203,7 @@ struct PatchGen : StructGen {
   // {kRemoveId}: {type} remove;
   t_field& remove(t_type_ref type) {
     return doc(
-        "Removes entries, if present. Applies thrid.",
+        "Removes entries, if present. Applies third.",
         field(kRemoveId, type, "remove"));
   }
 
@@ -217,7 +217,7 @@ struct PatchGen : StructGen {
   // {kEnsureStructId}: {type} ensure;
   t_field& ensureStruct(t_type_ref type) {
     return doc(
-        "Initlaize fields, using the given defaults. Applies third.",
+        "Initialize fields, using the given defaults. Applies third.",
         field(kEnsureStructId, type, "ensure"));
   }
 

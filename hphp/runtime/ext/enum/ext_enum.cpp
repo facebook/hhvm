@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/enum-util.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -142,6 +143,26 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   return res;
 }
 
+Resource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
+                                                     const Variant& val) {
+  return Resource(req::make<OpaqueResource>(id, val));
+}
+
+Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
+                                           const Resource& res) {
+  if (!res->instanceof<OpaqueResource>()) {
+    SystemLib::throwInvalidArgumentExceptionObject("Invalid OpaqueValue");
+  }
+  auto const ov = cast<OpaqueResource>(res);
+  if (ov->opaqueId() != id) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Could not unwrap OpaqueValue: id does not match"
+    );
+  }
+  return ov->opaqueValue();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 struct enumExtension final : Extension {
@@ -151,9 +172,13 @@ struct enumExtension final : Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
-    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
     HHVM_STATIC_MALIAS(HH\\BuiltinEnumClass, getValues, BuiltinEnum, getValues);
+    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
     HHVM_RC_STR(HH\\BUILTIN_ENUM_CLASS, "HH\\BuiltinEnumClass");
+#define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
+    X(create_opaque_value_internal);
+    X(unwrap_opaque_value);
+#undef X
     loadSystemlib();
   }
 } s_enum_extension;

@@ -189,14 +189,16 @@ let check_repetition s param =
   else
     s
 
-let check_name (p, name) =
+let check_name ctx (p, name) =
   (* We perform this check here because currently, naming edits the AST to add
    * a parent node of this class to enums during the AST transform *)
   if
     (String.equal name SN.Classes.cHH_BuiltinEnum
     || String.equal name SN.Classes.cHH_BuiltinEnumClass
     || String.equal name SN.Classes.cHH_BuiltinAbstractEnumClass)
-    && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
+    && not
+         (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi"
+         || TypecheckerOptions.is_systemlib (Provider_context.get_tcopt ctx))
   then
     Errors.add_naming_error
     @@ Naming_error.Using_internal_class { pos = p; class_name = strip_ns name }
@@ -216,7 +218,7 @@ let convert_shape_name env = function
             Typing_error.(primary @@ Primary.Self_outside_class class_pos);
           SN.Classes.cUnknown
       ) else
-        let () = check_name (class_pos, class_name) in
+        let () = check_name env.ctx (class_pos, class_name) in
         class_name
     in
     Ast_defs.SFclass_const ((class_pos, class_name), (const_pos, const_name))
@@ -598,7 +600,7 @@ and hint_id
               env
               hl )
       | _ ->
-        let () = check_name id in
+        let () = check_name env.ctx id in
         N.Happly
           ( id,
             hintl
@@ -991,7 +993,7 @@ and user_attributes env attrl =
       true
   in
   let on_attr acc { Aast.ua_name; ua_params } =
-    let () = check_name ua_name in
+    let () = check_name env.ctx ua_name in
     if not (validate_seen ua_name) then
       acc
     else
@@ -1998,12 +2000,12 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            let () = check_name (pc, cl) in
+            let () = check_name env.ctx (pc, cl) in
             N.Method_caller ((pc, cl), (pm, meth))
           | ( (_, _, N.Class_const ((_, _, N.CI cl), (_, mem))),
               (_, pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
-            let () = check_name cl in
+            let () = check_name env.ctx cl in
             N.Method_caller (cl, (pm, meth))
           | ((_, p, _), _) ->
             Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
@@ -2030,7 +2032,7 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            let () = check_name (pc, cl) in
+            let () = check_name env.ctx (pc, cl) in
             let cid = N.CI (pc, cl) in
             N.Smethod_id (((), pc, cid), (pm, meth))
           | ((_, _, N.Id (pc, const)), (_, pm, N.String meth))
@@ -2059,7 +2061,7 @@ and expr_ env p (e : Nast.expr_) =
           | ( (_, _, N.Class_const ((_, pc, N.CI cl), (_, mem))),
               (_, pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
-            let () = check_name cl in
+            let () = check_name env.ctx cl in
             let cid = N.CI cl in
             N.Smethod_id (((), pc, cid), (pm, meth))
           | ( (_, p, N.Class_const ((_, pc, N.CIself), (_, mem))),
@@ -2242,7 +2244,7 @@ and expr_ env p (e : Nast.expr_) =
     let f = expr_lambda env f in
     N.Lfun (f, idl)
   | Aast.Xml (x, al, el) ->
-    let () = check_name x in
+    let () = check_name env.ctx x in
     N.Xml (x, attrl env al, exprl env el)
   | Aast.Shape fdl ->
     let shp =
@@ -2253,7 +2255,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Import _ -> ignored_expr_ p
   | Aast.Omitted -> N.Omitted
   | Aast.EnumClassLabel (opt_sid, x) ->
-    let () = Option.iter ~f:check_name opt_sid in
+    let () = Option.iter ~f:(check_name env.ctx) opt_sid in
     N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
   (* The below were not found on the AST.ml so they are not implemented here *)
@@ -2349,7 +2351,7 @@ and make_class_id env ((p, x) as cid) =
       let lid = Local_id.make_unscoped x in
       N.CIexpr ((), p, N.Lvar (p, lid))
     | _ ->
-      let () = check_name cid in
+      let () = check_name env.ctx cid in
       N.CI cid )
 
 and casel env l = List.map l ~f:(case env)
@@ -2363,7 +2365,7 @@ and catchl env l = List.map l ~f:(catch env)
 
 and catch env ((p1, lid1), (p2, lid2), b) =
   let b = branch env b in
-  let () = check_name (p1, lid1) in
+  let () = check_name env.ctx (p1, lid1) in
   ((p1, lid1), (p2, lid2), b)
 
 and afield env field =

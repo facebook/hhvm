@@ -9,14 +9,24 @@ import subprocess as p
 import sys
 from typing import List
 
+FIXME_CODES: List[int] = [
+    # "Missing symbol:" used to break dependency cycles between files that might
+    # be mutually recursive or referential in some form (e.g.: any class with
+    # a `__Sealed` attribute).
+    2049,
+    # "Memoizing object parameters requires the capability AccessGlobals:" for
+    # now, we're allowing this in some places like `create_opaque_value`
+    4447,
+]
+
 FLAGS: List[str] = [
     "--no-builtins",
     "--is-systemlib",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
-    "2049",
+    ",".join(map(str, FIXME_CODES)),
     "--allowed-decl-fixme-codes",
-    "2049",
+    ",".join(map(str, FIXME_CODES)),
 ]
 
 

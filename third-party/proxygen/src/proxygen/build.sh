@@ -183,7 +183,9 @@ function setup_zstd() {
     echo -e "${COLOR_GREEN}[ INFO ] Cloning zstd repo ${COLOR_OFF}"
     git clone https://github.com/facebook/zstd.git "$ZSTD_DIR"
   fi
-
+  cd "$ZSTD_DIR"
+  git fetch --tags
+  git checkout v1.4.5
   echo -e "${COLOR_GREEN}Building Zstd ${COLOR_OFF}"
   mkdir -p "$ZSTD_BUILD_DIR"
   cd "$ZSTD_BUILD_DIR" || exit

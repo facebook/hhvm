@@ -154,6 +154,10 @@ public class RpcClientConformanceHandler {
     }
 
     @Override
+    public void visitRequestResponseTimeout(
+        RequestResponseTimeoutClientInstruction requestResponseTimeoutClientInstruction) {}
+
+    @Override
     public void visitStreamBasic(StreamBasicClientInstruction instruction) {
       result =
           client
@@ -199,6 +203,10 @@ public class RpcClientConformanceHandler {
     }
 
     @Override
+    public void visitSinkChunkTimeout(
+        SinkChunkTimeoutClientInstruction sinkChunkTimeoutClientInstruction) {}
+
+    @Override
     public void visitStreamInitialResponse(StreamInitialResponseClientInstruction instruction) {
       result =
           client
@@ -218,12 +226,7 @@ public class RpcClientConformanceHandler {
     }
 
     @Override
-    public void visitSinkChunkTimeout(SinkChunkTimeoutClientInstruction instruction) {}
-
-    @Override
-    public void visitStreamCreditTimeout(StreamCreditTimeoutClientInstruction instruction) {}
-
-    @Override
-    public void visitRequestResponseTimeout(RequestResponseTimeoutClientInstruction instruction) {}
+    public void visitStreamCreditTimeout(
+        StreamCreditTimeoutClientInstruction streamCreditTimeoutClientInstruction) {}
   }
 }

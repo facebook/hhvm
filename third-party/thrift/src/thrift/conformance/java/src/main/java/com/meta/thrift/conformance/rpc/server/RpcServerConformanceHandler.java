@@ -155,7 +155,18 @@ public class RpcServerConformanceHandler implements RPCConformanceService {
   }
 
   @Override
-  public Response requestResponseTimeout(Request req) throws TException {
+  public Response requestResponseTimeout(Request request) throws TException {
+    return null;
+  }
+
+  @Override
+  public Response requestResponseTimeout(Request req, RpcOptions rpcOptions) throws TException {
+    return null;
+  }
+
+  @Override
+  public ResponseWrapper<Response> requestResponseTimeoutWrapper(Request req, RpcOptions rpcOptions)
+      throws TException {
     return null;
   }
 }

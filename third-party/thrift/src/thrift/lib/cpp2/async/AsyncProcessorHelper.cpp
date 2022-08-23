@@ -17,7 +17,7 @@
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 
 #include <fmt/core.h>
-
+#include <folly/GLog.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 
 namespace apache::thrift {
@@ -47,18 +47,21 @@ namespace apache::thrift {
   try {
     ap->executeRequest(std::move(serverRequest), metadata);
   } catch (std::exception& ex) {
-    // Temporary code - just ensure that a failure produces an error.
-    // TODO: T113039894
-    folly::exception_wrapper ew(std::current_exception(), ex);
+    LOG(WARNING) << "exception in executeRequest:" << ex.what();
+
     auto eb = detail::ServerRequestHelper::eventBase(serverRequest);
     auto req = detail::ServerRequestHelper::request(std::move(serverRequest));
-    eb->runInEventBaseThread([request = std::move(req)]() {
-      request->sendErrorWrapped(
-          folly::make_exception_wrapper<TApplicationException>(
-              TApplicationException::INTERNAL_ERROR,
-              "AsyncProcessorHelper::executeRequest - resource pools mode"),
-          kUnknownErrorCode);
-    });
+    // We can return an error if the request has not been consumed already
+    if (eb && req) {
+      folly::exception_wrapper ew(std::current_exception(), ex);
+      eb->runInEventBaseThread([request = std::move(req)]() {
+        request->sendErrorWrapped(
+            folly::make_exception_wrapper<TApplicationException>(
+                TApplicationException::INTERNAL_ERROR,
+                "AsyncProcessorHelper::executeRequest exception"),
+            kUnknownErrorCode);
+      });
+    }
     return;
   }
 }

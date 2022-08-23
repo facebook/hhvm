@@ -2627,17 +2627,17 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruc
   const dict<int, this::TFieldSpec> SPEC = dict[
     1 => shape(
       'var' => 'int_field',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::I32,
     ),
     2 => shape(
       'var' => 'string_field',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
     3 => shape(
       'var' => 'set_field',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::SET,
       'etype' => \TType::I32,
       'elem' => shape(

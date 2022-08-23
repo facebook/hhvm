@@ -19,12 +19,12 @@ class MyData implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   const dict<int, this::TFieldSpec> SPEC = dict[
     1 => shape(
       'var' => 'data1',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
     2 => shape(
       'var' => 'data2',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::I32,
     ),
   ];
@@ -613,52 +613,52 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   const dict<int, this::TFieldSpec> SPEC = dict[
     1 => shape(
       'var' => 'boolVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     2 => shape(
       'var' => 'byteVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::BYTE,
     ),
     3 => shape(
       'var' => 'i16Val',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::I16,
     ),
     4 => shape(
       'var' => 'i32Val',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::I32,
     ),
     5 => shape(
       'var' => 'i64Val',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::I64,
     ),
     6 => shape(
       'var' => 'floatVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::FLOAT,
     ),
     7 => shape(
       'var' => 'doubleVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::DOUBLE,
     ),
     8 => shape(
       'var' => 'stringVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
     9 => shape(
       'var' => 'binaryVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
     10 => shape(
       'var' => 'structVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyData::class,
     ),
@@ -736,7 +736,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ),
     30 => shape(
       'var' => 'unionVal',
-      'is_terse' ==> true,
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyUnion::class,
     ),

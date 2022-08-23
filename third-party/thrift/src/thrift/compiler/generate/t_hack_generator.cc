@@ -2953,7 +2953,7 @@ void t_hack_generator::generate_php_struct_spec(
       indent(out) << "'adapter' => " << *adapter << "::class,\n";
     }
     if (field.qualifier() == t_field_qualifier::terse) {
-      indent(out) << "'is_terse' ==> true,\n";
+      indent(out) << "'is_terse' => true,\n";
     }
     generate_php_type_spec(out, &t);
     indent_down();

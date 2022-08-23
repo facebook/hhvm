@@ -37,5 +37,6 @@ oxidized = { path = "../../../../oxidized" }
 print_expr = { path = "../../../print_expr" }
 regex = "1.5.4"
 scope = { path = "../scope" }
+serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 stack_limit = { path = "../../../../utils/stack_limit" }
 statement_state = { path = "../statement_state" }

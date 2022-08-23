@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 use std::iter;
 use std::str::FromStr;
 
+use decl_provider::DeclProvider;
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
@@ -78,6 +79,7 @@ use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use oxidized::pos::Pos;
 use regex::Regex;
+use serde_json::json;
 
 use crate::emit_adata;
 use crate::emit_fatal;
@@ -1782,7 +1784,7 @@ fn emit_call<'a, 'arena, 'decl>(
         Some(ast_defs::Id(_, id)) => {
             let fq = hhbc::FunctionName::<'arena>::from_ast_name(alloc, id);
             let lower_fq_name = fq.unsafe_as_str();
-            emit_special_function(e, env, pos, args, uarg, lower_fq_name)
+            emit_special_function(e, env, pos, targs, args, uarg, lower_fq_name)
                 .transpose()
                 .unwrap_or_else(|| {
                     emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
@@ -2546,6 +2548,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
+    targs: &[ast::Targ],
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
     lower_fq_name: &str,
@@ -2839,6 +2842,48 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         ("HH\\tag_provenance_here", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
+        }
+        ("HH\\embed_type_decl", _)
+            if args.is_empty() && targs.len() == 1 && e.decl_provider.is_some() =>
+        {
+            match (targs[0].1).1.as_ref() {
+                aast_defs::Hint_::Happly(ast_defs::Id(_, id), _) => {
+                    let str = match e.decl_provider.as_ref().unwrap().type_decl(id, 0) {
+                        Ok(decl_provider::TypeDecl::Class(cls)) => json!({
+                            "name": cls.name.1,
+                            "final": cls.final_,
+                            "abstract": cls.abstract_,
+                            "kind": (match cls.kind {
+                                ast_defs::ClassishKind::Cclass(_) => "class",
+                                ast_defs::ClassishKind::Cinterface => "interface",
+                                ast_defs::ClassishKind::Ctrait => "trait",
+                                ast_defs::ClassishKind::Cenum => "enum",
+                                ast_defs::ClassishKind::CenumClass(_) => "enum class",
+                            })
+                        })
+                        .to_string(),
+                        Ok(decl_provider::TypeDecl::Typedef(td)) => json!({
+                            "kind": (match td.vis {
+                                aast_defs::TypedefVisibility::Transparent => "type",
+                                aast_defs::TypedefVisibility::Opaque => "newtype",
+                                aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
+                            })
+                        })
+                        .to_string(),
+                        Err(e) => {
+                            let s = format!("Error: {}", e);
+                            serde_json::to_string(&s).unwrap()
+                        }
+                    };
+                    Ok(Some(emit_adata::typed_value_into_instr(
+                        e,
+                        TypedValue::string(e.alloc.alloc_str(str.as_ref())),
+                    )?))
+                }
+                // If we don't have a classish type hint, compile this as
+                // normal and let the call fail down the line (for now)
+                _ => Ok(None),
+            }
         }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {

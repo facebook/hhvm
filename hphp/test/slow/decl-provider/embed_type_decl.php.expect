@@ -1,0 +1,15 @@
+object(stdClass) (4) {
+  ["abstract"]=>
+  bool(false)
+  ["final"]=>
+  bool(false)
+  ["kind"]=>
+  string(5) "class"
+  ["name"]=>
+  string(4) "\Foo"
+}
+object(stdClass) (1) {
+  ["kind"]=>
+  string(4) "type"
+}
+string(21) "Error: Decl not found"

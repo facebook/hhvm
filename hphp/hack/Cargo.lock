@@ -1182,6 +1182,7 @@ dependencies = [
  "print_expr",
  "regex",
  "scope",
+ "serde_json",
  "stack_limit",
  "statement_state",
 ]

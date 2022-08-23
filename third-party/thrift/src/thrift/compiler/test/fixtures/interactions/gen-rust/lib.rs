@@ -4256,8 +4256,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn truthify(
             &self,
         ) -> ::std::result::Result<
@@ -4306,8 +4304,6 @@ pub mod server {
             (**self).ping(
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn truthify(
             &self,
         ) -> ::std::result::Result<
@@ -4947,8 +4943,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn truthify(
             &self,
         ) -> ::std::result::Result<
@@ -4997,8 +4991,6 @@ pub mod server {
             (**self).ping(
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn truthify(
             &self,
         ) -> ::std::result::Result<
@@ -5958,8 +5950,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn serialize(
             &self,
         ) -> ::std::result::Result<
@@ -6024,8 +6014,6 @@ pub mod server {
             (**self).interactFast(
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn serialize(
             &self,
         ) -> ::std::result::Result<

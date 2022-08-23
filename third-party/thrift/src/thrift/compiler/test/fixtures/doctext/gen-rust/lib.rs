@@ -1147,8 +1147,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         #[doc = "Streaming function"]
         async fn numbers(
             &self,
@@ -1194,8 +1192,6 @@ pub mod server {
             (**self).f(
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn numbers(
             &self,
         ) -> ::std::result::Result<

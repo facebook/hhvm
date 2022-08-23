@@ -3877,8 +3877,6 @@ pub mod client {
 pub mod server {
     #[::async_trait::async_trait]
     pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 'static {
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn returnstream(
             &self,
             _i32_from: ::std::primitive::i32,
@@ -3894,8 +3892,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamthrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3910,8 +3906,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn servicethrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3926,8 +3920,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn boththrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3942,8 +3934,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamstreamthrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3961,8 +3951,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamservicethrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3980,8 +3968,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamboththrows(
             &self,
             _foo: ::std::primitive::i32,
@@ -3999,8 +3985,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn returnstreamFast(
             &self,
             _i32_from: ::std::primitive::i32,
@@ -4023,8 +4007,6 @@ pub mod server {
     where
         T: PubSubStreamingService + Send + Sync + ?Sized,
     {
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn returnstream(
             &self,
             i32_from: ::std::primitive::i32,
@@ -4038,8 +4020,6 @@ pub mod server {
                 i32_to, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamthrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4051,8 +4031,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn servicethrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4064,8 +4042,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn boththrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4077,8 +4053,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamstreamthrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4093,8 +4067,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamservicethrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4109,8 +4081,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn responseandstreamboththrows(
             &self,
             foo: ::std::primitive::i32,
@@ -4125,8 +4095,6 @@ pub mod server {
                 foo, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn returnstreamFast(
             &self,
             i32_from: ::std::primitive::i32,

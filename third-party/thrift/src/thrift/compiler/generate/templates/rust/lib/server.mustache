@@ -27,10 +27,6 @@
         type RequestContext: ::std::marker::Sync;{{!
     }}{{/service:requestContext?}}
     {{#service:rustFunctions}}{{^function:starts_interaction?}}
-        {{#function:returns_streams?}}
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
-        {{/function:returns_streams?}}
         {{#function:docs?}}
         #[doc = {{function:docs}}]
         {{/function:docs?}}
@@ -71,10 +67,6 @@
         type RequestContext = T::RequestContext;{{!
     }}{{/service:requestContext?}}
     {{#service:rustFunctions}}{{^function:starts_interaction?}}
-        {{#function:returns_streams?}}
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
-        {{/function:returns_streams?}}
         async fn {{function:rust_name}}(
             &self,{{!
             }}{{#service:requestContext?}}

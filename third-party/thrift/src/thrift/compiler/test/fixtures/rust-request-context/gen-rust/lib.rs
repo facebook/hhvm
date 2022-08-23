@@ -3679,8 +3679,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamById(
             &self,
             _request_context: &Self::RequestContext,
@@ -3696,8 +3694,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamByIdWithException(
             &self,
             _request_context: &Self::RequestContext,
@@ -3713,8 +3709,6 @@ pub mod server {
                 ),
             ))
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamByIdWithResponse(
             &self,
             _request_context: &Self::RequestContext,
@@ -3817,8 +3811,6 @@ pub mod server {
                 data, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamById(
             &self,
             request_context: &Self::RequestContext,
@@ -3832,8 +3824,6 @@ pub mod server {
                 id, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamByIdWithException(
             &self,
             request_context: &Self::RequestContext,
@@ -3847,8 +3837,6 @@ pub mod server {
                 id, 
             ).await
         }
-        // T115701914: server-side streaming is currently a WIP. Do not use.
-        #[doc(hidden)]
         async fn streamByIdWithResponse(
             &self,
             request_context: &Self::RequestContext,

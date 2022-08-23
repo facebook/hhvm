@@ -31,8 +31,8 @@ let check_implements
     | None -> "this expression"
     (* this case should never execute *)
   in
-  let enable_systemlib_annotations =
-    TypecheckerOptions.enable_systemlib_annotations (Typing_env.get_tcopt env)
+  let is_systemlib =
+    TypecheckerOptions.is_systemlib (Typing_env.get_tcopt env)
   in
   if String_utils.string_starts_with attr_name "__" then
     (* Check against builtins *)
@@ -62,8 +62,7 @@ let check_implements
     let () =
       if
         check_attr SN.UserAttributes.as_map
-        || enable_systemlib_annotations
-           && check_attr SN.UserAttributes.systemlib_map
+        || (is_systemlib && check_attr SN.UserAttributes.systemlib_map)
       then
         ()
       else

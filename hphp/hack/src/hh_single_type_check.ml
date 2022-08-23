@@ -287,7 +287,7 @@ let parse_options () =
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
   let disable_hh_ignore_error = ref false in
-  let enable_systemlib_annotations = ref false in
+  let is_systemlib = ref false in
   let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref None in
   let allowed_decl_fixme_codes = ref None in
@@ -682,9 +682,9 @@ let parse_options () =
       ( "--disable-hh-ignore-error",
         Arg.Set disable_hh_ignore_error,
         " Treat HH_IGNORE_ERROR comments as normal comments" );
-      ( "--enable-systemlib-annotations",
-        Arg.Set enable_systemlib_annotations,
-        " Enable systemlib annotations" );
+      ( "--is-systemlib",
+        Arg.Set is_systemlib,
+        " Enable systemlib annotations and other internal-only features" );
       ( "--enable-higher-kinded-types",
         Arg.Set enable_higher_kinded_types,
         " Enable support for higher-kinded types" );
@@ -944,7 +944,7 @@ let parse_options () =
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
-      ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
+      ~tco_is_systemlib:!is_systemlib
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)

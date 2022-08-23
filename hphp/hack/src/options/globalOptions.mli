@@ -225,7 +225,7 @@ type t = {
   po_enable_enum_classes: bool;
   po_disable_hh_ignore_error: bool;
   (* Enable features used to typecheck systemlib *)
-  tco_enable_systemlib_annotations: bool;
+  tco_is_systemlib: bool;
   (* Controls if higher-kinded types are supported *)
   tco_higher_kinded_types: bool;
   (* Controls if method-call inference is supported *)
@@ -419,7 +419,7 @@ val make :
   ?po_enable_enum_classes:bool ->
   ?po_disable_hh_ignore_error:bool ->
   ?po_allow_unstable_features:bool ->
-  ?tco_enable_systemlib_annotations:bool ->
+  ?tco_is_systemlib:bool ->
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->

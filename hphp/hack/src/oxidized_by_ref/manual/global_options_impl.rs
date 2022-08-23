@@ -96,7 +96,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     symbol_write_index_paths_file_output: None,
     po_enable_enum_classes: true,
     po_disable_hh_ignore_error: false,
-    tco_enable_systemlib_annotations: false,
+    tco_is_systemlib: false,
     tco_higher_kinded_types: false,
     tco_method_call_inference: false,
     tco_report_pos_from_reason: false,
@@ -323,7 +323,7 @@ impl GlobalOptions<'_> {
         let po_disable_xhp_children_declarations = self.po_disable_xhp_children_declarations;
         let po_enable_enum_classes = self.po_enable_enum_classes;
         let po_disable_hh_ignore_error = self.po_disable_hh_ignore_error;
-        let tco_enable_systemlib_annotations = self.tco_enable_systemlib_annotations;
+        let tco_is_systemlib = self.tco_is_systemlib;
         let tco_higher_kinded_types = self.tco_higher_kinded_types;
         let tco_method_call_inference = self.tco_method_call_inference;
         let tco_report_pos_from_reason = self.tco_report_pos_from_reason;
@@ -502,7 +502,7 @@ impl GlobalOptions<'_> {
             po_disable_xhp_children_declarations,
             po_enable_enum_classes,
             po_disable_hh_ignore_error,
-            tco_enable_systemlib_annotations,
+            tco_is_systemlib,
             tco_higher_kinded_types,
             tco_method_call_inference,
             tco_report_pos_from_reason,

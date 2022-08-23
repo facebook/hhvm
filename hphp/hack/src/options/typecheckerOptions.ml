@@ -194,8 +194,7 @@ let error_php_lambdas t = t.GlobalOptions.tco_error_php_lambdas
 let disallow_discarded_nullable_awaitables t =
   t.GlobalOptions.tco_disallow_discarded_nullable_awaitables
 
-let enable_systemlib_annotations t =
-  t.GlobalOptions.tco_enable_systemlib_annotations
+let is_systemlib t = t.GlobalOptions.tco_is_systemlib
 
 let higher_kinded_types t = t.GlobalOptions.tco_higher_kinded_types
 

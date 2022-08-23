@@ -202,11 +202,11 @@ let () =
       ignored_flag "--disallow-trait-reuse";
       ignored_flag "--enable-class-level-where-clauses";
       ignored_flag "--enable-higher-kinded-types";
-      ignored_flag "--enable-systemlib-annotations";
       ignored_flag "--forbid_nullable_cast";
       ( "--hh-log-level",
         Arg.Tuple [Arg.String (fun _ -> ()); Arg.String (fun _ -> ())],
         "(ignored)" );
+      ignored_flag "--is-systemlib";
       ignored_flag "--like-casts";
       ignored_flag "--like-type-hints";
       ignored_flag "--like-types-all";

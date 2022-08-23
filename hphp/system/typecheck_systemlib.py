@@ -11,7 +11,7 @@ from typing import List
 
 FLAGS: List[str] = [
     "--no-builtins",
-    "--enable-systemlib-annotations",
+    "--is-systemlib",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
     "2049",

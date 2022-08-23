@@ -1943,7 +1943,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         && !self.env.is_systemlib()
                         // The typechecker has its own implementation of this that
                         // allows its own testing and better error messaging.
-                        // see --tco_enable_systemlib_annotations
+                        // see --tco_is_systemlib
                         && !self.env.is_typechecker()
                     {
                         self.errors.push(make_error_from_node(

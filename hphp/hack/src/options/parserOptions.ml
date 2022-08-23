@@ -164,7 +164,7 @@ let make
     ~disallow_fun_and_cls_meth_pseudo_funcs
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth
-    ~enable_systemlib_annotations =
+    ~is_systemlib =
   GlobalOptions.
     {
       default with
@@ -191,7 +191,7 @@ let make
         disallow_fun_and_cls_meth_pseudo_funcs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       po_disallow_inst_meth = disallow_inst_meth;
-      tco_enable_systemlib_annotations = enable_systemlib_annotations;
+      tco_is_systemlib = is_systemlib;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -237,4 +237,4 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po,
-    po.GlobalOptions.tco_enable_systemlib_annotations )
+    po.GlobalOptions.tco_is_systemlib )

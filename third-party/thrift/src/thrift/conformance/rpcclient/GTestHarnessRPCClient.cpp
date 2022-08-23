@@ -206,10 +206,10 @@ class RPCClientConformanceTest : public testing::Test {
     // Wait for client to fetch test case
     bool getTestReceived =
         handler_->getTestReceived().wait(std::chrono::seconds(5));
-    EXPECT_EQ(conforming_, getTestReceived);
 
     // End test if client was unable to fetch test case
     if (!getTestReceived) {
+      EXPECT_FALSE(conforming_);
       return;
     }
 

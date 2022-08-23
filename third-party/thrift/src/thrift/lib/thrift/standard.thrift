@@ -26,7 +26,7 @@ package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type
 namespace py3 apache.thrift.type
-namespace php apache_thrift_type
+namespace php apache_thrift_type_standard
 namespace java com.facebook.thrift.type
 namespace java.swift com.facebook.thrift.standard_type
 namespace py.asyncio apache_thrift_asyncio.standard

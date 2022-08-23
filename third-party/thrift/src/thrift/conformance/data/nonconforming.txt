@@ -145,3 +145,8 @@ java2/CompatibilityTest/testset.binary/AddField.Binary
 java2/CompatibilityTest/testset.binary/AddField.Compact
 java2/CompatibilityTest/testset.string/AddField.Compact
 java2/CompatibilityTest/testset.string/AddField.Binary
+#
+#
+# TODO(dokwon): Move this to rpc specific nonconforming.txt
+java2/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
+java2/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest

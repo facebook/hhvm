@@ -153,4 +153,9 @@ public class RpcServerConformanceHandler implements RPCConformanceService {
       throws TException {
     return null;
   }
+
+  @Override
+  public Response requestResponseTimeout(Request req) throws TException {
+    return null;
+  }
 }

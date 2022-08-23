@@ -34,15 +34,18 @@ import org.apache.thrift.conformance.RequestResponseDeclaredExceptionClientInstr
 import org.apache.thrift.conformance.RequestResponseDeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.RequestResponseNoArgVoidResponseClientInstruction;
 import org.apache.thrift.conformance.RequestResponseNoArgVoidResponseClientTestResult;
+import org.apache.thrift.conformance.RequestResponseTimeoutClientInstruction;
 import org.apache.thrift.conformance.RequestResponseUndeclaredExceptionClientInstruction;
 import org.apache.thrift.conformance.RequestResponseUndeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.RpcTestCase;
 import org.apache.thrift.conformance.SinkBasicClientInstruction;
 import org.apache.thrift.conformance.SinkBasicClientTestResult;
+import org.apache.thrift.conformance.SinkChunkTimeoutClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientTestResult;
 import org.apache.thrift.conformance.StreamChunkTimeoutClientInstruction;
 import org.apache.thrift.conformance.StreamChunkTimeoutClientTestResult;
+import org.apache.thrift.conformance.StreamCreditTimeoutClientInstruction;
 import org.apache.thrift.conformance.StreamInitialResponseClientInstruction;
 import org.apache.thrift.conformance.StreamInitialResponseClientTestResult;
 import org.apache.thrift.conformance.UserException;
@@ -165,7 +168,9 @@ public class RpcClientConformanceHandler {
     @Override
     public void visitStreamChunkTimeout(StreamChunkTimeoutClientInstruction instruction) {
       RpcOptions rpcOptions =
-          new RpcOptions.Builder().setClientTimeoutMs(instruction.getChunkTimeoutMs()).build();
+          new RpcOptions.Builder()
+              .setClientTimeoutMs((int) instruction.getChunkTimeoutMs())
+              .build();
 
       result =
           client
@@ -211,5 +216,14 @@ public class RpcClientConformanceHandler {
                                       .collect(Collectors.toList()))
                               .build()));
     }
+
+    @Override
+    public void visitSinkChunkTimeout(SinkChunkTimeoutClientInstruction instruction) {}
+
+    @Override
+    public void visitStreamCreditTimeout(StreamCreditTimeoutClientInstruction instruction) {}
+
+    @Override
+    public void visitRequestResponseTimeout(RequestResponseTimeoutClientInstruction instruction) {}
   }
 }

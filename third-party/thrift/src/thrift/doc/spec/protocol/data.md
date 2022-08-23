@@ -219,6 +219,6 @@ This protocol prints the Thrift object as a human readable, nicely indented stri
 
 ## Deprecated
 
-- JSON. This protocol serializes Thrift objects into JSON objects (see [yaml](../experimental/yaml.md)).
-- SimpleJSON. This protocol is similar with JSON, it is simpler because it doesn't output verbose field type (see [yaml](../experimental/yaml.md)).
+- JSON. This protocol serializes Thrift objects into JSON objects (see [yaml](../../experimental/yaml.md)).
+- SimpleJSON. This protocol is similar with JSON, it is simpler because it doesn't output verbose field type (see [yaml](../../experimental/yaml.md)).
 * Phpserialize. This protocol serializes Thrift objects into PHP's "serialize" format. It is write only now, you cannot deserialize from PHP.

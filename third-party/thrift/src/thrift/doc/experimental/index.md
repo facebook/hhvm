@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Experimental Features
 
 Features that are in the works.

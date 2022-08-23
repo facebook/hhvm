@@ -30,6 +30,7 @@ class MysqlHandler {
       const ConnectionOptions& opts,
       const ConnectionKey& key,
       int flags) = 0;
+
   virtual Status runQuery(MYSQL* mysql, folly::StringPiece queryStmt) = 0;
   virtual MYSQL_RES* getResult(MYSQL* mysql) = 0;
   virtual Status nextResult(MYSQL* mysql) = 0;

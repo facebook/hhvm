@@ -204,28 +204,30 @@ std::shared_ptr<ConnectOperation> AsyncConnectionPool::beginConnection(
     const std::string& user,
     const std::string& password,
     const std::string& special_tag) {
+  return beginConnection(ConnectionKey(
+      host,
+      port,
+      database_name,
+      user,
+      password,
+      special_tag,
+      poolPerMysqlInstance()));
+}
+
+std::shared_ptr<ConnectOperation> AsyncConnectionPool::beginConnection(
+    const ConnectionKey& conn_key) {
   std::shared_ptr<ConnectPoolOperation> ret;
   {
     std::unique_lock<std::mutex> lock(shutdown_mutex_);
     // Assigning here to read from pool safely
     ret = std::make_shared<ConnectPoolOperation>(
-        getSelfWeakPointer(),
-        mysql_client_,
-        ConnectionKey(
-            host,
-            port,
-            database_name,
-            user,
-            password,
-            special_tag,
-            poolPerMysqlInstance()));
+        getSelfWeakPointer(), mysql_client_, conn_key);
     if (shutting_down_) {
       LOG(ERROR)
           << "Attempt to start pool operation while pool is shutting down";
       ret->cancel();
     }
   }
-
   mysql_client_->addOperation(ret);
   return ret;
 }

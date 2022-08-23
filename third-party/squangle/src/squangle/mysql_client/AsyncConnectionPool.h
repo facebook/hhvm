@@ -513,6 +513,10 @@ class AsyncConnectionPool
       const std::string& password,
       const std::string& special_tag = "");
 
+  // Returns a ConnectPoolOperation from a ConnKey
+  std::shared_ptr<ConnectOperation> beginConnection(
+      const ConnectionKey& conn_key);
+
   // Returns the client that this pool is using
   std::shared_ptr<AsyncMysqlClient> getMysqlClient() {
     return mysql_client_;

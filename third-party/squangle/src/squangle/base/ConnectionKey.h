@@ -29,6 +29,7 @@ class ConnectionKey {
   const std::string password;
   const std::string special_tag;
   const bool ignore_db_name;
+  const std::string unixSocketPath;
   const size_t partial_hash;
   const size_t hash;
 
@@ -39,7 +40,8 @@ class ConnectionKey {
       folly::StringPiece sp_user,
       folly::StringPiece sp_password,
       folly::StringPiece sp_special_tag = "",
-      bool sp_ignore_db_name = false);
+      bool sp_ignore_db_name = false,
+      folly::StringPiece sp_unixSocketPath = "");
 
   bool partialEqual(const ConnectionKey& rhs) const;
 

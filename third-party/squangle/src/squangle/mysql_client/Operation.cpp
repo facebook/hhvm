@@ -706,13 +706,16 @@ void ConnectOperation::socketActionable() {
 
   auto& handler = conn()->client()->getMysqlHandler();
   MYSQL* mysql = conn()->mysql();
+  const auto usingUnixSocket = !conn_key_.unixSocketPath.empty();
+
   auto status = handler.tryConnect(mysql, conn_options_, conn_key_, flags_);
 
   if (status == MysqlHandler::ERROR) {
     snapshotMysqlErrors();
     attemptFailed(OperationResult::Failed);
   } else {
-    if (isDoneWithTcpHandShake() && tcp_timeout_handler_.isScheduled()) {
+    if ((isDoneWithTcpHandShake() || usingUnixSocket) &&
+        tcp_timeout_handler_.isScheduled()) {
       // cancel tcp connect timeout
       tcp_timeout_handler_.cancelTimeout();
     }

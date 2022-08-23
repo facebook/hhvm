@@ -274,6 +274,7 @@ class AsyncMysqlClient : public MysqlClientBase {
         const ConnectionOptions& /*opts*/,
         const ConnectionKey& conn_key,
         int flags) override;
+
     Status runQuery(MYSQL* mysql, folly::StringPiece queryStmt) override;
     Status nextResult(MYSQL* mysql) override;
     Status fetchRow(MYSQL_RES* res, MYSQL_ROW& row) override;

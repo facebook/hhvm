@@ -21,11 +21,24 @@
 
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
+#include <thrift/lib/cpp2/FieldMask.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/lib/cpp2/type/Traits.h>
+#include <thrift/lib/cpp2/type/Type.h>
+#include <thrift/lib/thrift/gen-cpp2/id_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
-namespace apache::thrift::protocol::detail {
+namespace apache::thrift::protocol {
+
+// This is the return value of parseObject with mask.
+// Masked fields are deserialized to included Object, and the other fields are
+// are stored in excluded MaskedProtocolData.
+struct MaskedDecodeResult {
+  Object included;
+  MaskedProtocolData excluded;
+};
+
+namespace detail {
 
 template <typename C, typename T>
 decltype(auto) forward_elem(T& elem) {
@@ -431,6 +444,109 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
   }
 }
 
+struct MaskedDecodeResultValue {
+  Value included;
+  MaskedData excluded;
+};
+
+// Returns an element in the list by ValueId.
+template <typename T>
+const T& getByValueId(const std::vector<T>& values, type::ValueId id) {
+  return values[apache::thrift::util::zigzagToI64(static_cast<int64_t>(id))];
+}
+
+// Stores the serialized data of the given type in maskedData and protocolData.
+template <typename Protocol>
+void setMaskedDataFull(
+    Protocol& prot,
+    TType arg_type,
+    MaskedData& maskedData,
+    MaskedProtocolData& protocolData) {
+  auto& values = protocolData.values().ensure();
+  auto& encodedValue = values.emplace_back();
+  encodedValue.wireType() = type::toBaseType(arg_type);
+  // get the serialized data from cursor
+  auto cursor = prot.getCursor();
+  apache::thrift::skip(prot, arg_type);
+  cursor.clone(encodedValue.data().emplace(), prot.getCursor() - cursor);
+
+  maskedData.full_ref() =
+      type::ValueId{apache::thrift::util::i32ToZigzag(values.size() - 1)};
+}
+
+// parseValue with mask
+template <typename Protocol>
+MaskedDecodeResultValue parseValue(
+    Protocol& prot,
+    TType arg_type,
+    MaskRef mask,
+    MaskedProtocolData& protocolData,
+    bool string_to_binary = true) {
+  MaskedDecodeResultValue result;
+  if (mask.isNoneMask()) { // do not deserialize
+    setMaskedDataFull(prot, arg_type, result.excluded, protocolData);
+    return result;
+  }
+  if (mask.isAllMask()) { // serialize all
+    result.included = parseValue(prot, arg_type, string_to_binary);
+    return result;
+  }
+  switch (arg_type) {
+    case protocol::T_STRUCT: {
+      std::string name;
+      int16_t fid;
+      TType ftype;
+      prot.readStructBegin(name);
+      while (true) {
+        prot.readFieldBegin(name, ftype, fid);
+        if (ftype == protocol::T_STOP) {
+          break;
+        }
+        MaskRef next = mask.get(FieldId{fid});
+        MaskedDecodeResultValue nestedResult =
+            parseValue(prot, ftype, next, protocolData, string_to_binary);
+        // Set nested MaskedDecodeResult if not empty.
+        if (!apache::thrift::empty(nestedResult.included)) {
+          result.included.objectValue_ref().ensure()[FieldId{fid}] =
+              nestedResult.included;
+        }
+        if (!apache::thrift::empty(nestedResult.excluded)) {
+          result.excluded.fields_ref().ensure()[FieldId{fid}] =
+              nestedResult.excluded;
+        }
+        prot.readFieldEnd();
+      }
+      prot.readStructEnd();
+      return result;
+    }
+    // TODO: handle map
+    default: {
+      result.included = parseValue(prot, arg_type, string_to_binary);
+      return result;
+    }
+  }
+}
+
+template <typename Protocol>
+MaskedDecodeResult parseObject(
+    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+  Protocol prot;
+  prot.setInput(&buf);
+  MaskedDecodeResult result;
+  MaskedProtocolData& protocolData = result.excluded;
+  // TODO: change this to use get_standard_protocol
+  protocolData.protocol() = std::is_same_v<Protocol, BinaryProtocolReader>
+      ? type::StandardProtocol::Binary
+      : type::StandardProtocol::Compact;
+  MaskedDecodeResultValue parseValueResult = detail::parseValue(
+      prot, T_STRUCT, MaskRef{mask, false}, protocolData, string_to_binary);
+  protocolData.data() = std::move(parseValueResult.excluded);
+  // Calling ensure as it is possible that the value is not set.
+  result.included =
+      std::move(parseValueResult.included.objectValue_ref().ensure());
+  return result;
+}
+
 inline TType getTType(const Value& val) {
   auto type = toTType(static_cast<type::BaseType>(val.getType()));
   if (type == protocol::T_UTF7 || type == protocol::T_UTF8 ||
@@ -541,4 +657,5 @@ void serializeValue(Protocol& prot, const Value& value) {
   }
 }
 
-} // namespace apache::thrift::protocol::detail
+} // namespace detail
+} // namespace apache::thrift::protocol

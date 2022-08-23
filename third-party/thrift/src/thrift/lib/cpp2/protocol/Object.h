@@ -53,6 +53,14 @@ Object parseObject(const folly::IOBuf& buf, bool string_to_binary = true) {
   return *result.objectValue_ref();
 }
 
+// Schemaless deserialization of thrift serialized data with mask.
+// Only parses values that are masked. Unmasked fields are stored in MaskedData.
+template <typename Protocol>
+MaskedDecodeResult parseObject(
+    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+  return detail::parseObject<Protocol>(buf, mask, string_to_binary);
+}
+
 // Schemaless serialization of protocol::Object
 // into thrift serialization protocol
 // Protocol: protocol to use eg. apache::thrift::BinaryProtocolWriter

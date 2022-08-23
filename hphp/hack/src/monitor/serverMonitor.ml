@@ -897,6 +897,13 @@ struct
         | Exit_status.Exit_with _ as exn ->
           let e = Exception.wrap exn in
           Exception.reraise e
+        | Unix.Unix_error (Unix.EINVAL, _, _) as exn ->
+          let e = Exception.wrap exn in
+          Hh_logger.log
+            "Ack_and_handoff failure; closing client FD: %s"
+            (Exception.get_ctor_string e);
+          ensure_fd_closed fd;
+          raise Exit_status.(Exit_with Socket_error)
         | exn ->
           let e = Exception.wrap exn in
           Hh_logger.log

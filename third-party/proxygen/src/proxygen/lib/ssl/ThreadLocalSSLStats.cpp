@@ -71,6 +71,7 @@ TLSSLStats::TLSSLStats(const std::string& prefix)
       tlsVersion_1_0_(prefix + "_tls_v1_0", SUM),
       tlsVersion_1_1_(prefix + "_tls_v1_1", SUM),
       tlsVersion_1_2_(prefix + "_tls_v1_2", SUM),
+      tlsInsecureConnection(prefix + "_tls_insecure_connection", SUM),
       fizzPskTypeNotSupported_(prefix + "_fizz_psktype_not_supported", SUM),
       fizzPskTypeNotAttempted_(prefix + "_fizz_psktype_not_attempted", SUM),
       fizzPskTypeRejected_(prefix + "_fizz_psktype_rejected", SUM),
@@ -251,4 +252,9 @@ void TLSSLStats::recordTLSVersion(fizz::ProtocolVersion tlsVersion) noexcept {
   }
   tlsUnknown_.add(1);
 }
+
+void TLSSLStats::recordInsecureConnection() noexcept {
+  tlsInsecureConnection.add(1);
+}
+
 } // namespace proxygen

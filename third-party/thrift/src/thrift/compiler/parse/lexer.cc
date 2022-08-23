@@ -17,6 +17,7 @@
 #include <thrift/compiler/parse/lexer.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

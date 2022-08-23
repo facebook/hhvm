@@ -153,7 +153,8 @@ class t_hack_generator : public t_concat_generator {
       std::ostream& temp_var_initializations_out,
       t_name_generator& namer,
       bool immutable_collections = false,
-      bool ignore_wrapper = false);
+      bool ignore_wrapper = false,
+      bool structured_annotations = false);
   std::string render_default_value(const t_type* type);
 
   /**
@@ -1846,7 +1847,8 @@ std::string t_hack_generator::render_const_value_helper(
     std::ostream& temp_var_initializations_out,
     t_name_generator& namer,
     bool immutable_collections,
-    bool ignore_wrapper) {
+    bool ignore_wrapper,
+    bool structured_annotations) {
   std::ostringstream out;
   if (const auto* ttypedef = dynamic_cast<const t_placeholder_typedef*>(type)) {
     type = ttypedef->get_type();
@@ -1945,7 +1947,13 @@ std::string t_hack_generator::render_const_value_helper(
             inner << indent() << temp_val << "->" << field->name() << " = ";
           }
           inner << render_const_value_helper(
-              field->get_type(), v, temp_var_initializations_out, namer);
+              field->get_type(),
+              v,
+              temp_var_initializations_out,
+              namer,
+              false,
+              false,
+              structured_annotations);
           if (field_wrapper) {
             inner << ");\n";
           } else {
@@ -1986,13 +1994,19 @@ std::string t_hack_generator::render_const_value_helper(
                              &t_base_type::t_string(),
                              k,
                              temp_var_initializations_out,
-                             namer)
+                             namer,
+                             false, // immutable_collections
+                             false, // ignore_wrapper
+                             structured_annotations)
                       << " => "
                       << render_const_value_helper(
                              field.get_type(),
                              v,
                              temp_var_initializations_out,
-                             namer)
+                             namer,
+                             false, // immutable_collections
+                             false, // ignore_wrapper
+                             structured_annotations)
                       << ",\n";
         }
       }
@@ -2007,7 +2021,7 @@ std::string t_hack_generator::render_const_value_helper(
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
     const t_type* ktype = tmap->get_key_type();
     const t_type* vtype = tmap->get_val_type();
-    if (arrays_ || no_use_hack_collections_) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
       out << "dict[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Map {\n";
@@ -2020,25 +2034,29 @@ std::string t_hack_generator::render_const_value_helper(
           entry.first,
           temp_var_initializations_out,
           namer,
-          immutable_collections);
+          immutable_collections,
+          false, // ignore_wrapper
+          structured_annotations);
       out << " => ";
       out << render_const_value_helper(
           vtype,
           entry.second,
           temp_var_initializations_out,
           namer,
-          immutable_collections);
+          immutable_collections,
+          false, // ignore_wrapper
+          structured_annotations);
       out << ",\n";
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
     }
   } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
     const t_type* etype = tlist->get_elem_type();
-    if (arrays_ || no_use_hack_collections_) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
       out << "vec[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Vector {\n";
@@ -2051,11 +2069,13 @@ std::string t_hack_generator::render_const_value_helper(
           val,
           temp_var_initializations_out,
           namer,
-          immutable_collections);
+          immutable_collections,
+          false, // ignore_wrapper
+          structured_annotations);
       out << ",\n";
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
@@ -2064,7 +2084,7 @@ std::string t_hack_generator::render_const_value_helper(
     const t_type* etype = tset->get_elem_type();
     indent_up();
     const auto& vals = value->get_list();
-    if (arrays_) {
+    if (arrays_ || structured_annotations) {
       out << "keyset[\n";
       for (const auto* val : vals) {
         out << indent();
@@ -2073,7 +2093,9 @@ std::string t_hack_generator::render_const_value_helper(
             val,
             temp_var_initializations_out,
             namer,
-            immutable_collections);
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
         out << ",\n";
       }
       indent_down();
@@ -2087,7 +2109,9 @@ std::string t_hack_generator::render_const_value_helper(
             val,
             temp_var_initializations_out,
             namer,
-            immutable_collections);
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
         out << " => true";
         out << ",\n";
       }
@@ -2102,7 +2126,9 @@ std::string t_hack_generator::render_const_value_helper(
             val,
             temp_var_initializations_out,
             namer,
-            immutable_collections);
+            immutable_collections,
+            false, // ignore_wrapper
+            structured_annotations);
         out << ",\n";
       }
       indent_down();
@@ -4937,8 +4963,9 @@ std::string t_hack_generator::render_structured_annotations(
                          annotation->get_value(),
                          temp_var_initializations_out,
                          namer,
-                         false,
-                         true)
+                         false, // immutable_collections
+                         true, // ignore_wrapper
+                         true) // structured_annotations
                   << ",\n";
     }
     indent_down();

@@ -389,10 +389,10 @@ class MyThirdThriftStruct implements \IThriftSyncStruct {
       'struct' => dict[
         '\thrift\annotation\hack\Attributes' => \thrift\annotation\hack\Attributes::fromShape(
           shape(
-            "attributes" => Vector {
+            "attributes" => vec[
               "ApiEnum",
               "JSEnum",
-            },
+            ],
           )
         ),
       ],
@@ -401,9 +401,9 @@ class MyThirdThriftStruct implements \IThriftSyncStruct {
           'field' => dict[
             '\thrift\annotation\hack\Attributes' => \thrift\annotation\hack\Attributes::fromShape(
               shape(
-                "attributes" => Vector {
+                "attributes" => vec[
                   "FieldAttribute",
-                },
+                ],
               )
             ),
           ],
@@ -772,10 +772,10 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftUnion<\test\
       'struct' => dict[
         '\thrift\annotation\hack\UnionEnumAttributes' => \thrift\annotation\hack\UnionEnumAttributes::fromShape(
           shape(
-            "attributes" => Vector {
+            "attributes" => vec[
               "EnumAttributes",
               "EnumAttributes2",
-            },
+            ],
           )
         ),
       ],

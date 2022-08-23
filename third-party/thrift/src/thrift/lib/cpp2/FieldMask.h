@@ -95,12 +95,12 @@ Mask operator&(const Mask&, const Mask&); // intersect
 Mask operator|(const Mask&, const Mask&); // union
 Mask operator-(const Mask&, const Mask&); // subtract
 
-// This converts ident (field name type) to field id automatically which makes
+// This converts ident/ field name to field id automatically which makes
 // FieldMask easier for end-users to construct and use.
 // Example:
 //   MaskBuilder<T> mask(allMask()); // start with allMask
 //   mask.includes<ident1, ident2>(anotherMask);
-//   mask.excludes<ident3>(anotherMask);
+//   mask.excludes({"fieldname"}, anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
 
 template <typename T>
@@ -108,20 +108,34 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
 
-  // Includes the field specified by the list of Idents with the given mask.
-  // The field is t.ident1().ident2() ...
+  // Includes the field specified by the list of Idents/field names with
+  // the given mask.
+  // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
   template <typename... Ident>
   void includes(const Mask& mask = allMask()) {
     data_ = data_ | detail::path<T, Ident...>(mask);
   }
 
-  // Excludes the field specified by the list of Idents with the given mask.
-  // The field is t.ident1().ident2() ...
+  void includes(
+      const std::vector<folly::StringPiece>& fieldNames,
+      const Mask& mask = allMask()) {
+    data_ = data_ | detail::path<T>(fieldNames, 0, mask);
+  }
+
+  // Excludes the field specified by the list of Idents/field names with
+  // the given mask.
+  // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
   template <typename... Ident>
   void excludes(const Mask& mask = allMask()) {
     data_ = data_ - detail::path<T, Ident...>(mask);
+  }
+
+  void excludes(
+      const std::vector<folly::StringPiece>& fieldNames,
+      const Mask& mask = allMask()) {
+    data_ = data_ - detail::path<T>(fieldNames, 0, mask);
   }
 };
 

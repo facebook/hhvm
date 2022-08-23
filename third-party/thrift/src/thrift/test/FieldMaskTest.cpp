@@ -1660,7 +1660,7 @@ TEST(FieldMaskTest, LogicalOpIncludesExcludes) {
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 }
 
-TEST(FieldMaskTest, MaskBuilderSimple) {
+TEST(FieldMaskTest, MaskBuilderIncludeExcludeEmpty) {
   {
     MaskBuilder<Foo> builder(noneMask());
     EXPECT_EQ(builder.toThrift(), noneMask());
@@ -1681,14 +1681,42 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
     builder.includes(noneMask());
     EXPECT_EQ(builder.toThrift(), noneMask());
   }
+  // test when field name list is empty
+  {
+    MaskBuilder<Foo> builder(noneMask());
+    EXPECT_EQ(builder.toThrift(), noneMask());
+    builder.excludes({});
+    EXPECT_EQ(builder.toThrift(), noneMask());
+    builder.includes({});
+    EXPECT_EQ(builder.toThrift(), allMask());
+    builder.excludes({}, noneMask());
+    EXPECT_EQ(builder.toThrift(), allMask());
+  }
+  {
+    MaskBuilder<Foo> builder(allMask());
+    EXPECT_EQ(builder.toThrift(), allMask());
+    builder.includes({});
+    EXPECT_EQ(builder.toThrift(), allMask());
+    builder.excludes({});
+    EXPECT_EQ(builder.toThrift(), noneMask());
+    builder.includes({}, noneMask());
+    EXPECT_EQ(builder.toThrift(), noneMask());
+  }
+}
 
+void testMaskBuilderSimple(bool testFieldName) {
   // Test includes
   {
     // includes{1: excludes{},
     //          3: excludes{}}
     MaskBuilder<Foo> builder(noneMask());
-    builder.includes<tag::field1>();
-    builder.includes<tag::field2>();
+    if (testFieldName) {
+      builder.includes({"field1"});
+      builder.includes({"field2"});
+    } else {
+      builder.includes<tag::field1>();
+      builder.includes<tag::field2>();
+    }
     Mask expected;
     auto& includes = expected.includes_ref().emplace();
     includes[1] = allMask();
@@ -1697,15 +1725,26 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
   }
   {
     MaskBuilder<Foo> builder(allMask());
-    builder.includes<tag::field1>();
-    builder.includes<tag::field2>();
+    if (testFieldName) {
+      builder.includes({"field1"});
+      builder.includes({"field2"});
+    } else {
+      builder.includes<tag::field1>();
+      builder.includes<tag::field2>();
+    }
     EXPECT_EQ(builder.toThrift(), allMask());
   }
   {
     // includes{1: excludes{}}
     MaskBuilder<Foo> builder(noneMask());
-    builder.includes<tag::field1>();
-    builder.includes<tag::field1>(); // including twice is fine
+    // including twice is fine
+    if (testFieldName) {
+      builder.includes({"field1"});
+      builder.includes({"field1"});
+    } else {
+      builder.includes<tag::field1>();
+      builder.includes<tag::field1>();
+    }
     Mask expected;
     expected.includes_ref().emplace()[1] = allMask();
     EXPECT_EQ(builder.toThrift(), expected);
@@ -1715,23 +1754,39 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
   {
     // excludes{3: excludes{}}
     MaskBuilder<Foo> builder(allMask());
-    builder.excludes<tag::field1>(noneMask());
-    builder.excludes<tag::field2>();
+    if (testFieldName) {
+      builder.excludes({"field1"}, noneMask());
+      builder.excludes({"field2"});
+    } else {
+      builder.excludes<tag::field1>(noneMask());
+      builder.excludes<tag::field2>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[3] = allMask();
     EXPECT_EQ(builder.toThrift(), expected);
   }
   {
     MaskBuilder<Foo> builder(noneMask());
-    builder.excludes<tag::field1>();
-    builder.excludes<tag::field2>();
+    if (testFieldName) {
+      builder.excludes({"field1"});
+      builder.excludes({"field2"});
+    } else {
+      builder.excludes<tag::field1>();
+      builder.excludes<tag::field2>();
+    }
     EXPECT_EQ(builder.toThrift(), noneMask());
   }
   {
     // excludes{3: excludes{}}
     MaskBuilder<Foo> builder(allMask());
-    builder.excludes<tag::field2>();
-    builder.excludes<tag::field2>(); // excluding twice is fine
+    // excluding twice is fine
+    if (testFieldName) {
+      builder.excludes({"field2"});
+      builder.excludes({"field2"});
+    } else {
+      builder.excludes<tag::field2>();
+      builder.excludes<tag::field2>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[3] = allMask();
     EXPECT_EQ(builder.toThrift(), expected);
@@ -1740,24 +1795,40 @@ TEST(FieldMaskTest, MaskBuilderSimple) {
   // Test includes and excludes
   {
     MaskBuilder<Foo> builder(noneMask());
-    builder.includes<tag::field2>();
-    builder.excludes<tag::field2>(); // excluding the field we included
+    // excluding the field we included
+    if (testFieldName) {
+      builder.includes({"field2"});
+      builder.excludes({"field2"});
+    } else {
+      builder.includes<tag::field2>();
+      builder.excludes<tag::field2>();
+    }
     EXPECT_EQ(builder.toThrift(), noneMask());
   }
   {
     MaskBuilder<Foo> builder(allMask());
-    builder.excludes<tag::field2>();
-    builder.includes<tag::field2>(); // including the field we excluded
+    // including the field we excluded
+    if (testFieldName) {
+      builder.excludes({"field2"});
+      builder.includes({"field2"});
+    } else {
+      builder.excludes<tag::field2>();
+      builder.includes<tag::field2>();
+    }
     EXPECT_EQ(builder.toThrift(), allMask());
   }
 }
 
-TEST(FieldMaskTest, MaskBuilderNested) {
+void testMaskBuilderNested(bool testFieldName) {
   // Test includes
   {
     // includes{1: includes{1: excludes{}}}
     MaskBuilder<Bar2> builder(noneMask());
-    builder.includes<tag::field_3, tag::field_1>();
+    if (testFieldName) {
+      builder.includes({"field_3", "field_1"});
+    } else {
+      builder.includes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.includes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1766,8 +1837,14 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // includes{1: includes{1: excludes{}}}
     MaskBuilder<Bar2> builder(noneMask());
-    builder.includes<tag::field_3, tag::field_1>();
-    builder.includes<tag::field_3, tag::field_1>(); // including twice is fine
+    // including twice is fine
+    if (testFieldName) {
+      builder.includes({"field_3", "field_1"});
+      builder.includes({"field_3", "field_1"});
+    } else {
+      builder.includes<tag::field_3, tag::field_1>();
+      builder.includes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.includes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1778,7 +1855,11 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     MaskBuilder<Bar2> builder(noneMask());
     Mask nestedMask;
     nestedMask.includes_ref().emplace()[1] = allMask();
-    builder.includes<tag::field_3>(nestedMask);
+    if (testFieldName) {
+      builder.includes({"field_3"}, nestedMask);
+    } else {
+      builder.includes<tag::field_3>(nestedMask);
+    }
     Mask expected;
     expected.includes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1789,9 +1870,15 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     //                      2: excludes{}},
     //          2: excludes{}}
     MaskBuilder<Bar2> builder(noneMask());
-    builder.includes<tag::field_4>();
-    builder.includes<tag::field_3, tag::field_1>();
-    builder.includes<tag::field_3, tag::field_2>();
+    if (testFieldName) {
+      builder.includes({"field_4"});
+      builder.includes({"field_3", "field_1"});
+      builder.includes({"field_3", "field_2"});
+    } else {
+      builder.includes<tag::field_4>();
+      builder.includes<tag::field_3, tag::field_1>();
+      builder.includes<tag::field_3, tag::field_2>();
+    }
     Mask expected;
     auto& includes = expected.includes_ref().emplace();
     includes[2] = allMask();
@@ -1803,8 +1890,13 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // includes{1: excludes{}}
     MaskBuilder<Bar2> builder(noneMask());
-    builder.includes<tag::field_3, tag::field_1>();
-    builder.includes<tag::field_3>();
+    if (testFieldName) {
+      builder.includes({"field_3", "field_1"});
+      builder.includes({"field_3"});
+    } else {
+      builder.includes<tag::field_3, tag::field_1>();
+      builder.includes<tag::field_3>();
+    }
     Mask expected;
     expected.includes_ref().emplace()[1] = allMask();
     EXPECT_EQ(builder.toThrift(), expected);
@@ -1814,7 +1906,11 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // excludes{1: includes{1: excludes{}}}
     MaskBuilder<Bar2> builder(allMask());
-    builder.excludes<tag::field_3, tag::field_1>();
+    if (testFieldName) {
+      builder.excludes({"field_3", "field_1"});
+    } else {
+      builder.excludes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1823,8 +1919,14 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // excludes{1: includes{1: excludes{}}}
     MaskBuilder<Bar2> builder(allMask());
-    builder.excludes<tag::field_3, tag::field_1>();
-    builder.excludes<tag::field_3, tag::field_1>(); // excluding twice is fine
+    // excluding twice is fine
+    if (testFieldName) {
+      builder.excludes({"field_3", "field_1"});
+      builder.excludes({"field_3", "field_1"});
+    } else {
+      builder.excludes<tag::field_3, tag::field_1>();
+      builder.excludes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1835,7 +1937,11 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     MaskBuilder<Bar2> builder(allMask());
     Mask nestedMask;
     nestedMask.includes_ref().emplace()[1] = allMask();
-    builder.excludes<tag::field_3>(nestedMask);
+    if (testFieldName) {
+      builder.excludes({"field_3"}, nestedMask);
+    } else {
+      builder.excludes<tag::field_3>(nestedMask);
+    }
     Mask expected;
     expected.excludes_ref().emplace()[1].includes_ref().emplace()[1] =
         allMask();
@@ -1846,9 +1952,15 @@ TEST(FieldMaskTest, MaskBuilderNested) {
     //                      2: excludes{}},
     //          2: excludes{}}
     MaskBuilder<Bar2> builder(allMask());
-    builder.excludes<tag::field_4>();
-    builder.excludes<tag::field_3, tag::field_1>();
-    builder.excludes<tag::field_3, tag::field_2>();
+    if (testFieldName) {
+      builder.excludes({"field_4"});
+      builder.excludes({"field_3", "field_1"});
+      builder.excludes({"field_3", "field_2"});
+    } else {
+      builder.excludes<tag::field_4>();
+      builder.excludes<tag::field_3, tag::field_1>();
+      builder.excludes<tag::field_3, tag::field_2>();
+    }
     Mask expected;
     auto& excludes = expected.excludes_ref().emplace();
     excludes[2] = allMask();
@@ -1860,8 +1972,13 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // excludes{1: excludes{}}
     MaskBuilder<Bar2> builder(allMask());
-    builder.excludes<tag::field_3, tag::field_1>();
-    builder.excludes<tag::field_3>();
+    if (testFieldName) {
+      builder.excludes({"field_3", "field_1"});
+      builder.excludes({"field_3"});
+    } else {
+      builder.excludes<tag::field_3, tag::field_1>();
+      builder.excludes<tag::field_3>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[1] = allMask();
     EXPECT_EQ(builder.toThrift(), expected);
@@ -1871,8 +1988,13 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // includes{1: excludes{1: excludes{}}}
     MaskBuilder<Bar2> builder(noneMask());
-    builder.includes<tag::field_3>();
-    builder.excludes<tag::field_3, tag::field_1>();
+    if (testFieldName) {
+      builder.includes({"field_3"});
+      builder.excludes({"field_3", "field_1"});
+    } else {
+      builder.includes<tag::field_3>();
+      builder.excludes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.includes_ref().emplace()[1].excludes_ref().emplace()[1] =
         allMask();
@@ -1881,13 +2003,43 @@ TEST(FieldMaskTest, MaskBuilderNested) {
   {
     // excludes{1: excludes{1: excludes{}}}
     MaskBuilder<Bar2> builder(allMask());
-    builder.excludes<tag::field_3>();
-    builder.includes<tag::field_3, tag::field_1>();
+    if (testFieldName) {
+      builder.excludes({"field_3"});
+      builder.includes({"field_3", "field_1"});
+    } else {
+      builder.excludes<tag::field_3>();
+      builder.includes<tag::field_3, tag::field_1>();
+    }
     Mask expected;
     expected.excludes_ref().emplace()[1].excludes_ref().emplace()[1] =
         allMask();
     EXPECT_EQ(builder.toThrift(), expected);
   }
+}
+
+TEST(FieldMaskTest, MaskBuilderSimple) {
+  testMaskBuilderSimple(false);
+}
+
+TEST(FieldMaskTest, MaskBuilderNested) {
+  testMaskBuilderNested(false);
+}
+
+TEST(FieldMaskTest, MaskBuilderSimpleWithFieldName) {
+  testMaskBuilderSimple(true);
+}
+
+TEST(FieldMaskTest, MaskBuilderNestedWithFieldName) {
+  testMaskBuilderNested(true);
+}
+
+TEST(FieldMaskTest, MaskBuilderWithFieldNameError) {
+  MaskBuilder<Bar2> builder(noneMask());
+  // field not found
+  EXPECT_THROW(builder.includes({"random"}), std::runtime_error);
+  EXPECT_THROW(builder.excludes({"field_3, random"}), std::runtime_error);
+  // field_4 is not a thrift struct.
+  EXPECT_THROW(builder.includes({"field_4, random"}), std::runtime_error);
 }
 
 TEST(FieldMaskTest, ReverseMask) {

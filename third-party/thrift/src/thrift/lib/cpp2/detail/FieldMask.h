@@ -290,6 +290,37 @@ Mask path(const Mask& other) {
   throw std::runtime_error("field doesn't exist");
 }
 
+// This converts field name list from the given index to a field mask with a
+// single field.
+template <typename T>
+Mask path(
+    const std::vector<folly::StringPiece>& fieldNames,
+    size_t index,
+    const Mask& other) {
+  if (index == fieldNames.size()) {
+    return other;
+  }
+  // static_assert doesn't work as it compiles this code for every field.
+  if constexpr (is_thrift_struct_v<T>) {
+    Mask mask;
+    op::for_each_field_id<T>([&](auto fieldId) {
+      if (mask.includes_ref()) { // already set
+        return;
+      }
+      if (op::get_name<T, decltype(fieldId)> == fieldNames[index]) {
+        using FieldType = op::get_native_type<T, decltype(fieldId)>;
+        mask.includes_ref().emplace()[static_cast<int16_t>(fieldId())] =
+            path<FieldType>(fieldNames, index + 1, other);
+      }
+    });
+    if (!mask.includes_ref()) { // field not found
+      throw std::runtime_error("field doesn't exist");
+    }
+    return mask;
+  }
+  throw std::runtime_error("Path contains a non thrift struct field.");
+}
+
 // Throws a runtime error if the mask contains a map mask.
 void throwIfContainsMapMask(const Mask& mask);
 

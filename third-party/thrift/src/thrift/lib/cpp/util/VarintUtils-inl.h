@@ -232,7 +232,7 @@ void readVarintMediumSlowU64BMI2(
     if (continuationBits == 0xFF) {
       throwInvalidVarint();
     }
-    size_t intBytes = __builtin_ctz(continuationBits + 1) + 1;
+    size_t intBytes = __builtin_ctzll(continuationBits + 1) + 1;
     c.skipNoAdvance(2 + intBytes);
 
     uint64_t mask = (1ULL << (8 * intBytes - 1)) - 1;

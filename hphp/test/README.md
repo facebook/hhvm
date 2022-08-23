@@ -49,6 +49,7 @@ These are the allowed extensions:
 * `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).
 * `.php.serial` - The test will always be put in the serial bucket to be run sequentially with other serial tests so as to avoid any timing problems or collisions.
 * `.php.hphp_opts` - Options passed to hphp when generating a bytecode repo.
+* `.php.norepo` – If this file is present, then the test is not run in repo-authoritative mode. Repo-authoritative mode perfomrs a whole-program build.
 * `.php.diff or hhas.diff` - The diff for .expect tests.
 * `.hhas` - HipHop Assembly.
 * `.php.norepo` - don't run the test in repo mode
@@ -66,7 +67,7 @@ and the rest are optional.
 
 NOTE: If you are using a `.php.type-errors` file, then all the files suffixes listed in the paragraph above will include `type-errors` (e.g., `.php.type-errors.hhvm.expectf`).
 
-NOTE: You can have both a `.php.[hhvm].expect[f]` and a 
+NOTE: You can have both a `.php.[hhvm].expect[f]` and a
 `.php.typechecker.expect[f]`.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't

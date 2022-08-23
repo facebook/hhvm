@@ -29,6 +29,8 @@
 namespace thrift {
 namespace python {
 
+enum class LifecycleFunc;
+
 constexpr size_t kMaxUexwSize = 1024;
 
 class PythonUserException : public std::exception {
@@ -364,17 +366,23 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
 };
 
 class PythonAsyncProcessorFactory
-    : public apache::thrift::AsyncProcessorFactory {
+    : public apache::thrift::AsyncProcessorFactory,
+      public apache::thrift::ServiceHandlerBase {
  public:
   PythonAsyncProcessorFactory(
       std::map<std::string, PyObject*> functions,
       std::unordered_set<std::string> oneways,
+      std::vector<PyObject*> lifecycleFuncs,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
       : functions_(std::move(functions)),
         oneways_(std::move(oneways)),
+        lifecycleFuncs_(std::move(lifecycleFuncs)),
         executor(std::move(executor)),
         serviceName_(std::move(serviceName)) {}
+
+  folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
+  folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::make_unique<PythonAsyncProcessor>(
@@ -383,7 +391,7 @@ class PythonAsyncProcessorFactory
 
   std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
       override {
-    return {};
+    return {this};
   }
 
   CreateMethodMetadataResult createMethodMetadata() override {
@@ -406,8 +414,11 @@ class PythonAsyncProcessorFactory
   }
 
  private:
+  folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
+
   const std::map<std::string, PyObject*> functions_;
   const std::unordered_set<std::string> oneways_;
+  const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;
 };

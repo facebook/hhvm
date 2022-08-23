@@ -33,11 +33,12 @@ cdef class ServiceInterface:
 
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
-    cdef PythonAsyncProcessorFactory create(dict funcMap, bytes serviceName)
+    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName)
 
 cdef class PythonUserException(Exception):
     cdef unique_ptr[cPythonUserException] _cpp_obj
 
 cdef class ThriftServer(ThriftServer_py3):
     cdef readonly dict funcMap
+    cdef readonly list lifecycle
     cdef readonly ServiceInterface handler

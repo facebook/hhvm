@@ -20,7 +20,7 @@ import asyncio
 import sys
 import types
 import unittest
-from typing import Sequence
+from typing import Optional, Sequence
 
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy
@@ -31,9 +31,19 @@ from thrift.python.server import ThriftServer
 class Handler(TestingServiceInterface):
     initalized = False
 
+    def __init__(self) -> None:
+        self.on_start_serving = False
+        self.on_stop_requested = False
+
     async def __aenter__(self) -> "Handler":
         self.initalized = True
         return self
+
+    async def onStartServing(self) -> None:
+        self.on_start_serving = True
+
+    async def onStopRequested(self) -> None:
+        self.on_stop_requested = True
 
     async def invert(self, value: bool) -> bool:
         return not value
@@ -92,8 +102,10 @@ class ServicesTests(unittest.TestCase):
         coro = self.get_address(loop)
         self.assertIsInstance(loop.run_until_complete(coro), SocketAddress)
 
-    async def get_address(self, loop: asyncio.AbstractEventLoop) -> SocketAddress:
-        server = ThriftServer(Handler(), port=0)
+    async def get_address(
+        self, loop: asyncio.AbstractEventLoop, handler: Optional[Handler] = None
+    ) -> SocketAddress:
+        server = ThriftServer(Handler() if handler is None else handler, port=0)
         serve_task = loop.create_task(server.serve())
         addy = await server.get_address()
         server.stop()
@@ -145,3 +157,11 @@ class ServicesTests(unittest.TestCase):
         active_requests = server.get_active_requests()
         self.assertGreaterEqual(active_requests, 0)
         self.assertLess(active_requests, 10)
+
+    def test_lifecycle_hooks(self) -> None:
+        handler = Handler()
+        loop = asyncio.get_event_loop()
+        coro = self.get_address(loop, handler)
+        loop.run_until_complete(coro)
+        self.assertTrue(handler.on_start_serving)
+        self.assertTrue(handler.on_stop_requested)

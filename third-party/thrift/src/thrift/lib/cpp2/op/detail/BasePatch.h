@@ -350,7 +350,7 @@ class BaseEnsurePatch : public BasePatch<Patch, Derived> {
     if (*next.toThrift().clear()) {
       if (hasValue(next.toThrift().ensure())) {
         data_.clear() = true;
-        data_.patchPrior()->reset(); // We can ignore next.patch.
+        data_.patchPrior()->reset(); // We can ignore next.patchPrior.
         data_.ensure() = *std::forward<U>(next).toThrift().ensure();
         data_.patch() = *std::forward<U>(next).toThrift().patch();
       } else {
@@ -361,14 +361,14 @@ class BaseEnsurePatch : public BasePatch<Patch, Derived> {
 
     if (hasValue(data_.ensure())) {
       // All values will be set before next, so ignore next.ensure and
-      // merge next.patch and next.patch into this.patch.
+      // merge next.patchPrior and next.patch into this.patch.
       auto temp = *std::forward<U>(next).toThrift().patch();
       data_.patch()->merge(*std::forward<U>(next).toThrift().patchPrior());
       data_.patch()->merge(std::move(temp));
     } else { // Both this.ensure and next.clear are known to be empty.
-      // Merge anything (oddly) in patch into patch.
+      // Merge anything (oddly) in patch into patchPrior.
       data_.patchPrior()->merge(std::move(*data_.patch()));
-      // Merge in next.patch into patch.
+      // Merge in next.patchPrior into patchPrior.
       data_.patchPrior()->merge(*std::forward<U>(next).toThrift().patchPrior());
       // Consume next.ensure, if any.
       if (hasValue(next.toThrift().ensure())) {

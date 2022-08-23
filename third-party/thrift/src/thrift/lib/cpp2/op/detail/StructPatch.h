@@ -105,6 +105,7 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 // Patch must have the following fields:
 //   optional T assign;
 //   bool clear;
+//   P patchPrior;
 //   P patch;
 template <typename Patch>
 class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
@@ -128,14 +129,18 @@ class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
     }
     if (*data_.clear()) {
       thrift::clear(val);
+    } else {
+      data_.patchPrior()->apply(val);
     }
-    data_.patchPrior()->apply(val);
+    data_.patch()->apply(val);
   }
 
   template <typename U>
   void merge(U&& next) {
     if (!mergeAssignAndClear(std::forward<U>(next))) {
-      data_.patchPrior()->merge(*std::forward<U>(next).toThrift().patchPrior());
+      auto temp = *std::forward<U>(next).toThrift().patch();
+      data_.patch()->merge(*std::forward<U>(next).toThrift().patchPrior());
+      data_.patch()->merge(std::move(temp));
     }
   }
 
@@ -150,10 +155,10 @@ class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
       *data_.clear() = true;
 
       // Split the assignment patch into a patch of assignments.
-      data_.patchPrior()->assignFrom(std::move(*data_.assign()));
+      data_.patch()->assignFrom(std::move(*data_.assign()));
       data_.assign().reset();
     }
-    return *data_.patchPrior();
+    return *data_.patch();
   }
 };
 

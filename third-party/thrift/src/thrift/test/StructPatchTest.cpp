@@ -105,7 +105,7 @@ TEST(StructPatchTest, AssignSplit) {
   patch.patch();
   EXPECT_FALSE(patch.toThrift().assign().has_value());
   EXPECT_TRUE(*patch.toThrift().clear());
-  EXPECT_NE(*patch.toThrift().patchPrior(), MyStructFieldPatch{});
+  EXPECT_NE(*patch.toThrift().patch(), MyStructFieldPatch{});
   test::expectPatch(patch, {}, testValue());
 }
 
@@ -141,6 +141,15 @@ TEST(StructPatchTest, Patch) {
   expected2.structVal()->data1() = "BaNaNa";
 
   auto patch = testPatch();
+  test::expectPatch(patch, val, expected1, expected2);
+
+  // Make sure prior is being applied, if present.
+  (*std::move(patch).toThrift().patchPrior())
+      .toThrift()
+      .stringVal()
+      ->prepend("p");
+  expected1.stringVal() = "_phi_";
+  expected2.stringVal() = "_p_phi__";
   test::expectPatch(patch, val, expected1, expected2);
 
   patch.merge(MyStructPatch::createClear());

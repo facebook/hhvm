@@ -106,7 +106,8 @@ enum class MaskBuilderInit { all, none };
 
 template <typename T>
 struct MaskBuilder : type::detail::Wrap<Mask> {
-  MaskBuilder() = delete;
+  MaskBuilder() { data_ = Mask{}; }
+  /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
   // Constructs a new MaskWrapper with allMask or noneMask.
   explicit MaskBuilder(MaskBuilderInit init) {
     data_ = init == MaskBuilderInit::all ? allMask() : noneMask();
@@ -127,6 +128,9 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     data_ = data_ - detail::path<T, Ident...>(mask);
   }
 };
+
+template <typename T>
+using MaskAdapter = InlineAdapter<MaskBuilder<T>>;
 
 // Constructs a FieldMask object that includes the fields that are
 // different in the given two Thrift structs.

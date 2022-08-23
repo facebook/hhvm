@@ -16,7 +16,10 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/lib/thrift/field_mask.thrift"
+
 cpp_include "thrift/test/AdapterTest.h"
+cpp_include "thrift/lib/cpp2/FieldMask.h"
 
 package "apache.org/thrift/test"
 
@@ -64,4 +67,13 @@ struct SmartPointerStruct {
   2: optional Foo2 shared;
   @thrift.Box
   3: optional Foo2 boxed;
+}
+
+@cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
+typedef field_mask.Mask TypedBarMask
+
+struct MaskStruct {
+  @cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
+  1: field_mask.Mask mask;
+  2: TypedBarMask mask2;
 }

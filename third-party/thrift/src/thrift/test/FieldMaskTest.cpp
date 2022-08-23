@@ -1991,4 +1991,16 @@ TEST(FieldMaskTest, Compare) {
     EXPECT_EQ(protocol::compare(dst, src), mask); // commutative
   }
 }
+
+TEST(FieldMaskTest, MaskAdapter) {
+  MaskStruct foo;
+  static_assert(std::is_same_v<
+                std::remove_reference_t<decltype(foo.mask().value())>,
+                MaskBuilder<Bar>>);
+  EXPECT_EQ(foo.mask()->toThrift(), Mask{});
+  static_assert(std::is_same_v<
+                std::remove_reference_t<decltype(foo.mask2().value())>,
+                MaskBuilder<Bar>>);
+  EXPECT_EQ(foo.mask2()->toThrift(), Mask{});
+}
 } // namespace apache::thrift::test

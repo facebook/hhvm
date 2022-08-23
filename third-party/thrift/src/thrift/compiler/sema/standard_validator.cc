@@ -764,6 +764,21 @@ void validate_exception_php_annotations(
   }
 }
 
+void validate_function_return_type(
+    diagnostic_context& ctx, const t_function& node) {
+  if (node.is_oneway()) {
+    return;
+  }
+
+  if (ctx.has(context_type::no_legacy)) {
+    ctx.check(
+        node.return_type().get_type() != nullptr &&
+            node.return_type().get_type()->is_struct(),
+        "Function `{}`'s return type must be a thrift struct.",
+        node.name());
+  }
+}
+
 void validate_oneway_function(diagnostic_context& ctx, const t_function& node) {
   if (!node.is_oneway()) {
     return;
@@ -963,6 +978,7 @@ ast_validator standard_validator() {
       &validate_extends_service_function_name_uniqueness);
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_oneway_function);
+  validator.add_function_visitor(&validate_function_return_type);
   validator.add_function_visitor(&validate_stream_exceptions_return_type);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(&validate_interaction_factories);

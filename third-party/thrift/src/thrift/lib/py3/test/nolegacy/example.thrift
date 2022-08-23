@@ -93,13 +93,27 @@ union TestUnion {
   6: list<i32> dataptr (cpp2.ref_type = "shared");
 }
 
+struct String {
+  1: string field;
+}
+struct Bool {
+  1: bool field;
+}
+struct ListI32 {
+  1: list<i32> field;
+}
+
+struct ProcessCollectionRequest {
+  1: list<i32> values;
+  2: i32 addValue;
+  3: bool doThrow;
+}
+
 service TestService {
-  string getName();
-  bool invert(1: bool value);
-  list<i32> processCollection(
-    1: list<i32> values,
-    2: i32 addValue,
-    3: bool doThrow,
-  ) throws (1: ErrorWithEnum e);
-  bool renamedMethod(1: bool ret) (cpp.name = "renamedMethodInCpp");
+  String getName();
+  Bool invert(1: Bool value);
+  ListI32 processCollection(1: ProcessCollectionRequest request) throws (
+    1: ErrorWithEnum e,
+  );
+  Bool renamedMethod(1: Bool ret) (cpp.name = "renamedMethodInCpp");
 } (fun_times = "yes")

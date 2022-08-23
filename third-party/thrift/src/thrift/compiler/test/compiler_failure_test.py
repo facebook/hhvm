@@ -297,6 +297,31 @@ class CompilerFailureTest(unittest.TestCase):
         )
         self.assertEqual(ret, 1)
 
+    def test_function_return_type(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/thrift.thrift"
+                struct Empty {}
+
+                @thrift.NoLegacy
+                service MyService {
+                    string foo();
+                    i32 bar();
+                    Empty baz();
+                }
+                """
+            ),
+        )
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(
+            err,
+            "[ERROR:foo.thrift:6] Function `foo`'s return type must be a thrift struct.\n"
+            "[ERROR:foo.thrift:7] Function `bar`'s return type must be a thrift struct.\n",
+        )
+        self.assertEqual(ret, 1)
+
     def test_oneway_return_type(self):
         write_file(
             "foo.thrift",

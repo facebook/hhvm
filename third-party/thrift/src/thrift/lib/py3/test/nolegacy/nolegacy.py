@@ -20,10 +20,14 @@ import unittest
 from testing.example.services import TestServiceInterface
 
 from testing.example.types import (
+    Bool,
     Color,
     ErrorWithEnum,
     ErrorWithMessageAnnotation,
+    ListI32,
+    ProcessCollectionRequest,
     SimpleError,
+    String,
     TestNestedStruct,
     TestStruct,
     TestStructSimple,
@@ -182,21 +186,19 @@ class NoLegacyTest(unittest.TestCase):
 
 
 class Handler(TestServiceInterface):
-    async def getName(self) -> str:
-        return "TestServiceName"
+    async def getName(self) -> String:
+        return String(field="TestServiceName")
 
-    async def invert(self, value: bool) -> bool:
-        return not value
+    async def invert(self, value: Bool) -> Bool:
+        return Bool(field=not value.field)
 
-    async def processCollection(
-        self, values: typing.Sequence[int], addValue: int, doThrow: bool
-    ) -> typing.Sequence[int]:
-        if doThrow:
+    async def processCollection(self, request: ProcessCollectionRequest) -> ListI32:
+        if request.doThrow:
             raise ErrorWithEnum(color=Color.red, retcode=-1)
 
-        return [v + addValue for v in values]
+        return ListI32(field=[v + request.addValue for v in request.values])
 
-    async def renamedMethod(self, ret: bool) -> bool:
+    async def renamedMethod(self, ret: Bool) -> Bool:
         return ret
 
 
@@ -215,30 +217,32 @@ class NoLegacyServiceTests(unittest.TestCase):
         h = Handler()
         loop = asyncio.get_event_loop()
         ret = loop.run_until_complete(h.getName())
-        self.assertEqual(ret, "TestServiceName")
+        self.assertEqual(ret.field, "TestServiceName")
 
     def test_invert(self) -> None:
         h = Handler()
         loop = asyncio.get_event_loop()
-        ret = loop.run_until_complete(h.invert(True))
-        self.assertFalse(ret)
+        ret = loop.run_until_complete(h.invert(Bool(field=True)))
+        self.assertFalse(ret.field)
 
     def test_process_collection_no_throw(self) -> None:
         h = Handler()
         loop = asyncio.get_event_loop()
         values = [1, 2, 3]
-        ret = loop.run_until_complete(h.processCollection(values, 1, False))
-        self.assertEqual(ret, [2, 3, 4])
+        request = ProcessCollectionRequest(values=values, addValue=1, doThrow=False)
+        ret = loop.run_until_complete(h.processCollection(request))
+        self.assertEqual(ret.field, [2, 3, 4])
         self.assertEqual(values, [1, 2, 3])
 
     def test_process_collection_throw(self) -> None:
         h = Handler()
         loop = asyncio.get_event_loop()
         with self.assertRaises(ErrorWithEnum):
-            loop.run_until_complete(h.processCollection([], 0, True))
+            request = ProcessCollectionRequest(values=[], addValue=0, doThrow=True)
+            loop.run_until_complete(h.processCollection(request))
 
     def test_renamed_method(self) -> None:
         h = Handler()
         loop = asyncio.get_event_loop()
-        ret = loop.run_until_complete(h.renamedMethod(True))
-        self.assertTrue(ret)
+        ret = loop.run_until_complete(h.renamedMethod(Bool(field=True)))
+        self.assertTrue(ret.field)

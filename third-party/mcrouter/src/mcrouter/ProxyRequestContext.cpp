@@ -67,13 +67,15 @@ ProxyRequestContext::ProxyRequestContext(
     RecordingT,
     ProxyBase& pr,
     ClientCallback clientCallback,
-    ShardSplitCallback shardSplitCallback)
+    ShardSplitCallback shardSplitCallback,
+    BucketIdCallback bucketIdCallback)
     /* pr.nextRequestId() is not threadsafe */
     : proxyBase_(pr), recording_(true) {
   new (&recordingState_)
       std::unique_ptr<RecordingState>(std::make_unique<RecordingState>());
   recordingState_->clientCallback = std::move(clientCallback);
   recordingState_->shardSplitCallback = std::move(shardSplitCallback);
+  recordingState_->bucketIdCallback = std::move(bucketIdCallback);
 }
 
 } // namespace mcrouter

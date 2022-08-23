@@ -68,6 +68,9 @@ class McBucketRoute {
       const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const {
     auto bucketId = ch3_(getRoutingKey<Request>(req, salt_));
     if (bucketId < bucketizeUntil_) {
+      if (auto* ctx = fiber_local<MemcacheRouterInfo>::getTraverseCtx()) {
+        ctx->recordBucketId(bucketId);
+      }
       return fiber_local<MemcacheRouterInfo>::runWithLocals(
           [this, &req, &t, bucketId]() {
             fiber_local<MemcacheRouterInfo>::setBucketId(bucketId);

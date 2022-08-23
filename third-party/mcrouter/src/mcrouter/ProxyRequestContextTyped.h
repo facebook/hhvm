@@ -70,13 +70,15 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
   createRecording(
       Proxy<RouterInfo>& proxy,
       ClientCallback clientCallback,
-      ShardSplitCallback shardSplitCallback = nullptr) {
+      ShardSplitCallback shardSplitCallback = nullptr,
+      BucketIdCallback bucketIdCallback = nullptr) {
     return std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>(
         new ProxyRequestContextWithInfo<RouterInfo>(
             Recording,
             proxy,
             std::move(clientCallback),
-            std::move(shardSplitCallback)));
+            std::move(shardSplitCallback),
+            std::move(bucketIdCallback)));
   }
 
   /**
@@ -89,13 +91,15 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       Proxy<RouterInfo>& proxy,
       folly::fibers::Baton& baton,
       ClientCallback clientCallback,
-      ShardSplitCallback shardSplitCallback = nullptr) {
+      ShardSplitCallback shardSplitCallback = nullptr,
+      BucketIdCallback bucketIdCallback = nullptr) {
     return std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>(
         new ProxyRequestContextWithInfo<RouterInfo>(
             Recording,
             proxy,
             std::move(clientCallback),
-            std::move(shardSplitCallback)),
+            std::move(shardSplitCallback),
+            std::move(bucketIdCallback)),
         [&baton](ProxyRequestContext* ctx) {
           delete ctx;
           baton.post();
@@ -236,12 +240,14 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       RecordingT,
       Proxy<RouterInfo>& pr,
       ClientCallback clientCallback,
-      ShardSplitCallback shardSplitCallback = nullptr)
+      ShardSplitCallback shardSplitCallback = nullptr,
+      BucketIdCallback bucketIdCallback = nullptr)
       : ProxyRequestContext(
             Recording,
             pr,
             std::move(clientCallback),
-            std::move(shardSplitCallback)),
+            std::move(shardSplitCallback),
+            std::move(bucketIdCallback)),
         proxy_(pr) {}
 
   int64_t startDurationUs_{nowUs()};

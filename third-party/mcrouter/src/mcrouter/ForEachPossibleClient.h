@@ -40,7 +40,8 @@ foreachPossibleClient(
     ProxyRequestContext::ClientCallback clientCallback,
     ProxyRequestContext::ShardSplitCallback spCallback = nullptr,
     bool includeFailoverDestinations = false,
-    size_t splitSize = 0) {
+    size_t splitSize = 0,
+    ProxyRequestContext::BucketIdCallback bucketIdCallback = nullptr) {
   Request req(key);
   foreachPossibleClient(
       proxy,
@@ -48,7 +49,8 @@ foreachPossibleClient(
       std::move(clientCallback),
       std::move(spCallback),
       includeFailoverDestinations,
-      splitSize);
+      splitSize,
+      std::move(bucketIdCallback));
 }
 
 template <class Request, class RouterInfo>
@@ -61,9 +63,13 @@ foreachPossibleClient(
     ProxyRequestContext::ClientCallback clientCallback,
     ProxyRequestContext::ShardSplitCallback spCallback = nullptr,
     bool includeFailoverDestinations = false,
-    size_t splitSize = 0) {
+    size_t splitSize = 0,
+    ProxyRequestContext::BucketIdCallback bucketIdCallback = nullptr) {
   auto ctx = ProxyRequestContextWithInfo<RouterInfo>::createRecording(
-      proxy, std::move(clientCallback), std::move(spCallback));
+      proxy,
+      std::move(clientCallback),
+      std::move(spCallback),
+      std::move(bucketIdCallback));
   {
     auto p = proxy.getConfigLocked();
     fiber_local<RouterInfo>::runWithLocals([&p,

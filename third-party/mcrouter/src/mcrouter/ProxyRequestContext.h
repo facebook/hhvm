@@ -50,6 +50,7 @@ class ProxyRequestContext {
   using ClientCallback =
       std::function<void(const PoolContext&, const AccessPoint&)>;
   using ShardSplitCallback = std::function<void(const ShardSplitter&, bool)>;
+  using BucketIdCallback = std::function<void(const uint64_t bucketId)>;
 
   virtual ~ProxyRequestContext();
 
@@ -71,6 +72,12 @@ class ProxyRequestContext {
   void recordShardSplitter(const ShardSplitter& splitter, bool isShadow) const {
     if (recording_ && recordingState_->shardSplitCallback) {
       recordingState_->shardSplitCallback(splitter, isShadow);
+    }
+  }
+
+  void recordBucketId(const uint64_t bucketId) const {
+    if (recording_ && recordingState_->bucketIdCallback) {
+      recordingState_->bucketIdCallback(bucketId);
     }
   }
 
@@ -185,7 +192,8 @@ class ProxyRequestContext {
       RecordingT,
       ProxyBase& pr,
       ClientCallback clientCallback,
-      ShardSplitCallback shardSplitCallback);
+      ShardSplitCallback shardSplitCallback,
+      BucketIdCallback bucketIdCallback);
 
  private:
   ProxyBase& proxyBase_;
@@ -195,6 +203,7 @@ class ProxyRequestContext {
   struct RecordingState {
     ClientCallback clientCallback;
     ShardSplitCallback shardSplitCallback;
+    BucketIdCallback bucketIdCallback;
   };
 
   union {

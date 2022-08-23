@@ -197,4 +197,23 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
       wrappedCb);
 }
 
+template <class RequestGuardType, class ChannelGuardType>
+void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
+    sendRequestNoResponse(
+        RpcOptions&& rpcOptions,
+        MethodMetadata&& methodMetadata,
+        SerializedRequest&& serializedRequest,
+        std::shared_ptr<transport::THeader> header,
+        RequestClientCallback::Ptr cb) {
+  auto wrappedCb = RequestClientCallback::Ptr(
+      new GuardedRequestClientCallback<RequestGuardType>(std::move(cb)));
+
+  impl_->sendRequestNoResponse(
+      std::move(rpcOptions),
+      std::move(methodMetadata),
+      std::move(serializedRequest),
+      std::move(header),
+      std::move(wrappedCb));
+}
+
 } // namespace apache::thrift

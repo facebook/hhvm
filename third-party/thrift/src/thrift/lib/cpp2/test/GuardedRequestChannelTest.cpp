@@ -46,6 +46,11 @@ class TestServiceServerMock
       semifuture_echoIOBufAsByteStream,
       (std::unique_ptr<folly::IOBuf>, int32_t),
       (override));
+  MOCK_METHOD(
+      folly::SemiFuture<folly::Unit>,
+      semifuture_noResponse,
+      (int64_t),
+      (override));
 };
 
 class GuardedRequestChannelTest : public Test {
@@ -79,6 +84,11 @@ TEST_F(GuardedRequestChannelTest, normalSingleRequestSuccess) {
   EXPECT_CALL(*handler, echoInt(_)).WillOnce(Return(1)).WillOnce(Return(2));
   EXPECT_EQ(testClient.sync_echoInt(1), 1);
   EXPECT_EQ(testClient.sync_echoInt(2), 2);
+}
+
+TEST_F(GuardedRequestChannelTest, sendRequestNoResponse) {
+  EXPECT_NO_THROW(testClient.semifuture_noResponse(1));
+  EXPECT_NO_THROW(testClient.semifuture_noResponse(100));
 }
 
 TEST_F(GuardedRequestChannelTest, normalStreamResponseAndComplete) {

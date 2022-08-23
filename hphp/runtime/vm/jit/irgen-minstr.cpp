@@ -1358,8 +1358,9 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
-  auto value = topC(env);
   auto const baseType = env.irb->fs().mbase().type;
+  auto value = topC(env, BCSPRelOffset{0},
+                    baseType <= TKeyset ? DataTypeSpecific : DataTypeGeneric);
 
   // We load the member base pointer before calling makeCatchSet() to avoid
   // mismatched in-states for any catch block edges we emit later on.

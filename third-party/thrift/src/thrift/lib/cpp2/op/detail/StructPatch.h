@@ -38,6 +38,7 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
+  using Base::get;
   using Base::toThrift;
 
   template <typename T>
@@ -53,34 +54,21 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
   const Patch& operator*() const noexcept { return data_; }
 
   template <typename T>
-  void assignFrom(T&& val) {
-    op::for_each_field_id<Patch>([&](auto id) {
-      get(id, data_)->assign(get(id, std::forward<T>(val)));
-    });
-  }
-
-  template <typename T>
   void apply(T& val) const {
     op::for_each_field_id<Patch>(
-        [&](auto id) { get(id, data_)->apply(get(id, val)); });
+        [&](auto id) { get(id)->apply(get(id, val)); });
   }
 
   template <typename U>
   void merge(U&& next) {
     auto&& tval = std::forward<U>(next).toThrift();
     op::for_each_field_id<Patch>([&](auto id) {
-      get(id, data_)->merge(*get(id, std::forward<decltype(tval)>(tval)));
+      get(id)->merge(*get(id, std::forward<decltype(tval)>(tval)));
     });
   }
 
  private:
   using Base::data_;
-
-  // Gets the field reference, for the given field
-  template <typename Id, typename T>
-  constexpr static decltype(auto) get(Id, T&& data) {
-    return op::get<folly::remove_cvref_t<T>, Id>(std::forward<T>(data));
-  }
 
   friend bool operator==(const FieldPatch& lhs, const FieldPatch& rhs) {
     return lhs.data_ == rhs.data_;
@@ -147,6 +135,7 @@ class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
  private:
   using Base::applyAssign;
   using Base::data_;
+  using Base::get;
   using Base::mergeAssignAndClear;
 
   patch_type& ensurePatch() {
@@ -155,7 +144,10 @@ class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
       *data_.clear() = true;
 
       // Split the assignment patch into a patch of assignments.
-      data_.patch()->assignFrom(std::move(*data_.assign()));
+      op::for_each_field_id<T>([&](auto id) {
+        data_.patch()->get(id)->assign(get(id, std::move(*data_.assign())));
+      });
+      // Unset assign.
       data_.assign().reset();
     }
     return *data_.patch();

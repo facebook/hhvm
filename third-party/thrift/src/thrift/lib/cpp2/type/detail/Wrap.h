@@ -22,6 +22,7 @@
 #include <folly/Portability.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
 namespace apache {
@@ -60,6 +61,30 @@ class Wrap {
 
  protected:
   T data_;
+
+  // Gets the field reference, for the given id, in the given structured data.
+  template <typename Id, typename U>
+  constexpr static decltype(auto) get(Id, U&& data) {
+    return op::get<folly::remove_cvref_t<U>, Id>(std::forward<U>(data));
+  }
+
+  // Gets the field reference, for the given id, in the underlying data.
+  template <typename Id>
+  constexpr decltype(auto) get(Id id = Id{}) & {
+    return get(id, data_);
+  }
+  template <typename Id>
+  constexpr decltype(auto) get(Id id = Id{}) && {
+    return get(id, std::move(data_));
+  }
+  template <typename Id>
+  constexpr decltype(auto) get(Id id = Id{}) const& {
+    return get(id, data_);
+  }
+  template <typename Id>
+  constexpr decltype(auto) get(Id id = Id{}) const&& {
+    return get(id, std::move(data_));
+  }
 
   ~Wrap() = default; // abstract base class
 

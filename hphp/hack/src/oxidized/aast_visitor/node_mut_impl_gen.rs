@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac72067241af33af27c31013c8696799>>
+// @generated SignedSource<<8c653d48b33dac3d984ddedcb86d48d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2038,8 +2038,8 @@ impl<P: Params> NodeMut<P> for TypeRefinement {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            TypeRefinement::Texact(a0) => a0.accept(c, v),
-            TypeRefinement::Tloose(a0) => a0.accept(c, v),
+            TypeRefinement::TRexact(a0) => a0.accept(c, v),
+            TypeRefinement::TRloose(a0) => a0.accept(c, v),
         }
     }
 }

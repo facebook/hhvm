@@ -2194,15 +2194,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             }
             Ty_::Trefinement(&(root_ty, class_ref)) => {
                 let convert_class_type_ref = |ctr: &'a ClassTypeRefinement<'a>| match ctr {
-                    ClassTypeRefinement::Texact(ty) => {
-                        ClassTypeRefinement::Texact(self.convert_tapply_to_tgeneric(ty))
+                    ClassTypeRefinement::TRexact(ty) => {
+                        ClassTypeRefinement::TRexact(self.convert_tapply_to_tgeneric(ty))
                     }
 
-                    ClassTypeRefinement::Tloose(bnds) => {
+                    ClassTypeRefinement::TRloose(bnds) => {
                         let convert_tys = |tys: &'a [&'a Ty<'a>]| {
                             self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty)))
                         };
-                        ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                        ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
                             lower: convert_tys(bnds.lower),
                             upper: convert_tys(bnds.upper),
                         }))
@@ -5675,7 +5675,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let (lower, upper) = self.partition_type_bounds_into_lower_and_upper(constraints);
             Node::ClassTypeRefinement(self.alloc((
                 id,
-                ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
                     lower: lower.into_bump_slice(),
                     upper: upper.into_bump_slice(),
                 })),
@@ -5686,7 +5686,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 Some(ty) => ty,
                 None => return Node::Ignored(SK::TypeInRefinement),
             };
-            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::Texact(ty))))
+            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::TRexact(ty))))
         }
     }
 
@@ -5708,7 +5708,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let (lower, upper) = self.partition_ctx_bounds_into_lower_and_upper(constraints);
             Node::ClassTypeRefinement(self.alloc((
                 id,
-                ClassTypeRefinement::Tloose(self.alloc(ClassTypeRefinementBounds {
+                ClassTypeRefinement::TRloose(self.alloc(ClassTypeRefinementBounds {
                     lower: lower.into_bump_slice(),
                     upper: upper.into_bump_slice(),
                 })),
@@ -5719,7 +5719,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 Some(ty) => ty,
                 None => return Node::Ignored(SK::TypeInRefinement),
             };
-            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::Texact(ty))))
+            Node::ClassTypeRefinement(self.alloc((id, ClassTypeRefinement::TRexact(ty))))
         }
     }
 

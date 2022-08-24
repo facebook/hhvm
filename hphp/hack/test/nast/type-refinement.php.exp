@@ -56,7 +56,7 @@
       c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([10:6-10], "\\IBox"); t_tparams = []; 
-       t_constraint = None; t_kind = ([10:13-39], (Hrefinement (([10:13-16], (Happly (([10:13-16], "\\Box"), []))), [(Rtype (([10:29-31], "Tb"), (Texact ([10:34-37], (Hprim Tint)))))])));
+       t_constraint = None; t_kind = ([10:13-39], (Hrefinement (([10:13-16], (Happly (([10:13-16], "\\Box"), []))), [(Rtype (([10:29-31], "Tb"), (TRexact ([10:34-37], (Hprim Tint)))))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -76,7 +76,7 @@
   (Typedef
      { t_annotation = (); t_name = ([11:6-13], "\\SubIBox"); t_tparams = []; 
        t_constraint = None;
-       t_kind = ([11:16-43], (Hrefinement (([11:16-19], (Happly (([11:16-19], "\\Box"), []))), [(Rtype (([11:32-34], "Tb"), (Tloose { tr_lower = []; tr_upper = [([11:38-41], (Hprim Tint))] })))])));
+       t_kind = ([11:16-43], (Hrefinement (([11:16-19], (Happly (([11:16-19], "\\Box"), []))), [(Rtype (([11:32-34], "Tb"), (TRloose { tr_lower = []; tr_upper = [([11:38-41], (Hprim Tint))] })))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -99,7 +99,7 @@
        t_kind =
        ([12:17-54],
         (Hrefinement (([12:17-20], (Happly (([12:17-20], "\\Box"), []))),
-           [(Rtype (([12:33-35], "Tb"), (Tloose { tr_lower = []; tr_upper = [([12:39-42], (Hprim Tint)); ([12:46-52], (Hprim Tstring))] })))])));
+           [(Rtype (([12:33-35], "Tb"), (TRloose { tr_lower = []; tr_upper = [([12:39-42], (Hprim Tint)); ([12:46-52], (Hprim Tstring))] })))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -119,7 +119,7 @@
   (Typedef
      { t_annotation = (); t_name = ([13:6-13], "\\SupIBox"); t_tparams = []; 
        t_constraint = None;
-       t_kind = ([13:16-46], (Hrefinement (([13:16-19], (Happly (([13:16-19], "\\Box"), []))), [(Rtype (([13:32-34], "Tb"), (Tloose { tr_lower = [([13:41-44], (Hprim Tint))]; tr_upper = [] })))])));
+       t_kind = ([13:16-46], (Hrefinement (([13:16-19], (Happly (([13:16-19], "\\Box"), []))), [(Rtype (([13:32-34], "Tb"), (TRloose { tr_lower = [([13:41-44], (Hprim Tint))]; tr_upper = [] })))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -142,7 +142,7 @@
        t_kind =
        ([14:17-60],
         (Hrefinement (([14:17-20], (Happly (([14:17-20], "\\Box"), []))),
-           [(Rtype (([14:33-35], "Tb"), (Tloose { tr_lower = [([14:42-45], (Hprim Tint)); ([14:52-58], (Hprim Tstring))]; tr_upper = [] })))])));
+           [(Rtype (([14:33-35], "Tb"), (TRloose { tr_lower = [([14:42-45], (Hprim Tint)); ([14:52-58], (Hprim Tstring))]; tr_upper = [] })))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -164,8 +164,8 @@
        t_constraint = None;
        t_kind =
        ([16:18-55],
-        (Hrefinement (([16:18-21], (Happly (([16:18-21], "\\Box"), []))), 
-           [(Rtype (([16:34-36], "Tb"), (Tloose { tr_lower = [([16:50-53], (Hprim Tint))]; tr_upper = [([16:40-43], (Hprim Tint))] })))])));
+        (Hrefinement (([16:18-21], (Happly (([16:18-21], "\\Box"), []))),
+           [(Rtype (([16:34-36], "Tb"), (TRloose { tr_lower = [([16:50-53], (Hprim Tint))]; tr_upper = [([16:40-43], (Hprim Tint))] })))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];

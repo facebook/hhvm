@@ -193,11 +193,10 @@ impl<R: Reason> From<&obr::typing_defs::ClassTypeRefinement<'_>>
     for ty::ClassTypeRefinement<Ty<R>>
 {
     fn from(ctr: &obr::typing_defs::ClassTypeRefinement<'_>) -> Self {
-        use obr::typing_defs::ClassTypeRefinement::Texact;
-        use obr::typing_defs::ClassTypeRefinement::Tloose;
+        use obr::typing_defs::ClassTypeRefinement::*;
         match *ctr {
-            Texact(ty) => Self::Exact(ty.into()),
-            Tloose(bounds) => Self::Loose(bounds.into()),
+            TRexact(ty) => Self::Exact(ty.into()),
+            TRloose(bounds) => Self::Loose(bounds.into()),
         }
     }
 }

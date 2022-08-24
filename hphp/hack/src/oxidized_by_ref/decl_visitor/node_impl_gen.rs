@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9489e7e8b36487494460795714fdb3f>>
+// @generated SignedSource<<b18f936ee3f5fad95712e9e52de97a60>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -166,8 +166,8 @@ impl<'a> Node<'a> for ClassTypeRefinement<'a> {
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassTypeRefinement::Texact(ref __binding_0) => __binding_0.accept(v),
-            ClassTypeRefinement::Tloose(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeRefinement::TRexact(ref __binding_0) => __binding_0.accept(v),
+            ClassTypeRefinement::TRloose(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

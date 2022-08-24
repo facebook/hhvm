@@ -400,7 +400,7 @@ let rec expand ctx env root =
   | Tclass (_, Nonexact cr, _) when Class_refinement.has_type_ref ctx.id cr ->
     begin
       match Class_refinement.get_type_ref ctx.id cr with
-      | Some (Texact ty) -> ((env, None), Exact ty)
+      | Some (TRexact ty) -> ((env, None), Exact ty)
       | None -> (* unreachable *) ((env, None), Missing None)
     end
   | Tclass (cls, _, _) ->

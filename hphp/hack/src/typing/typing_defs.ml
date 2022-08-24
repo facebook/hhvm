@@ -970,15 +970,15 @@ and type_refinement_compare :
     type a. a class_type_refinement -> a class_type_refinement -> int =
  fun a b ->
   match (a, b) with
-  | (Texact _, Tloose _) -> -1
-  | (Tloose _, Texact _) -> 1
-  | (Tloose b1, Tloose b2) ->
+  | (TRexact _, TRloose _) -> -1
+  | (TRloose _, TRexact _) -> 1
+  | (TRloose b1, TRloose b2) ->
     begin
       match tyl_compare ~sort:true b1.tr_lower b2.tr_lower with
       | 0 -> tyl_compare ~sort:true b1.tr_upper b2.tr_upper
       | n -> n
     end
-  | (Texact ty1, Texact ty2) -> ty_compare ty1 ty2
+  | (TRexact ty1, TRexact ty2) -> ty_compare ty1 ty2
 
 and class_refinement_compare :
     type a. a class_refinement -> a class_refinement -> int =

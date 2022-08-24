@@ -407,9 +407,9 @@ and hint_
       | Aast.Rtype (ident, ref) ->
         let ref =
           match ref with
-          | Aast.Texact h -> N.Texact (hint env h)
-          | Aast.Tloose { Aast.tr_lower; tr_upper } ->
-            N.Tloose
+          | Aast.TRexact h -> N.TRexact (hint env h)
+          | Aast.TRloose { Aast.tr_lower; tr_upper } ->
+            N.TRloose
               {
                 N.tr_lower = List.map tr_lower ~f:(hint env);
                 N.tr_upper = List.map tr_upper ~f:(hint env);

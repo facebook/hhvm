@@ -356,8 +356,8 @@ and exact =
 and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
 
 and 'phase class_type_refinement =
-  | Texact : 'phase ty -> 'phase class_type_refinement
-  | Tloose :
+  | TRexact : 'phase ty -> 'phase class_type_refinement
+  | TRloose :
       decl_phase class_type_refinement_bounds
       -> decl_phase class_type_refinement
 
@@ -682,11 +682,11 @@ module Pp = struct
       type a. Format.formatter -> a class_type_refinement -> unit =
    fun fmt r ->
     match r with
-    | Texact exact ->
-      Format.pp_print_string fmt "Texact ";
+    | TRexact exact ->
+      Format.pp_print_string fmt "TRexact ";
       pp_ty fmt exact
-    | Tloose { tr_lower = lower; tr_upper = upper } ->
-      Format.fprintf fmt "Tloose @[<2>{";
+    | TRloose { tr_lower = lower; tr_upper = upper } ->
+      Format.fprintf fmt "TRloose @[<2>{";
       Format.pp_print_string fmt "tr_lower = ";
       pp_list pp_ty fmt lower;
       Format.fprintf fmt ";@ ";

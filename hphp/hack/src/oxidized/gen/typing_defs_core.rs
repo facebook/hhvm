@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b670d96e96e951c175a0edc8604302f9>>
+// @generated SignedSource<<9dad392f50a279aa7a93de9d6f0c5e38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -716,8 +716,8 @@ pub struct ClassRefinement {
 )]
 #[repr(C, u8)]
 pub enum ClassTypeRefinement {
-    Texact(Ty),
-    Tloose(ClassTypeRefinementBounds),
+    TRexact(Ty),
+    TRloose(ClassTypeRefinementBounds),
 }
 
 #[derive(

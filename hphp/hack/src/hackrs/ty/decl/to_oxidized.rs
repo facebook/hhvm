@@ -193,8 +193,8 @@ impl<'a, R: Reason> ToOxidized<'a> for ClassTypeRefinement<Ty<R>> {
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use obr::typing_defs::ClassTypeRefinement::*;
         match self {
-            Self::Exact(ty) => Texact(ty.to_oxidized(arena)),
-            Self::Loose(bounds) => Tloose(bounds.to_oxidized(arena)),
+            Self::Exact(ty) => TRexact(ty.to_oxidized(arena)),
+            Self::Loose(bounds) => TRloose(bounds.to_oxidized(arena)),
         }
     }
 }

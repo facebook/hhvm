@@ -75,8 +75,8 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
           ~is_ctx:false
           ppf
           (match ref with
-          | Aast.Texact hint -> [(`E, hint)]
-          | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+          | Aast.TRexact hint -> [(`E, hint)]
+          | Aast.TRloose { Aast.tr_lower; tr_upper } ->
             List.map tr_lower ~f:(fun x -> (`L, x))
             @ List.map tr_upper ~f:(fun x -> (`U, x)))
       | Aast.Rctx (ident, ref) ->

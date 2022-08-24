@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<040810dc55fe3aaab014b443c7a197dd>>
+// @generated SignedSource<<74ad09e95384612b8e22d548f7739c21>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -832,57 +832,57 @@ impl Refinement {
     }
 }
 impl TypeRefinement {
-    pub fn mk_texact(p0: Hint) -> Self {
-        TypeRefinement::Texact(p0)
+    pub fn mk_trexact(p0: Hint) -> Self {
+        TypeRefinement::TRexact(p0)
     }
-    pub fn mk_tloose(p0: TypeRefinementBounds) -> Self {
-        TypeRefinement::Tloose(p0)
+    pub fn mk_trloose(p0: TypeRefinementBounds) -> Self {
+        TypeRefinement::TRloose(p0)
     }
-    pub fn is_texact(&self) -> bool {
+    pub fn is_trexact(&self) -> bool {
         match self {
-            TypeRefinement::Texact(..) => true,
+            TypeRefinement::TRexact(..) => true,
             _ => false,
         }
     }
-    pub fn is_tloose(&self) -> bool {
+    pub fn is_trloose(&self) -> bool {
         match self {
-            TypeRefinement::Tloose(..) => true,
+            TypeRefinement::TRloose(..) => true,
             _ => false,
         }
     }
-    pub fn as_texact(&self) -> Option<&Hint> {
+    pub fn as_trexact(&self) -> Option<&Hint> {
         match self {
-            TypeRefinement::Texact(p0) => Some(p0),
+            TypeRefinement::TRexact(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_tloose(&self) -> Option<&TypeRefinementBounds> {
+    pub fn as_trloose(&self) -> Option<&TypeRefinementBounds> {
         match self {
-            TypeRefinement::Tloose(p0) => Some(p0),
+            TypeRefinement::TRloose(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_texact_mut(&mut self) -> Option<&mut Hint> {
+    pub fn as_trexact_mut(&mut self) -> Option<&mut Hint> {
         match self {
-            TypeRefinement::Texact(p0) => Some(p0),
+            TypeRefinement::TRexact(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_tloose_mut(&mut self) -> Option<&mut TypeRefinementBounds> {
+    pub fn as_trloose_mut(&mut self) -> Option<&mut TypeRefinementBounds> {
         match self {
-            TypeRefinement::Tloose(p0) => Some(p0),
+            TypeRefinement::TRloose(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_texact_into(self) -> Option<Hint> {
+    pub fn as_trexact_into(self) -> Option<Hint> {
         match self {
-            TypeRefinement::Texact(p0) => Some(p0),
+            TypeRefinement::TRexact(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_tloose_into(self) -> Option<TypeRefinementBounds> {
+    pub fn as_trloose_into(self) -> Option<TypeRefinementBounds> {
         match self {
-            TypeRefinement::Tloose(p0) => Some(p0),
+            TypeRefinement::TRloose(p0) => Some(p0),
             _ => None,
         }
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9c3ab6e5f14cd062c8930e6dce5b4d4>>
+// @generated SignedSource<<995629e0ed9a583704153f8148caff0b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -650,9 +650,9 @@ arena_deserializer::impl_deserialize_in_arena!(ClassRefinement<'arena>);
 #[repr(C, u8)]
 pub enum ClassTypeRefinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Texact(&'a Ty<'a>),
+    TRexact(&'a Ty<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tloose(&'a ClassTypeRefinementBounds<'a>),
+    TRloose(&'a ClassTypeRefinementBounds<'a>),
 }
 impl<'a> TrivialDrop for ClassTypeRefinement<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);

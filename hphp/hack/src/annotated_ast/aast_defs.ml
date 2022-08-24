@@ -151,8 +151,8 @@ and refinement =
   | Rtype of sid * type_refinement
 
 and type_refinement =
-  | Texact of hint
-  | Tloose of type_refinement_bounds
+  | TRexact of hint
+  | TRloose of type_refinement_bounds
 
 and type_refinement_bounds = {
   tr_lower: hint list;

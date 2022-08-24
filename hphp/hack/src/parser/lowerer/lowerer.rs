@@ -1001,9 +1001,9 @@ fn p_refinement_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Refine
             pos_name(&c.name, env)?,
             if c.type_.is_missing() {
                 let (lower, upper) = p_tconstraints_into_lower_and_upper(&c.constraints, env)?;
-                ast::TypeRefinement::Tloose(ast::TypeRefinementBounds { lower, upper })
+                ast::TypeRefinement::TRloose(ast::TypeRefinementBounds { lower, upper })
             } else {
-                ast::TypeRefinement::Texact(p_hint(&c.type_, env)?)
+                ast::TypeRefinement::TRexact(p_hint(&c.type_, env)?)
             },
         )),
         CtxInRefinement(c) => {

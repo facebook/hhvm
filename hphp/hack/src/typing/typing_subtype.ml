@@ -2217,7 +2217,7 @@ and simplify_subtype_i
       Class_refinement.fold_type_refs
         cr_super
         ~init:(valid env)
-        ~f:(fun type_id (Texact ty) (env, prop) ->
+        ~f:(fun type_id (TRexact ty) (env, prop) ->
           (env, prop)
           &&&
           let htm_ty =

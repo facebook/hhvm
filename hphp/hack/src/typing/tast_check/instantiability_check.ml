@@ -86,8 +86,8 @@ let rec check_hint env (pos, hint) =
     let check_member = function
       | Aast.Rtype (_, ref) ->
         (match ref with
-        | Aast.Texact h -> check_hint env h
-        | Aast.Tloose { Aast.tr_lower; tr_upper } ->
+        | Aast.TRexact h -> check_hint env h
+        | Aast.TRloose { Aast.tr_lower; tr_upper } ->
           check_bounds (tr_lower, tr_upper))
       | Aast.Rctx (_, ref) ->
         (match ref with

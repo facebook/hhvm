@@ -314,8 +314,8 @@ and exact =
 and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
 
 and 'phase class_type_refinement =
-  | Texact : 'phase ty -> 'phase class_type_refinement
-  | Tloose :
+  | TRexact : 'phase ty -> 'phase class_type_refinement
+  | TRloose :
       decl_phase class_type_refinement_bounds
       -> decl_phase class_type_refinement
 

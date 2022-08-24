@@ -428,9 +428,9 @@ end = struct
         aux acc @@ snd hint
       | Aast_defs.Hrefinement (hint, members) ->
         let member_hints = function
-          | Aast_defs.(Rtype (_, Texact hint) | Rctx (_, CRexact hint)) ->
+          | Aast_defs.(Rtype (_, TRexact hint) | Rctx (_, CRexact hint)) ->
             [hint]
-          | Aast_defs.(Rtype (_, Tloose { tr_lower; tr_upper })) ->
+          | Aast_defs.(Rtype (_, TRloose { tr_lower; tr_upper })) ->
             tr_lower @ tr_upper
           | Aast_defs.(Rctx (_, CRloose { cr_lower; cr_upper })) ->
             Option.to_list cr_lower @ Option.to_list cr_upper

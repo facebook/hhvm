@@ -78,8 +78,8 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
     | Nonexact cr ->
       begin
         match Class_refinement.get_type_ref type_id cr with
-        | Some (Texact ty) -> Exact ty
-        (* TODO(refinements): For `Tloose _` we will return `Abstract _` *)
+        | Some (TRexact ty) -> Exact ty
+        (* TODO(refinements): For `TRloose _` we will return `Abstract _` *)
         | None -> Error None
       end
     | _ -> Error None

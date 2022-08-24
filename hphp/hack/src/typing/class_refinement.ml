@@ -22,28 +22,28 @@ let add_type_ref id tr cr =
   let combine
       (type a) (r1 : a class_type_refinement) (r2 : a class_type_refinement) =
     match (r1, r2) with
-    | ((Texact _ as exact), _)
-    | (_, (Texact _ as exact)) ->
+    | ((TRexact _ as exact), _)
+    | (_, (TRexact _ as exact)) ->
       exact
-    | ( Tloose { tr_lower = ls1; tr_upper = us1 },
-        Tloose { tr_lower = ls2; tr_upper = us2 } ) ->
-      Tloose { tr_lower = ls1 @ ls2; tr_upper = us1 @ us2 }
+    | ( TRloose { tr_lower = ls1; tr_upper = us1 },
+        TRloose { tr_lower = ls2; tr_upper = us2 } ) ->
+      TRloose { tr_lower = ls1 @ ls2; tr_upper = us1 @ us2 }
   in
   { cr_types = SMap.add ~combine id tr cr.cr_types }
 
 let map_type_refinement (type a) f (r : a class_type_refinement) =
   match r with
-  | Texact ty -> Texact (f ty)
-  | Tloose { tr_lower = ls; tr_upper = us } ->
-    Tloose { tr_lower = List.map ls ~f; tr_upper = List.map us ~f }
+  | TRexact ty -> TRexact (f ty)
+  | TRloose { tr_lower = ls; tr_upper = us } ->
+    TRloose { tr_lower = List.map ls ~f; tr_upper = List.map us ~f }
 
 let map f { cr_types = trs } =
   { cr_types = SMap.map (map_type_refinement f) trs }
 
 let fold_type_refinement r ~init:acc ~f =
   match r with
-  | Texact ty -> f acc ty
-  | Tloose { tr_lower = ls; tr_upper = us } ->
+  | TRexact ty -> f acc ty
+  | TRloose { tr_lower = ls; tr_upper = us } ->
     let acc = List.fold ~f ~init:acc ls in
     let acc = List.fold ~f ~init:acc us in
     acc
@@ -56,8 +56,8 @@ let iter f r = fold r ~init:() ~f:(fun () -> f)
 let to_string ty_to_string { cr_types = trs } =
   let tref_to_string r =
     match r with
-    | Texact ty -> "= " ^ ty_to_string ty
-    | Tloose { tr_lower = ls; tr_upper = us } ->
+    | TRexact ty -> "= " ^ ty_to_string ty
+    | TRloose { tr_lower = ls; tr_upper = us } ->
       let l1 = List.map ls ~f:(fun ty -> "as " ^ ty_to_string ty) in
       let l2 = List.map us ~f:(fun ty -> "super " ^ ty_to_string ty) in
       String.concat ~sep:" " (l1 @ l2)

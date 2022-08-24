@@ -701,8 +701,8 @@ and refinement_member env variance member =
   match member with
   | Aast.Rtype (_, ref) ->
     (match ref with
-    | Aast.Texact h -> check_exact h
-    | Aast.Tloose { Aast.tr_lower = lb; tr_upper = ub } -> check_loose (lb, ub))
+    | Aast.TRexact h -> check_exact h
+    | Aast.TRloose { Aast.tr_lower = lb; tr_upper = ub } -> check_loose (lb, ub))
   | Aast.Rctx (_, ref) ->
     (match ref with
     | Aast.CRexact h -> check_exact h

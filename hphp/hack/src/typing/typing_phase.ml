@@ -974,11 +974,11 @@ and localize_refinement ~ety_env env r root { cr_types = trs } =
       SMap.fold
         (fun id tr ((env, ty_err_opt), cr) ->
           match tr with
-          | Texact ty ->
+          | TRexact ty ->
             let ((env, ty_err_opt'), ty) = localize ~ety_env env ty in
-            let cr = Class_refinement.add_type_ref id (Texact ty) cr in
+            let cr = Class_refinement.add_type_ref id (TRexact ty) cr in
             ((env, both_opt ty_err_opt ty_err_opt'), cr)
-          | Tloose _ ->
+          | TRloose _ ->
             let err = mk_unsupported_err () in
             ((env, both_opt ty_err_opt err), cr))
         trs

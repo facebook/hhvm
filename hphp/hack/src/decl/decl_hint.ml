@@ -218,20 +218,21 @@ and hint_ p env = function
         List.fold members ~init:SMap.empty ~f:(fun map r ->
             match r with
             | Rctx ((_, id), CRexact h) ->
-              SMap.add id (Texact (context_hint env h)) map
+              SMap.add id (TRexact (context_hint env h)) map
             | Rctx (((_, id) as _pos), CRloose { cr_lower; cr_upper }) ->
               let decl_bounds h =
                 Option.map ~f:(context_hint env) h |> Option.to_list
               in
               let tr_lower = decl_bounds cr_lower in
               let tr_upper = decl_bounds cr_upper in
-              SMap.add id (Tloose { tr_lower; tr_upper }) map
-            | Rtype ((_, id), Texact h) -> SMap.add id (Texact (hint env h)) map
-            | Rtype ((_, id), Tloose { tr_lower; tr_upper }) ->
+              SMap.add id (TRloose { tr_lower; tr_upper }) map
+            | Rtype ((_, id), TRexact h) ->
+              SMap.add id (TRexact (hint env h)) map
+            | Rtype ((_, id), TRloose { tr_lower; tr_upper }) ->
               let decl_bounds = List.map ~f:(hint env) in
               let tr_lower = decl_bounds tr_lower in
               let tr_upper = decl_bounds tr_upper in
-              SMap.add id (Tloose { tr_lower; tr_upper }) map)
+              SMap.add id (TRloose { tr_lower; tr_upper }) map)
       in
       { cr_types }
     in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42809ca90cd0d0b3752ab8da590e5631>>
+// @generated SignedSource<<79ec43dcb925fb9fb82fbd8af0d58311>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2038,8 +2038,8 @@ impl<P: Params> Node<P> for TypeRefinement {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            TypeRefinement::Texact(a0) => a0.accept(c, v),
-            TypeRefinement::Tloose(a0) => a0.accept(c, v),
+            TypeRefinement::TRexact(a0) => a0.accept(c, v),
+            TypeRefinement::TRloose(a0) => a0.accept(c, v),
         }
     }
 }

@@ -58,50 +58,48 @@ namespace detail {
 // Scoped timing in debug builds. The emitted messages are supplied
 // with lambdas to avoid overhead when the code is compiled out.
 struct Timer {
+  using Clock = std::chrono::steady_clock;
+
   // For when you're going to use stopWithMessage and don't want to
   // provide an initial message.
-  Timer() : m_msg{nullptr} {
-    ONTRACE(2, [this] { m_begin = std::chrono::steady_clock::now(); }());
-  }
+  Timer() : m_begin{Clock::now()}, m_msg{nullptr} {}
 
-  explicit Timer(const char* msg) : m_msg{msg} {
-    ONTRACE(2, [this] { m_begin = std::chrono::steady_clock::now(); }());
-  }
+  explicit Timer(const char* msg) : m_begin{Clock::now()}, m_msg{msg} {}
 
   template <typename F>
-  explicit Timer(const F& f) {
+  explicit Timer(const F& f) : m_begin{Clock::now()} {
     ONTRACE(2, [&] {
       m_str = f();
       m_msg = m_str.c_str();
-      m_begin = std::chrono::steady_clock::now();
     }());
   }
+
+  Clock::duration elapsed() const { return Clock::now() - m_begin; }
 
   // Stop the timer early before destruction with the given message.
   template<typename F>
   void stopWithMessage(const F& f) {
     ONTRACE(2, [&] {
       m_msg = nullptr;
-      FTRACE(2, "{} (took {})\n", f(), elapsed());
+      FTRACE(2, "{} (took {})\n", f(), elapsedStr());
     }());
   }
 
   ~Timer() {
     ONTRACE(2, [this] {
       if (!m_msg) return;
-      FTRACE(2, "{} took {}\n", m_msg, elapsed());
+      FTRACE(2, "{} took {}\n", m_msg, elapsedStr());
     }());
   }
 
 private:
-  std::string elapsed() const {
-    auto const d = std::chrono::duration_cast<std::chrono::duration<double>>(
-      std::chrono::steady_clock::now() - m_begin
-    ).count();
+  std::string elapsedStr() const {
+    namespace C = std::chrono;
+    auto const d = C::duration_cast<C::duration<double>>(elapsed()).count();
     return folly::prettyPrint(d, folly::PRETTY_TIME, false);
   }
 
-  std::chrono::steady_clock::time_point m_begin;
+  Clock::time_point m_begin;
   const char* m_msg;
   std::string m_str;
 

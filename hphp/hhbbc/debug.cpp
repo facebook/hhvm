@@ -306,17 +306,21 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     return double(a) / b * 100.0;
   };
 
+  auto const execs = stats.execs.load();
   auto const allocatedCores = stats.execAllocatedCores.load();
   auto const cpuUsecs = stats.execCpuUsec.load();
+  auto const execCalls = stats.execCalls.load();
+  auto const storeCalls = stats.storeCalls.load();
+  auto const loadCalls = stats.loadCalls.load();
 
   return folly::sformat(
     "  Execs: {:,} total, {:,} cache-hits ({:.2f}%), {:,} fallbacks\n"
     "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
     "  Blobs: {:,} total, {:,} uploaded ({}), {:,} fallbacks\n"
-    "  {:,} downloads ({}), {:,} throttles\n",
-    stats.execs.load(),
+    "  {:,} downloads ({}), {:,} throttles, (E: {} S: {} L: {}) avg latency\n",
+    execs,
     stats.execCacheHits.load(),
-    pct(stats.execCacheHits.load(), stats.execs.load()),
+    pct(stats.execCacheHits.load(), execs),
     stats.execFallbacks.load(),
     usecs(cpuUsecs),
     allocatedCores,
@@ -329,7 +333,10 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     stats.blobFallbacks.load(),
     stats.downloads.load(),
     format_bytes(stats.bytesDownloaded.load()),
-    stats.throttles.load()
+    stats.throttles.load(),
+    usecs(execCalls ? (stats.execLatencyUsec.load() / execCalls) : 0),
+    usecs(storeCalls ? (stats.storeLatencyUsec.load() / storeCalls) : 0),
+    usecs(loadCalls ? (stats.loadLatencyUsec.load() / loadCalls) : 0)
   );
 }
 

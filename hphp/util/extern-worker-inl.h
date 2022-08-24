@@ -290,6 +290,10 @@ inline std::string RequestId::toString() const {
   return folly::to<std::string>(m_id);
 }
 
+inline RequestId::Clock::duration RequestId::elapsed() const {
+  return m_timer->elapsed();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline const std::string& Client::implName() const {
@@ -381,6 +385,13 @@ template <typename T>
 coro::Task<T> Client::load(Ref<T> r) {
   RequestId requestId{"load blob"};
 
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
+
   // Get the appropriate implementation (it could have been created by
   // a fallback implementation), and forward the request to it.
   auto& impl = r.m_fromFallback ? *m_fallbackImpl.rawGet() : *m_impl;
@@ -402,6 +413,12 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), sizeof...(Ts) + 1);
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Retrieve the ids from the Refs, and split them into a set from
   // the main implementation, and a set from the fallback
@@ -504,6 +521,12 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), rs.size());
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Retrieve the RefId from the refs and split them into the ones
   // which come from the main implementation and the fallback
@@ -584,6 +607,12 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   RequestId requestId{"load blobs"};
   FTRACE(2, "{} {} blobs requested\n",
          requestId.tracePrefix(), rs.size() * tupleSize);
+  ++m_stats->loadCalls;
+  SCOPE_EXIT {
+    m_stats->loadLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // This is a hybrid of the variadic case and the vector case:
 
@@ -692,6 +721,12 @@ coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
 
   ++m_stats->blobs;
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -725,6 +760,12 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
          requestId.tracePrefix(), sizeof...(Ts) + 1);
 
   m_stats->blobs += (sizeof...(Ts) + 1);
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -798,6 +839,12 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
   );
 
   m_stats->blobs += ts.size();
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -850,6 +897,12 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
   );
 
   m_stats->blobs += (ts.size() * tupleSize);
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -921,6 +974,12 @@ Client::exec(const Job<C>& job,
          inputs.size());
 
   m_stats->execs += inputs.size();
+  ++m_stats->execCalls;
+  SCOPE_EXIT {
+    m_stats->execLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   // Return true if a Ref (or some container of them allowed as
   // inputs) came from the fallback implementation. If so, we'll force

@@ -757,6 +757,12 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
   );
 
   ++m_stats->files;
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto wasFallback = false;
   auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
@@ -795,6 +801,12 @@ Client::storeFile(std::vector<fs::path> paths,
   }());
 
   m_stats->files += paths.size();
+  ++m_stats->storeCalls;
+  SCOPE_EXIT {
+    m_stats->storeLatencyUsec += std::chrono::duration_cast<
+      std::chrono::microseconds
+    >(requestId.elapsed()).count();
+  };
 
   auto const DEBUG_ONLY size = paths.size();
   auto wasFallback = false;
@@ -874,8 +886,12 @@ std::string Client::Stats::toString(const std::string& phase,
     return double(a) / b * 100.0;
   };
 
+  auto const execs_ = execs.load();
   auto const allocatedCores = execAllocatedCores.load();
   auto const cpuUsecs = execCpuUsec.load();
+  auto const execCalls_ = execCalls.load();
+  auto const storeCalls_ = storeCalls.load();
+  auto const loadCalls_ = loadCalls.load();
 
   return folly::sformat(
     "  {}:{}\n"
@@ -884,12 +900,13 @@ std::string Client::Stats::toString(const std::string& phase,
     "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
     "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
     "  Mem: {} max used, {} reserved\n"
-    "  {:,} downloads ({}), {:,} throttles",
+    "  {:,} downloads ({}), {:,} throttles\n"
+    "  Avg Latency: {} exec, {} store, {} load",
     phase,
     extra.empty() ? "" : folly::sformat(" {}", extra),
-    execs.load(),
+    execs_,
     execCacheHits.load(),
-    pct(execCacheHits.load(), execs.load()),
+    pct(execCacheHits.load(), execs_),
     optimisticExecs.load(),
     execFallbacks.load(),
     files.load(),
@@ -910,7 +927,10 @@ std::string Client::Stats::toString(const std::string& phase,
     bytes(execReservedMem.load()),
     downloads.load(),
     bytes(bytesDownloaded.load()),
-    throttles.load()
+    throttles.load(),
+    usecs(execCalls_ ? (execLatencyUsec.load() / execCalls_) : 0),
+    usecs(storeCalls_ ? (storeLatencyUsec.load() / storeCalls_) : 0),
+    usecs(loadCalls_ ? (loadLatencyUsec.load() / loadCalls_) : 0)
   );
 }
 
@@ -942,6 +962,23 @@ void Client::Stats::logSample(const std::string& phase,
   sample.setInt(phase + "_exec_allocated_cores", execAllocatedCores.load());
   sample.setInt(phase + "_exec_max_used_mem", execMaxUsedMem.load());
   sample.setInt(phase + "_exec_reserved_mem", execReservedMem.load());
+
+  auto const execCalls_ = execCalls.load();
+  auto const storeCalls_ = storeCalls.load();
+  auto const loadCalls_ = loadCalls.load();
+
+  sample.setInt(
+    phase + "_avg_exec_latency_usec",
+    execCalls_ ? (execLatencyUsec.load() / execCalls_) : 0
+  );
+  sample.setInt(
+    phase + "_avg_store_latency_usec",
+    storeCalls_ ? (storeLatencyUsec.load() / storeCalls_) : 0
+  );
+  sample.setInt(
+    phase + "_avg_load_latency_usec",
+    loadCalls_ ? (loadLatencyUsec.load() / loadCalls_) : 0
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

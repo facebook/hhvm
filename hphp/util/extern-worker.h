@@ -272,6 +272,9 @@ struct RequestId {
   std::string tracePrefix() const;
   std::string toString() const;
 
+  using Clock = detail::Timer::Clock;
+  Clock::duration elapsed() const;
+
 private:
   uint64_t m_id;
   const char* m_type;
@@ -581,6 +584,12 @@ struct Client {
       /* Execs in optimistic mode which succeeded */                    \
       X(optimisticExecs)                                                \
       X(throttles)                                                      \
+      X(execLatencyUsec)                                                \
+      X(storeLatencyUsec)                                               \
+      X(loadLatencyUsec)                                                \
+      X(execCalls)                                                      \
+      X(storeCalls)                                                     \
+      X(loadCalls)                                                      \
 
     #define X(name) std::atomic<size_t> name{0};
     STATS

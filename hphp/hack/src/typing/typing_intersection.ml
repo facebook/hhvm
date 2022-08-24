@@ -440,6 +440,7 @@ let rec intersect_i env r ty1 lty2 =
           | ConstraintType cty ->
             (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty)))))
         | (_, Thas_member _)
+        | (_, Thas_type_member _)
         | (_, Tcan_index _)
         | (_, Tcan_traverse _)
         | (_, Tdestructure _) ->

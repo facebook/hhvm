@@ -221,6 +221,12 @@ class type ['env] constraint_type_mapper_type =
       Typing_defs.has_member ->
       'env * Typing_defs.constraint_type
 
+    method on_Thas_type_member :
+      'env ->
+      Typing_reason.t ->
+      string * Typing_defs.locl_ty ->
+      'env * Typing_defs.constraint_type
+
     method on_Tcan_index :
       'env ->
       Typing_reason.t ->

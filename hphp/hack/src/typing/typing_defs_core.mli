@@ -588,11 +588,14 @@ type constraint_type [@@deriving show]
 
 type constraint_type_ =
   | Thas_member of has_member
-  (* The type of a list destructuring assignment.
-   * Implements valid destructuring operations via subtyping *)
+      (** [Thas_type_member('T', ty)] is a supertype of all concrete class
+          types that have a type member [::T] set to [ty] *)
+  | Thas_type_member of string * locl_ty
   | Tcan_index of can_index
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
+      (** The type of a list destructuring assignment.
+          Implements valid destructuring operations via subtyping. *)
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
 [@@deriving show]

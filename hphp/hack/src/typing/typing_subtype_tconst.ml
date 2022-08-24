@@ -4,12 +4,13 @@ module Env = Typing_env
 module ITySet = Internal_type_set
 module Utils = Typing_utils
 
-(** Make tconstty (usually a type variable representing the type constant of
-another type variable v) equal to ty::tconstid (where ty is usually a bound
-of v) *)
+(** Make `tvar` equal to `ty::tconstid`. The locl type `tvar` is a
+type variable that represents the the type constant ::tconstid of
+another variable v. See get_tyvar_type_const below, where such type
+variables are created. *)
 let make_type_const_equal
     env
-    tconstty
+    tvar
     (ty : internal_type)
     tconstid
     ~(on_error : Typing_error.Reasons_callback.t option)
@@ -33,19 +34,35 @@ let make_type_const_equal
           ~f:Typing_error.Reasons_callback.type_constant_mismatch
           on_error
       in
-      let (env, e2) = Utils.sub_type env tytconst tconstty error in
-      let (env, e3) = Utils.sub_type env tconstty tytconst error in
+      let (env, e2) = Utils.sub_type env tytconst tvar error in
+      let (env, e3) = Utils.sub_type env tvar tytconst error in
       (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with
+      | (_, Thas_type_member _) ->
+        (* Because Thas_type_member(_) is only created when a class
+         * refinement is on the right-hand side of a subtype query,
+         * and make_type_const_equal is only called after a subtype
+         * query of the form #var <: ?, or ? <: #var, we can only
+         * get here after a query of the form:
+         *
+         *     #var <: Cls with { type T ... }
+         *
+         * But, in that case, the logic of Typing_subtype will not
+         * break apart the rhs and instead record the whole
+         * refinement as a bound for #var. Still, we are humble
+         * and log an error if the impossible happens. *)
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Internal_error
+                 { pos = Pos.none; msg = "Unexpected Thas_type_member(_)" });
+        (env, None)
       | (_, Thas_member _)
       | (_, Tcan_index _)
       | (_, Tcan_traverse _)
       | (_, Tdestructure _) ->
         (env, None)
-        (* This not quite correct but works for now since no constraint type has any
-           type constant. The proper way to do it would be to have Utils.expand_typeconst
-           work on constraint types directly. *)
       | (_, TCunion (lty, cty)) ->
         let (env, e1) = make_equal env (LoclType lty) in
         let (env, e2) = make_equal env (ConstraintType cty) in
@@ -54,8 +71,7 @@ let make_type_const_equal
         let (env, e1) = make_equal env (LoclType lty) in
         let (env, e2) = make_equal env (ConstraintType cty) in
         (* TODO: should we be taking the intersection of the errors? *)
-        ( env,
-          Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2]) ))
+        (env, Option.merge ~f:Typing_error.both e1 e2))
   in
   make_equal env ty
 

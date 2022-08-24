@@ -296,6 +296,7 @@ let simplify_constraint_type env ty =
     else
       (env, ConstraintType ty)
   | (_, Thas_member _)
+  | (_, Thas_type_member _)
   | (_, Tcan_index _)
   | (_, Tcan_traverse _)
   | (_, Tdestructure _) ->

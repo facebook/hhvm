@@ -916,6 +916,12 @@ module Full = struct
     let k' ~fuel cty = constraint_type ~fuel to_doc st penv cty in
     match x with
     | Thas_member hm -> thas_member ~fuel k hm
+    | Thas_type_member (id, lty) ->
+      let (fuel, lty_doc) = k ~fuel lty in
+      let has_type_member_doc =
+        Concat [text "has_type_member("; text id; comma_sep; lty_doc; text ")"]
+      in
+      (fuel, has_type_member_doc)
     | Tdestructure d -> tdestructure ~fuel k d
     | Tcan_index ci -> tcan_index ~fuel k ci
     | Tcan_traverse ct -> tcan_traverse ~fuel k ct

@@ -1,15 +1,3 @@
-File "subtype.php", line 24, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 17, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 24, characters 22-44:
-  Expected `Box with {type T = int}`
-  File "subtype.php", line 17, characters 50-51:
-    via this generic `Tb`
-  File "subtype.php", line 24, characters 14-19:
-  But got `IntBox`
-  File "subtype.php", line 17, characters 44-45:
-    via this generic `Ta`
 File "subtype.php", line 27, characters 3-12:
 A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 17, characters 10-19:
@@ -23,7 +11,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 17, characters 10-19:
   This is the method with `where` type constraints
   File "subtype.php", line 28, characters 19-44:
-  Expected `Box with {type T = string}`
+  Expected an object with `type T = string`
   File "subtype.php", line 17, characters 50-51:
     via this generic `Tb`
   File "subtype.php", line 28, characters 14-16:

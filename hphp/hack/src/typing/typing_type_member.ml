@@ -11,17 +11,16 @@ open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 
-(* This module is meant to eventually replace Typing_taccess,
- * with drastically simpler logic. The idea here is to only
- * have *lookup* logic on class types, unlike Typing_taccess
- * that aims to work on any locl type. *)
-
 type type_member =
   | Error of Typing_error.t option
   | Exact of locl_ty
   | Abstract of {
-      lower: locl_ty;
-      upper: locl_ty;
+      (* The bounds are optional: None for lower is equivalent
+       * to nothing and None for upper is equivalent to mixed.
+       * Having them optional ensures that [collect_bounds] below
+       * does not pick up trivial bounds and clutter the tpenv. *)
+      lower: locl_ty option;
+      upper: locl_ty option;
     }
 
 let make_missing_err ~on_error cls_id type_id =
@@ -53,16 +52,19 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
           | Some _ -> Error err_opt
           | None -> Exact lty) )
       | Some { ttc_kind = TCAbstract tca; _ } ->
-        let rnone = Reason.Rnone in
         let ((env, err_opt_1), lty_as) =
           match tca.atc_as_constraint with
-          | Some decl_ty -> localize env decl_ty
-          | None -> ((env, None), Typing_make_type.mixed rnone)
+          | Some decl_ty ->
+            let ((env, err_opt), lty) = localize env decl_ty in
+            ((env, err_opt), Some lty)
+          | None -> ((env, None), None)
         in
         let ((env, err_opt_2), lty_super) =
           match tca.atc_super_constraint with
-          | Some decl_ty -> localize env decl_ty
-          | None -> ((env, None), Typing_make_type.nothing rnone)
+          | Some decl_ty ->
+            let ((env, err_opt), lty) = localize env decl_ty in
+            ((env, err_opt), Some lty)
+          | None -> ((env, None), None)
         in
         ( env,
           (match Option.first_some err_opt_1 err_opt_2 with
@@ -70,9 +72,7 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
           | None -> Abstract { lower = lty_super; upper = lty_as }) )
     end
 
-(* Lookups a type member in a class definition, or in refinement
- * information (`exact`). *)
-let lookup_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
+let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
   let refined_type_member =
     match exact with
     | Nonexact cr ->
@@ -89,3 +89,38 @@ let lookup_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
   (* TODO(refinements): `Abstract _` will lookup the type member in the
    * class and combine the two results. *)
   | _ -> lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
+
+let make_dep_bound_type_member env ~on_error ~this_ty dep_kind bnd_ty type_id =
+  let rec collect_bounds env bnd_ty =
+    let (env, bnd_ty) = Env.expand_type env bnd_ty in
+    match deref bnd_ty with
+    | (_, Tclass (x_bnd, exact_bnd, _tyl_bnd)) ->
+      let (env, type_member) =
+        lookup_class_type_member
+          env
+          ~on_error
+          ~this_ty
+          (x_bnd, exact_bnd)
+          type_id
+      in
+      (match type_member with
+      | Error _ -> (env, [], [])
+      | Exact ty -> (env, [ty], [ty])
+      | Abstract { lower; upper } ->
+        (env, Option.to_list lower, Option.to_list upper))
+    | (_, Tintersection tyl) ->
+      List.fold tyl ~init:(env, [], []) ~f:(fun (env, l, h) bnd_ty ->
+          let (env, l', h') = collect_bounds env bnd_ty in
+          (env, l @ l', h @ h'))
+    | (_, _) -> (env, [], [])
+  in
+  let rigid_tvar_name = DependentKind.to_string dep_kind ^ "::" ^ snd type_id in
+  let reason = Reason.Rnone in
+  let ty = Typing_make_type.generic reason rigid_tvar_name in
+  let (env, lower_bounds, upper_bounds) = collect_bounds env bnd_ty in
+  let add_bounds bounds add env =
+    List.fold bounds ~init:env ~f:(fun env bnd -> add env rigid_tvar_name bnd)
+  in
+  let env = add_bounds lower_bounds Env.add_lower_bound env in
+  let env = add_bounds upper_bounds Env.add_upper_bound env in
+  (env, ty)

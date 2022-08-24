@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c7ffb18c01e989ae035fb6f09e9ed99e>>
+// @generated SignedSource<<b9c3ab6e5f14cd062c8930e6dce5b4d4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1001,6 +1001,10 @@ pub enum ConstraintType_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Thas_member")]
     ThasMember(&'a HasMember<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Thas_type_member")]
+    #[rust_to_ocaml(inline_tuple)]
+    ThasTypeMember(&'a (&'a str, &'a Ty<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(&'a CanIndex<'a>),

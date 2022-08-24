@@ -1061,6 +1061,7 @@ type can_traverse = {
 
 type constraint_type_ =
   | Thas_member of has_member
+  | Thas_type_member of string * locl_ty
   | Tcan_index of can_index
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure

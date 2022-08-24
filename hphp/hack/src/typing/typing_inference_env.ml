@@ -913,6 +913,7 @@ module Size = struct
         hm
       in
       ty_size env ty
+    | (_, Thas_type_member (_, ty)) -> 1 + ty_size env ty
     | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
     | (_, Tcan_traverse ct) ->
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key

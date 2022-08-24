@@ -399,6 +399,11 @@ let rec describe_ty_super ~is_coeffect env ty =
       (match targs with
       | None -> Printf.sprintf "an object with property `%s`" name
       | Some _ -> Printf.sprintf "an object with method `%s`" name)
+    | (_, Thas_type_member (id, ty)) ->
+      Printf.sprintf
+        "an object with `type %s = %s`"
+        id
+        (describe_ty ~is_coeffect:false env (LoclType ty))
     | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
     | (_, Tcan_index _) -> "an array that can be indexed"
     | (_, Tdestructure _) ->
@@ -1231,6 +1236,14 @@ and simplify_subtype_i
           ~fail
           ety_sub
           (r, has_member_ty)
+          env
+      | (r, Thas_type_member (id, ty)) ->
+        simplify_subtype_has_type_member
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ety_sub
+          (r, id, ty)
           env
     end
   (* Next deal with all locl types *)
@@ -2197,7 +2210,36 @@ and simplify_subtype_i
         (* All of these are definitely disjoint from class types *)
         | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
         | _ -> default_subtype env))
-    | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
+    | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
+      when not (Class_refinement.is_empty cr_super) ->
+      (* We discharge class refinements before anything
+       * else ... *)
+      Class_refinement.fold_type_refs
+        cr_super
+        ~init:(valid env)
+        ~f:(fun type_id (Texact ty) (env, prop) ->
+          (env, prop)
+          &&&
+          let htm_ty =
+            mk_constraint_type (r_super, Thas_type_member (type_id, ty))
+          in
+          simplify_subtype_i
+            ~subtype_env
+            ~this_ty
+            ~super_like
+            ety_sub
+            (ConstraintType htm_ty))
+      &&&
+      (* ... then recursively check the class with all the
+       * refinements dropped. *)
+      let ty_super = mk (r_super, Tclass (x_super, nonexact, tyl_super)) in
+      simplify_subtype_i
+        ~subtype_env
+        ~this_ty
+        ~super_like
+        ety_sub
+        (LoclType ty_super)
+    | (_r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
       ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
@@ -2238,37 +2280,6 @@ and simplify_subtype_i
             | (Nonexact _, Exact) -> false
             | (_, _) -> true
           in
-          let (env, refinements_prop) =
-            match exact_super with
-            | Exact -> valid env
-            | Nonexact cr ->
-              Class_refinement.fold_type_refs
-                cr
-                ~init:(valid env)
-                ~f:(fun type_id (Texact ref_ty) (env, prop) ->
-                  let (env, type_member) =
-                    (* TODO(refinements): The treatment of `this_ty` below is
-                     * no good; we should not default to `ty_sub`. `this_ty`
-                     * will be used when a type constant refers to another
-                     * constant either in its def or in its bounds.
-                     * See related FIXME(T59448452) below. *)
-                    Typing_type_member.lookup_type_member
-                      env
-                      ~this_ty:(Option.value this_ty ~default:ty_sub)
-                      ~on_error:subtype_env.on_error
-                      (x_sub, exact_sub)
-                      (Reason.to_pos r_super, type_id)
-                  in
-                  match type_member with
-                  | Typing_type_member.Error err -> invalid_env_with env err
-                  | Typing_type_member.Exact tconst_ty ->
-                    let this_ty = None in
-                    (env, prop)
-                    &&& simplify_subtype ~subtype_env ~this_ty tconst_ty ref_ty
-                    &&& simplify_subtype ~subtype_env ~this_ty ref_ty tconst_ty
-                  | Typing_type_member.Abstract _ -> invalid_env env)
-          in
-          (env, refinements_prop) &&& fun env ->
           if String.equal cid_super cid_sub then
             if List.is_empty tyl_sub && List.is_empty tyl_super && exact_match
             then
@@ -2346,17 +2357,6 @@ and simplify_subtype_i
                 }
               in
               let up_obj = Cls.get_ancestor class_sub cid_super in
-              let ty_super =
-                (* At this point we have already checked that all the
-                 * refinements in the super type hold, so we remove
-                 * them from ty_super *)
-                let exact_super =
-                  match exact_super with
-                  | Nonexact _ -> nonexact
-                  | Exact -> Exact
-                in
-                mk (r_super, Tclass (x_super, exact_super, tyl_super))
-              in
               (match up_obj with
               | Some up_obj ->
                 (* Since we have provided no `Typing_error.Reasons_callback.t`
@@ -2629,6 +2629,71 @@ and simplify_subtype_can_traverse
       let trav_ty = can_traverse_to_iface ct in
       simplify_subtype ~subtype_env ~this_ty lty_sub trav_ty env
     | _ -> default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super)
+
+and simplify_subtype_has_type_member
+    ~subtype_env ~this_ty ~fail ty_sub (r, memid, memty) env =
+  let htmty =
+    ConstraintType (mk_constraint_type (r, Thas_type_member (memid, memty)))
+  in
+  log_subtype_i
+    ~level:2
+    ~this_ty
+    ~function_name:"simplify_subtype_has_type_member"
+    env
+    ty_sub
+    htmty;
+  let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+  let default_subtype env =
+    default_subtype ~subtype_env ~this_ty ~fail env ety_sub htmty
+  in
+  match ety_sub with
+  | ConstraintType _ -> invalid ~fail env
+  | LoclType ty_sub ->
+    (match deref ty_sub with
+    | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
+      let (env, type_member) =
+        (* TODO(refinements): The treatment of `this_ty` below is
+         * no good; we should not default to `ty_sub`. `this_ty`
+         * will be used when a type constant refers to another
+         * constant either in its def or in its bounds.
+         * See related FIXME(T59448452) above. *)
+        Typing_type_member.lookup_class_type_member
+          env
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.on_error
+          (x_sub, exact_sub)
+          (Reason.to_pos r, memid)
+      in
+      (match type_member with
+      | Typing_type_member.Error err -> invalid ~fail:err env
+      | Typing_type_member.Exact ty ->
+        let this_ty = None in
+        simplify_subtype ~subtype_env ~this_ty ty memty env
+        &&& simplify_subtype ~subtype_env ~this_ty memty ty
+      | Typing_type_member.Abstract _ -> invalid ~fail env)
+    | (_r_sub, Tdependent (dtkind, bndty)) ->
+      (* First, we try to discharge the subtype query on the Tdependent
+       * bound; if that fails, we mint a fresh rigid type variable to
+       * represent the concrete type constant and try to solve the query
+       * using it *)
+      let ( ||| ) = ( ||| ) ~fail in
+      simplify_subtype_i ~subtype_env ~this_ty (LoclType bndty) htmty env
+      ||| fun env ->
+      (* TODO(refinements): The treatment of `this_ty` below is
+       * no good; see above. *)
+      let (env, dtmemty) =
+        Typing_type_member.make_dep_bound_type_member
+          env
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.on_error
+          dtkind
+          bndty
+          (Reason.to_pos r, memid)
+      in
+      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
+      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+    | (_, (Tvar _ | Tunion _ | Tintersection _ | Terr)) -> default_subtype env
+    | _ -> invalid ~fail env)
 
 and simplify_subtype_has_member
     ~subtype_env

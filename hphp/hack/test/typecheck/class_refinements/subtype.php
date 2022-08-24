@@ -6,11 +6,11 @@ abstract class Box {
   abstract const type T as mixed;
 }
 
-class IntBox {
+class IntBox extends Box {
   const type T = int;
 }
 
-class StrBox {
+class StrBox extends Box {
   const type T = string;
 }
 

@@ -356,6 +356,9 @@ let rec refresh_ctype renv v cty_orig =
     let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } = hm in
     let (renv, hm_type, changed) = refresh_type renv inv hm_type in
     (renv, mk_constraint_type (r, Thas_member { hm with hm_type }), changed)
+  | (r, Thas_type_member (id, lty)) ->
+    let (renv, lty, changed) = refresh_type renv inv lty in
+    (renv, mk_constraint_type (r, Thas_type_member (id, lty)), changed)
   | (r, Tcan_index ci) ->
     let (renv, ci_val, ch1) = refresh_type renv inv ci.ci_val in
     let (renv, ci_key, ch2) = refresh_type renv inv ci.ci_key in

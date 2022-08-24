@@ -581,7 +581,8 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
                 Add_fact.method_occ receiver_class name prog
               in
               let xref_json = Build.build_method_occ_json_ref target_id in
-              let _target_json = Build.build_occ_target_json xref_json in
+              let target_json = Build.build_occ_target_json xref_json in
+              let xrefs = XRefs.add xrefs target_id pos target_json in
               (xrefs, prog)
             | _ -> (xrefs, prog))
           | Some sym_def ->

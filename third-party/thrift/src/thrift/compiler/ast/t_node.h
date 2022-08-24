@@ -17,12 +17,8 @@
 #pragma once
 
 #include <cassert>
-#include <initializer_list>
-#include <iterator>
 #include <map>
-#include <memory>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 #include <thrift/compiler/ast/alias_span.h>
@@ -38,15 +34,14 @@ struct annotation_value {
 };
 
 /**
- * class t_node
- *
- * Base data structure for every parsed element in
- * a thrift program.
+ * A Thrift AST node.
  */
 class t_node {
  public:
   virtual ~t_node() = default;
 
+  // A source range `[begin, end)` where `begin` and `end` are location of the
+  // first and one past the last code units of this node in source respectively.
   const source_range& src_range() const { return range_; }
   void set_src_range(const source_range& r) { range_ = r; }
 
@@ -56,9 +51,6 @@ class t_node {
     doc_ = std::move(doc);
     has_doc_ = true;
   }
-
-  int lineno() const { return lineno_; }
-  void set_lineno(int lineno) { lineno_ = lineno; }
 
   // The annotations declared directly on this node.
   const auto& annotations() const { return annotations_; }
@@ -129,19 +121,16 @@ class t_node {
   }
 
  private:
-  std::string doc_;
-  bool has_doc_{false};
-
-  // TODO: Remove this lineno_, it will no longer be needed after source_range.
-  int lineno_ = -1;
   source_range range_;
+
+  std::string doc_;
+  bool has_doc_ = false;
 
   std::map<std::string, annotation_value> annotations_;
   // TODO(afuller): Remove everything below this comment. It is only provideed
   // for backwards compatibility.
  public:
   const std::string& get_doc() const { return doc_; }
-  int get_lineno() const { return lineno_; }
 };
 
 using t_annotation = std::map<std::string, annotation_value>::value_type;

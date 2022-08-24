@@ -81,6 +81,16 @@ TEST(SourceLocationTest, compare) {
   EXPECT_TRUE(source.start != loc);
 }
 
+TEST(SourceLocationTest, offset) {
+  auto sm = source_manager();
+  auto source = sm.add_string("path/to/file", "test");
+  auto loc = source.start;
+  EXPECT_EQ(loc.offset(), 0);
+  loc = loc + 2;
+  EXPECT_EQ(loc.offset(), 2);
+  EXPECT_EQ(source_location().offset(), 0);
+}
+
 TEST(SourceLocationTest, multi_line) {
   auto sm = source_manager();
   auto source = sm.add_string("path/to/file", "line1\nline2");

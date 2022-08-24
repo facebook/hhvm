@@ -59,6 +59,9 @@ class source_location {
     lhs.offset_ += rhs;
     return lhs;
   }
+
+  // Returns the offset in code units from the beginning of the source.
+  uint_least32_t offset() const { return offset_; }
 };
 
 struct source_range {

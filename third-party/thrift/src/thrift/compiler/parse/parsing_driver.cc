@@ -450,7 +450,6 @@ std::unique_ptr<t_const> parsing_driver::new_struct_annotation(
   auto ttype = const_struct->ttype(); // Copy the t_type_ref.
   auto result = std::make_unique<t_const>(
       program, std::move(ttype), "", std::move(const_struct));
-  result->set_lineno(get_lineno());
   result->set_src_range(range);
   return result;
 }
@@ -555,7 +554,6 @@ t_type_ref parsing_driver::new_type_ref(
   }
 
   if (auto* node = result.get_unresolved_type()) { // A newly created ph.
-    node->set_lineno(get_lineno());
     set_annotations(node, std::move(annotations));
   } else if (annotations != nullptr) { // Oh no!
     // TODO(afuller): Remove support for annotations on type references.
@@ -611,13 +609,11 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
   assert(!path.empty()); // Should have throw an exception if not found.
 
   if (program_cache.find(path) == program_cache.end()) {
-    auto included_program =
-        program->add_include(path, name, get_lineno(), range);
+    auto included_program = program->add_include(path, name, range);
     program_cache[path] = included_program.get();
     program_bundle->add_program(std::move(included_program));
   } else {
     auto include = std::make_unique<t_include>(program_cache[path]);
-    include->set_lineno(get_lineno());
     include->set_src_range(range);
     program->add_include(std::move(include));
   }

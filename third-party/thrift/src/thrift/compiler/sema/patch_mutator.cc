@@ -116,7 +116,7 @@ struct StructGen {
     t_field& result = generated.fields().back();
     // TODO(afuller): Make terse when supported.
     // result.set_qualifier(t_field_qualifier::terse);
-    result.set_lineno(annot.lineno());
+    result.set_src_range(annot.src_range());
     return result;
   }
 
@@ -407,7 +407,6 @@ t_type_ref patch_generator::find_patch_type(
         *annot.type()->program(), name, field.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
-      ph->set_lineno(field.lineno());
       ph->set_src_range(field.src_range());
       ph->set_generated();
     }
@@ -453,7 +452,6 @@ t_type_ref patch_generator::find_patch_type(
         *structured->program(), name, field.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
-      ph->set_lineno(field.lineno());
       ph->set_src_range(field.src_range());
       ph->set_generated();
     }
@@ -509,7 +507,7 @@ t_struct& patch_generator::gen_struct(
   generated->set_generated();
   generated->set_uri(std::move(uri));
   // Attribute the new struct to the anntation.
-  generated->set_lineno(annot.lineno());
+  generated->set_src_range(annot.src_range());
   program_.scope()->add_type(program_.scope_name(*generated), generated.get());
   return program_.add_def(std::move(generated));
 }

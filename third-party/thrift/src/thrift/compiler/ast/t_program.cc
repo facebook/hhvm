@@ -117,10 +117,7 @@ std::vector<std::string> t_program::gen_namespace_or_default(
 }
 
 std::unique_ptr<t_program> t_program::add_include(
-    std::string path,
-    std::string include_site,
-    int lineno,
-    const source_range& range) {
+    std::string path, std::string include_site, const source_range& range) {
   auto program = std::unique_ptr<t_program>(new t_program(path, scope_));
 
   std::string include_prefix;
@@ -132,7 +129,6 @@ std::unique_ptr<t_program> t_program::add_include(
   program->set_include_prefix(include_prefix);
 
   auto include = std::make_unique<t_include>(program.get());
-  include->set_lineno(lineno);
   include->set_src_range(range);
 
   add_include(std::move(include));

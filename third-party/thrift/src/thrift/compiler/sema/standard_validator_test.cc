@@ -62,7 +62,7 @@ class StandardValidatorTest : public ::testing::Test {
     value->set_ttype(t_type_ref::from_ptr(ttype));
     auto result =
         std::make_unique<t_const>(&program_, ttype, "", std::move(value));
-    result->set_lineno(lineno);
+    result->set_src_range({loc + (lineno - 1), loc + (lineno - 1)});
     return result;
   }
 
@@ -162,7 +162,7 @@ TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
         &t_base_type::t_void(),
         "foo",
         std::make_unique<t_paramlist>(&program_));
-    fn1->set_lineno(1);
+    fn1->set_src_range({loc, loc});
     auto fn2 = std::make_unique<t_function>(
         &t_base_type::t_void(),
         "foo",

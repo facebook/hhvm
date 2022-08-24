@@ -118,7 +118,7 @@ gen_struct_dependency_graph(
     // Order all deps in the order they are defined in.
     std::sort(
         deps.begin(), deps.end(), [](const t_struct* a, const t_struct* b) {
-          return a->get_lineno() < b->get_lineno();
+          return a->src_range().begin.offset() < b->src_range().begin.offset();
         });
 
     edges[obj] = std::move(deps);
@@ -201,7 +201,7 @@ gen_adapter_dependency_graph(
 
     // Order all deps in the order they are defined in.
     std::sort(deps.begin(), deps.end(), [](const t_type* a, const t_type* b) {
-      return a->get_lineno() < b->get_lineno();
+      return a->src_range().begin.offset() < b->src_range().begin.offset();
     });
   };
   return edges;

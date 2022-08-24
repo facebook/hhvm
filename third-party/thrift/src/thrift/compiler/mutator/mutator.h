@@ -24,9 +24,13 @@ namespace thrift {
 namespace compiler {
 
 struct mutator_exception : std::exception {
-  explicit mutator_exception(diagnostic msg) : message(std::move(msg)) {}
+  explicit mutator_exception(
+      source_location l, diagnostic_level lvl, std::string msg)
+      : loc(l), level(lvl), message(std::move(msg)) {}
 
-  diagnostic message;
+  source_location loc;
+  diagnostic_level level;
+  std::string message;
 };
 
 class mutator : virtual public visitor {

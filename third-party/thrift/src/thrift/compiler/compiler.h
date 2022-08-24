@@ -47,6 +47,7 @@ struct compile_result {
  */
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     const std::string& filename,
+    source_manager& sm,
     parsing_params pparams,
     diagnostic_params dparams = {});
 

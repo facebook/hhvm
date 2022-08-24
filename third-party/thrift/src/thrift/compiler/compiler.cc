@@ -479,13 +479,13 @@ parse_and_mutate_program(
 
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     const std::string& filename,
+    source_manager& sm,
     parsing_params pparams,
     diagnostic_params dparams) {
-  source_manager source_mgr;
   diagnostic_results results;
-  diagnostic_context ctx(source_mgr, results, std::move(dparams));
+  diagnostic_context ctx(sm, results, std::move(dparams));
   auto program =
-      parse_and_mutate_program(source_mgr, ctx, filename, std::move(pparams));
+      parse_and_mutate_program(sm, ctx, filename, std::move(pparams));
   for (const auto& diag : results.diagnostics()) {
     std::cerr << diag << "\n";
   }
@@ -531,8 +531,8 @@ compile_result compile(const std::vector<std::string>& arguments) {
   // TODO(afuller): Migrate to ast_mutator.
   try {
     mutator::mutate(program->root_program());
-  } catch (mutator_exception& e) {
-    ctx.report(std::move(e.message));
+  } catch (const mutator_exception& e) {
+    ctx.report(e.loc, e.level, "{}", e.message);
     return result;
   }
 

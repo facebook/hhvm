@@ -31,13 +31,16 @@ void replaceAll(string &s, const char *from, const char *to) {
   assert(from && *from);
   assert(to);
 
+  string::size_type pos = s.find(from);
+  if (pos == string::npos) return;
+
   string::size_type lenFrom = strlen(from);
   string::size_type lenTo = strlen(to);
-  for (string::size_type pos = s.find(from);
-       pos != string::npos;
-       pos = s.find(from, pos + lenTo)) {
+
+  do {
     s.replace(pos, lenFrom, to);
-  }
+    pos = s.find(from, pos + lenTo);
+  } while (pos != string::npos);
 }
 
 std::string toLower(folly::StringPiece s) {

@@ -6,25 +6,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "squangle/mysql_client/AsyncMysqlClient.h"
-#include "squangle/logger/DBEventLogger.h"
-#include "squangle/mysql_client/FutureAdapter.h"
-#include "squangle/mysql_client/Operation.h"
-
-#include <vector>
-
+#include <fcntl.h>
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/portability/GFlags.h>
 #include <folly/ssl/Init.h>
 #include <folly/system/ThreadName.h>
-
+#include <gflags/gflags.h>
 #include <mysql.h>
-
-#include <fcntl.h>
 #include <unistd.h>
+#include <vector>
+
+#include "squangle/logger/DBEventLogger.h"
+#include "squangle/mysql_client/AsyncMysqlClient.h"
+#include "squangle/mysql_client/FutureAdapter.h"
+#include "squangle/mysql_client/Operation.h"
 
 DECLARE_int64(mysql_mysql_timeout_micros);
 

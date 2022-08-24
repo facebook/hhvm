@@ -302,12 +302,8 @@ multiple rows that are marked as being unconditionally declared in the
 outermost scope with the same function name. Each function id must be between 0
 and 2^31 - 2 inclusive.
 
-Each row in the class table contains a unique class id, a class name specified
-by a litstr id, a flag that indicates if the class declaration is hoisted to
-the prelude of pseudo-main, and the class metadata. Note that there may be
-multiple rows in the class table with same class name. However, there may not
-be multiple rows that are marked as being hoisted with the same class name.
-Each class id must be between 0 and 2^31 - 2 inclusive.
+Each row in the class table contains a class name specified by a litstr id and
+the class metadata.
 
 
 Calling convention
@@ -3024,9 +3020,9 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class id>  [C|U..C|U]  ->  [C]
+CreateCl <num args> <class name>  [C|U..C|U]  ->  [C]
 
-  Creates an instance of the class specified by <class id> and pushes it on the
+  Creates an instance of the class specified by <class name> and pushes it on the
   stack.
 
   The specified class must be a subclass of "Closure", must have a single

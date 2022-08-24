@@ -22,6 +22,8 @@
 
 #include <folly/CPortability.h>
 #include <folly/lang/Exception.h>
+#include <folly/lang/Ordering.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -46,7 +48,7 @@ struct TypeInfo {
   void* (*make)(void*, bool);
   bool (*empty)(const void*);
   bool (*identical)(const void*, const RuntimeBase&);
-  int (*compare)(const void*, const RuntimeBase&);
+  folly::ordering (*compare)(const void*, const RuntimeBase&);
   void (*clear)(void*);
   void (*append)(void*, const RuntimeBase&);
   bool (*add)(void*, const RuntimeBase&);
@@ -54,8 +56,12 @@ struct TypeInfo {
   Ptr (*get_)(void*, FieldId, size_t, const RuntimeBase*);
   size_t (*size)(const void*);
 
-  int equal(const void* lhs, const RuntimeBase& rhs) const {
-    return compare(lhs, rhs) == 0;
+  bool equal(const void* lhs, const RuntimeBase& rhs) const {
+    return op::detail::is_eq(compare(lhs, rhs));
+  }
+
+  bool less(const void* lhs, const RuntimeBase& rhs) const {
+    return op::detail::is_lt(compare(lhs, rhs));
   }
 
   Ptr get(void* ptr, FieldId id) const;

@@ -406,11 +406,11 @@ struct VoidErasedOp : BaseErasedOp {
   }
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const RuntimeBase&) { return true; }
-  static int compare(const void*, const RuntimeBase& rhs) {
+  static folly::ordering compare(const void*, const RuntimeBase& rhs) {
     if (!rhs.type().empty()) {
       bad_op();
     }
-    return 0;
+    return folly::ordering::eq;
   }
   static void clear(void*) {}
 };

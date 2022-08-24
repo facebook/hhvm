@@ -58,13 +58,23 @@ struct BaseAnyOp : type::detail::BaseErasedOp {
     return op::identical<Tag>(ref(lhs), rhs.as<Tag>());
   }
 
-  static int compare(const void* lhs, const RuntimeBase& rhs) {
+  static folly::ordering compare(const void* lhs, const RuntimeBase& rhs) {
     if (const T* ptr = rhs.tryAs<Tag>()) {
-      return op::equal<Tag>(ref(lhs), *ptr) ? 0 : 1;
+      return cmp<Tag>(ref(lhs), *ptr);
     }
     // TODO(afuller): Throw bad_op() when all compatible type overloads are
     // implemented.
     unimplemented();
+  }
+
+ private:
+  template <typename UTag>
+  static if_comparable<UTag> cmp(const T& lhs, const T& rhs) {
+    return op::compare<Tag>(lhs, rhs);
+  }
+  template <typename UTag>
+  static if_not_comparable<UTag> cmp(const T& lhs, const T& rhs) {
+    return op::equal<Tag>(lhs, rhs) ? folly::ordering::eq : folly::ordering::gt;
   }
 };
 

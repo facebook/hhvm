@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2986d7d1b25b1b225077b0ef5e2b97ea>>
+// @generated SignedSource<<b35c049dcb84f498cb007487751490d0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -770,15 +770,14 @@ pub enum Expr_<'a, Ex, En> {
             oxidized::aast::PropOrMethod,
         ),
     ),
-    /// Static property or method access.
+    /// Static property or dynamic method access. The rhs of the :: begins with a $.
     ///
     ///     Foo::$bar               // Is_prop
     ///     $some_classname::$bar   // Is_prop
     ///     Foo::${$bar}            // Is_prop, only in partial mode
-    ///
-    ///     Foo::bar();             // Is_method
-    ///     Foo::$bar();            // Is_method, name stored in local $bar
     ///     (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    ///
+    ///     Foo::$bar();            // Is_method, name stored in local $bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Class_get")]
     #[rust_to_ocaml(inline_tuple)]
@@ -791,7 +790,7 @@ pub enum Expr_<'a, Ex, En> {
     ),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
-    /// method call.
+    /// method call. The rhs of the :: does not begin with $.
     ///
     /// This is not ambiguous, because constants are not allowed to
     /// contain functions.

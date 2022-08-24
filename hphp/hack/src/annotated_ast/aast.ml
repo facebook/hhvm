@@ -382,20 +382,19 @@ and ('ex, 'en) expr_ =
        *)
   | Class_get of
       ('ex, 'en) class_id * ('ex, 'en) class_get_expr * prop_or_method
-      (** Static property or method access.
+      (** Static property or dynamic method access. The rhs of the :: begins with a $.
        *
        *     Foo::$bar               // Is_prop
        *     $some_classname::$bar   // Is_prop
        *     Foo::${$bar}            // Is_prop, only in partial mode
-       *
-       *     Foo::bar();             // Is_method
-       *     Foo::$bar();            // Is_method, name stored in local $bar
        *     (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+       *
+       *     Foo::$bar();            // Is_method, name stored in local $bar
        *)
   | Class_const of ('ex, 'en) class_id * pstring
       (** Class constant or static method call. As a standalone expression,
        * this is a class constant. Inside a Call node, this is a static
-       * method call.
+       * method call. The rhs of the :: does not begin with $.
        *
        * This is not ambiguous, because constants are not allowed to
        * contain functions.

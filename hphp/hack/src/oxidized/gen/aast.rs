@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f37962187589358bfd9934f30b107c50>>
+// @generated SignedSource<<e26eedd38d814655566df056b71c9683>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -615,21 +615,20 @@ pub enum Expr_<Ex, En> {
     #[rust_to_ocaml(name = "Obj_get")]
     #[rust_to_ocaml(inline_tuple)]
     ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
-    /// Static property or method access.
+    /// Static property or dynamic method access. The rhs of the :: begins with a $.
     ///
     ///     Foo::$bar               // Is_prop
     ///     $some_classname::$bar   // Is_prop
     ///     Foo::${$bar}            // Is_prop, only in partial mode
-    ///
-    ///     Foo::bar();             // Is_method
-    ///     Foo::$bar();            // Is_method, name stored in local $bar
     ///     (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    ///
+    ///     Foo::$bar();            // Is_method, name stored in local $bar
     #[rust_to_ocaml(name = "Class_get")]
     #[rust_to_ocaml(inline_tuple)]
     ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
-    /// method call.
+    /// method call. The rhs of the :: does not begin with $.
     ///
     /// This is not ambiguous, because constants are not allowed to
     /// contain functions.

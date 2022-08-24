@@ -891,5 +891,94 @@ TEST(Object, ParseObjectWithMask) {
   testParseValueWithMask<
       ::apache::thrift::conformance::StandardProtocol::Binary>();
 }
+
+template <::apache::thrift::conformance::StandardProtocol Protocol>
+void testParseValueWithMapMask() {
+  Object obj;
+  // obj{1: map{10: {"foo": 1,
+  //                 "bar": 2},
+  //            20: {"baz": 3}},
+  //     2: set{1, 2, 3}}
+  std::map<int, std::map<std::string, int>> map = {
+      {10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}};
+  obj[FieldId{1}] = asValueStruct<
+      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(map);
+  std::set<int> set = {1, 2, 3};
+  obj[FieldId{2}] = asValueStruct<type::set<type::byte_t>>(set);
+  auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
+
+  // masks obj[1][10]["foo"] and obj[2]
+  Mask mask;
+  Value key10 = asValueStruct<type::i16_t>(10);
+  Value key20 = asValueStruct<type::i16_t>(20);
+  Value keyFoo = asValueStruct<type::string_t>("foo");
+  Value keyBar = asValueStruct<type::string_t>("bar");
+  auto& includes = mask.includes_ref().emplace();
+  includes[1]
+      .includes_map_ref()
+      .emplace()[(int64_t)&key10]
+      .includes_map_ref()
+      .emplace()[(int64_t)&keyFoo] = allMask();
+  // This is treated as allMask() as the type is set. It tests the edge case
+  // that a set field may have a map mask, since extractMaskFromPatch cannot
+  // determine if a patch is for map or set for some operators.
+  includes[2].excludes_map_ref().emplace()[99] = allMask();
+
+  Object expected;
+  // expected{1: map{10: {"foo": 1}},
+  //          2: set{1, 2, 3}}
+  std::map<int, std::map<std::string, int>> expectedMap = {{10, {{"foo", 1}}}};
+  expected[FieldId{1}] = asValueStruct<
+      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
+      expectedMap);
+  expected[FieldId{2}] = asValueStruct<type::set<type::byte_t>>(set);
+
+  // serialize the object and deserialize with mask
+  MaskedDecodeResult result =
+      parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+  EXPECT_EQ(result.included, expected);
+  EXPECT_EQ(*result.excluded.protocol(), convertStandardProtocol(Protocol));
+  auto& values = *result.excluded.values();
+  EXPECT_EQ(values.size(), 2); // map[10]["bar"] and map[20]
+  auto& keys = *result.excluded.keys();
+  EXPECT_EQ(keys.size(), 3); // 10, 20, and "bar"
+
+  auto getKeyValueId = [&](Value& key) {
+    auto it = std::find(keys.begin(), keys.end(), detail::makeValueStruct(key));
+    EXPECT_NE(it, keys.end()); // It should find the value.
+    return type::ValueId{apache::thrift::util::i32ToZigzag(it - keys.begin())};
+  };
+
+  // Excluded should contain map[10]["bar"] and map[20]
+  auto& excludedKeys =
+      result.excluded.data()->fields_ref()->at(FieldId{1}).values_ref().value();
+  EXPECT_EQ(excludedKeys.size(), 2);
+  // check map[20]
+  {
+    auto& mapEncoded = detail::getByValueId(
+        values, excludedKeys.at(getKeyValueId(key20)).full_ref().value());
+    EXPECT_EQ(
+        parseValue<protocol_reader_t<Protocol>>(mapEncoded, T_MAP).as_map(),
+        obj[FieldId{1}].as_map()[key20].as_map());
+  }
+  // check map[10]["bar"]
+  {
+    auto& nestedExcludedKeys =
+        excludedKeys.at(getKeyValueId(key10)).values_ref().value();
+    EXPECT_EQ(nestedExcludedKeys.size(), 1);
+    auto& i32Encoded = detail::getByValueId(
+        values,
+        nestedExcludedKeys.at(getKeyValueId(keyBar)).full_ref().value());
+    EXPECT_EQ(
+        parseValue<protocol_reader_t<Protocol>>(i32Encoded, T_I32).as_i32(), 2);
+  }
+}
+
+TEST(Object, ParseObjectWithMapMask) {
+  testParseValueWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact>();
+  testParseValueWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>();
+}
 } // namespace
 } // namespace apache::thrift::protocol

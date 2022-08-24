@@ -455,6 +455,9 @@ const T& getByValueId(const std::vector<T>& values, type::ValueId id) {
   return values[apache::thrift::util::zigzagToI64(static_cast<int64_t>(id))];
 }
 
+// Creates a new ValueStruct from value.
+ValueStruct makeValueStruct(Value value);
+
 // Stores the serialized data of the given type in maskedData and protocolData.
 template <typename Protocol>
 void setMaskedDataFull(
@@ -469,10 +472,12 @@ void setMaskedDataFull(
   auto cursor = prot.getCursor();
   apache::thrift::skip(prot, arg_type);
   cursor.clone(encodedValue.data().emplace(), prot.getCursor() - cursor);
-
   maskedData.full_ref() =
       type::ValueId{apache::thrift::util::i32ToZigzag(values.size() - 1)};
 }
+
+// Returns the map mask for the given key.
+int64_t getMaskKey(MaskRef ref, const Value& newKey);
 
 // parseValue with mask
 template <typename Protocol>
@@ -519,7 +524,33 @@ MaskedDecodeResultValue parseValue(
       prot.readStructEnd();
       return result;
     }
-    // TODO: handle map
+    case protocol::T_MAP: {
+      TType keyType;
+      TType valType;
+      uint32_t size;
+      prot.readMapBegin(keyType, valType, size);
+      for (uint32_t i = 0; i < size; i++) {
+        auto keyValue = parseValue(prot, keyType, string_to_binary);
+        auto key = getMaskKey(mask, keyValue);
+        MaskRef next = mask.get(MapId{key});
+        MaskedDecodeResultValue nestedResult =
+            parseValue(prot, valType, next, protocolData, string_to_binary);
+        // Set nested MaskedDecodeResult if not empty.
+        if (!apache::thrift::empty(nestedResult.included)) {
+          result.included.mapValue_ref().ensure()[keyValue] =
+              nestedResult.included;
+        }
+        if (!apache::thrift::empty(nestedResult.excluded)) {
+          auto& keys = protocolData.keys().ensure();
+          keys.push_back(makeValueStruct(keyValue));
+          type::ValueId id =
+              type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
+          result.excluded.values_ref().ensure()[id] = nestedResult.excluded;
+        }
+      }
+      prot.readMapEnd();
+      return result;
+    }
     default: {
       result.included = parseValue(prot, arg_type, string_to_binary);
       return result;

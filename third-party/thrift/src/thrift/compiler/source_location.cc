@@ -16,6 +16,8 @@
 
 #include <thrift/compiler/source_location.h>
 
+#include <fmt/format.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -27,6 +29,11 @@ namespace thrift {
 namespace compiler {
 
 namespace {
+
+struct read_result {
+  size_t count = 0;
+  int error_code = 0;
+};
 
 class file {
  private:
@@ -47,14 +54,10 @@ class file {
   file(const file&) = delete;
   void operator=(const file&) = delete;
 
-  size_t read(char* buffer, size_t size) {
+  read_result read(char* buffer, size_t size) {
     size_t result = fread(buffer, 1, size, file_);
     int error_code = errno;
-    if (result == 0 && ferror(file_)) {
-      throw std::runtime_error(
-          fmt::format("error reading from file, error code = {}", error_code));
-    }
-    return result;
+    return read_result{result, result == 0 && ferror(file_) ? error_code : 0};
   }
 };
 
@@ -86,8 +89,16 @@ source source_manager::add_file(std::string file_name) {
   auto f = file(file_name.c_str(), "rb");
   char buffer[4096];
   auto text = std::vector<char>();
-  while (size_t count = f.read(buffer, sizeof(buffer))) {
-    text.insert(text.end(), buffer, buffer + count);
+  for (;;) {
+    auto result = f.read(buffer, sizeof(buffer));
+    if (result.count == 0) {
+      if (result.error_code == 0) {
+        break;
+      }
+      throw fmt::system_error(
+          result.error_code, "error reading from {}", file_name);
+    }
+    text.insert(text.end(), buffer, buffer + result.count);
   }
   text.push_back('\0');
   return add_source(std::move(file_name), std::move(text));

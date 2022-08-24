@@ -1161,14 +1161,13 @@ class client(object):
 
     def capabilityCheck(self, optional=None, required=None):
         """Perform a server capability check"""
-        res = self.query(
-            "version", {"optional": optional or [], "required": required or []}
-        )
+        opts = {"optional": optional or [], "required": required or []}
+        res = self.query("version", opts)
 
         if not self._hasprop(res, "capabilities"):
             # Server doesn't support capabilities, so we need to
             # synthesize the results based on the version
-            capabilities.synthesize(res, optional)
+            capabilities.synthesize(res, opts)
             if "error" in res:
                 raise CommandError(res["error"])
 

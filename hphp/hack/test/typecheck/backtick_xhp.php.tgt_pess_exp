@@ -1,0 +1,6 @@
+File "backtick_xhp.php.pess", line 18, characters 10-34:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "backtick_xhp.php.pess", line 18, characters 19-24:
+  But got `string`

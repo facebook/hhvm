@@ -1,0 +1,30 @@
+File "typing_good_xhp.php.pess", line 22, characters 8-53:
+Invalid argument (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "typing_good_xhp.php.pess", line 22, characters 37-37:
+  But got `A`
+File "typing_good_xhp.php.pess", line 22, characters 8-53:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "typing_good_xhp.php.pess", line 19, characters 47-65:
+  But got `ConstVector<string>`
+File "typing_good_xhp.php.pess", line 22, characters 8-53:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "typing_good_xhp.php.pess", line 22, characters 17-17:
+  But got `int`
+File "typing_good_xhp.php.pess", line 22, characters 8-53:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "typing_good_xhp.php.pess", line 22, characters 20-26:
+  But got `string`
+File "typing_good_xhp.php.pess", line 22, characters 8-53:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "typing_good_xhp.php.pess", line 22, characters 37-37:
+  But got `A`

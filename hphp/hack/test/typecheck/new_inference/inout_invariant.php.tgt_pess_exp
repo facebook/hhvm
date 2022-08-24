@@ -1,0 +1,6 @@
+File "inout_invariant.php.pess", line 11, characters 10-45:
+Invalid return type (Typing[4110])
+  File "inout_invariant.php.pess", line 10, characters 46-85:
+  Expected `dynamic`
+  File "inout_invariant.php.pess", line 11, characters 10-45:
+  But got `(function(inout ~T $x, T $y): void) where T as supportdyn<mixed>`

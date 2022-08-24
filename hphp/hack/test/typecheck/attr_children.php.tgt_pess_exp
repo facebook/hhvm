@@ -1,0 +1,6 @@
+File "attr_children.php.pess", line 14, characters 8-24:
+The values of this `darray` are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 6, characters 27-41:
+  Expected `dynamic`
+  File "attr_children.php.pess", line 14, characters 21-22:
+  But got `string`

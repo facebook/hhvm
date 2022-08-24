@@ -1,0 +1,6 @@
+File "xhp_attr_spread_unsound.php.pess", line 28, characters 3-19:
+The values of this `darray` are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 6, characters 27-41:
+  Expected `dynamic`
+  File "xhp_attr_spread_unsound.php.pess", line 19, characters 21-24:
+  But got `:foo`

@@ -1,0 +1,6 @@
+File "dollar_xhp.php.pess", line 15, characters 10-21:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "dollar_xhp.php.pess", line 15, characters 15-15:
+  But got `string`

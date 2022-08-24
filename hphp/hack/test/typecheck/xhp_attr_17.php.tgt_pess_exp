@@ -1,0 +1,12 @@
+File "xhp_attr_17.php.pess", line 8, characters 8-46:
+The values of this `darray` are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 6, characters 27-41:
+  Expected `dynamic`
+  File "xhp_attr_17.php.pess", line 8, characters 22-26:
+  But got `string`
+File "xhp_attr_17.php.pess", line 8, characters 8-46:
+The values of this `darray` are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 6, characters 27-41:
+  Expected `dynamic`
+  File "xhp_attr_17.php.pess", line 8, characters 38-43:
+  But got `string`

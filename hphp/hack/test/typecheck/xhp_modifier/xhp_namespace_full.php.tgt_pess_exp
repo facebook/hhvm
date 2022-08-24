@@ -1,0 +1,54 @@
+File "xhp_namespace_full.php.pess", line 28, characters 5-57:
+Invalid argument (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 29, characters 8-17:
+  But got `third\bar`
+File "xhp_namespace_full.php.pess", line 28, characters 5-57:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 29, characters 8-17:
+  But got `third\bar`
+File "xhp_namespace_full.php.pess", line 34, characters 5-46:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 35, characters 8-8:
+  But got `int`
+File "xhp_namespace_full.php.pess", line 37, characters 5-36:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 37, characters 18-22:
+  But got `string`
+File "xhp_namespace_full.php.pess", line 38, characters 5-60:
+Invalid argument (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 39, characters 12-20:
+  But got `fourth\A`
+File "xhp_namespace_full.php.pess", line 38, characters 5-60:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 39, characters 12-20:
+  But got `fourth\A`
+File "xhp_namespace_full.php.pess", line 41, characters 5-97:
+Invalid argument (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 42, characters 8-18:
+  But got `second\foo`
+File "xhp_namespace_full.php.pess", line 41, characters 5-97:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 42, characters 8-18:
+  But got `second\foo`
+File "xhp_namespace_full.php.pess", line 42, characters 7-62:
+Some elements in this collection are incompatible (Typing[4110])
+  File "XHPTest.hhi", line 7, characters 20-34:
+  Expected `dynamic`
+  File "xhp_namespace_full.php.pess", line 42, characters 21-47:
+  But got `vec<vec<third\bar>>`

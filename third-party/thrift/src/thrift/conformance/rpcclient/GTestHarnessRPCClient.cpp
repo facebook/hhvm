@@ -205,7 +205,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TestBody() override {
     // Wait for client to fetch test case
     bool getTestReceived =
-        handler_->getTestReceived().wait(std::chrono::seconds(5));
+        handler_->getTestReceived().wait(std::chrono::seconds(10));
 
     // End test if client was unable to fetch test case
     if (!getTestReceived) {
@@ -215,7 +215,7 @@ class RPCClientConformanceTest : public testing::Test {
 
     // Wait for result from client
     folly::Try<ClientTestResult> actualClientResult =
-        handler_->clientResult().within(std::chrono::seconds(5)).getTry();
+        handler_->clientResult().within(std::chrono::seconds(10)).getTry();
 
     // End test if result was not received
     if (actualClientResult.hasException()) {
@@ -240,7 +240,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TearDown() override {
     clientProcess_.sendSignal(SIGINT);
     clientProcess_.waitOrTerminateOrKill(
-        std::chrono::seconds(5), std::chrono::seconds(5));
+        std::chrono::seconds(10), std::chrono::seconds(10));
   }
 
  private:

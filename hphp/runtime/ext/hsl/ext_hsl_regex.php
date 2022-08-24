@@ -62,7 +62,7 @@ namespace HH\Lib\_Private\_Regex {
     string $haystack,
     string $pattern, // actually \HH\Lib\Regex\Pattern<T>
     inout int $offset,
-  )[]: varray; // actually (?T, ?int)
+  )[]: (?T, ?int);
 
   /**
    * Tries to match $pattern in $haystack, replacing any matches with
@@ -76,5 +76,5 @@ namespace HH\Lib\_Private\_Regex {
     string $haystack,
     string $pattern, // actually \HH\Lib\Regex\Pattern<\HH\Lib\Regex\Match>
     string $replacement,
-  )[]: varray; // actually (?string, ?int)
+  )[]: (?string, ?int);
 }

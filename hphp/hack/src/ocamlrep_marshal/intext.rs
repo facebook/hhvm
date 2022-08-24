@@ -37,7 +37,7 @@ pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x76543210;
 
 #[cfg(not(target_arch = "arm"))]
 #[cfg(target_endian = "little")]
-pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x76543210;
+pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x01234567;
 
 // ---
 
@@ -95,4 +95,4 @@ pub(crate) const CODE_DOUBLE_ARRAY64_NATIVE: u8 =
 ///   sizeof(struct trail_block) and sizeof(struct output_block)
 ///   are slightly below 8Kb.
 pub(crate) const ENTRIES_PER_TRAIL_BLOCK: i16 = 1025;
-pub(crate) const SIZE_EXTERN_OUTPUT_BLOCK: i16 = 8100;
+pub(crate) const SIZE_EXTERN_OUTPUT_BLOCK: usize = 8100;

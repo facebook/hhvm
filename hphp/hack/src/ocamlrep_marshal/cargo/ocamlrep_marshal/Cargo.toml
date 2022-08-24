@@ -6,3 +6,7 @@ edition = "2021"
 
 [lib]
 path = "../../ocamlrep_marshal.rs"
+
+[dependencies]
+libc = "0.2.121"
+once_cell = "1.12"

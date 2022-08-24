@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/lib/thrift/standard.thrift"
 
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
@@ -205,7 +206,7 @@ struct StringPatch {
 @cpp.Adapter{
   underlyingName = "BinaryPatchStruct",
   extraNamespace = "",
-  name = "::apache::thrift::op::detail::AssignPatchAdapter",
+  name = "::apache::thrift::op::detail::BinaryPatchAdapter",
 }
 struct BinaryPatch {
   /**
@@ -213,7 +214,16 @@ struct BinaryPatch {
    *
    * If set, all other patch operations are ignored.
    */
-  1: optional binary (cpp.type = "::folly::IOBuf") assign;
+  1: optional standard.ByteBuffer assign;
+
+  /** Clear a given binary. */
+  2: bool clear;
+
+  /** Prepend to a given value. */
+  8: standard.ByteBuffer prepend;
+
+  /** Append to a given value. */
+  9: standard.ByteBuffer append;
 }
 
 /**

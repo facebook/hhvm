@@ -19,6 +19,7 @@ if sys.version_info[0] >= 3:
 import thrift.annotation.thrift.ttypes
 import thrift.annotation.scope.ttypes
 import thrift.annotation.cpp.ttypes
+import thrift.lib.thrift.standard.ttypes
 
 
 import pprint
@@ -1337,6 +1338,9 @@ class BinaryPatch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear a given binary.
+   - prepend: Prepend to a given value.
+   - append: Append to a given value.
   """
 
   thrift_spec = None
@@ -1364,6 +1368,21 @@ class BinaryPatch:
           self.assign = iprot.readString()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.STRING:
+          self.prepend = iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.STRING:
+          self.append = iprot.readString()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1380,6 +1399,18 @@ class BinaryPatch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.STRING, 1)
       oprot.writeString(self.assign)
+      oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
+      oprot.writeFieldEnd()
+    if self.prepend != None:
+      oprot.writeFieldBegin('prepend', TType.STRING, 8)
+      oprot.writeString(self.prepend)
+      oprot.writeFieldEnd()
+    if self.append != None:
+      oprot.writeFieldBegin('append', TType.STRING, 9)
+      oprot.writeString(self.append)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1398,6 +1429,12 @@ class BinaryPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = json_obj['assign']
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
+    if 'prepend' in json_obj and json_obj['prepend'] is not None:
+      self.prepend = json_obj['prepend']
+    if 'append' in json_obj and json_obj['append'] is not None:
+      self.append = json_obj['append']
 
   def __repr__(self):
     L = []
@@ -1406,6 +1443,18 @@ class BinaryPatch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
+    if self.prepend is not None:
+      value = pprint.pformat(self.prepend, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    prepend=%s' % (value))
+    if self.append is not None:
+      value = pprint.pformat(self.append, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    append=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -1420,6 +1469,9 @@ class BinaryPatch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
+      'prepend',
+      'append',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -3188,6 +3240,14 @@ all_structs.append(BinaryPatch)
 BinaryPatch.thrift_spec = (
   None, # 0
   (1, TType.STRING, 'assign', False, None, 1, ), # 1
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  None, # 3
+  None, # 4
+  None, # 5
+  None, # 6
+  None, # 7
+  (8, TType.STRING, 'prepend', False, None, 2, ), # 8
+  (9, TType.STRING, 'append', False, None, 2, ), # 9
 )
 
 BinaryPatch.thrift_struct_annotations = {
@@ -3195,13 +3255,19 @@ BinaryPatch.thrift_struct_annotations = {
 BinaryPatch.thrift_field_annotations = {
 }
 
-def BinaryPatch__init__(self, assign=None,):
+def BinaryPatch__init__(self, assign=None, clear=None, prepend=None, append=None,):
   self.assign = assign
+  self.clear = clear
+  self.prepend = prepend
+  self.append = append
 
 BinaryPatch.__init__ = BinaryPatch__init__
 
 def BinaryPatch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
+  state.setdefault('prepend', None)
+  state.setdefault('append', None)
   self.__dict__ = state
 
 BinaryPatch.__getstate__ = lambda self: self.__dict__.copy()

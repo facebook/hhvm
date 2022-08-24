@@ -260,6 +260,107 @@ class StringPatch : public BaseClearValuePatch<Patch, StringPatch<Patch>> {
   }
 };
 
+// Patch must have the following fields:
+//   optional T assign;
+//   bool clear;
+//   T append;
+//   T prepend;
+template <typename Patch>
+class BinaryPatch : public BaseClearValuePatch<Patch, BinaryPatch<Patch>> {
+  using Base = BaseClearValuePatch<Patch, BinaryPatch>;
+  using T = typename Base::value_type;
+
+ public:
+  using Base::apply;
+  using Base::Base;
+  using Base::operator=;
+
+  template <typename... Args>
+  static BinaryPatch createAppend(Args&&... args) {
+    BinaryPatch patch;
+    patch.append(std::forward<Args>(args)...);
+    return patch;
+  }
+
+  template <typename U>
+  static BinaryPatch createPrepend(U&& val) {
+    BinaryPatch patch;
+    patch.prepend(std::forward<U>(val));
+    return patch;
+  }
+
+  template <typename... Args>
+  void append(Args&&... args) {
+    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+    auto& cur = assignOr(*data_.append());
+    queue.append(cur);
+    queue.append(std::forward<Args>(args)...);
+    cur = queue.moveAsValue();
+  }
+
+  template <typename U>
+  void prepend(U&& val) {
+    auto& cur = assignOr(*data_.prepend());
+    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+    queue.append(std::forward<U>(val));
+    queue.append(cur);
+    cur = queue.moveAsValue();
+  }
+
+  void apply(T& val) const {
+    if (applyAssign(val)) {
+      return;
+    }
+
+    if (data_.clear() == true) {
+      val.clear();
+    }
+
+    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+    queue.append(std::move(*data_.prepend()));
+    queue.append(val);
+    queue.append(std::move(*data_.append()));
+    val = queue.moveAsValue();
+  }
+
+  template <typename U>
+  void merge(U&& next) {
+    if (!mergeAssignAndClear(std::forward<U>(next))) {
+      folly::IOBufQueue prependQueue{folly::IOBufQueue::cacheChainLength()};
+      prependQueue.append(*std::forward<U>(next).toThrift().prepend());
+      prependQueue.append(std::move(*data_.prepend()));
+      data_.prepend() = prependQueue.moveAsValue();
+
+      folly::IOBufQueue appendQueue{folly::IOBufQueue::cacheChainLength()};
+      appendQueue.append(std::move(*data_.append()));
+      appendQueue.append(*std::forward<U>(next).toThrift().append());
+      data_.append() = appendQueue.moveAsValue();
+    }
+  }
+
+  template <typename U>
+  BinaryPatch& operator+=(U&& val) {
+    append(std::forward<U>(val));
+    return *this;
+  }
+
+ private:
+  using Base::applyAssign;
+  using Base::assignOr;
+  using Base::data_;
+  using Base::mergeAssignAndClear;
+
+  template <typename U>
+  friend BinaryPatch operator+(BinaryPatch lhs, U&& rhs) {
+    return lhs += std::forward<U>(rhs);
+  }
+  template <typename U>
+  friend BinaryPatch operator+(U&& lhs, BinaryPatch rhs) {
+    rhs.prepend(std::forward<U>(lhs));
+    return rhs;
+  }
+};
+
 } // namespace detail
 } // namespace op
 } // namespace thrift

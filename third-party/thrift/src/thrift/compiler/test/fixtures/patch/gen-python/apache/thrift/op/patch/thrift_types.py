@@ -14,6 +14,8 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+import apache.thrift.type.standard.thrift_types
+
 import facebook.thrift.annotation.cpp.thrift_types
 
 import facebook.thrift.annotation.scope.thrift_types
@@ -491,7 +493,31 @@ class BinaryPatch(metaclass=_fbthrift_python_types.StructMeta):
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
-            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter class
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter class
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "prepend",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter class
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "append",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter class
         ),
@@ -1059,7 +1085,7 @@ class OptionalBinaryPatch(metaclass=_fbthrift_python_types.StructMeta):
             4,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "ensure",  # name
-            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter class
         ),

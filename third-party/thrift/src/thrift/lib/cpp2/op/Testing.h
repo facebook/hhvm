@@ -122,6 +122,49 @@ void expectPatch(
     EXPECT_EQ(actual3, actual);
   }
 }
+
+template <typename P>
+void expectPatch(
+    P patch,
+    const folly::IOBuf& actual,
+    const folly::IOBuf& expected1,
+    const folly::IOBuf& expected2) {
+  { // Applying twice produces the expected results.
+    auto actual1 = actual;
+    patch.apply(actual1);
+    EXPECT_TRUE(folly::IOBufEqualTo{}(actual1, expected1))
+        << "actual " << actual1.to<std::string>() << " expected "
+        << expected1.to<std::string>();
+    if (!folly::IOBufEqualTo{}(actual1, expected1)) {
+      EXPECT_FALSE(patch.empty());
+    }
+    patch.apply(actual1);
+    EXPECT_TRUE(folly::IOBufEqualTo{}(actual1, expected2))
+        << "actual " << actual1.to<std::string>() << " expected "
+        << expected2.to<std::string>();
+    ;
+  }
+  { // Merging with self, is the same as applying twice.
+    patch.merge(patch);
+    auto actual2 = actual;
+    patch.apply(actual2);
+    EXPECT_TRUE(folly::IOBufEqualTo{}(actual2, expected2))
+        << "actual " << actual2.to<std::string>() << " expected "
+        << expected2.to<std::string>();
+    ;
+  }
+  { // Reset should be a noop patch.
+    patch.reset();
+    EXPECT_TRUE(patch.empty());
+    auto actual3 = actual;
+    patch.apply(actual3);
+    EXPECT_TRUE(folly::IOBufEqualTo{}(actual3, actual))
+        << "actual " << actual3.to<std::string>() << " expected "
+        << actual.to<std::string>();
+    ;
+  }
+}
+
 template <typename P, typename T1 = typename P::value_type, typename T2 = T1>
 void expectPatch(P patch, const T1& actual, const T2& expected) {
   expectPatch(std::move(patch), actual, expected, expected);

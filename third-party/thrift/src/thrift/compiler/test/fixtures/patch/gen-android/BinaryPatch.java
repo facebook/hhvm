@@ -28,6 +28,9 @@ import com.facebook.thrift.protocol.*;
 public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("BinaryPatch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.STRING, (short)1);
+  private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
+  private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.STRING, (short)8);
+  private static final TField APPEND_FIELD_DESC = new TField("append", TType.STRING, (short)9);
 
   /**
    * Assign to a given value.
@@ -35,11 +38,32 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
    * If set, all other patch operations are ignored.
    */
   public final byte[] assign;
+  /**
+   * Clear a given binary.
+   */
+  public final Boolean clear;
+  /**
+   * Prepend to a given value.
+   */
+  public final byte[] prepend;
+  /**
+   * Append to a given value.
+   */
+  public final byte[] append;
   public static final int ASSIGN = 1;
+  public static final int CLEAR = 2;
+  public static final int PREPEND = 8;
+  public static final int APPEND = 9;
 
   public BinaryPatch(
-      byte[] assign) {
+      byte[] assign,
+      Boolean clear,
+      byte[] prepend,
+      byte[] append) {
     this.assign = assign;
+    this.clear = clear;
+    this.prepend = prepend;
+    this.append = append;
   }
 
   /**
@@ -50,6 +74,21 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
       this.assign = null;
+    }
+    if (other.isSetClear()) {
+      this.clear = TBaseHelper.deepCopy(other.clear);
+    } else {
+      this.clear = null;
+    }
+    if (other.isSetPrepend()) {
+      this.prepend = TBaseHelper.deepCopy(other.prepend);
+    } else {
+      this.prepend = null;
+    }
+    if (other.isSetAppend()) {
+      this.append = TBaseHelper.deepCopy(other.append);
+    } else {
+      this.append = null;
     }
   }
 
@@ -71,6 +110,42 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
     return this.assign != null;
   }
 
+  /**
+   * Clear a given binary.
+   */
+  public Boolean isClear() {
+    return this.clear;
+  }
+
+  // Returns true if field clear is set (has been assigned a value) and false otherwise
+  public boolean isSetClear() {
+    return this.clear != null;
+  }
+
+  /**
+   * Prepend to a given value.
+   */
+  public byte[] getPrepend() {
+    return this.prepend;
+  }
+
+  // Returns true if field prepend is set (has been assigned a value) and false otherwise
+  public boolean isSetPrepend() {
+    return this.prepend != null;
+  }
+
+  /**
+   * Append to a given value.
+   */
+  public byte[] getAppend() {
+    return this.append;
+  }
+
+  // Returns true if field append is set (has been assigned a value) and false otherwise
+  public boolean isSetAppend() {
+    return this.append != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -83,12 +158,18 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsSlow(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetClear(), that.isSetClear(), this.clear, that.clear)) { return false; }
+
+    if (!TBaseHelper.equalsSlow(this.isSetPrepend(), that.isSetPrepend(), this.prepend, that.prepend)) { return false; }
+
+    if (!TBaseHelper.equalsSlow(this.isSetAppend(), that.isSetAppend(), this.append, that.append)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign});
+    return Arrays.deepHashCode(new Object[] {assign, clear, prepend, append});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -98,6 +179,9 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
 
   public static BinaryPatch deserialize(TProtocol iprot) throws TException {
     byte[] tmp_assign = null;
+    Boolean tmp_clear = null;
+    byte[] tmp_prepend = null;
+    byte[] tmp_append = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -115,6 +199,27 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            tmp_clear = iprot.readBool();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case PREPEND:
+          if (__field.type == TType.STRING) {
+            tmp_prepend = iprot.readBinary();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case APPEND:
+          if (__field.type == TType.STRING) {
+            tmp_append = iprot.readBinary();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -126,6 +231,9 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
     BinaryPatch _that;
     _that = new BinaryPatch(
       tmp_assign
+      ,tmp_clear
+      ,tmp_prepend
+      ,tmp_append
     );
     _that.validate();
     return _that;
@@ -141,6 +249,21 @@ public class BinaryPatch implements TBase, java.io.Serializable, Cloneable {
         oprot.writeBinary(this.assign);
         oprot.writeFieldEnd();
       }
+    }
+    if (this.clear != null) {
+      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+      oprot.writeBool(this.clear);
+      oprot.writeFieldEnd();
+    }
+    if (this.prepend != null) {
+      oprot.writeFieldBegin(PREPEND_FIELD_DESC);
+      oprot.writeBinary(this.prepend);
+      oprot.writeFieldEnd();
+    }
+    if (this.append != null) {
+      oprot.writeFieldBegin(APPEND_FIELD_DESC);
+      oprot.writeBinary(this.append);
+      oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
     oprot.writeStructEnd();

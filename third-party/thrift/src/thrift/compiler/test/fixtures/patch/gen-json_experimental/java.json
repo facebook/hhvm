@@ -1,0 +1,36 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "java",
+  "namespaces": {
+    "go": "thrift.annotation.java",
+    "java": "com.facebook.thrift.annotation.java_deprecated",
+    "py": "thrift.annotation.java",
+    "py.asyncio": "facebook_thrift_asyncio.annotation.java"
+  },  "structs" :
+  {
+      "Adapter" : {
+        "name" : "Adapter",
+        "fields" : {
+          "adapterClassName" : {
+            "name" : "adapterClassName",
+            "key" : 1,
+            "lineno" : 34,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          },
+          "typeClassName" : {
+            "name" : "typeClassName",
+            "key" : 2,
+            "lineno" : 37,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 31
+      }
+      },
+  "source_path" : "thrift/annotation/java",
+  "py_namespace" : "thrift.annotation.java"
+}

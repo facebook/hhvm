@@ -13,6 +13,7 @@ import (
 	thrift0 "thrift/annotation/thrift"
 	scope1 "thrift/annotation/scope"
 	cpp2 "thrift/annotation/cpp"
+	standard3 "thrift/lib/thrift/standard"
 
 )
 
@@ -26,6 +27,7 @@ var _ = context.Background
 var _ = thrift0.GoUnusedProtection__
 var _ = scope1.GoUnusedProtection__
 var _ = cpp2.GoUnusedProtection__
+var _ = standard3.GoUnusedProtection__
 
 func init() {
 }

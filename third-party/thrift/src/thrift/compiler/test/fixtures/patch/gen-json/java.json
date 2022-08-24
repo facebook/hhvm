@@ -1,0 +1,53 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "java",
+  "structs" : {
+    "Adapter" : {
+      "lineno" : 31,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "adapterClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 30
+            }
+          }
+        },
+        "typeClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 37,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 37,
+              "column" : 27
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 31,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 63
+        }
+      }
+    }
+  }
+}

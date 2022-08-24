@@ -1,0 +1,641 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "standard",
+  "constants" : {
+    "minTypeHashBytes" : {
+      "lineno" : 43,
+      "value" : 8,
+      "type_enum" : "BYTE",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 43,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 43,
+          "column" : 33
+        }
+      }
+    },
+    "defaultTypeHashBytes" : {
+      "lineno" : 44,
+      "value" : 16,
+      "type_enum" : "BYTE",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 44,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 44,
+          "column" : 38
+        }
+      }
+    }
+  },
+  "enumerations" : {
+    "StandardProtocol" : {
+      "lineno" : 69,
+      "constants" : {
+        "Custom" : 0,
+        "Binary" : 1,
+        "Compact" : 2,
+        "Json" : 3,
+        "SimpleJson" : 4
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 69,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 79,
+          "column" : 2
+        }
+      }
+    },
+    "Void" : {
+      "lineno" : 82,
+      "constants" : {
+        "NoValue" : 0
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 82,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 84,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "ByteString" : {
+      "lineno" : 49,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 53,
+          "column" : 58
+        }
+      }
+    },
+    "ByteBuffer" : {
+      "lineno" : 62,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 62,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 66,
+          "column" : 55
+        }
+      }
+    },
+    "Uuid" : {
+      "lineno" : 94,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 94,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 95,
+          "column" : 20
+        }
+      }
+    },
+    "UuidString" : {
+      "lineno" : 108,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 108,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 109,
+          "column" : 26
+        }
+      }
+    },
+    "Path" : {
+      "lineno" : 114,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 114,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 115,
+          "column" : 20
+        }
+      }
+    },
+    "PathSegments" : {
+      "lineno" : 122,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 122,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 123,
+          "column" : 34
+        }
+      }
+    },
+    "Domain" : {
+      "lineno" : 130,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 130,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 131,
+          "column" : 22
+        }
+      }
+    },
+    "DomainLabels" : {
+      "lineno" : 138,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 138,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 139,
+          "column" : 34
+        }
+      }
+    },
+    "QueryString" : {
+      "lineno" : 148,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 148,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 149,
+          "column" : 27
+        }
+      }
+    },
+    "QueryArgs" : {
+      "lineno" : 157,
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+      "source_range" : {
+        "begin" : {
+          "line" : 157,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 158,
+          "column" : 38
+        }
+      }
+    },
+    "Uri" : {
+      "lineno" : 168,
+      "type_enum" : "STRING",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 168,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 169,
+          "column" : 37
+        }
+      }
+    }
+  },
+  "structs" : {
+    "UriStruct" : {
+      "lineno" : 179,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "scheme" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 182,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 182,
+              "column" : 20
+            }
+          }
+        },
+        "domain" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "DomainLabels",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 185,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 185,
+              "column" : 26
+            }
+          }
+        },
+        "path" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "PathSegments",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 188,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 188,
+              "column" : 24
+            }
+          }
+        },
+        "query" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "QueryArgs",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 191,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 191,
+              "column" : 22
+            }
+          }
+        },
+        "fragment" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 194,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 194,
+              "column" : 22
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 179,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 195,
+          "column" : 48
+        }
+      }
+    },
+    "TypeUri" : {
+      "lineno" : 198,
+      "is_exception" : false,
+      "is_union" : true,
+      "fields" : {
+        "uri" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "Uri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 200,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 200,
+              "column" : 14
+            }
+          }
+        },
+        "typeHashPrefixSha2_256" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "ByteString",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 202,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 202,
+              "column" : 40
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 198,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 203,
+          "column" : 2
+        }
+      }
+    },
+    "TypeName" : {
+      "lineno" : 206,
+      "is_exception" : false,
+      "is_union" : true,
+      "fields" : {
+        "boolType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 208,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 208,
+              "column" : 20
+            }
+          }
+        },
+        "byteType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 211,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 211,
+              "column" : 20
+            }
+          }
+        },
+        "i16Type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 214,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 214,
+              "column" : 19
+            }
+          }
+        },
+        "i32Type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 217,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 217,
+              "column" : 19
+            }
+          }
+        },
+        "i64Type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 220,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 220,
+              "column" : 19
+            }
+          }
+        },
+        "floatType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 223,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 223,
+              "column" : 21
+            }
+          }
+        },
+        "doubleType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 226,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 226,
+              "column" : 22
+            }
+          }
+        },
+        "stringType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 229,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 229,
+              "column" : 22
+            }
+          }
+        },
+        "binaryType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 232,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 232,
+              "column" : 22
+            }
+          }
+        },
+        "enumType" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "TypeUri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 235,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 235,
+              "column" : 24
+            }
+          }
+        },
+        "structType" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "TypeUri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 237,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 237,
+              "column" : 26
+            }
+          }
+        },
+        "unionType" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "TypeUri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 238,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 238,
+              "column" : 25
+            }
+          }
+        },
+        "exceptionType" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "TypeUri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 239,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 239,
+              "column" : 29
+            }
+          }
+        },
+        "listType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 240,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 240,
+              "column" : 21
+            }
+          }
+        },
+        "setType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 241,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 241,
+              "column" : 20
+            }
+          }
+        },
+        "mapType" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "Void",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 242,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 242,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 206,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 243,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

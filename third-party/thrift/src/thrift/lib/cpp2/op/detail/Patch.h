@@ -149,6 +149,7 @@ using AssignPatchAdapter = PatchAdapter<AssignPatch>;
 using BoolPatchAdapter = PatchAdapter<BoolPatch>;
 using NumberPatchAdapter = PatchAdapter<NumberPatch>;
 using StringPatchAdapter = PatchAdapter<StringPatch>;
+using BinaryPatchAdapter = PatchAdapter<BinaryPatch>;
 
 // Adapters for structred types.
 using FieldPatchAdapter = PatchAdapter<FieldPatch>;

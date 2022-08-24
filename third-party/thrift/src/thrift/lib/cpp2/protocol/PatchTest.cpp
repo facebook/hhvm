@@ -206,6 +206,42 @@ TEST_F(PatchTest, Binary) {
       patchValue,
       *apply(op::BinaryPatch{} = patchValue, binaryData).binaryValue_ref()));
 
+  // Append
+  {
+    op::BinaryPatch binPatch;
+    binPatch.append(patchValue);
+    std::string appended = data + patch;
+    EXPECT_TRUE(folly::IOBufEqualTo{}(
+        folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
+        *apply(binPatch, binaryData).binaryValue_ref()));
+    EXPECT_EQ(getMask(binPatch), allMask());
+  }
+  {
+    op::BinaryPatch binPatch;
+    binPatch.append("");
+    EXPECT_TRUE(folly::IOBufEqualTo{}(
+        toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
+    EXPECT_EQ(getMask(binPatch), noneMask());
+  }
+
+  // Prepend
+  {
+    op::BinaryPatch binPatch;
+    binPatch.prepend(patch);
+    std::string appended = patch + data;
+    EXPECT_TRUE(folly::IOBufEqualTo{}(
+        folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
+        *apply(binPatch, binaryData).binaryValue_ref()));
+    EXPECT_EQ(getMask(binPatch), allMask());
+  }
+  {
+    op::BinaryPatch binPatch;
+    binPatch.prepend("");
+    EXPECT_TRUE(folly::IOBufEqualTo{}(
+        toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
+    EXPECT_EQ(getMask(binPatch), noneMask());
+  }
+
   // Wrong patch provided
   EXPECT_THROW(apply(op::I16Patch{}, binaryData), std::runtime_error);
 

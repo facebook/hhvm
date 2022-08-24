@@ -21,122 +21,37 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * An annotation that applies a C++ adapter to typedef, field, or struct.
- * 
- * For example:
- * 
- *   @cpp.Adapter{name = "IdAdapter"}
- *   typedef i64 MyI64;
- * 
- * Here the type `MyI64` has the C++ adapter `IdAdapter`.
- * 
- *   struct User {
- *     @cpp.Adapter{name = "IdAdapter"}
- *     1: i64 id;
- *   }
- * 
- * Here the field `id` has the C++ adapter `IdAdapter`.
- */
 @SuppressWarnings({ "unused", "serial" })
 public class Adapter implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Adapter");
-  private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
-  private static final TField ADAPTED_TYPE_FIELD_DESC = new TField("adaptedType", TType.STRING, (short)2);
-  private static final TField UNDERLYING_NAME_FIELD_DESC = new TField("underlyingName", TType.STRING, (short)3);
-  private static final TField EXTRA_NAMESPACE_FIELD_DESC = new TField("extraNamespace", TType.STRING, (short)4);
-  private static final TField MOVE_ONLY_FIELD_DESC = new TField("moveOnly", TType.BOOL, (short)5);
+  private static final TField ADAPTER_CLASS_NAME_FIELD_DESC = new TField("adapterClassName", TType.STRING, (short)1);
+  private static final TField TYPE_CLASS_NAME_FIELD_DESC = new TField("typeClassName", TType.STRING, (short)2);
 
-  /**
-   * The name of a C++ adapter type used to convert between Thrift and native
-   * C++ representation.
-   * 
-   * The adapter can be either a Type or Field adapter, providing either of the following APIs:
-   * 
-   *     struct ThriftTypeAdapter {
-   *       static AdaptedType fromThrift(ThriftType thrift);
-   *       static {const ThriftType& | ThriftType} toThrift(const AdaptedType& native);
-   *     };
-   * 
-   *     struct ThriftFieldAdapter {
-   *       // Context is an instantiation of apache::thrift::FieldContext
-   *       template <class Context>
-   *       static void construct(AdaptedType& field, Context ctx);
-   * 
-   *       template <class Context>
-   *       static AdaptedType fromThriftField(ThriftType value, Context ctx);
-   * 
-   *       template <class Context>
-   *       static {const ThriftType& | ThriftType} toThrift(const AdaptedType& adapted, Context ctx);
-   *     };
-   */
-  public final String name;
-  /**
-   * It is sometimes necessary to specify AdaptedType here (in case the codegen would
-   * have a circular depdenceny, which will cause the C++ build to fail).
-   */
-  public final String adaptedType;
-  /**
-   * When applied directly to a type (as opposed to on a typedef) the IDL name of the
-   * type will refer to the adapted type in C++ and the underlying thrift struct will be
-   * generated in a nested namespace and/or with a different name. By default the struct
-   * will be generated in a nested 'detail' namespace with the same name,
-   * but both of these can be changed by setting these fields.
-   * Empty string disables the nested namespace and uses the IDL name for the struct.
-   */
-  public final String underlyingName;
-  public final String extraNamespace;
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public final Boolean moveOnly;
-  public static final int NAME = 1;
-  public static final int ADAPTEDTYPE = 2;
-  public static final int UNDERLYINGNAME = 3;
-  public static final int EXTRANAMESPACE = 4;
-  public static final int MOVEONLY = 5;
+  public final String adapterClassName;
+  public final String typeClassName;
+  public static final int ADAPTERCLASSNAME = 1;
+  public static final int TYPECLASSNAME = 2;
 
   public Adapter(
-      String name,
-      String adaptedType,
-      String underlyingName,
-      String extraNamespace,
-      Boolean moveOnly) {
-    this.name = name;
-    this.adaptedType = adaptedType;
-    this.underlyingName = underlyingName;
-    this.extraNamespace = extraNamespace;
-    this.moveOnly = moveOnly;
+      String adapterClassName,
+      String typeClassName) {
+    this.adapterClassName = adapterClassName;
+    this.typeClassName = typeClassName;
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
   public Adapter(Adapter other) {
-    if (other.isSetName()) {
-      this.name = TBaseHelper.deepCopy(other.name);
+    if (other.isSetAdapterClassName()) {
+      this.adapterClassName = TBaseHelper.deepCopy(other.adapterClassName);
     } else {
-      this.name = null;
+      this.adapterClassName = null;
     }
-    if (other.isSetAdaptedType()) {
-      this.adaptedType = TBaseHelper.deepCopy(other.adaptedType);
+    if (other.isSetTypeClassName()) {
+      this.typeClassName = TBaseHelper.deepCopy(other.typeClassName);
     } else {
-      this.adaptedType = null;
-    }
-    if (other.isSetUnderlyingName()) {
-      this.underlyingName = TBaseHelper.deepCopy(other.underlyingName);
-    } else {
-      this.underlyingName = null;
-    }
-    if (other.isSetExtraNamespace()) {
-      this.extraNamespace = TBaseHelper.deepCopy(other.extraNamespace);
-    } else {
-      this.extraNamespace = null;
-    }
-    if (other.isSetMoveOnly()) {
-      this.moveOnly = TBaseHelper.deepCopy(other.moveOnly);
-    } else {
-      this.moveOnly = null;
+      this.typeClassName = null;
     }
   }
 
@@ -144,87 +59,22 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
     return new Adapter(this);
   }
 
-  /**
-   * The name of a C++ adapter type used to convert between Thrift and native
-   * C++ representation.
-   * 
-   * The adapter can be either a Type or Field adapter, providing either of the following APIs:
-   * 
-   *     struct ThriftTypeAdapter {
-   *       static AdaptedType fromThrift(ThriftType thrift);
-   *       static {const ThriftType& | ThriftType} toThrift(const AdaptedType& native);
-   *     };
-   * 
-   *     struct ThriftFieldAdapter {
-   *       // Context is an instantiation of apache::thrift::FieldContext
-   *       template <class Context>
-   *       static void construct(AdaptedType& field, Context ctx);
-   * 
-   *       template <class Context>
-   *       static AdaptedType fromThriftField(ThriftType value, Context ctx);
-   * 
-   *       template <class Context>
-   *       static {const ThriftType& | ThriftType} toThrift(const AdaptedType& adapted, Context ctx);
-   *     };
-   */
-  public String getName() {
-    return this.name;
+  public String getAdapterClassName() {
+    return this.adapterClassName;
   }
 
-  // Returns true if field name is set (has been assigned a value) and false otherwise
-  public boolean isSetName() {
-    return this.name != null;
+  // Returns true if field adapterClassName is set (has been assigned a value) and false otherwise
+  public boolean isSetAdapterClassName() {
+    return this.adapterClassName != null;
   }
 
-  /**
-   * It is sometimes necessary to specify AdaptedType here (in case the codegen would
-   * have a circular depdenceny, which will cause the C++ build to fail).
-   */
-  public String getAdaptedType() {
-    return this.adaptedType;
+  public String getTypeClassName() {
+    return this.typeClassName;
   }
 
-  // Returns true if field adaptedType is set (has been assigned a value) and false otherwise
-  public boolean isSetAdaptedType() {
-    return this.adaptedType != null;
-  }
-
-  /**
-   * When applied directly to a type (as opposed to on a typedef) the IDL name of the
-   * type will refer to the adapted type in C++ and the underlying thrift struct will be
-   * generated in a nested namespace and/or with a different name. By default the struct
-   * will be generated in a nested 'detail' namespace with the same name,
-   * but both of these can be changed by setting these fields.
-   * Empty string disables the nested namespace and uses the IDL name for the struct.
-   */
-  public String getUnderlyingName() {
-    return this.underlyingName;
-  }
-
-  // Returns true if field underlyingName is set (has been assigned a value) and false otherwise
-  public boolean isSetUnderlyingName() {
-    return this.underlyingName != null;
-  }
-
-  public String getExtraNamespace() {
-    return this.extraNamespace;
-  }
-
-  // Returns true if field extraNamespace is set (has been assigned a value) and false otherwise
-  public boolean isSetExtraNamespace() {
-    return this.extraNamespace != null;
-  }
-
-  /**
-   * Must set to true when adapted type is not copyable.
-   */
-  public Boolean isMoveOnly() {
-    return this.moveOnly;
-  }
-
-  // Returns true if field moveOnly is set (has been assigned a value) and false otherwise
-  public boolean isSetMoveOnly() {
-    return this.moveOnly != null;
+  // Returns true if field typeClassName is set (has been assigned a value) and false otherwise
+  public boolean isSetTypeClassName() {
+    return this.typeClassName != null;
   }
 
   @Override
@@ -237,22 +87,16 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
       return false;
     Adapter that = (Adapter)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetName(), that.isSetName(), this.name, that.name)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetAdapterClassName(), that.isSetAdapterClassName(), this.adapterClassName, that.adapterClassName)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetAdaptedType(), that.isSetAdaptedType(), this.adaptedType, that.adaptedType)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetUnderlyingName(), that.isSetUnderlyingName(), this.underlyingName, that.underlyingName)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetExtraNamespace(), that.isSetExtraNamespace(), this.extraNamespace, that.extraNamespace)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetMoveOnly(), that.isSetMoveOnly(), this.moveOnly, that.moveOnly)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetTypeClassName(), that.isSetTypeClassName(), this.typeClassName, that.typeClassName)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {name, adaptedType, underlyingName, extraNamespace, moveOnly});
+    return Arrays.deepHashCode(new Object[] {adapterClassName, typeClassName});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -261,11 +105,8 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
   }
 
   public static Adapter deserialize(TProtocol iprot) throws TException {
-    String tmp_name = null;
-    String tmp_adaptedType = null;
-    String tmp_underlyingName = null;
-    String tmp_extraNamespace = null;
-    Boolean tmp_moveOnly = null;
+    String tmp_adapterClassName = null;
+    String tmp_typeClassName = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -276,37 +117,16 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
       }
       switch (__field.id)
       {
-        case NAME:
+        case ADAPTERCLASSNAME:
           if (__field.type == TType.STRING) {
-            tmp_name = iprot.readString();
+            tmp_adapterClassName = iprot.readString();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case ADAPTEDTYPE:
+        case TYPECLASSNAME:
           if (__field.type == TType.STRING) {
-            tmp_adaptedType = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case UNDERLYINGNAME:
-          if (__field.type == TType.STRING) {
-            tmp_underlyingName = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case EXTRANAMESPACE:
-          if (__field.type == TType.STRING) {
-            tmp_extraNamespace = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case MOVEONLY:
-          if (__field.type == TType.BOOL) {
-            tmp_moveOnly = iprot.readBool();
+            tmp_typeClassName = iprot.readString();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -321,11 +141,8 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
 
     Adapter _that;
     _that = new Adapter(
-      tmp_name
-      ,tmp_adaptedType
-      ,tmp_underlyingName
-      ,tmp_extraNamespace
-      ,tmp_moveOnly
+      tmp_adapterClassName
+      ,tmp_typeClassName
     );
     _that.validate();
     return _that;
@@ -335,29 +152,14 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable {
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.name != null) {
-      oprot.writeFieldBegin(NAME_FIELD_DESC);
-      oprot.writeString(this.name);
+    if (this.adapterClassName != null) {
+      oprot.writeFieldBegin(ADAPTER_CLASS_NAME_FIELD_DESC);
+      oprot.writeString(this.adapterClassName);
       oprot.writeFieldEnd();
     }
-    if (this.adaptedType != null) {
-      oprot.writeFieldBegin(ADAPTED_TYPE_FIELD_DESC);
-      oprot.writeString(this.adaptedType);
-      oprot.writeFieldEnd();
-    }
-    if (this.underlyingName != null) {
-      oprot.writeFieldBegin(UNDERLYING_NAME_FIELD_DESC);
-      oprot.writeString(this.underlyingName);
-      oprot.writeFieldEnd();
-    }
-    if (this.extraNamespace != null) {
-      oprot.writeFieldBegin(EXTRA_NAMESPACE_FIELD_DESC);
-      oprot.writeString(this.extraNamespace);
-      oprot.writeFieldEnd();
-    }
-    if (this.moveOnly != null) {
-      oprot.writeFieldBegin(MOVE_ONLY_FIELD_DESC);
-      oprot.writeBool(this.moveOnly);
+    if (this.typeClassName != null) {
+      oprot.writeFieldBegin(TYPE_CLASS_NAME_FIELD_DESC);
+      oprot.writeString(this.typeClassName);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

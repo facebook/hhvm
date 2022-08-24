@@ -102,7 +102,32 @@ TEST(PatchTest, StringPatch) {
 }
 
 TEST(PatchTest, BinaryPatch) {
-  // TODO(afuller): Binary tests.
+  BinaryPatch patch;
+
+  auto makeIOBuf = [](folly::StringPiece value) {
+    return folly::IOBuf::wrapBufferAsValue(value);
+  };
+
+  // Empty patch does nothing.
+  test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf("hi"));
+
+  // Relative patch patches.
+  patch = BinaryPatch::createPrepend(makeIOBuf("_"));
+  patch += makeIOBuf("_");
+  test::expectPatch(
+      patch, {makeIOBuf("hi")}, makeIOBuf("_hi_"), makeIOBuf("__hi__"));
+  patch.prepend(makeIOBuf("$"));
+  patch.merge(BinaryPatch::createAppend(makeIOBuf("^")));
+  test::expectPatch(
+      patch, {makeIOBuf("hi")}, makeIOBuf("$_hi_^"), makeIOBuf("$_$_hi_^_^"));
+
+  // Assign patch assigns.
+  patch = makeIOBuf("bye");
+  test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf("bye"));
+  patch = makeIOBuf("__") + std::move(patch) + makeIOBuf("__");
+  test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf("__bye__"));
+  patch = makeIOBuf("");
+  test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf(""));
 }
 
 } // namespace op

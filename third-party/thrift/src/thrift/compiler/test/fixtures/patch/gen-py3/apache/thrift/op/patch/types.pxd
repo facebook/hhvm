@@ -44,6 +44,7 @@ from folly.optional cimport cOptional as __cOptional
 cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 cimport facebook.thrift.annotation.scope.types as _facebook_thrift_annotation_scope_types
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport apache.thrift.op.patch.types_fields as _fbthrift_types_fields
 
@@ -52,8 +53,6 @@ cdef extern from "thrift/lib/thrift/gen-py3/patch/types.h":
 
 cdef extern from "thrift/lib/cpp2/op/detail/Patch.h":
   pass
-cdef extern from *:
-    ctypedef bstring _folly_IOBuf "::folly::IOBuf"
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/patch_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:

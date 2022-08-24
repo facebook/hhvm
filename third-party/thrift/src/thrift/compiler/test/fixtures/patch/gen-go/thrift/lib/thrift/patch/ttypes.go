@@ -13,6 +13,7 @@ import (
 	thrift0 "thrift/annotation/thrift"
 	scope1 "thrift/annotation/scope"
 	cpp2 "thrift/annotation/cpp"
+	standard3 "thrift/lib/thrift/standard"
 
 )
 
@@ -26,6 +27,7 @@ var _ = context.Background
 var _ = thrift0.GoUnusedProtection__
 var _ = scope1.GoUnusedProtection__
 var _ = cpp2.GoUnusedProtection__
+var _ = standard3.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 //The meaning of the patch op field ids, in all properly formulated patch
@@ -1715,18 +1717,37 @@ func (p *StringPatch) String() string {
 //  - Assign: Assign to a given value.
 // 
 // If set, all other patch operations are ignored.
+//  - Clear: Clear a given binary.
+//  - Prepend: Prepend to a given value.
+//  - Append: Append to a given value.
 type BinaryPatch struct {
-  Assign []byte `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Assign standard3.ByteBuffer `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+  // unused fields # 3 to 7
+  Prepend standard3.ByteBuffer `thrift:"prepend,8" db:"prepend" json:"prepend"`
+  Append standard3.ByteBuffer `thrift:"append,9" db:"append" json:"append"`
 }
 
 func NewBinaryPatch() *BinaryPatch {
   return &BinaryPatch{}
 }
 
-var BinaryPatch_Assign_DEFAULT []byte
+var BinaryPatch_Assign_DEFAULT standard3.ByteBuffer
 
-func (p *BinaryPatch) GetAssign() []byte {
+func (p *BinaryPatch) GetAssign() standard3.ByteBuffer {
   return p.Assign
+}
+
+func (p *BinaryPatch) GetClear() bool {
+  return p.Clear
+}
+
+func (p *BinaryPatch) GetPrepend() standard3.ByteBuffer {
+  return p.Prepend
+}
+
+func (p *BinaryPatch) GetAppend() standard3.ByteBuffer {
+  return p.Append
 }
 func (p *BinaryPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -1745,16 +1766,49 @@ func NewBinaryPatchBuilder() *BinaryPatchBuilder{
 func (p BinaryPatchBuilder) Emit() *BinaryPatch{
   return &BinaryPatch{
     Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+    Prepend: p.obj.Prepend,
+    Append: p.obj.Append,
   }
 }
 
-func (b *BinaryPatchBuilder) Assign(assign []byte) *BinaryPatchBuilder {
+func (b *BinaryPatchBuilder) Assign(assign standard3.ByteBuffer) *BinaryPatchBuilder {
   b.obj.Assign = assign
   return b
 }
 
-func (b *BinaryPatch) SetAssign(assign []byte) *BinaryPatch {
+func (b *BinaryPatchBuilder) Clear(clear bool) *BinaryPatchBuilder {
+  b.obj.Clear = clear
+  return b
+}
+
+func (b *BinaryPatchBuilder) Prepend(prepend standard3.ByteBuffer) *BinaryPatchBuilder {
+  b.obj.Prepend = prepend
+  return b
+}
+
+func (b *BinaryPatchBuilder) Append(append standard3.ByteBuffer) *BinaryPatchBuilder {
+  b.obj.Append = append
+  return b
+}
+
+func (b *BinaryPatch) SetAssign(assign standard3.ByteBuffer) *BinaryPatch {
   b.Assign = assign
+  return b
+}
+
+func (b *BinaryPatch) SetClear(clear bool) *BinaryPatch {
+  b.Clear = clear
+  return b
+}
+
+func (b *BinaryPatch) SetPrepend(prepend standard3.ByteBuffer) *BinaryPatch {
+  b.Prepend = prepend
+  return b
+}
+
+func (b *BinaryPatch) SetAppend(append standard3.ByteBuffer) *BinaryPatch {
+  b.Append = append
   return b
 }
 
@@ -1773,6 +1827,18 @@ func (p *BinaryPatch) Read(iprot thrift.Protocol) error {
     switch fieldId {
     case 1:
       if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 8:
+      if err := p.ReadField8(iprot); err != nil {
+        return err
+      }
+    case 9:
+      if err := p.ReadField9(iprot); err != nil {
         return err
       }
     default:
@@ -1794,7 +1860,37 @@ func (p *BinaryPatch)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
-    p.Assign = v
+    temp := standard3.ByteBuffer(v)
+    p.Assign = temp
+  }
+  return nil
+}
+
+func (p *BinaryPatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *BinaryPatch)  ReadField8(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBinary(); err != nil {
+    return thrift.PrependError("error reading field 8: ", err)
+  } else {
+    temp := standard3.ByteBuffer(v)
+    p.Prepend = temp
+  }
+  return nil
+}
+
+func (p *BinaryPatch)  ReadField9(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBinary(); err != nil {
+    return thrift.PrependError("error reading field 9: ", err)
+  } else {
+    temp := standard3.ByteBuffer(v)
+    p.Append = temp
   }
   return nil
 }
@@ -1803,6 +1899,9 @@ func (p *BinaryPatch) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("BinaryPatch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField8(oprot); err != nil { return err }
+  if err := p.writeField9(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -1822,13 +1921,46 @@ func (p *BinaryPatch) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *BinaryPatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *BinaryPatch) writeField8(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("prepend", thrift.STRING, 8); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:prepend: ", p), err) }
+  if err := oprot.WriteBinary(p.Prepend); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.prepend (8) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 8:prepend: ", p), err) }
+  return err
+}
+
+func (p *BinaryPatch) writeField9(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("append", thrift.STRING, 9); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 9:append: ", p), err) }
+  if err := oprot.WriteBinary(p.Append); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.append (9) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 9:append: ", p), err) }
+  return err
+}
+
 func (p *BinaryPatch) String() string {
   if p == nil {
     return "<nil>"
   }
 
   assignVal := fmt.Sprintf("%v", p.Assign)
-  return fmt.Sprintf("BinaryPatch({Assign:%s})", assignVal)
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  prependVal := fmt.Sprintf("%v", p.Prepend)
+  appendVal := fmt.Sprintf("%v", p.Append)
+  return fmt.Sprintf("BinaryPatch({Assign:%s Clear:%s Prepend:%s Append:%s})", assignVal, clearVal, prependVal, appendVal)
 }
 
 // Attributes:
@@ -4081,7 +4213,7 @@ type OptionalBinaryPatch struct {
   // unused field # 1
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   PatchPrior *BinaryPatch `thrift:"patchPrior,3" db:"patchPrior" json:"patchPrior"`
-  Ensure []byte `thrift:"ensure,4,optional" db:"ensure" json:"ensure,omitempty"`
+  Ensure standard3.ByteBuffer `thrift:"ensure,4,optional" db:"ensure" json:"ensure,omitempty"`
   // unused field # 5
   Patch *BinaryPatch `thrift:"patch,6" db:"patch" json:"patch"`
 }
@@ -4104,9 +4236,9 @@ func (p *OptionalBinaryPatch) GetPatchPrior() *BinaryPatch {
   }
 return p.PatchPrior
 }
-var OptionalBinaryPatch_Ensure_DEFAULT []byte
+var OptionalBinaryPatch_Ensure_DEFAULT standard3.ByteBuffer
 
-func (p *OptionalBinaryPatch) GetEnsure() []byte {
+func (p *OptionalBinaryPatch) GetEnsure() standard3.ByteBuffer {
   return p.Ensure
 }
 var OptionalBinaryPatch_Patch_DEFAULT *BinaryPatch
@@ -4157,7 +4289,7 @@ func (o *OptionalBinaryPatchBuilder) PatchPrior(patchPrior *BinaryPatch) *Option
   return o
 }
 
-func (o *OptionalBinaryPatchBuilder) Ensure(ensure []byte) *OptionalBinaryPatchBuilder {
+func (o *OptionalBinaryPatchBuilder) Ensure(ensure standard3.ByteBuffer) *OptionalBinaryPatchBuilder {
   o.obj.Ensure = ensure
   return o
 }
@@ -4177,7 +4309,7 @@ func (o *OptionalBinaryPatch) SetPatchPrior(patchPrior *BinaryPatch) *OptionalBi
   return o
 }
 
-func (o *OptionalBinaryPatch) SetEnsure(ensure []byte) *OptionalBinaryPatch {
+func (o *OptionalBinaryPatch) SetEnsure(ensure standard3.ByteBuffer) *OptionalBinaryPatch {
   o.Ensure = ensure
   return o
 }
@@ -4252,7 +4384,8 @@ func (p *OptionalBinaryPatch)  ReadField4(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 4: ", err)
   } else {
-    p.Ensure = v
+    temp := standard3.ByteBuffer(v)
+    p.Ensure = temp
   }
   return nil
 }

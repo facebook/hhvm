@@ -59,6 +59,8 @@ cimport facebook.thrift.annotation.scope.types as _facebook_thrift_annotation_sc
 import facebook.thrift.annotation.scope.types as _facebook_thrift_annotation_scope_types
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
+import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport apache.thrift.op.patch.types_reflection as _types_reflection
 

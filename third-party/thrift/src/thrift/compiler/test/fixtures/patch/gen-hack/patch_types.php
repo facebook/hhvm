@@ -1689,20 +1689,41 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::STRING,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'prepend',
+      'type' => \TType::STRING,
+    ),
+    9 => shape(
+      'var' => 'append',
+      'type' => \TType::STRING,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
+    'prepend' => 8,
+    'append' => 9,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?string,
+    ?'clear' => ?bool,
+    ?'prepend' => ?string,
+    ?'append' => ?string,
   );
 
   const type TShape = shape(
     ?'assign' => ?string,
+    'clear' => bool,
+    'prepend' => string,
+    'append' => string,
     ...
   );
-  const int STRUCTURAL_ID = 6677740157096629654;
+  const int STRUCTURAL_ID = 3272396238315663852;
   /**
    * Assign to a given value.
    * 
@@ -1712,9 +1733,33 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    * 1: binary assign
    */
   public ?string $assign;
+  /**
+   * Clear a given binary.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Prepend to a given value.
+   * 
+   * Original thrift field:-
+   * 8: binary prepend
+   */
+  public string $prepend;
+  /**
+   * Append to a given value.
+   * 
+   * Original thrift field:-
+   * 9: binary append
+   */
+  public string $append;
 
-  public function __construct(?string $assign = null)[] {
+  public function __construct(?string $assign = null, ?bool $clear = null, ?string $prepend = null, ?string $append = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->prepend = $prepend ?? '';
+    $this->append = $append ?? '';
   }
 
   public static function withDefaultValues()[]: this {
@@ -1724,6 +1769,9 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'prepend'),
+      Shapes::idx($shape, 'append'),
     );
   }
 
@@ -1741,11 +1789,71 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               "id" => 1,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.ByteBuffer",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
                 )
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.ByteBuffer",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "prepend",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.ByteBuffer",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "append",
             )
           ),
         ],
@@ -1763,13 +1871,46 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         ),
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
             "underlyingName" => "BinaryPatchStruct",
             "extraNamespace" => "",
           )
         ),
       ],
       'fields' => dict[
+        'assign' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
+                "typeClassName" => "io.netty.buffer.ByteBuf",
+              )
+            ),
+          ],
+        ),
+        'prepend' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
+                "typeClassName" => "io.netty.buffer.ByteBuf",
+              )
+            ),
+          ],
+        ),
+        'append' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
+                "typeClassName" => "io.netty.buffer.ByteBuf",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -1777,12 +1918,18 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
+      $shape['prepend'],
+      $shape['append'],
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
+      'prepend' => $this->prepend,
+      'append' => $this->append,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -1798,6 +1945,15 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
     if (idx($parsed, 'assign') !== null) {
       $this->assign = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['assign']);
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'prepend') !== null) {
+      $this->prepend = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['prepend']);
+    }
+    if (idx($parsed, 'append') !== null) {
+      $this->append = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['append']);
     }
   }
 
@@ -3987,7 +4143,7 @@ class OptionalBinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStru
     ?'patch' => ?\thrift\op\BinaryPatch::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 2891389540098318350;
+  const int STRUCTURAL_ID = 2053303517850041714;
   /**
    * Clears any set value. Applies first.
    * 
@@ -4077,7 +4233,16 @@ class OptionalBinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStru
               "id" => 4,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.ByteBuffer",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
                 )
               ),
               "name" => "ensure",
@@ -4126,9 +4291,20 @@ class OptionalBinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStru
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
                 "underlyingName" => "BinaryPatchStruct",
                 "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'ensure' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\java\Adapter' => \thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
+                "typeClassName" => "io.netty.buffer.ByteBuf",
               )
             ),
           ],
@@ -4142,7 +4318,7 @@ class OptionalBinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStru
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
                 "underlyingName" => "BinaryPatchStruct",
                 "extraNamespace" => "",
               )

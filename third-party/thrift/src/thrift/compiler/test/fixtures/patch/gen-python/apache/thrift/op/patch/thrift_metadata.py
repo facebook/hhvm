@@ -10,6 +10,8 @@ from __future__ import annotations
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 
+import apache.thrift.type.standard.thrift_metadata
+
 import facebook.thrift.annotation.cpp.thrift_metadata
 
 import facebook.thrift.annotation.scope.thrift_metadata
@@ -309,17 +311,26 @@ def _fbthrift_gen_metadata_struct_BinaryPatch(metadata_struct: _fbthrift_metadat
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="assign", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=8, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="prepend", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="append", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="patch.GenerateOptionalPatch"), fields= {  }),
-            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="BinaryPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""), "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::AssignPatchAdapter"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="BinaryPatchStruct"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""), "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::BinaryPatchAdapter"),  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
      # assign
+     # clear
+     # prepend
+     # append
 
     return new_struct
 def gen_metadata_struct_BinaryPatch() -> _fbthrift_metadata.ThriftMetadata:

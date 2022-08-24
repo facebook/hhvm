@@ -43,14 +43,12 @@ I64Patch patchType(type::i64_t);
 FloatPatch patchType(type::float_t);
 DoublePatch patchType(type::double_t);
 
-// A patch for a string, which additionally supports:
+// A patches for a string and binary, which additionally supports:
 // - append(...) - Updates the patch to additionally append the given value.
 // - prepend(U&&) - Updates the patch to additionally prepend the given value.
 // - operators +, += - Alias to the appropriate append and prepend calls.
 op::StringPatch patchType(type::string_t);
-
-// TODO (afuller): Add more binary patch operations.
-BinaryPatch patchType(type::binary_t);
+op::BinaryPatch patchType(type::binary_t);
 
 OptionalBoolPatch optPatchType(type::bool_t);
 OptionalI16Patch optPatchType(type::byte_t);

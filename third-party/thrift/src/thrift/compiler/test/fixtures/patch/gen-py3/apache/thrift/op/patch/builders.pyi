@@ -16,6 +16,8 @@ import facebook.thrift.annotation.scope.types as _facebook_thrift_annotation_sco
 import facebook.thrift.annotation.scope.builders as _facebook_thrift_annotation_scope_builders
 import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
+import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
+import apache.thrift.type.standard.builders as _apache_thrift_type_standard_builders
 
 import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 

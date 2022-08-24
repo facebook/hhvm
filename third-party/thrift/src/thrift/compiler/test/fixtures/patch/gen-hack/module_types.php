@@ -2422,7 +2422,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStr
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
                 "underlyingName" => "BinaryPatchStruct",
                 "extraNamespace" => "",
               )
@@ -4766,7 +4766,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
                 "underlyingName" => "BinaryPatchStruct",
                 "extraNamespace" => "",
               )

@@ -385,6 +385,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
        PatchOp::Clear,
        PatchOp::Patch,
        PatchOp::EnsureStruct,
+       PatchOp::EnsureUnion,
        PatchOp::PatchAfter});
   if (applyAssign<type::struct_c>(patch, value)) {
     return; // Ignore all other ops.
@@ -411,11 +412,31 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     applyFieldPatch(patchFields);
   }
 
-  if (const auto* ensure = findOp(patch, PatchOp::EnsureStruct)) {
-    if (const auto* obj = ensure->if_object()) {
+  if (const auto* sensure = findOp(patch, PatchOp::EnsureStruct)) {
+    if (const auto* obj = sensure->if_object()) {
       value.members()->insert(obj->begin(), obj->end());
     } else {
       throw std::runtime_error("struct patch Ensure should contain an object");
+    }
+  }
+
+  if (const auto* uensure = findOp(patch, PatchOp::EnsureUnion)) {
+    if (const auto* ensureUnion = uensure->if_object()) {
+      if (ensureUnion->size() != 1) {
+        throw std::runtime_error(
+            "union patch Ensure should contain an object with only one field set");
+      }
+
+      auto& id = ensureUnion->begin()->first;
+      auto itr = value.members()->find(id);
+      if (itr == value.end()) {
+        value = *ensureUnion;
+      } else if (value.size() != 1) {
+        // Clear other values, without copying the current value
+        value.members() = {{itr->first, std::move(itr->second)}};
+      }
+    } else {
+      throw std::runtime_error("union patch Ensure should contain an object");
     }
   }
 

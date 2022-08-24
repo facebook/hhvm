@@ -920,12 +920,145 @@ TEST_F(PatchTest, Struct) {
     expectedMask.includes_ref().emplace()[1] = allMask();
     EXPECT_EQ(extractMaskFromPatch(patchObj), expectedMask);
   }
+  // Ensure Fail
+  {
+    test::testset::struct_with<type::list<type::i32_t>> source;
+    auto sourceValue = asValueStruct<type::struct_c>(source);
+
+    Object patchObj =
+        makePatch(op::PatchOp::EnsureStruct, asValueStruct<type::i32_t>(42));
+
+    EXPECT_THROW(
+        applyContainerPatch(patchObj, sourceValue), std::runtime_error);
+  }
   {
     Value fieldPatch;
     fieldPatch.objectValue_ref().ensure();
     expectNoop(makePatch(op::PatchOp::Patch, fieldPatch));
     expectNoop(makePatch(op::PatchOp::EnsureStruct, fieldPatch));
     expectNoop(makePatch(op::PatchOp::PatchAfter, fieldPatch));
+  }
+}
+
+TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
+  test::testset::union_with<type::i32_t> valueObject;
+  test::testset::union_with<type::i32_t> patchObject;
+
+  valueObject.field_1_ref() = 42;
+  patchObject.field_2_ref() = 43;
+
+  auto value = asValueStruct<type::union_c>(valueObject);
+  auto patchValue = asValueStruct<type::union_c>(patchObject);
+
+  auto expectNoop = [&](auto&& patchObj) {
+    EXPECT_EQ(
+        *value.objectValue_ref(),
+        *applyContainerPatch(patchObj, value).objectValue_ref());
+    EXPECT_EQ(extractMaskFromPatch(patchObj), noneMask());
+  };
+
+  // Noop
+  {
+    Object patchObj;
+    expectNoop(patchObj);
+  }
+
+  // Assign
+  {
+    Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
+    EXPECT_EQ(
+        *patchValue.objectValue_ref(),
+        *applyContainerPatch(patchObj, value).objectValue_ref());
+    EXPECT_EQ(extractMaskFromPatch(patchObj), allMask());
+  }
+
+  // Clear
+  {
+    Object patchObj =
+        makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
+    EXPECT_TRUE(applyContainerPatch(patchObj, value)
+                    .objectValue_ref()
+                    ->members()
+                    ->empty());
+    EXPECT_EQ(extractMaskFromPatch(patchObj), allMask());
+  }
+  {
+    Object patchObj =
+        makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(false));
+    expectNoop(patchObj);
+  }
+
+  // Ensure and Patch
+  {
+    test::testset::union_with<type::i32_t> source;
+    source.field_1_ref() = 42;
+    auto sourceValue = asValueStruct<type::union_c>(source);
+
+    Value ensureValuePatch;
+    Object ensureObject;
+    ensureObject.members().ensure()[2] = asValueStruct<type::i32_t>(43);
+    ensureValuePatch.objectValue_ref() = ensureObject;
+
+    Value fieldPatchValue;
+    fieldPatchValue.objectValue_ref() =
+        makePatch(op::PatchOp::Add, asValueStruct<type::i32_t>(1));
+    Value fieldPatch;
+    fieldPatch.objectValue_ref().ensure().members().ensure()[2] =
+        fieldPatchValue;
+
+    Object patchObj = patchAddOperation(
+        makePatch(op::PatchOp::PatchAfter, fieldPatch),
+        op::PatchOp::EnsureUnion,
+        ensureValuePatch);
+
+    auto obj = *applyContainerPatch(patchObj, sourceValue).objectValue_ref();
+    EXPECT_TRUE(obj.members()->find(1) == obj.members()->end());
+    auto fieldIt = obj.members()->find(2);
+    EXPECT_TRUE(fieldIt != obj.members()->end());
+    EXPECT_EQ(44, fieldIt->second.as_i32());
+  }
+  // Ensure member that is already set
+  {
+    test::testset::union_with<type::i32_t> source;
+    source.field_1_ref() = 42;
+    auto sourceValue = asValueStruct<type::union_c>(source);
+
+    Value ensureValuePatch;
+    Object ensureObject;
+    ensureObject.members().ensure()[1] = asValueStruct<type::i32_t>(43);
+    ensureValuePatch.objectValue_ref() = ensureObject;
+
+    Object patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
+
+    auto obj = *applyContainerPatch(patchObj, sourceValue).objectValue_ref();
+    auto fieldIt = obj.members()->find(1);
+    EXPECT_TRUE(obj.members()->find(2) == obj.members()->end());
+    EXPECT_TRUE(fieldIt != obj.members()->end());
+    EXPECT_EQ(42, fieldIt->second.as_i32());
+  }
+
+  // Ensure Fail
+  {
+    test::testset::union_with<type::i32_t> source;
+    source.field_1_ref() = 42;
+    auto sourceValue = asValueStruct<type::union_c>(source);
+
+    Object patchObj =
+        makePatch(op::PatchOp::EnsureUnion, asValueStruct<type::i32_t>(42));
+
+    EXPECT_THROW(
+        applyContainerPatch(patchObj, sourceValue), std::runtime_error);
+
+    // Setting union to two variants at the same time
+    Value ensureValuePatch;
+    Object ensureObject;
+    ensureObject.members().ensure()[1] = asValueStruct<type::i32_t>(43);
+    ensureObject.members().ensure()[2] = asValueStruct<type::i32_t>(43);
+    ensureValuePatch.objectValue_ref() = ensureObject;
+    patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
+
+    EXPECT_THROW(
+        applyContainerPatch(patchObj, sourceValue), std::runtime_error);
   }
 }
 

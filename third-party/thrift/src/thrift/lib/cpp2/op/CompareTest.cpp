@@ -20,35 +20,79 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/if/gen-cpp2/object_types.h>
+#include <thrift/lib/cpp2/op/detail/Compare.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 
 namespace apache::thrift::op {
 namespace {
 using conformance::Value;
 
-TEST(CompareTest, Double) {
-  // 1 is equal and identical to itself.
-  EXPECT_TRUE(equal<type::double_t>(1.0, 1.0));
-  EXPECT_TRUE(identical<type::double_t>(1.0, 1.0));
+TEST(CompareTest, IOBuf) {
+  using STag = type::cpp_type<folly::IOBuf, type::string_t>;
+  using BTag = type::cpp_type<folly::IOBuf, type::binary_t>;
 
-  // 1 is neither equal or identical to 2.
-  EXPECT_FALSE(equal<type::double_t>(1.0, 2.0));
+  auto one = IOBuf::wrapBufferAsValue("a", 1);
+  auto two = IOBuf::wrapBufferAsValue("ab", 2);
+
+  EXPECT_TRUE(op::equal<STag>(one, one));
+  EXPECT_FALSE(op::equal<BTag>(one, two));
+  EXPECT_FALSE((op::equal<STag, BTag>(two, one)));
+  EXPECT_TRUE((op::equal<BTag, STag>(two, two)));
+
+  EXPECT_FALSE(op::less<STag>(one, one));
+  EXPECT_TRUE(op::less<BTag>(one, two));
+  EXPECT_FALSE((op::less<STag, BTag>(two, one)));
+  EXPECT_FALSE((op::less<BTag, STag>(two, two)));
+
+  EXPECT_EQ(op::compare<STag>(one, one), folly::ordering::eq);
+  EXPECT_EQ(op::compare<BTag>(one, two), folly::ordering::lt);
+  EXPECT_EQ((op::compare<STag, BTag>(two, one)), folly::ordering::gt);
+  EXPECT_EQ((op::compare<BTag, STag>(two, two)), folly::ordering::eq);
+}
+
+TEST(CompareTest, Double) {
+  auto hash = op::hash<type::double_t>;
+  EXPECT_EQ(hash(0.0), hash(-0.0));
+
+  // 1 is identical and equal to itself.
+  EXPECT_TRUE(identical<type::double_t>(1.0, 1.0));
+  EXPECT_TRUE(equal<type::double_t>(1.0, 1.0));
+  EXPECT_FALSE(less<type::double_t>(1.0, 1.0));
+  EXPECT_EQ(compare<type::double_t>(1.0, 1.0), folly::ordering::eq);
+
+  // 1 is neither identical or equal to 2.
   EXPECT_FALSE(identical<type::double_t>(1.0, 2.0));
+  EXPECT_FALSE(equal<type::double_t>(1.0, 2.0));
+  EXPECT_TRUE(less<type::double_t>(1.0, 2.0));
+  EXPECT_EQ(compare<type::double_t>(1.0, 2.0), folly::ordering::lt);
 
   // -0 is equal to, but not identical to 0.
-  EXPECT_TRUE(equal<type::double_t>(-0.0, +0.0));
   EXPECT_FALSE(identical<type::double_t>(-0.0, +0.0));
+  EXPECT_TRUE(equal<type::double_t>(-0.0, +0.0));
+  EXPECT_FALSE(less<type::double_t>(-0.0, +0.0));
+  EXPECT_EQ(compare<type::double_t>(-0.0, +0.0), folly::ordering::eq);
 
   // NaN is identical to, but not equal to itself.
-  EXPECT_FALSE(equal<type::double_t>(
-      std::numeric_limits<double>::quiet_NaN(),
-      std::numeric_limits<double>::quiet_NaN()));
   EXPECT_TRUE(identical<type::double_t>(
       std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_FALSE(equal<type::double_t>(
+      std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_FALSE(less<type::double_t>(
+      std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_EQ(
+      compare<type::double_t>(
+          std::numeric_limits<double>::quiet_NaN(),
+          std::numeric_limits<double>::quiet_NaN()),
+      folly::ordering::gt);
 }
 
 TEST(CompareTest, Float) {
+  auto hash = op::hash<type::float_t>;
+  EXPECT_EQ(hash(0.0f), hash(-0.0f));
+
   // 1 is equal and identical to itself.
   EXPECT_TRUE(equal<type::float_t>(1.0f, 1.0f));
   EXPECT_TRUE(identical<type::float_t>(1.0f, 1.0f));
@@ -134,41 +178,51 @@ TEST(CompareTest, MapWithDouble) {
 // Sets and maps that use representational uniqueness.
 template <typename KeyTag, typename T = type::native_type<KeyTag>>
 using InternSet = std::unordered_set<T, Hash<KeyTag>, IdenticalTo<KeyTag>>;
+template <typename KeyTag>
+using InternSetTag = type::cpp_type<InternSet<KeyTag>, type::set<KeyTag>>;
+
+TEST(CompareTest, InternSet_Dbl) {
+  using Tag = InternSetTag<type::double_t>;
+  using SetT = type::native_type<Tag>;
+  static_assert(!detail::less_than_comparable_v<Tag>, "");
+  static_assert(!detail::comparable_v<Tag>, "");
+
+  EXPECT_FALSE(identical<Tag>({0.0}, {-0.0}));
+  EXPECT_TRUE(equal<Tag>({0.0}, {-0.0}));
+
+  SetT set{0.0, -0.0};
+  EXPECT_EQ(set.size(), 2);
+  EXPECT_TRUE(identical<Tag>(set, SetT(set)));
+  EXPECT_TRUE(equal<Tag>(set, SetT(set)));
+}
+
 template <
     typename KeyTag,
     typename ValTag,
     typename K = type::native_type<KeyTag>,
     typename V = type::native_type<ValTag>>
 using InternMap = std::unordered_map<K, V, Hash<KeyTag>, IdenticalTo<KeyTag>>;
+template <typename KeyTag, typename ValTag>
+using InternMapTag =
+    type::cpp_type<InternMap<KeyTag, ValTag>, type::map<KeyTag, ValTag>>;
 
-TEST(CompareTest, Collisions) {
-  // Use intern set/map's of 0.0 and -0.0 to make it easy to cause a collision,
-  // as op::hash(0.0) must equal op::hash(-0.0).
-  auto hash = op::hash<type::double_t>;
-  EXPECT_EQ(hash(0.0), hash(-0.0));
-  EXPECT_FALSE(identical<type::double_t>(0.0, -0.0));
-  using set_t = type::set<type::double_t>;
-  using InternDblSet = InternSet<type::double_t>;
-  InternDblSet set{0.0, -0.0};
-  EXPECT_EQ(set.size(), 2);
+TEST(CompareTest, InternMap_Flt) {
+  using Tag = InternMapTag<type::float_t, type::float_t>;
+  using MapT = type::native_type<Tag>;
+  static_assert(!detail::less_than_comparable_v<Tag>, "");
+  static_assert(!detail::comparable_v<Tag>, "");
 
-  // identical and equal to a copy of itself.
-  EXPECT_TRUE(identical<set_t>(set, InternDblSet(set)));
-  EXPECT_TRUE(equal<set_t>(set, InternDblSet(set)));
-
-  using map_t = type::map<type::float_t, type::float_t>;
-  using InternFloatMap = InternMap<type::float_t, type::float_t>;
-  InternFloatMap map{{0.0f, 0.0f}, {-0.0f, 0.0f}};
+  MapT map{{0.0f, 0.0f}, {-0.0f, 0.0f}};
   EXPECT_EQ(map.size(), 2);
 
   // identical and equal to a copy of itself.
-  EXPECT_TRUE(identical<map_t>(map, InternFloatMap(map)));
-  EXPECT_TRUE(equal<map_t>(map, InternFloatMap(map)));
+  EXPECT_TRUE(identical<Tag>(map, MapT(map)));
+  EXPECT_TRUE(equal<Tag>(map, MapT(map)));
 
   // Equal, but not identical to a map with equal but not identical values.
-  InternFloatMap otherMap{{0.0f, 0.0f}, {-0.0f, -0.0f}};
-  EXPECT_FALSE(identical<map_t>(map, otherMap));
-  EXPECT_TRUE(equal<map_t>(map, otherMap));
+  MapT otherMap{{0.0f, 0.0f}, {-0.0f, -0.0f}};
+  EXPECT_FALSE(identical<Tag>(map, otherMap));
+  EXPECT_TRUE(equal<Tag>(map, otherMap));
 }
 
 } // namespace

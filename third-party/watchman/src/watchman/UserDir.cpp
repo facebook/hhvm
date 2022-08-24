@@ -6,6 +6,7 @@
  */
 
 #include "watchman/UserDir.h"
+#include <eden/common/utils/StringConv.h>
 #include <folly/String.h>
 #include "watchman/Logging.h"
 #include "watchman/Options.h"
@@ -92,8 +93,9 @@ std::string computeUserName() {
   DWORD size = static_cast<DWORD>(std::size(userW));
   if (GetUserNameW(userW, &size) && size > 0) {
     // Constructing a w_string from a WCHAR* will convert to UTF-8
-    w_string user(userW, size);
-    return user.string();
+    // -1 because the size includes the terminating null character.
+    std::wstring_view user(userW, size - 1);
+    return facebook::eden::wideToMultibyteString<std::string>(user);
   }
   DWORD lastError = GetLastError();
 

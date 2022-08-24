@@ -795,8 +795,7 @@ static void setup_sock_name() {
   }
 
   if (flags.named_pipe_path.empty()) {
-    flags.named_pipe_path =
-        folly::to<std::string>("\\\\.\\pipe\\watchman-", user);
+    flags.named_pipe_path = fmt::format("\\\\.\\pipe\\watchman-{}", user);
   }
 #endif
   compute_file_name(flags.unix_sock_name, user, "sock", "sockname");

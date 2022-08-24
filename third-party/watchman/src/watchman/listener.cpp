@@ -190,7 +190,7 @@ static void named_pipe_accept_loop_internal(
   handles[1] = (HANDLE)listener_event->system_handle();
   olap.hEvent = connected_event;
 
-  logf(ERR, "waiting for pipe clients on {}\n", get_named_pipe_sock_path());
+  logf(ERR, "waiting for pipe clients on {}\n", path);
   while (!w_is_stopping()) {
     FileDescriptor client_fd;
     DWORD res;

@@ -538,7 +538,10 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   void setThreadFactoryInit(
       std::function<void()>&& threadInitializer,
-      std::function<void()>&& threadFinalizer = {}) {
+      std::function<void()>&& threadFinalizer = [] {}) {
+    // These must be valid callables
+    CHECK(threadInitializer);
+    CHECK(threadFinalizer);
     CHECK(configMutable());
     std::lock_guard<std::mutex> lock(threadManagerMutex_);
     CHECK(!threadManager_);

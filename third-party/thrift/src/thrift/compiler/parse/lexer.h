@@ -38,12 +38,12 @@ class lex_handler {
 // A Thrift lexer.
 class lexer {
  private:
-  lex_handler* handler_;
-  diagnostics_engine* diags_;
   fmt::string_view source_; // Source being lexed; has a terminating '\0'.
   source_location start_;
   const char* ptr_; // Current position in the source.
   const char* token_start_;
+  lex_handler* handler_;
+  diagnostics_engine* diags_;
 
   const char* end() const { return source_.data() + source_.size() - 1; }
 
@@ -82,14 +82,10 @@ class lexer {
   comment_lex_result lex_whitespace_or_comment();
 
  public:
-  lexer(lex_handler& handler, diagnostics_engine& diags, source src);
+  lexer(source src, lex_handler& handler, diagnostics_engine& diags);
 
+  // Lexes and returns the next token.
   token get_next_token();
-
-  // Returns the current source location. If a token has been returned via
-  // `get_next_token` or `lex_handler` the returned location points one past
-  // the end of this token. Otherwise it points to the source start.
-  source_location location() const { return location(ptr_); }
 };
 
 } // namespace compiler

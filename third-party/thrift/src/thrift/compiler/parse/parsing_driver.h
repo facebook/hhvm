@@ -44,8 +44,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-class lexer;
-
 enum class parsing_mode {
   INCLUDES = 1,
   PROGRAM = 2,
@@ -110,23 +108,15 @@ class parsing_driver : public parser_actions {
   void on_program() override { clear_doctext(); }
 
   void on_standard_header(
+      source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override {
-    validate_header_location();
-    validate_header_annotations(std::move(attrs), std::move(annotations));
-  }
-
+      std::unique_ptr<t_annotations> annotations) override;
   void on_program_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override {
-    validate_header_location();
-    set_program_annotations(std::move(attrs), std::move(annotations), range);
-  }
+      std::unique_ptr<t_annotations> annotations) override;
 
-  void on_package(source_range range, std::string literal) override {
-    set_package(std::move(literal), range);
-  }
+  void on_package(source_range range, std::string name) override;
 
   void on_include(source_range range, std::string literal) override {
     add_include(std::move(literal), range);
@@ -198,13 +188,7 @@ class parsing_driver : public parser_actions {
       source_range range,
       std::string name,
       const std::string& base_name,
-      std::unique_ptr<t_function_list> functions) override {
-    auto base = !base_name.empty() ? find_service(base_name) : nullptr;
-    auto service = std::make_unique<t_service>(program, std::move(name), base);
-    service->set_src_range(range);
-    set_functions(*service, std::move(functions));
-    return service;
-  }
+      std::unique_ptr<t_function_list> functions) override;
 
   std::unique_ptr<t_interaction> on_interaction(
       source_range range,
@@ -462,9 +446,7 @@ class parsing_driver : public parser_actions {
     return const_value;
   }
 
-  int64_t on_integer(sign s, uint64_t value) override {
-    return to_int(value, s == sign::minus);
-  }
+  int64_t on_integer(source_range range, sign s, uint64_t value) override;
 
   [[noreturn]] void on_error() override { end_parsing(); }
 
@@ -514,11 +496,6 @@ class parsing_driver : public parser_actions {
   template <typename... T>
   void error(source_location loc, fmt::format_string<T...> msg, T&&... args) {
     ctx_.report(loc, diagnostic_level::error, msg, std::forward<T>(args)...);
-  }
-
-  [[noreturn]] void end_parsing(fmt::string_view msg) {
-    error(location(), "{}", msg);
-    end_parsing();
   }
 
   [[noreturn]] void end_parsing();
@@ -618,7 +595,6 @@ class parsing_driver : public parser_actions {
   void add_def(std::unique_ptr<t_named> node);
 
   void add_include(std::string name, const source_range& range);
-  void set_package(std::string name, const source_range& range);
 
   t_field_id to_field_id(source_location loc, int64_t value) {
     return narrow_int<t_field_id>(loc, value, "field ids");
@@ -629,29 +605,19 @@ class parsing_driver : public parser_actions {
   std::unique_ptr<t_const_value> to_const_value(
       source_location loc, int64_t value);
 
-  int64_t to_int(uint64_t val, bool negative = false);
-
-  const t_service* find_service(const std::string& name);
   const t_const* find_const(source_location loc, const std::string& name);
 
   std::unique_ptr<t_const_value> copy_const_value(
       source_location loc, const std::string& name);
 
   void set_parsed_definition();
-  void validate_header_location();
-  void validate_header_annotations(
-      std::unique_ptr<stmt_attrs> statement_attrs,
-      std::unique_ptr<t_annotations> annotations);
   void set_program_annotations(
       std::unique_ptr<stmt_attrs> statement_attrs,
       std::unique_ptr<t_annotations> annotations,
       const source_range& loc);
 
  private:
-  source_manager* source_mgr_;
-  class lex_handler_impl;
-  std::unique_ptr<lex_handler_impl> lex_handler_;
-  std::unique_ptr<lexer> lexer_;
+  source_manager& source_mgr_;
 
   std::set<std::string> already_parsed_paths_;
   std::set<std::string> circular_deps_;
@@ -665,6 +631,8 @@ class parsing_driver : public parser_actions {
    * Parse a single .thrift file. The file to parse is stored in params.program.
    */
   void parse_file();
+
+  void validate_header_location(source_location loc);
 
   // Adds an unnamed typedef to the program
   // TODO(afuller): Remove the need for these by an explicit t_type_ref node
@@ -697,9 +665,6 @@ class parsing_driver : public parser_actions {
     }
     return value;
   }
-
-  // Returns the current source location, see lexer::location.
-  source_location location() const;
 };
 
 } // namespace compiler

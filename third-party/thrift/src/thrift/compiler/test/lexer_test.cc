@@ -35,7 +35,7 @@ class LexerTest : public testing::Test {
   diagnostics_engine diags;
 
   lexer make_lexer(const std::string& source) {
-    return {handler, diags, source_mgr.add_string("", source)};
+    return {source_mgr.add_string("", source), handler, diags};
   }
 
   LexerTest() : diags(source_mgr, [](diagnostic) {}) {}

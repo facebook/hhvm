@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -143,8 +142,8 @@ const std::unordered_map<std::string, tok> keywords = {
 
 } // namespace
 
-lexer::lexer(lex_handler& handler, diagnostics_engine& diags, source src)
-    : handler_(&handler), diags_(&diags), source_(src.text), start_(src.start) {
+lexer::lexer(source src, lex_handler& handler, diagnostics_engine& diags)
+    : source_(src.text), start_(src.start), handler_(&handler), diags_(&diags) {
   ptr_ = source_.data();
   token_start_ = ptr_;
 }
@@ -210,7 +209,7 @@ bool lexer::lex_doc_comment() {
     }
   } while (strncmp(ptr_, prefix, prefix_size) == 0);
   if (!is_inline) {
-    handler_->on_doc_comment(token_text(), location());
+    handler_->on_doc_comment(token_text(), location(ptr_));
   }
   return is_inline;
 }
@@ -235,7 +234,7 @@ lexer::comment_lex_result lexer::lex_block_comment() {
     auto non_star = std::find_if(
         token_start_ + 2, ptr_ - 1, [](char c) { return c != '*'; });
     if (non_star != ptr_ - 1) {
-      handler_->on_doc_comment(token_text(), location());
+      handler_->on_doc_comment(token_text(), location(ptr_));
     }
   }
   return comment_lex_result::skipped;

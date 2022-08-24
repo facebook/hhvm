@@ -52,6 +52,7 @@ struct stmt_attrs {
 struct t_annotations {
   std::map<std::string, annotation_value> strings;
   std::map<std::string, std::shared_ptr<const t_const>> objects;
+  source_location loc;
 };
 
 struct type_throws_spec {
@@ -69,6 +70,7 @@ class parser_actions {
   virtual void on_program() = 0;
 
   virtual void on_standard_header(
+      source_range range,
       std::unique_ptr<stmt_attrs> attrs,
       std::unique_ptr<t_annotations> annotations) = 0;
   virtual void on_program_header(
@@ -76,7 +78,7 @@ class parser_actions {
       std::unique_ptr<stmt_attrs> attrs,
       std::unique_ptr<t_annotations> annotations) = 0;
 
-  virtual void on_package(source_range range, std::string literal) = 0;
+  virtual void on_package(source_range range, std::string name) = 0;
   virtual void on_include(source_range range, std::string literal) = 0;
 
   virtual void on_cpp_include(source_range, std::string literal) = 0;
@@ -214,7 +216,7 @@ class parser_actions {
   virtual std::unique_ptr<t_const_value> on_const_struct(
       source_range range, std::string name) = 0;
 
-  virtual int64_t on_integer(sign s, uint64_t value) = 0;
+  virtual int64_t on_integer(source_range range, sign s, uint64_t value) = 0;
 
   [[noreturn]] virtual void on_error() = 0;
 };

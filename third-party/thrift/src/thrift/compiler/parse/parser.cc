@@ -129,7 +129,8 @@ class parser {
     try_parse_comma_or_semicolon();
     switch (stmt.type) {
       case t_statement_type::standard_header:
-        actions_.on_standard_header(std::move(attrs), std::move(annotations));
+        actions_.on_standard_header(
+            range, std::move(attrs), std::move(annotations));
         break;
       case t_statement_type::program_header:
         actions_.on_program_header(
@@ -290,6 +291,7 @@ class parser {
   // annotation: identifier ("=" annotation_value)?
   // annotation_value: bool_constant | integer | string_literal
   std::unique_ptr<t_annotations> parse_annotations() {
+    auto loc = token_.range.begin;
     if (!try_consume_token('(')) {
       return {};
     }
@@ -297,6 +299,7 @@ class parser {
     while (token_.kind != ')') {
       if (!annotations) {
         annotations = std::make_unique<t_annotations>();
+        annotations->loc = loc;
       }
       auto range = track_range();
       auto key = parse_identifier();
@@ -862,6 +865,7 @@ class parser {
 
   // integer: ("+" | "-")? int_constant
   boost::optional<int64_t> try_parse_integer(sign s = sign::plus) {
+    auto range = track_range();
     switch (token_.kind) {
       case to_tok('-'):
         s = sign::minus;
@@ -872,8 +876,10 @@ class parser {
           report_expected("integer");
         }
         FMT_FALLTHROUGH;
-      case tok::int_constant:
-        return actions_.on_integer(s, consume_token().int_value());
+      case tok::int_constant: {
+        auto token = consume_token();
+        return actions_.on_integer(range, s, token.int_value());
+      }
       default:
         return {};
     }

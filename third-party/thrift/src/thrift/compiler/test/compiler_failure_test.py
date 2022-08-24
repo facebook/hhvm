@@ -706,7 +706,7 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:bar.thrift:5] Circular dependency found: "
+            "[ERROR:bar.thrift:1] Circular dependency found: "
             "file `foo.thrift` is already parsed.\n",
         )
 

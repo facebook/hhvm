@@ -18,7 +18,6 @@
 
 #include <stdlib.h>
 #include <cmath>
-#include <cstdarg>
 #include <limits>
 #include <memory>
 
@@ -38,9 +37,7 @@ class parsing_terminator : public std::runtime_error {
             "Internal exception used to terminate the parsing process.") {}
 };
 
-} // namespace
-
-class parsing_driver::lex_handler_impl : public lex_handler {
+class lex_handler_impl : public lex_handler {
  private:
   parsing_driver& driver_;
 
@@ -59,16 +56,14 @@ class parsing_driver::lex_handler_impl : public lex_handler {
   }
 };
 
+} // namespace
+
 parsing_driver::parsing_driver(
     source_manager& sm,
     diagnostic_context& ctx,
     std::string path,
     parsing_params parse_params)
-    : source_mgr_(&sm),
-      lex_handler_(std::make_unique<lex_handler_impl>(*this)),
-      lexer_(std::make_unique<lexer>(*lex_handler_, ctx, source())),
-      ctx_(ctx),
-      params_(std::move(parse_params)) {
+    : source_mgr_(sm), ctx_(ctx), params_(std::move(parse_params)) {
   program_bundle =
       std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
   program = program_bundle->root_program();
@@ -82,13 +77,86 @@ parsing_driver::parsing_driver(
  */
 parsing_driver::~parsing_driver() = default;
 
-int parsing_driver::get_lineno(source_location loc) {
-  return loc != source_location() ? resolved_location(loc, *source_mgr_).line()
-                                  : 0;
+void parsing_driver::on_standard_header(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<t_annotations> annotations) {
+  validate_header_location(range.begin);
+  if (attrs && attrs->struct_annotations) {
+    ctx_.error(
+        *attrs->struct_annotations->front(),
+        "Structured annotations are not supported for a given entity.");
+  }
+  if (annotations) {
+    error(
+        annotations->loc, "Annotations are not supported for a given entity.");
+  }
 }
 
-source_location parsing_driver::location() const {
-  return lexer_->location();
+void parsing_driver::on_program_header(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<t_annotations> annotations) {
+  validate_header_location(range.begin);
+  set_program_annotations(std::move(attrs), std::move(annotations), range);
+}
+
+void parsing_driver::on_package(source_range range, std::string name) {
+  if (mode != parsing_mode::PROGRAM) {
+    return;
+  }
+  if (!program->package().empty()) {
+    error(range.begin, "Package already specified.");
+  }
+  try {
+    program->set_package(t_package(std::move(name)));
+  } catch (const std::exception& e) {
+    error(range.begin, "{}", e.what());
+  }
+}
+
+std::unique_ptr<t_service> parsing_driver::on_service(
+    source_range range,
+    std::string name,
+    const std::string& base_name,
+    std::unique_ptr<t_function_list> functions) {
+  auto find_base_service = [&]() -> const t_service* {
+    if (mode == parsing_mode::PROGRAM && !base_name.empty()) {
+      if (auto* result = scope_cache->find_service(base_name)) {
+        return result;
+      }
+      if (auto* result =
+              scope_cache->find_service(program->scope_name(base_name))) {
+        return result;
+      }
+      error(range.begin, "Service \"{}\" has not been defined.", base_name);
+    }
+    return nullptr;
+  };
+  auto service = std::make_unique<t_service>(
+      program, std::move(name), find_base_service());
+  service->set_src_range(range);
+  set_functions(*service, std::move(functions));
+  return service;
+}
+
+int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
+  constexpr uint64_t max = std::numeric_limits<int64_t>::max();
+  if (s == sign::minus) {
+    if (mode == parsing_mode::PROGRAM && value > max + 1) {
+      error(range.begin, "integer constant -{} is too small", value);
+    }
+    return -value;
+  }
+  if (mode == parsing_mode::PROGRAM && value > max) {
+    error(range.begin, "integer constant {} is too large", value);
+  }
+  return value;
+}
+
+int parsing_driver::get_lineno(source_location loc) {
+  return loc != source_location() ? resolved_location(loc, source_mgr_).line()
+                                  : 0;
 }
 
 std::unique_ptr<t_program_bundle> parsing_driver::parse() {
@@ -112,11 +180,13 @@ void parsing_driver::parse_file() {
 
   auto src = source();
   try {
-    src = source_mgr_->add_file(path);
-  } catch (const std::runtime_error& ex) {
-    end_parsing(ex.what());
+    src = source_mgr_.add_file(path);
+  } catch (const std::runtime_error& e) {
+    error(source_location(), "{}", e.what());
+    end_parsing();
   }
-  lexer_ = std::make_unique<lexer>(*lex_handler_, ctx_, src);
+  auto lex_handler = lex_handler_impl(*this);
+  auto lexer = compiler::lexer(src, lex_handler, ctx_);
   program->set_src_range({src.start, src.start});
 
   // Create a new scope and scan for includes.
@@ -126,28 +196,34 @@ void parsing_driver::parse_file() {
       src.start, diagnostic_level::info, "Scanning {} for includes\n", path);
   mode = parsing_mode::INCLUDES;
   try {
-    if (!compiler::parse(*lexer_, *this, ctx_)) {
-      end_parsing("Parser error during include pass.");
+    if (!compiler::parse(lexer, *this, ctx_)) {
+      ctx_.error(*program, "Parser error during include pass.");
+      end_parsing();
     }
   } catch (const std::string& x) {
-    end_parsing(x);
+    error(source_location(), "{}", x);
+    assert(false);
+    end_parsing();
   }
 
-  // Recursively parse all the include programs
-  const auto& includes = program->get_included_programs();
+  // Recursively parse all the included programs.
+  const std::vector<t_include*>& includes = program->includes();
   // Always enable allow_neg_field_keys when parsing included files.
   // This way if a thrift file has negative keys, --allow-neg-keys doesn't have
   // to be used by everyone that includes it.
   auto old_params = params_;
   auto old_program = program;
-  for (auto included_program : includes) {
+  for (auto include : includes) {
+    t_program* included_program = include->get_program();
     circular_deps_.insert(path);
 
     // Fail on circular dependencies.
     if (circular_deps_.count(included_program->path()) != 0) {
-      end_parsing(fmt::format(
+      ctx_.error(
+          *include,
           "Circular dependency found: file `{}` is already parsed.",
-          included_program->path()));
+          included_program->path());
+      end_parsing();
     }
 
     // This must be after the previous circular include check, since the emitted
@@ -167,27 +243,38 @@ void parsing_driver::parse_file() {
 
   // Parse the program file
   try {
-    src = source_mgr_->add_file(path);
-    lexer_ = std::make_unique<lexer>(*lex_handler_, ctx_, src);
-  } catch (const std::runtime_error& ex) {
-    end_parsing(ex.what());
+    src = source_mgr_.add_file(path);
+  } catch (const std::runtime_error& e) {
+    error(source_location(), "{}", e.what());
+    end_parsing();
   }
+  lexer = compiler::lexer(src, lex_handler, ctx_);
 
   mode = parsing_mode::PROGRAM;
   ctx_.report(
       src.start, diagnostic_level::info, "Parsing {} for types\n", path);
   try {
-    if (!compiler::parse(*lexer_, *this, ctx_)) {
-      end_parsing("Parser error during types pass.");
+    if (!compiler::parse(lexer, *this, ctx_)) {
+      ctx_.error(*program, "Parser error during types pass.");
+      end_parsing();
     }
   } catch (const std::string& x) {
-    end_parsing(x);
+    error(source_location(), "{}", x);
+    assert(false);
+    end_parsing();
   }
   ctx_.end_visit(*program);
 }
 
 [[noreturn]] void parsing_driver::end_parsing() {
   throw parsing_terminator{};
+}
+
+void parsing_driver::validate_header_location(source_location loc) {
+  if (programs_that_parsed_definition_.find(program->path()) !=
+      programs_that_parsed_definition_.end()) {
+    error(loc, "Headers must be specified before definitions.");
+  }
 }
 
 // TODO: This doesn't really need to be a member function. Move it somewhere
@@ -206,13 +293,13 @@ std::string parsing_driver::directory_name(const std::string& filename) {
 std::string parsing_driver::find_include_file(
     source_location loc, const std::string& filename) {
   // Absolute path? Just try that
-  boost::filesystem::path path{filename};
+  boost::filesystem::path path(filename);
   if (path.has_root_directory()) {
     try {
       return boost::filesystem::canonical(path).string();
     } catch (const boost::filesystem::filesystem_error& e) {
-      end_parsing(fmt::format(
-          "Could not find file: {}. Error: {}", filename, e.what()));
+      error(loc, "Could not find file: {}. Error: {}", filename, e.what());
+      end_parsing();
     }
   }
 
@@ -619,20 +706,6 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
   }
 }
 
-void parsing_driver::set_package(std::string name, const source_range& range) {
-  if (mode != parsing_mode::PROGRAM) {
-    return;
-  }
-  if (!program->package().empty()) {
-    error(range.begin, "Package already specified.");
-  }
-  try {
-    program->set_package(t_package(std::move(name)));
-  } catch (const std::exception& e) {
-    error(location(), "{}", e.what());
-  }
-}
-
 const t_type* parsing_driver::add_unnamed_typedef(
     std::unique_ptr<t_typedef> node,
     std::unique_ptr<t_annotations> annotations) {
@@ -720,21 +793,6 @@ std::unique_ptr<t_const_value> parsing_driver::to_const_value(
   return node;
 }
 
-int64_t parsing_driver::to_int(uint64_t val, bool negative) {
-  constexpr uint64_t i64max = std::numeric_limits<int64_t>::max();
-  if (negative) {
-    if (mode == parsing_mode::PROGRAM && val > i64max + 1) {
-      error(location(), "integer constant -{} is too small", val);
-    }
-    return -val;
-  }
-
-  if (mode == parsing_mode::PROGRAM && val > i64max) {
-    error(location(), "integer constant {} is too large", val);
-  }
-  return val;
-}
-
 std::string parsing_driver::strip_doctext(fmt::string_view text) {
   if (mode != apache::thrift::compiler::parsing_mode::PROGRAM) {
     return {};
@@ -751,19 +809,6 @@ std::string parsing_driver::strip_doctext(fmt::string_view text) {
   }
 
   return clean_up_doctext(str);
-}
-
-const t_service* parsing_driver::find_service(const std::string& name) {
-  if (mode == parsing_mode::PROGRAM) {
-    if (auto* result = scope_cache->find_service(name)) {
-      return result;
-    }
-    if (auto* result = scope_cache->find_service(program->scope_name(name))) {
-      return result;
-    }
-    error(location(), "Service \"{}\" has not been defined.", name);
-  }
-  return nullptr;
 }
 
 const t_const* parsing_driver::find_const(
@@ -808,28 +853,6 @@ std::unique_ptr<t_const_value> parsing_driver::copy_const_value(
 void parsing_driver::set_parsed_definition() {
   if (mode == parsing_mode::PROGRAM) {
     programs_that_parsed_definition_.insert(program->path());
-  }
-}
-
-void parsing_driver::validate_header_location() {
-  if (programs_that_parsed_definition_.find(program->path()) !=
-      programs_that_parsed_definition_.end()) {
-    error(location(), "Headers must be specified before definitions.");
-  }
-}
-
-void parsing_driver::validate_header_annotations(
-    std::unique_ptr<stmt_attrs> statement_attrs,
-    std::unique_ptr<t_annotations> annotations) {
-  // Ideally the errors below have to be handled by a grammar, but it's not
-  // expressive enough to avoid conflicts when doing so.
-  if (statement_attrs && statement_attrs->struct_annotations.get()) {
-    error(
-        location(),
-        "Structured annotations are not supported for a given entity.");
-  }
-  if (annotations) {
-    error(location(), "Annotations are not supported for a given entity.");
   }
 }
 

@@ -1297,6 +1297,7 @@ let localize_targs_and_check_constraints
     ?(check_explicit_targs = true)
     env
     class_id
+    r
     tparaml
     hintl =
   let ((env, e1), type_argl) =
@@ -1313,9 +1314,7 @@ let localize_targs_and_check_constraints
   in
   let targs_tys = List.map ~f:fst type_argl in
   let this_ty =
-    mk
-      ( Reason.Rwitness (fst class_id),
-        Tclass (Positioned.of_raw_positioned class_id, exact, targs_tys) )
+    mk (r, Tclass (Positioned.of_raw_positioned class_id, exact, targs_tys))
   in
   let ety_env =
     {

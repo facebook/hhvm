@@ -15,6 +15,7 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 module SN = Naming_special_names
+module Cls = Decl_provider.Class
 
 let strip_awaitable fun_kind env et =
   if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
@@ -54,22 +55,39 @@ let make_info ret_pos fun_kind attributes env return_type =
     enforce_return_not_disposable ret_pos fun_kind env return_type;
   { return_type; return_disposable }
 
+(* Make a fresh Awaitable<_> etc making sure that any constraints (e.g. supportdyn)
+ * are added to the type variable
+ *)
+let make_wrapped_fresh_type env p r id =
+  let class_ = Env.get_class env id in
+  match class_ with
+  | None -> Env.fresh_type env p (* Shouldn't happen *)
+  | Some class_ ->
+    let ((env, _), ty, _tal) =
+      Typing_phase.localize_targs_and_check_constraints
+        ~exact:nonexact
+        ~check_well_kinded:false
+        ~def_pos:(Cls.pos class_)
+        ~use_pos:p
+        ~check_explicit_targs:false
+        env
+        (p, id)
+        r
+        (Cls.tparams class_)
+        []
+    in
+    (env, ty)
+
 (* Create a return type with fresh type variables  *)
 let make_fresh_return_type env p =
-  let (env, rty) = Env.fresh_type env p in
   let fun_kind = Env.get_fn_kind env in
   let r = Reason.Rret_fun_kind_from_decl (Pos_or_decl.of_raw_pos p, fun_kind) in
   match fun_kind with
-  | Ast_defs.FSync -> (env, rty)
-  | Ast_defs.FAsync -> (env, MakeType.awaitable r rty)
-  | Ast_defs.FGenerator ->
-    let (env, key) = Env.fresh_type env p in
-    let (env, send) = Env.fresh_type env p in
-    (env, MakeType.generator r key rty send)
+  | Ast_defs.FSync -> Env.fresh_type env p
+  | Ast_defs.FAsync -> make_wrapped_fresh_type env p r SN.Classes.cAwaitable
+  | Ast_defs.FGenerator -> make_wrapped_fresh_type env p r SN.Classes.cGenerator
   | Ast_defs.FAsyncGenerator ->
-    let (env, key) = Env.fresh_type env p in
-    let (env, send) = Env.fresh_type env p in
-    (env, MakeType.async_generator r key rty send)
+    make_wrapped_fresh_type env p r SN.Classes.cAsyncGenerator
 
 (** Force the return type of a function to adhere to the fun_kind specified in
     the env *)

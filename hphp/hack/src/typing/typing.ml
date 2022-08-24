@@ -8157,6 +8157,7 @@ and class_expr
                  ~check_explicit_targs
                  env
                  c
+                 (Reason.Rwitness (fst c))
                  (Cls.tparams class_)
           in
           Option.iter ~f:Errors.add_typing_error ty_err_opt;

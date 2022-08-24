@@ -136,6 +136,7 @@ val localize_targs_and_check_constraints :
   ?check_explicit_targs:bool ->
   env ->
   Ast_defs.id ->
+  Typing_reason.t ->
   decl_tparam list ->
   Aast.hint list ->
   (env * Typing_error.t option) * locl_ty * Tast.targ list

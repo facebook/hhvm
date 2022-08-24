@@ -123,14 +123,14 @@ function synch_dependency_to_commit() {
 function setup_fmt() {
   FMT_DIR=$DEPS_DIR/fmt
   FMT_BUILD_DIR=$DEPS_DIR/fmt/build/
-
+  FMT_TAG=$(grep "subdir = " ../../build/fbcode_builder/manifests/fmt | cut -d "-" -f 2)
   if [ ! -d "$FMT_DIR" ] ; then
     echo -e "${COLOR_GREEN}[ INFO ] Cloning fmt repo ${COLOR_OFF}"
     git clone https://github.com/fmtlib/fmt.git  "$FMT_DIR"
   fi
   cd "$FMT_DIR"
   git fetch --tags
-  git checkout 8.0.1
+  git checkout "${FMT_TAG}"
   echo -e "${COLOR_GREEN}Building fmt ${COLOR_OFF}"
   mkdir -p "$FMT_BUILD_DIR"
   cd "$FMT_BUILD_DIR" || exit
@@ -152,14 +152,14 @@ function setup_fmt() {
 function setup_googletest() {
   GTEST_DIR=$DEPS_DIR/googletest
   GTEST_BUILD_DIR=$DEPS_DIR/googletest/build/
-
+  GTEST_TAG=$(grep "subdir = " ../../build/fbcode_builder/manifests/googletest | cut -d "-" -f 2,3)
   if [ ! -d "$GTEST_DIR" ] ; then
     echo -e "${COLOR_GREEN}[ INFO ] Cloning googletest repo ${COLOR_OFF}"
     git clone https://github.com/google/googletest.git  "$GTEST_DIR"
   fi
   cd "$GTEST_DIR"
   git fetch --tags
-  git checkout release-1.12.1
+  git checkout "${GTEST_TAG}"
   echo -e "${COLOR_GREEN}Building googletest ${COLOR_OFF}"
   mkdir -p "$GTEST_BUILD_DIR"
   cd "$GTEST_BUILD_DIR" || exit
@@ -179,13 +179,14 @@ function setup_zstd() {
   ZSTD_DIR=$DEPS_DIR/zstd
   ZSTD_BUILD_DIR=$DEPS_DIR/zstd/build/cmake/builddir
   ZSTD_INSTALL_DIR=$DEPS_DIR
+  ZSTD_TAG=$(grep "subdir = " ../../build/fbcode_builder/manifests/zstd | cut -d "-" -f 2 | cut -d "/" -f 1)
   if [ ! -d "$ZSTD_DIR" ] ; then
     echo -e "${COLOR_GREEN}[ INFO ] Cloning zstd repo ${COLOR_OFF}"
     git clone https://github.com/facebook/zstd.git "$ZSTD_DIR"
   fi
   cd "$ZSTD_DIR"
   git fetch --tags
-  git checkout v1.4.5
+  git checkout "v${ZSTD_TAG}"
   echo -e "${COLOR_GREEN}Building Zstd ${COLOR_OFF}"
   mkdir -p "$ZSTD_BUILD_DIR"
   cd "$ZSTD_BUILD_DIR" || exit

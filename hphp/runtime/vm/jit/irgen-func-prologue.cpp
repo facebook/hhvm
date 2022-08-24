@@ -61,7 +61,7 @@ enum class StackCheck {
   Combine // can be delayed and combined with surprise flags check
 };
 
-StackCheck stack_check_kind(const Func* func, uint32_t argc) {
+StackCheck stack_check_kind(const Func* func) {
   if (func->isPhpLeafFn() &&
       func->maxStackCells() < RO::EvalStackCheckLeafPadding) {
     return StackCheck::None;
@@ -90,7 +90,7 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
 
-  return func->numLocals() < safeFromSEGV + argc
+  return func->numLocals() < safeFromSEGV + func->numRequiredParams()
     ? StackCheck::Combine
     : StackCheck::Early;
 }
@@ -403,7 +403,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
   emitCalleeRecordFuncCoverage(env, callee);
 
   // Emit early stack overflow check if necessary.
-  if (stack_check_kind(callee, argc) == StackCheck::Early) {
+  if (stack_check_kind(callee) == StackCheck::Early) {
     gen(env, CheckStackOverflow, sp(env));
   }
 }
@@ -634,7 +634,7 @@ void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
-  if (stack_check_kind(callee, argc) == StackCheck::Combine) {
+  if (stack_check_kind(callee) == StackCheck::Combine) {
     gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
   } else {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));

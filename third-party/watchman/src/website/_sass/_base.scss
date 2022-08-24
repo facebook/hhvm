@@ -4,6 +4,9 @@ body {
   font: 300 #{$base-font-size}/#{$base-line-height} $base-font-family;
   text-align: center;
   text-rendering: optimizeLegibility;
+
+  display: flex;
+  flex-direction: column;
 }
 
 img {
@@ -57,11 +60,9 @@ h1, h2, h3, h4 {
   height: $header-height;
   opacity: 0.0;
   padding: $header-ptop 0 $header-pbot;
-  position: fixed;
   -webkit-transition: opacity 0.2s ease-in-out;
   transition: opacity 0.2s ease-in-out;
   width: 100%;
-  z-index: 9999;
   top: 60px;
 
   &.visible {
@@ -130,6 +131,7 @@ h1, h2, h3, h4 {
         overflow: hidden;
         padding: 0;
         position: absolute;
+        z-index: 100;
         right: -12px;
         top: $header-height + $header-pbot;
         -webkit-transition: opacity 0.5s, width 0.5s;
@@ -167,10 +169,6 @@ h1, h2, h3, h4 {
 }
 
 .navPusher {
-  border-top: $header-height + $header-ptop + $header-pbot solid $primary-bg;
-  position: relative;
-  left: 0;
-  z-index: 99;
   height: 100%;
 
   &::after {
@@ -971,14 +969,12 @@ a.blockButton {
 .socialBanner {
   font-weight: bold;
   font-size: 20px;
-  padding: 20px;
+  padding: 20px 0;
   max-width: 768px;
   margin: 0 auto;
   text-align: center;
   color: white;
   height: 30px;
-  position: fixed;
-  z-index: 100;
   min-width: 100%;
   background: #1F242A;
 

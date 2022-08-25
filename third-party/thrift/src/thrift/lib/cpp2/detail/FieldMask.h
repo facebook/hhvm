@@ -273,6 +273,7 @@ bool copy_fields(MaskRef ref, const T& src, T& dst) {
 template <typename T>
 Mask path(const Mask& other) {
   // This is the base case as there is no more id.
+  detail::errorIfNotCompatible<T>(other);
   return other;
 }
 
@@ -298,6 +299,7 @@ Mask path(
     size_t index,
     const Mask& other) {
   if (index == fieldNames.size()) {
+    detail::errorIfNotCompatible<T>(other);
     return other;
   }
   // static_assert doesn't work as it compiles this code for every field.

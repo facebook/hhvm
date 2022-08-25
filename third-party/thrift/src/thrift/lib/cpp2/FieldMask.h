@@ -43,18 +43,21 @@ void clear(const Mask& mask, protocol::Object& t);
 // Throws a runtime exception if the mask and objects are incompatible.
 void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 
-// Returns whether field mask is compatible with thrift struct T.
-// It is incompatible if the mask contains a field that doesn't exist in the
-// struct or that exists with a different type.
+// Returns whether field mask is compatible with thrift type T.
+// If it is not a struct, it is only compatible when it is allMask or noneMask.
+// Otherwise, it is incompatible if the mask contains a field that doesn't exist
+// in the struct or that exists with a different type.
 template <typename T>
 bool is_compatible_with(const Mask& mask) {
-  static_assert(is_thrift_struct_v<T>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
   detail::MaskRef ref{mask, false};
   if (ref.isAllMask() || ref.isNoneMask()) {
     return true;
   }
-  return detail::validate_fields<T>(ref);
+  if constexpr (is_thrift_struct_v<T>) {
+    return detail::validate_fields<T>(ref);
+  }
+  return false;
 }
 
 // Ensures that the masked fields have value in the thrift struct.
@@ -107,7 +110,10 @@ Mask operator-(const Mask&, const Mask&); // subtract
 template <typename T>
 struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
-  /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
+  /* implicit */ MaskBuilder(Mask mask) {
+    detail::errorIfNotCompatible<T>(mask);
+    data_ = mask;
+  }
 
   MaskBuilder& reset_to_none() {
     data_ = noneMask();

@@ -915,6 +915,18 @@ TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
   }
 }
 
+TEST(FieldMaskTest, IsCompatibleWithOtherTypes) {
+  Mask mask;
+  mask.includes_ref().emplace()[1] = allMask();
+
+  EXPECT_TRUE(protocol::is_compatible_with<int>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<int>(noneMask()));
+  EXPECT_FALSE(protocol::is_compatible_with<int>(mask));
+  EXPECT_TRUE(protocol::is_compatible_with<std::list<std::string>>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<std::list<std::string>>(noneMask()));
+  EXPECT_FALSE(protocol::is_compatible_with<std::list<std::string>>(mask));
+}
+
 TEST(FieldMaskTest, Ensure) {
   Mask mask;
   // mask = includes{1: includes{2: excludes{}},
@@ -2281,6 +2293,18 @@ TEST(FieldMaskTest, MaskBuilderMaskAPIs) {
   EXPECT_EQ(src, cleared);
   builder.copy(src, dst);
   EXPECT_EQ(dst, cleared);
+}
+
+TEST(FieldMaskTest, MaskBuilderMaskNotCompatible) {
+  // Mask is not compatible with both Bar and Foo.
+  Mask mask;
+  mask.includes_ref().emplace()[5] = allMask();
+  EXPECT_THROW(MaskBuilder<Bar> temp(mask), std::runtime_error);
+  MaskBuilder<Bar> builder(noneMask());
+  EXPECT_THROW(builder.includes(mask), std::runtime_error);
+  EXPECT_THROW(builder.includes({}, mask), std::runtime_error);
+  EXPECT_THROW(builder.includes<tag::foo>(mask), std::runtime_error);
+  EXPECT_THROW(builder.includes({"foo"}, mask), std::runtime_error);
 }
 
 } // namespace apache::thrift::test

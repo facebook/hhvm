@@ -84,7 +84,7 @@ let go
       ~extra_roots:(ServerConfig.extra_paths genv.ServerEnv.config)
   in
 
-  let job (acc : (Int64.t * string) list) (fnl : Relative_path.t list) =
+  let job acc (fnl : Relative_path.t list) =
     let acc =
       List.fold_left
         ~init:acc
@@ -120,9 +120,17 @@ let go
 
   (* results is a list of (decl_hash, marshalled { symbol: decl }) pairs *)
   let results =
-    MultiWorker.call workers ~job ~neutral:[] ~merge:List.append ~next:get_next
+    I64Map.of_list
+      (MultiWorker.call
+         workers
+         ~job
+         ~neutral:[]
+         ~merge:List.append
+         ~next:get_next)
   in
-  let _ = Hh_logger.log "Processed %d decls" (List.length results) in
+  let _ = Hh_logger.log "Processed %d decls" (I64Map.cardinal results) in
+
   save_contents local_file results;
+  (* save_contents local_file (I64Map.of_list results); *)
   let _ = Hh_logger.log "Saved to local file %s" local_file in
   ()

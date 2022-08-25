@@ -435,7 +435,7 @@ let make_remote_server_api
     let load_shallow_decls_saved_state
         (saved_state_main_artifacts :
           Saved_state_loader.Shallow_decls_info.main_artifacts) :
-        ((Int64.t * string) list, string) result =
+        (string I64Map.t, string) result =
       let { Saved_state_loader.Shallow_decls_info.shallow_decls_path } =
         saved_state_main_artifacts
       in
@@ -453,8 +453,7 @@ let make_remote_server_api
     let download_shallow_decls_saved_state
         (manifold_api_key : string option)
         (manifold_path : string)
-        (use_manifold_cython_client : bool) :
-        ((Int64.t * string) list, string) result =
+        (use_manifold_cython_client : bool) : (string I64Map.t, string) result =
       let target_path = "/tmp/hh_server/" ^ Random_id.short_string () in
       Disk.mkdir_p target_path;
 
@@ -499,27 +498,9 @@ let make_remote_server_api
 
     let unmarshal_decls_from_download_result
         ~(ctx : Provider_context.t)
-        (shallow_decls : (Int64.t * string) list)
+        (shallow_decls : string I64Map.t)
         (classnames : SSet.elt list) :
         Shallow_decl_defs.shallow_class option SMap.t =
-      (* unmarshall shallow decls in parallel*)
-      let job
-          (acc : (Int64.t * Shallow_decl_defs.shallow_class option) list list)
-          (decls : (Int64.t * string) list) =
-        List.map decls ~f:(fun (hash, marshalled_decl) ->
-            let decl = Marshal.from_string marshalled_decl 0 in
-            (hash, Some decl))
-        :: acc
-      in
-      let shallow_decls =
-        List.concat
-          (MultiWorker.call
-             workers
-             ~job
-             ~neutral:[]
-             ~merge:(fun a b -> List.concat [a; b])
-             ~next:(MultiWorker.next ~max_size:50000 workers shallow_decls))
-      in
       (* match shallow decls with classnames according to hash code *)
       let db_path_opt = Remote_old_decl_client.Utils.db_path_of_ctx ~ctx in
       match db_path_opt with
@@ -537,57 +518,16 @@ let make_remote_server_api
               | Some hash -> Some (name, Int64.of_string hash))
             classnames
         in
-        let sorted_saved_states =
-          List.sort shallow_decls ~compare:(fun (hash1, _) (hash2, _) ->
-              Int64.compare hash1 hash2)
-        in
-        let sorted_targets =
-          List.sort decl_name_and_hashes ~compare:(fun (_, hash1) (_, hash2) ->
-              Int64.compare hash1 hash2)
-        in
-        Hh_logger.log "finished sorting";
-        let rec lookup_shallow_decls states targets result =
-          match (states, targets) with
-          | ([], _) -> result
-          | (_, []) -> result
-          | ( (state_hash, decl) :: states',
-              (target_name, target_hash) :: targets' ) ->
-            if Int64.( < ) state_hash target_hash then
-              lookup_shallow_decls states' targets result
-            else if Int64.( > ) state_hash target_hash then
-              lookup_shallow_decls states targets' result
-            else
-              lookup_shallow_decls
-                states'
-                targets'
-                ((target_name, decl) :: result)
-        in
-        let fetched_decls =
-          lookup_shallow_decls sorted_saved_states sorted_targets []
-        in
-        Hh_logger.log "finished fetching";
-        SMap.of_list fetched_decls
-    (*
-        Hh_logger.log "computed hashes";
-        let shallow_decls =
-          List.fold_left
-            ~init:[]
-            ~f:(fun acc (hash, decl) ->
-              List.cons (Int64.to_string hash, decl) acc)
-            shallow_decls
-        in
-        let shallow_decls_map = SMap.of_list shallow_decls in
         Hh_logger.log "constructed smap";
         List.fold_left
           ~init:SMap.empty
           ~f:(fun acc (name, hash) ->
-            match SMap.find_opt hash shallow_decls_map with
+            match I64Map.find_opt hash shallow_decls with
             | None -> acc
             | Some marshalled_decl ->
               let decl = Marshal.from_string marshalled_decl 0 in
               SMap.add name (Some decl) acc)
           decl_name_and_hashes
-          *)
 
     let fetch_remote_decls_from_saved_state
         manifold_api_key manifold_path use_manifold_cython_client classnames =
@@ -601,7 +541,7 @@ let make_remote_server_api
         let _ =
           Hh_logger.log
             "loaded %d shallow decls from saved state"
-            (List.length shallow_decls_download_result)
+            (I64Map.cardinal shallow_decls_download_result)
         in
         let state_decls =
           unmarshal_decls_from_download_result

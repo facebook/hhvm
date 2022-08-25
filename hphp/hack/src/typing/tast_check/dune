@@ -10,6 +10,7 @@
   shape_analysis
   shape_analysis_scuba
   tast_env
+  typing_deps
   typing_pessimisation_deps
   utils_core)
  (preprocess

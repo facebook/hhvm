@@ -10,7 +10,24 @@ open Hh_prelude
 open Shape_analysis_types
 module A = Aast
 module SA = Shape_analysis
+module SAC = Shape_analysis_codemod
 module Env = Tast_env
+
+let channel_opt = ref None
+
+let get_channel () =
+  match !channel_opt with
+  | None ->
+    let worker_id = Option.value ~default:0 !Typing_deps.worker_id in
+    let filename =
+      Format.asprintf "/tmp/shape-like-dict-codemod-%d.json" worker_id
+    in
+    let channel =
+      Caml.Out_channel.(open_gen [Open_wronly; Open_creat] 0o644 filename)
+    in
+    channel_opt := Some channel;
+    channel
+  | Some channel -> channel
 
 let log_events_locally typing_env : log_event list -> unit =
   let log_shape = function
@@ -28,6 +45,26 @@ let log_events_locally typing_env : log_event list -> unit =
   in
   List.iter ~f:log_shape
 
+let log_events_as_codemod typing_env : log_event list -> unit =
+  let log_shape = function
+    | Result { shape_result; _ } ->
+      let channel = get_channel () in
+      let len = Out_channel.length channel in
+      let result_json = SAC.of_results typing_env [shape_result] in
+      let result_str =
+        if Int64.(len = of_int 0) then
+          Format.asprintf "[\n%a\n]" Hh_json.pp_json result_json
+        else begin
+          Out_channel.seek channel Int64.(len - of_int 2);
+          Format.asprintf ",\n%a\n]" Hh_json.pp_json result_json
+        end
+      in
+      Out_channel.output_string channel result_str;
+      Out_channel.flush channel
+    | Failure _ -> ()
+  in
+  List.iter ~f:log_shape
+
 let log_events typing_env : log_event list -> unit =
   let shape_analysis_log_level =
     Typing_env.get_tcopt typing_env
@@ -37,6 +74,7 @@ let log_events typing_env : log_event list -> unit =
   match shape_analysis_log_level with
   | Some 1 -> log_events_locally typing_env
   | Some 2 -> Shape_analysis_scuba.log_events_remotely typing_env
+  | Some 3 -> log_events_as_codemod typing_env
   | _ -> Fn.const ()
 
 let compute_results tast_env id params return body =

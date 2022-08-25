@@ -481,25 +481,34 @@ void setMaskedDataFull(
 // Returns the map mask for the given key.
 int64_t getMaskKey(MaskRef ref, const Value& newKey);
 
-// parseValue with mask
+// parseValue with readMask and writeMask
 template <typename Protocol>
 MaskedDecodeResultValue parseValue(
     Protocol& prot,
     TType arg_type,
-    MaskRef mask,
+    MaskRef readMask,
+    MaskRef writeMask,
     MaskedProtocolData& protocolData,
     bool string_to_binary = true) {
   MaskedDecodeResultValue result;
-  if (mask.isNoneMask()) { // do not deserialize
-    setMaskedDataFull(prot, arg_type, result.excluded, protocolData);
-    return result;
-  }
-  if (mask.isAllMask()) { // serialize all
+  if (readMask.isAllMask()) { // serialize all
     result.included = parseValue(prot, arg_type, string_to_binary);
     return result;
   }
+  if (readMask.isNoneMask()) { // do not deserialize
+    if (writeMask.isNoneMask()) { // store the serialized data
+      setMaskedDataFull(prot, arg_type, result.excluded, protocolData);
+      return result;
+    }
+    if (writeMask.isAllMask()) { // no need to store
+      apache::thrift::skip(prot, arg_type);
+      return result;
+    }
+    // Need to recursively store the result not in writeMask.
+  }
   switch (arg_type) {
     case protocol::T_STRUCT: {
+      auto& object = result.included.objectValue_ref().ensure();
       std::string name;
       int16_t fid;
       TType ftype;
@@ -509,13 +518,13 @@ MaskedDecodeResultValue parseValue(
         if (ftype == protocol::T_STOP) {
           break;
         }
-        MaskRef next = mask.get(FieldId{fid});
-        MaskedDecodeResultValue nestedResult =
-            parseValue(prot, ftype, next, protocolData, string_to_binary);
+        MaskRef nextRead = readMask.get(FieldId{fid});
+        MaskRef nextWrite = writeMask.get(FieldId{fid});
+        MaskedDecodeResultValue nestedResult = parseValue(
+            prot, ftype, nextRead, nextWrite, protocolData, string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
-          result.included.objectValue_ref().ensure()[FieldId{fid}] =
-              nestedResult.included;
+          object[FieldId{fid}] = nestedResult.included;
         }
         if (!apache::thrift::empty(nestedResult.excluded)) {
           result.excluded.fields_ref().ensure()[FieldId{fid}] =
@@ -527,20 +536,21 @@ MaskedDecodeResultValue parseValue(
       return result;
     }
     case protocol::T_MAP: {
+      auto& map = result.included.mapValue_ref().ensure();
       TType keyType;
       TType valType;
       uint32_t size;
       prot.readMapBegin(keyType, valType, size);
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
-        auto key = getMaskKey(mask, keyValue);
-        MaskRef next = mask.get(MapId{key});
-        MaskedDecodeResultValue nestedResult =
-            parseValue(prot, valType, next, protocolData, string_to_binary);
+        MaskRef nextRead = readMask.get(MapId{getMaskKey(readMask, keyValue)});
+        MaskRef nextWrite =
+            writeMask.get(MapId{getMaskKey(writeMask, keyValue)});
+        MaskedDecodeResultValue nestedResult = parseValue(
+            prot, valType, nextRead, nextWrite, protocolData, string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
-          result.included.mapValue_ref().ensure()[keyValue] =
-              nestedResult.included;
+          map[keyValue] = nestedResult.included;
         }
         if (!apache::thrift::empty(nestedResult.excluded)) {
           auto& keys = protocolData.keys().ensure();
@@ -562,7 +572,10 @@ MaskedDecodeResultValue parseValue(
 
 template <typename Protocol>
 MaskedDecodeResult parseObject(
-    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+    const folly::IOBuf& buf,
+    Mask readMask,
+    Mask writeMask,
+    bool string_to_binary = true) {
   Protocol prot;
   prot.setInput(&buf);
   MaskedDecodeResult result;
@@ -572,7 +585,12 @@ MaskedDecodeResult parseObject(
       ? type::StandardProtocol::Binary
       : type::StandardProtocol::Compact;
   MaskedDecodeResultValue parseValueResult = detail::parseValue(
-      prot, T_STRUCT, MaskRef{mask, false}, protocolData, string_to_binary);
+      prot,
+      T_STRUCT,
+      MaskRef{readMask, false},
+      MaskRef{writeMask, false},
+      protocolData,
+      string_to_binary);
   protocolData.data() = std::move(parseValueResult.excluded);
   // Calling ensure as it is possible that the value is not set.
   result.included =

@@ -358,7 +358,7 @@ async function soft_run_with_async<Tout>(
 }
 
 function soft_run_with<Tout>(
-  (function (): Tout) $f,
+  (function ()[_]: Tout) $f,
   string $key,
 )[zoned, ctx $f]: Tout {
   $prev = _Private\set_special_implicit_context(
@@ -440,7 +440,7 @@ abstract class ImplicitContext {
 
   protected static function runWith<Tout>(
     this::T $context,
-    (function (): Tout) $f,
+    (function ()[_]: Tout) $f,
   )[zoned, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,

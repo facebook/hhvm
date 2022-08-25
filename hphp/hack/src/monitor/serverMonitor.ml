@@ -891,37 +891,34 @@ struct
       let () = EventLogger.recheck_disk_files () in
       env
     else
-      try
-        let (fd, _) = Unix.accept socket in
-        try ack_and_handoff_client env fd with
-        | Exit_status.Exit_with _ as exn ->
-          let e = Exception.wrap exn in
-          Exception.reraise e
-        | Unix.Unix_error (Unix.EINVAL, _, _) as exn ->
-          let e = Exception.wrap exn in
-          Hh_logger.log
-            "Ack_and_handoff failure; closing client FD: %s"
-            (Exception.get_ctor_string e);
-          ensure_fd_closed fd;
-          raise Exit_status.(Exit_with Socket_error)
+      let (fd, _) =
+        try Unix.accept socket with
         | exn ->
           let e = Exception.wrap exn in
+          HackEventLogger.accepting_on_socket_exception e;
           Hh_logger.log
-            "Ack_and_handoff failure; closing client FD: %s"
-            (Exception.get_ctor_string e);
-          ensure_fd_closed fd;
-          env
-      with
+            "ACCEPTING_ON_SOCKET_EXCEPTION; closing client FD. %s"
+            (Exception.to_string e |> Exception.clean_stack);
+          Exception.reraise e
+      in
+      try ack_and_handoff_client env fd with
       | Exit_status.Exit_with _ as exn ->
         let e = Exception.wrap exn in
         Exception.reraise e
+      | Unix.Unix_error (Unix.EINVAL, _, _) as exn ->
+        let e = Exception.wrap exn in
+        Hh_logger.log
+          "Ack_and_handoff failure; closing client FD: %s"
+          (Exception.get_ctor_string e);
+        ensure_fd_closed fd;
+        raise Exit_status.(Exit_with Socket_error)
       | exn ->
         let e = Exception.wrap exn in
-        HackEventLogger.accepting_on_socket_exception e;
         Hh_logger.log
-          "ACCEPTING_ON_SOCKET_EXCEPTION; closing client FD. %s"
-          (Exception.to_string e |> Exception.clean_stack);
-        env
+          "Ack_and_handoff failure; closing client FD: %s"
+          (Exception.get_ctor_string e);
+        ensure_fd_closed fd;
+        Exception.reraise e
 
   let check_and_run_loop_once (env, monitor_config, socket) =
     let env = check_and_run_loop_ env monitor_config socket in

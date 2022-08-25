@@ -34,78 +34,80 @@ namespace thrift {
 namespace op {
 namespace detail {
 
+// Helper that creates a leaky singleton.
+template <typename F>
+FOLLY_EXPORT const auto& staticDefault(F&& make) {
+  static const auto& kVal = *make().release();
+  return kVal;
+}
+
 // C++'s intrinsic default for the underlying native type, is the intrisitic
 // default for for all unstructured types.
-template <typename Tag>
+template <typename Tag, typename = void>
 struct GetIntrinsicDefault {
-  static_assert(type::is_concrete_v<Tag>, "");
-  using T = type::native_type<Tag>;
+  constexpr auto operator()() const { return type::native_type<Tag>{}; }
+};
 
-  template <typename TagT = Tag>
-  constexpr type::if_is_a<TagT, type::string_c, T> operator()() const {
-    return StringTraits<T>::fromStringLiteral("");
-  }
-
-  template <typename TagT = Tag>
-  FOLLY_EXPORT type::if_is_a<TagT, type::structured_c, const T&> operator()()
-      const {
-    static const T& kDefault = *[]() {
-      auto* value = new T{};
-      // The default construct respects 'custom' defaults on fields, but
-      // clearing any instance of a structured type, sets it to the
-      // 'intrinsic' default.
+// Gets the intrinsic default via `thrift::clear`
+//
+// Useful for any type that supports custom defaults.
+template <typename Tag>
+struct ThriftClearDefault {
+  const auto& operator()() const {
+    return staticDefault([] {
+      auto value = std::make_unique<type::native_type<Tag>>();
       apache::thrift::clear(*value);
       return value;
-    }();
-    return kDefault;
-  }
-
-  // For rest of type tag, value initialize its native type.
-  template <typename TagT = Tag>
-  constexpr std::enable_if_t<
-      !type::is_a_v<TagT, type::string_c> &&
-          !type::is_a_v<TagT, type::structured_c>,
-      T>
-  operator()() const {
-    return T{};
+    });
   }
 };
 
+// Gets the intrinsic default via `op::create`
+template <typename Tag>
+struct CreateDefault {
+  const auto& operator()() const {
+    return staticDefault([] {
+      return std::make_unique<type::native_type<Tag>>(op::create<Tag>());
+    });
+  }
+};
+
+// Cache the cleared defaults for structured types.
+template <typename T>
+struct GetIntrinsicDefault<type::struct_t<T>>
+    : ThriftClearDefault<type::struct_t<T>> {};
+template <typename T>
+struct GetIntrinsicDefault<type::exception_t<T>>
+    : ThriftClearDefault<type::exception_t<T>> {};
+// TODO(afuller): Is this actually needed for union?
+template <typename T>
+struct GetIntrinsicDefault<type::union_t<T>>
+    : ThriftClearDefault<type::union_t<T>> {};
+
+// Cache the result of op::create for adapters.
 template <typename Adapter, typename Tag>
-struct GetIntrinsicDefault<type::adapted<Adapter, Tag>> {
-  using adapted_tag = type::adapted<Adapter, Tag>;
-  using T = type::native_type<adapted_tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
-  FOLLY_EXPORT const T& operator()() const {
-    static const T& kDefault = *new T(op::create<adapted_tag>());
-    return kDefault;
-  }
-};
+struct GetIntrinsicDefault<type::adapted<Adapter, Tag>>
+    : CreateDefault<type::adapted<Adapter, Tag>> {};
 
 // TODO(dokwon): Support field_ref types.
 template <typename Tag, typename Context>
 struct GetIntrinsicDefault<type::field<Tag, Context>>
     : GetIntrinsicDefault<Tag> {};
 
-template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
+template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 struct GetIntrinsicDefault<
-    type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
-  using field_adapted_tag =
-      type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
-  using T = type::native_type<field_adapted_tag>;
-  static_assert(type::is_concrete_v<field_adapted_tag>, "");
-
-  FOLLY_EXPORT const T& operator()() const {
-    static const T& kDefault = *[]() {
-      // Note, this is a separate leaky singleton instance from
-      // 'op::getIntrinsicDefault<struct_t<Struct>>'.
+    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>> {
+  using Tag =
+      type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
+  const auto& operator()() const {
+    return staticDefault([] {
+      // Note, this is a separate leaky singleton instance used by
+      // staticDefault.
       auto& obj = *new Struct{};
       folly::annotate_object_leaked(&obj);
       apache::thrift::clear(obj);
-      auto* value = new T(op::create<field_adapted_tag>(obj));
-      return value;
-    }();
-    return kDefault;
+      return std::make_unique<type::native_type<Tag>>(op::create<Tag>(obj));
+    });
   }
 };
 

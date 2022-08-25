@@ -24,5 +24,4 @@ let ( <> ) ~env sk1 sk2 =
       ty_opt
     | (None, None) -> None
   in
-  let map = T.TShapeMap.merge merge_shape_key_map sk1 sk2 in
-  map
+  T.TShapeMap.merge merge_shape_key_map sk1 sk2

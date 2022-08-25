@@ -1,8 +1,8 @@
 === Shape analysis results for call.php
 Constraints for \f:
-   4: SK [4:9-24] : shape('a' => int)
+   4: ! SK [4:9-24] : shape('a' => int)
    4: Allocation at [4:9-24]
-   5: SK [5:9-24] : shape('b' => int)
+   5: ! SK [5:9-24] : shape('b' => int)
    5: Allocation at [5:9-24]
    6: [5:9-24] ⊆ [6:10-13]
    6: [4:9-24] ⊆ [6:5-8]
@@ -18,6 +18,6 @@ Constraints for \g:
 Constraints for \h:
   13: Parameter at [13:12-30]
   14: ?1 ⊆ ?2
-  14: SK ?1 : shape('c' => int)
+  14: ! SK ?1 : shape('c' => int)
   14: Arg(\h, 0) ⊆ ?1
 

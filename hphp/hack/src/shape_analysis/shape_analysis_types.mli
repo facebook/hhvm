@@ -93,11 +93,17 @@ type certainty =
   | Maybe
 [@@deriving show]
 
+(** Indicates whether the constraint provides information or requires it. *)
+type variety =
+  | Has
+  | Needs
+[@@deriving show]
+
 type constraint_ =
   | Marks of marker_kind * Pos.t  (** Marks a point of interest *)
-  | Has_static_key of certainty * entity_ * T.TShapeMap.key * T.locl_ty
-      (** Records a static key an entity is accessed with along with the Hack
-          type of that key *)
+  | Static_key of variety * certainty * entity_ * T.TShapeMap.key * T.locl_ty
+      (** Records a static field that is available along with the Hack type of
+          that key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
   | Subsets of entity_ * entity_

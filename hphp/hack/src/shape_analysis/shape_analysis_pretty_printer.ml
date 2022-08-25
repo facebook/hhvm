@@ -23,12 +23,16 @@ let show_entity = function
 
 let show_ty env = Typing_print.full env
 
+let show_variety = function
+  | Has -> "!"
+  | Needs -> "?"
+
 let show_constraint env =
   let show_ty = show_ty env in
   function
   | Marks (kind, pos) ->
     Format.asprintf "%s at %a" (show_marker_kind kind) Pos.pp pos
-  | Has_static_key (certainty, entity, key, ty) ->
+  | Static_key (variety, certainty, entity, key, ty) ->
     let sft_optional =
       match certainty with
       | Maybe -> true
@@ -36,7 +40,11 @@ let show_constraint env =
     in
     let field_map = T.TShapeMap.singleton key T.{ sft_ty = ty; sft_optional } in
     let shape = mk_shape field_map in
-    Format.asprintf "SK %s : %s" (show_entity entity) (show_ty shape)
+    Format.asprintf
+      "%s SK %s : %s"
+      (show_variety variety)
+      (show_entity entity)
+      (show_ty shape)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 

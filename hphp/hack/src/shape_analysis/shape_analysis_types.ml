@@ -67,9 +67,14 @@ type certainty =
   | Maybe
 [@@deriving ord, show { with_path = false }]
 
+type variety =
+  | Has
+  | Needs
+[@@deriving ord, show { with_path = false }]
+
 type constraint_ =
   | Marks of marker_kind * Pos.t
-  | Has_static_key of certainty * entity_ * T.TShapeField.t * T.locl_ty
+  | Static_key of variety * certainty * entity_ * T.TShapeField.t * T.locl_ty
   | Has_dynamic_key of entity_
   | Subsets of entity_ * entity_
 [@@deriving ord]

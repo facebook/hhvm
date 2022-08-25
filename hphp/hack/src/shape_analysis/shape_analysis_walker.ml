@@ -283,8 +283,14 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Eif (cond, Some then_expr, else_expr) ->
     let (parent_env, _cond_entity) = expr_ env cond in
     let base_env = Env.reset_constraints parent_env in
-    let (then_env, then_entity) = expr_ base_env then_expr in
-    let (else_env, else_entity) = expr_ base_env else_expr in
+    let (then_env, then_entity) =
+      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+      expr_ base_env then_expr
+    in
+    let (else_env, else_entity) =
+      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+      expr_ base_env else_expr
+    in
     let env = Env.union ~pos ~origin:__LINE__ parent_env then_env else_env in
     (* Create a join point entity. It is pretty much Option.marge except that
        that function doesn't allow threading state (`env`) through *)
@@ -301,14 +307,15 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (env, entity)
   | A.Eif (cond, None, else_expr) ->
     let (env, cond_entity) = expr_ env cond in
+    (* TODO(T129426549): This shouldn't be conditionally executed *)
     let (env, else_entity) = expr_ env else_expr in
     (* Create a join point entity. It is pretty much Option.marge except that
        that function doesn't allow threading state (`env`) through *)
     let (env, entity) =
       match (cond_entity, else_entity) with
-      | (Some then_entity_, Some else_entity_) ->
+      | (Some cond_entity_, Some else_entity_) ->
         let (env, join) =
-          join ~pos ~origin:__LINE__ env then_entity_ else_entity_
+          join ~pos ~origin:__LINE__ env cond_entity_ else_entity_
         in
         (env, Some join)
       | (None, Some _) -> (env, else_entity)
@@ -354,6 +361,7 @@ let rec switch
     (dfl : ('ex, 'en) A.default_case option) : env =
   let initialize_next_cont env =
     let env = Env.restore_conts_from env ~from:parent_locals [Cont.Next] in
+    let env = Env.refresh ~pos ~origin:__LINE__ env in
     let env =
       Env.update_next_from_conts
         ~pos
@@ -397,8 +405,14 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.If (cond, then_bl, else_bl) ->
     let parent_env = expr env cond in
     let base_env = Env.reset_constraints parent_env in
-    let then_env = block base_env then_bl in
-    let else_env = block base_env else_bl in
+    let then_env =
+      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+      block base_env then_bl
+    in
+    let else_env =
+      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+      block base_env else_bl
+    in
     Env.union ~pos ~origin:__LINE__ parent_env then_env else_env
   | A.Switch (cond, cases, dfl) ->
     let env = expr env cond in

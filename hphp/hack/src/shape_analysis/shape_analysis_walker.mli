@@ -17,6 +17,9 @@ val callable :
   Tast.fun_param list ->
   return:Tast.type_hint ->
   Tast.func_body ->
-  decorated_constraints
+  decorated_constraints * Error.t list
 
-val program : Provider_context.t -> Tast.program -> decorated_constraints SMap.t
+val program :
+  Provider_context.t ->
+  Tast.program ->
+  (decorated_constraints * Error.t list) SMap.t

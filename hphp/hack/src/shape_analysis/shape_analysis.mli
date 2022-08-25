@@ -11,7 +11,7 @@
 
 open Shape_analysis_types
 
-exception Shape_analysis_exn of string
+exception Shape_analysis_exn of Error.t
 
 val is_shape_like_dict : shape_result -> bool
 
@@ -23,7 +23,7 @@ val callable :
   Tast.fun_param list ->
   return:Tast.type_hint ->
   Tast.func_body ->
-  decorated_constraints
+  decorated_constraints * Error.t list
 
 val do_ : options -> Provider_context.t -> Tast.program -> unit
 

@@ -6,15 +6,22 @@
  *
  *)
 
+open Hh_prelude
 module A = Ast_defs
 module T = Typing_defs
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 module HT = Hips_types
 
-exception Shape_analysis_exn of string
+module Error = struct
+  type t = string [@@deriving show]
 
-module CommonSet (S : Set.S) = struct
+  let mk str = str
+end
+
+exception Shape_analysis_exn of Error.t
+
+module CommonSet (S : Caml.Set.S) = struct
   let unions_map ~f set =
     S.fold (fun elt acc -> S.union (f elt) acc) set S.empty
 end
@@ -102,9 +109,10 @@ type env = {
   lenv: lenv;
   return: entity;
   tast_env: Tast_env.t;
+  errors: Error.t list;
 }
 
-module PointsToSet = Set.Make (struct
+module PointsToSet = Caml.Set.Make (struct
   type t = entity_ * entity_
 
   let compare (a, b) (c, d) =
@@ -113,14 +121,14 @@ module PointsToSet = Set.Make (struct
     | x -> x
 end)
 
-module EntityMap = Map.Make (struct
+module EntityMap = Caml.Map.Make (struct
   type t = entity_
 
   let compare = compare_entity_
 end)
 
 module EntitySet = struct
-  module S = Set.Make (struct
+  module S = Caml.Set.Make (struct
     type t = entity_
 
     let compare = compare_entity_
@@ -130,20 +138,12 @@ module EntitySet = struct
   include CommonSet (S)
 end
 
-module ConstraintSet = Set.Make (struct
+module ConstraintSet = Caml.Set.Make (struct
   type t = constraint_
 
   let compare = compare_constraint_
 end)
 
-type log_event =
-  | Result of {
-      id: string;
-      shape_result: shape_result;
-    }
-  | Failure of {
-      id: string;
-      error_message: string;
-    }
+type event = string * (shape_result, Error.t) Either.t
 
 type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_

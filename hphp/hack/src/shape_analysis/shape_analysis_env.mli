@@ -27,6 +27,9 @@ val add_constraint : env -> constraint_ decorated -> env
 (** Record a shape analysis inter-procedural constraint *)
 val add_inter_constraint : env -> inter_constraint_ decorated -> env
 
+(** Stashes a critical error to report later in aggregate *)
+val add_error : env -> Error.t -> env
+
 (** Ignore all existing constraints. The intention of this is to prevent
     unnecessary duplication of constraints when multiple environments need to
     be merged. *)

@@ -119,6 +119,7 @@ let init tast_env constraints inter_constraints bindings ~return =
     lenv = LEnv.init bindings;
     return;
     tast_env;
+    errors = [];
   }
 
 let add_constraint env constraint_ =
@@ -126,6 +127,8 @@ let add_constraint env constraint_ =
 
 let add_inter_constraint env inter_constraint_ =
   { env with inter_constraints = inter_constraint_ :: env.inter_constraints }
+
+let add_error env err = { env with errors = err :: env.errors }
 
 let reset_constraints env = { env with constraints = [] }
 

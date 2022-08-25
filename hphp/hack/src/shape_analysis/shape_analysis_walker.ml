@@ -39,7 +39,12 @@ let when_local_mode tast_env ~default f =
   | _ -> default
 
 let failwithpos pos msg =
-  raise @@ Shape_analysis_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
+  raise
+  @@ Shape_analysis_exn (Error.mk @@ Format.asprintf "%a: %s" Pos.pp pos msg)
+
+let not_yet_supported (env : env) pos msg =
+  let msg = Error.mk @@ Format.asprintf "%a: Unsupported %s" Pos.pp pos msg in
+  Env.add_error env msg
 
 let failwith = failwithpos Pos.none
 
@@ -172,7 +177,7 @@ let rec assign
            situation, it is not meaningful to report a candidate. *)
         env
     end
-  | _ -> failwithpos lhs_pos ("Unsupported lvalue: " ^ Utils.expr_name lval)
+  | _ -> not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
@@ -251,7 +256,11 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             entity_exp
         in
         (env, None)
-      | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)
+      | _ ->
+        let env =
+          not_yet_supported env pos ("idx expression: " ^ Utils.expr_name e)
+        in
+        (env, None)
     end
   | A.Call ((_, _, A.Id (_, f_id)), _targs, args, _unpacked) ->
     let expr_arg arg_idx env (_param_kind, ((_ty, pos, _exp) as arg)) =
@@ -317,7 +326,9 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, _) = expr_ env e1 in
     let (env, _) = expr_ env e2 in
     (env, None)
-  | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+  | _ ->
+    let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
+    (env, None)
 
 and eif ~pos env cond then_expr_opt else_expr =
   let (cond_env, cond_entity) = expr_ env cond in
@@ -470,7 +481,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.AssertEnv _
   | A.Markup _ ->
     env
-  | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)
+  | _ -> not_yet_supported env pos ("statement: " ^ Utils.stmt_name stmt)
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
@@ -526,17 +537,17 @@ let init_params id tast_env (params : T.fun_param list) :
   in
   List.foldi ~f:add_param ~init:([], LMap.empty) params
 
-let callable id tast_env params ~return body : decorated_constraints =
+let callable id tast_env params ~return body =
   let (param_constraints, param_env) = init_params id tast_env params in
   let (return_constraints, return) = decl_hint `Return tast_env return in
   let constraints = return_constraints @ param_constraints in
   let env = Env.init tast_env constraints [] param_env ~return in
   let env = block env body.A.fb_ast in
-  (env.constraints, env.inter_constraints)
+  ((env.constraints, env.inter_constraints), env.errors)
 
-let program (ctx : Provider_context.t) (tast : Tast.program) :
-    decorated_constraints SMap.t =
-  let def (def : T.def) : (string * decorated_constraints) list =
+let program (ctx : Provider_context.t) (tast : Tast.program) =
+  let def (def : T.def) : (string * (decorated_constraints * Error.t list)) list
+      =
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->

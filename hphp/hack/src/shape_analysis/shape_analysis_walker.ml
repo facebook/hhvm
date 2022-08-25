@@ -280,8 +280,6 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = List.foldi ~f:expr_arg ~init:env args in
     (env, None)
-  | A.Eif (cond, then_expr_opt, else_expr) ->
-    eif ~pos env cond then_expr_opt else_expr
   | A.Await e -> expr_ env e
   | A.As (e, _ty, _) -> expr_ env e
   | A.Is (e, _ty) ->
@@ -296,6 +294,10 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (* Adding support for unary operations *)
     let (env, _) = expr_ env e1 in
     (env, None)
+  | A.Eif (cond, then_expr_opt, else_expr) ->
+    eif ~pos env cond then_expr_opt else_expr
+  | A.Binop (Ast_defs.QuestionQuestion, nullable_expr, else_expr) ->
+    eif ~pos env nullable_expr None else_expr
   | A.Binop
       ( Ast_defs.(
           ( Plus | Minus | Star | Slash | Eqeq | Eqeqeq | Starstar | Diff
@@ -304,7 +306,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         e1,
         e2 ) ->
     (* Adding support for binary operations. Currently not covering
-       "Ast_defs.Eq Some _" and "Ast_defs.QuestionQuestion" *)
+       "Ast_defs.Eq Some _" *)
     let (env, _) = expr_ env e1 in
     let (env, _) = expr_ env e2 in
     (env, None)

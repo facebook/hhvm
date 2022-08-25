@@ -602,15 +602,15 @@ void ThriftServer::setup() {
       }
     }
 #endif
+    // Do not allow setters to be called past this point until the IO worker
+    // threads have been joined in stopWorkers().
+    thriftConfig_.freeze();
 
     // Notify handler of the preServe event
     for (const auto& eventHandler : getEventHandlersUnsafe()) {
       eventHandler->preServe(&addresses_.at(0));
     }
 
-    // Do not allow setters to be called past this point until the IO worker
-    // threads have been joined in stopWorkers().
-    thriftConfig_.freeze();
   } catch (std::exception& ex) {
     // This block allows us to investigate the exception using gdb
     LOG(ERROR) << "Got an exception while setting up the server: " << ex.what();

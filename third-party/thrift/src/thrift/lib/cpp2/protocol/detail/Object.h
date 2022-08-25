@@ -21,7 +21,9 @@
 
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
+#include <folly/Utility.h>
 #include <thrift/lib/cpp2/FieldMask.h>
+#include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/lib/cpp2/type/Traits.h>
 #include <thrift/lib/cpp2/type/Type.h>
@@ -684,6 +686,80 @@ void serializeValue(Protocol& prot, const Value& value) {
     }
     default: {
       TProtocolException::throwInvalidFieldData();
+    }
+  }
+}
+
+// Writes the field from raw data in MaskedData.
+template <class Protocol>
+void writeRawField(
+    Protocol& prot,
+    FieldId fieldId,
+    MaskedProtocolData& protocolData,
+    MaskedData& maskedData) {
+  auto& nestedMaskedData = maskedData.fields_ref().value()[fieldId];
+  // When value doesn't exist in the object, maskedData should have full field.
+  if (!nestedMaskedData.full_ref()) {
+    throw std::runtime_error("incompatible value and maskedData");
+  }
+  type::ValueId valueId = nestedMaskedData.full_ref().value();
+  const EncodedValue& value = getByValueId(*protocolData.values(), valueId);
+  prot.writeFieldBegin(
+      "", toTType(*value.wireType()), folly::to_underlying(fieldId));
+  prot.writeRaw(*value.data());
+  prot.writeFieldEnd();
+}
+
+// We can assume that if value type is a struct, fields in maskedData is active.
+// It throws a runtime error if value and maskedData are incompatible.
+template <class Protocol>
+void serializeValue(
+    Protocol& prot,
+    const Value& value,
+    MaskedProtocolData& protocolData,
+    MaskedData& maskedData) {
+  switch (value.getType()) {
+    case Value::Type::objectValue: {
+      if (!maskedData.fields_ref()) {
+        throw std::runtime_error("incompatible value and maskedData");
+      }
+      prot.writeStructBegin("");
+      // It is more efficient to serialize with sorted field ids.
+      std::set<FieldId> fieldIds{};
+      for (const auto& [fieldId, _] : value.as_object()) {
+        fieldIds.insert(FieldId{fieldId});
+      }
+      for (const auto& [fieldId, _] : *maskedData.fields_ref()) {
+        fieldIds.insert(fieldId);
+      }
+
+      for (auto fieldId : fieldIds) {
+        if (!value.as_object().members()->contains(
+                folly::to_underlying(fieldId))) {
+          // no need to serialize the value
+          writeRawField(prot, fieldId, protocolData, maskedData);
+          continue;
+        }
+        // get type from value
+        const auto& fieldVal = value.as_object().at(fieldId);
+        auto fieldType = getTType(fieldVal);
+        prot.writeFieldBegin("", fieldType, folly::to_underlying(fieldId));
+        // just serialize the value
+        if (!maskedData.fields_ref()->contains(fieldId)) {
+          serializeValue(prot, fieldVal);
+        } else { // recursively serialize value with maskedData
+          auto& nextMaskedData = maskedData.fields_ref().value()[fieldId];
+          serializeValue(prot, fieldVal, protocolData, nextMaskedData);
+        }
+        prot.writeFieldEnd();
+      }
+      prot.writeFieldStop();
+      prot.writeStructEnd();
+      return;
+    }
+    // TODO: handle map
+    default: {
+      serializeValue(prot, value);
     }
   }
 }

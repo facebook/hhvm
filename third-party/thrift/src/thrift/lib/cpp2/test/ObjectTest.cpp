@@ -427,7 +427,7 @@ template <
     ::apache::thrift::conformance::StandardProtocol Protocol,
     typename Tag,
     typename T>
-void testParseObjectWithMask() {
+void testWithMask(bool testSerialize) {
   T testsetValue;
   for (const auto& val : data::ValueGenerator<Tag>::getKeyValues()) {
     SCOPED_TRACE(val.name);
@@ -435,36 +435,57 @@ void testParseObjectWithMask() {
     auto valueStruct = asValueStruct<type::struct_c>(testsetValue);
     const Object& object = valueStruct.get_objectValue();
 
+    auto reserialize = [&](MaskedDecodeResult& result) {
+      auto reserialized = serializeObject<protocol_writer_t<Protocol>>(
+          result.included, result.excluded);
+      Object finalObj = parseObject<protocol_reader_t<Protocol>>(*reserialized);
+      EXPECT_EQ(finalObj, object);
+    };
+
     auto iobuf = serialize<Protocol, T>(testsetValue);
     {
       // parseObject with allMask should parse the entire object.
       auto result = parseObject<protocol_reader_t<Protocol>>(*iobuf, allMask());
-      EXPECT_EQ(result.included, object);
-      MaskedProtocolData expected;
-      expected.protocol() = convertStandardProtocol(Protocol);
-      EXPECT_EQ(result.excluded, expected);
+      if (testSerialize) {
+        reserialize(result);
+      } else { // manually check the result
+        EXPECT_EQ(result.included, object);
+        MaskedProtocolData expected;
+        expected.protocol() = convertStandardProtocol(Protocol);
+        EXPECT_EQ(result.excluded, expected);
+      }
     }
     {
       // parseObject with noneMask should parse nothing.
       auto result =
           parseObject<protocol_reader_t<Protocol>>(*iobuf, noneMask());
-      EXPECT_EQ(result.included, Object{});
-      EXPECT_EQ(*result.excluded.protocol(), convertStandardProtocol(Protocol));
-      auto& values = *result.excluded.values();
-      auto& encodedValue =
-          detail::getByValueId(values, *result.excluded.data()->full_ref());
-      auto objFromExcluded =
-          parseObject<protocol_reader_t<Protocol>>(*encodedValue.data());
-      EXPECT_EQ(objFromExcluded, object);
+      if (testSerialize) {
+        reserialize(result);
+      } else { // manually check the result
+        EXPECT_EQ(result.included, Object{});
+        EXPECT_EQ(
+            *result.excluded.protocol(), convertStandardProtocol(Protocol));
+        auto& values = *result.excluded.values();
+        auto& encodedValue =
+            detail::getByValueId(values, *result.excluded.data()->full_ref());
+        auto objFromExcluded =
+            parseObject<protocol_reader_t<Protocol>>(*encodedValue.data());
+        EXPECT_EQ(objFromExcluded, object);
+      }
     }
     {
       // parseObject with Mask = includes{1: allMask()}
       Mask mask;
       mask.includes_ref().emplace()[1] = allMask();
       auto result = parseObject<protocol_reader_t<Protocol>>(*iobuf, mask);
-      EXPECT_EQ(result.included.size(), 1);
-      EXPECT_EQ(result.included.at(FieldId{1}), object.at(FieldId{1}));
-      EXPECT_EQ(*result.excluded.protocol(), convertStandardProtocol(Protocol));
+      if (testSerialize) {
+        reserialize(result);
+      } else { // manually check the result
+        EXPECT_EQ(result.included.size(), 1);
+        EXPECT_EQ(result.included.at(FieldId{1}), object.at(FieldId{1}));
+        EXPECT_EQ(
+            *result.excluded.protocol(), convertStandardProtocol(Protocol));
+      }
     }
   }
 }
@@ -579,15 +600,26 @@ TYPED_TEST(TypedParseObjectTest, ParseSerializedSameAsDirectObject) {
       testset::union_with<TypeParam>>();
 }
 
-TYPED_TEST(TypedParseObjectTest, ParseSerializedWithMask) {
-  testParseObjectWithMask<
+TYPED_TEST(TypedParseObjectTest, ParseObjectWithMask) {
+  testWithMask<
       ::apache::thrift::conformance::StandardProtocol::Binary,
       TypeParam,
-      testset::struct_with<TypeParam>>();
-  testParseObjectWithMask<
+      testset::struct_with<TypeParam>>(false);
+  testWithMask<
       ::apache::thrift::conformance::StandardProtocol::Compact,
       TypeParam,
-      testset::struct_with<TypeParam>>();
+      testset::struct_with<TypeParam>>(false);
+}
+
+TYPED_TEST(TypedParseObjectTest, SerializeObjectWithMask) {
+  testWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary,
+      TypeParam,
+      testset::struct_with<TypeParam>>(true);
+  testWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact,
+      TypeParam,
+      testset::struct_with<TypeParam>>(true);
 }
 
 TYPED_TEST(TypedParseObjectTest, SerializeObjectSameAsDirectSerialization) {
@@ -833,8 +865,9 @@ Value parseValue(const EncodedValue& encodedValue, TType type) {
   return detail::parseValue(prot, type, false);
 }
 
+// Tests parseObject (and serializeObject if testSerialize) with mask.
 template <::apache::thrift::conformance::StandardProtocol Protocol>
-void testParseValueWithMask() {
+void testParseObjectWithMask(bool testSerialize) {
   Object obj, foo, bar, expected;
   // obj{1: 3,
   //     2: {1: "foo"}
@@ -863,6 +896,18 @@ void testParseValueWithMask() {
   auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
   MaskedDecodeResult result =
       parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+
+  if (testSerialize) {
+    // test serializeObject with mask
+    auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
+        result.included, result.excluded);
+    Object finalObj =
+        parseObject<protocol_reader_t<Protocol>>(*reserialized, false);
+    EXPECT_EQ(finalObj, obj);
+    return;
+  }
+
+  // manually check the result
   EXPECT_EQ(*result.excluded.protocol(), convertStandardProtocol(Protocol));
   EXPECT_EQ(result.included, expected);
   auto& values = *result.excluded.values();
@@ -885,10 +930,128 @@ void testParseValueWithMask() {
       foo);
 }
 
+template <::apache::thrift::conformance::StandardProtocol Protocol>
+void testSerializeObjectWithMask() {
+  Object obj, foo;
+  // obj{1: {1: "foo",
+  //         2: "bar"},
+  //     2: 2,
+  //     3: 3}
+  foo[FieldId{1}].stringValue_ref() = "foo";
+  foo[FieldId{2}].stringValue_ref() = "bar";
+  obj[FieldId{1}].objectValue_ref() = foo;
+  obj[FieldId{2}].i32Value_ref() = 2;
+  obj[FieldId{3}].i32Value_ref() = 3;
+
+  // masks obj[1][1] and obj[2]
+  Mask mask;
+  auto& includes = mask.includes_ref().emplace();
+  includes[1].includes_ref().emplace()[1] = allMask();
+  includes[2] = allMask();
+
+  // serialize the object and deserialize with mask
+  auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
+  MaskedDecodeResult result =
+      parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+  {
+    Object expected, bar;
+    // expected{1: {1: "foo"},
+    //          2: 2}
+    bar[FieldId{1}].stringValue_ref() = "foo";
+    expected[FieldId{1}].objectValue_ref() = bar;
+    expected[FieldId{2}].i32Value_ref() = 2;
+    EXPECT_EQ(result.included, expected);
+  }
+
+  {
+    // reserialize with the unmodified object
+    auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
+        result.included, result.excluded);
+    Object finalObj =
+        parseObject<protocol_reader_t<Protocol>>(*reserialized, false);
+    EXPECT_EQ(finalObj, obj);
+  }
+
+  {
+    // reserialize with the modified object
+    Object modified, baz;
+    // modified{1: {3: "baz"},
+    //          4: 4}
+    baz[FieldId{3}].stringValue_ref() = "baz";
+    modified[FieldId{1}].objectValue_ref() = baz;
+    modified[FieldId{4}].i32Value_ref() = 4;
+
+    Object expected, bar;
+    // expected{1: {2: "bar",
+    //              3: "baz"},
+    //          3: 3,
+    //          4: 4}
+    bar[FieldId{2}].stringValue_ref() = "bar";
+    bar[FieldId{3}].stringValue_ref() = "baz";
+    expected[FieldId{1}].objectValue_ref() = bar;
+    expected[FieldId{3}].i32Value_ref() = 3;
+    expected[FieldId{4}].i32Value_ref() = 4;
+
+    auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
+        modified, result.excluded);
+    Object finalObj =
+        parseObject<protocol_reader_t<Protocol>>(*reserialized, false);
+    EXPECT_EQ(finalObj, expected);
+  }
+}
+
+template <::apache::thrift::conformance::StandardProtocol Protocol>
+void testSerializeObjectWithMaskError() {
+  Object obj, foo;
+  // obj{1: {1: "foo"}}
+  foo[FieldId{1}].stringValue_ref() = "foo";
+  obj[FieldId{1}].objectValue_ref() = foo;
+
+  {
+    // MaskedData[1] is full, which should be fields.
+    MaskedProtocolData protocolData;
+    protocolData.protocol() = convertStandardProtocol(Protocol);
+    MaskedData& maskedData = protocolData.data_ref().value();
+    maskedData.fields_ref().ensure()[FieldId{1}].full_ref() = type::ValueId{1};
+
+    EXPECT_THROW(
+        protocol::serializeObject<protocol_writer_t<Protocol>>(
+            obj, protocolData),
+        std::runtime_error);
+  }
+  {
+    // MaskedData[2] is fields, which should be full.
+    MaskedProtocolData protocolData;
+    protocolData.protocol() = convertStandardProtocol(Protocol);
+    MaskedData& maskedData = protocolData.data_ref().value();
+    maskedData.fields_ref().ensure()[FieldId{2}].fields_ref().ensure();
+
+    EXPECT_THROW(
+        protocol::serializeObject<protocol_writer_t<Protocol>>(
+            obj, protocolData),
+        std::runtime_error);
+  }
+}
+
 TEST(Object, ParseObjectWithMask) {
-  testParseValueWithMask<
+  testParseObjectWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact>(false);
+  testParseObjectWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>(false);
+}
+
+TEST(Object, SerializeObjectWithMask) {
+  testParseObjectWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact>(true);
+  testParseObjectWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>(true);
+  testSerializeObjectWithMask<
       ::apache::thrift::conformance::StandardProtocol::Compact>();
-  testParseValueWithMask<
+  testSerializeObjectWithMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>();
+  testSerializeObjectWithMaskError<
+      ::apache::thrift::conformance::StandardProtocol::Compact>();
+  testSerializeObjectWithMaskError<
       ::apache::thrift::conformance::StandardProtocol::Binary>();
 }
 

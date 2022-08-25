@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache::thrift::protocol {
 
@@ -75,6 +76,35 @@ std::unique_ptr<folly::IOBuf> serializeObject(const Object& obj) {
   Value val;
   val.objectValue_ref() = obj;
   detail::serializeValue(prot, val);
+  return queue.move();
+}
+
+// Serialization of protocol::Object with MaskedProtocolData.
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeObject(
+    const Object& obj, MaskedProtocolData& protocolData) {
+  // TODO: change this to use get_standard_protocol
+  static_assert(
+      std::is_same_v<Protocol, BinaryProtocolWriter> ||
+      std::is_same_v<Protocol, CompactProtocolWriter>);
+  auto expectedProtocol = std::is_same_v<Protocol, BinaryProtocolWriter>
+      ? type::StandardProtocol::Binary
+      : type::StandardProtocol::Compact;
+  assert(*protocolData.protocol() == expectedProtocol);
+  Protocol prot;
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  prot.setOutput(&queue);
+  Value val;
+  val.objectValue_ref() = obj;
+  if (protocolData.data()->full_ref()) { // entire object is not parsed
+    const EncodedValue& value = detail::getByValueId(
+        *protocolData.values(), protocolData.data()->full_ref().value());
+    prot.writeRaw(*value.data());
+  } else if (!protocolData.data()->fields_ref()) { // entire object is parsed
+    detail::serializeValue(prot, val);
+  } else { // use both object and masked data to serialize
+    detail::serializeValue(prot, val, protocolData, *protocolData.data());
+  }
   return queue.move();
 }
 

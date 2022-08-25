@@ -3,8 +3,8 @@ Summary for \f:
 [5:8-14] [Allocation]:
   shape()
 [8:13-15] [Debug]:
-  shape(?'a' => bool, ?'b' => int)
+  shape('a' => bool, ?'b' => int)
 [11:13-15] [Debug]:
-  shape(?'a' => bool, ?'b' => int)
+  shape('a' => bool, 'b' => int)
 [14:11-13] [Debug]:
   shape(?'a' => bool, ?'b' => int, 'c' => float)

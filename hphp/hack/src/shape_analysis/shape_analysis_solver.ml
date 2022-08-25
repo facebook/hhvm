@@ -33,11 +33,29 @@ module StaticAccess = struct
   end
 end
 
+module OptionalAccess = struct
+  type ty = entity_ * T.TShapeField.t
+
+  let compare =
+    Tuple.T2.compare ~cmp1:compare_entity_ ~cmp2:T.TShapeField.compare
+
+  module Set = struct
+    module S = Caml.Set.Make (struct
+      type t = ty
+
+      let compare = compare
+    end)
+
+    include S
+    include CommonSet (S)
+  end
+end
+
 type constraints = {
   markers: (marker_kind * Pos.t) list;
   base_static_accesses: StaticAccess.Set.t;
   derived_static_accesses: StaticAccess.Set.t;
-  optional_accesses: (entity_ * T.TShapeMap.key) list;
+  optional_accesses: OptionalAccess.Set.t;
   dynamic_accesses: EntitySet.t;
   subsets: (entity_ * entity_) list;
 }
@@ -47,7 +65,7 @@ let constraints_init =
     markers = [];
     base_static_accesses = StaticAccess.Set.empty;
     derived_static_accesses = StaticAccess.Set.empty;
-    optional_accesses = [];
+    optional_accesses = OptionalAccess.Set.empty;
     dynamic_accesses = EntitySet.empty;
     subsets = [];
   }
@@ -91,7 +109,8 @@ let disassemble constraints =
     | Has_optional_key (entity, key) ->
       {
         constraints with
-        optional_accesses = (entity, key) :: constraints.optional_accesses;
+        optional_accesses =
+          OptionalAccess.Set.add (entity, key) constraints.optional_accesses;
       }
     | Has_dynamic_key entity ->
       {
@@ -121,7 +140,7 @@ let assemble
       (StaticAccess.Set.elements derived_static_accesses)
   @ List.map
       ~f:(fun (entity, key) -> Has_optional_key (entity, key))
-      optional_accesses
+      (OptionalAccess.Set.elements optional_accesses)
   @ List.map
       ~f:(fun entity -> Has_dynamic_key entity)
       (EntitySet.elements dynamic_accesses)
@@ -237,6 +256,89 @@ let derive_dynamic_accesses adjacency_map dynamic_accesses =
   in
   close_upwards_and_downwards ~delta:dynamic_accesses ~acc:dynamic_accesses
 
+(*
+  We conclude that a key is optional either we explicitly observed it in the
+  source code, for example, through the use of `idx` or due to control flow
+  making the key exist in one branch of execution but not another.
+
+  We stop propagating this constraint if we encounter a static key added to an
+  entity from the source code.
+
+    has_optional_key_u(E,Key) :- has_optional_key(E,Key).
+    has_optional_key_u(Join,Key) :-
+      subsets(E,Join),
+      subsets(F,Join),
+      has_static_key_u(E,Key),
+      not has_static_key_u(F,Key).
+    has_optional_key_u(F,Key) :-
+      has_optional_key_u(E,Key),
+      subsets(E,F),
+      not has_static_key(F,Key).
+*)
+let derive_optional_accesses
+    adjacency_map
+    ~base_static_accesses
+    ~derived_static_accesses
+    observed_optional_accesses =
+  let open OptionalAccess.Set in
+  let definitely_not_optional_accesses =
+    StaticAccess.Set.fold
+      (fun (e, k, _) acc -> add (e, k) acc)
+      base_static_accesses
+      empty
+  in
+  let static_keys_of e =
+    let add_key (e', key, _) map =
+      if equal_entity_ e e' then
+        T.TShapeSet.add key map
+      else
+        map
+    in
+    StaticAccess.Set.fold add_key derived_static_accesses T.TShapeSet.empty
+  in
+  let deduced_optional_accesses =
+    let add_optional_access join adjacencies acc =
+      let handle_predecessor pred_entity common_keys =
+        let keys = static_keys_of pred_entity in
+        T.TShapeSet.inter keys common_keys
+      in
+      let all_keys = static_keys_of join in
+      let common_keys =
+        if EntitySet.cardinal adjacencies.backwards < 2 then
+          all_keys
+        else
+          EntitySet.fold handle_predecessor adjacencies.backwards all_keys
+      in
+      let optional_keys =
+        let key_diff = T.TShapeSet.diff all_keys common_keys in
+        T.TShapeSet.fold (fun key -> add (join, key)) key_diff empty
+      in
+      union optional_keys acc
+    in
+    EntityMap.fold add_optional_access adjacency_map empty
+  in
+  let rec close_upwards ~delta ~acc =
+    if is_empty delta then
+      acc
+    else
+      let propagate (e, k) =
+        match EntityMap.find_opt e adjacency_map with
+        | Some adjacency ->
+          let delta =
+            EntitySet.fold (fun e' -> add (e', k)) adjacency.forwards empty
+          in
+          let delta = diff delta definitely_not_optional_accesses in
+          delta
+        | None -> empty
+      in
+      let delta = unions_map ~f:propagate delta in
+      let delta = diff delta acc in
+      let acc = union delta acc in
+      close_upwards ~delta ~acc
+  in
+  let all = union observed_optional_accesses deduced_optional_accesses in
+  close_upwards ~delta:all ~acc:all
+
 (* The following program roughly summarises the solver in Datalog.
 
   Variables with single letters E and F and their variants with primes all
@@ -263,21 +365,6 @@ let derive_dynamic_accesses adjacency_map dynamic_accesses =
   // Transitive closure closure
   subsets_tr(E,F) :- subsets(E,F).
   subsets_tr(E,F) :- subsets(E,F), subsets_re(E,F).
-
-  // We conclude that a key is optional either we explicitly observed it in the
-  // source code, for example, through the use of `idx` or due to control flow
-  // making the key exist in one branch of execution but not another.
-  //
-  // TODO(T125888579): Note that this treatment is imprecise as we can later
-  // observe the key to be definitely in place, but it would still be marked as
-  // optional.
-  has_optional_key_base(E,Key) :- has_optional_key(E,Key).
-  has_optional_key_base(Join,Key) :-
-    subsets(E,Join),
-    subsets(F,Join),
-    has_static_key_u(E,Key),
-    not has_static_key_u(F,Key).
-  has_optional_key_u(F,Key) :- has_optional_key_base(E,Key), subsets_tr(E,F).
 *)
 let deduce (constraints : constraint_ list) : constraint_ list =
   let {
@@ -306,7 +393,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let adjacency_map = mk_adjacency_map subsets in
   let subsets = subsets_reflexive @ subsets in
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
-  let (_collect_subsets, collect_supersets) = subset_lookups subsets in
+  let (_collect_subsets, _collect_supersets) = subset_lookups subsets in
   let subsets = PointsToSet.elements subsets in
 
   (* Close upwards *)
@@ -316,44 +403,14 @@ let deduce (constraints : constraint_ list) : constraint_ list =
       ~base_static_accesses
       ~derived_static_accesses
   in
-  let static_keys_of e =
-    let add_key (e', key, _) map =
-      if equal_entity_ e e' then
-        T.TShapeSet.add key map
-      else
-        map
-    in
-    StaticAccess.Set.fold add_key derived_static_accesses T.TShapeSet.empty
-  in
 
-  let optional_accesses =
-    let add_optional_key join adjacencies acc =
-      let handle_predecessor pred_entity common_keys =
-        let keys = static_keys_of pred_entity in
-        T.TShapeSet.inter keys common_keys
-      in
-      let all_keys = static_keys_of join in
-      let common_keys =
-        if EntitySet.cardinal adjacencies.backwards < 2 then
-          all_keys
-        else
-          EntitySet.fold handle_predecessor adjacencies.backwards all_keys
-      in
-      let optional_keys =
-        T.TShapeSet.diff all_keys common_keys
-        |> T.TShapeSet.elements
-        |> List.map ~f:(fun optional_key -> (join, optional_key))
-      in
-      optional_keys @ acc
-    in
-    EntityMap.fold add_optional_key adjacency_map [] @ optional_accesses
-  in
   (* Close upwards *)
   let optional_accesses =
-    List.concat_map
-      ~f:(fun (entity, key) ->
-        collect_supersets entity |> List.map ~f:(fun entity -> (entity, key)))
+    derive_optional_accesses
+      adjacency_map
       optional_accesses
+      ~base_static_accesses
+      ~derived_static_accesses
   in
 
   (* Close upwards and downwards *)
@@ -407,29 +464,14 @@ let produce_results
   in
 
   (* Add known keys *)
-  let optional_accesses =
-    optional_accesses
-    |> List.fold
-         ~f:(fun map (entity, key) ->
-           EntityMap.update
-             entity
-             (function
-               | None -> Some (T.TShapeSet.singleton key)
-               | Some keys -> Some (T.TShapeSet.add key keys))
-             map)
-         ~init:EntityMap.empty
-  in
-  let is_optional entity key =
-    match EntityMap.find_opt entity optional_accesses with
-    | Some set -> T.TShapeSet.mem key set
-    | None -> false
-  in
   let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
     let update_entity entity key ty = function
       | None -> None
       | Some (kind, shape_keys') ->
-        let optional_field = is_optional entity key in
-        Some (kind, Logic.(singleton key ty optional_field <> shape_keys') ~env)
+        let is_optional =
+          OptionalAccess.Set.mem (entity, key) optional_accesses
+        in
+        Some (kind, Logic.(singleton key ty is_optional <> shape_keys') ~env)
     in
     let add_entity (entity, key, ty) pos_map =
       match entity with

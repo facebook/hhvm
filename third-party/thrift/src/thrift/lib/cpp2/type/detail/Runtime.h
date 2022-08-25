@@ -165,6 +165,29 @@ class RuntimeBase {
   }
 
   bool equal(const RuntimeBase& rhs) const { return type_->equal(ptr_, rhs); }
+  folly::ordering compare(const RuntimeBase& rhs) const {
+    return type_->compare(ptr_, rhs);
+  }
+
+ private:
+  friend bool operator==(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator!=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator<(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
 
  protected:
   RuntimeType type_;
@@ -217,12 +240,6 @@ class RuntimeBase {
   void reset() noexcept {
     type_ = {};
     ptr_ = {};
-  }
-
- private:
-  friend bool operator==(
-      const RuntimeBase& lhs, const RuntimeBase& rhs) noexcept {
-    return lhs.equal(rhs);
   }
 };
 
@@ -279,7 +296,7 @@ inline Ptr RuntimeBase::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
 }
 
 // A base struct provides helpers for throwing exceptions and default throwing
-// impls type-specific ops.
+// implementations for type-specific ops.
 struct BaseErasedOp {
   [[noreturn]] static void bad_op(const char* msg = "not supported") {
     folly::throw_exception<std::logic_error>(msg);
@@ -406,11 +423,11 @@ struct VoidErasedOp : BaseErasedOp {
   }
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const RuntimeBase&) { return true; }
-  static folly::ordering compare(const void*, const RuntimeBase& rhs) {
+  static partial_ordering compare(const void*, const RuntimeBase& rhs) {
     if (!rhs.type().empty()) {
       bad_op();
     }
-    return folly::ordering::eq;
+    return partial_ordering::eq;
   }
   static void clear(void*) {}
 };

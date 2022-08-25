@@ -34,25 +34,51 @@ namespace thrift {
 namespace op {
 namespace detail {
 
+// Simplified version of std::partial_ordering from c++20.
+//
+// TODO(afuller): Add next to folly::ordering?
+enum class partial_ordering : std::underlying_type_t<folly::ordering> {
+  lt = int(folly::ordering::lt), // i.e. std::partial_ordering::less
+  eq = int(folly::ordering::eq), // i.e. std::partial_ordering::equivalent
+  gt = int(folly::ordering::gt), // i.e. std::partial_ordering::greater
+  ne = -2, // i.e. std::partial_ordering::unordered
+           // Prefer compile-time error or exception, when possible.
+};
+inline constexpr partial_ordering to_partial_ordering(folly::ordering cmp) {
+  return static_cast<partial_ordering>(cmp);
+}
+inline constexpr folly::ordering to_ordering(partial_ordering cmp) {
+  if (cmp == partial_ordering::ne) {
+    folly::throw_exception<std::logic_error>("not comparable");
+  }
+  return static_cast<folly::ordering>(cmp);
+}
+inline constexpr bool is_eq(partial_ordering cmp) noexcept {
+  return cmp == partial_ordering::eq;
+}
+inline constexpr bool is_neq(partial_ordering cmp) noexcept {
+  return cmp != partial_ordering::eq;
+}
+
 // named comparison functions, similar to c++20
 //
 // TODO(afuller): Dedupe/Merge with folly.
-constexpr bool is_eq(folly::ordering cmp) noexcept {
+inline constexpr bool is_eq(folly::ordering cmp) noexcept {
   return cmp == folly::ordering::eq;
 }
-constexpr bool is_neq(folly::ordering cmp) noexcept {
+inline constexpr bool is_neq(folly::ordering cmp) noexcept {
   return cmp != folly::ordering::eq;
 }
-constexpr bool is_lt(folly::ordering cmp) noexcept {
+inline constexpr bool is_lt(folly::ordering cmp) noexcept {
   return cmp == folly::ordering::lt;
 }
-constexpr bool is_lteq(folly::ordering cmp) noexcept {
+inline constexpr bool is_lteq(folly::ordering cmp) noexcept {
   return cmp != folly::ordering::gt;
 }
-constexpr bool is_gt(folly::ordering cmp) noexcept {
+inline constexpr bool is_gt(folly::ordering cmp) noexcept {
   return cmp == folly::ordering::gt;
 }
-constexpr bool is_gteq(folly::ordering cmp) noexcept {
+inline constexpr bool is_gteq(folly::ordering cmp) noexcept {
   return cmp != folly::ordering::lt;
 }
 
@@ -139,11 +165,11 @@ FOLLY_INLINE_VARIABLE constexpr bool comparable_v =
     folly::is_detected_v<compare_with_t, LTag, RTag>;
 
 // Resolves to R, if the two tags *can* be used together in CompareWith.
-template <typename LTag, typename RTag = LTag, typename R = folly::ordering>
+template <typename LTag, typename RTag = LTag, typename R = partial_ordering>
 using if_comparable = folly::type_t<R, compare_with_t<LTag, RTag>>;
 
 // Resolves to R, if the two tags *cannot* be used together in CompareWith.
-template <typename LTag, typename RTag = LTag, typename R = folly::ordering>
+template <typename LTag, typename RTag = LTag, typename R = partial_ordering>
 using if_not_comparable = std::enable_if_t<!comparable_v<LTag, RTag>, R>;
 
 // An EqualTo that delegates to CompareWith.

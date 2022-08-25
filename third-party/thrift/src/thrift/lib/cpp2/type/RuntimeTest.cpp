@@ -256,6 +256,15 @@ TEST(RuntimeValueTest, CppType_Map) {
   map.put("foo", Ref::to<i32_t>(2));
   Ref value = map["foo"];
   EXPECT_EQ(value.as<i32_t>(), 2);
+  EXPECT_GT(value, Ref::to<i32_t>(1));
+  EXPECT_EQ(value, value);
+
+  auto otherMap = Value::create<Tag>();
+  EXPECT_NE(map, otherMap);
+  otherMap.put("bar", Ref::to<i32_t>(2));
+  EXPECT_NE(map, otherMap);
+
+  EXPECT_THROW(map < otherMap, std::logic_error);
 }
 
 } // namespace

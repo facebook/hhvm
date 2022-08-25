@@ -33,7 +33,7 @@ namespace apache {
 namespace thrift {
 namespace type {
 namespace detail {
-
+using op::detail::partial_ordering;
 class RuntimeBase;
 class Ptr;
 
@@ -48,7 +48,7 @@ struct TypeInfo {
   void* (*make)(void*, bool);
   bool (*empty)(const void*);
   bool (*identical)(const void*, const RuntimeBase&);
-  folly::ordering (*compare)(const void*, const RuntimeBase&);
+  partial_ordering (*compare_)(const void*, const RuntimeBase&);
   void (*clear)(void*);
   void (*append)(void*, const RuntimeBase&);
   bool (*add)(void*, const RuntimeBase&);
@@ -57,7 +57,11 @@ struct TypeInfo {
   size_t (*size)(const void*);
 
   bool equal(const void* lhs, const RuntimeBase& rhs) const {
-    return op::detail::is_eq(compare(lhs, rhs));
+    return is_eq(compare_(lhs, rhs));
+  }
+
+  folly::ordering compare(const void* lhs, const RuntimeBase& rhs) const {
+    return to_ordering(compare_(lhs, rhs));
   }
 
   bool less(const void* lhs, const RuntimeBase& rhs) const {

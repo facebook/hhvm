@@ -870,6 +870,37 @@ MCROUTER_OPTION_TOGGLE(
     no_short,
     "Enable Axon log features")
 
+MCROUTER_OPTION_TOGGLE(
+    external_carbon_connection_logging_enabled,
+    false,
+    "external-carbon-connection-logging-enabled",
+    no_short,
+    "Enables logging for external carbon connections")
+
+MCROUTER_OPTION_INTEGER(
+    uint64_t,
+    external_carbon_connection_log_rate_per_hour,
+    3600,
+    "external-carbon-connection-log-rate-per-hour",
+    no_short,
+    "Number of carbon connection samples to write on average per hour")
+
+MCROUTER_OPTION_INTEGER(
+    uint32_t,
+    external_carbon_connection_log_max_burst,
+    500,
+    "external-carbon-connection-log-max-burst",
+    no_short,
+    "maximum instantaneous number of request logs per server")
+
+MCROUTER_OPTION_INTEGER(
+    uint32_t,
+    external_carbon_connection_log_sample_rate,
+    10000,
+    "external-carbon-connection-log-sample-rate",
+    no_short,
+    "1 in S non-error connection samples will be logged")
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

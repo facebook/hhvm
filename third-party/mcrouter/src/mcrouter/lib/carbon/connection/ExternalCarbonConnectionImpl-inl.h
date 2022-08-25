@@ -14,13 +14,18 @@
 #include <folly/fibers/FiberManager.h>
 #include <folly/synchronization/Baton.h>
 
+#include "mcrouter/config.h"
 #include "mcrouter/lib/McResUtil.h"
+#include "mcrouter/lib/carbon/ExternalCarbonConnectionStats.h"
+#include "mcrouter/lib/network/ConnectionOptions.h"
 #include "mcrouter/lib/network/Transport.h"
 
 namespace carbon {
 namespace detail {
 
 DECLARE_int32(cacheclient_external_connection_threads);
+using ExternalConnectionLogger =
+    facebook::memcache::mcrouter::AdditionalExternalConnectionLogger;
 
 class ClientBase {
  public:
@@ -47,13 +52,15 @@ class Client : public ClientBase {
  public:
   Client(
       facebook::memcache::ConnectionOptions connOpts,
-      ExternalCarbonConnectionImplOptions opts)
+      ExternalCarbonConnectionImplOptions opts,
+      std::shared_ptr<ExternalConnectionLogger> logger)
       : ClientBase(std::move(connOpts), std::move(opts)),
         client_(
             folly::EventBaseManager::get()
                 ->getEventBase()
                 ->getVirtualEventBase(),
-            connectionOptions) {}
+            connectionOptions),
+        logger_(logger) {}
 
   virtual ~Client() override {
     closeNow();
@@ -66,15 +73,43 @@ class Client : public ClientBase {
       // fibers for them, until this fiber is complete anyway.
       counting_sem_post(&outstandingReqsSem, 1);
     };
-    return client_.sendSync(request, connectionOptions.writeTimeout);
+    auto reply = client_.sendSync(request, connectionOptions.writeTimeout);
+    if (logger_ && logger_->shouldLog()) {
+      auto stats = statsFrom(request, reply);
+      logger_->log(stats);
+    }
+    return reply;
   }
 
   facebook::memcache::Transport& getClient() override {
     return client_;
   }
 
+  template <class Request>
+  ExternalCarbonConnectionStats statsFrom(
+      Request& req,
+      facebook::memcache::ReplyT<Request>& reply) {
+    ExternalCarbonConnectionStats item;
+    item.key = carbon::getFullKey(req);
+    item.reqType = Request::name;
+    item.reqSizeBytes = carbon::valuePtrUnsafe(req)
+        ? carbon::valuePtrUnsafe(req)->computeChainDataLength()
+        : 0;
+    auto accessPoint = connectionOptions.accessPoint;
+    item.destHost = accessPoint->toHostPortString();
+    item.protocol = mc_protocol_to_string(accessPoint->getProtocol());
+    item.securityMechanism =
+        securityMechToString(accessPoint->getSecurityMech());
+    item.port = accessPoint->getPort();
+    item.respSizeBytes = carbon::valuePtrUnsafe(reply)
+        ? carbon::valuePtrUnsafe(reply)->computeChainDataLength()
+        : 0;
+    return item;
+  }
+
  private:
   Transport client_;
+  std::shared_ptr<ExternalConnectionLogger> logger_;
 };
 
 class ThreadInfo {
@@ -84,19 +119,21 @@ class ThreadInfo {
   template <class Transport>
   std::weak_ptr<Client<Transport>> createClient(
       facebook::memcache::ConnectionOptions connectionOptions,
-      ExternalCarbonConnectionImplOptions options) {
+      ExternalCarbonConnectionImplOptions options,
+      std::shared_ptr<ExternalConnectionLogger> logger) {
     return folly::fibers::await(
         [&](folly::fibers::Promise<std::weak_ptr<Client<Transport>>> p) {
-          fiberManager_.addTaskRemote([this,
-                                       promise = std::move(p),
-                                       connectionOptions =
-                                           std::move(connectionOptions),
-                                       options]() mutable {
-            auto client =
-                std::make_shared<Client<Transport>>(connectionOptions, options);
-            clients_.insert(client);
-            promise.setValue(client);
-          });
+          fiberManager_.addTaskRemote(
+              [this,
+               promise = std::move(p),
+               connectionOptions = std::move(connectionOptions),
+               options,
+               logger]() mutable {
+                auto client = std::make_shared<Client<Transport>>(
+                    connectionOptions, options, logger);
+                clients_.insert(client);
+                promise.setValue(client);
+              });
         });
   }
 
@@ -148,8 +185,11 @@ class ThreadPool : public std::enable_shared_from_this<ThreadPool> {
       return *threads_[threadId];
     }();
 
+    auto logger = options.enableLogging ? getLogger(options) : nullptr;
+
     std::weak_ptr<detail::Client<Transport>> clientPtr =
-        threadInfo.template createClient<Transport>(connectionOptions, options);
+        threadInfo.template createClient<Transport>(
+            connectionOptions, options, logger);
 
     std::shared_ptr<detail::ThreadInfo> threadInfoShared(
         shared_from_this(), &threadInfo);
@@ -159,14 +199,41 @@ class ThreadPool : public std::enable_shared_from_this<ThreadPool> {
         std::weak_ptr<detail::ThreadInfo>(std::move(threadInfoShared)));
   }
 
+  std::shared_ptr<ExternalConnectionLogger> getLogger(
+      ExternalCarbonConnectionImplOptions& opts) {
+    if (!logger_) {
+      createLogger(opts);
+    } else if (opts.enableLogging != logger_->getEnabledStatus()) {
+      logger_->setEnabledStatus(opts.enableLogging);
+    }
+    return logger_;
+  }
+
   static std::shared_ptr<ThreadPool> getInstance();
 
   int getThreadNum();
 
  private:
   std::mutex mutex_;
+  std::mutex loggerMtx_;
   size_t nextThreadId_{0};
   std::vector<std::unique_ptr<detail::ThreadInfo>> threads_;
+  std::shared_ptr<ExternalConnectionLogger> logger_ = nullptr;
+
+  void createLogger(ExternalCarbonConnectionImplOptions& opts) {
+    std::lock_guard<std::mutex> lk(loggerMtx_);
+    // Verify logger still doesn't exist
+    if (!logger_) {
+      ExternalCarbonConnectionLoggerOptions loggerOptions =
+          ExternalCarbonConnectionLoggerOptions(
+              opts.enableLogging,
+              opts.maxLogBurstSize,
+              0,
+              opts.hourlyLogRate,
+              opts.logSampleRate);
+      logger_ = std::make_shared<ExternalConnectionLogger>(loggerOptions);
+    }
+  }
 };
 
 } // namespace detail

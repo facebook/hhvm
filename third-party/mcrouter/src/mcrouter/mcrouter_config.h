@@ -68,6 +68,14 @@ class AdditionalProxyRequestLogger : public carbon::NoopAdditionalLogger {
       : NoopAdditionalLogger(proxyRequestContext) {}
 };
 
+class AdditionalExternalConnectionLogger
+    : public carbon::NoopExternalConnectionAdditionalLogger {
+ public:
+  explicit AdditionalExternalConnectionLogger(
+      carbon::ExternalCarbonConnectionLoggerOptions options)
+      : NoopExternalConnectionAdditionalLogger(options) {}
+};
+
 inline bool alwaysSendToMainShardSplit(uint64_t /* flags */) {
   return false;
 }

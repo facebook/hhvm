@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "mcrouter/lib/CacheClientStats.h"
+#include "mcrouter/lib/carbon/ExternalCarbonConnectionStats.h"
 #include "mcrouter/lib/carbon/connection/CarbonConnectionUtil.h"
 #include "mcrouter/lib/fbi/counting_sem.h"
 #include "mcrouter/lib/network/AsyncMcClient.h"
@@ -27,6 +28,10 @@ struct ExternalCarbonConnectionImplOptions {
   size_t maxOutstanding{0};
   bool maxOutstandingError{false};
   uint16_t portOverride{0};
+  bool enableLogging{false};
+  uint32_t hourlyLogRate{3600};
+  uint32_t maxLogBurstSize{500};
+  uint32_t logSampleRate{10000};
 };
 
 template <class RouterInfo>
@@ -71,6 +76,7 @@ class ExternalCarbonConnectionImpl {
 
   facebook::memcache::ConnectionOptions connectionOptions_;
   ExternalCarbonConnectionImplOptions options_;
+  ExternalCarbonConnectionLoggerOptions loggerOptions_;
 
   std::unique_ptr<Impl<facebook::memcache::AsyncMcClient>> carbonImpl_;
   std::unique_ptr<Impl<facebook::memcache::ThriftTransport<RouterInfo>>>

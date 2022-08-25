@@ -28,21 +28,15 @@ let show_constraint env =
   function
   | Marks (kind, pos) ->
     Format.asprintf "%s at %a" (show_marker_kind kind) Pos.pp pos
-  | Has_static_key (source, entity, key, ty) ->
-    let field_map =
-      T.TShapeMap.singleton key T.{ sft_ty = ty; sft_optional = false }
+  | Has_static_key (certainty, entity, key, ty) ->
+    let sft_optional =
+      match certainty with
+      | Maybe -> true
+      | Definite -> false
     in
+    let field_map = T.TShapeMap.singleton key T.{ sft_ty = ty; sft_optional } in
     let shape = mk_shape field_map in
-    Format.asprintf
-      "SK %s %s : %s"
-      (show_source source)
-      (show_entity entity)
-      (show_ty shape)
-  | Has_optional_key (entity, key) ->
-    Format.asprintf
-      "OK %s : %s"
-      (show_entity entity)
-      (Typing_utils.get_printable_shape_field_name key)
+    Format.asprintf "SK %s : %s" (show_entity entity) (show_ty shape)
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
   | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 

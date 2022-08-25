@@ -17,7 +17,7 @@ let ( <> ) ~env sk1 sk2 =
     match (ty_opt, ty_opt') with
     | (Some sft, Some sft') ->
       let (_env, sft_ty) = Typing_union.union env sft.T.sft_ty sft'.T.sft_ty in
-      let sft_optional = sft.T.sft_optional || sft'.T.sft_optional in
+      let sft_optional = sft.T.sft_optional && sft'.T.sft_optional in
       Some T.{ sft_ty; sft_optional }
     | (None, (Some _ as ty_opt))
     | ((Some _ as ty_opt), None) ->

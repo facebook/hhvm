@@ -3,16 +3,12 @@ Constraints for \idx_ife:
    3: Parameter at [3:18-37]
    4: Arg(\idx_ife, 0) ⊆ ?1
    4: Arg(\idx_ife, 0) ⊆ ?1
-   5: SK Base Arg(\idx_ife, 0) : shape('a' => mixed)
-   6: OK Arg(\idx_ife, 0) : b
-   6: SK Base Arg(\idx_ife, 0) : shape('b' => mixed)
-   7: SK Base Arg(\idx_ife, 0) : shape('c1' => mixed)
-   8: OK Arg(\idx_ife, 0) : d1
-   8: SK Base Arg(\idx_ife, 0) : shape('d1' => mixed)
-  10: SK Base Arg(\idx_ife, 0) : shape('a' => mixed)
-  11: OK Arg(\idx_ife, 0) : b
-  11: SK Base Arg(\idx_ife, 0) : shape('b' => mixed)
-  12: SK Base Arg(\idx_ife, 0) : shape('c2' => mixed)
-  13: OK Arg(\idx_ife, 0) : d2
-  13: SK Base Arg(\idx_ife, 0) : shape('d2' => mixed)
+   5: SK Arg(\idx_ife, 0) : shape('a' => mixed)
+   6: SK Arg(\idx_ife, 0) : shape(?'b' => mixed)
+   7: SK Arg(\idx_ife, 0) : shape('c1' => mixed)
+   8: SK Arg(\idx_ife, 0) : shape(?'d1' => mixed)
+  10: SK Arg(\idx_ife, 0) : shape('a' => mixed)
+  11: SK Arg(\idx_ife, 0) : shape(?'b' => mixed)
+  12: SK Arg(\idx_ife, 0) : shape('c2' => mixed)
+  13: SK Arg(\idx_ife, 0) : shape(?'d2' => mixed)
 

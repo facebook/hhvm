@@ -110,7 +110,7 @@ let add_key_constraint
     (env : env)
     entity
     (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
-    ~is_optional : env =
+    ~certainty : env =
   match entity with
   | Some entity ->
     begin
@@ -118,13 +118,9 @@ let add_key_constraint
       | A.String str ->
         let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
         let ty = Tast_env.fully_expand env.tast_env ty in
-        let constraint_ = Has_static_key (Base, entity, key, ty) in
+        let constraint_ = Has_static_key (certainty, entity, key, ty) in
         let env = Env.add_constraint env { hack_pos; origin; constraint_ } in
-        if is_optional then
-          let constraint_ = Has_optional_key (entity, key) in
-          Env.add_constraint env { hack_pos; origin; constraint_ }
-        else
-          env
+        env
       | _ ->
         let constraint_ = Has_dynamic_key entity in
         Env.add_constraint env { hack_pos; origin; constraint_ }
@@ -160,7 +156,7 @@ let rec assign
             env
             (Some current_assignment)
             (ix, ty_rhs)
-            ~is_optional:false
+            ~certainty:Definite
         in
         (* Handle copy-on-write by creating a variable indirection *)
         let (env, var) = redirect ~pos ~origin env current_assignment in
@@ -191,7 +187,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
       let (env, _val_entity) = expr_ env value in
-      add_key_constraint pos __LINE__ env entity (key, ty) ~is_optional:false
+      add_key_constraint pos __LINE__ env entity (key, ty) ~certainty:Definite
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
     (env, entity)
@@ -199,7 +195,13 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
     let env =
-      add_key_constraint pos __LINE__ env entity_exp (ix, ty) ~is_optional:false
+      add_key_constraint
+        pos
+        __LINE__
+        env
+        entity_exp
+        (ix, ty)
+        ~certainty:Definite
     in
     (env, None)
   | A.Lvar (_, lid) ->
@@ -226,7 +228,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             env
             entity_exp
             (ix, ty)
-            ~is_optional:true
+            ~certainty:Maybe
         in
         (env, None)
       | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)

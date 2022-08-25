@@ -33,29 +33,10 @@ module StaticAccess = struct
   end
 end
 
-module OptionalAccess = struct
-  type ty = entity_ * T.TShapeField.t
-
-  let compare =
-    Tuple.T2.compare ~cmp1:compare_entity_ ~cmp2:T.TShapeField.compare
-
-  module Set = struct
-    module S = Caml.Set.Make (struct
-      type t = ty
-
-      let compare = compare
-    end)
-
-    include S
-    include CommonSet (S)
-  end
-end
-
 type constraints = {
   markers: (marker_kind * Pos.t) list;
-  base_static_accesses: StaticAccess.Set.t;
-  derived_static_accesses: StaticAccess.Set.t;
-  optional_accesses: OptionalAccess.Set.t;
+  definite_static_accesses: StaticAccess.Set.t;
+  maybe_static_accesses: StaticAccess.Set.t;
   dynamic_accesses: EntitySet.t;
   subsets: (entity_ * entity_) list;
 }
@@ -63,9 +44,8 @@ type constraints = {
 let constraints_init =
   {
     markers = [];
-    base_static_accesses = StaticAccess.Set.empty;
-    derived_static_accesses = StaticAccess.Set.empty;
-    optional_accesses = OptionalAccess.Set.empty;
+    definite_static_accesses = StaticAccess.Set.empty;
+    maybe_static_accesses = StaticAccess.Set.empty;
     dynamic_accesses = EntitySet.empty;
     subsets = [];
   }
@@ -74,27 +54,21 @@ let disassemble constraints =
   let partition_constraint constraints = function
     | Marks (kind, entity) ->
       { constraints with markers = (kind, entity) :: constraints.markers }
-    | Has_static_key (Base, entity, key, ty) ->
+    | Has_static_key (Definite, entity, key, ty) ->
       {
         constraints with
-        base_static_accesses =
+        definite_static_accesses =
           StaticAccess.Set.add
             (entity, key, ty)
-            constraints.base_static_accesses;
+            constraints.definite_static_accesses;
       }
-    | Has_static_key (Derived, entity, key, ty) ->
+    | Has_static_key (Maybe, entity, key, ty) ->
       {
         constraints with
-        derived_static_accesses =
+        maybe_static_accesses =
           StaticAccess.Set.add
             (entity, key, ty)
-            constraints.derived_static_accesses;
-      }
-    | Has_optional_key (entity, key) ->
-      {
-        constraints with
-        optional_accesses =
-          OptionalAccess.Set.add (entity, key) constraints.optional_accesses;
+            constraints.maybe_static_accesses;
       }
     | Has_dynamic_key entity ->
       {
@@ -109,22 +83,18 @@ let disassemble constraints =
 let assemble
     {
       markers;
-      base_static_accesses;
-      derived_static_accesses;
-      optional_accesses;
+      definite_static_accesses;
+      maybe_static_accesses;
       dynamic_accesses;
       subsets;
     } =
   List.map ~f:(fun (kind, entity) -> Marks (kind, entity)) markers
   @ List.map
-      ~f:(fun (entity, key, ty) -> Has_static_key (Base, entity, key, ty))
-      (StaticAccess.Set.elements base_static_accesses)
+      ~f:(fun (entity, key, ty) -> Has_static_key (Definite, entity, key, ty))
+      (StaticAccess.Set.elements definite_static_accesses)
   @ List.map
-      ~f:(fun (entity, key, ty) -> Has_static_key (Derived, entity, key, ty))
-      (StaticAccess.Set.elements derived_static_accesses)
-  @ List.map
-      ~f:(fun (entity, key) -> Has_optional_key (entity, key))
-      (OptionalAccess.Set.elements optional_accesses)
+      ~f:(fun (entity, key, ty) -> Has_static_key (Maybe, entity, key, ty))
+      (StaticAccess.Set.elements maybe_static_accesses)
   @ List.map
       ~f:(fun entity -> Has_dynamic_key entity)
       (EntitySet.elements dynamic_accesses)
@@ -164,15 +134,123 @@ let mk_adjacency_map subsets =
   EntitySet.fold add entities EntityMap.empty
 
 (*
-  Propagates `Has_static_key` constraints forward through the dataflow graph.
+  Propagates the `Definite` variety of `Has_static_key` constraints forward
+  through the dataflow graph. The propagation only happens if all incoming
+  edges have the relevant static key, e.g.,
+
+    ('a', int) -------\               ('a', int) -------\
+    ('b', string)      \              ('b', string)      \
+                        \                                 \
+    ('a', float) -------- .   ====>   ('a', float) -------- ('a', int)
+                        /                                 / ('a', float)
+                       /                                 /
+    ('a', int) -------/               ('a', int) -------/
+
+  We use universal quantification over incoming edges which in general is not
+  monotonic (hence not necessarily convergent in a fixpoint setting), however,
+  the newly introduced edges in a growing adjacency map due to fixpoint
+  computation cannot change the incident edges of any vertices. So, there is no
+  way of invalidating a definite derived has static key constraint once it is
+  established.
+
+  TODO(T129093160): The monotonicity argument above is not strictly true due to
+  parameters with default values.
+
+  The implementation is semi-naïve, i.e., at each iteration it only considers
+  what newly generated facts can affect.
+
+    has_static_key_u(definite, E, K, Ty) :- has_static_key(definite, E, K, Ty)
+    has_static_key_u(definite, E, K, Ty) :-
+      common_definite_predecessor_key(E, K),
+      subsets(E', E),
+      has_static_key(E', K, Ty).
+
+    common_definite_predecessor_key(E, K) :-
+      forall subsets(E', E).
+      has_static_key_u(definite, E', K, _).
+*)
+let derive_definite_static_accesses adjacency_map definite_static_accesses =
+  let open StaticAccess.Set in
+  (* All successors to the entities in recently generated facts can potentially
+     obtain a new static key constraint. *)
+  let find_candidates delta =
+    let accum (e, _, _) =
+      let forwards =
+        Option.value_map
+          ~default:EntitySet.empty
+          ~f:(fun a -> a.forwards)
+          (EntityMap.find_opt e adjacency_map)
+      in
+      EntitySet.union forwards
+    in
+    fold accum delta EntitySet.empty
+  in
+  let rec close_upwards ~delta ~acc =
+    if is_empty delta then
+      acc
+    else
+      (* The following collects the intersection of all keys that occur in
+         predecessors of an entity along with possible types of those keys. *)
+      let common_predecessor_keys e =
+        let predecessors =
+          EntityMap.find_opt e adjacency_map
+          |> Option.value_map ~default:EntitySet.empty ~f:(fun a -> a.backwards)
+        in
+        let collect_common_keys e common_keys =
+          let collect_keys (e', k, ty) =
+            let add_ty = function
+              | None -> Some [ty]
+              | Some tys -> Some (ty :: tys)
+            in
+            if equal_entity_ e e' then
+              T.TShapeMap.update k add_ty
+            else
+              Fn.id
+          in
+          let keys = fold collect_keys acc T.TShapeMap.empty in
+          (* Here `None` represents the universe set *)
+          match common_keys with
+          | None -> Some keys
+          | Some keys' ->
+            let combine _ tys_opt tys'_opt =
+              match (tys_opt, tys'_opt) with
+              | (Some tys, Some tys') -> Some (tys @ tys')
+              | _ -> None
+            in
+            Some (T.TShapeMap.merge combine keys keys')
+        in
+        EntitySet.fold collect_common_keys predecessors None
+        |> Option.value ~default:T.TShapeMap.empty
+      in
+      (* Propagate all common keys forward *)
+      let propagate e acc =
+        let common_predecessor_keys = common_predecessor_keys e in
+        T.TShapeMap.fold
+          (fun k tys ->
+            union (List.map ~f:(fun ty -> (e, k, ty)) tys |> of_list))
+          common_predecessor_keys
+          acc
+      in
+      let candidates = find_candidates delta in
+      let delta = EntitySet.fold propagate candidates StaticAccess.Set.empty in
+      let delta = diff delta acc in
+      let acc = union delta acc in
+      close_upwards ~delta ~acc
+  in
+  close_upwards ~delta:definite_static_accesses ~acc:definite_static_accesses
+
+(*
+  Propagates the `Maybe` variety of `Has_static_key` constraints forward
+  through the dataflow graph.
+
   The implementation is semi-naïve, i.e., at each iteration it only considers
   newly generated facts.
 
-    has_static_key_u(E, Key, Ty) :- has_static_key(E, Key, Ty).
-    has_static_key_u(F, Key, Ty) :- has_static_key(E, Key, Ty), subsets(E,F).
+    has_static_key_u(maybe, E, Key, Ty) :- has_static_key(_, E, Key, Ty).
+    has_static_key_u(maybe, F, Key, Ty) :- has_static_key(maybe, E, Key, Ty), subsets(E,F).
 *)
-let derive_static_accesses
-    adjacency_map ~base_static_accesses ~derived_static_accesses =
+let derive_maybe_static_accesses
+    adjacency_map ~maybe_static_accesses ~definite_static_accesses =
   let open StaticAccess.Set in
   let rec close_upwards ~delta ~acc =
     if is_empty delta then
@@ -189,7 +267,9 @@ let derive_static_accesses
       let acc = union delta acc in
       close_upwards ~delta ~acc
   in
-  let all = union base_static_accesses derived_static_accesses in
+  let all =
+    StaticAccess.Set.union maybe_static_accesses definite_static_accesses
+  in
   close_upwards ~delta:all ~acc:all
 
 (*
@@ -217,89 +297,6 @@ let derive_dynamic_accesses adjacency_map dynamic_accesses =
   in
   close_upwards_and_downwards ~delta:dynamic_accesses ~acc:dynamic_accesses
 
-(*
-  We conclude that a key is optional either we explicitly observed it in the
-  source code, for example, through the use of `idx` or due to control flow
-  making the key exist in one branch of execution but not another.
-
-  We stop propagating this constraint if we encounter a static key added to an
-  entity from the source code.
-
-    has_optional_key_u(E,Key) :- has_optional_key(E,Key).
-    has_optional_key_u(Join,Key) :-
-      subsets(E,Join),
-      subsets(F,Join),
-      has_static_key_u(E,Key),
-      not has_static_key_u(F,Key).
-    has_optional_key_u(F,Key) :-
-      has_optional_key_u(E,Key),
-      subsets(E,F),
-      not has_static_key(F,Key).
-*)
-let derive_optional_accesses
-    adjacency_map
-    ~base_static_accesses
-    ~derived_static_accesses
-    observed_optional_accesses =
-  let open OptionalAccess.Set in
-  let definitely_not_optional_accesses =
-    StaticAccess.Set.fold
-      (fun (e, k, _) acc -> add (e, k) acc)
-      base_static_accesses
-      empty
-  in
-  let static_keys_of e =
-    let add_key (e', key, _) map =
-      if equal_entity_ e e' then
-        T.TShapeSet.add key map
-      else
-        map
-    in
-    StaticAccess.Set.fold add_key derived_static_accesses T.TShapeSet.empty
-  in
-  let deduced_optional_accesses =
-    let add_optional_access join adjacencies acc =
-      let handle_predecessor pred_entity common_keys =
-        let keys = static_keys_of pred_entity in
-        T.TShapeSet.inter keys common_keys
-      in
-      let all_keys = static_keys_of join in
-      let common_keys =
-        if EntitySet.cardinal adjacencies.backwards < 2 then
-          all_keys
-        else
-          EntitySet.fold handle_predecessor adjacencies.backwards all_keys
-      in
-      let optional_keys =
-        let key_diff = T.TShapeSet.diff all_keys common_keys in
-        T.TShapeSet.fold (fun key -> add (join, key)) key_diff empty
-      in
-      union optional_keys acc
-    in
-    EntityMap.fold add_optional_access adjacency_map empty
-  in
-  let rec close_upwards ~delta ~acc =
-    if is_empty delta then
-      acc
-    else
-      let propagate (e, k) =
-        match EntityMap.find_opt e adjacency_map with
-        | Some adjacency ->
-          let delta =
-            EntitySet.fold (fun e' -> add (e', k)) adjacency.forwards empty
-          in
-          let delta = diff delta definitely_not_optional_accesses in
-          delta
-        | None -> empty
-      in
-      let delta = unions_map ~f:propagate delta in
-      let delta = diff delta acc in
-      let acc = union delta acc in
-      close_upwards ~delta ~acc
-  in
-  let all = union observed_optional_accesses deduced_optional_accesses in
-  close_upwards ~delta:all ~acc:all
-
 (* The following program roughly summarises the solver in Datalog.
 
   Variables with single letters E and F and their variants with primes all
@@ -321,9 +318,8 @@ let derive_optional_accesses
 let deduce (constraints : constraint_ list) : constraint_ list =
   let {
     markers;
-    base_static_accesses;
-    derived_static_accesses;
-    optional_accesses;
+    definite_static_accesses;
+    maybe_static_accesses;
     dynamic_accesses;
     subsets;
   } =
@@ -332,20 +328,16 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let adjacency_map = mk_adjacency_map subsets in
 
   (* Close upwards *)
-  let derived_static_accesses =
-    derive_static_accesses
+  let maybe_static_accesses =
+    derive_maybe_static_accesses
       adjacency_map
-      ~base_static_accesses
-      ~derived_static_accesses
+      ~maybe_static_accesses
+      ~definite_static_accesses
   in
 
   (* Close upwards *)
-  let optional_accesses =
-    derive_optional_accesses
-      adjacency_map
-      optional_accesses
-      ~base_static_accesses
-      ~derived_static_accesses
+  let definite_static_accesses =
+    derive_definite_static_accesses adjacency_map definite_static_accesses
   in
 
   (* Close upwards and downwards *)
@@ -355,17 +347,18 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   assemble
     {
       markers;
-      base_static_accesses;
-      derived_static_accesses;
-      optional_accesses;
+      definite_static_accesses;
+      maybe_static_accesses;
       dynamic_accesses;
       subsets;
     }
 
 (*
   static_shape_result(E) :- marks(E), not has_dynamic_key_ud(E).
-  static_shape_result_key(E,Key,Ty) :- has_static_key_u(E,Key,Ty).
-  static_shape_result_key_optional(E,Key) :- has_optional_key_u(E,Key).
+  static_shape_result_key(E,Key,Ty) :- has_static_key_u(_,E,Key,Ty).
+  static_shape_result_key_optional(E,Key) :-
+    has_static_key_u(_, E, Key, _),
+    not has_static_key_u(definite, E, Key, _).
 
   dynamic_shape_result(E) :- marks(E), has_dynamic_key_ud(E).
 *)
@@ -374,8 +367,8 @@ let produce_results
     shape_result list =
   let {
     markers;
-    derived_static_accesses;
-    optional_accesses;
+    definite_static_accesses;
+    maybe_static_accesses;
     dynamic_accesses;
     _;
   } =
@@ -398,14 +391,12 @@ let produce_results
            not @@ EntitySet.mem (Literal pos) dynamic_accesses)
   in
 
-  (* Add known keys *)
-  let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
-    let update_entity entity key ty = function
+  (* Add known keys (maybe variant) *)
+  let add_known_keys ~is_optional static_accesses static_shape_results :
+      (marker_kind * shape_keys) Pos.Map.t =
+    let update_entity _ key ty = function
       | None -> None
       | Some (kind, shape_keys') ->
-        let is_optional =
-          OptionalAccess.Set.mem (entity, key) optional_accesses
-        in
         Some (kind, Logic.(singleton key ty is_optional <> shape_keys') ~env)
     in
     let add_entity (entity, key, ty) pos_map =
@@ -415,10 +406,12 @@ let produce_results
         Pos.Map.update pos (update_entity entity key ty) pos_map
       | Variable _ -> pos_map
     in
-    StaticAccess.Set.fold
-      add_entity
-      derived_static_accesses
-      static_shape_results
+    StaticAccess.Set.fold add_entity static_accesses static_shape_results
+  in
+  let static_shape_results =
+    static_shape_results
+    |> add_known_keys maybe_static_accesses ~is_optional:true
+    |> add_known_keys definite_static_accesses ~is_optional:false
   in
 
   (* Convert to individual statically accessed dict results *)
@@ -463,8 +456,6 @@ let substitute_inter_intra
       | Marks _ -> intra_constr
       | Has_static_key (source, intra_ent_2, key, ty) ->
         Has_static_key (source, replace intra_ent_2, key, ty)
-      | Has_optional_key (intra_ent_2, key) ->
-        Has_optional_key (replace intra_ent_2, key)
       | Has_dynamic_key intra_ent_2 -> Has_dynamic_key (replace intra_ent_2)
       | Subsets (intra_ent_2, intra_ent_3) ->
         Subsets (replace intra_ent_2, replace intra_ent_3)
@@ -484,7 +475,6 @@ let equiv
       (match intra_constr with
       | Marks _ -> Some intra_constr
       | Has_static_key (_, ent, _, _) -> only_inter_ent intra_constr ent
-      | Has_optional_key (ent, _) -> only_inter_ent intra_constr ent
       | Has_dynamic_key ent -> only_inter_ent intra_constr ent
       | _ -> None)
     | HT.Inter _ -> None

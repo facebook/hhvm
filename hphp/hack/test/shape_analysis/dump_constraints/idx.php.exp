@@ -1,8 +1,6 @@
 === Shape analysis results for idx.php
 Constraints for \idx_with_and_without_opt:
    3: Parameter at [3:35-54]
-   4: OK Arg(\idx_with_and_without_opt, 0) : x
-   4: SK Base Arg(\idx_with_and_without_opt, 0) : shape('x' => mixed)
-   5: OK Arg(\idx_with_and_without_opt, 0) : y
-   5: SK Base Arg(\idx_with_and_without_opt, 0) : shape('y' => mixed)
+   4: SK Arg(\idx_with_and_without_opt, 0) : shape(?'x' => mixed)
+   5: SK Arg(\idx_with_and_without_opt, 0) : shape(?'y' => mixed)
 

@@ -9,15 +9,22 @@ use anyhow::Result;
 use bstr::BString;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use tempdir::TempDir;
 
 #[derive(Debug)]
 pub struct DiskProvider {
     relative_path_ctx: Arc<RelativePathCtx>,
+    // Drop the tempdir when the disk provider goes out of scope
+    #[allow(dead_code)]
+    hhi_root: Option<TempDir>,
 }
 
 impl DiskProvider {
-    pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
-        Self { relative_path_ctx }
+    pub fn new(relative_path_ctx: Arc<RelativePathCtx>, hhi_root: Option<TempDir>) -> Self {
+        Self {
+            relative_path_ctx,
+            hhi_root,
+        }
     }
 
     pub fn read(&self, file: RelativePath) -> std::io::Result<BString> {

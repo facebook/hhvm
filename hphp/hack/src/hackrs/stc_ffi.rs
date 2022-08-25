@@ -92,7 +92,7 @@ fn main_impl<R: Reason>(cli_options: CliOptions) {
 
     let ast_provider = AstProvider::new(Arc::clone(&relative_path_ctx), Arc::clone(&options));
     let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
-        file_provider::DiskProvider::new(Arc::clone(&relative_path_ctx)),
+        file_provider::DiskProvider::new(Arc::clone(&relative_path_ctx), None),
     );
     let decl_parser = DeclParser::<R>::new(Arc::clone(&file_provider));
     let shallow_decl_store =

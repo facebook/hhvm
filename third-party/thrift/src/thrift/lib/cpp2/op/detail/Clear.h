@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/op/Create.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
@@ -41,11 +42,35 @@ FOLLY_EXPORT const auto& staticDefault(F&& make) {
   return kVal;
 }
 
+// Gets a (potentally const&) value representing the intrinsic default.
+//
 // C++'s intrinsic default for the underlying native type, is the intrisitic
 // default for for all unstructured types.
 template <typename Tag, typename = void>
 struct GetIntrinsicDefault {
   constexpr auto operator()() const { return type::native_type<Tag>{}; }
+};
+
+// Clear the given value, setting it to it's intrinsic default.
+template <typename Tag, typename = void>
+struct Clear {
+  constexpr void operator()(type::native_type<Tag>& val) const {
+    clear(val, Tag{});
+  }
+
+ private:
+  template <typename T>
+  static void clear(T& val, type::structured_c) {
+    thrift::clear(val);
+  }
+  template <typename T>
+  static void clear(T& val, type::container_c) {
+    val.clear();
+  }
+  template <typename T>
+  constexpr static void clear(T& val, type::all_c) {
+    val = GetIntrinsicDefault<Tag>{}();
+  }
 };
 
 // Gets the intrinsic default via `thrift::clear`
@@ -79,7 +104,7 @@ struct GetIntrinsicDefault<type::struct_t<T>>
 template <typename T>
 struct GetIntrinsicDefault<type::exception_t<T>>
     : ThriftClearDefault<type::exception_t<T>> {};
-// TODO(afuller): Is this actually needed for union?
+// TODO(afuller): Is thrift::clear actually needed for union?
 template <typename T>
 struct GetIntrinsicDefault<type::union_t<T>>
     : ThriftClearDefault<type::union_t<T>> {};
@@ -101,8 +126,7 @@ struct GetIntrinsicDefault<
       type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
   const auto& operator()() const {
     return staticDefault([] {
-      // Note, this is a separate leaky singleton instance used by
-      // staticDefault.
+      // TODO(afuller): Remove or move this logic to the adapter.
       auto& obj = *new Struct{};
       folly::annotate_object_leaked(&obj);
       apache::thrift::clear(obj);
@@ -111,29 +135,12 @@ struct GetIntrinsicDefault<
   }
 };
 
-template <typename Tag>
-struct Clear {
-  static_assert(type::is_concrete_v<Tag>, "");
-  template <typename T>
-  void operator()(T& value) const {
-    folly::overload(
-        [](auto& v, type::structured_c) { apache::thrift::clear(v); },
-        [](auto& v, type::container_c) { v.clear(); },
-        [](auto& v, type::all_c) {
-          // All unstructured types can be cleared by assigning to the intrinsic
-          // default.
-          v = GetIntrinsicDefault<Tag>{}();
-        })(value, Tag{});
-  }
-};
-
-template <typename Adapter, typename Tag>
-struct Clear<type::adapted<Adapter, Tag>> {
-  using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
-  template <typename T>
-  void operator()(T& value) const {
-    ::apache::thrift::adapt_detail::clear<Adapter>(value);
+// Delegate to adapter.
+template <typename Adapter, typename UTag>
+struct Clear<type::adapted<Adapter, UTag>> {
+  using Tag = type::adapted<Adapter, UTag>;
+  void operator()(type::native_type<Tag>& value) const {
+    adapt_detail::clear<Adapter>(value);
   }
 };
 

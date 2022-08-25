@@ -25,7 +25,14 @@ let join ~pos ~origin (env : env) (left : entity_) (right : entity_) :
   let env = List.fold ~f:add_constraint ~init:env constraints in
   (env, join)
 
-let when_tast_check tast_env ~default f =
+(* In local mode, we deliberately poison inter-procedural entities to prevent
+   the solver from yielding results that need access to other entities (e.g.,
+   other functions, class definitions, constants, etc.).
+
+   Currently, local mode is enabled only when we the shape analysis logger is
+   enabled.
+   *)
+let when_local_mode tast_env ~default f =
   let tcopt = Tast_env.get_tcopt tast_env |> TypecheckerOptions.log_levels in
   match SMap.find_opt "shape_analysis" tcopt with
   | Some level when level > 0 -> f ()
@@ -265,7 +272,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         (* TODO(T128046165) Generate and add inter-procedural constraints *)
         let new_entity_ = Literal pos in
         let env =
-          when_tast_check env.tast_env ~default:env @@ fun () ->
+          when_local_mode env.tast_env ~default:env @@ fun () ->
           let constraint_ =
             decorate ~origin:__LINE__ @@ Has_dynamic_key new_entity_
           in
@@ -489,7 +496,7 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     in
     let constraints = [marker_constraint] in
     let constraints =
-      when_tast_check tast_env ~default:constraints @@ fun () ->
+      when_local_mode tast_env ~default:constraints @@ fun () ->
       let invalidation_constraint =
         decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
       in

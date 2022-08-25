@@ -3753,8 +3753,9 @@ let get_filename_in_message_for_logging (message : lsp_message) :
 let get_message_kind_and_method_for_logging (message : lsp_message) :
     string * string =
   match message with
-  | ResponseMessage (_, _) -> ("Response", "[response]")
-  | RequestMessage (_, r) -> ("Request", Lsp_fmt.request_name_to_string r)
+  | ResponseMessage (_id, result) ->
+    ("Response", Lsp.lsp_result_to_log_string result)
+  | RequestMessage (_id, r) -> ("Request", Lsp_fmt.request_name_to_string r)
   | NotificationMessage n ->
     ("Notification", Lsp_fmt.notification_name_to_string n)
 
@@ -3764,13 +3765,13 @@ let log_response_if_necessary
     (result_telemetry_opt : result_telemetry option)
     (unblocked_time : float) : unit =
   match event with
-  | Client_message (metadata, message) ->
+  | Client_message ({ timestamp; tracking_id }, message) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
     let t = Unix.gettimeofday () in
     log_debug
       "lsp-message [%s] queue time [%0.3f] execution time [%0.3f]"
       method_
-      (unblocked_time -. metadata.timestamp)
+      (unblocked_time -. timestamp)
       (t -. unblocked_time);
     let (result_count, result_extra_telemetry) =
       match result_telemetry_opt with
@@ -3785,11 +3786,10 @@ let log_response_if_necessary
       ~path_opt:(get_filename_in_message_for_logging message)
       ~result_count
       ~result_extra_telemetry
-      ~tracking_id:metadata.tracking_id
-      ~start_queue_time:metadata.timestamp
+      ~tracking_id
+      ~start_queue_time:timestamp
       ~start_hh_server_state:
-        (get_older_hh_server_state metadata.timestamp
-        |> hh_server_state_to_string)
+        (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:env.use_serverless_ide
   | _ -> ()

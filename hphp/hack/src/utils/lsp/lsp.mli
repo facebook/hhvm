@@ -1085,3 +1085,5 @@ end
 module UriMap : sig
   include module type of WrappedMap.Make (UriKey)
 end
+
+val lsp_result_to_log_string : lsp_result -> string

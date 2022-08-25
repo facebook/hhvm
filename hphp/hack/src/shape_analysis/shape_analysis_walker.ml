@@ -105,30 +105,25 @@ let dict_pos_of_hint hint_opt =
   | None -> failwith "parameter hint is missing"
 
 let add_key_constraint
-    (hack_pos : Pos.t)
-    (origin : int)
-    (env : env)
-    entity
-    (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
+    ~(pos : Pos.t)
+    ~(origin : int)
     ~certainty
-    ~variety : env =
-  match entity with
-  | Some entity ->
-    begin
-      match key with
-      | A.String str ->
-        let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
-        let ty = Tast_env.fully_expand env.tast_env ty in
-        let add_static_key env variety =
-          let constraint_ = Static_key (variety, certainty, entity, key, ty) in
-          Env.add_constraint env { hack_pos; origin; constraint_ }
-        in
-        List.fold ~f:add_static_key variety ~init:env
-      | _ ->
-        let constraint_ = Has_dynamic_key entity in
-        Env.add_constraint env { hack_pos; origin; constraint_ }
-    end
-  | None -> env
+    ~variety
+    (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
+    (env : env)
+    entity : env =
+  match key with
+  | A.String str ->
+    let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
+    let ty = Tast_env.fully_expand env.tast_env ty in
+    let add_static_key env variety =
+      let constraint_ = Static_key (variety, certainty, entity, key, ty) in
+      Env.add_constraint env { hack_pos = pos; origin; constraint_ }
+    in
+    List.fold ~f:add_static_key variety ~init:env
+  | _ ->
+    let constraint_ = Has_dynamic_key entity in
+    Env.add_constraint env { hack_pos = pos; origin; constraint_ }
 
 let redirect ~pos ~origin (env : env) (entity_ : entity_) : env * entity_ =
   let var = Env.fresh_var () in
@@ -154,13 +149,13 @@ let rec assign
         let (env, current_assignment) = redirect ~pos ~origin env entity_ in
         let env =
           add_key_constraint
-            pos
-            origin
-            env
-            (Some current_assignment)
-            (ix, ty_rhs)
+            ~pos
+            ~origin
             ~certainty:Definite
             ~variety:[Has]
+            (ix, ty_rhs)
+            env
+            current_assignment
         in
         (* Handle copy-on-write by creating a variable indirection *)
         let (env, var) = redirect ~pos ~origin env current_assignment in
@@ -191,14 +186,16 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
       let (env, _val_entity) = expr_ env value in
-      add_key_constraint
-        pos
-        __LINE__
-        env
+      Option.fold
+        ~init:env
+        ~f:
+          (add_key_constraint
+             ~pos
+             ~origin:__LINE__
+             ~certainty:Definite
+             ~variety:[Has]
+             (key, ty))
         entity
-        (key, ty)
-        ~certainty:Definite
-        ~variety:[Has]
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
     (env, entity)
@@ -206,14 +203,16 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
     let env =
-      add_key_constraint
-        pos
-        __LINE__
-        env
+      Option.fold
+        ~init:env
+        ~f:
+          (add_key_constraint
+             ~pos
+             ~origin:__LINE__
+             ~certainty:Definite
+             ~variety:[Has; Needs]
+             (ix, ty))
         entity_exp
-        (ix, ty)
-        ~certainty:Definite
-        ~variety:[Has; Needs]
     in
     (env, None)
   | A.Lvar (_, lid) ->
@@ -234,14 +233,16 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         let (env, entity_exp) = expr_ env base in
         let (env, _entity_ix) = expr_ env ix in
         let env =
-          add_key_constraint
-            pos
-            __LINE__
-            env
+          Option.fold
+            ~init:env
+            ~f:
+              (add_key_constraint
+                 ~pos
+                 ~origin:__LINE__
+                 ~certainty:Maybe
+                 ~variety:[Has; Needs]
+                 (ix, ty))
             entity_exp
-            (ix, ty)
-            ~certainty:Maybe
-            ~variety:[Has; Needs]
         in
         (env, None)
       | _ -> failwithpos pos ("Unsupported idx expression: " ^ Utils.expr_name e)

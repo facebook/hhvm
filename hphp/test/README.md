@@ -49,11 +49,10 @@ These are the allowed extensions:
 * `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).
 * `.php.serial` - The test will always be put in the serial bucket to be run sequentially with other serial tests so as to avoid any timing problems or collisions.
 * `.php.hphp_opts` - Options passed to hphp when generating a bytecode repo.
-* `.php.norepo` – If this file is present, then the test is not run in repo-authoritative mode. Repo-authoritative mode perfomrs a whole-program build.
 * `.php.diff or hhas.diff` - The diff for .expect tests.
 * `.hhas` - HipHop Assembly.
-* `.php.norepo` - don't run the test in repo mode
-* `.php.noserver` - don't run the test in server mode
+* `.php.norepo` – If this file is present, then the test is not run in repo-authoritative mode. Repo-authoritative mode performs a whole-program build.
+* `.php.noserver` - Don't run the test in server mode.
 * `.php.hhconfig` - A blank or syntactically valid Hack typechecker configuration file if you want the test to be able to be run in typechecker mode.
 * `inc.php` - Use this extension for `require` or `include` files if you are going to have a typechecker test that uses them. For now, make sure they are in the same directory as the test. They will be copied along with the core test files when the test runner is executing.
 

@@ -80,6 +80,7 @@ class ErrorRoute {
             now);
         ctx->onReplyReceived(
             routeName() /* poolName */,
+            std::nullopt,
             ap,
             folly::StringPiece(),
             req,

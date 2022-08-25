@@ -220,6 +220,7 @@ class DestinationRoute {
         now);
     ctx.onReplyReceived(
         poolName_,
+        std::optional<size_t>(indexInPool_),
         *destination_->accessPoint(),
         folly::StringPiece(),
         req,
@@ -295,6 +296,7 @@ class DestinationRoute {
     auto reply = destination_->send(reqToSend, dctx, timeout_, rpcContext);
     ctx.onReplyReceived(
         poolName_,
+        std::optional<size_t>(indexInPool_),
         *destination_->accessPoint(),
         strippedRoutingPrefix,
         reqToSend,

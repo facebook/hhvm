@@ -160,6 +160,7 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
   template <class Request>
   void onReplyReceived(
       const folly::StringPiece poolName,
+      std::optional<size_t> poolIndex,
       const AccessPoint& ap,
       folly::StringPiece strippedRoutingPrefix,
       const Request& request,
@@ -196,7 +197,8 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
         flags,
         fiber_local<RouterInfo>::getFailoverCount(),
         fiber_local<RouterInfo>::getAccumulatedInjectedBeforeReqLatencyUs(),
-        fiber_local<RouterInfo>::getAccumulatedInjectedAfterReqLatencyUs());
+        fiber_local<RouterInfo>::getAccumulatedInjectedAfterReqLatencyUs(),
+        poolIndex);
     assert(logger_.hasValue());
     logger_->template log<Request>(loggerContext);
     assert(additionalLogger_.hasValue());

@@ -57,6 +57,9 @@ MaskRef MaskRef::get(FieldId id) const {
 }
 
 MaskRef MaskRef::get(MapId id) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
   throwIfNotMapMask();
   if (mask.includes_map_ref()) {
     return MaskRef{getMask(mask.includes_map_ref().value(), id), is_exclusion};

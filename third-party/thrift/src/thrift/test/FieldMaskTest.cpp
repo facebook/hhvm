@@ -278,6 +278,29 @@ TEST(FieldMaskTest, MaskRefGetExcludesMap) {
   testMaskRefGetExcludes<MapId>(mask, excludes[9]);
 }
 
+TEST(FieldMaskTest, MaskRefGetAllMaskNoneMask) {
+  {
+    MaskRef ref{allMask(), false};
+    EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
+    EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
+  }
+  {
+    MaskRef ref{allMask(), true};
+    EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
+    EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
+  }
+  {
+    MaskRef ref{noneMask(), false};
+    EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
+    EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
+  }
+  {
+    MaskRef ref{noneMask(), true};
+    EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
+    EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
+  }
+}
+
 TEST(FieldMaskTest, MaskRefGetException) {
   {
     Mask m;

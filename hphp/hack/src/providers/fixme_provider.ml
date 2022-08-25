@@ -206,10 +206,7 @@ let get_unused_fixmes_for codes applied_fixme_map fn acc =
             if
               (List.mem codes code ~equal:( = )
               || (List.is_empty codes && code < 5000))
-              && (not (fixme_was_applied applied_fixme_map fn line code))
-              && code
-                 <> Error_codes.Typing.(to_enum ConcreteConstInterfaceOverride)
-              (* Temporarily allow unused fixmes for constants *)
+              && not (fixme_was_applied applied_fixme_map fn line code)
             then
               fixme_pos :: acc
             else

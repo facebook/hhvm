@@ -476,4 +476,4 @@ let branches_return_same_value p =
     Codes.branch_return_same_value
     Lint_warning
     p
-    "All of these statements are returning the same value. Consider keeping a single return statement outside of the branches."
+    "There are multiple return statements, but they all return the same value."

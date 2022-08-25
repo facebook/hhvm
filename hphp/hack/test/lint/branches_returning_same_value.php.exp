@@ -1,100 +1,100 @@
 File "branches_returning_same_value.php", line 12, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 14, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 20, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 22, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 29, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 31, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 38, characters 12-15:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 41, characters 12-15:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 47, characters 12-23:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 49, characters 12-23:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 55, characters 12-24:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 57, characters 12-24:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 95, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 97, characters 10-12:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 102, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 104, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 106, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 125, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 130, characters 10-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 136, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 141, characters 10-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 147, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 149, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 151, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 153, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 175, characters 14-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 177, characters 14-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 183, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 185, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 192, characters 14-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 194, characters 14-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 201, characters 14-17:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 204, characters 14-17:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 210, characters 14-25:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 212, characters 14-25:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 218, characters 14-26:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 220, characters 14-26:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 258, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 260, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 262, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 281, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 286, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 292, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 297, characters 12-18:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 302, characters 14-16:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 304, characters 12-14:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 309, characters 16-22:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 311, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 313, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])
 File "branches_returning_same_value.php", line 315, characters 14-20:
-All of these statements are returning the same value. Consider keeping a single return statement outside of the branches. (Lint[5646])
+There are multiple return statements, but they all return the same value. (Lint[5646])

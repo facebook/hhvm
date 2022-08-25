@@ -710,7 +710,27 @@ void writeRawField(
   prot.writeFieldEnd();
 }
 
-// We can assume that if value type is a struct, fields in maskedData is active.
+// Writes the map value from raw data in MaskedData.
+template <class Protocol>
+void writeRawMapValue(
+    Protocol& prot,
+    TType valueType,
+    MaskedProtocolData& protocolData,
+    MaskedData& maskedData) {
+  // When value doesn't exist in the object, maskedData should have full field.
+  if (!maskedData.full_ref()) {
+    throw std::runtime_error("incompatible value and maskedData");
+  }
+  type::ValueId valueId = maskedData.full_ref().value();
+  const EncodedValue& value = getByValueId(*protocolData.values(), valueId);
+  if (toTType(*value.wireType()) != valueType) {
+    TProtocolException::throwInvalidFieldData();
+  }
+  prot.writeRaw(*value.data());
+}
+
+// We can assume that if value type is a struct, fields in maskedData is
+// active, and if value type is a map, values in maskedData is active.
 // It throws a runtime error if value and maskedData are incompatible.
 template <class Protocol>
 void serializeValue(
@@ -757,7 +777,65 @@ void serializeValue(
       prot.writeStructEnd();
       return;
     }
-    // TODO: handle map
+    case Value::Type::mapValue: {
+      if (!maskedData.values_ref()) {
+        throw std::runtime_error("incompatible value and maskedData");
+      }
+      TType keyType = protocol::T_STRING;
+      TType valueType = protocol::T_I64;
+
+      // compute size, keyType, and valueType
+      uint32_t size = value.mapValue_ref()->size();
+      if (size > 0) {
+        keyType = getTType(value.mapValue_ref()->begin()->first);
+        valueType = getTType(value.mapValue_ref()->begin()->second);
+      }
+      for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+        const Value& key =
+            *getByValueId(*protocolData.keys(), keyValueId).value();
+        if (size == 0) { // need to set keyType and valueType
+          keyType = getTType(key);
+          type::ValueId valueId = nestedMaskedData.full_ref().value();
+          valueType = toTType(
+              *getByValueId(*protocolData.values(), valueId).wireType());
+        }
+        if (!value.mapValue_ref()->contains(key)) {
+          ++size;
+        }
+      }
+
+      // Remember which keys are in the maskedData. Cannot use unordered_map
+      // as Value doesn't have a hash function.
+      std::set<Value> keys{};
+      prot.writeMapBegin(keyType, valueType, size);
+      for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
+        const Value& key =
+            *getByValueId(*protocolData.keys(), keyValueId).value();
+        keys.insert(key);
+        ensureSameType(key, keyType);
+        serializeValue(prot, key);
+        // no need to serialize the value
+        if (!value.mapValue_ref()->contains(key)) {
+          writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
+          continue;
+        }
+        // recursively serialize value with maskedData
+        const Value& val = value.mapValue_ref()->at(key);
+        ensureSameType(val, valueType);
+        serializeValue(prot, val, protocolData, nestedMaskedData);
+      }
+      for (const auto& [key, val] : *value.mapValue_ref()) {
+        if (keys.contains(key)) { // already serailized
+          continue;
+        }
+        ensureSameType(key, keyType);
+        ensureSameType(val, valueType);
+        serializeValue(prot, key);
+        serializeValue(prot, val);
+      }
+      prot.writeMapEnd();
+      return;
+    }
     default: {
       serializeValue(prot, value);
     }

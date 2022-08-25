@@ -1055,8 +1055,50 @@ TEST(Object, SerializeObjectWithMask) {
       ::apache::thrift::conformance::StandardProtocol::Binary>();
 }
 
+// called by testParseObjectWithMapMask when testSerialize=true
 template <::apache::thrift::conformance::StandardProtocol Protocol>
-void testParseValueWithMapMask() {
+void testSerializeObjectWithMapMask(MaskedDecodeResult& result, Object& obj) {
+  {
+    // test serializeObject with mask
+    // reserialize with the unmodified object
+    auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
+        result.included, result.excluded);
+    Object finalObj =
+        parseObject<protocol_reader_t<Protocol>>(*reserialized, false);
+    EXPECT_EQ(finalObj, obj);
+  }
+  {
+    // reserialize with the modified object
+    Object modified;
+    // modified{1: map{10: {},
+    //                 30: {"foo": 1}}}
+    // This tests when map is empty and types are determined from MaskedData.
+    std::map<int, std::map<std::string, int>> modifiedMap = {
+        {10, {}}, {30, {{"foo", 1}}}};
+    modified[FieldId{1}] = asValueStruct<
+        type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
+        modifiedMap);
+
+    Object expected;
+    // expected{1: map{10: {"bar": 2},
+    //                 20: {"baz": 3},
+    //                 30: {"foo": 1}}}
+    std::map<int, std::map<std::string, int>> expectedMap = {
+        {10, {{"bar", 2}}}, {20, {{"baz", 3}}}, {30, {{"foo", 1}}}};
+    expected[FieldId{1}] = asValueStruct<
+        type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
+        expectedMap);
+
+    auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
+        modified, result.excluded);
+    Object finalObj =
+        parseObject<protocol_reader_t<Protocol>>(*reserialized, false);
+    EXPECT_EQ(finalObj, expected);
+  }
+}
+
+template <::apache::thrift::conformance::StandardProtocol Protocol>
+void testParseObjectWithMapMask(bool testSerialize) {
   Object obj;
   // obj{1: map{10: {"foo": 1,
   //                 "bar": 2},
@@ -1099,6 +1141,13 @@ void testParseValueWithMapMask() {
   // serialize the object and deserialize with mask
   MaskedDecodeResult result =
       parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+
+  if (testSerialize) {
+    testSerializeObjectWithMapMask<Protocol>(result, obj);
+    return;
+  }
+
+  // manually check the result
   EXPECT_EQ(result.included, expected);
   EXPECT_EQ(*result.excluded.protocol(), convertStandardProtocol(Protocol));
   auto& values = *result.excluded.values();
@@ -1137,10 +1186,63 @@ void testParseValueWithMapMask() {
   }
 }
 
+template <::apache::thrift::conformance::StandardProtocol Protocol>
+void testSerializeObjectWithMapMaskError() {
+  Object obj;
+  // obj{1: map{1: "foo"}}
+  std::map<int, std::string> map = {{1, "foo"}};
+  obj[FieldId{1}] = asValueStruct<type::map<type::i32_t, type::string_t>>(map);
+
+  {
+    // MaskedData[1] is full, which should be values.
+    MaskedProtocolData protocolData;
+    protocolData.protocol() = convertStandardProtocol(Protocol);
+    MaskedData& maskedData = protocolData.data_ref().value();
+    maskedData.fields_ref().ensure()[FieldId{1}].full_ref() = type::ValueId{1};
+
+    EXPECT_THROW(
+        protocol::serializeObject<protocol_writer_t<Protocol>>(
+            obj, protocolData),
+        std::runtime_error);
+  }
+  {
+    // MaskedData[1][2] is values, which should be full.
+    MaskedProtocolData protocolData;
+    protocolData.protocol() = convertStandardProtocol(Protocol);
+    MaskedData& maskedData = protocolData.data_ref().value();
+    auto& keys = protocolData.keys().ensure();
+    keys.push_back(makeValueStruct(asValueStruct<type::i32_t>(2)));
+    type::ValueId keyValueId =
+        type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
+    maskedData.fields_ref()
+        .ensure()[FieldId{1}]
+        .values_ref()
+        .ensure()[keyValueId]
+        .values_ref()
+        .ensure();
+
+    EXPECT_THROW(
+        protocol::serializeObject<protocol_writer_t<Protocol>>(
+            obj, protocolData),
+        std::runtime_error);
+  }
+}
+
 TEST(Object, ParseObjectWithMapMask) {
-  testParseValueWithMapMask<
+  testParseObjectWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact>(false);
+  testParseObjectWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>(false);
+}
+
+TEST(Object, SerializeObjectWithMapMask) {
+  testParseObjectWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Compact>(true);
+  testParseObjectWithMapMask<
+      ::apache::thrift::conformance::StandardProtocol::Binary>(true);
+  testSerializeObjectWithMapMaskError<
       ::apache::thrift::conformance::StandardProtocol::Compact>();
-  testParseValueWithMapMask<
+  testSerializeObjectWithMapMaskError<
       ::apache::thrift::conformance::StandardProtocol::Binary>();
 }
 } // namespace

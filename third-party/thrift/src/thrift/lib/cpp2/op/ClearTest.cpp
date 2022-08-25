@@ -16,10 +16,12 @@
 
 #include <thrift/lib/cpp2/op/Clear.h>
 
+#include <folly/io/IOBuf.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/type/Name.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/cpp2/type/Traits.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
@@ -106,6 +108,26 @@ TEST(ClearTest, Structured) {
   testset::union_i64 one;
   one.field_1_ref().ensure() = 1;
   testClear<type::union_t<testset::union_i64>>({}, one);
+}
+
+TEST(ClearTest, IOBufPtr) {
+  using T = std::unique_ptr<folly::IOBuf>;
+  using Tag = type::cpp_type<T, type::binary_t>;
+  T empty;
+  EXPECT_TRUE(op::isEmpty<Tag>(empty));
+  empty = folly::IOBuf::wrapBuffer("", 0);
+  EXPECT_TRUE(op::isEmpty<Tag>(empty));
+  T one = folly::IOBuf::wrapBuffer("one", 3);
+  EXPECT_FALSE(op::isEmpty<Tag>(one));
+
+  op::clear<Tag>(one);
+  EXPECT_TRUE(op::isEmpty<Tag>(one));
+  EXPECT_EQ(one, nullptr);
+
+  // Normalizes to nullptr.
+  EXPECT_NE(empty, nullptr);
+  op::clear<Tag>(empty);
+  EXPECT_EQ(empty, nullptr);
 }
 
 TEST(ClearTest, Adapter) {

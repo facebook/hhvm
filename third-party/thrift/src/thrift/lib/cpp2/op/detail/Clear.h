@@ -19,9 +19,10 @@
 #include <cmath>
 
 #include <folly/CPortability.h>
-#include <folly/Overload.h>
 #include <folly/Portability.h>
+#include <folly/io/IOBuf.h>
 #include <folly/memory/SanitizeLeak.h>
+#include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Compare.h>
@@ -73,6 +74,36 @@ struct Clear {
   }
 };
 
+// Checks if the given value is empty.
+template <typename Tag>
+struct IsEmpty {
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
+    return empty(value, Tag{});
+  }
+
+ private:
+  template <typename T>
+  static bool empty(const T& val, type::structured_c) {
+    return thrift::empty(val);
+  }
+  template <typename T>
+  static bool empty(const T& val, type::container_c) {
+    return val.empty();
+  }
+  template <typename T>
+  static bool empty(const T& val, type::string_c) {
+    return val.empty();
+  }
+  template <typename T>
+  constexpr static bool empty(const T& val, type::all_c) {
+    return op::identical<Tag>(val, GetIntrinsicDefault<Tag>{}());
+  }
+  template <typename ATag>
+  static bool empty(const std::unique_ptr<folly::IOBuf>& val, ATag tag) {
+    return val == nullptr || empty(*val, tag);
+  }
+};
+
 // Gets the intrinsic default via `thrift::clear`
 //
 // Useful for any type that supports custom defaults.
@@ -109,21 +140,17 @@ template <typename T>
 struct GetIntrinsicDefault<type::union_t<T>>
     : ThriftClearDefault<type::union_t<T>> {};
 
+template <typename Adapter, typename UTag, typename Struct, int16_t id>
+using adapted_field_tag =
+    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>;
+
 // Cache the result of op::create for adapters.
-template <typename Adapter, typename Tag>
-struct GetIntrinsicDefault<type::adapted<Adapter, Tag>>
-    : CreateDefault<type::adapted<Adapter, Tag>> {};
-
-// TODO(dokwon): Support field_ref types.
-template <typename Tag, typename Context>
-struct GetIntrinsicDefault<type::field<Tag, Context>>
-    : GetIntrinsicDefault<Tag> {};
-
-template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
-struct GetIntrinsicDefault<
-    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>> {
-  using Tag =
-      type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, FieldId>>;
+template <typename Adapter, typename UTag>
+struct GetIntrinsicDefault<type::adapted<Adapter, UTag>>
+    : CreateDefault<type::adapted<Adapter, UTag>> {};
+template <typename Adapter, typename UTag, typename Struct, int16_t id>
+struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
   const auto& operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
@@ -139,10 +166,33 @@ struct GetIntrinsicDefault<
 template <typename Adapter, typename UTag>
 struct Clear<type::adapted<Adapter, UTag>> {
   using Tag = type::adapted<Adapter, UTag>;
-  void operator()(type::native_type<Tag>& value) const {
+  constexpr void operator()(type::native_type<Tag>& value) const {
     adapt_detail::clear<Adapter>(value);
   }
 };
+
+// Delegate to op::identical.
+template <typename Adapter, typename UTag>
+struct IsEmpty<type::adapted<Adapter, UTag>> {
+  using Tag = type::adapted<Adapter, UTag>;
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
+    return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
+  }
+};
+template <typename Adapter, typename UTag, typename Struct, int16_t id>
+struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, id>> {
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
+  constexpr bool operator()(const type::native_type<Tag>& value) const {
+    return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
+  }
+};
+
+// TODO(dokwon): Support field_ref types.
+template <typename Tag, typename Context>
+struct GetIntrinsicDefault<type::field<Tag, Context>>
+    : GetIntrinsicDefault<Tag> {};
+template <typename Tag, typename Context>
+struct IsEmpty<type::field<Tag, Context>> : IsEmpty<Tag> {};
 
 // TODO: support union
 struct ClearOptionalField {
@@ -187,80 +237,29 @@ struct ClearField<type::field<Tag, Context>> : ClearOptionalField {
   }
 };
 
-template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
-struct ClearField<
-    type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>>
+template <typename Adapter, typename UTag, typename Struct, int16_t id>
+struct ClearField<adapted_field_tag<Adapter, UTag, Struct, id>>
     : ClearOptionalField {
-  using field_adapted_tag =
-      type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
-  static_assert(type::is_concrete_v<field_adapted_tag>, "");
+  using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
+  static_assert(type::is_concrete_v<Tag>, "");
 
   using ClearOptionalField::operator();
-
   template <typename T>
   void operator()(required_field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
   }
 
   template <typename T>
   void operator()(terse_field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
   }
 
   template <typename T>
   void operator()(field_ref<T> field, Struct& s) const {
-    ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+    ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
   }
 };
 
-template <typename Tag>
-struct Empty {
-  static_assert(type::is_concrete_v<Tag>, "");
-  template <typename T = type::native_type<Tag>>
-  constexpr bool operator()(const T& value) const {
-    return folly::overload(
-        [](const auto& v, type::string_c) {
-          return StringTraits<T>::isEmpty(v);
-        },
-        [](const auto& v, type::container_c) { return v.empty(); },
-        [](const auto& v, type::structured_c) {
-          return apache::thrift::empty(v);
-        },
-        [](const auto& v, type::all_c) {
-          // All unstructured values are 'empty' if they are identical to their
-          // intrinsic default.
-          return op::identical<Tag>(v, GetIntrinsicDefault<Tag>{}());
-        })(value, Tag{});
-  }
-};
-
-template <typename Adapter, typename Tag>
-struct Empty<type::adapted<Adapter, Tag>> {
-  using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
-  template <typename T>
-  constexpr bool operator()(const T& value) const {
-    return op::identical<adapted_tag>(
-        value, GetIntrinsicDefault<adapted_tag>{}());
-  }
-};
-
-// TODO(dokwon): Support field_ref types.
-template <typename Tag, typename Context>
-struct Empty<type::field<Tag, Context>> : Empty<Tag> {};
-
-template <typename Adapter, typename Tag, typename Struct, int16_t FieldId>
-struct Empty<
-    type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>> {
-  using field_adapted_tag =
-      type::field<type::adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>;
-  static_assert(type::is_concrete_v<field_adapted_tag>, "");
-  template <typename T>
-  constexpr bool operator()(const T& value) const {
-    return op::identical<field_adapted_tag>(
-        value, GetIntrinsicDefault<field_adapted_tag>{}());
-  }
-};
 } // namespace detail
 } // namespace op
 } // namespace thrift

@@ -39,7 +39,7 @@ namespace op {
 //   isEmpty<set<i32_t>>({}) -> true
 //   isEmpty<set<i32_t>>({0}) -> false
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::Empty<Tag> isEmpty{};
+FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
 
 // Returns the 'intrinsic' default for the given type.
 //

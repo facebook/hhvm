@@ -524,4 +524,85 @@ mod v0 {
             dst[7] = n as libc::c_char;
         }
     }
+
+    // Write characters, integers, and blocks in the output buffer
+
+    fn write(s: &mut CamlExternState, c: libc::c_int) {
+        if s.extern_ptr >= s.extern_limit {
+            grow_extern_output(s, 1);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        unsafe { *s_extern_ptr = c as libc::c_char };
+        s.extern_ptr = unsafe { s_extern_ptr.add(1) } as usize;
+    }
+
+    fn writeblock(s: &mut CamlExternState, data: *const libc::c_char, len: isize) {
+        if s.extern_ptr + len as usize > s.extern_limit {
+            grow_extern_output(s, len);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        let s_extern_ptr_as_slice: &mut [libc::c_char] =
+            unsafe { std::slice::from_raw_parts_mut(s_extern_ptr, len as usize) };
+        let other: &[libc::c_char] = unsafe { std::slice::from_raw_parts(data, len as usize) };
+        s_extern_ptr_as_slice.copy_from_slice(other);
+        s.extern_ptr += len as usize;
+    }
+
+    #[cfg(target_arch = "arm")]
+    fn writeblock_float8(s: &mut CamlExternState, data: *const f64, ndoubles: isize) {
+        todo!()
+    }
+    #[cfg(not(target_arch = "arm"))]
+    fn writeblock_float8(s: &mut CamlExternState, data: *const f64, ndoubles: isize) {
+        writeblock(s, unsafe { std::mem::transmute(data) }, ndoubles * 8);
+    }
+
+    fn writecode8(s: &mut CamlExternState, code: libc::c_int, val: isize) {
+        if s.extern_ptr + 2 > s.extern_limit {
+            grow_extern_output(s, 2);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        let s_extern_ptr_as_slice: &mut [libc::c_char] =
+            unsafe { std::slice::from_raw_parts_mut(s_extern_ptr, 2) };
+        s_extern_ptr_as_slice[0] = code as libc::c_char;
+        s_extern_ptr_as_slice[1] = val as libc::c_char;
+        s.extern_ptr += 2;
+    }
+
+    fn writecode16(s: &mut CamlExternState, code: libc::c_int, val: isize) {
+        if s.extern_ptr + 3 > s.extern_limit {
+            grow_extern_output(s, 3);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        let s_extern_ptr_as_slice: &mut [libc::c_char] =
+            unsafe { std::slice::from_raw_parts_mut(s_extern_ptr, 3) };
+        s_extern_ptr_as_slice[0] = code as libc::c_char;
+        store16(unsafe { s_extern_ptr.offset(1) }, val as libc::c_int);
+        s.extern_ptr += 3;
+    }
+
+    fn writecode32(s: &mut CamlExternState, code: libc::c_int, val: isize) {
+        if s.extern_ptr + 5 > s.extern_limit {
+            grow_extern_output(s, 5);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        let s_extern_ptr_as_slice: &mut [libc::c_char] =
+            unsafe { std::slice::from_raw_parts_mut(s_extern_ptr, 3) };
+        s_extern_ptr_as_slice[0] = code as libc::c_char;
+        store32(unsafe { s_extern_ptr.offset(1) }, val);
+        s.extern_ptr += 5;
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    fn writecode64(s: &mut CamlExternState, code: libc::c_int, val: isize) {
+        if s.extern_ptr + 9 > s.extern_limit {
+            grow_extern_output(s, 9);
+        }
+        let s_extern_ptr = s.extern_ptr as *mut libc::c_char;
+        let s_extern_ptr_as_slice: &mut [libc::c_char] =
+            unsafe { std::slice::from_raw_parts_mut(s_extern_ptr, 3) };
+        s_extern_ptr_as_slice[0] = code as libc::c_char;
+        store64(unsafe { s_extern_ptr.offset(1) }, val as i64);
+        s.extern_ptr += 9;
+    }
 } //mod v0

@@ -6,6 +6,8 @@
  *
  *)
 
+val is_enum_or_enum_class : Ast_defs.classish_kind -> bool
+
 (* True if source text ends in a newline *)
 val ends_in_newline : Full_fidelity_source_text.t -> bool
 

@@ -10,6 +10,8 @@
   symbol_xrefs
   symbol_json_util
   symbol_index_batch
+  symbol_index_decls
+  symbol_index_xrefs
   symbol_entrypoint
   symbol_predicate)
  (libraries

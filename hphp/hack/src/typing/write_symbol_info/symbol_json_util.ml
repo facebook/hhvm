@@ -8,6 +8,12 @@
 
 open Hh_prelude
 
+let is_enum_or_enum_class = function
+  | Ast_defs.Cenum
+  | Ast_defs.Cenum_class _ ->
+    true
+  | Ast_defs.(Cinterface | Cclass _ | Ctrait) -> false
+
 let get_context_from_hint ctx h =
   let mode = FileInfo.Mhhi in
   let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in

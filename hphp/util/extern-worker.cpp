@@ -320,12 +320,12 @@ private:
   fs::path newExec();
   static fs::path newRoot(const Options&);
 
-  void doSubprocess(const RequestId&,
-                    const std::string&,
-                    const fs::path&,
-                    const fs::path&,
-                    const fs::path&,
-                    const fs::path&);
+  coro::Task<void> doSubprocess(const RequestId&,
+                                const std::string&,
+                                const fs::path&,
+                                const fs::path&,
+                                const fs::path&,
+                                const fs::path&);
 
   Options m_options;
 
@@ -482,6 +482,8 @@ SubprocessImpl::exec(const RequestId& requestId,
          requestId.tracePrefix(), command,
          execPath.native(), inputs.size());
 
+  HPHP_CORO_SAFE_POINT;
+
   // Set up the directory structure that the worker expects:
 
   auto const symlink = [&] (const RefId& id,
@@ -533,14 +535,14 @@ SubprocessImpl::exec(const RequestId& requestId,
   }
 
   // Do the actual fork+exec.
-  doSubprocess(
+  HPHP_CORO_AWAIT(doSubprocess(
     requestId,
     command,
     execPath,
     configPath,
     inputsPath,
     outputsPath
-  );
+  ));
 
   // Make RefIds corresponding to the outputs.
 
@@ -606,12 +608,12 @@ SubprocessImpl::exec(const RequestId& requestId,
   HPHP_CORO_MOVE_RETURN(out);
 }
 
-void SubprocessImpl::doSubprocess(const RequestId& requestId,
-                                  const std::string& command,
-                                  const fs::path& execPath,
-                                  const fs::path& configPath,
-                                  const fs::path& inputPath,
-                                  const fs::path& outputPath) {
+coro::Task<void> SubprocessImpl::doSubprocess(const RequestId& requestId,
+                                              const std::string& command,
+                                              const fs::path& execPath,
+                                              const fs::path& configPath,
+                                              const fs::path& inputPath,
+                                              const fs::path& outputPath) {
   std::vector<std::string> args{
     current_executable_path(),
     s_option,
@@ -634,6 +636,8 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
   FTRACE(4, "{} executing subprocess\n",
          requestId.tracePrefix());
 
+  HPHP_CORO_SAFE_POINT;
+
   auto const DEBUG_ONLY before = std::chrono::steady_clock::now();
 
   // Do the actual fork+exec.
@@ -650,6 +654,8 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
 
   auto const [_, stderr] = subprocess.communicate();
   auto const returnCode = subprocess.wait();
+
+  HPHP_CORO_SAFE_POINT;
 
   FTRACE(
     4,
@@ -684,7 +690,7 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
   }
 
   if (!returnCode.exited() || returnCode.exitStatus() != 0) {
-    throw Error{
+    throw WorkerError{
       folly::sformat(
         "Execution of `{}` failed: {}\nstderr:\n{}",
         command,
@@ -693,6 +699,8 @@ void SubprocessImpl::doSubprocess(const RequestId& requestId,
       )
     };
   }
+
+  HPHP_CORO_RETURN_VOID;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -706,6 +714,7 @@ Client::Client(folly::Executor::KeepAlive<> executor,
   : m_options{options}
   , m_stats{std::make_shared<Stats>()}
   , m_forceFallback{false}
+  , m_fallbackSem{1}
 {
   Timer _{"create impl"};
   // Look up which implementation to use. If a hook has been

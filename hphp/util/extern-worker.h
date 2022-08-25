@@ -88,6 +88,25 @@
 
 //////////////////////////////////////////////////////////////////////
 
+namespace HPHP::extern_worker {
+
+// Thrown by any of extern-worker functions to indicate an error
+struct Error : public std::runtime_error {
+  using std::runtime_error::runtime_error;
+};
+
+// Thrown by Client::exec if execution failed due to the worker
+// returning a non-zero exit code (to distinguish from other infra
+// errors) Note: some infra errors can manifest themself as the worker
+// failing, so this is best effort.
+struct WorkerError : public Error {
+  using Error::Error;
+};
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Implementation details to avoid cluttering interface
 #define incl_HPHP_EXTERN_WORKER_DETAIL_H_
 #include "hphp/util/extern-worker-detail.h"
@@ -109,19 +128,6 @@ extern const char* const s_option;
 
 // Entry point for workers
 extern int main(int argc, char** argv);
-
-//////////////////////////////////////////////////////////////////////
-
-// Thrown by any of extern-worker functions to indicate an error
-struct Error : public std::runtime_error {
-  using std::runtime_error::runtime_error;
-};
-
-// Thrown by some implementations if the backend is busy. Depending on
-// configuration, we might retry the action automatically.
-struct Throttle : public Error {
-  using Error::Error;
-};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -647,6 +653,7 @@ private:
   Options m_options;
   Stats::Ptr m_stats;
   bool m_forceFallback;
+  coro::Semaphore m_fallbackSem;
 
   template <typename T> coro::Task<Ref<T>> storeImpl(bool, T);
 

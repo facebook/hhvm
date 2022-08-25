@@ -950,6 +950,8 @@ coro::Task<Package::FileAndSizeVec> Package::parseGroup(
               // Update its FileData with additional Ref<UnitDecls>.
               resolveDecls(index, metas, parseMetas, fds, attempts);
             }
+          } catch (const extern_worker::WorkerError&) {
+            throw;
           } catch (const extern_worker::Error&) {
             if (!optimistic) throw;
             optimistic = false;
@@ -1333,6 +1335,8 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
             HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(
               configRef, std::move(metasRef), std::move(inputs), optimistic
             )));
+          } catch (const extern_worker::WorkerError&) {
+            throw;
           } catch (const extern_worker::Error&) {
             if (!optimistic) throw;
             optimistic = false;

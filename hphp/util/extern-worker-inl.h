@@ -338,9 +338,10 @@ coro::Task<T> Client::tryWithThrottling(const F& f) {
 template <typename T, typename F>
 coro::Task<T> Client::tryWithFallback(const F& f,
                                       bool& didFallback,
-                                      bool noFallback) {
+                                      bool optimistic) {
   // If we're forcing fallbacks, or if the main implementation has
   // disabled itself, go straight to the fallback case.
+  Optional<std::string> errorMsg;
   if (!m_forceFallback && !m_impl->isDisabled()) {
     try {
       // Attempt the normal implementation.
@@ -352,33 +353,59 @@ coro::Task<T> Client::tryWithFallback(const F& f,
           )
         )
       );
+    } catch (const WorkerError& exn) {
+      // If the worker failed, we'll retry with fallback even if we're
+      // using optimistic mode.
+      if (m_impl->isSubprocess()) throw;
+      if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
+      errorMsg.emplace(exn.what());
     } catch (const Error& exn) {
       // It failed. If the main implementation *is* the subprocess
       // implementation, there's no point in trying again. Just
       // rethrow the error. Likewise, if Options has determined we
       // shouldn't use the subprocess implementaiton, rethrow the
       // error.
-      if (noFallback) throw;
+      if (optimistic) throw;
       if (m_impl->isSubprocess()) throw;
       if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;
-      // Check this again. The implementation could have disabled
-      // itself while using it above, and in that case, its the
-      // implementation's responsibility to print something to the
-      // log.
-      if (!m_impl->isDisabled()) {
-        Logger::FError(
-          "Error: \"{}\". Attempting to retry with local fallback...",
-          exn.what()
-        );
-      }
+      errorMsg.emplace(exn.what());
     }
   }
-  // Fallback case. Make a fallback implementation if we haven't
-  // already (LockFreeLazy will ensure this), and call it. If it
-  // throws, nothing to be done, it will be propagated to the caller.
+
+  // Fallback case:
   didFallback = true;
+  HPHP_CORO_SAFE_POINT;
+  // Avoid thundering herd of fallbacks which all fail in the same way
+  // as the original (this is common if the workers are crashing due
+  // to a bug). m_fallbackSem controls the number of allowed
+  // concurrent fallbacks. If the fallback finishes successfully,
+  // we'll signal the semaphore twice (once if we throw). This means
+  // that successful fallbacks will allow for more fallbacks to be run
+  // in parallel. If things keep failing, we'll only run one at a
+  // time.
+  HPHP_CORO_AWAIT(m_fallbackSem.wait());
+  SCOPE_EXIT { m_fallbackSem.signal(); };
+  SCOPE_SUCCESS { m_fallbackSem.signal(); };
+  HPHP_CORO_SAFE_POINT;
+
+  // Check this again. The implementation could have disabled
+  // itself while using it above, and in that case, its the
+  // implementation's responsibility to print something to the
+  // log.
+  if (errorMsg && !m_impl->isDisabled()) {
+    Logger::FError(
+      "Error: \"{}\". Attempting to retry with local fallback...",
+      *errorMsg
+    );
+  }
+
+  // Make a fallback implementation if we haven't already
+  // (LockFreeLazy will ensure this), and call it. If it throws,
+  // nothing to be done, it will be propagated to the caller.
   auto& fallback = *m_fallbackImpl.get([this] { return makeFallbackImpl(); });
-  HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f(fallback, true)));
+  auto ret = HPHP_CORO_AWAIT(f(fallback, true));
+  HPHP_CORO_SAFE_POINT;
+  HPHP_CORO_MOVE_RETURN(ret);
 }
 
 template <typename T>
@@ -1403,7 +1430,7 @@ coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
     for (size_t i = 0; i < retries-1; ++i) {
       try {
         HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
-      } catch (const Throttle&) {
+      } catch (const detail::Throttle&) {
         ++throttles;
         throttleSleep(i, wait);
       }
@@ -1411,7 +1438,7 @@ coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
     // The last retry will just let whatever throws escape, since we
     // won't rerun.
     HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
-  } catch (const Throttle& exn) {
+  } catch (const detail::Throttle& exn) {
     // Don't let a Throttle escape from here. Convert it to a normal
     // Error. This keeps us from getting nested throttles.
     throw Error{exn.what()};

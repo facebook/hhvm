@@ -340,4 +340,12 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+// Thrown by some implementations if the backend is busy. Depending on
+// configuration, we might retry the action automatically.
+struct Throttle : public Error {
+  using Error::Error;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 }}

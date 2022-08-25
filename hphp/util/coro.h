@@ -105,6 +105,8 @@ constexpr const bool using_coros = true;
 // run on their assigned executor.
 #define HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR \
   (co_await folly::coro::co_reschedule_on_current_executor)
+// Throw a folly::OperationCancelled if this coroutine has been cancelled
+#define HPHP_CORO_SAFE_POINT (co_await folly::coro::co_safe_point)
 
 // The actual arguments of these can be complex, so we just perfect
 // forward everything rather than replicating it here.
@@ -214,6 +216,15 @@ private:
   folly::coro::AsyncScope m_scope;
 };
 
+// Coro aware semaphore (runs a different task when blocks)
+struct Semaphore {
+  explicit Semaphore(uint32_t tokens) : m_sem{tokens} {}
+  void signal() { m_sem.signal(); }
+  Task<void> wait() { return m_sem.co_wait(); }
+private:
+  folly::fibers::Semaphore m_sem;
+};
+
 // Allows you to run coroutines asynchronously. Assign an executor to
 // a Task, then add it to the AsyncScope. The coroutine will start
 // running and will be automatically cleaned up when done. Since you
@@ -229,6 +240,8 @@ using AsyncScope = folly::coro::AsyncScope;
 //////////////////////////////////////////////////////////////////////
 
 #else
+
+#include <folly/synchronization/LifoSem.h>
 
 // Emulated coroutines. The coroutine is just the value itself. The
 // value is calculated eagerly when the coroutine is created (so
@@ -284,6 +297,7 @@ template <typename T> using TaskWithExecutor = detail::DummyTask<T>;
 // executor" if coroutines don't actually exist.
 #define HPHP_CORO_CURRENT_EXECUTOR ((folly::Executor*)nullptr)
 #define HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR
+#define HPHP_CORO_SAFE_POINT
 
 template <typename T>
 auto wait(Task<T>&& t) { return std::move(t).take(); }
@@ -362,6 +376,14 @@ private:
 struct AsyncScope {
   void add(TaskWithExecutor<void>&&) {}
   Task<void> joinAsync() { return Task<void>{}; }
+};
+
+struct Semaphore {
+  explicit Semaphore(uint32_t tokens) : m_sem{tokens} {}
+  void signal() { m_sem.post(); }
+  Task<void> wait() { m_sem.wait(); return Task<void>{}; }
+private:
+  folly::LifoSem m_sem;
 };
 
 //////////////////////////////////////////////////////////////////////

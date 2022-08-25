@@ -444,10 +444,19 @@ let produce_results
   in
 
   (* Invalidate candidates that are observed to experience dynamic access *)
+  let dynamic_poss =
+    let add entity acc =
+      match entity with
+      | Literal pos
+      | Inter (HT.Param (_, _, pos)) ->
+        Pos.Set.add pos acc
+      | Variable _ -> acc
+    in
+    EntitySet.fold add dynamic_accesses Pos.Set.empty
+  in
   let static_shape_results : (marker_kind * shape_keys) Pos.Map.t =
     static_shape_results
-    |> Pos.Map.filter (fun pos _ ->
-           not @@ EntitySet.mem (Literal pos) dynamic_accesses)
+    |> Pos.Map.filter (fun pos _ -> not @@ Pos.Set.mem pos dynamic_poss)
   in
 
   let (forward_static_shape_results, backward_static_shape_results) =

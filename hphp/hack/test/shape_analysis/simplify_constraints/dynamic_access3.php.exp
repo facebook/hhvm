@@ -1,5 +1,3 @@
 === Shape analysis results for dynamic_access3.php
 Summary for \f:
-[3:12-31] [Parameter]:
-  shape()
 [8:11-13] : dynamic

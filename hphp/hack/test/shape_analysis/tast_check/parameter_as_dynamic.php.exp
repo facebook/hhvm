@@ -1,5 +1,3 @@
-[RESULT] \f: [3:12-31] [Parameter]:
-  shape()
 [RESULT] \f: [5:3-20] [Allocation]:
   shape('b' => bool)
 No errors

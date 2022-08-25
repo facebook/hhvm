@@ -3,8 +3,8 @@ Constraints for \idx_ife:
    3: Parameter at [3:18-37]
    4: ?1 ⊆ ?3
    4: ?2 ⊆ ?3
-   4: Arg(\idx_ife, 0) ⊆ ?1
-   4: Arg(\idx_ife, 0) ⊆ ?2
+   4: (Param ("\\idx_ife", 0, [3:18-37])) ⊆ ?1
+   4: (Param ("\\idx_ife", 0, [3:18-37])) ⊆ ?2
    5: ? SK ?1 : shape('a' => mixed)
    5: ! SK ?1 : shape('a' => mixed)
    6: ? SK ?1 : shape(?'b' => mixed)

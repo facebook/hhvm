@@ -280,48 +280,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = List.foldi ~f:expr_arg ~init:env args in
     (env, None)
-  | A.Eif (cond, Some then_expr, else_expr) ->
-    let (parent_env, _cond_entity) = expr_ env cond in
-    let base_env = Env.reset_constraints parent_env in
-    let (then_env, then_entity) =
-      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
-      expr_ base_env then_expr
-    in
-    let (else_env, else_entity) =
-      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
-      expr_ base_env else_expr
-    in
-    let env = Env.union ~pos ~origin:__LINE__ parent_env then_env else_env in
-    (* Create a join point entity. It is pretty much Option.marge except that
-       that function doesn't allow threading state (`env`) through *)
-    let (env, entity) =
-      match (then_entity, else_entity) with
-      | (Some then_entity_, Some else_entity_) ->
-        let (env, join) =
-          join ~pos ~origin:__LINE__ env then_entity_ else_entity_
-        in
-        (env, Some join)
-      | (None, Some _) -> (env, else_entity)
-      | (_, _) -> (env, then_entity)
-    in
-    (env, entity)
-  | A.Eif (cond, None, else_expr) ->
-    let (env, cond_entity) = expr_ env cond in
-    (* TODO(T129426549): This shouldn't be conditionally executed *)
-    let (env, else_entity) = expr_ env else_expr in
-    (* Create a join point entity. It is pretty much Option.marge except that
-       that function doesn't allow threading state (`env`) through *)
-    let (env, entity) =
-      match (cond_entity, else_entity) with
-      | (Some cond_entity_, Some else_entity_) ->
-        let (env, join) =
-          join ~pos ~origin:__LINE__ env cond_entity_ else_entity_
-        in
-        (env, Some join)
-      | (None, Some _) -> (env, else_entity)
-      | (_, _) -> (env, cond_entity)
-    in
-    (env, entity)
+  | A.Eif (cond, then_expr_opt, else_expr) ->
+    eif ~pos env cond then_expr_opt else_expr
   | A.Await e -> expr_ env e
   | A.As (e, _ty, _) -> expr_ env e
   | A.Is (e, _ty) ->
@@ -350,6 +310,35 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, _) = expr_ env e2 in
     (env, None)
   | _ -> failwithpos pos ("Unsupported expression: " ^ Utils.expr_name e)
+
+and eif ~pos env cond then_expr_opt else_expr =
+  let (cond_env, cond_entity) = expr_ env cond in
+  let base_env = Env.reset_constraints cond_env in
+  let (then_env, then_entity) =
+    match then_expr_opt with
+    | Some then_expr ->
+      let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+      expr_ base_env then_expr
+    | None -> (cond_env, cond_entity)
+  in
+  let (else_env, else_entity) =
+    let base_env = Env.refresh ~pos ~origin:__LINE__ base_env in
+    expr_ base_env else_expr
+  in
+  let env = Env.union ~pos ~origin:__LINE__ env then_env else_env in
+  (* Create a join point entity. It is pretty much Option.marge except that
+     that function doesn't allow threading state (`env`) through *)
+  let (env, entity) =
+    match (then_entity, else_entity) with
+    | (Some then_entity_, Some else_entity_) ->
+      let (env, join) =
+        join ~pos ~origin:__LINE__ env then_entity_ else_entity_
+      in
+      (env, Some join)
+    | (None, Some _) -> (env, else_entity)
+    | (_, _) -> (env, then_entity)
+  in
+  (env, entity)
 
 let expr (env : env) (e : T.expr) : env = expr_ env e |> fst
 

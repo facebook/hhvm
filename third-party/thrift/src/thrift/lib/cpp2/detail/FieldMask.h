@@ -269,22 +269,22 @@ bool copy_fields(MaskRef ref, const T& src, T& dst) {
   return copied;
 }
 
-// This converts ident list to a field mask with a single field.
+// This converts id list to a field mask with a single field.
 template <typename T>
 Mask path(const Mask& other) {
-  // This is the base case as there is no more ident.
+  // This is the base case as there is no more id.
   return other;
 }
 
-template <typename T, typename Ident, typename... Idents>
+template <typename T, typename Id, typename... Ids>
 Mask path(const Mask& other) {
   if constexpr (is_thrift_struct_v<T>) {
     Mask mask;
-    using fieldId = op::get_field_id<T, Ident>;
+    using fieldId = op::get_field_id<T, Id>;
     static_assert(fieldId::value != FieldId{});
-    using FieldType = op::get_native_type<T, Ident>;
+    using FieldType = op::get_native_type<T, Id>;
     mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
-        path<FieldType, Idents...>(other);
+        path<FieldType, Ids...>(other);
     return mask;
   }
   throw std::runtime_error("field doesn't exist");

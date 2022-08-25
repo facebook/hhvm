@@ -41,8 +41,9 @@ struct Baz {
 }
 
 struct Foo2 {
+  // They have different types to use op::get_ with type tags.
   1: optional i32 field_1;
-  2: optional i32 field_2;
+  2: optional i64 field_2;
 }
 
 struct Bar2 {

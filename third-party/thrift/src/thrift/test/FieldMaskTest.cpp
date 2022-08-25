@@ -2042,6 +2042,55 @@ TEST(FieldMaskTest, MaskBuilderWithFieldNameError) {
   EXPECT_THROW(builder.includes({"field_4, random"}), std::runtime_error);
 }
 
+TEST(FieldMaskTest, MaskBuilderOtherTypes) {
+  MaskBuilder<Bar2> builder(noneMask());
+  builder.includes<tag::field_3>();
+  builder.excludes<tag::field_3, tag::field_2>();
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<type::ordinal<1>>();
+    builder2.excludes<type::ordinal<1>, type::ordinal<2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<type::field_id<1>>();
+    builder2.excludes<type::field_id<1>, type::field_id<2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<op::get_field_tag<Bar2, tag::field_3>>();
+    builder2.excludes<
+        op::get_field_tag<Bar2, tag::field_3>,
+        op::get_field_tag<Foo2, tag::field_2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<op::get_type_tag<Bar2, tag::field_3>>();
+    builder2.excludes<
+        op::get_type_tag<Bar2, tag::field_3>,
+        op::get_type_tag<Foo2, tag::field_2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+  // test mixing different id type
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<op::get_type_tag<Bar2, type::ordinal<1>>>();
+    builder2
+        .excludes<type::field_id<1>, op::get_type_tag<Foo2, tag::field_2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+  {
+    MaskBuilder<Bar2> builder2(noneMask());
+    builder2.includes<op::get_type_tag<Bar2, tag::field_3>>();
+    builder2
+        .excludes<type::ordinal<1>, op::get_field_tag<Foo2, tag::field_2>>();
+    EXPECT_EQ(builder.toThrift(), builder2.toThrift());
+  }
+}
+
 TEST(FieldMaskTest, ReverseMask) {
   EXPECT_EQ(reverseMask(allMask()), noneMask());
   EXPECT_EQ(reverseMask(noneMask()), allMask());

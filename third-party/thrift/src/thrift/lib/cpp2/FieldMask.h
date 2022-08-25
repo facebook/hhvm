@@ -95,11 +95,12 @@ Mask operator&(const Mask&, const Mask&); // intersect
 Mask operator|(const Mask&, const Mask&); // union
 Mask operator-(const Mask&, const Mask&); // subtract
 
-// This converts ident/ field name to field id automatically which makes
+// This converts id/ field name to field id automatically which makes
 // FieldMask easier for end-users to construct and use.
+// Id can be Ordinal, FieldId, Ident, TypeTag, and FieldTag.
 // Example:
 //   MaskBuilder<T> mask(allMask()); // start with allMask
-//   mask.includes<ident1, ident2>(anotherMask);
+//   mask.includes<id1, id2>(anotherMask);
 //   mask.excludes({"fieldname"}, anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
 
@@ -108,13 +109,13 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
 
-  // Includes the field specified by the list of Idents/field names with
+  // Includes the field specified by the list of Ids/field names with
   // the given mask.
   // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
-  template <typename... Ident>
+  template <typename... Id>
   void includes(const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<T, Ident...>(mask);
+    data_ = data_ | detail::path<T, Id...>(mask);
   }
 
   void includes(
@@ -123,13 +124,13 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     data_ = data_ | detail::path<T>(fieldNames, 0, mask);
   }
 
-  // Excludes the field specified by the list of Idents/field names with
+  // Excludes the field specified by the list of Ids/field names with
   // the given mask.
   // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
-  template <typename... Ident>
+  template <typename... Id>
   void excludes(const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<T, Ident...>(mask);
+    data_ = data_ - detail::path<T, Id...>(mask);
   }
 
   void excludes(

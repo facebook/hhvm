@@ -30,6 +30,24 @@ TEST(DiagnosticTest, str) {
       diagnostic(diagnostic_level::info, "m", "f", 1).str(), "[INFO:f:1] m");
   EXPECT_EQ(
       diagnostic(diagnostic_level::warning, "m", "").str(), "[WARNING:] m");
+
+  diagnostic loaded{
+      diagnostic_level::warning,
+      "m",
+      "f",
+      2,
+      "the-more-you-know",
+      {"what/the", "spec/is/awesome"}};
+  EXPECT_EQ(
+      loaded.str(),
+      "[WARNING:f:2] m [the-more-you-know]\n"
+      "  See also: sdoc thrift/docs/spec/is/awesome");
+  loaded.tag("spec/first!"); // deterministic/stable output.
+  EXPECT_EQ(
+      loaded.str(),
+      "[WARNING:f:2] m [the-more-you-know]\n"
+      "  See also: sdoc thrift/docs/spec/first!\n"
+      "  See also: sdoc thrift/docs/spec/is/awesome");
 }
 
 class DiagnosticsEngineTest : public ::testing::Test {

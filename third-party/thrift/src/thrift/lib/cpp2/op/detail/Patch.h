@@ -92,8 +92,6 @@ class OptionalPatch : public BaseEnsurePatch<Patch, OptionalPatch<Patch>> {
   P& operator*() { return patch(); }
   P* operator->() { return &patch(); }
 
-  bool empty() const { return emptyEnsure(); }
-
   template <typename U>
   if_opt_type<folly::remove_cvref_t<U>> apply(U&& val) const {
     applyEnsure(val);

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Traits.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
@@ -23,11 +24,10 @@ namespace apache {
 namespace thrift {
 namespace type {
 namespace detail {
-template <typename U>
-struct StructuredTagImpl {
-  using T = folly::remove_cvref_t<U>;
+template <typename U, typename T = folly::remove_cvref_t<U>>
+struct StructuredTag {
   static_assert(is_thrift_class_v<T>, "");
-  using tag = folly::conditional_t<
+  using type = folly::conditional_t<
       is_thrift_union_v<T>,
       type::union_t<T>,
       folly::conditional_t<
@@ -39,7 +39,7 @@ struct StructuredTagImpl {
 
 // Generate structured type tag from a thrift class.
 template <typename T>
-using structured_tag = typename detail::StructuredTagImpl<T>::tag;
+using structured_tag = typename detail::StructuredTag<T>::type;
 
 } // namespace type
 } // namespace thrift

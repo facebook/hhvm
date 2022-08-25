@@ -106,8 +106,8 @@ bool sameType(terse_field_ref<T> unn1, const U& unn2) {
 // - Patch: The Thrift struct representation for the patch.
 // - Derived: The leaf type deriving from this class.
 template <typename Patch, typename Derived>
-class BasePatch : public type::detail::Wrap<Patch> {
-  using Base = type::detail::Wrap<Patch>;
+class BasePatch : public type::detail::EqWrap<Derived, Patch> {
+  using Base = type::detail::EqWrap<Derived, Patch>;
 
  public:
   using Base::Base;
@@ -141,11 +141,10 @@ class BasePatch : public type::detail::Wrap<Patch> {
   }
 
  protected:
+  using Base::derived;
   using Base::resetAnd;
-  ~BasePatch() = default; // abstract base class
 
-  Derived& derived() { return static_cast<Derived&>(*this); }
-  const Derived& derived() const { return static_cast<const Derived&>(*this); }
+  ~BasePatch() = default; // abstract base class
 };
 
 // Base class for value patch types.

@@ -2203,4 +2203,60 @@ TEST(FieldMaskTest, MaskAdapter) {
                 MaskBuilder<Bar>>);
   EXPECT_EQ(foo.mask2()->toThrift(), Mask{});
 }
+
+TEST(FieldMaskTest, MaskBuilderReset) {
+  // reset to none
+  {
+    MaskBuilder<Bar2> builder;
+    builder.reset_to_none();
+    EXPECT_EQ(builder.toThrift(), noneMask());
+    builder.includes<tag::field_3>().reset_to_none();
+    EXPECT_EQ(builder.toThrift(), noneMask());
+  }
+
+  // reset to all
+  {
+    MaskBuilder<Bar2> builder;
+    builder.reset_to_all();
+    EXPECT_EQ(builder.toThrift(), allMask());
+    builder.includes<tag::field_3>().reset_to_all();
+    EXPECT_EQ(builder.toThrift(), allMask());
+  }
+
+  // reset and includes
+  {
+    MaskBuilder<Bar2> expected(noneMask());
+    expected.includes<tag::field_4>();
+    {
+      MaskBuilder<Bar2> builder;
+      builder.reset_and_includes<tag::field_4>();
+      EXPECT_EQ(builder.toThrift(), expected.toThrift());
+    }
+    {
+      MaskBuilder<Bar2> builder;
+      builder.reset_to_all()
+          .includes({"field_3"})
+          .reset_and_includes({"field_4"});
+      EXPECT_EQ(builder.toThrift(), expected.toThrift());
+    }
+  }
+
+  // reset and excludes
+  {
+    MaskBuilder<Bar2> expected(allMask());
+    expected.excludes<tag::field_3, tag::field_1>();
+    {
+      MaskBuilder<Bar2> builder;
+      builder.reset_and_excludes<tag::field_3, tag::field_1>();
+      EXPECT_EQ(builder.toThrift(), expected.toThrift());
+    }
+    {
+      MaskBuilder<Bar2> builder;
+      builder.reset_to_none()
+          .includes({"field_3"})
+          .reset_and_excludes({"field_3", "field_1"});
+      EXPECT_EQ(builder.toThrift(), expected.toThrift());
+    }
+  }
+}
 } // namespace apache::thrift::test

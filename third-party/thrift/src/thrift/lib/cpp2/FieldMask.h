@@ -109,19 +109,31 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) { data_ = mask; }
 
+  MaskBuilder& reset_to_none() {
+    data_ = noneMask();
+    return *this;
+  }
+
+  MaskBuilder& reset_to_all() {
+    data_ = allMask();
+    return *this;
+  }
+
   // Includes the field specified by the list of Ids/field names with
   // the given mask.
   // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
-  void includes(const Mask& mask = allMask()) {
+  MaskBuilder& includes(const Mask& mask = allMask()) {
     data_ = data_ | detail::path<T, Id...>(mask);
+    return *this;
   }
 
-  void includes(
+  MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
     data_ = data_ | detail::path<T>(fieldNames, 0, mask);
+    return *this;
   }
 
   // Excludes the field specified by the list of Ids/field names with
@@ -129,14 +141,37 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // The field is t.field1().field2() ...
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
-  void excludes(const Mask& mask = allMask()) {
+  MaskBuilder& excludes(const Mask& mask = allMask()) {
     data_ = data_ - detail::path<T, Id...>(mask);
+    return *this;
   }
 
-  void excludes(
+  MaskBuilder& excludes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
     data_ = data_ - detail::path<T>(fieldNames, 0, mask);
+    return *this;
+  }
+
+  // reset_and_includes calls reset_to_none() and includes().
+  // reset_and_excludes calls reset_to_all() and excludes().
+  MaskBuilder& reset_and_includes(
+      std::vector<folly::StringPiece> fieldNames,
+      const Mask& mask = allMask()) {
+    return reset_to_none().includes(fieldNames, mask);
+  }
+  MaskBuilder& reset_and_excludes(
+      std::vector<folly::StringPiece> fieldNames,
+      const Mask& mask = allMask()) {
+    return reset_to_all().excludes(fieldNames, mask);
+  }
+  template <typename... Id>
+  MaskBuilder& reset_and_includes(const Mask& mask = allMask()) {
+    return reset_to_none().template includes<Id...>(mask);
+  }
+  template <typename... Id>
+  MaskBuilder& reset_and_excludes(const Mask& mask = allMask()) {
+    return reset_to_all().template excludes<Id...>(mask);
   }
 };
 

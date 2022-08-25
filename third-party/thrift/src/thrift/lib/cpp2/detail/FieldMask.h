@@ -279,16 +279,14 @@ Mask path(const Mask& other) {
 
 template <typename Struct, typename Id, typename... Ids>
 Mask path(const Mask& other) {
-  if constexpr (is_thrift_struct_v<Struct>) {
-    Mask mask;
-    using fieldId = op::get_field_id<Struct, Id>;
-    static_assert(fieldId::value != FieldId{});
-    using FieldType = op::get_native_type<Struct, Id>;
-    mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
-        path<FieldType, Ids...>(other);
-    return mask;
-  }
-  throw std::runtime_error("field doesn't exist");
+  static_assert(is_thrift_struct_v<Struct>);
+  Mask mask;
+  using fieldId = op::get_field_id<Struct, Id>;
+  static_assert(fieldId::value != FieldId{});
+  using FieldType = op::get_native_type<Struct, Id>;
+  mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
+      path<FieldType, Ids...>(other);
+  return mask;
 }
 
 // This converts field name list from the given index to a field mask with a

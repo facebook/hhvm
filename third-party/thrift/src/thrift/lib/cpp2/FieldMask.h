@@ -63,33 +63,33 @@ bool is_compatible_with(const Mask& mask) {
 // Ensures that the masked fields have value in the thrift struct.
 // If it doesn't, it emplaces the field.
 // Throws a runtime exception if the mask and struct are incompatible.
-template <typename T>
-void ensure(const Mask& mask, T& t) {
-  static_assert(is_thrift_struct_v<T>, "not a thrift struct");
+template <typename Struct>
+void ensure(const Mask& mask, Struct& t) {
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<T>(mask);
+  detail::errorIfNotCompatible<Struct>(mask);
   return detail::ensure_fields(detail::MaskRef{mask, false}, t);
 }
 
 // Clears masked fields in the thrift struct.
 // If the field doesn't have value, does nothing.
 // Throws a runtime exception if the mask and struct are incompatible.
-template <typename T>
-void clear(const Mask& mask, T& t) {
-  static_assert(is_thrift_struct_v<T>, "not a thrift struct");
+template <typename Struct>
+void clear(const Mask& mask, Struct& t) {
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<T>(mask);
+  detail::errorIfNotCompatible<Struct>(mask);
   return detail::clear_fields(detail::MaskRef{mask, false}, t);
 }
 
 // Copys masked fields from one thrift struct to another.
 // If the masked field doesn't exist in src, the field in dst will be removed.
 // Throws a runtime exception if the mask and objects are incompatible.
-template <typename T>
-void copy(const Mask& mask, const T& src, T& dst) {
-  static_assert(is_thrift_struct_v<T>, "not a thrift struct");
+template <typename Struct>
+void copy(const Mask& mask, const Struct& src, Struct& dst) {
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<T>(mask);
+  detail::errorIfNotCompatible<Struct>(mask);
   detail::copy_fields(detail::MaskRef{mask, false}, src, dst);
 }
 
@@ -102,16 +102,17 @@ Mask operator-(const Mask&, const Mask&); // subtract
 // FieldMask easier for end-users to construct and use.
 // Id can be Ordinal, FieldId, Ident, TypeTag, and FieldTag.
 // Example:
-//   MaskBuilder<T> mask(allMask()); // start with allMask
+//   MaskBuilder<Struct> mask(allMask()); // start with allMask
 //   mask.includes<id1, id2>(anotherMask);
 //   mask.excludes({"fieldname"}, anotherMask);
 //   mask.toThrift();  // --> reference to the underlying FieldMask.
 
-template <typename T>
+template <typename Struct>
 struct MaskBuilder : type::detail::Wrap<Mask> {
+  static_assert(is_thrift_struct_v<Struct>);
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) {
-    detail::errorIfNotCompatible<T>(mask);
+    detail::errorIfNotCompatible<Struct>(mask);
     data_ = mask;
   }
 
@@ -136,14 +137,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& includes(const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<T, Id...>(mask);
+    data_ = data_ | detail::path<Struct, Id...>(mask);
     return *this;
   }
 
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<T>(fieldNames, 0, mask);
+    data_ = data_ | detail::path<Struct>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -153,14 +154,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& excludes(const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<T, Id...>(mask);
+    data_ = data_ - detail::path<Struct, Id...>(mask);
     return *this;
   }
 
   MaskBuilder& excludes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<T>(fieldNames, 0, mask);
+    data_ = data_ - detail::path<Struct>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -186,20 +187,22 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   }
 
   // Mask APIs
-  void ensure(T& obj) const { protocol::ensure(data_, obj); }
-  void clear(T& obj) const { protocol::clear(data_, obj); }
-  void copy(const T& src, T& dst) const { protocol::copy(data_, src, dst); }
+  void ensure(Struct& obj) const { protocol::ensure(data_, obj); }
+  void clear(Struct& obj) const { protocol::clear(data_, obj); }
+  void copy(const Struct& src, Struct& dst) const {
+    protocol::copy(data_, src, dst);
+  }
 };
 
-template <typename T>
-using MaskAdapter = InlineAdapter<MaskBuilder<T>>;
+template <typename Struct>
+using MaskAdapter = InlineAdapter<MaskBuilder<Struct>>;
 
 // Constructs a FieldMask object that includes the fields that are
 // different in the given two Thrift structs.
 // TODO: support map mask
-template <typename T>
-Mask compare(const T& original, const T& modified) {
-  static_assert(is_thrift_struct_v<T>, "not a thrift struct");
+template <typename Struct>
+Mask compare(const Struct& original, const Struct& modified) {
+  static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   Mask result;
   detail::compare_impl(original, modified, result.includes_ref().emplace());
   return result;

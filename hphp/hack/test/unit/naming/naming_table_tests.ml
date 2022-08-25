@@ -183,7 +183,14 @@ let run_naming_table_test f =
       Db_path_provider.set_naming_db_path
         (Provider_context.get_backend ctx)
         (Some (Naming_sqlite.Db_path db_name));
-      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name with
+      (try
+         f
+           ~ctx
+           ~unbacked_naming_table
+           ~backed_naming_table
+           ~db_name
+           ~tmp_path:path
+       with
       | e ->
         Printf.eprintf
           "NOTE: backend was local-memory for this exception's test run\n";
@@ -196,7 +203,14 @@ let run_naming_table_test f =
           ~backend:(Provider_backend.get ())
           ~deps_mode
       in
-      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name with
+      (try
+         f
+           ~ctx
+           ~unbacked_naming_table
+           ~backed_naming_table
+           ~db_name
+           ~tmp_path:path
+       with
       | e ->
         Printf.eprintf
           "NOTE: backend was shared-memory for this exception's test run\n";
@@ -205,7 +219,13 @@ let run_naming_table_test f =
 
 let test_get_pos () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File
@@ -241,7 +261,13 @@ let test_get_pos () =
 
 let test_get_canon_name () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       (* Since we're parsing but not naming, the canon heap must fall back to the
          files on disk, which is the situation we'd be in when loading from a
          saved state. *)
@@ -264,7 +290,13 @@ let test_get_canon_name () =
 
 let test_remove () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
+    (fun
+      ~ctx:_
+      ~unbacked_naming_table
+      ~backed_naming_table
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let foo_path = Relative_path.from_root ~suffix:"foo.php" in
       assert (
         Naming_table.get_file_info unbacked_naming_table foo_path
@@ -288,7 +320,8 @@ let test_remove () =
 
 let test_get_sqlite_paths () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ~tmp_path:_
+    ->
       let provider_path =
         match
           Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
@@ -308,7 +341,8 @@ let test_get_sqlite_paths () =
 
 let test_local_changes () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ~tmp_path
+    ->
       let a_name = "CONST_IN_A" in
 
       let a_file = Relative_path.from_root ~suffix:"a.php" in
@@ -324,7 +358,9 @@ let test_local_changes () =
       let backed_naming_table =
         Naming_table.update backed_naming_table a_file a_file_info
       in
-      let changes_since_baseline_path = "/tmp/base_plus_changes" in
+      let changes_since_baseline_path =
+        Path.concat tmp_path "base_plus_changes" |> Path.to_string
+      in
       Naming_table.save_changes_since_baseline
         backed_naming_table
         ~destination_path:changes_since_baseline_path;
@@ -361,7 +397,13 @@ let test_local_changes () =
 
 let test_context_changes_consts () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
@@ -389,7 +431,13 @@ let test_context_changes_consts () =
 
 let test_context_changes_funs () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
         (Naming_provider.get_fun_canon_name ctx "\\bar")
@@ -460,7 +508,13 @@ let test_context_changes_funs () =
 
 let test_context_changes_classes () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
         (Naming_provider.get_type_canon_name ctx "\\Foo")
@@ -523,7 +577,13 @@ let test_context_changes_classes () =
 
 let test_context_changes_modules () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.Relative_path_asserter.assert_option_equals
         (Some (Relative_path.from_root ~suffix:"corge.php"))
         (Naming_provider.get_module_path ctx "Corge")
@@ -551,7 +611,13 @@ let test_context_changes_modules () =
 
 let test_context_changes_typedefs () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
         (Naming_provider.get_type_canon_name ctx "\\Baz")
@@ -637,7 +703,13 @@ let test_naming_table_hash () =
 
 let test_naming_table_query_by_dep_hash () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let db_path =
         Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
       in

@@ -76,9 +76,9 @@ impl B {
 }
 
 impl ::fbthrift::ThriftEnum for B {
-    fn enumerate() -> &'static [(B, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (B::HELLO, "HELLO"),
+            (Self::HELLO, "HELLO"),
         ]
     }
 
@@ -88,16 +88,16 @@ impl ::fbthrift::ThriftEnum for B {
         ]
     }
 
-    fn variant_values() -> &'static [B] {
+    fn variant_values() -> &'static [Self] {
         &[
-            B::HELLO,
+            Self::HELLO,
         ]
     }
 }
 
 impl ::std::default::Default for B {
     fn default() -> Self {
-        B(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -144,7 +144,7 @@ impl ::std::str::FromStr for B {
         static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
             ("HELLO", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "B").map(B)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "B").map(Self)
     }
 }
 
@@ -168,7 +168,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(B::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -282,17 +282,17 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("U");
         match self {
-            U::i(inner) => {
+            Self::i(inner) => {
                 p.write_field_begin("i", ::fbthrift::TType::I32, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            U::s(inner) => {
+            Self::s(inner) => {
                 p.write_field_begin("s", ::fbthrift::TType::String, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            U::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -317,11 +317,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(U::i(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::String, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(U::s(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

@@ -35,10 +35,10 @@ impl {{enum:rust_name}} {{>lib/block}}{{!
 }
 
 impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
-    fn enumerate() -> &'static [({{enum:rust_name}}, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
             {{#enum:values}}
-            ({{enum:rust_name}}::{{enum_value:rust_name}}, "{{enum_value:name}}"),
+            (Self::{{enum_value:rust_name}}, "{{enum_value:name}}"),
             {{/enum:values}}
         ]
     }
@@ -51,10 +51,10 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
         ]
     }
 
-    fn variant_values() -> &'static [{{enum:rust_name}}] {
+    fn variant_values() -> &'static [Self] {
         &[
             {{#enum:values}}
-            {{enum:rust_name}}::{{enum_value:rust_name}},
+            Self::{{enum_value:rust_name}},
             {{/enum:values}}
         ]
     }
@@ -62,7 +62,7 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
 
 impl ::std::default::Default for {{enum:rust_name}} {
     fn default() -> Self {
-        {{enum:rust_name}}(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -113,7 +113,7 @@ impl ::std::str::FromStr for {{enum:rust_name}} {
             ("{{enum_value:name}}", {{enum_value:value}}),
             {{/enum:variants_by_name}}
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "{{enum:name}}").map({{enum:rust_name}})
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "{{enum:name}}").map(Self)
     }
 }
 
@@ -146,7 +146,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok({{enum:rust_name}}::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 {{!newline}}

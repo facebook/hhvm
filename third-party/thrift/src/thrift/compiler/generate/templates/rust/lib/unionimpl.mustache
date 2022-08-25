@@ -44,7 +44,7 @@ where
         p.write_struct_begin("{{struct:name}}");
         match self {{>lib/block}}{{!
             }}{{#struct:fields}}
-            {{struct:rust_name}}::{{field:rust_name}}(inner) => {
+            Self::{{field:rust_name}}(inner) => {
                 p.write_field_begin({{!
                     }}"{{field:name}}", {{!
                     }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
@@ -54,7 +54,7 @@ where
                 p.write_field_end();
             }{{!
             }}{{/struct:fields}}
-            {{struct:rust_name}}::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -81,7 +81,7 @@ where
                 }}{{#struct:fields}}
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some({{struct:rust_name}}::{{field:rust_name}}({{#field:type}}{{>lib/read}}{{/field:type}}(p)?));
+                    alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{#field:type}}{{>lib/read}}{{/field:type}}(p)?));
                 }{{!
                 }}{{/struct:fields}}
                 (fty, _, false) => p.skip(fty)?,

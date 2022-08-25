@@ -34,10 +34,10 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(MyEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum::MyValue1, "MyValue1"),
-            (MyEnum::MyValue2, "MyValue2"),
+            (Self::MyValue1, "MyValue1"),
+            (Self::MyValue2, "MyValue2"),
         ]
     }
 
@@ -48,17 +48,17 @@ impl ::fbthrift::ThriftEnum for MyEnum {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum::MyValue1,
-            MyEnum::MyValue2,
+            Self::MyValue1,
+            Self::MyValue2,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
-        MyEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -107,7 +107,7 @@ impl ::std::str::FromStr for MyEnum {
             ("MyValue1", 0),
             ("MyValue2", 1),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(MyEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(Self)
     }
 }
 
@@ -131,7 +131,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -242,17 +242,17 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
-            MyUnion::myEnum(inner) => {
+            Self::myEnum(inner) => {
                 p.write_field_begin("myEnum", ::fbthrift::TType::I32, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            MyUnion::myDataItem(inner) => {
+            Self::myDataItem(inner) => {
                 p.write_field_begin("myDataItem", ::fbthrift::TType::Struct, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            MyUnion::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -277,11 +277,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(MyUnion::myEnum(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::myEnum(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Struct, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(MyUnion::myDataItem(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::myDataItem(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

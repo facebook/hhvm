@@ -25,29 +25,29 @@ pub mod services {
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for BounceMapExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                BounceMapExn::ApplicationException(exn)
+                Self::ApplicationException(exn)
             }
         }
 
         impl ::fbthrift::ExceptionInfo for BounceMapExn {
             fn exn_name(&self) -> &'static str {
                 match self {
-                    BounceMapExn::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    BounceMapExn::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
                 }
             }
 
             fn exn_value(&self) -> String {
                 match self {
-                    BounceMapExn::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    BounceMapExn::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
                 }
             }
 
             fn exn_is_declared(&self) -> bool {
                 match self {
-                    BounceMapExn::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    BounceMapExn::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 }
             }
         }
@@ -55,8 +55,8 @@ pub mod services {
         impl ::fbthrift::ResultInfo for BounceMapExn {
             fn result_type(&self) -> ::fbthrift::ResultType {
                 match self {
-                    BounceMapExn::Success(_) => ::fbthrift::ResultType::Return,
-                    BounceMapExn::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 }
             }
         }
@@ -70,12 +70,12 @@ pub mod services {
             P: ::fbthrift::ProtocolWriter,
         {
             fn write(&self, p: &mut P) {
-                if let BounceMapExn::ApplicationException(aexn) = self {
+                if let Self::ApplicationException(aexn) = self {
                     return aexn.write(p);
                 }
                 p.write_struct_begin("BounceMap");
                 match self {
-                    BounceMapExn::Success(inner) => {
+                    Self::Success(inner) => {
                         p.write_field_begin(
                             "Success",
                             ::fbthrift::TType::Map,
@@ -84,7 +84,7 @@ pub mod services {
                         inner.write(p);
                         p.write_field_end();
                     }
-                    BounceMapExn::ApplicationException(_aexn) => unreachable!(),
+                    Self::ApplicationException(_aexn) => unreachable!(),
                 }
                 p.write_field_stop();
                 p.write_struct_end();
@@ -111,7 +111,7 @@ pub mod services {
                         }
                         ((::fbthrift::TType::Map, 0i32), false) => {
                             once = true;
-                            alt = ::std::option::Option::Some(BounceMapExn::Success(::fbthrift::Deserialize::read(p)?));
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
                         }
                         ((ty, _id), false) => p.skip(ty)?,
                         ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
@@ -148,29 +148,29 @@ pub mod services {
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for BinaryKeyedMapExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                BinaryKeyedMapExn::ApplicationException(exn)
+                Self::ApplicationException(exn)
             }
         }
 
         impl ::fbthrift::ExceptionInfo for BinaryKeyedMapExn {
             fn exn_name(&self) -> &'static str {
                 match self {
-                    BinaryKeyedMapExn::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    BinaryKeyedMapExn::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
                 }
             }
 
             fn exn_value(&self) -> String {
                 match self {
-                    BinaryKeyedMapExn::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    BinaryKeyedMapExn::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
                 }
             }
 
             fn exn_is_declared(&self) -> bool {
                 match self {
-                    BinaryKeyedMapExn::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    BinaryKeyedMapExn::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 }
             }
         }
@@ -178,8 +178,8 @@ pub mod services {
         impl ::fbthrift::ResultInfo for BinaryKeyedMapExn {
             fn result_type(&self) -> ::fbthrift::ResultType {
                 match self {
-                    BinaryKeyedMapExn::Success(_) => ::fbthrift::ResultType::Return,
-                    BinaryKeyedMapExn::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 }
             }
         }
@@ -193,12 +193,12 @@ pub mod services {
             P: ::fbthrift::ProtocolWriter,
         {
             fn write(&self, p: &mut P) {
-                if let BinaryKeyedMapExn::ApplicationException(aexn) = self {
+                if let Self::ApplicationException(aexn) = self {
                     return aexn.write(p);
                 }
                 p.write_struct_begin("BinaryKeyedMap");
                 match self {
-                    BinaryKeyedMapExn::Success(inner) => {
+                    Self::Success(inner) => {
                         p.write_field_begin(
                             "Success",
                             ::fbthrift::TType::Map,
@@ -207,7 +207,7 @@ pub mod services {
                         inner.write(p);
                         p.write_field_end();
                     }
-                    BinaryKeyedMapExn::ApplicationException(_aexn) => unreachable!(),
+                    Self::ApplicationException(_aexn) => unreachable!(),
                 }
                 p.write_field_stop();
                 p.write_struct_end();
@@ -234,7 +234,7 @@ pub mod services {
                         }
                         ((::fbthrift::TType::Map, 0i32), false) => {
                             once = true;
-                            alt = ::std::option::Option::Some(BinaryKeyedMapExn::Success(::fbthrift::Deserialize::read(p)?));
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
                         }
                         ((ty, _id), false) => p.skip(ty)?,
                         ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(

@@ -98,7 +98,7 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Nada");
         match self {
-            Nada::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();

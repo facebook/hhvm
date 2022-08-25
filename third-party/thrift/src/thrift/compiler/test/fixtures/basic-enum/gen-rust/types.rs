@@ -25,7 +25,7 @@ impl EmptyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for EmptyEnum {
-    fn enumerate() -> &'static [(EmptyEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
         ]
     }
@@ -35,7 +35,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
         ]
     }
 
-    fn variant_values() -> &'static [EmptyEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
         ]
     }
@@ -43,7 +43,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
 
 impl ::std::default::Default for EmptyEnum {
     fn default() -> Self {
-        EmptyEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -88,7 +88,7 @@ impl ::std::str::FromStr for EmptyEnum {
     fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
         static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "EmptyEnum").map(EmptyEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "EmptyEnum").map(Self)
     }
 }
 
@@ -112,7 +112,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(EmptyEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -125,10 +125,10 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(MyEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum::ONE, "ONE"),
-            (MyEnum::TWO, "TWO"),
+            (Self::ONE, "ONE"),
+            (Self::TWO, "TWO"),
         ]
     }
 
@@ -139,17 +139,17 @@ impl ::fbthrift::ThriftEnum for MyEnum {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum::ONE,
-            MyEnum::TWO,
+            Self::ONE,
+            Self::TWO,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
-        MyEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -198,7 +198,7 @@ impl ::std::str::FromStr for MyEnum {
             ("ONE", 1),
             ("TWO", 2),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(MyEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(Self)
     }
 }
 
@@ -222,7 +222,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -253,28 +253,28 @@ impl MyBigEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyBigEnum {
-    fn enumerate() -> &'static [(MyBigEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyBigEnum::UNKNOWN, "UNKNOWN"),
-            (MyBigEnum::ONE, "ONE"),
-            (MyBigEnum::TWO, "TWO"),
-            (MyBigEnum::THREE, "THREE"),
-            (MyBigEnum::FOUR, "FOUR"),
-            (MyBigEnum::FIVE, "FIVE"),
-            (MyBigEnum::SIX, "SIX"),
-            (MyBigEnum::SEVEN, "SEVEN"),
-            (MyBigEnum::EIGHT, "EIGHT"),
-            (MyBigEnum::NINE, "NINE"),
-            (MyBigEnum::TEN, "TEN"),
-            (MyBigEnum::ELEVEN, "ELEVEN"),
-            (MyBigEnum::TWELVE, "TWELVE"),
-            (MyBigEnum::THIRTEEN, "THIRTEEN"),
-            (MyBigEnum::FOURTEEN, "FOURTEEN"),
-            (MyBigEnum::FIFTEEN, "FIFTEEN"),
-            (MyBigEnum::SIXTEEN, "SIXTEEN"),
-            (MyBigEnum::SEVENTEEN, "SEVENTEEN"),
-            (MyBigEnum::EIGHTEEN, "EIGHTEEN"),
-            (MyBigEnum::NINETEEN, "NINETEEN"),
+            (Self::UNKNOWN, "UNKNOWN"),
+            (Self::ONE, "ONE"),
+            (Self::TWO, "TWO"),
+            (Self::THREE, "THREE"),
+            (Self::FOUR, "FOUR"),
+            (Self::FIVE, "FIVE"),
+            (Self::SIX, "SIX"),
+            (Self::SEVEN, "SEVEN"),
+            (Self::EIGHT, "EIGHT"),
+            (Self::NINE, "NINE"),
+            (Self::TEN, "TEN"),
+            (Self::ELEVEN, "ELEVEN"),
+            (Self::TWELVE, "TWELVE"),
+            (Self::THIRTEEN, "THIRTEEN"),
+            (Self::FOURTEEN, "FOURTEEN"),
+            (Self::FIFTEEN, "FIFTEEN"),
+            (Self::SIXTEEN, "SIXTEEN"),
+            (Self::SEVENTEEN, "SEVENTEEN"),
+            (Self::EIGHTEEN, "EIGHTEEN"),
+            (Self::NINETEEN, "NINETEEN"),
         ]
     }
 
@@ -303,35 +303,35 @@ impl ::fbthrift::ThriftEnum for MyBigEnum {
         ]
     }
 
-    fn variant_values() -> &'static [MyBigEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyBigEnum::UNKNOWN,
-            MyBigEnum::ONE,
-            MyBigEnum::TWO,
-            MyBigEnum::THREE,
-            MyBigEnum::FOUR,
-            MyBigEnum::FIVE,
-            MyBigEnum::SIX,
-            MyBigEnum::SEVEN,
-            MyBigEnum::EIGHT,
-            MyBigEnum::NINE,
-            MyBigEnum::TEN,
-            MyBigEnum::ELEVEN,
-            MyBigEnum::TWELVE,
-            MyBigEnum::THIRTEEN,
-            MyBigEnum::FOURTEEN,
-            MyBigEnum::FIFTEEN,
-            MyBigEnum::SIXTEEN,
-            MyBigEnum::SEVENTEEN,
-            MyBigEnum::EIGHTEEN,
-            MyBigEnum::NINETEEN,
+            Self::UNKNOWN,
+            Self::ONE,
+            Self::TWO,
+            Self::THREE,
+            Self::FOUR,
+            Self::FIVE,
+            Self::SIX,
+            Self::SEVEN,
+            Self::EIGHT,
+            Self::NINE,
+            Self::TEN,
+            Self::ELEVEN,
+            Self::TWELVE,
+            Self::THIRTEEN,
+            Self::FOURTEEN,
+            Self::FIFTEEN,
+            Self::SIXTEEN,
+            Self::SEVENTEEN,
+            Self::EIGHTEEN,
+            Self::NINETEEN,
         ]
     }
 }
 
 impl ::std::default::Default for MyBigEnum {
     fn default() -> Self {
-        MyBigEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -416,7 +416,7 @@ impl ::std::str::FromStr for MyBigEnum {
             ("TWO", 2),
             ("UNKNOWN", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBigEnum").map(MyBigEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBigEnum").map(Self)
     }
 }
 
@@ -440,7 +440,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyBigEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 

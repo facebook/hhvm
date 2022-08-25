@@ -67,11 +67,11 @@ impl Animal {
 }
 
 impl ::fbthrift::ThriftEnum for Animal {
-    fn enumerate() -> &'static [(Animal, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (Animal::DOG, "DOG"),
-            (Animal::CAT, "CAT"),
-            (Animal::TARANTULA, "TARANTULA"),
+            (Self::DOG, "DOG"),
+            (Self::CAT, "CAT"),
+            (Self::TARANTULA, "TARANTULA"),
         ]
     }
 
@@ -83,18 +83,18 @@ impl ::fbthrift::ThriftEnum for Animal {
         ]
     }
 
-    fn variant_values() -> &'static [Animal] {
+    fn variant_values() -> &'static [Self] {
         &[
-            Animal::DOG,
-            Animal::CAT,
-            Animal::TARANTULA,
+            Self::DOG,
+            Self::CAT,
+            Self::TARANTULA,
         ]
     }
 }
 
 impl ::std::default::Default for Animal {
     fn default() -> Self {
-        Animal(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -145,7 +145,7 @@ impl ::std::str::FromStr for Animal {
             ("DOG", 1),
             ("TARANTULA", 3),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Animal").map(Animal)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Animal").map(Self)
     }
 }
 
@@ -169,7 +169,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(Animal::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 

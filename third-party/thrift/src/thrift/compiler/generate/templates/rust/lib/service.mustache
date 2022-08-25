@@ -147,7 +147,7 @@
                 let mut once = false;
                 let mut alt = {{!
                     }}{{#function:void?}}{{!
-                        }}{{function:upcamel}}StreamExn::Success(()){{!
+                        }}Self::Success(()){{!
                     }}{{/function:void?}}{{!
                     }}{{^function:void?}}::std::option::Option::None{{/function:void?}}{{!
                 }};
@@ -162,7 +162,7 @@
                             once = true;
                             alt = {{!
                                 }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
-                                }}{{function:upcamel}}StreamExn::Success(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{^function:void?}}){{/function:void?}}{{!
                             }};
                         }{{!
@@ -171,7 +171,7 @@
                             once = true;
                             alt = {{!
                                 }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
-                                }}{{function:upcamel}}StreamExn::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{^function:void?}}){{/function:void?}}{{!
                             }};
                         }{{!
@@ -226,30 +226,30 @@
         impl ::fbthrift::ExceptionInfo for {{function:upcamel}}ResponseExn {
             fn exn_name(&self) -> &'static str {
                 match self {
-                    {{function:upcamel}}ResponseExn::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    {{function:upcamel}}ResponseExn::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) => exn.exn_name(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_name(),
                     {{/function:exceptions}}
                 }
             }
 
             fn exn_value(&self) -> String {
                 match self {
-                    {{function:upcamel}}ResponseExn::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    {{function:upcamel}}ResponseExn::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) => exn.exn_value(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_value(),
                     {{/function:exceptions}}
                 }
             }
 
             fn exn_is_declared(&self) -> bool {
                 match self {
-                    {{function:upcamel}}ResponseExn::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    {{function:upcamel}}ResponseExn::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}ResponseExn::{{field:rust_name}}(exn) => exn.exn_is_declared(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
                     {{/function:exceptions}}
                 }
             }
@@ -258,10 +258,10 @@
         impl ::fbthrift::ResultInfo for {{function:upcamel}}ResponseExn {
             fn result_type(&self) -> ::fbthrift::ResultType {
                 match self {
-                    {{function:upcamel}}ResponseExn::Success(_) => ::fbthrift::ResultType::Return,
-                    {{function:upcamel}}ResponseExn::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                     {{#function:exceptions}}
-                    {{function:upcamel}}ResponseExn::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
+                    Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
                     {{/function:exceptions}}
                 }
             }
@@ -270,14 +270,14 @@
         {{#function:uniqueExceptions}}
         impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}ResponseExn {
             fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                {{function:upcamel}}ResponseExn::{{field:rust_name}}(exn)
+                Self::{{field:rust_name}}(exn)
             }
         }{{!
         }}{{/function:uniqueExceptions}}
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}ResponseExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                {{function:upcamel}}ResponseExn::ApplicationException(exn)
+                Self::ApplicationException(exn)
             }
         }
 
@@ -300,7 +300,7 @@
                 }
                 p.write_struct_begin("{{function:upcamel}}");
                 match self {
-                    {{function:upcamel}}ResponseExn::Success(_inner) => {
+                    Self::Success(_inner) => {
                         p.write_field_begin(
                             "Success",
                             {{#function:stream_has_first_response?}}
@@ -317,7 +317,7 @@
                         p.write_field_end();
                     }{{!
                     }}{{#function:exceptions}}
-                    {{function:upcamel}}ResponseExn::{{field:rust_name}}(inner) => {
+                    Self::{{field:rust_name}}(inner) => {
                         p.write_field_begin(
                             "{{field:name}}",
                             {{#field:type}}{{>lib/ttype}}{{/field:type}},
@@ -348,7 +348,7 @@
                 let mut once = false;
                 let mut alt = {{!
                     }}{{^function:stream_has_first_response?}}{{!
-                        }}{{function:upcamel}}ResponseExn::Success(()){{!
+                        }}Self::Success(()){{!
                     }}{{/function:stream_has_first_response?}}{{!
                     }}{{#function:stream_has_first_response?}}::std::option::Option::None{{/function:stream_has_first_response?}}{{!
                 }};
@@ -365,7 +365,7 @@
                             once = true;
                             alt = {{!
                                 }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                                }}{{function:upcamel}}ResponseExn::Success(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
                             }};
                         }{{!
@@ -374,7 +374,7 @@
                             once = true;
                             alt = {{!
                                 }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                                }}{{function:upcamel}}ResponseExn::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
                             }};
                         }{{!
@@ -426,44 +426,44 @@
 
         impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Exn {
             fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                {{function:upcamel}}Exn::{{field:rust_name}}(exn)
+                Self::{{field:rust_name}}(exn)
             }
         }{{!
         }}{{/function:uniqueExceptions}}
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Exn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                {{function:upcamel}}Exn::ApplicationException(exn)
+                Self::ApplicationException(exn)
             }
         }
 
         impl ::fbthrift::ExceptionInfo for {{function:upcamel}}Exn {
             fn exn_name(&self) -> &'static str {
                 match self {
-                    {{function:upcamel}}Exn::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    {{function:upcamel}}Exn::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}Exn::{{field:rust_name}}(exn) => exn.exn_name(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_name(),
                     {{/function:exceptions}}
                 }
             }
 
             fn exn_value(&self) -> String {
                 match self {
-                    {{function:upcamel}}Exn::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    {{function:upcamel}}Exn::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}Exn::{{field:rust_name}}(exn) => exn.exn_value(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_value(),
                     {{/function:exceptions}}
                 }
             }
 
             fn exn_is_declared(&self) -> bool {
                 match self {
-                    {{function:upcamel}}Exn::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    {{function:upcamel}}Exn::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                     {{#function:exceptions}}
-                    {{function:upcamel}}Exn::{{field:rust_name}}(exn) => exn.exn_is_declared(),
+                    Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
                     {{/function:exceptions}}
                 }
             }
@@ -472,10 +472,10 @@
         impl ::fbthrift::ResultInfo for {{function:upcamel}}Exn {
             fn result_type(&self) -> ::fbthrift::ResultType {
                 match self {
-                    {{function:upcamel}}Exn::Success(_) => ::fbthrift::ResultType::Return,
-                    {{function:upcamel}}Exn::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                     {{#function:exceptions}}
-                    {{function:upcamel}}Exn::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
+                    Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
                     {{/function:exceptions}}
                 }
             }
@@ -491,14 +491,14 @@
             P: ::fbthrift::ProtocolWriter,
         {
             fn write(&self, p: &mut P) {
-                if let {{function:upcamel}}Exn::ApplicationException(aexn) = self {
+                if let Self::ApplicationException(aexn) = self {
                     return aexn.write(p);
                 }
                 p.write_struct_begin("{{function:upcamel}}");
                 match self {
                     {{!We handle serialization of response and stream items with a separate logic.
                     However, the service exceptions can have the same serialization logic}}
-                    {{function:upcamel}}Exn::Success(inner) => {
+                    Self::Success(inner) => {
                         p.write_field_begin(
                             "Success",
                             {{#function:return_type}}{{>lib/ttype}}{{/function:return_type}},
@@ -508,7 +508,7 @@
                         p.write_field_end();
                     }{{!
                     }}{{#function:exceptions}}
-                    {{function:upcamel}}Exn::{{field:rust_name}}(inner) => {
+                    Self::{{field:rust_name}}(inner) => {
                         p.write_field_begin(
                             "{{field:name}}",
                             {{#field:type}}{{>lib/ttype}}{{/field:type}},
@@ -518,7 +518,7 @@
                         p.write_field_end();
                     }{{!
                     }}{{/function:exceptions}}
-                    {{function:upcamel}}Exn::ApplicationException(_aexn) => unreachable!(),
+                    Self::ApplicationException(_aexn) => unreachable!(),
                 }
                 p.write_field_stop();
                 p.write_struct_end();
@@ -541,7 +541,7 @@
                 let mut once = false;
                 let mut alt = {{!
                     }}{{#function:void?}}{{!
-                        }}{{function:upcamel}}Exn::Success(()){{!
+                        }}Self::Success(()){{!
                     }}{{/function:void?}}{{!
                     }}{{^function:void?}}::std::option::Option::None{{/function:void?}}{{!
                 }};
@@ -556,7 +556,7 @@
                             once = true;
                             alt = {{!
                                 }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
-                                }}{{function:upcamel}}Exn::Success(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{^function:void?}}){{/function:void?}}{{!
                             }};
                         }{{!
@@ -565,7 +565,7 @@
                             once = true;
                             alt = {{!
                                 }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
-                                }}{{function:upcamel}}Exn::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
                                 }}{{^function:void?}}){{/function:void?}}{{!
                             }};
                         }{{!

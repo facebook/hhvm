@@ -25,29 +25,29 @@ pub mod services {
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for QueryExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                QueryExn::ApplicationException(exn)
+                Self::ApplicationException(exn)
             }
         }
 
         impl ::fbthrift::ExceptionInfo for QueryExn {
             fn exn_name(&self) -> &'static str {
                 match self {
-                    QueryExn::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    QueryExn::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
                 }
             }
 
             fn exn_value(&self) -> String {
                 match self {
-                    QueryExn::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    QueryExn::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
                 }
             }
 
             fn exn_is_declared(&self) -> bool {
                 match self {
-                    QueryExn::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    QueryExn::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
                 }
             }
         }
@@ -55,8 +55,8 @@ pub mod services {
         impl ::fbthrift::ResultInfo for QueryExn {
             fn result_type(&self) -> ::fbthrift::ResultType {
                 match self {
-                    QueryExn::Success(_) => ::fbthrift::ResultType::Return,
-                    QueryExn::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
                 }
             }
         }
@@ -70,12 +70,12 @@ pub mod services {
             P: ::fbthrift::ProtocolWriter,
         {
             fn write(&self, p: &mut P) {
-                if let QueryExn::ApplicationException(aexn) = self {
+                if let Self::ApplicationException(aexn) = self {
                     return aexn.write(p);
                 }
                 p.write_struct_begin("Query");
                 match self {
-                    QueryExn::Success(inner) => {
+                    Self::Success(inner) => {
                         p.write_field_begin(
                             "Success",
                             ::fbthrift::TType::Struct,
@@ -84,7 +84,7 @@ pub mod services {
                         inner.write(p);
                         p.write_field_end();
                     }
-                    QueryExn::ApplicationException(_aexn) => unreachable!(),
+                    Self::ApplicationException(_aexn) => unreachable!(),
                 }
                 p.write_field_stop();
                 p.write_struct_end();
@@ -111,7 +111,7 @@ pub mod services {
                         }
                         ((::fbthrift::TType::Struct, 0i32), false) => {
                             once = true;
-                            alt = ::std::option::Option::Some(QueryExn::Success(::fbthrift::Deserialize::read(p)?));
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
                         }
                         ((ty, _id), false) => p.skip(ty)?,
                         ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(

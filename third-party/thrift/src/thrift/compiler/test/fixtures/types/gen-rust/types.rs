@@ -330,13 +330,13 @@ impl has_bitwise_ops {
 }
 
 impl ::fbthrift::ThriftEnum for has_bitwise_ops {
-    fn enumerate() -> &'static [(has_bitwise_ops, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (has_bitwise_ops::none, "none"),
-            (has_bitwise_ops::zero, "zero"),
-            (has_bitwise_ops::one, "one"),
-            (has_bitwise_ops::two, "two"),
-            (has_bitwise_ops::three, "three"),
+            (Self::none, "none"),
+            (Self::zero, "zero"),
+            (Self::one, "one"),
+            (Self::two, "two"),
+            (Self::three, "three"),
         ]
     }
 
@@ -350,20 +350,20 @@ impl ::fbthrift::ThriftEnum for has_bitwise_ops {
         ]
     }
 
-    fn variant_values() -> &'static [has_bitwise_ops] {
+    fn variant_values() -> &'static [Self] {
         &[
-            has_bitwise_ops::none,
-            has_bitwise_ops::zero,
-            has_bitwise_ops::one,
-            has_bitwise_ops::two,
-            has_bitwise_ops::three,
+            Self::none,
+            Self::zero,
+            Self::one,
+            Self::two,
+            Self::three,
         ]
     }
 }
 
 impl ::std::default::Default for has_bitwise_ops {
     fn default() -> Self {
-        has_bitwise_ops(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -418,7 +418,7 @@ impl ::std::str::FromStr for has_bitwise_ops {
             ("two", 4),
             ("zero", 1),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "has_bitwise_ops").map(has_bitwise_ops)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "has_bitwise_ops").map(Self)
     }
 }
 
@@ -442,7 +442,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(has_bitwise_ops::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -455,10 +455,10 @@ impl is_unscoped {
 }
 
 impl ::fbthrift::ThriftEnum for is_unscoped {
-    fn enumerate() -> &'static [(is_unscoped, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (is_unscoped::hello, "hello"),
-            (is_unscoped::world, "world"),
+            (Self::hello, "hello"),
+            (Self::world, "world"),
         ]
     }
 
@@ -469,17 +469,17 @@ impl ::fbthrift::ThriftEnum for is_unscoped {
         ]
     }
 
-    fn variant_values() -> &'static [is_unscoped] {
+    fn variant_values() -> &'static [Self] {
         &[
-            is_unscoped::hello,
-            is_unscoped::world,
+            Self::hello,
+            Self::world,
         ]
     }
 }
 
 impl ::std::default::Default for is_unscoped {
     fn default() -> Self {
-        is_unscoped(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -528,7 +528,7 @@ impl ::std::str::FromStr for is_unscoped {
             ("hello", 0),
             ("world", 1),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "is_unscoped").map(is_unscoped)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "is_unscoped").map(Self)
     }
 }
 
@@ -552,7 +552,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(is_unscoped::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -565,10 +565,10 @@ impl MyForwardRefEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
-    fn enumerate() -> &'static [(MyForwardRefEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyForwardRefEnum::ZERO, "ZERO"),
-            (MyForwardRefEnum::NONZERO, "NONZERO"),
+            (Self::ZERO, "ZERO"),
+            (Self::NONZERO, "NONZERO"),
         ]
     }
 
@@ -579,17 +579,17 @@ impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
         ]
     }
 
-    fn variant_values() -> &'static [MyForwardRefEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyForwardRefEnum::ZERO,
-            MyForwardRefEnum::NONZERO,
+            Self::ZERO,
+            Self::NONZERO,
         ]
     }
 }
 
 impl ::std::default::Default for MyForwardRefEnum {
     fn default() -> Self {
-        MyForwardRefEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -638,7 +638,7 @@ impl ::std::str::FromStr for MyForwardRefEnum {
             ("NONZERO", 12),
             ("ZERO", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyForwardRefEnum").map(MyForwardRefEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyForwardRefEnum").map(Self)
     }
 }
 
@@ -662,7 +662,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyForwardRefEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -676,11 +676,11 @@ impl MyEnumA {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnumA {
-    fn enumerate() -> &'static [(MyEnumA, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnumA::fieldA, "fieldA"),
-            (MyEnumA::fieldB, "fieldB"),
-            (MyEnumA::fieldC, "fieldC"),
+            (Self::fieldA, "fieldA"),
+            (Self::fieldB, "fieldB"),
+            (Self::fieldC, "fieldC"),
         ]
     }
 
@@ -692,18 +692,18 @@ impl ::fbthrift::ThriftEnum for MyEnumA {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnumA] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnumA::fieldA,
-            MyEnumA::fieldB,
-            MyEnumA::fieldC,
+            Self::fieldA,
+            Self::fieldB,
+            Self::fieldC,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnumA {
     fn default() -> Self {
-        MyEnumA(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -754,7 +754,7 @@ impl ::std::str::FromStr for MyEnumA {
             ("fieldB", 2),
             ("fieldC", 4),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnumA").map(MyEnumA)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnumA").map(Self)
     }
 }
 
@@ -778,7 +778,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnumA::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -2450,17 +2450,17 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("NoExceptMoveUnion");
         match self {
-            NoExceptMoveUnion::string_field(inner) => {
+            Self::string_field(inner) => {
                 p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            NoExceptMoveUnion::i32_field(inner) => {
+            Self::i32_field(inner) => {
                 p.write_field_begin("i32_field", ::fbthrift::TType::I32, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            NoExceptMoveUnion::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -2485,11 +2485,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(NoExceptMoveUnion::string_field(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::string_field(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::I32, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(NoExceptMoveUnion::i32_field(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::i32_field(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

@@ -448,32 +448,32 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Baz");
         match self {
-            Baz::intField(inner) => {
+            Self::intField(inner) => {
                 p.write_field_begin("intField", ::fbthrift::TType::I32, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            Baz::setField(inner) => {
+            Self::setField(inner) => {
                 p.write_field_begin("setField", ::fbthrift::TType::Set, 4);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            Baz::mapField(inner) => {
+            Self::mapField(inner) => {
                 p.write_field_begin("mapField", ::fbthrift::TType::Map, 6);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            Baz::binaryField(inner) => {
+            Self::binaryField(inner) => {
                 p.write_field_begin("binaryField", ::fbthrift::TType::String, 8);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            Baz::longField(inner) => {
+            Self::longField(inner) => {
                 p.write_field_begin("longField", ::fbthrift::TType::I64, 9);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            Baz::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -501,23 +501,23 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Baz::intField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::intField(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Set, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Baz::setField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::setField(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Map, 6, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Baz::mapField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::mapField(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::String, 8, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Baz::binaryField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::binaryField(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::I64, 9, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Baz::longField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::longField(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

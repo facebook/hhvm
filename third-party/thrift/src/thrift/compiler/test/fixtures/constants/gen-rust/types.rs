@@ -116,7 +116,7 @@ impl EmptyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for EmptyEnum {
-    fn enumerate() -> &'static [(EmptyEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
         ]
     }
@@ -126,7 +126,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
         ]
     }
 
-    fn variant_values() -> &'static [EmptyEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
         ]
     }
@@ -134,7 +134,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
 
 impl ::std::default::Default for EmptyEnum {
     fn default() -> Self {
-        EmptyEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -179,7 +179,7 @@ impl ::std::str::FromStr for EmptyEnum {
     fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
         static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "EmptyEnum").map(EmptyEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "EmptyEnum").map(Self)
     }
 }
 
@@ -203,7 +203,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(EmptyEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -218,12 +218,12 @@ impl City {
 }
 
 impl ::fbthrift::ThriftEnum for City {
-    fn enumerate() -> &'static [(City, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (City::NYC, "NYC"),
-            (City::MPK, "MPK"),
-            (City::SEA, "SEA"),
-            (City::LON, "LON"),
+            (Self::NYC, "NYC"),
+            (Self::MPK, "MPK"),
+            (Self::SEA, "SEA"),
+            (Self::LON, "LON"),
         ]
     }
 
@@ -236,19 +236,19 @@ impl ::fbthrift::ThriftEnum for City {
         ]
     }
 
-    fn variant_values() -> &'static [City] {
+    fn variant_values() -> &'static [Self] {
         &[
-            City::NYC,
-            City::MPK,
-            City::SEA,
-            City::LON,
+            Self::NYC,
+            Self::MPK,
+            Self::SEA,
+            Self::LON,
         ]
     }
 }
 
 impl ::std::default::Default for City {
     fn default() -> Self {
-        City(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -301,7 +301,7 @@ impl ::std::str::FromStr for City {
             ("NYC", 0),
             ("SEA", 2),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "City").map(City)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "City").map(Self)
     }
 }
 
@@ -325,7 +325,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(City::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -340,12 +340,12 @@ impl Company {
 }
 
 impl ::fbthrift::ThriftEnum for Company {
-    fn enumerate() -> &'static [(Company, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (Company::FACEBOOK, "FACEBOOK"),
-            (Company::WHATSAPP, "WHATSAPP"),
-            (Company::OCULUS, "OCULUS"),
-            (Company::INSTAGRAM, "INSTAGRAM"),
+            (Self::FACEBOOK, "FACEBOOK"),
+            (Self::WHATSAPP, "WHATSAPP"),
+            (Self::OCULUS, "OCULUS"),
+            (Self::INSTAGRAM, "INSTAGRAM"),
         ]
     }
 
@@ -358,19 +358,19 @@ impl ::fbthrift::ThriftEnum for Company {
         ]
     }
 
-    fn variant_values() -> &'static [Company] {
+    fn variant_values() -> &'static [Self] {
         &[
-            Company::FACEBOOK,
-            Company::WHATSAPP,
-            Company::OCULUS,
-            Company::INSTAGRAM,
+            Self::FACEBOOK,
+            Self::WHATSAPP,
+            Self::OCULUS,
+            Self::INSTAGRAM,
         ]
     }
 }
 
 impl ::std::default::Default for Company {
     fn default() -> Self {
-        Company(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -423,7 +423,7 @@ impl ::std::str::FromStr for Company {
             ("OCULUS", 2),
             ("WHATSAPP", 1),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Company").map(Company)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Company").map(Self)
     }
 }
 
@@ -447,7 +447,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(Company::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -1008,17 +1008,17 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("union1");
         match self {
-            union1::i(inner) => {
+            Self::i(inner) => {
                 p.write_field_begin("i", ::fbthrift::TType::I32, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union1::d(inner) => {
+            Self::d(inner) => {
                 p.write_field_begin("d", ::fbthrift::TType::Double, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union1::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -1043,11 +1043,11 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union1::i(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Double, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union1::d(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
@@ -1085,27 +1085,27 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("union2");
         match self {
-            union2::i(inner) => {
+            Self::i(inner) => {
                 p.write_field_begin("i", ::fbthrift::TType::I32, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union2::d(inner) => {
+            Self::d(inner) => {
                 p.write_field_begin("d", ::fbthrift::TType::Double, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union2::s(inner) => {
+            Self::s(inner) => {
                 p.write_field_begin("s", ::fbthrift::TType::Struct, 3);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union2::u(inner) => {
+            Self::u(inner) => {
                 p.write_field_begin("u", ::fbthrift::TType::Struct, 4);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            union2::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -1132,19 +1132,19 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union2::i(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::i(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Double, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union2::d(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::d(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Struct, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union2::s(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Struct, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(union2::u(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::u(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

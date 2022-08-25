@@ -46,13 +46,13 @@ impl Metasyntactic {
 }
 
 impl ::fbthrift::ThriftEnum for Metasyntactic {
-    fn enumerate() -> &'static [(Metasyntactic, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (Metasyntactic::FOO, "FOO"),
-            (Metasyntactic::BAR, "BAR"),
-            (Metasyntactic::BAZ, "BAZ"),
-            (Metasyntactic::BAX, "BAX"),
-            (Metasyntactic::Unspecified, "Unspecified"),
+            (Self::FOO, "FOO"),
+            (Self::BAR, "BAR"),
+            (Self::BAZ, "BAZ"),
+            (Self::BAX, "BAX"),
+            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -66,20 +66,20 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
         ]
     }
 
-    fn variant_values() -> &'static [Metasyntactic] {
+    fn variant_values() -> &'static [Self] {
         &[
-            Metasyntactic::FOO,
-            Metasyntactic::BAR,
-            Metasyntactic::BAZ,
-            Metasyntactic::BAX,
-            Metasyntactic::Unspecified,
+            Self::FOO,
+            Self::BAR,
+            Self::BAZ,
+            Self::BAX,
+            Self::Unspecified,
         ]
     }
 }
 
 impl ::std::default::Default for Metasyntactic {
     fn default() -> Self {
-        Metasyntactic(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -134,7 +134,7 @@ impl ::std::str::FromStr for Metasyntactic {
             ("FOO", 1),
             ("Unspecified", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Metasyntactic").map(Metasyntactic)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Metasyntactic").map(Self)
     }
 }
 
@@ -158,7 +158,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(Metasyntactic::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -175,14 +175,14 @@ impl MyEnum1 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum1 {
-    fn enumerate() -> &'static [(MyEnum1, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum1::ME1_1, "ME1_1"),
-            (MyEnum1::ME1_2, "ME1_2"),
-            (MyEnum1::ME1_3, "ME1_3"),
-            (MyEnum1::ME1_5, "ME1_5"),
-            (MyEnum1::ME1_6, "ME1_6"),
-            (MyEnum1::ME1_0, "ME1_0"),
+            (Self::ME1_1, "ME1_1"),
+            (Self::ME1_2, "ME1_2"),
+            (Self::ME1_3, "ME1_3"),
+            (Self::ME1_5, "ME1_5"),
+            (Self::ME1_6, "ME1_6"),
+            (Self::ME1_0, "ME1_0"),
         ]
     }
 
@@ -197,21 +197,21 @@ impl ::fbthrift::ThriftEnum for MyEnum1 {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum1] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum1::ME1_1,
-            MyEnum1::ME1_2,
-            MyEnum1::ME1_3,
-            MyEnum1::ME1_5,
-            MyEnum1::ME1_6,
-            MyEnum1::ME1_0,
+            Self::ME1_1,
+            Self::ME1_2,
+            Self::ME1_3,
+            Self::ME1_5,
+            Self::ME1_6,
+            Self::ME1_0,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum1 {
     fn default() -> Self {
-        MyEnum1(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -268,7 +268,7 @@ impl ::std::str::FromStr for MyEnum1 {
             ("ME1_5", 5),
             ("ME1_6", 6),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum1").map(MyEnum1)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum1").map(Self)
     }
 }
 
@@ -292,7 +292,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum1::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -306,11 +306,11 @@ impl MyEnum2 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum2 {
-    fn enumerate() -> &'static [(MyEnum2, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum2::ME2_0, "ME2_0"),
-            (MyEnum2::ME2_1, "ME2_1"),
-            (MyEnum2::ME2_2, "ME2_2"),
+            (Self::ME2_0, "ME2_0"),
+            (Self::ME2_1, "ME2_1"),
+            (Self::ME2_2, "ME2_2"),
         ]
     }
 
@@ -322,18 +322,18 @@ impl ::fbthrift::ThriftEnum for MyEnum2 {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum2] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum2::ME2_0,
-            MyEnum2::ME2_1,
-            MyEnum2::ME2_2,
+            Self::ME2_0,
+            Self::ME2_1,
+            Self::ME2_2,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum2 {
     fn default() -> Self {
-        MyEnum2(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -384,7 +384,7 @@ impl ::std::str::FromStr for MyEnum2 {
             ("ME2_1", 1),
             ("ME2_2", 2),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum2").map(MyEnum2)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum2").map(Self)
     }
 }
 
@@ -408,7 +408,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum2::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -425,14 +425,14 @@ impl MyEnum3 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum3 {
-    fn enumerate() -> &'static [(MyEnum3, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum3::ME3_0, "ME3_0"),
-            (MyEnum3::ME3_1, "ME3_1"),
-            (MyEnum3::ME3_N2, "ME3_N2"),
-            (MyEnum3::ME3_N1, "ME3_N1"),
-            (MyEnum3::ME3_9, "ME3_9"),
-            (MyEnum3::ME3_10, "ME3_10"),
+            (Self::ME3_0, "ME3_0"),
+            (Self::ME3_1, "ME3_1"),
+            (Self::ME3_N2, "ME3_N2"),
+            (Self::ME3_N1, "ME3_N1"),
+            (Self::ME3_9, "ME3_9"),
+            (Self::ME3_10, "ME3_10"),
         ]
     }
 
@@ -447,21 +447,21 @@ impl ::fbthrift::ThriftEnum for MyEnum3 {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum3] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum3::ME3_0,
-            MyEnum3::ME3_1,
-            MyEnum3::ME3_N2,
-            MyEnum3::ME3_N1,
-            MyEnum3::ME3_9,
-            MyEnum3::ME3_10,
+            Self::ME3_0,
+            Self::ME3_1,
+            Self::ME3_N2,
+            Self::ME3_N1,
+            Self::ME3_9,
+            Self::ME3_10,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum3 {
     fn default() -> Self {
-        MyEnum3(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -518,7 +518,7 @@ impl ::std::str::FromStr for MyEnum3 {
             ("ME3_N1", -1),
             ("ME3_N2", -2),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum3").map(MyEnum3)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum3").map(Self)
     }
 }
 
@@ -542,7 +542,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum3::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -558,13 +558,13 @@ impl MyEnum4 {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum4 {
-    fn enumerate() -> &'static [(MyEnum4, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum4::ME4_A, "ME4_A"),
-            (MyEnum4::ME4_B, "ME4_B"),
-            (MyEnum4::ME4_C, "ME4_C"),
-            (MyEnum4::ME4_D, "ME4_D"),
-            (MyEnum4::Unspecified, "Unspecified"),
+            (Self::ME4_A, "ME4_A"),
+            (Self::ME4_B, "ME4_B"),
+            (Self::ME4_C, "ME4_C"),
+            (Self::ME4_D, "ME4_D"),
+            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -578,20 +578,20 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum4] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum4::ME4_A,
-            MyEnum4::ME4_B,
-            MyEnum4::ME4_C,
-            MyEnum4::ME4_D,
-            MyEnum4::Unspecified,
+            Self::ME4_A,
+            Self::ME4_B,
+            Self::ME4_C,
+            Self::ME4_D,
+            Self::Unspecified,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum4 {
     fn default() -> Self {
-        MyEnum4(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -646,7 +646,7 @@ impl ::std::str::FromStr for MyEnum4 {
             ("ME4_D", -2147483648),
             ("Unspecified", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum4").map(MyEnum4)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum4").map(Self)
     }
 }
 
@@ -670,7 +670,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum4::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -685,12 +685,12 @@ impl MyBitmaskEnum1 {
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
-    fn enumerate() -> &'static [(MyBitmaskEnum1, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyBitmaskEnum1::ONE, "ONE"),
-            (MyBitmaskEnum1::TWO, "TWO"),
-            (MyBitmaskEnum1::FOUR, "FOUR"),
-            (MyBitmaskEnum1::Unspecified, "Unspecified"),
+            (Self::ONE, "ONE"),
+            (Self::TWO, "TWO"),
+            (Self::FOUR, "FOUR"),
+            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -703,19 +703,19 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
         ]
     }
 
-    fn variant_values() -> &'static [MyBitmaskEnum1] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyBitmaskEnum1::ONE,
-            MyBitmaskEnum1::TWO,
-            MyBitmaskEnum1::FOUR,
-            MyBitmaskEnum1::Unspecified,
+            Self::ONE,
+            Self::TWO,
+            Self::FOUR,
+            Self::Unspecified,
         ]
     }
 }
 
 impl ::std::default::Default for MyBitmaskEnum1 {
     fn default() -> Self {
-        MyBitmaskEnum1(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -768,7 +768,7 @@ impl ::std::str::FromStr for MyBitmaskEnum1 {
             ("TWO", 2),
             ("Unspecified", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum1").map(MyBitmaskEnum1)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum1").map(Self)
     }
 }
 
@@ -792,7 +792,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyBitmaskEnum1::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -807,12 +807,12 @@ impl MyBitmaskEnum2 {
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
-    fn enumerate() -> &'static [(MyBitmaskEnum2, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyBitmaskEnum2::ONE, "ONE"),
-            (MyBitmaskEnum2::TWO, "TWO"),
-            (MyBitmaskEnum2::FOUR, "FOUR"),
-            (MyBitmaskEnum2::Unspecified, "Unspecified"),
+            (Self::ONE, "ONE"),
+            (Self::TWO, "TWO"),
+            (Self::FOUR, "FOUR"),
+            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -825,19 +825,19 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
         ]
     }
 
-    fn variant_values() -> &'static [MyBitmaskEnum2] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyBitmaskEnum2::ONE,
-            MyBitmaskEnum2::TWO,
-            MyBitmaskEnum2::FOUR,
-            MyBitmaskEnum2::Unspecified,
+            Self::ONE,
+            Self::TWO,
+            Self::FOUR,
+            Self::Unspecified,
         ]
     }
 }
 
 impl ::std::default::Default for MyBitmaskEnum2 {
     fn default() -> Self {
-        MyBitmaskEnum2(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -890,7 +890,7 @@ impl ::std::str::FromStr for MyBitmaskEnum2 {
             ("TWO", 2),
             ("Unspecified", 0),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum2").map(MyBitmaskEnum2)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum2").map(Self)
     }
 }
 
@@ -914,7 +914,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyBitmaskEnum2::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 

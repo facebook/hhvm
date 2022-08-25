@@ -93,11 +93,11 @@ impl MyEnum {
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum {
-    fn enumerate() -> &'static [(MyEnum, &'static str)] {
+    fn enumerate() -> &'static [(Self, &'static str)] {
         &[
-            (MyEnum::MyValue1, "MyValue1"),
-            (MyEnum::MyValue2, "MyValue2"),
-            (MyEnum::DOMAIN, "DOMAIN"),
+            (Self::MyValue1, "MyValue1"),
+            (Self::MyValue2, "MyValue2"),
+            (Self::DOMAIN, "DOMAIN"),
         ]
     }
 
@@ -109,18 +109,18 @@ impl ::fbthrift::ThriftEnum for MyEnum {
         ]
     }
 
-    fn variant_values() -> &'static [MyEnum] {
+    fn variant_values() -> &'static [Self] {
         &[
-            MyEnum::MyValue1,
-            MyEnum::MyValue2,
-            MyEnum::DOMAIN,
+            Self::MyValue1,
+            Self::MyValue2,
+            Self::DOMAIN,
         ]
     }
 }
 
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
-        MyEnum(::fbthrift::__UNKNOWN_ID)
+        Self(::fbthrift::__UNKNOWN_ID)
     }
 }
 
@@ -171,7 +171,7 @@ impl ::std::str::FromStr for MyEnum {
             ("MyValue1", 0),
             ("MyValue2", 1),
         ];
-        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(MyEnum)
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum").map(Self)
     }
 }
 
@@ -195,7 +195,7 @@ where
 {
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        ::std::result::Result::Ok(MyEnum::from(p.read_i32()?))
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
 
@@ -286,7 +286,7 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
-            MyUnion::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();

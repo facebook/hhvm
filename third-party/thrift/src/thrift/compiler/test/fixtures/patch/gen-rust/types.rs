@@ -503,12 +503,12 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("InnerUnion");
         match self {
-            InnerUnion::innerOption(inner) => {
+            Self::innerOption(inner) => {
                 p.write_field_begin("innerOption", ::fbthrift::TType::String, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            InnerUnion::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -532,7 +532,7 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(InnerUnion::innerOption(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::innerOption(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
@@ -576,22 +576,22 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnion");
         match self {
-            MyUnion::option1(inner) => {
+            Self::option1(inner) => {
                 p.write_field_begin("option1", ::fbthrift::TType::String, 1);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            MyUnion::option2(inner) => {
+            Self::option2(inner) => {
                 p.write_field_begin("option2", ::fbthrift::TType::I32, 2);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            MyUnion::option3(inner) => {
+            Self::option3(inner) => {
                 p.write_field_begin("option3", ::fbthrift::TType::Struct, 3);
                 ::fbthrift::Serialize::write(inner, p);
                 p.write_field_end();
             }
-            MyUnion::UnknownField(_) => {}
+            Self::UnknownField(_) => {}
         }
         p.write_field_stop();
         p.write_struct_end();
@@ -617,15 +617,15 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::String, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(MyUnion::option1(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::option1(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::I32, 2, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(MyUnion::option2(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::option2(::fbthrift::Deserialize::read(p)?));
                 }
                 (::fbthrift::TType::Struct, 3, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(MyUnion::option3(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::option3(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(

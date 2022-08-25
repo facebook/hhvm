@@ -60,14 +60,14 @@
         {{#function:uniqueExceptions}}
         impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Error {
             fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                {{function:upcamel}}Error::{{field:rust_name}}(e)
+                Self::{{field:rust_name}}(e)
             }
         }
 
         impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}Error {
             fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> Option<&{{#field:type}}{{>lib/type}}{{/field:type}}> {
                 match self {
-                    {{function:upcamel}}Error::{{field:rust_name}}(inner) => Some(inner),
+                    Self::{{field:rust_name}}(inner) => Some(inner),
                     _ => None,
                 }
             }
@@ -76,13 +76,13 @@
         {{/function:uniqueExceptions}}
         impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Error {
             fn from(err: ::anyhow::Error) -> Self {
-                {{function:upcamel}}Error::ThriftError(err)
+                Self::ThriftError(err)
             }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Error {
             fn from(ae: ::fbthrift::ApplicationException) -> Self {
-                {{function:upcamel}}Error::ApplicationException(ae)
+                Self::ApplicationException(ae)
             }
         }
         {{/function:exceptions?}}
@@ -164,20 +164,20 @@
         {{#function:uniqueStreamExceptions}}
         impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamError {
             fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                {{function:upcamel}}StreamError::{{field:rust_name}}(e)
+                Self::{{field:rust_name}}(e)
             }
         }
 
         {{/function:uniqueStreamExceptions}}
         impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamError {
             fn from(err: ::anyhow::Error) -> Self {
-                {{function:upcamel}}StreamError::ThriftError(err)
+                Self::ThriftError(err)
             }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}StreamError {
             fn from(ae: ::fbthrift::ApplicationException) -> Self {
-                {{function:upcamel}}StreamError::ApplicationException(ae)
+                Self::ApplicationException(ae)
             }
         }
 

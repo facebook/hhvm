@@ -23,6 +23,7 @@ namespace java.swift org.apache.thrift.conformance
 
 include "thrift/conformance/if/serialization.thrift"
 include "thrift/conformance/if/rpc.thrift"
+include "thrift/conformance/if/patch_data.thrift"
 
 // A Collection of tests.
 struct TestSuite {
@@ -73,4 +74,5 @@ struct TestCase {
 union TestCaseUnion {
   1: serialization.RoundTripTestCase roundTrip;
   2: rpc.RpcTestCase rpc;
+  3: patch_data.PatchOpTestCase objectPatch;
 }

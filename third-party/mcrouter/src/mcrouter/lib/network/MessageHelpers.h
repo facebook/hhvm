@@ -66,6 +66,15 @@ template <typename Message>
 std::optional<std::string> getBucketIdImpl(std::false_type, Message&) {
   return std::nullopt;
 }
+
+template <typename Message>
+uint64_t getQueryTagsImpl(std::true_type, Message& message) {
+  return *message.queryTags_ref();
+}
+template <typename Message>
+uint64_t getQueryTagsImpl(std::false_type, Message&) {
+  return 0;
+}
 } // namespace detail
 
 // Flags helpers
@@ -169,5 +178,22 @@ template <typename Message>
 std::optional<std::string> getBucketId(Message& message) {
   return detail::getBucketIdImpl(HasBucketIdTrait<Message>{}, message);
 }
+
+template <typename Message, typename = std::enable_if_t<true>>
+class HasQueryTagsTrait : public std::false_type {};
+template <typename Message>
+class HasQueryTagsTrait<
+    Message,
+    std::enable_if_t<std::is_same<
+        decltype(std::declval<std::remove_const_t<Message>&>().queryTags_ref()),
+        apache::thrift::field_ref<std::uint64_t&>>{}>> : public std::true_type {
+};
+
+// Return queryTag if it exists in Message and 0 otherwise.
+template <class Message>
+uint64_t getQueryTagsIfExists(Message& message) {
+  return detail::getQueryTagsImpl(HasQueryTagsTrait<Message>{}, message);
+}
+
 } // namespace memcache
 } // namespace facebook

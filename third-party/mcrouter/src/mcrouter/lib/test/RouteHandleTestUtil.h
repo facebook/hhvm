@@ -155,6 +155,8 @@ struct TestHandleImpl {
 
   std::vector<uint64_t> sawBucketIds;
 
+  std::vector<uint64_t> sawQueryTags;
+
   bool isTko;
 
   bool isPaused;
@@ -367,6 +369,7 @@ struct RecordingRoute {
     h_->sawOperations.push_back(Request::name);
     h_->sawExptimes.push_back(getExptimeIfExist(req));
     h_->sawFlags.push_back(getFlagsIfExist(req));
+    h_->sawQueryTags.push_back(getQueryTagsIfExists(req));
     recordBucketId(req);
     recordShadowId(req);
     if (carbon::GetLike<Request>::value) {

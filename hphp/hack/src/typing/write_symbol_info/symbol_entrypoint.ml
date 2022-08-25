@@ -43,19 +43,19 @@ let write_json
      in
      if List.is_empty large then
        let json_chunks =
-         Symbol_json_builder.build_json ctx files_info ~ownership
+         Symbol_index_batch.build_json ctx files_info ~ownership
        in
        write_file file_dir (List.length files_info) json_chunks
      else
-       let json_chunks = Symbol_json_builder.build_json ctx small ~ownership in
+       let json_chunks = Symbol_index_batch.build_json ctx small ~ownership in
        write_file file_dir (List.length small) json_chunks;
        List.iter large ~f:(fun file_info ->
            let decl_json_chunks =
-             Symbol_json_builder.build_decls_json ctx [file_info] ~ownership
+             Symbol_index_batch.build_decls_json ctx [file_info] ~ownership
            in
            write_file file_dir 1 decl_json_chunks;
            let xref_json_chunks =
-             Symbol_json_builder.build_xrefs_json ctx [file_info] ~ownership
+             Symbol_index_batch.build_xrefs_json ctx [file_info] ~ownership
            in
            write_file file_dir 1 xref_json_chunks)
    with

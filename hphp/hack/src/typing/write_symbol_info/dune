@@ -9,7 +9,7 @@
   symbol_fact_id
   symbol_xrefs
   symbol_json_util
-  symbol_json_builder
+  symbol_index_batch
   symbol_entrypoint
   symbol_predicate)
  (libraries

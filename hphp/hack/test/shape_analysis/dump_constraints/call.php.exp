@@ -17,7 +17,6 @@ Constraints for \g:
 
 Constraints for \h:
   13: Parameter at [13:12-30]
-  14: ?1 ⊆ ?2
   14: ! SK ?1 : shape('c' => int)
   14: Arg(\h, 0) ⊆ ?1
 

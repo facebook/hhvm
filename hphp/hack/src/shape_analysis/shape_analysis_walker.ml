@@ -146,7 +146,8 @@ let rec assign
     begin
       match entity with
       | Some entity_ ->
-        let (env, current_assignment) = redirect ~pos ~origin env entity_ in
+        (* Handle copy-on-write by creating a variable indirection *)
+        let (env, entity_) = redirect ~pos ~origin env entity_ in
         let env =
           add_key_constraint
             ~pos
@@ -155,11 +156,9 @@ let rec assign
             ~variety:[Has]
             (ix, ty_rhs)
             env
-            current_assignment
+            entity_
         in
-        (* Handle copy-on-write by creating a variable indirection *)
-        let (env, var) = redirect ~pos ~origin env current_assignment in
-        Env.set_local env lid (Some var)
+        Env.set_local env lid (Some entity_)
       | None ->
         (* We might end up here as a result of deadcode, such as a dictionary
            assignment after an unconditional break in a loop. In this

@@ -2259,4 +2259,28 @@ TEST(FieldMaskTest, MaskBuilderReset) {
     }
   }
 }
+
+TEST(FieldMaskTest, MaskBuilderMaskAPIs) {
+  Bar2 src, dst;
+
+  MaskBuilder<Bar2> builder;
+  builder.reset_and_includes({"field_3", "field_1"}).includes({"field_4"});
+  // test invert
+  Mask expectedMask = reverseMask(builder.toThrift());
+  EXPECT_EQ(builder.invert().toThrift(), expectedMask);
+  // Mask includes bar.field_3().field_2().
+  // test ensure, clear, and copy
+  Bar2 expected, cleared;
+  expected.field_3().emplace().field_2() = 0;
+  cleared.field_3().emplace();
+  builder.ensure(src);
+  EXPECT_EQ(src, expected);
+  builder.copy(src, dst);
+  EXPECT_EQ(dst, expected);
+  builder.clear(src);
+  EXPECT_EQ(src, cleared);
+  builder.copy(src, dst);
+  EXPECT_EQ(dst, cleared);
+}
+
 } // namespace apache::thrift::test

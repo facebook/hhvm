@@ -119,6 +119,11 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return *this;
   }
 
+  MaskBuilder& invert() {
+    data_ = reverseMask(data_);
+    return *this;
+  }
+
   // Includes the field specified by the list of Ids/field names with
   // the given mask.
   // The field is t.field1().field2() ...
@@ -173,6 +178,11 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& reset_and_excludes(const Mask& mask = allMask()) {
     return reset_to_all().template excludes<Id...>(mask);
   }
+
+  // Mask APIs
+  void ensure(T& obj) const { protocol::ensure(data_, obj); }
+  void clear(T& obj) const { protocol::clear(data_, obj); }
+  void copy(const T& src, T& dst) const { protocol::copy(data_, src, dst); }
 };
 
 template <typename T>

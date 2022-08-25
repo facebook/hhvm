@@ -25,7 +25,7 @@ auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_
 <%#field:cpp_first_adapter%>
 <%#field:cpp_exactly_one_adapter?%>
 constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, folly::remove_cvref_t<decltype(<% > field/member%>)>>::value;
-::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+::folly::if_constexpr<hasInplaceToThrift>(
   [&](auto& field) { <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(field), _readState); },
   [&](auto&) {})(<% > field/member%>);
 if (!hasInplaceToThrift) {

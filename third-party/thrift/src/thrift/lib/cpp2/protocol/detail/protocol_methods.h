@@ -81,23 +81,6 @@ namespace thrift {
 namespace detail {
 namespace pm {
 
-// Simulate if constexpr in C++14
-template <bool cond>
-struct IfConstexpr {
-  template <class F, class G>
-  auto operator()(F f, G) {
-    return f;
-  }
-};
-
-template <>
-struct IfConstexpr<false> {
-  template <class F, class G>
-  auto operator()(F, G g) {
-    return g;
-  }
-};
-
 template <typename T>
 auto reserve_if_possible(T* t, std::uint32_t size)
     -> decltype(t->reserve(size), std::true_type{}) {
@@ -308,7 +291,7 @@ struct protocol_methods;
   }                                                                          \
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
-    IfConstexpr<Context::kAcceptsContext>{}(                                 \
+    folly::if_constexpr<Context::kAcceptsContext>(                           \
         [&](auto& p) { p.read##Method##WithContext(out, ctx); },             \
         [&](auto& p) { p.read##Method(out); })(protocol);                    \
   }                                                                          \
@@ -354,7 +337,7 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
     SignedType tmp;                                                          \
-    IfConstexpr<Context::kAcceptsContext>{}(                                 \
+    folly::if_constexpr<Context::kAcceptsContext>(                           \
         [&](auto& p) { p.read##Method##WithContext(tmp, ctx); },             \
         [&](auto& p) { p.read##Method(tmp); })(protocol);                    \
     out = folly::to_unsigned(tmp);                                           \

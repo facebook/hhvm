@@ -1652,7 +1652,7 @@ _readField_data1:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_data1)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_data1);
     if (!hasInplaceToThrift) {
@@ -1676,7 +1676,7 @@ _readField_data2:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_data2)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_data2);
     if (!hasInplaceToThrift) {
@@ -1858,7 +1858,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -1898,7 +1898,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -2134,7 +2134,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -2175,7 +2175,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -2374,7 +2374,7 @@ _readField_innerOption:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BinaryPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_innerOption)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_innerOption);
     if (!hasInplaceToThrift) {
@@ -2532,7 +2532,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -2572,7 +2572,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -2806,7 +2806,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -2847,7 +2847,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -3046,7 +3046,7 @@ _readField_option1:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_option1)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_option1);
     if (!hasInplaceToThrift) {
@@ -3070,7 +3070,7 @@ _readField_option2:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_option2)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_option2);
     if (!hasInplaceToThrift) {
@@ -3094,7 +3094,7 @@ _readField_option3:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_option3)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_option3);
     if (!hasInplaceToThrift) {
@@ -3298,7 +3298,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -3338,7 +3338,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -3572,7 +3572,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -3613,7 +3613,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -4066,7 +4066,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::ListPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField21PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -4107,7 +4107,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::ListPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField21PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -4560,7 +4560,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::SetPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField22PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::SetPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -4601,7 +4601,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::SetPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField22PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::SetPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -5054,7 +5054,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::MapPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -5095,7 +5095,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::MapPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -5294,7 +5294,7 @@ _readField_boolVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BoolPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_boolVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BoolPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_boolVal);
     if (!hasInplaceToThrift) {
@@ -5318,7 +5318,7 @@ _readField_byteVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_byteVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_byteVal);
     if (!hasInplaceToThrift) {
@@ -5342,7 +5342,7 @@ _readField_i16Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_i16Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_i16Val);
     if (!hasInplaceToThrift) {
@@ -5366,7 +5366,7 @@ _readField_i32Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_i32Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_i32Val);
     if (!hasInplaceToThrift) {
@@ -5390,7 +5390,7 @@ _readField_i64Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_i64Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_i64Val);
     if (!hasInplaceToThrift) {
@@ -5414,7 +5414,7 @@ _readField_floatVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_floatVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_floatVal);
     if (!hasInplaceToThrift) {
@@ -5438,7 +5438,7 @@ _readField_doubleVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_doubleVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_doubleVal);
     if (!hasInplaceToThrift) {
@@ -5462,7 +5462,7 @@ _readField_stringVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_stringVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_stringVal);
     if (!hasInplaceToThrift) {
@@ -5486,7 +5486,7 @@ _readField_binaryVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BinaryPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_binaryVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_binaryVal);
     if (!hasInplaceToThrift) {
@@ -5510,7 +5510,7 @@ _readField_structVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_structVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_structVal);
     if (!hasInplaceToThrift) {
@@ -5534,7 +5534,7 @@ _readField_optBoolVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optBoolVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalBoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optBoolVal);
     if (!hasInplaceToThrift) {
@@ -5558,7 +5558,7 @@ _readField_optByteVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optByteVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalBytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optByteVal);
     if (!hasInplaceToThrift) {
@@ -5582,7 +5582,7 @@ _readField_optI16Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optI16Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalI16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optI16Val);
     if (!hasInplaceToThrift) {
@@ -5606,7 +5606,7 @@ _readField_optI32Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optI32Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalI32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optI32Val);
     if (!hasInplaceToThrift) {
@@ -5630,7 +5630,7 @@ _readField_optI64Val:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optI64Val)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalI64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optI64Val);
     if (!hasInplaceToThrift) {
@@ -5654,7 +5654,7 @@ _readField_optFloatVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optFloatVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalFloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optFloatVal);
     if (!hasInplaceToThrift) {
@@ -5678,7 +5678,7 @@ _readField_optDoubleVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optDoubleVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalDoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optDoubleVal);
     if (!hasInplaceToThrift) {
@@ -5702,7 +5702,7 @@ _readField_optStringVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optStringVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalStringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optStringVal);
     if (!hasInplaceToThrift) {
@@ -5726,7 +5726,7 @@ _readField_optBinaryVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optBinaryVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::OptionalBinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optBinaryVal);
     if (!hasInplaceToThrift) {
@@ -5750,7 +5750,7 @@ _readField_optStructVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optStructVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::OptionalMyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optStructVal);
     if (!hasInplaceToThrift) {
@@ -5774,7 +5774,7 @@ _readField_optListVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optListVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::OptionalMyStructField21PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optListVal);
     if (!hasInplaceToThrift) {
@@ -5798,7 +5798,7 @@ _readField_optSetVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optSetVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::OptionalMyStructField22PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optSetVal);
     if (!hasInplaceToThrift) {
@@ -5822,7 +5822,7 @@ _readField_optMapVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::OptionalPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_optMapVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::OptionalMyStructField23PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::OptionalPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_optMapVal);
     if (!hasInplaceToThrift) {
@@ -5846,7 +5846,7 @@ _readField_unionVal:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_unionVal)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_unionVal);
     if (!hasInplaceToThrift) {
@@ -6534,7 +6534,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -6574,7 +6574,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {
@@ -6810,7 +6810,7 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patchPrior)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patchPrior);
     if (!hasInplaceToThrift) {
@@ -6851,7 +6851,7 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter, folly::remove_cvref_t<decltype(this->__fbthrift_field_patch)>>::value;
-    ::apache::thrift::detail::pm::IfConstexpr<hasInplaceToThrift>{}(
+    ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_patch);
     if (!hasInplaceToThrift) {

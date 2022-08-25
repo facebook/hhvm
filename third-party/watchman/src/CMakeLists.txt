@@ -143,10 +143,10 @@ include(RustStaticLibrary)
 # roll the checks in together with writing out the features to config.h
 # ourselves here.
 function(config_h LINE)
-  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/config.h.new" "${LINE}\n")
+  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h.new" "${LINE}\n")
 endfunction()
 
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/config.h.new" "#pragma once\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h.new" "#pragma once\n")
 
 if(NOT WIN32)
   set(WATCHMAN_STATE_DIR "${CMAKE_INSTALL_PREFIX}/var/run/watchman" CACHE STRING
@@ -270,16 +270,16 @@ endif()
 
 # Now close out config.h.  We only want to touch the file if the contents are
 # different, so do a little dance to figure that out.
-if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/config.h")
-  file(MD5 "${CMAKE_CURRENT_BINARY_DIR}/config.h" orig_hash)
-  file(MD5 "${CMAKE_CURRENT_BINARY_DIR}/config.h.new" this_hash)
+if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h")
+  file(MD5 "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h" orig_hash)
+  file(MD5 "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h.new" this_hash)
   if(NOT orig_hash STREQUAL this_hash)
-    file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/config.h.new"
-      "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+    file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h.new"
+      "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h")
   endif()
 else()
-  file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/config.h.new"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+  file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h.new"
+    "${CMAKE_CURRENT_BINARY_DIR}/watchman/config.h")
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

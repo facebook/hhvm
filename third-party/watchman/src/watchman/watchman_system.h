@@ -14,7 +14,7 @@
 #define __STDC_LIMIT_MACROS
 #define __STDC_FORMAT_MACROS
 #include <folly/portability/SysTypes.h>
-#include "config.h" // @manual=//watchman:config_h
+#include "watchman/config.h"
 
 // This header plays tricks with posix IO functions and
 // can result in ambiguous overloads on Windows if io.h

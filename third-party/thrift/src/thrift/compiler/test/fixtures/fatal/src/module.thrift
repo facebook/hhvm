@@ -403,7 +403,7 @@ struct struct_with_indirections {
   3: HasANumber number;
   4: HasAResult result;
   5: HasAPhrase phrase;
-}
+} (thrift.uri = "facebook.com/thrift/test/fixtures")
 
 struct StructWithFieldAdapter {
   @cpp.Adapter{name = "my::Adapter1"}

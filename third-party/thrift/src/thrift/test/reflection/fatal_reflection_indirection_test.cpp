@@ -18,7 +18,9 @@
 #include <folly/Utility.h>
 #include <folly/portability/GTest.h>
 
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
+#include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_reflection_indirection_fatal_types.h>
 
 namespace {
@@ -167,4 +169,36 @@ TEST_F(FatalReflectionIndirectionTest, indirection_string_field) {
   member::field_ref_getter{}(obj) = reflection_indirection::HasAPhrase("world");
   EXPECT_EQ("world", member::getter{}(obj));
   EXPECT_TRUE(member::is_set(obj));
+}
+
+TEST_F(FatalReflectionIndirectionTest, type_tag) {
+  using apache::thrift::field_ordinal;
+  using apache::thrift::op::get_type_tag;
+  using apache::thrift::test::same_type;
+  using namespace apache::thrift::type;
+  using namespace reflection_indirection;
+
+  same_type<get_type_tag<type, field_ordinal<0>>, void>;
+  same_type<get_type_tag<type, field_ordinal<1>>, i32_t>;
+  same_type<
+      get_type_tag<type, field_ordinal<2>>,
+      apache::thrift::type::cpp_type<CppFakeI32, apache::thrift::type::i32_t>>;
+  same_type<
+      get_type_tag<type, field_ordinal<3>>,
+      apache::thrift::type::adapted<
+          apache::thrift::IndirectionAdapter<
+              reflection_indirection::CppHasANumber>,
+          apache::thrift::type::i32_t>>;
+  same_type<
+      get_type_tag<type, field_ordinal<4>>,
+      apache::thrift::type::adapted<
+          apache::thrift::IndirectionAdapter<
+              reflection_indirection::CppHasAResult>,
+          apache::thrift::type::i32_t>>;
+  same_type<
+      get_type_tag<type, field_ordinal<5>>,
+      apache::thrift::type::adapted<
+          apache::thrift::IndirectionAdapter<
+              reflection_indirection::CppHasAPhrase>,
+          apache::thrift::type::string_t>>;
 }

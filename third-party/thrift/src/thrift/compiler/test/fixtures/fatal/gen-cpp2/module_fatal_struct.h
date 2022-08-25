@@ -2175,7 +2175,20 @@ class struct_with_indirections_struct_traits {
       using phrase = __fbthrift_refl_impl::reflected_no_annotations;
     };
 
+    struct __fbthrift_keys {
+      using thrift_uri = __fbthrift_strings_module::thrift_uri;
+    };
+
+    struct __fbthrift_values {
+      using thrift_uri = ::fatal::sequence<char, 'f', 'a', 'c', 'e', 'b', 'o', 'o', 'k', '.', 'c', 'o', 'm', '/', 't', 'h', 'r', 'i', 'f', 't', '/', 't', 'e', 's', 't', '/', 'f', 'i', 'x', 't', 'u', 'r', 'e', 's'>;
+    };
+
    public:
+    using keys = __fbthrift_keys;
+    using values = __fbthrift_values;
+    using map = ::fatal::list<
+        ::apache::thrift::annotation<keys::thrift_uri, values::thrift_uri>
+    >;
     using members = __fbthrift_members;
   };
 

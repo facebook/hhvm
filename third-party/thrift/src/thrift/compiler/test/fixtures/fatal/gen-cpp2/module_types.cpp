@@ -3845,6 +3845,10 @@ void TccStructTraits<::test_cpp2::cpp_reflection::struct_with_indirections>::tra
 
 namespace test_cpp2 { namespace cpp_reflection {
 
+const char* struct_with_indirections::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/fixtures";
+}
+
 const folly::StringPiece struct_with_indirections::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<struct_with_indirections>::fields_names[folly::to_underlying(ord) - 1];

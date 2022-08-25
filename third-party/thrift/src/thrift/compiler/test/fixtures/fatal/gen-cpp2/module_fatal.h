@@ -331,6 +331,7 @@ struct __fbthrift_strings_module {
   using test_php_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'p', 'h', 'p', '_', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
   using test_py_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 'p', 'y', '.', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
   using test_swift_cpp_reflection = ::fatal::sequence<char, 't', 'e', 's', 't', '_', 's', 'w', 'i', 'f', 't', '.', 'c', 'p', 'p', '_', 'r', 'e', 'f', 'l', 'e', 'c', 't', 'i', 'o', 'n'>;
+  using thrift_uri = ::fatal::sequence<char, 't', 'h', 'r', 'i', 'f', 't', '.', 'u', 'r', 'i'>;
   using type = ::fatal::sequence<char, 't', 'y', 'p', 'e'>;
   using ud = ::fatal::sequence<char, 'u', 'd'>;
   using ud_2 = ::fatal::sequence<char, 'u', 'd', '_', '2'>;

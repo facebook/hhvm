@@ -289,8 +289,7 @@ namespace {
 //    * __fbthrift_cpp2_gen_json
 struct gen_check_get_json {
   template <typename Type>
-  using apply =
-      decltype(struct_private_access::__fbthrift_cpp2_gen_json<Type>());
+  using apply = decltype(private_access::__fbthrift_cpp2_gen_json<Type>());
 };
 
 //  gen_check_get

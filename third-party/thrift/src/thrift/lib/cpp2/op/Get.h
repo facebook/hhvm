@@ -30,8 +30,8 @@ namespace op {
 
 // Resolves to the number of definitions contained in Thrift class.
 template <typename S>
-FOLLY_INLINE_VARIABLE constexpr std::size_t size_v = ::apache::thrift::detail::
-    st::struct_private_access::__fbthrift_field_size_v<S>;
+FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
+    ::apache::thrift::detail::st::private_access::__fbthrift_field_size_v<S>;
 
 // Gets the ordinal, for example:
 //
@@ -61,7 +61,7 @@ template <class S, class Id>
 using get_field_id = folly::conditional_t<
     get_ordinal<S, Id>::value == type::Ordinal{},
     field_id<0>,
-    ::apache::thrift::detail::st::struct_private_access::
+    ::apache::thrift::detail::st::private_access::
         field_id<S, get_ordinal<S, Id>>>;
 template <class S, class Id>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
@@ -79,8 +79,8 @@ void for_each_field_id(F&& f) {
 //   using Ident = get_field_id<MyS, field_id<7>>
 //
 template <class S, class Id>
-using get_ident = ::apache::thrift::detail::st::struct_private_access::
-    ident<S, get_ordinal<S, Id>>;
+using get_ident =
+    ::apache::thrift::detail::st::private_access::ident<S, get_ordinal<S, Id>>;
 
 // It calls the given function with each folly::tag<thrift::ident::*>{} in
 // Thrift class.
@@ -97,7 +97,7 @@ void for_each_ident(F&& f) {
 //
 template <typename S, class Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
-    ::apache::thrift::detail::st::struct_private_access::
+    ::apache::thrift::detail::st::private_access::
         __fbthrift_get_field_name<S, get_ordinal<S, Id>>();
 
 // Gets the Thrift type tag, for example:
@@ -106,7 +106,7 @@ FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
 //   using Tag = get_field_id<MyS, ident::foo>
 //
 template <typename S, typename Id>
-using get_type_tag = ::apache::thrift::detail::st::struct_private_access::
+using get_type_tag = ::apache::thrift::detail::st::private_access::
     type_tag<S, get_ordinal<S, Id>>;
 
 template <class S, class Id>
@@ -129,7 +129,7 @@ struct GetOrdinalImpl {
   // TODO(ytj): To reduce build time, only check whether Id is reflection
   // metadata if we couldn't find Id.
   static_assert(type::is_id_v<Id>, "");
-  using type = ::apache::thrift::detail::st::struct_private_access::
+  using type = ::apache::thrift::detail::st::private_access::
       ordinal<type::native_type<Tag>, Id>;
 };
 

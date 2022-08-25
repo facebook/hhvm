@@ -28,7 +28,7 @@
 #include <thrift/lib/cpp2/type/Testing.h>
 
 namespace apache::thrift::type {
-using apache::thrift::detail::st::struct_private_access;
+using apache::thrift::detail::st::private_access;
 
 TEST(FieldsTest, Get) {
   test_cpp2::cpp_reflection::struct3 s;
@@ -88,15 +88,15 @@ template <
     class FieldTag>
 void checkField(const char* identName) {
   if constexpr (Ordinal::value != Ordinal{}) {
-    test::same_tag<Id, struct_private_access::field_id<Struct, Ordinal>>;
+    test::same_tag<Id, private_access::field_id<Struct, Ordinal>>;
   }
-  test::same_tag<TypeTag, struct_private_access::type_tag<Struct, Ordinal>>;
-  test::same_tag<Ident, struct_private_access::ident<Struct, Ordinal>>;
-  test::same_tag<Ordinal, struct_private_access::ordinal<Struct, Id>>;
-  test::same_tag<Ordinal, struct_private_access::ordinal<Struct, Ident>>;
+  test::same_tag<TypeTag, private_access::type_tag<Struct, Ordinal>>;
+  test::same_tag<Ident, private_access::ident<Struct, Ordinal>>;
+  test::same_tag<Ordinal, private_access::ordinal<Struct, Id>>;
+  test::same_tag<Ordinal, private_access::ordinal<Struct, Ident>>;
 
   if constexpr (is_type_tag_unique) {
-    test::same_tag<Ordinal, struct_private_access::ordinal<Struct, TypeTag>>;
+    test::same_tag<Ordinal, private_access::ordinal<Struct, TypeTag>>;
   }
 
   test::same_tag<op::get_ordinal<Struct, Ordinal>, Ordinal>;

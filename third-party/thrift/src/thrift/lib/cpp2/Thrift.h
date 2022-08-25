@@ -67,7 +67,7 @@ enum class ExceptionBlame {
 
 enum class ExceptionSafety {
   UNSPECIFIED = 0,
-  SAFE = 1, // It is guarneteed the associated RPC failed completely, and no
+  SAFE = 1, // It is guaranteed the associated RPC failed completely, and no
             // significant server state changed while trying to process the
             // RPC.
 };
@@ -75,13 +75,11 @@ enum class ExceptionSafety {
 namespace detail {
 namespace st {
 
-//  struct_private_access
+//  (struct_)private_access
 //
-//  Thrift structures have private members but it may be necessary for the
+//  Thrift generated types have private members but it may be necessary for the
 //  Thrift support library to access those private members.
 //
-//  TODO(dokwon): Rename struct_private_access to have single `private access`
-//  struct.
 struct struct_private_access {
   //  These should be alias templates but Clang has a bug where it does not
   //  permit member alias templates of a friend struct to access private
@@ -148,6 +146,9 @@ struct struct_private_access {
   template <typename T>
   static constexpr auto __fbthrift_field_size_v = T::__fbthrift_field_size_v;
 };
+//  TODO(dokwon): Remove all usage of struct_private_access and standardize on
+//  private_access.
+using private_access = struct_private_access;
 
 template <typename T, typename = void>
 struct IsThriftClass : std::false_type {};
@@ -166,24 +167,24 @@ struct IsThriftUnion<T, folly::void_t<typename T::__fbthrift_cpp2_type>>
 // __fbthrift_clear_terse_fields should be called for a terse struct field
 // before deserialization so that it only clears out terse fields in a terse
 // struct.
-using clear_terse_fields_fn = struct_private_access::clear_terse_fields_fn;
+using clear_terse_fields_fn = private_access::clear_terse_fields_fn;
 FOLLY_INLINE_VARIABLE static constexpr clear_terse_fields_fn
     clear_terse_fields{};
 
 } // namespace st
 } // namespace detail
 
-using clear_fn = detail::st::struct_private_access::clear_fn;
+using clear_fn = detail::st::private_access::clear_fn;
 FOLLY_INLINE_VARIABLE constexpr clear_fn clear{};
 
-using empty_fn = detail::st::struct_private_access::empty_fn;
+using empty_fn = detail::st::private_access::empty_fn;
 FOLLY_INLINE_VARIABLE static constexpr empty_fn empty{};
 
 // TODO(dokwon): Add apache::thrift::uri support for generated enum types.
 template <typename T>
 FOLLY_EXPORT const std::string& uri() {
-  static const auto& kUri = *new std::string(
-      detail::st::struct_private_access::__fbthrift_thrift_uri<T>());
+  static const auto& kUri =
+      *new std::string(detail::st::private_access::__fbthrift_thrift_uri<T>());
   return kUri;
 }
 

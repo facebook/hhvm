@@ -1849,11 +1849,11 @@ std::string serializeExceptionMeta(const folly::exception_wrapper& ew) {
   constexpr auto errorKind = apache::thrift::detail::st::struct_private_access::
       __fbthrift_cpp2_gen_exception_kind<T>();
   errorClassification.kind() = fromExceptionKind(errorKind);
-  constexpr auto errorBlame = apache::thrift::detail::st::
-      struct_private_access::__fbthrift_cpp2_gen_exception_blame<T>();
+  constexpr auto errorBlame = apache::thrift::detail::st::private_access::
+      __fbthrift_cpp2_gen_exception_blame<T>();
   errorClassification.blame() = fromExceptionBlame(errorBlame);
-  constexpr auto errorSafety = apache::thrift::detail::st::
-      struct_private_access::__fbthrift_cpp2_gen_exception_safety<T>();
+  constexpr auto errorSafety = apache::thrift::detail::st::private_access::
+      __fbthrift_cpp2_gen_exception_safety<T>();
   errorClassification.safety() = fromExceptionSafety(errorSafety);
 
   ew.with_exception(

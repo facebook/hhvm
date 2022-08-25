@@ -5,9 +5,9 @@ Summary after closing and simplifying for \f:
 [7:12-30] [Parameter]:
   shape()
 [9:11-13] [Debug]:
-  shape('a' => int, ?'b' => bool)
+  shape('a' => int, 'b' => bool)
 Summary after closing and simplifying for \g:
 [7:12-30] [Parameter]:
   shape()
 [9:11-13] [Debug]:
-  shape(?'b' => bool)
+  shape('b' => bool)

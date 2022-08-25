@@ -70,22 +70,6 @@ let constraints_init =
     subsets = [];
   }
 
-let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
-  let immediate_consequence (x, y) set =
-    let add (y', z) set =
-      if equal_entity_ y y' then
-        PointsToSet.add (x, z) set
-      else
-        set
-    in
-    PointsToSet.fold add set set
-  in
-  let new_set = PointsToSet.fold immediate_consequence set set in
-  if PointsToSet.cardinal new_set = PointsToSet.cardinal set then
-    set
-  else
-    transitive_closure new_set
-
 let disassemble constraints =
   let partition_constraint constraints = function
     | Marks (kind, entity) ->
@@ -145,29 +129,6 @@ let assemble
       ~f:(fun entity -> Has_dynamic_key entity)
       (EntitySet.elements dynamic_accesses)
   @ List.map ~f:(fun (sub, sup) -> Subsets (sub, sup)) subsets
-
-let subset_lookups subsets =
-  let update entity entity' =
-    EntityMap.update entity (function
-        | None -> Some (EntitySet.singleton entity')
-        | Some set -> Some (EntitySet.add entity' set))
-  in
-  let (subset_map, superset_map) =
-    let update_maps (e, e') (subset_map, superset_map) =
-      let subset_map = update e' e subset_map in
-      let superset_map = update e e' superset_map in
-      (subset_map, superset_map)
-    in
-    PointsToSet.fold update_maps subsets (EntityMap.empty, EntityMap.empty)
-  in
-
-  (* Generate lookup functions *)
-  let collect map entity =
-    match EntityMap.find_opt entity map with
-    | Some entities -> EntitySet.elements entities
-    | None -> []
-  in
-  (collect subset_map, collect superset_map)
 
 type adjacencies = {
   backwards: EntitySet.t;
@@ -356,15 +317,6 @@ let derive_optional_accesses
     `r` means reflexively closed
     `u` means upwards closed by propagating through subsets
     `d` means downwards closed by propagating through subsets
-
-  // Reflexive closure
-  subsets_tr(E,E) :-
-    subsets(E,_); subsets(_,E);
-    has_static_key(E,_,_);
-    has_dynamic_key(E,_,_).
-  // Transitive closure closure
-  subsets_tr(E,F) :- subsets(E,F).
-  subsets_tr(E,F) :- subsets(E,F), subsets_re(E,F).
 *)
 let deduce (constraints : constraint_ list) : constraint_ list =
   let {
@@ -377,24 +329,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   } =
     disassemble constraints
   in
-
-  let subsets_reflexive =
-    List.map ~f:(fun (_, pos) -> Literal pos) markers
-    @ List.map
-        (StaticAccess.Set.elements base_static_accesses)
-        ~f:(fun (e, _, _) -> e)
-    @ List.map
-        (StaticAccess.Set.elements derived_static_accesses)
-        ~f:(fun (e, _, _) -> e)
-    @ EntitySet.elements dynamic_accesses
-    @ List.concat_map subsets ~f:(fun (e, e') -> [e; e'])
-    |> List.map ~f:(fun e -> (e, e))
-  in
   let adjacency_map = mk_adjacency_map subsets in
-  let subsets = subsets_reflexive @ subsets in
-  let subsets = PointsToSet.of_list subsets |> transitive_closure in
-  let (_collect_subsets, _collect_supersets) = subset_lookups subsets in
-  let subsets = PointsToSet.elements subsets in
 
   (* Close upwards *)
   let derived_static_accesses =

@@ -65,7 +65,8 @@ There are several key goals for these components:
 
 ### Dependencies
 
-If on Linux or MacOS (with homebrew installed) you can install system dependencies to save building them:
+On Linux or MacOS (with homebrew installed) you can install system dependencies
+to save building them:
 
     # Clone the repo
     git clone https://github.com/facebook/fbthrift
@@ -81,19 +82,23 @@ Some of the dependencies `getdeps.py` uses and installs are:
 [Boost](https://www.boost.org),
 [CMake](https://cmake.org),
 [OpenSSLv1.0.2g](https://www.openssl.org),
-[PThreads](https://computing.llnl.gov/tutorials/pthreads), and
+[PThreads](https://computing.llnl.gov/tutorials/pthreads),
+[Python](https://www.python.org/), and
 [Zlib](https://zlib.net)
 
 **External**:
 [{fmt}](https://github.com/fmtlib/fmt),
-[GFlags](https://github.com/gflags/gflags), and
-[GLog](https://github.com/google/glog)
+[GFlags](https://github.com/gflags/gflags),
+[GLog](https://github.com/google/glog), and
+[GTest and GMock](https://github.com/google/googletest)
 
 **Facebook**:
 [Fizz](https://github.com/facebookincubator/fizz),
 [Folly](https://github.com/facebook/folly),
 [Wangle](https://github.com/facebook/wangle), and
 [Zstd](https://github.com/facebook/zstd)
+
+The Thrift compiler only depends on Boost, CMake and {fmt}.
 
 ### Build
 
@@ -110,6 +115,13 @@ Some of the dependencies `getdeps.py` uses and installs are:
 * `installed/fbthrift/lib/libthriftcpp2.a`: Library for clients and servers.
 
 If you want to invoke `cmake` again to iterate, there is an helpful `run_cmake.py` output in the scratch `build/fbthrift` directory.
+
+CMake options:
+
+* `compiler_only`:
+  specifies whether to build only the Thrift compiler (OFF by default)
+* `enable_tests`:
+  specifies whether to enable tests
 
 ### Thrift Files
 

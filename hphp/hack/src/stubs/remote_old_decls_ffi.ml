@@ -8,4 +8,4 @@
 
 let get_decls _ _ _ = failwith "get_decls not implemented"
 
-let put_decls _ _ = failwith "put_decls not implemented"
+let put_decls ~silent:_ _ _ = failwith "put_decls not implemented"

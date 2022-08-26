@@ -135,6 +135,8 @@ let go
       ~next:get_next
   in
 
-  let _ = Remote_old_decls_ffi.put_decls hh_config_version results in
+  let _ =
+    Remote_old_decls_ffi.put_decls ~silent:false hh_config_version results
+  in
   Hh_logger.log "Processed %d decls" (List.length results);
   ()

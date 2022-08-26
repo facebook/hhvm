@@ -6,4 +6,7 @@ internal class Child extends Foo {
   public static function get(): int {
     return 5;
   }
+  public function get2(): int {
+    return 5;
+  }
 }

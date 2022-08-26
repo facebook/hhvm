@@ -233,14 +233,8 @@ let go
         match Direct_decl_utils.direct_decl_parse ctx fn with
         | None -> acc
         | Some parsed_file ->
-          let class_decls =
-            List.filter_map
-              parsed_file.Direct_decl_parser.pfh_decls
-              ~f:(function
-                | (_, Shallow_decl_defs.Class _, _) as decl -> Some decl
-                | _ -> None)
-          in
-          let pf_hash_and_marshalled_declmap =
+          let class_decls = parsed_file.Direct_decl_parser.pfh_decls in
+          let decls_to_upload =
             List.map class_decls ~f:(fun (name, decl, decl_hash) ->
                 let decl_hash_64 = Int64.to_string decl_hash in
                 let symbol_to_shallow_decl = SMap.singleton name decl in
@@ -249,7 +243,7 @@ let go
                 in
                 (decl_hash_64, marshalled_symbol_to_shallow_decl))
           in
-          acc @ pf_hash_and_marshalled_declmap)
+          acc @ decls_to_upload)
       fnl
   in
 

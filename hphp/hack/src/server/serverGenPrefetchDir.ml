@@ -87,43 +87,27 @@ let go
 
   let job (acc : (string * string) list) (fnl : Relative_path.t list) :
       (string * string) list =
-    let acc =
-      List.fold_left
-        ~init:acc
-        ~f:(fun acc fn ->
-          Hh_logger.log
-            "Saving decls for prefetching: %s"
-            (Relative_path.suffix fn);
-          match Direct_decl_utils.direct_decl_parse ctx fn with
-          | None -> acc
-          | Some parsed_file ->
-            let decls = parsed_file.Direct_decl_parser.pfh_decls in
-            Direct_decl_utils.cache_decls ctx fn decls;
-            let names_and_decl_hashes =
-              get_name_and_decl_hashes_from_decls decls
-            in
-            List.fold_left
-              ~init:acc
-              ~f:(fun acc (name, decl_hash) ->
-                let shallow_decl_opt = Shallow_classes_provider.get ctx name in
-                if Option.is_some shallow_decl_opt then
-                  let shallow_decl = Option.value_exn shallow_decl_opt in
-                  let shallow_decls_in_file = SMap.empty in
-                  let shallow_decls_in_file =
-                    SMap.add name shallow_decl shallow_decls_in_file
-                  in
-                  List.rev_append
-                    acc
-                    [
-                      ( Int64.to_string decl_hash,
-                        Marshal.to_string shallow_decls_in_file [] );
-                    ]
-                else
-                  acc)
-              names_and_decl_hashes)
-        fnl
-    in
-    acc
+    List.fold_left
+      ~init:acc
+      ~f:(fun acc fn ->
+        Hh_logger.log
+          "Saving decls for prefetching: %s"
+          (Relative_path.suffix fn);
+        match Direct_decl_utils.direct_decl_parse ctx fn with
+        | None -> acc
+        | Some parsed_file ->
+          let class_decls = parsed_file.Direct_decl_parser.pfh_decls in
+          let decls_to_upload =
+            List.map class_decls ~f:(fun (name, decl, decl_hash) ->
+                let decl_hash_64 = Int64.to_string decl_hash in
+                let symbol_to_shallow_decl = SMap.singleton name decl in
+                let marshalled_symbol_to_shallow_decl =
+                  Marshal.to_string symbol_to_shallow_decl []
+                in
+                (decl_hash_64, marshalled_symbol_to_shallow_decl))
+          in
+          acc @ decls_to_upload)
+      fnl
   in
 
   let results =

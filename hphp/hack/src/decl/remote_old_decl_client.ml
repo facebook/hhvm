@@ -127,11 +127,14 @@ let fetch_old_decls
         List.fold
           ~init:SMap.empty
           ~f:(fun acc blob ->
-            let contents : Shallow_decl_defs.shallow_class SMap.t =
+            let contents : Shallow_decl_defs.decl SMap.t =
               Marshal.from_string blob 0
             in
             SMap.fold
-              (fun name cls acc -> SMap.add name (Some cls) acc)
+              (fun name decl acc ->
+                match decl with
+                | Shallow_decl_defs.Class cls -> SMap.add name (Some cls) acc
+                | _ -> acc)
               contents
               acc)
           decl_blobs

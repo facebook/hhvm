@@ -97,8 +97,22 @@ type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 #[derive(Clone)]
 pub struct DirectDeclSmartConstructors<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
+    state: Rc<Impl<'a, 'o, 't, S>>,
     pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
+    previous_token_kind: TokenKind,
+}
 
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> std::ops::Deref
+    for DirectDeclSmartConstructors<'a, 'o, 't, S>
+{
+    type Target = Impl<'a, 'o, 't, S>;
+    fn deref(&self) -> &Self::Target {
+        &self.state
+    }
+}
+
+#[derive(Clone)]
+pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     pub source_text: IndexedSourceText<'t>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
@@ -115,7 +129,6 @@ pub struct DirectDeclSmartConstructors<'a, 'o, 't, S: SourceTextAllocator<'t, 'a
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
-    previous_token_kind: TokenKind,
     source_text_allocator: S,
     module: Option<Id<'a>>,
 }
@@ -136,38 +149,34 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
         let filename = RelativePath::make(prefix, path);
         Self {
-            token_factory: SimpleTokenFactoryImpl::new(),
-
-            source_text,
-            arena,
-            filename: arena.alloc(filename),
-            file_mode,
-            decls: Decls::empty(),
-            file_attributes: List::empty(),
-            const_refs: None,
-            namespace_builder: Rc::new(NamespaceBuilder::new_in(
-                &opts.auto_namespace_map,
-                opts.disable_xhp_element_mangling,
-                elaborate_xhp_namespaces_for_facts,
+            state: Rc::new(Impl {
+                source_text,
                 arena,
-            )),
-            opts,
-            classish_name_builder: ClassishNameBuilder::new(),
-            type_parameters: Rc::new(Vec::new()),
+                filename: arena.alloc(filename),
+                file_mode,
+                decls: Decls::empty(),
+                file_attributes: List::empty(),
+                const_refs: None,
+                namespace_builder: Rc::new(NamespaceBuilder::new_in(
+                    &opts.auto_namespace_map,
+                    opts.disable_xhp_element_mangling,
+                    elaborate_xhp_namespaces_for_facts,
+                    arena,
+                )),
+                opts,
+                classish_name_builder: ClassishNameBuilder::new(),
+                type_parameters: Rc::new(Vec::new()),
+                source_text_allocator,
+                retain_or_omit_user_attributes_for_facts,
+                module: None,
+            }),
+            token_factory: SimpleTokenFactoryImpl::new(),
             // EndOfFile is used here as a None value (signifying "beginning of
             // file") to save space. There is no legitimate circumstance where
             // we would parse a token and the previous token kind would be
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
-            source_text_allocator,
-            retain_or_omit_user_attributes_for_facts,
-            module: None,
         }
-    }
-
-    #[inline(always)]
-    pub fn alloc<T>(&self, val: T) -> &'a T {
-        self.arena.alloc(val)
     }
 
     fn qualified_name_from_parts(&self, parts: &'a [Node<'a>], pos: &'a Pos<'a>) -> Id<'a> {
@@ -367,29 +376,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         )
     }
 
-    fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
-        let mut result = match iter.size_hint().1 {
-            Some(upper_bound) => bump::Vec::with_capacity_in(upper_bound, self.arena),
-            None => bump::Vec::new_in(self.arena),
-        };
-        for item in iter {
-            result.push(item);
-        }
-        result.into_bump_slice()
-    }
-
     fn start_accumulating_const_refs(&mut self) {
-        self.const_refs = Some(Default::default());
+        let this = Rc::make_mut(&mut self.state);
+        this.const_refs = Some(Default::default());
     }
 
     fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
+        let this = Rc::make_mut(&mut self.state);
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).
         // TODO: Hack is the wrong place to detect circularity (because we can never do
         // it completely soundly, and because it's a cross-body problem). The right place
         // to do it is in a linter. All this should be removed from here and put into a linter.
-        if let Some(const_refs) = &mut self.const_refs {
+        if let Some(const_refs) = &mut this.const_refs {
             match class_id.2 {
                 nast::ClassId_::CI(sid) => {
                     const_refs.insert(typing_defs::ClassConstRef(
@@ -411,7 +411,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn stop_accumulating_const_refs(&mut self) -> &'a [typing_defs::ClassConstRef<'a>] {
-        match self.const_refs.take() {
+        let this = Rc::make_mut(&mut self.state);
+        match this.const_refs.take() {
             Some(const_refs) => {
                 let mut elements: bump::Vec<'_, typing_defs::ClassConstRef<'_>> =
                     bumpalo::collections::Vec::with_capacity_in(const_refs.len(), self.arena);
@@ -1139,7 +1140,7 @@ struct Attributes<'a> {
     safe_global_variable: bool,
 }
 
-impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
@@ -1156,6 +1157,34 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         self.decls.add(name, Decl::Module(decl), self.arena)
     }
 
+    #[inline(always)]
+    pub fn alloc<T>(&self, val: T) -> &'a T {
+        self.arena.alloc(val)
+    }
+
+    fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
+        let mut result = match iter.size_hint().1 {
+            Some(upper_bound) => bump::Vec::with_capacity_in(upper_bound, self.arena),
+            None => bump::Vec::new_in(self.arena),
+        };
+        for item in iter {
+            result.push(item);
+        }
+        result.into_bump_slice()
+    }
+
+    fn user_attribute_to_decl(
+        &self,
+        attr: &UserAttributeNode<'a>,
+    ) -> &'a shallow_decl_defs::UserAttribute<'a> {
+        self.alloc(shallow_decl_defs::UserAttribute {
+            name: attr.name.into(),
+            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
+        })
+    }
+}
+
+impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
     #[inline]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
         concat(self.arena, str1, str2)
@@ -1697,7 +1726,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     fn pop_type_params(&mut self, node: Node<'a>) -> &'a [&'a Tparam<'a>] {
         match node {
             Node::TypeParameters(tparams) => {
-                Rc::make_mut(&mut self.type_parameters).pop().unwrap();
+                let this = Rc::make_mut(&mut self.state);
+                Rc::make_mut(&mut this.type_parameters).pop().unwrap();
                 tparams
             }
             _ => &[],
@@ -1737,7 +1767,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
     }
 
     fn as_fun_implicit_params(
-        &mut self,
+        &self,
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
@@ -2036,7 +2066,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         })
     }
 
-    fn make_t_shape_field_name(&mut self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
+    fn make_t_shape_field_name(&self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
             ShapeFieldName::SFlitInt(&(pos, x)) => {
                 TshapeFieldName::TSFlitInt(self.alloc(PosString(pos, x)))
@@ -2273,16 +2303,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             ty_ => ty_,
         };
         self.alloc(Ty(r, ty_))
-    }
-
-    fn user_attribute_to_decl(
-        &self,
-        attr: &UserAttributeNode<'a>,
-    ) -> &'a shallow_decl_defs::UserAttribute<'a> {
-        self.alloc(shallow_decl_defs::UserAttribute {
-            name: attr.name.into(),
-            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
-        })
     }
 
     fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
@@ -2739,12 +2759,14 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     || self.previous_token_kind == TokenKind::Interface
                 {
                     if let Some(current_class_name) = self.elaborate_defined_id(name) {
-                        self.classish_name_builder
+                        let previous_token_kind = self.previous_token_kind;
+                        let this = Rc::make_mut(&mut self.state);
+                        this.classish_name_builder
                             .lexed_name_after_classish_keyword(
-                                self.arena,
+                                this.arena,
                                 current_class_name.1,
                                 pos,
-                                self.previous_token_kind,
+                                previous_token_kind,
                             );
                     }
                 }
@@ -3320,7 +3342,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             docs_url,
         });
 
-        self.add_typedef(name, typedef);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
 
         Node::Ignored(SK::AliasDeclaration)
     }
@@ -3388,7 +3411,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             docs_url: None,
         });
 
-        self.add_typedef(name, typedef);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
 
         Node::Ignored(SK::ContextAliasDeclaration)
     }
@@ -3493,7 +3517,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 _ => {}
             }
         }
-        Rc::make_mut(&mut self.type_parameters).push(tparam_names.into());
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.type_parameters).push(tparam_names.into());
         let mut tparams = bump::Vec::with_capacity_in(tparams_with_name.len(), self.arena);
         for (decl, name) in tparams_with_name.into_iter() {
             let &TypeParameterDecl {
@@ -3648,7 +3673,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     support_dynamic_type: self.opts.everything_sdt
                         || parsed_attributes.support_dynamic_type,
                 });
-                self.add_fun(name, fun_elt);
+                let this = Rc::make_mut(&mut self.state);
+                this.add_fun(name, fun_elt);
                 Node::Ignored(SK::FunctionDeclaration)
             }
             _ => Node::Ignored(SK::FunctionDeclaration),
@@ -3834,7 +3860,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                                     .node_to_ty(hint)
                                     .or_else(|| self.infer_const(name, initializer))
                                     .unwrap_or_else(|| self.tany_with_pos(id_pos));
-                                self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
+                                let this = Rc::make_mut(&mut self.state);
+                                this.add_const(id, this.alloc(ConstDecl { pos, type_: ty }));
                             }
                         }
                         _ => {}
@@ -3872,7 +3899,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         body: Self::Output,
     ) -> Self::Output {
         if let Node::Ignored(SK::NamespaceBody) = body {
-            Rc::make_mut(&mut self.namespace_builder).pop_namespace();
+            let this = Rc::make_mut(&mut self.state);
+            Rc::make_mut(&mut this.namespace_builder).pop_namespace();
         }
         Node::Ignored(SK::NamespaceDeclaration)
     }
@@ -3886,7 +3914,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // if this is header of semicolon-style (one with NamespaceEmptyBody) namespace, we should pop
         // the previous namespace first, but we don't have the body yet. We'll fix it retroactively in
         // make_namespace_empty_body
-        Rc::make_mut(&mut self.namespace_builder).push_namespace(name);
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.namespace_builder).push_namespace(name);
         Node::Ignored(SK::NamespaceDeclarationHeader)
     }
 
@@ -3900,7 +3929,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     }
 
     fn make_namespace_empty_body(&mut self, _semicolon: Self::Output) -> Self::Output {
-        Rc::make_mut(&mut self.namespace_builder).pop_previous_namespace();
+        let this = Rc::make_mut(&mut self.state);
+        Rc::make_mut(&mut this.namespace_builder).pop_previous_namespace();
         Node::Ignored(SK::NamespaceEmptyBody)
     }
 
@@ -3914,7 +3944,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         if let Some(import_kind) = Self::namespace_use_kind(&namespace_use_kind) {
             for clause in clauses.iter() {
                 if let Node::NamespaceUseClause(nuc) = clause {
-                    Rc::make_mut(&mut self.namespace_builder).add_import(
+                    let this = Rc::make_mut(&mut self.state);
+                    Rc::make_mut(&mut this.namespace_builder).add_import(
                         import_kind,
                         nuc.id.1,
                         nuc.as_,
@@ -3944,7 +3975,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 let mut id = bump::String::new_in(self.arena);
                 id.push_str(prefix);
                 id.push_str(nuc.id.1);
-                Rc::make_mut(&mut self.namespace_builder).add_import(
+                let this = Rc::make_mut(&mut self.state);
+                Rc::make_mut(&mut this.namespace_builder).add_import(
                     nuc.kind,
                     id.into_bump_str(),
                     nuc.as_,
@@ -4320,9 +4352,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             enum_type: None,
             docs_url,
         });
-        self.add_class(name, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(name, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SK::ClassishDeclaration)
     }
@@ -4760,9 +4793,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             })),
             docs_url,
         });
-        self.add_class(key, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(key, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SK::EnumDeclaration)
     }
@@ -4941,9 +4975,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             })),
             docs_url,
         });
-        self.add_class(name.1, cls);
+        let this = Rc::make_mut(&mut self.state);
+        this.add_class(name.1, cls);
 
-        self.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder.parsed_classish_declaration();
 
         Node::Ignored(SyntaxKind::EnumClassDeclaration)
     }
@@ -5894,12 +5929,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _right_double_angle: Self::Output,
     ) -> Self::Output {
         if self.retain_or_omit_user_attributes_for_facts {
-            self.file_attributes = List::empty();
+            let this = Rc::make_mut(&mut self.state);
+            this.file_attributes = List::empty();
             for attr in attributes.iter() {
                 match attr {
-                    Node::Attribute(attr) => self
+                    Node::Attribute(attr) => this
                         .file_attributes
-                        .push_front(self.user_attribute_to_decl(attr), self.arena),
+                        .push_front(this.user_attribute_to_decl(attr), this.arena),
                     _ => {}
                 }
             }
@@ -5995,7 +6031,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 exports,
                 imports,
             });
-            self.add_module(module_name, module);
+            let this = Rc::make_mut(&mut self.state);
+            this.add_module(module_name, module);
         }
         Node::Ignored(SK::ModuleDeclaration)
     }
@@ -6029,10 +6066,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         match name {
             Node::ModuleName(&(parts, pos)) => {
                 if self.module.is_none() {
-                    self.module = Some(oxidized_by_ref::ast::Id(
-                        pos,
-                        self.module_name_string_from_parts(parts, pos),
-                    ));
+                    let name = self.module_name_string_from_parts(parts, pos);
+                    let this = Rc::make_mut(&mut self.state);
+                    this.module = Some(oxidized_by_ref::ast::Id(pos, name));
                 }
             }
             _ => {}

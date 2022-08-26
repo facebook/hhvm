@@ -162,6 +162,26 @@ GuardedRequestChannel<RequestGuardType, ChannelGuardType>::getProtocolId() {
 
 template <class RequestGuardType, class ChannelGuardType>
 void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
+    terminateInteraction(InteractionId id) {
+  impl_->terminateInteraction(std::move(id));
+}
+
+template <class RequestGuardType, class ChannelGuardType>
+InteractionId
+GuardedRequestChannel<RequestGuardType, ChannelGuardType>::createInteraction(
+    ManagedStringView&& name) {
+  return impl_->createInteraction(std::move(name));
+}
+
+template <class RequestGuardType, class ChannelGuardType>
+InteractionId
+GuardedRequestChannel<RequestGuardType, ChannelGuardType>::registerInteraction(
+    ManagedStringView&& name, int64_t id) {
+  return impl_->registerInteraction(std::move(name), id);
+}
+
+template <class RequestGuardType, class ChannelGuardType>
+void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
     sendRequestResponse(
         RpcOptions&& rpcOptions,
         MethodMetadata&& methodMetadata,

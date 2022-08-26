@@ -40,6 +40,13 @@ class GuardedRequestChannel : public RequestChannel {
 
   uint16_t getProtocolId() override;
 
+  virtual void terminateInteraction(InteractionId id) override;
+
+  virtual InteractionId createInteraction(ManagedStringView&& name) override;
+
+  virtual InteractionId registerInteraction(
+      ManagedStringView&& name, int64_t id) override;
+
   void sendRequestResponse(
       RpcOptions&& rpcOptions,
       MethodMetadata&& methodMetadata,

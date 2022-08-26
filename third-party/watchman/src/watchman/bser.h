@@ -54,9 +54,18 @@ int w_bser_write_pdu(
     const json_ref& json,
     void* data);
 int w_bser_dump(const bser_ctx_t* ctx, const json_ref& json, void* data);
-bool bunser_int(
-    const char* buf,
-    json_int_t avail,
-    json_int_t* needed,
-    json_int_t* val);
+
+constexpr size_t kDecodeIntFailed = ~size_t{};
+
+/**
+ * Attempt to unserialize an integer value.
+ * Returns the integer if successful. Returns std::nullopt if unsuccessful.
+ * If decoding fails, *needed is set to the number of bytes required to parse
+ * the integer.
+ *
+ * If *needed is kDecodeIntFailed, then `buf` does not contain a valid BSER int.
+ */
+std::optional<json_int_t>
+bunser_int(const char* buf, size_t avail, size_t* needed);
+
 json_ref bunser(const char* buf, const char* end, json_int_t* needed);

@@ -151,7 +151,6 @@ bool PduBuffer::decodePduInfo(
     json_int_t* len,
     json_int_t* bser_capabilities,
     json_error_t* jerr) {
-  json_int_t needed;
   if (bser_version == 2) {
     uint32_t capabilities;
     while (wpos - rpos < sizeof(capabilities)) {
@@ -167,8 +166,17 @@ bool PduBuffer::decodePduInfo(
     rpos += sizeof(capabilities);
   }
 
-  while (!bunser_int(buf + rpos, wpos - rpos, &needed, len)) {
-    if (needed == -1) {
+  for (;;) {
+    size_t needed;
+    std::optional<json_int_t> pdu_length =
+        bunser_int(buf + rpos, wpos - rpos, &needed);
+    if (pdu_length) {
+      *len = *pdu_length;
+      rpos += needed;
+      return true;
+    }
+
+    if (needed == kDecodeIntFailed) {
       snprintf(jerr->text, sizeof(jerr->text), "failed to read PDU size");
       return false;
     }
@@ -177,7 +185,6 @@ bool PduBuffer::decodePduInfo(
       return false;
     }
   }
-  rpos += (uint32_t)needed;
 
   return true;
 }

@@ -22,17 +22,22 @@
 
 #define UTF8_PILE_OF_POO "\xf0\x9f\x92\xa9"
 
+namespace {
+
 // Construct a std::string from a literal that may have embedded NUL bytes.
 // The -1 compensates for the NUL terminator that is included in sizeof()
-#define S(str_literal) std::string(str_literal, sizeof(str_literal) - 1)
+template <size_t N>
+std::string S(const char (&str)[N]) {
+  return std::string{str, str + N - 1};
+}
 
-static int dump_to_string(const char* buffer, size_t size, void* data) {
+int dump_to_string(const char* buffer, size_t size, void* data) {
   auto str = (std::string*)data;
   str->append(buffer, size);
   return 0;
 }
 
-static void hexdump(const char* start, const char* end) {
+void hexdump(const char* start, const char* end) {
   int i;
   int maxbytes = 24;
 
@@ -58,7 +63,7 @@ static void hexdump(const char* start, const char* end) {
   }
 }
 
-static std::unique_ptr<std::string>
+std::unique_ptr<std::string>
 bdumps(uint32_t version, uint32_t capabilities, const json_ref& json) {
   std::string buffer;
   bser_ctx_t ctx{version, capabilities, dump_to_string};
@@ -70,7 +75,7 @@ bdumps(uint32_t version, uint32_t capabilities, const json_ref& json) {
   return nullptr;
 }
 
-static std::unique_ptr<std::string>
+std::unique_ptr<std::string>
 bdumps_pdu(uint32_t version, uint32_t capabilities, const json_ref& json) {
   std::string buffer;
 
@@ -82,7 +87,7 @@ bdumps_pdu(uint32_t version, uint32_t capabilities, const json_ref& json) {
   return nullptr;
 }
 
-static const char* json_inputs[] = {
+const char* json_inputs[] = {
     "{\"bar\": true, \"foo\": 42}",
     "[1, 2, 3]",
     "[null, true, false, 65536]",
@@ -91,7 +96,7 @@ static const char* json_inputs[] = {
     "[1, 16000, 65536, 90000, 2147483648, 4294967295]",
 };
 
-static struct {
+struct {
   const char* json_text;
   const char* template_text;
 } template_tests[] = {
@@ -102,7 +107,7 @@ static struct {
      "]",
      "[\"name\", \"age\"]"}};
 
-static struct {
+struct {
   const char* json_text;
   std::string bserv1;
   std::string bserv2;
@@ -122,7 +127,7 @@ static struct {
           "\x30\x05\x87\xd6\x12\x00\x06\x4e\xd6\x14\x5e\x54\xdc\x2b\x00"),
     }};
 
-static void check_roundtrip(
+void check_roundtrip(
     uint32_t bser_version,
     uint32_t bser_capabilities,
     const char* input,
@@ -153,7 +158,7 @@ static void check_roundtrip(
   EXPECT_EQ(jdump, input) << "round-tripped";
 }
 
-static void check_serialization(
+void check_serialization(
     uint32_t bser_version,
     uint32_t bser_capabilities,
     const char* json_in,
@@ -172,56 +177,55 @@ static void check_serialization(
 // to see how it's constructed.
 // The breaks in the middle of the string literals here are to prevent "\x05f"
 // etc from being treated as a single character.
-static const std::string bser_typed_intro = S("\x00\x03\x03");
-static const std::string bser_typed_bytestring =
+const std::string bser_typed_intro = S("\x00\x03\x03");
+const std::string bser_typed_bytestring =
     S("\x02\x03\x05"
       "foo\xd0\xff");
 
-static const std::string bser_typed_utf8string_byte =
+const std::string bser_typed_utf8string_byte =
     S("\x02\x03\x07"
       "bar" UTF8_PILE_OF_POO);
-static const std::string bser_typed_utf8string_utf8 =
+const std::string bser_typed_utf8string_utf8 =
     S("\x0d\x03\x07"
       "bar" UTF8_PILE_OF_POO);
 
-static const std::string bser_typed_mixedstring_byte =
+const std::string bser_typed_mixedstring_byte =
     S("\x02\x03\x0e"
       "baz\xb1\xc1\xe0\x90\x40" UTF8_PILE_OF_POO "\xf4\xff");
-static const std::string bser_typed_mixedstring_utf8 =
+const std::string bser_typed_mixedstring_utf8 =
     S("\x0d\x03\x0e"
       "baz?????" UTF8_PILE_OF_POO "??");
 
 // The tuples are (bser version, bser capabilities, expected BSER serialization)
-static std::vector<std::tuple<uint32_t, uint32_t, std::string>>
-    typed_string_checks = {
-        std::make_tuple(
-            1,
-            0,
-            bser_typed_intro + bser_typed_bytestring +
-                bser_typed_utf8string_byte + bser_typed_mixedstring_byte),
-        std::make_tuple(
-            2,
-            0,
-            bser_typed_intro + bser_typed_bytestring +
-                bser_typed_utf8string_utf8 + bser_typed_mixedstring_utf8),
-        std::make_tuple(
-            2,
-            BSER_CAP_DISABLE_UNICODE,
-            bser_typed_intro + bser_typed_bytestring +
-                bser_typed_utf8string_byte + bser_typed_mixedstring_byte),
-        std::make_tuple(
-            2,
-            BSER_CAP_DISABLE_UNICODE_FOR_ERRORS,
-            bser_typed_intro + bser_typed_bytestring +
-                bser_typed_utf8string_utf8 + bser_typed_mixedstring_byte),
+std::vector<std::tuple<uint32_t, uint32_t, std::string>> typed_string_checks = {
+    std::make_tuple(
+        1,
+        0,
+        bser_typed_intro + bser_typed_bytestring + bser_typed_utf8string_byte +
+            bser_typed_mixedstring_byte),
+    std::make_tuple(
+        2,
+        0,
+        bser_typed_intro + bser_typed_bytestring + bser_typed_utf8string_utf8 +
+            bser_typed_mixedstring_utf8),
+    std::make_tuple(
+        2,
+        BSER_CAP_DISABLE_UNICODE,
+        bser_typed_intro + bser_typed_bytestring + bser_typed_utf8string_byte +
+            bser_typed_mixedstring_byte),
+    std::make_tuple(
+        2,
+        BSER_CAP_DISABLE_UNICODE_FOR_ERRORS,
+        bser_typed_intro + bser_typed_bytestring + bser_typed_utf8string_utf8 +
+            bser_typed_mixedstring_byte),
 
-        std::make_tuple(
-            2,
-            BSER_CAP_DISABLE_UNICODE | BSER_CAP_DISABLE_UNICODE_FOR_ERRORS,
-            bser_typed_intro + bser_typed_bytestring +
-                bser_typed_utf8string_byte + bser_typed_mixedstring_byte)};
+    std::make_tuple(
+        2,
+        BSER_CAP_DISABLE_UNICODE | BSER_CAP_DISABLE_UNICODE_FOR_ERRORS,
+        bser_typed_intro + bser_typed_bytestring + bser_typed_utf8string_byte +
+            bser_typed_mixedstring_byte)};
 
-static void check_bser_typed_strings() {
+void check_bser_typed_strings() {
   auto bytestring = typed_string_to_json("foo\xd0\xff", W_STRING_BYTE);
   auto utf8string =
       typed_string_to_json("bar" UTF8_PILE_OF_POO, W_STRING_UNICODE);
@@ -258,6 +262,7 @@ TEST(Bser, bser_tests) {
   int num_serial = sizeof(serialization_tests) / sizeof(serialization_tests[0]);
 
   for (i = 0; i < num_json_inputs; i++) {
+    fmt::print("json_input = {}\n", json_inputs[i]);
     check_roundtrip(1, 0, json_inputs[i], nullptr);
     check_roundtrip(2, 0, json_inputs[i], nullptr);
     check_roundtrip(2, BSER_CAP_DISABLE_UNICODE, json_inputs[i], nullptr);
@@ -302,7 +307,23 @@ TEST(Bser, bser_tests) {
   check_bser_typed_strings();
 }
 
-namespace {
+TEST(Bser, bunser_int_returns_needed) {
+  size_t needed;
+
+  EXPECT_EQ(std::nullopt, bunser_int(nullptr, 0, &needed));
+  EXPECT_EQ(1, needed);
+  EXPECT_EQ(std::nullopt, bunser_int("\x03", 1, &needed));
+  EXPECT_EQ(2, needed);
+  EXPECT_EQ(std::nullopt, bunser_int("\x04", 1, &needed));
+  EXPECT_EQ(3, needed);
+  EXPECT_EQ(std::nullopt, bunser_int("\x05", 1, &needed));
+  EXPECT_EQ(5, needed);
+  EXPECT_EQ(std::nullopt, bunser_int("\x06", 1, &needed));
+  EXPECT_EQ(9, needed);
+
+  EXPECT_EQ(std::nullopt, bunser_int("\x00", 1, &needed));
+  EXPECT_EQ(kDecodeIntFailed, needed);
+}
 
 // NOTE: The returned pointer may not be aligned.
 using Alloc = std::unique_ptr<char[], std::function<void(void*)>>;
@@ -404,8 +425,6 @@ std::string_view literal(const char (&p)[N]) {
   return std::string_view{p, N - 1};
 }
 
-} // namespace
-
 TEST(Bser, fuzz_examples) {
   std::string_view corpus[] = {
       literal("\x08"),
@@ -422,6 +441,7 @@ TEST(Bser, fuzz_examples) {
       literal("\x0b\x00\x03\xee\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00"),
       literal("\x00\x06\x7f\xff\xff\xff\xff\xff\xff\xff"),
       literal("\x00\x06\xff\xff\xff\xff\xff\xff\xff\xff"),
+      literal("\x02\x03\xf4"),
   };
   for (std::string_view input : corpus) {
     for (auto allocator : allAllocators) {
@@ -441,5 +461,4 @@ TEST(Bser, fuzz_examples) {
   }
 }
 
-/* vim:ts=2:sw=2:et:
- */
+} // namespace

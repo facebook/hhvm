@@ -15,26 +15,47 @@
 
 from __future__ import annotations
 
-import typing
+from typing import Optional, Sequence
 
 from thrift.python.adapter import Adapter
+from thrift.python.types import Struct
 
 
 class AtoiAdapter(Adapter[str, int]):
     @classmethod
-    def from_thrift(cls, original: str) -> int:
+    def from_thrift(
+        cls,
+        original: str,
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> int:
         return int(original)
 
     @classmethod
-    def to_thrift(cls, adapted: int) -> str:
+    def to_thrift(
+        cls,
+        adapted: int,
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> str:
         return str(adapted)
 
 
-class ItoaListAdapter(Adapter[typing.Sequence[int], typing.Sequence[str]]):
+class ItoaListAdapter(Adapter[Sequence[int], Sequence[str]]):
     @classmethod
-    def from_thrift(cls, original: typing.Sequence[int]) -> typing.Sequence[str]:
+    def from_thrift(
+        cls,
+        original: Sequence[int],
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> Sequence[str]:
         return [str(i) for i in original]
 
     @classmethod
-    def to_thrift(cls, adapted: typing.Sequence[str]) -> typing.Sequence[int]:
+    def to_thrift(
+        cls,
+        adapted: Sequence[str],
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> Sequence[int]:
         return [int(a) for a in adapted]

@@ -26,6 +26,7 @@ from thrift.python.test.adapters.noop import Wrapped
 
 # @manual=//thrift/lib/python/test:adapter_thrift-python-types
 from thrift.python.test.adapter.thrift_types import (
+    _fbthrift_unadapted_AsDatetime,
     _fbthrift_unadapted_Baz,
 )  # isort:skip
 
@@ -48,6 +49,29 @@ class AdapterTest(unittest.TestCase):
         now = datetime.fromtimestamp(int(time.time()))
         bar = Bar(ts=now)
         self.assertEqual(bar.ts, now)
+
+    def test_adapter_called_with_transitive_annotation(self) -> None:
+        mock_from_thrift = MagicMock(wraps=DatetimeAdapter.from_thrift)
+        DatetimeAdapter.from_thrift = mock_from_thrift
+        mock_to_thrift = MagicMock(wraps=DatetimeAdapter.to_thrift)
+        DatetimeAdapter.to_thrift = mock_to_thrift
+
+        now_ts = int(time.time())
+        now = datetime.fromtimestamp(now_ts)
+        foo = Foo(updated_at=now)
+        mock_to_thrift.assert_called_once_with(
+            now,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeTypedef"
+            ),
+        )
+        foo.updated_at
+        mock_from_thrift.assert_called_once_with(
+            now_ts,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeTypedef"
+            ),
+        )
 
     def test_adapter_called_with_field_id(self) -> None:
         mock_from_thrift_field = MagicMock(wraps=DatetimeAdapter.from_thrift_field)

@@ -24,9 +24,11 @@ include "thrift/annotation/scope.thrift"
   typeHint = "datetime.datetime",
 }
 @scope.Transitive
-struct AsDatetime {}
+struct AsDatetime {
+  1: string signature;
+}
 
-@AsDatetime
+@AsDatetime{signature = "DatetimeTypedef"}
 typedef i32 Datetime
 
 @python.Adapter{

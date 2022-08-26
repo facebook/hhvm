@@ -27,17 +27,17 @@ class Adapter(*AdapterGeneric.__mro_entries__((AdapterGeneric,))):
     __orig_bases__ = (AdapterGeneric,)
 
     @classmethod
-    def from_thrift(cls, original):
+    def from_thrift(cls, original, *, transitive_annotation=None):
         raise NotImplementedError()
 
     @classmethod
-    def to_thrift(cls, adapted):
+    def to_thrift(cls, adapted, *, transitive_annotation=None):
         raise NotImplementedError()
 
     @classmethod
-    def from_thrift_field(cls, ori, field_id, strct):
-        return cls.from_thrift(ori)
+    def from_thrift_field(cls, ori, field_id, strct, *, transitive_annotation=None):
+        return cls.from_thrift(ori, transitive_annotation=transitive_annotation)
 
     @classmethod
-    def to_thrift_field(cls, adapted, field_id, strct):
-        return cls.to_thrift(adapted)
+    def to_thrift_field(cls, adapted, field_id, strct, *, transitive_annotation=None):
+        return cls.to_thrift(adapted, transitive_annotation=transitive_annotation)

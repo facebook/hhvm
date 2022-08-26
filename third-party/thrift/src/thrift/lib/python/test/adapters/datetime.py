@@ -16,15 +16,27 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
 from thrift.python.adapter import Adapter
+from thrift.python.types import Struct
 
 
 class DatetimeAdapter(Adapter[int, datetime]):
     @classmethod
-    def from_thrift(cls, original: int) -> datetime:
+    def from_thrift(
+        cls,
+        original: int,
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> datetime:
         return datetime.fromtimestamp(original)
 
     @classmethod
-    def to_thrift(cls, adapted: datetime) -> int:
+    def to_thrift(
+        cls,
+        adapted: datetime,
+        *,
+        transitive_annotation: Optional[Struct] = None,
+    ) -> int:
         return int(adapted.timestamp())

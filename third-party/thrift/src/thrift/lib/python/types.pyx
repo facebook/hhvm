@@ -383,20 +383,25 @@ cdef class EnumTypeInfo:
 
 
 cdef class AdaptedTypeInfo:
-    def __cinit__(self, orig_type_info, adapter_class):
+    def __cinit__(self, orig_type_info, adapter_class, transitive_annotation):
         self._orig_type_info = orig_type_info
         self._adapter_class = adapter_class
+        self._transitive_annotation = transitive_annotation
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
         return self._orig_type_info.to_internal_data(
-            self._adapter_class.to_thrift(value)
+            self._adapter_class.to_thrift(
+                value,
+                transitive_annotation=self._transitive_annotation(),
+            )
         )
 
     # convert deserialized data to user format
     def to_python_value(self, object value):
         return self._adapter_class.from_thrift(
-            self._orig_type_info.to_python_value(value)
+            self._orig_type_info.to_python_value(value),
+            transitive_annotation=self._transitive_annotation(),
         )
 
     def to_container_value(self, object value not None):

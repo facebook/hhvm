@@ -61,6 +61,20 @@ const std::string get_annotation_property(
   return "";
 }
 
+const t_const* get_transitive_annotation_of_adapter_or_null(
+    const t_named& node) {
+  for (const auto* annotation : node.structured_annotations()) {
+    const t_type& annotation_type = *annotation->type();
+    if (is_transitive_annotation(annotation_type)) {
+      if (annotation_type.find_structured_annotation_or_null(
+              kPythonAdapterUri)) {
+        return annotation;
+      }
+    }
+  }
+  return nullptr;
+}
+
 const std::string extract_module_path(const std::string& fully_qualified_name) {
   auto tokens = split_namespace(fully_qualified_name);
   if (tokens.size() <= 1) {
@@ -502,6 +516,8 @@ class python_mstch_function : public mstch_function {
   const std::string cppName_;
 };
 
+class python_mstch_const_value;
+
 class python_mstch_type : public mstch_type {
  public:
   python_mstch_type(
@@ -511,7 +527,9 @@ class python_mstch_type : public mstch_type {
       const t_program* prog)
       : mstch_type(type->get_true_type(), ctx, pos),
         prog_(prog),
-        adapter_annotation_(find_structured_adapter_annotation(*type)) {
+        adapter_annotation_(find_structured_adapter_annotation(*type)),
+        transitive_adapter_annotation_(
+            get_transitive_annotation_of_adapter_or_null(*type)) {
     register_methods(
         this,
         {
@@ -526,6 +544,10 @@ class python_mstch_type : public mstch_type {
             {"type:has_adapter?", &python_mstch_type::has_adapter},
             {"type:adapter_name", &python_mstch_type::adapter_name},
             {"type:adapter_type_hint", &python_mstch_type::adapter_type_hint},
+            {"type:is_adapter_transitive?",
+             &python_mstch_type::is_adapter_transitive},
+            {"type:transitive_adapter_annotation",
+             &python_mstch_type::transitive_adapter_annotation},
             {"type:with_regular_response?",
              &python_mstch_type::with_regular_response},
         });
@@ -589,6 +611,19 @@ class python_mstch_type : public mstch_type {
     return get_annotation_property(adapter_annotation_, "typeHint");
   }
 
+  mstch::node is_adapter_transitive() {
+    return transitive_adapter_annotation_ != nullptr;
+  }
+
+  mstch::node transitive_adapter_annotation() {
+    return std::make_shared<python_mstch_const_value>(
+        transitive_adapter_annotation_->value(),
+        context_,
+        pos_,
+        transitive_adapter_annotation_,
+        &*transitive_adapter_annotation_->type());
+  }
+
   mstch::node with_regular_response() {
     if (!resolved_type_->is_streamresponse()) {
       return !resolved_type_->is_void();
@@ -607,6 +642,7 @@ class python_mstch_type : public mstch_type {
 
   const t_program* prog_;
   const t_const* adapter_annotation_;
+  const t_const* transitive_adapter_annotation_;
 };
 
 class python_mstch_typedef : public mstch_typedef {

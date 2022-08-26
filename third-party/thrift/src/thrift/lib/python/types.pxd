@@ -132,6 +132,7 @@ cdef class EnumTypeInfo:
 cdef class AdaptedTypeInfo:
     cdef object _orig_type_info
     cdef object _adapter_class
+    cdef object _transitive_annotation
 
 cdef class StructOrUnion:
     cdef object _fbthrift_data

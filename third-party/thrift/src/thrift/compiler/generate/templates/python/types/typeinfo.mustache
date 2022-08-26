@@ -46,4 +46,12 @@ in the client or server source rather than the type definition source.
 }}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}){{/type:enum}}{{!
-}}{{#type:has_adapter?}}, {{type:adapter_name}}){{/type:has_adapter?}}
+}}{{#type:has_adapter?}}{{!
+  }}, {{type:adapter_name}}, lambda: {{!
+  }}{{#type:is_adapter_transitive?}}{{!
+    }}{{#type:transitive_adapter_annotation}}{{> types/constant_value }}{{/type:transitive_adapter_annotation}}{{!
+  }}{{/type:is_adapter_transitive?}}{{!
+  }}{{^type:is_adapter_transitive?}}{{!
+    }}None{{!
+  }}{{/type:is_adapter_transitive?}}{{!
+}}){{/type:has_adapter?}}

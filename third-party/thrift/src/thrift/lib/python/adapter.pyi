@@ -25,9 +25,19 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
     """
 
     @classmethod
-    def from_thrift(cls, original: TAdaptFrom) -> TAdaptTo: ...
+    def from_thrift(
+        cls,
+        original: TAdaptFrom,
+        *,
+        transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
+    ) -> TAdaptTo: ...
     @classmethod
-    def to_thrift(cls, adapted: TAdaptTo) -> TAdaptFrom: ...
+    def to_thrift(
+        cls,
+        adapted: TAdaptTo,
+        *,
+        transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
+    ) -> TAdaptFrom: ...
 
     """
     For Field Adapter, override (from|to)_thrift_field.
@@ -39,6 +49,8 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         original: TAdaptFrom,
         field_id: int,
         strct: "thrift.python.types.StructOrUnion",
+        *,
+        transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
     ) -> TAdaptTo: ...
     @classmethod
     def to_thrift_field(
@@ -46,4 +58,6 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         adapted: TAdaptTo,
         field_id: int,
         strct: "thrift.python.types.StructOrUnion",
+        *,
+        transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
     ) -> TAdaptFrom: ...

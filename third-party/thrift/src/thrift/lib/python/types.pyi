@@ -67,7 +67,10 @@ TAdapter = typing.TypeVar("TAdapter", bound=Adapter[object, object])
 
 class AdaptedTypeInfo:
     def __init__(
-        self, orig_type_info: AnyTypeInfo, adapter_class: typing.Type[TAdapter]
+        self,
+        orig_type_info: AnyTypeInfo,
+        adapter_class: typing.Type[TAdapter],
+        transitive_annotation: typing.Callable[[], typing.Optional[Struct]],
     ) -> None: ...
 
 # Parent class for structs and unions

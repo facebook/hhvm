@@ -4,3 +4,4 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod intext; // c.f. 'runtime/caml/intext.h
+mod ser; // serialize; c.f. runtime/extern.c

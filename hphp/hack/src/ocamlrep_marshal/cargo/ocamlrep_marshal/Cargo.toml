@@ -6,3 +6,8 @@ edition = "2021"
 
 [lib]
 path = "../../ocamlrep_marshal.rs"
+test = false
+doctest = false
+
+[dependencies]
+libc = "0.2.121"

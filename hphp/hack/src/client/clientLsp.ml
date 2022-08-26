@@ -63,10 +63,6 @@ type hh_server_state =
   | Hh_server_forgot
 [@@deriving eq]
 
-let hh_server_restart_button_text = "Restart hh_server"
-
-let client_ide_restart_button_text = "Restart Hack IDE"
-
 let see_output_hack = " See Output\xE2\x80\xBAHack for details." (* chevron *)
 
 type incoming_metadata = {
@@ -883,12 +879,7 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
     Lsp_helpers.telemetry_error to_stdout e.message ~extras
 
 (** request_showStatusFB: pops up a dialog *)
-let request_showStatusFB
-    ?(on_result : ShowStatusFB.result -> state -> state Lwt.t =
-      (fun _ state -> Lwt.return state))
-    ?(on_error : Error.t -> state -> state Lwt.t =
-      (fun _ state -> Lwt.return state))
-    (params : ShowStatusFB.params) : unit =
+let request_showStatusFB (params : ShowStatusFB.params) : unit =
   let initialize_params = initialize_params_exc () in
   if not (Lsp_helpers.supports_status initialize_params) then
     ()
@@ -896,7 +887,7 @@ let request_showStatusFB
     (* We try not to send duplicate statuses.
        That means: if you call request_showStatus but your message is the same as
        what's already up, then you won't be shown, and your callbacks won't be shown. *)
-    let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
+    let msg = params.ShowStatusFB.request.ShowStatusFB.message in
     if String.equal msg !showStatus_outstanding then
       ()
     else (
@@ -905,21 +896,8 @@ let request_showStatusFB
       let request = ShowStatusRequestFB params in
       to_stdout (print_lsp_request id request);
 
-      let handler (result : lsp_result) (state : state) : state Lwt.t =
-        if String.equal msg !showStatus_outstanding then
-          showStatus_outstanding := "";
-        match result with
-        | ShowStatusResultFB result -> on_result result state
-        | ErrorResult error -> on_error error state
-        | _ ->
-          let error =
-            {
-              Error.code = Error.ParseError;
-              message = "expected ShowStatusResult";
-              data = None;
-            }
-          in
-          on_error error state
+      let handler (_ : lsp_result) (state : state) : state Lwt.t =
+        Lwt.return state
       in
       requests_outstanding :=
         IdMap.add id (request, handler) !requests_outstanding
@@ -1513,9 +1491,8 @@ let report_connect_end (ienv : In_init_env.t) : state =
           {
             ShowStatusFB.request =
               {
-                ShowMessageRequest.type_ = MessageType.InfoMessage;
+                ShowStatusFB.type_ = MessageType.InfoMessage;
                 message = "hh_server: ready.";
-                actions = [];
               };
             progress = None;
             total = None;
@@ -1632,83 +1609,20 @@ let stop_ide_service
   in
   Lwt.return_unit
 
-let on_status_restart_action
-    ~(env : env)
-    ~(ide_service : ClientIdeService.t ref option)
-    (result : ShowStatusFB.result)
-    (state : state) : state Lwt.t =
-  let open ShowMessageRequest in
-  match (result, state, ide_service) with
-  | (Some { title }, Lost_server _, _)
-    when String.equal title hh_server_restart_button_text ->
-    let root = get_root_exn () in
-    (* Belt-and-braces kill the server. This is in case the server was *)
-    (* stuck in some weird state. It's also what 'hh restart' does. *)
-    if MonitorConnection.server_exists (Path.to_string root) then
-      ClientStop.kill_server root !from;
-
-    (* After that it's safe to try to reconnect! *)
-    start_server ~env root;
-    let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
-    Lwt.return state
-  | (Some { title }, _, Some ide_service)
-    when String.equal title client_ide_restart_button_text ->
-    log "Restarting IDE service";
-
-    (* It's possible that [destroy] takes a while to finish, so make
-       sure to assign the new IDE service to the [ref] before attempting
-       to do an asynchronous operation with the old one. *)
-    let ide_args =
-      {
-        ClientIdeMessage.init_id = env.init_id;
-        verbose_to_stderr = env.args.verbose;
-        verbose_to_file = !verbose_to_file;
-      }
-    in
-    let new_ide_service = ClientIdeService.make ide_args in
-    let old_ide_service = !ide_service in
-    ide_service := new_ide_service;
-    (* Note: the env.verbose passed on init controls verbosity for stderr
-       and is only ever controlled by --verbose command line, stored in env.
-       But verbosity-to-file can be altered dynamically by the user. *)
-    let (promise : unit Lwt.t) =
-      run_ide_service
-        env
-        new_ide_service
-        (initialize_params_exc ())
-        (get_editor_open_files state)
-    in
-    ignore_promise_but_handle_failure
-      promise
-      ~desc:"run-ide-after-restart"
-      ~terminate_on_failure:true;
-    (* Invariant: at all times after InitializeRequest, ide_service has
-       already been sent an "initialize" message. *)
-    let%lwt () =
-      stop_ide_service
-        old_ide_service
-        ~tracking_id:"restart"
-        ~stop_reason:ClientIdeService.Stop_reason.Restarting
-    in
-    Lwt.return state
-  | _ -> Lwt.return state
-
 let get_client_ide_status (ide_service : ClientIdeService.t) :
     ShowStatusFB.params option =
-  let (type_, shortMessage, message, actions, telemetry) =
+  let (type_, shortMessage, message, telemetry) =
     match ClientIdeService.get_status ide_service with
     | ClientIdeService.Status.Initializing ->
       ( MessageType.WarningMessage,
         "Hack: initializing",
         "Hack IDE: initializing.",
-        [],
         None )
     | ClientIdeService.Status.Processing_files p ->
       let open ClientIdeMessage.Processing_files in
       ( MessageType.WarningMessage,
         "Hack",
         Printf.sprintf "Hack IDE: processing %d files." p.total,
-        [],
         None )
     | ClientIdeService.Status.Rpc requests ->
       let telemetry =
@@ -1717,22 +1631,20 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       ( MessageType.WarningMessage,
         "Hack",
         "Hack IDE: working...",
-        [],
         Some telemetry )
     | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", [], None)
+      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", None)
     | ClientIdeService.Status.Stopped s ->
       let open ClientIdeMessage in
       ( MessageType.ErrorMessage,
         "Hack: " ^ s.short_user_message,
         s.medium_user_message ^ see_output_hack,
-        [{ ShowMessageRequest.title = client_ide_restart_button_text }],
         None )
   in
   Some
     {
       ShowStatusFB.shortMessage = Some shortMessage;
-      request = { ShowMessageRequest.type_; message; actions };
+      request = { ShowStatusFB.type_; message };
       progress = None;
       total = None;
       telemetry;
@@ -1742,7 +1654,6 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
 It normally it gets status quickly, but has a 3s timeout just in case. *)
 let get_hh_server_status (state : state) : ShowStatusFB.params option =
   let open ShowStatusFB in
-  let open ShowMessageRequest in
   match state with
   | Pre_init
   | Post_shutdown ->
@@ -1792,7 +1703,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     in
     Some
       {
-        request = { type_ = MessageType.WarningMessage; message; actions = [] };
+        request = { type_ = MessageType.WarningMessage; message };
         progress = None;
         total = None;
         shortMessage = Some "Hack: initializing";
@@ -1808,11 +1719,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
       {
         shortMessage = Some "Hack: stopped";
         request =
-          {
-            type_ = MessageType.ErrorMessage;
-            message = p.Lost_env.explanation;
-            actions = [{ title = hh_server_restart_button_text }];
-          };
+          { type_ = MessageType.ErrorMessage; message = p.Lost_env.explanation };
         progress = None;
         total = None;
         telemetry = None;
@@ -1823,7 +1730,6 @@ let hh_server_status_to_diagnostic
     (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
     PublishDiagnostics.params option =
   let open ShowStatusFB in
-  let open ShowMessageRequest in
   let open PublishDiagnostics in
   let diagnostic =
     {
@@ -1975,7 +1881,6 @@ let merge_statuses
   | (Some _, None) -> client_ide_status
   | (Some client_ide_status, Some hh_server_status) ->
     let open Lsp.ShowStatusFB in
-    let open Lsp.ShowMessageRequest in
     let request =
       {
         client_ide_status.request with
@@ -1983,8 +1888,6 @@ let merge_statuses
           client_ide_status.request.message
           ^ "\n"
           ^ hh_server_status.request.message;
-        actions =
-          client_ide_status.request.actions @ hh_server_status.request.actions;
       }
     in
     if
@@ -1998,8 +1901,7 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t ref option) :
-    unit =
+let refresh_status ~(ide_service : ClientIdeService.t ref option) : unit =
   let client_ide_status =
     match ide_service with
     | None -> None
@@ -2008,11 +1910,7 @@ let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t ref option) :
   let status =
     merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
   in
-  Option.iter
-    status
-    ~f:
-      (request_showStatusFB
-         ~on_result:(on_status_restart_action ~env ~ide_service));
+  Option.iter status ~f:request_showStatusFB;
   ()
 
 let rpc_lock = Lwt_mutex.create ()
@@ -2092,7 +1990,8 @@ let ide_rpc
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
-  let progress () = refresh_status ~env ~ide_service:(Some ide_service) in
+  let (_ : env) = env in
+  let progress () = refresh_status ~ide_service:(Some ide_service) in
   let%lwt result =
     ClientIdeService.rpc
       !ide_service
@@ -2170,7 +2069,7 @@ let state_to_rage (state : state) : string =
         (menv.editor_open_files |> UriMap.keys |> uris_to_string)
         (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
         (menv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
-        menv.hh_server_status.ShowStatusFB.request.ShowMessageRequest.message
+        menv.hh_server_status.ShowStatusFB.request.ShowStatusFB.message
         (Option.value
            menv.hh_server_status.ShowStatusFB.shortMessage
            ~default:"[absent]")
@@ -3517,7 +3416,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     let hh_server_status =
       {
         ShowStatusFB.shortMessage = Some shortMessage;
-        request = { ShowMessageRequest.type_; message; actions = [] };
+        request = { ShowStatusFB.type_; message };
         total = None;
         progress = None;
         telemetry = None;
@@ -5114,7 +5013,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       if not (is_pre_init !state || is_post_shutdown !state) then begin
         state :=
           publish_hh_server_status_diagnostic !state !latest_hh_server_status;
-        refresh_status ~env ~ide_service
+        refresh_status ~ide_service
       end;
 
       (* this is the main handler for each message*)

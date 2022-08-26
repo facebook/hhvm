@@ -1148,14 +1148,19 @@ end
 module ShowStatusFB = struct
   type params = showStatusParams
 
-  and result = ShowMessageRequest.messageActionItem option
+  and result = unit
 
   and showStatusParams = {
-    request: ShowMessageRequest.showMessageRequestParams;
+    request: showStatusRequestParams;
     progress: int option;
     total: int option;
     shortMessage: string option;
     telemetry: Hh_json.json option;
+  }
+
+  and showStatusRequestParams = {
+    type_: MessageType.t;
+    message: string;
   }
 end
 

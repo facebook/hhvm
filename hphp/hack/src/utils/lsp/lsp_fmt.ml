@@ -613,18 +613,11 @@ let parse_result_showMessageRequest (result : json option) :
 (************************************************************************)
 
 let print_showStatus (r : ShowStatusFB.showStatusParams) : json =
-  let print_action (action : ShowMessageRequest.messageActionItem) : json =
-    JSON_Object [("title", JSON_String action.ShowMessageRequest.title)]
-  in
   let rr = r.ShowStatusFB.request in
   Jprint.object_opt
     [
-      ("type", Some (int_ (MessageType.to_enum rr.ShowMessageRequest.type_)));
-      ( "actions",
-        Some
-          (JSON_Array (List.map rr.ShowMessageRequest.actions ~f:print_action))
-      );
-      ("message", Some (JSON_String rr.ShowMessageRequest.message));
+      ("type", Some (int_ (MessageType.to_enum rr.ShowStatusFB.type_)));
+      ("message", Some (JSON_String rr.ShowStatusFB.message));
       ("shortMessage", Option.map r.ShowStatusFB.shortMessage ~f:string_);
       ("telemetry", r.ShowStatusFB.telemetry);
       ( "progress",
@@ -1584,10 +1577,8 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   match request with
   | ShowMessageRequestRequest _ ->
     ShowMessageRequestResult (parse_result_showMessageRequest (Some result))
-  | ShowStatusRequestFB _ ->
-    ShowStatusResultFB (parse_result_showMessageRequest (Some result))
+  | ShowStatusRequestFB _ -> ShowStatusResultFB ()
   | RegisterCapabilityRequest _ -> RegisterCapabilityRequestResult
-  (* shares result type *)
   | InitializeRequest _
   | ShutdownRequest
   | CodeLensResolveRequest _

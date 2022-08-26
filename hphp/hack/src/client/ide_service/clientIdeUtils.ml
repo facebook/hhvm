@@ -72,7 +72,7 @@ let make_bug_reason
     ClientIdeMessage.short_user_message = "failed";
     medium_user_message = "Hack IDE has failed.";
     long_user_message =
-      "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.";
+      "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.";
     debug_details = message ^ "\nDETAILS:\n" ^ Hh_json.json_to_string data;
     is_actionable = false;
   }

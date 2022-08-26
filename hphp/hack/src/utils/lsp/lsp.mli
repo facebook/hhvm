@@ -893,7 +893,7 @@ end
 module ShowStatusFB : sig
   type params = showStatusParams
 
-  and result = ShowMessageRequest.messageActionItem option
+  and result = unit
 
   (** the showStatus LSP request will be handled by our VSCode extension.
   It's a facebook-specific extension to the LSP spec. How it's rendered
@@ -901,11 +901,16 @@ module ShowStatusFB : sig
   in the tooltip. The [telemetry] field isn't displayed to the user, but might
   be useful to someone debugging an LSP transcript. *)
   and showStatusParams = {
-    request: ShowMessageRequest.showMessageRequestParams;
+    request: showStatusRequestParams;
     progress: int option;
     total: int option;
     shortMessage: string option;
     telemetry: Hh_json.json option;
+  }
+
+  and showStatusRequestParams = {
+    type_: MessageType.t;
+    message: string;
   }
 end
 

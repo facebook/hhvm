@@ -14,6 +14,7 @@
 
 namespace fizz {
 class HybridKeyExFactory : public OpenSSLFactory {
+ public:
   std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
       KeyExchangeMode mode) const override {
@@ -32,7 +33,7 @@ class HybridKeyExFactory : public OpenSSLFactory {
             OQSKeyExchange::createOQSKeyExchange(
                 mode, OQS_KEM_alg_ntru_hrss701));
       default:
-        throw std::runtime_error("ke: not implemented");
+        return OpenSSLFactory::makeKeyExchange(group, mode);
     }
   }
 };

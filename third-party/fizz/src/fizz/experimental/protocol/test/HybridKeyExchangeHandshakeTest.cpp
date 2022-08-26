@@ -12,7 +12,6 @@
 namespace fizz {
 namespace test {
 TEST_F(HandshakeTest, secp521r1_x25519) {
-  auto f = HybridKeyExFactory();
   auto factory = std::make_shared<HybridKeyExFactory>();
   clientContext_->setFactory(factory);
   serverContext_->setFactory(factory);
@@ -26,8 +25,8 @@ TEST_F(HandshakeTest, secp521r1_x25519) {
   verifyParameters();
   sendAppData();
 }
+
 TEST_F(HandshakeTest, secp384r1_bikel3) {
-  auto f = HybridKeyExFactory();
   auto factory = std::make_shared<HybridKeyExFactory>();
   clientContext_->setFactory(factory);
   serverContext_->setFactory(factory);
@@ -35,6 +34,21 @@ TEST_F(HandshakeTest, secp384r1_bikel3) {
   clientContext_->setDefaultShares({NamedGroup::secp384r1_bikel3});
   serverContext_->setSupportedGroups({NamedGroup::secp384r1_bikel3});
   expected_.group = NamedGroup::secp384r1_bikel3;
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
+TEST_F(HandshakeTest, x25519UsingHybridFactory) {
+  auto factory = std::make_shared<HybridKeyExFactory>();
+  clientContext_->setFactory(factory);
+  serverContext_->setFactory(factory);
+  clientContext_->setSupportedGroups({NamedGroup::x25519});
+  clientContext_->setDefaultShares({NamedGroup::x25519});
+  serverContext_->setSupportedGroups({NamedGroup::x25519});
+  expected_.group = NamedGroup::x25519;
 
   expectSuccess();
   doHandshake();

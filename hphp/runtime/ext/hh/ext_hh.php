@@ -340,9 +340,9 @@ namespace ImplicitContext {
 function get_implicit_context_blame()[zoned]: (vec<string>, vec<string>);
 
 async function soft_run_with_async<Tout>(
-  (function (): Awaitable<Tout>) $f,
+  (function ()[_]: Awaitable<Tout>) $f,
   string $key,
-)[zoned]: Awaitable<Tout> {
+)[zoned, ctx $f]: Awaitable<Tout> {
   $prev = _Private\set_special_implicit_context(
     \HH\MEMOIZE_IC_TYPE_SOFT_SET,
     $key
@@ -422,8 +422,8 @@ abstract class ImplicitContext {
 
   protected static async function runWithAsync<Tout>(
     this::T $context,
-    (function (): Awaitable<Tout>) $f,
-  )[zoned]: Awaitable<Tout> {
+    (function ()[_]: Awaitable<Tout>) $f,
+  )[zoned, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,

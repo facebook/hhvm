@@ -25,7 +25,7 @@ using namespace ::testing;
 TEST(PatchGeneratorTest, Basic) {
   auto suite = createPatchSuite();
   constexpr size_t kNumProtocols = 2;
-  constexpr size_t kNumTypes = 7;
+  constexpr size_t kNumTypes = 9;
   EXPECT_EQ(*suite.name(), "PatchTest");
   ASSERT_EQ(suite.tests()->size(), kNumProtocols * kNumTypes);
   EXPECT_EQ(*suite.tests()->at(0 * kNumTypes).name(), "Binary");

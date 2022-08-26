@@ -122,6 +122,42 @@ PatchOpTestCase makeAddTest(
   return opTest;
 }
 
+template <typename TT, typename GeneratedValue>
+PatchOpTestCase makePrependTest(
+    const GeneratedValue& value,
+    const AnyRegistry& registry,
+    const Protocol& protocol) {
+  PatchOpTestCase opTest;
+  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+
+  auto patch = op::patch_type<TT>();
+  patch.prepend(toValue<TT>(value.value));
+  opTest.patch() =
+      registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  auto expected = value.value + value.value;
+  opTest.result() =
+      registry.store(asValueStruct<TT>(toValue<TT>(expected)), protocol);
+  return opTest;
+}
+
+template <typename TT, typename GeneratedValue>
+PatchOpTestCase makeAppendTest(
+    const GeneratedValue& value,
+    const AnyRegistry& registry,
+    const Protocol& protocol) {
+  PatchOpTestCase opTest;
+  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+
+  auto patch = op::patch_type<TT>();
+  patch.append(toValue<TT>(value.value));
+  opTest.patch() =
+      registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  auto expected = value.value + value.value;
+  opTest.result() =
+      registry.store(asValueStruct<TT>(toValue<TT>(expected)), protocol);
+  return opTest;
+}
+
 template <typename TT>
 Test createNumericPatchTest(
     const AnyRegistry& registry, const Protocol& protocol) {
@@ -148,6 +184,38 @@ Test createNumericPatchTest(
   return test;
 }
 
+template <typename TT>
+Test createStringLikePatchTest(
+    const AnyRegistry& registry, const Protocol& protocol) {
+  Test test;
+  test.name() = protocol.name();
+
+  for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
+    auto& assignCase = test.testCases()->emplace_back();
+    assignCase.name() = fmt::format("{}/assign", type::getName<TT>());
+
+    auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
+    tascase = makeAssignTest<TT>(value, registry, protocol);
+
+    auto& clearCase = test.testCases()->emplace_back();
+    clearCase.name() = fmt::format("{}/clear", type::getName<TT>());
+    auto& tclcase = clearCase.test().emplace().objectPatch_ref().emplace();
+    tclcase = makeClearTest<TT>(value, registry, protocol);
+
+    auto& prependCase = test.testCases()->emplace_back();
+    prependCase.name() = fmt::format("{}/prepend", type::getName<TT>());
+    auto& tprcase = prependCase.test().emplace().objectPatch_ref().emplace();
+    tprcase = makePrependTest<TT>(value, registry, protocol);
+
+    auto& appendCase = test.testCases()->emplace_back();
+    appendCase.name() = fmt::format("{}/append", type::getName<TT>());
+    auto& tapcase = appendCase.test().emplace().objectPatch_ref().emplace();
+    tapcase = makeAppendTest<TT>(value, registry, protocol);
+  }
+
+  return test;
+}
+
 void addPatchToSuite(
     const AnyRegistry& registry, const Protocol& protocol, TestSuite& suite) {
   mp11::mp_for_each<detail::PrimaryTypeTags>([&](auto tt) {
@@ -157,6 +225,9 @@ void addPatchToSuite(
         !std::is_same_v<TT, type::binary_t>) {
       suite.tests()->emplace_back(
           createNumericPatchTest<TT>(registry, protocol));
+    } else {
+      suite.tests()->emplace_back(
+          createStringLikePatchTest<TT>(registry, protocol));
     }
   });
 }

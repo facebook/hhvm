@@ -20,6 +20,7 @@ import com.facebook.thrift.client.RpcClientFactory;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.rsocket.client.RSocketRpcClientFactory;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.stream.Collectors;
@@ -73,160 +74,153 @@ public class RpcClientConformanceHandler {
             .build(clientFactory, address);
   }
 
+  private Mono<ClientTestResult> execute(ClientInstruction instruction) {
+    try {
+      String name =
+          instruction.getThriftName().substring(0, 1).toUpperCase()
+              + instruction.getThriftName().substring(1);
+      Method getter = ClientInstruction.class.getMethod("get" + name, null);
+      Object o = getter.invoke(instruction);
+      Method test = this.getClass().getMethod("test" + name, o.getClass());
+      return (Mono<ClientTestResult>) test.invoke(this, o);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  /**
+   * All tests are executed using reflection to enable loosely coupling between test definitions and
+   * the implementation. Any additional tests introduced in the conformance test framework should
+   * not cause any build time failure. Additional tests should be added to the nonconforming.txt
+   * file for exclusion.
+   */
   public void executeTests() {
     Mono<Void> test =
         client
             .getTestCase()
             .map(RpcTestCase::getClientInstruction)
-            .flatMap(
-                instruction -> {
-                  Test v = new Test();
-                  instruction.accept(v);
-                  return v.getResult();
-                })
+            .flatMap(this::execute)
+            .onErrorStop()
             .flatMap(client::sendTestResult);
 
     StepVerifier.create(test).verifyComplete();
   }
 
-  private class Test implements ClientInstruction.Visitor {
+  public Mono<ClientTestResult> testRequestResponseBasic(
+      RequestResponseBasicClientInstruction instruction) {
+    return client
+        .requestResponseBasic(instruction.getRequest())
+        .map(
+            r ->
+                ClientTestResult.fromRequestResponseBasic(
+                    new RequestResponseBasicClientTestResult.Builder().setResponse(r).build()));
+  }
 
-    private Mono<ClientTestResult> result;
+  public Mono<ClientTestResult> testRequestResponseDeclaredException(
+      RequestResponseDeclaredExceptionClientInstruction instruction) {
+    return client
+        .requestResponseDeclaredException(instruction.getRequest())
+        .cast(ClientTestResult.class)
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromRequestResponseDeclaredException(
+                        new RequestResponseDeclaredExceptionClientTestResult.Builder()
+                            .setUserException((UserException) t)
+                            .build())));
+  }
 
-    public Mono<ClientTestResult> getResult() {
-      return this.result;
-    }
+  public Mono<ClientTestResult> testRequestResponseNoArgVoidResponse(
+      RequestResponseNoArgVoidResponseClientInstruction instruction) {
+    return client
+        .requestResponseNoArgVoidResponse()
+        .thenReturn(
+            ClientTestResult.fromRequestResponseNoArgVoidResponse(
+                new RequestResponseNoArgVoidResponseClientTestResult.Builder().build()));
+  }
 
-    @Override
-    public void visitRequestResponseBasic(RequestResponseBasicClientInstruction instruction) {
-      result =
-          client
-              .requestResponseBasic(instruction.getRequest())
-              .map(
-                  r ->
-                      ClientTestResult.fromRequestResponseBasic(
-                          new RequestResponseBasicClientTestResult.Builder()
-                              .setResponse(r)
-                              .build()));
-    }
+  public Mono<ClientTestResult> testRequestResponseUndeclaredException(
+      RequestResponseUndeclaredExceptionClientInstruction instruction) {
+    return client
+        .requestResponseUndeclaredException(instruction.getRequest())
+        .cast(ClientTestResult.class)
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromRequestResponseUndeclaredException(
+                        new RequestResponseUndeclaredExceptionClientTestResult.Builder()
+                            .setExceptionMessage(t.getMessage())
+                            .build())));
+  }
 
-    @Override
-    public void visitRequestResponseDeclaredException(
-        RequestResponseDeclaredExceptionClientInstruction instruction) {
-      result =
-          client
-              .requestResponseDeclaredException(instruction.getRequest())
-              .cast(ClientTestResult.class)
-              .onErrorResume(
-                  t ->
-                      Mono.just(
-                          ClientTestResult.fromRequestResponseDeclaredException(
-                              new RequestResponseDeclaredExceptionClientTestResult.Builder()
-                                  .setUserException((UserException) t)
-                                  .build())));
-    }
+  public Mono<ClientTestResult> testStreamBasic(StreamBasicClientInstruction instruction) {
+    return client
+        .streamBasic(instruction.getRequest())
+        .collectList()
+        .map(
+            r ->
+                ClientTestResult.fromStreamBasic(
+                    new StreamBasicClientTestResult.Builder().setStreamPayloads(r).build()));
+  }
 
-    @Override
-    public void visitRequestResponseNoArgVoidResponse(
-        RequestResponseNoArgVoidResponseClientInstruction instruction) {
-      result =
-          client
-              .requestResponseNoArgVoidResponse()
-              .thenReturn(
-                  ClientTestResult.fromRequestResponseNoArgVoidResponse(
-                      new RequestResponseNoArgVoidResponseClientTestResult.Builder().build()));
-    }
+  public Mono<ClientTestResult> testStreamChunkTimeout(
+      StreamChunkTimeoutClientInstruction instruction) {
+    RpcOptions rpcOptions =
+        new RpcOptions.Builder().setClientTimeoutMs((int) instruction.getChunkTimeoutMs()).build();
 
-    @Override
-    public void visitRequestResponseUndeclaredException(
-        RequestResponseUndeclaredExceptionClientInstruction instruction) {
-      result =
-          client
-              .requestResponseUndeclaredException(instruction.getRequest())
-              .cast(ClientTestResult.class)
-              .onErrorResume(
-                  t ->
-                      Mono.just(
-                          ClientTestResult.fromRequestResponseUndeclaredException(
-                              new RequestResponseUndeclaredExceptionClientTestResult.Builder()
-                                  .setExceptionMessage(t.getMessage())
-                                  .build())));
-    }
+    return client
+        .streamChunkTimeout(instruction.getRequest(), rpcOptions)
+        .collectList()
+        .map(
+            r ->
+                ClientTestResult.fromStreamChunkTimeout(
+                    new StreamChunkTimeoutClientTestResult.Builder()
+                        .setStreamPayloads(r)
+                        .setChunkTimeoutException(true)
+                        .build()));
+  }
 
-    @Override
-    public void visitRequestResponseTimeout(
-        RequestResponseTimeoutClientInstruction requestResponseTimeoutClientInstruction) {}
+  public Mono<ClientTestResult> testSinkBasic(SinkBasicClientInstruction instruction) {
+    Publisher<Request> publisher = Flux.fromIterable(instruction.getSinkPayloads());
 
-    @Override
-    public void visitStreamBasic(StreamBasicClientInstruction instruction) {
-      result =
-          client
-              .streamBasic(instruction.getRequest())
-              .collectList()
-              .map(
-                  r ->
-                      ClientTestResult.fromStreamBasic(
-                          new StreamBasicClientTestResult.Builder().setStreamPayloads(r).build()));
-    }
+    return client
+        .sinkBasic(instruction.getRequest(), publisher)
+        .map(
+            r ->
+                ClientTestResult.fromSinkBasic(
+                    new SinkBasicClientTestResult.Builder().setFinalResponse(r).build()));
+  }
 
-    @Override
-    public void visitStreamChunkTimeout(StreamChunkTimeoutClientInstruction instruction) {
-      RpcOptions rpcOptions =
-          new RpcOptions.Builder()
-              .setClientTimeoutMs((int) instruction.getChunkTimeoutMs())
-              .build();
+  public Mono<ClientTestResult> testStreamInitialResponse(
+      StreamInitialResponseClientInstruction instruction) {
+    return client
+        .streamInitialResponse(instruction.getRequest())
+        .collectList()
+        .map(
+            r ->
+                ClientTestResult.fromStreamInitialResponse(
+                    new StreamInitialResponseClientTestResult.Builder()
+                        .setInitialResponse(r.get(0).getFirstResponse())
+                        .setStreamPayloads(
+                            r.stream()
+                                .filter(s -> s.isSetData())
+                                .map(s -> s.getData())
+                                .collect(Collectors.toList()))
+                        .build()));
+  }
 
-      result =
-          client
-              .streamChunkTimeout(instruction.getRequest(), rpcOptions)
-              .collectList()
-              .map(
-                  r ->
-                      ClientTestResult.fromStreamChunkTimeout(
-                          new StreamChunkTimeoutClientTestResult.Builder()
-                              .setStreamPayloads(r)
-                              .setChunkTimeoutException(true)
-                              .build()));
-    }
+  public Mono<ClientTestResult> testRequestResponseTimeout(
+      RequestResponseTimeoutClientInstruction instruction) {
+    return null;
+  }
 
-    @Override
-    public void visitSinkBasic(SinkBasicClientInstruction instruction) {
-      Publisher<Request> publisher = Flux.fromIterable(instruction.getSinkPayloads());
+  public Mono<ClientTestResult> testSinkChunkTimeout(
+      SinkChunkTimeoutClientInstruction instruction) {
+    return null;
+  }
 
-      result =
-          client
-              .sinkBasic(instruction.getRequest(), publisher)
-              .map(
-                  r ->
-                      ClientTestResult.fromSinkBasic(
-                          new SinkBasicClientTestResult.Builder().setFinalResponse(r).build()));
-    }
-
-    @Override
-    public void visitSinkChunkTimeout(
-        SinkChunkTimeoutClientInstruction sinkChunkTimeoutClientInstruction) {}
-
-    @Override
-    public void visitStreamInitialResponse(StreamInitialResponseClientInstruction instruction) {
-      result =
-          client
-              .streamInitialResponse(instruction.getRequest())
-              .collectList()
-              .map(
-                  r ->
-                      ClientTestResult.fromStreamInitialResponse(
-                          new StreamInitialResponseClientTestResult.Builder()
-                              .setInitialResponse(r.get(0).getFirstResponse())
-                              .setStreamPayloads(
-                                  r.stream()
-                                      .filter(s -> s.isSetData())
-                                      .map(s -> s.getData())
-                                      .collect(Collectors.toList()))
-                              .build()));
-    }
-
-    @Override
-    public void visitStreamCreditTimeout(
-        StreamCreditTimeoutClientInstruction streamCreditTimeoutClientInstruction) {}
+  public Mono<ClientTestResult> testStreamCreditTimeout(
+      StreamCreditTimeoutClientInstruction instruction) {
+    return null;
   }
 }

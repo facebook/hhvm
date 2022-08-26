@@ -52,6 +52,7 @@ type obj_get_args = {
   this_ty_conjunct: locl_ty;
   is_parent_call: bool;
   dep_kind: Reason.t * Typing_dependent_type.ExprDepTy.dep;
+  seen: SSet.t;
 }
 
 let log_obj_get env helper id_pos ty this_ty =
@@ -1155,7 +1156,8 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     merge_ty_err expand_ty_err_opt @@ obj_get_inner args env ty id on_error
-  | (r, Tgeneric (_name, _)) ->
+  | (r, Tgeneric (name, _)) when not (SSet.mem name args.seen) ->
+    let args = { args with seen = SSet.add name args.seen } in
     (match TUtils.get_concrete_supertypes ~abstract_enum:true env ety1 with
     | (env, []) ->
       let ctxt =
@@ -1397,6 +1399,7 @@ let obj_get_with_mismatches
       dep_kind;
       this_ty = receiver_ty;
       this_ty_conjunct = receiver_ty;
+      seen = SSet.empty;
     }
   in
   let (env, e2, ty, lval_err, rval_err_opt) =

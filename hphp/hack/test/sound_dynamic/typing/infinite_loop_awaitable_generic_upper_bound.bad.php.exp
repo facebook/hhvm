@@ -1,0 +1,12 @@
+File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 16-18:
+Lacking `__construct`, class `Inf` does not initialize its private member(s): `t` (NastCheck[3030])
+File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
+Invalid return type (Typing[4336])
+  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 42-45:
+  Expected `G<T>`
+  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
+  But got `void` because this function does not always return a value
+File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 16, characters 15-21:
+You are trying to access the method `noexist` but this is a value of generic type T (Typing[4062])
+  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 44-44:
+  Definition is here

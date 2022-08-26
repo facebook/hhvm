@@ -370,6 +370,22 @@ enum class NamedGroup : uint16_t {
    * Post-Quantum
    */
   cecpq2 = 16696,
+
+  // Nearly standardized algorithms. See
+  // https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/G0DoD7lkGPk .
+
+  /**
+   * Experimental, see
+   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L69 .
+   */
+  x25519_kyber512 = 12089,
+
+  /**
+   * Experimental, see
+   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L70 and
+   * T129759634.
+   */
+  secp256r1_kyber512 = 12090,
 };
 
 std::string toString(NamedGroup);

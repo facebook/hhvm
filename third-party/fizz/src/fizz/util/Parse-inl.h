@@ -57,7 +57,9 @@ inline NamedGroup parse(folly::StringPiece s) {
       {"secp521r1", NamedGroup::secp521r1},
       {"x25519", NamedGroup::x25519},
       {"secp384r1_bikel3", NamedGroup::secp384r1_bikel3},
-      {"cecpq2", NamedGroup::cecpq2}};
+      {"cecpq2", NamedGroup::cecpq2},
+      {"x25519_kyber512", NamedGroup::x25519_kyber512},
+      {"secp256r1_kyber512", NamedGroup::secp256r1_kyber512}};
 
   auto location = stringToGroups.find(s);
   if (location != stringToGroups.end()) {

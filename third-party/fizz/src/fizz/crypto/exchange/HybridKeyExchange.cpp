@@ -29,18 +29,18 @@ void HybridKeyExchange::generateKeyPair() {
 }
 
 /**
- * Simply concatenate the public key. According to RFC, if either X or Y is
- * not fixed-length, we need to inject length fields or other data to ensure
- * the composition of the two values injective. But this is out of this draft
- * RFC's scope. We need to implement this in future to avoid boundary
+ * Simply concatenate the public key. According to RFC, if either of two key
+ * exchanges is not fixed-length, we need to inject length fields or other data
+ * to ensure the composition of the two values injective. But this is out of
+ * this draft RFC's scope. We need to implement this in future to avoid boundary
  * confusion attacks.
  */
 std::unique_ptr<folly::IOBuf> HybridKeyExchange::getKeyShare() const {
   // We don't need to copy the IOBuf even though we use first's keyshare to
   // concatenate second's keyshare because we used unique_ptr.
   auto keyShare = firstKex_->getKeyShare();
-  auto keyShareY = secondKex_->getKeyShare();
-  keyShare->appendToChain(std::move(keyShareY));
+  auto secondKeyShare = secondKex_->getKeyShare();
+  keyShare->appendToChain(std::move(secondKeyShare));
   return keyShare;
 }
 

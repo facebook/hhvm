@@ -224,37 +224,6 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   }
 }
 
-template <typename T>
-void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
-  auto const caller = curFunc(env);
-  if (will_symbol_raise_module_boundary_violation(symbol, caller)) {
-      auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseModuleBoundaryViolation, data, cns(env, symbol));
-  }
-}
-
-void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func = true) {
-  if (!RO::EvalEnforceModules) return;
-  auto const caller = curFunc(env);
-  ifElse(
-    env,
-    [&] (Block* skip) {
-      auto const data = AttrData { AttrInternal };
-      auto const internal =
-        gen(env, func ? FuncHasAttr : ClassHasAttr, data, symbol);
-      gen(env, JmpZero, skip, internal);
-      auto violate =
-        gen(env, CallViolatesModuleBoundary, FuncData { caller }, symbol);
-      gen(env, JmpZero, skip, violate);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseModuleBoundaryViolation, data, symbol);
-    }
-  );
-}
-
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool skipRepack, bool dynamicCall,
                  bool asyncEagerReturn) {
@@ -1268,6 +1237,40 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 } // namespace
 
+template <typename T>
+void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
+  auto const caller = curFunc(env);
+  if (will_symbol_raise_module_boundary_violation(symbol, caller)) {
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModuleBoundaryViolation, data, cns(env, symbol));
+  }
+}
+
+template void emitModuleBoundaryCheckKnown(IRGS&, const Func*);
+template void emitModuleBoundaryCheckKnown(IRGS&, const Class*);
+
+void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
+  if (!RO::EvalEnforceModules) return;
+  auto const caller = curFunc(env);
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const data = AttrData { AttrInternal };
+      auto const internal =
+        gen(env, func ? FuncHasAttr : ClassHasAttr, data, symbol);
+      gen(env, JmpZero, skip, internal);
+      auto violate =
+        gen(env, CallViolatesModuleBoundary, FuncData { caller }, symbol);
+      gen(env, JmpZero, skip, violate);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModuleBoundaryViolation, data, symbol);
+    }
+  );
+}
+
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
   auto const callerCtx = [&] {
@@ -1469,7 +1472,6 @@ void emitNewObj(IRGS& env) {
   auto const cls = popC(env);
   if (!cls->isA(TCls)) PUNT(NewObj-NotClass);
   emitDynamicConstructChecks(env, cls);
-  emitModuleBoundaryCheck(env, cls, false);
   push(env, gen(env, AllocObj, cls));
 }
 
@@ -1479,7 +1481,6 @@ void emitNewObjR(IRGS& env) {
   if (!cls->isA(TCls))     PUNT(NewObjR-NotClass);
 
   emitDynamicConstructChecks(env, cls);
-  emitModuleBoundaryCheck(env, cls, false);
   auto const obj = [&] {
     if (generics->isA(TVec)) {
       emitReifiedClassChecks(env, cls, generics);

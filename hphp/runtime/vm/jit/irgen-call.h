@@ -40,6 +40,14 @@ Type callReturnType(const Func* callee);
 Type awaitedCallReturnType(const Func* callee);
 Type callOutType(const Func* callee, uint32_t index);
 
+/*
+ * Emits instructions to check and enforce module boundary violations
+ */
+void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
+
+template <typename T>
+void emitModuleBoundaryCheckKnown(IRGS&, const T* symbol);
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

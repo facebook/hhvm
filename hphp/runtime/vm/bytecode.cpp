@@ -965,24 +965,16 @@ void checkModuleBoundaryViolation(const Class* cls) {
 } // namespace
 
 static inline Class* lookupClsRef(TypedValue* input) {
-  Class* class_ = nullptr;
   if (isStringType(input->m_type) || isLazyClassType(input->m_type)) {
     auto const cname = isStringType(input->m_type) ?
       input->m_data.pstr : input->m_data.plazyclass.name();
-    class_ = Class::load(cname);
-    if (class_ == nullptr) {
-      raise_error(Strings::UNKNOWN_CLASS, cname->data());
-    }
-  } else if (input->m_type == KindOfObject) {
-    class_ = input->m_data.pobj->getVMClass();
-  } else if (isClassType(input->m_type)) {
-    class_ = input->m_data.pclass;
-  } else {
-    raise_error("Cls: Expected string or object, got %s",
-                describe_actual_type(input).c_str());
+    if (Class* class_ = Class::resolve(cname, vmfp()->func())) return class_;
+    raise_error(Strings::UNKNOWN_CLASS, cname->data());
   }
-  checkModuleBoundaryViolation(class_);
-  return class_;
+  if (input->m_type == KindOfObject) return input->m_data.pobj->getVMClass();
+  if (isClassType(input->m_type)) return input->m_data.pclass;
+  raise_error("Cls: Expected string or object, got %s",
+              describe_actual_type(input).c_str());
 }
 
 static UNUSED int innerCount(TypedValue tv) {

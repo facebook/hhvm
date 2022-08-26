@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -55,6 +56,7 @@ void emitClassGetC(IRGS& env) {
 
   auto const cls = ldCls(env, name);
   decRef(env, name, DecRefProfileId::Default);
+  emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }
 
@@ -526,6 +528,7 @@ void emitBreakTraceHint(IRGS&)     {}
 
 void emitResolveClass(IRGS& env, const StringData* name) {
   if (auto const cls = lookupUniqueClass(env, name)) {
+    emitModuleBoundaryCheckKnown(env, cls);
     push(env, cns(env, cls));
     return;
   }

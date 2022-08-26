@@ -38,6 +38,10 @@ function main() {
   try {
     new $x;
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  $x = __hhvm_intrinsics\launder_value(InternalCls::class);
+  try {
+    new $x;
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try {
     new ReifiedInternalCls();
   } catch (Exception $e) { echo $e->getMessage()."\n"; }

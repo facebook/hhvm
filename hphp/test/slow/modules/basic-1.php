@@ -18,6 +18,8 @@ function main() {
   new InternalCls();
   $x = __hhvm_intrinsics\launder_value("InternalCls");
   new $x;
+  $x = __hhvm_intrinsics\launder_value(InternalCls::class);
+  new $x;
   new ReifiedInternalCls();
   $y = __hhvm_intrinsics\launder_value("ReifiedInternalCls");
   new $y;

@@ -183,6 +183,11 @@ class TwoLevelCache {
     return 0;
   }
 
+  // for debugging, return number of pool keys in level1 map
+  size_t level1NumKey() const {
+    return level1_.size();
+  }
+
  private:
   using Level2Value = folly::F14FastSet<Key, FullKeyHash>;
   using Level1Map = folly::F14FastMap<Key, std::list<Value>, FullKeyHash>;
@@ -586,6 +591,11 @@ class AsyncConnectionPool
     return pool_per_instance_;
   }
 
+  // for debugging, return number of pool keys in the pool
+  FOLLY_NODISCARD size_t getNumKey() const noexcept {
+    return conn_storage_.getNumKey();
+  }
+
  private:
   friend class Connection;
   friend class MysqlPooledHolder;
@@ -745,6 +755,11 @@ class AsyncConnectionPool
 
     FOLLY_NODISCARD Duration maxIdleTime() const noexcept {
       return max_idle_time_;
+    }
+
+    // for debugging, return number of pool keys in the pool
+    size_t getNumKey() const {
+      return stock_.level1NumKey();
     }
 
    private:

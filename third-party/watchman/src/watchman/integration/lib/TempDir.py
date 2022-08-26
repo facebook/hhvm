@@ -35,7 +35,7 @@ class TempDir(object):
         # can clean it all up at the end.
 
         parent_dir = tempfile.gettempdir()
-        prefix = "wat"
+        prefix = "watchmantest"
 
         self.temp_dir = path.get_canonical_filesystem_path(
             tempfile.mkdtemp(dir=parent_dir, prefix=prefix)

@@ -27,6 +27,7 @@ const uint64_t kDefaultBufferSize = 100;
 Test createRequestResponseBasicTest() {
   Test ret;
   ret.name() = "RequestResponseBasicTest";
+  ret.tags()->emplace("spec/protocol/interface/#request-response");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseBasic/Success";
@@ -68,6 +69,8 @@ Test createRequestResponseBasicTest() {
 Test createRequestResponseDeclaredExceptionTest() {
   Test ret;
   ret.name() = "RequestResponseDeclaredExceptionTest";
+  ret.tags()->emplace(
+      "spec/protocol/interface/#declared-response-and-declared-exception");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseDeclaredException/Success";
@@ -108,6 +111,7 @@ Test createRequestResponseDeclaredExceptionTest() {
 Test createRequestResponseUndeclaredExceptionTest() {
   Test ret;
   ret.name() = "RequestResponseUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#undeclared-exception");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseUndeclaredException/Success";
@@ -145,6 +149,7 @@ Test createRequestResponseUndeclaredExceptionTest() {
 Test createRequestResponseNoArgVoidResponse() {
   Test ret;
   ret.name() = "RequestResponseNoArgVoidResponseTest";
+  ret.tags()->emplace("spec/protocol/interface/#request-response");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseNoArgVoidResponse/Success";
@@ -174,6 +179,7 @@ Test createRequestResponseNoArgVoidResponse() {
 Test createRequestResponseTimeoutTest() {
   Test ret;
   ret.name() = "RequestResponseTimeoutTest";
+  ret.tags()->emplace("spec/protocol/interface/#client-timeout");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseTimeout/Success";
@@ -211,6 +217,7 @@ Test createRequestResponseTimeoutTest() {
 Test createRequestResponseFragmentationTest() {
   Test ret;
   ret.name() = "RequestResponseFragmentationTest";
+  ret.tags()->emplace("spec/protocol/interface/rocket#request-response");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "RequestResponseFragmentation/Success";
@@ -253,6 +260,7 @@ Test createRequestResponseFragmentationTest() {
 Test createStreamBasicTest() {
   Test ret;
   ret.name() = "StreamBasicTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamBasic/Success";
@@ -291,6 +299,7 @@ Test createStreamBasicTest() {
 Test createStreamChunkTimeoutTest() {
   Test ret;
   ret.name() = "StreamChunkTimeoutTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream-chunk-timeout");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamChunkTimeout/Success";
@@ -335,6 +344,7 @@ Test createStreamChunkTimeoutTest() {
 Test createStreamFragmentationTest() {
   Test ret;
   ret.name() = "StreamFragmentationTest";
+  ret.tags()->emplace("spec/protocol/interface/rocket/#stream");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamFragmentation/Success";
@@ -370,6 +380,7 @@ Test createStreamFragmentationTest() {
 Test createStreamInitialResponseTest() {
   Test ret;
   ret.name() = "StreamInitialResponseTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream-initial-response");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamInitialResponse/Success";
@@ -418,6 +429,7 @@ Test createStreamSubsequentCreditsTest() {
   // credits in order to receive all stream payloads.
   Test ret;
   ret.name() = "StreamSubsequentCreditsTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream-flow-control");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamSubsequentCredits/Success";
@@ -456,6 +468,7 @@ Test createStreamSubsequentCreditsTest() {
 Test createStreamCreditTimeoutTest() {
   Test ret;
   ret.name() = "StreamCreditTimeoutTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream-expire-time");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "StreamCreditTimeout/Success";
@@ -499,6 +512,7 @@ Test createStreamCreditTimeoutTest() {
 Test createSinkBasicTest() {
   Test ret;
   ret.name() = "SinkBasicTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "SinkBasic/Success";
@@ -536,6 +550,7 @@ Test createSinkBasicTest() {
 Test createSinkFragmentationTest() {
   Test ret;
   ret.name() = "SinkFragmentationTest";
+  ret.tags()->emplace("spec/protocol/interface/rocket/#sink");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "SinkFragmentation/Success";
@@ -573,6 +588,7 @@ Test createSinkSubsequentCreditsTest() {
   // order to receive all sink payloads.
   Test ret;
   ret.name() = "SinkSubsequentCreditsTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-flow-control");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "SinkSubsequestCredits/Success";
@@ -610,6 +626,7 @@ Test createSinkSubsequentCreditsTest() {
 Test createSinkChunkTimeoutTest() {
   Test ret;
   ret.name() = "SinkChunkTimeoutTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-chunk-timeout");
 
   auto& testCase = ret.testCases()->emplace_back();
   testCase.name() = "SinkChunkTimeout/Success";
@@ -671,6 +688,7 @@ void addCommonRPCTests(TestSuite& suite) {
 TestSuite createRPCServerTestSuite() {
   TestSuite suite;
   suite.name() = "ThriftRPCServerTest";
+  suite.tags()->emplace("spec/protocol/interface/");
   addCommonRPCTests(suite);
   // =================== Sink ===================
   suite.tests()->push_back(createSinkChunkTimeoutTest());
@@ -680,6 +698,7 @@ TestSuite createRPCServerTestSuite() {
 TestSuite createRPCClientTestSuite() {
   TestSuite suite;
   suite.name() = "ThriftRPCClientTest";
+  suite.tags()->emplace("spec/protocol/interface/");
   addCommonRPCTests(suite);
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseTimeoutTest());

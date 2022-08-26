@@ -17,9 +17,9 @@ Facebook Thrift is not a distribution of [Apache Thrift](https://thrift.apache.o
 
 You can also learn more about this project in the original Facebook Code [blog post](https://code.facebook.com/posts/1468950976659943/under-the-hood-building-and-open-sourcing-fbthrift/).
 
-Table of Contents (ToC):
+Table of Contents
 =========================
-* [The Three Things About Thrift](#about-thrift)
+* [About Thrift](#about-thrift)
   * [A Code Generator](#a-code-generator)
   * [A Serialization Framework](#a-serialization-framework)
   * [An RPC Framework](#an-rpc-framework)

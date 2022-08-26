@@ -27,6 +27,7 @@ import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
+import com.facebook.thrift.legacy.server.testservices.ReactivePingService;
 import com.facebook.thrift.rsocket.server.RSocketServerTransport;
 import com.facebook.thrift.rsocket.server.RSocketServerTransportFactory;
 import com.facebook.thrift.server.RpcServerHandler;
@@ -42,6 +43,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 public class RSocketThriftClientTest {
 
@@ -201,6 +203,68 @@ public class RSocketThriftClientTest {
 
     byte[] result = client.pingBinary(new PingRequest.Builder().setRequest("ping").build());
     assertEquals("hello!", new String(result, StandardCharsets.UTF_8));
+  }
+
+  @Test
+  public void test1StreamingPing() {
+    sendNPings(1);
+  }
+
+  @Test
+  public void test10StreamingPing() {
+    sendNPings(10);
+  }
+
+  @Test
+  public void test100StreamingPing() {
+    sendNPings(100);
+  }
+
+  @Test
+  public void test1000StreamingPing() {
+    sendNPings(1_000);
+  }
+
+  @Test
+  public void test10_000StreamingPing() {
+    sendNPings(10_000);
+  }
+
+  public void sendNPings(int numOfPings) {
+    System.out.println("create server handler");
+    RpcServerHandler serverHandler =
+        new PingServiceRpcServerHandler(new ReactivePingService(), Collections.emptyList());
+
+    System.out.println("starting server");
+    RSocketServerTransportFactory transportFactory =
+        new RSocketServerTransportFactory(new ThriftServerConfig().setSslEnabled(false));
+    RSocketServerTransport transport =
+        transportFactory.createServerTransport(serverHandler).block();
+    InetSocketAddress address = (InetSocketAddress) transport.getAddress();
+
+    System.out.println("creating client");
+
+    RpcClientFactory factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableRSocket(false)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
+
+    PingService.Reactive client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(factory, address);
+
+    Flux<PingResponse> ping =
+        client
+            .streamOfPings(new PingRequest.Builder().setRequest("ping").build(), numOfPings)
+            .timeout(java.time.Duration.ofSeconds(30));
+
+    StepVerifier.create(ping).expectNextCount(numOfPings).verifyComplete();
   }
 
   @Test

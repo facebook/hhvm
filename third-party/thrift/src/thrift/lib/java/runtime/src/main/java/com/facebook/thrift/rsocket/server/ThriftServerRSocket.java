@@ -26,6 +26,7 @@ import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.payload.Writer;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
+import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.NettyNiftyRequestContext;
@@ -38,13 +39,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import org.apache.thrift.ProtocolId;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
 import org.apache.thrift.protocol.TProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class ThriftServerRSocket implements RSocket {
@@ -82,6 +83,58 @@ public class ThriftServerRSocket implements RSocket {
     }
   }
 
+  @Override
+  public Flux<Payload> requestStream(Payload payload) {
+    try {
+      RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
+
+      RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
+
+      ServerRequestPayload requestPayload =
+          deserializeRequest(payload, requestRpcMetadata, requestContext);
+
+      payload.release();
+
+      assert requestPayload.getRequestRpcMetadata().getKind()
+          == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE;
+
+      return rpcServerHandler
+          .singleRequestStreamingResponse(requestPayload)
+          .map(responsePayload -> handleStreamResponse(alloc, requestPayload, responsePayload));
+    } catch (Throwable t) {
+      payload.release();
+      return Flux.error(t);
+    }
+  }
+
+  private static Payload handleStreamResponse(
+      ByteBufAllocator alloc,
+      ServerRequestPayload requestPayload,
+      ServerResponsePayload responsePayload) {
+    ByteBuf data = null;
+    ByteBuf metadata = null;
+
+    try {
+      data = alloc.buffer();
+      metadata = alloc.buffer();
+
+      serializeStreamMetadata(responsePayload, metadata);
+      serializeResponse(requestPayload, responsePayload, data);
+
+      return createPayload(
+          alloc, responsePayload.getStreamPayloadMetadata().getCompression(), data, metadata);
+    } catch (Throwable t) {
+      if (data != null && data.refCnt() > 0) {
+        data.release();
+      }
+
+      if (metadata != null && metadata.refCnt() > 0) {
+        metadata.release();
+      }
+      throw Exceptions.propagate(t);
+    }
+  }
+
   private static RequestContext createRequestContext(Map<String, String> requestHeaders) {
     ConnectionContext connectionContext = new NiftyConnectionContext();
     return new NettyNiftyRequestContext(requestHeaders, connectionContext);
@@ -97,9 +150,7 @@ public class ThriftServerRSocket implements RSocket {
   }
 
   private static RequestRpcMetadata decodeRequestRpcMetadata(Payload payload) {
-    ByteBufTProtocol out =
-        TProtocolType.fromProtocolId(ProtocolId.COMPACT).apply(payload.sliceMetadata());
-    return RequestRpcMetadata.read0(out);
+    return ProtocolUtil.readCompact(RequestRpcMetadata::read0, payload.sliceMetadata());
   }
 
   private static Payload handleResponse(
@@ -114,7 +165,7 @@ public class ThriftServerRSocket implements RSocket {
       metadata = alloc.buffer();
 
       serializeResponse(requestPayload, responsePayload, data);
-      serializeMetadata(responsePayload, metadata);
+      serializeResponseMetadata(responsePayload, metadata);
 
       return createPayload(
           alloc, responsePayload.getResponseRpcMetadata().getCompression(), data, metadata);
@@ -131,9 +182,14 @@ public class ThriftServerRSocket implements RSocket {
     }
   }
 
-  private static void serializeMetadata(ServerResponsePayload responsePayload, ByteBuf metadata) {
-    final ByteBufTProtocol metadataProtocol = TProtocolType.TCompact.apply(metadata);
-    responsePayload.getResponseRpcMetadata().write0(metadataProtocol);
+  private static void serializeResponseMetadata(
+      ServerResponsePayload responsePayload, ByteBuf metadata) {
+    ProtocolUtil.writeCompact(responsePayload.getResponseRpcMetadata()::write0, metadata);
+  }
+
+  private static void serializeStreamMetadata(
+      ServerResponsePayload responsePayload, ByteBuf metadata) {
+    ProtocolUtil.writeCompact(responsePayload.getStreamPayloadMetadata()::write0, metadata);
   }
 
   private static void serializeResponse(

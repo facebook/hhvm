@@ -22,6 +22,7 @@ import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class ReactivePingService implements PingService.Reactive {
@@ -57,5 +58,11 @@ public class ReactivePingService implements PingService.Reactive {
   @Override
   public Mono<Void> pingVoid(PingRequest pingRequest) {
     return Mono.empty();
+  }
+
+  @Override
+  public Flux<PingResponse> streamOfPings(PingRequest request, int numberOfPings) {
+    return Flux.range(1, numberOfPings)
+        .map(i -> new PingResponse.Builder().setResponse("pong " + i).build());
   }
 }

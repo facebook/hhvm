@@ -43,6 +43,10 @@ public final class ProtocolUtil {
     writer.write(protocol);
   }
 
+  public static void writeCompact(Writer writer, ByteBuf dest) {
+    write(writer, dest, TProtocolType.TCompact);
+  }
+
   public static void write(Writer writer, ByteBuf dest, TProtocolType type) {
     write(writer, type.apply(dest));
   }
@@ -70,6 +74,10 @@ public final class ProtocolUtil {
 
   public static <T> T read(Reader<T> reader, ByteBuf src, TProtocolType type) {
     return read(reader, type.apply(src));
+  }
+
+  public static <T> T readCompact(Reader<T> reader, ByteBuf src) {
+    return read(reader, src, TProtocolType.TCompact);
   }
 
   public static <T> T read(

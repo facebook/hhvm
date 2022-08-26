@@ -141,6 +141,11 @@ public class ReactiveRpcBenchmarks {
     }
 
     @Override
+    public Flux<PingResponse> streamOfPings(PingRequest request, int numberOfPings) {
+      return Flux.empty();
+    }
+
+    @Override
     public void dispose() {}
   }
 }

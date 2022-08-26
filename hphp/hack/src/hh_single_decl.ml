@@ -93,6 +93,12 @@ let rec shallow_declare_ast ctx decls prog =
         let (name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
         (name, Shallow_decl_defs.Module decl) :: decls)
 
+let direct_decl_parse ctx fn text =
+  let popt = Provider_context.get_popt ctx in
+  let opts = DeclParserOptions.from_parser_options popt in
+  let parsed_file = parse_decls opts fn text in
+  parsed_file.pf_decls
+
 let compare_decls ctx fn text =
   let (ctx, _entry) =
     Provider_context.(
@@ -101,10 +107,7 @@ let compare_decls ctx fn text =
   let ast = Ast_provider.get_ast ctx fn in
   let legacy_decls = shallow_declare_ast ctx [] ast in
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
-  let popt = Provider_context.get_popt ctx in
-  let opts = DeclParserOptions.from_parser_options popt in
-  let parsed_file = parse_decls opts fn text in
-  let decls = parsed_file.pf_decls in
+  let decls = direct_decl_parse ctx fn text in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
   if matched then
@@ -125,7 +128,26 @@ let compare_decls ctx fn text =
           ());
   matched
 
-type modes = CompareDirectDeclParser
+let compare_marshal ctx fn text =
+  let (ctx, _entry) =
+    Provider_context.(
+      add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
+  in
+  let decls = direct_decl_parse ctx fn text in
+  let ocaml_marshaled = Marshal.to_string decls [] in
+  let rust_marshaled = Ocamlrep_marshal_ffi.to_string decls [] in
+  let matched = String.equal ocaml_marshaled rust_marshaled in
+  if not matched then begin
+    Printf.printf
+      "OCaml Marshal output does not match Rust ocamlrep_marshal output:\n%!";
+    Printf.printf "ocaml:\t%S\n%!" ocaml_marshaled;
+    Printf.printf "rust:\t%S\n%!" rust_marshaled
+  end;
+  matched
+
+type modes =
+  | CompareDirectDeclParser
+  | VerifyOcamlrepMarshal
 
 let () =
   let usage =
@@ -164,6 +186,10 @@ let () =
       ( "--compare-direct-decl-parser",
         Arg.Unit (set_mode CompareDirectDeclParser),
         "(mode) Runs the direct decl parser against the FFP -> naming -> decl pipeline and compares their output"
+      );
+      ( "--verify-ocamlrep-marshal",
+        Arg.Unit (set_mode VerifyOcamlrepMarshal),
+        "(mode) Marshals the output of the direct decl parser using Marshal and ocamlrep_marshal and compares their output"
       );
       ( "--skip-if-errors",
         Arg.Set skip_if_errors,
@@ -258,79 +284,82 @@ let () =
     ]
     set_file
     usage;
-  match !mode with
-  | None -> usage_and_exit ()
-  | Some CompareDirectDeclParser ->
-    begin
-      match !file with
-      | None -> usage_and_exit ()
-      | Some file ->
-        let () =
-          if
-            !skip_if_errors
-            && not
-               @@ String_utils.is_substring
-                    "No errors"
-                    (RealDisk.cat (file ^ ".exp"))
-          then begin
-            print_endline "Skipping because input file has errors";
-            exit 0
-          end
-        in
-        let file = Path.make file in
-        let auto_namespace_map = !auto_namespace_map in
-        let enable_xhp_class_modifier = !enable_xhp_class_modifier in
-        let disable_xhp_element_mangling = !disable_xhp_element_mangling in
-        let disable_enum_classes = !disable_enum_classes in
-        let interpret_soft_types_as_like_types =
-          !interpret_soft_types_as_like_types
-        in
-        let everything_sdt = !everything_sdt in
-        let popt =
-          popt
-            ~auto_namespace_map
-            ~enable_xhp_class_modifier
-            ~disable_xhp_element_mangling
-            ~disable_enum_classes
-            ~interpret_soft_types_as_like_types
-            ~everything_sdt
-        in
-        let tco_experimental_features =
-          TypecheckerOptions.experimental_from_flags
-            ~disallow_static_memoized:!disallow_static_memoized
-        in
-        let popt = { popt with GlobalOptions.tco_experimental_features } in
-        let ctx = init (Path.dirname file) popt in
-        let file = Relative_path.(create Root (Path.to_string file)) in
-        let files = Multifile.file_to_file_list file in
-        let num_files = List.length files in
-        let (all_matched, _) =
-          List.fold
-            files
-            ~init:(true, true)
-            ~f:(fun (matched, is_first) (filename, contents) ->
-              (* All output is printed to stderr because that's the output
-                 channel Ppxlib_print_diff prints to. *)
-              if not is_first then Printf.eprintf "\n%!";
-              (* Multifile turns the path into an absolute path instead of a
-                 relative one. Turn it back into a relative path. *)
-              let filename =
-                Relative_path.(create Root (Relative_path.to_absolute filename))
-              in
-              if num_files > 1 then
-                Printf.eprintf
-                  "File %s\n%!"
-                  (Relative_path.storage_to_string filename);
-              let matched =
-                Provider_utils.respect_but_quarantine_unsaved_changes
-                  ~ctx
-                  ~f:(fun () -> compare_decls ctx filename contents)
-                && matched
-              in
-              (matched, false))
-        in
-        if all_matched then
-          Printf.eprintf "\nThey matched!\n%!"
-        else
-          exit 1
+  let mode =
+    match !mode with
+    | None -> usage_and_exit ()
+    | Some mode -> mode
+  in
+  let file =
+    match !file with
+    | None -> usage_and_exit ()
+    | Some file -> file
+  in
+  let () =
+    if
+      !skip_if_errors
+      && not
+         @@ String_utils.is_substring "No errors" (RealDisk.cat (file ^ ".exp"))
+    then begin
+      print_endline "Skipping because input file has errors";
+      exit 0
     end
+  in
+  let file = Path.make file in
+  let auto_namespace_map = !auto_namespace_map in
+  let enable_xhp_class_modifier = !enable_xhp_class_modifier in
+  let disable_xhp_element_mangling = !disable_xhp_element_mangling in
+  let disable_enum_classes = !disable_enum_classes in
+  let interpret_soft_types_as_like_types =
+    !interpret_soft_types_as_like_types
+  in
+  let everything_sdt = !everything_sdt in
+  let popt =
+    popt
+      ~auto_namespace_map
+      ~enable_xhp_class_modifier
+      ~disable_xhp_element_mangling
+      ~disable_enum_classes
+      ~interpret_soft_types_as_like_types
+      ~everything_sdt
+  in
+  let tco_experimental_features =
+    TypecheckerOptions.experimental_from_flags
+      ~disallow_static_memoized:!disallow_static_memoized
+  in
+  let popt = { popt with GlobalOptions.tco_experimental_features } in
+  let ctx = init (Path.dirname file) popt in
+  let file = Relative_path.(create Root (Path.to_string file)) in
+  let files = Multifile.file_to_file_list file in
+  let num_files = List.length files in
+  let (all_matched, _) =
+    List.fold
+      files
+      ~init:(true, true)
+      ~f:(fun (matched, is_first) (filename, contents) ->
+        (* All output is printed to stderr because that's the output
+           channel Ppxlib_print_diff prints to. *)
+        if not is_first then Printf.eprintf "\n%!";
+        (* Multifile turns the path into an absolute path instead of a
+           relative one. Turn it back into a relative path. *)
+        let filename =
+          Relative_path.(create Root (Relative_path.to_absolute filename))
+        in
+        if num_files > 1 then
+          Printf.eprintf
+            "File %s\n%!"
+            (Relative_path.storage_to_string filename);
+        let matched =
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () ->
+              match mode with
+              | CompareDirectDeclParser -> compare_decls ctx filename contents
+              | VerifyOcamlrepMarshal -> compare_marshal ctx filename contents)
+          && matched
+        in
+        (matched, false))
+  in
+  if all_matched then
+    Printf.eprintf "\nThey matched!\n%!"
+  else
+    exit 1

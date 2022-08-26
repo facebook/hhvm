@@ -164,6 +164,7 @@
   default_injector_config
   direct_decl_parser
   file_provider
+  ocamlrep_marshal_ffi
   ppxlib.print_diff
   provider_context
   provider_utils

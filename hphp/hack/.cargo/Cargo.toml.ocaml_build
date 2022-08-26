@@ -73,6 +73,7 @@ members = [
     "src/ocamlrep",
     "src/ocamlrep_custom",
     "src/ocamlrep_derive",
+    "src/ocamlrep_marshal/cargo/ocamlrep_marshal",
     "src/ocamlrep_ocamlpool",
     "src/oxidized",
     "src/oxidized_by_ref",

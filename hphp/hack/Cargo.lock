@@ -2365,6 +2365,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ocamlrep_marshal"
+version = "0.0.0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "ocamlrep_ocamlpool"
 version = "0.0.0"
 dependencies = [

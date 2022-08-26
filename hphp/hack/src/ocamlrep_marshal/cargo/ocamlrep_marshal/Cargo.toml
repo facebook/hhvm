@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../ocamlrep_marshal.rs"
 test = false
 doctest = false
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 libc = "0.2.121"

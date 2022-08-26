@@ -6,12 +6,9 @@
  *
  *)
 
-external ocamlrep_marshal_to_string : 'a -> Marshal.extern_flags list -> string
-  = "ocamlrep_marshal_output_value_to_string"
-
 let assert_eq v =
   let ocaml_marshaled = Marshal.to_string v [] in
-  let rust_marshaled = ocamlrep_marshal_to_string v [] in
+  let rust_marshaled = Ocamlrep_marshal_ffi.to_string v [] in
   if not (String.equal rust_marshaled ocaml_marshaled) then begin
     Printf.printf
       "OCaml Marshal output does not match Rust ocamlrep_marshal output:\n%!";

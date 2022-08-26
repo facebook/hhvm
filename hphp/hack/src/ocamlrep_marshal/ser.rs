@@ -287,7 +287,7 @@ const POS_TABLE_INIT_SIZE: usize = 1 << POS_TABLE_INIT_SIZE_LOG2;
 struct output_block {
     next: *mut output_block,
     end: *mut c_char,
-    data: [c_char; SIZE_EXTERN_OUTPUT_BLOCK as usize],
+    data: *mut [c_char],
 }
 
 #[derive(Copy, Clone)]
@@ -589,13 +589,16 @@ unsafe fn init_extern_output(mut s: *mut caml_extern_state) {
     if (*s).extern_output_first.is_null() {
         caml_raise_out_of_memory();
     }
+    let sz = SIZE_EXTERN_OUTPUT_BLOCK;
+    (*(*s).extern_output_first).data =
+        std::slice::from_raw_parts_mut(caml_stat_alloc_noexc(sz as c_ulong) as *mut c_char, sz);
+    if (*(*s).extern_output_first).data.is_null() {
+        caml_raise_out_of_memory();
+    }
     (*s).extern_output_block = (*s).extern_output_first;
     (*(*s).extern_output_block).next = std::ptr::null_mut();
     (*s).extern_ptr = (*(*s).extern_output_block).data.as_mut_ptr();
-    (*s).extern_limit = (*(*s).extern_output_block)
-        .data
-        .as_mut_ptr()
-        .add(SIZE_EXTERN_OUTPUT_BLOCK);
+    (*s).extern_limit = (*(*s).extern_output_block).data.as_mut_ptr().add(sz);
 }
 
 unsafe fn close_extern_output(mut s: *mut caml_extern_state) {
@@ -612,6 +615,7 @@ unsafe fn free_extern_output(mut s: *mut caml_extern_state) {
         blk = (*s).extern_output_first;
         while !blk.is_null() {
             nextblk = (*blk).next;
+            caml_stat_free((*blk).data as caml_stat_block);
             caml_stat_free(blk as caml_stat_block);
             blk = nextblk
         }
@@ -637,21 +641,21 @@ unsafe fn grow_extern_output(mut s: *mut caml_extern_state, required: intnat) {
     } else {
         extra = required
     };
-    blk = caml_stat_alloc_noexc(
-        (std::mem::size_of::<output_block>() as c_ulong).wrapping_add(extra as c_ulong),
-    ) as _;
+    blk = caml_stat_alloc_noexc(std::mem::size_of::<output_block>() as c_ulong) as _;
     if blk.is_null() {
+        extern_out_of_memory(s);
+    }
+    let sz = SIZE_EXTERN_OUTPUT_BLOCK.wrapping_add(extra as usize);
+    (*blk).data =
+        std::slice::from_raw_parts_mut(caml_stat_alloc_noexc(sz as c_ulong) as *mut c_char, sz);
+    if (*blk).data.is_null() {
         extern_out_of_memory(s);
     }
     (*(*s).extern_output_block).next = blk;
     (*s).extern_output_block = blk;
     (*(*s).extern_output_block).next = std::ptr::null_mut();
     (*s).extern_ptr = (*(*s).extern_output_block).data.as_mut_ptr();
-    (*s).extern_limit = (*(*s).extern_output_block)
-        .data
-        .as_mut_ptr()
-        .add(SIZE_EXTERN_OUTPUT_BLOCK)
-        .offset(extra as isize);
+    (*s).extern_limit = (*(*s).extern_output_block).data.as_mut_ptr().add(sz);
 }
 
 unsafe fn extern_output_length(s: *mut caml_extern_state) -> intnat {
@@ -1269,6 +1273,7 @@ unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> st
             (*blk).end.wrapping_offset_from((*blk).data.as_mut_ptr()) as usize,
         ))?;
         nextblk = (*blk).next;
+        caml_stat_free((*blk).data as caml_stat_block);
         caml_stat_free(blk as caml_stat_block);
         blk = nextblk
     }

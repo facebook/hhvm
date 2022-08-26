@@ -540,7 +540,7 @@ void RocketClientChannel::setCompression(
               apache::thrift::CodecConfig::Type::zlibConfig &&
           getServerZstdSupported() &&
           THRIFT_FLAG(rocket_client_upgrade_zlib_to_zstd_v2)) {
-        codecRef->set_zstdConfig({});
+        codecRef->zstdConfig_ref().emplace();
       }
       if (payloadSize >
           compressionConfig->compressionSizeLimit_ref().value_or(0)) {

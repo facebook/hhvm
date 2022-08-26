@@ -78,13 +78,13 @@ void HeaderChannel::preprocessHeader(
       switch (transform) {
         case transport::THeader::ZLIB_TRANSFORM: {
           apache::thrift::CodecConfig codec;
-          codec.set_zlibConfig(apache::thrift::ZlibCompressionCodecConfig());
+          codec.zlibConfig_ref() = apache::thrift::ZlibCompressionCodecConfig();
           compressionConfig.codecConfig_ref() = codec;
           break;
         }
         case transport::THeader::ZSTD_TRANSFORM: {
           apache::thrift::CodecConfig codec;
-          codec.set_zstdConfig(apache::thrift::ZstdCompressionCodecConfig());
+          codec.zstdConfig_ref() = apache::thrift::ZstdCompressionCodecConfig();
           compressionConfig.codecConfig_ref() = codec;
           break;
         }

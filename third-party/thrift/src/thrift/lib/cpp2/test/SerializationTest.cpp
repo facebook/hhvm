@@ -470,7 +470,7 @@ TEST(SerializationTest, UnsignedIntUnion) {
       std::is_same<decltype(u.get_u64()), const uint64_t&>::value,
       "Unexpected return value type for s.get_u64()");
 
-  u.set_u64(9223372036854775808ULL);
+  u.u64_ref() = 9223372036854775808ULL;
 
   folly::IOBufQueue q;
   CompactSerializer::serialize(u, &q);

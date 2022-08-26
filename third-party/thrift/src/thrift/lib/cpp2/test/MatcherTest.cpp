@@ -90,7 +90,7 @@ TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
   auto r = Result();
 
   int value = 42;
-  r.set_success(value);
+  r.success_ref() = value;
   EXPECT_THAT(r, IsThriftUnionWith<field::success>(value));
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(r, IsThriftUnionWith<field::success>(Not(value))), "");
@@ -98,7 +98,7 @@ TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
       EXPECT_THAT(r, IsThriftUnionWith<field::error>(_)), "");
 
   std::string error = "error";
-  r.set_error(error);
+  r.error_ref() = error;
   EXPECT_THAT(r, IsThriftUnionWith<field::error>(error));
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(r, IsThriftUnionWith<field::error>(Not(error))), "");
@@ -122,7 +122,7 @@ TEST(
   namespace field = apache::thrift::tag;
 
   auto r = SameType();
-  r.set_b("b");
+  r.b_ref() = "b";
   EXPECT_THAT(r, IsThriftUnionWith<field::b>(_));
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(r, IsThriftUnionWith<field::a>(_)), "");
 }

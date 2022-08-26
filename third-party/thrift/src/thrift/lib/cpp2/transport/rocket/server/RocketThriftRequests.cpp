@@ -130,7 +130,7 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
 
         PayloadMetadata payloadMetadata;
         if (fid == 0) {
-          payloadMetadata.set_responseMetadata(PayloadResponseMetadata());
+          payloadMetadata.responseMetadata_ref() = PayloadResponseMetadata();
         } else {
           PayloadExceptionMetadataBase exceptionMetadataBase;
           PayloadDeclaredExceptionMetadata declaredExceptionMetadata;
@@ -164,11 +164,11 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
             }
           }
           PayloadExceptionMetadata exceptionMetadata;
-          exceptionMetadata.set_declaredException(
-              std::move(declaredExceptionMetadata));
+          exceptionMetadata.declaredException_ref() =
+              std::move(declaredExceptionMetadata);
           exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
-          payloadMetadata.set_exceptionMetadata(
-              std::move(exceptionMetadataBase));
+          payloadMetadata.exceptionMetadata_ref() =
+              std::move(exceptionMetadataBase);
         }
         metadata.payloadMetadata_ref() = std::move(payloadMetadata);
         break;
@@ -203,8 +203,8 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
           if (version < 10) {
             exceptionMetadataBase.name_utf8_ref() = *anyexTypePtr;
             PayloadExceptionMetadata exceptionMetadata;
-            exceptionMetadata.set_DEPRECATED_proxyException(
-                PayloadProxyExceptionMetadata());
+            exceptionMetadata.DEPRECATED_proxyException_ref() =
+                PayloadProxyExceptionMetadata();
             exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
 
             payload = protocol::base64Decode(*anyexPtr);
@@ -315,7 +315,8 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
         }
 
         PayloadMetadata payloadMetadata;
-        payloadMetadata.set_exceptionMetadata(std::move(exceptionMetadataBase));
+        payloadMetadata.exceptionMetadata_ref() =
+            std::move(exceptionMetadataBase);
         metadata.payloadMetadata_ref() = std::move(payloadMetadata);
 
         break;

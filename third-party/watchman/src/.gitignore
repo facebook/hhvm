@@ -19,7 +19,6 @@ buck-cache
 /Makefile
 *.o
 /config.status
-/watchman
 *.swp
 /compile
 /stamp-h1

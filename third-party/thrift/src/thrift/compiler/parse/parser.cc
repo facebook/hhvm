@@ -17,7 +17,7 @@
 #include <cassert>
 #include <exception>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/diagnostic.h>
@@ -215,20 +215,20 @@ class parser {
     if (token_.kind != tok::string_literal) {
       report_expected("string literal");
     }
-    auto literal = token_.string_value();
+    auto str = token_.string_value();
     consume_token();
     switch (kind) {
       case tok::kw_package:
-        actions_.on_package(range, literal);
+        actions_.on_package(range, str);
         return t_statement_type::program_header;
       case tok::kw_include:
-        actions_.on_include(range, std::move(literal));
+        actions_.on_include(range, str);
         break;
       case tok::kw_cpp_include:
-        actions_.on_cpp_include(range, std::move(literal));
+        actions_.on_cpp_include(range, str);
         break;
       case tok::kw_hs_include:
-        actions_.on_hs_include(range, std::move(literal));
+        actions_.on_hs_include(range, str);
         break;
       default:
         assert(false);
@@ -242,9 +242,9 @@ class parser {
     actions_.on_program_doctext();
     consume_token();
     auto language = parse_identifier();
-    std::string ns = token_.kind == tok::string_literal
+    auto ns = token_.kind == tok::string_literal
         ? consume_token().string_value()
-        : parse_identifier();
+        : parse_identifier().str;
     return actions_.on_namespace(language, ns);
   }
 
@@ -274,12 +274,11 @@ class parser {
     if (!try_consume_token('@')) {
       return {};
     }
-    auto name_range = token_.range;
     auto name = parse_identifier();
     if (token_.kind != '{') {
-      return actions_.on_structured_annotation(range, name);
+      return actions_.on_structured_annotation(range, name.str);
     }
-    auto const_value = parse_const_struct_body(name_range, std::move(name));
+    auto const_value = parse_const_struct_body(name);
     return actions_.on_structured_annotation(range, std::move(const_value));
   }
 
@@ -306,16 +305,16 @@ class parser {
       auto value = std::string("1");
       if (try_consume_token('=')) {
         if (token_.kind == tok::string_literal) {
-          value = consume_token().string_value();
+          value = fmt::to_string(consume_token().string_value());
         } else if (token_.kind == tok::bool_constant) {
-          value = fmt::format("{:d}", consume_token().bool_value());
+          value = fmt::to_string(consume_token().bool_value() ? 1 : 0);
         } else if (auto integer = try_parse_integer()) {
-          value = fmt::format("{}", *integer);
+          value = fmt::to_string(*integer);
         } else {
           report_expected("integer, bool or string");
         }
       }
-      annotations->strings[std::move(key)] = {range, std::move(value)};
+      annotations->strings[fmt::to_string(key.str)] = {range, std::move(value)};
       if (!try_parse_comma_or_semicolon()) {
         break;
       }
@@ -330,13 +329,12 @@ class parser {
     auto range = track_range();
     expect_and_consume(tok::kw_service);
     auto name = parse_identifier();
-    auto base = std::string();
+    auto base = identifier();
     if (try_consume_token(tok::kw_extends)) {
       base = parse_identifier();
     }
     auto functions = parse_braced_function_list();
-    return actions_.on_service(
-        range, std::move(name), std::move(base), std::move(functions));
+    return actions_.on_service(range, name, base, std::move(functions));
   }
 
   // interaction: "interaction" identifier "{" function_or_performs* "}"
@@ -345,8 +343,7 @@ class parser {
     expect_and_consume(tok::kw_interaction);
     auto name = parse_identifier();
     auto functions = parse_braced_function_list();
-    return actions_.on_interaction(
-        range, std::move(name), std::move(functions));
+    return actions_.on_interaction(range, name, std::move(functions));
   }
 
   // function_or_performs:
@@ -403,7 +400,6 @@ class parser {
     }
 
     auto return_type = parse_return_type();
-    auto name_loc = token_.range.begin;
     auto name = parse_identifier();
 
     // Parse arguments.
@@ -418,8 +414,7 @@ class parser {
         std::move(attrs),
         qual,
         std::move(return_type),
-        name_loc,
-        std::move(name),
+        name,
         std::move(params),
         std::move(throws),
         std::move(annotations));
@@ -492,7 +487,7 @@ class parser {
     expect_and_consume(tok::kw_typedef);
     auto type = parse_field_type();
     auto name = parse_identifier();
-    return actions_.on_typedef(range, std::move(type), std::move(name));
+    return actions_.on_typedef(range, std::move(type), name);
   }
 
   // struct: "struct" identifier "{" field* "}"
@@ -501,7 +496,7 @@ class parser {
     expect_and_consume(tok::kw_struct);
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
-    return actions_.on_struct(range, std::move(name), std::move(fields));
+    return actions_.on_struct(range, name, std::move(fields));
   }
 
   // union: "union" identifier "{" field* "}"
@@ -510,7 +505,7 @@ class parser {
     expect_and_consume(tok::kw_union);
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
-    return actions_.on_union(range, std::move(name), std::move(fields));
+    return actions_.on_union(range, name, std::move(fields));
   }
 
   // exception:
@@ -551,7 +546,7 @@ class parser {
     auto name = parse_identifier();
     auto fields = parse_braced_field_list();
     return actions_.on_exception(
-        range, safety, kind, blame, std::move(name), std::move(fields));
+        range, safety, kind, blame, name, std::move(fields));
   }
 
   t_field_list parse_braced_field_list() {
@@ -596,7 +591,6 @@ class parser {
     }
 
     auto type = parse_field_type();
-    auto name_loc = token_.range.begin;
     auto name = parse_identifier();
 
     // Parse the default value.
@@ -614,8 +608,7 @@ class parser {
         field_id,
         qual,
         std::move(type),
-        name_loc,
-        std::move(name),
+        name,
         std::move(value),
         std::move(annotations),
         std::move(doc));
@@ -642,10 +635,9 @@ class parser {
     }
     switch (token_.kind) {
       case tok::identifier: {
-        auto value = consume_token().string_value();
+        auto name = consume_token().string_value();
         auto annotations = parse_annotations();
-        return actions_.on_field_type(
-            range, std::move(value), std::move(annotations));
+        return actions_.on_field_type(range, name, std::move(annotations));
       }
       case tok::kw_list: {
         consume_token();
@@ -722,7 +714,7 @@ class parser {
       values.emplace_back(parse_enum_value());
     }
     expect_and_consume('}');
-    return actions_.on_enum(range, std::move(name), std::move(values));
+    return actions_.on_enum(range, name, std::move(values));
   }
 
   // enum_value:
@@ -731,7 +723,6 @@ class parser {
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
-    auto name_loc = token_.range.begin;
     auto name = parse_identifier();
     auto value = try_consume_token('=')
         ? boost::optional<int64_t>(parse_integer())
@@ -742,8 +733,7 @@ class parser {
     return actions_.on_enum_value(
         range,
         std::move(attrs),
-        name_loc,
-        std::move(name),
+        name,
         value ? &*value : nullptr,
         std::move(annotations),
         std::move(doc));
@@ -757,7 +747,7 @@ class parser {
     auto name = parse_identifier();
     expect_and_consume('=');
     auto value = parse_const_value();
-    return actions_.on_const(range, type, std::move(name), std::move(value));
+    return actions_.on_const(range, type, name, std::move(value));
   }
 
   // const_value:
@@ -794,9 +784,8 @@ class parser {
         return parse_const_map();
       default:
         if (auto id = try_parse_identifier()) {
-          return token_.kind == '{'
-              ? parse_const_struct_body(range, *id)
-              : actions_.on_reference_const(range, std::move(*id));
+          return token_.kind == '{' ? parse_const_struct_body(*id)
+                                    : actions_.on_reference_const(*id);
         }
         break;
     }
@@ -846,12 +835,12 @@ class parser {
   // const_struct_contents:
   //   (identifier "=" const_value comma_or_semicolon)*
   //    identifier "=" const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_const_struct_body(
-      source_range range, std::string id) {
+  std::unique_ptr<t_const_value> parse_const_struct_body(identifier id) {
+    auto id_end = end_;
     expect_and_consume('{');
-    auto map = actions_.on_const_struct(range, std::move(id));
+    auto map = actions_.on_const_struct({id.loc, id_end}, id.str);
     while (token_.kind != '}') {
-      auto key = actions_.on_string_literal(parse_identifier());
+      auto key = actions_.on_string_literal(parse_identifier().str);
       expect_and_consume('=');
       auto value = parse_const_value();
       map->add_map(std::move(key), std::move(value));
@@ -927,12 +916,11 @@ class parser {
   //   | "permanent"
   //   | "server"
   //   | "client"
-  boost::optional<std::string> try_parse_identifier() {
-    auto id = std::string();
+  boost::optional<identifier> try_parse_identifier() {
+    auto range = track_range();
     switch (token_.kind) {
       case tok::identifier:
-        id = token_.string_value();
-        break;
+        return identifier{consume_token().string_value(), range};
       // Context-sensitive keywords allowed in identifiers:
       case tok::kw_package:
       case tok::kw_sink:
@@ -944,19 +932,14 @@ class parser {
       case tok::kw_stateful:
       case tok::kw_permanent:
       case tok::kw_server:
-      case tok::kw_client: {
-        auto s = to_string(token_.kind);
-        id = {s.data(), s.size()};
-        break;
-      }
+      case tok::kw_client:
+        return identifier{to_string(consume_token().kind), range};
       default:
         return {};
     }
-    consume_token();
-    return id;
   }
 
-  std::string parse_identifier() {
+  identifier parse_identifier() {
     if (auto id = try_parse_identifier()) {
       return *id;
     }

@@ -101,7 +101,7 @@ void parsing_driver::on_program_header(
   set_program_annotations(std::move(attrs), std::move(annotations), range);
 }
 
-void parsing_driver::on_package(source_range range, std::string name) {
+void parsing_driver::on_package(source_range range, fmt::string_view name) {
   if (mode != parsing_mode::PROGRAM) {
     return;
   }
@@ -109,7 +109,7 @@ void parsing_driver::on_package(source_range range, std::string name) {
     error(range.begin, "Package already specified.");
   }
   try {
-    program->set_package(t_package(std::move(name)));
+    program->set_package(t_package(fmt::to_string(name)));
   } catch (const std::exception& e) {
     error(range.begin, "{}", e.what());
   }
@@ -117,11 +117,12 @@ void parsing_driver::on_package(source_range range, std::string name) {
 
 std::unique_ptr<t_service> parsing_driver::on_service(
     source_range range,
-    std::string name,
-    const std::string& base_name,
+    const identifier& name,
+    const identifier& base,
     std::unique_ptr<t_function_list> functions) {
   auto find_base_service = [&]() -> const t_service* {
-    if (mode == parsing_mode::PROGRAM && !base_name.empty()) {
+    if (mode == parsing_mode::PROGRAM && base.str.size() != 0) {
+      auto base_name = fmt::to_string(base.str);
       if (auto* result = scope_cache->find_service(base_name)) {
         return result;
       }
@@ -134,7 +135,7 @@ std::unique_ptr<t_service> parsing_driver::on_service(
     return nullptr;
   };
   auto service = std::make_unique<t_service>(
-      program, std::move(name), find_base_service());
+      program, fmt::to_string(name.str), find_base_service());
   service->set_src_range(range);
   set_functions(*service, std::move(functions));
   return service;

@@ -17,7 +17,6 @@
 #pragma once
 
 #include <cassert>
-#include <string>
 
 #include <fmt/core.h>
 #include <thrift/compiler/source_location.h>
@@ -243,7 +242,9 @@ class token {
     return as.float_value;
   }
 
-  std::string string_value() const {
+  // Returns the value of an identifier, string literal or inline doc.
+  // The string is owned by the source manager.
+  fmt::string_view string_value() const {
     if (kind != tok::identifier && kind != tok::string_literal &&
         kind != tok::inline_doc) {
       throw_invalid_kind("string");

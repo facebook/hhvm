@@ -39,6 +39,11 @@ class t_throws;
 class t_typedef;
 class t_union;
 
+struct identifier {
+  fmt::string_view str;
+  source_location loc;
+};
+
 struct comment {
   std::string text;
   source_location loc;
@@ -51,7 +56,6 @@ struct stmt_attrs {
 
 struct t_annotations {
   std::map<std::string, annotation_value> strings;
-  std::map<std::string, std::shared_ptr<const t_const>> objects;
   source_location loc;
 };
 
@@ -78,13 +82,14 @@ class parser_actions {
       std::unique_ptr<stmt_attrs> attrs,
       std::unique_ptr<t_annotations> annotations) = 0;
 
-  virtual void on_package(source_range range, std::string name) = 0;
-  virtual void on_include(source_range range, std::string literal) = 0;
+  virtual void on_package(source_range range, fmt::string_view name) = 0;
+  virtual void on_include(source_range range, fmt::string_view str) = 0;
 
-  virtual void on_cpp_include(source_range, std::string literal) = 0;
-  virtual void on_hs_include(source_range, std::string) = 0;
+  virtual void on_cpp_include(source_range, fmt::string_view str) = 0;
+  virtual void on_hs_include(source_range, fmt::string_view str) = 0;
 
-  virtual void on_namespace(std::string language, std::string ns) = 0;
+  virtual void on_namespace(
+      const identifier& language, fmt::string_view ns) = 0;
 
   virtual void on_definition(
       source_range range,
@@ -94,14 +99,14 @@ class parser_actions {
 
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
-  virtual comment on_inline_doc(source_location loc, std::string text) = 0;
+  virtual comment on_inline_doc(source_location loc, fmt::string_view text) = 0;
 
   virtual std::unique_ptr<stmt_attrs> on_statement_attrs(
       boost::optional<comment> doc,
       std::unique_ptr<node_list<t_const>> annotations) = 0;
 
   virtual std::unique_ptr<t_const> on_structured_annotation(
-      source_range range, std::string name) = 0;
+      source_range range, fmt::string_view name) = 0;
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) = 0;
 
@@ -109,13 +114,13 @@ class parser_actions {
 
   virtual std::unique_ptr<t_service> on_service(
       source_range range,
-      std::string name,
-      const std::string& base_name,
+      const identifier& name,
+      const identifier& base,
       std::unique_ptr<t_function_list> functions) = 0;
 
   virtual std::unique_ptr<t_interaction> on_interaction(
       source_range range,
-      std::string name,
+      const identifier& name,
       std::unique_ptr<t_function_list> functions) = 0;
 
   virtual std::unique_ptr<t_function> on_function(
@@ -123,8 +128,7 @@ class parser_actions {
       std::unique_ptr<stmt_attrs> attrs,
       t_function_qualifier qual,
       std::vector<t_type_ref> return_type,
-      source_location name_loc,
-      std::string name,
+      const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws,
       std::unique_ptr<t_annotations> annotations) = 0;
@@ -148,20 +152,20 @@ class parser_actions {
   virtual std::unique_ptr<t_throws> on_throws(t_field_list exceptions) = 0;
 
   virtual std::unique_ptr<t_typedef> on_typedef(
-      source_range range, t_type_ref type, std::string name) = 0;
+      source_range range, t_type_ref type, const identifier& name) = 0;
 
   virtual std::unique_ptr<t_struct> on_struct(
-      source_range range, std::string name, t_field_list fields) = 0;
+      source_range range, const identifier& name, t_field_list fields) = 0;
 
   virtual std::unique_ptr<t_union> on_union(
-      source_range range, std::string name, t_field_list fields) = 0;
+      source_range range, const identifier& name, t_field_list fields) = 0;
 
   virtual std::unique_ptr<t_exception> on_exception(
       source_range range,
       t_error_safety safety,
       t_error_kind kind,
       t_error_blame blame,
-      std::string name,
+      const identifier& name,
       t_field_list fields) = 0;
 
   virtual std::unique_ptr<t_field> on_field(
@@ -170,8 +174,7 @@ class parser_actions {
       boost::optional<int64_t> id,
       t_field_qualifier qual,
       t_type_ref type,
-      source_location name_loc,
-      std::string name,
+      const identifier& name,
       std::unique_ptr<t_const_value> value,
       std::unique_ptr<t_annotations> annotations,
       boost::optional<comment> doc) = 0;
@@ -181,17 +184,16 @@ class parser_actions {
 
   virtual t_type_ref on_field_type(
       source_range range,
-      std::string name,
+      fmt::string_view name,
       std::unique_ptr<t_annotations> annotations) = 0;
 
   virtual std::unique_ptr<t_enum> on_enum(
-      source_range range, std::string name, t_enum_value_list values) = 0;
+      source_range range, const identifier& name, t_enum_value_list values) = 0;
 
   virtual std::unique_ptr<t_enum_value> on_enum_value(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      source_location name_loc,
-      std::string name,
+      const identifier& name,
       int64_t* value,
       std::unique_ptr<t_annotations> annotations,
       boost::optional<comment> doc) = 0;
@@ -199,7 +201,7 @@ class parser_actions {
   virtual std::unique_ptr<t_const> on_const(
       source_range range,
       t_type_ref type,
-      std::string name,
+      const identifier& name,
       std::unique_ptr<t_const_value> value) = 0;
 
   virtual std::unique_ptr<t_const_value> on_bool_const(bool value) = 0;
@@ -207,14 +209,14 @@ class parser_actions {
       source_location loc, int64_t value) = 0;
   virtual std::unique_ptr<t_const_value> on_double_const(double value) = 0;
   virtual std::unique_ptr<t_const_value> on_reference_const(
-      source_location loc, std::string name) = 0;
+      const identifier& name) = 0;
   virtual std::unique_ptr<t_const_value> on_string_literal(
-      std::string value) = 0;
+      fmt::string_view value) = 0;
 
   virtual std::unique_ptr<t_const_value> on_const_list() = 0;
   virtual std::unique_ptr<t_const_value> on_const_map() = 0;
   virtual std::unique_ptr<t_const_value> on_const_struct(
-      source_range range, std::string name) = 0;
+      source_range range, fmt::string_view name) = 0;
 
   virtual int64_t on_integer(source_range range, sign s, uint64_t value) = 0;
 

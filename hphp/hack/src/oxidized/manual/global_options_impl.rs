@@ -97,7 +97,7 @@ impl Default for GlobalOptions {
             symbol_write_include_hhi: true,
             symbol_write_index_paths_file_output: None,
             po_enable_enum_classes: true,
-            po_disable_hh_ignore_error: false,
+            po_disable_hh_ignore_error: 0,
             tco_is_systemlib: false,
             tco_higher_kinded_types: false,
             tco_method_call_inference: false,

@@ -29,6 +29,7 @@ module Parsing = struct
     (* | UnterminatedXhpCommentDEPRECATED [@value 1005] *)
     (* | CallTimePassByReferenceDEPRECATED [@value 1006] *)
     | XhpParsingError [@value 1007]
+    | HhIgnoreComment [@value 1008]
   (* Add new Parsing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

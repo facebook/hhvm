@@ -660,22 +660,19 @@ and add_error (error : error) =
 
   let pos = fst claim in
 
-  if ISet.mem code hard_banned_codes then
-    if fixme_present pos code then
-      let explanation =
-        Printf.sprintf
-          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
-          code
-      in
-      add_error_with_fixme_error error explanation
-    else
-      add_error_impl error
-  else if not (fixme_present pos code) then
+  if not (fixme_present pos code) then
     (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
      * the position information after the fact. This is the default case, where an HH_FIXME
      * comment is not present. Therefore, the remaining cases are variations on behavior when
      * a fixme is present *)
     add_error_impl error
+  else if ISet.mem code hard_banned_codes then
+    let explanation =
+      Printf.sprintf
+        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
+        code
+    in
+    add_error_with_fixme_error error explanation
   else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
     add_applied_fixme error
   else if !report_pos_from_reason && Pos.get_from_reason pos then

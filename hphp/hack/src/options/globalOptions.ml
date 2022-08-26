@@ -114,7 +114,7 @@ type t = {
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
   po_enable_enum_classes: bool;
-  po_disable_hh_ignore_error: bool;
+  po_disable_hh_ignore_error: int;
   tco_is_systemlib: bool;
   tco_higher_kinded_types: bool;
   tco_method_call_inference: bool;
@@ -251,7 +251,7 @@ let default =
     po_disable_xhp_element_mangling = true;
     po_disable_xhp_children_declarations = true;
     po_enable_enum_classes = true;
-    po_disable_hh_ignore_error = false;
+    po_disable_hh_ignore_error = 0;
     tco_is_systemlib = false;
     tco_higher_kinded_types = false;
     tco_method_call_inference = false;

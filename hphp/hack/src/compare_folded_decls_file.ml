@@ -188,7 +188,7 @@ let () =
       ignored_flag "--complex-coercion";
       ignored_flag "--const-attribute";
       ignored_flag "--const-static-props";
-      ignored_flag "--disable-hh-ignore-error";
+      ignored_arg "--disable-hh-ignore-error";
       ignored_flag "--disable-modes";
       ignored_flag "--disable-partially-abstract-typeconsts";
       ignored_flag "--disable-unset-class-const";

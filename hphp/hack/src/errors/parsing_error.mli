@@ -8,6 +8,7 @@
 
 type t =
   | Fixme_format of Pos.t
+  | Hh_ignore_comment of Pos.t
   | Parsing_error of {
       pos: Pos.t;
       msg: string;

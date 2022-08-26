@@ -33,7 +33,7 @@ pub struct ScourComment<'a, T, V> {
     pub include_line_comments: bool,
     pub allowed_decl_fixme_codes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
-    pub disable_hh_ignore_error: bool,
+    pub disable_hh_ignore_error: isize,
 }
 
 impl<'src, 'arena, T, V> ScourComment<'src, T, V>
@@ -59,7 +59,7 @@ where
                         || (self.collect_fixmes
                             && (t.has_trivia_kind(TriviaKind::FixMe)
                                 || (t.has_trivia_kind(TriviaKind::IgnoreError)
-                                    && !self.disable_hh_ignore_error)))
+                                    && self.disable_hh_ignore_error <= 1)))
                     {
                         let leading = t.scan_leading(self.source_text());
                         let trailing = t.scan_trailing(self.source_text());
@@ -136,6 +136,8 @@ where
                                 || self.allowed_decl_fixme_codes.contains(&code))
                             {
                                 acc.add_to_misuses(line, code, p);
+                            } else if self.disable_hh_ignore_error == 1 && t.kind() == IgnoreError {
+                                acc.add_disallowed_ignore(p);
                             } else {
                                 acc.add_to_fixmes(line, code, p);
                             }

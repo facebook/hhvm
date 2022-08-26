@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f9661843e3f6cea5f093073b77e4524>>
+// @generated SignedSource<<1a4c47d5bf5a4391f8fdf6d9ff95859d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,6 +47,8 @@ pub struct ScouredComments<'a> {
     pub misuses: &'a Fixmes<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub error_pos: &'a [&'a pos::Pos<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub bad_ignore_pos: &'a [&'a pos::Pos<'a>],
 }
 impl<'a> TrivialDrop for ScouredComments<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ScouredComments<'arena>);

@@ -223,7 +223,8 @@ type t = {
   po_disable_xhp_children_declarations: bool;
   (* Enable enum class syntax *)
   po_enable_enum_classes: bool;
-  po_disable_hh_ignore_error: bool;
+  (* Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
+  po_disable_hh_ignore_error: int;
   (* Enable features used to typecheck systemlib *)
   tco_is_systemlib: bool;
   (* Controls if higher-kinded types are supported *)
@@ -417,7 +418,7 @@ val make :
   ?po_disable_xhp_element_mangling:bool ->
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_enum_classes:bool ->
-  ?po_disable_hh_ignore_error:bool ->
+  ?po_disable_hh_ignore_error:int ->
   ?po_allow_unstable_features:bool ->
   ?tco_is_systemlib:bool ->
   ?tco_higher_kinded_types:bool ->

@@ -87,6 +87,8 @@ let pos_of_error path source_text error =
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
   List.iter sc.sc_error_pos ~f:(fun pos ->
       Errors.add_parsing_error @@ Parsing_error.Fixme_format pos);
+  List.iter sc.sc_bad_ignore_pos ~f:(fun pos ->
+      Errors.add_parsing_error @@ Parsing_error.Hh_ignore_comment pos);
   if (not env.disable_global_state_mutation) && env.keep_errors then (
     Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
     if env.quick_mode then

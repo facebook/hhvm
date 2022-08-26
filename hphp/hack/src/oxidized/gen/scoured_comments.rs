@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<96e1c8de5c82fef7a62dd5102a1505b9>>
+// @generated SignedSource<<88f87433ceff3b26870ee3eeb528c02e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,4 +42,5 @@ pub struct ScouredComments {
     pub fixmes: Fixmes,
     pub misuses: Fixmes,
     pub error_pos: Vec<pos::Pos>,
+    pub bad_ignore_pos: Vec<pos::Pos>,
 }

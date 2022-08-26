@@ -8,6 +8,7 @@ use pos::RelativePath;
 #[derive(Debug, Clone)]
 pub enum ParsingError {
     FixmeFormat(oxidized::pos::Pos),
+    HhIgnoreComment(oxidized::pos::Pos),
     ParsingError {
         pos: oxidized::pos::Pos,
         msg: String,

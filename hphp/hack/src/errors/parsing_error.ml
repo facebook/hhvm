@@ -9,6 +9,7 @@ module Error_code = Error_codes.Parsing
 
 type t =
   | Fixme_format of Pos.t
+  | Hh_ignore_comment of Pos.t
   | Parsing_error of {
       pos: Pos.t;
       msg: string;
@@ -24,6 +25,13 @@ let to_user_error = function
     User_error.make
       Error_code.(to_enum FixmeFormat)
       (pos, "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`")
+      []
+  | Hh_ignore_comment pos ->
+    User_error.make
+      Error_code.(to_enum HhIgnoreComment)
+      ( pos,
+        "`HH_IGNORE_ERROR` comments are disabled by configuration and will soon be treated like normal comments, so you cannot use them to suppress errors"
+      )
       []
   | Parsing_error { pos; msg; quickfixes } ->
     User_error.make Error_code.(to_enum ParsingError) ~quickfixes (pos, msg) []

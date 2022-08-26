@@ -125,14 +125,14 @@ class SplFileObject extends SplFileInfo
     string $delimiter = ",",
     string $enclosure = "\"",
     string $escape = "\\",
-    /* HH_IGNORE_ERROR[2071] */
+    /* HH_FIXME[2071] */
   ): varray;
   public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, inout mixed $wouldblock): bool;
   public function fpassthru(): int;
   public function fputcsv(
-    /* HH_IGNORE_ERROR[2071] */
+    /* HH_FIXME[2071] */
     varray $fields,
     string $delimiter = ",",
     string $enclosure = '"',
@@ -140,12 +140,12 @@ class SplFileObject extends SplFileInfo
   public function fread(int $length): string;
   public function fscanf(string $format): varray;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
-  /* HH_IGNORE_ERROR[2071] */
+  /* HH_FIXME[2071] */
   public function fstat(): darray;
   public function ftell(): int;
   public function ftruncate(int $size): bool;
   public function fwrite(string $str, int $length): int;
-  /* HH_IGNORE_ERROR[2071] */
+  /* HH_FIXME[2071] */
   public function getCsvControl(): varray;
   public function getFlags(): int;
   public function getMaxLineLen(): int;

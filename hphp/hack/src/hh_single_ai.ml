@@ -100,6 +100,7 @@ let parse_options () =
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let allowed_fixme_codes_strict = ref None in
+  let disable_hh_ignore_error = ref 0 in
   let allowed_decl_fixme_codes = ref None in
   let options =
     [
@@ -136,6 +137,10 @@ let parse_options () =
         Arg.String
           (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in strict mode." );
+      ( "--disable-hh-ignore-error",
+        Arg.Int (( := ) disable_hh_ignore_error),
+        " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
+      );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
@@ -157,6 +162,7 @@ let parse_options () =
     GlobalOptions.make
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
+      ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations

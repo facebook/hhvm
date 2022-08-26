@@ -181,7 +181,7 @@ final class AsyncMysqlClient {
                                             = dict[],
                                       ): Awaitable<(
                                           AsyncMysqlConnectResult,
-                                          /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+                                          /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
                                           Vector<AsyncMysqlQueryResult>
                                       )>;
 }
@@ -328,7 +328,7 @@ class AsyncMysqlConnectionPool {
     string $extra_key = "",
     dict<string, string> $query_attributes = dict[],
   ):
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)>;
 }
 
@@ -461,7 +461,7 @@ final class AsyncMysqlConnection {
                       int $timeout_micros = -1,
                       dict<string, string> $query_attributes = dict[],
                       ):
-                      /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+                      /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
                       Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
@@ -647,7 +647,7 @@ final class AsyncMysqlConnection {
    *           by MySQL.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertSan(): Vector<string>;
 
   /**
@@ -662,7 +662,7 @@ final class AsyncMysqlConnection {
    *           by MySQL.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertExtensions(): Vector<string>;
 
   /**
@@ -977,7 +977,7 @@ abstract class AsyncMysqlResult {
    *           from the server certificate presented by MySQL.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertSan(): Vector<string>;
 
   /**
@@ -991,7 +991,7 @@ abstract class AsyncMysqlResult {
    *           values from the server certificate presented by MySQL.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSslCertExtensions(): Vector<string>;
 
   /**
@@ -1210,7 +1210,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
    *           produced by a successful query statement.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function getSuccessfulResults(): Vector<AsyncMysqlQueryResult>;
 }
 
@@ -1337,7 +1337,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function mapRows(): Vector<Map<string, ?string>>;
 
   /**
@@ -1356,7 +1356,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function vectorRows(): Vector<KeyedContainer<int, ?string>>;
 
   /**
@@ -1372,7 +1372,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function mapRowsTyped():  Vector<Map<string, mixed>>;
 
   <<__Native>>
@@ -1391,7 +1391,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>>;
 
   /**
@@ -1412,7 +1412,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           of which represent the full result of the query.
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function rowBlocks(): Vector<AsyncMysqlRowBlock>;
 
   /**
@@ -1441,7 +1441,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - A Map<string, string> of the response attributes from MySQL
    */
   <<__Native>>
-  /* HH_IGNORE_ERROR[2049] TODO(T121423772) [systemlib] Hack Collections */
+  /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function responseAttributes(): Map<string, string>;
 }
 

@@ -16,6 +16,7 @@ impl ScouredComments {
             fixmes: IMap::new(),
             misuses: IMap::new(),
             error_pos: vec![],
+            bad_ignore_pos: vec![],
         }
     }
 
@@ -34,6 +35,10 @@ impl ScouredComments {
 
     pub fn add_format_error(&mut self, pos: Pos) {
         self.error_pos.push(pos);
+    }
+
+    pub fn add_disallowed_ignore(&mut self, pos: Pos) {
+        self.bad_ignore_pos.push(pos);
     }
 
     fn add(m: &mut Fixmes, line: isize, code: isize, pos: Pos) {

@@ -82,6 +82,9 @@ impl AstProvider {
         if !sc.error_pos.is_empty() {
             unimplemented!()
         }
+        if !sc.bad_ignore_pos.is_empty() {
+            unimplemented!()
+        }
     }
 
     fn process_syntax_errors(

@@ -1060,6 +1060,20 @@ TEST(FieldMaskTest, EnsureSmartPointer) {
     EXPECT_EQ(obj.boxed_ref()->field_1(), 0);
     EXPECT_FALSE(obj.boxed_ref()->field_2().has_value());
   }
+
+  // Test ensure works with struct that has a shared const pointer field.
+  {
+    SharedConstPointerStruct obj;
+    MaskBuilder<SharedConstPointerStruct> builder(noneMask());
+    builder.includes<tag::unique>();
+    builder.ensure(obj);
+    assertPointerHasAllValues(obj.unique_ref());
+    EXPECT_FALSE(obj.shared_const_ref());
+
+    // Cannot ensure the shared const field.
+    builder.includes<tag::shared_const>();
+    EXPECT_THROW(builder.ensure(obj), std::runtime_error);
+  }
 }
 
 TEST(FieldMaskTest, EnsureException) {
@@ -1221,6 +1235,22 @@ TEST(FieldMaskTest, SchemafulClearSmartPointer) {
     EXPECT_FALSE(bool(obj.shared_ref()));
     assertPointerHasAllValues(obj.boxed());
   }
+
+  // Test clear works with struct that has a shared const pointer field.
+  {
+    SharedConstPointerStruct obj;
+    MaskBuilder<SharedConstPointerStruct> builder(noneMask());
+    builder.includes<tag::unique>();
+    builder.ensure(obj);
+    builder.clear(obj);
+    EXPECT_FALSE(obj.unique_ref());
+    EXPECT_FALSE(obj.shared_const_ref());
+
+    // Cannot clear a field inside the shared const field.
+    builder.includes<tag::shared_const, tag::field_1>();
+    obj.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
+    EXPECT_THROW(builder.clear(obj), std::runtime_error);
+  }
 }
 
 TEST(FieldMaskTest, SchemafulClearException) {
@@ -1339,24 +1369,42 @@ TEST(FieldMaskTest, SchemafulCopyTerseWrite) {
 
 TEST(FieldMaskTest, SchemafulCopySmartPointer) {
   // test with allMask and noneMask
-  SmartPointerStruct full, dst, empty;
-  protocol::ensure(allMask(), full);
+  {
+    SmartPointerStruct full, dst, empty;
+    protocol::ensure(allMask(), full);
 
-  protocol::copy(allMask(), empty, dst);
-  assertSmartPointerStructIsEmpty(dst);
+    protocol::copy(allMask(), empty, dst);
+    assertSmartPointerStructIsEmpty(dst);
 
-  protocol::copy(noneMask(), full, dst);
-  assertSmartPointerStructIsEmpty(dst);
+    protocol::copy(noneMask(), full, dst);
+    assertSmartPointerStructIsEmpty(dst);
 
-  protocol::copy(allMask(), full, dst);
-  assertSmartPointerStructHasAllValues(dst);
-  protocol::copy(allMask(), full, dst);
-  assertSmartPointerStructHasAllValues(dst);
+    protocol::copy(allMask(), full, dst);
+    assertSmartPointerStructHasAllValues(dst);
+    protocol::copy(allMask(), full, dst);
+    assertSmartPointerStructHasAllValues(dst);
 
-  protocol::copy(noneMask(), empty, dst);
-  assertSmartPointerStructHasAllValues(dst);
-  protocol::copy(allMask(), empty, dst);
-  assertSmartPointerStructIsEmpty(dst);
+    protocol::copy(noneMask(), empty, dst);
+    assertSmartPointerStructHasAllValues(dst);
+    protocol::copy(allMask(), empty, dst);
+    assertSmartPointerStructIsEmpty(dst);
+  }
+
+  // Test copy works with struct that has a shared const pointer field.
+  {
+    SharedConstPointerStruct src, dst;
+    MaskBuilder<SharedConstPointerStruct> builder(noneMask());
+    builder.includes<tag::unique>();
+    builder.ensure(src);
+    builder.copy(src, dst);
+    assertPointerHasAllValues(dst.unique_ref());
+
+    // Cannot copy to a field inside the shared const field.
+    builder.includes<tag::shared_const, tag::field_1>();
+    src.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
+    dst.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
+    EXPECT_THROW(builder.copy(src, dst), std::runtime_error);
+  }
 }
 
 TEST(FieldMaskTest, SchemafulCopySmartPointerAddField) {

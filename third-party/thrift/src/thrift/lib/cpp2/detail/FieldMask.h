@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Copy.h>
 #include <thrift/lib/cpp2/op/Ensure.h>
@@ -146,62 +147,66 @@ bool validate_fields(MaskRef ref) {
 // Ensures the masked fields in the given thrift struct.
 template <typename Struct>
 void ensure_fields(MaskRef ref, Struct& t) {
-  static_assert(
-      !std::is_const_v<std::remove_reference_t<Struct>>,
-      "Cannot clear a const object.");
-  op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
-    using OrdinalTag = decltype(fieldOrdinalTag);
-    MaskRef next = ref.get(op::get_field_id<Struct, OrdinalTag>());
-    if (next.isNoneMask()) {
-      return;
-    }
-    using FieldTag = op::get_field_tag<Struct, OrdinalTag>;
-    auto&& field_ref = op::get<Struct, OrdinalTag>(t);
-    op::ensure<FieldTag>(field_ref, t);
-    // Need to ensure the struct object.
-    using FieldType = op::get_native_type<Struct, OrdinalTag>;
-    if constexpr (is_thrift_struct_v<FieldType>) {
-      auto& value = *op::get_value_or_null(field_ref);
-      ensure_fields(next, value);
-    }
-  });
+  if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
+    op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
+      using OrdinalTag = decltype(fieldOrdinalTag);
+      MaskRef next = ref.get(op::get_field_id<Struct, OrdinalTag>());
+      if (next.isNoneMask()) {
+        return;
+      }
+      using FieldTag = op::get_field_tag<Struct, OrdinalTag>;
+      auto&& field_ref = op::get<Struct, OrdinalTag>(t);
+      op::ensure<FieldTag>(field_ref, t);
+      // Need to ensure the struct object.
+      using FieldType = op::get_native_type<Struct, OrdinalTag>;
+      if constexpr (is_thrift_struct_v<FieldType>) {
+        auto& value = *op::get_value_or_null(field_ref);
+        ensure_fields(next, value);
+      }
+    });
+  } else {
+    throw std::runtime_error("Cannot ensure a const object");
+  }
 }
 
 // Clears the masked fields in the given thrift struct.
 template <typename Struct>
 void clear_fields(MaskRef ref, Struct& t) {
-  static_assert(
-      !std::is_const_v<std::remove_reference_t<Struct>>,
-      "Cannot clear a const object.");
-  op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
-    using OrdinalTag = decltype(fieldOrdinalTag);
-    MaskRef next = ref.get(op::get_field_id<Struct, OrdinalTag>());
-    if (next.isNoneMask()) {
-      return;
-    }
-    using FieldTag = op::get_field_tag<Struct, OrdinalTag>;
-    auto&& field_ref = op::get<Struct, OrdinalTag>(t);
-    if (next.isAllMask()) {
-      op::clear_field<FieldTag>(field_ref, t);
-      return;
-    }
-    auto* field_value = op::get_value_or_null(field_ref);
-    if (!field_value) {
-      return;
-    }
-    // Need to clear the struct object.
-    using FieldType = op::get_native_type<Struct, OrdinalTag>;
-    if constexpr (is_thrift_struct_v<FieldType>) {
-      clear_fields(next, *field_value);
-    }
-  });
+  if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
+    op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
+      using OrdinalTag = decltype(fieldOrdinalTag);
+      MaskRef next = ref.get(op::get_field_id<Struct, OrdinalTag>());
+      if (next.isNoneMask()) {
+        return;
+      }
+      using FieldTag = op::get_field_tag<Struct, OrdinalTag>;
+      auto&& field_ref = op::get<Struct, OrdinalTag>(t);
+      if (next.isAllMask()) {
+        op::clear_field<FieldTag>(field_ref, t);
+        return;
+      }
+      auto* field_value = op::get_value_or_null(field_ref);
+      if (!field_value) {
+        return;
+      }
+      // Need to clear the struct object.
+      using FieldType = op::get_native_type<Struct, OrdinalTag>;
+      if constexpr (is_thrift_struct_v<FieldType>) {
+        clear_fields(next, *field_value);
+      }
+    });
+  } else {
+    throw std::runtime_error("Cannot clear a const object");
+  }
 }
 
 // Moves the given object to the field (can be field ref or smart pointer).
 template <typename T, typename U>
 void moveObject(T& field, U&& object) {
-  if constexpr (thrift::detail::is_shared_or_unique_ptr_v<T>) {
-    *field = std::forward<U>(object);
+  if constexpr (thrift::detail::is_unique_ptr_v<T>) {
+    field = std::make_unique<U>(std::forward<U>(object));
+  } else if constexpr (thrift::detail::is_shared_ptr_v<T>) {
+    field = std::make_shared<U>(std::forward<U>(object));
   } else {
     field = std::forward<U>(object);
   }
@@ -209,64 +214,68 @@ void moveObject(T& field, U&& object) {
 
 // Copies the masked fields from src thrift struct to dst.
 // Returns true if it copied a field from src to dst.
-template <typename Struct>
-bool copy_fields(MaskRef ref, const Struct& src, Struct& dst) {
-  static_assert(
-      !std::is_const_v<std::remove_reference_t<Struct>>,
-      "Cannot clear a const object.");
-  bool copied = false;
-  op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
-    using OrdinalTag = decltype(fieldOrdinalTag);
-    MaskRef next = ref.get(op::get_field_id<Struct, OrdinalTag>());
-    // Id doesn't exist in field mask, skip.
-    if (next.isNoneMask()) {
-      return;
-    }
-    using FieldTag = op::get_field_tag<Struct, OrdinalTag>;
-    auto&& src_ref = op::get<Struct, OrdinalTag>(src);
-    auto&& dst_ref = op::get<Struct, OrdinalTag>(dst);
-    bool srcHasValue = bool(op::get_value_or_null(src_ref));
-    bool dstHasValue = bool(op::get_value_or_null(dst_ref));
-    if (!srcHasValue && !dstHasValue) { // skip
-      return;
-    }
-    // Id that we want to copy.
-    if (next.isAllMask()) {
-      if (srcHasValue) {
-        op::copy(src_ref, dst_ref);
-        copied = true;
-      } else {
-        op::clear_field<FieldTag>(dst_ref, dst);
-      }
-      return;
-    }
-    using FieldType = op::get_native_type<Struct, OrdinalTag>;
-    if constexpr (is_thrift_struct_v<FieldType>) {
-      // Field doesn't exist in src, so just clear dst with the mask.
-      if (!srcHasValue) {
-        clear_fields(next, *op::get_value_or_null(dst_ref));
+template <typename SrcStruct, typename DstStruct>
+bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
+  static_assert(std::is_same_v<
+                folly::remove_cvref_t<SrcStruct>,
+                folly::remove_cvref_t<DstStruct>>);
+  if constexpr (!std::is_const_v<std::remove_reference_t<DstStruct>>) {
+    bool copied = false;
+    op::for_each_ordinal<DstStruct>([&](auto fieldOrdinalTag) {
+      using OrdinalTag = decltype(fieldOrdinalTag);
+      MaskRef next = ref.get(op::get_field_id<DstStruct, OrdinalTag>());
+      // Id doesn't exist in field mask, skip.
+      if (next.isNoneMask()) {
         return;
       }
-      // Field exists in both src and dst, so call copy recursively.
-      if (dstHasValue) {
-        copied |= copy_fields(
-            next,
-            *op::get_value_or_null(src_ref),
-            *op::get_value_or_null(dst_ref));
+      using FieldTag = op::get_field_tag<DstStruct, OrdinalTag>;
+      auto&& src_ref = op::get<DstStruct, OrdinalTag>(src);
+      auto&& dst_ref = op::get<DstStruct, OrdinalTag>(dst);
+      bool srcHasValue = bool(op::get_value_or_null(src_ref));
+      bool dstHasValue = bool(op::get_value_or_null(dst_ref));
+      if (!srcHasValue && !dstHasValue) { // skip
         return;
       }
-      // Field only exists in src. Need to construct object only if there's
-      // a field to add.
-      FieldType newObject;
-      bool constructObject =
-          copy_fields(next, *op::get_value_or_null(src_ref), newObject);
-      if (constructObject) {
-        moveObject(dst_ref, std::move(newObject));
-        copied = true;
+      // Id that we want to copy.
+      if (next.isAllMask()) {
+        if (srcHasValue) {
+          op::copy(src_ref, dst_ref);
+          copied = true;
+        } else {
+          op::clear_field<FieldTag>(dst_ref, dst);
+        }
+        return;
       }
-    }
-  });
-  return copied;
+      using FieldType = op::get_native_type<DstStruct, OrdinalTag>;
+      if constexpr (is_thrift_struct_v<FieldType>) {
+        // Field doesn't exist in src, so just clear dst with the mask.
+        if (!srcHasValue) {
+          clear_fields(next, *op::get_value_or_null(dst_ref));
+          return;
+        }
+        // Field exists in both src and dst, so call copy recursively.
+        if (dstHasValue) {
+          copied |= copy_fields(
+              next,
+              *op::get_value_or_null(src_ref),
+              *op::get_value_or_null(dst_ref));
+          return;
+        }
+        // Field only exists in src. Need to construct object only if there's
+        // a field to add.
+        FieldType newObject;
+        bool constructObject =
+            copy_fields(next, *op::get_value_or_null(src_ref), newObject);
+        if (constructObject) {
+          moveObject(dst_ref, std::move(newObject));
+          copied = true;
+        }
+      }
+    });
+    return copied;
+  } else {
+    throw std::runtime_error("Cannot copy to a const field");
+  }
 }
 
 // This converts id list to a field mask with a single field.

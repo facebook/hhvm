@@ -70,6 +70,13 @@ struct SmartPointerStruct {
   3: optional Foo2 boxed;
 }
 
+struct SharedConstPointerStruct {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Foo2 unique;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional Foo2 shared_const;
+}
+
 @cpp.Adapter{name = "::apache::thrift::protocol::MaskAdapter<Bar>"}
 typedef field_mask.Mask TypedBarMask
 

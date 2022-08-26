@@ -736,7 +736,9 @@ class python_mstch_field : public mstch_field {
       const field_generator_context* field_context)
       : mstch_field(field, ctx, pos, field_context),
         py_name_(py3::get_py3_name(*field)),
-        adapter_annotation_(find_structured_adapter_annotation(*field)) {
+        adapter_annotation_(find_structured_adapter_annotation(*field)),
+        transitive_adapter_annotation_(
+            get_transitive_annotation_of_adapter_or_null(*field)) {
     register_methods(
         this,
         {
@@ -748,6 +750,10 @@ class python_mstch_field : public mstch_field {
             {"field:has_adapter?", &python_mstch_field::has_adapter},
             {"field:adapter_name", &python_mstch_field::adapter_name},
             {"field:adapter_type_hint", &python_mstch_field::adapter_type_hint},
+            {"field:is_adapter_transitive?",
+             &python_mstch_field::is_adapter_transitive},
+            {"field:transitive_adapter_annotation",
+             &python_mstch_field::transitive_adapter_annotation},
         });
   }
 
@@ -791,10 +797,22 @@ class python_mstch_field : public mstch_field {
   mstch::node adapter_type_hint() {
     return get_annotation_property(adapter_annotation_, "typeHint");
   }
+  mstch::node is_adapter_transitive() {
+    return transitive_adapter_annotation_ != nullptr;
+  }
+  mstch::node transitive_adapter_annotation() {
+    return std::make_shared<python_mstch_const_value>(
+        transitive_adapter_annotation_->value(),
+        context_,
+        pos_,
+        transitive_adapter_annotation_,
+        &*transitive_adapter_annotation_->type());
+  }
 
  private:
   const std::string py_name_;
   const t_const* adapter_annotation_;
+  const t_const* transitive_adapter_annotation_;
 };
 
 class python_mstch_enum : public mstch_enum {

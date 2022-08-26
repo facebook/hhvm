@@ -21,7 +21,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "intValue",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -29,7 +29,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "intListValue",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -37,7 +37,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "stringListValue",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -45,7 +45,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "stringValue",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -53,7 +53,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "typedefValue",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             14,  # id
@@ -61,7 +61,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "stringRef",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -101,7 +101,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "intListValue",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -109,7 +109,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "stringListValue",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -149,7 +149,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "binaryData",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -157,7 +157,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "stringData",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -197,7 +197,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             "strVal",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -205,7 +205,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             "intVal",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -213,7 +213,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             "typedefValue",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -253,7 +253,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "v1",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -261,7 +261,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "v2",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -301,7 +301,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "thingOne",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -309,7 +309,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "thingTwo",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -349,7 +349,7 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
             "num",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -389,7 +389,7 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "s",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(NonCopyableStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

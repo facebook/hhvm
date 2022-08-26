@@ -21,7 +21,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             "message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -84,7 +84,7 @@ class _fbthrift_MyService_interact_args(metaclass=_fbthrift_python_types.StructM
             "arg",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -107,7 +107,7 @@ class _fbthrift_MyService_interactFast_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -125,7 +125,7 @@ class _fbthrift_MyService_serialize_result(metaclass=_fbthrift_python_types.Stru
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -138,7 +138,7 @@ class _fbthrift_MyService_serialize_result_stream(metaclass=_fbthrift_python_typ
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

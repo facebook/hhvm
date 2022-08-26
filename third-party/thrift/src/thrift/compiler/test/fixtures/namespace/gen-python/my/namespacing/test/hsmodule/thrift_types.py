@@ -21,7 +21,7 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
             "MyInt",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -74,7 +74,7 @@ class _fbthrift_HsTestService_init_args(metaclass=_fbthrift_python_types.StructM
             "int1",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -87,7 +87,7 @@ class _fbthrift_HsTestService_init_result(metaclass=_fbthrift_python_types.Struc
             "success",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

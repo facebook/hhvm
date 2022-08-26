@@ -99,7 +99,7 @@ cdef class StructInfo:
 cdef class UnionInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj
     cdef dict type_infos
-    cdef dict id_to_adapter_class
+    cdef dict id_to_adapter_info
     cdef tuple fields
     cdef dict name_to_index
     cdef void fill(self) except *
@@ -131,7 +131,7 @@ cdef class EnumTypeInfo:
 
 cdef class AdaptedTypeInfo:
     cdef object _orig_type_info
-    cdef object _adapter_class
+    cdef object _adapter_info
     cdef object _transitive_annotation
 
 cdef class StructOrUnion:

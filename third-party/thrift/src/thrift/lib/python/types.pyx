@@ -194,18 +194,18 @@ cdef class UnionInfo:
             True,
         )
         self.type_infos = {}
-        self.id_to_adapter_class = {}
+        self.id_to_adapter_info = {}
         self.name_to_index = {}
 
     cdef void fill(self) except *:
         cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
-        for idx, (id, qualifier, name, type_info, _, adapter_class) in enumerate(self.fields):
+        for idx, (id, qualifier, name, type_info, _, adapter_info) in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order
             if callable(type_info):
                 type_info = type_info()
             self.type_infos[id] = type_info
-            self.id_to_adapter_class[id] = adapter_class
+            self.id_to_adapter_info[id] = adapter_info
             self.name_to_index[name] = idx
             info_ptr.addFieldInfo(
                 id, qualifier, name.encode("utf-8"), getCTypeInfo(type_info)
@@ -383,15 +383,15 @@ cdef class EnumTypeInfo:
 
 
 cdef class AdaptedTypeInfo:
-    def __cinit__(self, orig_type_info, adapter_class, transitive_annotation):
+    def __cinit__(self, orig_type_info, adapter_info, transitive_annotation):
         self._orig_type_info = orig_type_info
-        self._adapter_class = adapter_class
+        self._adapter_info = adapter_info
         self._transitive_annotation = transitive_annotation
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
         return self._orig_type_info.to_internal_data(
-            self._adapter_class.to_thrift(
+            self._adapter_info.to_thrift(
                 value,
                 transitive_annotation=self._transitive_annotation(),
             )
@@ -399,7 +399,7 @@ cdef class AdaptedTypeInfo:
 
     # convert deserialized data to user format
     def to_python_value(self, object value):
-        return self._adapter_class.from_thrift(
+        return self._adapter_info.from_thrift(
             self._orig_type_info.to_python_value(value),
             transitive_annotation=self._transitive_annotation(),
         )
@@ -439,10 +439,16 @@ cdef class Struct(StructOrUnion):
                 raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
             if value is None:
                 continue
-            adapter_class = info.fields[index][5]
-            if adapter_class:
+            adapter_info = info.fields[index][5]
+            if adapter_info:
+                adapter_class, transitive_annotation = adapter_info
                 field_id = info.fields[index][0]
-                value = adapter_class.to_thrift_field(value, field_id, self)
+                value = adapter_class.to_thrift_field(
+                    value,
+                    field_id,
+                    self,
+                    transitive_annotation=transitive_annotation(),
+                )
             set_struct_field(
                 self._fbthrift_data,
                 index,
@@ -465,10 +471,16 @@ cdef class Struct(StructOrUnion):
                     continue
                 value_to_copy = self._fbthrift_data[index + 1]
             else:  # new assigned value
-                adapter_class = info.fields[index][5]
-                if adapter_class:
+                adapter_info = info.fields[index][5]
+                if adapter_info:
+                    adapter_class, transitive_annotation = adapter_info
                     field_id = info.fields[index][0]
-                    value = adapter_class.to_thrift_field(value, field_id, self)
+                    value = adapter_class.to_thrift_field(
+                        value,
+                        field_id,
+                        self,
+                        transitive_annotation=transitive_annotation(),
+                    )
                 value_to_copy = info.type_infos[index].to_internal_data(value)
             set_struct_field(new_inst._fbthrift_data, index, value_to_copy)
         if kwargs:
@@ -611,9 +623,15 @@ cdef class Union(StructOrUnion):
 
     cdef object _fbthrift_to_internal_data(self, type_value, value):
         cdef UnionInfo union_info = self._fbthrift_struct_info
-        adapter_class = union_info.id_to_adapter_class[type_value]
-        if adapter_class:
-            value = adapter_class.to_thrift_field(value, type_value, self)
+        adapter_info = union_info.id_to_adapter_info[type_value]
+        if adapter_info:
+            adapter_class, transitive_annotation = adapter_info
+            value = adapter_class.to_thrift_field(
+                value,
+                type_value,
+                self,
+                transitive_annotation=transitive_annotation(),
+            )
         return union_info.type_infos[type_value].to_internal_data(value)
 
     cdef void _fbthrift_update_type_value(self, type_value, value) except *:
@@ -707,25 +725,29 @@ cdef class Union(StructOrUnion):
         return dir(type(self))
 
 
-cdef make_fget_struct(i, field_id, adapter_class):
-    if adapter_class:
+cdef make_fget_struct(i, field_id, adapter_info):
+    if adapter_info:
+        adapter_class, transitive_annotation = adapter_info
         return property(lambda self:
             adapter_class.from_thrift_field(
                 (<Struct>self)._fbthrift_get_field_value(i),
                 field_id,
                 self,
+                transitive_annotation=transitive_annotation(),
             )
         )
     return property(lambda self: (<Struct>self)._fbthrift_get_field_value(i))
 
 
-cdef make_fget_union(type_value, adapter_class):
-    if adapter_class:
+cdef make_fget_union(type_value, adapter_info):
+    if adapter_info:
+        adapter_class, transitive_annotation = adapter_info
         return property(lambda self:
             adapter_class.from_thrift_field(
                 (<Union>self)._fbthrift_get_field_value(type_value),
                 type_value,
                 self,
+                transitive_annotation=transitive_annotation(),
             )
         )
     return property(lambda self: (<Union>self)._fbthrift_get_field_value(type_value))

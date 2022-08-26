@@ -23,7 +23,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             "injected_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             101,  # id
@@ -31,7 +31,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             "injected_structured_annotation_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             102,  # id
@@ -39,7 +39,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             "injected_unstructured_annotation_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

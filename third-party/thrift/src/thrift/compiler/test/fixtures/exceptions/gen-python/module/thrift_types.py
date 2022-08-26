@@ -23,7 +23,7 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             "message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -70,7 +70,7 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             "sonnet",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -117,7 +117,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             "error_message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -125,7 +125,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             "internal_error_message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -172,7 +172,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             "error_message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -180,7 +180,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             "internal_error_message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -227,7 +227,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             "message",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -235,7 +235,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             "error_code",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -282,7 +282,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             "message_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -290,7 +290,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             "error_code",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -408,7 +408,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             "b",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -416,7 +416,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             "f",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -424,7 +424,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             "s",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -442,7 +442,7 @@ class _fbthrift_Raiser_get200_result(metaclass=_fbthrift_python_types.StructMeta
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -460,7 +460,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -468,7 +468,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             "f",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -476,7 +476,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             "b",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -484,7 +484,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             "s",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

@@ -27,7 +27,7 @@ class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
             "scheme",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -35,7 +35,7 @@ class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
             "domain",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -43,7 +43,7 @@ class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
             "path",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -51,7 +51,7 @@ class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
             "query",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -59,7 +59,7 @@ class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
             "fragment",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -99,7 +99,7 @@ class TypeUri(metaclass=_fbthrift_python_types.UnionMeta):
             "uri",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -107,7 +107,7 @@ class TypeUri(metaclass=_fbthrift_python_types.UnionMeta):
             "typeHashPrefixSha2_256",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -147,7 +147,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "boolType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -155,7 +155,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "byteType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -163,7 +163,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "i16Type",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -171,7 +171,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "i32Type",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -179,7 +179,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "i64Type",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -187,7 +187,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "floatType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -195,7 +195,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "doubleType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -203,7 +203,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "stringType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -211,7 +211,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "binaryType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             10,  # id
@@ -219,7 +219,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "enumType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             11,  # id
@@ -227,7 +227,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "structType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             12,  # id
@@ -235,7 +235,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "unionType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             13,  # id
@@ -243,7 +243,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "exceptionType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             14,  # id
@@ -251,7 +251,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "listType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             15,  # id
@@ -259,7 +259,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "setType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             16,  # id
@@ -267,7 +267,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             "mapType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

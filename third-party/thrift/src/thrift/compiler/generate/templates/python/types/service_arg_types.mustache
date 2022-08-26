@@ -28,7 +28,7 @@ class {{> types/function_args_type}}(metaclass=_fbthrift_python_types.StructMeta
             "{{field:py_name}}",  # name
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_class }},  # adapter class
+            {{> fields/adapter_info }},  # adapter info
         ),
         {{/function:args}}
     )
@@ -45,7 +45,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
             "success",  # name
             {{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_class }},  # adapter class
+            {{> fields/adapter_info }},  # adapter info
         ),
         {{/type:void?}}
         {{/function:regular_response_type}}
@@ -56,7 +56,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
             "{{field:py_name}}",  # name
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_class }},  # adapter class
+            {{> fields/adapter_info }},  # adapter info
         ),
         {{/function:exceptions}}
     )
@@ -73,7 +73,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             "success",  # name
             {{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_class }},  # adapter class
+            {{> fields/adapter_info }},  # adapter info
         ),
         {{/function:return_stream_elem_type}}
         {{#function:stream_exceptions}}
@@ -83,7 +83,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             "{{field:py_name}}",  # name
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_class }},  # adapter class
+            {{> fields/adapter_info }},  # adapter info
         ),
         {{/function:stream_exceptions}}
     )

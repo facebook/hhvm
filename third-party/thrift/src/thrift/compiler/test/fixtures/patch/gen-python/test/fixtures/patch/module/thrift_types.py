@@ -25,7 +25,7 @@ class MyData(metaclass=_fbthrift_python_types.StructMeta):
             "data1",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -33,7 +33,7 @@ class MyData(metaclass=_fbthrift_python_types.StructMeta):
             "data2",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -73,7 +73,7 @@ class InnerUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "innerOption",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -113,7 +113,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "option1",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -121,7 +121,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "option2",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -129,7 +129,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "option3",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -169,7 +169,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "boolVal",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -177,7 +177,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "byteVal",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -185,7 +185,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "i16Val",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -193,7 +193,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "i32Val",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -201,7 +201,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "i64Val",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -209,7 +209,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "floatVal",  # name
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -217,7 +217,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "doubleVal",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -225,7 +225,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "stringVal",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -233,7 +233,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "binaryVal",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             10,  # id
@@ -241,7 +241,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "structVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             11,  # id
@@ -249,7 +249,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optBoolVal",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             12,  # id
@@ -257,7 +257,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optByteVal",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             13,  # id
@@ -265,7 +265,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optI16Val",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             14,  # id
@@ -273,7 +273,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optI32Val",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             15,  # id
@@ -281,7 +281,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optI64Val",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             16,  # id
@@ -289,7 +289,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optFloatVal",  # name
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             17,  # id
@@ -297,7 +297,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optDoubleVal",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             18,  # id
@@ -305,7 +305,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optStringVal",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             19,  # id
@@ -313,7 +313,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optBinaryVal",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             20,  # id
@@ -321,7 +321,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optStructVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             21,  # id
@@ -329,7 +329,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optListVal",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             22,  # id
@@ -337,7 +337,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optSetVal",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             23,  # id
@@ -345,7 +345,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optMapVal",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             30,  # id
@@ -353,7 +353,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "unionVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -393,7 +393,7 @@ class MyDataFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "data1",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -401,7 +401,7 @@ class MyDataFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "data2",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -441,7 +441,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -449,7 +449,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -457,7 +457,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -465,7 +465,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -473,7 +473,7 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -513,7 +513,7 @@ class OptionalMyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -521,7 +521,7 @@ class OptionalMyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -529,7 +529,7 @@ class OptionalMyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyData),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -537,7 +537,7 @@ class OptionalMyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -577,7 +577,7 @@ class InnerUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "innerOption",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -617,7 +617,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -625,7 +625,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -633,7 +633,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -641,7 +641,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -649,7 +649,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -689,7 +689,7 @@ class OptionalInnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -697,7 +697,7 @@ class OptionalInnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -705,7 +705,7 @@ class OptionalInnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -713,7 +713,7 @@ class OptionalInnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -753,7 +753,7 @@ class MyUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "option1",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -761,7 +761,7 @@ class MyUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "option2",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -769,7 +769,7 @@ class MyUnionFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "option3",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -809,7 +809,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -817,7 +817,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -825,7 +825,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -833,7 +833,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -841,7 +841,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -881,7 +881,7 @@ class OptionalMyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -889,7 +889,7 @@ class OptionalMyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -897,7 +897,7 @@ class OptionalMyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -905,7 +905,7 @@ class OptionalMyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -945,7 +945,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "boolVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -953,7 +953,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "byteVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BytePatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -961,7 +961,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "i16Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -969,7 +969,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "i32Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -977,7 +977,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "i64Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -985,7 +985,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "floatVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.FloatPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -993,7 +993,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "doubleVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.DoublePatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -1001,7 +1001,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "stringVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -1009,7 +1009,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "binaryVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             10,  # id
@@ -1017,7 +1017,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "structVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             11,  # id
@@ -1025,7 +1025,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optBoolVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBoolPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             12,  # id
@@ -1033,7 +1033,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optByteVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBytePatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             13,  # id
@@ -1041,7 +1041,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optI16Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI16Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             14,  # id
@@ -1049,7 +1049,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optI32Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI32Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             15,  # id
@@ -1057,7 +1057,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optI64Val",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI64Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             16,  # id
@@ -1065,7 +1065,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optFloatVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalFloatPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             17,  # id
@@ -1073,7 +1073,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optDoubleVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalDoublePatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             18,  # id
@@ -1081,7 +1081,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optStringVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalStringPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             19,  # id
@@ -1089,7 +1089,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optBinaryVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBinaryPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             20,  # id
@@ -1097,7 +1097,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optStructVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyDataPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             21,  # id
@@ -1105,7 +1105,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optListVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField21Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             22,  # id
@@ -1113,7 +1113,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optSetVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField22Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             23,  # id
@@ -1121,7 +1121,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "optMapVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField23Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             30,  # id
@@ -1129,7 +1129,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             "unionVal",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnionPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1169,7 +1169,7 @@ class MyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -1177,7 +1177,7 @@ class MyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -1185,7 +1185,7 @@ class MyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "prepend",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -1193,7 +1193,7 @@ class MyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "append",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1233,7 +1233,7 @@ class OptionalMyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -1241,7 +1241,7 @@ class OptionalMyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField21Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -1249,7 +1249,7 @@ class OptionalMyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -1257,7 +1257,7 @@ class OptionalMyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField21Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1297,7 +1297,7 @@ class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -1305,7 +1305,7 @@ class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -1313,7 +1313,7 @@ class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "remove",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -1321,7 +1321,7 @@ class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "add",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1361,7 +1361,7 @@ class OptionalMyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -1369,7 +1369,7 @@ class OptionalMyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField22Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -1377,7 +1377,7 @@ class OptionalMyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -1385,7 +1385,7 @@ class OptionalMyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField22Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1425,7 +1425,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -1433,7 +1433,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -1441,7 +1441,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "add",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -1449,7 +1449,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "put",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1489,7 +1489,7 @@ class OptionalMyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -1497,7 +1497,7 @@ class OptionalMyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -1505,7 +1505,7 @@ class OptionalMyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -1513,7 +1513,7 @@ class OptionalMyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1553,7 +1553,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -1561,7 +1561,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -1569,7 +1569,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -1577,7 +1577,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -1585,7 +1585,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1625,7 +1625,7 @@ class OptionalMyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "clear",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -1633,7 +1633,7 @@ class OptionalMyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patchPrior",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -1641,7 +1641,7 @@ class OptionalMyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "ensure",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -1649,7 +1649,7 @@ class OptionalMyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructPatch),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

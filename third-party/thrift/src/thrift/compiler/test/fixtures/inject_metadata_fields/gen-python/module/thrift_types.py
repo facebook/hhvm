@@ -25,7 +25,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             "injected_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -65,7 +65,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "injected_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -105,7 +105,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             "injected_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -113,7 +113,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             "string_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -153,7 +153,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             "injected_unstructured_annotation_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             -1101,  # id
@@ -161,7 +161,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             "injected_structured_annotation_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             -1100,  # id
@@ -169,7 +169,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             "injected_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -177,7 +177,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             "string_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

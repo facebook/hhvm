@@ -101,7 +101,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(metaclass=_fbthrift_pyt
             "i32_from",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -109,7 +109,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(metaclass=_fbthrift_pyt
             "i32_to",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -127,7 +127,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result_stream(metaclass=_fbt
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -140,7 +140,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_args(metaclass=_fbthrift_pyt
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -158,7 +158,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbt
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -166,7 +166,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbt
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -179,7 +179,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_args(metaclass=_fbthrift_py
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -192,7 +192,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -205,7 +205,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result_stream(metaclass=_fb
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -218,7 +218,7 @@ class _fbthrift_PubSubStreamingService_boththrows_args(metaclass=_fbthrift_pytho
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -231,7 +231,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_pyt
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -244,7 +244,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthr
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -252,7 +252,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthr
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -265,7 +265,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(metacl
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -278,7 +278,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(meta
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -291,7 +291,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -299,7 +299,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -312,7 +312,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(metac
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -325,7 +325,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -333,7 +333,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -346,7 +346,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_str
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -359,7 +359,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(metaclas
             "foo",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -372,7 +372,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -380,7 +380,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -393,7 +393,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             1,  # id
@@ -401,7 +401,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
             "e",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -414,7 +414,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(metaclass=_fbthrift
             "i32_from",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -422,7 +422,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(metaclass=_fbthrift
             "i32_to",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -440,7 +440,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream(metaclass=
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

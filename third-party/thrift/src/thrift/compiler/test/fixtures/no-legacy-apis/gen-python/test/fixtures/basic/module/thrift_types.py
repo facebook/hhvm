@@ -25,7 +25,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "myIntField",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -33,7 +33,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "myStringField",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -59,7 +59,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "myEnum",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -67,7 +67,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "myDataItem",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -120,7 +120,7 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
             "u",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -133,7 +133,7 @@ class _fbthrift_MyService_query_result(metaclass=_fbthrift_python_types.StructMe
             "success",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

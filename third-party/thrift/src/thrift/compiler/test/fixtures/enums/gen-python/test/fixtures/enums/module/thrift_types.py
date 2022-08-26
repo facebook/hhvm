@@ -25,7 +25,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             "reasonable",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.FOO,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -33,7 +33,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             "fine",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.BAR,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -41,7 +41,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             "questionable",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(Metasyntactic, -1),  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -49,7 +49,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             "tags",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             lambda: _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, ()),  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -89,7 +89,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "me2_3",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum2),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum2, 3),  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -97,7 +97,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "me3_n3",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum3),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum3, -3),  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -105,7 +105,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "me1_t1",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -113,7 +113,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "me1_t2",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

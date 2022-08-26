@@ -25,7 +25,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "MyIntField",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -33,7 +33,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "MyStringField",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -41,7 +41,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "MyDataField",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -49,7 +49,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "myEnum",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -57,7 +57,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "oneway",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -65,7 +65,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "readonly",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -73,7 +73,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "idempotent",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -81,7 +81,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "floatSet",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -89,7 +89,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             "no_hack_codegen_field",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -161,7 +161,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "myEnum",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -169,7 +169,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "myStruct",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -177,7 +177,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "myDataItem",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -185,7 +185,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "floatSet",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -225,7 +225,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
             "reserved_field",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -265,7 +265,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
             "reserved_field",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -384,7 +384,7 @@ class _fbthrift_FB303Service_simple_rpc_args(metaclass=_fbthrift_python_types.St
             "int_parameter",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -397,7 +397,7 @@ class _fbthrift_FB303Service_simple_rpc_result(metaclass=_fbthrift_python_types.
             "success",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(ReservedKeyword),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -427,7 +427,7 @@ class _fbthrift_MyService_getRandomData_result(metaclass=_fbthrift_python_types.
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -440,7 +440,7 @@ class _fbthrift_MyService_sink_args(metaclass=_fbthrift_python_types.StructMeta)
             "sink",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -458,7 +458,7 @@ class _fbthrift_MyService_putDataById_args(metaclass=_fbthrift_python_types.Stru
             "id",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -466,7 +466,7 @@ class _fbthrift_MyService_putDataById_args(metaclass=_fbthrift_python_types.Stru
             "data",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -484,7 +484,7 @@ class _fbthrift_MyService_hasDataById_args(metaclass=_fbthrift_python_types.Stru
             "id",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -497,7 +497,7 @@ class _fbthrift_MyService_hasDataById_result(metaclass=_fbthrift_python_types.St
             "success",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -510,7 +510,7 @@ class _fbthrift_MyService_getDataById_args(metaclass=_fbthrift_python_types.Stru
             "id",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -523,7 +523,7 @@ class _fbthrift_MyService_getDataById_result(metaclass=_fbthrift_python_types.St
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -536,7 +536,7 @@ class _fbthrift_MyService_deleteDataById_args(metaclass=_fbthrift_python_types.S
             "id",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -554,7 +554,7 @@ class _fbthrift_MyService_lobDataById_args(metaclass=_fbthrift_python_types.Stru
             "id",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -562,7 +562,7 @@ class _fbthrift_MyService_lobDataById_args(metaclass=_fbthrift_python_types.Stru
             "data",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -580,7 +580,7 @@ class _fbthrift_MyService_invalid_return_for_hack_result(metaclass=_fbthrift_pyt
             "success",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -605,7 +605,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_args(metaclass=_fbthrift_pyt
             "key",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -618,7 +618,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_result(metaclass=_fbthrift_p
             "success",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -631,7 +631,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_args(metaclass=_fbthrift_pyt
             "key",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -644,7 +644,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_result(metaclass=_fbthrift_p
             "success",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

@@ -46,7 +46,7 @@ struct Baz {
 }
 
 struct Foo {
-  @AsDatetime
+  @AsDatetime{signature = "DatetimeField"}
   1: i32 created_at;
   2: Datetime updated_at;
   @AsDatetime
@@ -64,6 +64,6 @@ struct Foo {
 
 union Bar {
   1: string baz;
-  @AsDatetime
+  @AsDatetime{signature = "DatetimeField"}
   2: i32 ts;
 }

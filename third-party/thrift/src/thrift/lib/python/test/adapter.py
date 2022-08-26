@@ -50,7 +50,7 @@ class AdapterTest(unittest.TestCase):
         bar = Bar(ts=now)
         self.assertEqual(bar.ts, now)
 
-    def test_adapter_called_with_transitive_annotation(self) -> None:
+    def test_struct_adapter_called_with_transitive_annotation(self) -> None:
         mock_from_thrift = MagicMock(wraps=DatetimeAdapter.from_thrift)
         DatetimeAdapter.from_thrift = mock_from_thrift
         mock_to_thrift = MagicMock(wraps=DatetimeAdapter.to_thrift)
@@ -73,7 +73,7 @@ class AdapterTest(unittest.TestCase):
             ),
         )
 
-    def test_adapter_called_with_field_id(self) -> None:
+    def test_field_adapter_called_with_field_id_and_trasitive_annotation(self) -> None:
         mock_from_thrift_field = MagicMock(wraps=DatetimeAdapter.from_thrift_field)
         DatetimeAdapter.from_thrift_field = mock_from_thrift_field
         mock_to_thrift_field = MagicMock(wraps=DatetimeAdapter.to_thrift_field)
@@ -82,16 +82,44 @@ class AdapterTest(unittest.TestCase):
         now_ts = int(time.time())
         now = datetime.fromtimestamp(now_ts)
         foo = Foo(created_at=now)
-        mock_to_thrift_field.assert_called_once_with(now, 1, foo)
+        mock_to_thrift_field.assert_called_once_with(
+            now,
+            1,
+            foo,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeField"
+            ),
+        )
         foo.created_at
-        mock_from_thrift_field.assert_called_once_with(now_ts, 1, foo)
+        mock_from_thrift_field.assert_called_once_with(
+            now_ts,
+            1,
+            foo,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeField"
+            ),
+        )
 
         mock_from_thrift_field.reset_mock()
         mock_to_thrift_field.reset_mock()
         bar = Bar(ts=now)
-        mock_to_thrift_field.assert_called_once_with(now, 2, bar)
+        mock_to_thrift_field.assert_called_once_with(
+            now,
+            2,
+            bar,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeField"
+            ),
+        )
         bar.ts
-        mock_from_thrift_field.assert_called_once_with(now_ts, 2, bar)
+        mock_from_thrift_field.assert_called_once_with(
+            now_ts,
+            2,
+            bar,
+            transitive_annotation=_fbthrift_unadapted_AsDatetime(
+                signature="DatetimeField"
+            ),
+        )
 
     def test_typedef_field(self) -> None:
         now = datetime.fromtimestamp(int(time.time()))

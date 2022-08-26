@@ -25,7 +25,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             "err_code",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -65,7 +65,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
             "optional_blob",  # name
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -105,7 +105,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "is_on",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -113,7 +113,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "tiny_int",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -121,7 +121,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "small_int",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -129,7 +129,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "nice_sized_int",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -137,7 +137,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "big_int",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -145,7 +145,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "real",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -153,7 +153,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "smaller_real",  # name
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -161,7 +161,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             "hidden_field",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -201,7 +201,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "structOne",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -209,7 +209,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "structTwo",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             3,  # id
@@ -217,7 +217,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "an_integer",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             4,  # id
@@ -225,7 +225,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "name",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             5,  # id
@@ -233,7 +233,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "an_enum",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             6,  # id
@@ -241,7 +241,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "some_bytes",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             7,  # id
@@ -249,7 +249,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "sender",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             8,  # id
@@ -257,7 +257,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "cdef_",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             9,  # id
@@ -265,7 +265,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             "bytes_with_cpp_type",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -305,7 +305,7 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
             "iobuf_val",  # name
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -345,7 +345,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
             "u",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -522,7 +522,7 @@ class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -535,7 +535,7 @@ class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_types.Str
             "num",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -548,7 +548,7 @@ class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -571,7 +571,7 @@ class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_types.Struc
             "first",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -579,7 +579,7 @@ class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_types.Struc
             "second",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -592,7 +592,7 @@ class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_types.Str
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -605,7 +605,7 @@ class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_types.St
             "simple_struct",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -618,7 +618,7 @@ class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_types.
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -631,7 +631,7 @@ class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_types.Struc
             "input",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -644,7 +644,7 @@ class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_types.Str
             "success",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -657,7 +657,7 @@ class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_types.StructM
             "input",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -670,7 +670,7 @@ class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_types.Struc
             "success",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -683,7 +683,7 @@ class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_types.Struct
             "input",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -696,7 +696,7 @@ class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_types.Stru
             "success",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -709,7 +709,7 @@ class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_types.StructMe
             "input",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -722,7 +722,7 @@ class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_types.Struct
             "success",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -735,7 +735,7 @@ class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_types.StructMe
             "input",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -748,7 +748,7 @@ class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_types.Struct
             "success",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -766,7 +766,7 @@ class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_pyth
             "se",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleException),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -784,7 +784,7 @@ class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_py
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -797,7 +797,7 @@ class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_types
             "numbers",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -810,7 +810,7 @@ class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_typ
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -823,7 +823,7 @@ class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_types
             "numbers",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -836,7 +836,7 @@ class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_typ
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -849,7 +849,7 @@ class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_types
             "numbers",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -862,7 +862,7 @@ class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_typ
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -875,7 +875,7 @@ class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_types.
             "words",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -888,7 +888,7 @@ class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_type
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -901,7 +901,7 @@ class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_type
             "items",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -914,7 +914,7 @@ class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_ty
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -927,7 +927,7 @@ class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_types.Stru
             "numbers",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -940,7 +940,7 @@ class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_types.St
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -953,7 +953,7 @@ class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_type
             "words",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -961,7 +961,7 @@ class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_type
             "word",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -974,7 +974,7 @@ class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_ty
             "success",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -987,7 +987,7 @@ class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_type
             "words",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -995,7 +995,7 @@ class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_type
             "key",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1008,7 +1008,7 @@ class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_ty
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1021,7 +1021,7 @@ class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_types.S
             "items",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1034,7 +1034,7 @@ class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_types
             "success",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1047,7 +1047,7 @@ class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_typ
             "items",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1060,7 +1060,7 @@ class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_t
             "success",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1073,7 +1073,7 @@ class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_ty
             "counter",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(ComplexStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1086,7 +1086,7 @@ class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1099,7 +1099,7 @@ class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_types.
             "counter",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(ComplexStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1112,7 +1112,7 @@ class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_type
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1130,7 +1130,7 @@ class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_types
             "success",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1143,7 +1143,7 @@ class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_types.StructMe
             "n",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1156,7 +1156,7 @@ class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_types.Struct
             "success",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1169,7 +1169,7 @@ class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_types
             "words",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1182,7 +1182,7 @@ class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_typ
             "success",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1195,7 +1195,7 @@ class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_types.
             "words",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1208,7 +1208,7 @@ class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_type
             "success",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1221,7 +1221,7 @@ class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_types.Str
             "in_enum",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1234,7 +1234,7 @@ class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1247,7 +1247,7 @@ class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_type
             "num_lists",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
         (
             2,  # id
@@ -1255,7 +1255,7 @@ class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_type
             "num_items",  # name
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1268,7 +1268,7 @@ class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_ty
             "success",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1281,7 +1281,7 @@ class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_
             "sentence",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1294,7 +1294,7 @@ class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrif
             "success",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1307,7 +1307,7 @@ class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_types
             "some_words",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1320,7 +1320,7 @@ class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_typ
             "success",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1333,7 +1333,7 @@ class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_pytho
             "struct_map",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct))),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1346,7 +1346,7 @@ class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_pyt
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1359,7 +1359,7 @@ class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_type
             "word_chars",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1372,7 +1372,7 @@ class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_ty
             "success",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1385,7 +1385,7 @@ class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_types.St
             "sets",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1398,7 +1398,7 @@ class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_types.
             "success",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1411,7 +1411,7 @@ class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_types.Str
             "string_map",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1424,7 +1424,7 @@ class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1437,7 +1437,7 @@ class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_type
             "key",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1450,7 +1450,7 @@ class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_ty
             "success",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1463,7 +1463,7 @@ class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_ty
             "something",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1476,7 +1476,7 @@ class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_
             "success",  # name
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1489,7 +1489,7 @@ class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_typ
             "binaries",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1502,7 +1502,7 @@ class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_t
             "success",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1515,7 +1515,7 @@ class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_types
             "the_enum",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1528,7 +1528,7 @@ class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_typ
             "success",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(AnEnum)),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1541,7 +1541,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_p
             "u",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnion),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1554,7 +1554,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift
             "success",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BinaryUnionStruct),  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1574,7 +1574,7 @@ class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_types.S
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 
@@ -1594,7 +1594,7 @@ class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_typ
             "success",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
-            None,  # adapter class
+            None,  # adapter info
         ),
     )
 

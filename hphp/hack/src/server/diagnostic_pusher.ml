@@ -318,7 +318,9 @@ end = struct
        ~new_errors
        ~phase
        ~priority_files ->
-    let new_errors : error list FileMap.t = Errors.as_map new_errors in
+    let new_errors : error list FileMap.t =
+      Errors.as_map (Errors.drop_fixmed_errors_in_files new_errors)
+    in
     (* Merge to_push and errors_beyond_limit to obtain the total
      * set of errors to be pushed. *)
     let to_push = FileMap.union errors_beyond_limit to_push in

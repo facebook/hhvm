@@ -118,3 +118,41 @@ class TestFreshInit(common_tests.CommonTests):
                 }
             """,
             )
+
+    def test_remove_dead_fixmes_single_alive(self) -> None:
+        with open(
+            os.path.join(self.test_driver.repo_dir, "foo_fixme_single_alive.php"), "w"
+        ) as f:
+            f.write(
+                """<?hh
+                function takes_int(int $_): void {}
+
+                function foo(): void {
+                  /* HH_FIXME[4110] not dead. */
+                  takes_int("not an int");
+                }
+            """
+            )
+
+        self.test_driver.start_hh_server(
+            changed_files=["foo_fixme_single_alive.php"], args=["--no-load"]
+        )
+        self.test_driver.check_cmd(
+            expected_output=None, options=["--remove-dead-fixmes"]
+        )
+
+        with open(
+            os.path.join(self.test_driver.repo_dir, "foo_fixme_single_alive.php")
+        ) as f:
+            out = f.read()
+            self.assertEqual(
+                out,
+                """<?hh
+                function takes_int(int $_): void {}
+
+                function foo(): void {
+                  /* HH_FIXME[4110] not dead. */
+                  takes_int("not an int");
+                }
+            """,
+            )

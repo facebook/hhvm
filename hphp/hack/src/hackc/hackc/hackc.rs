@@ -81,12 +81,6 @@ struct Opts {
     #[clap(long)]
     pub(crate) use_serialized_decls: bool,
 
-    #[clap(long)]
-    pub(crate) naming_table: Option<PathBuf>,
-
-    #[clap(long)]
-    pub(crate) naming_table_root: Option<PathBuf>,
-
     /// Controls systemlib specific logic
     #[clap(long)]
     is_systemlib: bool,

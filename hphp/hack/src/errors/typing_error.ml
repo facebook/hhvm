@@ -391,7 +391,7 @@ module Primary = struct
       let claim =
         lazy
           ( pos,
-            "Was expecting a constant string, class constant, or int (for shape access)"
+            "Shape access requires a string literal, integer literal, or a class constant"
           )
       in
       (Error_code.InvalidShapeFieldName, claim, lazy [], [])

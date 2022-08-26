@@ -1,6 +1,0 @@
-File "await_as_an_expression_xhp.php.pess", line 10, characters 3-88:
-The values of this `darray` are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 6, characters 27-41:
-  Expected `dynamic`
-  File "await_as_an_expression_xhp.php.pess", line 10, characters 35-36:
-  But got `int`

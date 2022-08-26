@@ -1,6 +1,0 @@
-File "generic_attr3.php.pess", line 10, characters 10-39:
-The values of this `darray` are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 6, characters 27-41:
-  Expected `dynamic`
-  File "generic_attr3.php.pess", line 10, characters 23-35:
-  But got `Vector<[unresolved]>`

@@ -1,6 +1,0 @@
-File "xhpchild.php.pess", line 22, characters 6-14:
-Some elements in this collection are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 7, characters 20-34:
-  Expected `dynamic`
-  File "xhpchild.php.pess", line 22, characters 9-10:
-  But got `string`

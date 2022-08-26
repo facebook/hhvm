@@ -1,6 +1,0 @@
-File "xhp_attr_spread_inconsistent.php.pess", line 10, characters 12-29:
-The values of this `darray` are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 6, characters 27-41:
-  Expected `dynamic`
-  File "xhp_attr_spread_inconsistent.php.pess", line 10, characters 21-25:
-  But got `this as :foo`

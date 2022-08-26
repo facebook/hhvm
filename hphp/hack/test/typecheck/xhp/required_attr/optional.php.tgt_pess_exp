@@ -1,6 +1,0 @@
-File "optional.php.pess", line 12, characters 8-20:
-The values of this `darray` are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 6, characters 27-41:
-  Expected `dynamic`
-  File "optional.php.pess", line 11, characters 9-9:
-  But got `:b`

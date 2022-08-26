@@ -1,6 +1,0 @@
-File "functional_xhp.php.pess", line 25, characters 8-31:
-The values of this `darray` are incompatible (Typing[4110])
-  File "XHPTest.hhi", line 6, characters 27-41:
-  Expected `dynamic`
-  File "functional_xhp.php.pess", line 25, characters 17-22:
-  But got `Map<[unresolved], [unresolved]>`

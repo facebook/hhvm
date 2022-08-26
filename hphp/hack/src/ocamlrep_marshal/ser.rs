@@ -1,9 +1,6 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 #![allow(clippy::needless_late_init)]
 
-use std::borrow::Borrow;
-use std::borrow::BorrowMut;
-
 use libc::c_char;
 use libc::c_double;
 use libc::c_int;
@@ -318,67 +315,43 @@ struct caml_extern_state {
     extern_output_block: *mut output_block,
 }
 
-thread_local! {
-    static EXTERN_STATE: std::cell::Cell<*mut caml_extern_state> =
-        std::cell::Cell::new(std::ptr::null_mut());
+unsafe fn new_extern_state() -> *mut caml_extern_state {
+    let mut extern_state: *mut caml_extern_state =
+        caml_stat_alloc_noexc(std::mem::size_of::<caml_extern_state>() as asize_t) as _;
+    if extern_state.is_null() {
+        return std::ptr::null_mut();
+    }
+
+    (*extern_state).extern_flags = 0;
+    (*extern_state).obj_counter = 0;
+    (*extern_state).size_32 = 0;
+    (*extern_state).size_64 = 0;
+    (*extern_state).extern_stack = (*extern_state).extern_stack_init.as_mut_ptr();
+    (*extern_state).extern_stack_limit = (*extern_state).extern_stack.add(EXTERN_STACK_INIT_SIZE);
+
+    extern_state
 }
 
-unsafe fn get_extern_state() -> *mut caml_extern_state {
-    EXTERN_STATE.with(|mut key| {
-        let state_ptr = key.borrow().get();
-        if !state_ptr.is_null() {
-            return state_ptr;
-        }
-
-        let mut extern_state: *mut caml_extern_state =
-            caml_stat_alloc_noexc(std::mem::size_of::<caml_extern_state>() as asize_t) as _;
-        if extern_state.is_null() {
-            return std::ptr::null_mut();
-        }
-
-        (*extern_state).extern_flags = 0;
-        (*extern_state).obj_counter = 0;
-        (*extern_state).size_32 = 0;
-        (*extern_state).size_64 = 0;
-        (*extern_state).extern_stack = (*extern_state).extern_stack_init.as_mut_ptr();
-        (*extern_state).extern_stack_limit =
-            (*extern_state).extern_stack.add(EXTERN_STACK_INIT_SIZE);
-
-        key.borrow_mut().set(extern_state);
-        extern_state
-    })
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ocamlrep_marshal_free_extern_state() {
-    EXTERN_STATE.with(|mut key| {
-        let state_ptr = key.borrow().get();
-        if !state_ptr.is_null() {
-            caml_stat_free(state_ptr as caml_stat_block);
-            key.borrow_mut().set(std::ptr::null_mut());
-        };
-    })
+unsafe fn free_extern_state(extern_state: *mut caml_extern_state) {
+    if !extern_state.is_null() {
+        caml_stat_free(extern_state as caml_stat_block);
+    }
 }
 
 /// Free the extern stack if needed
-unsafe fn extern_free_stack(mut s: *mut caml_extern_state) {
-    if (*s).extern_stack != (*s).extern_stack_init.as_mut_ptr() {
-        caml_stat_free((*s).extern_stack as caml_stat_block);
+unsafe fn extern_free_stack(s: &mut caml_extern_state) {
+    if s.extern_stack != s.extern_stack_init.as_mut_ptr() {
+        caml_stat_free(s.extern_stack as caml_stat_block);
         // Reinitialize the globals for next time around
-        (*s).extern_stack = (*s).extern_stack_init.as_mut_ptr();
-        (*s).extern_stack_limit = (*s).extern_stack.add(EXTERN_STACK_INIT_SIZE)
+        s.extern_stack = s.extern_stack_init.as_mut_ptr();
+        s.extern_stack_limit = s.extern_stack.add(EXTERN_STACK_INIT_SIZE)
     };
 }
 
-unsafe fn extern_resize_stack(
-    mut s: *mut caml_extern_state,
-    sp: *mut extern_item,
-) -> *mut extern_item {
-    let newsize: asize_t = (2 as asize_t).wrapping_mul(
-        (*s).extern_stack_limit
-            .wrapping_offset_from((*s).extern_stack) as asize_t,
-    );
-    let sp_offset: asize_t = sp.wrapping_offset_from((*s).extern_stack) as asize_t;
+unsafe fn extern_resize_stack(s: &mut caml_extern_state, sp: *mut extern_item) -> *mut extern_item {
+    let newsize: asize_t = (2 as asize_t)
+        .wrapping_mul(s.extern_stack_limit.wrapping_offset_from(s.extern_stack) as asize_t);
+    let sp_offset: asize_t = sp.wrapping_offset_from(s.extern_stack) as asize_t;
 
     if newsize >= EXTERN_STACK_MAX_SIZE as c_ulong {
         extern_stack_overflow(s);
@@ -392,17 +365,17 @@ unsafe fn extern_resize_stack(
     // Copy items from the old stack to the new stack
     memcpy(
         newstack as *mut c_void,
-        (*s).extern_stack as *const c_void,
+        s.extern_stack as *const c_void,
         (std::mem::size_of::<extern_item>() as c_ulong).wrapping_mul(sp_offset) as usize,
     );
 
     // Free the old stack if it is not the initial stack
-    if (*s).extern_stack != (*s).extern_stack_init.as_mut_ptr() {
-        caml_stat_free((*s).extern_stack as caml_stat_block);
+    if s.extern_stack != s.extern_stack_init.as_mut_ptr() {
+        caml_stat_free(s.extern_stack as caml_stat_block);
     }
 
-    (*s).extern_stack = newstack;
-    (*s).extern_stack_limit = newstack.offset(newsize as isize);
+    s.extern_stack = newstack;
+    s.extern_stack_limit = newstack.offset(newsize as isize);
     newstack.offset(sp_offset as isize)
 }
 
@@ -422,36 +395,36 @@ const fn Threshold(sz: usize) -> usize {
 }
 
 /// Initialize the position table
-unsafe fn extern_init_position_table(mut s: *mut caml_extern_state) {
-    if (*s).extern_flags & NO_SHARING != 0 {
+unsafe fn extern_init_position_table(s: &mut caml_extern_state) {
+    if s.extern_flags & NO_SHARING != 0 {
         return;
     }
-    (*s).pos_table.size = POS_TABLE_INIT_SIZE as mlsize_t;
-    (*s).pos_table.shift = 8usize
+    s.pos_table.size = POS_TABLE_INIT_SIZE as mlsize_t;
+    s.pos_table.shift = 8usize
         .wrapping_mul(std::mem::size_of::<value>())
         .wrapping_sub(POS_TABLE_INIT_SIZE_LOG2) as c_int;
-    (*s).pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
-    (*s).pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
-    (*s).pos_table.present = (*s).pos_table_present_init.as_mut_ptr();
-    (*s).pos_table.entries = (*s).pos_table_entries_init.as_mut_ptr();
+    s.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
+    s.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
+    s.pos_table.present = s.pos_table_present_init.as_mut_ptr();
+    s.pos_table.entries = s.pos_table_entries_init.as_mut_ptr();
     memset(
-        (*s).pos_table_present_init.as_mut_ptr() as *mut c_void,
+        s.pos_table_present_init.as_mut_ptr() as *mut c_void,
         0,
         Bitvect_size(POS_TABLE_INIT_SIZE).wrapping_mul(std::mem::size_of::<uintnat>()),
     );
 }
 
 /// Free the position table
-unsafe fn extern_free_position_table(mut s: *mut caml_extern_state) {
-    if (*s).extern_flags & NO_SHARING != 0 {
+unsafe fn extern_free_position_table(s: &mut caml_extern_state) {
+    if s.extern_flags & NO_SHARING != 0 {
         return;
     }
-    if (*s).pos_table.present != (*s).pos_table_present_init.as_mut_ptr() {
-        caml_stat_free((*s).pos_table.present as caml_stat_block);
-        caml_stat_free((*s).pos_table.entries as caml_stat_block);
+    if s.pos_table.present != s.pos_table_present_init.as_mut_ptr() {
+        caml_stat_free(s.pos_table.present as caml_stat_block);
+        caml_stat_free(s.pos_table.entries as caml_stat_block);
         // Protect against repeated calls to extern_free_position_table
-        (*s).pos_table.present = (*s).pos_table_present_init.as_mut_ptr();
-        (*s).pos_table.entries = (*s).pos_table_entries_init.as_mut_ptr()
+        s.pos_table.present = s.pos_table_present_init.as_mut_ptr();
+        s.pos_table.entries = s.pos_table_entries_init.as_mut_ptr()
     };
 }
 
@@ -470,7 +443,7 @@ unsafe fn bitvect_set(bv: *mut uintnat, i: uintnat) {
 }
 
 /// Grow the position table
-unsafe fn extern_resize_position_table(mut s: *mut caml_extern_state) {
+unsafe fn extern_resize_position_table(s: &mut caml_extern_state) {
     let new_size: mlsize_t;
     let mut new_byte_size: mlsize_t = 0;
     let new_shift: c_int;
@@ -478,7 +451,7 @@ unsafe fn extern_resize_position_table(mut s: *mut caml_extern_state) {
     let new_entries: *mut object_position;
     let mut i: uintnat;
     let mut h: uintnat;
-    let old: position_table = (*s).pos_table;
+    let old: position_table = s.pos_table;
 
     // Grow the table quickly (x 8) up to 10^6 entries,
     // more slowly (x 2) afterwards.
@@ -510,20 +483,20 @@ unsafe fn extern_resize_position_table(mut s: *mut caml_extern_state) {
         caml_stat_free(new_entries as caml_stat_block);
         extern_out_of_memory(s);
     }
-    (*s).pos_table.size = new_size;
-    (*s).pos_table.shift = new_shift;
-    (*s).pos_table.mask = new_size.wrapping_sub(1);
-    (*s).pos_table.threshold = Threshold(new_size as usize) as mlsize_t;
-    (*s).pos_table.present = new_present;
-    (*s).pos_table.entries = new_entries;
+    s.pos_table.size = new_size;
+    s.pos_table.shift = new_shift;
+    s.pos_table.mask = new_size.wrapping_sub(1);
+    s.pos_table.threshold = Threshold(new_size as usize) as mlsize_t;
+    s.pos_table.present = new_present;
+    s.pos_table.entries = new_entries;
 
     // Insert every entry of the old table in the new table
     i = 0;
     while i < old.size {
         if bitvect_test(old.present, i) != 0 {
-            h = Hash((*old.entries.offset(i as isize)).obj, (*s).pos_table.shift);
+            h = Hash((*old.entries.offset(i as isize)).obj, s.pos_table.shift);
             while bitvect_test(new_present, h) != 0 {
-                h = h.wrapping_add(1) & (*s).pos_table.mask
+                h = h.wrapping_add(1) & s.pos_table.mask
             }
             bitvect_set(new_present, h);
             *new_entries.offset(h as isize) = *old.entries.offset(i as isize)
@@ -532,7 +505,7 @@ unsafe fn extern_resize_position_table(mut s: *mut caml_extern_state) {
     }
 
     // Free the old tables if they are not the initial ones
-    if old.present != (*s).pos_table_present_init.as_mut_ptr() {
+    if old.present != s.pos_table_present_init.as_mut_ptr() {
         caml_stat_free(old.present as caml_stat_block);
         caml_stat_free(old.entries as caml_stat_block);
     }
@@ -544,22 +517,22 @@ unsafe fn extern_resize_position_table(mut s: *mut caml_extern_state) {
 /// `extern_record_location` and return 0.
 #[inline]
 unsafe fn extern_lookup_position(
-    s: *mut caml_extern_state,
+    s: &mut caml_extern_state,
     obj: value,
     pos_out: *mut uintnat,
     h_out: *mut uintnat,
 ) -> c_int {
-    let mut h: uintnat = Hash(obj, (*s).pos_table.shift);
+    let mut h: uintnat = Hash(obj, s.pos_table.shift);
     loop {
-        if bitvect_test((*s).pos_table.present, h) == 0 {
+        if bitvect_test(s.pos_table.present, h) == 0 {
             *h_out = h;
             return 0;
         }
-        if (*(*s).pos_table.entries.offset(h as isize)).obj == obj {
-            *pos_out = (*(*s).pos_table.entries.offset(h as isize)).pos;
+        if (*s.pos_table.entries.offset(h as isize)).obj == obj {
+            *pos_out = (*s.pos_table.entries.offset(h as isize)).pos;
             return 1;
         }
-        h = h.wrapping_add(1) & (*s).pos_table.mask
+        h = h.wrapping_add(1) & s.pos_table.mask
     }
 }
 
@@ -567,75 +540,75 @@ unsafe fn extern_lookup_position(
 ///
 /// The [h] parameter is the index in the hash table where the object
 /// must be inserted.  It was determined during lookup.
-unsafe fn extern_record_location(mut s: *mut caml_extern_state, obj: value, h: uintnat) {
-    if (*s).extern_flags & NO_SHARING != 0 {
+unsafe fn extern_record_location(s: &mut caml_extern_state, obj: value, h: uintnat) {
+    if s.extern_flags & NO_SHARING != 0 {
         return;
     }
-    bitvect_set((*s).pos_table.present, h);
-    (*(*s).pos_table.entries.offset(h as isize)).obj = obj;
-    (*(*s).pos_table.entries.offset(h as isize)).pos = (*s).obj_counter;
-    (*s).obj_counter = (*s).obj_counter.wrapping_add(1);
-    if (*s).obj_counter >= (*s).pos_table.threshold {
+    bitvect_set(s.pos_table.present, h);
+    (*s.pos_table.entries.offset(h as isize)).obj = obj;
+    (*s.pos_table.entries.offset(h as isize)).pos = s.obj_counter;
+    s.obj_counter = s.obj_counter.wrapping_add(1);
+    if s.obj_counter >= s.pos_table.threshold {
         extern_resize_position_table(s);
     };
 }
 
 // To buffer the output
 
-unsafe fn init_extern_output(mut s: *mut caml_extern_state) {
-    (*s).extern_userprovided_output = std::ptr::null_mut();
-    (*s).extern_output_first =
+unsafe fn init_extern_output(s: &mut caml_extern_state) {
+    s.extern_userprovided_output = std::ptr::null_mut();
+    s.extern_output_first =
         caml_stat_alloc_noexc(std::mem::size_of::<output_block>() as c_ulong) as _;
-    if (*s).extern_output_first.is_null() {
+    if s.extern_output_first.is_null() {
         caml_raise_out_of_memory();
     }
     let sz = SIZE_EXTERN_OUTPUT_BLOCK;
-    (*(*s).extern_output_first).data =
+    (*s.extern_output_first).data =
         std::slice::from_raw_parts_mut(caml_stat_alloc_noexc(sz as c_ulong) as *mut c_char, sz);
-    if (*(*s).extern_output_first).data.is_null() {
+    if (*s.extern_output_first).data.is_null() {
         caml_raise_out_of_memory();
     }
-    (*s).extern_output_block = (*s).extern_output_first;
-    (*(*s).extern_output_block).next = std::ptr::null_mut();
-    (*s).extern_ptr = (*(*s).extern_output_block).data.as_mut_ptr();
-    (*s).extern_limit = (*(*s).extern_output_block).data.as_mut_ptr().add(sz);
+    s.extern_output_block = s.extern_output_first;
+    (*s.extern_output_block).next = std::ptr::null_mut();
+    s.extern_ptr = (*s.extern_output_block).data.as_mut_ptr();
+    s.extern_limit = (*s.extern_output_block).data.as_mut_ptr().add(sz);
 }
 
-unsafe fn close_extern_output(mut s: *mut caml_extern_state) {
-    if (*s).extern_userprovided_output.is_null() {
-        (*(*s).extern_output_block).end = (*s).extern_ptr
+unsafe fn close_extern_output(s: &mut caml_extern_state) {
+    if s.extern_userprovided_output.is_null() {
+        (*s.extern_output_block).end = s.extern_ptr
     };
 }
 
-unsafe fn free_extern_output(mut s: *mut caml_extern_state) {
+unsafe fn free_extern_output(s: &mut caml_extern_state) {
     let mut blk: *mut output_block;
     let mut nextblk: *mut output_block;
 
-    if (*s).extern_userprovided_output.is_null() {
-        blk = (*s).extern_output_first;
+    if s.extern_userprovided_output.is_null() {
+        blk = s.extern_output_first;
         while !blk.is_null() {
             nextblk = (*blk).next;
             caml_stat_free((*blk).data as caml_stat_block);
             caml_stat_free(blk as caml_stat_block);
             blk = nextblk
         }
-        (*s).extern_output_first = std::ptr::null_mut()
+        s.extern_output_first = std::ptr::null_mut()
     }
     extern_free_stack(s);
     extern_free_position_table(s);
 }
 
-unsafe fn grow_extern_output(mut s: *mut caml_extern_state, required: intnat) {
+unsafe fn grow_extern_output(s: &mut caml_extern_state, required: intnat) {
     let blk: *mut output_block;
     let extra: intnat;
 
-    if !(*s).extern_userprovided_output.is_null() {
+    if !s.extern_userprovided_output.is_null() {
         extern_failwith(
             s,
             b"Marshal.to_buffer: buffer overflow\x00" as *const u8 as *const c_char,
         );
     }
-    (*(*s).extern_output_block).end = (*s).extern_ptr;
+    (*s.extern_output_block).end = s.extern_ptr;
     if required <= (SIZE_EXTERN_OUTPUT_BLOCK / 2) as intnat {
         extra = 0
     } else {
@@ -651,23 +624,23 @@ unsafe fn grow_extern_output(mut s: *mut caml_extern_state, required: intnat) {
     if (*blk).data.is_null() {
         extern_out_of_memory(s);
     }
-    (*(*s).extern_output_block).next = blk;
-    (*s).extern_output_block = blk;
-    (*(*s).extern_output_block).next = std::ptr::null_mut();
-    (*s).extern_ptr = (*(*s).extern_output_block).data.as_mut_ptr();
-    (*s).extern_limit = (*(*s).extern_output_block).data.as_mut_ptr().add(sz);
+    (*s.extern_output_block).next = blk;
+    s.extern_output_block = blk;
+    (*s.extern_output_block).next = std::ptr::null_mut();
+    s.extern_ptr = (*s.extern_output_block).data.as_mut_ptr();
+    s.extern_limit = (*s.extern_output_block).data.as_mut_ptr().add(sz);
 }
 
-unsafe fn extern_output_length(s: *mut caml_extern_state) -> intnat {
+unsafe fn extern_output_length(s: &mut caml_extern_state) -> intnat {
     let mut blk: *mut output_block;
     let mut len: intnat;
 
-    if !(*s).extern_userprovided_output.is_null() {
-        (*s).extern_ptr
-            .wrapping_offset_from((*s).extern_userprovided_output) as intnat
+    if !s.extern_userprovided_output.is_null() {
+        s.extern_ptr
+            .wrapping_offset_from(s.extern_userprovided_output) as intnat
     } else {
         len = 0;
-        blk = (*s).extern_output_first;
+        blk = s.extern_output_first;
         while !blk.is_null() {
             len += (*blk).end.wrapping_offset_from((*blk).data.as_mut_ptr()) as intnat;
             blk = (*blk).next
@@ -678,22 +651,22 @@ unsafe fn extern_output_length(s: *mut caml_extern_state) -> intnat {
 
 // Exception raising, with cleanup
 
-unsafe fn extern_out_of_memory(s: *mut caml_extern_state) -> ! {
+unsafe fn extern_out_of_memory(s: &mut caml_extern_state) -> ! {
     free_extern_output(s);
     caml_raise_out_of_memory();
 }
 
-unsafe fn extern_invalid_argument(s: *mut caml_extern_state, msg: *const c_char) -> ! {
+unsafe fn extern_invalid_argument(s: &mut caml_extern_state, msg: *const c_char) -> ! {
     free_extern_output(s);
     caml_invalid_argument(msg);
 }
 
-unsafe fn extern_failwith(s: *mut caml_extern_state, msg: *const c_char) -> ! {
+unsafe fn extern_failwith(s: &mut caml_extern_state, msg: *const c_char) -> ! {
     free_extern_output(s);
     caml_failwith(msg);
 }
 
-unsafe fn extern_stack_overflow(s: *mut caml_extern_state) -> ! {
+unsafe fn extern_stack_overflow(s: &mut caml_extern_state) -> ! {
     caml_gc_message(
         0x4,
         b"Stack overflow in marshaling value\n\x00" as *const u8 as *const c_char,
@@ -733,71 +706,71 @@ unsafe fn store64(dst: *mut c_char, n: int64_t) {
 // Write characters, integers, and blocks in the output buffer
 
 #[inline]
-unsafe fn write(mut s: *mut caml_extern_state, c: c_int) {
-    if (*s).extern_ptr >= (*s).extern_limit {
+unsafe fn write(s: &mut caml_extern_state, c: c_int) {
+    if s.extern_ptr >= s.extern_limit {
         grow_extern_output(s, 1);
     }
-    let fresh3 = (*s).extern_ptr;
-    (*s).extern_ptr = (*s).extern_ptr.offset(1);
+    let fresh3 = s.extern_ptr;
+    s.extern_ptr = s.extern_ptr.offset(1);
     *fresh3 = c as c_char;
 }
 
-unsafe fn writeblock(mut s: *mut caml_extern_state, data: *const c_char, len: intnat) {
-    if (*s).extern_ptr.offset(len as isize) > (*s).extern_limit {
+unsafe fn writeblock(s: &mut caml_extern_state, data: *const c_char, len: intnat) {
+    if s.extern_ptr.offset(len as isize) > s.extern_limit {
         grow_extern_output(s, len);
     }
     memcpy(
-        (*s).extern_ptr as *mut c_void,
+        s.extern_ptr as *mut c_void,
         data as *const c_void,
         len as usize,
     );
-    (*s).extern_ptr = (*s).extern_ptr.offset(len as isize);
+    s.extern_ptr = s.extern_ptr.offset(len as isize);
 }
 
 #[inline]
-unsafe fn writeblock_float8(s: *mut caml_extern_state, data: *const c_double, ndoubles: intnat) {
+unsafe fn writeblock_float8(s: &mut caml_extern_state, data: *const c_double, ndoubles: intnat) {
     writeblock(s, data as *const c_char, ndoubles * 8);
 }
 
-unsafe fn writecode8(mut s: *mut caml_extern_state, code: c_int, val: intnat) {
-    if (*s).extern_ptr.offset(2) > (*s).extern_limit {
+unsafe fn writecode8(s: &mut caml_extern_state, code: c_int, val: intnat) {
+    if s.extern_ptr.offset(2) > s.extern_limit {
         grow_extern_output(s, 2);
     }
-    *(*s).extern_ptr.offset(0) = code as c_char;
-    *(*s).extern_ptr.offset(1) = val as c_char;
-    (*s).extern_ptr = (*s).extern_ptr.offset(2);
+    *s.extern_ptr.offset(0) = code as c_char;
+    *s.extern_ptr.offset(1) = val as c_char;
+    s.extern_ptr = s.extern_ptr.offset(2);
 }
 
-unsafe fn writecode16(mut s: *mut caml_extern_state, code: c_int, val: intnat) {
-    if (*s).extern_ptr.offset(3) > (*s).extern_limit {
+unsafe fn writecode16(s: &mut caml_extern_state, code: c_int, val: intnat) {
+    if s.extern_ptr.offset(3) > s.extern_limit {
         grow_extern_output(s, 3);
     }
-    *(*s).extern_ptr.offset(0) = code as c_char;
-    store16((*s).extern_ptr.offset(1), val as c_int);
-    (*s).extern_ptr = (*s).extern_ptr.offset(3);
+    *s.extern_ptr.offset(0) = code as c_char;
+    store16(s.extern_ptr.offset(1), val as c_int);
+    s.extern_ptr = s.extern_ptr.offset(3);
 }
 
-unsafe fn writecode32(mut s: *mut caml_extern_state, code: c_int, val: intnat) {
-    if (*s).extern_ptr.offset(5) > (*s).extern_limit {
+unsafe fn writecode32(s: &mut caml_extern_state, code: c_int, val: intnat) {
+    if s.extern_ptr.offset(5) > s.extern_limit {
         grow_extern_output(s, 5);
     }
-    *(*s).extern_ptr.offset(0) = code as c_char;
-    store32((*s).extern_ptr.offset(1), val);
-    (*s).extern_ptr = (*s).extern_ptr.offset(5);
+    *s.extern_ptr.offset(0) = code as c_char;
+    store32(s.extern_ptr.offset(1), val);
+    s.extern_ptr = s.extern_ptr.offset(5);
 }
 
-unsafe fn writecode64(mut s: *mut caml_extern_state, code: c_int, val: intnat) {
-    if (*s).extern_ptr.offset(9) > (*s).extern_limit {
+unsafe fn writecode64(s: &mut caml_extern_state, code: c_int, val: intnat) {
+    if s.extern_ptr.offset(9) > s.extern_limit {
         grow_extern_output(s, 9);
     }
-    *(*s).extern_ptr.offset(0) = code as c_char;
-    store64((*s).extern_ptr.offset(1), val);
-    (*s).extern_ptr = (*s).extern_ptr.offset(9);
+    *s.extern_ptr.offset(0) = code as c_char;
+    store64(s.extern_ptr.offset(1), val);
+    s.extern_ptr = s.extern_ptr.offset(9);
 }
 
 /// Marshaling integers
 #[inline]
-unsafe fn extern_int(s: *mut caml_extern_state, n: intnat) {
+unsafe fn extern_int(s: &mut caml_extern_state, n: intnat) {
     if (0..0x40).contains(&n) {
         write(s, PREFIX_SMALL_INT + n as c_int);
     } else if (-(1 << 7)..(1 << 7)).contains(&n) {
@@ -805,7 +778,7 @@ unsafe fn extern_int(s: *mut caml_extern_state, n: intnat) {
     } else if (-(1 << 15)..(1 << 15)).contains(&n) {
         writecode16(s, CODE_INT16, n);
     } else if !(-(1 << 30)..(1 << 30)).contains(&n) {
-        if (*s).extern_flags & COMPAT_32 != 0 {
+        if s.extern_flags & COMPAT_32 != 0 {
             extern_failwith(
                 s,
                 b"output_value: integer cannot be read back on 32-bit platform\x00" as *const u8
@@ -820,7 +793,7 @@ unsafe fn extern_int(s: *mut caml_extern_state, n: intnat) {
 
 /// Marshaling references to previously-marshaled blocks
 #[inline]
-unsafe fn extern_shared_reference(s: *mut caml_extern_state, d: uintnat) {
+unsafe fn extern_shared_reference(s: &mut caml_extern_state, d: uintnat) {
     if d < 0x100 {
         writecode8(s, CODE_SHARED8, d as intnat);
     } else if d < 0x10000 {
@@ -834,7 +807,7 @@ unsafe fn extern_shared_reference(s: *mut caml_extern_state, d: uintnat) {
 
 /// Marshaling block headers
 #[inline]
-unsafe fn extern_header(s: *mut caml_extern_state, sz: mlsize_t, tag: tag_t) {
+unsafe fn extern_header(s: &mut caml_extern_state, sz: mlsize_t, tag: tag_t) {
     if tag < 16 && sz < 8 {
         write(
             s,
@@ -844,7 +817,7 @@ unsafe fn extern_header(s: *mut caml_extern_state, sz: mlsize_t, tag: tag_t) {
         );
     } else {
         let hd: header_t = Make_header(sz, tag, NOT_MARKABLE);
-        if sz > 0x3FFFFF && (*s).extern_flags & COMPAT_32 != 0 {
+        if sz > 0x3FFFFF && s.extern_flags & COMPAT_32 != 0 {
             extern_failwith(
                 s,
                 b"output_value: array cannot be read back on 32-bit platform\x00" as *const u8
@@ -860,13 +833,13 @@ unsafe fn extern_header(s: *mut caml_extern_state, sz: mlsize_t, tag: tag_t) {
 }
 
 #[inline]
-unsafe fn extern_string(s: *mut caml_extern_state, v: value, len: mlsize_t) {
+unsafe fn extern_string(s: &mut caml_extern_state, v: value, len: mlsize_t) {
     if len < 0x20 {
         write(s, PREFIX_SMALL_STRING.wrapping_add(len as c_int));
     } else if len < 0x100 {
         writecode8(s, CODE_STRING8, len as intnat);
     } else {
-        if len > 0xFFFFFB && (*s).extern_flags & COMPAT_32 != 0 {
+        if len > 0xFFFFFB && s.extern_flags & COMPAT_32 != 0 {
             extern_failwith(
                 s,
                 b"output_value: string cannot be read back on 32-bit platform\x00" as *const u8
@@ -884,18 +857,18 @@ unsafe fn extern_string(s: *mut caml_extern_state, v: value, len: mlsize_t) {
 
 /// Marshaling FP numbers
 #[inline]
-unsafe fn extern_double(s: *mut caml_extern_state, v: value) {
+unsafe fn extern_double(s: &mut caml_extern_state, v: value) {
     write(s, CODE_DOUBLE_NATIVE);
     writeblock_float8(s, v as *mut c_double, 1 as intnat);
 }
 
 /// Marshaling FP arrays
 #[inline]
-unsafe fn extern_double_array(s: *mut caml_extern_state, v: value, nfloats: mlsize_t) {
+unsafe fn extern_double_array(s: &mut caml_extern_state, v: value, nfloats: mlsize_t) {
     if nfloats < 0x100 {
         writecode8(s, CODE_DOUBLE_ARRAY8_NATIVE, nfloats as intnat);
     } else {
-        if nfloats > 0x1FFFFF && (*s).extern_flags & COMPAT_32 != 0 {
+        if nfloats > 0x1FFFFF && s.extern_flags & COMPAT_32 != 0 {
             extern_failwith(
                 s,
                 b"output_value: float array cannot be read back on 32-bit platform\x00" as *const u8
@@ -914,7 +887,7 @@ unsafe fn extern_double_array(s: *mut caml_extern_state, v: value, nfloats: mlsi
 /// Marshaling custom blocks
 #[inline]
 unsafe fn extern_custom(
-    mut s: *mut caml_extern_state,
+    s: &mut caml_extern_state,
     v: value,
     sz_32: *mut uintnat, // out
     sz_64: *mut uintnat, // out
@@ -936,11 +909,11 @@ unsafe fn extern_custom(
         write(s, CODE_CUSTOM_LEN);
         writeblock(s, ident, strlen(ident).wrapping_add(1) as intnat);
         // Reserve 12 bytes for the lengths (sz_32 and sz_64).
-        if (*s).extern_ptr.offset(12) >= (*s).extern_limit {
+        if s.extern_ptr.offset(12) >= s.extern_limit {
             grow_extern_output(s, 12);
         }
-        size_header = (*s).extern_ptr;
-        (*s).extern_ptr = (*s).extern_ptr.offset(12);
+        size_header = s.extern_ptr;
+        s.extern_ptr = s.extern_ptr.offset(12);
         serialize(v, sz_32, sz_64);
         // Store length before serialized block
         store32(size_header, *sz_32 as intnat);
@@ -962,13 +935,13 @@ unsafe fn extern_custom(
 }
 
 // Marshaling code pointers
-unsafe fn extern_code_pointer(s: *mut caml_extern_state, codeptr: *mut c_char) {
+unsafe fn extern_code_pointer(s: &mut caml_extern_state, codeptr: *mut c_char) {
     let cf: *mut code_fragment;
     let digest: *const c_char;
 
     cf = caml_find_code_fragment_by_pc(codeptr);
     if !cf.is_null() {
-        if (*s).extern_flags & CLOSURES == 0 {
+        if s.extern_flags & CLOSURES == 0 {
             extern_invalid_argument(
                 s,
                 b"output_value: functional value\x00" as *const u8 as *const c_char,
@@ -997,7 +970,7 @@ unsafe fn extern_code_pointer(s: *mut caml_extern_state, codeptr: *mut c_char) {
 
 /// Marshaling the non-environment part of closures
 #[inline]
-unsafe fn extern_closure_up_to_env(s: *mut caml_extern_state, v: value) -> mlsize_t {
+unsafe fn extern_closure_up_to_env(s: &mut caml_extern_state, v: value) -> mlsize_t {
     let startenv: mlsize_t;
     let mut i: mlsize_t = 0;
     let mut info: value;
@@ -1033,7 +1006,7 @@ unsafe fn extern_closure_up_to_env(s: *mut caml_extern_state, v: value) -> mlsiz
 }
 
 /// Marshal the given value in the output buffer
-unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
+unsafe fn extern_rec(s: &mut caml_extern_state, mut v: value) {
     let mut goto_next_item: bool;
 
     let mut sp: *mut extern_item;
@@ -1041,7 +1014,7 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
     let mut pos: uintnat = 0;
 
     extern_init_position_table(s);
-    sp = (*s).extern_stack;
+    sp = s.extern_stack;
 
     loop {
         if Is_long(v) {
@@ -1071,9 +1044,9 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
                 extern_header(s, 0, tag);
             } else {
                 // Check if object already seen
-                if (*s).extern_flags & NO_SHARING == 0 {
+                if s.extern_flags & NO_SHARING == 0 {
                     if extern_lookup_position(s, v, &mut pos, &mut h) != 0 {
-                        extern_shared_reference(s, (*s).obj_counter.wrapping_sub(pos));
+                        extern_shared_reference(s, s.obj_counter.wrapping_sub(pos));
                         goto_next_item = true;
                     } else {
                         goto_next_item = false;
@@ -1087,27 +1060,27 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
                         String_tag => {
                             let len: mlsize_t = caml_string_length(v);
                             extern_string(s, v, len);
-                            (*s).size_32 = (*s).size_32.wrapping_add(
+                            s.size_32 = s.size_32.wrapping_add(
                                 (1 as uintnat).wrapping_add(len.wrapping_add(4).wrapping_div(4)),
                             );
-                            (*s).size_64 = (*s).size_64.wrapping_add(
+                            s.size_64 = s.size_64.wrapping_add(
                                 (1 as uintnat).wrapping_add(len.wrapping_add(8).wrapping_div(8)),
                             );
                             extern_record_location(s, v, h);
                         }
                         Double_tag => {
                             extern_double(s, v);
-                            (*s).size_32 = (*s).size_32.wrapping_add(1 + 2);
-                            (*s).size_64 = (*s).size_64.wrapping_add(1 + 1);
+                            s.size_32 = s.size_32.wrapping_add(1 + 2);
+                            s.size_64 = s.size_64.wrapping_add(1 + 1);
                             extern_record_location(s, v, h);
                         }
                         Double_array_tag => {
                             let nfloats: mlsize_t = Wosize_val(v) / Double_wosize;
                             extern_double_array(s, v, nfloats);
-                            (*s).size_32 = (*s)
+                            s.size_32 = (*s)
                                 .size_32
                                 .wrapping_add((1 as uintnat).wrapping_add(nfloats.wrapping_mul(2)));
-                            (*s).size_64 = (*s)
+                            s.size_64 = (*s)
                                 .size_64
                                 .wrapping_add((1 as uintnat).wrapping_add(nfloats));
                             extern_record_location(s, v, h);
@@ -1128,10 +1101,10 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
                             let mut sz_32: uintnat = 0;
                             let mut sz_64: uintnat = 0;
                             extern_custom(s, v, &mut sz_32, &mut sz_64);
-                            (*s).size_32 = (*s).size_32.wrapping_add(
+                            s.size_32 = s.size_32.wrapping_add(
                                 (2 as uintnat).wrapping_add(sz_32.wrapping_add(3) >> 2),
                             ); // header + ops + data
-                            (*s).size_64 = (*s).size_64.wrapping_add(
+                            s.size_64 = s.size_64.wrapping_add(
                                 (2 as uintnat).wrapping_add(sz_64.wrapping_add(7) >> 3),
                             );
                             extern_record_location(s, v, h);
@@ -1139,17 +1112,15 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
                         Closure_tag => {
                             let i: mlsize_t;
                             extern_header(s, sz, tag);
-                            (*s).size_32 =
-                                (*s).size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
-                            (*s).size_64 =
-                                (*s).size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
+                            s.size_32 = s.size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
+                            s.size_64 = s.size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
                             extern_record_location(s, v, h);
                             i = extern_closure_up_to_env(s, v);
                             if i < sz {
                                 // Remember that we still have to serialize fields i + 1 ... sz - 1
                                 if i < sz.wrapping_sub(1) {
                                     sp = sp.offset(1);
-                                    if sp >= (*s).extern_stack_limit {
+                                    if sp >= s.extern_stack_limit {
                                         sp = extern_resize_stack(s, sp)
                                     }
                                     (*sp).v = Field_ptr_mut(v, i.wrapping_add(1) as usize);
@@ -1162,15 +1133,13 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
                         }
                         _ => {
                             extern_header(s, sz, tag);
-                            (*s).size_32 =
-                                (*s).size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
-                            (*s).size_64 =
-                                (*s).size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
+                            s.size_32 = s.size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
+                            s.size_64 = s.size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
                             extern_record_location(s, v, h);
                             // Remember that we still have to serialize fields 1 ... sz - 1
                             if sz > 1 {
                                 sp = sp.offset(1);
-                                if sp >= (*s).extern_stack_limit {
+                                if sp >= s.extern_stack_limit {
                                     sp = extern_resize_stack(s, sp)
                                 }
                                 (*sp).v = Field_ptr_mut(v, 1);
@@ -1187,7 +1156,7 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
         // C goto label `next_item:` here
 
         // Pop one more item to marshal, if any
-        if sp == (*s).extern_stack {
+        if sp == s.extern_stack {
             // We are done.   Cleanup the stack and leave the function
             extern_free_stack(s);
             extern_free_position_table(s);
@@ -1207,7 +1176,7 @@ unsafe fn extern_rec(mut s: *mut caml_extern_state, mut v: value) {
 static mut EXTERN_FLAG_VALUES: [c_int; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
 
 unsafe fn extern_value(
-    mut s: *mut caml_extern_state,
+    s: &mut caml_extern_state,
     v: value,
     flags: value,
     header: *mut c_char,    // out
@@ -1215,21 +1184,21 @@ unsafe fn extern_value(
 ) -> intnat {
     let res_len: intnat;
     // Parse flag list
-    (*s).extern_flags = caml_convert_flag_list(flags, EXTERN_FLAG_VALUES.as_ptr());
+    s.extern_flags = caml_convert_flag_list(flags, EXTERN_FLAG_VALUES.as_ptr());
     // Initializations
-    (*s).obj_counter = 0;
-    (*s).size_32 = 0;
-    (*s).size_64 = 0;
+    s.obj_counter = 0;
+    s.size_32 = 0;
+    s.size_64 = 0;
     // Marshal the object
     extern_rec(s, v);
     // Record end of output
     close_extern_output(s);
     // Write the header
     res_len = extern_output_length(s);
-    if res_len >= (1 << 32) || (*s).size_32 >= (1 << 32) || (*s).size_64 >= (1 << 32) {
+    if res_len >= (1 << 32) || s.size_32 >= (1 << 32) || s.size_64 >= (1 << 32) {
         // The object is too big for the small header format.
         // Fail if we are in compat32 mode, or use big header.
-        if (*s).extern_flags & COMPAT_32 != 0 {
+        if s.extern_flags & COMPAT_32 != 0 {
             free_extern_output(s);
             caml_failwith(
                 b"output_value: object too big to be read back on 32-bit platform\x00" as *const u8
@@ -1239,17 +1208,17 @@ unsafe fn extern_value(
         store32(header, MAGIC_NUMBER_BIG as intnat);
         store32(header.offset(4), 0);
         store64(header.offset(8), res_len);
-        store64(header.offset(16), (*s).obj_counter as int64_t);
-        store64(header.offset(24), (*s).size_64 as int64_t);
+        store64(header.offset(16), s.obj_counter as int64_t);
+        store64(header.offset(24), s.size_64 as int64_t);
         *header_len = 32;
         return res_len;
     }
     // Use the small header format
     store32(header, MAGIC_NUMBER_SMALL as intnat);
     store32(header.offset(4), res_len);
-    store32(header.offset(8), (*s).obj_counter as intnat);
-    store32(header.offset(12), (*s).size_32 as intnat);
-    store32(header.offset(16), (*s).size_64 as intnat);
+    store32(header.offset(8), s.obj_counter as intnat);
+    store32(header.offset(12), s.size_32 as intnat);
+    store32(header.offset(16), s.size_64 as intnat);
     *header_len = 20;
     res_len
 }
@@ -1259,10 +1228,11 @@ unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> st
     let mut header_len: c_int = 0;
     let mut blk: *mut output_block;
     let mut nextblk: *mut output_block;
-    let s: *mut caml_extern_state = get_extern_state();
+    let s: &mut caml_extern_state = new_extern_state().as_mut().expect("nonnull");
     init_extern_output(s);
     extern_value(s, v, flags, header.as_mut_ptr(), &mut header_len);
-    blk = (*s).extern_output_first;
+    blk = s.extern_output_first;
+    free_extern_state(s);
     w.write_all(std::slice::from_raw_parts(
         header.as_mut_ptr() as *mut u8,
         header_len as usize,

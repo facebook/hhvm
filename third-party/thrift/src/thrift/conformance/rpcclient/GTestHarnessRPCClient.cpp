@@ -182,8 +182,14 @@ class ConformanceVerificationServer
 class RPCClientConformanceTest : public testing::Test {
  public:
   RPCClientConformanceTest(
-      std::string_view clientCmd, const TestCase* testCase, bool conforming)
-      : testCase_(*testCase),
+      std::string_view clientCmd,
+      const TestSuite* suite,
+      const conformance::Test* test,
+      const TestCase* testCase,
+      bool conforming)
+      : suite_(*suite),
+        test_(*test),
+        testCase_(*testCase),
         conforming_(conforming),
         handler_(std::make_shared<ConformanceVerificationServer>(
             *testCase_.rpc_ref())),
@@ -203,38 +209,20 @@ class RPCClientConformanceTest : public testing::Test {
 
  protected:
   void TestBody() override {
-    // Wait for client to fetch test case
-    bool getTestReceived =
-        handler_->getTestReceived().wait(std::chrono::seconds(10));
-
-    // End test if client was unable to fetch test case
-    if (!getTestReceived) {
-      EXPECT_FALSE(conforming_);
-      return;
+    testing::AssertionResult conforming = runTest();
+    if (conforming_) {
+      EXPECT_TRUE(conforming) << "For more detail see:"
+                              << std::endl
+                              // Most specific to least specific.
+                              << genTagLinks(testCase_) << genTagLinks(test_)
+                              << genTagLinks(suite_);
+    } else {
+      EXPECT_FALSE(conforming)
+          << "If intentional, please remove the associated entry from:"
+          << std::endl
+          // TODO: create separate nonconforming.txt file for client rpc tests
+          << "    thrift/conformance/data/nonconforming.txt" << std::endl;
     }
-
-    // Wait for result from client
-    folly::Try<ClientTestResult> actualClientResult =
-        handler_->clientResult().within(std::chrono::seconds(10)).getTry();
-
-    // End test if result was not received
-    if (actualClientResult.hasException()) {
-      EXPECT_FALSE(conforming_);
-      return;
-    }
-
-    auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
-    if (!equal(*actualClientResult, expectedClientResult)) {
-      EXPECT_FALSE(conforming_);
-    }
-
-    auto& actualServerResult = handler_->serverResult();
-    auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
-    if (actualServerResult != expectedServerResult) {
-      EXPECT_FALSE(conforming_);
-    }
-
-    EXPECT_TRUE(conforming_);
   }
 
   void TearDown() override {
@@ -244,6 +232,41 @@ class RPCClientConformanceTest : public testing::Test {
   }
 
  private:
+  testing::AssertionResult runTest() {
+    // Wait for client to fetch test case
+    bool getTestReceived =
+        handler_->getTestReceived().wait(std::chrono::seconds(10));
+
+    // End test if client was unable to fetch test case
+    if (!getTestReceived) {
+      return testing::AssertionFailure();
+    }
+
+    // Wait for result from client
+    folly::Try<ClientTestResult> actualClientResult =
+        handler_->clientResult().within(std::chrono::seconds(10)).getTry();
+
+    // End test if result was not received
+    if (actualClientResult.hasException()) {
+      return testing::AssertionFailure();
+    }
+
+    auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
+    if (!equal(*actualClientResult, expectedClientResult)) {
+      return testing::AssertionFailure();
+    }
+
+    auto& actualServerResult = handler_->serverResult();
+    auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
+    if (actualServerResult != expectedServerResult) {
+      return testing::AssertionFailure();
+    }
+
+    return testing::AssertionSuccess();
+  }
+
+  const TestSuite& suite_;
+  const conformance::Test& test_;
   const TestCase& testCase_;
   bool conforming_;
   std::shared_ptr<ConformanceVerificationServer> handler_;
@@ -271,9 +294,9 @@ void registerTests(
           conforming ? nullptr : "nonconforming",
           file,
           line,
-          [&testCase, clientCmd, conforming]() {
+          [&test, &testCase, suite, clientCmd, conforming]() {
             return new RPCClientConformanceTest(
-                clientCmd, &testCase, conforming);
+                clientCmd, suite, &test, &testCase, conforming);
           });
     }
   }

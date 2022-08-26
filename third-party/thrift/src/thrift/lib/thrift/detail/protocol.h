@@ -77,7 +77,7 @@ class ObjectWrapper : public Base {
   }
 
   bool contains(FieldId i) const {
-    return members()->contains(folly::to_underlying(i));
+    return members()->find(folly::to_underlying(i)) != members()->end();
   }
 
   std::size_t erase(FieldId i) {

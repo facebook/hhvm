@@ -25,7 +25,8 @@
 namespace apache::thrift::test {
 namespace {
 
-void testFieldRef(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testFieldRef(Obj obj, Ord ordinal) {
   auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
   field = 2;
   EXPECT_EQ(*op::get_value_or_null(field), 2);
@@ -35,19 +36,22 @@ void testFieldRef(auto obj, auto ordinal) {
   EXPECT_EQ(*op::get_value_or_null(fieldConst), 2);
 }
 
-void testGetValueNotOptional(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testGetValueNotOptional(Obj obj, Ord ordinal) {
   auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
   EXPECT_EQ(*op::get_value_or_null(field), 0);
   testFieldRef(obj, ordinal);
 }
 
-void testGetValueOptional(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testGetValueOptional(Obj obj, Ord ordinal) {
   auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
   EXPECT_EQ(op::get_value_or_null(field), nullptr);
   testFieldRef(obj, ordinal);
 }
 
-void testGetValueSmartPointer(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testGetValueSmartPointer(Obj obj, Ord ordinal) {
   auto& field = op::get<decltype(obj), decltype(ordinal)>(obj);
   EXPECT_EQ(op::get_value_or_null(field), nullptr);
   if constexpr (detail::is_unique_ptr_v<

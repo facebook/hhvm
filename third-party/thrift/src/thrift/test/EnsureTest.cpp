@@ -23,7 +23,8 @@
 namespace apache::thrift::test {
 namespace {
 
-void testEnsure(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testEnsure(Obj obj, Ord ordinal) {
   using Struct = decltype(obj);
   using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
   auto field = op::get<Struct, decltype(ordinal)>(obj);
@@ -34,7 +35,8 @@ void testEnsure(auto obj, auto ordinal) {
   EXPECT_EQ(field, 2);
 }
 
-void testEnsurePtr(auto obj, auto ordinal) {
+template <typename Obj, typename Ord>
+void testEnsurePtr(Obj obj, Ord ordinal) {
   using Struct = decltype(obj);
   using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
   auto& field = op::get<Struct, decltype(ordinal)>(obj);

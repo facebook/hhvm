@@ -93,15 +93,6 @@ class MaskRef {
   void throwIfNotMapMask() const;
 };
 
-// Throws an error if a thrift type is not compatible with the mask.
-// TODO(aoka): Check compatibility in ensure, clear, and copy methods.
-template <typename T>
-void errorIfNotCompatible(const Mask& mask) {
-  if (!is_compatible_with<T>(mask)) {
-    throw std::runtime_error("The mask and struct are incompatible.");
-  }
-}
-
 // Validates the fields in the Struct with the MaskRef.
 template <typename Struct>
 bool validate_fields(MaskRef ref) {
@@ -116,7 +107,7 @@ bool validate_fields(MaskRef ref) {
       : ref.mask.excludes_ref().value();
   for (auto& [id, _] : map) {
     // Mask contains a field not in the struct.
-    if (!ids.contains(FieldId{id})) {
+    if (ids.find(FieldId{id}) == ids.end()) {
       return false;
     }
   }
@@ -142,6 +133,27 @@ bool validate_fields(MaskRef ref) {
     isValid = false;
   });
   return isValid;
+}
+
+template <typename T>
+bool is_compatible_with(const Mask& mask) {
+  MaskRef ref{mask, false};
+  if (ref.isAllMask() || ref.isNoneMask()) {
+    return true;
+  }
+  if constexpr (is_thrift_struct_v<T>) {
+    return detail::validate_fields<T>(ref);
+  }
+  return false;
+}
+
+// Throws an error if a thrift struct type is not compatible with the mask.
+// TODO(aoka): Check compatibility in ensure, clear, and copy methods.
+template <typename T>
+void errorIfNotCompatible(const Mask& mask) {
+  if (!detail::is_compatible_with<T>(mask)) {
+    throw std::runtime_error("The mask and struct are incompatible.");
+  }
 }
 
 // Ensures the masked fields in the given thrift struct.

@@ -50,14 +50,7 @@ void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 template <typename T>
 bool is_compatible_with(const Mask& mask) {
   detail::throwIfContainsMapMask(mask);
-  detail::MaskRef ref{mask, false};
-  if (ref.isAllMask() || ref.isNoneMask()) {
-    return true;
-  }
-  if constexpr (is_thrift_struct_v<T>) {
-    return detail::validate_fields<T>(ref);
-  }
-  return false;
+  return detail::is_compatible_with<T>(mask);
 }
 
 // Ensures that the masked fields have value in the thrift struct.

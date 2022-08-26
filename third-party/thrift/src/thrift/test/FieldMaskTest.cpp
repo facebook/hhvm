@@ -437,12 +437,12 @@ TEST(FieldMaskTest, SchemalessClearMap) {
 
   ASSERT_TRUE(barObject.contains(FieldId{1}));
   std::map<Value, Value>& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
-  ASSERT_TRUE(m1.contains(asValueStruct<type::i64_t>(1)));
-  EXPECT_FALSE(m1.contains(asValueStruct<type::i64_t>(2)));
+  ASSERT_NE(m1.find(asValueStruct<type::i64_t>(1)), m1.end());
+  EXPECT_EQ(m1.find(asValueStruct<type::i64_t>(2)), m1.end());
   std::map<Value, Value>& m2 =
       m1[asValueStruct<type::i64_t>(1)].mapValue_ref().value();
   EXPECT_EQ(m2[asValueStruct<type::i16_t>(1)].stringValue_ref().value(), "1");
-  EXPECT_FALSE(m2.contains(asValueStruct<type::i16_t>(2)));
+  EXPECT_EQ(m2.find(asValueStruct<type::i16_t>(2)), m2.end());
   EXPECT_FALSE(barObject.contains(FieldId{2}));
   ASSERT_TRUE(barObject.contains(FieldId{3}));
   EXPECT_EQ(barObject.at(FieldId{3}).as_i32(), 5);
@@ -2205,12 +2205,10 @@ TEST(FieldMaskTest, Compare) {
     modified.field_4() = 6;
     // obj[1][1] and obj[2] are different
     Mask mask = protocol::compare(original, modified);
-    EXPECT_EQ(mask.includes_ref().value()[2], allMask());
-    ASSERT_TRUE(mask.includes_ref().value().contains(1));
-    EXPECT_EQ(
-        mask.includes_ref().value()[1].includes_ref().value()[1], allMask());
-    EXPECT_FALSE(
-        mask.includes_ref().value()[1].includes_ref().value().contains(2));
+    Mask expected;
+    expected.includes_ref().emplace()[2] = allMask();
+    expected.includes_ref().value()[1].includes_ref().emplace()[1] = allMask();
+    EXPECT_EQ(mask, expected);
     EXPECT_EQ(protocol::compare(modified, original), mask); // commutative
   }
   {
@@ -2264,13 +2262,11 @@ TEST(FieldMaskTest, Compare) {
     // mask = {1: includes{1: allMask()},
     //         2: allMask()}
     Mask mask = protocol::compare(src, dst);
-    ASSERT_TRUE(mask.includes_ref().value().contains(1));
-    EXPECT_EQ(
-        mask.includes_ref().value()[1].includes_ref().value()[1], allMask());
-    EXPECT_FALSE(
-        mask.includes_ref().value()[1].includes_ref().value().contains(2));
-    EXPECT_EQ(mask.includes_ref().value()[2], allMask());
-    EXPECT_FALSE(mask.includes_ref().value().contains(3));
+    Mask expected;
+    auto& includes = expected.includes_ref().emplace();
+    includes[1].includes_ref().emplace()[1] = allMask();
+    includes[2] = allMask();
+    EXPECT_EQ(mask, expected);
     EXPECT_EQ(protocol::compare(dst, src), mask); // commutative
   }
 }

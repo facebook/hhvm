@@ -33,8 +33,8 @@ void assertSameType() {
       "src and dst have different types.");
 }
 
-template <typename Src, typename Dst>
-void copy_field_ref(auto src_ref, auto dst_ref) {
+template <typename Src, typename Dst, typename SrcRef, typename DstRef>
+void copy_field_ref(SrcRef src_ref, DstRef dst_ref) {
   assertSameType<Src, Dst>();
   dst_ref.copy_from(src_ref);
 }

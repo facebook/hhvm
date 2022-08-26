@@ -80,7 +80,7 @@ FieldIdToMask intersectMask(
     const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
   FieldIdToMask map;
   for (auto& [fieldId, lhsMask] : lhs) {
-    if (!rhs.contains(fieldId)) { // Only lhs contains the field.
+    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
       continue;
     }
     // Both maps have the field, so the mask is their intersection.
@@ -91,7 +91,7 @@ FieldIdToMask intersectMask(
 FieldIdToMask unionMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
   FieldIdToMask map;
   for (auto& [fieldId, lhsMask] : lhs) {
-    if (!rhs.contains(fieldId)) { // Only lhs contains the field.
+    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
       insertIfNotNoneMask(map, fieldId, lhsMask);
       continue;
     }
@@ -99,7 +99,7 @@ FieldIdToMask unionMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
     insertIfNotNoneMask(map, fieldId, lhsMask | rhs.at(fieldId));
   }
   for (auto& [fieldId, rhsMask] : rhs) {
-    if (!lhs.contains(fieldId)) { // Only rhs contains the field.
+    if (lhs.find(fieldId) == lhs.end()) { // Only rhs contains the field.
       insertIfNotNoneMask(map, fieldId, rhsMask);
     }
   }
@@ -108,7 +108,7 @@ FieldIdToMask unionMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
 FieldIdToMask subtractMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
   FieldIdToMask map;
   for (auto& [fieldId, lhsMask] : lhs) {
-    if (!rhs.contains(fieldId)) { // Only lhs contains the field.
+    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
       insertIfNotNoneMask(map, fieldId, lhsMask);
       continue;
     }

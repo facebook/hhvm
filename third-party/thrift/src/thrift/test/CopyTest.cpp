@@ -26,27 +26,31 @@ namespace apache::thrift::test {
 // Assumes src field has a value.
 // srcFieldRef has field_ref<T&> type while src can be other
 // types like field_ref<const T&&>.
-void copyFieldRef(auto srcFieldRef, auto src, auto dst) {
+template <typename SrcRef, typename Src, typename Dst>
+void copyFieldRef(SrcRef srcFieldRef, Src src, Dst dst) {
   srcFieldRef = can_throw(*srcFieldRef) + 1;
   op::copy(src, dst);
   EXPECT_EQ(*dst, *srcFieldRef);
 }
 // srcPtr has smart_ptr<T>& type while src can be other
 // types like const smart_ptr<T>&&.
-void copyUniquePointer(auto& srcPtr, auto&& src, auto&& dst) {
+template <typename SrcPtr, typename Src, typename Dst>
+void copyUniquePointer(SrcPtr& srcPtr, Src&& src, Dst&& dst) {
   assert(srcPtr != nullptr);
   *srcPtr = *srcPtr + 1;
   op::copy(std::forward<decltype(src)>(src), std::forward<decltype(dst)>(dst));
   EXPECT_EQ(*dst, *srcPtr);
 }
 
-void copySharedPointer(auto&& src, auto&& dst) {
+template <typename Src, typename Dst>
+void copySharedPointer(Src&& src, Dst&& dst) {
   dst = nullptr;
   op::copy(std::forward<decltype(src)>(src), std::forward<decltype(dst)>(dst));
   EXPECT_EQ(src, dst);
 }
 
-void testFieldRef(auto src, auto dst, auto ordinal) {
+template <typename Src, typename Dst, typename Ord>
+void testFieldRef(Src src, Dst dst, Ord ordinal) {
   using Struct = decltype(src);
   auto srcField = op::get<Struct, decltype(ordinal)>(src);
   auto dstField = op::get<Struct, decltype(ordinal)>(dst);
@@ -68,7 +72,8 @@ void testFieldRef(auto src, auto dst, auto ordinal) {
   copyFieldRef(srcField, srcRvalueConstField, dstField);
 }
 
-void testCopyNotOptional(auto src, auto dst, auto ordinal) {
+template <typename Src, typename Dst, typename Ord>
+void testCopyNotOptional(Src src, Dst dst, Ord ordinal) {
   using Struct = decltype(src);
   auto srcField = op::get<Struct, decltype(ordinal)>(src);
   auto dstField = op::get<Struct, decltype(ordinal)>(dst);
@@ -77,7 +82,8 @@ void testCopyNotOptional(auto src, auto dst, auto ordinal) {
   testFieldRef(src, dst, ordinal);
 }
 
-void testCopyOptional(auto src, auto dst, auto ordinal) {
+template <typename Src, typename Dst, typename Ord>
+void testCopyOptional(Src src, Dst dst, Ord ordinal) {
   using Struct = decltype(src);
   auto srcField = op::get<Struct, decltype(ordinal)>(src);
   auto dstField = op::get<Struct, decltype(ordinal)>(dst);
@@ -92,7 +98,8 @@ void testCopyOptional(auto src, auto dst, auto ordinal) {
   testFieldRef(src, dst, ordinal);
 }
 
-void testCopyUniquePointer(auto src, auto dst, auto ordinal) {
+template <typename Src, typename Dst, typename Ord>
+void testCopyUniquePointer(Src src, Dst dst, Ord ordinal) {
   using Struct = decltype(src);
   using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
   auto& srcField = op::get<Struct, decltype(ordinal)>(src);
@@ -126,7 +133,8 @@ void testCopyUniquePointer(auto src, auto dst, auto ordinal) {
       dstField);
 }
 
-void testCopySharedPointer(auto src, auto dst, auto ordinal) {
+template <typename Src, typename Dst, typename Ord>
+void testCopySharedPointer(Src src, Dst dst, Ord ordinal) {
   using Struct = decltype(src);
   using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
   auto& srcField = op::get<Struct, decltype(ordinal)>(src);

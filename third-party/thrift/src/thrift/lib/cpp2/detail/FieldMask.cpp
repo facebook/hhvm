@@ -25,15 +25,16 @@ namespace apache::thrift::protocol::detail {
 // returns noneMask.
 const Mask& getMask(const FieldIdToMask& map, FieldId id) {
   auto fieldId = folly::to_underlying(id);
-  return map.contains(fieldId) ? map.at(fieldId)
-                               : field_mask_constants::noneMask();
+  return map.find(fieldId) != map.end() ? map.at(fieldId)
+                                        : field_mask_constants::noneMask();
 }
 
 // Gets the mask of the given map id if it exists in the map, otherwise,
 // returns noneMask.
 const Mask& getMask(const MapIdToMask& map, MapId id) {
   auto mapId = folly::to_underlying(id);
-  return map.contains(mapId) ? map.at(mapId) : field_mask_constants::noneMask();
+  return map.find(mapId) != map.end() ? map.at(mapId)
+                                      : field_mask_constants::noneMask();
 }
 
 void MaskRef::throwIfNotFieldMask() const {
@@ -121,7 +122,8 @@ void clear(MaskRef ref, Value& value) {
   throw std::runtime_error("The mask and object are incompatible.");
 }
 
-void clear_impl(MaskRef ref, auto& obj, auto id, Value& value) {
+template <typename T, typename Id>
+void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
   // Id doesn't exist in mask, skip.
   if (ref.isNoneMask()) {
     return;
@@ -163,30 +165,43 @@ void copy(MaskRef ref, const Value& src, Value& dst) {
   throw std::runtime_error("The mask and object are incompatible.");
 }
 
-void copy_impl(MaskRef ref, auto& src, auto& dst, auto id) {
+template <typename T, typename Id>
+bool containsId(const T& t, Id id) {
+  if constexpr (std::is_same_v<T, Object>) {
+    return t.contains(id);
+  } else {
+    return t.find(id) != t.end();
+  }
+}
+
+template <typename T, typename Id>
+void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
   // Id doesn't exist in field mask, skip.
   if (ref.isNoneMask()) {
     return;
   }
+  bool srcContainsId = containsId(src, id);
+  bool dstContainsId = containsId(dst, id);
+
   // Id that we want to copy.
   if (ref.isAllMask()) {
-    if (src.contains(id)) {
+    if (srcContainsId) {
       dst[id] = src.at(id);
     } else {
       dst.erase(id);
     }
     return;
   }
-  if (!src.contains(id) && !dst.contains(id)) { // skip
+  if (!srcContainsId && !dstContainsId) { // skip
     return;
   }
   // Field doesn't exist in src, so just clear dst with the mask.
-  if (!src.contains(id)) {
+  if (!srcContainsId) {
     clear(ref, dst.at(id));
     return;
   }
   // Field exists in both src and dst, so call copy recursively.
-  if (dst.contains(id)) {
+  if (dstContainsId) {
     copy(ref, src.at(id), dst.at(id));
     return;
   }

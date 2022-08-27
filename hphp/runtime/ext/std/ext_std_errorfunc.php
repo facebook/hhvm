@@ -246,7 +246,7 @@ function hphp_clear_unflushed(): void;
  *    context) of the callsite that invoked the current function or method.
  */
 <<__Native>>
-function hphp_debug_caller_info(): darray<string, mixed>;
+function hphp_debug_caller_info()[leak_safe]: darray<string, mixed>;
 
 <<__Native("NoInjection")>>
 function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;

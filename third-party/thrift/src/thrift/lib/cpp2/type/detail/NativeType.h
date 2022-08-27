@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <set>
@@ -72,6 +73,10 @@ struct ConcreteType {
   using native_type = NativeType;
 };
 struct AbstractType {};
+template <typename Tag>
+struct StandardTag {
+  using type = Tag;
+};
 
 template <template <typename...> class T, typename ValTag>
 using parameterized_type = folly::conditional_t<
@@ -89,6 +94,11 @@ using parameterized_kv_type = folly::conditional_t<
 
 template <>
 struct NativeTypes<void_t> : ConcreteType<void> {};
+template <>
+struct InferTag<void> : StandardTag<void_t> {};
+// TODO: Consider also std::null_opt
+template <>
+struct InferTag<std::nullptr_t> : StandardTag<void_t> {};
 
 // The native types for all primitive types.
 template <>

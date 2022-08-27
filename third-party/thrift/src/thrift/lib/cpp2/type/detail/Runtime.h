@@ -169,26 +169,6 @@ class RuntimeBase {
     return type_->compare(ptr_, rhs);
   }
 
- private:
-  friend bool operator==(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator!=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator<(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const RuntimeBase& lhs, const RuntimeBase& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-
  protected:
   RuntimeType type_;
   void* ptr_ = nullptr;
@@ -323,8 +303,8 @@ struct BaseErasedOp {
 // TODO(afuller): Consider adding asMap(), asList(), etc, to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
-template <typename ConstT, typename MutT>
-class RuntimeAccessBase : public RuntimeBase {
+template <typename ConstT, typename MutT, typename Derived>
+class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
   using Base = RuntimeBase;
 
  public:
@@ -389,11 +369,31 @@ class RuntimeAccessBase : public RuntimeBase {
   static ConstT asRef(const std::string& name) {
     return ConstT::template to<type::string_t>(name);
   }
+
+ private:
+  friend bool operator==(const Derived& lhs, const Derived& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator!=(const Derived& lhs, const Derived& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator<(const Derived& lhs, const Derived& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const Derived& lhs, const Derived& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const Derived& lhs, const Derived& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const Derived& lhs, const Derived& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
 };
 
 template <typename Derived, typename ConstT = Derived>
-class BaseRef : public RuntimeAccessBase<ConstT, Derived> {
-  using Base = RuntimeAccessBase<ConstT, Derived>;
+class BaseRef : public RuntimeAccessBase<ConstT, Derived, Derived> {
+  using Base = RuntimeAccessBase<ConstT, Derived, Derived>;
 
  public:
   using Base::Base;

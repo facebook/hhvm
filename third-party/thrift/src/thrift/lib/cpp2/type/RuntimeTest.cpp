@@ -160,7 +160,7 @@ TEST(RuntimeRefTest, Map) {
   EXPECT_EQ(ref.size(), 1);
   EXPECT_THROW(ref.put(FieldId{1}, 2), std::logic_error);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
-  EXPECT_EQ(ref["one"], Ref::to<i32_t>(2));
+  EXPECT_EQ(ref["one"], 2);
   EXPECT_THROW(ref["two"], std::out_of_range);
 
   ref.clear();
@@ -256,7 +256,7 @@ TEST(RuntimeValueTest, CppType_Map) {
   map.put("foo", 2);
   Ref value = map["foo"];
   EXPECT_EQ(value.as<i32_t>(), 2);
-  EXPECT_GT(value, Ref::to<i32_t>(1));
+  EXPECT_GT(value, 1);
   EXPECT_EQ(value, value);
 
   auto otherMap = Value::create<Tag>();

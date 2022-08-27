@@ -27,6 +27,7 @@
 
 # lets try in the obvious places first
 find_path(TEST_TBB_INCLUDE_DIR
+    NAMES
     tbb/task_scheduler_init.h
     tbb/tbb.h
 )
@@ -152,6 +153,7 @@ else (TBB_OBVIOUS_PLACE)
   #-- Look for include directory and set ${TBB_INCLUDE_DIR}
   set (TBB_INC_SEARCH_DIR ${_TBB_INSTALL_DIR}/include)
   find_path(TBB_INCLUDE_DIR
+    NAMES
     tbb/task_scheduler_init.h
     tbb/tbb.h
     PATHS ${TBB_INC_SEARCH_DIR}

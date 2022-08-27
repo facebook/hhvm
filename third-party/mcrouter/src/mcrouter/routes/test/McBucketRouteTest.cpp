@@ -13,10 +13,9 @@
 
 #include <vector>
 
-#include <gtest/gtest.h>
-
 #include <folly/Range.h>
 #include <folly/dynamic.h>
+#include <gtest/gtest.h>
 #include "folly/fibers/FiberManagerMap.h"
 #include "folly/io/async/EventBase.h"
 #include "folly/json.h"
@@ -125,4 +124,40 @@ TEST(McBucketRouteTest, bucketIdShouldNotPropagateInTraverse) {
   EXPECT_TRUE(srHandleVec[0]->sawBucketIds.empty());
 }
 
+TEST(McBucketRouteTest, checkParams) {
+  std::vector<std::shared_ptr<TestHandle>> srHandleVec{
+      std::make_shared<TestHandle>(
+          GetRouteTestData(carbon::Result::FOUND, "a")),
+  };
+  auto mockSrHandle = get_route_handles(srHandleVec)[0];
+  std::string_view total = "100";
+  std::string_view until = "29";
+  std::string_view keyspace = "testReg:testPool";
+
+  std::string kMcBucketRouteConfig = folly::sformat(
+      R"(
+  {{
+    "bucketize": true,
+    "total_buckets": {},
+    "bucketize_until": {},
+    "bucketization_keyspace": "{}"
+  }}
+  )",
+      total,
+      until,
+      keyspace);
+
+  auto rh =
+      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  mockFiberContext();
+  auto name = rh->routeName();
+  std::vector<std::string> params;
+  facebook::strings::split('|', name, params, true);
+  EXPECT_TRUE(params.size() == 5);
+  EXPECT_EQ(params[0], "bucketize");
+  EXPECT_EQ(params[1], folly::to<std::string>("total_buckets=", total));
+  EXPECT_EQ(params[2], folly::to<std::string>("bucketize_until=", until));
+  EXPECT_EQ(params[3], folly::to<std::string>("salt="));
+  EXPECT_EQ(params[4], folly::to<std::string>("keyspace=", keyspace));
+}
 } // namespace facebook::memcache::mcrouter

@@ -47,6 +47,7 @@ std::shared_ptr<MemcacheRouteHandleIf> makeMcBucketRoute(
   checkLogic(
       bucketizationKeyspacePtr && bucketizationKeyspacePtr->isString(),
       "McBucketRoute: must have bucketization_keyspace");
+  settings.bucketizationKeyspace = bucketizationKeyspacePtr->getString();
 
   if (auto jSalt = json.get_ptr("salt")) {
     checkLogic(jSalt->isString(), "McBucketRoute: salt is not a string");

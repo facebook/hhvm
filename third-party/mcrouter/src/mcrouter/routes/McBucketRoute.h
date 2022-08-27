@@ -23,6 +23,7 @@ struct McBucketRouteSettings {
   size_t totalBuckets;
   size_t bucketizeUntil;
   std::string salt;
+  std::string bucketizationKeyspace;
 };
 
 /**
@@ -52,14 +53,16 @@ class McBucketRoute {
         totalBuckets_(settings.totalBuckets),
         bucketizeUntil_(settings.bucketizeUntil),
         salt_(settings.salt),
-        ch3_(totalBuckets_) {}
+        ch3_(totalBuckets_),
+        bucketizationKeyspace_(settings.bucketizationKeyspace) {}
 
   std::string routeName() const {
     return fmt::format(
-        "bucketize|total_buckets={}|bucketize_until={}|salt={}",
+        "bucketize|total_buckets={}|bucketize_until={}|salt={}|keyspace={}",
         totalBuckets_,
         bucketizeUntil_,
-        salt_);
+        salt_,
+        bucketizationKeyspace_);
   }
 
   template <class Request>
@@ -101,6 +104,7 @@ class McBucketRoute {
   const size_t bucketizeUntil_{0};
   const std::string salt_;
   const Ch3HashFunc ch3_;
+  const std::string bucketizationKeyspace_;
 };
 
 std::shared_ptr<MemcacheRouteHandleIf> makeMcBucketRoute(

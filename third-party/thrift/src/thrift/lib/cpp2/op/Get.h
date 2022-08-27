@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp2/op/detail/Get.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
-#include <thrift/lib/cpp2/type/TagUtil.h>
 
 namespace apache {
 namespace thrift {

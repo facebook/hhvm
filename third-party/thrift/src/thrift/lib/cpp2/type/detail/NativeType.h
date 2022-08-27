@@ -24,6 +24,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
@@ -171,6 +172,18 @@ struct native_types<field<adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>>
               FieldId,
               typename native_types<Tag>::native_type,
               Struct>> {};
+
+template <typename U, typename T = folly::remove_cvref_t<U>>
+struct StructuredTag {
+  static_assert(is_thrift_class_v<T>, "");
+  using type = folly::conditional_t<
+      is_thrift_union_v<T>,
+      type::union_t<T>,
+      folly::conditional_t<
+          is_thrift_exception_v<T>,
+          type::exception_t<T>,
+          type::struct_t<T>>>;
+};
 
 } // namespace detail
 } // namespace type

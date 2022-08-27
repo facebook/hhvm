@@ -36,9 +36,9 @@ using standard_type = typename detail::native_types<Tag>::standard_type;
 template <typename Tag>
 using native_type = typename detail::native_types<Tag>::native_type;
 
-// Infer structured type tag from a thrift class.
+// Infer the Thrift type tag from a standard type.
 template <typename T>
-using structured_tag = typename detail::StructuredTag<T>::type;
+using infer_tag = typename detail::InferTag<folly::remove_cvref_t<T>>::type;
 
 } // namespace type
 } // namespace thrift

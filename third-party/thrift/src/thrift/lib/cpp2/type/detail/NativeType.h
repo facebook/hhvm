@@ -173,8 +173,12 @@ struct native_types<field<adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>>
               typename native_types<Tag>::native_type,
               Struct>> {};
 
-template <typename U, typename T = folly::remove_cvref_t<U>>
-struct StructuredTag {
+// Infers an appropiate type tag for given native type.
+template <typename T, typename = void>
+struct InferTag;
+
+template <typename T>
+struct InferTag<T, std::enable_if_t<is_thrift_class_v<T>>> {
   static_assert(is_thrift_class_v<T>, "");
   using type = folly::conditional_t<
       is_thrift_union_v<T>,

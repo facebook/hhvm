@@ -39,7 +39,7 @@ FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
 //
 template <class S, class Id>
 using get_ordinal =
-    typename detail::GetOrdinalImpl<type::structured_tag<S>, Id>::type;
+    typename detail::GetOrdinalImpl<type::infer_tag<S>, Id>::type;
 template <class S, class Id>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
     get_ordinal<S, Id>::value;

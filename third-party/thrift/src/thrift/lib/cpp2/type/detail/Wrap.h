@@ -53,7 +53,7 @@ class BaseDerived {
 // Specifically designed to work with thrift::InlineAdapter.
 //
 // TODO(afuller): Consider expanding features and making public.
-template <typename T, typename Tag = structured_tag<T>>
+template <typename T, typename Tag = infer_tag<T>>
 class Wrap {
  public:
   using underlying_type = T;
@@ -110,7 +110,7 @@ class Wrap {
   FOLLY_NODISCARD T& resetAnd() { return (reset(), data_); }
 };
 
-template <typename Derived, typename T, typename Tag = structured_tag<T>>
+template <typename Derived, typename T, typename Tag = infer_tag<T>>
 class EqWrap : public Wrap<T, Tag>, protected BaseDerived<Derived> {
   using Base = Wrap<T, Tag>;
 
@@ -138,7 +138,7 @@ class EqWrap : public Wrap<T, Tag>, protected BaseDerived<Derived> {
   }
 };
 
-template <typename Derived, typename T, typename Tag = structured_tag<T>>
+template <typename Derived, typename T, typename Tag = infer_tag<T>>
 class CompareWrap : public EqWrap<Derived, T, Tag> {
   using Base = EqWrap<Derived, T, Tag>;
 

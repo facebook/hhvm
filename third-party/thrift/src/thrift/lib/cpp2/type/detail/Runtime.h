@@ -331,6 +331,8 @@ class RuntimeAccessBase : public RuntimeBase {
   using Base::Base;
   explicit RuntimeAccessBase(const Base& other) : Base(other) {}
 
+  bool identical(const ConstT& rhs) const { return Base::identical(rhs); }
+
   // Get by value.
   MutT get(const Base& key) & { return MutT{Base::get(key)}; }
   MutT get(const Base& key) && { return MutT{Base::get(key, false, true)}; }

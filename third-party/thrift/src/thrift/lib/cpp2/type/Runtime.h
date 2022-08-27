@@ -46,6 +46,10 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   // 'capture' any other runtime type.
   /* implicit */ ConstRef(const detail::RuntimeBase& other) noexcept
       : Base(other) {}
+  // 'capture' any native type we can safely infer the tag for.
+  template <typename T, typename Tag = infer_tag<T>>
+  /* implicit */ ConstRef(T&& val) noexcept
+      : ConstRef(Tag{}, std::forward<T>(val)) {}
 
  private:
   friend Base;
@@ -74,19 +78,17 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   void clear() { Base::clear(); }
 
   // Append to a list, string, etc.
-  void append(const RuntimeBase& val) { Base::append(val); }
+  void append(ConstRef val) { Base::append(val); }
 
   // Add to a set, number, etc.
-  bool add(const RuntimeBase& val) { return Base::add(val); }
+  bool add(ConstRef val) { return Base::add(val); }
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
-  bool put(FieldId id, const RuntimeBase& val) { return Base::put(id, val); }
-  bool put(const RuntimeBase& key, const RuntimeBase& val) {
-    return Base::put(key, val);
-  }
-  bool put(const std::string& name, const RuntimeBase& val) {
+  bool put(FieldId id, ConstRef val) { return Base::put(id, val); }
+  bool put(ConstRef key, ConstRef val) { return Base::put(key, val); }
+  bool put(const std::string& name, ConstRef val) {
     return put(asRef(name), val);
   }
 
@@ -198,19 +200,17 @@ class Value : public detail::RuntimeAccessBase<ConstRef, Ref> {
   void clear() { Base::clear(); }
 
   // Append to a list, string, etc.
-  void append(const RuntimeBase& val) { Base::append(val); }
+  void append(ConstRef val) { Base::append(val); }
 
   // Add to a set, number, etc.
-  bool add(const RuntimeBase& val) { return Base::add(val); }
+  bool add(ConstRef val) { return Base::add(val); }
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
-  bool put(FieldId id, const RuntimeBase& val) { return Base::put(id, val); }
-  bool put(const RuntimeBase& key, const RuntimeBase& val) {
-    return Base::put(key, val);
-  }
-  bool put(const std::string& name, const RuntimeBase& val) {
+  bool put(FieldId id, ConstRef val) { return Base::put(id, val); }
+  bool put(ConstRef key, ConstRef val) { return Base::put(key, val); }
+  bool put(const std::string& name, ConstRef val) {
     return put(asRef(name), val);
   }
 

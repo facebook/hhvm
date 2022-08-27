@@ -150,15 +150,15 @@ TEST(RuntimeRefTest, Map) {
   auto ref = Ref::to<map<string_t, i32_t>>(value);
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
-  EXPECT_FALSE(ref.put(Ref::to<string_t>("one"), Ref::to<i32_t>(1)));
+  EXPECT_FALSE(ref.put(Ref::to<string_t>("one"), 1));
   EXPECT_EQ(value["one"], 1);
 
-  EXPECT_TRUE(ref.put("one", Ref::to<i32_t>(2)));
+  EXPECT_TRUE(ref.put("one", 2));
   EXPECT_EQ(value["one"], 2);
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
-  EXPECT_THROW(ref.put(FieldId{1}, Ref::to<i32_t>(2)), std::logic_error);
+  EXPECT_THROW(ref.put(FieldId{1}, 2), std::logic_error);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
   EXPECT_EQ(ref["one"], Ref::to<i32_t>(2));
   EXPECT_THROW(ref["two"], std::out_of_range);
@@ -177,16 +177,16 @@ TEST(RuntimeRefTest, Identical) {
   float negZero = -0.0;
   double dblZero = 0.0;
   EXPECT_TRUE(ref.empty());
-  EXPECT_TRUE(ref.identical(Ref::to<float_t>(zero)));
-  EXPECT_FALSE(ref.identical(Ref::to<float_t>(negZero)));
-  EXPECT_FALSE(ref.identical(Ref::to<double_t>(dblZero)));
+  EXPECT_TRUE(ref.identical(zero));
+  EXPECT_FALSE(ref.identical(negZero));
+  EXPECT_FALSE(ref.identical(dblZero));
 }
 
 TEST(RuntimeRefTest, ConstRef) {
   constexpr int32_t one = 1;
   auto ref = Ref::to<i32_t>(one);
   EXPECT_FALSE(ref.empty());
-  EXPECT_TRUE(ref.identical(Ref::to<i32_t>(1)));
+  EXPECT_TRUE(ref.identical(1));
   // Cannot be modified.
   EXPECT_THROW(ref.clear(), std::logic_error);
 }
@@ -235,9 +235,9 @@ TEST(RuntimeValueTest, Identical) {
   EXPECT_FALSE(value.empty());
   value.clear();
   EXPECT_TRUE(value.empty());
-  EXPECT_TRUE(value.identical(Value::of<float_t>(0.0f)));
-  EXPECT_FALSE(value.identical(Value::of<float_t>(-0.0f)));
-  EXPECT_FALSE(value.identical(Value::of<double_t>(0.0)));
+  EXPECT_TRUE(value.identical(0.0f));
+  EXPECT_FALSE(value.identical(-0.0f));
+  EXPECT_FALSE(value.identical(0.0));
 }
 
 TEST(RuntimeValueTest, CppType_List) {
@@ -253,7 +253,7 @@ TEST(RuntimeValueTest, CppType_Map) {
   using Tag = cpp_type<T, type::map<string_t, i32_t>>;
 
   auto map = Value::create<Tag>();
-  map.put("foo", Ref::to<i32_t>(2));
+  map.put("foo", 2);
   Ref value = map["foo"];
   EXPECT_EQ(value.as<i32_t>(), 2);
   EXPECT_GT(value, Ref::to<i32_t>(1));
@@ -261,7 +261,7 @@ TEST(RuntimeValueTest, CppType_Map) {
 
   auto otherMap = Value::create<Tag>();
   EXPECT_NE(map, otherMap);
-  otherMap.put("bar", Ref::to<i32_t>(2));
+  otherMap.put("bar", 2);
   EXPECT_NE(map, otherMap);
 
   EXPECT_THROW(map < otherMap, std::logic_error);

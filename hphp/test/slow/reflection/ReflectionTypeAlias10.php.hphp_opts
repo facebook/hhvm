@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/reflection/ReflectionTypeAlias.inc
+--inputs=hphp/test/slow/reflection/ReflectionTypeAlias10.inc

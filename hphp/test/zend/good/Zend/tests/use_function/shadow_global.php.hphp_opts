@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/Zend/tests/use_function/includes/foo_bar.inc
+--inputs=hphp/test/zend/good/Zend/tests/use_function/includes/global_bar.inc

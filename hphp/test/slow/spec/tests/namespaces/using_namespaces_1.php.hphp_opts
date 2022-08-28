@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/spec/tests/namespaces/Circle.inc
+--inputs=hphp/test/slow/spec/tests/namespaces/Point.inc

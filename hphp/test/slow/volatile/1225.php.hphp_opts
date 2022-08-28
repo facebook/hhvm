@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/volatile/1225-1.inc
+--inputs=hphp/test/slow/volatile/1225-2.inc

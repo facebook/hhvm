@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/modules/resolve-1.inc
+--inputs=hphp/test/slow/modules/resolve-1.inc1

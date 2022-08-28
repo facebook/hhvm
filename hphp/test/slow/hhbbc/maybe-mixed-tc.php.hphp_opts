@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/hhbbc/maybe-mixed-tc1.inc
+--inputs=hphp/test/slow/hhbbc/maybe-mixed-tc2.inc

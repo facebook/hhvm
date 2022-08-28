@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/spec/tests/classes/MyCollection.inc
+--inputs=hphp/test/slow/spec/tests/classes/mylist.inc

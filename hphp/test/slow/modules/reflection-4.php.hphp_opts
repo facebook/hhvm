@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/modules/reflection-4.inc
+--inputs=hphp/test/slow/modules/reflection-4.inc2

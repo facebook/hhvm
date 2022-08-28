@@ -1,0 +1,4 @@
+--inputs=hphp/test/server/http/tests/globalDocumentTestUtils.inc
+--inputs=hphp/test/server/http/tests/test_base.inc
+--inputs=hphp/test/server/util/server_tests.inc
+--inputs=hphp/test/server/fastcgi/Adoy/Client.php

@@ -1,2 +1,3 @@
 --inputs=test/zend/good/ext/standard/tests/class_object/AutoInterface.inc
 --inputs=hphp/test/zend/good/ext/standard/tests/class_object/AutoInterface.inc
+--inputs=hphp/test/zend/good/ext/standard/tests/class_object/get_declared_interfaces_variation1.inc

@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/apc/apc-object-1.inc
+--inputs=hphp/test/slow/apc/apc-object-2.inc

@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/ext_enum/enum-cache-1.inc
+--inputs=hphp/test/slow/ext_enum/enum-cache-2.inc

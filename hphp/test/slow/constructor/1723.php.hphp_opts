@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/constructor/1723.b.inc
+--inputs=hphp/test/slow/constructor/1723.inc

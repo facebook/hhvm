@@ -1,3 +1,4 @@
 -vRuntime.Eval.EmitClassPointers=2
 -vRuntime.Eval.RaiseClassConversionWarning=true
 -vRuntime.Eval.ClassStringHintNotices=true
+--inputs=hphp/test/slow/class-ptr/class-key-convert.inc

@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/file-coverage/multi-file-b.inc
+--inputs=hphp/test/slow/file-coverage/multi-file-c.inc

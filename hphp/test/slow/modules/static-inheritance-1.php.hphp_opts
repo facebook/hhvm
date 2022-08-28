@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/modules/static-inheritance-1.inc
+--inputs=hphp/test/slow/modules/static-inheritance-1.inc1

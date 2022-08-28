@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/Zend/tests/bug63976-1.inc
+--inputs=hphp/test/zend/good/Zend/tests/bug63976-2.inc

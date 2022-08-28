@@ -1,0 +1,2 @@
+--inputs=hphp/test/quick/traits_exception-2.inc
+--inputs=hphp/test/quick/traits_exception.inc

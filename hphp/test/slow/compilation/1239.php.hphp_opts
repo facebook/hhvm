@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/compilation/1239-1.inc
+--inputs=hphp/test/slow/compilation/1239-2.inc

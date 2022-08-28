@@ -1,0 +1,4 @@
+--inputs=hphp/test/slow/ext_options/test1.inc
+--inputs=hphp/test/slow/ext_options/test2.inc
+--inputs=hphp/test/slow/ext_options/test3.inc
+--inputs=hphp/test/slow/ext_options/test4.inc

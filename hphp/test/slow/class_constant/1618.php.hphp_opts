@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/class_constant/1618-1.inc
+--inputs=hphp/test/slow/class_constant/1618-2.inc

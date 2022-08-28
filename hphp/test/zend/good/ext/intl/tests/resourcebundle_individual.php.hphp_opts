@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/ext/intl/tests/resourcebundle.inc
+--inputs=hphp/test/zend/good/ext/intl/tests/ut_common.inc

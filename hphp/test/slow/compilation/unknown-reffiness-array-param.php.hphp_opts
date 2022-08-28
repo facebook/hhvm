@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/compilation/unknown-reffiness-array-param1.inc
+--inputs=hphp/test/slow/compilation/unknown-reffiness-array-param2.inc

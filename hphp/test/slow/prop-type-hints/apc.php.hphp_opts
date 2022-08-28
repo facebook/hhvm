@@ -1,1 +1,4 @@
 -vCheckPropTypeHints=1
+--inputs=hphp/test/slow/prop-type-hints/apc1.inc
+--inputs=hphp/test/slow/prop-type-hints/apc2.inc
+--inputs=hphp/test/slow/prop-type-hints/apc3.inc

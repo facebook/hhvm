@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/memoize/namespacebar.php.inc
+--inputs=hphp/test/slow/memoize/namespacefoo.php.inc
+--inputs=hphp/test/slow/memoize/traits.inc

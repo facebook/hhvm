@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/namespace/2227-1.inc
+--inputs=hphp/test/slow/namespace/2227-2.inc

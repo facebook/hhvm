@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/unit-cache-reaper-1.inc
+--inputs=hphp/test/slow/unit-cache-reaper-2.inc

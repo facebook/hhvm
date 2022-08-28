@@ -1,2 +1,5 @@
 -vRuntime.Eval.CheckPropTypeHints=3
 -vRuntime.Eval.EnforceGenericsUB=0
+--inputs=hphp/test/quick/upper-bounds/prop-type-alias.inc
+--inputs=hphp/test/quick/upper-bounds/prop-ub-class-1.inc
+--inputs=hphp/test/quick/upper-bounds/prop-ub-class-2.inc

@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/type_assertions/1860-1.inc
+--inputs=hphp/test/slow/type_assertions/1860-2.inc
+--inputs=hphp/test/slow/type_assertions/1860-after.inc

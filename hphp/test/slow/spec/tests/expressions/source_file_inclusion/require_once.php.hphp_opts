@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/Circle.inc
+--inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/Point.inc
+--inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/Positions.inc

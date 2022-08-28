@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/tests/classes/interface_optional_arg_003-2.inc
+--inputs=hphp/test/zend/good/tests/classes/interface_optional_arg_003.inc

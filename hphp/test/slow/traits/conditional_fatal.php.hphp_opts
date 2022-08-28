@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/traits/conditional_fatal-1.inc
+--inputs=hphp/test/slow/traits/conditional_fatal-2.inc

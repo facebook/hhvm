@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/ext_watchman/callback.inc
+--inputs=hphp/test/slow/ext_watchman/constants.inc
+--inputs=hphp/test/slow/ext_watchman/wminst.inc

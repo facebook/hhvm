@@ -5,3 +5,4 @@
 --inputs=hphp/test/quick/autoload3-3.inc
 --inputs=hphp/test/quick/autoload3-4.inc
 --inputs=hphp/test/quick/autoload3-5.inc
+--inputs=hphp/test/quick/autoload3-main.inc

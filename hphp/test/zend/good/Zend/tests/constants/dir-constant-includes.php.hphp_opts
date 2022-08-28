@@ -1,0 +1,4 @@
+--inputs=hphp/test/zend/good/Zend/tests/constants/fixtures/folder1/fixture.inc
+--inputs=hphp/test/zend/good/Zend/tests/constants/fixtures/folder2/fixture.inc
+--inputs=hphp/test/zend/good/Zend/tests/constants/fixtures/folder3/fixture.inc
+--inputs=hphp/test/zend/good/Zend/tests/constants/fixtures/folder4/fixture.inc

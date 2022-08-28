@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/reflection_classes/1356-1.inc
+--inputs=hphp/test/slow/reflection_classes/1356-2.inc

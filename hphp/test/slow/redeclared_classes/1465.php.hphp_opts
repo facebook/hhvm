@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/redeclared_classes/1465-1.inc
+--inputs=hphp/test/slow/redeclared_classes/1465-2.inc

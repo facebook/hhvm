@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/parser-config/nested/inner.inc
+--inputs=hphp/test/slow/parser-config/nested/nested3/inner.inc

@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/spec/tests/interfaces/MyCollection.inc
+--inputs=hphp/test/slow/spec/tests/interfaces/MyList.inc
+--inputs=hphp/test/slow/spec/tests/interfaces/interfaces.inc

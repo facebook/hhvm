@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/ext_vsdebug/context.php
+--inputs=hphp/test/slow/ext_vsdebug/common.inc

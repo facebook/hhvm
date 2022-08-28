@@ -1,0 +1,3 @@
+--inputs=hphp/test/server/fastcgi/tests/test_base.inc
+--inputs=hphp/test/server/fastcgi/Adoy/Client.php
+--inputs=hphp/test/server/util/server_tests.inc

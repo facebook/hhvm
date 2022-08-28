@@ -8,7 +8,7 @@ SYSTEMLIB=$1; shift
 AT="@"
 
 echo "<?hh // partial" > ${SYSTEMLIB}
-echo "// {$AT}generated" >> ${SYSTEMLIB}
+echo "// ${AT}generated" >> ${SYSTEMLIB}
 
 for i in $@; do
   if [ ! -f "$i" ]; then

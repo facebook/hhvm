@@ -47,10 +47,10 @@ use types::readonly_nonlocal_infer;
 
 /// Common input needed for compilation.
 #[derive(Debug)]
-pub struct NativeEnv<'a> {
+pub struct NativeEnv {
     pub filepath: RelativePath,
-    pub aliased_namespaces: &'a str,
-    pub include_roots: &'a str,
+    pub aliased_namespaces: String,
+    pub include_roots: String,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub hhbc_flags: HHBCFlags,
@@ -58,12 +58,12 @@ pub struct NativeEnv<'a> {
     pub flags: EnvFlags,
 }
 
-impl Default for NativeEnv<'_> {
+impl Default for NativeEnv {
     fn default() -> Self {
         Self {
             filepath: RelativePath::make(Prefix::Dummy, Default::default()),
-            aliased_namespaces: "",
-            include_roots: "",
+            aliased_namespaces: "".into(),
+            include_roots: "".into(),
             emit_class_pointers: 0,
             check_int_overflow: 0,
             hhbc_flags: HHBCFlags::empty(),
@@ -336,10 +336,13 @@ impl ParserFlags {
     }
 }
 
-impl<'a> NativeEnv<'a> {
-    fn to_options(native_env: &NativeEnv<'a>) -> Options {
+impl NativeEnv {
+    fn to_options(native_env: &NativeEnv) -> Options {
         let hhbc_flags = native_env.hhbc_flags;
-        let config = [native_env.aliased_namespaces, native_env.include_roots];
+        let config = [
+            native_env.aliased_namespaces.as_str(),
+            native_env.include_roots.as_str(),
+        ];
         let opts = Options::from_configs(&config).unwrap();
         let hhvm = Hhvm {
             aliased_namespaces: opts.hhvm.aliased_namespaces,
@@ -430,7 +433,7 @@ pub fn from_text<'decl>(
     alloc: &bumpalo::Bump,
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
-    native_env: &NativeEnv<'_>,
+    native_env: &NativeEnv,
     decl_provider: Option<&'decl dyn DeclProvider>,
     profile: &mut Profile,
 ) -> Result<()> {
@@ -477,7 +480,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
 pub fn unit_from_text<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
-    native_env: &NativeEnv<'_>,
+    native_env: &NativeEnv,
     decl_provider: Option<&'decl dyn DeclProvider>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
@@ -486,7 +489,7 @@ pub fn unit_from_text<'arena, 'decl>(
 }
 
 pub fn unit_to_string(
-    native_env: &NativeEnv<'_>,
+    native_env: &NativeEnv,
     writer: &mut dyn std::io::Write,
     program: &Unit<'_>,
     profile: &mut Profile,
@@ -615,7 +618,7 @@ fn emit_fatal<'arena>(
 
 fn create_emitter<'arena, 'decl>(
     flags: EnvFlags,
-    native_env: &NativeEnv<'_>,
+    native_env: &NativeEnv,
     decl_provider: Option<&'decl dyn DeclProvider>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {

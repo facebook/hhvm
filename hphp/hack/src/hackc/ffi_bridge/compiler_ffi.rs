@@ -227,19 +227,19 @@ fn make_env_flags(
 }
 
 impl compile_ffi::NativeEnv {
-    fn to_compile_env<'a>(env: &'a compile_ffi::NativeEnv) -> Option<compile::NativeEnv<'a>> {
+    fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
             filepath: RelativePath::make(
                 Prefix::Dummy,
-                PathBuf::from(OsStr::from_bytes(env.filepath.as_bytes())),
+                PathBuf::from(OsStr::from_bytes(self.filepath.as_bytes())),
             ),
-            aliased_namespaces: &env.aliased_namespaces,
-            include_roots: &env.include_roots,
-            emit_class_pointers: env.emit_class_pointers,
-            check_int_overflow: env.check_int_overflow,
-            hhbc_flags: compile::HHBCFlags::from_bits(env.hhbc_flags)?,
-            parser_flags: compile::ParserFlags::from_bits(env.parser_flags)?,
-            flags: compile::EnvFlags::from_bits(env.flags)?,
+            aliased_namespaces: self.aliased_namespaces.clone(),
+            include_roots: self.include_roots.clone(),
+            emit_class_pointers: self.emit_class_pointers,
+            check_int_overflow: self.check_int_overflow,
+            hhbc_flags: compile::HHBCFlags::from_bits(self.hhbc_flags)?,
+            parser_flags: compile::ParserFlags::from_bits(self.parser_flags)?,
+            flags: compile::EnvFlags::from_bits(self.flags)?,
         })
     }
 }
@@ -255,7 +255,7 @@ fn hackc_compile_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
-    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
         source_text.as_bytes(),
@@ -353,7 +353,7 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     let bump = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let native_env = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
         source_text.as_bytes(),

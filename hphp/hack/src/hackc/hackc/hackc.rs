@@ -202,15 +202,15 @@ impl Opts {
         }
     }
 
-    pub fn native_env(&self, path: PathBuf) -> Result<NativeEnv<'_>> {
+    pub fn native_env(&self, path: PathBuf) -> Result<NativeEnv> {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
         let parser_flags = ParserFlags::from_hhvm_config(&hhvm_config)?;
         let hhbc_flags = HHBCFlags::from_hhvm_config(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
-            aliased_namespaces: crate::Opts::AUTO_NAMESPACE_MAP,
-            include_roots: crate::Opts::INCLUDE_ROOTS,
+            aliased_namespaces: crate::Opts::AUTO_NAMESPACE_MAP.into(),
+            include_roots: crate::Opts::INCLUDE_ROOTS.into(),
             hhbc_flags,
             parser_flags,
             flags: self.env_flags(),

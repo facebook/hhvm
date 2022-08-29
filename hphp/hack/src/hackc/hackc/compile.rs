@@ -130,7 +130,7 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
     results.into_iter().collect()
 }
 
-pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv<'_> {
+pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv {
     let mut flags = EnvFlags::empty();
     flags.set(
         EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
@@ -186,7 +186,7 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
 }
 
 fn compile_impl<'d>(
-    env: NativeEnv<'_>,
+    env: NativeEnv,
     source_text: Vec<u8>,
     decl_provider: Option<&'d dyn DeclProvider>,
 ) -> Result<Vec<u8>> {

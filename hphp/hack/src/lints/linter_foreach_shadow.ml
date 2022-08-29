@@ -10,6 +10,21 @@
 open Linting_visitors
 open Aast
 
+(**
+   Lint on loop or catch variables that shadow local variables.
+
+   function foo(): void {
+     $x = 99;
+
+     // Lint on this $x:
+     foreach (vec[1, 2] as $x) {
+     }
+
+     // $x is 2 here.
+     $x;
+   }
+ *)
+
 let lvar_visitor =
   object
     inherit [lid list] Nast.Visitor_DEPRECATED.visitor
@@ -75,6 +90,16 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
 
       method! on_catch () (_, var, block) =
         this#on_block_with_local_vars [var] block
+
+      method! on_expr () ((_, _, e_) as e) =
+        match e_ with
+        | Efun _
+        | Lfun _ ->
+          let old_frames = frames in
+          frames <- [[]];
+          parent#on_expr () e;
+          frames <- old_frames
+        | _ -> parent#on_expr () e
     end
 end
 

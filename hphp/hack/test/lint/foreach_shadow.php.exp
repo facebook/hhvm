@@ -28,5 +28,3 @@ File "foreach_shadow.php", line 79, characters 8-9: (Lint[5568])
 File "foreach_shadow.php", line 92, characters 21-22:
 Loop variable `$x` shadows a local variable defined or last assigned here:
 File "foreach_shadow.php", line 90, characters 22-23: (Lint[5568])
-File "foreach_shadow.php", line 112, characters 5-11:
-In function \f12: This assignment may be unreachable. It appears after a condition which is always false. (Other[6001])

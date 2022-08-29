@@ -1,6 +1,9 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 #![allow(clippy::needless_late_init)]
 
+// Initially generatd by c2rust of 'extern.c' at revision:
+// `f14c8ff3f8a164685bc24184fba84904391e378e`.
+
 use std::io::Write;
 
 use libc::c_char;
@@ -155,8 +158,6 @@ const fn String_val(v: value) -> *const c_char {
 
 const Double_wosize: mlsize_t =
     (std::mem::size_of::<c_double>() / std::mem::size_of::<value>()) as mlsize_t;
-
-const NOT_MARKABLE: color_t = 3 << 8;
 
 #[inline]
 const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
@@ -641,7 +642,18 @@ impl State {
                     .wrapping_add((sz << 4) as c_int),
             );
         } else {
-            let hd: header_t = Make_header(sz, tag, NOT_MARKABLE);
+            // Note: ocaml-14.4.0 uses `Caml_white` (`0 << 8`)
+            // ('caml/runtime/gc.h'). That's why we use this here, so that we
+            // may test what this program generates vs. ocaml-4.14.0 in use
+            // today.
+            //
+            // In PR https://github.com/ocaml/ocaml/pull/10831, in commit
+            // `https://github.com/ocaml/ocaml/commit/868265f4532a2cc33bbffd83221c9613e743d759`
+            // this becomes,
+            //   let hd: header_t = Make_header(sz, tag, NOT_MARKABLE);
+            // where, `NOT_MARKABLE` (`3 << 8`) ('caml/runtime/shared_heap.h').
+            let hd: header_t = Make_header(sz, tag, 0 << 8);
+
             if sz > 0x3FFFFF && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith(
                     b"output_value: array cannot be read back on 32-bit platform\x00" as *const u8

@@ -121,6 +121,20 @@ let fold_and_compare_single_decl
       ctx
       decl_class_name
   in
+  (* Incidentally test here that Rust and OCaml produce the same marshaled
+     bytes. *)
+  let ocaml_marshaled = Marshal.to_string ocaml_decl_opt [] in
+  let rust_marshaled = Ocamlrep_marshal_ffi.to_string ocaml_decl_opt [] in
+  let _ =
+    if not (String.equal rust_marshaled ocaml_marshaled) then
+      failwith
+        (Printf.sprintf
+           "Marshaling of '%s' differs between Rust and OCaml. This indicates 'ocamlrep_marshal_output_value_to_string' is broken."
+           decl_class_name)
+    else
+      ()
+  in
+  (* The real test: are the Rust decl and OCaml decl the same? *)
   match ocaml_decl_opt with
   | Some (ocaml_decl, _) ->
     let is_identical =

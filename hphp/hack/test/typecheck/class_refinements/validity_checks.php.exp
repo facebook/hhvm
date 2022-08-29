@@ -1,0 +1,16 @@
+File "validity_checks.php", line 16, characters 13-35:
+Invalid class refinement (Other[0000])
+  File "validity_checks.php", line 16, characters 13-13:
+  Class `C` has no type constant `T`
+File "validity_checks.php", line 17, characters 13-33:
+Invalid class refinement (Other[0000])
+  File "validity_checks.php", line 9, characters 28-35:
+  Expected `arraykey`
+  File "validity_checks.php", line 17, characters 31-31:
+  But got `C`
+File "validity_checks.php", line 18, characters 13-35:
+Invalid class refinement (Other[0000])
+  File "validity_checks.php", line 13, characters 18-23:
+  Expected `string`
+  File "validity_checks.php", line 18, characters 31-33:
+  But got `int`

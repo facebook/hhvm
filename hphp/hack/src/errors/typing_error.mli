@@ -434,6 +434,7 @@ module Primary : sig
         name: string;
         parent_name: string;
       }
+    | Bad_class_refinement of { pos: Pos.t }
     | Explain_where_constraint of {
         pos: Pos.t;
         in_class: bool;
@@ -1845,6 +1846,8 @@ module Reasons_callback : sig
 
   val bad_decl_override :
     name:string -> parent_pos:Pos.t -> parent_name:string -> t
+
+  val bad_class_refinement : Pos.t -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t

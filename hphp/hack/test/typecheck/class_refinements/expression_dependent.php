@@ -6,7 +6,7 @@ abstract class Box {
   abstract const type TData as arraykey;
 }
 
-function getfun<T>(Box with { type TData = T } $b): T {
+function getfun<T as arraykey>(Box with { type TData = T } $b): T {
   while(true) {}
 }
 

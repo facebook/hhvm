@@ -955,36 +955,32 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   ((env, ty_err_opt), tyl)
 
-and localize_refinement ~ety_env env r root { cr_types = trs } =
+and localize_refinement ~ety_env env r root decl_cr =
   let mk_unsupported_err () =
     let pos = Reason.to_pos r in
-    Option.map
-      ety_env.on_error
-      ~f:
+    Option.map ety_env.on_error ~f:(fun on_error ->
         Typing_error.(
-          fun on_error ->
-            apply_reasons ~on_error
-            @@ Secondary.Unsupported_class_refinement pos)
+          apply_reasons ~on_error (Secondary.Unsupported_class_refinement pos)))
   in
   let ((env, ty_err_opt), root) = localize ~ety_env env root in
   match get_node root with
-  | Tclass (c, Nonexact cr, tyl) ->
-    let both_opt e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
+  | Tclass (cid, Nonexact cr, tyl) ->
+    let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
     let ((env, ty_err_opt), cr) =
-      SMap.fold
-        (fun id tr ((env, ty_err_opt), cr) ->
+      Class_refinement.fold_type_refs
+        decl_cr
+        ~init:((env, ty_err_opt), cr)
+        ~f:(fun id tr ((env, ty_err_opt), cr) ->
           match tr with
           | TRexact ty ->
             let ((env, ty_err_opt'), ty) = localize ~ety_env env ty in
             let cr = Class_refinement.add_type_ref id (TRexact ty) cr in
-            ((env, both_opt ty_err_opt ty_err_opt'), cr)
+            ((env, both_err ty_err_opt ty_err_opt'), cr)
           | TRloose _ ->
             let err = mk_unsupported_err () in
-            ((env, both_opt ty_err_opt err), cr))
-        trs
-        ((env, ty_err_opt), cr)
+            ((env, both_err ty_err_opt err), cr))
     in
-    ((env, ty_err_opt), mk (r, Tclass (c, Nonexact cr, tyl)))
+    ((env, ty_err_opt), mk (r, Tclass (cid, Nonexact cr, tyl)))
   | _ -> ((env, mk_unsupported_err ()), TUtils.terr env r)
 
 (* Like localize_no_subst, but uses the supplied kind, enabling support

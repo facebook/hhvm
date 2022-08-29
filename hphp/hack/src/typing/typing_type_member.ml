@@ -38,7 +38,7 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
   let ety_env = { empty_expand_env with this_ty; on_error } in
   (* Things are not perfect here, localize may itself call into
    * Typing_taccess, leading to legacy behavior. *)
-  let localize env decl_ty = Typing_phase.localize ~ety_env env decl_ty in
+  let localize env decl_ty = Typing_utils.localize ~ety_env env decl_ty in
   match Env.get_class env (snd cls_id) with
   | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
   | Some cls ->

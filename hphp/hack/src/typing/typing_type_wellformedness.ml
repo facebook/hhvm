@@ -32,8 +32,7 @@ let check_tparams_constraints env use_pos tparams targs =
   in
   Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
-(** Mostly check constraints on type parameters. *)
-let check_happly unchecked_tparams env h =
+let loclty_of_hint unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -55,9 +54,66 @@ let check_happly unchecked_tparams env h =
       empty_expand_env
   in
   let ety_env = { ety_env with expand_visible_newtype = false } in
-  let ((env, ty_err_opt1), locl_ty) = Phase.localize env ~ety_env decl_ty in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt1;
-  let (env, ty_err_opt2) =
+  let ((env, ty_err_opt), locl_ty) = Phase.localize env ~ety_env decl_ty in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, hint_pos, locl_ty)
+
+let check_hrefinement unchecked_tparams env h =
+  let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
+  let (_, ty_err_opt) =
+    match get_node locl_ty with
+    | Tclass (cls, Nonexact cr, _) ->
+      let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
+      let on_error =
+        Some (Typing_error.Reasons_callback.bad_class_refinement hint_pos)
+      in
+      Class_refinement.fold_type_refs
+        cr
+        ~init:(env, None)
+        ~f:(fun type_id (TRexact ty) (env, ty_err_opt) ->
+          let (env, type_member) =
+            (* FIXME(refinements): the this type below is plain sketchy *)
+            Typing_type_member.lookup_class_type_member
+              env
+              ~on_error
+              ~this_ty:locl_ty
+              (cls, nonexact)
+              (Pos_or_decl.none, type_id)
+          in
+          match type_member with
+          | Typing_type_member.Error ty_err_opt' ->
+            (env, both_err ty_err_opt ty_err_opt')
+          | Typing_type_member.Exact ty' ->
+            let (env, ty_err_opt') =
+              Typing_utils.sub_type env ty' ty on_error
+            in
+            let (env, ty_err_opt') =
+              match ty_err_opt with
+              | None -> Typing_utils.sub_type env ty ty' on_error
+              | Some _ -> (env, ty_err_opt')
+            in
+            (env, both_err ty_err_opt ty_err_opt')
+          | Typing_type_member.Abstract { lower; upper } ->
+            let (env, ty_err_opt') =
+              Option.value_map upper ~default:(env, None) ~f:(fun up ->
+                  Typing_utils.sub_type env ty up on_error)
+            in
+            let (env, ty_err_opt') =
+              match ty_err_opt' with
+              | None ->
+                Option.value_map lower ~default:(env, None) ~f:(fun lo ->
+                    Typing_utils.sub_type env lo ty on_error)
+              | Some _ -> (env, ty_err_opt')
+            in
+            (env, both_err ty_err_opt ty_err_opt'))
+    | _ -> (env, None)
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt
+
+(** Mostly check constraints on type parameters. *)
+let check_happly unchecked_tparams env h =
+  let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
+  let (env, ty_err_opt) =
     match get_node locl_ty with
     | Tnewtype (type_name, targs, _cstr_ty) ->
       (match Env.get_typedef env type_name with
@@ -71,7 +127,7 @@ let check_happly unchecked_tparams env h =
       | None -> (env, None))
     | _ -> (env, None)
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   env
 
 let rec context_hint ?(in_signature = true) env (p, h) =
@@ -152,9 +208,9 @@ and hint_ ~in_signature env p h_ =
         in
         hints env hl
     end
-  | Hrefinement _ ->
-    (* FIXME, TODO(refinements): well formedness checks? *)
-    []
+  | Hrefinement (hr, _) as h ->
+    check_hrefinement env.typedef_tparams env.tenv (p, h);
+    hint env hr
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map

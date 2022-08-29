@@ -1619,6 +1619,7 @@ module Primary = struct
         name: string;
         parent_name: string;
       }
+    | Bad_class_refinement of { pos: Pos.t }
     | Explain_where_constraint of {
         pos: Pos.t;
         in_class: bool;
@@ -2629,6 +2630,12 @@ module Primary = struct
             "Some members in class %s are incompatible with those declared in type %s"
             (Render.strip_ns name |> Markdown_lite.md_codify)
             (Render.strip_ns parent_name |> Markdown_lite.md_codify) ),
+      lazy [],
+      [] )
+
+  let bad_class_refinement pos =
+    ( Error_code.InternalError,
+      lazy (pos, "Invalid class refinement"),
       lazy [],
       [] )
 
@@ -5495,6 +5502,7 @@ module Primary = struct
       bad_conditional_support_dynamic pos child parent ty_name self_ty_name
     | Bad_decl_override { pos; name; parent_name } ->
       bad_decl_override name pos parent_name
+    | Bad_class_refinement { pos } -> bad_class_refinement pos
     | Explain_where_constraint { pos; decl_pos; in_class } ->
       explain_where_constraint pos decl_pos in_class
     | Explain_constraint pos -> explain_constraint pos
@@ -7954,6 +7962,8 @@ and Reasons_callback : sig
   val bad_decl_override :
     name:string -> parent_pos:Pos.t -> parent_name:string -> t
 
+  val bad_class_refinement : Pos.t -> t
+
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
 
@@ -8246,6 +8256,13 @@ end = struct
     @@ retain_quickfixes
     @@ of_primary_error
     @@ Primary.Bad_decl_override { name; pos = parent_pos; parent_name }
+
+  let bad_class_refinement pos =
+    append_incoming_reasons
+    @@ retain_code
+    @@ retain_quickfixes
+    @@ of_primary_error
+    @@ Primary.Bad_class_refinement { pos }
 
   let explain_where_constraint pos ~in_class ~decl_pos =
     append_incoming_reasons

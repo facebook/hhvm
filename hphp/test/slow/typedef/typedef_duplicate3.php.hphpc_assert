@@ -1,2 +1,2 @@
-Fatal: An unexpected exception was thrown while parsing: More than one symbol with the name Existing. In %s and %s
+Fatal: An unexpected exception was thrown while emitting: More than one symbol with the name Existing. In %s and %s
 hphp failed

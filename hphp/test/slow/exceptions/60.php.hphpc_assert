@@ -1,2 +1,2 @@
-Fatal: An unexpected exception was thrown while parsing: More than one class with the name a. In %s and %s
+Fatal: An unexpected exception was thrown while emitting: More than one class with the name a. In %s and %s
 hphp failed

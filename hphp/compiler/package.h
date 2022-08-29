@@ -194,6 +194,8 @@ struct Package {
       }
     };
     Definitions m_definitions;
+
+    // File path copied from UnitEmitter::m_filepath
     const StringData* m_filepath{nullptr};
 
     template <typename SerDe> void serde(SerDe& sd) {
@@ -221,6 +223,7 @@ struct Package {
     void(std::string, IndexMeta, extern_worker::Ref<UnitDecls>)
   >;
   using IndexMetaVec = std::vector<IndexMeta>;
+
   coro::Task<bool> index(const IndexCallback&);
 
   using UEVec = std::vector<std::unique_ptr<UnitEmitter>>;
@@ -230,16 +233,14 @@ struct Package {
                               extern_worker::Ref<RepoOptionsFlags>,
                               std::vector<extern_worker::Ref<UnitDecls>>>;
 
-  using LocalCallback = std::function<coro::Task<void>(UEVec)>;
-  using ParseCallback = std::function<coro::Task<std::pair<bool,ParseMetaVec>>(
+  using ParseCallback = std::function<coro::Task<ParseMetaVec>(
     const extern_worker::Ref<Config>&,
     extern_worker::Ref<FileMetaVec>,
     std::vector<FileData>,
     bool
   )>;
 
-  coro::Task<bool> parse(const UnitIndex&, const ParseCallback&,
-                         const LocalCallback&);
+  coro::Task<bool> parse(const UnitIndex&, const ParseCallback&);
 
   // These are meant to be called from extern-worker Jobs to perform
   // the actual parsing.
@@ -249,6 +250,14 @@ struct Package {
   static UnitEmitterSerdeWrapper parseRun(const std::string&,
                                           const RepoOptionsFlags&,
                                           const std::vector<UnitDecls>&);
+
+  using LocalCallback = std::function<coro::Task<void>(UEVec)>;
+  using EmitCallback = std::function<
+    coro::Task<ParseMetaVec>(const std::vector<std::filesystem::path>&)
+  >;
+  coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
+                        const LocalCallback&);
+
 private:
 
   struct FileAndSize {
@@ -287,13 +296,18 @@ private:
   coro::Task<void> indexGroup(const IndexCallback&, Group);
 
   coro::Task<void> parseAll(const ParseCallback&, const UnitIndex&);
-  coro::Task<FileAndSizeVec>
-  parseGroups(Groups, const ParseCallback&, const UnitIndex&);
-  coro::Task<FileAndSizeVec>
-  parseGroup(Group, const ParseCallback&, const UnitIndex&);
+  coro::Task<void> parseGroups(Groups, const ParseCallback&, const UnitIndex&);
+  coro::Task<void> parseGroup(Group, const ParseCallback&, const UnitIndex&);
 
   void resolveDecls(const UnitIndex&, const FileMetaVec&,
       const std::vector<ParseMeta>&, std::vector<FileData>&, size_t attempts);
+
+  coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&);
+  coro::Task<FileAndSizeVec>
+  emitGroups(Groups, const EmitCallback&, const UnitIndex&);
+  coro::Task<FileAndSizeVec>
+  emitGroup(Group, const EmitCallback&, const UnitIndex&);
+
   void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, const UnitIndex&,
       bool report = false);
 
@@ -350,10 +364,6 @@ struct UnitIndex final {
   // Returns true if any ParseMeta in parseMetas references a missing
   // symbol that is present in this index.
   bool containsAnyMissing(const Package::ParseMetaVec& parseMetas) const;
-
-  // Initialize to an empty state, ensuring underlying elements
-  // are destroyed and internal capacity is freed.
-  void clear();
 
   IMap types;
   IMap funcs;

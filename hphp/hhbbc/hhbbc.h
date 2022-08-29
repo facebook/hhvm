@@ -78,7 +78,8 @@ struct WholeProgramInput {
 
   void add(Key, extern_worker::Ref<Value>);
 
-  static std::vector<std::pair<Key, Value>> make(std::unique_ptr<UnitEmitter>);
+  using KeyValueVec = std::vector<std::pair<Key, Value>>;
+  static KeyValueVec make(std::unique_ptr<UnitEmitter>);
 
   struct Impl;
   struct Deleter { void operator()(Impl*) const; };

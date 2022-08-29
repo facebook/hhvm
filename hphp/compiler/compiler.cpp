@@ -816,17 +816,17 @@ void logPhaseStats(const std::string& phase, const Package& package,
 // Compute a UnitIndex by parsing decls for all autoload-eligible files.
 // If no Autoload.Query is specified by RepoOptions, this just indexes
 // the input files.
-bool computeIndex(
+std::unique_ptr<UnitIndex> computeIndex(
     const CompilerOptions& po,
     StructuredLogEntry& sample,
     coro::TicketExecutor& executor,
-    extern_worker::Client& client,
-    UnitIndex& index
+    extern_worker::Client& client
 ) {
-  auto const onIndex = [&] (
-      std::string rpath,
-      Package::IndexMeta meta,
-      Ref<Package::UnitDecls> declsRef
+  auto index = std::make_unique<UnitIndex>();
+  auto const indexUnit = [&] (
+      std::string&& rpath,
+      Package::IndexMeta&& meta,
+      Ref<Package::UnitDecls>&& declsRef
   ) {
     auto locations = std::make_shared<UnitIndex::Locations>(
         std::move(rpath), std::move(declsRef)
@@ -841,10 +841,10 @@ bool computeIndex(
         }
       }
     };
-    insert(meta.types, index.types, "type");
-    insert(meta.funcs, index.funcs, "function");
-    insert(meta.constants, index.constants, "constant");
-    insert(meta.modules, index.modules, "module");
+    insert(meta.types, index->types, "type");
+    insert(meta.funcs, index->funcs, "function");
+    insert(meta.constants, index->constants, "constant");
+    insert(meta.modules, index->modules, "module");
   };
 
   Package indexPackage{po.inputDir, executor, client};
@@ -854,25 +854,25 @@ bool computeIndex(
   auto const queryStr = repoFlags.autoloadQuery();
   if (!queryStr.empty()) {
     // Index the files specified by Autoload.Query
-    if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return false;
+    if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return nullptr;
   } else {
     // index just the input files
     addInputsToPackage(indexPackage, po);
   }
 
-  if (!coro::wait(indexPackage.index(onIndex))) return false;
+  if (!coro::wait(indexPackage.index(indexUnit))) return nullptr;
 
   logPhaseStats("index", indexPackage, client, sample,
                 indexTimer.getMicroSeconds());
   Logger::FInfo("index size: types={:,} funcs={:,} constants={:,} modules={:,}",
-      index.types.size(),
-      index.funcs.size(),
-      index.constants.size(),
-      index.modules.size()
+      index->types.size(),
+      index->funcs.size(),
+      index->constants.size(),
+      index->modules.size()
   );
   client.resetStats();
 
-  return true;
+  return index;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -937,6 +937,26 @@ std::vector<WPI::Key> ParseForHHBBCJob::s_inputKeys;
 
 Job<ParseJob> s_parseJob;
 Job<ParseForHHBBCJob> s_parseForHHBBCJob;
+
+// A ParsedFile owns all the HHBC state associated with a parsed source
+// file before we have decided to add it to the Program.
+struct ParsedFile {
+  explicit ParsedFile(Package::ParseMeta m)
+    : parseMeta(std::move(m))
+  {}
+  ParsedFile(Package::ParseMeta m, Ref<UnitEmitterSerdeWrapper> w)
+    : parseMeta(std::move(m)), ueRef(std::move(w))
+  {}
+
+  Package::ParseMeta parseMeta;
+  Optional<Ref<UnitEmitterSerdeWrapper>> ueRef;
+  std::vector<std::pair<WPI::Key, Ref<WPI::Value>>> hhbbcInputs;
+};
+
+using ParsedFiles = folly_concurrent_hash_map_simd<
+  std::string,
+  std::unique_ptr<ParsedFile>
+>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1008,14 +1028,8 @@ bool process(const CompilerOptions &po) {
   sample.setStr("extern_worker_impl", client->implName());
   sample.setStr("extern_worker_session", client->session());
 
-  UnitIndex index;
-  if (!computeIndex(po, sample, *executor, *client, index)) return false;
-
-  auto package = std::make_unique<Package>(
-    po.inputDir,
-    *executor,
-    *client
-  );
+  auto index = computeIndex(po, sample, *executor, *client);
+  if (!index) return false;
 
   // Always used, but we can clear it early to save memory.
   Optional<SymbolSets> unique;
@@ -1042,7 +1056,7 @@ bool process(const CompilerOptions &po) {
   std::mutex repoLock;
 
   // Emit a fully processed unit (either processed by HHBBC or not).
-  auto const emit = [&] (std::unique_ptr<UnitEmitter> ue) {
+  auto const emitUnit = [&] (std::unique_ptr<UnitEmitter> ue) {
     assertx(ue);
     assertx(Option::GenerateBinaryHHBC ||
             Option::GenerateTextHHBC ||
@@ -1072,8 +1086,12 @@ bool process(const CompilerOptions &po) {
     repo->add(encoded);
   };
 
+  // This will contain all files eligible to be in the program: input files
+  // and all ondemand-eligible files, except files excluded by CLI options.
+  auto parsedFiles = std::make_unique<ParsedFiles>();
+
   // Process unit-emitters produced locally (usually systemlib stuff).
-  auto const local = [&] (Package::UEVec ues) -> coro::Task<void> {
+  auto const emitLocalUnit = [&] (Package::UEVec ues) -> coro::Task<void> {
     if (RO::EvalUseHHBBC) {
       // If we're using HHBBC, turn them into WholeProgramInput
       // key/values (after checking uniqueness), upload the values,
@@ -1102,16 +1120,16 @@ bool process(const CompilerOptions &po) {
     }
 
     // Otherwise just emit it
-    for (auto& ue : ues) emit(std::move(ue));
+    for (auto& ue : ues) emitUnit(std::move(ue));
     HPHP_CORO_RETURN_VOID;
   };
 
   // Parse a group of files remotely
-  auto const remote = [&] (const Ref<Package::Config>& config,
-                           Ref<Package::FileMetaVec> fileMetas,
-                           std::vector<Package::FileData> files,
-                           bool optimistic)
-    -> coro::Task<std::pair<bool,Package::ParseMetaVec>> {
+  auto const parseRemoteUnit = [&] (const Ref<Package::Config>& config,
+                                    Ref<Package::FileMetaVec> fileMetas,
+                                    std::vector<Package::FileData> files,
+                                    bool optimistic)
+    -> coro::Task<Package::ParseMetaVec> {
     if (RO::EvalUseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
       // key/values.
@@ -1136,82 +1154,204 @@ bool process(const CompilerOptions &po) {
 
       // Stop now if the index contains any missing decls.
       // parseRun() will retry this job with additional inputs.
-      if (index.containsAnyMissing(parseMetas)) {
-        HPHP_CORO_RETURN(std::make_pair(true, parseMetas));
+      if (index->containsAnyMissing(parseMetas)) {
+        HPHP_CORO_MOVE_RETURN(parseMetas);
       }
 
-      // We don't have unit-emitters to do uniqueness checking, but
-      // the parse metadata has the definitions we can use instead.
-      for (auto const& p : parseMetas) {
-        if (!p.m_filepath) continue;
-        unique->add(p.m_definitions, p.m_filepath);
-      }
-
+      always_assert(parseMetas.size() == inputValueRefs.size());
       auto const numKeys = inputKeys.size();
       size_t keyIdx = 0;
-      for (auto& v : inputValueRefs) {
-        for (auto& r : v) {
+      for (size_t i = 0, n = parseMetas.size(); i < n; i++) {
+        auto& p = parseMetas[i];
+        p.m_missing = Package::DeclNames{}; // done with this list now.
+        if (!p.m_filepath) continue;
+        auto& valueRefs = inputValueRefs[i];
+        auto filename = p.m_filepath->toCppString();
+        auto pf = std::make_unique<ParsedFile>(std::move(p));
+        pf->hhbbcInputs.reserve(valueRefs.size());
+        for (auto& r : valueRefs) {
           always_assert(keyIdx < numKeys);
-          hhbbcInputs->add(std::move(inputKeys[keyIdx]), std::move(r));
+          pf->hhbbcInputs.emplace_back(
+            std::move(inputKeys[keyIdx]), std::move(r)
+          );
           ++keyIdx;
         }
+        parsedFiles->emplace(filename, std::move(pf));
       }
-      always_assert(keyIdx == numKeys);
 
-      HPHP_CORO_RETURN(std::make_pair(false, parseMetas));
+      // Indicate we're done by returning an empty vec.
+      HPHP_CORO_RETURN(Package::ParseMetaVec{});
     }
 
     // Otherwise, do a "normal" (non-HHBBC parse job), load the
     // unit-emitters and parse metadata, and emit the unit-emitters.
-    auto [wrapperRefs, metaRefs] = HPHP_CORO_AWAIT(
+    auto [ueRefs, metaRefs] = HPHP_CORO_AWAIT(
       client->exec(
         s_parseJob,
-        std::make_tuple(
-          config,
-          std::move(fileMetas)
-        ),
+        std::make_tuple(config, std::move(fileMetas)),
         std::move(files),
         optimistic
       )
     );
 
-    auto [wrappers, parseMetas] = HPHP_CORO_AWAIT(coro::collect(
-      client->load(std::move(wrapperRefs)),
-      client->load(std::move(metaRefs))
-    ));
+    auto parseMetas = HPHP_CORO_AWAIT(client->load(std::move(metaRefs)));
 
     // Stop now if the index contains any missing decls.
     // parseRun() will retry this job with additional inputs.
-    if (index.containsAnyMissing(parseMetas)) {
-      HPHP_CORO_RETURN(std::make_pair(true, parseMetas));
+    if (index->containsAnyMissing(parseMetas)) {
+      HPHP_CORO_MOVE_RETURN(parseMetas);
     }
 
-    for (auto& wrapper : wrappers) {
-      if (!wrapper.m_ue) continue;
-      emit(std::move(wrapper.m_ue));
+    always_assert(parseMetas.size() == ueRefs.size());
+    for (size_t i = 0, n = parseMetas.size(); i < n; i++) {
+      auto& p = parseMetas[i];
+      p.m_missing = Package::DeclNames{}; // done with this list now.
+      if (!p.m_filepath) continue;
+      auto filename = p.m_filepath->toCppString();
+      auto pf = std::make_unique<ParsedFile>(
+        std::move(p), std::move(ueRefs[i])
+      );
+      parsedFiles->emplace(filename, std::move(pf));
     }
-    HPHP_CORO_RETURN(std::make_pair(false, parseMetas));
+
+    // Indicate we're done by returning an empty vec.
+    HPHP_CORO_RETURN(Package::ParseMetaVec{});
+  };
+
+  // Emit a group of files that were parsed remotely
+  auto const emitRemoteUnit = [&] (
+      const std::vector<std::filesystem::path>& rpaths
+  ) -> coro::Task<Package::ParseMetaVec> {
+    Package::ParseMetaVec parseMetas;
+    parseMetas.reserve(rpaths.size());
+
+    if (RO::EvalUseHHBBC) {
+      // Retrieve HHBBC WPI (Key, Ref<Value>) pairs that were already parsed.
+      // No Async I/O is necessary in this case.
+      for (auto& rpath : rpaths) {
+        auto it = parsedFiles->find(rpath.native());
+        if (it == parsedFiles->end()) {
+          // If you see this error in a test case, add a line to to test.php.hphp_opts:
+          // --inputs=hphp/path/to/file.inc
+          Package::ParseMeta bad;
+          bad.m_abort = folly::sformat("Unknown include file: {}\n", rpath.native());
+          parseMetas.emplace_back(std::move(bad));
+          continue;
+        }
+        auto& pf = it->second;
+        parseMetas.emplace_back(std::move(pf->parseMeta));
+        auto& p = parseMetas.back();
+        if (!p.m_filepath) continue;
+        // We don't have unit-emitters to do uniqueness checking, but
+        // the parse metadata has the definitions we can use instead.
+        unique->add(p.m_definitions, p.m_filepath);
+        auto inputs = std::move(pf->hhbbcInputs);
+        for (auto& e : inputs) {
+          hhbbcInputs->add(std::move(e.first), std::move(e.second));
+        }
+      }
+      HPHP_CORO_MOVE_RETURN(parseMetas);
+    }
+
+    // Otherwise, retrieve PraseMeta and load unit-emitters from a normal
+    // ParseJob, then emit the unit-emitters.
+    std::vector<Ref<UnitEmitterSerdeWrapper>> ueRefs;
+    ueRefs.reserve(rpaths.size());
+    for (auto& rpath : rpaths) {
+      auto it = parsedFiles->find(rpath);
+      if (it == parsedFiles->end()) {
+        // If you see this error in a test case, add a line to to test.php.hphp_opts:
+        // --inputs=hphp/path/to/file.inc
+        Package::ParseMeta bad;
+        bad.m_abort = folly::sformat("Unknown include file: {}", rpath.native());
+        parseMetas.emplace_back(std::move(bad));
+        continue;
+      }
+      auto& pf = it->second;
+      parseMetas.emplace_back(std::move(pf->parseMeta));
+      ueRefs.emplace_back(std::move(*pf->ueRef));
+    }
+
+    always_assert(parseMetas.size() == ueRefs.size());
+    auto ueWrappers = HPHP_CORO_AWAIT(
+      client->load(std::move(ueRefs))
+    );
+
+    for (auto& wrapper : ueWrappers) {
+      if (!wrapper.m_ue) continue;
+      emitUnit(std::move(wrapper.m_ue));
+    }
+    HPHP_CORO_MOVE_RETURN(parseMetas);
   };
 
   {
+    // Parsing phase: compile all input files and autoload files to bytecode.
+    // Deferring emit reduces wall time by parsing all files in parallel in
+    // one pass, then computing the full transitive closure of ondemand files
+    // in one go while emitting. Unreferenced ondemand files are discarded.
+    auto parsePackage = std::make_unique<Package>(
+      po.inputDir,
+      *executor,
+      *client
+    );
     Timer parseTimer(Timer::WallTime, "parsing");
+
+    // Parse the input files specified on the command line
+    addInputsToPackage(*parsePackage, po);
+    auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+    auto const queryStr = repoFlags.autoloadQuery();
+    if (!queryStr.empty()) {
+      // Parse all the files specified by Autoload.Query
+      if (!addAutoloadQueryToPackage(*parsePackage, queryStr)) return false;
+    }
+
+    if (!coro::wait(parsePackage->parse(*index, parseRemoteUnit))) return false;
+
+    logPhaseStats("parse", *parsePackage, *client, sample,
+                  parseTimer.getMicroSeconds());
+    client->resetStats();
+  }
+
+  auto package = std::make_unique<Package>(
+    po.inputDir,
+    *executor,
+    *client
+  );
+
+  {
+    // Emit phase: emit systemlib units, all input files, and the transitive
+    // closure of files referenced by symbolRefs.
+    Timer emitTimer(Timer::WallTime, "emit");
     addInputsToPackage(*package, po);
 
     if (!RO::EvalUseHHBBC && Option::GenerateBinaryHHBC) {
+      // Initialize autoload and repo for emitUnit() to populate
       autoload.emplace();
       repo.emplace(outputFile);
     }
-    if (!coro::wait(package->parse(index, remote, local))) return false;
 
-    logPhaseStats("parse", *package, *client, sample,
-                  parseTimer.getMicroSeconds());
+    if (!coro::wait(package->emit(*index, emitRemoteUnit, emitLocalUnit))) {
+      return false;
+    }
 
-    // We don't need the ondemand/autoload index after this point.
-    index.clear();
+    // We didn't run any extern worker jobs, and in HHBBC mode we
+    // also didn't load anything. Most of these stats are zero but a
+    // few are still interesting.
+    logPhaseStats("emit", *package, *client, sample,
+                  emitTimer.getMicroSeconds());
   }
 
   std::thread fileCache{
-    [&, package = std::move(package)] () mutable {
+    [&, package = std::move(package), parsedFiles = std::move(parsedFiles),
+      index = std::move(index)] () mutable {
+      {
+        Timer t{Timer::WallTime, "dropping unused files"};
+        parsedFiles.reset();
+      }
+      {
+        Timer t{Timer::WallTime, "dropping index"};
+        index.reset();
+      }
       SCOPE_EXIT { package.reset(); };
       if (po.filecache.empty()) return;
       Timer _{Timer::WallTime, "saving file cache..."};
@@ -1291,7 +1431,7 @@ bool process(const CompilerOptions &po) {
     std::move(*hhbbcInputs),
     std::move(executor),
     std::move(client),
-    emit,
+    emitUnit,
     dispose,
     &sample,
     Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0

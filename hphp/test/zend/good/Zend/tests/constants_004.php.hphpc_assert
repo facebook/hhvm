@@ -1,2 +1,2 @@
-Fatal: An unexpected exception was thrown while parsing: More than one constant with the name foo%sfoo. In %s and %s
+Fatal: An unexpected exception was thrown while emitting: More than one constant with the name foo%sfoo. In %s and %s
 hphp failed

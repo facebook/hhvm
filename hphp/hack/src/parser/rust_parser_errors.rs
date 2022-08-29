@@ -4980,8 +4980,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if Some(TokenKind::Variable) == token_kind(&e.name) {
                     return;
                 }
-                // Foo::{$bar} = ...;
-                // OK, as this is static member assignment to whatever prop name is in `$bar`
+                // Foo::{_} = ...;
+                // OK, as this is some form of static member assignment.
                 if let BracedExpression(_) = e.name.children {
                     return;
                 }

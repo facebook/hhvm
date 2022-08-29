@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
   if (FLAGS_cert.length() > 0 && FLAGS_key.length() > 0) {
     auto sslContext = std::make_shared<wangle::SSLContextConfig>();
     sslContext->setCertificate(FLAGS_cert, FLAGS_key, "");
-    sslContext->clientCAFile = FLAGS_client_ca_list;
+    sslContext->clientCAFiles = std::vector<std::string>{FLAGS_client_ca_list};
     sslContext->eccCurveName = FLAGS_ecc_curve;
     server->setSSLConfig(sslContext);
   }

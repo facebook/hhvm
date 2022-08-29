@@ -47,7 +47,7 @@ uint32_t sanitizeNumThreads(int32_t n) {
 std::shared_ptr<wangle::SSLContextConfig> getSSLConfig() {
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setCertificate(FLAGS_certPath.c_str(), FLAGS_keyPath.c_str(), "");
-  sslConfig->clientCAFile = FLAGS_caPath.c_str();
+  sslConfig->clientCAFiles = std::vector<std::string>{FLAGS_caPath.c_str()};
   sslConfig->clientVerification =
       folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
   sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());

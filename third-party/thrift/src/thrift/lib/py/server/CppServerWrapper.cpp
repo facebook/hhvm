@@ -598,7 +598,8 @@ class CppServerWrapper : public ThriftServer {
       return;
     }
     auto cfg = std::make_shared<SSLContextConfig>();
-    cfg->clientCAFile = getStringAttrSafe(sslConfig, "client_ca_path");
+    cfg->clientCAFiles = std::vector<std::string>{
+        getStringAttrSafe(sslConfig, "client_ca_path")};
     if (!certPath.empty()) {
       auto keyPwPath = getStringAttrSafe(sslConfig, "key_pw_path");
       cfg->setCertificate(certPath, keyPath, keyPwPath);

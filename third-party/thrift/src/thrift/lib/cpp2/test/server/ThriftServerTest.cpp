@@ -2492,7 +2492,7 @@ namespace {
 void setupServerSSL(ThriftServer& server) {
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
-  sslConfig->clientCAFile = folly::kTestCA;
+  sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
   sslConfig->sessionContext = "ThriftServerTest";
   server.setSSLConfig(std::move(sslConfig));
 }
@@ -2501,7 +2501,7 @@ void setupServerSSLWithAlpn(
     ThriftServer& server, std::list<std::string> nextProtocols) {
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
-  sslConfig->clientCAFile = folly::kTestCA;
+  sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
   sslConfig->sessionContext = "ThriftServerTest";
   sslConfig->setNextProtocols(nextProtocols);
   server.setSSLConfig(std::move(sslConfig));

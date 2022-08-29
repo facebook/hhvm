@@ -20,7 +20,14 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock
 
-from thrift.python.test.adapter.thrift_types import AdaptedInt, Bar, Baz, Datetime, Foo
+from thrift.python.test.adapter.thrift_types import (
+    AdaptedInt,
+    Bar,
+    Baz,
+    Datetime,
+    Foo,
+    NINETEEN_EIGHTY_FOUR,
+)
 from thrift.python.test.adapters.datetime import DatetimeAdapter
 from thrift.python.test.adapters.noop import Wrapped
 
@@ -28,6 +35,7 @@ from thrift.python.test.adapters.noop import Wrapped
 from thrift.python.test.adapter.thrift_types import (
     _fbthrift_unadapted_AsDatetime,
     _fbthrift_unadapted_Baz,
+    _fbthrift_unadapted_NINETEEN_EIGHTY_FOUR,
 )  # isort:skip
 
 
@@ -158,3 +166,7 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual(Baz, Wrapped)
         self.assertIsInstance(foo.baz, Wrapped)
         self.assertIsInstance(foo.baz.obj, _fbthrift_unadapted_Baz)
+
+    def test_adapted_variable(self) -> None:
+        self.assertEqual(NINETEEN_EIGHTY_FOUR, datetime(1984, 1, 1))
+        self.assertEqual(_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR, 441792000)

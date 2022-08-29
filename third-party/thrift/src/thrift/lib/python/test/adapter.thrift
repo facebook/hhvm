@@ -67,3 +67,6 @@ union Bar {
   @AsDatetime{signature = "DatetimeField"}
   2: i32 ts;
 }
+
+@AsDatetime{signature = "DatetimeConstant"}
+const i32 NINETEEN_EIGHTY_FOUR = 441792000;

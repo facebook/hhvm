@@ -931,6 +931,61 @@ class t_mstch_python_generator : public t_mstch_generator {
   boost::filesystem::path generate_root_path_;
 };
 
+class python_mstch_const : public mstch_const {
+ public:
+  python_mstch_const(
+      const t_const* c,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_const* current_const,
+      const t_type* expected_type,
+      const t_field* field)
+      : mstch_const(c, ctx, pos, current_const, expected_type, field),
+        adapter_annotation_(find_structured_adapter_annotation(*c)),
+        transitive_adapter_annotation_(
+            get_transitive_annotation_of_adapter_or_null(*c)) {
+    register_methods(
+        this,
+        {
+            {"constant:has_adapter?", &python_mstch_const::has_adapter},
+            {"constant:adapter_name", &python_mstch_const::adapter_name},
+            {"constant:adapter_type_hint",
+             &python_mstch_const::adapter_type_hint},
+            {"constant:is_adapter_transitive?",
+             &python_mstch_const::is_adapter_transitive},
+            {"constant:transitive_adapter_annotation",
+             &python_mstch_const::transitive_adapter_annotation},
+        });
+  }
+
+  mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
+
+  mstch::node adapter_name() {
+    return get_annotation_property(adapter_annotation_, "name");
+  }
+
+  mstch::node adapter_type_hint() {
+    return get_annotation_property(adapter_annotation_, "typeHint");
+  }
+
+  mstch::node is_adapter_transitive() {
+    return transitive_adapter_annotation_ != nullptr;
+  }
+
+  mstch::node transitive_adapter_annotation() {
+    return std::make_shared<python_mstch_const_value>(
+        transitive_adapter_annotation_->value(),
+        context_,
+        pos_,
+        transitive_adapter_annotation_,
+        &*transitive_adapter_annotation_->type());
+  }
+
+ private:
+  const t_const* adapter_annotation_;
+  const t_const* transitive_adapter_annotation_;
+};
+
 class python_mstch_const_value : public mstch_const_value {
  public:
   python_mstch_const_value(
@@ -1087,6 +1142,7 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_field>();
   mstch_context_.add<python_mstch_enum>();
   mstch_context_.add<python_mstch_enum_value>();
+  mstch_context_.add<python_mstch_const>();
   mstch_context_.add<python_mstch_const_value>();
 }
 

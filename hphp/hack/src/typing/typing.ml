@@ -941,21 +941,21 @@ let requires_consistent_construct = function
  * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
  * is expected.
  *
- * If for_lambda is true, then we are expecting a function type for the expected type,
+ * If strip_supportdyn is true, then we are expecting a function or shape type for the expected type,
  * and we should decompose supportdyn<t>, and like-push, and return true to
  * indicate that the type supports dynamic.
  *
  * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
  *)
 let expand_expected_and_get_node
-    ?(for_lambda = false) env (expected : ExpectedTy.t option) =
+    ?(strip_supportdyn = false) env (expected : ExpectedTy.t option) =
   let rec unbox env ty =
     match TUtils.try_strip_dynamic env ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
         let (env, opt_ty) =
           if
-            (not for_lambda)
+            (not strip_supportdyn)
             && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
           then
             (env, None)
@@ -988,7 +988,7 @@ let expand_expected_and_get_node
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
     let (env, uty, supportdyn) = unbox env ty in
-    if supportdyn && not for_lambda then
+    if supportdyn && not strip_supportdyn then
       (env, None)
     else
       (env, Some (p, ur, supportdyn, uty, get_node uty))
@@ -4863,7 +4863,9 @@ and expr_
         (env, (k, et, ty))
     in
     let (env, tfdm) =
-      match expand_expected_and_get_node env expected with
+      match
+        expand_expected_and_get_node ~strip_supportdyn:true env expected
+      with
       | (env, Some (pos, ur, _, _, Tshape (_, expected_fdm))) ->
         List.map_env
           env
@@ -5142,7 +5144,7 @@ and lambda ~is_anon ?expected p env f idl =
     (env, tefun, ty)
   in
   let (env, eexpected) =
-    expand_expected_and_get_node ~for_lambda:true env expected
+    expand_expected_and_get_node ~strip_supportdyn:true env expected
   in
   match eexpected with
   | Some (_pos, _ur, _, tdyn, Tdynamic)

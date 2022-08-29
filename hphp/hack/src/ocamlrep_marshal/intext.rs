@@ -29,15 +29,15 @@ pub(crate) const MAGIC_NUMBER_BIG: u32 = 0x8495A6BF; // 100001001001010110100110
 #[cfg(target_arch = "arm")]
 // Careful. This might not be quite right. See
 // https://github.com/ocaml/ocaml/issues/4224.
-pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x45670123;
+pub(crate) const ARCH_FLOAT_ENDIANNESS: u32 = 0x45670123;
 
 #[cfg(not(target_arch = "arm"))]
 #[cfg(target_endian = "big")]
-pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x76543210;
+pub(crate) const ARCH_FLOAT_ENDIANNESS: u32 = 0x76543210;
 
 #[cfg(not(target_arch = "arm"))]
 #[cfg(target_endian = "little")]
-pub(crate) const ARCH_FLOAT_ENDIANESS: u32 = 0x01234567;
+pub(crate) const ARCH_FLOAT_ENDIANNESS: u32 = 0x01234567;
 
 // ---
 
@@ -75,7 +75,7 @@ pub(crate) const CODE_CUSTOM_FIXED: libc::c_int = 0x19; // 00011001
 
 macro_rules! cond_arch_float_endian {
     ($if_:ident, $else_:ident) => {
-        if ARCH_FLOAT_ENDIANESS == 0x76543210 {
+        if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
             $if_
         } else {
             $else_

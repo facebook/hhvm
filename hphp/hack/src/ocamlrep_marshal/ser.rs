@@ -1,6 +1,8 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 #![allow(clippy::needless_late_init)]
 
+use std::io::Write;
+
 use libc::c_char;
 use libc::c_double;
 use libc::c_int;
@@ -257,40 +259,20 @@ unsafe fn bitvect_set(bv: *mut uintnat, i: uintnat) {
 // Conversion to big-endian
 
 #[inline]
-unsafe fn store16(dst: *mut c_char, n: c_int) {
-    *dst.offset(0) = (n >> 8) as c_char;
-    *dst.offset(1) = n as c_char;
+fn store16(dst: &mut impl Write, n: c_int) {
+    dst.write_all(&(n as i16).to_be_bytes()).unwrap()
 }
 
 #[inline]
-unsafe fn store32(dst: *mut c_char, n: intnat) {
-    *dst.offset(0) = (n >> 24) as c_char;
-    *dst.offset(1) = (n >> 16) as c_char;
-    *dst.offset(2) = (n >> 8) as c_char;
-    *dst.offset(3) = n as c_char;
+fn store32(dst: &mut impl Write, n: intnat) {
+    dst.write_all(&(n as i32).to_be_bytes()).unwrap()
 }
 
 #[inline]
-unsafe fn store64(dst: *mut c_char, n: int64_t) {
-    *dst.offset(0) = (n >> 56) as c_char;
-    *dst.offset(1) = (n >> 48) as c_char;
-    *dst.offset(2) = (n >> 40) as c_char;
-    *dst.offset(3) = (n >> 32) as c_char;
-    *dst.offset(4) = (n >> 24) as c_char;
-    *dst.offset(5) = (n >> 16) as c_char;
-    *dst.offset(6) = (n >> 8) as c_char;
-    *dst.offset(7) = n as c_char;
+fn store64(dst: &mut impl Write, n: int64_t) {
+    dst.write_all(&(n as i64).to_be_bytes()).unwrap()
 }
 
-#[derive(Copy, Clone)]
-#[repr(C)]
-struct output_block {
-    next: *mut output_block,
-    end: *mut c_char,
-    data: *mut [c_char],
-}
-
-#[derive(Copy, Clone)]
 #[repr(C)]
 struct State {
     extern_flags: c_int, // logical or of some of the flags
@@ -310,12 +292,7 @@ struct State {
     pos_table: position_table,
 
     // To buffer the output
-    extern_userprovided_output: *mut c_char,
-    extern_ptr: *mut c_char,
-    extern_limit: *mut c_char,
-
-    extern_output_first: *mut output_block,
-    extern_output_block: *mut output_block,
+    output: Vec<u8>,
 }
 
 impl State {
@@ -333,12 +310,14 @@ impl State {
         (*extern_state).extern_stack = (*extern_state).extern_stack_init.as_mut_ptr();
         (*extern_state).extern_stack_limit =
             (*extern_state).extern_stack.add(EXTERN_STACK_INIT_SIZE);
+        (*extern_state).output = vec![];
 
         extern_state
     }
 
     unsafe fn free(extern_state: *mut State) {
         if !extern_state.is_null() {
+            drop(std::mem::take(&mut (*extern_state).output));
             caml_stat_free(extern_state as caml_stat_block);
         }
     }
@@ -533,95 +512,20 @@ impl State {
 
     // To buffer the output
 
-    unsafe fn init_output(&mut self) {
-        self.extern_userprovided_output = std::ptr::null_mut();
-        self.extern_output_first =
-            caml_stat_alloc_noexc(std::mem::size_of::<output_block>() as c_ulong) as _;
-        if self.extern_output_first.is_null() {
-            caml_raise_out_of_memory();
-        }
-        let sz = SIZE_EXTERN_OUTPUT_BLOCK;
-        (*self.extern_output_first).data =
-            std::slice::from_raw_parts_mut(caml_stat_alloc_noexc(sz as c_ulong) as *mut c_char, sz);
-        if (*self.extern_output_first).data.is_null() {
-            caml_raise_out_of_memory();
-        }
-        self.extern_output_block = self.extern_output_first;
-        (*self.extern_output_block).next = std::ptr::null_mut();
-        self.extern_ptr = (*self.extern_output_block).data.as_mut_ptr();
-        self.extern_limit = (*self.extern_output_block).data.as_mut_ptr().add(sz);
+    fn init_output(&mut self) {
+        self.output = Vec::with_capacity(SIZE_EXTERN_OUTPUT_BLOCK);
     }
 
-    unsafe fn close_output(&mut self) {
-        if self.extern_userprovided_output.is_null() {
-            (*self.extern_output_block).end = self.extern_ptr
-        };
-    }
+    fn close_output(&mut self) {}
 
     unsafe fn free_output(&mut self) {
-        let mut blk: *mut output_block;
-        let mut nextblk: *mut output_block;
-
-        if self.extern_userprovided_output.is_null() {
-            blk = self.extern_output_first;
-            while !blk.is_null() {
-                nextblk = (*blk).next;
-                caml_stat_free((*blk).data as caml_stat_block);
-                caml_stat_free(blk as caml_stat_block);
-                blk = nextblk
-            }
-            self.extern_output_first = std::ptr::null_mut()
-        }
+        drop(std::mem::take(&mut self.output));
         self.free_stack();
         self.free_position_table();
     }
 
-    unsafe fn grow_output(&mut self, required: intnat) {
-        let blk: *mut output_block;
-        let extra: intnat;
-
-        if !self.extern_userprovided_output.is_null() {
-            self.failwith(b"Marshal.to_buffer: buffer overflow\x00" as *const u8 as *const c_char);
-        }
-        (*self.extern_output_block).end = self.extern_ptr;
-        if required <= (SIZE_EXTERN_OUTPUT_BLOCK / 2) as intnat {
-            extra = 0
-        } else {
-            extra = required
-        };
-        blk = caml_stat_alloc_noexc(std::mem::size_of::<output_block>() as c_ulong) as _;
-        if blk.is_null() {
-            self.out_of_memory();
-        }
-        let sz = SIZE_EXTERN_OUTPUT_BLOCK.wrapping_add(extra as usize);
-        (*blk).data =
-            std::slice::from_raw_parts_mut(caml_stat_alloc_noexc(sz as c_ulong) as *mut c_char, sz);
-        if (*blk).data.is_null() {
-            self.out_of_memory();
-        }
-        (*self.extern_output_block).next = blk;
-        self.extern_output_block = blk;
-        (*self.extern_output_block).next = std::ptr::null_mut();
-        self.extern_ptr = (*self.extern_output_block).data.as_mut_ptr();
-        self.extern_limit = (*self.extern_output_block).data.as_mut_ptr().add(sz);
-    }
-
     unsafe fn output_length(&mut self) -> intnat {
-        let mut blk: *mut output_block;
-        let mut len: intnat;
-
-        if !self.extern_userprovided_output.is_null() {
-            self.extern_ptr
-                .wrapping_offset_from(self.extern_userprovided_output) as intnat
-        } else {
-            len = 0;
-            blk = self.extern_output_first;
-            while !blk.is_null() {
-                len += (*blk).end.wrapping_offset_from((*blk).data.as_mut_ptr()) as intnat;
-                blk = (*blk).next
-            }
-            len
-        }
+        self.output.len() as intnat
     }
 
     // Exception raising, with cleanup
@@ -653,66 +557,42 @@ impl State {
     // Write characters, integers, and blocks in the output buffer
 
     #[inline]
-    unsafe fn write(&mut self, c: c_int) {
-        if self.extern_ptr >= self.extern_limit {
-            self.grow_output(1);
-        }
-        let fresh3 = self.extern_ptr;
-        self.extern_ptr = self.extern_ptr.offset(1);
-        *fresh3 = c as c_char;
+    fn write(&mut self, c: c_int) {
+        self.output.write_all(&[c as u8]).unwrap();
     }
 
     unsafe fn writeblock(&mut self, data: *const c_char, len: intnat) {
-        if self.extern_ptr.offset(len as isize) > self.extern_limit {
-            self.grow_output(len);
-        }
-        memcpy(
-            self.extern_ptr as *mut c_void,
-            data as *const c_void,
-            len as usize,
-        );
-        self.extern_ptr = self.extern_ptr.offset(len as isize);
+        self.output
+            .write_all(std::slice::from_raw_parts(data as *const u8, len as usize))
+            .unwrap();
     }
 
     #[inline]
     unsafe fn writeblock_float8(&mut self, data: *const c_double, ndoubles: intnat) {
-        self.writeblock(data as *const c_char, ndoubles * 8);
+        if ARCH_FLOAT_ENDIANNESS == 0x01234567 || ARCH_FLOAT_ENDIANNESS == 0x76543210 {
+            self.writeblock(data as *const c_char, ndoubles * 8);
+        } else {
+            unimplemented!()
+        }
     }
 
-    unsafe fn writecode8(&mut self, code: c_int, val: intnat) {
-        if self.extern_ptr.offset(2) > self.extern_limit {
-            self.grow_output(2);
-        }
-        *self.extern_ptr.offset(0) = code as c_char;
-        *self.extern_ptr.offset(1) = val as c_char;
-        self.extern_ptr = self.extern_ptr.offset(2);
+    fn writecode8(&mut self, code: c_int, val: intnat) {
+        self.output.write_all(&[code as u8, val as u8]).unwrap();
     }
 
-    unsafe fn writecode16(&mut self, code: c_int, val: intnat) {
-        if self.extern_ptr.offset(3) > self.extern_limit {
-            self.grow_output(3);
-        }
-        *self.extern_ptr.offset(0) = code as c_char;
-        store16(self.extern_ptr.offset(1), val as c_int);
-        self.extern_ptr = self.extern_ptr.offset(3);
+    fn writecode16(&mut self, code: c_int, val: intnat) {
+        self.output.write_all(&[code as u8]).unwrap();
+        store16(&mut self.output, val as c_int);
     }
 
-    unsafe fn writecode32(&mut self, code: c_int, val: intnat) {
-        if self.extern_ptr.offset(5) > self.extern_limit {
-            self.grow_output(5);
-        }
-        *self.extern_ptr.offset(0) = code as c_char;
-        store32(self.extern_ptr.offset(1), val);
-        self.extern_ptr = self.extern_ptr.offset(5);
+    fn writecode32(&mut self, code: c_int, val: intnat) {
+        self.output.write_all(&[code as u8]).unwrap();
+        store32(&mut self.output, val);
     }
 
-    unsafe fn writecode64(&mut self, code: c_int, val: intnat) {
-        if self.extern_ptr.offset(9) > self.extern_limit {
-            self.grow_output(9);
-        }
-        *self.extern_ptr.offset(0) = code as c_char;
-        store64(self.extern_ptr.offset(1), val);
-        self.extern_ptr = self.extern_ptr.offset(9);
+    fn writecode64(&mut self, code: c_int, val: intnat) {
+        self.output.write_all(&[code as u8]).unwrap();
+        store64(&mut self.output, val);
     }
 
     /// Marshaling integers
@@ -975,8 +855,8 @@ impl State {
         &mut self,
         v: value,
         flags: value,
-        header: *mut c_char,    // out
-        header_len: *mut c_int, // out
+        mut header: &mut [u8],  // out
+        header_len: &mut usize, // out
     ) -> intnat {
         static EXTERN_FLAG_VALUES: [c_int; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
 
@@ -1003,49 +883,35 @@ impl State {
                         as *const u8 as *const c_char,
                 );
             }
-            store32(header, MAGIC_NUMBER_BIG as intnat);
-            store32(header.offset(4), 0);
-            store64(header.offset(8), res_len);
-            store64(header.offset(16), self.obj_counter as int64_t);
-            store64(header.offset(24), self.size_64 as int64_t);
+            store32(&mut header, MAGIC_NUMBER_BIG as intnat);
+            store32(&mut header, 0);
+            store64(&mut header, res_len);
+            store64(&mut header, self.obj_counter as int64_t);
+            store64(&mut header, self.size_64 as int64_t);
             *header_len = 32;
             return res_len;
         }
         // Use the small header format
-        store32(header, MAGIC_NUMBER_SMALL as intnat);
-        store32(header.offset(4), res_len);
-        store32(header.offset(8), self.obj_counter as intnat);
-        store32(header.offset(12), self.size_32 as intnat);
-        store32(header.offset(16), self.size_64 as intnat);
+        store32(&mut header, MAGIC_NUMBER_SMALL as intnat);
+        store32(&mut header, res_len);
+        store32(&mut header, self.obj_counter as intnat);
+        store32(&mut header, self.size_32 as intnat);
+        store32(&mut header, self.size_64 as intnat);
         *header_len = 20;
         res_len
     }
 }
 
 unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> std::io::Result<()> {
-    let mut header: [c_char; 32] = [0; 32];
-    let mut header_len: c_int = 0;
-    let mut blk: *mut output_block;
-    let mut nextblk: *mut output_block;
+    let mut header: [u8; 32] = [0; 32];
+    let mut header_len = 0;
     let s: &mut State = State::new().as_mut().expect("nonnull");
     s.init_output();
-    s.extern_value(v, flags, header.as_mut_ptr(), &mut header_len);
-    blk = s.extern_output_first;
+    s.extern_value(v, flags, &mut header, &mut header_len);
+    let output = std::mem::take(&mut s.output);
     State::free(s as *mut State);
-    w.write_all(std::slice::from_raw_parts(
-        header.as_mut_ptr() as *mut u8,
-        header_len as usize,
-    ))?;
-    while !blk.is_null() {
-        w.write_all(std::slice::from_raw_parts(
-            (*blk).data.as_mut_ptr() as *mut u8,
-            (*blk).end.wrapping_offset_from((*blk).data.as_mut_ptr()) as usize,
-        ))?;
-        nextblk = (*blk).next;
-        caml_stat_free((*blk).data as caml_stat_block);
-        caml_stat_free(blk as caml_stat_block);
-        blk = nextblk
-    }
+    w.write_all(&header[0..header_len])?;
+    w.write_all(&output)?;
     w.flush()
 }
 

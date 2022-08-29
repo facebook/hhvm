@@ -6,3 +6,15 @@ File "unsupported.php", line 15, characters 41-60:
 Invalid type hint (Other[0000])
   File "unsupported.php", line 15, characters 41-60:
   Unsupported class refinement
+File "unsupported.php", line 24, characters 24-48:
+Unsupported class refinement (Other[0000])
+File "unsupported.php", line 30, characters 23-47:
+Unsupported class refinement (Other[0000])
+File "unsupported.php", line 25, characters 32-34:
+You are trying to access the method `get` but this is a value of generic type TBox0 (Typing[4062])
+  File "unsupported.php", line 19, characters 53-53:
+  Definition is here
+File "unsupported.php", line 31, characters 32-34:
+You are trying to access the method `get` but this is a value of generic type TBox0 (Typing[4062])
+  File "unsupported.php", line 19, characters 53-53:
+  Definition is here

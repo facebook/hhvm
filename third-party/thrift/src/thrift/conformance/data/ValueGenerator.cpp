@@ -56,6 +56,12 @@ void addNumberValues(NamedValues<Tag>& values) {
     values.emplace_back(-values.back().value, "min_int");
     values.emplace_back((1UL << numeric_limits::digits) - 1, "max_digits");
     values.emplace_back(-values.back().value, "neg_max_digits");
+
+    values.emplace_back(0.1, "one_tenth");
+    values.emplace_back(
+        std::nextafter(numeric_limits::min(), T(1)), "min_plus_ulp");
+    values.emplace_back(
+        std::nextafter(numeric_limits::max(), T(1)), "max_minus_ulp");
   }
   if constexpr (numeric_limits::has_infinity) {
     values.emplace_back(numeric_limits::infinity(), "inf");
@@ -75,6 +81,11 @@ void addNumberValues(NamedValues<Tag>& values) {
   if constexpr (numeric_limits::has_denorm == std::denorm_present) {
     values.emplace_back(numeric_limits::denorm_min(), "denorm_min");
     values.emplace_back(-numeric_limits::denorm_min(), "neg_denorm_min");
+  }
+
+  if constexpr (std::is_same_v<T, double>) {
+    values.emplace_back(1.9156918820264798e-56, "fmt_case_1");
+    values.emplace_back(3788512123356.9854, "fmt_case_2");
   }
 
   if constexpr (!key) {

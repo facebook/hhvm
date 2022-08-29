@@ -11,7 +11,6 @@ use libc::c_ulong;
 use libc::c_void;
 use libc::memcpy;
 use libc::memset;
-use libc::strlen;
 
 use crate::intext::*;
 
@@ -32,16 +31,13 @@ impl<T> WrappingOffset<T> for *const T {
 
 extern "C" {
     fn caml_alloc_string(len: mlsize_t) -> value;
-    fn caml_find_code_fragment_by_pc(pc: *mut c_char) -> *mut code_fragment;
     fn caml_convert_flag_list(_: value, _: *const c_int) -> c_int;
-    fn caml_digest_of_code_fragment(_: *mut code_fragment) -> *mut c_uchar;
     fn caml_stat_alloc_noexc(_: asize_t) -> caml_stat_block;
     fn caml_failwith(msg: *const c_char) -> !;
     fn caml_invalid_argument(msg: *const c_char) -> !;
     fn caml_raise_out_of_memory() -> !;
     fn caml_stat_calloc_noexc(_: asize_t, _: asize_t) -> caml_stat_block;
     fn caml_stat_free(_: caml_stat_block);
-    fn caml_fatal_error(_: *const c_char, _: ...) -> !;
     fn caml_string_length(_: value) -> mlsize_t;
     fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
 }
@@ -144,20 +140,6 @@ const unsafe fn Infix_offset_hd(hd: header_t) -> mlsize_t {
     Bosize_hd(hd)
 }
 
-/// Arity and start env
-#[inline]
-const unsafe fn Closinfo_val(val: value) -> value {
-    Field(val, 1)
-}
-#[inline]
-const fn Arity_closinfo(info: value) -> intnat {
-    (info as intnat) >> 56
-}
-#[inline]
-const fn Start_env_closinfo(info: value) -> uintnat {
-    ((info as uintnat) << 8) >> 9
-}
-
 /// Pointer to the first byte
 #[inline]
 const fn Bp_val(v: value) -> *const c_char {
@@ -181,43 +163,7 @@ const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
         .wrapping_add(tag as header_t)
 }
 
-#[derive(Copy, Clone)]
-#[repr(C)]
-struct custom_fixed_length {
-    bsize_32: intnat,
-    bsize_64: intnat,
-}
-type digest_status = c_uint;
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-struct code_fragment {
-    code_start: *mut c_char,
-    code_end: *mut c_char,
-    fragnum: c_int,
-    digest: [c_uchar; 16],
-    digest_status: digest_status,
-}
-
 type caml_stat_block = *mut c_void;
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-struct custom_operations {
-    identifier: *const c_char,
-    finalize: Option<unsafe extern "C" fn(_: value) -> ()>,
-    compare: Option<unsafe extern "C" fn(_: value, _: value) -> c_int>,
-    hash: Option<unsafe extern "C" fn(_: value) -> intnat>,
-    serialize: Option<unsafe extern "C" fn(_: value, _: *mut uintnat, _: *mut uintnat) -> ()>,
-    deserialize: Option<unsafe extern "C" fn(_: *mut c_void) -> uintnat>,
-    compare_ext: Option<unsafe extern "C" fn(_: value, _: value) -> c_int>,
-    fixed_length: *const custom_fixed_length,
-}
-
-#[inline]
-const unsafe fn Custom_ops_val(v: value) -> *const custom_operations {
-    *(v as *const *const custom_operations)
-}
 
 // Flags affecting marshaling
 
@@ -880,123 +826,6 @@ impl State {
         self.writeblock_float8(v as *mut c_double, nfloats as intnat);
     }
 
-    /// Marshaling custom blocks
-    #[inline]
-    unsafe fn extern_custom(
-        &mut self,
-        v: value,
-        sz_32: *mut uintnat, // out
-        sz_64: *mut uintnat, // out
-    ) {
-        let size_header: *mut c_char;
-        let ident: *const c_char = (*Custom_ops_val(v)).identifier;
-        let serialize: Option<
-            unsafe extern "C" fn(_: value, _: *mut uintnat, _: *mut uintnat) -> (),
-        > = (*Custom_ops_val(v)).serialize;
-        let fixed_length: *const custom_fixed_length = (*Custom_ops_val(v)).fixed_length;
-        let serialize = if let Some(serialize) = serialize {
-            serialize
-        } else {
-            self.invalid_argument(
-                b"output_value: abstract value (Custom)\x00" as *const u8 as *const c_char,
-            );
-        };
-        if fixed_length.is_null() {
-            self.write(CODE_CUSTOM_LEN);
-            self.writeblock(ident, strlen(ident).wrapping_add(1) as intnat);
-            // Reserve 12 bytes for the lengths (sz_32 and sz_64).
-            if self.extern_ptr.offset(12) >= self.extern_limit {
-                self.grow_output(12);
-            }
-            size_header = self.extern_ptr;
-            self.extern_ptr = self.extern_ptr.offset(12);
-            serialize(v, sz_32, sz_64);
-            // Store length before serialized block
-            store32(size_header, *sz_32 as intnat);
-            store64(size_header.offset(4), *sz_64 as int64_t);
-        } else {
-            self.write(CODE_CUSTOM_FIXED);
-            self.writeblock(ident, strlen(ident).wrapping_add(1) as intnat);
-            serialize(v, sz_32, sz_64);
-            if *sz_32 != (*fixed_length).bsize_32 as uintnat
-                || *sz_64 != (*fixed_length).bsize_64 as uintnat
-            {
-                caml_fatal_error(
-                    b"output_value: incorrect fixed sizes specified by %self\x00" as *const u8
-                        as *const c_char,
-                    ident,
-                );
-            }
-        };
-    }
-
-    // Marshaling code pointers
-    unsafe fn extern_code_pointer(&mut self, codeptr: *mut c_char) {
-        let cf: *mut code_fragment;
-        let digest: *const c_char;
-
-        cf = caml_find_code_fragment_by_pc(codeptr);
-        if !cf.is_null() {
-            if self.extern_flags & CLOSURES == 0 {
-                self.invalid_argument(
-                    b"output_value: functional value\x00" as *const u8 as *const c_char,
-                );
-            }
-            digest = caml_digest_of_code_fragment(cf) as *const c_char;
-            if digest.is_null() {
-                self.invalid_argument(
-                    b"output_value: private function\x00" as *const u8 as *const c_char,
-                );
-            }
-            self.writecode32(
-                CODE_CODEPOINTER,
-                codeptr.wrapping_offset_from((*cf).code_start) as c_long,
-            );
-            self.writeblock(digest, 16);
-        } else {
-            self.invalid_argument(
-                b"output_value: abstract value (outside heap)\x00" as *const u8 as *const c_char,
-            );
-        };
-    }
-
-    /// Marshaling the non-environment part of closures
-    #[inline]
-    unsafe fn extern_closure_up_to_env(&mut self, v: value) -> mlsize_t {
-        let startenv: mlsize_t;
-        let mut i: mlsize_t = 0;
-        let mut info: value;
-
-        startenv = Start_env_closinfo(Closinfo_val(v));
-        loop {
-            // The infix header
-            if i > 0 {
-                let fresh4 = i;
-                i = i.wrapping_add(1);
-                self.extern_int(Long_val(Field(v, fresh4 as usize)));
-            }
-            // The default entry point
-            let fresh5 = i;
-            i = i.wrapping_add(1);
-            self.extern_code_pointer(Field(v, fresh5 as usize) as *mut c_char);
-            // The closure info.
-            let fresh6 = i;
-            i = i.wrapping_add(1);
-            info = Field(v, fresh6 as usize);
-            self.extern_int(Long_val(info));
-            // The direct entry point if arity is neither 0 nor 1
-            if Arity_closinfo(info) != 0 && Arity_closinfo(info) != 1 {
-                let fresh7 = i;
-                i = i.wrapping_add(1);
-                self.extern_code_pointer(Field(v, fresh7 as usize) as *mut c_char);
-            }
-            if i >= startenv {
-                break;
-            }
-        }
-        startenv
-    }
-
     /// Marshal the given value in the output buffer
     unsafe fn extern_rec(&mut self, mut v: value) {
         let mut goto_next_item: bool;
@@ -1090,42 +919,14 @@ impl State {
                                 v = (v as uintnat).wrapping_sub(Infix_offset_hd(hd)) as value; // PR#5772
                                 continue;
                             }
-                            Custom_tag => {
-                                let mut sz_32: uintnat = 0;
-                                let mut sz_64: uintnat = 0;
-                                self.extern_custom(v, &mut sz_32, &mut sz_64);
-                                self.size_32 = self.size_32.wrapping_add(
-                                    (2 as uintnat).wrapping_add(sz_32.wrapping_add(3) >> 2),
-                                ); // header + ops + data
-                                self.size_64 = self.size_64.wrapping_add(
-                                    (2 as uintnat).wrapping_add(sz_64.wrapping_add(7) >> 3),
-                                );
-                                self.record_location(v, h);
-                            }
-                            Closure_tag => {
-                                let i: mlsize_t;
-                                self.extern_header(sz, tag);
-                                self.size_32 =
-                                    self.size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
-                                self.size_64 =
-                                    self.size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
-                                self.record_location(v, h);
-                                i = self.extern_closure_up_to_env(v);
-                                if i < sz {
-                                    // Remember that we still have to serialize fields i + 1 ... sz - 1
-                                    if i < sz.wrapping_sub(1) {
-                                        sp = sp.offset(1);
-                                        if sp >= self.extern_stack_limit {
-                                            sp = self.resize_stack(sp)
-                                        }
-                                        (*sp).v = Field_ptr_mut(v, i.wrapping_add(1) as usize);
-                                        (*sp).count = sz.wrapping_sub(i).wrapping_sub(1)
-                                    }
-                                    // Continue serialization with the first environment field
-                                    v = Field(v, i as usize);
-                                    continue;
-                                }
-                            }
+                            Custom_tag => self.invalid_argument(
+                                b"output_value: marshaling of custom blocks not implemented\0"
+                                    as *const u8 as *const c_char,
+                            ),
+                            Closure_tag => self.invalid_argument(
+                                b"output_value: marshaling of closures not implemented\0"
+                                    as *const u8 as *const c_char,
+                            ),
                             _ => {
                                 self.extern_header(sz, tag);
                                 self.size_32 =

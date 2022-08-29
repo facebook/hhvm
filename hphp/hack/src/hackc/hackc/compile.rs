@@ -165,9 +165,8 @@ pub(crate) fn process_single_file(
     let filepath = RelativePath::make(Prefix::Dummy, filepath);
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = native_env(filepath, opts);
-    let arena = bumpalo::Bump::new();
     let mut output = Vec::new();
-    compile::from_text(&arena, &mut output, source_text, &env, None, profile)?;
+    compile::from_text(&mut output, source_text, &env, None, profile)?;
     if opts.verbosity >= 1 {
         eprintln!("{}: {:#?}", env.filepath.path().display(), profile);
     }
@@ -192,9 +191,7 @@ fn compile_impl<'d>(
 ) -> Result<Vec<u8>> {
     let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
-    let arena = bumpalo::Bump::new();
     compile::from_text(
-        &arena,
         &mut hhas,
         text,
         &env,

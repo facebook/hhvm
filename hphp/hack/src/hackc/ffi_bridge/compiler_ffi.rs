@@ -260,8 +260,6 @@ fn hackc_compile_from_text_cpp_ffi(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
         source_text.as_bytes(),
     );
-    let mut output = Vec::new();
-    let alloc = bumpalo::Bump::new();
     let decl_allocator = bumpalo::Bump::new();
 
     let decl_provider = if env.decl_provider != 0 {
@@ -273,8 +271,8 @@ fn hackc_compile_from_text_cpp_ffi(
         None
     };
 
+    let mut output = Vec::new();
     compile::from_text(
-        &alloc,
         &mut output,
         text,
         &native_env,

@@ -430,19 +430,19 @@ impl Profile {
 /// Update `profile` with stats from any passes that run,
 /// even if the compiler ultimately returns Err.
 pub fn from_text<'decl>(
-    alloc: &bumpalo::Bump,
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
     decl_provider: Option<&'decl dyn DeclProvider>,
     profile: &mut Profile,
 ) -> Result<()> {
-    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
+    let alloc = bumpalo::Bump::new();
+    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, &alloc);
     let mut unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
 
     if native_env.flags.contains(EnvFlags::ENABLE_IR) {
         let ir = bc_to_ir::bc_to_ir(&unit);
-        unit = ir_to_bc::ir_to_bc(alloc, ir);
+        unit = ir_to_bc::ir_to_bc(&alloc, ir);
     }
 
     unit_to_string(native_env, writer, &unit, profile)?;

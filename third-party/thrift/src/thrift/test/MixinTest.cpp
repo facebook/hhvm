@@ -34,19 +34,24 @@ void mixinSimpleTest() {
   EXPECT_FALSE(s.field6().has_value());
 
   EXPECT_EQ(
-      *apache::thrift::detail::invoke_reffer<apache::thrift::tag::field1>{}(s),
+      *apache::thrift::detail::invoke_reffer<apache::thrift::ident::field1>{}(
+          s),
       "1");
   EXPECT_EQ(
-      *apache::thrift::detail::invoke_reffer<apache::thrift::tag::field2>{}(s),
+      *apache::thrift::detail::invoke_reffer<apache::thrift::ident::field2>{}(
+          s),
       "2");
   EXPECT_EQ(
-      *apache::thrift::detail::invoke_reffer<apache::thrift::tag::field3>{}(s),
+      *apache::thrift::detail::invoke_reffer<apache::thrift::ident::field3>{}(
+          s),
       "3");
   EXPECT_EQ(
-      *apache::thrift::detail::invoke_reffer<apache::thrift::tag::field4>{}(s),
+      *apache::thrift::detail::invoke_reffer<apache::thrift::ident::field4>{}(
+          s),
       "4");
   EXPECT_EQ(
-      *apache::thrift::detail::invoke_reffer<apache::thrift::tag::field5>{}(s),
+      *apache::thrift::detail::invoke_reffer<apache::thrift::ident::field5>{}(
+          s),
       "5");
 
   s.u()->field6_ref() = "6";

@@ -188,25 +188,25 @@ TEST(FieldsTest, UnifiedAPIs) {
 
   // clang-format off
   checkField<struct3, field_ordinal<0>,  field_id<0>,  void,        true,  void,      void>("");
-  checkField<struct3, field_ordinal<1>,  field_id<2>,  tag::fieldA, true,  TypeTag1,  FieldTag1>("fieldA");
-  checkField<struct3, field_ordinal<2>,  field_id<1>,  tag::fieldB, true,  TypeTag2,  FieldTag2>("fieldB");
-  checkField<struct3, field_ordinal<3>,  field_id<3>,  tag::fieldC, true,  TypeTag3,  FieldTag3>("fieldC");
-  checkField<struct3, field_ordinal<4>,  field_id<4>,  tag::fieldD, true,  TypeTag4,  FieldTag4>("fieldD");
-  checkField<struct3, field_ordinal<5>,  field_id<5>,  tag::fieldE, true,  TypeTag5,  FieldTag5>("fieldE");
-  checkField<struct3, field_ordinal<6>,  field_id<6>,  tag::fieldF, false, TypeTag6,  FieldTag6>("fieldF");
-  checkField<struct3, field_ordinal<7>,  field_id<7>,  tag::fieldG, true,  TypeTag7,  FieldTag7>("fieldG");
-  checkField<struct3, field_ordinal<8>,  field_id<8>,  tag::fieldH, false, TypeTag8,  FieldTag8>("fieldH");
-  checkField<struct3, field_ordinal<9>,  field_id<9>,  tag::fieldI, true,  TypeTag9,  FieldTag9>("fieldI");
-  checkField<struct3, field_ordinal<10>, field_id<10>, tag::fieldJ, true,  TypeTag10, FieldTag10>("fieldJ");
-  checkField<struct3, field_ordinal<11>, field_id<11>, tag::fieldK, true,  TypeTag11, FieldTag11>("fieldK");
-  checkField<struct3, field_ordinal<12>, field_id<12>, tag::fieldL, true,  TypeTag12, FieldTag12>("fieldL");
-  checkField<struct3, field_ordinal<13>, field_id<13>, tag::fieldM, true,  TypeTag13, FieldTag13>("fieldM");
-  checkField<struct3, field_ordinal<14>, field_id<14>, tag::fieldN, false, TypeTag14, FieldTag14>("fieldN");
-  checkField<struct3, field_ordinal<15>, field_id<15>, tag::fieldO, false, TypeTag15, FieldTag15>("fieldO");
-  checkField<struct3, field_ordinal<16>, field_id<16>, tag::fieldP, true,  TypeTag16, FieldTag16>("fieldP");
-  checkField<struct3, field_ordinal<17>, field_id<17>, tag::fieldQ, true,  TypeTag17, FieldTag17>("fieldQ");
-  checkField<struct3, field_ordinal<18>, field_id<18>, tag::fieldR, true,  TypeTag18, FieldTag18>("fieldR");
-  checkField<struct3, field_ordinal<19>, field_id<20>, tag::fieldS, true,  TypeTag19, FieldTag19>("fieldS");
+  checkField<struct3, field_ordinal<1>,  field_id<2>,  ident::fieldA, true,  TypeTag1,  FieldTag1>("fieldA");
+  checkField<struct3, field_ordinal<2>,  field_id<1>,  ident::fieldB, true,  TypeTag2,  FieldTag2>("fieldB");
+  checkField<struct3, field_ordinal<3>,  field_id<3>,  ident::fieldC, true,  TypeTag3,  FieldTag3>("fieldC");
+  checkField<struct3, field_ordinal<4>,  field_id<4>,  ident::fieldD, true,  TypeTag4,  FieldTag4>("fieldD");
+  checkField<struct3, field_ordinal<5>,  field_id<5>,  ident::fieldE, true,  TypeTag5,  FieldTag5>("fieldE");
+  checkField<struct3, field_ordinal<6>,  field_id<6>,  ident::fieldF, false, TypeTag6,  FieldTag6>("fieldF");
+  checkField<struct3, field_ordinal<7>,  field_id<7>,  ident::fieldG, true,  TypeTag7,  FieldTag7>("fieldG");
+  checkField<struct3, field_ordinal<8>,  field_id<8>,  ident::fieldH, false, TypeTag8,  FieldTag8>("fieldH");
+  checkField<struct3, field_ordinal<9>,  field_id<9>,  ident::fieldI, true,  TypeTag9,  FieldTag9>("fieldI");
+  checkField<struct3, field_ordinal<10>, field_id<10>, ident::fieldJ, true,  TypeTag10, FieldTag10>("fieldJ");
+  checkField<struct3, field_ordinal<11>, field_id<11>, ident::fieldK, true,  TypeTag11, FieldTag11>("fieldK");
+  checkField<struct3, field_ordinal<12>, field_id<12>, ident::fieldL, true,  TypeTag12, FieldTag12>("fieldL");
+  checkField<struct3, field_ordinal<13>, field_id<13>, ident::fieldM, true,  TypeTag13, FieldTag13>("fieldM");
+  checkField<struct3, field_ordinal<14>, field_id<14>, ident::fieldN, false, TypeTag14, FieldTag14>("fieldN");
+  checkField<struct3, field_ordinal<15>, field_id<15>, ident::fieldO, false, TypeTag15, FieldTag15>("fieldO");
+  checkField<struct3, field_ordinal<16>, field_id<16>, ident::fieldP, true,  TypeTag16, FieldTag16>("fieldP");
+  checkField<struct3, field_ordinal<17>, field_id<17>, ident::fieldQ, true,  TypeTag17, FieldTag17>("fieldQ");
+  checkField<struct3, field_ordinal<18>, field_id<18>, ident::fieldR, true,  TypeTag18, FieldTag18>("fieldR");
+  checkField<struct3, field_ordinal<19>, field_id<20>, ident::fieldS, true,  TypeTag19, FieldTag19>("fieldS");
   // clang-format off
 }
 
@@ -235,7 +235,7 @@ TEST(FieldsTest, IsReflectionMetadata) {
   static_assert(!is_ordinal_v<void>);
   static_assert(!is_ordinal_v<IncompleteType>);
 
-  static_assert(is_ident_v<tag::fieldA>);
+  static_assert(is_ident_v<ident::fieldA>);
   static_assert(!is_ident_v<IncompleteType>);
   static_assert(!is_ident_v<int>);
   static_assert(!is_ident_v<void>);
@@ -247,7 +247,7 @@ TEST(FieldsTest, IsReflectionMetadata) {
   static_assert(is_id_v<field_id<1>>);
   static_assert(is_id_v<field_ordinal<0>>);
   static_assert(is_id_v<field_ordinal<1>>);
-  static_assert(is_id_v<tag::fieldA>);
+  static_assert(is_id_v<ident::fieldA>);
   static_assert(!is_id_v<bool>);
   static_assert(!is_id_v<std::int32_t>);
   static_assert(!is_id_v<std::vector<int32_t>>);
@@ -285,11 +285,11 @@ TEST(FieldsTest, NotFoundFieldInfo) {
   test::same_tag<op::get_ident<Struct, binary_t>, void>;
   test::same_tag<op::get_field_tag<Struct, binary_t>, void>;
 
-  test::same_tag<op::get_ordinal<Struct, tag::a>, field_ordinal<0>>;
-  test::same_tag<op::get_field_id<Struct, tag::a>, field_id<0>>;
-  test::same_tag<op::get_type_tag<Struct, tag::a>, void>;
-  test::same_tag<op::get_ident<Struct, tag::a>, void>;
-  test::same_tag<op::get_field_tag<Struct, tag::a>, void>;
+  test::same_tag<op::get_ordinal<Struct, ident::a>, field_ordinal<0>>;
+  test::same_tag<op::get_field_id<Struct, ident::a>, field_id<0>>;
+  test::same_tag<op::get_type_tag<Struct, ident::a>, void>;
+  test::same_tag<op::get_ident<Struct, ident::a>, void>;
+  test::same_tag<op::get_field_tag<Struct, ident::a>, void>;
 }
 
 
@@ -302,7 +302,7 @@ TEST(FieldsTest, HelperAPIs) {
   using Struct = test_cpp2::cpp_reflection::struct3;
 
   test::same_tag<op::get_native_type<Struct, field_ordinal<1>>, std::int32_t>;
-  test::same_tag<op::get_native_type<Struct, tag::fieldA>, std::int32_t>;
+  test::same_tag<op::get_native_type<Struct, ident::fieldA>, std::int32_t>;
   test::same_tag<op::get_native_type<Struct, field_id<11>>, std::deque<std::string>>;
   EXPECT_EQ((op::get_field_id_v<Struct, field_ordinal<1>>), FieldId{2});
   EXPECT_EQ((op::get_ordinal_v<Struct, field_id<2>>), FieldOrdinal{1});

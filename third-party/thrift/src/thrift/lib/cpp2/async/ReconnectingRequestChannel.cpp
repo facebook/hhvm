@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/async/ReconnectingRequestChannel.h>
 
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -111,6 +112,17 @@ class ChannelKeepAliveSink : public SinkClientCallback {
   ReconnectingRequestChannel::ImplPtr keepAlive_;
   SinkClientCallback& clientCallback_;
 };
+
+static const folly::exception_wrapper pendingRequestOverflowError() {
+  return folly::make_exception_wrapper<std::logic_error>(
+      "Request Queue Overflowed!");
+}
+
+static const folly::exception_wrapper requestQueueNonEmptyAtDestructionError() {
+  return folly::make_exception_wrapper<std::logic_error>(
+      "Channel destroyed while request still pending!");
+}
+
 } // namespace
 
 void ReconnectingRequestChannel::sendRequestResponse(
@@ -119,9 +131,41 @@ void ReconnectingRequestChannel::sendRequestResponse(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     RequestClientCallback::Ptr cob) {
-  reconnectIfNeeded();
-  cob = RequestClientCallback::Ptr(new ChannelKeepAlive(impl_, std::move(cob)));
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      if (requestQueue_.size() >= requestQueueLimit) {
+        cob.release()->onResponseError(pendingRequestOverflowError());
+        return;
+      }
+      requestQueue_.push_back([this,
+                               options = options,
+                               methodMetadata = std::move(methodMetadata),
+                               request = std::move(request),
+                               header = std::move(header),
+                               cob = std::move(cob)](bool failRequest) mutable {
+        if (failRequest) {
+          cob.release()->onResponseError(
+              requestQueueNonEmptyAtDestructionError());
+          return;
+        }
+        cob = RequestClientCallback::Ptr(
+            new ChannelKeepAlive(impl_, std::move(cob)));
+        return impl_->sendRequestResponse(
+            std::move(options),
+            std::move(methodMetadata),
+            std::move(request),
+            std::move(header),
+            std::move(cob));
+      });
+      reconnectRequestChannelWithCallback();
+      // Callback will invoke this request after successful reconnecting.
+      return;
+    }
+    reconnectRequestChannel();
+  }
+  DCHECK_EQ(requestQueue_.size(), 0);
 
+  cob = RequestClientCallback::Ptr(new ChannelKeepAlive(impl_, std::move(cob)));
   return impl_->sendRequestResponse(
       options,
       std::move(methodMetadata),
@@ -136,7 +180,38 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     RequestClientCallback::Ptr cob) {
-  reconnectIfNeeded();
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      if (requestQueue_.size() >= requestQueueLimit) {
+        cob.release()->onResponseError(pendingRequestOverflowError());
+        return;
+      }
+      requestQueue_.push_back([this,
+                               options = options,
+                               methodMetadata = std::move(methodMetadata),
+                               request = std::move(request),
+                               header = std::move(header),
+                               cob = std::move(cob)](bool failRequest) mutable {
+        if (failRequest) {
+          cob.release()->onResponseError(
+              requestQueueNonEmptyAtDestructionError());
+          return;
+        }
+        cob = RequestClientCallback::Ptr(
+            new ChannelKeepAlive(impl_, std::move(cob)));
+        return impl_->sendRequestNoResponse(
+            std::move(options),
+            std::move(methodMetadata),
+            std::move(request),
+            std::move(header),
+            std::move(cob));
+      });
+      reconnectRequestChannelWithCallback();
+      // Callback will invoke this request after successful reconnecting.
+      return;
+    }
+    reconnectRequestChannel();
+  }
   cob = RequestClientCallback::Ptr(new ChannelKeepAlive(impl_, std::move(cob)));
 
   return impl_->sendRequestNoResponse(
@@ -153,7 +228,36 @@ void ReconnectingRequestChannel::sendRequestStream(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     StreamClientCallback* cob) {
-  reconnectIfNeeded();
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      if (requestQueue_.size() >= requestQueueLimit) {
+        cob->onFirstResponseError(pendingRequestOverflowError());
+        return;
+      }
+      requestQueue_.push_back([this,
+                               options = options,
+                               methodMetadata = std::move(methodMetadata),
+                               request = std::move(request),
+                               header = std::move(header),
+                               cob = std::move(cob)](bool failRequest) mutable {
+        if (failRequest) {
+          cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
+          return;
+        }
+        cob = new ChannelKeepAliveStream(impl_, *cob);
+        return impl_->sendRequestStream(
+            std::move(options),
+            std::move(methodMetadata),
+            std::move(request),
+            std::move(header),
+            cob);
+      });
+      reconnectRequestChannelWithCallback();
+      // Callback will invoke this request after successful reconnecting.
+      return;
+    }
+    reconnectRequestChannel();
+  }
   cob = new ChannelKeepAliveStream(impl_, *cob);
 
   return impl_->sendRequestStream(
@@ -170,7 +274,37 @@ void ReconnectingRequestChannel::sendRequestSink(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     SinkClientCallback* cob) {
-  reconnectIfNeeded();
+  if (!isChannelGood()) {
+    if (useRequestQueue_) {
+      if (requestQueue_.size() >= requestQueueLimit) {
+        cob->onFirstResponseError(pendingRequestOverflowError());
+        return;
+      }
+      requestQueue_.push_back([this,
+                               options = options,
+                               methodMetadata = std::move(methodMetadata),
+                               request = std::move(request),
+                               header = std::move(header),
+                               cob = std::move(cob)](bool failRequest) mutable {
+        if (failRequest) {
+          cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
+          return;
+        }
+        cob = new ChannelKeepAliveSink(impl_, *cob);
+        return impl_->sendRequestSink(
+            std::move(options),
+            std::move(methodMetadata),
+            std::move(request),
+            std::move(header),
+            cob);
+      });
+      reconnectRequestChannelWithCallback();
+      // sendQueuedRequests() will take care of sending this request.
+      return;
+    }
+    reconnectRequestChannel();
+  }
+
   cob = new ChannelKeepAliveSink(impl_, *cob);
 
   return impl_->sendRequestSink(
@@ -181,9 +315,47 @@ void ReconnectingRequestChannel::sendRequestSink(
       cob);
 }
 
-void ReconnectingRequestChannel::reconnectIfNeeded() {
-  if (!impl_ || !impl_->good()) {
-    impl_ = implCreator_(evb_);
+void ReconnectingRequestChannel::connectSuccess() noexcept {
+  isReconnecting_ = false;
+  sendQueuedRequests();
+}
+
+void ReconnectingRequestChannel::connectErr(
+    const folly::AsyncSocketException& ex) noexcept {
+  isReconnecting_ = false;
+  VLOG(1) << "Reconnecting Failed with Error: " << ex.what();
+  // With reconnecting failed, sendQueuedRequests() will send request and clean
+  // the queue via bad channel and fail each request.
+  sendQueuedRequests();
+}
+
+bool ReconnectingRequestChannel::isChannelGood() {
+  return impl_ && impl_->good();
+}
+
+void ReconnectingRequestChannel::reconnectRequestChannel() {
+  impl_ = implCreator_(evb_);
+}
+
+void ReconnectingRequestChannel::reconnectRequestChannelWithCallback() {
+  if (isReconnecting_ || isCreatingChannel_) {
+    // Another request is doing reconnecting.
+    return;
+  }
+  isReconnecting_ = true;
+  isCreatingChannel_ = true;
+  impl_ = implCreatorWithCallback_(evb_, *this);
+  isCreatingChannel_ = false;
+  sendQueuedRequests();
+}
+
+void ReconnectingRequestChannel::sendQueuedRequests() {
+  // Only send request while channel and socket are both ready.
+  if (!isCreatingChannel_ && !isReconnecting_) {
+    while (!requestQueue_.empty()) {
+      requestQueue_.front()(/*failRequest=*/false);
+      requestQueue_.pop_front();
+    }
   }
 }
 

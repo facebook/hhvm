@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <utility>
 
 #include <glog/logging.h>
 
 #include <folly/Function.h>
+#include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/DelayedDestruction.h>
 
 #include <thrift/lib/cpp2/async/ClientChannel.h>
@@ -41,17 +43,37 @@ class THeader;
 
 // Simple RequestChannel wrapper that automatically re-creates underlying
 // RequestChannel in case request is about to be sent over a bad channel.
-class ReconnectingRequestChannel : public RequestChannel {
+class ReconnectingRequestChannel : public RequestChannel,
+                                   public folly::AsyncSocket::ConnectCallback {
  public:
   using Impl = ClientChannel;
   using ImplPtr = std::shared_ptr<Impl>;
   using ImplCreator = folly::Function<ImplPtr(folly::EventBase&)>;
+  using ImplCreatorWithCallback = folly::Function<ImplPtr(
+      folly::EventBase&, folly::AsyncSocket::ConnectCallback&)>;
+
+  /**
+   * DEPRECATED: Please use the newChannel() variant with a callback, which
+   * supports queuing of requests while a channel is being reestablished
+   * following a disconnect.
+   */
+  [[deprecated(
+      "Use newChannel(folly::EventBase&, ImplCreatorWithCallback)")]] static std::
+      unique_ptr<
+          ReconnectingRequestChannel,
+          folly::DelayedDestruction::Destructor>
+      newChannel(folly::EventBase& evb, ImplCreator implCreator) {
+    return {new ReconnectingRequestChannel(evb, std::move(implCreator)), {}};
+  }
 
   static std::unique_ptr<
       ReconnectingRequestChannel,
       folly::DelayedDestruction::Destructor>
-  newChannel(folly::EventBase& evb, ImplCreator implCreator) {
-    return {new ReconnectingRequestChannel(evb, std::move(implCreator)), {}};
+  newChannel(
+      folly::EventBase& evb, ImplCreatorWithCallback implCreatorWithCallback) {
+    return {
+        new ReconnectingRequestChannel(evb, std::move(implCreatorWithCallback)),
+        {}};
   }
 
   using RequestChannel::sendRequestNoResponse;
@@ -94,22 +116,63 @@ class ReconnectingRequestChannel : public RequestChannel {
   folly::EventBase* getEventBase() const override { return &evb_; }
 
   uint16_t getProtocolId() override {
-    reconnectIfNeeded();
+    if (!isChannelGood()) {
+      reconnectRequestChannel();
+    }
     return impl_->getProtocolId();
   }
 
+  // Avoid using this method, unless really necessary and you understand how in
+  // your system the request and socket->connect are working.
+  void setRequestQueueSize(size_t s) { requestQueueLimit = s; }
+
+  void connectSuccess() noexcept override;
+  void connectErr(const folly::AsyncSocketException& ex) noexcept override;
+
  protected:
-  ~ReconnectingRequestChannel() override = default;
+  ~ReconnectingRequestChannel() override {
+    while (!requestQueue_.empty()) {
+      requestQueue_.front()(/*failRequest=*/true);
+      requestQueue_.pop_front();
+    }
+  }
 
  private:
   ReconnectingRequestChannel(folly::EventBase& evb, ImplCreator implCreator)
-      : implCreator_(std::move(implCreator)), evb_(evb) {}
+      : implCreator_(std::move(implCreator)),
+        evb_(evb),
+        useRequestQueue_(false),
+        isReconnecting_(false),
+        isCreatingChannel_(false) {}
+  // With this contructor, each time when Channel Reconnecting happens, requests
+  // will be first stored in a queue, and then let the socket->connect 's
+  // callback to send them.
+  ReconnectingRequestChannel(
+      folly::EventBase& evb, ImplCreatorWithCallback implCreatorWithCallback)
+      : implCreatorWithCallback_(std::move(implCreatorWithCallback)),
+        evb_(evb),
+        useRequestQueue_(true),
+        isReconnecting_(false),
+        isCreatingChannel_(false) {}
 
-  void reconnectIfNeeded();
+  bool isChannelGood();
+  void reconnectRequestChannel();
+  void reconnectRequestChannelWithCallback();
+  void sendQueuedRequests();
+
+  // An arbitrary number that ensure memory consuption will be limited to
+  // request queue. If the queue reaches the limit, we will reject new request
+  // immediatly. This is a safe guard that we expect to be rarely hit.
+  size_t requestQueueLimit = 1024;
 
   ImplPtr impl_;
   ImplCreator implCreator_;
+  ImplCreatorWithCallback implCreatorWithCallback_;
   folly::EventBase& evb_;
+  std::deque<folly::Function<void(/*failRequest=*/bool)>> requestQueue_;
+  const bool useRequestQueue_;
+  bool isReconnecting_;
+  bool isCreatingChannel_;
 };
 
 } // namespace thrift

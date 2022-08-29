@@ -77,6 +77,10 @@ template <typename Tag>
 struct StandardTag {
   using type = Tag;
 };
+template <typename T, typename Tag>
+struct CppTag {
+  using type = cpp_type<T, Tag>;
+};
 
 template <template <typename...> class T, typename ValTag>
 using parameterized_type = folly::conditional_t<
@@ -132,6 +136,11 @@ template <>
 struct NativeTypes<string_t> : ConcreteType<std::string> {};
 template <>
 struct NativeTypes<binary_t> : ConcreteType<std::string> {};
+
+// Unsigned types.
+template <typename T>
+struct InferTag<T, std::enable_if_t<folly::is_unsigned_v<T>>>
+    : CppTag<T, typename InferTag<std::make_signed_t<T>>::type> {};
 
 // Traits for enums.
 template <typename E>

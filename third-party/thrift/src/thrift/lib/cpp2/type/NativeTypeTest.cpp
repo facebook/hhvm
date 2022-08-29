@@ -47,6 +47,10 @@ TEST(InferTagTest, Integer) {
   test::same_tag<i16_t, infer_tag<int16_t>>;
   test::same_tag<i32_t, infer_tag<int32_t>>;
   test::same_tag<i64_t, infer_tag<int64_t>>;
+  test::same_tag<cpp_type<uint8_t, byte_t>, infer_tag<uint8_t>>;
+  test::same_tag<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>;
+  test::same_tag<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>;
+  test::same_tag<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>;
 }
 
 TEST(InferTagTest, Floating) {

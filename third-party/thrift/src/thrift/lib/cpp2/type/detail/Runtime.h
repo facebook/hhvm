@@ -370,6 +370,22 @@ class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
     return ConstT::template to<type::string_t>(name);
   }
 
+  void append(ConstT val) { Base::append(val); }
+  void append(const std::string& val) {
+    append(ConstT::template to<binary_t>(val));
+  }
+
+  bool add(ConstT val) { return Base::add(val); }
+  bool add(const std::string& val) {
+    return add(ConstT::template to<binary_t>(val));
+  }
+
+  bool put(FieldId id, ConstT val) { return Base::put(id, val); }
+  bool put(ConstT key, ConstT val) { return Base::put(key, val); }
+  bool put(const std::string& name, ConstT val) {
+    return put(asRef(name), val);
+  }
+
  private:
   friend bool operator==(const Derived& lhs, const Derived& rhs) {
     return lhs.equal(rhs);

@@ -50,6 +50,10 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   template <typename T, typename Tag = infer_tag<T>>
   /* implicit */ ConstRef(T&& val) noexcept
       : ConstRef(Tag{}, std::forward<T>(val)) {}
+  // 'capture' a std::string.
+  // TODO: infer_tag a string_view type instead.
+  /* implicit */ ConstRef(const std::string& val) noexcept
+      : ConstRef(binary_t{}, val) {}
 
  private:
   friend Base;
@@ -78,19 +82,15 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   void clear() { Base::clear(); }
 
   // Append to a list, string, etc.
-  void append(ConstRef val) { Base::append(val); }
+  using Base::append;
 
   // Add to a set, number, etc.
-  bool add(ConstRef val) { return Base::add(val); }
+  using Base::add;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
-  bool put(FieldId id, ConstRef val) { return Base::put(id, val); }
-  bool put(ConstRef key, ConstRef val) { return Base::put(key, val); }
-  bool put(const std::string& name, ConstRef val) {
-    return put(asRef(name), val);
-  }
+  using Base::put;
 
   // Throws on mismatch or if const.
   template <typename Tag>
@@ -237,19 +237,15 @@ class Value : public detail::RuntimeAccessBase<ConstRef, Ref, Value> {
   void clear() { Base::clear(); }
 
   // Append to a list, string, etc.
-  void append(ConstRef val) { Base::append(val); }
+  using Base::append;
 
   // Add to a set, number, etc.
-  bool add(ConstRef val) { return Base::add(val); }
+  using Base::add;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
-  bool put(FieldId id, ConstRef val) { return Base::put(id, val); }
-  bool put(ConstRef key, ConstRef val) { return Base::put(key, val); }
-  bool put(const std::string& name, ConstRef val) {
-    return put(asRef(name), val);
-  }
+  using Base::put;
 
  private:
   using Base::Base;

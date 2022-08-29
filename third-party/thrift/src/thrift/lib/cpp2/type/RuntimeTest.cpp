@@ -131,7 +131,7 @@ TEST(RuntimeRefTest, Set) {
   auto ref = Ref::to<set<string_t>>(value);
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
-  EXPECT_TRUE(ref.add(Ref::to<string_t>("hi")));
+  EXPECT_TRUE(ref.add("hi"));
   EXPECT_THAT(value, ::testing::ElementsAre("hi"));
 
   EXPECT_FALSE(ref.empty());
@@ -150,7 +150,7 @@ TEST(RuntimeRefTest, Map) {
   auto ref = Ref::to<map<string_t, i32_t>>(value);
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
-  EXPECT_FALSE(ref.put(Ref::to<string_t>("one"), 1));
+  EXPECT_FALSE(ref.put("one", 1));
   EXPECT_EQ(value["one"], 1);
 
   EXPECT_TRUE(ref.put("one", 2));
@@ -244,7 +244,7 @@ TEST(RuntimeValueTest, CppType_List) {
   using T = std::list<std::string>;
   using Tag = cpp_type<T, type::list<string_t>>;
   auto list = Value::create<Tag>();
-  list.append(Ref::to<string_t>("foo"));
+  list.append("foo");
   EXPECT_EQ(list[0], Ref::to<string_t>("foo"));
 }
 

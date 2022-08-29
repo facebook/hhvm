@@ -34,11 +34,11 @@ class SomeStruct_struct_traits {
     using owner = ::facebook::ns::qwerty::SomeStruct;
     using name = __fbthrift_strings_enums::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using type = ::std::int32_t;
-    using tag = ::apache::thrift::tag::fieldA;
+    using tag = ::apache::thrift::ident::fieldA;
     static constexpr ::apache::thrift::field_id_t id = 1;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::tag::fieldA>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::tag::fieldA>;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::fieldA>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::fieldA>;
     using type_class = ::apache::thrift::type_class::integral;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };

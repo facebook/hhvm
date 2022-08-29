@@ -13,12 +13,12 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct useless_field;
 struct i;
 struct s;
 struct message;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_useless_field
 #define APACHE_THRIFT_ACCESSOR_useless_field

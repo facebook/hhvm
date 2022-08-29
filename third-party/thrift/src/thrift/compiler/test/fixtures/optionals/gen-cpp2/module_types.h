@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct red;
 struct green;
 struct blue;
@@ -33,7 +33,7 @@ struct bestFriend;
 struct petNames;
 struct afraidOfAnimal;
 struct vehicles;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_red
 #define APACHE_THRIFT_ACCESSOR_red

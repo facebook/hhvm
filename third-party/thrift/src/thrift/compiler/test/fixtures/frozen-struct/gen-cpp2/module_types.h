@@ -16,7 +16,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct i32Field;
 struct strField;
 struct listField;
@@ -26,7 +26,7 @@ struct inclBField;
 struct i32Field;
 struct inclEnumB;
 struct field;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_i32Field
 #define APACHE_THRIFT_ACCESSOR_i32Field

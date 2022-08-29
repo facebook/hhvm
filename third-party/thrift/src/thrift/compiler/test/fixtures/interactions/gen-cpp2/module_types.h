@@ -13,9 +13,9 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct message;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_message
 #define APACHE_THRIFT_ACCESSOR_message

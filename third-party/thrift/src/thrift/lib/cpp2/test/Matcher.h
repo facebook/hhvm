@@ -65,9 +65,9 @@ class IsThriftUnionWithMatcher;
 //   EXPECT_THAT(p, ThriftField<name>(Eq("Zaphod")));
 //   EXPECT_THAT(p. ThriftField<id>(Optional(Eq("Zaphod"))))
 //
-// The `name` and `id` types are declared inside the `apache::thrift::tag`
+// The `name` and `id` types are declared inside the `apache::thrift::ident`
 // namespace in the `_types.h` generated file.
-// A useful pattern is to define `namespace field = apache::thrift::tag;`, and
+// A useful pattern is to define `namespace field = apache::thrift::ident;`, and
 // refer to the fields as `field::field_name`, e.g.
 // `ThriftField<op::get_field_id>(_)`.
 //
@@ -114,10 +114,10 @@ detail::ThriftFieldMatcher<FieldTag, Matcher> ThriftField(Matcher matcher) {
 //   EXPECT_THAT(p, IsThriftUnionWith<success>(Eq(1)));
 //   EXPECT_THAT(p, Not(IsThriftUnionWith<error>(_)));
 //
-// The `success` and `error` types are declared inside the `apache::thrift::tag`
-// namespace in the `_types.h` generated file.
-// A useful pattern is to define `namespace field = apache::thrift::tag;`, and
-// refer to the fields as `field::field_name`, e.g.
+// The `success` and `error` types are declared inside the
+// `apache::thrift::ident` namespace in the `_types.h` generated file. A useful
+// pattern is to define `namespace field = apache::thrift::ident;`, and refer to
+// the fields as `field::field_name`, e.g.
 // `IsThriftUnionWith<op::get_field_id>(_)`.
 //
 template <typename FieldTag, typename Matcher>

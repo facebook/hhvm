@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct weeks;
 struct title;
 struct employer;
@@ -39,7 +39,7 @@ struct i;
 struct d;
 struct s;
 struct u;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_weeks
 #define APACHE_THRIFT_ACCESSOR_weeks

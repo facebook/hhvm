@@ -16,7 +16,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct ui;
 struct ud;
 struct us;
@@ -177,7 +177,7 @@ struct fake;
 struct number;
 struct result;
 struct phrase;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_ui
 #define APACHE_THRIFT_ACCESSOR_ui

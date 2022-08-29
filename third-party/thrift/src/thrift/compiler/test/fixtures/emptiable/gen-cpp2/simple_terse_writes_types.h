@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct bool_field;
 struct byte_field;
 struct short_field;
@@ -42,7 +42,7 @@ struct list_field;
 struct set_field;
 struct map_field;
 struct struct_field;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_bool_field
 #define APACHE_THRIFT_ACCESSOR_bool_field

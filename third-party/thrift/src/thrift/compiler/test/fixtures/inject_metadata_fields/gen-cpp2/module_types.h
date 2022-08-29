@@ -15,7 +15,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct injected_field;
 struct injected_field;
 struct string_field;
@@ -24,7 +24,7 @@ struct string_field;
 struct injected_field;
 struct injected_structured_annotation_field;
 struct injected_unstructured_annotation_field;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_injected_field
 #define APACHE_THRIFT_ACCESSOR_injected_field

@@ -15,12 +15,12 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct first;
 struct second;
 struct s;
 struct id;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_first
 #define APACHE_THRIFT_ACCESSOR_first

@@ -30,14 +30,14 @@
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void<%#struct:fields%>,
-                                                      ::apache::thrift::tag::<%field:cpp_name%><%/struct:fields%>>;
+                                                      ::apache::thrift::ident::<%field:cpp_name%><%/struct:fields%>>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     <%#struct:fields%>
     template<> static constexpr int value<::apache::thrift::field_id<<%field:key%>>> = <%field:ordinal%>;
-    template<> static constexpr int value<::apache::thrift::tag::<%field:cpp_name%>> = <%field:ordinal%>;
+    template<> static constexpr int value<::apache::thrift::ident::<%field:cpp_name%>> = <%field:ordinal%>;
     <%/struct:fields%>
 #else
 <%! Build speed wise, function overload is much slower than explicit template specialization %>
@@ -45,7 +45,7 @@
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     <%#struct:fields%>
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<<%field:key%>>>) { return <%field:ordinal%>; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::<%field:cpp_name%>>) { return <%field:ordinal%>; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::<%field:cpp_name%>>) { return <%field:ordinal%>; }
     <%/struct:fields%>
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif

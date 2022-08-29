@@ -43,7 +43,7 @@ TEST(MatcherTest, ThriftField) {
 }
 
 TEST(MatcherTest_ThriftMacher, FieldRef) {
-  namespace field = apache::thrift::tag;
+  namespace field = apache::thrift::ident;
   int value = 42;
 
   auto p = Person();
@@ -54,7 +54,7 @@ TEST(MatcherTest_ThriftMacher, FieldRef) {
 }
 
 TEST(MatcherTest_ThriftMacher, OptionalRef) {
-  namespace field = apache::thrift::tag;
+  namespace field = apache::thrift::ident;
   std::string value = "Zaphod";
   std::string wrong = "wrong";
 
@@ -86,7 +86,7 @@ TEST(MatcherTest, FiledRefPrintsCorrectly) {
 }
 
 TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
-  namespace field = apache::thrift::tag;
+  namespace field = apache::thrift::ident;
   auto r = Result();
 
   int value = 42;
@@ -107,7 +107,7 @@ TEST(ThriftMacher_Union, MatchesIfActiveMemberIsCorrectAndInnerMatcherMatches) {
 }
 
 TEST(ThriftMacher_Union, Given_IsUnset_Then_NoTagMatches) {
-  namespace field = apache::thrift::tag;
+  namespace field = apache::thrift::ident;
 
   auto r = Result();
   EXPECT_NONFATAL_FAILURE(
@@ -119,7 +119,7 @@ TEST(ThriftMacher_Union, Given_IsUnset_Then_NoTagMatches) {
 TEST(
     ThriftMacher_Union,
     Given_UnionHasSameTypes_And_IsSet_Then_TagForActiveMemberMatches) {
-  namespace field = apache::thrift::tag;
+  namespace field = apache::thrift::ident;
 
   auto r = SameType();
   r.b_ref() = "b";

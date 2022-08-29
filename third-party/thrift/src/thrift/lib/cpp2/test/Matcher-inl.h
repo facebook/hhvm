@@ -32,10 +32,10 @@ namespace test::detail {
 
 template <typename FieldTag>
 std::string_view getFieldName() {
-  // Thrift generates the tags in the 'apache::thrift::tag' namespace,
+  // Thrift generates the tags in the 'apache::thrift::ident' namespace,
   // so we can just skip it to provide a better name for the users.
   // -1 because we don't want to count the terminating \0 character.
-  constexpr std::size_t offset = sizeof("apache::thrift::tag::") - 1;
+  constexpr std::size_t offset = sizeof("apache::thrift::ident::") - 1;
   // it's safe to return the string_view because pretty_name() returns a
   // statically allocated char *
   std::string_view name{folly::pretty_name<FieldTag>()};

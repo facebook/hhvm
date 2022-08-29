@@ -13,10 +13,10 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct field;
 struct some_map;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_field
 #define APACHE_THRIFT_ACCESSOR_field

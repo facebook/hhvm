@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct anInteger;
 struct aString;
 struct opt_value;
@@ -62,7 +62,7 @@ struct def_shared_string_ref;
 struct def_shared_string_const_ref;
 struct unique_string_ref;
 struct shared_string_ref;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_anInteger
 #define APACHE_THRIFT_ACCESSOR_anInteger

@@ -15,14 +15,14 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct access_field;
 struct access_shared_field;
 struct access_optional_shared_field;
 struct access_shared_const_field;
 struct access_optional_shared_const_field;
 struct access_optional_boxed_field;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_access_field
 #define APACHE_THRIFT_ACCESSOR_access_field
@@ -103,42 +103,42 @@ class InterceptedFields final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::access_field,
-                                                      ::apache::thrift::tag::access_shared_field,
-                                                      ::apache::thrift::tag::access_optional_shared_field,
-                                                      ::apache::thrift::tag::access_shared_const_field,
-                                                      ::apache::thrift::tag::access_optional_shared_const_field,
-                                                      ::apache::thrift::tag::access_optional_boxed_field>;
+                                                      ::apache::thrift::ident::access_field,
+                                                      ::apache::thrift::ident::access_shared_field,
+                                                      ::apache::thrift::ident::access_optional_shared_field,
+                                                      ::apache::thrift::ident::access_shared_const_field,
+                                                      ::apache::thrift::ident::access_optional_shared_const_field,
+                                                      ::apache::thrift::ident::access_optional_boxed_field>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::access_field> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::access_field> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::access_shared_field> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::access_shared_field> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::access_optional_shared_field> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::access_optional_shared_field> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::access_shared_const_field> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::access_shared_const_field> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::access_optional_shared_const_field> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::access_optional_shared_const_field> = 5;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
-    template<> static constexpr int value<::apache::thrift::tag::access_optional_boxed_field> = 6;
+    template<> static constexpr int value<::apache::thrift::ident::access_optional_boxed_field> = 6;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_field>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_field>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_shared_field>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_shared_field>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_optional_shared_field>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_optional_shared_field>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_shared_const_field>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_shared_const_field>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_optional_shared_const_field>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_optional_shared_const_field>) { return 5; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::access_optional_boxed_field>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::access_optional_boxed_field>) { return 6; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };

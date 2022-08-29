@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct content;
 struct content;
 struct content;
@@ -21,7 +21,7 @@ struct sink;
 struct reason;
 struct reason;
 struct reason;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_content
 #define APACHE_THRIFT_ACCESSOR_content

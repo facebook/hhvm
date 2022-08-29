@@ -14,12 +14,12 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct myIntField;
 struct myStringField;
 struct myEnum;
 struct myDataItem;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_myIntField
 #define APACHE_THRIFT_ACCESSOR_myIntField
@@ -138,22 +138,22 @@ class MyStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::myIntField,
-                                                      ::apache::thrift::tag::myStringField>;
+                                                      ::apache::thrift::ident::myIntField,
+                                                      ::apache::thrift::ident::myStringField>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::myIntField> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::myIntField> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::myStringField> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::myStringField> = 2;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myIntField>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myIntField>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myStringField>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myStringField>) { return 2; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -343,22 +343,22 @@ class MyUnion final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::myEnum,
-                                                      ::apache::thrift::tag::myDataItem>;
+                                                      ::apache::thrift::ident::myEnum,
+                                                      ::apache::thrift::ident::myDataItem>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::myEnum> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::myEnum> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::myDataItem> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::myDataItem> = 2;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myEnum>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myEnum>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myDataItem>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myDataItem>) { return 2; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };

@@ -73,7 +73,7 @@ Struct:
     %>::apache::thrift::detail::make_constant<<% > common/type_namespace_cpp2%><%type:name%>>(<%!
         %><% > common/type_class%>{}<%!
         %><%#value:const_struct%><%#constant:type%><%#constant:value%>, <%!
-        %>::apache::thrift::detail::wrap_struct_argument<::apache::thrift::tag::<%constant:cpp_name%>>(<%!
+        %>::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::<%constant:cpp_name%>>(<%!
             %><% > common/cxx_value_prefix%><% > common/iterate_const_values%><% > common/cxx_value_suffix%>)<%!
         %><%/constant:value%><%/constant:type%><%/value:const_struct%>)<%!
 %><%/type:struct?%>

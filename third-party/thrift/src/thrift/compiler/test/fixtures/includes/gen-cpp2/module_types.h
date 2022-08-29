@@ -14,11 +14,11 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct MyIncludedField;
 struct MyOtherIncludedField;
 struct MyIncludedInt;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_MyIncludedField
 #define APACHE_THRIFT_ACCESSOR_MyIncludedField
@@ -75,7 +75,7 @@ class MyStruct final  {
  public:
 
   MyStruct() :
-      __fbthrift_field_MyIncludedField(static_cast<::cpp2::Included>(::apache::thrift::detail::make_constant< ::cpp2::Included>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::tag::MyIntField>(static_cast<::std::int64_t>(2)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::tag::MyTransitiveField>(static_cast<::cpp2::Foo>(::apache::thrift::detail::make_constant< ::cpp2::Foo>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::tag::a>(static_cast<::std::int64_t>(2)))))))),
+      __fbthrift_field_MyIncludedField(static_cast<::cpp2::Included>(::apache::thrift::detail::make_constant< ::cpp2::Included>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyIntField>(static_cast<::std::int64_t>(2)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyTransitiveField>(static_cast<::cpp2::Foo>(::apache::thrift::detail::make_constant< ::cpp2::Foo>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int64_t>(2)))))))),
       __fbthrift_field_MyIncludedInt(static_cast<::cpp2::IncludedInt64>(42)) {
   }
   // FragileConstructor for use in initialization lists only.

@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct fieldA;
 struct fieldB;
 struct fieldC;
@@ -29,7 +29,7 @@ struct fieldG;
 struct fieldH;
 struct fieldA;
 struct fieldB;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_fieldA
 #define APACHE_THRIFT_ACCESSOR_fieldA

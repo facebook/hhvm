@@ -36,13 +36,13 @@
 <%#program:structs?%>
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 <%#program:structs%>
 <%#struct:fields%>
 struct <%field:cpp_name%>;
 <%/struct:fields%>
 <%/program:structs%>
-} // namespace tag
+} // namespace ident
 namespace detail {
 <%#program:structs%>
 <%#struct:fields%>

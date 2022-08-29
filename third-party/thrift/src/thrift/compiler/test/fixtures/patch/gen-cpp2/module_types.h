@@ -15,7 +15,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct data1;
 struct data2;
 struct innerOption;
@@ -136,7 +136,7 @@ struct clear;
 struct patchPrior;
 struct ensure;
 struct patch;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_data1
 #define APACHE_THRIFT_ACCESSOR_data1
@@ -686,22 +686,22 @@ class MyData final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::data1,
-                                                      ::apache::thrift::tag::data2>;
+                                                      ::apache::thrift::ident::data1,
+                                                      ::apache::thrift::ident::data2>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::data1> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::data1> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::data2> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::data2> = 2;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::data1>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::data1>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::data2>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::data2>) { return 2; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -911,17 +911,17 @@ class InnerUnion final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::innerOption>;
+                                                      ::apache::thrift::ident::innerOption>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::innerOption> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::innerOption> = 1;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::innerOption>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::innerOption>) { return 1; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -1169,27 +1169,27 @@ class MyUnion final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::option1,
-                                                      ::apache::thrift::tag::option2,
-                                                      ::apache::thrift::tag::option3>;
+                                                      ::apache::thrift::ident::option1,
+                                                      ::apache::thrift::ident::option2,
+                                                      ::apache::thrift::ident::option3>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::option1> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::option1> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::option2> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::option2> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::option3> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::option3> = 3;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option1>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option1>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option2>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option2>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option3>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option3>) { return 3; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -1625,132 +1625,132 @@ class MyStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::boolVal,
-                                                      ::apache::thrift::tag::byteVal,
-                                                      ::apache::thrift::tag::i16Val,
-                                                      ::apache::thrift::tag::i32Val,
-                                                      ::apache::thrift::tag::i64Val,
-                                                      ::apache::thrift::tag::floatVal,
-                                                      ::apache::thrift::tag::doubleVal,
-                                                      ::apache::thrift::tag::stringVal,
-                                                      ::apache::thrift::tag::binaryVal,
-                                                      ::apache::thrift::tag::structVal,
-                                                      ::apache::thrift::tag::optBoolVal,
-                                                      ::apache::thrift::tag::optByteVal,
-                                                      ::apache::thrift::tag::optI16Val,
-                                                      ::apache::thrift::tag::optI32Val,
-                                                      ::apache::thrift::tag::optI64Val,
-                                                      ::apache::thrift::tag::optFloatVal,
-                                                      ::apache::thrift::tag::optDoubleVal,
-                                                      ::apache::thrift::tag::optStringVal,
-                                                      ::apache::thrift::tag::optBinaryVal,
-                                                      ::apache::thrift::tag::optStructVal,
-                                                      ::apache::thrift::tag::optListVal,
-                                                      ::apache::thrift::tag::optSetVal,
-                                                      ::apache::thrift::tag::optMapVal,
-                                                      ::apache::thrift::tag::unionVal>;
+                                                      ::apache::thrift::ident::boolVal,
+                                                      ::apache::thrift::ident::byteVal,
+                                                      ::apache::thrift::ident::i16Val,
+                                                      ::apache::thrift::ident::i32Val,
+                                                      ::apache::thrift::ident::i64Val,
+                                                      ::apache::thrift::ident::floatVal,
+                                                      ::apache::thrift::ident::doubleVal,
+                                                      ::apache::thrift::ident::stringVal,
+                                                      ::apache::thrift::ident::binaryVal,
+                                                      ::apache::thrift::ident::structVal,
+                                                      ::apache::thrift::ident::optBoolVal,
+                                                      ::apache::thrift::ident::optByteVal,
+                                                      ::apache::thrift::ident::optI16Val,
+                                                      ::apache::thrift::ident::optI32Val,
+                                                      ::apache::thrift::ident::optI64Val,
+                                                      ::apache::thrift::ident::optFloatVal,
+                                                      ::apache::thrift::ident::optDoubleVal,
+                                                      ::apache::thrift::ident::optStringVal,
+                                                      ::apache::thrift::ident::optBinaryVal,
+                                                      ::apache::thrift::ident::optStructVal,
+                                                      ::apache::thrift::ident::optListVal,
+                                                      ::apache::thrift::ident::optSetVal,
+                                                      ::apache::thrift::ident::optMapVal,
+                                                      ::apache::thrift::ident::unionVal>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::boolVal> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::boolVal> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::byteVal> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::byteVal> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::i16Val> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::i16Val> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::i32Val> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::i32Val> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::i64Val> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::i64Val> = 5;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
-    template<> static constexpr int value<::apache::thrift::tag::floatVal> = 6;
+    template<> static constexpr int value<::apache::thrift::ident::floatVal> = 6;
     template<> static constexpr int value<::apache::thrift::field_id<7>> = 7;
-    template<> static constexpr int value<::apache::thrift::tag::doubleVal> = 7;
+    template<> static constexpr int value<::apache::thrift::ident::doubleVal> = 7;
     template<> static constexpr int value<::apache::thrift::field_id<8>> = 8;
-    template<> static constexpr int value<::apache::thrift::tag::stringVal> = 8;
+    template<> static constexpr int value<::apache::thrift::ident::stringVal> = 8;
     template<> static constexpr int value<::apache::thrift::field_id<9>> = 9;
-    template<> static constexpr int value<::apache::thrift::tag::binaryVal> = 9;
+    template<> static constexpr int value<::apache::thrift::ident::binaryVal> = 9;
     template<> static constexpr int value<::apache::thrift::field_id<10>> = 10;
-    template<> static constexpr int value<::apache::thrift::tag::structVal> = 10;
+    template<> static constexpr int value<::apache::thrift::ident::structVal> = 10;
     template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
-    template<> static constexpr int value<::apache::thrift::tag::optBoolVal> = 11;
+    template<> static constexpr int value<::apache::thrift::ident::optBoolVal> = 11;
     template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
-    template<> static constexpr int value<::apache::thrift::tag::optByteVal> = 12;
+    template<> static constexpr int value<::apache::thrift::ident::optByteVal> = 12;
     template<> static constexpr int value<::apache::thrift::field_id<13>> = 13;
-    template<> static constexpr int value<::apache::thrift::tag::optI16Val> = 13;
+    template<> static constexpr int value<::apache::thrift::ident::optI16Val> = 13;
     template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
-    template<> static constexpr int value<::apache::thrift::tag::optI32Val> = 14;
+    template<> static constexpr int value<::apache::thrift::ident::optI32Val> = 14;
     template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
-    template<> static constexpr int value<::apache::thrift::tag::optI64Val> = 15;
+    template<> static constexpr int value<::apache::thrift::ident::optI64Val> = 15;
     template<> static constexpr int value<::apache::thrift::field_id<16>> = 16;
-    template<> static constexpr int value<::apache::thrift::tag::optFloatVal> = 16;
+    template<> static constexpr int value<::apache::thrift::ident::optFloatVal> = 16;
     template<> static constexpr int value<::apache::thrift::field_id<17>> = 17;
-    template<> static constexpr int value<::apache::thrift::tag::optDoubleVal> = 17;
+    template<> static constexpr int value<::apache::thrift::ident::optDoubleVal> = 17;
     template<> static constexpr int value<::apache::thrift::field_id<18>> = 18;
-    template<> static constexpr int value<::apache::thrift::tag::optStringVal> = 18;
+    template<> static constexpr int value<::apache::thrift::ident::optStringVal> = 18;
     template<> static constexpr int value<::apache::thrift::field_id<19>> = 19;
-    template<> static constexpr int value<::apache::thrift::tag::optBinaryVal> = 19;
+    template<> static constexpr int value<::apache::thrift::ident::optBinaryVal> = 19;
     template<> static constexpr int value<::apache::thrift::field_id<20>> = 20;
-    template<> static constexpr int value<::apache::thrift::tag::optStructVal> = 20;
+    template<> static constexpr int value<::apache::thrift::ident::optStructVal> = 20;
     template<> static constexpr int value<::apache::thrift::field_id<21>> = 21;
-    template<> static constexpr int value<::apache::thrift::tag::optListVal> = 21;
+    template<> static constexpr int value<::apache::thrift::ident::optListVal> = 21;
     template<> static constexpr int value<::apache::thrift::field_id<22>> = 22;
-    template<> static constexpr int value<::apache::thrift::tag::optSetVal> = 22;
+    template<> static constexpr int value<::apache::thrift::ident::optSetVal> = 22;
     template<> static constexpr int value<::apache::thrift::field_id<23>> = 23;
-    template<> static constexpr int value<::apache::thrift::tag::optMapVal> = 23;
+    template<> static constexpr int value<::apache::thrift::ident::optMapVal> = 23;
     template<> static constexpr int value<::apache::thrift::field_id<30>> = 24;
-    template<> static constexpr int value<::apache::thrift::tag::unionVal> = 24;
+    template<> static constexpr int value<::apache::thrift::ident::unionVal> = 24;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::boolVal>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::boolVal>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::byteVal>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byteVal>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i16Val>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i16Val>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i32Val>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i32Val>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i64Val>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i64Val>) { return 5; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::floatVal>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::floatVal>) { return 6; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 7; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::doubleVal>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::doubleVal>) { return 7; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 8; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::stringVal>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::stringVal>) { return 8; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 9; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::binaryVal>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binaryVal>) { return 9; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<10>>) { return 10; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::structVal>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::structVal>) { return 10; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optBoolVal>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBoolVal>) { return 11; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optByteVal>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optByteVal>) { return 12; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<13>>) { return 13; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI16Val>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI16Val>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI32Val>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI32Val>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI64Val>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI64Val>) { return 15; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optFloatVal>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optFloatVal>) { return 16; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optDoubleVal>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optDoubleVal>) { return 17; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optStringVal>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStringVal>) { return 18; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optBinaryVal>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBinaryVal>) { return 19; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optStructVal>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStructVal>) { return 20; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optListVal>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optListVal>) { return 21; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optSetVal>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optSetVal>) { return 22; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optMapVal>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optMapVal>) { return 23; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<30>>) { return 24; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::unionVal>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::unionVal>) { return 24; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -3182,22 +3182,22 @@ class MyDataFieldPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::data1,
-                                                      ::apache::thrift::tag::data2>;
+                                                      ::apache::thrift::ident::data1,
+                                                      ::apache::thrift::ident::data2>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::data1> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::data1> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::data2> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::data2> = 2;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::data1>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::data1>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::data2>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::data2>) { return 2; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -3394,37 +3394,37 @@ class MyDataPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 5;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 5; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -3768,32 +3768,32 @@ class OptionalMyDataPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -4079,17 +4079,17 @@ class InnerUnionFieldPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::innerOption>;
+                                                      ::apache::thrift::ident::innerOption>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::innerOption> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::innerOption> = 1;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::innerOption>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::innerOption>) { return 1; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -4242,37 +4242,37 @@ class InnerUnionPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 5;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 5; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -4625,32 +4625,32 @@ class OptionalInnerUnionPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -4940,27 +4940,27 @@ class MyUnionFieldPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::option1,
-                                                      ::apache::thrift::tag::option2,
-                                                      ::apache::thrift::tag::option3>;
+                                                      ::apache::thrift::ident::option1,
+                                                      ::apache::thrift::ident::option2,
+                                                      ::apache::thrift::ident::option3>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::option1> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::option1> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::option2> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::option2> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::option3> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::option3> = 3;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option1>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option1>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option2>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option2>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::option3>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::option3>) { return 3; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -5201,37 +5201,37 @@ class MyUnionPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 5;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 5; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -5584,32 +5584,32 @@ class OptionalMyUnionPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -5901,32 +5901,32 @@ class MyStructField21PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::prepend,
-                                                      ::apache::thrift::tag::append>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::prepend,
+                                                      ::apache::thrift::ident::append>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<8>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::prepend> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::prepend> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<9>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::append> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::append> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::prepend>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::prepend>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::append>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::append>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -6245,32 +6245,32 @@ class OptionalMyStructField21PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -6572,32 +6572,32 @@ class MyStructField22PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::remove,
-                                                      ::apache::thrift::tag::add>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::remove,
+                                                      ::apache::thrift::ident::add>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<7>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::remove> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::remove> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<8>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::add> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::add> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::remove>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::remove>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::add>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::add>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -6916,32 +6916,32 @@ class OptionalMyStructField22PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -7243,32 +7243,32 @@ class MyStructField23PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::add,
-                                                      ::apache::thrift::tag::put>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::add,
+                                                      ::apache::thrift::ident::put>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::add> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::add> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<9>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::put> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::put> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::add>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::add>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::put>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::put>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -7587,32 +7587,32 @@ class OptionalMyStructField23PatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -7954,132 +7954,132 @@ class MyStructFieldPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::boolVal,
-                                                      ::apache::thrift::tag::byteVal,
-                                                      ::apache::thrift::tag::i16Val,
-                                                      ::apache::thrift::tag::i32Val,
-                                                      ::apache::thrift::tag::i64Val,
-                                                      ::apache::thrift::tag::floatVal,
-                                                      ::apache::thrift::tag::doubleVal,
-                                                      ::apache::thrift::tag::stringVal,
-                                                      ::apache::thrift::tag::binaryVal,
-                                                      ::apache::thrift::tag::structVal,
-                                                      ::apache::thrift::tag::optBoolVal,
-                                                      ::apache::thrift::tag::optByteVal,
-                                                      ::apache::thrift::tag::optI16Val,
-                                                      ::apache::thrift::tag::optI32Val,
-                                                      ::apache::thrift::tag::optI64Val,
-                                                      ::apache::thrift::tag::optFloatVal,
-                                                      ::apache::thrift::tag::optDoubleVal,
-                                                      ::apache::thrift::tag::optStringVal,
-                                                      ::apache::thrift::tag::optBinaryVal,
-                                                      ::apache::thrift::tag::optStructVal,
-                                                      ::apache::thrift::tag::optListVal,
-                                                      ::apache::thrift::tag::optSetVal,
-                                                      ::apache::thrift::tag::optMapVal,
-                                                      ::apache::thrift::tag::unionVal>;
+                                                      ::apache::thrift::ident::boolVal,
+                                                      ::apache::thrift::ident::byteVal,
+                                                      ::apache::thrift::ident::i16Val,
+                                                      ::apache::thrift::ident::i32Val,
+                                                      ::apache::thrift::ident::i64Val,
+                                                      ::apache::thrift::ident::floatVal,
+                                                      ::apache::thrift::ident::doubleVal,
+                                                      ::apache::thrift::ident::stringVal,
+                                                      ::apache::thrift::ident::binaryVal,
+                                                      ::apache::thrift::ident::structVal,
+                                                      ::apache::thrift::ident::optBoolVal,
+                                                      ::apache::thrift::ident::optByteVal,
+                                                      ::apache::thrift::ident::optI16Val,
+                                                      ::apache::thrift::ident::optI32Val,
+                                                      ::apache::thrift::ident::optI64Val,
+                                                      ::apache::thrift::ident::optFloatVal,
+                                                      ::apache::thrift::ident::optDoubleVal,
+                                                      ::apache::thrift::ident::optStringVal,
+                                                      ::apache::thrift::ident::optBinaryVal,
+                                                      ::apache::thrift::ident::optStructVal,
+                                                      ::apache::thrift::ident::optListVal,
+                                                      ::apache::thrift::ident::optSetVal,
+                                                      ::apache::thrift::ident::optMapVal,
+                                                      ::apache::thrift::ident::unionVal>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::boolVal> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::boolVal> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::byteVal> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::byteVal> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::i16Val> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::i16Val> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::i32Val> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::i32Val> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::i64Val> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::i64Val> = 5;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
-    template<> static constexpr int value<::apache::thrift::tag::floatVal> = 6;
+    template<> static constexpr int value<::apache::thrift::ident::floatVal> = 6;
     template<> static constexpr int value<::apache::thrift::field_id<7>> = 7;
-    template<> static constexpr int value<::apache::thrift::tag::doubleVal> = 7;
+    template<> static constexpr int value<::apache::thrift::ident::doubleVal> = 7;
     template<> static constexpr int value<::apache::thrift::field_id<8>> = 8;
-    template<> static constexpr int value<::apache::thrift::tag::stringVal> = 8;
+    template<> static constexpr int value<::apache::thrift::ident::stringVal> = 8;
     template<> static constexpr int value<::apache::thrift::field_id<9>> = 9;
-    template<> static constexpr int value<::apache::thrift::tag::binaryVal> = 9;
+    template<> static constexpr int value<::apache::thrift::ident::binaryVal> = 9;
     template<> static constexpr int value<::apache::thrift::field_id<10>> = 10;
-    template<> static constexpr int value<::apache::thrift::tag::structVal> = 10;
+    template<> static constexpr int value<::apache::thrift::ident::structVal> = 10;
     template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
-    template<> static constexpr int value<::apache::thrift::tag::optBoolVal> = 11;
+    template<> static constexpr int value<::apache::thrift::ident::optBoolVal> = 11;
     template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
-    template<> static constexpr int value<::apache::thrift::tag::optByteVal> = 12;
+    template<> static constexpr int value<::apache::thrift::ident::optByteVal> = 12;
     template<> static constexpr int value<::apache::thrift::field_id<13>> = 13;
-    template<> static constexpr int value<::apache::thrift::tag::optI16Val> = 13;
+    template<> static constexpr int value<::apache::thrift::ident::optI16Val> = 13;
     template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
-    template<> static constexpr int value<::apache::thrift::tag::optI32Val> = 14;
+    template<> static constexpr int value<::apache::thrift::ident::optI32Val> = 14;
     template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
-    template<> static constexpr int value<::apache::thrift::tag::optI64Val> = 15;
+    template<> static constexpr int value<::apache::thrift::ident::optI64Val> = 15;
     template<> static constexpr int value<::apache::thrift::field_id<16>> = 16;
-    template<> static constexpr int value<::apache::thrift::tag::optFloatVal> = 16;
+    template<> static constexpr int value<::apache::thrift::ident::optFloatVal> = 16;
     template<> static constexpr int value<::apache::thrift::field_id<17>> = 17;
-    template<> static constexpr int value<::apache::thrift::tag::optDoubleVal> = 17;
+    template<> static constexpr int value<::apache::thrift::ident::optDoubleVal> = 17;
     template<> static constexpr int value<::apache::thrift::field_id<18>> = 18;
-    template<> static constexpr int value<::apache::thrift::tag::optStringVal> = 18;
+    template<> static constexpr int value<::apache::thrift::ident::optStringVal> = 18;
     template<> static constexpr int value<::apache::thrift::field_id<19>> = 19;
-    template<> static constexpr int value<::apache::thrift::tag::optBinaryVal> = 19;
+    template<> static constexpr int value<::apache::thrift::ident::optBinaryVal> = 19;
     template<> static constexpr int value<::apache::thrift::field_id<20>> = 20;
-    template<> static constexpr int value<::apache::thrift::tag::optStructVal> = 20;
+    template<> static constexpr int value<::apache::thrift::ident::optStructVal> = 20;
     template<> static constexpr int value<::apache::thrift::field_id<21>> = 21;
-    template<> static constexpr int value<::apache::thrift::tag::optListVal> = 21;
+    template<> static constexpr int value<::apache::thrift::ident::optListVal> = 21;
     template<> static constexpr int value<::apache::thrift::field_id<22>> = 22;
-    template<> static constexpr int value<::apache::thrift::tag::optSetVal> = 22;
+    template<> static constexpr int value<::apache::thrift::ident::optSetVal> = 22;
     template<> static constexpr int value<::apache::thrift::field_id<23>> = 23;
-    template<> static constexpr int value<::apache::thrift::tag::optMapVal> = 23;
+    template<> static constexpr int value<::apache::thrift::ident::optMapVal> = 23;
     template<> static constexpr int value<::apache::thrift::field_id<30>> = 24;
-    template<> static constexpr int value<::apache::thrift::tag::unionVal> = 24;
+    template<> static constexpr int value<::apache::thrift::ident::unionVal> = 24;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::boolVal>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::boolVal>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::byteVal>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byteVal>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i16Val>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i16Val>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i32Val>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i32Val>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::i64Val>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i64Val>) { return 5; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::floatVal>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::floatVal>) { return 6; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 7; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::doubleVal>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::doubleVal>) { return 7; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 8; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::stringVal>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::stringVal>) { return 8; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 9; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::binaryVal>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binaryVal>) { return 9; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<10>>) { return 10; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::structVal>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::structVal>) { return 10; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optBoolVal>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBoolVal>) { return 11; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optByteVal>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optByteVal>) { return 12; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<13>>) { return 13; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI16Val>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI16Val>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI32Val>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI32Val>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optI64Val>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI64Val>) { return 15; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optFloatVal>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optFloatVal>) { return 16; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optDoubleVal>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optDoubleVal>) { return 17; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optStringVal>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStringVal>) { return 18; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optBinaryVal>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBinaryVal>) { return 19; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optStructVal>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStructVal>) { return 20; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optListVal>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optListVal>) { return 21; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optSetVal>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optSetVal>) { return 22; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::optMapVal>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optMapVal>) { return 23; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<30>>) { return 24; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::unionVal>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::unionVal>) { return 24; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -9244,37 +9244,37 @@ class MyStructPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::assign,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::assign,
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::assign> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<5>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 4;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 5;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 5;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::assign>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::assign>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 5; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -9618,32 +9618,32 @@ class OptionalMyStructPatchStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::clear,
-                                                      ::apache::thrift::tag::patchPrior,
-                                                      ::apache::thrift::tag::ensure,
-                                                      ::apache::thrift::tag::patch>;
+                                                      ::apache::thrift::ident::clear,
+                                                      ::apache::thrift::ident::patchPrior,
+                                                      ::apache::thrift::ident::ensure,
+                                                      ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::clear> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::clear> = 1;
     template<> static constexpr int value<::apache::thrift::field_id<3>> = 2;
-    template<> static constexpr int value<::apache::thrift::tag::patchPrior> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::patchPrior> = 2;
     template<> static constexpr int value<::apache::thrift::field_id<4>> = 3;
-    template<> static constexpr int value<::apache::thrift::tag::ensure> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::ensure> = 3;
     template<> static constexpr int value<::apache::thrift::field_id<6>> = 4;
-    template<> static constexpr int value<::apache::thrift::tag::patch> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::patch> = 4;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::clear>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::clear>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patchPrior>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patchPrior>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::ensure>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::ensure>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::patch>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::patch>) { return 4; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };

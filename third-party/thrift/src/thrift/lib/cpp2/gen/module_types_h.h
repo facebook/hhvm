@@ -48,7 +48,7 @@
 //  all members are logically private to fbthrift; external use is deprecated
 #define APACHE_THRIFT_DEFINE_ACCESSOR(name)                  \
   template <>                                                \
-  struct invoke_reffer<::apache::thrift::tag::name> {        \
+  struct invoke_reffer<::apache::thrift::ident::name> {      \
     template <typename T>                                    \
     FOLLY_ERASE constexpr auto operator()(T&& t) const       \
         noexcept(noexcept(static_cast<T&&>(t).name##_ref())) \
@@ -59,7 +59,8 @@
 
 namespace apache {
 namespace thrift {
-
+namespace ident {}
+namespace tag = ident; // TODO(afuller): Remove all usage and delete.
 namespace detail {
 
 template <typename T>
@@ -208,7 +209,7 @@ using DeserializationMutex = std::shared_timed_mutex; // C++14
 } // namespace st
 
 } // namespace detail
-namespace tag {
+namespace ident {
 template <class T>
 void __fbthrift_check_whether_type_is_ident_via_adl(T&&);
 }

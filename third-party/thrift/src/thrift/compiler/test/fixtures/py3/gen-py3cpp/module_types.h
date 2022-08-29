@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct err_code;
 struct optional_blob;
 struct is_on;
@@ -35,7 +35,7 @@ struct cdef;
 struct bytes_with_cpp_type;
 struct iobuf_val;
 struct u;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_err_code
 #define APACHE_THRIFT_ACCESSOR_err_code

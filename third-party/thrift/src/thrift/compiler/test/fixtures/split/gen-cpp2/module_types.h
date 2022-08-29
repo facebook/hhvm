@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct MyIntField;
 struct MyStringField;
 struct MyDataField;
@@ -24,7 +24,7 @@ struct idempotent;
 struct myEnum;
 struct myStruct;
 struct myDataItem;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_MyIntField
 #define APACHE_THRIFT_ACCESSOR_MyIntField

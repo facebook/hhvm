@@ -13,11 +13,11 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct myString;
 struct myString;
 struct myString;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_myString
 #define APACHE_THRIFT_ACCESSOR_myString
@@ -78,17 +78,17 @@ class MyStruct final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::myString>;
+                                                      ::apache::thrift::ident::myString>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::myString> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::myString> = 1;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myString>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myString>) { return 1; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -246,17 +246,17 @@ class MyUnion final  {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::myString>;
+                                                      ::apache::thrift::ident::myString>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::myString> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::myString> = 1;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myString>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myString>) { return 1; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -500,17 +500,17 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::tag::myString>;
+                                                      ::apache::thrift::ident::myString>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
-    template<> static constexpr int value<::apache::thrift::tag::myString> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::myString> = 1;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::tag::myString>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::myString>) { return 1; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };

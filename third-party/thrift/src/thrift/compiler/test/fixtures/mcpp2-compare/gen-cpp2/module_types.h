@@ -16,7 +16,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct boolField;
 struct boolField;
 struct MyBoolField;
@@ -177,7 +177,7 @@ struct doubleField;
 struct floatSide;
 struct doubleSide;
 struct intField;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_boolField
 #define APACHE_THRIFT_ACCESSOR_boolField

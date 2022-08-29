@@ -13,7 +13,7 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
+namespace ident {
 struct myLongField;
 struct MyByteField;
 struct myStringField;
@@ -123,7 +123,7 @@ struct errorEnum;
 struct unionError;
 struct structError;
 struct lsMap;
-} // namespace tag
+} // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_myLongField
 #define APACHE_THRIFT_ACCESSOR_myLongField

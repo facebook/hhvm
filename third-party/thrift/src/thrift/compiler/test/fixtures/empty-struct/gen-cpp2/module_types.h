@@ -13,8 +13,8 @@
 
 namespace apache {
 namespace thrift {
-namespace tag {
-} // namespace tag
+namespace ident {
+} // namespace ident
 namespace detail {
 } // namespace detail
 } // namespace thrift

@@ -239,7 +239,6 @@ public final class RSocketRpcClient implements RpcClient {
 
     private StreamingResponseHandler(ClientRequestPayload<T> requestPayload) {
       this.requestPayload = requestPayload;
-      this.isFirstPayload = requestPayload.getFirstResponseReader() != null;
     }
 
     @Override

@@ -33,7 +33,6 @@ service PingService {
   binary pingBinary(1: PingRequest key);
   PingResponse pingException(1: PingRequest key) throws (1: CustomException ex);
   void pingVoid(1: PingRequest key);
-  stream<PingResponse> streamOfPings(1: PingRequest key, 2: i32 numberOfPings);
 }
 
 service ExtendedPing extends PingService {

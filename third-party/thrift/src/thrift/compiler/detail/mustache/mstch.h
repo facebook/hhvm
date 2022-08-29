@@ -33,6 +33,7 @@ SOFTWARE.
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/variant.hpp>
@@ -47,17 +48,17 @@ template <class N>
 class object_t {
  public:
   const N& at(const std::string& name) const {
-    cache[name] = (methods.at(name))();
-    return cache[name];
+    cache_[name] = (methods_.at(name))();
+    return cache_[name];
   }
 
   bool has(const std::string& name) const {
-    return methods.find(name) != methods.end();
+    return (methods_.find(name) != methods_.end());
   }
 
  protected:
   void register_method(std::string name, std::function<N()> method) {
-    auto result = methods.emplace(std::move(name), std::move(method));
+    auto result = methods_.emplace(std::move(name), std::move(method));
     if (!result.second) {
       throw std::runtime_error(
           "Method already registered: " + result.first->first);
@@ -66,15 +67,16 @@ class object_t {
 
   template <class S>
   void register_methods(
-      S* s, const std::map<std::string, N (S::*)()>& methods_) {
-    for (const auto& item : methods_) {
-      register_method(item.first, [s, m = item.second]() { return (s->*m)(); });
+      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
+    for (const auto& method : methods) {
+      register_method(
+          method.first, [s, m = method.second]() { return (s->*m)(); });
     }
   }
 
  private:
-  std::map<std::string, std::function<N()>> methods;
-  mutable std::map<std::string, N> cache;
+  std::unordered_map<std::string, std::function<N()>> methods_;
+  mutable std::unordered_map<std::string, N> cache_;
 };
 
 template <class T, class N>

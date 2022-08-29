@@ -2067,11 +2067,23 @@ let check_class_extends_parents_typeconsts
                }
              env ->
           (* If class_ is a trait that has a require class C constraint, and C provides a concrete definition
-           * for the type constant, then compare the parent type constant against the type constant defined in
-           * the required class.  Otherwise compare it against the type constant defined in class_, if any *)
+           * for the type constant, and the parent definition is abstract, then compare the parent type constant
+           * against the type constant defined in the required class.
+           * Otherwise compare it against the type constant defined in class_, if any *)
           let class_tconst_opt =
+            (* if the parent definition is a concrete type constant, then we can skip checking type constants
+             * inherited via require class constants, as these must be concrete and a conflict check will be
+             * performed on the class itself *)
+            let is_parent_tconst_abstract =
+              match parent_tconst.ttc_kind with
+              | TCAbstract _ -> true
+              | TCConcrete _ -> false
+            in
             let class_req_tconst_opt =
-              if Ast_defs.is_c_trait (Cls.kind class_) then
+              if
+                Ast_defs.is_c_trait (Cls.kind class_)
+                && is_parent_tconst_abstract
+              then
                 List.find_map
                   (Cls.all_ancestor_req_class_requirements class_)
                   ~f:(fun (_, req_ty) ->

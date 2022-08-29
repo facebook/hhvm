@@ -252,7 +252,9 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
       (* concretization of abstract type constant with default *)
       {
-        ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
+        ttc_synthesized =
+          is_set mro_via_req_extends mro.mro_flags
+          || is_set mro_via_req_class mro.mro_flags;
         ttc_name;
         ttc_kind = TCConcrete { tc_type = default };
         ttc_origin;
@@ -263,7 +265,9 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       }
     | _ ->
       {
-        ttc_synthesized = is_set mro_via_req_extends mro.mro_flags;
+        ttc_synthesized =
+          is_set mro_via_req_extends mro.mro_flags
+          || is_set mro_via_req_class mro.mro_flags;
         ttc_name;
         ttc_kind;
         ttc_origin;

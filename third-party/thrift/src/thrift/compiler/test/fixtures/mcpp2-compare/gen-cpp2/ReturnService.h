@@ -53,67 +53,127 @@ class ServiceHandler<::some::valid::ns::ReturnService> : public apache::thrift::
   virtual bool boolReturn();
   virtual folly::Future<bool> future_boolReturn();
   virtual folly::SemiFuture<bool> semifuture_boolReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<bool> co_boolReturn();
+  virtual folly::coro::Task<bool> co_boolReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_boolReturn(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback);
   virtual ::std::int16_t i16Return();
   virtual folly::Future<::std::int16_t> future_i16Return();
   virtual folly::SemiFuture<::std::int16_t> semifuture_i16Return();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int16_t> co_i16Return();
+  virtual folly::coro::Task<::std::int16_t> co_i16Return(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_i16Return(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback);
   virtual ::std::int32_t i32Return();
   virtual folly::Future<::std::int32_t> future_i32Return();
   virtual folly::SemiFuture<::std::int32_t> semifuture_i32Return();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_i32Return();
+  virtual folly::coro::Task<::std::int32_t> co_i32Return(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_i32Return(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int64_t i64Return();
   virtual folly::Future<::std::int64_t> future_i64Return();
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64Return();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int64_t> co_i64Return();
+  virtual folly::coro::Task<::std::int64_t> co_i64Return(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_i64Return(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback);
   virtual float floatReturn();
   virtual folly::Future<float> future_floatReturn();
   virtual folly::SemiFuture<float> semifuture_floatReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<float> co_floatReturn();
+  virtual folly::coro::Task<float> co_floatReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_floatReturn(std::unique_ptr<apache::thrift::HandlerCallback<float>> callback);
   virtual double doubleReturn();
   virtual folly::Future<double> future_doubleReturn();
   virtual folly::SemiFuture<double> semifuture_doubleReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<double> co_doubleReturn();
+  virtual folly::coro::Task<double> co_doubleReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_doubleReturn(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback);
   virtual void async_eb_stringReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
   virtual void binaryReturn(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_binaryReturn();
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_binaryReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_binaryReturn();
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_binaryReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_binaryReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
   virtual void mapReturn(::std::map<::std::string, ::std::int64_t>& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> future_mapReturn();
   virtual folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> semifuture_mapReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> co_mapReturn();
+  virtual folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> co_mapReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_mapReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>> callback);
   virtual ::some::valid::ns::simpleTypeDef simpleTypedefReturn();
   virtual folly::Future<::some::valid::ns::simpleTypeDef> future_simpleTypedefReturn();
   virtual folly::SemiFuture<::some::valid::ns::simpleTypeDef> semifuture_simpleTypedefReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn();
+  virtual folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_simpleTypedefReturn(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>> callback);
   virtual void complexTypedefReturn(::some::valid::ns::complexStructTypeDef& /*_return*/);
   virtual folly::Future<std::unique_ptr<::some::valid::ns::complexStructTypeDef>> future_complexTypedefReturn();
   virtual folly::SemiFuture<std::unique_ptr<::some::valid::ns::complexStructTypeDef>> semifuture_complexTypedefReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::complexStructTypeDef>> co_complexTypedefReturn();
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::complexStructTypeDef>> co_complexTypedefReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_complexTypedefReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::complexStructTypeDef>>> callback);
   virtual void list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>> future_list_mostComplexTypedefReturn();
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>> semifuture_list_mostComplexTypedefReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>> co_list_mostComplexTypedefReturn();
+  virtual folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>> co_list_mostComplexTypedefReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_list_mostComplexTypedefReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>>> callback);
   virtual void async_eb_enumReturn(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>> callback);
   virtual void async_eb_list_EnumReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>> callback);
   virtual void structReturn(::some::valid::ns::MyStruct& /*_return*/);
   virtual folly::Future<std::unique_ptr<::some::valid::ns::MyStruct>> future_structReturn();
   virtual folly::SemiFuture<std::unique_ptr<::some::valid::ns::MyStruct>> semifuture_structReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::MyStruct>> co_structReturn();
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::MyStruct>> co_structReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_structReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>> callback);
   virtual void set_StructReturn(::std::set<::some::valid::ns::MyStruct>& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> future_set_StructReturn();
   virtual folly::SemiFuture<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> semifuture_set_StructReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> co_set_StructReturn();
+  virtual folly::coro::Task<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> co_set_StructReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_set_StructReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>> callback);
   virtual void async_eb_unionReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>> callback);
   virtual void list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> future_list_UnionReturn();
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> semifuture_list_UnionReturn();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> co_list_UnionReturn();
+  virtual folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> co_list_UnionReturn(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_list_UnionReturn(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>> callback);
   virtual void async_eb_readDataEb(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::IOBuf>>> callback, ::std::int64_t p_size);
   virtual void readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/);
   virtual folly::Future<std::unique_ptr<::some::valid::ns::IOBufPtr>> future_readData(::std::int64_t p_size);
   virtual folly::SemiFuture<std::unique_ptr<::some::valid::ns::IOBufPtr>> semifuture_readData(::std::int64_t p_size);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::IOBufPtr>> co_readData(::std::int64_t p_size);
+  virtual folly::coro::Task<std::unique_ptr<::some::valid::ns::IOBufPtr>> co_readData(apache::thrift::RequestParams params, ::std::int64_t p_size);
+#endif
   virtual void async_tm_readData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::IOBufPtr>>> callback, ::std::int64_t p_size);
  private:
   static ::some::valid::ns::ReturnServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

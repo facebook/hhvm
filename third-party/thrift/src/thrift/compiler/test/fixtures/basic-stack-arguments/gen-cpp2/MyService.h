@@ -49,18 +49,34 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual bool hasDataById(::std::int64_t /*id*/);
   virtual folly::Future<bool> future_hasDataById(::std::int64_t p_id);
   virtual folly::SemiFuture<bool> semifuture_hasDataById(::std::int64_t p_id);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<bool> co_hasDataById(::std::int64_t p_id);
+  virtual folly::coro::Task<bool> co_hasDataById(apache::thrift::RequestParams params, ::std::int64_t p_id);
+#endif
   virtual void async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_id);
   virtual void getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
   virtual folly::Future<::std::string> future_getDataById(::std::int64_t p_id);
   virtual folly::SemiFuture<::std::string> semifuture_getDataById(::std::int64_t p_id);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::string> co_getDataById(::std::int64_t p_id);
+  virtual folly::coro::Task<::std::string> co_getDataById(apache::thrift::RequestParams params, ::std::int64_t p_id);
+#endif
   virtual void async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<::std::string>> callback, ::std::int64_t p_id);
   virtual void putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
   virtual folly::Future<folly::Unit> future_putDataById(::std::int64_t p_id, const ::std::string& p_data);
   virtual folly::SemiFuture<folly::Unit> semifuture_putDataById(::std::int64_t p_id, const ::std::string& p_data);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_putDataById(::std::int64_t p_id, const ::std::string& p_data);
+  virtual folly::coro::Task<void> co_putDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, const ::std::string& p_data);
+#endif
   virtual void async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id, const ::std::string& p_data);
   virtual void lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
   virtual folly::Future<folly::Unit> future_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
   virtual folly::SemiFuture<folly::Unit> semifuture_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
+  virtual folly::coro::Task<void> co_lobDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, const ::std::string& p_data);
+#endif
   virtual void async_tm_lobDataById(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int64_t p_id, const ::std::string& p_data);
  private:
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

@@ -80,6 +80,10 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   virtual ::std::int32_t bar();
   virtual folly::Future<::std::int32_t> future_bar();
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_bar();
+  virtual folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
  private:
   static ::cpp2::GoodServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

@@ -45,19 +45,45 @@ folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService
   return apache::thrift::detail::si::future(semifuture_bar(), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService>::co_bar() {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_bar.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<>());
+}
+
+folly::coro::Task<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService>::co_bar(apache::thrift::RequestParams /* params */) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_bar.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_bar();
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::cpp2::GoodService>::async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_bar.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_bar.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bar(params);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_bar.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -71,6 +97,22 @@ void apache::thrift::ServiceHandler<::cpp2::GoodService>::async_tm_bar(std::uniq
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bar(params);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_bar();
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(bar());
@@ -81,6 +123,11 @@ void apache::thrift::ServiceHandler<::cpp2::GoodService>::async_tm_bar(std::uniq
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie() = std::move(ex).restoreArgs<>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }

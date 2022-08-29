@@ -41,19 +41,45 @@ folly::Future<::facebook::thrift::test::MyI32> apache::thrift::ServiceHandler<::
   return apache::thrift::detail::si::future(semifuture_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::facebook::thrift::test::MyI32> apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::co_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_func.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/>(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3)));
+}
+
+folly::coro::Task<::facebook::thrift::test::MyI32> apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::co_func(apache::thrift::RequestParams /* params */, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_func.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32>> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_func.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_func.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_func(params, std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_func.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -67,6 +93,22 @@ void apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::async_tm
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_func(params, std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3)));
@@ -77,6 +119,11 @@ void apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::async_tm
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_arg1, p_arg2, p_arg3) = std::move(ex).restoreArgs<std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }

@@ -54,6 +54,10 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
   virtual void query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
   virtual folly::Future<std::unique_ptr<::test::fixtures::basic::MyStruct>> future_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
   virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic::MyStruct>> semifuture_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic::MyStruct>> co_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
+  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic::MyStruct>> co_query(apache::thrift::RequestParams params, std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
+#endif
   virtual void async_tm_query(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic::MyStruct>>> callback, std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
  private:
   static ::test::fixtures::basic::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

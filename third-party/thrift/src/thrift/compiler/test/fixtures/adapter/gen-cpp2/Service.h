@@ -58,6 +58,10 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
   virtual ::facebook::thrift::test::MyI32 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
   virtual folly::Future<::facebook::thrift::test::MyI32> future_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
   virtual folly::SemiFuture<::facebook::thrift::test::MyI32> semifuture_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::facebook::thrift::test::MyI32> co_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual folly::coro::Task<::facebook::thrift::test::MyI32> co_func(apache::thrift::RequestParams params, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+#endif
   virtual void async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32>> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
  private:
   static ::facebook::thrift::test::ServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

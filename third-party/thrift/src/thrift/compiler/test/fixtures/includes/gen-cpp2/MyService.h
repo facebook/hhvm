@@ -51,10 +51,18 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual void query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
   virtual folly::Future<folly::Unit> future_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual folly::SemiFuture<folly::Unit> semifuture_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+  virtual folly::coro::Task<void> co_query(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+#endif
   virtual void async_tm_query(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual void has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
   virtual folly::Future<folly::Unit> future_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual folly::SemiFuture<folly::Unit> semifuture_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+  virtual folly::coro::Task<void> co_has_arg_docs(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
+#endif
   virtual void async_tm_has_arg_docs(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
  private:
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

@@ -54,6 +54,10 @@ class ServiceHandler<::test::fixtures::basic::FooService> : public apache::thrif
   virtual void simple_rpc();
   virtual folly::Future<folly::Unit> future_simple_rpc();
   virtual folly::SemiFuture<folly::Unit> semifuture_simple_rpc();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_simple_rpc();
+  virtual folly::coro::Task<void> co_simple_rpc(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_simple_rpc(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
  private:
   static ::test::fixtures::basic::FooServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

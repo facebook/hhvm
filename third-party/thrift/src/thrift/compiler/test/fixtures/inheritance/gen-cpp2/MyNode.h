@@ -54,6 +54,10 @@ class ServiceHandler<::cpp2::MyNode> : virtual public ::cpp2::MyRootSvIf {
   virtual void do_mid();
   virtual folly::Future<folly::Unit> future_do_mid();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_mid();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_do_mid();
+  virtual folly::coro::Task<void> co_do_mid(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_do_mid(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
  private:
   static ::cpp2::MyNodeServiceInfoHolder __fbthrift_serviceInfoHolder;

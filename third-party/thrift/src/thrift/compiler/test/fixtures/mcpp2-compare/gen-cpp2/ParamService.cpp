@@ -46,19 +46,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_byte_i16_param(p_param1, p_param2), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_byte_i16_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int8_t /*param1*/, ::std::int16_t /*param2*/>(p_param1, p_param2));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_byte_i16_param(apache::thrift::RequestParams /* params */, ::std::int8_t p_param1, ::std::int16_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_byte_i16_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_byte_i16_param(p_param1, p_param2);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_byte_i16_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int8_t p_param1, ::std::int16_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_byte_i16_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_byte_i16_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_byte_i16_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_byte_i16_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -72,6 +98,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_byte_i16_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_byte_i16_param(p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_byte_i16_param(p_param1, p_param2);
@@ -83,6 +125,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<::std::int8_t /*param1*/, ::std::int16_t /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -105,19 +152,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_map_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_map_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_map_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -131,6 +204,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_map_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_map_param(std::move(p_param1));
@@ -142,6 +231,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -164,19 +258,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/, std::unique_ptr<::std::set<::std::vector<::std::string>>> /*param2*/>(std::move(p_param1), std::move(p_param2)));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_setlist_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_map_setlist_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_map_setlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_setlist_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_map_setlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -190,6 +310,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_setlist_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
@@ -201,6 +337,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/, std::unique_ptr<::std::set<::std::vector<::std::string>>> /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -223,19 +364,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_map_typedef_param(p_param1), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_map_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::some::valid::ns::simpleTypeDef /*param1*/>(p_param1));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_map_typedef_param(apache::thrift::RequestParams /* params */, ::some::valid::ns::simpleTypeDef p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_map_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_map_typedef_param(p_param1);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_map_typedef_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::some::valid::ns::simpleTypeDef p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_map_typedef_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_map_typedef_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_typedef_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_map_typedef_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -249,6 +416,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_map_typedef_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_map_typedef_param(p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_map_typedef_param(p_param1);
@@ -260,6 +443,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<::some::valid::ns::simpleTypeDef /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -282,19 +470,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_enum_param(p_param1), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::some::valid::ns::MyEnumA /*param1*/>(p_param1));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_enum_param(apache::thrift::RequestParams /* params */, ::some::valid::ns::MyEnumA p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_enum_param(p_param1);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_enum_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::some::valid::ns::MyEnumA p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_enum_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_enum_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_enum_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_enum_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -308,6 +522,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_enum_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_enum_param(p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_enum_param(p_param1);
@@ -319,6 +549,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<::some::valid::ns::MyEnumA /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -341,19 +576,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_struct_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_struct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::some::valid::ns::MyStruct> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_struct_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_struct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_struct_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_struct_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_struct_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_struct_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_struct_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_struct_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -367,6 +628,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_struct_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_struct_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_struct_param(std::move(p_param1));
@@ -378,6 +655,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::some::valid::ns::MyStruct> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -400,19 +682,45 @@ folly::Future<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::Par
   return apache::thrift::detail::si::future(semifuture_void_ret_listunion_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_void_ret_listunion_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<void> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_void_ret_listunion_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_void_ret_listunion_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_void_ret_listunion_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_void_ret_listunion_param(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_void_ret_listunion_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_void_ret_listunion_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_listunion_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_void_ret_listunion_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -426,6 +734,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_void_ret_listunion_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_void_ret_listunion_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         void_ret_listunion_param(std::move(p_param1));
@@ -437,6 +761,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_v
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -458,19 +787,45 @@ folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamServi
   return apache::thrift::detail::si::future(semifuture_bool_ret_i32_i64_param(p_param1, p_param2), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_bool_ret_i32_i64_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*param1*/, ::std::int64_t /*param2*/>(p_param1, p_param2));
+}
+
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_i32_i64_param(apache::thrift::RequestParams /* params */, ::std::int32_t p_param1, ::std::int64_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_bool_ret_i32_i64_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_bool_ret_i32_i64_param(p_param1, p_param2);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_i32_i64_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int32_t p_param1, ::std::int64_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_bool_ret_i32_i64_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_bool_ret_i32_i64_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_i32_i64_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_bool_ret_i32_i64_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -484,6 +839,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_i32_i64_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_bool_ret_i32_i64_param(p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(bool_ret_i32_i64_param(p_param1, p_param2));
@@ -494,6 +865,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<::std::int32_t /*param1*/, ::std::int64_t /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -515,19 +891,45 @@ folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamServi
   return apache::thrift::detail::si::future(semifuture_bool_ret_map_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_bool_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_map_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_bool_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_bool_ret_map_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_bool_ret_map_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_bool_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_bool_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -541,6 +943,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_bool_ret_map_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(bool_ret_map_param(std::move(p_param1)));
@@ -551,6 +969,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -572,19 +995,45 @@ folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamServi
   return apache::thrift::detail::si::future(semifuture_bool_ret_union_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_bool_ret_union_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::some::valid::ns::ComplexUnion> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_bool_ret_union_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_bool_ret_union_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_bool_ret_union_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_bool_ret_union_param(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_bool_ret_union_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_bool_ret_union_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_union_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_bool_ret_union_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -598,6 +1047,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_bool_ret_union_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_bool_ret_union_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(bool_ret_union_param(std::move(p_param1)));
@@ -608,6 +1073,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::some::valid::ns::ComplexUnion> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -629,19 +1099,45 @@ folly::Future<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::
   return apache::thrift::detail::si::future(semifuture_i64_ret_float_double_param(p_param1, p_param2), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_i64_ret_float_double_param(float p_param1, double p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_i64_ret_float_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<float /*param1*/, double /*param2*/>(p_param1, p_param2));
+}
+
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_i64_ret_float_double_param(apache::thrift::RequestParams /* params */, float p_param1, double p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_i64_ret_float_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_i64_ret_float_double_param(p_param1, p_param2);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_float_double_param(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, float p_param1, double p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_i64_ret_float_double_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_i64_ret_float_double_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_i64_ret_float_double_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_i64_ret_float_double_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -655,6 +1151,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_i64_ret_float_double_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_i64_ret_float_double_param(p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(i64_ret_float_double_param(p_param1, p_param2));
@@ -665,6 +1177,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<float /*param1*/, double /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -686,19 +1203,45 @@ folly::Future<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::
   return apache::thrift::detail::si::future(semifuture_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_i64_ret_string_typedef_param(std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_i64_ret_string_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::string> /*param1*/, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> /*param2*/>(std::move(p_param1), std::move(p_param2)));
+}
+
+folly::coro::Task<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_i64_ret_string_typedef_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_i64_ret_string_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i64_ret_string_typedef_param(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_i64_ret_string_typedef_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_i64_ret_string_typedef_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_i64_ret_string_typedef_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_i64_ret_string_typedef_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -712,6 +1255,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_i64_ret_string_typedef_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2)));
@@ -722,6 +1281,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_i
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<std::unique_ptr<::std::string> /*param1*/, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -747,19 +1311,45 @@ folly::Future<double> apache::thrift::ServiceHandler<::some::valid::ns::ParamSer
   return apache::thrift::detail::si::future(semifuture_double_ret_setstruct_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<double> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_double_ret_setstruct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<double> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_double_ret_setstruct_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_double_ret_setstruct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_double_ret_setstruct_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_double_ret_setstruct_param(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_double_ret_setstruct_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_double_ret_setstruct_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_double_ret_setstruct_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_double_ret_setstruct_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -773,6 +1363,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_d
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_double_ret_setstruct_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_double_ret_setstruct_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(double_ret_setstruct_param(std::move(p_param1)));
@@ -783,6 +1389,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_d
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -806,19 +1417,45 @@ folly::Future<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::s
   return apache::thrift::detail::si::future(semifuture_string_ret_string_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_string_ret_string_param(std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_string_ret_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::string> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_string_ret_string_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_string_ret_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_string_ret_string_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_string_ret_string_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_string_ret_string_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_string_ret_string_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_string_ret_string_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_string_ret_string_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -832,6 +1469,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_s
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_string_ret_string_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_string_ret_string_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
@@ -844,6 +1497,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_s
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::string> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -867,19 +1525,45 @@ folly::Future<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::s
   return apache::thrift::detail::si::future(semifuture_binary_ret_binary_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_binary_ret_binary_param(std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_binary_ret_binary_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::string> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_binary_ret_binary_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_binary_ret_binary_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_binary_ret_binary_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_binary_ret_binary_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_binary_ret_binary_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_binary_ret_binary_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_binary_ret_binary_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_binary_ret_binary_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -893,6 +1577,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_binary_ret_binary_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_binary_ret_binary_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
@@ -905,6 +1605,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_b
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::string> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -928,19 +1633,45 @@ folly::Future<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> apache
   return apache::thrift::detail::si::future(semifuture_map_ret_bool_param(p_param1), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_map_ret_bool_param(bool p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_map_ret_bool_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<bool /*param1*/>(p_param1));
+}
+
+folly::coro::Task<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_map_ret_bool_param(apache::thrift::RequestParams /* params */, bool p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_map_ret_bool_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_map_ret_bool_param(p_param1);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_map_ret_bool_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>> callback, bool p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_map_ret_bool_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_map_ret_bool_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_map_ret_bool_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_map_ret_bool_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -954,6 +1685,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_m
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_map_ret_bool_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_map_ret_bool_param(p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::std::string, ::std::int64_t> _return;
@@ -966,6 +1713,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_m
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<bool /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -989,19 +1741,45 @@ folly::Future<std::unique_ptr<::std::vector<bool>>> apache::thrift::ServiceHandl
   return apache::thrift::detail::si::future(semifuture_list_ret_map_setlist_param(std::move(p_param1), std::move(p_param2)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::vector<bool>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_list_ret_map_setlist_param(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_list_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> /*param1*/, std::unique_ptr<::std::vector<::std::string>> /*param2*/>(std::move(p_param1), std::move(p_param2)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::vector<bool>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_list_ret_map_setlist_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_list_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_list_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_list_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_list_ret_map_setlist_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_list_ret_map_setlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_list_ret_map_setlist_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_list_ret_map_setlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1015,6 +1793,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_list_ret_map_setlist_param(params, std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_list_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<bool> _return;
@@ -1027,6 +1821,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> /*param1*/, std::unique_ptr<::std::vector<::std::string>> /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1050,19 +1849,45 @@ folly::Future<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t
   return apache::thrift::detail::si::future(semifuture_mapsetlistmapliststring_ret_listlistlist_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_mapsetlistmapliststring_ret_listlistlist_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>> callback, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_mapsetlistmapliststring_ret_listlistlist_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1076,6 +1901,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_m
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_mapsetlistmapliststring_ret_listlistlist_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_mapsetlistmapliststring_ret_listlistlist_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> _return;
@@ -1088,6 +1929,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_m
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1109,19 +1955,45 @@ folly::Future<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<:
   return apache::thrift::detail::si::future(semifuture_typedef_ret_i32_param(p_param1), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_typedef_ret_i32_param(::std::int32_t p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_typedef_ret_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*param1*/>(p_param1));
+}
+
+folly::coro::Task<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_typedef_ret_i32_param(apache::thrift::RequestParams /* params */, ::std::int32_t p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_typedef_ret_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_typedef_ret_i32_param(p_param1);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_typedef_ret_i32_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>> callback, ::std::int32_t p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_typedef_ret_i32_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_typedef_ret_i32_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_typedef_ret_i32_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_typedef_ret_i32_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1135,6 +2007,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_t
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_typedef_ret_i32_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_typedef_ret_i32_param(p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(typedef_ret_i32_param(p_param1));
@@ -1145,6 +2033,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_t
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<::std::int32_t /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1170,19 +2063,45 @@ folly::Future<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some:
   return apache::thrift::detail::si::future(semifuture_enum_ret_double_param(p_param1), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_enum_ret_double_param(double p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_enum_ret_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<double /*param1*/>(p_param1));
+}
+
+folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_enum_ret_double_param(apache::thrift::RequestParams /* params */, double p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_enum_ret_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_enum_ret_double_param(p_param1);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>> callback, double p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_enum_ret_double_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_enum_ret_double_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_enum_ret_double_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_enum_ret_double_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1196,6 +2115,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_e
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_enum_ret_double_param(params, p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_enum_ret_double_param(p_param1);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(enum_ret_double_param(p_param1));
@@ -1206,6 +2141,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_e
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<double /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1227,19 +2167,45 @@ folly::Future<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some:
   return apache::thrift::detail::si::future(semifuture_enum_ret_double_enum_param(p_param1, p_param2), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_enum_ret_double_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<double /*param1*/, ::some::valid::ns::MyEnumA /*param2*/>(p_param1, p_param2));
+}
+
+folly::coro::Task<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_enum_ret_double_enum_param(apache::thrift::RequestParams /* params */, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_enum_ret_double_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_enum_ret_double_enum_param(p_param1, p_param2);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_enum_ret_double_enum_param(std::unique_ptr<apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_enum_ret_double_enum_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_enum_ret_double_enum_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_enum_ret_double_enum_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_enum_ret_double_enum_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1253,6 +2219,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_e
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_enum_ret_double_enum_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_enum_ret_double_enum_param(p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         callback->result(enum_ret_double_enum_param(p_param1, p_param2));
@@ -1263,6 +2245,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_e
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<double /*param1*/, ::some::valid::ns::MyEnumA /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1286,19 +2273,45 @@ folly::Future<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>> apache
   return apache::thrift::detail::si::future(semifuture_listenum_ret_map_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_listenum_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_listenum_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_listenum_ret_map_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_listenum_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_listenum_ret_map_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listenum_ret_map_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>> callback, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_listenum_ret_map_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_listenum_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_listenum_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_listenum_ret_map_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1312,6 +2325,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_listenum_ret_map_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_listenum_ret_map_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<::some::valid::ns::MyEnumA> _return;
@@ -1324,6 +2353,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1351,19 +2385,45 @@ folly::Future<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apache::
   return apache::thrift::detail::si::future(semifuture_setstruct_ret_set_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_setstruct_ret_set_param(std::unique_ptr<::std::set<::std::string>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_setstruct_ret_set_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::set<::std::string>> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_setstruct_ret_set_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::set<::std::string>> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_setstruct_ret_set_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_setstruct_ret_set_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_setstruct_ret_set_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>> callback, std::unique_ptr<::std::set<::std::string>> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_setstruct_ret_set_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_setstruct_ret_set_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_setstruct_ret_set_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_setstruct_ret_set_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1377,6 +2437,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_s
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_setstruct_ret_set_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_setstruct_ret_set_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::set<::some::valid::ns::MyStruct> _return;
@@ -1389,6 +2465,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_s
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::set<::std::string>> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1412,19 +2493,45 @@ folly::Future<std::unique_ptr<::some::valid::ns::ComplexUnion>> apache::thrift::
   return apache::thrift::detail::si::future(semifuture_union_ret_i32_i32_param(p_param1, p_param2), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::some::valid::ns::ComplexUnion>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_union_ret_i32_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<::std::int32_t /*param1*/, ::std::int32_t /*param2*/>(p_param1, p_param2));
+}
+
+folly::coro::Task<std::unique_ptr<::some::valid::ns::ComplexUnion>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_union_ret_i32_i32_param(apache::thrift::RequestParams /* params */, ::std::int32_t p_param1, ::std::int32_t p_param2) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_union_ret_i32_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_union_ret_i32_i32_param(p_param1, p_param2);
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_union_ret_i32_i32_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>> callback, ::std::int32_t p_param1, ::std::int32_t p_param2) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_union_ret_i32_i32_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_union_ret_i32_i32_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_union_ret_i32_i32_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_union_ret_i32_i32_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1438,6 +2545,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_u
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_union_ret_i32_i32_param(params, p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_union_ret_i32_i32_param(p_param1, p_param2);
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::some::valid::ns::ComplexUnion _return;
@@ -1450,6 +2573,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_u
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1, p_param2) = std::move(ex).restoreArgs<::std::int32_t /*param1*/, ::std::int32_t /*param2*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }
@@ -1473,19 +2601,45 @@ folly::Future<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> a
   return apache::thrift::detail::si::future(semifuture_listunion_string_param(std::move(p_param1)), getInternalKeepAlive());
 }
 
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_listunion_string_param(std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_listunion_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::withCapturedArgs<std::unique_ptr<::std::string> /*param1*/>(std::move(p_param1)));
+}
+
+folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::co_listunion_string_param(apache::thrift::RequestParams /* params */, std::unique_ptr<::std::string> p_param1) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_listunion_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Coro, std::memory_order_relaxed);
+  return co_listunion_string_param(std::move(p_param1));
+}
+#endif // FOLLY_HAS_COROUTINES
+
 void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_listunion_string_param(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>> callback, std::unique_ptr<::std::string> p_param1) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
   auto invocationType = __fbthrift_invocation_listunion_string_param.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_listunion_string_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_listunion_string_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_listunion_string_param.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
         FOLLY_FALLTHROUGH;
+#endif // FOLLY_HAS_COROUTINES
       }
       case apache::thrift::detail::si::InvocationType::Future:
       {
@@ -1499,6 +2653,22 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam:
+      {
+        apache::thrift::RequestParams params{callback->getRequestContext(),
+          callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
+        auto task = co_listunion_string_param(params, std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro:
+      {
+        auto task = co_listunion_string_param(std::move(p_param1));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<::some::valid::ns::ComplexUnion> _return;
@@ -1511,6 +2681,11 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_tm_l
         folly::assume_unreachable();
       }
     }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_param1) = std::move(ex).restoreArgs<std::unique_ptr<::std::string> /*param1*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
   } catch (...) {
     callback->exception(std::current_exception());
   }

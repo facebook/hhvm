@@ -52,114 +52,226 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual ::std::int32_t get();
   virtual folly::Future<::std::int32_t> future_get();
   virtual folly::SemiFuture<::std::int32_t> semifuture_get();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_get();
+  virtual folly::coro::Task<::std::int32_t> co_get(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_get(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t getter();
   virtual folly::Future<::std::int32_t> future_getter();
   virtual folly::SemiFuture<::std::int32_t> semifuture_getter();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_getter();
+  virtual folly::coro::Task<::std::int32_t> co_getter(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_getter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t lists();
   virtual folly::Future<::std::int32_t> future_lists();
   virtual folly::SemiFuture<::std::int32_t> semifuture_lists();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_lists();
+  virtual folly::coro::Task<::std::int32_t> co_lists(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_lists(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t maps();
   virtual folly::Future<::std::int32_t> future_maps();
   virtual folly::SemiFuture<::std::int32_t> semifuture_maps();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_maps();
+  virtual folly::coro::Task<::std::int32_t> co_maps(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_maps(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t name();
   virtual folly::Future<::std::int32_t> future_name();
   virtual folly::SemiFuture<::std::int32_t> semifuture_name();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_name();
+  virtual folly::coro::Task<::std::int32_t> co_name(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t name_to_value();
   virtual folly::Future<::std::int32_t> future_name_to_value();
   virtual folly::SemiFuture<::std::int32_t> semifuture_name_to_value();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_name_to_value();
+  virtual folly::coro::Task<::std::int32_t> co_name_to_value(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_name_to_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t names();
   virtual folly::Future<::std::int32_t> future_names();
   virtual folly::SemiFuture<::std::int32_t> semifuture_names();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_names();
+  virtual folly::coro::Task<::std::int32_t> co_names(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_names(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t prefix_tree();
   virtual folly::Future<::std::int32_t> future_prefix_tree();
   virtual folly::SemiFuture<::std::int32_t> semifuture_prefix_tree();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_prefix_tree();
+  virtual folly::coro::Task<::std::int32_t> co_prefix_tree(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_prefix_tree(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t sets();
   virtual folly::Future<::std::int32_t> future_sets();
   virtual folly::SemiFuture<::std::int32_t> semifuture_sets();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_sets();
+  virtual folly::coro::Task<::std::int32_t> co_sets(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_sets(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t setter();
   virtual folly::Future<::std::int32_t> future_setter();
   virtual folly::SemiFuture<::std::int32_t> semifuture_setter();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_setter();
+  virtual folly::coro::Task<::std::int32_t> co_setter(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_setter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t str();
   virtual folly::Future<::std::int32_t> future_str();
   virtual folly::SemiFuture<::std::int32_t> semifuture_str();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_str();
+  virtual folly::coro::Task<::std::int32_t> co_str(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_str(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t strings();
   virtual folly::Future<::std::int32_t> future_strings();
   virtual folly::SemiFuture<::std::int32_t> semifuture_strings();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_strings();
+  virtual folly::coro::Task<::std::int32_t> co_strings(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_strings(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t type();
   virtual folly::Future<::std::int32_t> future_type();
   virtual folly::SemiFuture<::std::int32_t> semifuture_type();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_type();
+  virtual folly::coro::Task<::std::int32_t> co_type(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_type(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t value();
   virtual folly::Future<::std::int32_t> future_value();
   virtual folly::SemiFuture<::std::int32_t> semifuture_value();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_value();
+  virtual folly::coro::Task<::std::int32_t> co_value(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t value_to_name();
   virtual folly::Future<::std::int32_t> future_value_to_name();
   virtual folly::SemiFuture<::std::int32_t> semifuture_value_to_name();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_value_to_name();
+  virtual folly::coro::Task<::std::int32_t> co_value_to_name(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_value_to_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t values();
   virtual folly::Future<::std::int32_t> future_values();
   virtual folly::SemiFuture<::std::int32_t> semifuture_values();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_values();
+  virtual folly::coro::Task<::std::int32_t> co_values(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_values(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t id();
   virtual folly::Future<::std::int32_t> future_id();
   virtual folly::SemiFuture<::std::int32_t> semifuture_id();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_id();
+  virtual folly::coro::Task<::std::int32_t> co_id(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_id(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t ids();
   virtual folly::Future<::std::int32_t> future_ids();
   virtual folly::SemiFuture<::std::int32_t> semifuture_ids();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_ids();
+  virtual folly::coro::Task<::std::int32_t> co_ids(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_ids(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t descriptor();
   virtual folly::Future<::std::int32_t> future_descriptor();
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptor();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_descriptor();
+  virtual folly::coro::Task<::std::int32_t> co_descriptor(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_descriptor(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t descriptors();
   virtual folly::Future<::std::int32_t> future_descriptors();
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptors();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_descriptors();
+  virtual folly::coro::Task<::std::int32_t> co_descriptors(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_descriptors(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t key();
   virtual folly::Future<::std::int32_t> future_key();
   virtual folly::SemiFuture<::std::int32_t> semifuture_key();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_key();
+  virtual folly::coro::Task<::std::int32_t> co_key(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_key(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t keys();
   virtual folly::Future<::std::int32_t> future_keys();
   virtual folly::SemiFuture<::std::int32_t> semifuture_keys();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_keys();
+  virtual folly::coro::Task<::std::int32_t> co_keys(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_keys(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t annotation();
   virtual folly::Future<::std::int32_t> future_annotation();
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotation();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_annotation();
+  virtual folly::coro::Task<::std::int32_t> co_annotation(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_annotation(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t annotations();
   virtual folly::Future<::std::int32_t> future_annotations();
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotations();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_annotations();
+  virtual folly::coro::Task<::std::int32_t> co_annotations(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_annotations(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t member();
   virtual folly::Future<::std::int32_t> future_member();
   virtual folly::SemiFuture<::std::int32_t> semifuture_member();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_member();
+  virtual folly::coro::Task<::std::int32_t> co_member(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_member(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t members();
   virtual folly::Future<::std::int32_t> future_members();
   virtual folly::SemiFuture<::std::int32_t> semifuture_members();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_members();
+  virtual folly::coro::Task<::std::int32_t> co_members(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_members(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t field();
   virtual folly::Future<::std::int32_t> future_field();
   virtual folly::SemiFuture<::std::int32_t> semifuture_field();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_field();
+  virtual folly::coro::Task<::std::int32_t> co_field(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_field(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t fields();
   virtual folly::Future<::std::int32_t> future_fields();
   virtual folly::SemiFuture<::std::int32_t> semifuture_fields();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_fields();
+  virtual folly::coro::Task<::std::int32_t> co_fields(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_fields(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
  private:
   static ::test_cpp2::cpp_reflection::service_with_special_namesServiceInfoHolder __fbthrift_serviceInfoHolder;

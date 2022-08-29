@@ -50,10 +50,18 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
   virtual void ping();
   virtual folly::Future<folly::Unit> future_ping();
   virtual folly::SemiFuture<folly::Unit> semifuture_ping();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_ping();
+  virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void pong();
   virtual folly::Future<folly::Unit> future_pong();
   virtual folly::SemiFuture<folly::Unit> semifuture_pong();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_pong();
+  virtual folly::coro::Task<void> co_pong(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_pong(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
  private:
   static ::cpp2::MyServicePrioParentServiceInfoHolder __fbthrift_serviceInfoHolder;

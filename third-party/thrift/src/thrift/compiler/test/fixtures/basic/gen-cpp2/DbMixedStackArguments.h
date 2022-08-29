@@ -54,10 +54,18 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   virtual void getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataByKey0(std::unique_ptr<::std::string> p_key);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_getDataByKey0(std::unique_ptr<::std::string> p_key);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey0(std::unique_ptr<::std::string> p_key);
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey0(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_key);
+#endif
   virtual void async_tm_getDataByKey0(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key);
   virtual void getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataByKey1(std::unique_ptr<::std::string> p_key);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_getDataByKey1(std::unique_ptr<::std::string> p_key);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey1(std::unique_ptr<::std::string> p_key);
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getDataByKey1(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_key);
+#endif
   virtual void async_tm_getDataByKey1(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key);
  private:
   static ::test::fixtures::basic::DbMixedStackArgumentsServiceInfoHolder __fbthrift_serviceInfoHolder;

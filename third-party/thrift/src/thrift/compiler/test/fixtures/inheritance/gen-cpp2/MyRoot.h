@@ -49,6 +49,10 @@ class ServiceHandler<::cpp2::MyRoot> : public apache::thrift::ServerInterface {
   virtual void do_root();
   virtual folly::Future<folly::Unit> future_do_root();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_root();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_do_root();
+  virtual folly::coro::Task<void> co_do_root(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_do_root(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
  private:
   static ::cpp2::MyRootServiceInfoHolder __fbthrift_serviceInfoHolder;

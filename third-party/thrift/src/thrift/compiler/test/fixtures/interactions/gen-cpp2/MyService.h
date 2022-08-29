@@ -155,6 +155,10 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   virtual void foo();
   virtual folly::Future<folly::Unit> future_foo();
   virtual folly::SemiFuture<folly::Unit> semifuture_foo();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_foo();
+  virtual folly::coro::Task<void> co_foo(apache::thrift::RequestParams params);
+#endif
   virtual void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> interact(::std::int32_t /*arg*/);
   virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>> future_interact(::std::int32_t p_arg);

@@ -53,6 +53,10 @@ class ServiceHandler<::test::namespace_from_package::module::TestService> : publ
   virtual ::std::int64_t init(::std::int64_t /*int1*/);
   virtual folly::Future<::std::int64_t> future_init(::std::int64_t p_int1);
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(::std::int64_t p_int1);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_int1);
+  virtual folly::coro::Task<::std::int64_t> co_init(apache::thrift::RequestParams params, ::std::int64_t p_int1);
+#endif
   virtual void async_tm_init(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_int1);
  private:
   static ::test::namespace_from_package::module::TestServiceServiceInfoHolder __fbthrift_serviceInfoHolder;

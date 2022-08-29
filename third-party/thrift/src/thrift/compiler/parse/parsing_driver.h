@@ -27,7 +27,6 @@
 #include <boost/optional.hpp>
 #include <fmt/format.h>
 
-#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -36,6 +35,7 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_scope.h>
+#include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/parser.h>
 #include <thrift/compiler/source_location.h>
@@ -100,7 +100,7 @@ class parsing_driver : public parser_actions {
  public:
   parsing_driver(
       source_manager& sm,
-      diagnostic_context& ctx,
+      diagnostics_engine& diags,
       std::string path,
       parsing_params parse_params);
   ~parsing_driver() override;
@@ -496,16 +496,6 @@ class parsing_driver : public parser_actions {
    */
   std::unique_ptr<t_program_bundle> parse();
 
-  template <typename... T>
-  void warning(source_location loc, fmt::format_string<T...> msg, T&&... args) {
-    ctx_.report(loc, diagnostic_level::warning, msg, std::forward<T>(args)...);
-  }
-
-  template <typename... T>
-  void error(source_location loc, fmt::format_string<T...> msg, T&&... args) {
-    ctx_.report(loc, diagnostic_level::error, msg, std::forward<T>(args)...);
-  }
-
   [[noreturn]] void end_parsing();
 
   /**
@@ -629,7 +619,7 @@ class parsing_driver : public parser_actions {
   std::set<std::string> already_parsed_paths_;
   std::set<std::string> circular_deps_;
 
-  diagnostic_context& ctx_;
+  diagnostics_engine& diags_;
   parsing_params params_;
 
   std::unordered_set<std::string> programs_that_parsed_definition_;
@@ -662,7 +652,7 @@ class parsing_driver : public parser_actions {
     using limits = std::numeric_limits<T>;
     if (mode == parsing_mode::PROGRAM &&
         (value < limits::min() || value > limits::max())) {
-      error(
+      diags_.error(
           loc,
           "Integer constant {} outside the range of {} ([{}, {}]).",
           value,

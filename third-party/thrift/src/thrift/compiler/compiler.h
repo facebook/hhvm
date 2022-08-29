@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/parse/parsing_driver.h>
 
 namespace apache {

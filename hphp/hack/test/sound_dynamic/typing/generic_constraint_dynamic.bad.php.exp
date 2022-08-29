@@ -13,7 +13,7 @@ Some type arguments violate their constraints (Typing[4323])
 File "generic_constraint_dynamic.bad.php", line 21, characters 14-20:
 Invalid argument (Typing[4110])
   File "generic_constraint_dynamic.bad.php", line 21, characters 12-12:
-  Expected `~[unresolved]` because type parameter `T` of `C` could not be determined. Please add explicit type parameters to the invocation of `C`
+  Expected `~_` because type parameter `T` of `C` could not be determined. Please add explicit type parameters to the invocation of `C`
   File "generic_constraint_dynamic.bad.php", line 6, characters 39-39:
     via this generic `T`
   File "generic_constraint_dynamic.bad.php", line 21, characters 18-18:

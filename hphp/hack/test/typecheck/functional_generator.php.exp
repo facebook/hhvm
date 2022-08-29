@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "functional_generator.php", line 27, characters 20-30:
   Expected `Stream<int>`
   File "functional_generator.php", line 27, characters 20-30:
-  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+  But got `Generator<_, _, _>` (result of function containing a `yield`)

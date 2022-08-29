@@ -5,4 +5,4 @@ Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
   File "sound_dynamic_callable_2.bad.php", line 10, characters 27-34:
   Expected `dynamic` because method must be callable in a dynamic context
   File "sound_dynamic_callable_2.bad.php", line 11, characters 16-18:
-  Type `Box<[unresolved]>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `Box<_>` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -11,6 +11,6 @@ Some type arguments violate their constraints (Typing[4323])
 File "array_sub.php", line 21, characters 12-13:
 Invalid argument (Typing[4110])
   File "array_sub.php", line 12, characters 27-40:
-  Expected `dict<[unresolved], [unresolved]>`
+  Expected `dict<_, _>`
   File "array_sub.php", line 20, characters 15-25:
   But got `vec<int>`

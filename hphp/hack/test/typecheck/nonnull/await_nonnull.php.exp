@@ -9,6 +9,6 @@ Invalid return type (Typing[4336])
 File "await_nonnull.php", line 4, characters 3-10:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "await_nonnull.php", line 4, characters 3-10:
-  Expected `Awaitable<[unresolved]>`
+  Expected `Awaitable<_>`
   File "await_nonnull.php", line 3, characters 18-24:
   But got `nonnull`

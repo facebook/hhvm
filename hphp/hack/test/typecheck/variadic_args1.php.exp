@@ -1,7 +1,7 @@
 File "variadic_args1.php--strict.php", line 15, characters 20-24:
 Invalid argument (Typing[4110])
   File "variadic_args1.php--strict.php", line 29, characters 34-46:
-  Expected `dict<[unresolved], [unresolved]>`
+  Expected `dict<_, _>`
   File "variadic_args1.php--strict.php", line 8, characters 21-25:
   But got `vec<T>` (variadic argument)
 File "variadic_args1.php--strict.php", line 29, characters 34-46:

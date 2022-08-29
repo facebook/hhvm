@@ -7,12 +7,12 @@ The values of this `dict` are incompatible (Typing[4110])
 File "dict_error.php", line 57, characters 10-14:
 Typing error (Typing[4110])
   File "dict_error.php", line 57, characters 10-14:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  Expected `Spliceable<_, _, _>` because this is being spliced into another Expression Tree
   File "dict_error.php", line 54, characters 15-24:
   But got `ExampleInt`
 File "dict_error.php", line 57, characters 12-13:
 Invalid argument (Typing[4110])
   File "dict_error.php", line 48, characters 5-45:
-  Expected `Spliceable<DictError, mixed, [unresolved]>`
+  Expected `Spliceable<DictError, mixed, _>`
   File "dict_error.php", line 54, characters 15-24:
   But got `ExampleInt`

@@ -3,6 +3,6 @@ Splice syntax `${...}` cannot be nested. (Parsing[1002])
 File "nested_splicing2.php", line 6, characters 20-23:
 Typing error (Typing[4110])
   File "nested_splicing2.php", line 6, characters 20-23:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  Expected `Spliceable<_, _, _>` because this is being spliced into another Expression Tree
   File "nested_splicing2.php", line 6, characters 22-22:
   But got `int`

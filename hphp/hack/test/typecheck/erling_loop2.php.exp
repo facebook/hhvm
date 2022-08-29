@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "erling_loop2.php", line 16, characters 18-20:
   Expected `int`
   File "erling_loop2.php", line 18, characters 3-13:
-  But got `([unresolved] & (int | string))`
+  But got `(_ & (int | string))`

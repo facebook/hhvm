@@ -55,7 +55,7 @@ Invalid `foreach` (Typing[4110])
 File "supportdynamic.bad.php", line 18, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "supportdynamic.bad.php", line 18, characters 3-11:
-  Expected `Awaitable<[unresolved]>`
+  Expected `Awaitable<_>`
   File "supportdynamic.bad.php", line 15, characters 32-38:
   But got `nonnull`
   File "supportdynamic.hhi", line 6, characters 29-29:

@@ -1,15 +1,15 @@
 File "re_prefixed_string.php", line 23, characters 16-17:
 Invalid argument (Typing[4110])
-File "re_prefixed_string.php", line 26, characters 43-65:
-Expected `HH\Lib\Regex\Pattern<[unresolved]>`
-File "re_prefixed_string.php", line 20, characters 8-20:
-But got `string` because this is the result of a concatenation
+  File "re_prefixed_string.php", line 26, characters 43-65:
+  Expected `HH\Lib\Regex\Pattern<_>`
+  File "re_prefixed_string.php", line 20, characters 8-20:
+  But got `string` because this is the result of a concatenation
 File "re_prefixed_string.php", line 26, characters 10-16:
 Invalid return type (Typing[4336])
-File "re_prefixed_string.php", line 26, characters 78-78:
-Expected `T`
-File "re_prefixed_string.php", line 26, characters 10-16:
-But got `void` because this function does not always return a value
+  File "re_prefixed_string.php", line 26, characters 78-78:
+  Expected `T`
+  File "re_prefixed_string.php", line 26, characters 10-16:
+  But got `void` because this function does not always return a value
 File "re_prefixed_string.php", line 32, characters 13-35:
 Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
 File "re_prefixed_string.php", line 33, characters 13-29:

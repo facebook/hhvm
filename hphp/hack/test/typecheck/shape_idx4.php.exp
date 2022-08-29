@@ -7,6 +7,6 @@ Invalid argument (Typing[4110])
 File "shape_idx4.php", line 7, characters 15-16:
 Invalid argument (Typing[4110])
   File "shape_idx4.php", line 7, characters 15-16:
-  Expected `shape(?'x' => [unresolved], ...)` because `Shapes::idx` expects a shape
+  Expected `shape(?'x' => _, ...)` because `Shapes::idx` expects a shape
   File "shape_idx4.php", line 6, characters 15-17:
   But got `int`

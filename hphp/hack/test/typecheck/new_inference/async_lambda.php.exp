@@ -17,4 +17,4 @@ Invalid return type (Typing[4323])
   File "collections/Set.hhi", line 195, characters 29-36:
   Expected `arraykey`
   File "async_lambda.php", line 6, characters 11-25:
-  But got `Awaitable<[unresolved]>` (result of an `async` function)
+  But got `Awaitable<_>` (result of an `async` function)

@@ -1,18 +1,18 @@
 File "await_old_precedence.php", line 10, characters 14-15:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-File "await_old_precedence.php", line 8, characters 40-54:
-This is why I think it is `Awaitable`
+  File "await_old_precedence.php", line 8, characters 40-54:
+  This is why I think it is `Awaitable`
 File "await_old_precedence.php", line 10, characters 19-20:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-File "await_old_precedence.php", line 8, characters 60-74:
-This is why I think it is `Awaitable`
+  File "await_old_precedence.php", line 8, characters 60-74:
+  This is why I think it is `Awaitable`
 File "await_old_precedence.php", line 20, characters 3-30:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-File "await_old_precedence.php", line 17, characters 35-46:
-This is why I think it is `Awaitable`
+  File "await_old_precedence.php", line 17, characters 35-46:
+  This is why I think it is `Awaitable`
 File "await_old_precedence.php", line 20, characters 18-19:
 Invalid argument (Typing[4110])
-File "await_old_precedence.php", line 17, characters 16-27:
-Expected `Awaitable<[unresolved]>`
-File "await_old_precedence.php", line 19, characters 30-32:
-But got `int`
+  File "await_old_precedence.php", line 17, characters 16-27:
+  Expected `Awaitable<_>`
+  File "await_old_precedence.php", line 19, characters 30-32:
+  But got `int`

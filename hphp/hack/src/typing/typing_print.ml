@@ -653,7 +653,7 @@ module Full = struct
             if ISet.mem n' st then
               text "[rec]"
             else if !blank_tyvars then
-              text "[unresolved]"
+              text "_"
             else
               text ("#" ^ string_of_int n')
           in

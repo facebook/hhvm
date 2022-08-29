@@ -1,19 +1,19 @@
 File "generics.php--file2.php", line 68, characters 3-13:
   exact A<int>
 File "generics.php--file2.php", line 71, characters 3-13:
-  (exact A<[unresolved]> | exact A<[unresolved]>)
+  (exact A<_> | exact A<_>)
 File "generics.php--file2.php", line 74, characters 3-13:
-  (exact A<int> | exact A<[unresolved]>)
+  (exact A<int> | exact A<_>)
 File "generics.php--file2.php", line 77, characters 3-13:
   exact B<int>
 File "generics.php--file2.php", line 80, characters 3-13:
-  (exact B<[unresolved]> | exact B<[unresolved]>)
+  (exact B<_> | exact B<_>)
 File "generics.php--file2.php", line 83, characters 3-13:
   A<int>
 File "generics.php--file2.php", line 86, characters 3-13:
-  (A<int> | exact A<[unresolved]>)
+  (A<int> | exact A<_>)
 File "generics.php--file2.php", line 89, characters 3-13:
-  (exact A<[unresolved]> | A<T>)
+  (exact A<_> | A<T>)
 File "generics.php--file2.php", line 92, characters 3-13:
   (exact A<int> | A<T>)
 File "generics.php--file2.php", line 95, characters 3-13:
@@ -29,7 +29,7 @@ File "generics.php--file2.php", line 105, characters 3-13:
 File "generics.php--file2.php", line 106, characters 3-34:
   bool
 File "generics.php--file2.php", line 109, characters 3-13:
-  (exact A<int> | exact B<[unresolved]>)
+  (exact A<int> | exact B<_>)
 File "generics.php--file2.php", line 110, characters 3-25:
   bool
 File "generics.php--file2.php", line 113, characters 3-13:

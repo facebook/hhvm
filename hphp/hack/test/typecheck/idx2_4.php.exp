@@ -1,6 +1,6 @@
 File "idx2_4.php", line 9, characters 12-12:
 Invalid argument (Typing[4110])
   File "idx.hhi", line 31, characters 4-25:
-  Expected `KeyedContainer<[unresolved], [unresolved]>`
+  Expected `KeyedContainer<_, _>`
   File "idx2_4.php", line 9, characters 12-12:
   But got `int`

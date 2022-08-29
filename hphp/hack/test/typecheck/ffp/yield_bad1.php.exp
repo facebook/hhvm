@@ -7,6 +7,6 @@ Invalid return type (Typing[4110])
   File "yield_bad1.php", line 4, characters 18-21:
   Expected `void`
   File "yield_bad1.php", line 4, characters 18-21:
-  But got `Generator<[unresolved], [unresolved], [unresolved]>` (result of function containing a `yield`)
+  But got `Generator<_, _, _>` (result of function containing a `yield`)
 File "yield_bad1.php", line 5, characters 3-5:
 Unbound name (typing): `foo` (Typing[4107])

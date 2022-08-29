@@ -886,11 +886,11 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
   wangle::SSLContextConfig sslCtxConfig;
 
   if (RuntimeOption::SSLClientAuthLevel == 2) {
-    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientCAFiles = std::vector<std::string>{RuntimeOption::SSLClientCAFile};
     sslCtxConfig.clientVerification =
       folly::SSLContext::VerifyClientCertificate::ALWAYS;
   } else if (RuntimeOption::SSLClientAuthLevel == 1) {
-    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientCAFiles = std::vector<std::string>{RuntimeOption::SSLClientCAFile};
     sslCtxConfig.clientVerification =
       folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
   } else {

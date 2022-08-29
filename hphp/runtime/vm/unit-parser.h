@@ -22,9 +22,11 @@
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-struct DeclProvider;
-
 namespace HPHP {
+
+namespace hackc {
+struct DeclProvider;
+}
 
 namespace Native {
 struct FuncTable;
@@ -154,7 +156,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   bool forDebuggerEval,
   const RepoOptionsFlags& options,
   CompileAbortMode mode,
-  DeclProvider* provider
+  hackc::DeclProvider* provider
 );
 
 }

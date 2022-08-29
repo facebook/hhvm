@@ -27,22 +27,22 @@ namespace HPHP {
 // When hackc requests a symbol we don't have in the local map,
 // remember it in m_missing so hphpc can look it up in its UnitIndex,
 // then retry hackc with additional UnitDecls.
-struct BatchDeclProvider final: ::DeclProvider {
+struct BatchDeclProvider final: hackc::DeclProvider {
 
   // Initialize provider from a list of UnitDecls. The given decls must
   // be live and unchanged for the lifetime of this BatchDeclProvider.
   explicit BatchDeclProvider(const std::vector<Package::UnitDecls>&);
 
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getType(std::string_view symbol, uint64_t) noexcept override;
 
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getFunc(std::string_view symbol) noexcept override;
 
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getConst(std::string_view symbol) noexcept override;
 
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getModule(std::string_view symbol) noexcept override;
 
   void finish();

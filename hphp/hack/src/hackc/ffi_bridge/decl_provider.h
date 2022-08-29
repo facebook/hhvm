@@ -8,6 +8,9 @@
 #include <string>
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
+namespace HPHP {
+namespace hackc {
+
 // DeclProviders return pointers to data that must outlive the provider.
 // This must be kept in sync with `enum ExternalDeclProviderResult` in
 // 'hackc/decl_provider/external.rs' so they both are layout compatible.
@@ -94,3 +97,6 @@ struct DeclProvider {
   virtual ExternalDeclProviderResult getModule(
       std::string_view symbol) noexcept = 0;
 };
+
+} // namespace hackc
+} // namespace HPHP

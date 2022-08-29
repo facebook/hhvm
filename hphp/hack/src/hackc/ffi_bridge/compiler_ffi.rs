@@ -30,7 +30,7 @@ use sha1::Digest;
 use sha1::Sha1;
 
 #[allow(clippy::derivable_impls)]
-#[cxx::bridge]
+#[cxx::bridge(namespace = "HPHP::hackc")]
 pub mod compile_ffi {
     struct NativeEnv {
         /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
@@ -142,24 +142,21 @@ pub mod compile_ffi {
         ) -> u8;
 
         /// Compile Hack source code to a Unit or an error.
-        unsafe fn hackc_compile_unit_from_text_cpp_ffi(
+        unsafe fn compile_unit_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
         ) -> Result<Box<UnitWrapper>>;
 
         /// Compile Hack source code to either HHAS or an error.
-        fn hackc_compile_from_text_cpp_ffi(
-            env: &NativeEnv,
-            source_text: &CxxString,
-        ) -> Result<Vec<u8>>;
+        fn compile_from_text_cpp_ffi(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
 
-        fn hackc_create_direct_decl_parse_options(
+        fn create_direct_decl_parse_options(
             flags: i32,
             aliased_namespaces: &CxxString,
         ) -> Box<DeclParserOptions>;
 
         /// Invoke the hackc direct decl parser and return every shallow decl in the file.
-        fn hackc_direct_decl_parse(
+        fn direct_decl_parse(
             options: &DeclParserOptions,
             filename: &CxxString,
             text: &CxxString,
@@ -168,16 +165,16 @@ pub mod compile_ffi {
         fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
-        fn hackc_type_exists(decls: &DeclResult, symbol: &str) -> bool;
+        fn type_exists(decls: &DeclResult, symbol: &str) -> bool;
 
         /// For testing: return true if deserializing produces the expected Decls.
-        fn hackc_verify_deserialization(decls: &DeclResult) -> bool;
+        fn verify_deserialization(decls: &DeclResult) -> bool;
 
         /// Serialize a FactsResult to JSON
-        fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
+        fn facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        fn hackc_decls_to_facts_cpp_ffi(
+        fn decls_to_facts_cpp_ffi(
             decl_flags: i32,
             decls: &DeclResult,
             sha1sum: &CxxString,
@@ -251,7 +248,7 @@ fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
     hasher.finalize().into()
 }
 
-fn hackc_compile_from_text_cpp_ffi(
+fn compile_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
@@ -285,12 +282,12 @@ fn hackc_compile_from_text_cpp_ffi(
     Ok(output)
 }
 
-fn hackc_type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
+fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
     // TODO T123158488: fix case insensitive lookups
     result.decls.decls.types().any(|(sym, _)| sym == symbol)
 }
 
-pub fn hackc_create_direct_decl_parse_options(
+pub fn create_direct_decl_parse_options(
     flags: i32,
     aliased_namespaces: &CxxString,
 ) -> Box<DeclParserOptions> {
@@ -312,7 +309,7 @@ pub fn hackc_create_direct_decl_parse_options(
     }))
 }
 
-pub fn hackc_direct_decl_parse(
+pub fn direct_decl_parse(
     opts: &DeclParserOptions,
     filename: &CxxString,
     text: &CxxString,
@@ -338,13 +335,13 @@ pub fn hackc_direct_decl_parse(
     }
 }
 
-fn hackc_verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
+fn verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
     let arena = bumpalo::Bump::new();
     let decls = decl_provider::deserialize_decls(&arena, &result.serialized).unwrap();
     decls == result.decls.decls
 }
 
-fn hackc_compile_unit_from_text_cpp_ffi(
+fn compile_unit_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Box<UnitWrapper>, String> {
@@ -380,7 +377,7 @@ fn hackc_compile_unit_from_text_cpp_ffi(
     .map_err(|e| e.to_string())
 }
 
-pub fn hackc_facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
+pub fn facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
     if facts_result.has_errors {
         String::new()
     } else {
@@ -389,7 +386,7 @@ pub fn hackc_facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, prett
     }
 }
 
-pub fn hackc_decls_to_facts_cpp_ffi(
+pub fn decls_to_facts_cpp_ffi(
     decl_flags: i32,
     decl_result: &compile_ffi::DeclResult,
     sha1sum: &CxxString,

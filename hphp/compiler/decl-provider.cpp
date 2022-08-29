@@ -33,7 +33,7 @@ BatchDeclProvider::BatchDeclProvider(
 
 namespace {
 
-template<typename T, typename V> ExternalDeclProviderResult find(
+template<typename T, typename V> hackc::ExternalDeclProviderResult find(
   std::string_view symbol, const T& map, V& list
 ) {
   // TODO(T110866581): symbol should be normalized by hackc
@@ -41,30 +41,30 @@ template<typename T, typename V> ExternalDeclProviderResult find(
   auto interned = makeStaticString(normalized);
   auto const it = map.find(interned);
   if (it != map.end()) {
-    return ExternalDeclProviderResult::from_string(it->second);
+    return hackc::ExternalDeclProviderResult::from_string(it->second);
   }
   list.emplace_back(interned);
-  return ExternalDeclProviderResult::missing();
+  return hackc::ExternalDeclProviderResult::missing();
 }
 
 }
 
-ExternalDeclProviderResult
+hackc::ExternalDeclProviderResult
 BatchDeclProvider::getType(std::string_view symbol, uint64_t) noexcept {
   return find(symbol, m_types, m_missing.types);
 }
 
-ExternalDeclProviderResult
+hackc::ExternalDeclProviderResult
 BatchDeclProvider::getFunc(std::string_view symbol) noexcept {
   return find(symbol, m_funcs, m_missing.funcs);
 }
 
-ExternalDeclProviderResult
+hackc::ExternalDeclProviderResult
 BatchDeclProvider::getConst(std::string_view symbol) noexcept {
   return find(symbol, m_constants, m_missing.constants);
 }
 
-ExternalDeclProviderResult
+hackc::ExternalDeclProviderResult
 BatchDeclProvider::getModule(std::string_view symbol) noexcept {
   return find(symbol, m_modules, m_missing.modules);
 }

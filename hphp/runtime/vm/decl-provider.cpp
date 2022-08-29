@@ -58,39 +58,39 @@ HhvmDeclProvider::HhvmDeclProvider(
     AutoloadMap* map,
     const std::filesystem::path& repo
 )
-  : m_opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
+  : m_opts{hackc::create_direct_decl_parse_options(flags, aliased_namespaces)}
   , m_map{map}
   , m_repo{repo}
 {}
 
 // Called by hackc.
 
-ExternalDeclProviderResult HhvmDeclProvider::getType(
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getType(
   std::string_view symbol,
   uint64_t depth
 ) noexcept {
   return getDecls(symbol, depth, AutoloadMap::KindOf::TypeOrTypeAlias);
 }
 
-ExternalDeclProviderResult HhvmDeclProvider::getFunc(
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getFunc(
   std::string_view symbol
 ) noexcept {
   return getDecls(symbol, 0, AutoloadMap::KindOf::Function);
 }
 
-ExternalDeclProviderResult HhvmDeclProvider::getConst(
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getConst(
   std::string_view symbol
 ) noexcept {
   return getDecls(symbol, 0, AutoloadMap::KindOf::Constant);
 }
 
-ExternalDeclProviderResult HhvmDeclProvider::getModule(
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getModule(
   std::string_view symbol
 ) noexcept {
   return getDecls(symbol, 0, AutoloadMap::KindOf::Module);
 }
 
-ExternalDeclProviderResult HhvmDeclProvider::getDecls(
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
   std::string_view symbol,
   uint64_t depth,
   AutoloadMap::KindOf kind
@@ -107,7 +107,7 @@ ExternalDeclProviderResult HhvmDeclProvider::getDecls(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return ExternalDeclProviderResult::from_decls(result->second);
+      return hackc::ExternalDeclProviderResult::from_decls(result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -116,7 +116,7 @@ ExternalDeclProviderResult HhvmDeclProvider::getDecls(
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
     };
 
-    DeclResult decl_result = hackc_direct_decl_parse(*m_opts, filename, text);
+    auto decl_result = hackc::direct_decl_parse(*m_opts, filename, text);
     ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
     auto const norm_filename =
@@ -128,11 +128,11 @@ ExternalDeclProviderResult HhvmDeclProvider::getDecls(
     // Insert decl_result into the cache, return DeclResult::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return ExternalDeclProviderResult::from_decls(it->second);
+    return hackc::ExternalDeclProviderResult::from_decls(it->second);
   }
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
   m_sawMissing = true;
-  return ExternalDeclProviderResult::missing();
+  return hackc::ExternalDeclProviderResult::missing();
 }
 
 std::vector<DeclDep> HhvmDeclProvider::getFlatDeps() const {

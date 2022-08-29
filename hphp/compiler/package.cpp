@@ -1107,17 +1107,17 @@ Package::UnitDecls IndexJob::run(
   }
 
   auto decl_flags = repoOptions.getDeclFlags();
-  auto decl_options = hackc_create_direct_decl_parse_options(
+  auto decl_options = hackc::create_direct_decl_parse_options(
       decl_flags,
       repoOptions.getAliasedNamespacesConfig()
   );
-  auto decls = hackc_direct_decl_parse(*decl_options, fileName, content);
+  auto decls = hackc::direct_decl_parse(*decl_options, fileName, content);
   if (decls.has_errors) {
     return bail("decl parser error");
   }
 
   // Get Facts from Decls, then populate IndexMeta.
-  auto facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, "");
+  auto facts = hackc::decls_to_facts_cpp_ffi(decl_flags, decls, "");
   Package::IndexMeta summary;
   for (auto& e : facts.facts.types) {
     summary.types.emplace_back(makeStaticString(std::string(e.name)));

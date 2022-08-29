@@ -32,7 +32,7 @@ namespace HPHP {
 
 struct RepoOptionsFlags;
 
-struct HhvmDeclProvider: ::DeclProvider {
+struct HhvmDeclProvider: hackc::DeclProvider {
   HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
                    AutoloadMap*, const std::filesystem::path&);
   virtual ~HhvmDeclProvider() override = default;
@@ -48,13 +48,13 @@ struct HhvmDeclProvider: ::DeclProvider {
   );
 
   // Callback invoked by hackc's ExternalDeclProvider.
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getType(std::string_view symbol, uint64_t depth) noexcept override;
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getFunc(std::string_view symbol) noexcept override;
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getConst(std::string_view symbol) noexcept override;
-  ExternalDeclProviderResult
+  hackc::ExternalDeclProviderResult
   getModule(std::string_view symbol) noexcept override;
 
   // Get a list of observed dependencies from the decl provider, which may
@@ -69,7 +69,7 @@ struct HhvmDeclProvider: ::DeclProvider {
   bool sawMissing() const { return m_sawMissing; }
 
  private:
-  ExternalDeclProviderResult getDecls(
+  hackc::ExternalDeclProviderResult getDecls(
       std::string_view symbol,
       uint64_t depth,
       AutoloadMap::KindOf
@@ -88,11 +88,11 @@ struct HhvmDeclProvider: ::DeclProvider {
 
   bool m_sawMissing{false};
 
-  rust::Box<DeclParserOptions> m_opts;
+  rust::Box<hackc::DeclParserOptions> m_opts;
 
   // Map from filename to DeclResult containing the cached results of calling
   // hackc_direct_decl_parse().
-  hphp_hash_map<std::string, DeclResult> m_cache;
+  hphp_hash_map<std::string, hackc::DeclResult> m_cache;
 
   // Record of dependencies collected from queries to the decl provider
   hphp_hash_map<DeclSym, DepInfo> m_deps;

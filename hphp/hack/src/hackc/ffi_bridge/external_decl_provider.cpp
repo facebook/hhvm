@@ -6,6 +6,8 @@
 
 #include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
 
+using namespace HPHP::hackc;
+
 // These stubs perform C++ virtual method dispatch on behalf of
 // hackc/decl_provider/external.rs
 extern "C" {

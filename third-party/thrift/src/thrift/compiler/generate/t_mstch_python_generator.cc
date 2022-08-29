@@ -1077,8 +1077,6 @@ class python_mstch_const_value : public mstch_const_value {
   }
 };
 
-} // namespace
-
 void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>(program_);
@@ -1139,6 +1137,8 @@ void t_mstch_python_generator::generate_services() {
   }
   generate_file("thrift_services.py", NotTypesFile, generate_root_path_);
 }
+
+} // namespace
 
 THRIFT_REGISTER_GENERATOR(
     mstch_python,

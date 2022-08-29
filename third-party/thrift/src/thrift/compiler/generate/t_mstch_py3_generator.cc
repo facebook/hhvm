@@ -168,6 +168,7 @@ class py3_mstch_program : public mstch_program {
     }
     return a;
   }
+
   mstch::node unique_functions_by_return_type() {
     std::vector<const t_function*> functions;
     bool no_stream = has_option("no_stream");
@@ -1217,8 +1218,6 @@ py3_mstch_type::CachedProperties& py3_mstch_type::get_cached_props(
   return it->second;
 }
 
-} // namespace
-
 void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>();
   mstch_context_.add<py3_mstch_service>(program_);
@@ -1345,6 +1344,8 @@ void t_mstch_py3_generator::generate_services() {
     generate_file(file, NotTypesFile);
   }
 }
+
+} // namespace
 
 THRIFT_REGISTER_GENERATOR(
     mstch_py3,

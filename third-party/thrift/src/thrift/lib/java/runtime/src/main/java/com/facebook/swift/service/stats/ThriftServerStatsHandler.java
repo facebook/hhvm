@@ -21,6 +21,7 @@ import static java.lang.System.currentTimeMillis;
 import com.facebook.nifty.core.RequestContext;
 import com.facebook.swift.service.ThriftEventHandler;
 import com.google.common.base.Preconditions;
+import io.netty.util.internal.OutOfDirectMemoryError;
 
 /**
  * Handler which needs to be injected to Thrift server processor for capturing ServerStats. An
@@ -70,6 +71,9 @@ public class ThriftServerStatsHandler extends ThriftEventHandler {
 
   @Override
   public void preWriteException(Object context, String methodName, Throwable t) {
+    if (t instanceof OutOfDirectMemoryError) {
+      thriftServerStats.markDirectOomError();
+    }
     thriftServerStats.error(methodName);
   }
 

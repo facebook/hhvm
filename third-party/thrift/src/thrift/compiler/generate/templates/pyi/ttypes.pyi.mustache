@@ -56,17 +56,17 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
 
     def __init__(
         self{{#struct:fields}},
-        {{field:name}}: {{#field:type}}{{> common/OptionalFieldType}}{{/field:type}} = ...{{/struct:fields}}
+        {{field:py_name}}: {{#field:type}}{{> common/OptionalFieldType}}{{/field:type}} = ...{{/struct:fields}}
     ) -> None:
         ...
 
     {{#struct:fields}}
     {{#field:type}}
     @__property__
-    def {{field:name}}(self) -> {{#field:PEP484Optional?}}__T.Optional[{{/field:PEP484Optional?}}{{!
+    def {{field:py_name}}(self) -> {{#field:PEP484Optional?}}__T.Optional[{{/field:PEP484Optional?}}{{!
     }}{{> common/FieldType}}{{#field:PEP484Optional?}}]{{/field:PEP484Optional?}}: ...
-    @{{field:name}}.setter
-    def {{field:name}}(self, value: {{> common/OptionalFieldType}}) -> None: ...
+    @{{field:py_name}}.setter
+    def {{field:py_name}}(self, value: {{> common/OptionalFieldType}}) -> None: ...
     {{/field:type}}
     {{/struct:fields}}
 
@@ -75,8 +75,8 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
 
     {{#struct:fields}}
     {{#field:type}}
-    def get_{{field:name}}(self) -> {{> common/FieldType}}: ...
-    def set_{{field:name}}(self, value: {{> common/FieldType}}) -> None: ...
+    def get_{{field:py_name}}(self) -> {{> common/FieldType}}: ...
+    def set_{{field:py_name}}(self, value: {{> common/FieldType}}) -> None: ...
     {{/field:type}}
     {{/struct:fields}}
 

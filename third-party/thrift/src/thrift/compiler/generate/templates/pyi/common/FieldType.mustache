@@ -23,8 +23,8 @@ form:
 
 Recursive.
 
-}}{{#type:adapter}}{{.}}.Type{{/type:adapter}}{{!
-}}{{^type:adapter}}{{!
+}}{{#type:has_adapter?}}{{#type:adapter}}{{.}}.Type{{/type:adapter}}{{/type:has_adapter?}}{{!
+}}{{^type:has_adapter?}}{{!
   }}{{#type:void?}}None{{/type:void?}}{{!
   }}{{#type:bool?}}bool{{/type:bool?}}{{!
   }}{{#type:byte?}}int{{/type:byte?}}{{!
@@ -41,5 +41,5 @@ Recursive.
   }}{{#type:map?}}__T.Dict[{{#type:key_type}}{{> common/FieldType}}{{/type:key_type}},{{!
   }} {{#type:value_type}}{{> common/FieldType}}{{/type:value_type}}]{{/type:map?}}{{!
   }}{{#type:enum}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}{{/type:enum}}{{!
-  }}{{#type:typedef?}}{{#type:typedef_type}}{{> common/FieldType}}{{/type:typedef_type}}{{/type:typedef?}}{{!
-}}{{/type:adapter}}
+  }}{{#type:typedef?}}{{#type:typedef_type}}{{#type:struct?}}{{> common/FieldType}}{{/type:struct?}}{{/type:typedef_type}}{{/type:typedef?}}{{!
+}}{{/type:has_adapter?}}

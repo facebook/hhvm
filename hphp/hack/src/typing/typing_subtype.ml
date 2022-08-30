@@ -2214,7 +2214,8 @@ and simplify_subtype_i
         | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
         | _ -> default_subtype env))
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
-      when not (Class_refinement.is_empty cr_super) ->
+      when (not (Class_refinement.is_empty cr_super))
+           && subtype_env.require_soundness ->
       (* We discharge class refinements before anything
        * else ... *)
       Class_refinement.fold_type_refs

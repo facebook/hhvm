@@ -1,31 +1,3 @@
-File "covariant-dep-1.php", line 15, characters 30-32:
-You are trying to access the method `get` but this is a value of generic type TBox (Typing[4062])
-  File "covariant-dep-1.php", line 5, characters 53-53:
-  Definition is here
-File "covariant-dep-1.php", line 22, characters 12-36:
-Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 21, characters 6-7:
-  Expected `T0`
-  File "covariant-dep-1.php", line 9, characters 26-32:
-  But got `<expr#1>::T as TBox::T`
-  File "covariant-dep-1.php", line 22, characters 12-29:
-    where `<expr#1>` is a reference to this expression
-File "covariant-dep-1.php", line 28, characters 12-36:
-Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 27, characters 6-7:
-  Expected `T0`
-  File "covariant-dep-1.php", line 9, characters 26-32:
-  But got `<expr#1>::T as TBox0::T`
-  File "covariant-dep-1.php", line 28, characters 12-29:
-    where `<expr#1>` is a reference to this expression
-File "covariant-dep-1.php", line 34, characters 12-36:
-Invalid return type (Typing[4110])
-  File "covariant-dep-1.php", line 33, characters 6-7:
-  Expected `T0`
-  File "covariant-dep-1.php", line 9, characters 26-32:
-  But got `<expr#1>::T as TBox::T`
-  File "covariant-dep-1.php", line 34, characters 12-29:
-    where `<expr#1>` is a reference to this expression
 File "covariant-dep-1.php", line 52, characters 12-36:
 Invalid return type (Typing[4110])
   File "covariant-dep-1.php", line 51, characters 6-7:

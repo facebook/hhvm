@@ -75,7 +75,7 @@ fn sort_by_start_pos<T>(items: &mut Vec<(Pos, T)>) {
 
 /// The source code of `program` with expression tree literals
 /// replaced with their desugared form.
-fn desugar_and_replace_et_literals(flags: EnvFlags, program: ast::Program, src: &str) -> String {
+fn desugar_and_replace_et_literals(flags: &EnvFlags, program: ast::Program, src: &str) -> String {
     let mut literals = find_et_literals(program);
     sort_by_start_pos(&mut literals);
 
@@ -96,9 +96,8 @@ fn desugar_and_replace_et_literals(flags: EnvFlags, program: ast::Program, src: 
 /// Parse the file in `env`, desugar expression tree literals, and
 /// print the source code as if the user manually wrote the desugared
 /// syntax.
-pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
+pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let type_directed = false;
-    let is_systemlib = flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts = Options::from_configs(&[]).expect("Invalid options");
     let content = fs::read(filepath.to_absolute()).unwrap();
     let source_text = SourceText::make(RcOc::new(filepath), &content);
@@ -115,7 +114,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: EnvFlags) {
         source_text,
         false,
         ns,
-        is_systemlib,
+        flags.is_systemlib,
         type_directed,
         &mut Profile::default(),
     ) {

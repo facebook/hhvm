@@ -512,6 +512,7 @@ dependencies = [
  "bitflags",
  "bumpalo",
  "bytecode_printer",
+ "clap 3.2.17",
  "decl_provider",
  "elaborate_namespaces_visitor",
  "emit_unit",

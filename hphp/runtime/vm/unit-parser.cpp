@@ -185,14 +185,6 @@ CompilerResult hackc_compile(
 ) {
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
 
-  uint8_t flags = hackc::make_env_flags(
-    isSystemLib,                    // is_systemlib
-    false,                          // is_evaled
-    forDebuggerEval,                // for_debugger_eval
-    false,                          // disable_toplevel_elaboration
-    false                           // enable_ir
-  );
-
   hackc::NativeEnv const native_env{
     reinterpret_cast<uint64_t>(provider),
     filename,
@@ -202,7 +194,13 @@ CompilerResult hackc_compile(
     RuntimeOption::CheckIntOverflow,
     options.getCompilerFlags(),
     options.getParserFlags(),
-    flags
+    hackc::EnvFlags {
+      isSystemLib,
+      false, // is_evaled
+      forDebuggerEval,
+      false, // disable_toplevel_elaboration,
+      false, // enable_ir
+    }
   };
 
   // Invoke hackc, producing a rust Vec<u8> containing HHAS.

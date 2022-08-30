@@ -68,21 +68,35 @@ impl Default for NativeEnv {
             check_int_overflow: 0,
             hhbc_flags: HHBCFlags::empty(),
             parser_flags: ParserFlags::empty(),
-            flags: EnvFlags::empty(),
+            flags: EnvFlags::default(),
         }
     }
 }
 
-bitflags! {
-    pub struct EnvFlags: u8 {
-        const IS_SYSTEMLIB = 1 << 0;
-        const IS_EVALED = 1 << 1;
-        const FOR_DEBUGGER_EVAL = 1 << 2;
-        const UNUSED_PLACEHOLDER = 1 << 3;
-        const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
-        const DUMP_IR = 1 << 5;
-        const ENABLE_IR = 1 << 6;
-    }
+#[derive(Debug, Default, Clone, clap::Parser)]
+pub struct EnvFlags {
+    /// Enable features only allowed in systemlib
+    #[clap(long)]
+    pub is_systemlib: bool,
+
+    #[clap(long)]
+    pub is_evaled: bool,
+
+    /// Mutate the program as if we're in the debuger REPL
+    #[clap(long)]
+    pub for_debugger_eval: bool,
+
+    /// Disable namespace elaboration for toplevel definitions
+    #[clap(long)]
+    pub disable_toplevel_elaboration: bool,
+
+    /// Dump IR instead of HHAS
+    #[clap(long)]
+    pub dump_ir: bool,
+
+    /// Compile files using the IR pass
+    #[clap(long)]
+    pub enable_ir: bool,
 }
 
 // Keep in sync with compiler_ffi.rs
@@ -437,10 +451,10 @@ pub fn from_text<'decl>(
     profile: &mut Profile,
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
-    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, &alloc);
-    let mut unit = emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)?;
+    let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, &alloc);
+    let mut unit = emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)?;
 
-    if native_env.flags.contains(EnvFlags::ENABLE_IR) {
+    if native_env.flags.enable_ir {
         let ir = bc_to_ir::bc_to_ir(&unit);
         unit = ir_to_bc::ir_to_bc(&alloc, ir);
     }
@@ -484,8 +498,8 @@ pub fn unit_from_text<'arena, 'decl>(
     decl_provider: Option<&'decl dyn DeclProvider>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
-    let mut emitter = create_emitter(native_env.flags, native_env, decl_provider, alloc);
-    emit_unit_from_text(&mut emitter, native_env.flags, source_text, profile)
+    let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, alloc);
+    emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)
 }
 
 pub fn unit_to_string(
@@ -494,7 +508,7 @@ pub fn unit_to_string(
     program: &Unit<'_>,
     profile: &mut Profile,
 ) -> Result<()> {
-    if native_env.flags.contains(EnvFlags::DUMP_IR) {
+    if native_env.flags.dump_ir {
         let ir = bc_to_ir::bc_to_ir(program);
         struct FmtFromIo<'a>(&'a mut dyn std::io::Write);
         impl fmt::Write for FmtFromIo<'_> {
@@ -555,7 +569,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
 
 fn emit_unit_from_text<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    flags: EnvFlags,
+    flags: &EnvFlags,
     source_text: SourceText<'_>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
@@ -577,9 +591,9 @@ fn emit_unit_from_text<'arena, 'decl>(
         parse_file(
             emitter.options(),
             source_text,
-            !flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+            !flags.disable_toplevel_elaboration,
             RcOc::clone(&namespace_env),
-            flags.contains(EnvFlags::IS_SYSTEMLIB),
+            flags.is_systemlib,
             type_directed,
             profile,
         )
@@ -617,15 +631,15 @@ fn emit_fatal<'arena>(
 }
 
 fn create_emitter<'arena, 'decl>(
-    flags: EnvFlags,
+    flags: &EnvFlags,
     native_env: &NativeEnv,
     decl_provider: Option<&'decl dyn DeclProvider>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {
     Emitter::new(
         NativeEnv::to_options(native_env),
-        flags.contains(EnvFlags::IS_SYSTEMLIB),
-        flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        flags.is_systemlib,
+        flags.for_debugger_eval,
         alloc,
         decl_provider,
     )
@@ -767,7 +781,7 @@ fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
     (r, t.as_secs_f64())
 }
 
-pub fn expr_to_string_lossy(flags: EnvFlags, expr: &ast::Expr) -> String {
+pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {
     use print_expr::Context;
 
     let opts = Options::from_configs(&[]).expect("Malformed options");
@@ -775,8 +789,8 @@ pub fn expr_to_string_lossy(flags: EnvFlags, expr: &ast::Expr) -> String {
     let alloc = bumpalo::Bump::new();
     let emitter = Emitter::new(
         opts,
-        flags.contains(EnvFlags::IS_SYSTEMLIB),
-        flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        flags.is_systemlib,
+        flags.for_debugger_eval,
         &alloc,
         None,
     );

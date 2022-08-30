@@ -14,6 +14,7 @@ bc_to_ir = { path = "../../../ir/conversions/bc_to_ir" }
 bitflags = "1.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
+clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
 decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 emit_unit = { path = "../../../emitter/cargo/emit_unit" }

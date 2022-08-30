@@ -49,21 +49,8 @@ pub struct Opts {
 
 #[derive(Parser, Clone, Debug)]
 pub(crate) struct SingleFileOpts {
-    /// Disable toplevel definition elaboration
-    #[clap(long)]
-    pub(crate) disable_toplevel_elaboration: bool,
-
-    /// Dump IR instead of HHAS
-    #[clap(long)]
-    pub(crate) dump_ir: bool,
-
-    /// Compile files using the IR pass
-    #[clap(long)]
-    pub(crate) enable_ir: bool,
-
-    /// Treat the files as part of systemlib
-    #[clap(long)]
-    pub(crate) systemlib: bool,
+    #[clap(flatten)]
+    pub(crate) env_flags: EnvFlags,
 
     /// The level of verbosity (can be set multiple times)
     #[clap(long = "verbose", parse(from_occurrences))]
@@ -131,24 +118,15 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
 }
 
 pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv {
-    let mut flags = EnvFlags::empty();
-    flags.set(
-        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
-        opts.disable_toplevel_elaboration,
-    );
-    flags.set(EnvFlags::DUMP_IR, opts.dump_ir);
-    flags.set(EnvFlags::ENABLE_IR, opts.enable_ir);
-    flags.set(EnvFlags::IS_SYSTEMLIB, opts.systemlib);
     let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
         | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
         | HHBCFlags::FOLD_LAZY_CLASS_KEYS
         | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
-    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
     NativeEnv {
         filepath,
         hhbc_flags,
-        parser_flags,
-        flags,
+        parser_flags: ParserFlags::ENABLE_ENUM_CLASSES,
+        flags: opts.env_flags.clone(),
         ..Default::default()
     }
 }

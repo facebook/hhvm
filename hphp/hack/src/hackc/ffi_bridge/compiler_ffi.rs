@@ -48,8 +48,15 @@ pub mod compile_ffi {
         /// compiler::ParserFlags
         parser_flags: u32,
 
-        /// compiler::EnvFlags
-        flags: u8,
+        flags: EnvFlags,
+    }
+
+    struct EnvFlags {
+        is_systemlib: bool,
+        is_evaled: bool,
+        for_debugger_eval: bool,
+        disable_toplevel_elaboration: bool,
+        enable_ir: bool,
     }
 
     pub struct DeclResult {
@@ -133,14 +140,6 @@ pub mod compile_ffi {
         type DeclParserOptions;
         type UnitWrapper;
 
-        fn make_env_flags(
-            is_systemlib: bool,
-            is_evaled: bool,
-            for_debugger_eval: bool,
-            disable_toplevel_elaboration: bool,
-            enable_ir: bool,
-        ) -> u8;
-
         /// Compile Hack source code to a Unit or an error.
         unsafe fn compile_unit_from_text_cpp_ffi(
             env: &NativeEnv,
@@ -197,32 +196,6 @@ pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-fn make_env_flags(
-    is_systemlib: bool,
-    is_evaled: bool,
-    for_debugger_eval: bool,
-    disable_toplevel_elaboration: bool,
-    enable_ir: bool,
-) -> u8 {
-    let mut flags = EnvFlags::empty();
-    if is_systemlib {
-        flags |= EnvFlags::IS_SYSTEMLIB;
-    }
-    if is_evaled {
-        flags |= EnvFlags::IS_EVALED;
-    }
-    if for_debugger_eval {
-        flags |= EnvFlags::FOR_DEBUGGER_EVAL;
-    }
-    if disable_toplevel_elaboration {
-        flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
-    }
-    if enable_ir {
-        flags |= EnvFlags::ENABLE_IR;
-    }
-    flags.bits()
-}
-
 impl compile_ffi::NativeEnv {
     fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
@@ -236,7 +209,14 @@ impl compile_ffi::NativeEnv {
             check_int_overflow: self.check_int_overflow,
             hhbc_flags: compile::HHBCFlags::from_bits(self.hhbc_flags)?,
             parser_flags: compile::ParserFlags::from_bits(self.parser_flags)?,
-            flags: compile::EnvFlags::from_bits(self.flags)?,
+            flags: EnvFlags {
+                is_systemlib: self.flags.is_systemlib,
+                is_evaled: self.flags.is_evaled,
+                for_debugger_eval: self.flags.for_debugger_eval,
+                disable_toplevel_elaboration: self.flags.disable_toplevel_elaboration,
+                enable_ir: self.flags.enable_ir,
+                ..Default::default()
+            },
         })
     }
 }

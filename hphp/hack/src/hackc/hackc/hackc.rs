@@ -48,13 +48,8 @@ struct Opts {
     #[clap(flatten)]
     files: FileOpts,
 
-    /// Disable toplevel definition elaboration
-    #[clap(long)]
-    disable_toplevel_elaboration: bool,
-
-    /// Mutate the program as if we're in the debugger repl
-    #[clap(long)]
-    for_debugger_eval: bool,
+    #[clap(flatten)]
+    pub(crate) env_flags: EnvFlags,
 
     #[clap(long, default_value("0"))]
     emit_class_pointers: i32,
@@ -80,10 +75,6 @@ struct Opts {
     /// (only used by --test-compile-with-decls)
     #[clap(long)]
     pub(crate) use_serialized_decls: bool,
-
-    /// Controls systemlib specific logic
-    #[clap(long)]
-    is_systemlib: bool,
 
     /// [Experimental] Enable Type-Directed Bytecode Compilation
     #[clap(long)]
@@ -169,20 +160,6 @@ impl FileOpts {
 }
 
 impl Opts {
-    pub fn env_flags(&self) -> EnvFlags {
-        let mut flags = EnvFlags::empty();
-        if self.for_debugger_eval {
-            flags |= EnvFlags::FOR_DEBUGGER_EVAL;
-        }
-        if self.disable_toplevel_elaboration {
-            flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
-        }
-        if self.is_systemlib {
-            flags |= EnvFlags::IS_SYSTEMLIB;
-        }
-        flags
-    }
-
     pub fn decl_opts(&self) -> DeclParserOptions {
         // TODO: share this logic with hackc_create_decl_parse_options()
         let config_opts = options::Options::from_configs(&[Self::AUTO_NAMESPACE_MAP]).unwrap();
@@ -213,7 +190,7 @@ impl Opts {
             include_roots: crate::Opts::INCLUDE_ROOTS.into(),
             hhbc_flags,
             parser_flags,
-            flags: self.env_flags(),
+            flags: self.env_flags.clone(),
             emit_class_pointers: self.emit_class_pointers,
             check_int_overflow: self.check_int_overflow,
         })

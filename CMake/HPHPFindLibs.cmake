@@ -179,6 +179,9 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
+# gflags
+find_package(Gflags REQUIRED)
+
 # HHProf
 if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
   add_definitions(-DENABLE_HHPROF=1)
@@ -362,6 +365,8 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBGLOG_LIBRARY})
+  target_link_libraries(${target} ${VISIBILITY} ${LIBGFLAGS_LIBRARY})
+
   if (LIBJSONC_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBJSONC_LIBRARY})
   endif()

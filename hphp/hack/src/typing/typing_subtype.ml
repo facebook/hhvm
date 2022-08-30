@@ -855,10 +855,13 @@ and simplify_subtype_i
         | Some TL.CoerceToDynamic -> " <:D"
         | Some TL.CoerceFromDynamic -> " D<:")
       ^
-      if super_like then
-        " super-like"
-      else
-        "")
+      let flag str = function
+        | true -> str
+        | false -> ""
+      in
+      flag " super-like" super_like
+      ^ flag " require_soundness" subtype_env.require_soundness
+      ^ flag " require_completeness" subtype_env.require_completeness)
     env
     ty_sub
     ty_super;

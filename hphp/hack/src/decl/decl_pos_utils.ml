@@ -132,6 +132,8 @@ struct
       Rdynamic_partial_enforcement (pos_or_decl p, cn, reason r)
     | Rrigid_tvar_escape (p, v, w, r) ->
       Rrigid_tvar_escape (pos p, v, w, reason r)
+    | Ropaque_type_from_module (p, m, r) ->
+      Ropaque_type_from_module (pos_or_decl p, m, reason r)
 
   let rec ty t =
     let (p, x) = deref t in

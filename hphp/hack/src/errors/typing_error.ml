@@ -1809,6 +1809,7 @@ module Primary = struct
         kind: [ `method_ | `property ];
         name: string;
         is_nullable: bool;
+        ty_reasons: (Pos_or_decl.t * string) list Lazy.t;
       }
     | Unresolved_tyvar_projection of {
         pos: Pos.t;
@@ -3218,7 +3219,7 @@ module Primary = struct
     and reason = lazy [(decl_pos, "Parent definition is here")] in
     (Error_code.TraitParentConstructInconsistent, claim, reason, [])
 
-  let top_member pos ctxt ty_name decl_pos kind name is_nullable =
+  let top_member pos ctxt ty_name decl_pos kind name is_nullable ty_reasons =
     let claim =
       Lazy.map ty_name ~f:(fun ty_name ->
           let kind_str =
@@ -3232,7 +3233,15 @@ module Primary = struct
               kind_str
               (Markdown_lite.md_codify name)
               ty_name ))
-    and reason = lazy [(decl_pos, "Definition is here")]
+    and reason =
+      lazy
+        begin
+          let reasons = Lazy.force ty_reasons in
+          if List.length reasons = 0 then
+            [(decl_pos, "Definition is here")]
+          else
+            reasons
+        end
     and code =
       Error_code.(
         match ctxt with
@@ -5621,8 +5630,9 @@ module Primary = struct
       kind_mismatch pos decl_pos tparam_name expected_kind actual_kind
     | Trait_parent_construct_inconsistent { pos; decl_pos } ->
       trait_parent_construct_inconsistent pos decl_pos
-    | Top_member { pos; ctxt; ty_name; decl_pos; kind; name; is_nullable } ->
-      top_member pos ctxt ty_name decl_pos kind name is_nullable
+    | Top_member
+        { pos; ctxt; ty_name; decl_pos; kind; name; is_nullable; ty_reasons } ->
+      top_member pos ctxt ty_name decl_pos kind name is_nullable ty_reasons
     | Unresolved_tyvar_projection { pos; proj_pos; tconst_name } ->
       unresolved_tyvar_projection pos proj_pos tconst_name
     | Cyclic_class_constant { pos; class_name; const_name } ->

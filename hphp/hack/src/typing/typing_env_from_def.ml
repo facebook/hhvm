@@ -95,6 +95,7 @@ let class_env ?origin ctx c =
   let droot = Some (Typing_deps.Dep.Type (snd c.c_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:c.c_mode ~droot in
   Typing_inference_env.Identifier_provider.reinitialize ();
+  let env = Env.set_current_module env c.c_module in
   let env = set_self env c in
   let env = set_parent env c in
   env

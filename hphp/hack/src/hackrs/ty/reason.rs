@@ -237,6 +237,9 @@ pub trait Reason:
                 OR::RrigidTvarEscape(&(pos, s1, s2, r)) => {
                     RI::RrigidTvarEscape(pos.into(), Symbol::new(s1), Symbol::new(s2), r.into())
                 }
+                OR::RopaqueTypeFromModule(&(pos, s, r)) => {
+                    RI::RopaqueTypeFromModule(pos.into(), Symbol::new(s), r.into())
+                }
             }
         })
     }
@@ -385,6 +388,7 @@ pub enum ReasonImpl<R, P> {
     RsupportDynamicType(P),
     RdynamicPartialEnforcement(P, Symbol, R),
     RrigidTvarEscape(P, Symbol, Symbol, R),
+    RopaqueTypeFromModule(P, Symbol, R),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
@@ -620,6 +624,11 @@ impl<'a> ToOxidized<'a> for BReason {
                 pos.to_oxidized(arena),
                 s1.to_oxidized(arena),
                 s2.to_oxidized(arena),
+                r.to_oxidized(arena),
+            ))),
+            RI::RopaqueTypeFromModule(pos, s1, r) => OR::RopaqueTypeFromModule(arena.alloc((
+                pos.to_oxidized(arena),
+                s1.to_oxidized(arena),
                 r.to_oxidized(arena),
             ))),
         }

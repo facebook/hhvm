@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c3076facc19ccd763f3baf2feee91350>>
+// @generated SignedSource<<503046538725c336ddd2206262090e61>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -311,6 +311,8 @@ pub enum T_ {
     RdynamicPartialEnforcement(pos_or_decl::PosOrDecl, String, Box<T_>),
     #[rust_to_ocaml(name = "Rrigid_tvar_escape")]
     RrigidTvarEscape(pos::Pos, String, String, Box<T_>),
+    #[rust_to_ocaml(name = "Ropaque_type_from_module")]
+    RopaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
 }
 
 pub type Reason = T_;

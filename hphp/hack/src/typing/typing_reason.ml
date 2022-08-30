@@ -155,6 +155,9 @@ type _ t_ =
   | Rrigid_tvar_escape :
       Pos.t * string * string * locl_phase t_
       -> locl_phase t_
+  | Ropaque_type_from_module :
+      Pos_or_decl.t * string * locl_phase t_
+      -> locl_phase t_
 
 type t = locl_phase t_
 
@@ -595,6 +598,13 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ( Pos_or_decl.of_raw_pos p,
       prefix ^ " because " ^ tvar ^ " escaped from " ^ what )
     :: to_string ("  where " ^ tvar ^ " originates from") r_orig
+  | Ropaque_type_from_module (p, module_, r_orig) ->
+    ( p,
+      prefix
+      ^ " because this is an internal symbol from module "
+      ^ module_
+      ^ ", which is opaque outside of the module." )
+    :: to_string "The type originated from here" r_orig
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -697,6 +707,7 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
     to_raw_pos r
   | Rdynamic_coercion r -> to_raw_pos r
   | Rdynamic_partial_enforcement (p, _, _) -> p
+  | Ropaque_type_from_module (p, _, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -826,6 +837,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rsupport_dynamic_type _ -> "Rsupport_dynamic_type"
   | Rdynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
   | Rrigid_tvar_escape _ -> "Rrigid_tvar_escape"
+  | Ropaque_type_from_module _ -> "Ropaque_type_from_module"
 
 let pp fmt r =
   let pos = to_raw_pos r in

@@ -1,16 +1,18 @@
 File "internal_keyword.php--file2.php", line 2, characters 15-25:
 Cannot access an internal element from module `foo` outside of a module (Typing[4444])
-  File "internal_keyword.php--test.php", line 8, characters 16-26:
+  File "internal_keyword.php--test.php", line 11, characters 16-26:
   This is from module `foo`
 File "internal_keyword.php--file2.php", line 4, characters 3-14:
 Cannot access an internal element from module `foo` outside of a module (Typing[4444])
-  File "internal_keyword.php--test.php", line 15, characters 19-30:
+  File "internal_keyword.php--test.php", line 18, characters 19-30:
   This is from module `foo`
 File "internal_keyword.php--file2.php", line 5, characters 7-9:
 You cannot access internal members outside of a module (Typing[4112])
   File "internal_keyword.php--test.php", line 5, characters 21-23:
   This member is internal
-File "internal_keyword.php--test.php", line 13, characters 3-34:
-You cannot make this trait member `internal` (NastCheck[3099])
-  File "internal_keyword.php--test.php", line 12, characters 7-10:
-  Only `internal` traits can have `internal` members
+File "internal_keyword.php--file2.php", line 7, characters 7-9:
+You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "internal_keyword.php--test.php", line 11, characters 16-26:
+  This type is mixed because this is an internal symbol from module foo, which is opaque outside of the module.
+  File "internal_keyword.php--file2.php", line 2, characters 15-25:
+  The type originated from here

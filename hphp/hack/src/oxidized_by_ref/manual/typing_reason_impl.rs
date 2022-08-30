@@ -118,6 +118,7 @@ impl<'a> Reason<'a> {
             | RexprDepType((r, _, _))
             | RcontravariantGeneric((r, _))
             | RinvariantGeneric((r, _)) => r.pos(),
+            RopaqueTypeFromModule((p, _, _)) => Some(p),
             RdynamicCoercion(r) => r.pos(),
         }
     }

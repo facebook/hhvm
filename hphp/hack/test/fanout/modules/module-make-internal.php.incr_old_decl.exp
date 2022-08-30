@@ -3,6 +3,10 @@ No errors!
 === changed errors ===
 foo-use.php:3:23,26: Cannot access an internal element from module `A` outside of a module (Typing[4444])
   foo-defn.php:5:16,19: This is from module `A`
+foo-use.php:4:10,19: Invalid return type (Typing[4110])
+  foo-defn.php:5:16,19: Expected exactly the type `FooA` because this is an internal symbol from module A, which is opaque outside of the module.
+  foo-use.php:3:23,26: The type originated from here
+  foo-use.php:4:14,17: But got the nonexact type `FooA`
 foo-use.php:4:14,17: Cannot access an internal element from module `A` outside of a module (Typing[4444])
   foo-defn.php:5:16,19: This is from module `A`
 foo-use.php:8:14,17: Cannot access an internal element from module `A` outside of a module (Typing[4444])

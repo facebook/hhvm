@@ -19,3 +19,5 @@ val can_access :
   | `Outside of string
   | `OutsideViaTrait of Pos_or_decl.t
   ]
+
+val is_class_visible : Typing_env_types.env -> Decl_provider.class_decl -> bool

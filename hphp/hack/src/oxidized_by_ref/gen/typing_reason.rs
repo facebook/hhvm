@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0952f354392e00a90ec0408e24e2e9ce>>
+// @generated SignedSource<<7c1a9c71c92604213a31993966a9d1a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -402,6 +402,10 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "Rrigid_tvar_escape")]
     #[rust_to_ocaml(inline_tuple)]
     RrigidTvarEscape(&'a (&'a pos::Pos<'a>, &'a str, &'a str, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Ropaque_type_from_module")]
+    #[rust_to_ocaml(inline_tuple)]
+    RopaqueTypeFromModule(&'a (&'a pos_or_decl::PosOrDecl<'a>, &'a str, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

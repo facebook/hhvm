@@ -455,7 +455,13 @@ let rec obj_get_concrete_ty
   | (_, Tany _)
   | (_, Terr) ->
     default None
-  | (_, Tnonnull) ->
+  | (r, Tnonnull) ->
+    let ty_reasons =
+      match r with
+      | Reason.Ropaque_type_from_module _ ->
+        lazy (Reason.to_string "This type is mixed" r)
+      | _ -> lazy []
+    in
     let ty_err =
       Typing_error.(
         primary
@@ -476,6 +482,7 @@ let rec obj_get_concrete_ty
                is_nullable = false;
                decl_pos = get_pos concrete_ty;
                ty_name = lazy (Typing_print.error env concrete_ty);
+               ty_reasons;
              })
     in
     let ty_nothing = MakeType.nothing Reason.none in
@@ -1018,6 +1025,12 @@ and nullable_obj_get
     let (ty_expect, ty_err) =
       let r = get_reason ety1 in
       if rcv_is_nothing then
+        let ty_reasons =
+          match r with
+          | Reason.Ropaque_type_from_module _ ->
+            lazy (Reason.to_string "This type is mixed" r)
+          | _ -> lazy []
+        in
         let ty_err =
           Typing_error.(
             primary
@@ -1038,6 +1051,7 @@ and nullable_obj_get
                    is_nullable = true;
                    decl_pos = Reason.to_pos r;
                    ty_name = lazy (Typing_print.error env ety1);
+                   ty_reasons;
                  })
         in
         (MakeType.nothing Reason.none, ty_err)

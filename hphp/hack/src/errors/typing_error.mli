@@ -624,6 +624,7 @@ module Primary : sig
         kind: [ `method_ | `property ];
         name: string;
         is_nullable: bool;
+        ty_reasons: (Pos_or_decl.t * string) list Lazy.t;
       }
     | Unresolved_tyvar_projection of {
         pos: Pos.t;

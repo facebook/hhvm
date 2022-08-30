@@ -2835,6 +2835,8 @@ and simplify_subtype_has_member
                           is_nullable = true;
                           decl_pos = Reason.to_pos r_option;
                           ty_name = lazy (Typing_print.error env ty_sub);
+                          (* Subtyping already gives these reasons *)
+                          ty_reasons = lazy [];
                         }))
         | _ ->
           invalid
@@ -2882,6 +2884,8 @@ and simplify_subtype_has_member
                       ctxt = `read;
                       decl_pos = Reason.to_pos r_inter;
                       ty_name = lazy (Typing_print.error env ty_sub);
+                      (* Subtyping already gives these reasons *)
+                      ty_reasons = lazy [];
                     }))
     | (r_inter, Tintersection tyl) when using_new_method_call_inference ->
       let (env, tyl) = List.map_env ~f:Env.expand_type env tyl in

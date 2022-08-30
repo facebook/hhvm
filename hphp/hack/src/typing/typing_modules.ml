@@ -31,3 +31,16 @@ let can_access
       | None ->
         `Yes))
   | (Some current, Some target) -> `Disjoint (current, target)
+
+let is_class_visible (env : Typing_env_types.env) (cls : Cls.t) =
+  if Cls.internal cls then
+    match
+      can_access
+        ~env
+        ~current:(Env.get_current_module env)
+        ~target:(Cls.get_module cls)
+    with
+    | `Yes -> true
+    | _ -> false
+  else
+    true

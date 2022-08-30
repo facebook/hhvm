@@ -489,7 +489,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
     else
       let tparams = Cls.tparams class_info in
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
-      let (env, tyl) =
+      let ((env, err), tyl) =
         if
           TypecheckerOptions.global_inference (Env.get_tcopt env)
           && (not (List.is_empty tparams))
@@ -511,7 +511,22 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
             tyargs
             nkinds
       in
-      (env, mk (r, Tclass (sid, nonexact, tyl)))
+      (* Hide the class type if its internal and outside of the module *)
+      if Typing_modules.is_class_visible env class_info then
+        ((env, err), mk (r, Tclass (sid, nonexact, tyl)))
+      else
+        let callee_module =
+          match Cls.get_module class_info with
+          | Some m -> m
+          | None ->
+            failwith
+              "Internal error: module must exist for class to be not visible"
+        in
+        let new_r =
+          Reason.Ropaque_type_from_module (Cls.pos class_info, callee_module, r)
+        in
+        let cstr = MakeType.mixed new_r in
+        ((env, err), mk (new_r, Tnewtype (name, [], cstr)))
 
 and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
     =

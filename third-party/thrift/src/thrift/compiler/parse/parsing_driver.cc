@@ -232,11 +232,6 @@ int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
   return value;
 }
 
-int parsing_driver::get_lineno(source_location loc) {
-  return loc != source_location() ? resolved_location(loc, source_mgr_).line()
-                                  : 0;
-}
-
 std::unique_ptr<t_program_bundle> parsing_driver::parse() {
   std::unique_ptr<t_program_bundle> result;
   try {

@@ -452,8 +452,6 @@ class parsing_driver : public parser_actions {
    */
   std::map<std::string, t_program*> program_cache;
 
-  int get_lineno(source_location loc = {});
-
   /**
    * Parses a program and returns the resulted AST.
    * Diagnostic messages (warnings, debug messages, etc.) are reported via the

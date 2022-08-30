@@ -30,13 +30,12 @@ enum class tok {
   eof,
   error,
 
-  bool_constant,
-  int_constant,
-  float_constant,
+  bool_literal,
+  int_literal,
+  float_literal,
   string_literal,
   identifier,
 
-  doctext,
   inline_doc,
 
   // clang-format off
@@ -187,21 +186,21 @@ class token {
 
   token(token_kind k, const source_range& r) : kind(k), range(r) {}
 
-  static token make_bool_constant(const source_range& r, bool value) {
-    auto t = token(tok::bool_constant, r);
+  static token make_bool_literal(const source_range& r, bool value) {
+    auto t = token(tok::bool_literal, r);
     t.as.bool_value = value;
     return t;
   }
 
-  static token make_int_constant(const source_range& r, uint64_t value) {
-    auto t = token(tok::int_constant, r);
+  static token make_int_literal(const source_range& r, uint64_t value) {
+    auto t = token(tok::int_literal, r);
     t.as.int_value = value;
     return t;
   }
 
-  // Makes a floating-point constant.
-  static token make_float_constant(const source_range& r, double value) {
-    auto t = token(tok::float_constant, r);
+  // Makes a floating-point literal.
+  static token make_float_literal(const source_range& r, double value) {
+    auto t = token(tok::float_literal, r);
     t.as.float_value = value;
     return t;
   }
@@ -221,14 +220,14 @@ class token {
   }
 
   bool bool_value() const {
-    if (kind != tok::bool_constant) {
+    if (kind != tok::bool_literal) {
       throw_invalid_kind("bool");
     }
     return as.bool_value;
   }
 
   uint64_t int_value() const {
-    if (kind != tok::int_constant) {
+    if (kind != tok::int_literal) {
       throw_invalid_kind("int");
     }
     return as.int_value;
@@ -236,7 +235,7 @@ class token {
 
   // Returns the value of a floating-point constant.
   double float_value() const {
-    if (kind != tok::float_constant) {
+    if (kind != tok::float_literal) {
       throw_invalid_kind("float");
     }
     return as.float_value;

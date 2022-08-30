@@ -45,7 +45,7 @@ TEST_F(TokenTest, token_kind) {
 
 TEST_F(TokenTest, to_string) {
   EXPECT_EQ(to_string(tok::comma), ",");
-  EXPECT_EQ(to_string(tok::int_constant), "int constant");
+  EXPECT_EQ(to_string(tok::int_literal), "int literal");
   EXPECT_EQ(to_string(tok::kw_struct), "struct");
 
   for (int i = 0; i < 128; ++i) {
@@ -67,9 +67,9 @@ TEST_F(TokenTest, token) {
   EXPECT_THROW(t.string_value(), std::runtime_error);
 }
 
-TEST_F(TokenTest, bool_constant) {
-  auto t = token::make_bool_constant(source_range{loc, loc}, true);
-  EXPECT_EQ(t.kind, tok::bool_constant);
+TEST_F(TokenTest, bool_literal) {
+  auto t = token::make_bool_literal(source_range{loc, loc}, true);
+  EXPECT_EQ(t.kind, tok::bool_literal);
   EXPECT_EQ(t.range.begin, loc);
   EXPECT_EQ(t.range.end, loc);
   EXPECT_TRUE(t.bool_value());
@@ -78,9 +78,9 @@ TEST_F(TokenTest, bool_constant) {
   EXPECT_THROW(t.string_value(), std::runtime_error);
 }
 
-TEST_F(TokenTest, int_constant) {
-  auto t = token::make_int_constant(source_range{loc, loc}, 42);
-  EXPECT_EQ(t.kind, tok::int_constant);
+TEST_F(TokenTest, int_literal) {
+  auto t = token::make_int_literal(source_range{loc, loc}, 42);
+  EXPECT_EQ(t.kind, tok::int_literal);
   EXPECT_EQ(t.range.begin, loc);
   EXPECT_EQ(t.range.end, loc);
   EXPECT_THROW(t.bool_value(), std::runtime_error);
@@ -89,9 +89,9 @@ TEST_F(TokenTest, int_constant) {
   EXPECT_THROW(t.string_value(), std::runtime_error);
 }
 
-TEST_F(TokenTest, float_constant) {
-  auto t = token::make_float_constant(source_range{loc, loc}, 0.42);
-  EXPECT_EQ(t.kind, tok::float_constant);
+TEST_F(TokenTest, float_literal) {
+  auto t = token::make_float_literal(source_range{loc, loc}, 0.42);
+  EXPECT_EQ(t.kind, tok::float_literal);
   EXPECT_EQ(t.range.begin, loc);
   EXPECT_EQ(t.range.end, loc);
   EXPECT_THROW(t.bool_value(), std::runtime_error);

@@ -37,13 +37,12 @@ constexpr token_kind_info info[] = {
     {tok::eof, "EOF"},
     {tok::error, "error"},
 
-    {tok::bool_constant, "bool constant"},
-    {tok::int_constant, "int constant"},
-    {tok::float_constant, "float constant"},
+    {tok::bool_literal, "bool literal"},
+    {tok::int_literal, "int literal"},
+    {tok::float_literal, "float literal"},
     {tok::string_literal, "string literal"},
     {tok::identifier, "identifier"},
 
-    {tok::doctext, "doctext"},
     {tok::inline_doc, "inline doc"},
 
     // // Operators and punctuators:

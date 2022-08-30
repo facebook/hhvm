@@ -142,6 +142,82 @@ std::unique_ptr<t_service> parsing_driver::on_service(
   return service;
 }
 
+std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
+    const identifier& name) {
+  auto name_str = fmt::to_string(name.str);
+  if (const t_const* constant = find_const(name.loc, name_str)) {
+    // Copy const_value to perform isolated mutations
+    auto result = constant->get_value()->clone();
+    // We only want to clone the value, while discarding all real type
+    // information.
+    result->set_ttype({});
+    result->set_is_enum(false);
+    result->set_enum(nullptr);
+    result->set_enum_value(nullptr);
+    return result;
+  }
+
+  // TODO(afuller): Make this an error.
+  if (mode == parsing_mode::PROGRAM) {
+    diags_.warning(
+        name.loc,
+        "The identifier '{}' is not defined yet. Constants and enums should "
+        "be defined before using them as default values.",
+        name.str);
+  }
+  return std::make_unique<t_const_value>(std::move(name_str));
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_bool(value);
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_int_literal(
+    source_location loc, int64_t value) {
+  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
+      (value < INT32_MIN || value > INT32_MAX)) {
+    diags_.warning(
+        loc, "64-bit constant {} may not work in all languages", value);
+  }
+  auto node = std::make_unique<t_const_value>();
+  node->set_integer(value);
+  return node;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_float_literal(double value) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_double(value);
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_string_literal(
+    fmt::string_view value) {
+  return std::make_unique<t_const_value>(fmt::to_string(value));
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_list_literal() {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_list();
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_map_literal() {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_map();
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_struct_literal(
+    source_range range, fmt::string_view name) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_map();
+  const_value->set_ttype(
+      new_type_ref(fmt::to_string(name), nullptr, range, /*is_const=*/true));
+  return const_value;
+}
+
 int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
   constexpr uint64_t max = std::numeric_limits<int64_t>::max();
   if (s == sign::minus) {
@@ -773,18 +849,6 @@ void parsing_driver::maybe_allocate_field_id(
   }
 }
 
-std::unique_ptr<t_const_value> parsing_driver::to_const_value(
-    source_location loc, int64_t value) {
-  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
-      (value < INT32_MIN || value > INT32_MAX)) {
-    diags_.warning(
-        loc, "64-bit constant {} may not work in all languages", value);
-  }
-  auto node = std::make_unique<t_const_value>();
-  node->set_integer(value);
-  return node;
-}
-
 std::string parsing_driver::strip_doctext(fmt::string_view text) {
   if (mode != apache::thrift::compiler::parsing_mode::PROGRAM) {
     return {};
@@ -815,31 +879,6 @@ const t_const* parsing_driver::find_const(
     return constant;
   }
   return nullptr;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::copy_const_value(
-    source_location loc, const std::string& name) {
-  if (const t_const* constant = find_const(loc, name)) {
-    // Copy const_value to perform isolated mutations
-    auto result = constant->get_value()->clone();
-    // We only want to clone the value, while discarding all real type
-    // information.
-    result->set_ttype({});
-    result->set_is_enum(false);
-    result->set_enum(nullptr);
-    result->set_enum_value(nullptr);
-    return result;
-  }
-
-  // TODO(afuller): Make this an error.
-  if (mode == parsing_mode::PROGRAM) {
-    diags_.warning(
-        loc,
-        "The identifier '{}' is not defined yet. Constants and enums should "
-        "be defined before using them as default values.",
-        name);
-  }
-  return std::make_unique<t_const_value>(name);
 }
 
 void parsing_driver::set_parsed_definition() {

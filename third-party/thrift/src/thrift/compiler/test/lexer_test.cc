@@ -45,7 +45,7 @@ TEST_F(LexerTest, move) {
   auto lexer = make_lexer("42");
   auto moved_lexer = std::move(lexer);
   auto token = moved_lexer.get_next_token();
-  EXPECT_EQ(token.kind, tok::int_constant);
+  EXPECT_EQ(token.kind, tok::int_literal);
 }
 
 TEST_F(LexerTest, eof) {
@@ -73,22 +73,22 @@ TEST_F(LexerTest, keywords) {
   }
 }
 
-TEST_F(LexerTest, int_constant) {
+TEST_F(LexerTest, int_literal) {
   auto lexer = make_lexer("42 0b100 0B010 0777 0xdeadbeef 0XCAFE");
   const uint64_t values[] = {42, 0b100, 0B010, 0777, 0xdeadbeef, 0XCAFE};
   for (auto value : values) {
     auto token = lexer.get_next_token();
-    EXPECT_EQ(token.kind, tok::int_constant);
+    EXPECT_EQ(token.kind, tok::int_literal);
     EXPECT_EQ(token.int_value(), value);
   }
 }
 
-TEST_F(LexerTest, float_constant) {
+TEST_F(LexerTest, float_literal) {
   auto lexer = make_lexer("3.14 1e23 1.2E+34 0.0 .4e-2");
   const double values[] = {3.14, 1e23, 1.2E+34, 0.0, .4e-2};
   for (auto value : values) {
     auto token = lexer.get_next_token();
-    EXPECT_EQ(token.kind, tok::float_constant);
+    EXPECT_EQ(token.kind, tok::float_literal);
     EXPECT_EQ(token.float_value(), value);
   }
 }
@@ -128,7 +128,7 @@ TEST_F(LexerTest, block_doc_comment) {
         42
       )");
   auto token = lexer.get_next_token();
-  EXPECT_EQ(token.kind, tok::int_constant);
+  EXPECT_EQ(token.kind, tok::int_literal);
   EXPECT_EQ(handler.doc_comment, "/** Block comment */");
 }
 
@@ -140,7 +140,7 @@ TEST_F(LexerTest, line_doc_comment) {
         42
       )");
   auto token = lexer.get_next_token();
-  EXPECT_EQ(token.kind, tok::int_constant);
+  EXPECT_EQ(token.kind, tok::int_literal);
 }
 
 TEST_F(LexerTest, inline_doc_comment) {

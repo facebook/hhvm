@@ -84,9 +84,8 @@ class parser_actions {
 
   virtual void on_package(source_range range, fmt::string_view name) = 0;
   virtual void on_include(source_range range, fmt::string_view str) = 0;
-
-  virtual void on_cpp_include(source_range, fmt::string_view str) = 0;
-  virtual void on_hs_include(source_range, fmt::string_view str) = 0;
+  virtual void on_cpp_include(source_range range, fmt::string_view str) = 0;
+  virtual void on_hs_include(source_range range, fmt::string_view str) = 0;
 
   virtual void on_namespace(
       const identifier& language, fmt::string_view ns) = 0;
@@ -204,18 +203,18 @@ class parser_actions {
       const identifier& name,
       std::unique_ptr<t_const_value> value) = 0;
 
-  virtual std::unique_ptr<t_const_value> on_bool_const(bool value) = 0;
-  virtual std::unique_ptr<t_const_value> on_int_const(
-      source_location loc, int64_t value) = 0;
-  virtual std::unique_ptr<t_const_value> on_double_const(double value) = 0;
-  virtual std::unique_ptr<t_const_value> on_reference_const(
+  virtual std::unique_ptr<t_const_value> on_const_ref(
       const identifier& name) = 0;
+
+  virtual std::unique_ptr<t_const_value> on_bool_literal(bool value) = 0;
+  virtual std::unique_ptr<t_const_value> on_int_literal(
+      source_location loc, int64_t value) = 0;
+  virtual std::unique_ptr<t_const_value> on_float_literal(double value) = 0;
   virtual std::unique_ptr<t_const_value> on_string_literal(
       fmt::string_view value) = 0;
-
-  virtual std::unique_ptr<t_const_value> on_const_list() = 0;
-  virtual std::unique_ptr<t_const_value> on_const_map() = 0;
-  virtual std::unique_ptr<t_const_value> on_const_struct(
+  virtual std::unique_ptr<t_const_value> on_list_literal() = 0;
+  virtual std::unique_ptr<t_const_value> on_map_literal() = 0;
+  virtual std::unique_ptr<t_const_value> on_struct_literal(
       source_range range, fmt::string_view name) = 0;
 
   virtual int64_t on_integer(source_range range, sign s, uint64_t value) = 0;

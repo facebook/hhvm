@@ -67,8 +67,8 @@ class lexer {
 
   // Reports an error if the parsed value cannot fit in the widest supported
   // representation, i.e. int64_t and double.
-  token make_int_constant(int offset, int base);
-  token make_float_constant();
+  token make_int_literal(int offset, int base);
+  token make_float_literal();
 
   template <typename... T>
   token report_error(fmt::format_string<T...> msg, T&&... args);

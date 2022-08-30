@@ -400,59 +400,24 @@ class parsing_driver : public parser_actions {
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value) override {
-    auto const_node = std::make_unique<t_const>(
+    auto constant = std::make_unique<t_const>(
         program, std::move(type), fmt::to_string(name.str), std::move(value));
-    const_node->set_src_range(range);
-    return const_node;
+    constant->set_src_range(range);
+    return constant;
   }
 
-  std::unique_ptr<t_const_value> on_bool_const(bool value) override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_bool(value);
-    return const_value;
-  }
+  std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override;
 
-  std::unique_ptr<t_const_value> on_int_const(
-      source_location loc, int64_t value) override {
-    return to_const_value(loc, value);
-  }
-
-  std::unique_ptr<t_const_value> on_double_const(double value) override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_double(value);
-    return const_value;
-  }
-
-  std::unique_ptr<t_const_value> on_reference_const(
-      const identifier& name) override {
-    return copy_const_value(name.loc, fmt::to_string(name.str));
-  }
-
+  std::unique_ptr<t_const_value> on_bool_literal(bool value) override;
+  std::unique_ptr<t_const_value> on_int_literal(
+      source_location loc, int64_t value) override;
+  std::unique_ptr<t_const_value> on_float_literal(double value) override;
   std::unique_ptr<t_const_value> on_string_literal(
-      fmt::string_view value) override {
-    return std::make_unique<t_const_value>(fmt::to_string(value));
-  }
-
-  std::unique_ptr<t_const_value> on_const_list() override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_list();
-    return const_value;
-  }
-
-  std::unique_ptr<t_const_value> on_const_map() override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_map();
-    return const_value;
-  }
-
-  std::unique_ptr<t_const_value> on_const_struct(
-      source_range range, fmt::string_view name) override {
-    auto const_value = std::make_unique<t_const_value>();
-    const_value->set_map();
-    const_value->set_ttype(
-        new_type_ref(fmt::to_string(name), nullptr, range, /*is_const=*/true));
-    return const_value;
-  }
+      fmt::string_view value) override;
+  std::unique_ptr<t_const_value> on_list_literal() override;
+  std::unique_ptr<t_const_value> on_map_literal() override;
+  std::unique_ptr<t_const_value> on_struct_literal(
+      source_range range, fmt::string_view name) override;
 
   int64_t on_integer(source_range range, sign s, uint64_t value) override;
 
@@ -600,13 +565,8 @@ class parsing_driver : public parser_actions {
   int32_t to_enum_value(source_location loc, int64_t value) {
     return narrow_int<int32_t>(loc, value, "enum values");
   }
-  std::unique_ptr<t_const_value> to_const_value(
-      source_location loc, int64_t value);
 
   const t_const* find_const(source_location loc, const std::string& name);
-
-  std::unique_ptr<t_const_value> copy_const_value(
-      source_location loc, const std::string& name);
 
   void set_parsed_definition();
   void set_program_annotations(

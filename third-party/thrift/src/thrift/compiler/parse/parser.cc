@@ -268,7 +268,7 @@ class parser {
         : boost::optional<comment>();
   }
 
-  // structured_annotation: "@" (const_struct | const_struct_type)
+  // structured_annotation: "@" (struct_literal | struct_literal_type)
   std::unique_ptr<t_const> parse_structured_annotation() {
     auto range = track_range();
     if (!try_consume_token('@')) {
@@ -278,8 +278,8 @@ class parser {
     if (token_.kind != '{') {
       return actions_.on_structured_annotation(range, name.str);
     }
-    auto const_value = parse_const_struct_body(name);
-    return actions_.on_structured_annotation(range, std::move(const_value));
+    auto value = parse_struct_literal_body(name);
+    return actions_.on_structured_annotation(range, std::move(value));
   }
 
   // annotations: "(" annotation_list? ")"
@@ -288,7 +288,7 @@ class parser {
   //   (annotation comma_or_semicolon)* annotation comma_or_semicolon?
   //
   // annotation: identifier ("=" annotation_value)?
-  // annotation_value: bool_constant | integer | string_literal
+  // annotation_value: bool_literal | integer | string_literal
   std::unique_ptr<t_annotations> parse_annotations() {
     auto loc = token_.range.begin;
     if (!try_consume_token('(')) {
@@ -306,7 +306,7 @@ class parser {
       if (try_consume_token('=')) {
         if (token_.kind == tok::string_literal) {
           value = fmt::to_string(consume_token().string_value());
-        } else if (token_.kind == tok::bool_constant) {
+        } else if (token_.kind == tok::bool_literal) {
           value = fmt::to_string(consume_token().bool_value() ? 1 : 0);
         } else if (auto integer = try_parse_integer()) {
           value = fmt::to_string(*integer);
@@ -751,54 +751,54 @@ class parser {
   }
 
   // const_value:
-  //     bool_constant | integer | float | string_literal
-  //   | const_list | const_map | const_struct
+  //     bool_literal | integer | float | string_literal
+  //   | list_literal | map_literal | struct_literal
   //   | identifier
   std::unique_ptr<t_const_value> parse_const_value() {
     auto range = track_range();
     auto s = sign::plus;
     switch (token_.kind) {
-      case tok::bool_constant:
-        return actions_.on_bool_const(consume_token().bool_value());
+      case tok::bool_literal:
+        return actions_.on_bool_literal(consume_token().bool_value());
       case to_tok('-'):
         s = sign::minus;
         FMT_FALLTHROUGH;
       case to_tok('+'):
         consume_token();
-        if (token_.kind == tok::int_constant) {
-          return actions_.on_int_const(range, parse_integer(s));
-        } else if (token_.kind == tok::float_constant) {
-          return actions_.on_double_const(parse_float(s));
+        if (token_.kind == tok::int_literal) {
+          return actions_.on_int_literal(range, parse_integer(s));
+        } else if (token_.kind == tok::float_literal) {
+          return actions_.on_float_literal(parse_float(s));
         }
         report_expected("number");
         break;
-      case tok::int_constant:
-        return actions_.on_int_const(range, parse_integer());
-      case tok::float_constant:
-        return actions_.on_double_const(parse_float());
+      case tok::int_literal:
+        return actions_.on_int_literal(range, parse_integer());
+      case tok::float_literal:
+        return actions_.on_float_literal(parse_float());
       case tok::string_literal:
         return actions_.on_string_literal(consume_token().string_value());
       case to_tok('['):
-        return parse_const_list();
+        return parse_list_literal();
       case to_tok('{'):
-        return parse_const_map();
+        return parse_map_literal();
       default:
         if (auto id = try_parse_identifier()) {
-          return token_.kind == '{' ? parse_const_struct_body(*id)
-                                    : actions_.on_reference_const(*id);
+          return token_.kind == '{' ? parse_struct_literal_body(*id)
+                                    : actions_.on_const_ref(*id);
         }
         break;
     }
     report_expected("constant");
   }
 
-  // const_list: "[" const_list_contents? "]"
+  // list_literal: "[" list_literal_contents? "]"
   //
-  // const_list_contents:
+  // list_literal_contents:
   //   (const_value comma_or_semicolon)* const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_const_list() {
+  std::unique_ptr<t_const_value> parse_list_literal() {
     expect_and_consume('[');
-    auto list = actions_.on_const_list();
+    auto list = actions_.on_list_literal();
     while (token_.kind != ']') {
       list->add_list(parse_const_value());
       if (!try_parse_comma_or_semicolon()) {
@@ -809,14 +809,14 @@ class parser {
     return list;
   }
 
-  // const_map: "{" const_map_contents? "}"
+  // map_literal: "{" map_literal_contents? "}"
   //
-  // const_map_contents:
+  // map_literal_contents:
   //   (const_value ":" const_value comma_or_semicolon)
   //    const_value ":" const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_const_map() {
+  std::unique_ptr<t_const_value> parse_map_literal() {
     expect_and_consume('{');
-    auto map = actions_.on_const_map();
+    auto map = actions_.on_map_literal();
     while (token_.kind != '}') {
       auto key = parse_const_value();
       expect_and_consume(':');
@@ -830,15 +830,15 @@ class parser {
     return map;
   }
 
-  // const_struct: identifier "{" const_struct_contents? "}"
+  // struct_literal: identifier "{" struct_literal_contents? "}"
   //
-  // const_struct_contents:
+  // struct_literal_contents:
   //   (identifier "=" const_value comma_or_semicolon)*
   //    identifier "=" const_value comma_or_semicolon?
-  std::unique_ptr<t_const_value> parse_const_struct_body(identifier id) {
+  std::unique_ptr<t_const_value> parse_struct_literal_body(identifier id) {
     auto id_end = end_;
     expect_and_consume('{');
-    auto map = actions_.on_const_struct({id.loc, id_end}, id.str);
+    auto map = actions_.on_struct_literal({id.loc, id_end}, id.str);
     while (token_.kind != '}') {
       auto key = actions_.on_string_literal(parse_identifier().str);
       expect_and_consume('=');
@@ -852,7 +852,7 @@ class parser {
     return map;
   }
 
-  // integer: ("+" | "-")? int_constant
+  // integer: ("+" | "-")? int_literal
   boost::optional<int64_t> try_parse_integer(sign s = sign::plus) {
     auto range = track_range();
     switch (token_.kind) {
@@ -861,11 +861,11 @@ class parser {
         FMT_FALLTHROUGH;
       case to_tok('+'):
         consume_token();
-        if (token_.kind != tok::int_constant) {
+        if (token_.kind != tok::int_literal) {
           report_expected("integer");
         }
         FMT_FALLTHROUGH;
-      case tok::int_constant: {
+      case tok::int_literal: {
         auto token = consume_token();
         return actions_.on_integer(range, s, token.int_value());
       }
@@ -881,7 +881,7 @@ class parser {
     report_expected("integer");
   }
 
-  // float: ("+" | "-")? float_constant
+  // float: ("+" | "-")? float_literal
   double parse_float(sign s = sign::plus) {
     switch (token_.kind) {
       case to_tok('-'):
@@ -889,11 +889,11 @@ class parser {
         FMT_FALLTHROUGH;
       case to_tok('+'):
         consume_token();
-        if (token_.kind != tok::float_constant) {
+        if (token_.kind != tok::float_literal) {
           break;
         }
         FMT_FALLTHROUGH;
-      case tok::float_constant: {
+      case tok::float_literal: {
         double value = consume_token().float_value();
         return s == sign::plus ? value : -value;
       }

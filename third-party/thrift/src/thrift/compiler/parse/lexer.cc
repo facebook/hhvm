@@ -62,7 +62,7 @@ bool is_identifier_char(char c) {
 
 // Lexes a decimal constant of the form [0-9]+. Returns a pointer past the end
 // if the constant has been lexed; `none` otherwise.
-const char* lex_dec_constant(const char* p, const char* none = nullptr) {
+const char* lex_dec_literal(const char* p, const char* none = nullptr) {
   if (!is_dec_digit(*p)) {
     return none;
   }
@@ -82,20 +82,20 @@ const char* lex_float_exponent(const char* p, const char* none = nullptr) {
   if (*p == '+' || *p == '-') {
     ++p; // Consume the sign.
   }
-  return lex_dec_constant(p);
+  return lex_dec_literal(p);
 }
 
 // Lexes a float constant in the form [0-9]+ followed by an optional exponent.
 // Returns a pointer past the end if the constant has been lexed; nullptr
 // otherwise.
-const char* lex_float_constant(const char* p) {
-  p = lex_dec_constant(p);
+const char* lex_float_literal(const char* p) {
+  p = lex_dec_literal(p);
   return p ? lex_float_exponent(p, p) : nullptr;
 }
 
 const std::unordered_map<std::string, tok> keywords = {
-    {"false", tok::bool_constant},
-    {"true", tok::bool_constant},
+    {"false", tok::bool_literal},
+    {"true", tok::bool_literal},
     {"include", tok::kw_include},
     {"cpp_include", tok::kw_cpp_include},
     {"hs_include", tok::kw_hs_include},
@@ -148,17 +148,17 @@ lexer::lexer(source src, lex_handler& handler, diagnostics_engine& diags)
   token_start_ = ptr_;
 }
 
-token lexer::make_int_constant(int offset, int base) {
+token lexer::make_int_literal(int offset, int base) {
   fmt::string_view text = token_text();
   errno = 0;
   uint64_t val = strtoull(
       std::string(text.data(), text.size()).c_str() + offset, nullptr, base);
   return errno != ERANGE
-      ? token::make_int_constant(token_source_range(), val)
+      ? token::make_int_literal(token_source_range(), val)
       : report_error("integer constant {} is too large", text);
 }
 
-token lexer::make_float_constant() {
+token lexer::make_float_literal() {
   fmt::string_view text = token_text();
   errno = 0;
   double val = strtod(std::string(text.data(), text.size()).c_str(), nullptr);
@@ -171,7 +171,7 @@ token lexer::make_float_constant() {
     }
     // Allow subnormals.
   }
-  return token::make_float_constant(token_source_range(), val);
+  return token::make_float_literal(token_source_range(), val);
 }
 
 template <typename... T>
@@ -295,15 +295,15 @@ token lexer::get_next_token() {
     auto text = token_text();
     auto it = keywords.find(std::string(text.data(), text.size()));
     if (it != keywords.end()) {
-      return it->second == tok::bool_constant
-          ? token::make_bool_constant(token_source_range(), it->first == "true")
+      return it->second == tok::bool_literal
+          ? token::make_bool_literal(token_source_range(), it->first == "true")
           : token(it->second, token_source_range());
     }
     return token::make_identifier(token_source_range(), text);
   } else if (c == '.') {
-    if (const char* p = lex_float_constant(ptr_)) {
+    if (const char* p = lex_float_literal(ptr_)) {
       ptr_ = p;
-      return make_float_constant();
+      return make_float_literal();
     }
   } else if (is_dec_digit(c)) {
     if (c == '0') {
@@ -318,7 +318,7 @@ token lexer::get_next_token() {
           while (is_hex_digit(*ptr_)) {
             ++ptr_;
           }
-          return make_int_constant(2, 16);
+          return make_int_literal(2, 16);
         case 'b':
         case 'B':
           // Lex a binary constant.
@@ -329,29 +329,29 @@ token lexer::get_next_token() {
           while (is_bin_digit(*ptr_)) {
             ++ptr_;
           }
-          return make_int_constant(2, 2);
+          return make_int_literal(2, 2);
       }
     }
     // Lex a decimal, octal or floating-point constant.
-    ptr_ = lex_dec_constant(ptr_, ptr_);
+    ptr_ = lex_dec_literal(ptr_, ptr_);
     switch (*ptr_) {
       case '.':
-        if (const char* p = lex_float_constant(ptr_ + 1)) {
+        if (const char* p = lex_float_literal(ptr_ + 1)) {
           ptr_ = p;
-          return make_float_constant();
+          return make_float_literal();
         }
         break;
       case 'e':
       case 'E':
         if (const char* p = lex_float_exponent(ptr_)) {
           ptr_ = p;
-          return make_float_constant();
+          return make_float_literal();
         }
         break;
     }
     if (c != '0') {
       // Lex a decimal constant.
-      return make_int_constant(0, 10);
+      return make_int_literal(0, 10);
     }
     // Lex an octal constant.
     const char* p = std::find_if(
@@ -359,7 +359,7 @@ token lexer::get_next_token() {
     if (p != ptr_) {
       return unexpected_token();
     }
-    return make_int_constant(1, 8);
+    return make_int_literal(1, 8);
   } else if (c == '"' || c == '\'') {
     // Lex a string literal.
     const char* p = std::find(ptr_, end(), c);

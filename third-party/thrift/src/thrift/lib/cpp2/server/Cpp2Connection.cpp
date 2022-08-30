@@ -330,6 +330,12 @@ void Cpp2Connection::requestReceived(
     readEnd = std::chrono::steady_clock::now();
   }
 
+  folly::call_once(clientInfoFlag_, [&] {
+    if (const auto& m = hreq->getHeader()->extractClientMetadata()) {
+      context_.setClientMetadata(*m);
+    }
+  });
+
   bool useHttpHandler = false;
   // Any POST not for / should go to the status handler
   if (hreq->getHeader()->getClientType() == THRIFT_HTTP_SERVER_TYPE) {
@@ -572,11 +578,6 @@ void Cpp2Connection::requestReceived(
       hreq->getHeader()->getClientTimeout();
   auto differentTimeouts = server->getTaskExpireTimeForRequest(
       clientQueueTimeout, clientTimeout, queueTimeout, taskTimeout);
-  folly::call_once(clientInfoFlag_, [&] {
-    if (const auto& m = hreq->getHeader()->extractClientMetadata()) {
-      context_.setClientMetadata(*m);
-    }
-  });
 
   context_.setClientType(hreq->getHeader()->getClientType());
 

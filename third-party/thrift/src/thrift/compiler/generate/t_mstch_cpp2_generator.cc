@@ -658,6 +658,8 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::parent_service_cpp_name},
             {"service:parent_service_qualified_name",
              &cpp_mstch_service::parent_service_qualified_name},
+            {"service:thrift_uri_or_service_name",
+             &cpp_mstch_service::thrift_uri_or_service_name},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
         });
 
@@ -722,6 +724,9 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node reduced_client() {
     return service_->is_interaction() || !generate_legacy_api(*service_);
+  }
+  mstch::node thrift_uri_or_service_name() {
+    return service_->uri().empty() ? parent_service_name() : service_->uri();
   }
 
  private:

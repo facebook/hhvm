@@ -23,7 +23,8 @@ void apache::thrift::Client<::cpp2::MyLeaf>::do_leafT(Protocol_* prot, RpcOption
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "do_leaf",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyLeaf");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

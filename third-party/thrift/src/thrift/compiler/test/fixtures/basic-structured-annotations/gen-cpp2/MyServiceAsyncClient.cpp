@@ -25,7 +25,8 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "first",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "test.dev/fixtures/basic-structured-annotations/MyService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -40,7 +41,8 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "second",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "test.dev/fixtures/basic-structured-annotations/MyService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

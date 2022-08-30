@@ -33,7 +33,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodAT(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodA",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -50,7 +51,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodBT(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodB",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -64,7 +66,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodCT(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodC",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -81,7 +84,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodDT(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodD",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -95,7 +99,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodET(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodE",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -112,7 +117,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service3>::methodFT(Pro
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodF",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service3");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

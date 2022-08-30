@@ -77,7 +77,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "get",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -91,7 +92,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "getter",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -105,7 +107,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "lists",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -119,7 +122,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "maps",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -133,7 +137,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "name",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -147,7 +152,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "name_to_value",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -161,7 +167,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "names",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -175,7 +182,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "prefix_tree",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -189,7 +197,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "sets",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -203,7 +212,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "setter",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -217,7 +227,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "str",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -231,7 +242,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "strings",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -245,7 +257,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "type",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -259,7 +272,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "value",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -273,7 +287,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "value_to_name",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -287,7 +302,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "values",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -301,7 +317,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "id",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -315,7 +332,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "ids",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -329,7 +347,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "descriptor",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -343,7 +362,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "descriptors",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -357,7 +377,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "key",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -371,7 +392,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "keys",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -385,7 +407,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "annotation",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -399,7 +422,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "annotations",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -413,7 +437,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "member",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -427,7 +452,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "members",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -441,7 +467,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "field",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -455,7 +482,8 @@ void apache::thrift::Client<::test_cpp2::cpp_reflection::service_with_special_na
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "fields",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "service_with_special_names");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

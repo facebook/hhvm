@@ -63,7 +63,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodT(Protocol_* prot, RpcOp
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "method",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -77,7 +78,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodAndReponseT(Protocol_* p
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodAndReponse",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -91,7 +93,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodThrowT(Protocol_* prot, 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodThrow",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -105,7 +108,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodSinkThrowT(Protocol_* pr
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodSinkThrow",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -119,7 +123,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodFinalThrowT(Protocol_* p
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodFinalThrow",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -133,7 +138,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodBothThrowT(Protocol_* pr
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodBothThrow",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -147,7 +153,8 @@ void apache::thrift::Client<::cpp2::SinkService>::methodFastT(Protocol_* prot, R
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "methodFast",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "SinkService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 

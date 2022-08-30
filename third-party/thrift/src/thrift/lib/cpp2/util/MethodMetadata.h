@@ -65,14 +65,17 @@ class MethodMetadata {
     Data(
         std::string name,
         FunctionQualifier qualifier,
+        std::string uriOrName = {},
         InteractionMethodPosition position = InteractionMethodPosition::None,
         std::string interaction = {})
         : methodName(std::move(name)),
           functionQualifier(qualifier),
+          thriftServiceUriOrName(std::move(uriOrName)),
           interactionPosition(position),
           interactionName(std::move(interaction)) {}
     std::string methodName;
     FunctionQualifier functionQualifier;
+    std::string thriftServiceUriOrName;
     InteractionMethodPosition interactionPosition;
     std::string interactionName;
   };
@@ -181,6 +184,31 @@ class MethodMetadata {
   }
 
   FunctionQualifier qualifier() const { return data_->functionQualifier; }
+
+  ManagedStringView thriftServiceUriOrName_managed() const& {
+    return isOwning()
+        ? ManagedStringView(thriftServiceUriOrName_view())
+        : ManagedStringView::from_static(thriftServiceUriOrName_view());
+  }
+
+  ManagedStringView thriftServiceUriOrName_managed() && {
+    return isOwning()
+        ? ManagedStringView(std::move(data_->thriftServiceUriOrName))
+        : ManagedStringView::from_static(thriftServiceUriOrName_view());
+  }
+
+  std::string thriftServiceUriOrName_str() const& {
+    return data_->thriftServiceUriOrName;
+  }
+
+  std::string thriftServiceUriOrName_str() && {
+    return isOwning() ? std::move(data_->thriftServiceUriOrName)
+                      : data_->thriftServiceUriOrName;
+  }
+
+  std::string_view thriftServiceUriOrName_view() const {
+    return data_->thriftServiceUriOrName;
+  }
 
   InteractionMethodPosition interactionPosition() const {
     return data_->interactionPosition;

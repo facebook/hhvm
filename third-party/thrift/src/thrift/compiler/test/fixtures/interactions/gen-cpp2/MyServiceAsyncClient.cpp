@@ -32,7 +32,8 @@ void apache::thrift::Client<::cpp2::MyService>::fooT(Protocol_* prot, RpcOptions
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "foo",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -50,6 +51,7 @@ void apache::thrift::Client<::cpp2::MyService>::interactT(Protocol_* prot, RpcOp
         new ::apache::thrift::MethodMetadata::Data(
                 "interact",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "MyInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -68,6 +70,7 @@ void apache::thrift::Client<::cpp2::MyService>::interactFastT(Protocol_* prot, R
         new ::apache::thrift::MethodMetadata::Data(
                 "interactFast",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "MyInteractionFast");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -86,6 +89,7 @@ void apache::thrift::Client<::cpp2::MyService>::serializeT(Protocol_* prot, RpcO
         new ::apache::thrift::MethodMetadata::Data(
                 "serialize",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "SerialInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -822,6 +826,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteraction::frobnicateT(Proto
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteraction.frobnicate",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -840,6 +845,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteraction::pingT(Protocol_* 
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteraction.ping",
                 ::apache::thrift::FunctionQualifier::OneWay,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -858,6 +864,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteraction::truthifyT(Protoco
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteraction.truthify",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -876,6 +883,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteraction::encodeT(Protocol_
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteraction.encode",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -1421,6 +1429,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteractionFast::frobnicateT(P
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteractionFast.frobnicate",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteractionFast");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -1439,6 +1448,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteractionFast::pingT(Protoco
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteractionFast.ping",
                 ::apache::thrift::FunctionQualifier::OneWay,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteractionFast");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -1457,6 +1467,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteractionFast::truthifyT(Pro
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteractionFast.truthify",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteractionFast");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -1475,6 +1486,7 @@ void apache::thrift::Client<::cpp2::MyService>::MyInteractionFast::encodeT(Proto
         new ::apache::thrift::MethodMetadata::Data(
                 "MyInteractionFast.encode",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteractionFast");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINK, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -2008,6 +2020,7 @@ void apache::thrift::Client<::cpp2::MyService>::SerialInteraction::frobnicateT(P
         new ::apache::thrift::MethodMetadata::Data(
                 "SerialInteraction.frobnicate",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "MyService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "SerialInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);

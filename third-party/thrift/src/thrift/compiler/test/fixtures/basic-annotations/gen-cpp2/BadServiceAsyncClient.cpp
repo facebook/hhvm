@@ -23,7 +23,8 @@ void apache::thrift::Client<::cpp2::GoodService>::barT(Protocol_* prot, RpcOptio
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "bar",
-                ::apache::thrift::FunctionQualifier::Unspecified);
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "BadService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
 }
 
@@ -241,6 +242,7 @@ void apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooT(Protocol_
         new ::apache::thrift::MethodMetadata::Data(
                 "BadInteraction.foo",
                 ::apache::thrift::FunctionQualifier::Unspecified,
+                "BadService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "BadInteraction");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::move(rpcOpts), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);

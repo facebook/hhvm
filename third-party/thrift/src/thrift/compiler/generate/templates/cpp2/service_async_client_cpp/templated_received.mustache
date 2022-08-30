@@ -39,7 +39,8 @@ void <% > service_common/client_class_name%>::<%function:cpp_name%>T(Protocol_* 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "<%#service:interaction?%><%service:name%>.<%/service:interaction?%><%function:name%>",
-                ::apache::thrift::FunctionQualifier::<%function:qualifier%><%#function:creates_interaction?%>,
+                ::apache::thrift::FunctionQualifier::<%function:qualifier%>,
+                "<%service:thrift_uri_or_service_name%>"<%#function:creates_interaction?%>,
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "<%function:created_interaction%>"<%/function:creates_interaction?%><%#service:interaction?%>,
                 ::apache::thrift::InteractionMethodPosition::Member,

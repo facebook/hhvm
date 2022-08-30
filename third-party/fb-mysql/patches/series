@@ -1,3 +1,0 @@
-cmake-libatomic.patch
-zstd-include-path.patch
-xcode-12.5-macos-sdk-11.3.patch

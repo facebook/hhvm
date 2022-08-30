@@ -3,14 +3,6 @@ add_library(mcrouter INTERFACE)
 include(ExternalProject)
 include(HPHPFunctions)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  MCROUTER_DOWNLOAD_ARGS
-  SOURCE_URL "https://github.com/facebook/mcrouter/archive/refs/tags/v2022.07.04.00.tar.gz"
-  SOURCE_HASH "SHA256=7a2a0b44736e896c844c4f8c7697202cdebf7fa42dbb4b84931ee5036a46945c"
-  # The tarball name is just the tag name, which can conflict in the cache
-  FILENAME_PREFIX "mcrouter-"
-)
-
 set(
   MCROUTER_DEPS
   boost
@@ -27,7 +19,7 @@ add_dependencies(mcrouter_deps ragel)
 
 ExternalProject_Add(
   bundled_mcrouter
-  ${MCROUTER_DOWNLOAD_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E create_symlink 
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-CMakeLists.txt"

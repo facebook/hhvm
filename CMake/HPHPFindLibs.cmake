@@ -357,6 +357,10 @@ macro(hphp_link target)
 
   target_link_libraries(${target} ${VISIBILITY} libsodium)
 
+  if (GFLAGS_FOUND)
+    target_link_libraries(${target} ${VISIBILITY} ${LIBGFLAGS_LIBRARY})
+  endif()
+
   target_link_libraries(${target} ${VISIBILITY} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})

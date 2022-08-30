@@ -79,9 +79,6 @@ pub struct EnvFlags {
     #[clap(long)]
     pub is_systemlib: bool,
 
-    #[clap(long)]
-    pub is_evaled: bool,
-
     /// Mutate the program as if we're in the debuger REPL
     #[clap(long)]
     pub for_debugger_eval: bool,

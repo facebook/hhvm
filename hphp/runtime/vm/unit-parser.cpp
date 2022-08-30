@@ -196,7 +196,6 @@ CompilerResult hackc_compile(
     options.getParserFlags(),
     hackc::EnvFlags {
       isSystemLib,
-      false, // is_evaled
       forDebuggerEval,
       false, // disable_toplevel_elaboration,
       false, // enable_ir

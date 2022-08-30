@@ -53,7 +53,6 @@ pub mod compile_ffi {
 
     struct EnvFlags {
         is_systemlib: bool,
-        is_evaled: bool,
         for_debugger_eval: bool,
         disable_toplevel_elaboration: bool,
         enable_ir: bool,
@@ -211,7 +210,6 @@ impl compile_ffi::NativeEnv {
             parser_flags: compile::ParserFlags::from_bits(self.parser_flags)?,
             flags: EnvFlags {
                 is_systemlib: self.flags.is_systemlib,
-                is_evaled: self.flags.is_evaled,
                 for_debugger_eval: self.flags.for_debugger_eval,
                 disable_toplevel_elaboration: self.flags.disable_toplevel_elaboration,
                 enable_ir: self.flags.enable_ir,

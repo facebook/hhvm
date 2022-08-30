@@ -130,7 +130,7 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 105,
+            "lineno" : 107,
             "required" : "opt-in-req-out",
             "type" : "string"
           }
@@ -145,7 +145,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 110,
+            "lineno" : 112,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -155,13 +155,13 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 109
+        "lineno" : 111
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 113
+        "lineno" : 115
       }
       },
   "source_path" : "thrift/annotation/hack",

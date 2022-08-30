@@ -101,6 +101,8 @@ struct UnionEnumAttributes {
 
 // This annotation is for using a custom trait for structs.
 @scope.Struct
+@scope.Union
+@scope.Exception
 struct StructTrait {
   1: string name;
 }
@@ -111,4 +113,6 @@ struct Attributes {
 }
 
 @scope.Struct
+@scope.Union
+@scope.Exception
 struct StructAsTrait {}

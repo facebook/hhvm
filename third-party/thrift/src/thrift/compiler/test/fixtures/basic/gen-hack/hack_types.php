@@ -899,6 +899,14 @@ class StructTrait implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
           )
         ),
+        '\thrift\annotation\Union' => \thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Exception' => \thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -1114,6 +1122,14 @@ class StructAsTrait implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return shape(
       'struct' => dict[
         '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Union' => \thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Exception' => \thrift\annotation\Exception::fromShape(
           shape(
           )
         ),

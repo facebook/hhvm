@@ -66,6 +66,8 @@ public class ServerStats {
   private final Distribution writeTimeOneMin;
   private final Distribution writeTimeOneHour;
 
+  private final AtomicLong outOfDirectMemroyErrors;
+
   private final ConcurrentHashMap<String, AtomicLong> methodCounters = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, DecayCounter> methodDecayCounters =
       new ConcurrentHashMap<>();
@@ -78,6 +80,8 @@ public class ServerStats {
   // Request related Counter Keys
   private static final String RECEIVED_REQUESTS_KEY = "thrift.received_requests.count";
   private static final String SENT_REPLIES_KEY = "thrift.sent_replies.count";
+  private static final String OUT_OF_DIRECT_MEMORY_EXCEPTIONS_KEY =
+      "thrift.out_of_direct_memory_num_exceptions.count";
   private static final String ACTIVE_REQUESTS_KEY = "thrift.active_requests.avg";
   private static final String QUEUED_REQUESTS_KEY = "thrift.queued_requests.avg.60";
   // Connection related Counter Keys
@@ -129,6 +133,8 @@ public class ServerStats {
     this.writeTime = new Distribution();
     this.writeTimeOneMin = new Distribution(ExponentialDecay.oneMinute());
     this.writeTimeOneHour = new Distribution(ExponentialDecay.seconds(3600));
+
+    this.outOfDirectMemroyErrors = new AtomicLong(0);
   }
 
   public void setNiftyMetrics(NiftyMetrics niftyMetrics) {
@@ -228,6 +234,8 @@ public class ServerStats {
     counters.put(WRITE_TIME_KEY + P95 + ONE_MINUTE, Math.round(writeTimeOneMin.getP95()));
     counters.put(WRITE_TIME_KEY + P95 + ONE_HOUR, Math.round(writeTimeOneHour.getP95()));
 
+    counters.put(OUT_OF_DIRECT_MEMORY_EXCEPTIONS_KEY, outOfDirectMemroyErrors.get());
+
     counters.put(WRITE_TIME_KEY + P99, Math.round(writeTime.getP99()));
     counters.put(WRITE_TIME_KEY + P99 + ONE_MINUTE, Math.round(writeTimeOneMin.getP99()));
     counters.put(WRITE_TIME_KEY + P99 + ONE_HOUR, Math.round(writeTimeOneHour.getP99()));
@@ -266,6 +274,10 @@ public class ServerStats {
 
   public Map<String, String> getAttributes() {
     return ATTRIBUTE_MAP;
+  }
+
+  public void markDirectOomError() {
+    this.outOfDirectMemroyErrors.incrementAndGet();
   }
 
   private void incrementCounterValues(String key) {

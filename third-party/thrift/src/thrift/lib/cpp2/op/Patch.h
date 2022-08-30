@@ -36,7 +36,7 @@ op::BoolPatch patchType(type::bool_t);
 // - subtract(T value) - Update to the patch to additionally subtract the given
 // value.
 // - operators -, -=, +, += - Alias to the appropriate add and subtract calls.
-I16Patch patchType(type::byte_t);
+BytePatch patchType(type::byte_t);
 I16Patch patchType(type::i16_t);
 I32Patch patchType(type::i32_t);
 I64Patch patchType(type::i64_t);

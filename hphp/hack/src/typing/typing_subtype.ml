@@ -2696,7 +2696,8 @@ and simplify_subtype_has_type_member
       in
       simplify_subtype ~subtype_env ~this_ty dtmemty memty env
       &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
-    | (_, (Tvar _ | Tunion _ | Tintersection _ | Terr)) -> default_subtype env
+    | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _ | Terr)) ->
+      default_subtype env
     | _ -> invalid ~fail env)
 
 and simplify_subtype_has_member

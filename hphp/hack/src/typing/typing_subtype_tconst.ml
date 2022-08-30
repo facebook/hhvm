@@ -15,6 +15,9 @@ let make_type_const_equal
     tconstid
     ~(on_error : Typing_error.Reasons_callback.t option)
     ~as_tyvar_with_cnstr =
+  let subtype_error =
+    Option.map ~f:Typing_error.Reasons_callback.type_constant_mismatch on_error
+  in
   let rec make_equal env ty =
     match ty with
     | LoclType ty ->
@@ -29,35 +32,17 @@ let make_type_const_equal
           ~allow_abstract_tconst:true
           ~ignore_errors:(Option.is_some as_tyvar_with_cnstr)
       in
-      let error =
-        Option.map
-          ~f:Typing_error.Reasons_callback.type_constant_mismatch
-          on_error
-      in
-      let (env, e2) = Utils.sub_type env tytconst tvar error in
-      let (env, e3) = Utils.sub_type env tvar tytconst error in
+      let (env, e2) = Utils.sub_type env tytconst tvar subtype_error in
+      let (env, e3) = Utils.sub_type env tvar tytconst subtype_error in
       (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with
-      | (_, Thas_type_member _) ->
-        (* Because Thas_type_member(_) is only created when a class
-         * refinement is on the right-hand side of a subtype query,
-         * and make_type_const_equal is only called after a subtype
-         * query of the form #var <: ?, or ? <: #var, we can only
-         * get here after a query of the form:
-         *
-         *     #var <: Cls with { type T ... }
-         *
-         * But, in that case, the logic of Typing_subtype will not
-         * break apart the rhs and instead record the whole
-         * refinement as a bound for #var. Still, we are humble
-         * and log an error if the impossible happens. *)
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Internal_error
-                 { pos = Pos.none; msg = "Unexpected Thas_type_member(_)" });
-        (env, None)
+      | (_, Thas_type_member (type_id, ty))
+        when String.equal type_id (snd tconstid) ->
+        let (env, e1) = Utils.sub_type env ty tvar subtype_error in
+        let (env, e2) = Utils.sub_type env tvar ty subtype_error in
+        (env, Option.merge ~f:Typing_error.both e1 e2)
+      | (_, Thas_type_member _)
       | (_, Thas_member _)
       | (_, Tcan_index _)
       | (_, Tcan_traverse _)

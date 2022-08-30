@@ -579,7 +579,7 @@ Flags handle_general_effects(Local& env,
         assertx(inst.src(0)->isA(TVec));
         if (!inst.src(1)->hasConstVal(TInt)) return std::nullopt;
         auto const idx = inst.src(1)->intVal();
-        auto const acls = canonicalize(AElemI { inst.src(0), idx });
+        auto const acls = canonicalize(AliasClass(AElemI { inst.src(0), idx }));
         auto const meta = env.global.ainfo.find(acls);
         if (!meta) return std::nullopt;
         if (!env.state.avail[meta->index]) return std::nullopt;
@@ -863,7 +863,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     // and so avoid value type-checks. Here, "dropConstVal" drops the precise
     // value of the end (for static bases) but preserves the pointee type.
     auto const iter = inst.extra<LdIterPos>()->iterId;
-    auto const end_cls = canonicalize(aiter_end(inst.src(0), iter));
+    auto const end_cls = canonicalize(AliasClass(aiter_end(inst.src(0), iter)));
     auto const end = find_tracked(env, env.global.ainfo.find(end_cls));
     if (end != nullptr) {
       auto const end_type = end->knownType.dropConstVal();
@@ -876,7 +876,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
     auto const extra = inst.extra<StIterType>();
     auto const value = iter_type_immediate(*extra);
-    auto const acls = canonicalize(aiter_type(inst.src(0), extra->iterId));
+    auto const acls = canonicalize(AliasClass(aiter_type(inst.src(0), extra->iterId)));
     store(env, acls, env.global.unit.cns(value));
     break;
   }

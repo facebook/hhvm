@@ -311,7 +311,10 @@ impl State {
         (*extern_state).extern_stack = (*extern_state).extern_stack_init.as_mut_ptr();
         (*extern_state).extern_stack_limit =
             (*extern_state).extern_stack.add(EXTERN_STACK_INIT_SIZE);
-        (*extern_state).output = vec![];
+
+        // Using `write` instead of assignment via `=` to not call `drop` on the
+        // old, uninitialized value.
+        std::ptr::addr_of_mut!((*extern_state).output).write(vec![]);
 
         extern_state
     }

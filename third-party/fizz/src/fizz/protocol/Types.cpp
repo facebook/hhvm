@@ -28,6 +28,8 @@ size_t getHashSize(HashFunction hash) {
       return 32;
     case HashFunction::Sha384:
       return 48;
+    case HashFunction::Sha512:
+      return 64;
   }
   throw std::runtime_error("unknown hash function");
 }
@@ -38,6 +40,8 @@ folly::StringPiece toString(HashFunction hash) {
       return "Sha256";
     case HashFunction::Sha384:
       return "Sha384";
+    case HashFunction::Sha512:
+      return "Sha512";
   }
   return "Invalid HashFunction";
 }

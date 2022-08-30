@@ -13,7 +13,7 @@
 
 namespace fizz {
 
-enum class HashFunction { Sha256, Sha384 };
+enum class HashFunction { Sha256, Sha384, Sha512 };
 
 enum class PskType {
   NotSupported,

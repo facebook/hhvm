@@ -376,8 +376,9 @@ function run_hhvm(OptionMap $opts): void {
   } else {
     $cmd = "$pfx $hhvm $flags --file $filename";
   }
-  if ($opts->containsKey('gdb')) {
-    // Trick gdb into thinking gdb_stderr->isatty()
+  if ($opts->containsKey('gdb') || $opts->containsKey('lldb')) {
+    // Trick gdb into thinking gdb_stderr->isatty(), so tui mode can be used.
+    // Also enables lldb to progress after trying to set the target.run-args.
     $cmd = "script -q --return -c \" $cmd \" /dev/null";
   }
   if ($opts->containsKey('print-command')) {

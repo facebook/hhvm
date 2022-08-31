@@ -9,6 +9,7 @@ use std::path::Path;
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::RichChecksum;
+use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntMap;
 use nohash_hasher::IntSet;
@@ -16,7 +17,6 @@ use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
 use rusqlite::Connection;
 
-use crate::datatypes::ToplevelCanonSymbolHash;
 use crate::naming_sqlite;
 use crate::FileSummary;
 

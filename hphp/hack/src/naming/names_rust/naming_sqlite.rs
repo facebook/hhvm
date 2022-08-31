@@ -5,6 +5,7 @@
 
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
+use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntMap;
 use nohash_hasher::IntSet;
@@ -233,7 +234,7 @@ fn get_overflow_row(
 ) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
-        crate::datatypes::ToplevelCanonSymbolHash,
+        ToplevelCanonSymbolHash,
         DeclHash,
         NameType,
         crate::datatypes::FileInfoId,
@@ -287,7 +288,7 @@ fn get_row(
 ) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
-        crate::datatypes::ToplevelCanonSymbolHash,
+        ToplevelCanonSymbolHash,
         DeclHash,
         NameType,
         crate::datatypes::FileInfoId,
@@ -368,7 +369,7 @@ pub fn get_path(
 
 pub fn get_path_case_insensitive(
     connection: &Connection,
-    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
+    symbol_hash: ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<RelativePath>> {
     let select_statement = "
         SELECT
@@ -398,7 +399,7 @@ pub fn get_path_case_insensitive(
 
 pub fn get_type_name_case_insensitive(
     connection: &Connection,
-    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
+    symbol_hash: ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<String>> {
     let select_statement = "
         SELECT
@@ -426,15 +427,12 @@ pub fn get_type_name_case_insensitive(
 
     if let Some((classes, typedefs)) = names_opt {
         for class in classes.split('|') {
-            if symbol_hash == crate::datatypes::ToplevelCanonSymbolHash::from_type(class.to_owned())
-            {
+            if symbol_hash == ToplevelCanonSymbolHash::from_type(class.to_owned()) {
                 return Ok(Some(class.to_owned()));
             }
         }
         for typedef in typedefs.split('|') {
-            if symbol_hash
-                == crate::datatypes::ToplevelCanonSymbolHash::from_type(typedef.to_owned())
-            {
+            if symbol_hash == ToplevelCanonSymbolHash::from_type(typedef.to_owned()) {
                 return Ok(Some(typedef.to_owned()));
             }
         }
@@ -444,7 +442,7 @@ pub fn get_type_name_case_insensitive(
 
 pub fn get_fun_name_case_insensitive(
     connection: &Connection,
-    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
+    symbol_hash: ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<String>> {
     let select_statement = "
         SELECT
@@ -470,7 +468,7 @@ pub fn get_fun_name_case_insensitive(
 
     if let Some(funs) = names_opt {
         for fun in funs.split('|') {
-            if symbol_hash == crate::datatypes::ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
+            if symbol_hash == ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
                 return Ok(Some(fun.to_owned()));
             }
         }

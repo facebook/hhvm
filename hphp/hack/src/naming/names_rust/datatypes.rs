@@ -5,7 +5,6 @@
 
 use std::path::PathBuf;
 
-pub use hh24_types::ToplevelCanonSymbolHash;
 use oxidized::file_info::Mode;
 use oxidized::relative_path::Prefix;
 use rusqlite::types::FromSql;

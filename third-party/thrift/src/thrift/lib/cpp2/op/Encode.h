@@ -20,6 +20,14 @@
 
 namespace apache {
 namespace thrift {
-namespace op {} // namespace op
+namespace op {
+
+// Encodes the given value to the given protocol using the type tag.
+// This handles adapted type.
+// For example: encode<type::int16_t>(prot, 1);
+template <typename Tag>
+FOLLY_INLINE_VARIABLE constexpr detail::Encode<Tag> encode{};
+
+} // namespace op
 } // namespace thrift
 } // namespace apache

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
 namespace apache {
@@ -101,6 +102,179 @@ struct TypeTagToTType<type::adapted<Adapter, Tag>> {
 template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr apache::thrift::protocol::TType typeTagToTType =
     detail::TypeTagToTType<Tag>::value;
+
+template <typename>
+struct Encode;
+
+template <>
+struct Encode<type::bool_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, bool t) const {
+    return prot.writeBool(t);
+  }
+};
+
+template <>
+struct Encode<type::byte_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int8_t i) const {
+    return prot.writeByte(i);
+  }
+};
+
+template <>
+struct Encode<type::i16_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int16_t i) const {
+    return prot.writeI16(i);
+  }
+};
+
+template <>
+struct Encode<type::i32_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int32_t i) const {
+    return prot.writeI32(i);
+  }
+};
+
+template <>
+struct Encode<type::i64_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int64_t i) const {
+    return prot.writeI64(i);
+  }
+};
+
+template <>
+struct Encode<type::float_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, float i) const {
+    return prot.writeFloat(i);
+  }
+};
+
+template <>
+struct Encode<type::double_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, double i) const {
+    return prot.writeDouble(i);
+  }
+};
+
+template <>
+struct Encode<type::string_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.writeString(s);
+  }
+};
+
+template <>
+struct Encode<type::binary_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.writeBinary(s);
+  }
+};
+
+template <typename T>
+struct Encode<type::struct_t<T>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& s) const {
+    return s.write(&prot);
+  }
+};
+
+template <typename T>
+struct Encode<type::union_t<T>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& s) const {
+    return s.write(&prot);
+  }
+};
+
+template <typename T>
+struct Encode<type::exception_t<T>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& s) const {
+    return s.write(&prot);
+  }
+};
+
+template <typename T>
+struct Encode<type::enum_t<T>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& s) const {
+    return prot.writeI32(static_cast<int32_t>(s));
+  }
+};
+
+// TODO: add optimization used in protocol_methods.h
+template <typename Tag>
+struct Encode<type::list<Tag>> {
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot, const type::native_type<type::list<Tag>>& list) const {
+    std::size_t xfer = 0;
+    xfer += prot.writeListBegin(typeTagToTType<Tag>, list.size());
+    for (const auto& elem : list) {
+      xfer += Encode<Tag>{}(prot, elem);
+    }
+    xfer += prot.writeListEnd();
+    return xfer;
+  }
+};
+
+template <typename Tag>
+struct Encode<type::set<Tag>> {
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot, const type::native_type<type::set<Tag>>& set) const {
+    std::size_t xfer = 0;
+    xfer += prot.writeSetBegin(typeTagToTType<Tag>, set.size());
+    for (const auto& elem : set) {
+      xfer += Encode<Tag>{}(prot, elem);
+    }
+    xfer += prot.writeSetEnd();
+    return xfer;
+  }
+};
+
+template <typename Key, typename Value>
+struct Encode<type::map<Key, Value>> {
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot,
+      const type::native_type<type::map<Key, Value>>& map) const {
+    std::size_t xfer = 0;
+    xfer += prot.writeMapBegin(
+        typeTagToTType<Key>, typeTagToTType<Value>, map.size());
+    for (const auto& kv : map) {
+      xfer += Encode<Key>{}(prot, kv.first);
+      xfer += Encode<Value>{}(prot, kv.second);
+    }
+    xfer += prot.writeMapEnd();
+    return xfer;
+  }
+};
+
+// TODO: Handle cpp_type with containers that cannot use static_cast.
+template <typename T, typename Tag>
+struct Encode<type::cpp_type<T, Tag>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& t) const {
+    return Encode<Tag>{}(prot, static_cast<type::native_type<Tag>>(t));
+  }
+};
+
+template <typename Adapter, typename Tag>
+struct Encode<type::adapted<Adapter, Tag>> {
+  template <typename Protocol, typename U>
+  uint32_t operator()(Protocol& prot, const U& m) const {
+    return Encode<Tag>{}(prot, Adapter::toThrift(m));
+  }
+};
 
 } // namespace detail
 } // namespace op

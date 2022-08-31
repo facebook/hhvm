@@ -79,6 +79,11 @@ class NoopExternalConnectionAdditionalLogger {
   bool shouldLog() const {
     return false;
   }
+
+  void setEnabledStatus(bool /* unused */) {}
+  bool getEnabledStatus() {
+    return false;
+  }
 };
 
 } // namespace carbon

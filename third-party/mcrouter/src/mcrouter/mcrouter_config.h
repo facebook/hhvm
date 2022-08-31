@@ -72,7 +72,7 @@ class AdditionalExternalConnectionLogger
     : public carbon::NoopExternalConnectionAdditionalLogger {
  public:
   explicit AdditionalExternalConnectionLogger(
-      carbon::ExternalCarbonConnectionLoggerOptions options)
+      carbon::ExternalCarbonConnectionLoggerOptions& options)
       : NoopExternalConnectionAdditionalLogger(options) {}
 };
 

@@ -116,7 +116,7 @@ TEST(StructPatchTest, Clear) {
   test::expectPatch(op::StringPatch::createClear(), {"hi"}, "");
 }
 
-TEST(StructPatchTest, ClearField_Bool) {
+TEST(StructPatchTest, ClearField_BoolPatch) {
   MyStruct actual;
 
   actual.boolVal() = true;
@@ -126,6 +126,30 @@ TEST(StructPatchTest, ClearField_Bool) {
   actual.optBoolVal() = true;
   op::BoolPatch::createClear().apply(actual.optBoolVal());
   EXPECT_FALSE(actual.optBoolVal().has_value());
+}
+
+TEST(StructPatchTest, ClearField_NumberPatch) {
+  MyStruct actual;
+
+  actual.i16Val() = 1;
+  op::I16Patch::createClear().apply(actual.i16Val());
+  EXPECT_EQ(*actual.boolVal(), 0);
+
+  actual.optDoubleVal() = 1;
+  op::DoublePatch::createClear().apply(actual.optDoubleVal());
+  EXPECT_FALSE(actual.optDoubleVal().has_value());
+}
+
+TEST(StructPatchTest, ClearField_StringPatch) {
+  MyStruct actual;
+
+  actual.stringVal() = "hi";
+  op::StringPatch::createClear().apply(actual.stringVal());
+  EXPECT_EQ(*actual.stringVal(), "");
+
+  actual.optBinaryVal().ensure();
+  op::BinaryPatch::createClear().apply(actual.optBinaryVal());
+  EXPECT_FALSE(actual.optBinaryVal().has_value());
 }
 
 TEST(StructPatchTest, Patch) {

@@ -96,11 +96,13 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
 
 // Patch must have the following fields:
 //   optional T assign;
+//   bool clear;
 //   T add;
 template <typename Patch>
-class NumberPatch : public BaseAssignPatch<Patch, NumberPatch<Patch>> {
-  using Base = BaseAssignPatch<Patch, NumberPatch>;
+class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
+  using Base = BaseClearPatch<Patch, NumberPatch>;
   using T = typename Base::value_type;
+  using Tag = type::infer_tag<T>;
 
  public:
   using Base::apply;
@@ -131,14 +133,14 @@ class NumberPatch : public BaseAssignPatch<Patch, NumberPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssign(val)) {
+    if (!Base::template applyAssignAndClear<Tag>(val)) {
       val += *data_.add();
     }
   }
 
   template <typename U>
   void merge(U&& next) {
-    if (!mergeAssign(std::forward<U>(next))) {
+    if (!mergeAssignAndClear(std::forward<U>(next))) {
       *data_.add() += *next.toThrift().add();
     }
   }
@@ -156,10 +158,9 @@ class NumberPatch : public BaseAssignPatch<Patch, NumberPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssign;
+  using Base::mergeAssignAndClear;
 
   template <typename U>
   friend NumberPatch operator+(NumberPatch lhs, U&& rhs) {

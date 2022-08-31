@@ -104,10 +104,16 @@ bool applyAssign(const Object& patch, value_native_type<Tag>& value) {
 template <typename Tag, typename T>
 void applyNumericPatch(const Object& patch, T& value) {
   constexpr auto valueType = static_cast<Value::Type>(type::base_type_v<Tag>);
-  checkOps(patch, valueType, {PatchOp::Assign, PatchOp::Add});
+  checkOps(patch, valueType, {PatchOp::Assign, PatchOp::Clear, PatchOp::Add});
   if (applyAssign<Tag>(patch, value)) {
     return; // Ignore all other ops.
   }
+  if (auto* clear = findOp(patch, PatchOp::Clear)) {
+    if (argAs<type::bool_t>(*clear)) {
+      value = {};
+    }
+  }
+
   if (auto* arg = findOp(patch, PatchOp::Add)) {
     value += argAs<Tag>(*arg);
   }

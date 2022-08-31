@@ -80,6 +80,9 @@ struct BytePatch {
    */
   1: optional byte assign;
 
+  /** Clear any set value. */
+  2: bool clear;
+
   /** Add to a given value. */
   8: byte add;
 }
@@ -98,6 +101,9 @@ struct I16Patch {
    * If set, all other patch operations are ignored.
    */
   1: optional i16 assign;
+
+  /** Clear any set value. */
+  2: bool clear;
 
   /** Add to a given value. */
   8: i16 add;
@@ -118,6 +124,9 @@ struct I32Patch {
    */
   1: optional i32 assign;
 
+  /** Clear any set value. */
+  2: bool clear;
+
   /** Add to a given value. */
   8: i32 add;
 }
@@ -136,6 +145,9 @@ struct I64Patch {
    * If set, all other patch operations are ignored.
    */
   1: optional i64 assign;
+
+  /** Clear any set value. */
+  2: bool clear;
 
   /** Add to a given value. */
   8: i64 add;
@@ -156,6 +168,9 @@ struct FloatPatch {
    */
   1: optional float assign;
 
+  /** Clear any set value. */
+  2: bool clear;
+
   /** Add to a given value. */
   8: float add;
 }
@@ -174,6 +189,9 @@ struct DoublePatch {
    * If set, all other patch operations are ignored.
    */
   1: optional double assign;
+
+  /** Clear any set value. */
+  2: bool clear;
 
   /** Add to a given value. */
   8: double add;

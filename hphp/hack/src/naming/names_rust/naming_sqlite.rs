@@ -14,8 +14,6 @@ use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;
 
-use crate::datatypes::*;
-
 pub fn create_tables(connection: &mut Connection) -> anyhow::Result<()> {
     let tx = connection.transaction()?;
     tx.prepare_cached(
@@ -88,7 +86,7 @@ pub fn remove_symbol(
     symbol_hash: ToplevelSymbolHash,
     path: &RelativePath,
 ) -> anyhow::Result<()> {
-    let file_info_id: FileInfoId = connection
+    let file_info_id: crate::datatypes::FileInfoId = connection
         .prepare(
             "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
                 WHERE PATH_PREFIX_TYPE = ?
@@ -173,9 +171,9 @@ pub fn insert_file_summary(
 
     for mut item in items {
         let decl_hash = item.hash;
-        let hash = convert::name_to_hash(dep_type, &item.symbol);
+        let hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
         item.symbol.make_ascii_lowercase();
-        let canon_hash = convert::name_to_hash(dep_type, &item.symbol);
+        let canon_hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
         let kind = item.name_type as i64;
 
         if let Some((
@@ -235,10 +233,10 @@ fn get_overflow_row(
 ) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
-        ToplevelCanonSymbolHash,
+        crate::datatypes::ToplevelCanonSymbolHash,
         DeclHash,
-        ToplevelSymbolFlags,
-        FileInfoId,
+        crate::datatypes::ToplevelSymbolFlags,
+        crate::datatypes::FileInfoId,
         RelativePath,
     )>,
 > {
@@ -266,8 +264,8 @@ fn get_overflow_row(
     let mut select_statement = connection.prepare_cached(select_statement)?;
     let result = select_statement
         .query_row(params![symbol_hash], |row| {
-            let prefix: SqlitePrefix = row.get(5)?;
-            let suffix: SqlitePathBuf = row.get(6)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
             let path = RelativePath::make(prefix.value, suffix.value);
             Ok((
                 row.get(0)?,
@@ -289,10 +287,10 @@ fn get_row(
 ) -> anyhow::Result<
     Option<(
         ToplevelSymbolHash,
-        ToplevelCanonSymbolHash,
+        crate::datatypes::ToplevelCanonSymbolHash,
         DeclHash,
-        ToplevelSymbolFlags,
-        FileInfoId,
+        crate::datatypes::ToplevelSymbolFlags,
+        crate::datatypes::FileInfoId,
         RelativePath,
     )>,
 > {
@@ -318,8 +316,8 @@ fn get_row(
     let mut select_statement = connection.prepare_cached(select_statement)?;
     let result = select_statement
         .query_row(params![symbol_hash], |row| {
-            let prefix: SqlitePrefix = row.get(5)?;
-            let suffix: SqlitePathBuf = row.get(6)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
             let path = RelativePath::make(prefix.value, suffix.value);
             Ok((
                 row.get(0)?,
@@ -358,8 +356,8 @@ pub fn get_path(
     let mut select_statement = connection.prepare_cached(select_statement)?;
     let result = select_statement
         .query_row(params![symbol_hash], |row| {
-            let prefix: SqlitePrefix = row.get(0)?;
-            let suffix: SqlitePathBuf = row.get(1)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(0)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(1)?;
             let kind: NameType = row.get(2)?;
             Ok((RelativePath::make(prefix.value, suffix.value), kind))
         })
@@ -370,7 +368,7 @@ pub fn get_path(
 
 pub fn get_path_case_insensitive(
     connection: &Connection,
-    symbol_hash: ToplevelCanonSymbolHash,
+    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<RelativePath>> {
     let select_statement = "
         SELECT
@@ -389,8 +387,8 @@ pub fn get_path_case_insensitive(
     let mut select_statement = connection.prepare_cached(select_statement)?;
     let result = select_statement
         .query_row(params![symbol_hash], |row| {
-            let prefix: SqlitePrefix = row.get(0)?;
-            let suffix: SqlitePathBuf = row.get(1)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(0)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(1)?;
             Ok(RelativePath::make(prefix.value, suffix.value))
         })
         .optional();
@@ -400,7 +398,7 @@ pub fn get_path_case_insensitive(
 
 pub fn get_type_name_case_insensitive(
     connection: &Connection,
-    symbol_hash: ToplevelCanonSymbolHash,
+    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<String>> {
     let select_statement = "
         SELECT
@@ -428,12 +426,15 @@ pub fn get_type_name_case_insensitive(
 
     if let Some((classes, typedefs)) = names_opt {
         for class in classes.split('|') {
-            if symbol_hash == ToplevelCanonSymbolHash::from_type(class.to_owned()) {
+            if symbol_hash == crate::datatypes::ToplevelCanonSymbolHash::from_type(class.to_owned())
+            {
                 return Ok(Some(class.to_owned()));
             }
         }
         for typedef in typedefs.split('|') {
-            if symbol_hash == ToplevelCanonSymbolHash::from_type(typedef.to_owned()) {
+            if symbol_hash
+                == crate::datatypes::ToplevelCanonSymbolHash::from_type(typedef.to_owned())
+            {
                 return Ok(Some(typedef.to_owned()));
             }
         }
@@ -443,7 +444,7 @@ pub fn get_type_name_case_insensitive(
 
 pub fn get_fun_name_case_insensitive(
     connection: &Connection,
-    symbol_hash: ToplevelCanonSymbolHash,
+    symbol_hash: crate::datatypes::ToplevelCanonSymbolHash,
 ) -> anyhow::Result<Option<String>> {
     let select_statement = "
         SELECT
@@ -469,7 +470,7 @@ pub fn get_fun_name_case_insensitive(
 
     if let Some(funs) = names_opt {
         for fun in funs.split('|') {
-            if symbol_hash == ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
+            if symbol_hash == crate::datatypes::ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
                 return Ok(Some(fun.to_owned()));
             }
         }
@@ -568,7 +569,7 @@ pub fn insert_file_info(
 ) -> anyhow::Result<()> {
     let prefix_type = path_rel.prefix() as u8; // TODO(ljw): shouldn't this use prefix_to_i64?
     let suffix = path_rel.path().to_str().unwrap();
-    let type_checker_mode = convert::mode_to_i64(file_summary.mode);
+    let type_checker_mode = crate::datatypes::convert::mode_to_i64(file_summary.mode);
     let hash = file_summary.hash;
 
     connection
@@ -609,7 +610,7 @@ fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> Str
 }
 
 pub fn delete(connection: &Connection, path: &RelativePath) -> anyhow::Result<()> {
-    let file_info_id: Option<FileInfoId> = connection
+    let file_info_id: Option<crate::datatypes::FileInfoId> = connection
         .prepare_cached(
             "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
                 WHERE PATH_PREFIX_TYPE = ?

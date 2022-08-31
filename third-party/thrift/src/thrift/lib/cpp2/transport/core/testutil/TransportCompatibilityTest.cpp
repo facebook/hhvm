@@ -571,7 +571,7 @@ void TransportCompatibilityTest::TestRequestResponse_Header_Load() {
   connectToServer([](std::unique_ptr<TestServiceAsyncClient> client) {
     RpcOptions rpcOptions;
     rpcOptions.setWriteHeader("header_from_client", "2");
-    rpcOptions.setWriteHeader(THeader::QUERY_LOAD_HEADER, {});
+    rpcOptions.setWriteHeader((std::string)THeader::QUERY_LOAD_HEADER, {});
     auto resultAndHeaders = client->header_future_headers(rpcOptions).get();
     const auto readHeaders =
         std::move(resultAndHeaders.second)->releaseHeaders();

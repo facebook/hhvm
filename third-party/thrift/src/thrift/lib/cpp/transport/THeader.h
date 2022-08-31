@@ -221,8 +221,8 @@ class THeader final {
   std::optional<ClientMetadata> extractClientMetadata();
 
   // these work with write headers
-  void setHeader(const std::string& key, const std::string& value);
-  void setHeader(const std::string& key, std::string&& value);
+  void setHeader(std::string_view key, const std::string& value);
+  void setHeader(std::string_view key, std::string&& value);
   void setHeader(
       const char* key, size_t keyLength, const char* value, size_t valueLength);
   void setHeaders(StringToStringMap&&);
@@ -235,7 +235,7 @@ class THeader final {
 
   // these work with read headers
   void setReadHeaders(StringToStringMap&&);
-  void setReadHeader(const std::string& key, std::string&& value);
+  void setReadHeader(std::string_view key, std::string&& value);
   void eraseReadHeader(const std::string& key);
   const StringToStringMap& getHeaders() const;
   StringToStringMap releaseHeaders();
@@ -328,8 +328,7 @@ class THeader final {
 
   apache::thrift::concurrency::PRIORITY getCallPriority() const;
 
-  std::chrono::milliseconds getTimeoutFromHeader(
-      const std::string& header) const;
+  std::chrono::milliseconds getTimeoutFromHeader(std::string_view header) const;
 
   std::chrono::milliseconds getClientTimeout() const;
 
@@ -379,12 +378,13 @@ class THeader final {
   static const uint32_t BIG_FRAME_MAGIC = 0x42494746; // BIGF
 
   static const uint32_t MAX_FRAME_SIZE = 0x3FFFFFFF;
-  static const std::string PRIORITY_HEADER;
+  static constexpr std::string_view PRIORITY_HEADER = "thrift_priority";
+  // TODO: change to string_view
   static const std::string& CLIENT_TIMEOUT_HEADER;
-  static const std::string QUEUE_TIMEOUT_HEADER;
-  static const std::string QUERY_LOAD_HEADER;
-  static const std::string kClientId;
-  static const std::string kServiceTraceMeta;
+  static constexpr std::string_view QUEUE_TIMEOUT_HEADER = "queue_timeout";
+  static constexpr std::string_view QUERY_LOAD_HEADER = "load";
+  static constexpr std::string_view kClientId = "client_id";
+  static constexpr std::string_view kServiceTraceMeta = "service_trace_meta";
   static constexpr std::string_view CLIENT_METADATA_HEADER = "client_metadata";
 
  private:
@@ -461,9 +461,9 @@ class THeader final {
   folly::Optional<std::string> clientId_;
   folly::Optional<std::string> serviceTraceMeta_;
 
-  static const std::string IDENTITY_HEADER;
-  static const std::string ID_VERSION_HEADER;
-  static const std::string ID_VERSION;
+  static constexpr std::string_view IDENTITY_HEADER = "identity";
+  static constexpr std::string_view ID_VERSION_HEADER = "id_version";
+  static constexpr std::string_view ID_VERSION = "1";
 
   bool allowBigFrames_;
   folly::Optional<CompressionConfig> compressionConfig_;

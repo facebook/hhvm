@@ -472,7 +472,8 @@ void doLoadHeaderTest(bool isRocket) {
     // Empty load header
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
   }
@@ -481,7 +482,8 @@ void doLoadHeaderTest(bool isRocket) {
     // Custom load header
     RpcOptions options;
     const std::string kLoadMetric{"custom_load_metric_789"};
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
   }
@@ -490,7 +492,8 @@ void doLoadHeaderTest(bool isRocket) {
     // Force server overload. Load should still be returned on server overload.
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
 
     folly::fibers::Baton baton;
     THeader header;
@@ -527,7 +530,8 @@ void doLoadHeaderTest(bool isRocket) {
     });
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setQueueTimeout(std::chrono::milliseconds(10));
 
     folly::fibers::Baton baton;
@@ -564,7 +568,8 @@ void doLoadHeaderTest(bool isRocket) {
 
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setTimeout(std::chrono::seconds(1));
 
     auto prevTaskExpireTime = runner.getThriftServer().getTaskExpireTime();

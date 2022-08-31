@@ -64,15 +64,7 @@ using namespace folly;
 using namespace folly::io;
 using apache::thrift::protocol::TBinaryProtocol;
 
-const string THeader::IDENTITY_HEADER = "identity";
-const string THeader::ID_VERSION_HEADER = "id_version";
-const string THeader::ID_VERSION = "1";
-const string THeader::PRIORITY_HEADER = "thrift_priority";
 const string& THeader::CLIENT_TIMEOUT_HEADER = *(new string("client_timeout"));
-const string THeader::QUEUE_TIMEOUT_HEADER = "queue_timeout";
-const string THeader::QUERY_LOAD_HEADER = "load";
-const string THeader::kClientId = "client_id";
-const string THeader::kServiceTraceMeta = "service_trace_meta";
 
 std::string getReadableChars(Cursor c, size_t limit) {
   size_t size = 0;
@@ -696,11 +688,11 @@ static void flushInfoHeaders(
   }
 }
 
-void THeader::setHeader(const std::string& key, const std::string& value) {
+void THeader::setHeader(std::string_view key, const std::string& value) {
   ensureWriteHeaders()[key] = value;
 }
 
-void THeader::setHeader(const std::string& key, std::string&& value) {
+void THeader::setHeader(std::string_view key, std::string&& value) {
   ensureWriteHeaders()[key] = std::move(value);
 }
 
@@ -790,7 +782,7 @@ const THeader::StringToStringMap& THeader::getWriteHeaders() const {
   return writeHeaders_ ? *writeHeaders_ : kEmptyMap();
 }
 
-void THeader::setReadHeader(const std::string& key, std::string&& value) {
+void THeader::setReadHeader(std::string_view key, std::string&& value) {
   ensureReadHeaders()[key] = std::move(value);
 }
 
@@ -1006,7 +998,7 @@ apache::thrift::concurrency::PRIORITY THeader::getCallPriority() const {
 }
 
 std::chrono::milliseconds THeader::getTimeoutFromHeader(
-    const std::string& header) const {
+    std::string_view header) const {
   const auto& map = getHeaders();
   auto iter = map.find(header);
   if (iter != map.end()) {

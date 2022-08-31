@@ -310,18 +310,22 @@ TEST(Bser, bser_tests) {
 TEST(Bser, bunser_int_returns_needed) {
   size_t needed;
 
-  EXPECT_EQ(std::nullopt, bunser_int(nullptr, 0, &needed));
+  // Work around a bug in googletest 1.11 (Ubuntu 22.04) on gcc 11.2.
+  // https://github.com/google/googletest/issues/3384
+  auto nullopt = std::optional<json_int_t>{};
+
+  EXPECT_EQ(nullopt, bunser_int(nullptr, 0, &needed));
   EXPECT_EQ(1, needed);
-  EXPECT_EQ(std::nullopt, bunser_int("\x03", 1, &needed));
+  EXPECT_EQ(nullopt, bunser_int("\x03", 1, &needed));
   EXPECT_EQ(2, needed);
-  EXPECT_EQ(std::nullopt, bunser_int("\x04", 1, &needed));
+  EXPECT_EQ(nullopt, bunser_int("\x04", 1, &needed));
   EXPECT_EQ(3, needed);
-  EXPECT_EQ(std::nullopt, bunser_int("\x05", 1, &needed));
+  EXPECT_EQ(nullopt, bunser_int("\x05", 1, &needed));
   EXPECT_EQ(5, needed);
-  EXPECT_EQ(std::nullopt, bunser_int("\x06", 1, &needed));
+  EXPECT_EQ(nullopt, bunser_int("\x06", 1, &needed));
   EXPECT_EQ(9, needed);
 
-  EXPECT_EQ(std::nullopt, bunser_int("\x00", 1, &needed));
+  EXPECT_EQ(nullopt, bunser_int("\x00", 1, &needed));
   EXPECT_EQ(kDecodeIntFailed, needed);
 }
 

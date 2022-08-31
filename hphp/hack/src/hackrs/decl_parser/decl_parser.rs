@@ -23,7 +23,7 @@ use ty::reason::Reason;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
-    opts: ParserOptions,
+    pub opts: ParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
     // parser to a single Reason type.

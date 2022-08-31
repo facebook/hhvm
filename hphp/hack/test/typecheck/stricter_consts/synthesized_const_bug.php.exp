@@ -1,0 +1,6 @@
+File "synthesized_const_bug.php", line 29, characters 13-17:
+Constant T is defined concretely in multiple ancestors (Typing[4374])
+  File "synthesized_const_bug.php", line 5, characters 14-14:
+  One conflicting definition is here, inherited through Parentt
+  File "synthesized_const_bug.php", line 26, characters 14-14:
+  Another conflicting definition is here

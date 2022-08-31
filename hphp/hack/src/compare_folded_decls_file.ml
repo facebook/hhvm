@@ -15,7 +15,8 @@ let popt
     ~disable_xhp_element_mangling
     ~disable_enum_classes
     ~interpret_soft_types_as_like_types
-    ~everything_sdt =
+    ~everything_sdt
+    ~enable_strict_const_semantics =
   let enable_enum_classes = not disable_enum_classes in
   let po = ParserOptions.default in
   let po =
@@ -34,6 +35,13 @@ let popt
       interpret_soft_types_as_like_types
   in
   let po = ParserOptions.with_everything_sdt po everything_sdt in
+  let po =
+    {
+      po with
+      GlobalOptions.tco_enable_strict_const_semantics =
+        enable_strict_const_semantics;
+    }
+  in
   po
 
 let init ~enable_strict_const_semantics popt : Provider_context.t =
@@ -260,6 +268,7 @@ let () =
         ~disable_enum_classes
         ~interpret_soft_types_as_like_types
         ~everything_sdt
+        ~enable_strict_const_semantics
     in
     let tco_experimental_features =
       TypecheckerOptions.experimental_from_flags

@@ -197,7 +197,10 @@ let add_const name const acc =
 
 let add_members members acc = SMap.fold SMap.add members acc
 
-let add_typeconst ~strict_const_semantics name sig_ typeconsts =
+let add_typeconst env c name sig_ typeconsts =
+  let fix_synthesized =
+    TypecheckerOptions.enable_strict_const_semantics (Decl_env.tcopt env) > 3
+  in
   match SMap.find_opt name typeconsts with
   | None ->
     (* The type constant didn't exist so far, let's add it *)
@@ -221,7 +224,8 @@ let add_typeconst ~strict_const_semantics name sig_ typeconsts =
          old_sig.ttc_kind,
          sig_.ttc_kind )
      with
-    | (false, true, _, _) when strict_const_semantics ->
+    | (false, true, _, _) when Ast_defs.is_c_class c.sc_kind && fix_synthesized
+      ->
       (* Don't replace a type constant with a synthesized type constant. This
          covers the following case:
 
@@ -296,7 +300,7 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   in
   (ce, Decl_utils.coalesce_consistent acc_consist cstr_consist)
 
-let add_inherited _env inherited acc =
+let add_inherited env c inherited acc =
   {
     ih_substs =
       SMap.merge
@@ -331,18 +335,7 @@ let add_inherited _env inherited acc =
     ih_cstr = add_constructor inherited.ih_cstr acc.ih_cstr;
     ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
-      begin
-        (* TODO(T125402906) Re-enable this after fixing inheritance *)
-        let strict_const_semantics =
-          false
-          (* TypecheckerOptions.enable_strict_const_semantics (Decl_env.tcopt env)
-             > 2 *)
-        in
-        SMap.fold
-          (add_typeconst ~strict_const_semantics)
-          inherited.ih_typeconsts
-          acc.ih_typeconsts
-      end;
+      SMap.fold (add_typeconst env c) inherited.ih_typeconsts acc.ih_typeconsts;
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
@@ -617,25 +610,26 @@ let parents_which_provide_members c =
 
 let from_parent env c (parents : Decl_store.class_entries SMap.t) acc parent =
   let inherited = from_class env c parents parent in
-  add_inherited env inherited acc
+  add_inherited env c inherited acc
 
 let from_requirements env c parents acc reqs =
   let inherited = from_class env c parents reqs in
   let inherited = mark_as_synthesized inherited in
-  add_inherited env inherited acc
+  add_inherited env c inherited acc
 
 let from_trait env c parents acc uses =
   let inherited = from_class env c parents uses in
-  add_inherited env inherited acc
+  add_inherited env c inherited acc
 
-let from_xhp_attr_use env (parents : Decl_store.class_entries SMap.t) acc uses =
+let from_xhp_attr_use env c (parents : Decl_store.class_entries SMap.t) acc uses
+    =
   let inherited = from_class_xhp_attrs_only env parents uses in
-  add_inherited env inherited acc
+  add_inherited env c inherited acc
 
 let from_interface_constants
-    env (parents : Decl_store.class_entries SMap.t) acc impls =
+    env c (parents : Decl_store.class_entries SMap.t) acc impls =
   let inherited = from_class_constants_only env parents impls in
-  add_inherited env inherited acc
+  add_inherited env c inherited acc
 
 let has_highest_precedence : (OverridePrecedence.t * 'a) option -> bool =
   function
@@ -737,7 +731,7 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
   in
   let acc =
     List.fold_left
-      ~f:(from_xhp_attr_use env parents)
+      ~f:(from_xhp_attr_use env c parents)
       ~init:acc
       c.sc_xhp_attr_uses
   in
@@ -748,7 +742,7 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
    *)
   let acc =
     List.fold_left
-      ~f:(from_interface_constants env parents)
+      ~f:(from_interface_constants env c parents)
       ~init:acc
       c.sc_req_implements
   in
@@ -759,12 +753,12 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
   in
   let acc =
     List.fold_left
-      ~f:(from_interface_constants env parents)
+      ~f:(from_interface_constants env c parents)
       ~init:acc
       included_enums
   in
   List.fold_left
-    ~f:(from_interface_constants env parents)
+    ~f:(from_interface_constants env c parents)
     ~init:acc
     c.sc_implements
 

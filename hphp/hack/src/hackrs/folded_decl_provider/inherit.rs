@@ -220,9 +220,10 @@ impl<R: Reason> Inherited<R> {
     fn add_type_consts(
         &mut self,
         opts: &GlobalOptions,
+        child: &ShallowClass<R>,
         other_type_consts: TypeConstNameIndexMap<TypeConst<R>>,
     ) {
-        let strict_const_semantics = opts.tco_enable_strict_const_semantics > 2;
+        let fix_synthesized = opts.tco_enable_strict_const_semantics > 3;
 
         for (name, mut new_const) in other_type_consts {
             match self.type_consts.entry(name) {
@@ -239,15 +240,20 @@ impl<R: Reason> Inherited<R> {
                         e.get_mut().enforceable = new_const.enforceable.clone();
                     }
                     let old_const = e.get();
+                    let is_class = || match child.kind {
+                        ClassishKind::Cclass(_) => true,
+                        ClassishKind::Ctrait
+                        | ClassishKind::Cinterface
+                        | ClassishKind::Cenum
+                        | ClassishKind::CenumClass(_) => false,
+                    };
                     match (
                         old_const.is_synthesized,
                         new_const.is_synthesized,
                         &old_const.kind,
                         &new_const.kind,
                     ) {
-                        // TODO(T125402906) Re-enable this after fixing inheritance
-                        // (false, true, _, _) => {}
-                        (false, true, _, _) if strict_const_semantics => {}
+                        (false, true, _, _) if is_class() && fix_synthesized => {}
                         // This covers the following case
                         // ```
                         // interface I1 { abstract const type T; }
@@ -308,7 +314,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_inherited(&mut self, opts: &GlobalOptions, other: Self) {
+    fn add_inherited(&mut self, opts: &GlobalOptions, child: &ShallowClass<R>, other: Self) {
         let Self {
             substs,
             props,
@@ -326,7 +332,7 @@ impl<R: Reason> Inherited<R> {
         self.add_static_methods(static_methods);
         self.add_constructor(constructor);
         self.add_consts(consts);
-        self.add_type_consts(opts, type_consts);
+        self.add_type_consts(opts, child, type_consts);
     }
 
     fn mark_as_synthesized(&mut self) {
@@ -506,7 +512,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn add_from_interface_constants(&mut self) -> Result<()> {
         for ty in self.child.req_implements.iter() {
             self.members
-                .add_inherited(self.opts, self.class_constants_from_class(ty)?)
+                .add_inherited(self.opts, self.child, self.class_constants_from_class(ty)?)
         }
 
         Ok(())
@@ -515,7 +521,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn add_from_implements_constants(&mut self) -> Result<()> {
         for ty in self.child.implements.iter() {
             self.members
-                .add_inherited(self.opts, self.class_constants_from_class(ty)?)
+                .add_inherited(self.opts, self.child, self.class_constants_from_class(ty)?)
         }
 
         Ok(())
@@ -524,7 +530,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn add_from_xhp_attr_uses(&mut self) -> Result<()> {
         for ty in self.child.xhp_attr_uses.iter() {
             self.members
-                .add_inherited(self.opts, self.xhp_attrs_from_class(ty)?)
+                .add_inherited(self.opts, self.child, self.xhp_attrs_from_class(ty)?)
         }
 
         Ok(())
@@ -554,7 +560,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         // be implemented.
         for ty in tys.iter().rev() {
             self.members
-                .add_inherited(self.opts, self.members_from_class(ty)?);
+                .add_inherited(self.opts, self.child, self.members_from_class(ty)?);
         }
 
         Ok(())
@@ -564,7 +570,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         for ty in self.child.req_extends.iter() {
             let mut inherited = self.members_from_class(ty)?;
             inherited.mark_as_synthesized();
-            self.members.add_inherited(self.opts, inherited);
+            self.members.add_inherited(self.opts, self.child, inherited);
         }
 
         Ok(())
@@ -573,7 +579,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn add_from_traits(&mut self) -> Result<()> {
         for ty in self.child.uses.iter() {
             self.members
-                .add_inherited(self.opts, self.members_from_class(ty)?);
+                .add_inherited(self.opts, self.child, self.members_from_class(ty)?);
         }
 
         Ok(())
@@ -582,8 +588,11 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn add_from_included_enums_constants(&mut self) -> Result<()> {
         if let Some(et) = self.child.enum_type.as_ref() {
             for ty in et.includes.iter() {
-                self.members
-                    .add_inherited(self.opts, self.class_constants_from_class(ty)?);
+                self.members.add_inherited(
+                    self.opts,
+                    self.child,
+                    self.class_constants_from_class(ty)?,
+                );
             }
         }
 

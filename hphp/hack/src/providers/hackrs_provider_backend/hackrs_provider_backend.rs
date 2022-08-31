@@ -95,7 +95,7 @@ impl HhServerProviderBackend {
         ))));
 
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-            Arc::new(Default::default()), // TODO: remove?
+            Arc::new(parser_options.clone()),
             Arc::clone(&folded_classes_store) as _,
             Arc::clone(&lazy_shallow_decl_provider) as _,
             dependency_graph,

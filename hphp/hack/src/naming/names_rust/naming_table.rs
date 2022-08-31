@@ -273,10 +273,10 @@ impl Names {
             typing_deps_hash::DepType::Fun,
             file_summary
                 .funs()
-                .map(|(name, decl_hash)| naming_sqlite::SymbolItem {
-                    name: name.to_owned(),
-                    kind: NameType::Fun,
-                    decl_hash,
+                .map(|(name, decl_hash)| crate::DeclSummary {
+                    symbol: name.to_owned(),
+                    name_type: NameType::Fun,
+                    hash: decl_hash,
                 }),
         )?;
         naming_sqlite::insert_file_summary(
@@ -286,10 +286,10 @@ impl Names {
             typing_deps_hash::DepType::GConst,
             file_summary
                 .consts()
-                .map(|(name, decl_hash)| naming_sqlite::SymbolItem {
-                    name: name.to_owned(),
-                    kind: NameType::Const,
-                    decl_hash,
+                .map(|(name, decl_hash)| crate::DeclSummary {
+                    symbol: name.to_owned(),
+                    name_type: NameType::Const,
+                    hash: decl_hash,
                 }),
         )?;
         naming_sqlite::insert_file_summary(
@@ -299,10 +299,10 @@ impl Names {
             typing_deps_hash::DepType::Type,
             file_summary
                 .classes()
-                .map(|(name, decl_hash)| naming_sqlite::SymbolItem {
-                    name: name.to_owned(),
-                    kind: NameType::Class,
-                    decl_hash,
+                .map(|(name, decl_hash)| crate::DeclSummary {
+                    symbol: name.to_owned(),
+                    name_type: NameType::Class,
+                    hash: decl_hash,
                 }),
         )?;
         naming_sqlite::insert_file_summary(
@@ -312,10 +312,10 @@ impl Names {
             typing_deps_hash::DepType::Type,
             file_summary
                 .typedefs()
-                .map(|(name, decl_hash)| naming_sqlite::SymbolItem {
-                    name: name.to_owned(),
-                    kind: NameType::Typedef,
-                    decl_hash,
+                .map(|(name, decl_hash)| crate::DeclSummary {
+                    symbol: name.to_owned(),
+                    name_type: NameType::Typedef,
+                    hash: decl_hash,
                 }),
         )?;
         Ok(())

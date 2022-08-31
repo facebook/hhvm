@@ -15,14 +15,6 @@ use rusqlite::Connection;
 use rusqlite::OptionalExtension;
 
 use crate::datatypes::*;
-use crate::FileSummary;
-
-#[derive(Clone, Debug)]
-pub struct SymbolItem {
-    pub name: String,
-    pub kind: NameType,
-    pub decl_hash: DeclHash,
-}
 
 pub fn create_tables(connection: &mut Connection) -> anyhow::Result<()> {
     let tx = connection.transaction()?;
@@ -153,7 +145,7 @@ pub fn insert_file_summary(
     path: &RelativePath,
     file_info_id: i64,
     dep_type: typing_deps_hash::DepType,
-    items: impl Iterator<Item = SymbolItem>,
+    items: impl Iterator<Item = crate::DeclSummary>,
 ) -> anyhow::Result<()> {
     let insert_statement = "
         INSERT INTO NAMING_SYMBOLS (
@@ -180,11 +172,11 @@ pub fn insert_file_summary(
     let mut insert_overflow_statement = connection.prepare(insert_overflow_statement)?;
 
     for mut item in items {
-        let decl_hash = item.decl_hash;
-        let hash = convert::name_to_hash(dep_type, &item.name);
-        item.name.make_ascii_lowercase();
-        let canon_hash = convert::name_to_hash(dep_type, &item.name);
-        let kind = item.kind as i64;
+        let decl_hash = item.hash;
+        let hash = convert::name_to_hash(dep_type, &item.symbol);
+        item.symbol.make_ascii_lowercase();
+        let canon_hash = convert::name_to_hash(dep_type, &item.symbol);
+        let kind = item.name_type as i64;
 
         if let Some((
             symbol_hash,
@@ -572,7 +564,7 @@ pub fn get_symbol_and_decl_hashes(
 pub fn insert_file_info(
     connection: &Connection,
     path_rel: &RelativePath,
-    file_summary: &FileSummary,
+    file_summary: &crate::FileSummary,
 ) -> anyhow::Result<()> {
     let prefix_type = path_rel.prefix() as u8; // TODO(ljw): shouldn't this use prefix_to_i64?
     let suffix = path_rel.path().to_str().unwrap();

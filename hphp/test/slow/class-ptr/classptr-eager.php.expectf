@@ -17,7 +17,4 @@ Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
 string(3) "Bar"
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager.php on line 41
-string(1) "T"
-
-Fatal error: Class undefined: T in %s/test/slow/class-ptr/classptr-eager.php on line 43
+Fatal error: Failure to resolve undefined class T in %s/test/slow/class-ptr/classptr-eager.php on line 41

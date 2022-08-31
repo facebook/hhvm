@@ -205,12 +205,16 @@ void raise_hackarr_compat_is_operator(const char* source, const char* target) {
   );
 }
 
-void raise_resolve_undefined(const StringData* name, const Class* cls) {
+void raise_resolve_func_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Failure to resolve", name, cls);
 }
 
 void raise_call_to_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Call to", name, cls);
+}
+
+void raise_resolve_class_undefined(const StringData* name) {
+  raise_error("Failure to resolve undefined class %s", name->data());
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

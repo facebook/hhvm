@@ -39,6 +39,4 @@ function foo(HH\classname $x) : N {
   Baz::$f = Bar::class;
   var_dump(Baz::$f);
   $t = T::class; // T is not a class
-  var_dump($t);
-  var_dump($t::A);
 }

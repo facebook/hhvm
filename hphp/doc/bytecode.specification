@@ -3228,10 +3228,9 @@ ThrowNonExhaustiveSwitch [] -> []
   emitted correctly.
 
 ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
-                           []  ->  [C:Str]
 
   If %1 is a valid class name, resolve it to a class pointer value, then push
-  the pointer onto the top of stack. When resolution fails, push the class name.
+  the pointer onto the top of stack. When resolution fails, raise an error.
 
 RaiseClassStringConversionWarning [] -> []
 

@@ -369,9 +369,7 @@ static const struct {
                    {Stack1,           Stack1,       OutClsMethLike  }},
   { OpResolveRClsMethodS,
                    {Stack1,           Stack1,       OutClsMethLike  }},
-
-  // TODO (T61651936): ResolveClass may return a classptr or a string
-  { OpResolveClass,{None,             Stack1,       OutUnknown      }},
+  { OpResolveClass,{None,             Stack1,       OutClass      }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyImplicitContextState,

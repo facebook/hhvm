@@ -156,9 +156,10 @@ void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
                                          bool isSoft, bool isUB);
 
-void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
+[[noreturn]] void raise_resolve_func_undefined(const StringData* name, const Class* c = nullptr);
 [[noreturn]] void raise_call_to_undefined(const StringData* name,
                                           const Class* c = nullptr);
+[[noreturn]] void raise_resolve_class_undefined(const StringData* name);
 
 void raise_convert_object_to_string(const char* cls_name);
 void raise_convert_rfunc_to_type(const char* typeName);

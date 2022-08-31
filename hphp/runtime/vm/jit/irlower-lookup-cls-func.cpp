@@ -206,7 +206,7 @@ const Func* loadUnknownFunc(const StringData* name) {
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {
-  return loadUnknownFuncHelper(name, raise_resolve_undefined);
+  return loadUnknownFuncHelper(name, raise_resolve_func_undefined);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

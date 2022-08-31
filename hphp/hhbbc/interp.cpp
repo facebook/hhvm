@@ -4254,15 +4254,14 @@ void in(ISS& env, const bc::ResolveRClsMethodS& op) {
 }
 
 void in(ISS& env, const bc::ResolveClass& op) {
-  // TODO (T61651936)
   auto cls = env.index.resolve_class(env.ctx, op.str1);
   if (cls && cls->resolved()) {
     effect_free(env);
     push(env, clsExact(*cls));
   } else {
-    // If the class is not resolved,
-    // it might not be unique or it might not be a valid classname.
-    push(env, union_of(TArrKey, TCls, TLazyCls));
+    // No non-unique classes in repo mode.
+    unreachable(env);
+    push(env, TBottom);
   }
 }
 

@@ -2175,16 +2175,8 @@ OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
   auto const class_ = Class::resolve(cname, vmfp()->func());
-  // TODO (T61651936): Disallow implicit conversion to string
-  if (class_ == nullptr) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      raise_class_to_string_conversion_warning();
-    }
-    vmStack().pushStaticString(cname);
-  }
-  else {
-    vmStack().pushClass(class_);
-  }
+  if (class_) vmStack().pushClass(class_);
+  else raise_resolve_class_undefined(cname);
 }
 
 OPTBLD_INLINE void iopLazyClass(Id id) {
@@ -3717,8 +3709,8 @@ Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
-  if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
-  return func;
+  if (func) return func;
+  raise_resolve_func_undefined(unit->lookupLitstrId(id));
 }
 
 OPTBLD_INLINE void iopResolveFunc(Id id) {

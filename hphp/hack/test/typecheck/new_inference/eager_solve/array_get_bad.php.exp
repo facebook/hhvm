@@ -22,6 +22,12 @@ Invalid index type for this ImmMap (Typing[4324])
   This is a string
   File "array_get_bad.php", line 45, characters 21-22:
   It is incompatible with an int
+File "array_get_bad.php", line 47, characters 15-23:
+Invalid index type for this ConstMap (Typing[4324])
+  File "array_get_bad.php", line 24, characters 12-17:
+  This is a string
+  File "array_get_bad.php", line 47, characters 21-22:
+  It is incompatible with an int
 File "array_get_bad.php", line 49, characters 16-22:
 Invalid index type for this keyset (Typing[4449])
   File "array_get_bad.php", line 25, characters 10-15:

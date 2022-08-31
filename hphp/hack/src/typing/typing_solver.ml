@@ -471,6 +471,21 @@ let rec always_solve_tyvar_down ~freshen env r var =
     in
     let (env, ty_err_opt2) =
       let lower_bounds = Env.get_tyvar_lower_bounds env var in
+      (* We cannot do more on (<expr#1> as C) than on simply C,
+       * so replace expression-dependent types with their bound.
+       * This avoids solving to a type so specific that it ends
+       * up hurting completeness. *)
+      let lower_bounds =
+        ITySet.map
+          (function
+            | LoclType lty as ity ->
+              let (_env, lty) = Env.expand_type env lty in
+              (match get_node lty with
+              | Tdependent (_, bnd) -> LoclType bnd
+              | _ -> ity)
+            | ity -> ity)
+          lower_bounds
+      in
       bind_to_lower_bound ~freshen env r var lower_bounds
     in
     let (env, ety) = Env.expand_var env r var in

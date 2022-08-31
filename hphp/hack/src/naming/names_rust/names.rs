@@ -8,7 +8,7 @@ mod naming_sqlite;
 mod naming_table;
 mod summary;
 
-pub use naming_table::Names;
+pub use naming_sqlite::Names;
 pub use naming_table::NamingTable;
 pub use summary::DeclSummary;
 pub use summary::FileSummary;

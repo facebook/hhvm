@@ -772,8 +772,7 @@ void serializeValue(
       }
 
       for (auto fieldId : fieldIds) {
-        if (!value.as_object().members()->contains(
-                folly::to_underlying(fieldId))) {
+        if (!value.as_object().contains(fieldId)) {
           // no need to serialize the value
           writeRawField(prot, fieldId, protocolData, maskedData);
           continue;
@@ -783,7 +782,7 @@ void serializeValue(
         auto fieldType = getTType(fieldVal);
         prot.writeFieldBegin("", fieldType, folly::to_underlying(fieldId));
         // just serialize the value
-        if (!maskedData.fields_ref()->contains(fieldId)) {
+        if (folly::get_ptr(*maskedData.fields_ref(), fieldId) == nullptr) {
           serializeValue(prot, fieldVal);
         } else { // recursively serialize value with maskedData
           auto& nextMaskedData = maskedData.fields_ref().value()[fieldId];
@@ -817,7 +816,7 @@ void serializeValue(
           valueType = toTType(
               *getByValueId(*protocolData.values(), valueId).wireType());
         }
-        if (!value.mapValue_ref()->contains(key)) {
+        if (folly::get_ptr(*value.mapValue_ref(), key) == nullptr) {
           ++size;
         }
       }
@@ -833,7 +832,7 @@ void serializeValue(
         ensureSameType(key, keyType);
         serializeValue(prot, key);
         // no need to serialize the value
-        if (!value.mapValue_ref()->contains(key)) {
+        if (folly::get_ptr(*value.mapValue_ref(), key) == nullptr) {
           writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
           continue;
         }
@@ -843,7 +842,7 @@ void serializeValue(
         serializeValue(prot, val, protocolData, nestedMaskedData);
       }
       for (const auto& [key, val] : *value.mapValue_ref()) {
-        if (keys.contains(key)) { // already serailized
+        if (keys.find(key) != keys.end()) { // already serailized
           continue;
         }
         ensureSameType(key, keyType);

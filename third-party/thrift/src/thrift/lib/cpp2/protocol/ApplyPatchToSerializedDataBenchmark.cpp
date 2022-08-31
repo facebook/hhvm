@@ -120,7 +120,8 @@ void init(int n) {
   patchObj3 = getPatchObj3(n);
 }
 
-void runOriginalApproach(auto& serialized, const Object& patchObj) {
+void runOriginalApproach(
+    std::unique_ptr<folly::IOBuf>& serialized, const Object& patchObj) {
   Value value;
   value.objectValue_ref() = parseObject<CompactProtocolReader>(*serialized);
   protocol::applyPatch(patchObj, value);

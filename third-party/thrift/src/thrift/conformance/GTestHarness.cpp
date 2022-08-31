@@ -58,11 +58,17 @@ testing::AssertionResult runRoundTripTest(
     }
   };
 
+  auto toJson = [](const Object& o) {
+    return folly::toPrettyJson(protocol::toDynamic(o));
+  };
+
   Object actual = parseAny(*res.value());
   Object expected = parseAny(expectedAny);
   if (!op::identical<type::struct_t<Object>>(actual, expected)) {
     // TODO(afuller): Report out the delta
-    return testing::AssertionFailure();
+    return testing::AssertionFailure()
+        << "\nInput: " << toJson(parseAny(*roundTrip.request()->value()))
+        << "\nExpected: " << toJson(expected) << "\nActual: " << toJson(actual);
   }
   return testing::AssertionSuccess();
 }

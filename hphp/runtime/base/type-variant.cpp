@@ -411,14 +411,6 @@ Variant::AllowedAsConstantValue Variant::isAllowedAsConstantValue() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
-  StringData *s = getStringData();
-  assertx(s);
-  return s->isNumericWithVal(*lval, *dval, 1);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
 bool Variant::toBooleanHelper() const {

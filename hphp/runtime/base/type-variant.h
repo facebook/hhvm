@@ -1303,8 +1303,6 @@ private:
   int64_t  toInt64Helper(int base = 10) const;
   Array  toPHPArrayHelper() const;
   Resource toResourceHelper() const;
-
-  DataType convertToNumeric(int64_t *lval, double *dval) const;
 };
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;

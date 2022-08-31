@@ -69,7 +69,7 @@ pub(crate) const CODE_DOUBLE_ARRAY64_BIG: libc::c_int = 0x16; // 00010110
 pub(crate) const CODE_DOUBLE_ARRAY64_LITTLE: libc::c_int = 0x17; // 00010111
 pub(crate) const CODE_CODEPOINTER: libc::c_int = 0x10; // 00010000
 pub(crate) const CODE_INFIXPOINTER: libc::c_int = 0x11; // 00010001
-// pub(crate) const CODE_CUSTOM: libc::c_int = 0x12  -- no longer supported
+pub(crate) const CODE_CUSTOM: libc::c_int = 0x12; // 00010010 (deprecated)
 pub(crate) const CODE_CUSTOM_LEN: libc::c_int = 0x18; // 00011000
 pub(crate) const CODE_CUSTOM_FIXED: libc::c_int = 0x19; // 00011001
 

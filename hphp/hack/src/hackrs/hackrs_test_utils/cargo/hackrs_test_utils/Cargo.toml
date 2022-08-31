@@ -21,7 +21,6 @@ intern = { path = "../../../../../../../relay/oss/crates/intern" }
 lz4 = "1.23.1"
 moka = { version = "0.8", features = ["future"] }
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
-oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 rayon = "1.2"
 serde = { version = "1.0.136", features = ["derive", "rc"] }

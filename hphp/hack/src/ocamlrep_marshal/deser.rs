@@ -31,26 +31,6 @@ use libc::snprintf;
 
 use crate::intext::*;
 
-trait WrappingOffset<T: ?Sized> {
-    fn wrapping_offset_from(self, origin: *const T) -> isize
-    where
-        T: Sized;
-}
-
-impl<T: ?Sized> WrappingOffset<T> for *const T {
-    #[inline]
-    fn wrapping_offset_from(self, origin: *const T) -> isize
-    where
-        T: Sized,
-    {
-        let pointee_size = std::mem::size_of::<T>();
-        assert!(0 < pointee_size && pointee_size <= isize::max_value() as usize);
-
-        let d = isize::wrapping_sub(self as _, origin as _);
-        d.wrapping_div(pointee_size as _)
-    }
-}
-
 extern "C" {
 
     pub type _IO_wide_data;
@@ -738,9 +718,8 @@ unsafe fn intern_stack_overflow() -> ! {
 }
 
 unsafe fn intern_resize_stack(sp: *mut intern_item) -> *mut intern_item {
-    let newsize: asize_t =
-        (2 * intern_stack_limit.wrapping_offset_from(intern_stack) as c_long) as asize_t;
-    let sp_offset: asize_t = sp.wrapping_offset_from(intern_stack) as c_long as asize_t;
+    let newsize: asize_t = (2 * intern_stack_limit.offset_from(intern_stack) as c_long) as asize_t;
+    let sp_offset: asize_t = sp.offset_from(intern_stack) as c_long as asize_t;
     let mut newstack: *mut intern_item = std::ptr::null_mut::<intern_item>();
 
     if newsize >= INTERN_STACK_MAX_SIZE as c_ulong {
@@ -1154,14 +1133,13 @@ unsafe fn intern_add_to_heap(whsize: mlsize_t) -> *mut header_t {
         if intern_dest < end_extra_block {
             make_free_blocks(
                 intern_dest as *mut value,
-                end_extra_block.wrapping_offset_from(intern_dest) as c_long as mlsize_t,
+                end_extra_block.offset_from(intern_dest) as c_long as mlsize_t,
                 0 as c_int,
                 Caml_white,
             );
         }
         caml_allocated_words += Wsize_bsize(
-            (intern_dest as *mut c_char).wrapping_offset_from(intern_extra_block) as c_long
-                as c_ulong,
+            (intern_dest as *mut c_char).offset_from(intern_extra_block) as c_long as c_ulong,
         );
         if caml_add_to_heap(intern_extra_block) != 0 {
             intern_cleanup();

@@ -16,14 +16,10 @@
 
 #pragma once
 
-#include <type_traits>
 #include <folly/Portability.h>
-#include <thrift/lib/cpp2/FieldMask.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/cpp2/protocol/detail/Object.h>
 #include <thrift/lib/thrift/detail/protocol.h>
+#include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
 
 namespace apache {
 namespace thrift {
@@ -68,28 +64,9 @@ Mask extractMaskFromPatch(const protocol::Object& patch);
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
 protocol::Mask extractMaskFromPatch(Object&& patch) = delete;
 
-// TODO: move the function definition to .cpp file to avoid including expensive
-// headers.
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
-    const protocol::Object& patch, const folly::IOBuf& buf) {
-  // TODO: create method for this operation
-  static_assert(
-      Protocol == type::StandardProtocol::Binary ||
-      Protocol == type::StandardProtocol::Compact);
-  using ProtocolReader = std::conditional_t<
-      Protocol == type::StandardProtocol::Binary,
-      BinaryProtocolReader,
-      CompactProtocolReader>;
-  using ProtocolWriter = std::conditional_t<
-      Protocol == type::StandardProtocol::Binary,
-      BinaryProtocolWriter,
-      CompactProtocolWriter>;
-  Mask mask = extractMaskFromPatch(patch);
-  MaskedDecodeResult result = parseObject<ProtocolReader>(buf, mask);
-  applyPatch(patch, result.included);
-  return serializeObject<ProtocolWriter>(result.included, result.excluded);
-}
+    const protocol::Object& patch, const folly::IOBuf& buf);
 
 } // namespace protocol
 } // namespace thrift

@@ -24,7 +24,10 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
+#include <thrift/lib/cpp2/FieldMask.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -530,6 +533,35 @@ Mask extractMaskFromPatch(const protocol::Object& patch) {
 Mask extractMaskFromPatch(const protocol::Object& patch) {
   return detail::extractMaskFromPatch(patch);
 }
+
+template <type::StandardProtocol Protocol>
+std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
+    const protocol::Object& patch, const folly::IOBuf& buf) {
+  // TODO: create method for this operation
+  static_assert(
+      Protocol == type::StandardProtocol::Binary ||
+      Protocol == type::StandardProtocol::Compact);
+  using ProtocolReader = std::conditional_t<
+      Protocol == type::StandardProtocol::Binary,
+      BinaryProtocolReader,
+      CompactProtocolReader>;
+  using ProtocolWriter = std::conditional_t<
+      Protocol == type::StandardProtocol::Binary,
+      BinaryProtocolWriter,
+      CompactProtocolWriter>;
+  Mask mask = protocol::extractMaskFromPatch(patch);
+  MaskedDecodeResult result = parseObject<ProtocolReader>(buf, mask);
+  applyPatch(patch, result.included);
+  return serializeObject<ProtocolWriter>(result.included, result.excluded);
+}
+
+// Uses explicit instantiations to have the function definition in .cpp file.
+template std::unique_ptr<folly::IOBuf>
+applyPatchToSerializedData<type::StandardProtocol::Binary>(
+    const protocol::Object& patch, const folly::IOBuf& buf);
+template std::unique_ptr<folly::IOBuf>
+applyPatchToSerializedData<type::StandardProtocol::Compact>(
+    const protocol::Object& patch, const folly::IOBuf& buf);
 } // namespace protocol
 } // namespace thrift
 } // namespace apache

@@ -21,6 +21,9 @@ public class MyServiceRpcServerHandler
   private final java.util.List<com.facebook.thrift.payload.Reader> _fooReaders;
   private final java.util.List<com.facebook.thrift.payload.Reader> _interactReaders;
   private final java.util.List<com.facebook.thrift.payload.Reader> _interactFastReaders;
+  private final java.util.List<com.facebook.thrift.payload.Reader> _serializeReaders;
+  private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<com.facebook.thrift.model.StreamResponse<Integer,Integer>> _delegate_serialize;
+  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<Integer,Integer> _handler_serialize;
 
   private final java.util.List<com.facebook.swift.service.ThriftEventHandler> _eventHandlers;
 
@@ -43,14 +46,80 @@ public class MyServiceRpcServerHandler
 
     _methodMap.put("foo", this);
     _fooReaders = _create_foo_request_readers();
-
     _methodMap.put("interact", this);
     _interactReaders = _create_interact_request_readers();
-
     _methodMap.put("interactFast", this);
     _interactFastReaders = _create_interactFast_request_readers();
 
+    _methodMap.put("serialize", this);
+    _serializeReaders = _create_serialize_request_readers();
+    _delegate_serialize = (java.util.List<Object> _list) -> {
+        java.util.Iterator _iterator = _list.iterator();
+
+        return _delegate.serialize();
+    };
+
+    _handler_serialize =
+    new com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<>(
+      _delegate_serialize,
+      _first_ResponseWriterFactory_serialize,
+      _ResponseWriterFactory_serialize,
+      _serializeReaders,
+      "serialize"    );
+
+
   }
+
+  private final static java.util.List<com.facebook.thrift.payload.Reader> _create_serialize_request_readers() {
+    java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
+
+
+    return _readerList;
+  }
+
+  private final static com.facebook.thrift.server.generated.ResponseWriterFactory _ResponseWriterFactory_serialize = (java.lang.Object _o, com.facebook.swift.service.ContextChain _chain, com.facebook.thrift.payload.ServerRequestPayload _requestPayload) -> {
+    return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        
+        int _iter0 = (int)_o;
+        oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
+oprot.writeI32(_iter0);
+        oprot.writeFieldEnd();
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_o);
+      } catch (Throwable _e) {
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  };
+
+  private final static com.facebook.thrift.server.generated.ResponseWriterFactory _first_ResponseWriterFactory_serialize = (java.lang.Object _o, com.facebook.swift.service.ContextChain _chain, com.facebook.thrift.payload.ServerRequestPayload _requestPayload) -> {
+    return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        
+        int _iter0 = (int)_o;
+        oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
+oprot.writeI32(_iter0);
+        oprot.writeFieldEnd();
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_o);
+      } catch (Throwable _e) {
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  };
+
+
 
   private static java.util.List<com.facebook.thrift.payload.Reader> _create_foo_request_readers() {
     java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
@@ -317,6 +386,41 @@ oprot.writeI32(_iter0);
           return _internalResponse;
   }
 
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> singleRequestStreamingResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
+    final String _name = _payload.getRequestRpcMetadata().getName();
+
+    com.facebook.swift.service.ContextChain _chain;
+    try {
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+    } catch (Throwable _t) {
+      org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(_t.getMessage());
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), null);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    }
+
+    reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> _result;
+    try {
+      switch(_name) {
+        case "serialize":
+          _result = _handler_serialize.handleStream(_payload, _chain);
+          break;
+        default: {
+            _chain.preRead();
+            org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.UNKNOWN_METHOD, "no method found with name " + _name);
+            com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+            return reactor.core.publisher.Flux.just(_serverResponsePayload);
+        }
+      }
+    } catch (org.apache.thrift.TApplicationException _tApplicationException) {
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    } catch (Throwable _t) {
+      _result = reactor.core.publisher.Flux.error(_t);
+    }
+    return _result;
+  }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> singleRequestSingleResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {

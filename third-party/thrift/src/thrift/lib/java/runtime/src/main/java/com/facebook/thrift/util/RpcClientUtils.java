@@ -244,7 +244,6 @@ public final class RpcClientUtils {
     if (field.id == 0) {
       K streamResponse;
       if (isFirstResponse) {
-        // First response in plain stream is void event with type = 0
         streamResponse =
             (K)
                 StreamResponse.fromFirstResponse(

@@ -33,6 +33,16 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
   {{#service:singleRequestFunctions}}
   private final java.util.List<com.facebook.thrift.payload.Reader> _{{function:javaName}}Readers;
   {{/service:singleRequestFunctions}}
+  {{#service:streamingFunctions}}
+  private final java.util.List<com.facebook.thrift.payload.Reader> _{{function:javaName}}Readers;
+  private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}> _delegate_{{function:javaName}};
+  {{^function:stream_has_first_response?}}
+  private final com.facebook.thrift.server.generated.StreamResponseHandler<{{#function:return_type}}{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
+  {{/function:stream_has_first_response?}}
+  {{#function:stream_has_first_response?}}
+  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<{{#function:return_type}}{{#type:stream_first_response_type}}{{> BoxedType}}{{/type:stream_first_response_type}},{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
+  {{/function:stream_has_first_response?}}
+  {{/service:streamingFunctions}}
 
   private final java.util.List<com.facebook.swift.service.ThriftEventHandler> _eventHandlers;
 
@@ -56,9 +66,115 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     {{#service:singleRequestFunctions}}
     _methodMap.put("{{function:javaName}}", this);
     _{{function:javaName}}Readers = _create_{{function:javaName}}_request_readers();
-
     {{/service:singleRequestFunctions}}
+
+    {{#service:streamingFunctions}}
+    _methodMap.put("{{function:javaName}}", this);
+    _{{function:javaName}}Readers = _create_{{function:javaName}}_request_readers();
+    _delegate_{{function:javaName}} = (java.util.List<Object> _list) -> {
+        java.util.Iterator _iterator = _list.iterator();
+        {{#function:args}}
+        {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}} = ({{#field:type}}{{> Type}}{{/field:type}}) _iterator.next();
+        {{/function:args}}
+
+        return _delegate.{{function:javaName}}({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}});
+    };
+
+    _handler_{{function:javaName}} =
+    {{^function:stream_has_first_response?}}
+    new com.facebook.thrift.server.generated.StreamResponseHandler<>(
+      _delegate_{{function:javaName}},
+      _ResponseWriterFactory_{{function:javaName}},
+      _{{function:javaName}}Readers,
+      "{{function:javaName}}"{{#function:exceptions?}},
+      {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}}, {{/last?}}{{/function:exceptions}}
+      {{/function:exceptions?}}
+    );
+    {{/function:stream_has_first_response?}}
+    {{#function:stream_has_first_response?}}
+    new com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<>(
+      _delegate_{{function:javaName}},
+      _first_ResponseWriterFactory_{{function:javaName}},
+      _ResponseWriterFactory_{{function:javaName}},
+      _{{function:javaName}}Readers,
+      "{{function:javaName}}"{{#function:exceptions?}},
+      {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}}, {{/last?}}{{/function:exceptions}}
+      {{/function:exceptions?}}
+    );
+    {{/function:stream_has_first_response?}}
+
+    {{/service:streamingFunctions}}
+
   }
+
+  {{#service:streamingFunctions}}
+  private final static java.util.List<com.facebook.thrift.payload.Reader> _create_{{function:javaName}}_request_readers() {
+    java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
+
+    {{#function:args}}
+    {{function:unsetIsNested}}
+    _readerList.add({{#field:type}}{{> TypeReader }}{{/field:type}});
+    {{/function:args}}
+
+    return _readerList;
+  }
+
+  private final static com.facebook.thrift.server.generated.ResponseWriterFactory _ResponseWriterFactory_{{function:javaName}} = (java.lang.Object _o, com.facebook.swift.service.ContextChain _chain, com.facebook.thrift.payload.ServerRequestPayload _requestPayload) -> {
+    return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        {{function:unsetIsNested}}
+        {{^function:voidType}}
+        {{#function:return_type}}
+        {{#type:stream_elem_type}}
+        {{> Type}} _iter0 = ({{> Type}})_o;
+        {{function:nestedDepth++}}{{> WriteResponseType}}{{function:nestedDepth--}}
+        {{/type:stream_elem_type}}
+        oprot.writeFieldEnd();
+        {{/function:return_type}}
+        {{/function:voidType}}
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_o);
+      } catch (Throwable _e) {
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  };
+
+  {{#function:stream_has_first_response?}}
+  private final static com.facebook.thrift.server.generated.ResponseWriterFactory _first_ResponseWriterFactory_{{function:javaName}} = (java.lang.Object _o, com.facebook.swift.service.ContextChain _chain, com.facebook.thrift.payload.ServerRequestPayload _requestPayload) -> {
+    return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        {{function:unsetIsNested}}
+        {{^function:voidType}}
+        {{#function:return_type}}
+        {{#type:stream_first_response_type}}
+        {{> Type}} _iter0 = ({{> Type}})_o;
+        {{function:nestedDepth++}}{{> WriteResponseType}}{{function:nestedDepth--}}
+        {{/type:stream_first_response_type}}
+        oprot.writeFieldEnd();
+        {{/function:return_type}}
+        {{/function:voidType}}
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_o);
+      } catch (Throwable _e) {
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  };
+
+  {{/function:stream_has_first_response?}}
+
+  {{/service:streamingFunctions}}
 
   {{#service:requestResponseFunctions}}
   private static java.util.List<com.facebook.thrift.payload.Reader> _create_{{function:javaName}}_request_readers() {
@@ -253,6 +369,48 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     return _internalResponse;
   }
   {{/service:onewayFunctions}}
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> singleRequestStreamingResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
+    final String _name = _payload.getRequestRpcMetadata().getName();
+
+    com.facebook.swift.service.ContextChain _chain;
+    try {
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+    } catch (Throwable _t) {
+      org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(_t.getMessage());
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), null);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    }
+
+    reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> _result;
+    try {
+      switch(_name) {
+        {{#service:streamingFunctions}}
+        case "{{function:javaName}}":
+          _result = _handler_{{function:javaName}}.handleStream(_payload, _chain);
+          break;
+        {{/service:streamingFunctions}}
+        default: {
+          {{#service:extends}}
+          _result =  super.singleRequestStreamingResponse(_payload);
+          {{/service:extends}}
+          {{^service:extends}}
+            _chain.preRead();
+            org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.UNKNOWN_METHOD, "no method found with name " + _name);
+            com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+            return reactor.core.publisher.Flux.just(_serverResponsePayload);
+          {{/service:extends}}
+        }
+      }
+    } catch (org.apache.thrift.TApplicationException _tApplicationException) {
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    } catch (Throwable _t) {
+      _result = reactor.core.publisher.Flux.error(_t);
+    }
+    return _result;
+  }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> singleRequestSingleResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {

@@ -50,35 +50,28 @@ public class MyServiceRpcServerHandler
 
     _methodMap.put("ping", this);
     _pingReaders = _create_ping_request_readers();
-
     _methodMap.put("getRandomData", this);
     _getRandomDataReaders = _create_getRandomData_request_readers();
-
     _methodMap.put("sink", this);
     _sinkReaders = _create_sink_request_readers();
-
     _methodMap.put("putDataById", this);
     _putDataByIdReaders = _create_putDataById_request_readers();
-
     _methodMap.put("hasDataById", this);
     _hasDataByIdReaders = _create_hasDataById_request_readers();
-
     _methodMap.put("getDataById", this);
     _getDataByIdReaders = _create_getDataById_request_readers();
-
     _methodMap.put("deleteDataById", this);
     _deleteDataByIdReaders = _create_deleteDataById_request_readers();
-
     _methodMap.put("lobDataById", this);
     _lobDataByIdReaders = _create_lobDataById_request_readers();
-
     _methodMap.put("invalidReturnForHack", this);
     _invalidReturnForHackReaders = _create_invalidReturnForHack_request_readers();
-
     _methodMap.put("rpcSkippedCodegen", this);
     _rpcSkippedCodegenReaders = _create_rpcSkippedCodegen_request_readers();
 
+
   }
+
 
   private static java.util.List<com.facebook.thrift.payload.Reader> _create_ping_request_readers() {
     java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
@@ -923,6 +916,38 @@ oprot.writeString(_iter0);
     }
 
     return _internalResponse;
+  }
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> singleRequestStreamingResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
+    final String _name = _payload.getRequestRpcMetadata().getName();
+
+    com.facebook.swift.service.ContextChain _chain;
+    try {
+      _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
+    } catch (Throwable _t) {
+      org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(_t.getMessage());
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), null);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    }
+
+    reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> _result;
+    try {
+      switch(_name) {
+        default: {
+            _chain.preRead();
+            org.apache.thrift.TApplicationException _tApplicationException = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.UNKNOWN_METHOD, "no method found with name " + _name);
+            com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+            return reactor.core.publisher.Flux.just(_serverResponsePayload);
+        }
+      }
+    } catch (org.apache.thrift.TApplicationException _tApplicationException) {
+      com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload = com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+      return reactor.core.publisher.Flux.just(_serverResponsePayload);
+    } catch (Throwable _t) {
+      _result = reactor.core.publisher.Flux.error(_t);
+    }
+    return _result;
   }
 
   @java.lang.Override

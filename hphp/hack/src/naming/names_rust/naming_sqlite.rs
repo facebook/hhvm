@@ -15,6 +15,21 @@ use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;
 
+/// This is what each row looks like in NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW,
+/// i.e. the reverse naming table. When this struct is used for reading from the
+/// database, we generally join NAMING_FILE_INFO to populate 'path' since there's very
+/// little you can do with a row without turning file_info_id into a pathname;
+/// when used for writing, we generally ignore 'path'.
+#[derive(Clone, Debug)]
+pub struct SymbolRow {
+    pub hash: ToplevelSymbolHash,
+    pub canon_hash: ToplevelCanonSymbolHash,
+    pub decl_hash: DeclHash,
+    pub kind: NameType,
+    pub file_info_id: crate::datatypes::FileInfoId,
+    pub path: RelativePath,
+}
+
 pub fn create_tables(connection: &mut Connection) -> anyhow::Result<()> {
     let tx = connection.transaction()?;
     tx.prepare_cached(
@@ -104,19 +119,13 @@ pub fn remove_symbol(
         .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
         .execute(params![symbol_hash, file_info_id])?;
 
-    if let Some((
-        symbol_hash,
-        symbol_canon_hash,
-        symbol_decl_hash,
-        symbol_kind,
-        symbol_file_info_id,
-        _,
-    )) = get_overflow_row(connection, symbol_hash)?
-    {
+    let mut overflow_symbols = get_overflow_rows_unordered(connection, symbol_hash)?;
+    overflow_symbols.sort_by_key(|symbol| symbol.path.clone());
+    if let Some(symbol) = overflow_symbols.into_iter().next() {
         // Move row from overflow to main symbol table
         connection
             .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
-            .execute(params![symbol_hash, symbol_file_info_id])?;
+            .execute(params![symbol_hash, symbol.file_info_id])?;
         let insert_statement = "
         INSERT INTO NAMING_SYMBOLS (
             HASH,
@@ -128,11 +137,11 @@ pub fn remove_symbol(
             ?, ?, ?, ?, ?
         );";
         connection.prepare(insert_statement)?.execute(params![
-            symbol_hash,
-            symbol_canon_hash,
-            symbol_decl_hash,
-            symbol_kind,
-            symbol_file_info_id
+            symbol.hash,
+            symbol.canon_hash,
+            symbol.decl_hash,
+            symbol.kind,
+            symbol.file_info_id
         ])?;
     }
 
@@ -177,29 +186,21 @@ pub fn insert_file_summary(
         let canon_hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
         let kind = item.name_type as i64;
 
-        if let Some((
-            symbol_hash,
-            symbol_canon_hash,
-            symbol_decl_hash,
-            symbol_kind,
-            symbol_file_info_id,
-            symbol_path,
-        )) = get_row(connection, ToplevelSymbolHash::from_u64(hash as u64))?
-        {
+        if let Some(symbol) = get_row(connection, ToplevelSymbolHash::from_u64(hash as u64))? {
             // check if new entry appears first alphabetically
-            if path.path_str() < symbol_path.path_str() {
+            if path.path_str() < symbol.path.path_str() {
                 // delete symbol from symbols
                 connection
                     .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ? AND FILE_INFO_ID = ?")?
-                    .execute(params![symbol_hash, symbol_file_info_id])?;
+                    .execute(params![symbol.hash, symbol.file_info_id])?;
 
                 // insert old row into overflow
                 insert_overflow_statement.execute(params![
-                    symbol_hash,
-                    symbol_canon_hash,
-                    symbol_decl_hash,
-                    symbol_kind,
-                    symbol_file_info_id
+                    symbol.hash,
+                    symbol.canon_hash,
+                    symbol.decl_hash,
+                    symbol.kind,
+                    symbol.file_info_id
                 ])?;
 
                 // insert new row into main table
@@ -228,19 +229,10 @@ pub fn insert_file_summary(
     Ok(())
 }
 
-fn get_overflow_row(
+fn get_overflow_rows_unordered(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> anyhow::Result<
-    Option<(
-        ToplevelSymbolHash,
-        ToplevelCanonSymbolHash,
-        DeclHash,
-        NameType,
-        crate::datatypes::FileInfoId,
-        RelativePath,
-    )>,
-> {
+) -> anyhow::Result<Vec<SymbolRow>> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS_OVERFLOW.HASH,
@@ -258,43 +250,31 @@ fn get_overflow_row(
             NAMING_SYMBOLS_OVERFLOW.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
         WHERE
             NAMING_SYMBOLS_OVERFLOW.HASH = ?
-        ORDER BY
-            NAMING_FILE_INFO.PATH_SUFFIX ASC
         ";
 
     let mut select_statement = connection.prepare_cached(select_statement)?;
-    let result = select_statement
-        .query_row(params![symbol_hash], |row| {
-            let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
-            let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
-            let path = RelativePath::make(prefix.value, suffix.value);
-            Ok((
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-                path,
-            ))
-        })
-        .optional();
-
-    Ok(result?)
+    let mut rows = select_statement.query(params![symbol_hash])?;
+    let mut result = vec![];
+    while let Some(row) = rows.next()? {
+        let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
+        let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
+        let path = RelativePath::make(prefix.value, suffix.value);
+        result.push(SymbolRow {
+            hash: row.get(0)?,
+            canon_hash: row.get(1)?,
+            decl_hash: row.get(2)?,
+            kind: row.get(3)?,
+            file_info_id: row.get(4)?,
+            path,
+        });
+    }
+    Ok(result)
 }
 
 fn get_row(
     connection: &Connection,
     symbol_hash: ToplevelSymbolHash,
-) -> anyhow::Result<
-    Option<(
-        ToplevelSymbolHash,
-        ToplevelCanonSymbolHash,
-        DeclHash,
-        NameType,
-        crate::datatypes::FileInfoId,
-        RelativePath,
-    )>,
-> {
+) -> anyhow::Result<Option<SymbolRow>> {
     let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
@@ -320,14 +300,14 @@ fn get_row(
             let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
             let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
             let path = RelativePath::make(prefix.value, suffix.value);
-            Ok((
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
+            Ok(SymbolRow {
+                hash: row.get(0)?,
+                canon_hash: row.get(1)?,
+                decl_hash: row.get(2)?,
+                kind: row.get(3)?,
+                file_info_id: row.get(4)?,
                 path,
-            ))
+            })
         })
         .optional();
 

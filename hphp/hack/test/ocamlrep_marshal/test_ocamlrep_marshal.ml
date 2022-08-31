@@ -30,6 +30,41 @@ let show_float_list = [%derive.show: float list]
 
 let show_float_array x = show_float_list (Array.to_list x)
 
+(* A type of non-empty trees of strings. *)
+type tree = [
+  |`Node of string * tree list
+] [@@ocamlformat "disable"]
+
+(* [print tree] produces a rendering of [tree]. *)
+let rec print_tree
+          ?(pad : (string * string)= ("", ""))
+          (tree : tree) : string list =
+  let pd, pc = pad in
+  match tree with
+  | `Node (tag, cs) ->
+     let n = List.length cs - 1 in
+     Printf.sprintf "%s%s" pd tag :: List.concat (List.mapi (
+         fun i c ->
+         let pad =
+           (pc ^ (if i = n then "`-- " else "|-- "),
+            pc ^ (if i = n then "    " else "|   ")) in
+         print_tree ~pad c
+       ) cs) [@@ocamlformat "disable"]
+
+(* [show_tree] produces a string of [t]. *)
+let show_tree t = Printf.sprintf "\n%s\n" (String.concat "\n" (print_tree t))
+
+(* An example tree. *)
+let tree =
+  `Node ("."
+        , [
+            `Node ("S", [
+                      `Node ("T", [
+                                `Node ("U", [])]);
+                      `Node ("V", [])])
+          ;  `Node ("W", [])
+          ]) [@@ocamlformat "disable"]
+
 let () =
   assert_eq 5;
   assert_eq 3.14;
@@ -43,5 +78,6 @@ let () =
   test_round_trip (Printf.sprintf "%S") "a";
   test_round_trip show_pair_opt_int_string (Some 42, "foo");
   test_round_trip show_float_array (Array.make 3 3.14);
+  test_round_trip show_tree tree;
 
   ()

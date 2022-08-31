@@ -30,43 +30,6 @@ let is_int env t =
   Option.iter ~f:Errors.add_typing_error e;
   r
 
-(* Checking of numeric operands for arithmetic operators:
- *    (1) Enforce that it coerces to num
- *    (2) Solve to float if it's a type variable with float as lower bound
- *    (3) Check if it's dynamic
- *)
-let check_dynamic_or_enforce_num env p t r err =
-  let et_type = MakeType.num r in
-  let (env, e1) =
-    Typing_coercion.coerce_type
-      ~coerce_for_op:true
-      p
-      Reason.URnone
-      env
-      t
-      { et_type; et_enforced = Enforced }
-      err
-  in
-  let ty_mismatch = Option.map e1 ~f:Fn.(const (t, et_type)) in
-  let widen_for_arithmetic env ty =
-    match get_node ty with
-    | Tprim Tast.Tfloat -> ((env, None), Some ty)
-    | _ -> ((env, None), None)
-  in
-  let default = MakeType.num (Reason.Rarith p) in
-  let ((env, e2), _) =
-    Typing_solver.expand_type_and_narrow
-      env
-      ~default
-      ~description_of_expected:"a number"
-      widen_for_arithmetic
-      p
-      t
-  in
-  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  (env, Typing_utils.is_dynamic env t, ty_mismatch)
-
 (* Checking of numeric operands for arithmetic operators that work only
  * on integers:
  *   (1) Enforce that it coerce to int
@@ -93,12 +56,15 @@ let check_dynamic_or_enforce_int env p t r err =
   true, and the type with the ~ removed. If it is not a subtype of either, the
   error generated refers to the attempt to make [ty] <: num. If there were errors
   in both cases, we return the errors from the non ~ case. *)
-let check_like_num p_exp p env ty =
+let check_like_num ?err p_exp p env ty =
   let err =
-    if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-      Typing_error.Callback.math_invalid_argument
-    else
-      Typing_error.Callback.unify_error
+    match err with
+    | None ->
+      if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
+        Typing_error.Callback.math_invalid_argument
+      else
+        Typing_error.Callback.unify_error
+    | Some err -> err
   in
   let et_type = MakeType.num (Reason.Rarith p_exp) in
   Typing_coercion.coerce_type_like_strip p Reason.URnone env ty et_type err
@@ -243,6 +209,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       in
       MakeType.num (Reason.Rarith_ret_num (p, r, apos))
     in
+    let (env, ty1) = Env.expand_type env ty1 in
+    let (env, ty2) = Env.expand_type env ty2 in
+    let is_dynamic1 = Typing_defs.is_dynamic ty1 in
+    let is_dynamic2 = Typing_defs.is_dynamic ty2 in
     let (env, ty_mismatch1, is_like1, ty1) = check_like_num p p1 env ty1 in
     let (env, ty_mismatch2, is_like2, ty2) = check_like_num p p2 env ty2 in
     (* We'll compute the type ignoring whether one of the arguments was a like-type,
@@ -270,15 +240,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                Put the first one to try in ty1,
                and the second, if any in ty2. Keep the result of the previous
                check whether the second type was an int. *)
-            let ((ty1, p1, is_like1), (ty2, p2, is_int2, is_like2), swapped) =
+            let ( (ty1, p1, is_dynamic1),
+                  (ty2, p2, is_int2, is_dynamic2),
+                  swapped ) =
               if is_int1 then
-                ((ty2, p2, is_like2), (ty1, p1, is_int1, is_like1), true)
+                ((ty2, p2, is_dynamic2), (ty1, p1, is_int1, is_dynamic1), true)
               else
-                ((ty1, p1, is_like1), (ty2, p2, is_int2, is_like2), false)
+                ((ty1, p1, is_dynamic1), (ty2, p2, is_int2, is_dynamic2), false)
             in
             let ((env, ty_err_opt), ty1) =
               expand_type_and_narrow_to_numeric
-                ~allow_nothing:is_like1
+                ~allow_nothing:is_dynamic1
                 env
                 p1
                 ty1
@@ -298,7 +270,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                 (* The second type needs solving too *)
                 let ((env, ty_err_opt), ty2) =
                   expand_type_and_narrow_to_numeric
-                    ~allow_nothing:is_like2
+                    ~allow_nothing:is_dynamic2
                     env
                     p2
                     ty2
@@ -648,44 +620,33 @@ let unop p env uop te ty =
           MakeType.int (Reason.Rbitwise_ret p)
       in
       make_result env te err_opt result_ty
+  | Ast_defs.Uplus
+  | Ast_defs.Uminus
   | Ast_defs.Uincr
   | Ast_defs.Upincr
-  | Ast_defs.Updecr
-  | Ast_defs.Udecr ->
-    (* increment and decrement operators modify the value,
-     * check for immutability violation here *)
+  | Ast_defs.Udecr
+  | Ast_defs.Updecr ->
     if is_any ty then
       make_result env te None ty
     else
-      (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, is_dynamic, err_opt) =
-        check_dynamic_or_enforce_num
-          env
+      let allow_nothing = Typing_defs.is_dynamic ty in
+      let (env, ty_mismatch, is_like, ty) =
+        check_like_num
+          ?err:
+            (match uop with
+            | Ast_defs.Uincr
+            | Ast_defs.Upincr
+            | Ast_defs.Udecr
+            | Ast_defs.Updecr ->
+              Some Typing_error.Callback.inc_dec_invalid_argument
+            | _ -> None)
           p
+          p
+          env
           ty
-          (Reason.Rarith p)
-          Typing_error.Callback.inc_dec_invalid_argument
       in
-      let result_ty =
-        if is_dynamic then
-          MakeType.dynamic (Reason.Rincdec_dynamic p)
-        else if is_float env ty then
-          MakeType.float
-            (Reason.Rarith_ret_float (p, get_reason ty, Reason.Aonly))
-        else if is_int env ty then
-          MakeType.int (Reason.Rarith_ret_int p)
-        else
-          MakeType.num (Reason.Rarith_ret_num (p, get_reason ty, Reason.Aonly))
-      in
-      make_result env te err_opt result_ty
-  | Ast_defs.Uplus
-  | Ast_defs.Uminus ->
-    if is_any ty then
-      make_result env te None ty
-    else
-      let (env, ty_mismatch, is_like, ty) = check_like_num p p env ty in
       let ((env, ty_err_opt), (ty : locl_ty)) =
-        expand_type_and_narrow_to_numeric ~allow_nothing:is_like env p ty
+        expand_type_and_narrow_to_numeric ~allow_nothing env p ty
       in
       Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let result_ty =

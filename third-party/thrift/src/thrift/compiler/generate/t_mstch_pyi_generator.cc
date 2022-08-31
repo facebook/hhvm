@@ -53,6 +53,29 @@ const std::unordered_set<std::string> kKeywords = {
     "True",
 };
 
+// TO-DO: remove duplicate in py3
+mstch::array create_string_array(const std::vector<std::string>& values) {
+  mstch::array mstch_array;
+  for (auto it = values.begin(); it != values.end(); ++it) {
+    mstch_array.push_back(mstch::map{
+        {"value", *it},
+        {"first?", it == values.begin()},
+        {"last?", std::next(it) == values.end()},
+    });
+  }
+
+  return mstch_array;
+}
+
+// TO-DO: remove duplicate in py3
+bool has_types(const t_program* program) {
+  assert(program != nullptr);
+
+  return !(
+      program->objects().empty() && program->enums().empty() &&
+      program->typedefs().empty() && program->consts().empty());
+}
+
 std::vector<std::string> get_py_namespaces_raw(
     const t_program* program, bool is_asyncio, const std::string& tail = {}) {
   assert(program != nullptr);
@@ -122,50 +145,6 @@ const std::string* get_py_adapter(const t_type* type) {
   return t_typedef::get_first_annotation_or_null(type, {"py.adapter"});
 }
 
-mstch::array create_string_array(const std::vector<std::string>& values) {
-  mstch::array mstch_array;
-  for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.push_back(mstch::map{
-        {"value", *it},
-        {"first?", it == values.begin()},
-        {"last?", std::next(it) == values.end()},
-    });
-  }
-
-  return mstch_array;
-}
-
-void add_container_types(
-    std::vector<const t_type*>& container_types,
-    std::set<std::string>& visited,
-    const t_type* type) {
-  assert(type != nullptr);
-
-  if (!type->is_container()) {
-    return;
-  }
-
-  std::string name = to_flat_type_name(type);
-  if (visited.find(name) != visited.end()) {
-    return;
-  }
-
-  if (type->is_list()) {
-    const auto* listType = dynamic_cast<const t_list*>(type)->get_elem_type();
-    add_container_types(container_types, visited, listType);
-  } else if (type->is_set()) {
-    const auto* setType = dynamic_cast<const t_set*>(type)->get_elem_type();
-    add_container_types(container_types, visited, setType);
-  } else if (type->is_map()) {
-    const auto* mapType = dynamic_cast<const t_map*>(type);
-    add_container_types(container_types, visited, mapType->get_key_type());
-    add_container_types(container_types, visited, mapType->get_val_type());
-  }
-
-  visited.insert(name);
-  container_types.push_back(type);
-}
-
 std::set<std::string> get_distinct_adapters(const t_program* program) {
   assert(program != nullptr);
 
@@ -191,6 +170,31 @@ std::set<std::string> get_distinct_adapters(const t_program* program) {
   return adapters;
 }
 
+std::vector<std::string> gather_import_modules(
+    const t_program* program, bool is_asyncio) {
+  assert(program != nullptr);
+
+  std::vector<std::string> import_modules = {};
+
+  for (const auto* prog : program->get_included_programs()) {
+    if (prog->path() == program->path()) {
+      continue;
+    }
+
+    if (has_types(prog)) {
+      import_modules.push_back(boost::algorithm::join(
+          get_py_namespaces_raw(prog, is_asyncio, "ttypes"), "."));
+    }
+  }
+
+  auto adapters = get_distinct_adapters(program);
+  for (const auto& adapter : adapters) {
+    import_modules.push_back(adapter);
+  }
+
+  return import_modules;
+}
+
 // Program
 
 class pyi_mstch_program : public mstch_program {
@@ -209,33 +213,20 @@ class pyi_mstch_program : public mstch_program {
              &pyi_mstch_program::get_python_namespaces},
             {"program:py3Namespaces", &pyi_mstch_program::get_py3_namespaces},
             {"program:importModules", &pyi_mstch_program::get_import_modules},
-            {"program:containerTypes", &pyi_mstch_program::get_container_types},
+            {"program:containerTypes", &pyi_mstch_program::get_containers},
             {"program:moveContainerTypes",
-             &pyi_mstch_program::get_move_container_types},
+             &pyi_mstch_program::get_move_containers},
         });
     register_has_option("program:asyncio?", "asyncio");
     register_has_option("program:cpp_transport?", "cpp_transport");
 
-    this->container_types_ = this->visit_container_types();
+    this->visit_import_modules();
+    this->visit_return_types();
+    this->visit_containers();
   }
 
   mstch::node get_return_types() {
-    std::vector<const t_type*> return_types = {};
-
-    std::set<std::string> visited;
-    for (const auto* service : mstch_program::program_->services()) {
-      for (const auto* function : service->get_functions()) {
-        const auto* returnType = function->get_returntype();
-        std::string name = to_flat_type_name(returnType);
-
-        if (visited.find(name) == visited.end()) {
-          return_types.push_back(returnType);
-          visited.insert(name);
-        }
-      }
-    }
-
-    return make_mstch_types(return_types);
+    return make_mstch_types(this->return_types_);
   }
 
   mstch::node get_py_namespaces() {
@@ -255,85 +246,109 @@ class pyi_mstch_program : public mstch_program {
   }
 
   mstch::node get_import_modules() {
-    mstch::array modules;
-
-    for (const auto* program :
-         mstch_program::program_->get_included_programs()) {
-      if (program->path() == mstch_program::program_->path()) {
-        continue;
-      }
-
-      const auto has_structs = !program->objects().empty();
-      const auto has_enums = !program->enums().empty();
-      const auto has_typedefs = !program->typedefs().empty();
-      const auto has_consts = !program->consts().empty();
-      if (has_structs || has_enums || has_typedefs || has_consts) {
-        modules.push_back(boost::algorithm::join(
-            get_py_namespaces_raw(
-                program, mstch_base::has_option("asyncio"), "ttypes"),
-            "."));
-      }
+    mstch::array mstch_array;
+    for (const auto& module : this->import_modules_) {
+      mstch_array.push_back(module);
     }
-
-    auto adapters = get_distinct_adapters(mstch_program::program_);
-    for (const auto& adapter : adapters) {
-      modules.push_back(adapter);
-    }
-
-    return modules;
+    return mstch_array;
   }
 
-  mstch::node get_container_types() {
-    return make_mstch_types(this->container_types_);
-  }
+  mstch::node get_containers() { return make_mstch_types(this->containers_); }
 
-  mstch::node get_move_container_types() {
-    std::vector<const t_type*> move_container_types;
-    std::set<std::string> visited;
-
-    for (const auto* container_type : this->container_types_) {
-      auto name = to_flat_type_name(container_type);
-      boost::algorithm::replace_all(name, "binary", "string");
-
-      if (visited.find(name) == visited.end()) {
-        visited.insert(name);
-        move_container_types.push_back(container_type);
-      }
-    }
-
-    return make_mstch_types(move_container_types);
+  mstch::node get_move_containers() {
+    return make_mstch_types(this->move_containers_);
   }
 
  private:
-  std::vector<const t_type*> container_types_;
+  std::vector<const t_type*> return_types_;
+  std::vector<std::string> import_modules_;
+  std::vector<const t_type*> containers_;
+  std::vector<const t_type*> move_containers_;
 
-  std::vector<const t_type*> visit_container_types() const {
-    std::vector<const t_type*> container_types;
+  void visit_import_modules() {
+    this->import_modules_ = gather_import_modules(
+        mstch_program::program_, mstch_base::has_option("asyncio"));
+  }
+
+  void visit_return_types() {
+    std::set<std::string> visited;
+    for (const auto* service : mstch_program::program_->services()) {
+      for (const auto* function : service->get_functions()) {
+        const auto* returnType = function->get_returntype();
+        std::string name = to_flat_type_name(returnType);
+
+        if (visited.find(name) == visited.end()) {
+          visited.insert(name);
+          this->return_types_.push_back(returnType);
+        }
+      }
+    }
+  }
+
+  void visit_containers() {
     std::set<std::string> visited;
 
     for (const auto* service : mstch_program::program_->services()) {
       for (const auto& function : service->functions()) {
         for (const auto& param : function.get_paramlist()->fields()) {
-          add_container_types(container_types, visited, param.get_type());
+          this->add_containers(visited, param.get_type());
         }
 
         auto return_type = function.get_returntype();
-        add_container_types(container_types, visited, return_type);
+        this->add_containers(visited, return_type);
       }
     }
 
     for (const auto* object : mstch_program::program_->objects()) {
       for (const auto& field : object->fields()) {
-        add_container_types(container_types, visited, field.get_type());
+        this->add_containers(visited, field.get_type());
       }
     }
 
     for (const auto* constant : mstch_program::program_->consts()) {
       const auto* const_type = constant->get_type();
-      add_container_types(container_types, visited, const_type);
+      this->add_containers(visited, const_type);
     }
 
-    return container_types;
+    // Collecting move containers within found containers
+    visited.clear();
+    for (const auto* container : this->containers_) {
+      auto name = to_flat_type_name(container);
+      boost::algorithm::replace_all(name, "binary", "string");
+
+      if (visited.find(name) == visited.end()) {
+        visited.insert(name);
+        this->move_containers_.push_back(container);
+      }
+    }
+  }
+
+  void add_containers(std::set<std::string>& visited, const t_type* type) {
+    assert(type != nullptr);
+
+    if (!type->is_container()) {
+      return;
+    }
+
+    std::string name = to_flat_type_name(type);
+    if (visited.find(name) != visited.end()) {
+      return;
+    }
+
+    if (type->is_list()) {
+      const auto* listType = dynamic_cast<const t_list*>(type)->get_elem_type();
+      add_containers(visited, listType);
+    } else if (type->is_set()) {
+      const auto* setType = dynamic_cast<const t_set*>(type)->get_elem_type();
+      add_containers(visited, setType);
+    } else if (type->is_map()) {
+      const auto* mapType = dynamic_cast<const t_map*>(type);
+      add_containers(visited, mapType->get_key_type());
+      add_containers(visited, mapType->get_val_type());
+    }
+
+    visited.insert(name);
+    this->containers_.push_back(type);
   }
 };
 
@@ -468,6 +483,8 @@ class pyi_mstch_service : public mstch_service {
              &pyi_mstch_service::get_program_import_modules},
         });
     register_has_option("program:asyncio?", "asyncio");
+
+    this->visit_program_import_modules();
   }
 
   mstch::node is_external_program() {
@@ -490,35 +507,21 @@ class pyi_mstch_service : public mstch_service {
   }
 
   mstch::node get_program_import_modules() {
-    mstch::array modules;
-
-    for (const auto* program : this->program_->get_included_programs()) {
-      if (program->path() == this->program_->path()) {
-        continue;
-      }
-
-      const auto has_structs = !program->objects().empty();
-      const auto has_enums = !program->enums().empty();
-      const auto has_typedefs = !program->typedefs().empty();
-      const auto has_consts = !program->consts().empty();
-      if (has_structs || has_enums || has_typedefs || has_consts) {
-        modules.push_back(boost::algorithm::join(
-            get_py_namespaces_raw(
-                program, mstch_base::has_option("asyncio"), "ttypes"),
-            "."));
-      }
+    mstch::array mstch_array;
+    for (const auto& module : this->program_import_modules_) {
+      mstch_array.push_back(module);
     }
-
-    auto adapters = get_distinct_adapters(this->program_);
-    for (const auto& adapter : adapters) {
-      modules.push_back(adapter);
-    }
-
-    return modules;
+    return mstch_array;
   }
 
  private:
   const t_program* program_;
+  std::vector<std::string> program_import_modules_;
+
+  void visit_program_import_modules() {
+    this->program_import_modules_ = gather_import_modules(
+        this->program_, mstch_base::has_option("asyncio"));
+  }
 };
 
 // Function

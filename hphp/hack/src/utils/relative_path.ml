@@ -124,6 +124,7 @@ let to_absolute_with_prefix ~www ~hhi (p, rest) =
   match p with
   | Root -> path_concat www rest
   | Hhi -> path_concat hhi rest
+  | Dummy -> rest
   | _ -> failwith "invalid prefix"
 
 let to_tmp (_, rest) = (Tmp, rest)

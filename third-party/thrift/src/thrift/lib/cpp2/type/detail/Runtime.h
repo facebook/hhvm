@@ -20,8 +20,8 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <folly/ConstexprMath.h>
 #include <folly/lang/Exception.h>
+#include <thrift/lib/cpp2/type/AlignedPtr.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -34,54 +34,6 @@ class Ref;
 namespace detail {
 
 const TypeInfo& voidTypeInfo();
-
-// A pointer for a type that has sufficent alignment to store information
-// in the lower bits.
-//
-// TODO(afuller): Moved to a shared locations, so this can be used to track
-// 'ownership' as well.
-template <typename T, size_t Bits = folly::constexpr_log2(alignof(T))>
-class AlignedPtr {
- public:
-  static_assert(
-      Bits > 0 && Bits <= folly::constexpr_log2(alignof(T)),
-      "insufficent alignment");
-  constexpr static std::uintptr_t kMask = ~std::uintptr_t{} << Bits;
-
-  constexpr AlignedPtr() noexcept = default;
-  /* implicit */ constexpr AlignedPtr(T* ptr, std::uintptr_t bits = {}) noexcept
-      : ptr_((folly::bit_cast<std::uintptr_t>(ptr) & kMask) | (bits & ~kMask)) {
-    assert((bits & kMask) == 0); // Programming error.
-    // Never happens because of T's alignment.
-    assert((folly::bit_cast<std::uintptr_t>(ptr) & ~kMask) == 0);
-  }
-
-  T* get() const noexcept { return reinterpret_cast<T*>(ptr_ & kMask); }
-
-  template <size_t Bit>
-  constexpr bool get() const noexcept {
-    return ptr_ & bitMask<Bit>();
-  }
-
-  template <size_t Bit>
-  constexpr void set() noexcept {
-    ptr_ |= bitMask<Bit>();
-  }
-
-  template <size_t Bit>
-  constexpr void clear() noexcept {
-    ptr_ &= ~bitMask<Bit>();
-  }
-
- private:
-  std::uintptr_t ptr_ = {};
-
-  template <size_t Bit>
-  constexpr static auto bitMask() noexcept {
-    static_assert(Bit < Bits, "out of range");
-    return std::uintptr_t{1} << Bit;
-  }
-};
 
 // The type information associated with a runtime Thrift value.
 //

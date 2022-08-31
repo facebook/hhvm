@@ -124,25 +124,6 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline TypedNum stringToNumeric(
-  const StringData* sd,
-    ConvNoticeLevel level,
-    const StringData* notice_reason) {
-    int64_t ival;
-  double dval;
-  auto const dt = sd->isNumericWithVal(ival, dval, true /* allow_errors */);
-  handleConvNoticeLevel(
-    level, "string", dt == KindOfDouble ? "double" : "int", notice_reason);
-  return dt == KindOfInt64 ? make_tv<KindOfInt64>(ival) :
-         dt == KindOfDouble ? make_tv<KindOfDouble>(dval) :
-         make_tv<KindOfInt64>(0);
-}
-
-
-inline TypedNum stringToNumeric(const StringData* sd) {
-  return stringToNumeric(sd, ConvNoticeLevel::None, nullptr);
-}
-
 inline TypedValue tvClassToString(TypedValue key) {
   if (isClassType(type(key))) {
     auto const keyStr = classToStringHelper(val(key).pclass);

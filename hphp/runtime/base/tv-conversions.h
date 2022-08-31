@@ -95,15 +95,6 @@ double tvToDouble(TypedValue);
 template <IntishCast IC = IntishCast::None>
 TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
 
-/*
- * Convert a string to a TypedNum following PHP semantics, allowing strings
- * that have only a partial number in them (i.e. the string may have junk after
- * the number).
- */
-TypedNum stringToNumeric(const StringData*);
-TypedNum stringToNumeric(
-    const StringData*, const ConvNoticeLevel, const StringData* notice_reason);
-
 TypedValue tvClassToString(TypedValue key);
 
 }

@@ -7,18 +7,15 @@
 use std::path::Path;
 
 use hh24_types::Checksum;
-use hh24_types::DeclHash;
 use hh24_types::RichChecksum;
-use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntMap;
 use nohash_hasher::IntSet;
-use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
 
 pub struct NamingTable {
     path_cache: IntMap<ToplevelSymbolHash, Option<RelativePath>>,
-    names: crate::Names,
+    pub names: crate::Names,
     rich_checksums: IntMap<Checksum, RichChecksum>,
     checksum: Checksum,
 }
@@ -50,7 +47,7 @@ impl NamingTable {
         path: &RelativePath,
         file_summary: crate::FileSummary,
     ) -> anyhow::Result<(IntSet<ToplevelSymbolHash>, IntSet<ToplevelSymbolHash>)> {
-        let mut removed_symbol_hashes = self.get_symbol_hashes(path)?;
+        let mut removed_symbol_hashes = self.names.get_symbol_hashes(path)?;
         let mut changed_symbol_hashes = IntSet::default();
 
         for (symbol_hash, decl_hash) in file_summary.decl_hashes() {
@@ -84,34 +81,27 @@ impl NamingTable {
         Ok((changed_symbol_hashes, removed_symbol_hashes))
     }
 
-    pub fn process_deleted_file(
-        &mut self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        self.remove_file(path)
-    }
-
     pub fn remove_file(
         &mut self,
         path: &RelativePath,
     ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let symbol_hashes = self.get_symbol_hashes(path)?;
-        let overflow_symbol_hashes = self.get_overflow_symbol_hashes(path)?;
+        let symbol_hashes = self.names.get_symbol_hashes(path)?;
+        let overflow_symbol_hashes = self.names.get_overflow_symbol_hashes(path)?;
         let affected_symbol_hashes: IntSet<_> = symbol_hashes
             .union(&overflow_symbol_hashes)
             .copied()
             .collect();
         let mut changed_symbol_hashes = IntSet::default();
-        let combined_hashes = self.get_symbol_and_decl_hashes(path)?;
+        let combined_hashes = self.names.get_symbol_and_decl_hashes(path)?;
 
         // remove symbols from naming table
         for &symbol_hash in &affected_symbol_hashes {
             let old_filename = self.names.get_path_by_symbol_hash(symbol_hash)?;
-            self.remove_symbol(symbol_hash, path)?;
+            self.names.remove_symbol(symbol_hash, path)?;
             let new_filename = self.names.get_path_by_symbol_hash(symbol_hash)?;
 
             if new_filename != old_filename {
-                if let Some(decl_hash) = self.get_decl_hash(symbol_hash)? {
+                if let Some(decl_hash) = self.names.get_decl_hash(symbol_hash)? {
                     // an inferior symbol has been promoted
                     self.checksum.addremove(symbol_hash, decl_hash);
                 }
@@ -152,11 +142,7 @@ impl NamingTable {
         self.rich_checksums.get(&checksum).map(|x| x.to_owned())
     }
 
-    pub fn save_state(&self, output_dir: &Path) -> anyhow::Result<()> {
-        self.names.backup(&output_dir.join("naming.sql"))
-    }
-
-    pub fn get_path_by_symbol_hash(
+    pub fn get_and_cache_path_by_symbol_hash(
         &mut self,
         symbol_hash: ToplevelSymbolHash,
     ) -> anyhow::Result<Option<RelativePath>> {
@@ -166,65 +152,6 @@ impl NamingTable {
         let path_opt = self.names.get_path_by_symbol_hash(symbol_hash)?;
         self.path_cache.insert(symbol_hash, path_opt.clone());
         Ok(path_opt)
-    }
-
-    pub fn get_symbol_hashes(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        self.names.get_symbol_hashes(path)
-    }
-
-    pub fn get_overflow_symbol_hashes(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        self.names.get_overflow_symbol_hashes(path)
-    }
-
-    pub fn remove_symbol(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-        path: &RelativePath,
-    ) -> anyhow::Result<()> {
-        self.names.remove_symbol(symbol_hash, path)
-    }
-
-    pub fn get_symbol_and_decl_hashes(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntMap<ToplevelSymbolHash, DeclHash>> {
-        self.names.get_symbol_and_decl_hashes(path)
-    }
-
-    pub fn get_decl_hash(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Option<DeclHash>> {
-        self.names.get_decl_hash(symbol_hash)
-    }
-
-    pub fn get_filename(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Option<(RelativePath, NameType)>> {
-        self.names.get_filename(symbol_hash)
-    }
-
-    pub fn get_fun_path_case_insensitive(
-        &self,
-        name: String,
-    ) -> anyhow::Result<Option<RelativePath>> {
-        self.names
-            .get_path_case_insensitive(ToplevelCanonSymbolHash::from_fun(name))
-    }
-
-    pub fn get_type_path_case_insensitive(
-        &self,
-        name: String,
-    ) -> anyhow::Result<Option<RelativePath>> {
-        self.names
-            .get_path_case_insensitive(ToplevelCanonSymbolHash::from_type(name))
     }
 }
 

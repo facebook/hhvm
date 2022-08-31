@@ -5440,10 +5440,6 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
     params := paraml;
     (match hint_of_type_hint param.param_type_hint with
     | Some h ->
-      let (pos, _) = h in
-      (* When creating a closure, the 'this' type will mean the
-       * late bound type of the current enclosing class
-       *)
       let decl_ty = Decl_hint.hint env.decl_env h in
       (match Typing_enforceability.get_enforcement env decl_ty with
       | Unenforced ->
@@ -5458,26 +5454,6 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
         Phase.localize_no_subst env ~ignore_errors:false decl_ty
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt1;
-      let (env, ty_err_opt2) =
-        Typing_coercion.coerce_type
-          pos
-          Reason.URparam
-          env
-          ty
-          (MakeType.unenforced h)
-          Typing_error.Callback.unify_error
-      in
-      (* Closures are allowed to have explicit type-hints. When
-       * that is the case we should check that the argument passed
-       * is compatible with the type-hint.
-       * The body of the function should be type-checked with the
-       * hint and not the type of the argument passed.
-       * Otherwise it leads to strange results where
-       * foo(?string $x = null) is called with a string and fails to
-       * type-check. If $x is a string instead of ?string, null is not
-       * subtype of string ...
-       *)
-      Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
       let (env, t_param) = bind_param env (h, param) in
       (env, t_params @ [t_param])
     | None ->
@@ -5494,23 +5470,10 @@ and closure_bind_variadic env vparam variadic_ty =
       (* if the hint is missing, use the type we expect *)
       ((env, None), variadic_ty, get_pos variadic_ty)
     | Some hint ->
-      let pos = fst hint in
       let ((env, ty_err_opt1), h) =
         Phase.localize_hint_no_subst env ~ignore_errors:false hint
       in
-      let (env, ty_err_opt2) =
-        Typing_coercion.coerce_type
-          pos
-          Reason.URparam
-          env
-          variadic_ty
-          (MakeType.unenforced h)
-          Typing_error.Callback.unify_error
-      in
-      let ty_err_opt =
-        Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2
-      in
-      ((env, ty_err_opt), h, Pos_or_decl.of_raw_pos vparam.param_pos)
+      ((env, ty_err_opt1), h, Pos_or_decl.of_raw_pos vparam.param_pos)
   in
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let r = Reason.Rvar_param_from_decl pos in

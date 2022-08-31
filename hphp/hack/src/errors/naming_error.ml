@@ -111,7 +111,6 @@ type t =
     }
   | Missing_typehint of Pos.t
   | Expected_variable of Pos.t
-  | Clone_too_many_arguments of Pos.t
   | Too_many_arguments of Pos.t
   | Too_few_arguments of Pos.t
   | Expected_collection of {
@@ -759,12 +758,6 @@ let expected_variable pos =
     (pos, "Was expecting a variable name")
     []
 
-let clone_too_many_arguments pos =
-  User_error.make
-    Error_code.(to_enum NamingTooManyArguments)
-    (pos, "`__clone` method cannot take arguments")
-    []
-
 let too_many_arguments pos =
   User_error.make
     Error_code.(to_enum NamingTooManyArguments)
@@ -1127,7 +1120,6 @@ let to_user_error = function
     shadowed_tparam prev_pos tparam_name pos
   | Missing_typehint pos -> missing_typehint pos
   | Expected_variable pos -> expected_variable pos
-  | Clone_too_many_arguments pos -> clone_too_many_arguments pos
   | Too_many_arguments pos -> too_many_arguments pos
   | Too_few_arguments pos -> too_few_arguments pos
   | Expected_collection { pos; cname } -> expected_collection pos cname

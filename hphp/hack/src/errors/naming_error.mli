@@ -107,7 +107,6 @@ type t =
     }
   | Missing_typehint of Pos.t
   | Expected_variable of Pos.t
-  | Clone_too_many_arguments of Pos.t
   | Too_many_arguments of Pos.t
   | Too_few_arguments of Pos.t
   | Expected_collection of {

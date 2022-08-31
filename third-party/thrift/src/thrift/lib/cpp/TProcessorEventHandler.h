@@ -44,8 +44,8 @@ class TProcessorEventHandler {
   /**
    * Returns the name of the TProcessorEventHandler implementation
    */
-  virtual std::string_view getName() const {
-    return folly::demangle(typeid(*this).name());
+  virtual std::string getName() const {
+    return folly::demangle(typeid(*this).name()).toStdString();
   }
 
   /**

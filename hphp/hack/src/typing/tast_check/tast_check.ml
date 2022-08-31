@@ -99,6 +99,10 @@ let visitor ctx =
             Some Global_write_check.handler
           else
             None);
+          (if skip_hierarchy_checks then
+            None
+          else
+            Some Enum_check.handler);
         ]
   in
   let handlers =

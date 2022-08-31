@@ -200,12 +200,13 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base::resetAnd;
   ~BaseAssignPatch() = default; // abstract base class
 
+  FOLLY_NODISCARD bool hasAssign() const { return hasValue(data_.assign()); }
   FOLLY_NODISCARD value_type& assignOr(value_type& value) noexcept {
-    return hasValue(data_.assign()) ? *data_.assign() : value;
+    return hasAssign() ? *data_.assign() : value;
   }
 
   bool applyAssign(value_type& val) const {
-    if (hasValue(data_.assign())) {
+    if (hasAssign()) {
       val = *data_.assign();
       return true;
     }
@@ -218,7 +219,7 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
       data_ = std::forward<U>(next).toThrift();
       return true;
     }
-    if (hasValue(data_.assign())) {
+    if (hasAssign()) {
       next.apply(*data_.assign());
       return true;
     }
@@ -239,6 +240,7 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
  public:
   using Base::Base;
   using Base::operator=;
+  using Base::apply;
 
   FOLLY_NODISCARD static Derived createClear() {
     Derived patch;
@@ -246,8 +248,21 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
     return patch;
   }
 
+  // Clear resets optional fields.
+  template <typename U>
+  if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
+    if (data_.clear() == true && !hasAssign()) {
+      field.reset();
+    } else if (field.has_value()) {
+      derived().apply(*std::forward<U>(field));
+    }
+  }
+
  protected:
+  using Base::applyAssign;
   using Base::data_;
+  using Base::derived;
+  using Base::hasAssign;
   using Base::mergeAssign;
   using Base::resetAnd;
   ~BaseClearPatch() = default;
@@ -264,6 +279,17 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
       return true;
     }
     return mergeAssign(std::forward<U>(next));
+  }
+
+  template <typename Tag>
+  bool applyAssignAndClear(T& val) const {
+    if (applyAssign(val)) {
+      return true;
+    }
+    if (data_.clear() == true) {
+      op::clear<Tag>(val);
+    }
+    return false;
   }
 
   void clear() { resetAnd().clear() = true; }

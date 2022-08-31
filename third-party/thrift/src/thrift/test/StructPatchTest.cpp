@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
 #include <thrift/lib/cpp2/type/Testing.h>
+#include <thrift/lib/thrift/gen-cpp2/patch_types.h>
 #include <thrift/test/gen-cpp2/StructPatchTest_fatal_types.h>
 #include <thrift/test/gen-cpp2/StructPatchTest_types.h>
 
@@ -113,6 +114,18 @@ TEST(StructPatchTest, Clear) {
   // Clear patch, clears all fields (even ones with defaults)
   test::expectPatch(MyStructPatch::createClear(), testValue(), {});
   test::expectPatch(op::StringPatch::createClear(), {"hi"}, "");
+}
+
+TEST(StructPatchTest, ClearField_Bool) {
+  MyStruct actual;
+
+  actual.boolVal() = true;
+  op::BoolPatch::createClear().apply(actual.boolVal());
+  EXPECT_FALSE(*actual.boolVal());
+
+  actual.optBoolVal() = true;
+  op::BoolPatch::createClear().apply(actual.optBoolVal());
+  EXPECT_FALSE(actual.optBoolVal().has_value());
 }
 
 TEST(StructPatchTest, Patch) {

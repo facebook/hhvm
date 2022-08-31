@@ -58,6 +58,9 @@ struct BoolPatch {
    */
   1: optional bool assign;
 
+  /** Clear any set value. */
+  2: bool clear;
+
   /** If the bool value should be inverted. */
   9: bool invert;
 }

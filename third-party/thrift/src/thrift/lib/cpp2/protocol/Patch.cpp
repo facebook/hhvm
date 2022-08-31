@@ -155,9 +155,16 @@ void ApplyPatch::operator()(const Object& patch, protocol::Value& value) const {
 }
 
 void ApplyPatch::operator()(const Object& patch, bool& value) const {
-  checkOps(patch, Value::Type::boolValue, {PatchOp::Assign, PatchOp::Put});
+  checkOps(
+      patch,
+      Value::Type::boolValue,
+      {PatchOp::Assign, PatchOp::Put, PatchOp::Clear});
   if (applyAssign<type::bool_t>(patch, value)) {
     return; // Ignore all other ops.
+  }
+  if (auto* clear = findOp(patch, PatchOp::Clear);
+      clear != nullptr && *clear->boolValue_ref()) {
+    value = false;
   }
   if (auto* invert = findOp(patch, PatchOp::Put)) { // Put is Invert for bool.
     if (argAs<type::bool_t>(*invert)) {

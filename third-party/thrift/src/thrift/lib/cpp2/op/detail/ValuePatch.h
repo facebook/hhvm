@@ -53,10 +53,11 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
 
 // Patch must have the following fields:
 //   optional T assign;
+//   bool clear;
 //   bool invert;
 template <typename Patch>
-class BoolPatch : public BaseAssignPatch<Patch, BoolPatch<Patch>> {
-  using Base = BaseAssignPatch<Patch, BoolPatch>;
+class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
+  using Base = BaseClearPatch<Patch, BoolPatch>;
   using T = typename Base::value_type;
 
  public:
@@ -72,23 +73,23 @@ class BoolPatch : public BaseAssignPatch<Patch, BoolPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssign(val) && *data_.invert()) {
+    if (!Base::template applyAssignAndClear<type::bool_t>(val) &&
+        *data_.invert()) {
       val = !val;
     }
   }
 
   template <typename U>
   void merge(U&& next) {
-    if (!mergeAssign(std::forward<U>(next))) {
+    if (!mergeAssignAndClear(std::forward<U>(next))) {
       *data_.invert() ^= *next.toThrift().invert();
     }
   }
 
  private:
-  using Base::applyAssign;
   using Base::assignOr;
   using Base::data_;
-  using Base::mergeAssign;
+  using Base::mergeAssignAndClear;
 
   friend BoolPatch operator!(BoolPatch val) { return (val.invert(), val); }
 };

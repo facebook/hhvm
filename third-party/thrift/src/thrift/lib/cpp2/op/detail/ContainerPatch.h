@@ -39,8 +39,8 @@ void erase_all(C1& container, const C2& values) {
 //   list<T> append;
 //   list<T> prepend;
 template <typename Patch>
-class ListPatch : public BaseClearValuePatch<Patch, ListPatch<Patch>> {
-  using Base = BaseClearValuePatch<Patch, ListPatch>;
+class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
+  using Base = BaseContainerPatch<Patch, ListPatch>;
   using T = typename Base::value_type;
 
  public:
@@ -95,10 +95,7 @@ class ListPatch : public BaseClearValuePatch<Patch, ListPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssign(val)) {
-      if (data_.clear() == true) {
-        val.clear();
-      }
+    if (!applyAssignOrClear(val)) {
       val.insert(val.begin(), data_.prepend()->begin(), data_.prepend()->end());
       val.insert(val.end(), data_.append()->begin(), data_.append()->end());
     }
@@ -123,7 +120,7 @@ class ListPatch : public BaseClearValuePatch<Patch, ListPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
+  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
   using Base::mergeAssignAndClear;
@@ -135,8 +132,8 @@ class ListPatch : public BaseClearValuePatch<Patch, ListPatch<Patch>> {
 //   set<T> add;
 //   set<T> remove;
 template <typename Patch>
-class SetPatch : public BaseClearValuePatch<Patch, SetPatch<Patch>> {
-  using Base = BaseClearValuePatch<Patch, SetPatch>;
+class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
+  using Base = BaseContainerPatch<Patch, SetPatch>;
   using T = typename Base::value_type;
 
  public:
@@ -200,14 +197,12 @@ class SetPatch : public BaseClearValuePatch<Patch, SetPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssign(val)) {
-      if (data_.clear() == true) {
-        val.clear();
-      } else {
-        erase_all(val, *data_.remove());
-      }
-      val.insert(data_.add()->begin(), data_.add()->end());
+    if (applyAssignOrClear(val)) {
+      return;
     }
+
+    erase_all(val, *data_.remove());
+    val.insert(data_.add()->begin(), data_.add()->end());
   }
 
   template <typename U>
@@ -219,7 +214,7 @@ class SetPatch : public BaseClearValuePatch<Patch, SetPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
+  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
   using Base::mergeAssignAndClear;
@@ -230,8 +225,8 @@ class SetPatch : public BaseClearValuePatch<Patch, SetPatch<Patch>> {
 //   bool clear;
 //   map<K, V> put;
 template <typename Patch>
-class MapPatch : public BaseClearValuePatch<Patch, MapPatch<Patch>> {
-  using Base = BaseClearValuePatch<Patch, MapPatch>;
+class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
+  using Base = BaseContainerPatch<Patch, MapPatch>;
   using T = typename Base::value_type;
 
  public:
@@ -262,13 +257,11 @@ class MapPatch : public BaseClearValuePatch<Patch, MapPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssign(val)) {
-      if (data_.clear() == true) {
-        val.clear();
-      }
-      for (const auto& entry : *data_.put()) {
-        val.insert_or_assign(entry.first, entry.second);
-      }
+    if (applyAssignOrClear(val)) {
+      return;
+    }
+    for (const auto& entry : *data_.put()) {
+      val.insert_or_assign(entry.first, entry.second);
     }
   }
 
@@ -280,7 +273,7 @@ class MapPatch : public BaseClearValuePatch<Patch, MapPatch<Patch>> {
   }
 
  private:
-  using Base::applyAssign;
+  using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
   using Base::mergeAssignAndClear;

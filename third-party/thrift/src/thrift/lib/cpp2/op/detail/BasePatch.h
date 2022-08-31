@@ -147,12 +147,12 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
   ~BasePatch() = default; // abstract base class
 };
 
-// Base class for value patch types.
+// Base class for assign patch types.
 //
 // Patch must have the following fields:
-//   optional T assign;
+//   [optional] T assign;
 template <typename Patch, typename Derived>
-class BaseValuePatch : public BasePatch<Patch, Derived> {
+class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base = BasePatch<Patch, Derived>;
 
  public:
@@ -198,8 +198,7 @@ class BaseValuePatch : public BasePatch<Patch, Derived> {
   using Base::data_;
   using Base::derived;
   using Base::resetAnd;
-
-  ~BaseValuePatch() = default; // abstract base class
+  ~BaseAssignPatch() = default; // abstract base class
 
   FOLLY_NODISCARD value_type& assignOr(value_type& value) noexcept {
     return hasValue(data_.assign()) ? *data_.assign() : value;
@@ -227,14 +226,14 @@ class BaseValuePatch : public BasePatch<Patch, Derived> {
   }
 };
 
-// Base class for clearable value patch types.
+// Base class for clearable patch types.
 //
 // Patch must have the following fields:
-//   optional T assign;
+//   (optional) T assign;
 //   bool clear;
 template <typename Patch, typename Derived>
-class BaseClearValuePatch : public BaseValuePatch<Patch, Derived> {
-  using Base = BaseValuePatch<Patch, Derived>;
+class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
+  using Base = BaseAssignPatch<Patch, Derived>;
   using T = typename Base::value_type;
 
  public:
@@ -247,15 +246,11 @@ class BaseClearValuePatch : public BaseValuePatch<Patch, Derived> {
     return patch;
   }
 
-  void clear() { resetAnd().clear() = true; }
-
  protected:
-  using Base::applyAssign;
   using Base::data_;
   using Base::mergeAssign;
   using Base::resetAnd;
-
-  ~BaseClearValuePatch() = default;
+  ~BaseClearPatch() = default;
 
   template <typename U>
   bool mergeAssignAndClear(U&& next) {
@@ -269,6 +264,41 @@ class BaseClearValuePatch : public BaseValuePatch<Patch, Derived> {
       return true;
     }
     return mergeAssign(std::forward<U>(next));
+  }
+
+  void clear() { resetAnd().clear() = true; }
+  FOLLY_NODISCARD T& clearAnd() { return (clear(), data_); }
+};
+
+// Base class for 'container' patch types.
+//
+// Patch must have the following fields:
+//   (optional) T assign;
+//   bool clear;
+template <typename Patch, typename Derived>
+class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
+  using Base = BaseClearPatch<Patch, Derived>;
+  using T = typename Base::value_type;
+
+ public:
+  using Base::Base;
+  using Base::operator=;
+  using Base::clear;
+
+ protected:
+  using Base::applyAssign;
+  using Base::data_;
+  ~BaseContainerPatch() = default; // Abstract base class.
+
+  // Returns true if assign was applied, and no more patchs should be applied.
+  bool applyAssignOrClear(T& val) const {
+    if (applyAssign(val)) {
+      return true;
+    }
+    if (data_.clear() == true) {
+      val.clear();
+    }
+    return false;
   }
 };
 

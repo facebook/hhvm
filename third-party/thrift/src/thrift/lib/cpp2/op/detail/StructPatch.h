@@ -54,14 +54,13 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 
   template <typename T>
   void apply(T& val) const {
-    op::for_each_field_id<Patch>(
-        [&](auto id) { get(id)->apply(get(id, val)); });
+    for_each_field_id<Patch>([&](auto id) { get(id)->apply(get(id, val)); });
   }
 
   template <typename U>
   void merge(U&& next) {
     auto&& tval = std::forward<U>(next).toThrift();
-    op::for_each_field_id<Patch>([&](auto id) {
+    for_each_field_id<Patch>([&](auto id) {
       get(id)->merge(*get(id, std::forward<decltype(tval)>(tval)));
     });
   }
@@ -89,8 +88,8 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 //   P patchPrior;
 //   P patch;
 template <typename Patch>
-class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
-  using Base = BaseClearValuePatch<Patch, StructPatch>;
+class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
+  using Base = BaseClearPatch<Patch, StructPatch>;
   using T = typename Base::value_type;
 
  public:
@@ -137,7 +136,7 @@ class StructPatch : public BaseClearValuePatch<Patch, StructPatch<Patch>> {
       *data_.clear() = true;
 
       // Split the assignment patch into a patch of assignments.
-      op::for_each_field_id<T>([&](auto id) {
+      for_each_field_id<T>([&](auto id) {
         data_.patch()->get(id)->assign(get(id, std::move(*data_.assign())));
       });
       // Unset assign.

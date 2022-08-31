@@ -94,19 +94,3 @@ pub(crate) mod convert {
         typing_deps_hash::hash1(dep_type, name.as_bytes()) as i64
     }
 }
-
-/// The flags associated with types. Used to denote whether a type is a TypeDef or Class
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ToplevelSymbolFlags(u64);
-
-impl rusqlite::ToSql for ToplevelSymbolFlags {
-    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        Ok(rusqlite::types::ToSqlOutput::from(self.0 as i64))
-    }
-}
-
-impl rusqlite::types::FromSql for ToplevelSymbolFlags {
-    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
-        Ok(Self(value.as_i64()? as u64))
-    }
-}

@@ -51,3 +51,9 @@ impl FromSql for NameType {
         }
     }
 }
+
+impl rusqlite::ToSql for NameType {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        Ok(rusqlite::types::ToSqlOutput::from(*self as i64))
+    }
+}

@@ -26,6 +26,8 @@ namespace thrift {
 namespace compiler {
 class schematizer {
  public:
+  // Creates a constant of type schema.Struct describing the argument.
+  // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
   static std::unique_ptr<t_const_value> gen_schema(const t_structured& node);
 };
 } // namespace compiler

@@ -28,6 +28,12 @@ namespace op {
 template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr detail::Encode<Tag> encode{};
 
+// Decodes the value from the given protocol using the type tag.
+// This handles adapted type.
+// For example: decode<type::int16_t>(prot, i); // decode to variable i
+template <typename Tag>
+FOLLY_INLINE_VARIABLE constexpr detail::Decode<Tag> decode{};
+
 } // namespace op
 } // namespace thrift
 } // namespace apache

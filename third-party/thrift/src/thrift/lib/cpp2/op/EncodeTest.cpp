@@ -213,5 +213,43 @@ TEST(EncodeTest, EncodeAdapted) {
   testEncodeAdapted<conformance::StandardProtocol::Binary>();
   testEncodeAdapted<conformance::StandardProtocol::Compact>();
 }
+
+template <conformance::StandardProtocol Protocol, typename Tag, typename T>
+void testDecode(T value) {
+  SCOPED_TRACE(folly::pretty_name<Tag>());
+  protocol_writer_t<Protocol> writer;
+  folly::IOBufQueue queue;
+  writer.setOutput(&queue);
+  encode<Tag>(writer, value);
+
+  protocol_reader_t<Protocol> reader;
+  auto serialized = queue.move();
+  reader.setInput(serialized.get());
+  T result;
+  decode<Tag>(reader, result);
+  EXPECT_EQ(result, value);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testDecodeBasicTypes() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testDecode<Protocol, type::bool_t>(true);
+  testDecode<Protocol, type::byte_t>((int8_t)1);
+  testDecode<Protocol, type::i16_t>((int16_t)11);
+  testDecode<Protocol, type::i32_t>((int32_t)11);
+  testDecode<Protocol, type::i64_t>((int64_t)11);
+  testDecode<Protocol, type::float_t>(1.5f);
+  testDecode<Protocol, type::double_t>(1.5);
+  testDecode<Protocol, type::string_t>(std::string("foo"));
+  testDecode<Protocol, type::binary_t>(std::string("foo"));
+  enum class MyEnum { value = 1 };
+  testDecode<Protocol, type::enum_t<MyEnum>>(MyEnum::value);
+}
+
+TEST(DecodeTest, DecodeBasicTypes) {
+  testDecodeBasicTypes<conformance::StandardProtocol::Binary>();
+  testDecodeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
 } // namespace
 } // namespace apache::thrift::op

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <utility>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -273,6 +274,91 @@ struct Encode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
     return Encode<Tag>{}(prot, Adapter::toThrift(m));
+  }
+};
+
+template <typename>
+struct Decode;
+
+template <>
+struct Decode<type::bool_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, bool& b) const {
+    prot.readBool(b);
+  }
+};
+
+template <>
+struct Decode<type::byte_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, int8_t& i) const {
+    prot.readByte(i);
+  }
+};
+
+template <>
+struct Decode<type::i16_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, int16_t& i) const {
+    prot.readI16(i);
+  }
+};
+
+template <>
+struct Decode<type::i32_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, int32_t& i) const {
+    prot.readI32(i);
+  }
+};
+
+template <>
+struct Decode<type::i64_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, int64_t& i) const {
+    prot.readI64(i);
+  }
+};
+
+template <>
+struct Decode<type::float_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, float& f) const {
+    prot.readFloat(f);
+  }
+};
+
+template <>
+struct Decode<type::double_t> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, double& d) const {
+    prot.readDouble(d);
+  }
+};
+
+template <>
+struct Decode<type::string_t> {
+  template <typename Protocol, typename StrType>
+  void operator()(Protocol& prot, StrType& s) const {
+    prot.readString(s);
+  }
+};
+
+template <>
+struct Decode<type::binary_t> {
+  template <typename Protocol, typename StrType>
+  void operator()(Protocol& prot, StrType& s) const {
+    prot.readBinary(s);
+  }
+};
+
+template <typename T>
+struct Decode<type::enum_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& t) const {
+    int32_t i;
+    prot.readI32(i);
+    t = static_cast<T>(i);
   }
 };
 

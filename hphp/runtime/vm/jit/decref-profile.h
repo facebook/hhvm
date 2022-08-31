@@ -64,6 +64,7 @@ enum class DecRefProfileId {
   ConcatStr1,
   ConcatStr2,
   ConcatStr3,
+  Context,
   GeneratorReturnOldKey,
   GeneratorReturnOldValue,
   IdxDef,

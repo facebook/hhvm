@@ -1261,17 +1261,7 @@ void killInstrAdjustRC(
   for (auto dec : decs) {
     auto replaced = dec->src(0) != inst->dst();
     auto srcIx = 0;
-    if (dec->is(DecReleaseCheck)) {
-      if (inst->is(ConstructClosure) && inst->src(0)->type().maybe(TCounted)) {
-        assertx(!replaced);
-        assertx(anyRemaining);
-        assertx(inst->mayMoveReference(0));
-
-        // While the closure is going to be released via ReleaseShallow it will
-        // still be responsible for releasing the captured context.
-        insertDecRef(dec, inst->src(0));
-      }
-    } else if (anyRemaining) {
+    if (!dec->is(DecReleaseCheck) && anyRemaining) {
       assertx(dec->is(DecRef));
       // The remaining inputs might be moved, so may need to survive
       // until this instruction is decreffed

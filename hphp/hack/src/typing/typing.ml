@@ -950,6 +950,7 @@ let requires_consistent_construct = function
 let expand_expected_and_get_node
     ?(strip_supportdyn = false) env (expected : ExpectedTy.t option) =
   let rec unbox env ty =
+    let (env, ty) = Env.expand_type env ty in
     match TUtils.try_strip_dynamic env ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
@@ -986,7 +987,6 @@ let expand_expected_and_get_node
   match expected with
   | None -> (env, None)
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
-    let (env, ty) = Env.expand_type env ty in
     let (env, uty, supportdyn) = unbox env ty in
     if supportdyn && not strip_supportdyn then
       (env, None)

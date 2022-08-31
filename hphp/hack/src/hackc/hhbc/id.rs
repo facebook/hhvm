@@ -155,7 +155,7 @@ impl<'arena> MethodName<'arena> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[derive(Copy, Clone, Eq, Hash, Serialize)]
 #[repr(C)]
 pub struct FunctionName<'arena>(Str<'arena>);
 
@@ -165,6 +165,27 @@ impl_add_suffix!(FunctionName);
 impl<'arena> FunctionName<'arena> {
     pub fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionName<'arena> {
         FunctionName(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
+    }
+}
+
+impl<'arena> PartialEq for FunctionName<'arena> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_bytes().eq_ignore_ascii_case(other.as_bytes())
+    }
+}
+
+impl<'arena> Ord for FunctionName<'arena> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.eq(other) {
+            return std::cmp::Ordering::Equal;
+        }
+        self.0.cmp(&other.0)
+    }
+}
+
+impl<'arena> PartialOrd for FunctionName<'arena> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -182,6 +203,8 @@ impl<'arena> ConstName<'arena> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
+
     use super::*;
 
     #[test]
@@ -206,5 +229,27 @@ mod tests {
         let alloc = bumpalo::Bump::new();
         let id = MethodName::from_ast_name(&alloc, "meth");
         assert_eq!("meth", id.unsafe_as_str());
+    }
+
+    #[test]
+    fn test_eq_function_name() {
+        let alloc = bumpalo::Bump::new();
+        let id1 = FunctionName::from_ast_name(&alloc, "foo2$memoize_impl");
+        let id2 = FunctionName::from_ast_name(&alloc, "Foo2$memoize_impl");
+        assert_eq!(id1, id2);
+    }
+
+    #[test]
+    fn test_ord_function_name() {
+        let alloc = bumpalo::Bump::new();
+        let mut ids = BTreeSet::new();
+        ids.insert(FunctionName::from_ast_name(&alloc, "foo"));
+        ids.insert(FunctionName::from_ast_name(&alloc, "Foo"));
+        ids.insert(FunctionName::from_ast_name(&alloc, "foo2"));
+        ids.insert(FunctionName::from_ast_name(&alloc, "Bar"));
+        ids.insert(FunctionName::from_ast_name(&alloc, "bar"));
+        let expected = ["Bar", "foo", "foo2"];
+        let ids: Vec<&str> = ids.into_iter().map(|id| id.unsafe_as_str()).collect();
+        assert_eq!(expected, ids.as_slice());
     }
 }

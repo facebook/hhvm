@@ -1186,6 +1186,66 @@ void testParseObjectWithMapMask(bool testSerialize) {
   }
 }
 
+TEST(ObjectTest, ToDynamic) {
+  Value v;
+  v.emplace_bool() = true;
+  EXPECT_EQ(toDynamic(v), true);
+  v.emplace_byte() = 10;
+  EXPECT_EQ(toDynamic(v), 10);
+  v.emplace_i16() = 20;
+  EXPECT_EQ(toDynamic(v), 20);
+  v.emplace_i32() = 30;
+  EXPECT_EQ(toDynamic(v), 30);
+  v.emplace_i64() = 40;
+  EXPECT_EQ(toDynamic(v), 40);
+  v.emplace_float() = 50;
+  EXPECT_EQ(toDynamic(v), float(50));
+  v.emplace_double() = 60;
+  EXPECT_EQ(toDynamic(v), double(60));
+  v.emplace_string() = "70";
+  EXPECT_EQ(toDynamic(v), "70");
+  v = asValueStruct<type::binary_t>("80");
+  EXPECT_EQ(toDynamic(v), "80");
+
+  v.emplace_float() = NAN;
+  EXPECT_TRUE(std::isnan(toDynamic(v).asDouble()));
+
+  std::vector<int> vec = {1, 4, 2};
+  v = asValueStruct<type::list<type::i16_t>>(vec);
+  EXPECT_EQ(toDynamic(v), folly::dynamic::array(1, 4, 2));
+
+  std::vector<int> s = {1, 4, 2};
+  v = asValueStruct<type::set<type::i16_t>>(s);
+  EXPECT_EQ(toDynamic(v), folly::dynamic::array(1, 2, 4));
+
+  std::map<std::string, std::string> m = {
+      {"1", "10"}, {"4", "40"}, {"2", "20"}};
+  v = asValueStruct<type::map<type::string_t, type::string_t>>(m);
+  EXPECT_EQ(
+      toDynamic(v),
+      folly::dynamic(folly::dynamic::object("4", "40")("1", "10")("2", "20")));
+
+  v.emplace_object();
+  v.as_object()[FieldId{10}].emplace_string() = "100";
+  v.as_object()[FieldId{40}].emplace_string() = "400";
+  v.as_object()[FieldId{20}].emplace_string() = "200";
+  EXPECT_EQ(
+      toDynamic(v),
+      folly::dynamic(
+          folly::dynamic::object("40", "400")("10", "100")("20", "200")));
+
+  Value v2;
+  v2.emplace_object()[FieldId{30}].emplace_string() = "300";
+  v2.as_object()[FieldId{50}] = v;
+  EXPECT_EQ(
+      toDynamic(v2),
+      folly::dynamic(folly::dynamic::object("30", "300")("50", toDynamic(v))));
+
+  v = asValueStruct<type::list<type::i16_t>>(vec);
+  v2.emplace_map()[v] = asValueStruct<type::i32_t>(10);
+  EXPECT_THROW(toDynamic(v2), std::runtime_error);
+}
+
 template <::apache::thrift::conformance::StandardProtocol Protocol>
 void testSerializeObjectWithMapMaskError() {
   Object obj;

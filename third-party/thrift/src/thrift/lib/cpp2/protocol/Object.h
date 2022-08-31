@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include <folly/dynamic.h>
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
@@ -124,5 +125,7 @@ std::unique_ptr<folly::IOBuf> serializeObject(
 // Returns whether the protocol::Value/ Object is its intrinsic default.
 bool isIntrinsicDefault(const Value& value);
 bool isIntrinsicDefault(const Object& obj);
+folly::dynamic toDynamic(const Value& value);
+folly::dynamic toDynamic(const Object& obj);
 
 } // namespace apache::thrift::protocol

@@ -83,6 +83,18 @@ TEST_F(LexerTest, int_literal) {
   }
 }
 
+TEST_F(LexerTest, int_literal_octal_zero) {
+  auto lexer = make_lexer("0\n32");
+  auto number1 = lexer.get_next_token();
+  auto number2 = lexer.get_next_token();
+
+  EXPECT_EQ(number1.kind, tok::int_literal);
+  EXPECT_EQ(number1.int_value(), 0);
+
+  EXPECT_EQ(number2.kind, tok::int_literal);
+  EXPECT_EQ(number2.int_value(), 32);
+}
+
 TEST_F(LexerTest, float_literal) {
   auto lexer = make_lexer("3.14 1e23 1.2E+34 0.0 .4e-2");
   const double values[] = {3.14, 1e23, 1.2E+34, 0.0, .4e-2};

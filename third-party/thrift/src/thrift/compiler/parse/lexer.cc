@@ -151,8 +151,9 @@ lexer::lexer(source src, lex_handler& handler, diagnostics_engine& diags)
 token lexer::make_int_literal(int offset, int base) {
   fmt::string_view text = token_text();
   errno = 0;
-  uint64_t val = strtoull(
-      std::string(text.data(), text.size()).c_str() + offset, nullptr, base);
+  char* end = nullptr;
+  uint64_t val = strtoull(text.data() + offset, &end, base);
+  assert(end == text.data() + text.size());
   return errno != ERANGE
       ? token::make_int_literal(token_source_range(), val)
       : report_error("integer constant {} is too large", text);
@@ -359,7 +360,9 @@ token lexer::get_next_token() {
     if (p != ptr_) {
       return unexpected_token();
     }
-    return make_int_literal(1, 8);
+    return ptr_ - token_start_ != 1
+        ? make_int_literal(1, 8)
+        : token::make_int_literal(token_source_range(), 0);
   } else if (c == '"' || c == '\'') {
     // Lex a string literal.
     const char* p = std::find(ptr_, end(), c);

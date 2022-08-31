@@ -18,6 +18,7 @@
 
 #include <utility>
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
@@ -286,6 +287,13 @@ struct Decode<type::bool_t> {
   void operator()(Protocol& prot, bool& b) const {
     prot.readBool(b);
   }
+
+  template <typename Protocol>
+  void operator()(Protocol& prot, std::vector<bool>::reference t) const {
+    bool b;
+    prot.readBool(b);
+    t = b;
+  }
 };
 
 template <>
@@ -353,12 +361,133 @@ struct Decode<type::binary_t> {
 };
 
 template <typename T>
+struct Decode<type::struct_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& s) const {
+    s.read(&prot);
+  }
+};
+
+template <typename T>
+struct Decode<type::union_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& s) const {
+    s.read(&prot);
+  }
+};
+
+template <typename T>
+struct Decode<type::exception_t<T>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& s) const {
+    s.read(&prot);
+  }
+};
+
+template <typename T>
 struct Decode<type::enum_t<T>> {
   template <typename Protocol>
   void operator()(Protocol& prot, T& t) const {
     int32_t i;
     prot.readI32(i);
     t = static_cast<T>(i);
+  }
+};
+
+// TODO: add optimization used in protocol_methods.h
+template <typename Tag>
+struct Decode<type::list<Tag>> {
+  using ListType = type::native_type<type::list<Tag>>;
+  template <typename Protocol>
+  void operator()(Protocol& prot, ListType& list) const {
+    TType t;
+    uint32_t s;
+    prot.readListBegin(t, s);
+    apache::thrift::detail::pm::reserve_if_possible(&list, s);
+    if (typeTagToTType<Tag> == t) {
+      while (s--) {
+        auto&& elem = apache::thrift::detail::pm::emplace_back_default(list);
+        Decode<Tag>{}(prot, elem);
+      }
+    } else {
+      while (s--) {
+        prot.skip(t);
+      }
+    }
+    prot.readListEnd();
+  }
+};
+
+template <typename Tag>
+struct Decode<type::set<Tag>> {
+  using SetType = type::native_type<type::set<Tag>>;
+  template <typename Protocol>
+  void operator()(Protocol& prot, SetType& set) const {
+    TType t;
+    uint32_t s;
+    prot.readSetBegin(t, s);
+    apache::thrift::detail::pm::reserve_if_possible(&set, s);
+    if (typeTagToTType<Tag> == t) {
+      while (s--) {
+        typename SetType::value_type value;
+        Decode<Tag>{}(prot, value);
+        set.emplace_hint(set.end(), std::move(value));
+      }
+    } else {
+      while (s--) {
+        prot.skip(t);
+      }
+    }
+    prot.readSetEnd();
+  }
+};
+
+template <typename Key, typename Value>
+struct Decode<type::map<Key, Value>> {
+  using MapType = type::native_type<type::map<Key, Value>>;
+  template <typename Protocol>
+  void operator()(Protocol& prot, MapType& map) const {
+    TType keyType, valueType;
+    uint32_t s;
+    prot.readMapBegin(keyType, valueType, s);
+    apache::thrift::detail::pm::reserve_if_possible(&map, s);
+    if (typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
+      while (s--) {
+        typename MapType::key_type key;
+        Decode<Key>{}(prot, key);
+        auto iter = map.emplace_hint(
+            map.end(), std::move(key), typename MapType::mapped_type{});
+        Decode<Value>{}(prot, iter->second);
+      }
+    } else {
+      while (s--) {
+        prot.skip(keyType);
+        prot.skip(valueType);
+      }
+    }
+    prot.readMapEnd();
+  }
+};
+
+// TODO: Handle cpp_type with containers that cannot use static_cast.
+template <typename T, typename Tag>
+struct Decode<type::cpp_type<T, Tag>> {
+  template <typename Protocol>
+  void operator()(Protocol& prot, T& t) const {
+    type::native_type<Tag> u;
+    Decode<Tag>{}(prot, u);
+    t = static_cast<T>(u);
+  }
+};
+
+// TODO: Use inplace adapter deserialization as optimization.
+template <typename Adapter, typename Tag>
+struct Decode<type::adapted<Adapter, Tag>> {
+  template <typename Protocol, typename U>
+  void operator()(Protocol& prot, U& m) const {
+    type::native_type<Tag> orig;
+    Decode<Tag>{}(prot, orig);
+    m = Adapter::fromThrift(std::move(orig));
   }
 };
 

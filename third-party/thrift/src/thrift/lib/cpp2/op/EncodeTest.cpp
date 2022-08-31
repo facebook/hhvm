@@ -214,20 +214,33 @@ TEST(EncodeTest, EncodeAdapted) {
   testEncodeAdapted<conformance::StandardProtocol::Compact>();
 }
 
-template <conformance::StandardProtocol Protocol, typename Tag, typename T>
-void testDecode(T value) {
-  SCOPED_TRACE(folly::pretty_name<Tag>());
+// Encodes the given value with EncodeTag, and decodes the result with DecodeTag
+// to DecodeT type using the Protocol.
+template <
+    conformance::StandardProtocol Protocol,
+    typename EncodeTag,
+    typename DecodeTag,
+    typename DecodeT,
+    typename EncodeT>
+DecodeT encodeAndDecode(EncodeT value) {
   protocol_writer_t<Protocol> writer;
   folly::IOBufQueue queue;
   writer.setOutput(&queue);
-  encode<Tag>(writer, value);
+  encode<EncodeTag>(writer, value);
 
   protocol_reader_t<Protocol> reader;
   auto serialized = queue.move();
   reader.setInput(serialized.get());
-  T result;
-  decode<Tag>(reader, result);
-  EXPECT_EQ(result, value);
+  DecodeT result;
+  decode<DecodeTag>(reader, result);
+  return result;
+}
+
+template <conformance::StandardProtocol Protocol, typename Tag, typename T>
+void testDecode(T value) {
+  SCOPED_TRACE(folly::pretty_name<Tag>());
+  EXPECT_EQ(
+      (encodeAndDecode<Protocol, Tag, Tag, decltype(value)>(value)), value);
 }
 
 template <conformance::StandardProtocol Protocol>
@@ -246,9 +259,127 @@ void testDecodeBasicTypes() {
   testDecode<Protocol, type::enum_t<MyEnum>>(MyEnum::value);
 }
 
+template <conformance::StandardProtocol Protocol>
+void testDecodeContainers() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testDecode<Protocol, type::list<type::enum_t<int>>>(
+      std::vector<int32_t>{1, 2, 3});
+  testDecode<Protocol, type::list<type::bool_t>>(
+      std::vector<bool>{true, false, true});
+  testDecode<Protocol, type::set<type::bool_t>>(std::set<bool>{true, false});
+  testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
+      std::map<std::string, int8_t>{
+          {std::string("foo"), 1}, {std::string("foo"), 2}});
+
+  // Test if it skips when value type doesn't match.
+  {
+    auto result = encodeAndDecode<
+        Protocol,
+        type::list<type::i32_t>,
+        type::list<type::string_t>,
+        std::vector<std::string>>(std::vector<int32_t>{1, 2, 3});
+    EXPECT_TRUE(result.empty());
+  }
+  {
+    auto result = encodeAndDecode<
+        Protocol,
+        type::set<type::i32_t>,
+        type::set<type::i64_t>,
+        std::set<int64_t>>(std::set<int32_t>{1, 2, 3});
+    EXPECT_TRUE(result.empty());
+  }
+  {
+    auto result = encodeAndDecode<
+        Protocol,
+        type::map<type::i32_t, type::bool_t>,
+        type::map<type::string_t, type::bool_t>,
+        std::map<std::string, bool>>(
+        std::map<int32_t, bool>{{1, true}, {2, false}});
+    EXPECT_TRUE(result.empty());
+  }
+  {
+    auto result = encodeAndDecode<
+        Protocol,
+        type::map<type::string_t, type::bool_t>,
+        type::map<type::string_t, type::i32_t>,
+        std::map<std::string, int32_t>>(
+        std::map<std::string, bool>{{"1", true}, {"2", false}});
+    EXPECT_TRUE(result.empty());
+  }
+}
+
+template <
+    conformance::StandardProtocol Protocol,
+    typename Struct,
+    typename Tag,
+    bool IsAdapted = false,
+    typename T>
+void testDecodeObject(T value) {
+  Struct s;
+  s.field_1_ref() = value;
+  if constexpr (IsAdapted) {
+    using AdaptedTag = type::adapted<test::TemplatedTestAdapter, Tag>;
+    testDecode<Protocol, AdaptedTag>(test::TemplatedTestAdapter::fromThrift(s));
+  } else {
+    testDecode<Protocol, Tag>(s);
+  }
+}
+
+template <conformance::StandardProtocol Protocol>
+void testDecodeStruct() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  using Struct =
+      test::testset::struct_with<type::map<type::string_t, type::i32_t>>;
+  std::map<std::string, int> mapValues = {{"one", 1}, {"four", 4}, {"two", 2}};
+  testDecodeObject<Protocol, Struct, type::struct_t<Struct>>(mapValues);
+  using Union = test::testset::union_with<type::set<type::string_t>>;
+  std::set<std::string> setValues = {"foo", "bar", "baz"};
+  testDecodeObject<Protocol, Union, type::union_t<Union>>(setValues);
+  using Exception = test::testset::exception_with<type::i64_t>;
+  testDecodeObject<Protocol, Exception, type::exception_t<Exception>>(1);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testDecodeCppType() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testDecode<Protocol, type::cpp_type<int, type::i16_t>>(1);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testDecodeAdapted() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  using AdaptedTag = type::adapted<test::TemplatedTestAdapter, type::string_t>;
+  testDecode<Protocol, AdaptedTag>(
+      test::TemplatedTestAdapter::fromThrift(std::string()));
+  using Struct = test::testset::struct_with<type::i32_t>;
+  testDecodeObject<Protocol, Struct, type::struct_t<Struct>, true>(1);
+  using Union = test::testset::union_with<type::i32_t>;
+  testDecodeObject<Protocol, Union, type::union_t<Union>, true>(1);
+}
+
 TEST(DecodeTest, DecodeBasicTypes) {
   testDecodeBasicTypes<conformance::StandardProtocol::Binary>();
   testDecodeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeContainers) {
+  testDecodeContainers<conformance::StandardProtocol::Binary>();
+  testDecodeContainers<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeStruct) {
+  testDecodeStruct<conformance::StandardProtocol::Binary>();
+  testDecodeStruct<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeCppType) {
+  testDecodeCppType<conformance::StandardProtocol::Binary>();
+  testDecodeCppType<conformance::StandardProtocol::Compact>();
+}
+
+TEST(DecodeTest, DecodeAdapted) {
+  testDecodeAdapted<conformance::StandardProtocol::Binary>();
+  testDecodeAdapted<conformance::StandardProtocol::Compact>();
 }
 
 } // namespace

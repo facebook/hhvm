@@ -114,11 +114,13 @@ struct RepoOptionsFlags {
 
   const SHA1& cacheKeySha1() const { return m_sha1; }
 
-  std::uint32_t getCompilerFlags() const;
   ParserEnv getParserEnvironment() const;
   std::uint32_t getDeclFlags() const;
   std::uint32_t getParserFlags() const;
   std::string getAliasedNamespacesConfig() const;
+
+  bool ltrAssign() const { return LTRAssign; }
+  bool uvs() const { return UVS; }
 
   std::string autoloadQuery() const { return Query; }
   std::string trustedDBPath() const { return TrustedDBPath; }

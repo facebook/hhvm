@@ -14,7 +14,7 @@ use std::sync::Mutex;
 use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
-use compile::HHBCFlags;
+use compile::HhbcFlags;
 use compile::NativeEnv;
 use compile::ParserFlags;
 use compile::Profile;
@@ -118,13 +118,15 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
 }
 
 pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> NativeEnv {
-    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
-        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
-        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
-        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
     NativeEnv {
         filepath,
-        hhbc_flags,
+        hhbc_flags: HhbcFlags {
+            emit_cls_meth_pointers: true,
+            emit_meth_caller_func_pointers: true,
+            fold_lazy_class_keys: true,
+            log_extern_compiler_perf: true,
+            ..Default::default()
+        },
         parser_flags: ParserFlags::ENABLE_ENUM_CLASSES,
         flags: opts.env_flags.clone(),
         ..Default::default()

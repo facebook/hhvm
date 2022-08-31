@@ -53,7 +53,7 @@ pub struct NativeEnv {
     pub include_roots: String,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
-    pub hhbc_flags: HHBCFlags,
+    pub hhbc_flags: HhbcFlags,
     pub parser_flags: ParserFlags,
     pub flags: EnvFlags,
 }
@@ -66,7 +66,7 @@ impl Default for NativeEnv {
             include_roots: "".into(),
             emit_class_pointers: 0,
             check_int_overflow: 0,
-            hhbc_flags: HHBCFlags::empty(),
+            hhbc_flags: HhbcFlags::default(),
             parser_flags: ParserFlags::empty(),
             flags: EnvFlags::default(),
         }
@@ -96,26 +96,32 @@ pub struct EnvFlags {
     pub enable_ir: bool,
 }
 
-// Keep in sync with compiler_ffi.rs
-bitflags! {
-      pub struct HHBCFlags: u32 {
-        const LTR_ASSIGN=1 << 0;
-        const UVS=1 << 1;
-        // No longer using bit 3.
-        const AUTHORITATIVE=1 << 4;
-        const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
-        const LOG_EXTERN_COMPILER_PERF=1 << 6;
-        const ENABLE_INTRINSICS_EXTENSION=1 << 7;
-        // No longer using bit 8.
-        // No longer using bit 9.
-        const EMIT_CLS_METH_POINTERS=1 << 10;
-        const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
-        // No longer using bit 12.
-        const ARRAY_PROVENANCE=1 << 13;
-        // No longer using bit 14.
-        const FOLD_LAZY_CLASS_KEYS=1 << 15;
-        // No longer using bit 16.
-    }
+#[derive(Debug, Default, Clone, clap::Parser)]
+pub struct HhbcFlags {
+    /// PHP7 left-to-right assignment semantics
+    #[clap(long)]
+    pub ltr_assign: bool,
+
+    /// PHP7 Uniform Variable Syntax
+    #[clap(long)]
+    pub uvs: bool,
+
+    #[clap(long)]
+    pub repo_authoritative: bool,
+    #[clap(long)]
+    pub jit_enable_rename_function: bool,
+    #[clap(long)]
+    pub log_extern_compiler_perf: bool,
+    #[clap(long)]
+    pub enable_intrinsics_extension: bool,
+    #[clap(long)]
+    pub emit_cls_meth_pointers: bool,
+    #[clap(long)]
+    pub emit_meth_caller_func_pointers: bool,
+    #[clap(long)]
+    pub array_provenance: bool,
+    #[clap(long)]
+    pub fold_lazy_class_keys: bool,
 }
 
 // Mapping must match getParserFlags() in runtime-option.cpp and compiler_ffi.rs
@@ -142,105 +148,98 @@ bitflags! {
   }
 }
 
-impl HHBCFlags {
+impl HhbcFlags {
     pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
-        let mut hhbc_options = Self::empty();
+        let mut flags = Self::default();
 
-        // Only ini version in use
-        if let Some(true) = config.get_bool("php7.ltr_assign")? {
-            hhbc_options |= Self::LTR_ASSIGN;
-        }
-        // Only ini version in use
-        if let Some(true) = config.get_bool("php7.uvs")? {
-            hhbc_options |= Self::UVS;
-        }
-        // Both variants in use
-        if let Some(true) = config.get_bool("Repo.Authoritative")? {
-            hhbc_options |= Self::AUTHORITATIVE;
-        }
-        // HDF uses both Eval.JitEnableRenameFunction and JitEnableRenameFunction
-        // ini only uses the hhvm.jit_enable_rename_function
-        if let Some(true) = config.get_bool("Eval.JitEnableRenameFunction")? {
-            hhbc_options |= Self::JIT_ENABLE_RENAME_FUNCTION;
-        }
-        if let Some(true) = config.get_bool("JitEnableRenameFunction")? {
-            hhbc_options |= Self::JIT_ENABLE_RENAME_FUNCTION;
-        }
-        // Only hdf version in use
-        if let Some(true) = config.get_bool("Eval.LogExternCompilerPerf")? {
-            hhbc_options |= Self::LOG_EXTERN_COMPILER_PERF;
-        }
-        // I think only the hdf is used correctly
-        if let Some(true) = config.get_bool("Eval.EnableIntrinsicsExtension")? {
-            hhbc_options |= Self::ENABLE_INTRINSICS_EXTENSION;
-        }
-        // Only the hdf versions used
-        if let Some(true) = config.get_bool("Eval.EmitClsMethPointers")? {
-            hhbc_options |= Self::EMIT_CLS_METH_POINTERS;
-        }
+        // Use the config setting if provided; otherwise preserve default.
+        let init = |flag: &mut bool, name: &str| -> Result<()> {
+            match config.get_bool(name)? {
+                Some(b) => Ok(*flag = b),
+                None => Ok(()),
+            }
+        };
+
+        init(&mut flags.ltr_assign, "php7.ltr_assign")?;
+        init(&mut flags.uvs, "php7.uvs")?;
+        init(&mut flags.repo_authoritative, "Repo.Authoritative")?;
+        init(
+            &mut flags.jit_enable_rename_function,
+            "Eval.JitEnableRenameFunction",
+        )?;
+        init(
+            &mut flags.jit_enable_rename_function,
+            "JitEnableRenameFunction",
+        )?;
+        init(
+            &mut flags.log_extern_compiler_perf,
+            "Eval.LogExternCompilerPerf",
+        )?;
+        init(
+            &mut flags.enable_intrinsics_extension,
+            "Eval.EnableIntrinsicsExtension",
+        )?;
+        init(
+            &mut flags.emit_cls_meth_pointers,
+            "Eval.EmitClsMethPointers",
+        )?;
+
         // Only the hdf versions used. Can kill variant in options_cli.rs
-        if config
+        flags.emit_meth_caller_func_pointers = config
             .get_bool("Eval.EmitMethCallerFuncPointers")?
-            .unwrap_or(true)
-        {
-            hhbc_options |= Self::EMIT_METH_CALLER_FUNC_POINTERS;
-        }
+            .unwrap_or(true);
+
         // ini might use hhvm.array_provenance
         // hdf might use Eval.ArrayProvenance
         // But super unclear here
-        if let Some(true) = config.get_bool("Eval.ArrayProvenance")? {
-            hhbc_options |= Self::ARRAY_PROVENANCE;
-        }
-        if let Some(true) = config.get_bool("array_provenance")? {
-            hhbc_options |= Self::ARRAY_PROVENANCE;
-        }
+        init(&mut flags.array_provenance, "Eval.ArrayProvenance")?;
+        init(&mut flags.array_provenance, "array_provenance")?;
+
         // Only hdf version
-        if config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true) {
-            hhbc_options |= Self::FOLD_LAZY_CLASS_KEYS;
-        }
-        Ok(hhbc_options)
+        flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
+        Ok(flags)
     }
 
-    fn to_php7_flags(self) -> Php7Flags {
+    fn to_php7_flags(&self) -> Php7Flags {
         let mut f = Php7Flags::empty();
-        if self.contains(Self::UVS) {
+        if self.uvs {
             f |= Php7Flags::UVS;
         }
-        if self.contains(Self::LTR_ASSIGN) {
+        if self.ltr_assign {
             f |= Php7Flags::LTR_ASSIGN;
         }
         f
     }
 
-    fn to_hhvm_flags(self) -> HhvmFlags {
+    fn to_hhvm_flags(&self) -> HhvmFlags {
         let mut f = HhvmFlags::empty();
-        if self.contains(Self::ARRAY_PROVENANCE) {
+        if self.array_provenance {
             f |= HhvmFlags::ARRAY_PROVENANCE;
         }
-        if self.contains(Self::EMIT_CLS_METH_POINTERS) {
+        if self.emit_cls_meth_pointers {
             f |= HhvmFlags::EMIT_CLS_METH_POINTERS;
         }
-        if self.contains(Self::EMIT_METH_CALLER_FUNC_POINTERS) {
+        if self.emit_meth_caller_func_pointers {
             f |= HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS;
         }
-        if self.contains(Self::ENABLE_INTRINSICS_EXTENSION) {
+        if self.enable_intrinsics_extension {
             f |= HhvmFlags::ENABLE_INTRINSICS_EXTENSION;
         }
-        if self.contains(Self::FOLD_LAZY_CLASS_KEYS) {
+        if self.fold_lazy_class_keys {
             f |= HhvmFlags::FOLD_LAZY_CLASS_KEYS;
         }
-        if self.contains(Self::JIT_ENABLE_RENAME_FUNCTION) {
+        if self.jit_enable_rename_function {
             f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;
         }
-        if self.contains(Self::LOG_EXTERN_COMPILER_PERF) {
+        if self.log_extern_compiler_perf {
             f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
         }
         f
     }
 
-    fn to_repo_flags(self) -> RepoFlags {
+    fn to_repo_flags(&self) -> RepoFlags {
         let mut f = RepoFlags::empty();
-        if self.contains(Self::AUTHORITATIVE) {
+        if self.repo_authoritative {
             f |= RepoFlags::AUTHORITATIVE;
         }
         f
@@ -349,7 +348,7 @@ impl ParserFlags {
 
 impl NativeEnv {
     fn to_options(native_env: &NativeEnv) -> Options {
-        let hhbc_flags = native_env.hhbc_flags;
+        let hhbc_flags = &native_env.hhbc_flags;
         let config = [
             native_env.aliased_namespaces.as_str(),
             native_env.include_roots.as_str(),

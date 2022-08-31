@@ -16,6 +16,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use compile::EnvFlags;
+use compile::HhbcFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
 use external_decl_provider::ExternalDeclProvider;
@@ -42,8 +43,7 @@ pub mod compile_ffi {
         emit_class_pointers: i32,
         check_int_overflow: i32,
 
-        /// compiler::HHBCFlags
-        hhbc_flags: u32,
+        hhbc_flags: HhbcFlags,
 
         /// compiler::ParserFlags
         parser_flags: u32,
@@ -51,11 +51,25 @@ pub mod compile_ffi {
         flags: EnvFlags,
     }
 
+    /// compiler::EnvFlags exposed to C++
     struct EnvFlags {
         is_systemlib: bool,
         for_debugger_eval: bool,
         disable_toplevel_elaboration: bool,
         enable_ir: bool,
+    }
+
+    /// compiler::HhbcFlags exposed to C++
+    struct HhbcFlags {
+        ltr_assign: bool,
+        uvs: bool,
+        repo_authoritative: bool,
+        jit_enable_rename_function: bool,
+        log_extern_compiler_perf: bool,
+        enable_intrinsics_extension: bool,
+        emit_cls_meth_pointers: bool,
+        emit_meth_caller_func_pointers: bool,
+        fold_lazy_class_keys: bool,
     }
 
     pub struct DeclResult {
@@ -206,7 +220,18 @@ impl compile_ffi::NativeEnv {
             include_roots: self.include_roots.clone(),
             emit_class_pointers: self.emit_class_pointers,
             check_int_overflow: self.check_int_overflow,
-            hhbc_flags: compile::HHBCFlags::from_bits(self.hhbc_flags)?,
+            hhbc_flags: HhbcFlags {
+                ltr_assign: self.hhbc_flags.ltr_assign,
+                uvs: self.hhbc_flags.uvs,
+                repo_authoritative: self.hhbc_flags.repo_authoritative,
+                jit_enable_rename_function: self.hhbc_flags.jit_enable_rename_function,
+                log_extern_compiler_perf: self.hhbc_flags.log_extern_compiler_perf,
+                enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
+                emit_cls_meth_pointers: self.hhbc_flags.emit_cls_meth_pointers,
+                emit_meth_caller_func_pointers: self.hhbc_flags.emit_meth_caller_func_pointers,
+                fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
+                ..Default::default()
+            },
             parser_flags: compile::ParserFlags::from_bits(self.parser_flags)?,
             flags: EnvFlags {
                 is_systemlib: self.flags.is_systemlib,

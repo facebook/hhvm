@@ -186,19 +186,29 @@ CompilerResult hackc_compile(
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
 
   hackc::NativeEnv const native_env{
-    reinterpret_cast<uint64_t>(provider),
-    filename,
-    aliased_namespaces,
-    s_misc_config,
-    RuntimeOption::EvalEmitClassPointers,
-    RuntimeOption::CheckIntOverflow,
-    options.getCompilerFlags(),
-    options.getParserFlags(),
-    hackc::EnvFlags {
-      isSystemLib,
-      forDebuggerEval,
-      false, // disable_toplevel_elaboration,
-      false, // enable_ir
+    .decl_provider = reinterpret_cast<uint64_t>(provider),
+    .filepath = filename,
+    .aliased_namespaces = aliased_namespaces,
+    .include_roots = s_misc_config,
+    .emit_class_pointers = RuntimeOption::EvalEmitClassPointers,
+    .check_int_overflow = RuntimeOption::CheckIntOverflow,
+    .hhbc_flags = hackc::HhbcFlags {
+      .ltr_assign = options.ltrAssign(),
+      .uvs = options.uvs(),
+      .repo_authoritative = RO::RepoAuthoritative,
+      .jit_enable_rename_function = RO::EvalJitEnableRenameFunction,
+      .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
+      .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
+      .emit_cls_meth_pointers = RO::EvalEmitClsMethPointers,
+      .emit_meth_caller_func_pointers = RO::EvalEmitMethCallerFuncPointers,
+      .fold_lazy_class_keys = RO::EvalFoldLazyClassKeys,
+    },
+    .parser_flags = options.getParserFlags(),
+    .flags = hackc::EnvFlags {
+      .is_systemlib = isSystemLib,
+      .for_debugger_eval = forDebuggerEval,
+      .disable_toplevel_elaboration = false,
+      .enable_ir = false,
     }
   };
 

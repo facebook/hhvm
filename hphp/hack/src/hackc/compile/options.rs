@@ -357,8 +357,8 @@ impl Default for LangFlags {
 prefixed_flags!(
     Php7Flags,
     "hhvm.php7.",
-    LTR_ASSIGN, //
-    UVS,        //
+    LTR_ASSIGN, // Left to right assignment
+    UVS,        // uniform variable syntax
 );
 impl Default for Php7Flags {
     fn default() -> Php7Flags {

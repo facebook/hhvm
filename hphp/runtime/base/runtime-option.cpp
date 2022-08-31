@@ -303,28 +303,6 @@ ParserEnv RepoOptionsFlags::getParserEnvironment() const {
     };
 }
 
-// Mapping must match HHBCFlags in compile.rs
-std::uint32_t RepoOptionsFlags::getCompilerFlags() const {
-  std::uint32_t hhbc_flags = 0;
-
-  #define HHBC_FLAGS()                                          \
-    SETFLAGS(LTRAssign, 0)                                      \
-    SETFLAGS(UVS, 1)                                            \
-    SETFLAGS(RuntimeOption::RepoAuthoritative, 4)               \
-    SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
-    SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \
-    SETFLAGS(RuntimeOption::EnableIntrinsicsExtension, 7)       \
-    SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
-    SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
-    SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)
-
-  #define SETFLAGS(flag, n)                                     \
-    if (flag) {hhbc_flags |= 1 << n;}
-    HHBC_FLAGS()
-  #undef SETFLAGS
-  return hhbc_flags;
-}
-
 std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
   folly::dynamic m_config = folly::dynamic::object();
   m_config["hhvm.aliased_namespaces"] =

@@ -18,7 +18,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use ::compile::EnvFlags;
-use ::compile::HHBCFlags;
+use ::compile::HhbcFlags;
 use ::compile::NativeEnv;
 use ::compile::ParserFlags;
 use anyhow::Result;
@@ -183,7 +183,7 @@ impl Opts {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
         let parser_flags = ParserFlags::from_hhvm_config(&hhvm_config)?;
-        let hhbc_flags = HHBCFlags::from_hhvm_config(&hhvm_config)?;
+        let hhbc_flags = HhbcFlags::from_hhvm_config(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
             aliased_namespaces: crate::Opts::AUTO_NAMESPACE_MAP.into(),

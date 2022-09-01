@@ -15,7 +15,6 @@ use libc::c_uint;
 use libc::c_ulong;
 use libc::c_void;
 use libc::memcpy;
-use libc::memset;
 
 use crate::intext::*;
 
@@ -41,7 +40,6 @@ extern "C" {
     fn caml_failwith(msg: *const c_char) -> !;
     fn caml_invalid_argument(msg: *const c_char) -> !;
     fn caml_raise_out_of_memory() -> !;
-    fn caml_stat_calloc_noexc(_: asize_t, _: asize_t) -> caml_stat_block;
     fn caml_stat_free(_: caml_stat_block);
     fn caml_string_length(_: value) -> mlsize_t;
     fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
@@ -207,15 +205,14 @@ struct object_position {
 // [present] bitvector needs to be filled with zeros, the [entries]
 // array can be left uninitialized.
 
-#[derive(Copy, Clone)]
 #[repr(C)]
 struct position_table {
     shift: c_int,
-    size: mlsize_t,                // size == 1 << (wordsize - shift)
-    mask: mlsize_t,                // mask == size - 1
-    threshold: mlsize_t,           // threshold == a fixed fraction of size
-    present: *mut uintnat,         // [Bitvect_size(size)]
-    entries: *mut object_position, // [size]
+    size: mlsize_t,                  // size == 1 << (wordsize - shift)
+    mask: mlsize_t,                  // mask == size - 1
+    threshold: mlsize_t,             // threshold == a fixed fraction of size
+    present: Box<[uintnat]>,         // [Bitvect_size(size)]
+    entries: Box<[object_position]>, // [size]
 }
 
 const Bits_word: usize = 8 * std::mem::size_of::<uintnat>();
@@ -286,8 +283,6 @@ struct State {
     stack: Vec<extern_item>,
 
     // Hash table to record already marshalled objects
-    pos_table_present_init: [uintnat; Bitvect_size(POS_TABLE_INIT_SIZE)],
-    pos_table_entries_init: [object_position; POS_TABLE_INIT_SIZE],
     pos_table: position_table,
 
     // To buffer the output
@@ -312,6 +307,8 @@ impl State {
         std::ptr::addr_of_mut!((*extern_state).stack)
             .write(Vec::with_capacity(EXTERN_STACK_INIT_SIZE));
         std::ptr::addr_of_mut!((*extern_state).output).write(vec![]);
+        std::ptr::addr_of_mut!((*extern_state).pos_table.present).write([].into());
+        std::ptr::addr_of_mut!((*extern_state).pos_table.entries).write([].into());
 
         extern_state
     }
@@ -340,13 +337,9 @@ impl State {
             .wrapping_sub(POS_TABLE_INIT_SIZE_LOG2) as c_int;
         self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
         self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
-        self.pos_table.present = self.pos_table_present_init.as_mut_ptr();
-        self.pos_table.entries = self.pos_table_entries_init.as_mut_ptr();
-        memset(
-            self.pos_table_present_init.as_mut_ptr() as *mut c_void,
-            0,
-            Bitvect_size(POS_TABLE_INIT_SIZE).wrapping_mul(std::mem::size_of::<uintnat>()),
-        );
+        self.pos_table.present =
+            Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
+        self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE).assume_init();
     }
 
     /// Free the position table
@@ -354,13 +347,8 @@ impl State {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
-        if self.pos_table.present != self.pos_table_present_init.as_mut_ptr() {
-            caml_stat_free(self.pos_table.present as caml_stat_block);
-            caml_stat_free(self.pos_table.entries as caml_stat_block);
-            // Protect against repeated calls to free_position_table
-            self.pos_table.present = self.pos_table_present_init.as_mut_ptr();
-            self.pos_table.entries = self.pos_table_entries_init.as_mut_ptr()
-        };
+        drop(std::mem::take(&mut self.pos_table.present));
+        drop(std::mem::take(&mut self.pos_table.entries));
     }
 
     /// Grow the position table
@@ -368,20 +356,20 @@ impl State {
         let new_size: mlsize_t;
         let mut new_byte_size: mlsize_t = 0;
         let new_shift: c_int;
-        let new_present: *mut uintnat;
-        let new_entries: *mut object_position;
+        let new_present: Box<[uintnat]>;
+        let new_entries: Box<[object_position]>;
         let mut i: uintnat;
         let mut h: uintnat;
-        let old: position_table = self.pos_table;
+        let mut old: position_table;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
-        if old.size < 1000000 {
-            new_size = (old.size).wrapping_mul(8);
-            new_shift = old.shift - 3;
+        if self.pos_table.size < 1000000 {
+            new_size = (self.pos_table.size).wrapping_mul(8);
+            new_shift = self.pos_table.shift - 3;
         } else {
-            new_size = (old.size).wrapping_mul(2);
-            new_shift = old.shift - 1;
+            new_size = (self.pos_table.size).wrapping_mul(2);
+            new_shift = self.pos_table.shift - 1;
         }
         if new_size == 0
             || caml_umul_overflow(
@@ -392,43 +380,36 @@ impl State {
         {
             self.out_of_memory();
         }
-        new_entries = caml_stat_alloc_noexc(new_byte_size) as _;
-        if new_entries.is_null() {
-            self.out_of_memory();
-        }
-        new_present = caml_stat_calloc_noexc(
-            Bitvect_size(new_size as usize) as asize_t,
-            std::mem::size_of::<uintnat>() as asize_t,
-        ) as _;
-        if new_present.is_null() {
-            caml_stat_free(new_entries as caml_stat_block);
-            self.out_of_memory();
-        }
-        self.pos_table.size = new_size;
-        self.pos_table.shift = new_shift;
-        self.pos_table.mask = new_size.wrapping_sub(1);
-        self.pos_table.threshold = Threshold(new_size as usize) as mlsize_t;
-        self.pos_table.present = new_present;
-        self.pos_table.entries = new_entries;
+        new_entries = Box::new_uninit_slice(new_size as usize).assume_init();
+        new_present = Box::new_zeroed_slice(Bitvect_size(new_size as usize)).assume_init();
+        old = std::mem::replace(
+            &mut self.pos_table,
+            position_table {
+                size: new_size,
+                shift: new_shift,
+                mask: new_size.wrapping_sub(1),
+                threshold: Threshold(new_size as usize) as mlsize_t,
+                present: new_present,
+                entries: new_entries,
+            },
+        );
 
         // Insert every entry of the old table in the new table
+        let old_present = old.present.as_mut_ptr();
+        let old_entries = old.entries.as_mut_ptr();
+        let new_present = self.pos_table.present.as_mut_ptr();
+        let new_entries = self.pos_table.entries.as_mut_ptr();
         i = 0;
         while i < old.size {
-            if bitvect_test(old.present, i) != 0 {
-                h = Hash((*old.entries.offset(i as isize)).obj, self.pos_table.shift);
+            if bitvect_test(old_present, i) != 0 {
+                h = Hash((*old_entries.offset(i as isize)).obj, self.pos_table.shift);
                 while bitvect_test(new_present, h) != 0 {
                     h = h.wrapping_add(1) & self.pos_table.mask
                 }
                 bitvect_set(new_present, h);
-                *new_entries.offset(h as isize) = *old.entries.offset(i as isize)
+                *new_entries.offset(h as isize) = *old_entries.offset(i as isize)
             }
             i = i.wrapping_add(1)
-        }
-
-        // Free the old tables if they are not the initial ones
-        if old.present != self.pos_table_present_init.as_mut_ptr() {
-            caml_stat_free(old.present as caml_stat_block);
-            caml_stat_free(old.entries as caml_stat_block);
         }
     }
 
@@ -445,12 +426,12 @@ impl State {
     ) -> c_int {
         let mut h: uintnat = Hash(obj, self.pos_table.shift);
         loop {
-            if bitvect_test(self.pos_table.present, h) == 0 {
+            if bitvect_test(self.pos_table.present.as_mut_ptr(), h) == 0 {
                 *h_out = h;
                 return 0;
             }
-            if (*self.pos_table.entries.offset(h as isize)).obj == obj {
-                *pos_out = (*self.pos_table.entries.offset(h as isize)).pos;
+            if (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj == obj {
+                *pos_out = (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos;
                 return 1;
             }
             h = h.wrapping_add(1) & self.pos_table.mask
@@ -465,9 +446,9 @@ impl State {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
-        bitvect_set(self.pos_table.present, h);
-        (*self.pos_table.entries.offset(h as isize)).obj = obj;
-        (*self.pos_table.entries.offset(h as isize)).pos = self.obj_counter;
+        bitvect_set(self.pos_table.present.as_mut_ptr(), h);
+        (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj = obj;
+        (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos = self.obj_counter;
         self.obj_counter = self.obj_counter.wrapping_add(1);
         if self.obj_counter >= self.pos_table.threshold {
             self.resize_position_table();

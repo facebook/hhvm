@@ -223,38 +223,68 @@ MACRO (MYSQL_CHECK_SSL)
     ENDIF()
 
     IF(OPENSSL_INCLUDE_DIR)
-      # Verify version number. Version information looks like:
-      #   #define OPENSSL_VERSION_NUMBER 0x1000103fL
-      # Encoded as MNNFFPPS: major minor fix patch status
       if(EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/base.h")
         SET(SSL_VERSION_FILE "${OPENSSL_INCLUDE_DIR}/openssl/base.h")
       else()
         SET(SSL_VERSION_FILE "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
       endif()
       FILE(STRINGS "${SSL_VERSION_FILE}"
-        OPENSSL_VERSION_NUMBER
-        REGEX "^#[ ]*define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9].*"
+        OPENSSL_MAJOR_VERSION
+        REGEX "^#[ ]*define[\t ]+OPENSSL_VERSION_MAJOR[\t ]+[0-9].*"
         )
-      STRING(REGEX REPLACE
-        "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1"
-        OPENSSL_MAJOR_VERSION "${OPENSSL_VERSION_NUMBER}"
-        )
-      STRING(REGEX REPLACE
-        "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9]([0-9][0-9]).*$" "\\1"
-        OPENSSL_MINOR_VERSION "${OPENSSL_VERSION_NUMBER}"
-        )
-      STRING(REGEX REPLACE
-        "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9]([0-9][0-9]).*$" "\\1"
-        OPENSSL_FIX_VERSION "${OPENSSL_VERSION_NUMBER}"
-        )
+      IF(OPENSSL_MAJOR_VERSION STREQUAL "")
+        # Verify version number. Version information looks like:
+        #   #define OPENSSL_VERSION_NUMBER 0x1000103fL
+        # Encoded as MNNFFPPS: major minor fix patch status
+        FILE(STRINGS "${SSL_VERSION_FILE}"
+          OPENSSL_VERSION_NUMBER
+          REGEX "^#[ ]*define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9].*"
+          )
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1"
+          OPENSSL_MAJOR_VERSION "${OPENSSL_VERSION_NUMBER}"
+          )
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9]([0-9][0-9]).*$" "\\1"
+          OPENSSL_MINOR_VERSION "${OPENSSL_VERSION_NUMBER}"
+          )
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9]([0-9][0-9]).*$" "\\1"
+          OPENSSL_FIX_VERSION "${OPENSSL_VERSION_NUMBER}"
+          )
+      ELSE()
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_MAJOR[\t ]+([0-9]).*$" "\\1"
+          OPENSSL_MAJOR_VERSION "${OPENSSL_MAJOR_VERSION}"
+          )
+        FILE(STRINGS "${SSL_VERSION_FILE}"
+          OPENSSL_MINOR_VERSION
+          REGEX "^#[ ]*define[\t ]+OPENSSL_VERSION_MINOR[\t ]+[0-9].*"
+          )
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_MINOR[\t ]+([0-9]).*$" "\\1"
+          OPENSSL_MINOR_VERSION "${OPENSSL_MINOR_VERSION}"
+          )
+        FILE(STRINGS "${SSL_VERSION_FILE}"
+          OPENSSL_FIX_VERSION
+          REGEX "^#[ ]*define[\t ]+OPENSSL_VERSION_PATCH[\t ]+[0-9].*"
+          )
+        STRING(REGEX REPLACE
+          "^.*OPENSSL_VERSION_PATCH[\t ]+([0-9]).*$" "\\1"
+          OPENSSL_FIX_VERSION "${OPENSSL_FIX_VERSION}"
+          )
+      ENDIF()
     ENDIF()
     IF("${OPENSSL_MAJOR_VERSION}.${OPENSSL_MINOR_VERSION}.${OPENSSL_FIX_VERSION}" VERSION_GREATER "1.1.0")
        ADD_DEFINITIONS(-DHAVE_TLSv13)
     ENDIF()
+    IF("${OPENSSL_MAJOR_VERSION}.${OPENSSL_MINOR_VERSION}.${OPENSSL_FIX_VERSION}" VERSION_GREATER "3.0.0")
+       ADD_DEFINITIONS(-DOPENSSL_SUPPRESS_DEPRECATED)
+    ENDIF()
     IF(OPENSSL_INCLUDE_DIR AND
        OPENSSL_LIBRARY   AND
        CRYPTO_LIBRARY      AND
-       OPENSSL_MAJOR_VERSION STREQUAL "1"
+       (OPENSSL_MAJOR_VERSION STREQUAL "1" OR OPENSSL_MAJOR_VERSION STREQUAL "3")
       )
       SET(OPENSSL_FOUND TRUE)
       FIND_PROGRAM(OPENSSL_EXECUTABLE openssl

@@ -45,6 +45,11 @@
 #include <openssl/ec.h>
 #endif /* OPENSSL_VERSION_NUMBER < 0x10002000L */
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/evp.h>
+#include <openssl/provider.h>
+#endif
+
 #define TLS_VERSION_OPTION_SIZE 256
 
 using std::string;
@@ -573,12 +578,20 @@ int set_fips_mode(const uint fips_mode, char err_string[OPENSSL_ERROR_LENGTH]) {
   if (fips_mode > 2) {
     goto EXIT;
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  fips_mode_old = EVP_default_properties_is_fips_enabled(NULL);
+#else
   fips_mode_old = FIPS_mode();
+#endif
   if (fips_mode_old == fips_mode) {
     rc = 1;
     goto EXIT;
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  if (!(rc = EVP_default_properties_enable_fips(NULL, fips_mode))) {
+#else
   if (!(rc = FIPS_mode_set(fips_mode))) {
+#endif
     /*
       If OS doesn't have FIPS enabled openssl library and user sets FIPS mode
       ON, It fails with proper error. But in the same time it doesn't allow to
@@ -586,7 +599,11 @@ int set_fips_mode(const uint fips_mode, char err_string[OPENSSL_ERROR_LENGTH]) {
       error, setting old working FIPS mode value in the OpenSSL library. It will
       allow successful cryptographic operation and will not abort the server.
     */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    EVP_default_properties_enable_fips(NULL, fips_mode_old);
+#else
     FIPS_mode_set(fips_mode_old);
+#endif
     err_library = ERR_get_error();
     ERR_error_string_n(err_library, err_string, OPENSSL_ERROR_LENGTH - 1);
     err_string[OPENSSL_ERROR_LENGTH - 1] = '\0';
@@ -600,7 +617,14 @@ EXIT:
 
   @returns openssl current fips mode
 */
-uint get_fips_mode() { return FIPS_mode(); }
+uint get_fips_mode() {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  return EVP_default_properties_is_fips_enabled(NULL) &&
+         OSSL_PROVIDER_available(NULL, "fips");
+#else
+  return FIPS_mode();
+#endif
+}
 #endif
 
 long process_tls_version(const char *tls_version) {

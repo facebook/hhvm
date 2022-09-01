@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/py3/util.h>
-
-#include <memory>
-
-#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/lib/py3/util.h>
 
 using namespace apache::thrift::compiler;
 
-class UtilTest : public testing::Test {};
-
-TEST_F(UtilTest, get_py3_name) {
+TEST(UtilTest, get_py3_name) {
   EXPECT_EQ("foo", py3::get_py3_name(t_field(t_base_type::t_i32(), "foo")));
   EXPECT_EQ("True_", py3::get_py3_name(t_field(t_base_type::t_i32(), "True")));
   EXPECT_EQ(

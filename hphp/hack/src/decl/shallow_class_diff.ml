@@ -98,13 +98,15 @@ module type Member_S = sig
 
   val is_private : t -> bool
 
-  (** Whether adding this member implies that the constructor should be considered modified.
+  (** Whether adding this member implies that the constructor and the
+    constructor of all descendants should be considered modified.
     This is the case for example for required XHP attributes. *)
-  val constructor_is_modified_when_added : t -> bool
+  val constructor_is_changed_inheritance_when_added : t -> bool
 
-  (** Whether modifying this member implies that the constructor should be considered modified.
+  (** Whether modifying this member implies that the constructor and the
+    constructor of all descendants should be considered modified.
     This is the case for example for required XHP attributes. *)
-  val constructor_is_modified_when_modified : old:t -> new_:t -> bool
+  val constructor_is_changed_inheritance_when_modified : old:t -> new_:t -> bool
 end
 
 (** Returns the diff of two member lists, plus a diff on the constructor if the member changes
@@ -132,8 +134,8 @@ let diff_members
         let constructor_change =
           max_constructor_change
             constructor_change
-            (if Member.constructor_is_modified_when_added m then
-              Some Modified
+            (if Member.constructor_is_changed_inheritance_when_added m then
+              Some Changed_inheritance
             else
               None)
         in
@@ -148,11 +150,11 @@ let diff_members
           max_constructor_change
             constructor_change
             (if
-             Member.constructor_is_modified_when_modified
+             Member.constructor_is_changed_inheritance_when_modified
                ~old:old_member
                ~new_:new_member
             then
-              Some Modified
+              Some Changed_inheritance
             else
               None)
         in
@@ -175,9 +177,9 @@ module ClassConst : Member_S with type t = shallow_class_const = struct
 
   let is_private _ = false
 
-  let constructor_is_modified_when_added _ = false
+  let constructor_is_changed_inheritance_when_added _ = false
 
-  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
+  let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
 end
 
 module TypeConst : Member_S with type t = shallow_typeconst = struct
@@ -198,9 +200,9 @@ module TypeConst : Member_S with type t = shallow_typeconst = struct
 
   let is_private _ = false
 
-  let constructor_is_modified_when_added _ = false
+  let constructor_is_changed_inheritance_when_added _ = false
 
-  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
+  let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
 end
 
 module Prop : Member_S with type t = shallow_prop = struct
@@ -222,10 +224,10 @@ module Prop : Member_S with type t = shallow_prop = struct
   let is_private p : bool =
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
 
-  let constructor_is_modified_when_added p =
+  let constructor_is_changed_inheritance_when_added p =
     Xhp_attribute.opt_is_required p.sp_xhp_attr
 
-  let constructor_is_modified_when_modified ~old ~new_ =
+  let constructor_is_changed_inheritance_when_modified ~old ~new_ =
     Xhp_attribute.opt_is_required new_.sp_xhp_attr
     && (not @@ Xhp_attribute.opt_is_required old.sp_xhp_attr)
 end
@@ -249,9 +251,9 @@ module Method : Member_S with type t = shallow_method = struct
   let is_private m : bool =
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
 
-  let constructor_is_modified_when_added _ = false
+  let constructor_is_changed_inheritance_when_added _ = false
 
-  let constructor_is_modified_when_modified ~old:_ ~new_:_ = false
+  let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
 end
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =

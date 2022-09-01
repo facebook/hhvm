@@ -112,8 +112,8 @@ const unsafe fn Field(x: value, i: usize) -> value {
     *(x as *const value).add(i)
 }
 #[inline]
-unsafe fn Field_ptr_mut(x: value, i: usize) -> *mut value {
-    &mut *(x as *mut value).add(i) as *mut value
+unsafe fn Field_ptr(x: value, i: usize) -> *const value {
+    &*(x as *const value).add(i) as *const value
 }
 
 // const No_scan_tag: c_uint = 251;
@@ -174,7 +174,7 @@ const EXTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
 #[derive(Copy, Clone)]
 #[repr(C)]
 struct extern_item {
-    v: *mut value,
+    v: *const value,
     count: mlsize_t,
 }
 
@@ -759,7 +759,7 @@ impl State {
                                         self.stack_overflow();
                                     }
                                     self.stack.push(extern_item {
-                                        v: Field_ptr_mut(v, 1),
+                                        v: Field_ptr(v, 1),
                                         count: sz.wrapping_sub(1),
                                     });
                                 }

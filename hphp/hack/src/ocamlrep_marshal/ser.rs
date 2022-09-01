@@ -36,16 +36,13 @@ impl<T> WrappingOffset<T> for *const T {
 extern "C" {
     fn caml_alloc_string(len: mlsize_t) -> value;
     fn caml_convert_flag_list(_: value, _: *const c_int) -> c_int;
-    fn caml_stat_alloc_noexc(_: asize_t) -> caml_stat_block;
     fn caml_failwith(msg: *const c_char) -> !;
     fn caml_invalid_argument(msg: *const c_char) -> !;
     fn caml_raise_out_of_memory() -> !;
-    fn caml_stat_free(_: caml_stat_block);
     fn caml_string_length(_: value) -> mlsize_t;
     fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
 }
 
-type size_t = c_ulong;
 type int64_t = c_long;
 type intnat = c_long;
 type uintnat = c_ulong;
@@ -57,7 +54,6 @@ unsafe fn caml_umul_overflow(a: uintnat, b: uintnat, res: *mut uintnat) -> c_int
     did_overflow as c_int
 }
 
-type asize_t = size_t;
 type value = intnat;
 type header_t = uintnat;
 type mlsize_t = uintnat;
@@ -163,8 +159,6 @@ const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
         .wrapping_add(color as header_t)
         .wrapping_add(tag as header_t)
 }
-
-type caml_stat_block = *mut c_void;
 
 // Flags affecting marshaling
 
@@ -290,34 +284,25 @@ struct State {
 }
 
 impl State {
-    unsafe fn new() -> *mut State {
-        let mut extern_state: *mut State =
-            caml_stat_alloc_noexc(std::mem::size_of::<State>() as asize_t) as _;
-        if extern_state.is_null() {
-            return std::ptr::null_mut();
-        }
+    fn new() -> Self {
+        Self {
+            extern_flags: 0,
+            obj_counter: 0,
+            size_32: 0,
+            size_64: 0,
 
-        (*extern_state).extern_flags = 0;
-        (*extern_state).obj_counter = 0;
-        (*extern_state).size_32 = 0;
-        (*extern_state).size_64 = 0;
+            stack: Vec::with_capacity(EXTERN_STACK_INIT_SIZE),
 
-        // Using `write` instead of assignment via `=` to not call `drop` on the
-        // old, uninitialized value.
-        std::ptr::addr_of_mut!((*extern_state).stack)
-            .write(Vec::with_capacity(EXTERN_STACK_INIT_SIZE));
-        std::ptr::addr_of_mut!((*extern_state).output).write(vec![]);
-        std::ptr::addr_of_mut!((*extern_state).pos_table.present).write([].into());
-        std::ptr::addr_of_mut!((*extern_state).pos_table.entries).write([].into());
+            pos_table: position_table {
+                shift: 0,
+                size: 0,
+                mask: 0,
+                threshold: 0,
+                present: [].into(),
+                entries: [].into(),
+            },
 
-        extern_state
-    }
-
-    unsafe fn free(extern_state: *mut State) {
-        if !extern_state.is_null() {
-            drop(std::mem::take(&mut (*extern_state).output));
-            drop(std::mem::take(&mut (*extern_state).stack));
-            caml_stat_free(extern_state as caml_stat_block);
+            output: vec![],
         }
     }
 
@@ -861,11 +846,11 @@ impl State {
 unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> std::io::Result<()> {
     let mut header: [u8; 32] = [0; 32];
     let mut header_len = 0;
-    let s: &mut State = State::new().as_mut().expect("nonnull");
+    let mut s: State = State::new();
     s.init_output();
     s.extern_value(v, flags, &mut header, &mut header_len);
     let output = std::mem::take(&mut s.output);
-    State::free(s as *mut State);
+    drop(s);
     w.write_all(&header[0..header_len])?;
     w.write_all(&output)?;
     w.flush()

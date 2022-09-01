@@ -16,6 +16,7 @@
 , gd
 , gdb
 , gettext
+, gflags
 , git
 , glog
 , gmp
@@ -118,6 +119,7 @@ stdenv.mkDerivation rec {
       gd
       gdb
       gettext
+      gflags
       git
       glog
       gmp

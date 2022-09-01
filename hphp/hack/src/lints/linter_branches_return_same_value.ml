@@ -12,7 +12,7 @@ open Hh_prelude
    Lint on functions/methods that always return the same value. This
    is usually a copy-paste error.
 
-   function some_prediate(Whatever $value): bool {
+   function some_predicate(Whatever $value): bool {
      if ($value->foo()) {
        return false;
      }

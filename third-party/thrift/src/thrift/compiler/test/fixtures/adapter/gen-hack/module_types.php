@@ -97,7 +97,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
           shape(
             "name" => "my.module.Adapter2",
-            "typeHint" => "my.another.module.AdaptedType2",
+            "typeHint" => "my.another.module.AdaptedType2[]",
           )
         ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
@@ -847,7 +847,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
               shape(
                 "name" => "my.Adapter3",
-                "typeHint" => "my.AdaptedType3",
+                "typeHint" => "my.AdaptedType3[]",
               )
             ),
           ],
@@ -3174,7 +3174,7 @@ class Config implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
           shape(
             "name" => "my.ConfigAdapter",
-            "typeHint" => "my.ConfiguredVar",
+            "typeHint" => "my.ConfiguredVar[]",
           )
         ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(

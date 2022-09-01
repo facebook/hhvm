@@ -39,7 +39,7 @@ typedef ListWithElemAdapter ListWithElemAdapter_withAdapter
 
 @python.Adapter{
   name = "my.module.Adapter2",
-  typeHint = "my.another.module.AdaptedType2",
+  typeHint = "my.another.module.AdaptedType2[]",
 }
 @scope.Transitive
 struct MyAnnotation {
@@ -84,7 +84,7 @@ struct Foo {
   8: binary (py.adapter = 'my.Adapter1') binaryField;
   9: MyI64 longField;
   @cpp.Adapter{name = "my::Adapter2"}
-  @python.Adapter{name = "my.Adapter3", typeHint = "my.AdaptedType3"}
+  @python.Adapter{name = "my.Adapter3", typeHint = "my.AdaptedType3[]"}
   10: MyI64 adaptedLongField;
   11: DoubleTypedefI64 doubleAdaptedField;
 } (
@@ -192,7 +192,7 @@ service Service {
 }
 
 @cpp.Adapter{name = "MyVarAdapter"}
-@python.Adapter{name = "my.ConfigAdapter", typeHint = "my.ConfiguredVar"}
+@python.Adapter{name = "my.ConfigAdapter", typeHint = "my.ConfiguredVar[]"}
 @scope.Transitive
 @thrift.Experimental
 struct Config {

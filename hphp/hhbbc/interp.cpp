@@ -4259,9 +4259,8 @@ void in(ISS& env, const bc::ResolveClass& op) {
     effect_free(env);
     push(env, clsExact(*cls));
   } else {
-    // No non-unique classes in repo mode.
-    unreachable(env);
-    push(env, TBottom);
+    // If the class is not resolved, it might not be unique
+    push(env, TCls);
   }
 }
 

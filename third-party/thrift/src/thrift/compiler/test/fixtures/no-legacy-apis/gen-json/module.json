@@ -127,6 +127,7 @@
           },
           "args" : [
             {
+              "name" : "u",
               "type_enum" : "STRUCT",
               "spec_args" : "MyUnion"
             }

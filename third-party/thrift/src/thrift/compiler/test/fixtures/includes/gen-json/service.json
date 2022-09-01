@@ -44,10 +44,12 @@
           },
           "args" : [
             {
+              "name" : "s",
               "type_enum" : "STRUCT",
               "spec_args" : "module.MyStruct"
             },
             {
+              "name" : "i",
               "type_enum" : "STRUCT",
               "spec_args" : "includes.Included"
             }
@@ -71,10 +73,12 @@
           },
           "args" : [
             {
+              "name" : "s",
               "type_enum" : "STRUCT",
               "spec_args" : "module.MyStruct"
             },
             {
+              "name" : "i",
               "type_enum" : "STRUCT",
               "spec_args" : "includes.Included"
             }

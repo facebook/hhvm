@@ -547,6 +547,7 @@
           },
           "args" : [
             {
+              "name" : "count",
               "type_enum" : "I64",
               "spec_args" : null,
               "structured_annotations" : {

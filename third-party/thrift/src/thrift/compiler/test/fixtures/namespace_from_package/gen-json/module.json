@@ -46,6 +46,7 @@
           },
           "args" : [
             {
+              "name" : "int1",
               "type_enum" : "I64",
               "spec_args" : null
             }

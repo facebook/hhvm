@@ -395,6 +395,7 @@
           },
           "args" : [
             {
+              "name" : "int_parameter",
               "type_enum" : "I32",
               "spec_args" : null
             }
@@ -470,6 +471,7 @@
           },
           "args" : [
             {
+              "name" : "sink",
               "type_enum" : "I64",
               "spec_args" : null
             }
@@ -493,10 +495,12 @@
           },
           "args" : [
             {
+              "name" : "id",
               "type_enum" : "I64",
               "spec_args" : null
             },
             {
+              "name" : "data",
               "type_enum" : "STRING",
               "spec_args" : null
             }
@@ -520,6 +524,7 @@
           },
           "args" : [
             {
+              "name" : "id",
               "type_enum" : "I64",
               "spec_args" : null
             }
@@ -543,6 +548,7 @@
           },
           "args" : [
             {
+              "name" : "id",
               "type_enum" : "I64",
               "spec_args" : null
             }
@@ -566,6 +572,7 @@
           },
           "args" : [
             {
+              "name" : "id",
               "type_enum" : "I64",
               "spec_args" : null
             }
@@ -589,10 +596,12 @@
           },
           "args" : [
             {
+              "name" : "id",
               "type_enum" : "I64",
               "spec_args" : null
             },
             {
+              "name" : "data",
               "type_enum" : "STRING",
               "spec_args" : null
             }
@@ -668,6 +677,7 @@
           },
           "args" : [
             {
+              "name" : "key",
               "type_enum" : "STRING",
               "spec_args" : null
             }
@@ -691,6 +701,7 @@
           },
           "args" : [
             {
+              "name" : "key",
               "type_enum" : "STRING",
               "spec_args" : null
             }

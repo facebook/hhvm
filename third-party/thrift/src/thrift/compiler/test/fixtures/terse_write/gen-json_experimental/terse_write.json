@@ -1,6 +1,14 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "terse_write",
+  "typedefs": {
+      "MyInteger": {
+        "name": "MyInteger",
+        "type": "i32",
+        "is_same_type": "false",
+        "structured_annotations": ""
+      }
+  },
   "enumerations" :
   {
       "MyEnum" : {

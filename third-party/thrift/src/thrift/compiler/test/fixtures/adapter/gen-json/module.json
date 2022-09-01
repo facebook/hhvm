@@ -1008,14 +1008,17 @@
           },
           "args" : [
             {
+              "name" : "arg1",
               "type_enum" : "TYPEDEF",
               "spec_args" : "StringWithAdapter"
             },
             {
+              "name" : "arg2",
               "type_enum" : "STRING",
               "spec_args" : null
             },
             {
+              "name" : "arg3",
               "type_enum" : "STRUCT",
               "spec_args" : "Foo"
             }

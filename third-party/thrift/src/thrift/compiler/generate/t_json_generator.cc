@@ -60,6 +60,7 @@ class t_json_generator : public t_concat_generator {
   void generate_xception(const t_struct* txception) override;
 
   void print_type(const t_type* ttype);
+  void print_name(const string& name);
   void print_const_value(const t_const_value* tvalue);
   void print_const_key(t_const_value* tvalue);
   void print_lineno(const t_node& node);
@@ -325,6 +326,11 @@ void t_json_generator::print_type(const t_type* ttype) {
   indent(f_out_) << "\"type_enum\" : \"" << type_to_string(ttype) << "\","
                  << endl;
   indent(f_out_) << "\"spec_args\" : " << type_to_spec_args(ttype);
+}
+
+void t_json_generator::print_name(const string& name) {
+  f_out_ << indent() << "\"name\" : "
+         << "\"" << name << "\"," << endl;
 }
 
 /**
@@ -702,6 +708,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         }
         indent(f_out_) << "{" << endl;
         indent_up();
+        print_name((*arg_iter)->get_name());
         print_type((*arg_iter)->get_type());
         if ((*arg_iter)->get_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";

@@ -18,21 +18,6 @@ use ocamlrep::Value;
 
 use crate::intext::*;
 
-trait WrappingOffset<T> {
-    fn wrapping_offset_from(self, origin: *const T) -> isize;
-}
-
-impl<T> WrappingOffset<T> for *const T {
-    #[inline]
-    fn wrapping_offset_from(self, origin: *const T) -> isize {
-        let pointee_size = std::mem::size_of::<T>();
-        assert!(0 < pointee_size && pointee_size <= isize::max_value() as usize);
-
-        let d = isize::wrapping_sub(self as _, origin as _);
-        d.wrapping_div(pointee_size as _)
-    }
-}
-
 extern "C" {
     fn caml_alloc_string(len: mlsize_t) -> value;
     fn caml_convert_flag_list(_: value, _: *const c_int) -> c_int;

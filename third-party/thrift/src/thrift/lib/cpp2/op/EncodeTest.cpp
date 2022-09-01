@@ -72,13 +72,22 @@ template <
     bool ZeroCopy,
     typename Tag,
     typename TypeClass,
+    bool IsAdapted = false,
     typename T>
 void testSerializedSize(T value) {
   SCOPED_TRACE(folly::pretty_name<Tag>());
   protocol_writer_t<Protocol> writer;
-  auto size = op::serialized_size<ZeroCopy, Tag>(writer, value);
-  auto expected = apache::thrift::detail::pm::protocol_methods<TypeClass, T>::
-      template serializedSize<ZeroCopy>(writer, value);
+  uint32_t size;
+  if constexpr (IsAdapted) {
+    using AdaptedTag = type::adapted<test::TemplatedTestAdapter, Tag>;
+    size = op::serialized_size<ZeroCopy, AdaptedTag>(
+        writer, test::TemplatedTestAdapter::fromThrift(value));
+  } else {
+    size = op::serialized_size<ZeroCopy, Tag>(writer, value);
+  }
+  uint32_t expected =
+      apache::thrift::detail::pm::protocol_methods<TypeClass, T>::
+          template serializedSize<ZeroCopy>(writer, value);
   EXPECT_EQ(size, expected);
 }
 
@@ -86,10 +95,11 @@ template <
     conformance::StandardProtocol Protocol,
     typename Tag,
     typename TypeClass,
+    bool IsAdapted = false,
     typename T>
 void testSerializedSize(T value) {
-  testSerializedSize<Protocol, false, Tag, TypeClass>(value);
-  testSerializedSize<Protocol, true, Tag, TypeClass>(value);
+  testSerializedSize<Protocol, false, Tag, TypeClass, IsAdapted>(value);
+  testSerializedSize<Protocol, true, Tag, TypeClass, IsAdapted>(value);
 }
 
 template <conformance::StandardProtocol Protocol>
@@ -109,9 +119,122 @@ void testSerializedSizeBasicTypes() {
       MyEnum::value);
 }
 
+template <conformance::StandardProtocol Protocol>
+void testSerializedSizeContainers() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testSerializedSize<
+      Protocol,
+      type::list<type::bool_t>,
+      type_class::list<type_class::integral>>(
+      std::vector<bool>{true, false, true});
+  testSerializedSize<
+      Protocol,
+      type::set<type::bool_t>,
+      type_class::set<type_class::integral>>(std::set<bool>{true, false});
+  testSerializedSize<
+      Protocol,
+      type::map<type::string_t, type::byte_t>,
+      type_class::map<type_class::string, type_class::integral>>(
+      std::map<std::string, int8_t>{
+          {std::string("foo"), 1}, {std::string("foo"), 2}});
+}
+
+template <conformance::StandardProtocol Protocol>
+void testSerializedSizeCppType() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<int, type::i16_t>,
+      type_class::integral>((int16_t)1);
+}
+
+template <
+    conformance::StandardProtocol Protocol,
+    typename Struct,
+    typename Tag,
+    typename TypeClass,
+    bool IsAdapted = false,
+    typename T>
+void testSerializedSizeObject(T value) {
+  Struct s;
+  s.field_1_ref() = value;
+  testSerializedSize<Protocol, Tag, TypeClass, IsAdapted>(s);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testSerializedSizeStruct() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  using Struct =
+      test::testset::struct_with<type::map<type::string_t, type::i32_t>>;
+  std::map<std::string, int> mapValues = {{"one", 1}, {"four", 4}, {"two", 2}};
+  testSerializedSizeObject<
+      Protocol,
+      Struct,
+      type::struct_t<Struct>,
+      type_class::structure>(mapValues);
+  using Union = test::testset::union_with<type::set<type::string_t>>;
+  std::set<std::string> setValues = {"foo", "bar", "baz"};
+  testSerializedSizeObject<
+      Protocol,
+      Union,
+      type::union_t<Union>,
+      type_class::structure>(setValues);
+  using Exception = test::testset::exception_with<type::i64_t>;
+  testSerializedSizeObject<
+      Protocol,
+      Exception,
+      type::exception_t<Exception>,
+      type_class::structure>(1);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testSerializedSizeAdapted() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testSerializedSize<Protocol, type::string_t, type_class::string, true>("foo");
+  testSerializedSize<
+      Protocol,
+      type::set<type::i32_t>,
+      type_class::set<type_class::integral>,
+      true>(std::set<int32_t>{1, 2, 3});
+  using Struct = test::testset::struct_with<type::i32_t>;
+  testSerializedSizeObject<
+      Protocol,
+      Struct,
+      type::struct_t<Struct>,
+      type_class::structure,
+      true>(1);
+  using Union = test::testset::union_with<type::i32_t>;
+  testSerializedSizeObject<
+      Protocol,
+      Union,
+      type::union_t<Union>,
+      type_class::structure,
+      true>(1);
+}
+
 TEST(SerializedSizeTest, SerializedSizeBasicTypes) {
   testSerializedSizeBasicTypes<conformance::StandardProtocol::Binary>();
   testSerializedSizeBasicTypes<conformance::StandardProtocol::Compact>();
+}
+
+TEST(SerializedSizeTest, SerializedSizeContainers) {
+  testSerializedSizeContainers<conformance::StandardProtocol::Binary>();
+  testSerializedSizeContainers<conformance::StandardProtocol::Compact>();
+}
+
+TEST(SerializedSizeTest, SerializedSizeCppType) {
+  testSerializedSizeCppType<conformance::StandardProtocol::Binary>();
+  testSerializedSizeCppType<conformance::StandardProtocol::Compact>();
+}
+
+TEST(SerializedSizeTest, SerializedSizeStruct) {
+  testSerializedSizeStruct<conformance::StandardProtocol::Binary>();
+  testSerializedSizeStruct<conformance::StandardProtocol::Compact>();
+}
+
+TEST(SerializedSizeTest, SerializedSizeAdapted) {
+  testSerializedSizeAdapted<conformance::StandardProtocol::Binary>();
+  testSerializedSizeAdapted<conformance::StandardProtocol::Compact>();
 }
 
 template <conformance::StandardProtocol Protocol, typename Tag, typename T>

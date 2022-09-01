@@ -87,6 +87,11 @@ template <typename Id>
 FOLLY_INLINE_VARIABLE constexpr bool is_id_v = detail::is_type_tag_v<Id> ||
     is_field_id_v<Id> || is_ordinal_v<Id> || is_ident_v<Id>;
 
+template <typename Id, typename R = void>
+using if_id = std::enable_if_t<is_id_v<Id>, R>;
+template <typename Id, typename R = void>
+using if_not_id = std::enable_if_t<!is_id_v<Id>, R>;
+
 /**
  * Converts a value into an ordinal. Useful for represending e.g. list indexes
  * allowing 0 represent all elements in the list.

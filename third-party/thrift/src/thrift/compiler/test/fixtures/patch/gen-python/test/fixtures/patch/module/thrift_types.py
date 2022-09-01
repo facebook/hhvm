@@ -1023,7 +1023,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             11,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optBoolVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBoolPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1031,7 +1031,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             12,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optByteVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBytePatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BytePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1039,7 +1039,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             13,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optI16Val",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI16Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1047,7 +1047,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             14,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optI32Val",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI32Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I32Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1055,7 +1055,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             15,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optI64Val",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalI64Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1063,7 +1063,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             16,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optFloatVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalFloatPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.FloatPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1071,7 +1071,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             17,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optDoubleVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalDoublePatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.DoublePatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1079,7 +1079,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             18,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optStringVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalStringPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1087,7 +1087,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             19,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optBinaryVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.OptionalBinaryPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BinaryPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1095,7 +1095,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             20,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optStructVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyDataPatch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1103,7 +1103,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             21,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optListVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField21Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField21Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1111,7 +1111,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             22,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optSetVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField22Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField22Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1119,7 +1119,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             23,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "optMapVal",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(OptionalMyStructField23Patch),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1225,70 +1225,6 @@ class MyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField21Patch, self)
 
 
-class OptionalMyStructField21Patch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "clear",  # name
-            _fbthrift_python_types.typeinfo_bool,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patchPrior",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField21Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            4,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ensure",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patch",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField21Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.OptionalMyStructField21Patch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/patch/OptionalMyStructField21Patch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_OptionalMyStructField21Patch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.patch.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.OptionalMyStructField21Patch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.OptionalMyStructField21Patch, self)
-
-
 class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -1353,70 +1289,6 @@ class MyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField22Patch, self)
 
 
-class OptionalMyStructField22Patch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "clear",  # name
-            _fbthrift_python_types.typeinfo_bool,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patchPrior",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField22Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            4,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ensure",  # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patch",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField22Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.OptionalMyStructField22Patch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/patch/OptionalMyStructField22Patch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_OptionalMyStructField22Patch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.patch.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.OptionalMyStructField22Patch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.OptionalMyStructField22Patch, self)
-
-
 class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -1479,70 +1351,6 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField23Patch, self)
-
-
-class OptionalMyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "clear",  # name
-            _fbthrift_python_types.typeinfo_bool,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patchPrior",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            4,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ensure",  # name
-            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            6,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "patch",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField23Patch),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.OptionalMyStructField23Patch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/patch/OptionalMyStructField23Patch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_OptionalMyStructField23Patch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.patch.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.OptionalMyStructField23Patch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.OptionalMyStructField23Patch, self)
 
 
 class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -1714,16 +1522,10 @@ def _fbthrift_metadata__struct_MyStructFieldPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructFieldPatch()
 def _fbthrift_metadata__struct_MyStructField21Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField21Patch()
-def _fbthrift_metadata__struct_OptionalMyStructField21Patch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_OptionalMyStructField21Patch()
 def _fbthrift_metadata__struct_MyStructField22Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField22Patch()
-def _fbthrift_metadata__struct_OptionalMyStructField22Patch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_OptionalMyStructField22Patch()
 def _fbthrift_metadata__struct_MyStructField23Patch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructField23Patch()
-def _fbthrift_metadata__struct_OptionalMyStructField23Patch():
-    return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_OptionalMyStructField23Patch()
 def _fbthrift_metadata__struct_MyStructPatch():
     return test.fixtures.patch.module.thrift_metadata.gen_metadata_struct_MyStructPatch()
 def _fbthrift_metadata__struct_OptionalMyStructPatch():
@@ -1745,11 +1547,8 @@ _fbthrift_all_structs = [
     OptionalMyUnionPatch,
     MyStructFieldPatch,
     MyStructField21Patch,
-    OptionalMyStructField21Patch,
     MyStructField22Patch,
-    OptionalMyStructField22Patch,
     MyStructField23Patch,
-    OptionalMyStructField23Patch,
     MyStructPatch,
     OptionalMyStructPatch,
 ]

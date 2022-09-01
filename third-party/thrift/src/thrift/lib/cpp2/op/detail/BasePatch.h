@@ -23,6 +23,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/op/Clear.h>
+#include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
 namespace apache {
@@ -58,6 +59,8 @@ template <typename T>
 if_opt_type<T, bool> hasValue(const T& opt) {
   return opt.has_value();
 }
+// TODO(afuller): Technically 'fill' field should always return true for
+// hasValue, is this really just op::isEmpty?
 template <typename T>
 bool hasValue(field_ref<T> val) {
   return !thrift::empty(*val);
@@ -66,15 +69,31 @@ template <typename T>
 bool hasValue(terse_field_ref<T> val) {
   return !thrift::empty(*val);
 }
+
+// If the given field is absent/unset/void.
+template <typename T>
+if_opt_type<T, bool> isAbsent(const T& opt) {
+  return !opt.has_value();
+}
+template <typename T>
+constexpr bool isAbsent(field_ref<T>) {
+  return false;
+}
+template <typename T>
+constexpr bool isAbsent(terse_field_ref<T>) {
+  return false;
+}
+
 // TODO: use op::clear and op::ensure to avoid duplication
 template <typename T>
-if_opt_type<T> clearValue(T& opt) {
+if_opt_type<folly::remove_cvref_t<T>> clearValue(T&& opt) {
   opt.reset();
 }
 template <typename T>
 if_not_opt_type<T> clearValue(T& unn) {
   thrift::clear(unn);
 }
+
 template <typename T>
 if_opt_type<T> ensureValue(T& opt) {
   if (!opt.has_value()) {
@@ -89,6 +108,7 @@ template <typename T>
 void ensureValue(terse_field_ref<T>) {
   // A terse field doesn't have a set or unset state, so ensure is a noop.
 }
+
 template <typename T, typename U>
 if_opt_type<T, bool> sameType(const T& opt1, const U& opt2) {
   return opt1.has_value() == opt2.has_value();
@@ -122,11 +142,11 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
     derived().apply(*field);
   }
   template <typename U>
-  void assign(field_ref<U> val) {
+  type::if_not_id<U> assign(field_ref<U> val) {
     derived().assign(std::forward<U>(*val));
   }
   template <typename U>
-  void assign(terse_field_ref<U> val) {
+  type::if_not_id<U> assign(terse_field_ref<U> val) {
     derived().assign(std::forward<U>(*val));
   }
   template <typename U>
@@ -259,6 +279,8 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   }
 
  protected:
+  template <typename>
+  friend class StructPatch;
   using Base::applyAssign;
   using Base::data_;
   using Base::derived;

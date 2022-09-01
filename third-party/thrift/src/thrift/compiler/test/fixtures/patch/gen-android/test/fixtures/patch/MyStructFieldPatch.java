@@ -61,19 +61,19 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   public final StringPatch stringVal;
   public final BinaryPatch binaryVal;
   public final MyDataPatch structVal;
-  public final OptionalBoolPatch optBoolVal;
-  public final OptionalBytePatch optByteVal;
-  public final OptionalI16Patch optI16Val;
-  public final OptionalI32Patch optI32Val;
-  public final OptionalI64Patch optI64Val;
-  public final OptionalFloatPatch optFloatVal;
-  public final OptionalDoublePatch optDoubleVal;
-  public final OptionalStringPatch optStringVal;
-  public final OptionalBinaryPatch optBinaryVal;
-  public final OptionalMyDataPatch optStructVal;
-  public final OptionalMyStructField21Patch optListVal;
-  public final OptionalMyStructField22Patch optSetVal;
-  public final OptionalMyStructField23Patch optMapVal;
+  public final BoolPatch optBoolVal;
+  public final BytePatch optByteVal;
+  public final I16Patch optI16Val;
+  public final I32Patch optI32Val;
+  public final I64Patch optI64Val;
+  public final FloatPatch optFloatVal;
+  public final DoublePatch optDoubleVal;
+  public final StringPatch optStringVal;
+  public final BinaryPatch optBinaryVal;
+  public final MyDataPatch optStructVal;
+  public final MyStructField21Patch optListVal;
+  public final MyStructField22Patch optSetVal;
+  public final MyStructField23Patch optMapVal;
   public final MyUnionPatch unionVal;
   public static final int BOOLVAL = 1;
   public static final int BYTEVAL = 2;
@@ -111,19 +111,19 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       StringPatch stringVal,
       BinaryPatch binaryVal,
       MyDataPatch structVal,
-      OptionalBoolPatch optBoolVal,
-      OptionalBytePatch optByteVal,
-      OptionalI16Patch optI16Val,
-      OptionalI32Patch optI32Val,
-      OptionalI64Patch optI64Val,
-      OptionalFloatPatch optFloatVal,
-      OptionalDoublePatch optDoubleVal,
-      OptionalStringPatch optStringVal,
-      OptionalBinaryPatch optBinaryVal,
-      OptionalMyDataPatch optStructVal,
-      OptionalMyStructField21Patch optListVal,
-      OptionalMyStructField22Patch optSetVal,
-      OptionalMyStructField23Patch optMapVal,
+      BoolPatch optBoolVal,
+      BytePatch optByteVal,
+      I16Patch optI16Val,
+      I32Patch optI32Val,
+      I64Patch optI64Val,
+      FloatPatch optFloatVal,
+      DoublePatch optDoubleVal,
+      StringPatch optStringVal,
+      BinaryPatch optBinaryVal,
+      MyDataPatch optStructVal,
+      MyStructField21Patch optListVal,
+      MyStructField22Patch optSetVal,
+      MyStructField23Patch optMapVal,
       MyUnionPatch unionVal) {
     this.boolVal = boolVal;
     this.byteVal = byteVal;
@@ -371,7 +371,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.structVal != null;
   }
 
-  public OptionalBoolPatch getOptBoolVal() {
+  public BoolPatch getOptBoolVal() {
     return this.optBoolVal;
   }
 
@@ -380,7 +380,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optBoolVal != null;
   }
 
-  public OptionalBytePatch getOptByteVal() {
+  public BytePatch getOptByteVal() {
     return this.optByteVal;
   }
 
@@ -389,7 +389,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optByteVal != null;
   }
 
-  public OptionalI16Patch getOptI16Val() {
+  public I16Patch getOptI16Val() {
     return this.optI16Val;
   }
 
@@ -398,7 +398,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optI16Val != null;
   }
 
-  public OptionalI32Patch getOptI32Val() {
+  public I32Patch getOptI32Val() {
     return this.optI32Val;
   }
 
@@ -407,7 +407,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optI32Val != null;
   }
 
-  public OptionalI64Patch getOptI64Val() {
+  public I64Patch getOptI64Val() {
     return this.optI64Val;
   }
 
@@ -416,7 +416,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optI64Val != null;
   }
 
-  public OptionalFloatPatch getOptFloatVal() {
+  public FloatPatch getOptFloatVal() {
     return this.optFloatVal;
   }
 
@@ -425,7 +425,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optFloatVal != null;
   }
 
-  public OptionalDoublePatch getOptDoubleVal() {
+  public DoublePatch getOptDoubleVal() {
     return this.optDoubleVal;
   }
 
@@ -434,7 +434,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optDoubleVal != null;
   }
 
-  public OptionalStringPatch getOptStringVal() {
+  public StringPatch getOptStringVal() {
     return this.optStringVal;
   }
 
@@ -443,7 +443,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optStringVal != null;
   }
 
-  public OptionalBinaryPatch getOptBinaryVal() {
+  public BinaryPatch getOptBinaryVal() {
     return this.optBinaryVal;
   }
 
@@ -452,7 +452,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optBinaryVal != null;
   }
 
-  public OptionalMyDataPatch getOptStructVal() {
+  public MyDataPatch getOptStructVal() {
     return this.optStructVal;
   }
 
@@ -461,7 +461,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optStructVal != null;
   }
 
-  public OptionalMyStructField21Patch getOptListVal() {
+  public MyStructField21Patch getOptListVal() {
     return this.optListVal;
   }
 
@@ -470,7 +470,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optListVal != null;
   }
 
-  public OptionalMyStructField22Patch getOptSetVal() {
+  public MyStructField22Patch getOptSetVal() {
     return this.optSetVal;
   }
 
@@ -479,7 +479,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optSetVal != null;
   }
 
-  public OptionalMyStructField23Patch getOptMapVal() {
+  public MyStructField23Patch getOptMapVal() {
     return this.optMapVal;
   }
 
@@ -579,19 +579,19 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     StringPatch tmp_stringVal = null;
     BinaryPatch tmp_binaryVal = null;
     MyDataPatch tmp_structVal = null;
-    OptionalBoolPatch tmp_optBoolVal = null;
-    OptionalBytePatch tmp_optByteVal = null;
-    OptionalI16Patch tmp_optI16Val = null;
-    OptionalI32Patch tmp_optI32Val = null;
-    OptionalI64Patch tmp_optI64Val = null;
-    OptionalFloatPatch tmp_optFloatVal = null;
-    OptionalDoublePatch tmp_optDoubleVal = null;
-    OptionalStringPatch tmp_optStringVal = null;
-    OptionalBinaryPatch tmp_optBinaryVal = null;
-    OptionalMyDataPatch tmp_optStructVal = null;
-    OptionalMyStructField21Patch tmp_optListVal = null;
-    OptionalMyStructField22Patch tmp_optSetVal = null;
-    OptionalMyStructField23Patch tmp_optMapVal = null;
+    BoolPatch tmp_optBoolVal = null;
+    BytePatch tmp_optByteVal = null;
+    I16Patch tmp_optI16Val = null;
+    I32Patch tmp_optI32Val = null;
+    I64Patch tmp_optI64Val = null;
+    FloatPatch tmp_optFloatVal = null;
+    DoublePatch tmp_optDoubleVal = null;
+    StringPatch tmp_optStringVal = null;
+    BinaryPatch tmp_optBinaryVal = null;
+    MyDataPatch tmp_optStructVal = null;
+    MyStructField21Patch tmp_optListVal = null;
+    MyStructField22Patch tmp_optSetVal = null;
+    MyStructField23Patch tmp_optMapVal = null;
     MyUnionPatch tmp_unionVal = null;
     TField __field;
     iprot.readStructBegin();
@@ -675,91 +675,91 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
           break;
         case OPTBOOLVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optBoolVal = OptionalBoolPatch.deserialize(iprot);
+            tmp_optBoolVal = BoolPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTBYTEVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optByteVal = OptionalBytePatch.deserialize(iprot);
+            tmp_optByteVal = BytePatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTI16VAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optI16Val = OptionalI16Patch.deserialize(iprot);
+            tmp_optI16Val = I16Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTI32VAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optI32Val = OptionalI32Patch.deserialize(iprot);
+            tmp_optI32Val = I32Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTI64VAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optI64Val = OptionalI64Patch.deserialize(iprot);
+            tmp_optI64Val = I64Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTFLOATVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optFloatVal = OptionalFloatPatch.deserialize(iprot);
+            tmp_optFloatVal = FloatPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTDOUBLEVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optDoubleVal = OptionalDoublePatch.deserialize(iprot);
+            tmp_optDoubleVal = DoublePatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTSTRINGVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optStringVal = OptionalStringPatch.deserialize(iprot);
+            tmp_optStringVal = StringPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTBINARYVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optBinaryVal = OptionalBinaryPatch.deserialize(iprot);
+            tmp_optBinaryVal = BinaryPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTSTRUCTVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optStructVal = OptionalMyDataPatch.deserialize(iprot);
+            tmp_optStructVal = MyDataPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTLISTVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optListVal = OptionalMyStructField21Patch.deserialize(iprot);
+            tmp_optListVal = MyStructField21Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTSETVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optSetVal = OptionalMyStructField22Patch.deserialize(iprot);
+            tmp_optSetVal = MyStructField22Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTMAPVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optMapVal = OptionalMyStructField23Patch.deserialize(iprot);
+            tmp_optMapVal = MyStructField23Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }

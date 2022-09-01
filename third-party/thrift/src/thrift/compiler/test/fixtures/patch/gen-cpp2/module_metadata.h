@@ -90,27 +90,12 @@ class StructMetadata<::test::fixtures::patch::MyStructField21PatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::OptionalMyStructField21PatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
 class StructMetadata<::test::fixtures::patch::MyStructField22PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::OptionalMyStructField22PatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
 class StructMetadata<::test::fixtures::patch::MyStructField23PatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::OptionalMyStructField23PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

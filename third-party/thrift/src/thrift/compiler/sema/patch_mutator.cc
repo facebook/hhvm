@@ -55,31 +55,6 @@ const char* getPatchTypeName(t_base_type::type base_type) {
       return "";
   }
 }
-// TODO(afuller): Index all types by uri, and find them that way.
-const char* getOptionalPatchTypeName(t_base_type::type base_type) {
-  switch (base_type) {
-    case t_base_type::type::t_bool:
-      return "patch.OptionalBoolPatch";
-    case t_base_type::type::t_byte:
-      return "patch.OptionalBytePatch";
-    case t_base_type::type::t_i16:
-      return "patch.OptionalI16Patch";
-    case t_base_type::type::t_i32:
-      return "patch.OptionalI32Patch";
-    case t_base_type::type::t_i64:
-      return "patch.OptionalI64Patch";
-    case t_base_type::type::t_float:
-      return "patch.OptionalFloatPatch";
-    case t_base_type::type::t_double:
-      return "patch.OptionalDoublePatch";
-    case t_base_type::type::t_string:
-      return "patch.OptionalStringPatch";
-    case t_base_type::type::t_binary:
-      return "patch.OptionalBinaryPatch";
-    default:
-      return "";
-  }
-}
 
 std::string getSibName(const std::string& sibling, const std::string& name) {
   return sibling.substr(0, sibling.find_last_of("/")) + name;
@@ -394,9 +369,7 @@ t_type_ref patch_generator::find_patch_type(
   // Base types use a shared representation defined in patch.thrift.
   const auto* type = field.type()->get_true_type();
   if (auto* base_type = dynamic_cast<const t_base_type*>(type)) {
-    const char* name = field.qualifier() == t_field_qualifier::optional
-        ? getOptionalPatchTypeName(base_type->base_type())
-        : getPatchTypeName(base_type->base_type());
+    const char* name = getPatchTypeName(base_type->base_type());
     if (const auto* result = program_.scope()->find_type(name)) {
       return t_type_ref::from_ptr(result);
     }
@@ -435,10 +408,6 @@ t_type_ref patch_generator::find_patch_type(
 
   if (auto* structured = dynamic_cast<const t_structured*>(type)) {
     std::string name = structured->name() + "Patch";
-    if (field.qualifier() == t_field_qualifier::optional) {
-      name = "Optional" + std::move(name);
-    }
-
     if (!structured->uri().empty()) { // Try to look up by URI.
       if (auto* result = dynamic_cast<const t_type*>(program_.scope()->find_def(
               getSibName(structured->uri(), name)))) {
@@ -493,10 +462,6 @@ t_type_ref patch_generator::find_patch_type(
     }
   } else {
     gen.set_adapter("AssignPatchAdapter", program_);
-  }
-
-  if (field.qualifier() == t_field_qualifier::optional) {
-    return add_optional_patch(annot, field.type(), gen);
   }
   return gen;
 }

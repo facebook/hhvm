@@ -179,17 +179,6 @@ struct ForEachField<::test::fixtures::patch::MyStructField21PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyStructField21PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::patch::MyStructField22PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -201,17 +190,6 @@ struct ForEachField<::test::fixtures::patch::MyStructField22PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyStructField22PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::patch::MyStructField23PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -219,17 +197,6 @@ struct ForEachField<::test::fixtures::patch::MyStructField23PatchStruct> {
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).add_ref()...);
     f(3, static_cast<T&&>(t).put_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyStructField23PatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
   }
 };
 

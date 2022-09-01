@@ -34,12 +34,12 @@ static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
               ::apache::thrift::op::detail::FieldPatchAdapter,
               MyStructFieldPatch>::value);
 
-using ListPatch = std::decay_t<
-    decltype(std::declval<MyStructFieldPatch>()->optListVal()->ensure())>;
-using SetPatch = std::decay_t<
-    decltype(std::declval<MyStructFieldPatch>()->optSetVal()->ensure())>;
-using MapPatch = std::decay_t<
-    decltype(std::declval<MyStructFieldPatch>()->optMapVal()->ensure())>;
+using ListPatch =
+    std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optListVal())>;
+using SetPatch =
+    std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optSetVal())>;
+using MapPatch =
+    std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optMapVal())>;
 
 MyStruct testValue() {
   MyStruct val;
@@ -58,34 +58,34 @@ MyStruct testValue() {
 
 MyStructPatch testPatch() {
   auto val = testValue();
-  MyStructPatch patch;
-  patch.patch()->boolVal() = !op::BoolPatch{};
-  *patch->byteVal() = val.byteVal();
-  *patch->i16Val() += 2;
-  *patch->i32Val() += 3;
-  *patch->i64Val() += 4;
-  *patch->floatVal() += 5;
-  *patch->doubleVal() += 6;
-  patch->stringVal() = "_" + op::StringPatch{} + "_";
-  patch->structVal()->patch()->data1()->append("Na");
-  return patch;
+  MyStructPatch result;
+  result.patch<ident::boolVal>() = !op::BoolPatch{};
+  result.patch<ident::byteVal>() = val.byteVal();
+  result.patch<ident::i16Val>() += 2;
+  result.patch<ident::i32Val>() += 3;
+  result.patch<ident::i64Val>() += 4;
+  result.patch<ident::floatVal>() += 5;
+  result.patch<ident::doubleVal>() += 6;
+  result.patch<ident::stringVal>() = "_" + op::StringPatch{} + "_";
+  result.patch<ident::structVal>().patch<ident::data1>().append("Na");
+  return result;
 }
 
 MyStructPatch testOptPatch() {
   auto val = testValue();
-  MyStructPatch patch;
-  patch.patch()->optBoolVal()->patch() = !op::BoolPatch{};
-  patch->optByteVal()->patch() = val.byteVal();
-  patch->optI16Val()->patch() += 2;
-  patch->optI32Val()->patch() += 3;
-  patch->optI64Val()->patch() += 4;
-  patch->optFloatVal()->patch() += 5;
-  patch->optDoubleVal()->patch() += 6;
-  patch->optStringVal()->patch() = "_" + op::StringPatch{} + "_";
+  MyStructPatch result;
+  result.patch<ident::optBoolVal>() = !op::BoolPatch{};
+  result.patch<ident::optByteVal>() = val.byteVal();
+  result.patch<ident::optI16Val>() += 2;
+  result.patch<ident::optI32Val>() += 3;
+  result.patch<ident::optI64Val>() += 4;
+  result.patch<ident::optFloatVal>() += 5;
+  result.patch<ident::optDoubleVal>() += 6;
+  result.patch<ident::optStringVal>() = "_" + op::StringPatch{} + "_";
   MyData data;
   data.data2() = 5;
-  patch->optStructVal()->patch() = std::move(data);
-  return patch;
+  result.patch<ident::optStructVal>() = std::move(data);
+  return result;
 }
 
 TEST(StructPatchTest, Noop) {
@@ -102,11 +102,11 @@ TEST(StructPatchTest, Assign) {
 
 TEST(StructPatchTest, AssignSplit) {
   auto patch = MyStructPatch::createAssign(testValue());
-  // Break apart the assign patch and check the result;
-  patch.patch();
+  // For the patch to break apart the assign and check the result;
+  patch.patch<ident::optI64Val>();
   EXPECT_FALSE(patch.toThrift().assign().has_value());
   EXPECT_TRUE(*patch.toThrift().clear());
-  EXPECT_NE(*patch.toThrift().patch(), MyStructFieldPatch{});
+  EXPECT_EQ(*patch.toThrift().ensure(), testValue());
   test::expectPatch(patch, {}, testValue());
 }
 
@@ -191,7 +191,8 @@ TEST(StructPatchTest, Patch) {
 
   patch.merge(MyStructPatch::createClear());
   EXPECT_FALSE(patch.toThrift().assign().has_value());
-  EXPECT_EQ(patch.patch(), MyStructFieldPatch{});
+  EXPECT_EQ(patch.toThrift().patchPrior(), MyStructFieldPatch{});
+  EXPECT_EQ(patch.toThrift().patch(), MyStructFieldPatch{});
   EXPECT_TRUE(*patch.toThrift().clear());
   test::expectPatch(patch, testValue(), {});
 }
@@ -214,6 +215,56 @@ TEST(StructPatchTest, AssignClear) {
   EXPECT_TRUE(*patch.toThrift().clear());
 }
 
+TEST(StructPatchTest, OptionalField_Ensure) {
+  MyStructPatch patch;
+  patch.ensure<ident::optListVal>({1});
+  patch.ensure<ident::optListVal>({2});
+
+  MyStruct actual;
+  actual.optListVal() = {3};
+  test::expectPatch(patch, actual, actual);
+
+  MyStruct oneVal;
+  oneVal.optListVal().ensure() = {1};
+  test::expectPatch(patch, {}, oneVal);
+}
+
+TEST(StructPatchTest, OptionalField_Clear) {
+  MyStructPatch patch;
+  patch.clear<ident::optBoolVal>();
+  MyStruct actual;
+  actual.optBoolVal() = true;
+  test::expectPatch(patch, actual, {});
+}
+
+TEST(StructPatchTest, OptionalField_Assign) {
+  MyStructPatch patch;
+  // = -> clear + ensure + assign;
+  patch.assign<ident::optBoolVal>(true);
+  MyStruct expected;
+  expected.optBoolVal() = true;
+  test::expectPatch(patch, {}, expected);
+}
+
+TEST(StructPatchTest, OptionalField_PatchPrior) {
+  // unset -> true -> false.
+  // set -> invert -> invert
+  MyStructPatch patch;
+  patch.patch<ident::optBoolVal>().invert();
+  patch.ensure<ident::optBoolVal>(true);
+
+  MyStruct trueVal;
+  trueVal.optBoolVal() = true;
+  MyStruct falseVal;
+  falseVal.optBoolVal() = false;
+
+  // unset -> true -> false.
+  test::expectPatch(patch, {}, trueVal, falseVal);
+  // set -> invert -> invert
+  test::expectPatch(patch, falseVal, trueVal, falseVal);
+  test::expectPatch(patch, trueVal, falseVal, trueVal);
+}
+
 TEST(StructPatchTest, OptionalFields) {
   MyStructPatch patch = testPatch();
   MyStructPatch optPatch = testOptPatch();
@@ -224,16 +275,16 @@ TEST(StructPatchTest, OptionalFields) {
   // Applying a value patch to void does nothing.
   test::expectPatch(optPatch, {}, {});
   EXPECT_EQ(actual, MyStruct{});
-  patch->boolVal()->apply(actual.optBoolVal());
-  patch->byteVal()->apply(actual.optByteVal());
-  patch->i16Val()->apply(actual.optI16Val());
-  patch->i32Val()->apply(actual.optI32Val());
-  patch->i64Val()->apply(actual.optI64Val());
-  patch->floatVal()->apply(actual.optFloatVal());
-  patch->doubleVal()->apply(actual.optDoubleVal());
-  patch->stringVal()->apply(actual.optStringVal());
-  patch->structVal()->apply(actual.optStructVal());
-  patch->stringVal()->apply(optStr);
+  patch.patch<ident::boolVal>().apply(actual.optBoolVal());
+  patch.patch<ident::byteVal>().apply(actual.optByteVal());
+  patch.patch<ident::i16Val>().apply(actual.optI16Val());
+  patch.patch<ident::i32Val>().apply(actual.optI32Val());
+  patch.patch<ident::i64Val>().apply(actual.optI64Val());
+  patch.patch<ident::floatVal>().apply(actual.optFloatVal());
+  patch.patch<ident::doubleVal>().apply(actual.optDoubleVal());
+  patch.patch<ident::stringVal>().apply(actual.optStringVal());
+  patch.patch<ident::structVal>().apply(actual.optStructVal());
+  patch.patch<ident::stringVal>().apply(optStr);
   EXPECT_EQ(actual, MyStruct{});
   EXPECT_FALSE(optStr.has_value());
 
@@ -248,7 +299,7 @@ TEST(StructPatchTest, OptionalFields) {
   actual.optStringVal() = "hi";
   actual.optStructVal().ensure().data1() = "Ba";
   optStr = "hi";
-  test::expectPatch(*patch->stringVal(), optStr, "_hi_", "__hi__");
+  test::expectPatch(patch.patch<ident::stringVal>(), optStr, "_hi_", "__hi__");
 
   MyStruct expected1, expected2;
   expected1.optBoolVal() = true;
@@ -271,16 +322,16 @@ TEST(StructPatchTest, OptionalFields) {
   expected2.optStructVal().ensure().data2() = 5;
   test::expectPatch(optPatch, actual, expected1, expected2);
 
-  patch->boolVal()->apply(actual.optBoolVal());
-  patch->byteVal()->apply(actual.optByteVal());
-  patch->i16Val()->apply(actual.optI16Val());
-  patch->i32Val()->apply(actual.optI32Val());
-  patch->i64Val()->apply(actual.optI64Val());
-  patch->floatVal()->apply(actual.optFloatVal());
-  patch->doubleVal()->apply(actual.optDoubleVal());
-  patch->stringVal()->apply(actual.optStringVal());
-  patch->structVal()->apply(actual.optStructVal());
-  patch->stringVal()->apply(optStr);
+  patch.patch<ident::boolVal>().apply(actual.optBoolVal());
+  patch.patch<ident::byteVal>().apply(actual.optByteVal());
+  patch.patch<ident::i16Val>().apply(actual.optI16Val());
+  patch.patch<ident::i32Val>().apply(actual.optI32Val());
+  patch.patch<ident::i64Val>().apply(actual.optI64Val());
+  patch.patch<ident::floatVal>().apply(actual.optFloatVal());
+  patch.patch<ident::doubleVal>().apply(actual.optDoubleVal());
+  patch.patch<ident::stringVal>().apply(actual.optStringVal());
+  patch.patch<ident::structVal>().apply(actual.optStructVal());
+  patch.patch<ident::stringVal>().apply(optStr);
   EXPECT_EQ(*actual.optBoolVal(), true);
   EXPECT_EQ(*actual.optByteVal(), 2);
   EXPECT_EQ(*actual.optI16Val(), 2);
@@ -356,14 +407,6 @@ TEST(StructPatchTest, PrimitivesNotBoxed) {
   test::same_type<
       decltype(std::declval<op::OptionalBinaryPatchStruct>().ensure()),
       optional_field_ref<folly::IOBuf&&>>;
-}
-
-TEST(StructPatchTest, FieldPatch) {
-  MyStructPatch patch;
-  patch->optListVal()->ensure() = {1, 2};
-  MyStruct expected;
-  expected.optListVal().ensure() = {1, 2};
-  test::expectPatch(patch, {}, expected);
 }
 
 TEST(StructPatchTest, ListPatch) {

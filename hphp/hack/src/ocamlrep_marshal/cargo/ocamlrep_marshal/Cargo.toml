@@ -12,3 +12,4 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 libc = "0.2.121"
+ocamlrep = { path = "../../../ocamlrep" }

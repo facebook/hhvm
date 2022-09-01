@@ -16,10 +16,18 @@ use crate::Value;
 /// Blocks with tags greater than or equal to NO_SCAN_TAG contain binary data,
 /// and are not scanned by the garbage collector. Likewise, we must avoid
 /// interpreting the fields of blocks with such tags as Values.
-pub const CLOSURE_TAG: u8 = 247;
 pub const NO_SCAN_TAG: u8 = 251;
+pub const FORWARD_TAG: u8 = 250;
+pub const INFIX_TAG: u8 = 249;
+pub const OBJECT_TAG: u8 = 248;
+pub const CLOSURE_TAG: u8 = 247;
+pub const LAZY_TAG: u8 = 246;
+pub const CONT_TAG: u8 = 245;
+pub const FORCING_TAG: u8 = 244;
+pub const ABSTRACT_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
+pub const DOUBLE_ARRAY_TAG: u8 = 254;
 pub const CUSTOM_TAG: u8 = 255;
 
 /// A recently-allocated, not-yet-finalized Block.
@@ -77,23 +85,27 @@ impl<'a> BlockBuilder<'a> {
 pub struct Block<'arena>(pub(crate) &'arena [Value<'arena>]);
 
 impl<'a> Block<'a> {
-    pub(crate) fn header(&self) -> Header {
+    #[inline(always)]
+    pub fn header(self) -> Header {
         Header(self.0[0].0)
     }
 
-    pub fn size(&self) -> usize {
+    #[inline(always)]
+    pub fn size(self) -> usize {
         self.header().size()
     }
 
-    pub fn tag(&self) -> u8 {
+    #[inline(always)]
+    pub fn tag(self) -> u8 {
         self.header().tag()
     }
 
-    pub fn as_value(&self) -> Value<'_> {
+    fn as_value(self) -> Value<'a> {
         unsafe { Value::from_ptr(&self.0[1]) }
     }
 
-    pub fn as_values(&self) -> Option<&[Value<'_>]> {
+    #[inline(always)]
+    pub fn as_values(self) -> Option<&'a [Value<'a>]> {
         if self.tag() >= NO_SCAN_TAG {
             return None;
         }
@@ -102,7 +114,7 @@ impl<'a> Block<'a> {
 
     /// Helper for `Value::clone_with_allocator`.
     pub(crate) fn clone_with<'b, A: Allocator>(
-        &self,
+        self,
         alloc: &'b A,
         seen: &mut HashMap<usize, OpaqueValue<'b>>,
     ) -> OpaqueValue<'b> {
@@ -139,6 +151,7 @@ impl<'a> Block<'a> {
 impl<'a> Index<usize> for Block<'a> {
     type Output = Value<'a>;
 
+    #[inline(always)]
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index + 1]
     }
@@ -161,24 +174,29 @@ impl Debug for Block<'_> {
 pub struct Header(usize);
 
 impl Header {
-    pub(crate) fn new(size: usize, tag: u8) -> Self {
+    #[inline(always)]
+    pub(crate) const fn new(size: usize, tag: u8) -> Self {
         let bits = size << 10 | (tag as usize);
         Header(bits)
     }
 
-    pub fn size(self) -> usize {
+    #[inline(always)]
+    pub const fn size(self) -> usize {
         self.0 >> 10
     }
 
-    pub fn tag(self) -> u8 {
+    #[inline(always)]
+    pub const fn tag(self) -> u8 {
         self.0 as u8
     }
 
-    pub(crate) fn from_bits(bits: usize) -> Self {
+    #[inline(always)]
+    pub const fn from_bits(bits: usize) -> Self {
         Header(bits)
     }
 
-    pub(crate) fn to_bits(self) -> usize {
+    #[inline(always)]
+    pub const fn to_bits(self) -> usize {
         self.0
     }
 }

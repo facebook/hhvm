@@ -40,12 +40,12 @@ pub struct Value<'a>(pub(crate) usize, PhantomData<&'a ()>);
 
 impl<'a> Value<'a> {
     #[inline(always)]
-    pub fn is_immediate(self) -> bool {
+    pub const fn is_immediate(self) -> bool {
         is_ocaml_int(self.0)
     }
 
     #[inline(always)]
-    pub fn int(value: isize) -> Value<'static> {
+    pub const fn int(value: isize) -> Value<'static> {
         Value(isize_to_ocaml_int(value), PhantomData)
     }
 
@@ -73,12 +73,23 @@ impl<'a> Value<'a> {
     }
 
     #[inline(always)]
-    pub fn as_float(&self) -> Option<f64> {
+    pub fn as_float(self) -> Option<f64> {
         let block = self.as_block()?;
         if block.tag() != block::DOUBLE_TAG {
             return None;
         }
         Some(f64::from_bits(block[0].0 as u64))
+    }
+
+    #[inline(always)]
+    pub fn as_double_array(self) -> Option<&'a [f64]> {
+        let block = self.as_block()?;
+        if block.tag() != block::DOUBLE_ARRAY_TAG {
+            return None;
+        }
+        Some(unsafe {
+            std::slice::from_raw_parts(block.0.as_ptr().add(1) as *const f64, block.size())
+        })
     }
 
     #[inline(always)]
@@ -102,6 +113,16 @@ impl<'a> Value<'a> {
     pub fn as_str(self) -> Option<Cow<'a, str>> {
         let slice = self.as_byte_string()?;
         Some(String::from_utf8_lossy(slice))
+    }
+
+    #[inline(always)]
+    pub fn field(self, index: usize) -> Option<Value<'a>> {
+        self.field_ref(index).copied()
+    }
+
+    #[inline(always)]
+    pub fn field_ref(self, index: usize) -> Option<&'a Value<'a>> {
+        self.as_block()?.as_values()?.get(index)
     }
 
     /// Given a pointer to the first field of a [`Block`](struct.Block.html),
@@ -128,7 +149,7 @@ impl<'a> Value<'a> {
     /// lifetime, the block this pointer points to, and every value reachable
     /// from it, does not get written to.
     #[inline(always)]
-    pub unsafe fn from_bits(value: usize) -> Value<'a> {
+    pub const unsafe fn from_bits(value: usize) -> Value<'a> {
         Value(value, PhantomData)
     }
 
@@ -136,7 +157,7 @@ impl<'a> Value<'a> {
     /// to be used as an OCaml value. Take care that the returned value does
     /// not outlive the arena.
     #[inline(always)]
-    pub fn to_bits(self) -> usize {
+    pub const fn to_bits(self) -> usize {
         self.0
     }
 

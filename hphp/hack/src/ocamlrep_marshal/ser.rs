@@ -10,11 +10,11 @@ use libc::c_char;
 use libc::c_double;
 use libc::c_int;
 use libc::c_long;
-use libc::c_uchar;
-use libc::c_uint;
 use libc::c_ulong;
 use libc::c_void;
 use libc::memcpy;
+use ocamlrep::Header;
+use ocamlrep::Value;
 
 use crate::intext::*;
 
@@ -39,7 +39,6 @@ extern "C" {
     fn caml_failwith(msg: *const c_char) -> !;
     fn caml_invalid_argument(msg: *const c_char) -> !;
     fn caml_raise_out_of_memory() -> !;
-    fn caml_string_length(_: value) -> mlsize_t;
     fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
 }
 
@@ -57,104 +56,70 @@ unsafe fn caml_umul_overflow(a: uintnat, b: uintnat, res: *mut uintnat) -> c_int
 type value = intnat;
 type header_t = uintnat;
 type mlsize_t = uintnat;
-type tag_t = c_uint; // Actually, an unsigned char
 type color_t = uintnat;
 
 #[inline]
-const fn Is_long(x: value) -> bool {
-    x & 1 != 0
+const fn Is_long(x: Value<'_>) -> bool {
+    x.is_immediate()
 }
 #[inline]
-const fn Is_block(x: value) -> bool {
-    x & 1 == 0
+const fn Is_block(x: Value<'_>) -> bool {
+    !x.is_immediate()
 }
 
 // Conversion macro names are always of the form  "to_from".
 // Example: Val_long as in "Val from long" or "Val of long".
 
 #[inline]
-const fn Long_val(x: value) -> intnat {
-    x >> 1
+fn Long_val(x: Value<'_>) -> intnat {
+    x.as_int().unwrap() as intnat
 }
 #[inline]
-const fn Tag_hd(hd: header_t) -> tag_t {
-    (hd & 0xFF) as tag_t
+const fn Tag_hd(hd: Header) -> u8 {
+    hd.tag()
 }
 #[inline]
-const fn Wosize_hd(hd: header_t) -> mlsize_t {
-    hd >> 10
+const fn Wosize_hd(hd: Header) -> mlsize_t {
+    hd.size() as mlsize_t
 }
 #[inline]
-const unsafe fn Hd_val(v: value) -> header_t {
-    *(v as *const header_t).offset(-1)
-}
-#[inline]
-const unsafe fn Wosize_val(val: value) -> mlsize_t {
-    Wosize_hd(Hd_val(val))
+fn Hd_val(v: Value<'_>) -> Header {
+    v.as_block().unwrap().header()
 }
 #[inline]
 const fn Bsize_wsize(sz: mlsize_t) -> mlsize_t {
-    sz.wrapping_mul(std::mem::size_of::<value>() as mlsize_t)
+    sz.wrapping_mul(std::mem::size_of::<Value<'_>>() as mlsize_t)
 }
 #[inline]
-const unsafe fn Bosize_hd(hd: header_t) -> mlsize_t {
+const fn Bosize_hd(hd: Header) -> mlsize_t {
     Bsize_wsize(Wosize_hd(hd))
 }
 #[inline]
-unsafe fn Tag_val(val: value) -> tag_t {
-    *(val as *mut c_uchar).offset((std::mem::size_of::<value>() as c_ulong).wrapping_neg() as isize)
-        as tag_t
+fn Tag_val(val: Value<'_>) -> u8 {
+    val.as_block().unwrap().header().tag()
 }
 
 /// Fields are numbered from 0.
 #[inline]
-const unsafe fn Field(x: value, i: usize) -> value {
-    *(x as *const value).add(i)
+fn Field(x: Value<'_>, i: usize) -> Value<'_> {
+    x.field(i).unwrap()
 }
 #[inline]
-unsafe fn Field_ptr(x: value, i: usize) -> *const value {
-    &*(x as *const value).add(i) as *const value
+fn Field_ref<'a>(x: Value<'a>, i: usize) -> &'a Value<'a> {
+    x.field_ref(i).unwrap()
 }
 
-// const No_scan_tag: c_uint = 251;
-const Forward_tag: c_uint = 250;
-const Infix_tag: c_uint = 249;
-// const Object_tag: c_uint = 248;
-const Closure_tag: c_uint = 247;
-const Lazy_tag: c_uint = 246;
-// const Cont_tag: c_uint = 245;
-const Forcing_tag: c_uint = 244;
-const Abstract_tag: c_uint = 251;
-const String_tag: c_uint = 252;
-const Double_tag: c_uint = 253;
-const Double_array_tag: c_uint = 254;
-const Custom_tag: c_uint = 255;
-
 #[inline]
-const unsafe fn Forward_val(v: value) -> value {
+fn Forward_val(v: Value<'_>) -> Value<'_> {
     Field(v, 0)
 }
 #[inline]
-const unsafe fn Infix_offset_hd(hd: header_t) -> mlsize_t {
+const fn Infix_offset_hd(hd: Header) -> mlsize_t {
     Bosize_hd(hd)
 }
 
-/// Pointer to the first byte
 #[inline]
-const fn Bp_val(v: value) -> *const c_char {
-    v as _
-}
-
-#[inline]
-const fn String_val(v: value) -> *const c_char {
-    Bp_val(v)
-}
-
-const Double_wosize: mlsize_t =
-    (std::mem::size_of::<c_double>() / std::mem::size_of::<value>()) as mlsize_t;
-
-#[inline]
-const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
+const fn Make_header(wosize: mlsize_t, tag: u8, color: color_t) -> header_t {
     (wosize << 10)
         .wrapping_add(color as header_t)
         .wrapping_add(tag as header_t)
@@ -173,8 +138,8 @@ const EXTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-struct extern_item {
-    v: *const value,
+struct extern_item<'a> {
+    v: &'a Value<'a>,
     count: mlsize_t,
 }
 
@@ -182,8 +147,8 @@ struct extern_item {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-struct object_position {
-    obj: value,
+struct object_position<'a> {
+    obj: Value<'a>,
     pos: uintnat,
 }
 
@@ -200,13 +165,13 @@ struct object_position {
 // array can be left uninitialized.
 
 #[repr(C)]
-struct position_table {
+struct position_table<'a> {
     shift: c_int,
-    size: mlsize_t,                  // size == 1 << (wordsize - shift)
-    mask: mlsize_t,                  // mask == size - 1
-    threshold: mlsize_t,             // threshold == a fixed fraction of size
-    present: Box<[uintnat]>,         // [Bitvect_size(size)]
-    entries: Box<[object_position]>, // [size]
+    size: mlsize_t,                      // size == 1 << (wordsize - shift)
+    mask: mlsize_t,                      // mask == size - 1
+    threshold: mlsize_t,                 // threshold == a fixed fraction of size
+    present: Box<[uintnat]>,             // [Bitvect_size(size)]
+    entries: Box<[object_position<'a>]>, // [size]
 }
 
 const Bits_word: usize = 8 * std::mem::size_of::<uintnat>();
@@ -224,8 +189,8 @@ const POS_TABLE_INIT_SIZE: usize = 1 << POS_TABLE_INIT_SIZE_LOG2;
 // HASH_FACTOR is (sqrt(5) - 1) / 2 * 2^wordsize.
 const HASH_FACTOR: uintnat = 11400714819323198486;
 #[inline]
-const fn Hash(v: value, shift: c_int) -> mlsize_t {
-    (v as uintnat).wrapping_mul(HASH_FACTOR) >> shift as uintnat
+const fn Hash(v: Value<'_>, shift: c_int) -> mlsize_t {
+    (v.to_bits() as uintnat).wrapping_mul(HASH_FACTOR) >> shift as uintnat
 }
 
 // When the table becomes 2/3 full, its size is increased.
@@ -266,7 +231,7 @@ fn store64(dst: &mut impl Write, n: int64_t) {
 }
 
 #[repr(C)]
-struct State {
+struct State<'a> {
     extern_flags: c_int, // logical or of some of the flags
 
     obj_counter: uintnat, // Number of objects emitted so far
@@ -274,16 +239,16 @@ struct State {
     size_64: uintnat,     // Size in words of 64-bit block for struct.
 
     // Stack for pending value to marshal
-    stack: Vec<extern_item>,
+    stack: Vec<extern_item<'a>>,
 
     // Hash table to record already marshalled objects
-    pos_table: position_table,
+    pos_table: position_table<'a>,
 
     // To buffer the output
     output: Vec<u8>,
 }
 
-impl State {
+impl<'a> State<'a> {
     fn new() -> Self {
         Self {
             extern_flags: 0,
@@ -318,7 +283,7 @@ impl State {
         }
         self.pos_table.size = POS_TABLE_INIT_SIZE as mlsize_t;
         self.pos_table.shift = 8usize
-            .wrapping_mul(std::mem::size_of::<value>())
+            .wrapping_mul(std::mem::size_of::<Value<'a>>())
             .wrapping_sub(POS_TABLE_INIT_SIZE_LOG2) as c_int;
         self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
         self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
@@ -342,10 +307,10 @@ impl State {
         let mut new_byte_size: mlsize_t = 0;
         let new_shift: c_int;
         let new_present: Box<[uintnat]>;
-        let new_entries: Box<[object_position]>;
+        let new_entries: Box<[object_position<'a>]>;
         let mut i: uintnat;
         let mut h: uintnat;
-        let mut old: position_table;
+        let mut old: position_table<'a>;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
@@ -359,7 +324,7 @@ impl State {
         if new_size == 0
             || caml_umul_overflow(
                 new_size,
-                std::mem::size_of::<object_position>() as c_ulong,
+                std::mem::size_of::<object_position<'a>>() as c_ulong,
                 &mut new_byte_size,
             ) != 0
         {
@@ -405,7 +370,7 @@ impl State {
     #[inline]
     unsafe fn lookup_position(
         &mut self,
-        obj: value,
+        obj: Value<'a>,
         pos_out: *mut uintnat,
         h_out: *mut uintnat,
     ) -> c_int {
@@ -427,7 +392,7 @@ impl State {
     ///
     /// The [h] parameter is the index in the hash table where the object
     /// must be inserted.  It was determined during lookup.
-    unsafe fn record_location(&mut self, obj: value, h: uintnat) {
+    unsafe fn record_location(&mut self, obj: Value<'a>, h: uintnat) {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
@@ -563,7 +528,7 @@ impl State {
 
     /// Marshaling block headers
     #[inline]
-    unsafe fn extern_header(&mut self, sz: mlsize_t, tag: tag_t) {
+    unsafe fn extern_header(&mut self, sz: mlsize_t, tag: u8) {
         if tag < 16 && sz < 8 {
             self.write(
                 PREFIX_SMALL_BLOCK
@@ -598,11 +563,12 @@ impl State {
     }
 
     #[inline]
-    unsafe fn extern_string(&mut self, v: value, len: mlsize_t) {
+    unsafe fn extern_string(&mut self, bytes: &'a [u8]) {
+        let len: intnat = bytes.len().try_into().unwrap();
         if len < 0x20 {
             self.write(PREFIX_SMALL_STRING.wrapping_add(len as c_int));
         } else if len < 0x100 {
-            self.writecode8(CODE_STRING8, len as intnat);
+            self.writecode8(CODE_STRING8, len);
         } else {
             if len > 0xFFFFFB && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith(
@@ -611,26 +577,27 @@ impl State {
                 );
             }
             if len < 1 << 32 {
-                self.writecode32(CODE_STRING32, len as intnat);
+                self.writecode32(CODE_STRING32, len);
             } else {
-                self.writecode64(CODE_STRING64, len as intnat);
+                self.writecode64(CODE_STRING64, len);
             }
         }
-        self.writeblock(String_val(v), len as intnat);
+        self.writeblock(bytes.as_ptr() as *const c_char, len);
     }
 
     /// Marshaling FP numbers
     #[inline]
-    unsafe fn extern_double(&mut self, v: value) {
+    unsafe fn extern_double(&mut self, v: f64) {
         self.write(CODE_DOUBLE_NATIVE);
-        self.writeblock_float8(v as *mut c_double, 1 as intnat);
+        self.writeblock_float8(&v, 1 as intnat);
     }
 
     /// Marshaling FP arrays
     #[inline]
-    unsafe fn extern_double_array(&mut self, v: value, nfloats: mlsize_t) {
+    unsafe fn extern_double_array(&mut self, slice: &[f64]) {
+        let nfloats = slice.len() as intnat;
         if nfloats < 0x100 {
-            self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as intnat);
+            self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats);
         } else {
             if nfloats > 0x1FFFFF && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith(
@@ -639,16 +606,16 @@ impl State {
                 );
             }
             if nfloats < 1 << 32 {
-                self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats as intnat);
+                self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats);
             } else {
-                self.writecode64(CODE_DOUBLE_ARRAY64_NATIVE, nfloats as intnat);
+                self.writecode64(CODE_DOUBLE_ARRAY64_NATIVE, nfloats);
             }
         }
-        self.writeblock_float8(v as *mut c_double, nfloats as intnat);
+        self.writeblock_float8(slice.as_ptr() as *const c_double, nfloats);
     }
 
     /// Marshal the given value in the output buffer
-    unsafe fn extern_rec(&mut self, mut v: value) {
+    unsafe fn extern_rec(&mut self, mut v: Value<'a>) {
         let mut goto_next_item: bool;
 
         let mut h: uintnat = 0;
@@ -660,17 +627,17 @@ impl State {
             if Is_long(v) {
                 self.extern_int(Long_val(v));
             } else {
-                let hd: header_t = Hd_val(v);
-                let tag: tag_t = Tag_hd(hd);
+                let hd: Header = Hd_val(v);
+                let tag: u8 = Tag_hd(hd);
                 let sz: mlsize_t = Wosize_hd(hd);
 
-                if tag == Forward_tag {
-                    let f: value = Forward_val(v);
+                if tag == ocamlrep::FORWARD_TAG {
+                    let f: Value<'a> = Forward_val(v);
                     if Is_block(f)
-                        && (Tag_val(f) == Forward_tag
-                            || Tag_val(f) == Lazy_tag
-                            || Tag_val(f) == Forcing_tag
-                            || Tag_val(f) == Double_tag)
+                        && (Tag_val(f) == ocamlrep::FORWARD_TAG
+                            || Tag_val(f) == ocamlrep::LAZY_TAG
+                            || Tag_val(f) == ocamlrep::FORCING_TAG
+                            || Tag_val(f) == ocamlrep::DOUBLE_TAG)
                     {
                         // Do not short-circuit the pointer.
                     } else {
@@ -697,9 +664,10 @@ impl State {
                     if !goto_next_item {
                         // Output the contents of the object
                         match tag {
-                            String_tag => {
-                                let len: mlsize_t = caml_string_length(v);
-                                self.extern_string(v, len);
+                            ocamlrep::STRING_TAG => {
+                                let bytes = v.as_byte_string().unwrap();
+                                let len: mlsize_t = bytes.len() as mlsize_t;
+                                self.extern_string(bytes);
                                 self.size_32 = self.size_32.wrapping_add(
                                     (1 as uintnat)
                                         .wrapping_add(len.wrapping_add(4).wrapping_div(4)),
@@ -710,15 +678,16 @@ impl State {
                                 );
                                 self.record_location(v, h);
                             }
-                            Double_tag => {
-                                self.extern_double(v);
+                            ocamlrep::DOUBLE_TAG => {
+                                self.extern_double(v.as_float().unwrap());
                                 self.size_32 = self.size_32.wrapping_add(1 + 2);
                                 self.size_64 = self.size_64.wrapping_add(1 + 1);
                                 self.record_location(v, h);
                             }
-                            Double_array_tag => {
-                                let nfloats: mlsize_t = Wosize_val(v) / Double_wosize;
-                                self.extern_double_array(v, nfloats);
+                            ocamlrep::DOUBLE_ARRAY_TAG => {
+                                let slice = v.as_double_array().unwrap();
+                                self.extern_double_array(slice);
+                                let nfloats = slice.len() as mlsize_t;
                                 self.size_32 = (*self).size_32.wrapping_add(
                                     (1 as uintnat).wrapping_add(nfloats.wrapping_mul(2)),
                                 );
@@ -727,22 +696,25 @@ impl State {
                                     .wrapping_add((1 as uintnat).wrapping_add(nfloats));
                                 self.record_location(v, h);
                             }
-                            Abstract_tag => {
+                            ocamlrep::ABSTRACT_TAG => {
                                 self.invalid_argument(
                                     b"output_value: abstract value (Abstract)\x00" as *const u8
                                         as *const c_char,
                                 );
                             }
-                            Infix_tag => {
+                            ocamlrep::INFIX_TAG => {
                                 self.writecode32(CODE_INFIXPOINTER, Infix_offset_hd(hd) as intnat);
-                                v = (v as uintnat).wrapping_sub(Infix_offset_hd(hd)) as value; // PR#5772
+                                v = Value::from_bits(
+                                    (v.to_bits() as uintnat).wrapping_sub(Infix_offset_hd(hd))
+                                        as usize,
+                                ); // PR#5772
                                 continue;
                             }
-                            Custom_tag => self.invalid_argument(
+                            ocamlrep::CUSTOM_TAG => self.invalid_argument(
                                 b"output_value: marshaling of custom blocks not implemented\0"
                                     as *const u8 as *const c_char,
                             ),
-                            Closure_tag => self.invalid_argument(
+                            ocamlrep::CLOSURE_TAG => self.invalid_argument(
                                 b"output_value: marshaling of closures not implemented\0"
                                     as *const u8 as *const c_char,
                             ),
@@ -759,12 +731,12 @@ impl State {
                                         self.stack_overflow();
                                     }
                                     self.stack.push(extern_item {
-                                        v: Field_ptr(v, 1),
+                                        v: Field_ref(v, 1),
                                         count: sz.wrapping_sub(1),
                                     });
                                 }
                                 // Continue serialization with the first field
-                                v = *(v as *mut value).offset(0);
+                                v = Field(v, 0);
                                 continue;
                             }
                         }
@@ -776,7 +748,7 @@ impl State {
             // Pop one more item to marshal, if any
             if let Some(item) = self.stack.last_mut() {
                 let fresh8 = item.v;
-                item.v = item.v.offset(1);
+                item.v = &*(item.v as *const Value<'a>).offset(1) as &'a Value<'a>;
                 v = *fresh8;
                 item.count = item.count.wrapping_sub(1);
                 if item.count == 0 {
@@ -794,7 +766,7 @@ impl State {
 
     unsafe fn extern_value(
         &mut self,
-        v: value,
+        v: Value<'a>,
         flags: value,
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
@@ -843,10 +815,14 @@ impl State {
     }
 }
 
-unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> std::io::Result<()> {
+unsafe fn output_val<W: std::io::Write>(
+    w: &mut W,
+    v: Value<'_>,
+    flags: value,
+) -> std::io::Result<()> {
     let mut header: [u8; 32] = [0; 32];
     let mut header_len = 0;
-    let mut s: State = State::new();
+    let mut s: State<'_> = State::new();
     s.init_output();
     s.extern_value(v, flags, &mut header, &mut header_len);
     let output = std::mem::take(&mut s.output);
@@ -858,6 +834,7 @@ unsafe fn output_val<W: std::io::Write>(w: &mut W, v: value, flags: value) -> st
 
 #[no_mangle]
 pub unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(v: value, flags: value) -> value {
+    let v = Value::from_bits(v as usize);
     let mut vec = vec![];
     output_val(&mut vec, v, flags).unwrap();
     let res: value = caml_alloc_string(vec.len() as mlsize_t);

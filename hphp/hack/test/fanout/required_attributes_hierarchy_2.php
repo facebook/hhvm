@@ -24,7 +24,7 @@ final class :child extends :element {}
 //// base-b.php
 <?hh
 
-function xhp_simple_attribute(int $prop): :element{
+function xhp_simple_attribute(int $prop): :child{
   return <child prop={$prop} />;
 }
 
@@ -54,6 +54,6 @@ final class :child extends :element {}
 //// changed-b.php
 <?hh
 
-function xhp_simple_attribute(int $prop): :element{
+function xhp_simple_attribute(int $prop): :child{
   return <child prop={$prop} />;
 }

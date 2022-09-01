@@ -59,7 +59,6 @@ ExternalProject_add(
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
     # Options
-    -DWITHOUT_GFLAGS=ON
     -DWITHOUT_LIBLZMA=ON
     -DWITHOUT_LIBSNAPPY=ON
     -DWITHOUT_LIBUNWIND=ON
@@ -69,6 +68,8 @@ ExternalProject_add(
     -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
     -DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
     -DGLOG_LIBRARY=${LIBGLOG_LIBRARY}
+    -DLIBGFLAGS_INCLUDE_DIR=${LIBGFLAGS_INCLUDE_DIR}
+    -DLIBGFLAGS_LIBRARY=${LIBGFLAGS_LIBRARY}
     -DBoost_NO_SYSTEM_PATHS=ON
     -DBoost_NO_BOOST_CMAKE=ON
     -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
@@ -85,9 +86,6 @@ ExternalProject_add(
   BUILD_COMMAND
     ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
   INSTALL_COMMAND
-    ${CMAKE_COMMAND} -E copy_directory
-      "${CMAKE_CURRENT_LIST_DIR}/include"
-      "<INSTALL_DIR>/include" &&
 # Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib

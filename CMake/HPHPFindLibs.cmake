@@ -179,6 +179,9 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
+# gflags
+find_package(Gflags MODULE REQUIRED)
+
 # HHProf
 if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
   add_definitions(-DENABLE_HHPROF=1)
@@ -447,6 +450,8 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} parser_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
+
+  target_link_libraries(${target} ${VISIBILITY} ${LIBGFLAGS_LIBRARY})
 
   if (NOT MSVC)
     target_link_libraries(${target} ${VISIBILITY} afdt)

@@ -12,9 +12,9 @@ b2i_macros = { path = "b2i_macros" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
-hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
-hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 ir = { path = "../.." }
-lazy_static = "1.4"
+itertools = "0.10.3"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
+maplit = "1.0"
 newtype = { path = "../../../../utils/newtype" }
+once_cell = "1.12"

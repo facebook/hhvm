@@ -4,29 +4,31 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Pair;
-use ffi::Str;
 use hhbc::Class;
-use ir::class::TraitReqKind;
-use ir::Type;
+use itertools::Itertools;
 
 use crate::convert;
 use crate::types;
 
 pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
-    let constants: Vec<ir::HackConstant<'a>> = cls
+    let constants = cls
         .constants
         .as_ref()
         .iter()
         .map(crate::constant::convert_constant)
-        .collect();
+        .collect_vec();
 
-    let enum_type: Option<_> = cls.enum_type.as_ref().map(types::convert_type).into();
+    let enum_type = cls
+        .enum_type
+        .as_ref()
+        .map(|ty| types::convert_type(ty, &mut unit.strings))
+        .into_option();
 
-    let enum_includes: Vec<_> = cls
+    let enum_includes = cls
         .enum_includes
         .iter()
         .map(|name| ir::ClassId::from_hhbc(*name, &mut unit.strings))
-        .collect();
+        .collect_vec();
 
     let type_constants = cls
         .type_constants
@@ -36,7 +38,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
 
     let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
 
-    let requirements: Vec<(ir::ClassId, TraitReqKind)> = cls
+    let requirements = cls
         .requirements
         .as_ref()
         .iter()
@@ -44,35 +46,39 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
             let clsid = ir::ClassId::from_hhbc(*clsid, &mut unit.strings);
             (clsid, *req_kind)
         })
-        .collect();
+        .collect_vec();
 
-    let upper_bounds: Vec<(Str<'a>, Vec<Type<'a>>)> = cls
+    let upper_bounds = cls
         .upper_bounds
         .iter()
         .map(|Pair(name, tys)| {
-            let tys: Vec<Type<'a>> = tys.as_ref().iter().map(types::convert_type).collect();
+            let tys = tys
+                .as_ref()
+                .iter()
+                .map(|ty| types::convert_type(ty, &mut unit.strings))
+                .collect_vec();
             (*name, tys)
         })
-        .collect();
+        .collect_vec();
 
     let attributes = cls
         .attributes
         .as_ref()
         .iter()
         .map(convert::convert_attribute)
-        .collect();
+        .collect_vec();
 
     let base = cls
         .base
         .map(|cls| ir::ClassId::from_hhbc(cls, &mut unit.strings))
         .into();
 
-    let implements: Vec<ir::ClassId> = cls
+    let implements = cls
         .implements
         .as_ref()
         .iter()
         .map(|interface| ir::ClassId::from_hhbc(*interface, &mut unit.strings))
-        .collect();
+        .collect_vec();
 
     let name = ir::ClassId::from_hhbc(cls.name, &mut unit.strings);
 

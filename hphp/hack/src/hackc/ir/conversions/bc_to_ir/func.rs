@@ -99,7 +99,10 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
         .map(|Pair(name, bounds)| {
             let id = unit.strings.intern_str(*name);
             let name = ir::ClassId::new(id);
-            let bounds = bounds.iter().map(types::convert_type).collect();
+            let bounds = bounds
+                .iter()
+                .map(|ty| types::convert_type(ty, &mut unit.strings))
+                .collect();
             (name, ir::TParamBounds { bounds })
         })
         .collect();
@@ -123,7 +126,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
         locs: Default::default(),
         num_iters,
         params: Default::default(),
-        return_type: types::convert_maybe_type(return_type_info.as_ref()),
+        return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),
         shadowed_tparams,
         tparams,
     };
@@ -212,7 +215,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
         is_variadic: param.is_variadic,
         is_inout: param.is_inout,
         is_readonly: param.is_readonly,
-        ty: types::convert_maybe_type(param.type_info.as_ref()),
+        ty: types::convert_maybe_type(param.type_info.as_ref(), &mut ctx.unit.strings),
         user_attributes,
     }
 }

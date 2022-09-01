@@ -30,8 +30,8 @@ use crate::Literal;
 use crate::LiteralId;
 use crate::LocId;
 use crate::SrcLoc;
-use crate::Type;
 use crate::UnitStringId;
+use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
 
@@ -43,7 +43,7 @@ pub struct Param<'a> {
     pub is_inout: bool,
     pub is_readonly: bool,
     pub user_attributes: Vec<Attribute<'a>>,
-    pub ty: Type<'a>,
+    pub ty: UserType,
     /// This is the BlockId which is the entrypoint for where initialization of
     /// this param begins.  The string is the code string which was used to
     /// compile the initialization value (for reflection).
@@ -158,11 +158,11 @@ pub struct Func<'a> {
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
     pub params: Vec<Param<'a>>,
-    pub return_type: Type<'a>,
+    pub return_type: UserType,
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassId>,
-    pub tparams: ClassIdMap<TParamBounds<'a>>,
+    pub tparams: ClassIdMap<TParamBounds>,
 }
 
 impl<'a> Func<'a> {
@@ -402,6 +402,6 @@ pub struct Method<'a> {
 }
 
 #[derive(Debug)]
-pub struct TParamBounds<'a> {
-    pub bounds: Vec<Type<'a>>,
+pub struct TParamBounds {
+    pub bounds: Vec<UserType>,
 }

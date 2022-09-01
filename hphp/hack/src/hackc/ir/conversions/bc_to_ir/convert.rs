@@ -6,7 +6,6 @@
 use ffi::Maybe;
 use hash::HashMap;
 use hhbc::Unit;
-use hhvm_hhbc_defs_ffi as hhvm_ffi;
 
 /// Convert a hhbc::Unit to an ir::Unit.
 ///
@@ -78,9 +77,9 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
 
     if let Maybe::Just(ffi::Triple(op, loc, msg)) = unit.fatal {
         ir_unit.fatal = match op {
-            hhvm_ffi::ffi::FatalOp::Parse => ir::FatalOp::Parse(loc, msg),
-            hhvm_ffi::ffi::FatalOp::Runtime => ir::FatalOp::Runtime(loc, msg),
-            hhvm_ffi::ffi::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, msg),
+            hhbc::FatalOp::Parse => ir::FatalOp::Parse(loc, msg),
+            hhbc::FatalOp::Runtime => ir::FatalOp::Runtime(loc, msg),
+            hhbc::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, msg),
             _ => panic!("bad FatalOp value"),
         };
     }

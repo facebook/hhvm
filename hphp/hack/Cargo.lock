@@ -237,12 +237,12 @@ dependencies = [
  "ffi",
  "hash",
  "hhbc",
- "hhvm_hhbc_defs_ffi",
- "hhvm_types_ffi",
  "ir",
- "lazy_static",
+ "itertools 0.10.3",
  "log",
+ "maplit",
  "newtype",
+ "once_cell",
 ]
 
 [[package]]
@@ -1868,11 +1868,9 @@ dependencies = [
  "ffi",
  "hash",
  "hhbc",
- "hhvm_types_ffi",
  "instruction_sequence",
  "ir",
  "itertools 0.10.3",
- "lazy_static",
  "log",
  "smallvec",
 ]

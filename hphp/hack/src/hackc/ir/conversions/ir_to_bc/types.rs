@@ -7,64 +7,96 @@ use ffi::Maybe;
 use ffi::Str;
 use hhbc::Constraint;
 use hhbc::TypeInfo;
-use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use lazy_static::lazy_static;
+use ir::BaseType;
+use ir::StringInterner;
+use ir::TypeConstraintFlags;
 
-lazy_static! {
-    static ref BUILTIN_NAME_VOID: Str<'static> = Str::new(br"HH\void");
-}
+fn convert_type<'a>(
+    alloc: &'a bumpalo::Bump,
+    ty: &ir::UserType,
+    strings: &StringInterner<'a>,
+) -> TypeInfo<'a> {
+    let mut user_type = ty.user_type.map(|ut| strings.lookup(ut).to_ffi_str(alloc));
 
-fn ir2bc<'a>(ty: &ir::Type<'a>) -> TypeInfo<'a> {
-    use ir::Type;
-    match ty {
-        Type::Empty => TypeInfo {
-            user_type: Maybe::Just(ffi::Slice::empty()),
-            type_constraint: Constraint {
-                name: Maybe::Nothing,
-                flags: TypeConstraintFlags::NoFlags,
-            },
-        },
-        Type::Flags(flags, inner) => {
-            let mut ty = ir2bc(inner);
-            ty.type_constraint.flags = *flags;
-            ty
+    let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
+        if user_type.is_none() {
+            let nullable = ty
+                .enforced
+                .modifiers
+                .contains(TypeConstraintFlags::Nullable);
+            let soft = ty.enforced.modifiers.contains(TypeConstraintFlags::Soft);
+            user_type = Some(if !nullable && !soft {
+                name
+            } else {
+                let len = name.len() + nullable as usize + soft as usize;
+                let p = alloc.alloc_slice_fill_copy(len, 0u8);
+                let mut i = 0;
+                if soft {
+                    p[i] = b'@';
+                    i += 1;
+                }
+                if nullable {
+                    p[i] = b'?';
+                    i += 1;
+                }
+                p[i..].copy_from_slice(&name);
+                ffi::Slice::new(p)
+            });
         }
-        Type::None => unreachable!(),
-        Type::User(name) => TypeInfo {
-            user_type: Maybe::Just(*name),
-            type_constraint: Constraint {
-                name: Maybe::Just(*name),
-                flags: TypeConstraintFlags::NoFlags,
-            },
-        },
-        Type::UserNoConstraint(name) => TypeInfo {
-            user_type: Maybe::Just(*name),
-            type_constraint: Constraint {
-                name: Maybe::Nothing,
-                flags: TypeConstraintFlags::NoFlags,
-            },
-        },
-        Type::UserWithConstraint(name, constraint) => TypeInfo {
-            user_type: Maybe::Just(*name),
-            type_constraint: Constraint {
-                name: Maybe::Just(*constraint),
-                flags: TypeConstraintFlags::NoFlags,
-            },
-        },
-        Type::Void => TypeInfo {
-            user_type: Maybe::Just(*BUILTIN_NAME_VOID),
-            type_constraint: Constraint {
-                name: Maybe::Nothing,
-                flags: TypeConstraintFlags::NoFlags,
-            },
+        Some(name)
+    } else {
+        match ty.enforced.ty {
+            BaseType::Mixed | BaseType::Void => None,
+            BaseType::Class(name) => Some(strings.lookup(name.id).to_ffi_str(alloc)),
+            _ => unreachable!(),
+        }
+    };
+
+    TypeInfo {
+        user_type: user_type.into(),
+        type_constraint: Constraint {
+            name: name.map(|name| Str::new_slice(alloc, &name)).into(),
+            flags: ty.enforced.modifiers,
         },
     }
 }
 
-pub(crate) fn convert<'a>(ty: &ir::Type<'a>) -> Maybe<TypeInfo<'a>> {
-    if *ty == ir::Type::None {
+fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
+    match ty {
+        BaseType::Class(_) | BaseType::Mixed | BaseType::None | BaseType::Void => None,
+        BaseType::Arraykey => Some(ir::types::BUILTIN_NAME_ARRAYKEY),
+        BaseType::Bool => Some(ir::types::BUILTIN_NAME_BOOL),
+        BaseType::Dict => Some(ir::types::BUILTIN_NAME_DICT),
+        BaseType::Float => Some(ir::types::BUILTIN_NAME_FLOAT),
+        BaseType::AnyArray => Some(ir::types::BUILTIN_NAME_ANY_ARRAY),
+        BaseType::Nothing => Some(ir::types::BUILTIN_NAME_NOTHING),
+        BaseType::Classname => Some(ir::types::BUILTIN_NAME_CLASSNAME),
+        BaseType::This => Some(ir::types::BUILTIN_NAME_THIS),
+        BaseType::Resource => Some(ir::types::BUILTIN_NAME_RESOURCE),
+        BaseType::Num => Some(ir::types::BUILTIN_NAME_NUM),
+        BaseType::Int => Some(ir::types::BUILTIN_NAME_INT),
+        BaseType::Keyset => Some(ir::types::BUILTIN_NAME_KEYSET),
+        BaseType::Typename => Some(ir::types::BUILTIN_NAME_TYPENAME),
+        BaseType::Nonnull => Some(ir::types::BUILTIN_NAME_NONNULL),
+        BaseType::Noreturn => Some(ir::types::BUILTIN_NAME_NORETURN),
+        BaseType::Null => Some(ir::types::BUILTIN_NAME_NULL),
+        BaseType::String => Some(ir::types::BUILTIN_NAME_STRING),
+        BaseType::Varray => Some(ir::types::BUILTIN_NAME_VARRAY),
+        BaseType::Darray => Some(ir::types::BUILTIN_NAME_DARRAY),
+        BaseType::Vec => Some(ir::types::BUILTIN_NAME_VEC),
+        BaseType::VecOrDict => Some(ir::types::BUILTIN_NAME_VEC_OR_DICT),
+        BaseType::VarrayOrDarray => Some(ir::types::BUILTIN_NAME_VARRAY_OR_DARRAY),
+    }
+}
+
+pub(crate) fn convert<'a>(
+    alloc: &'a bumpalo::Bump,
+    ty: &ir::UserType,
+    strings: &StringInterner<'a>,
+) -> Maybe<TypeInfo<'a>> {
+    if ty.is_empty() {
         Maybe::Nothing
     } else {
-        Maybe::Just(ir2bc(ty))
+        Maybe::Just(convert_type(alloc, ty, strings))
     }
 }

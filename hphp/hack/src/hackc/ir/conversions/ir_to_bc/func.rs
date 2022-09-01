@@ -60,7 +60,7 @@ pub(crate) fn convert_func<'a>(
     let mut labeler = emitter::Labeler::new(&func);
     let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings);
 
-    let return_type_info = crate::types::convert(&func.return_type);
+    let return_type_info = crate::types::convert(alloc, &func.return_type, strings);
 
     let decl_vars = Slice::fill_iter(alloc, decl_vars.into_iter());
 
@@ -79,7 +79,7 @@ pub(crate) fn convert_func<'a>(
                 is_inout: param.is_inout,
                 is_readonly: param.is_readonly,
                 user_attributes,
-                type_info: crate::types::convert(&param.ty),
+                type_info: crate::types::convert(alloc, &param.ty, strings),
                 default_value: dv.into(),
             }
         }),
@@ -96,7 +96,7 @@ pub(crate) fn convert_func<'a>(
                 tparam
                     .bounds
                     .iter()
-                    .map(|ty| crate::types::convert(ty).unwrap()),
+                    .map(|ty| crate::types::convert(alloc, ty, strings).unwrap()),
             );
             Pair(name.as_ffi_str(), type_info)
         }),

@@ -278,7 +278,7 @@ impl<'a, T> std::ops::Deref for Slice<'a, T> {
 }
 
 impl<'a, T: 'a> Slice<'a, T> {
-    pub fn new(t: &'a [T]) -> Self {
+    pub const fn new(t: &'a [T]) -> Self {
         Slice {
             data: t.as_ptr(),
             len: t.len(),

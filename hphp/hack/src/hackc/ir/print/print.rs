@@ -319,7 +319,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner<'_
     }
 
     if let Some(et) = class.enum_type.as_ref() {
-        writeln!(w, "  enum_type {}", FmtType(et))?;
+        writeln!(w, "  enum_type {}", et.display(strings))?;
     }
 
     for (name, tys) in &class.upper_bounds {
@@ -327,7 +327,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner<'_
             w,
             "  upper_bound {}: [{}]",
             FmtIdentifier(name.as_ref()),
-            FmtSep::comma(tys.iter(), |w, ty| FmtType(ty).fmt(w))
+            FmtSep::comma(tys.iter(), |w, ty| ty.display(strings).fmt(w))
         )?;
     }
 
@@ -1617,7 +1617,7 @@ pub(crate) fn print_param(
     write!(
         w,
         "{} {}{}",
-        FmtType(&param.ty),
+        param.ty.display(strings),
         ellipsis_for_variadic,
         FmtIdentifierId(param.name, strings)
     )?;

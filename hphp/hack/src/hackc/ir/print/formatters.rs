@@ -554,7 +554,7 @@ impl Display for FmtSpecialClsRef {
 }
 
 pub(crate) struct FmtTParams<'a>(
-    pub(crate) &'a ClassIdMap<TParamBounds<'a>>,
+    pub(crate) &'a ClassIdMap<TParamBounds>,
     pub &'a StringInterner<'a>,
 );
 
@@ -573,7 +573,7 @@ impl Display for FmtTParams<'_> {
                         write!(f, ": ")?;
                         let mut sep = "";
                         for bound in bounds.bounds.iter() {
-                            write!(f, "{sep}{}", FmtType(bound))?;
+                            write!(f, "{sep}{}", bound.display(strings))?;
                             sep = " + ";
                         }
                     }
@@ -602,31 +602,6 @@ impl Display for FmtShadowedTParams<'_> {
                     FmtIdentifierId(name.id, strings).fmt(f)
                 })
             )
-        }
-    }
-}
-
-pub(crate) struct FmtType<'a>(pub(crate) &'a Type<'a>);
-
-impl Display for FmtType<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self.0 {
-            Type::Empty => write!(f, "empty"),
-            Type::Flags(flags, inner) => write!(f, "flags({}, {})", flags, FmtType(inner)),
-            Type::None => write!(f, "unspecified"),
-            Type::User(name) => write!(f, "{}", FmtIdentifier(name.as_ref())),
-            Type::UserNoConstraint(name) => {
-                write!(f, "unconstrained({})", FmtIdentifier(name.as_ref()))
-            }
-            Type::UserWithConstraint(name, constraint) => {
-                write!(
-                    f,
-                    "constrained({}, {})",
-                    FmtIdentifier(name.as_ref()),
-                    FmtIdentifier(constraint.as_ref())
-                )
-            }
-            Type::Void => write!(f, "void"),
         }
     }
 }

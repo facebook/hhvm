@@ -63,7 +63,7 @@ pub(crate) fn convert_class<'a>(
 
     let enum_type: Maybe<_> = enum_type
         .as_ref()
-        .map(|et| types::convert(et).unwrap())
+        .map(|et| types::convert(alloc, et, strings).unwrap())
         .into();
 
     let type_constants = Slice::fill_iter(alloc, type_constants.iter().map(convert_type_constant));
@@ -73,7 +73,11 @@ pub(crate) fn convert_class<'a>(
         upper_bounds.iter().map(|(name, tys)| {
             Pair(
                 *name,
-                Slice::fill_iter(alloc, tys.iter().map(|ty| types::convert(ty).unwrap())),
+                Slice::fill_iter(
+                    alloc,
+                    tys.iter()
+                        .map(|ty| types::convert(alloc, ty, strings).unwrap()),
+                ),
             )
         }),
     );

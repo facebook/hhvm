@@ -315,6 +315,32 @@ auto typesToValues(F&& f) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Abstracts away how a worker should obtain it's inputs, and write
+// it's outputs. These functions are tightly coupled with the logic in
+// JobBase::serialize and JobBase::deserialize.
+struct ISource {
+  virtual ~ISource() = default;
+  virtual std::string blob() = 0;
+  virtual Optional<std::string> optBlob() = 0;
+  virtual std::vector<std::string> variadic() = 0;
+  virtual void initDone() = 0;
+  virtual bool inputEnd() const = 0;
+  virtual void nextInput() = 0;
+  virtual void finish() = 0;
+};
+
+struct ISink {
+  virtual ~ISink() = default;
+  virtual void blob(const std::string&) = 0;
+  virtual void optBlob(const Optional<std::string>&) = 0;
+  virtual void variadic(const std::vector<std::string>&) = 0;
+  virtual void nextOutput() = 0;
+  virtual void startFini() = 0;
+  virtual void finish() = 0;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 // Base class for Jobs. This provide a consistent interface to invoke
 // through.
 struct JobBase {
@@ -323,15 +349,16 @@ protected:
   explicit JobBase(const std::string& name);
   virtual ~JobBase() = default;
 
-  template <typename T> static T deserialize(const std::filesystem::path&);
-  template <typename T> static void serialize(const T&,
-                                              size_t,
-                                              const std::filesystem::path&);
+  template <typename T> static T deserialize(ISource&);
+  template <typename T> static void serialize(const T&, ISink&);
 
 private:
-  virtual void init(const std::filesystem::path&) const = 0;
-  virtual void fini(const std::filesystem::path&) const = 0;
-  virtual void run(const std::filesystem::path&, const std::filesystem::path&) const = 0;
+  template <typename T> static T deserializeBlob(std::string);
+  template <typename T> static std::string serializeBlob(const T&);
+
+  virtual void init(ISource&) const = 0;
+  virtual void fini(ISink&) const = 0;
+  virtual void run(ISource&, ISink&) const = 0;
 
   std::string m_name;
 

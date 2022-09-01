@@ -5640,6 +5640,8 @@ materialize_inputs(const IndexData& index,
   auto program = std::make_unique<php::Program>();
 
   auto const loadAndParse = [&] (Chunk chunk) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
     auto [classes, funcs, units] = HPHP_CORO_AWAIT(coro::collect(
       client->load(std::move(chunk.classes)),
       client->load(std::move(chunk.funcs)),

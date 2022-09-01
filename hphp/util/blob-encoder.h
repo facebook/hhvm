@@ -127,7 +127,7 @@ struct BlobEncoder {
   void writeRaw(const char* ptr, size_t size) {
     auto const start = m_blob.size();
     m_blob.resize(start + size);
-    std::copy(ptr, ptr + size, &m_blob[start]);
+    std::copy(ptr, ptr + size, m_blob.data() + start);
   }
 
   /*

@@ -220,7 +220,7 @@ impl Display for FmtIdentifier<'_> {
     }
 }
 
-pub(crate) struct FmtIdentifierId<'a, 'b>(pub UnitStringId, pub &'b StringInterner<'a>);
+pub(crate) struct FmtIdentifierId<'a, 'b>(pub UnitBytesId, pub &'b StringInterner<'a>);
 
 impl Display for FmtIdentifierId<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -471,14 +471,14 @@ impl Display for FmtQuotedStr<'_> {
 }
 
 pub(crate) struct FmtQuotedStringId<'a, 'b>(
-    pub(crate) UnitStringId,
+    pub(crate) UnitBytesId,
     pub(crate) &'b StringInterner<'a>,
 );
 
 impl Display for FmtQuotedStringId<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtQuotedStringId(id, strings) = *self;
-        if id == UnitStringId::NONE {
+        if id == UnitBytesId::NONE {
             write!(f, "none")
         } else {
             let name = strings.lookup(id);

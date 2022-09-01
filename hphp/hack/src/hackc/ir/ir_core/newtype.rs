@@ -24,17 +24,17 @@ pub use hhbc::TypeStructResolveOp;
 use newtype::newtype_int;
 
 use crate::string_intern::StringInterner;
-use crate::UnitStringId;
+use crate::UnitBytesId;
 
 macro_rules! interned_hhbc_id {
     ($name: ident, $hhbc: ident) => {
         #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
         pub struct $name {
-            pub id: UnitStringId,
+            pub id: UnitBytesId,
         }
 
         impl $name {
-            pub fn new(id: UnitStringId) -> Self {
+            pub fn new(id: UnitBytesId) -> Self {
                 Self { id }
             }
 

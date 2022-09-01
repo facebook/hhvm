@@ -38,7 +38,7 @@ use crate::FunctionId;
 use crate::LocId;
 use crate::MethodId;
 use crate::PropId;
-use crate::UnitStringId;
+use crate::UnitBytesId;
 use crate::ValueId;
 use crate::VarId;
 
@@ -184,7 +184,7 @@ pub enum Terminator {
     },
     SSwitch {
         cond: ValueId,
-        cases: Box<[UnitStringId]>,
+        cases: Box<[UnitBytesId]>,
         targets: Box<[BlockId]>,
         loc: LocId,
     },
@@ -498,7 +498,7 @@ pub enum Hhbc {
     #[has_operands(none)]
     NewObjS(SpecialClsRef, LocId),
     NewPair([ValueId; 2], LocId),
-    NewStructDict(Box<[UnitStringId]>, Box<[ValueId]>, LocId),
+    NewStructDict(Box<[UnitBytesId]>, Box<[ValueId]>, LocId),
     NewVec(Box<[ValueId]>, LocId),
     Not(ValueId, LocId),
     #[has_locals(none)]
@@ -830,7 +830,7 @@ impl CallDetail {
 #[has_locals(none)]
 pub struct Call {
     pub operands: Box<[ValueId]>,
-    pub context: UnitStringId,
+    pub context: UnitBytesId,
     pub detail: CallDetail,
     pub flags: FCallArgsFlags,
     pub num_rets: u32,
@@ -896,7 +896,7 @@ pub enum MemberKey {
     EL,
     // literal string as index
     //   $a["hello"]
-    ET(UnitStringId),
+    ET(UnitBytesId),
     // cell from stack as property
     //   $a->(foo())
     PC,
@@ -1110,7 +1110,7 @@ impl Instr {
     pub fn simple_call(func: FunctionId, operands: &[ValueId], loc: LocId) -> Instr {
         Self::call(Call {
             operands: operands.into(),
-            context: UnitStringId::NONE,
+            context: UnitBytesId::NONE,
             detail: CallDetail::FCallFuncD { func },
             flags: FCallArgsFlags::default(),
             num_rets: 0,
@@ -1173,7 +1173,7 @@ newtype_int!(UnnamedLocalId, u32, UnnamedLocalIdMap, UnnamedLocalIdSet);
 /// Note: Unlike HHBC the IR named and unnamed are in distinct namespaces.
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum LocalId {
-    Named(UnitStringId),
+    Named(UnitBytesId),
     // The UnnamedLocalIds are just for uniqueness - there are no requirements
     // for these IDs to be contiguous or in any particular order.
     Unnamed(UnnamedLocalId),

@@ -11,7 +11,7 @@ use naming_special_names_rust as naming_special_names;
 
 use crate::newtype::ClassId;
 use crate::StringInterner;
-use crate::UnitStringId;
+use crate::UnitBytesId;
 
 // As a const fn, given a string removes the leading backslash.
 // r"\HH\AnyArray" -> r"HH\AnyArray".
@@ -191,7 +191,7 @@ pub struct UserType {
     /// The textual type that the user wrote including generics and special
     /// chars (like '?').  If None then this is directly computable from the
     /// enforced type.
-    pub user_type: Option<UnitStringId>,
+    pub user_type: Option<UnitBytesId>,
     /// The underlying type this UserType is constrained as.
     pub enforced: EnforceableType,
 }

@@ -30,7 +30,7 @@ use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
 use crate::SrcLoc;
-use crate::UnitStringId;
+use crate::UnitBytesId;
 use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
@@ -38,7 +38,7 @@ use crate::ValueIdMap;
 /// Func parameters.
 #[derive(Debug)]
 pub struct Param<'a> {
-    pub name: UnitStringId,
+    pub name: UnitBytesId,
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,

@@ -60,7 +60,7 @@ fn field_might_contain_buried_local_id(ty: &SimpleType<'_>) -> bool {
             || ident == "SetOpOp"
             || ident == "SurpriseCheck"
             || ident == "TypeStructResolveOp"
-            || ident == "UnitStringId"
+            || ident == "UnitBytesId"
             || ident == "ValueId"
             || ident == "VarId"
             || ident == "u32"

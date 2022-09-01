@@ -90,7 +90,7 @@ pub use self::newtype::ValueIdMap;
 pub use self::newtype::ValueIdSet;
 pub use self::newtype::VarId;
 pub use self::string_intern::StringInterner;
-pub use self::string_intern::UnitStringId;
+pub use self::string_intern::UnitBytesId;
 pub use self::type_const::TypeConstant;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;

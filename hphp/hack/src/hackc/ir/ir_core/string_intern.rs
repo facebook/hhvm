@@ -10,8 +10,8 @@ use newtype::newtype_int;
 
 // Improvement list:
 //
-// - In debug mode have UnitStringId store a pointer to the original
-// StringInterner and check that whenever the UnitStringId is used to look up
+// - In debug mode have UnitBytesId store a pointer to the original
+// StringInterner and check that whenever the UnitBytesId is used to look up
 // values in the table. It's not as safe as using lifetimes to track it but it's
 // a lot cleaner code.
 
@@ -40,8 +40,8 @@ impl<'a> InternValue<'a> {
     }
 }
 
-// A UnitStringId represents an entry in the Unit::strings table.
-newtype_int!(UnitStringId, u32, UnitStringIdMap, UnitStringIdSet);
+// A UnitBytesId represents an entry in the Unit::strings table.
+newtype_int!(UnitBytesId, u32, UnitBytesIdMap, UnitBytesIdSet);
 
 #[derive(Default)]
 pub struct StringInterner<'a> {
@@ -49,12 +49,12 @@ pub struct StringInterner<'a> {
 }
 
 impl<'a> StringInterner<'a> {
-    pub fn intern_str(&mut self, s: Str<'a>) -> UnitStringId {
+    pub fn intern_str(&mut self, s: Str<'a>) -> UnitBytesId {
         let (index, _) = self.values.insert_full(InternValue::Str(s));
-        UnitStringId::from_usize(index)
+        UnitBytesId::from_usize(index)
     }
 
-    pub fn lookup(&self, id: UnitStringId) -> &InternValue<'a> {
+    pub fn lookup(&self, id: UnitBytesId) -> &InternValue<'a> {
         &self.values[id.as_usize()]
     }
 }

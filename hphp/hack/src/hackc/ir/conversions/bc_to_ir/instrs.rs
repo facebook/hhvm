@@ -22,7 +22,7 @@ use ir::FunctionId;
 use ir::Instr;
 use ir::LocalId;
 use ir::TryCatchId;
-use ir::UnitStringId;
+use ir::UnitBytesId;
 use ir::ValueId;
 use log::trace;
 
@@ -1156,7 +1156,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             Action::None
         }
         Opcode::NewStructDict(keys) => {
-            let keys: Box<[UnitStringId]> = keys
+            let keys: Box<[UnitBytesId]> = keys
                 .iter()
                 .map(|key| ctx.unit.strings.intern_str(*key))
                 .collect();

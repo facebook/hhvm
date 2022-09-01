@@ -386,6 +386,12 @@ enum class NamedGroup : uint16_t {
    * T129759634.
    */
   secp256r1_kyber512 = 12090,
+
+  /**
+   * Performance test only. Purely rely on unverified post-quantum crypto may
+   * cause security flaws.
+   */
+  kyber512 = 511,
 };
 
 std::string toString(NamedGroup);

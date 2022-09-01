@@ -283,9 +283,7 @@ struct State {
     size_64: uintnat,     // Size in words of 64-bit block for struct.
 
     // Stack for pending value to marshal
-    extern_stack_init: [extern_item; EXTERN_STACK_INIT_SIZE],
-    extern_stack: *mut extern_item,
-    extern_stack_limit: *mut extern_item,
+    stack: Vec<extern_item>,
 
     // Hash table to record already marshalled objects
     pos_table_present_init: [uintnat; Bitvect_size(POS_TABLE_INIT_SIZE)],
@@ -308,12 +306,11 @@ impl State {
         (*extern_state).obj_counter = 0;
         (*extern_state).size_32 = 0;
         (*extern_state).size_64 = 0;
-        (*extern_state).extern_stack = (*extern_state).extern_stack_init.as_mut_ptr();
-        (*extern_state).extern_stack_limit =
-            (*extern_state).extern_stack.add(EXTERN_STACK_INIT_SIZE);
 
         // Using `write` instead of assignment via `=` to not call `drop` on the
         // old, uninitialized value.
+        std::ptr::addr_of_mut!((*extern_state).stack)
+            .write(Vec::with_capacity(EXTERN_STACK_INIT_SIZE));
         std::ptr::addr_of_mut!((*extern_state).output).write(vec![]);
 
         extern_state
@@ -322,51 +319,14 @@ impl State {
     unsafe fn free(extern_state: *mut State) {
         if !extern_state.is_null() {
             drop(std::mem::take(&mut (*extern_state).output));
+            drop(std::mem::take(&mut (*extern_state).stack));
             caml_stat_free(extern_state as caml_stat_block);
         }
     }
 
     /// Free the extern stack if needed
-    unsafe fn free_stack(&mut self) {
-        if self.extern_stack != self.extern_stack_init.as_mut_ptr() {
-            caml_stat_free(self.extern_stack as caml_stat_block);
-            // Reinitialize the globals for next time around
-            self.extern_stack = self.extern_stack_init.as_mut_ptr();
-            self.extern_stack_limit = self.extern_stack.add(EXTERN_STACK_INIT_SIZE)
-        };
-    }
-
-    unsafe fn resize_stack(&mut self, sp: *mut extern_item) -> *mut extern_item {
-        let newsize: asize_t = (2 as asize_t).wrapping_mul(
-            self.extern_stack_limit
-                .wrapping_offset_from(self.extern_stack) as asize_t,
-        );
-        let sp_offset: asize_t = sp.wrapping_offset_from(self.extern_stack) as asize_t;
-
-        if newsize >= EXTERN_STACK_MAX_SIZE as c_ulong {
-            self.stack_overflow();
-        }
-        let newstack: *mut extern_item =
-            caml_stat_calloc_noexc(newsize, std::mem::size_of::<extern_item>() as asize_t) as _;
-        if newstack.is_null() {
-            self.stack_overflow();
-        }
-
-        // Copy items from the old stack to the new stack
-        memcpy(
-            newstack as *mut c_void,
-            self.extern_stack as *const c_void,
-            (std::mem::size_of::<extern_item>() as c_ulong).wrapping_mul(sp_offset) as usize,
-        );
-
-        // Free the old stack if it is not the initial stack
-        if self.extern_stack != self.extern_stack_init.as_mut_ptr() {
-            caml_stat_free(self.extern_stack as caml_stat_block);
-        }
-
-        self.extern_stack = newstack;
-        self.extern_stack_limit = newstack.offset(newsize as isize);
-        newstack.offset(sp_offset as isize)
+    fn free_stack(&mut self) {
+        drop(std::mem::take(&mut self.stack));
     }
 
     /// Initialize the position table
@@ -725,12 +685,10 @@ impl State {
     unsafe fn extern_rec(&mut self, mut v: value) {
         let mut goto_next_item: bool;
 
-        let mut sp: *mut extern_item;
         let mut h: uintnat = 0;
         let mut pos: uintnat = 0;
 
         self.init_position_table();
-        sp = self.extern_stack;
 
         loop {
             if Is_long(v) {
@@ -831,12 +789,13 @@ impl State {
                                 self.record_location(v, h);
                                 // Remember that we still have to serialize fields 1 ... sz - 1
                                 if sz > 1 {
-                                    sp = sp.offset(1);
-                                    if sp >= self.extern_stack_limit {
-                                        sp = self.resize_stack(sp)
+                                    if self.stack.len() + 1 >= EXTERN_STACK_MAX_SIZE {
+                                        self.stack_overflow();
                                     }
-                                    (*sp).v = Field_ptr_mut(v, 1);
-                                    (*sp).count = sz.wrapping_sub(1)
+                                    self.stack.push(extern_item {
+                                        v: Field_ptr_mut(v, 1),
+                                        count: sz.wrapping_sub(1),
+                                    });
                                 }
                                 // Continue serialization with the first field
                                 v = *(v as *mut value).offset(0);
@@ -849,18 +808,19 @@ impl State {
             // C goto label `next_item:` here
 
             // Pop one more item to marshal, if any
-            if sp == self.extern_stack {
+            if let Some(item) = self.stack.last_mut() {
+                let fresh8 = item.v;
+                item.v = item.v.offset(1);
+                v = *fresh8;
+                item.count = item.count.wrapping_sub(1);
+                if item.count == 0 {
+                    self.stack.pop();
+                }
+            } else {
                 // We are done.   Cleanup the stack and leave the function
                 self.free_stack();
                 self.free_position_table();
                 return;
-            }
-            let fresh8 = (*sp).v;
-            (*sp).v = (*sp).v.offset(1);
-            v = *fresh8;
-            (*sp).count = (*sp).count.wrapping_sub(1);
-            if (*sp).count == 0 {
-                sp = sp.offset(-1)
             }
         }
         // Never reached as function leaves with return

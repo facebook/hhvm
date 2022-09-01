@@ -1247,3 +1247,68 @@ func (p *FieldInterceptor) String() string {
   return fmt.Sprintf("FieldInterceptor({Name:%s Noinline:%s})", nameVal, noinlineVal)
 }
 
+type UseOpEncode struct {
+}
+
+func NewUseOpEncode() *UseOpEncode {
+  return &UseOpEncode{}
+}
+
+type UseOpEncodeBuilder struct {
+  obj *UseOpEncode
+}
+
+func NewUseOpEncodeBuilder() *UseOpEncodeBuilder{
+  return &UseOpEncodeBuilder{
+    obj: NewUseOpEncode(),
+  }
+}
+
+func (p UseOpEncodeBuilder) Emit() *UseOpEncode{
+  return &UseOpEncode{
+  }
+}
+
+func (p *UseOpEncode) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *UseOpEncode) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("UseOpEncode"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *UseOpEncode) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("UseOpEncode({})")
+}
+

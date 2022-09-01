@@ -25,6 +25,7 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<ScopedEnumAsUnionType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StrongType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FieldInterceptor>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<UseOpEncode>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

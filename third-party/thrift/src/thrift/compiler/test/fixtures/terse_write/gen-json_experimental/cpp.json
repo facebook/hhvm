@@ -187,6 +187,12 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 161
+      },
+      "UseOpEncode" : {
+        "name" : "UseOpEncode",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 187
       }
       },
   "source_path" : "thrift/annotation/cpp",

@@ -349,6 +349,24 @@
           "column" : 2
         }
       }
+    },
+    "UseOpEncode" : {
+      "lineno" : 187,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 187,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 188,
+          "column" : 22
+        }
+      }
     }
   }
 }

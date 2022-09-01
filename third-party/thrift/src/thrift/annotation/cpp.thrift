@@ -183,3 +183,6 @@ struct FieldInterceptor {
    */
   2: bool noinline;
 }
+
+@scope.Struct
+struct UseOpEncode {}

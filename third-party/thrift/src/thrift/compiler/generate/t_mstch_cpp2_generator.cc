@@ -1096,6 +1096,7 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:no_deprecated_tag_incompatible_and_thrift_uri?",
              &cpp_mstch_struct::no_deprecated_tag_incompatible_and_thrift_uri},
+            {"struct:cpp_use_op_encode", &cpp_mstch_struct::cpp_use_op_encode},
         });
     register_has_option(
         "struct:deprecated_tag_incompatible?", "deprecated_tag_incompatible");
@@ -1422,6 +1423,11 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node no_deprecated_tag_incompatible_and_thrift_uri() {
     return !has_option("deprecated_tag_incompatible") &&
         !struct_->uri().empty();
+  }
+
+  mstch::node cpp_use_op_encode() {
+    return struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri) !=
+        nullptr;
   }
 
  protected:

@@ -76,6 +76,8 @@ constexpr auto kCppStrongTypeUri =
     "facebook.com/thrift/annotation/cpp/StrongType";
 constexpr auto kCppTriviallyRelocatableUri =
     "facebook.com/thrift/annotation/cpp/TriviallyRelocatable";
+constexpr auto kCppUseOpEncodeUri =
+    "facebook.com/thrift/annotation/cpp/UseOpEncode";
 
 // java
 constexpr auto kJavaAdapterUri = "facebook.com/thrift/annotation/java/Adapter";

@@ -102,12 +102,16 @@ impl Names {
         )?
         .execute(params![])?;
 
+        // TODO(ljw) - NAMING_FILE_INFO should be indexed on PATH_SUFFIX.
+
         tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
             .execute(params![])?;
 
         Ok(tx.commit()?)
     }
 
+    /// Walks O(table) to derive checksum based on the decl_hash of each item.
+    /// TODO(ljw) - We should store checksum in the table directly.
     pub fn derive_checksum(&self) -> anyhow::Result<Checksum> {
         let select_statement = "
         SELECT
@@ -127,6 +131,10 @@ impl Names {
         Ok(checksum)
     }
 
+    /// Removes a symbol definition from the reverse naming table (be it in
+    /// a winner or in the overflow table), and fixes the remaining candidates.
+    /// TODO(ljw): this crashes in the case where you delete an overflow symbol
+    /// and it tries to move the remaining overflow symbol into the main table.
     pub fn remove_symbol(
         &self,
         symbol_hash: ToplevelSymbolHash,
@@ -179,6 +187,8 @@ impl Names {
         Ok(())
     }
 
+    /// Adds all of a file's symbols into the reverse naming table,
+    /// into normal or overflow as appropriate.
     pub fn save_file_summary(
         &self,
         path: &RelativePath,
@@ -236,6 +246,7 @@ impl Names {
         Ok(())
     }
 
+    /// private helper for saved_file_summary
     fn insert_file_summary(
         &self,
         path: &RelativePath,
@@ -323,6 +334,8 @@ impl Names {
         Ok(())
     }
 
+    /// Gets all overflow rows in the reverse naming table for a given symbol hash,
+    /// and joins with the forward naming table to resolve filenames.
     fn get_overflow_rows_unordered(
         &self,
         symbol_hash: ToplevelSymbolHash,
@@ -365,6 +378,8 @@ impl Names {
         Ok(result)
     }
 
+    /// Gets the winning entry for a symbol from the reverse naming table,
+    /// and joins with forward-naming-table to get filename.
     fn get_row(&self, symbol_hash: ToplevelSymbolHash) -> anyhow::Result<Option<SymbolRow>> {
         let select_statement = "
         SELECT
@@ -405,7 +420,21 @@ impl Names {
         Ok(result?)
     }
 
-    /// Similar to get_path_by_symbol_hash, but inclues the name kind
+    /// This looks up the reverse naming table by hash, to fetch the decl-hash
+    pub fn get_decl_hash(
+        &self,
+        symbol_hash: ToplevelSymbolHash,
+    ) -> anyhow::Result<Option<DeclHash>> {
+        let result = self
+            .conn
+            .prepare_cached("SELECT DECL_HASH FROM NAMING_SYMBOLS WHERE HASH = ?")?
+            .query_row(params![symbol_hash], |row| row.get(0))
+            .optional();
+        Ok(result?)
+    }
+
+    /// Looks up reverse-naming-table winner by symbol hash.
+    /// Similar to get_path_by_symbol_hash, but includes the name kind.
     pub fn get_filename(
         &self,
         symbol_hash: ToplevelSymbolHash,
@@ -439,6 +468,7 @@ impl Names {
         Ok(result?)
     }
 
+    /// Looks up reverse-naming-table winner by symbol hash.
     /// Similar to get_filename, but discards the name kind
     pub fn get_path_by_symbol_hash(
         &self,
@@ -450,6 +480,7 @@ impl Names {
         }
     }
 
+    /// Looks up reverse-naming-table winner by case-insensitive symbol hash.
     pub fn get_path_case_insensitive(
         &self,
         symbol_hash: ToplevelCanonSymbolHash,
@@ -480,7 +511,12 @@ impl Names {
         Ok(result?)
     }
 
-    #[allow(unused)]
+    /// This function shouldn't really exist.
+    /// It searches the reverse-naming-table by case-insensitive hash.
+    /// Then looks up the forward-naming-table entry for that winner.
+    /// Then it iterates the string type names stored in that forward-naming-table entry,
+    /// comparing them one by one until it finds one whose case-insensitive hash
+    /// matches what was asked for.
     pub fn get_type_name_case_insensitive(
         &self,
         symbol_hash: ToplevelCanonSymbolHash,
@@ -524,7 +560,12 @@ impl Names {
         Ok(None)
     }
 
-    #[allow(unused)]
+    /// This function shouldn't really exist.
+    /// It searches the reverse-naming-table by case-insensitive hash.
+    /// Then looks up the forward-naming-table entry for that winner.
+    /// Then it iterates the string fun names stored in that forward-naming-table entry,
+    /// comparing them one by one until it finds one whose case-insensitive hash
+    /// matches what was asked for.
     pub fn get_fun_name_case_insensitive(
         &self,
         symbol_hash: ToplevelCanonSymbolHash,
@@ -561,6 +602,11 @@ impl Names {
         Ok(None)
     }
 
+    /// It scans O(table) for every entry in the reverse naming table that matches
+    /// the filename, and returns them.
+    /// TODO(ljw) This function does a needless O(table) scan.
+    /// It should get the same information more cheaply by lookup up the forward
+    /// naming table directly.
     pub fn get_symbol_hashes(
         &self,
         path: &RelativePath,
@@ -589,6 +635,11 @@ impl Names {
         Ok(symbol_hashes)
     }
 
+    /// It scans O(table) for every entry in the overflow reverse naming table that matches
+    /// the filename, and returns them.
+    /// TODO(ljw) This function does a needless O(table) scan.
+    /// It should get the same information more cheaply by lookup up the forward
+    /// naming table directly.
     pub fn get_overflow_symbol_hashes(
         &self,
         path: &RelativePath,
@@ -617,6 +668,11 @@ impl Names {
         Ok(symbol_hashes)
     }
 
+    /// It scans O(table) for every entry in the reverse naming table that matches
+    /// the filename, and returns them.
+    /// TODO(ljw) This function does a needless O(table) scan.
+    /// It should get the same information more cheaply by lookup up the forward
+    /// naming table directly.
     pub fn get_symbol_and_decl_hashes(
         &self,
         path: &RelativePath,
@@ -645,6 +701,7 @@ impl Names {
         Ok(symbol_and_decl_hashes)
     }
 
+    /// This inserts an item into the forward naming table.
     fn insert_file_info_and_get_file_id(
         &self,
         path_rel: &RelativePath,
@@ -693,6 +750,7 @@ impl Names {
         s
     }
 
+    /// This removes an entry from the forward naming table.
     pub fn delete(&self, path: &RelativePath) -> anyhow::Result<()> {
         let file_info_id: Option<crate::datatypes::FileInfoId> = self
             .conn
@@ -713,17 +771,5 @@ impl Names {
             .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
             .execute(params![file_info_id])?;
         Ok(())
-    }
-
-    pub fn get_decl_hash(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Option<DeclHash>> {
-        let result = self
-            .conn
-            .prepare_cached("SELECT DECL_HASH FROM NAMING_SYMBOLS WHERE HASH = ?")?
-            .query_row(params![symbol_hash], |row| row.get(0))
-            .optional();
-        Ok(result?)
     }
 }

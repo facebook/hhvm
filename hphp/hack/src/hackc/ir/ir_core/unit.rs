@@ -11,7 +11,7 @@ pub use hhbc::FunctionName;
 pub use hhbc::IncludePath;
 pub use hhbc::Typedef;
 
-use crate::literal::AdataId;
+use crate::constant::AdataId;
 use crate::string_intern::StringInterner;
 use crate::Attribute;
 use crate::Class;

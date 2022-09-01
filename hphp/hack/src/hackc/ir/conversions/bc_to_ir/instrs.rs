@@ -808,12 +808,12 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
 #[b2i_macros::bc_to_ir]
 fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> bool {
     use instr::Hhbc;
-    use ir::Literal;
+    use ir::Constant;
     let loc = ctx.loc;
 
     enum Action<'a> {
         Emit(Instr),
-        Literal(Literal<'a>),
+        Constant(Constant<'a>),
         None,
         Push(Instr),
         Terminal(Terminator),
@@ -1003,15 +1003,15 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::ContValid => simple!(Hhbc::ContValid),
         Opcode::CreateCont => simple!(Hhbc::CreateCont),
         Opcode::DblAsBits => todo!(),
-        Opcode::Dict => simple!(Literal::Dict),
-        Opcode::Dir => simple!(Literal::Dir),
+        Opcode::Dict => simple!(Constant::Dict),
+        Opcode::Dir => simple!(Constant::Dir),
         Opcode::Div => simple!(Hhbc::Div),
-        Opcode::Double => simple!(Literal::Double),
+        Opcode::Double => simple!(Constant::Double),
         Opcode::Eq => simple!(Hhbc::CmpOp, CmpOp::Eq),
         Opcode::Exit => simple!(Terminator::Exit),
-        Opcode::False => simple!(Literal::Bool, false),
-        Opcode::File => simple!(Literal::File),
-        Opcode::FuncCred => simple!(Literal::FuncCred),
+        Opcode::False => simple!(Constant::Bool, false),
+        Opcode::File => simple!(Constant::File),
+        Opcode::FuncCred => simple!(Constant::FuncCred),
         Opcode::GetClsRGProp => simple!(Hhbc::GetClsRGProp),
         Opcode::GetMemoKeyL => simple!(Hhbc::GetMemoKeyL),
         Opcode::Gt => simple!(Hhbc::CmpOp, CmpOp::Gt),
@@ -1024,7 +1024,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::InitProp => simple!(Hhbc::InitProp),
         Opcode::InstanceOf => todo!(),
         Opcode::InstanceOfD => simple!(Hhbc::InstanceOfD),
-        Opcode::Int => simple!(Literal::Int),
+        Opcode::Int => simple!(Constant::Int),
         Opcode::IsLateBoundCls => simple!(Hhbc::IsLateBoundCls),
         Opcode::IsTypeC => simple!(Hhbc::IsTypeC),
         Opcode::IsTypeL => simple!(Hhbc::IsTypeL),
@@ -1034,7 +1034,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),
         Opcode::IterFree => simple!(Hhbc::IterFree),
-        Opcode::Keyset => simple!(Literal::Keyset),
+        Opcode::Keyset => simple!(Constant::Keyset),
         Opcode::LIterFree => todo!(),
         Opcode::LIterInit => todo!(),
         Opcode::LIterNext => todo!(),
@@ -1046,14 +1046,14 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Lte => simple!(Hhbc::CmpOp, CmpOp::Lte),
         Opcode::MemoSet => simple!(Hhbc::MemoSet),
         Opcode::MemoSetEager => simple!(Hhbc::MemoSetEager),
-        Opcode::Method => simple!(Literal::Method),
+        Opcode::Method => simple!(Constant::Method),
         Opcode::Mod => simple!(Hhbc::Modulo),
         Opcode::Mul => simple!(Hhbc::Mul),
         Opcode::MulO => todo!(),
         Opcode::NSame => simple!(Hhbc::CmpOp, CmpOp::NSame),
         Opcode::NativeImpl => simple!(Terminator::NativeImpl),
         Opcode::Neq => simple!(Hhbc::CmpOp, CmpOp::Neq),
-        Opcode::NewCol => simple!(Literal::NewCol),
+        Opcode::NewCol => simple!(Constant::NewCol),
         Opcode::NewDictArray => simple!(Hhbc::NewDictArray),
         Opcode::NewKeysetArray => simple!(Hhbc::NewKeysetArray),
         Opcode::NewObj => simple!(Hhbc::NewObj),
@@ -1065,8 +1065,8 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::NewVec => simple!(Hhbc::NewVec),
         Opcode::Nop => todo!(),
         Opcode::Not => simple!(Hhbc::Not),
-        Opcode::Null => simple!(Literal::Null),
-        Opcode::NullUninit => simple!(Literal::Uninit),
+        Opcode::Null => simple!(Constant::Null),
+        Opcode::NullUninit => simple!(Constant::Uninit),
         Opcode::OODeclExists => simple!(Hhbc::OODeclExists),
         Opcode::ParentCls => simple!(Hhbc::ParentCls),
         Opcode::PopL => simple!(Hhbc::SetL),
@@ -1103,17 +1103,17 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Shl => simple!(Hhbc::Shl),
         Opcode::Shr => simple!(Hhbc::Shr),
         Opcode::Silence => simple!(Hhbc::Silence),
-        Opcode::String => simple!(Literal::String),
+        Opcode::String => simple!(Constant::String),
         Opcode::Sub => simple!(Hhbc::Sub),
         Opcode::SubO => todo!(),
         Opcode::This => simple!(Hhbc::This),
         Opcode::Throw => simple!(Terminator::Throw),
         Opcode::ThrowNonExhaustiveSwitch => simple!(Hhbc::ThrowNonExhaustiveSwitch),
-        Opcode::True => simple!(Literal::Bool, true),
+        Opcode::True => simple!(Constant::Bool, true),
         Opcode::UGetCUNop => todo!(),
         Opcode::UnsetG => simple!(Hhbc::UnsetG),
         Opcode::UnsetL => simple!(Hhbc::UnsetL),
-        Opcode::Vec => simple!(Literal::Vec),
+        Opcode::Vec => simple!(Constant::Vec),
         Opcode::VerifyImplicitContextState => simple!(Hhbc::VerifyImplicitContextState),
         Opcode::VerifyOutType => simple!(Hhbc::VerifyOutType),
         Opcode::VerifyParamType => simple!(Hhbc::VerifyParamType),
@@ -1139,7 +1139,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             ctx.push(s1);
             Action::None
         }
-        Opcode::CnsE(id) => Action::Literal(Literal::Named(id)),
+        Opcode::CnsE(id) => Action::Constant(Constant::Named(id)),
         Opcode::CreateCl(num_args, class) => {
             let operands = collect_args(ctx, num_args);
             let clsid = ir::ClassId::from_hhbc(class, &mut ctx.unit.strings);
@@ -1173,8 +1173,8 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Action::Emit(opcode) => {
             ctx.emit(opcode);
         }
-        Action::Literal(literal) => {
-            ctx.emit_push_literal(literal);
+        Action::Constant(constant) => {
+            ctx.emit_push_constant(constant);
         }
         Action::None => {}
         Action::Push(opcode) => {

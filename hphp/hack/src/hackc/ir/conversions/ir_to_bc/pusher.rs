@@ -303,10 +303,10 @@ impl<'a, 'b> PushInserter<'a, 'b> {
                         .emit(Instr::Hhbc(instr::Hhbc::CGetL(lid, LocId::NONE)));
                 }
             }
-            FullInstrId::Literal(lid) => {
+            FullInstrId::Constant(cid) => {
                 self.builder
-                    .emit(Instr::Special(Special::IrToBc(IrToBc::PushLiteral(
-                        ValueId::from_literal(lid),
+                    .emit(Instr::Special(Special::IrToBc(IrToBc::PushConstant(
+                        ValueId::from_constant(cid),
                     ))));
             }
         }

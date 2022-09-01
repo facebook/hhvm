@@ -239,11 +239,11 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         dominated_iids: &InstrIdSet,
     ) -> Result {
         match op_vid.full() {
-            FullInstrId::Literal(cid) => {
+            FullInstrId::Constant(cid) => {
                 check!(
                     self,
-                    self.func.literals.get(cid).is_some(),
-                    "iid {} refers to missing literal {}",
+                    self.func.constants.get(cid).is_some(),
+                    "iid {} refers to missing constant {}",
                     src_iid,
                     cid
                 )
@@ -491,11 +491,11 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     iid
                 ));
             }
-            Instr::Special(Special::IrToBc(IrToBc::PushLiteral(vid))) => {
+            Instr::Special(Special::IrToBc(IrToBc::PushConstant(vid))) => {
                 check!(
                     self,
-                    vid.is_literal(),
-                    "vid {} PushLiteral must refer to a LiteralId",
+                    vid.is_constant(),
+                    "vid {} PushConstant must refer to a ConstantId",
                     iid
                 );
             }

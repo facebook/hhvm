@@ -1076,7 +1076,7 @@ pub enum IrToBc {
     PopC,
     PopL(LocalId),
     PushL(LocalId),
-    PushLiteral(ValueId),
+    PushConstant(ValueId),
     PushUninit,
     UnsetL(LocalId),
 }

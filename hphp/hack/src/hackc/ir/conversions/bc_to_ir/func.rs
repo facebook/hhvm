@@ -122,7 +122,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
         instrs: Default::default(),
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        literals: Default::default(),
+        constants: Default::default(),
         locs: Default::default(),
         num_iters,
         params: Default::default(),

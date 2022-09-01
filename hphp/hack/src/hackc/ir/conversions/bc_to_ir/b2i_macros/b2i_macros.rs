@@ -202,7 +202,7 @@ fn parse_convert_simple(
 
     let instr_path: Path = input.parse()?;
     let (instr_class, _instr_variant) = split_path2(&instr_path)?;
-    let is_literal = instr_class == "Literal";
+    let is_constant = instr_class == "Constant";
     let is_terminator = instr_class == "Terminator";
     let instr_class = Ident::new(&instr_class, instr_path.span());
 
@@ -330,7 +330,7 @@ fn parse_convert_simple(
             .map(|name| Ident::new(name, span).to_token_stream()),
     );
     params.extend(extra.iter().map(ToTokens::to_token_stream));
-    if !is_literal {
+    if !is_constant {
         params.push(quote!(ctx.loc));
     }
 
@@ -350,11 +350,11 @@ fn parse_convert_simple(
                 }
             }
             Outputs::Fixed(outputs) if outputs.len() == 1 => {
-                if is_literal {
+                if is_constant {
                     if params.is_empty() {
-                        quote!(Action::Literal(#instr_path))
+                        quote!(Action::Constant(#instr_path))
                     } else {
-                        quote!(Action::Literal(#instr_path(#(#params),*)))
+                        quote!(Action::Constant(#instr_path(#(#params),*)))
                     }
                 } else if is_terminator {
                     quote!(Action::Terminal(#instr_path(#(#params),*)))

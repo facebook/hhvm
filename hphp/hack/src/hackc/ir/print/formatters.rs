@@ -230,28 +230,28 @@ impl Display for FmtIdentifierId<'_, '_> {
     }
 }
 
-pub(crate) struct FmtLiteral<'a, 'b>(pub(crate) &'b Literal<'a>);
+pub(crate) struct FmtConstant<'a, 'b>(pub(crate) &'b Constant<'a>);
 
-impl Display for FmtLiteral<'_, '_> {
+impl Display for FmtConstant<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtLiteral(literal) = self;
-        match literal {
-            Literal::Bool(false) => write!(f, "false")?,
-            Literal::Bool(true) => write!(f, "true")?,
-            Literal::Dict(name) => write!(f, "dict({})", FmtQuotedStr(name))?,
-            Literal::Dir => write!(f, "dir")?,
-            Literal::Double(value) => write!(f, "{}", value.0)?,
-            Literal::File => write!(f, "file")?,
-            Literal::FuncCred => write!(f, "func_cred")?,
-            Literal::Int(value) => write!(f, "{}", value)?,
-            Literal::Keyset(name) => write!(f, "keyset({})", FmtQuotedStr(name))?,
-            Literal::Method => write!(f, "method")?,
-            Literal::Named(name) => write!(f, "literal({})", FmtIdentifier(name.as_bytes()))?,
-            Literal::NewCol(k) => write!(f, "new_col({:?})", k)?,
-            Literal::Null => write!(f, "null")?,
-            Literal::String(value) => FmtQuotedStr(value).fmt(f)?,
-            Literal::Uninit => write!(f, "uninit")?,
-            Literal::Vec(name) => write!(f, "vec({})", FmtQuotedStr(name))?,
+        let FmtConstant(constant) = self;
+        match constant {
+            Constant::Bool(false) => write!(f, "false")?,
+            Constant::Bool(true) => write!(f, "true")?,
+            Constant::Dict(name) => write!(f, "dict({})", FmtQuotedStr(name))?,
+            Constant::Dir => write!(f, "dir")?,
+            Constant::Double(value) => write!(f, "{}", value.0)?,
+            Constant::File => write!(f, "file")?,
+            Constant::FuncCred => write!(f, "func_cred")?,
+            Constant::Int(value) => write!(f, "{}", value)?,
+            Constant::Keyset(name) => write!(f, "keyset({})", FmtQuotedStr(name))?,
+            Constant::Method => write!(f, "method")?,
+            Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes()))?,
+            Constant::NewCol(k) => write!(f, "new_col({:?})", k)?,
+            Constant::Null => write!(f, "null")?,
+            Constant::String(value) => FmtQuotedStr(value).fmt(f)?,
+            Constant::Uninit => write!(f, "uninit")?,
+            Constant::Vec(name) => write!(f, "vec({})", FmtQuotedStr(name))?,
         }
 
         Ok(())
@@ -264,11 +264,11 @@ impl Display for FmtVid<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtVid(body, vid, verbose) = *self;
         match vid.full() {
-            FullInstrId::Literal(lid) => {
+            FullInstrId::Constant(cid) => {
                 if verbose {
                     FmtRawVid(vid).fmt(f)
                 } else {
-                    FmtLiteralId(body, lid).fmt(f)
+                    FmtConstantId(body, cid).fmt(f)
                 }
             }
             FullInstrId::Instr(iid) => {
@@ -395,13 +395,13 @@ impl Display for FmtLids<'_, '_> {
     }
 }
 
-pub(crate) struct FmtLiteralId<'a>(pub(crate) &'a Func<'a>, pub(crate) LiteralId);
+pub(crate) struct FmtConstantId<'a>(pub(crate) &'a Func<'a>, pub(crate) ConstantId);
 
-impl Display for FmtLiteralId<'_> {
+impl Display for FmtConstantId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtLiteralId(body, lid) = *self;
-        let literal = body.literal(lid);
-        FmtLiteral(literal).fmt(f)
+        let FmtConstantId(body, cid) = *self;
+        let constant = body.constant(cid);
+        FmtConstant(constant).fmt(f)
     }
 }
 
@@ -512,11 +512,11 @@ impl Display for FmtRawVid {
                     write!(f, "%{}", iid.as_usize())
                 }
             }
-            FullInstrId::Literal(lid) => {
-                if lid == LiteralId::NONE {
+            FullInstrId::Constant(cid) => {
+                if cid == ConstantId::NONE {
                     f.write_str("#none")
                 } else {
-                    write!(f, "#{}", lid.as_usize())
+                    write!(f, "#{}", cid.as_usize())
                 }
             }
             FullInstrId::None => f.write_str("none"),

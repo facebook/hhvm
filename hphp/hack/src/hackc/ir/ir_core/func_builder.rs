@@ -9,12 +9,12 @@ use crate::instr::HasOperands;
 use crate::instr::Special;
 use crate::Block;
 use crate::BlockId;
+use crate::Constant;
+use crate::ConstantId;
 use crate::Func;
 use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
-use crate::Literal;
-use crate::LiteralId;
 use crate::LocId;
 use crate::SrcLoc;
 use crate::ValueId;
@@ -23,7 +23,7 @@ pub struct FuncBuilder<'a> {
     pub func: Func<'a>,
     cur_bid: BlockId,
     pub loc_lookup: HashMap<SrcLoc, LocId>,
-    pub literal_lookup: HashMap<Literal<'a>, LiteralId>,
+    pub constant_lookup: HashMap<Constant<'a>, ConstantId>,
     block_rewrite_stopped: bool,
     changed: bool,
 
@@ -52,17 +52,17 @@ impl<'a> FuncBuilder<'a> {
     }
 
     pub fn with_func(func: Func<'a>) -> Self {
-        let literal_lookup: HashMap<Literal<'a>, LiteralId> = func
-            .literals
+        let constant_lookup: HashMap<Constant<'a>, ConstantId> = func
+            .constants
             .iter()
             .enumerate()
-            .map(|(idx, literal)| (literal.clone(), LiteralId::from_usize(idx)))
+            .map(|(idx, constant)| (constant.clone(), ConstantId::from_usize(idx)))
             .collect();
         FuncBuilder {
             func,
             cur_bid: BlockId::NONE,
             loc_lookup: Default::default(),
-            literal_lookup,
+            constant_lookup,
             block_rewrite_stopped: false,
             changed: false,
             replacements: Default::default(),
@@ -122,12 +122,12 @@ impl<'a> FuncBuilder<'a> {
         ValueId::from_instr(iid)
     }
 
-    pub fn emit_literal(&mut self, literal: Literal<'a>) -> ValueId {
+    pub fn emit_constant(&mut self, constant: Constant<'a>) -> ValueId {
         let lit_id = self
-            .literal_lookup
-            .entry(literal)
-            .or_insert_with_key(|literal| self.func.alloc_literal(literal.clone()));
-        ValueId::from_literal(*lit_id)
+            .constant_lookup
+            .entry(constant)
+            .or_insert_with_key(|constant| self.func.alloc_constant(constant.clone()));
+        ValueId::from_constant(*lit_id)
     }
 
     pub fn finish(self) -> Func<'a> {

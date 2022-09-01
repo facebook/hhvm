@@ -444,9 +444,9 @@ mod test {
     use ir_core::instr::HasOperands;
     use ir_core::instr::Predicate;
     use ir_core::instr::Terminator;
+    use ir_core::Constant;
     use ir_core::FuncBuilder;
     use ir_core::FunctionId;
-    use ir_core::Literal;
     use ir_core::LocId;
     use ir_core::StringInterner;
 
@@ -460,8 +460,8 @@ mod test {
         let mut func = FuncBuilder::build_func(|builder| {
             // %0 = call("my_fn", [42])
             // %1 = ret null
-            let value = builder.emit_literal(Literal::Int(42));
-            let null = builder.emit_literal(Literal::Null);
+            let value = builder.emit_constant(Constant::Int(42));
+            let null = builder.emit_constant(Constant::Null);
             let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
@@ -484,9 +484,9 @@ mod test {
             // call("my_fn", [%2])
             // ret null
             let var = VarId::from_usize(0);
-            let value = builder.emit_literal(Literal::Int(42));
+            let value = builder.emit_constant(Constant::Int(42));
             builder.emit(Instr::set_var(var, value));
-            let null = builder.emit_literal(Literal::Null);
+            let null = builder.emit_constant(Constant::Null);
             let value = builder.emit(Instr::get_var(var));
             let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
@@ -505,8 +505,8 @@ mod test {
         let ops = instr.unwrap().operands();
         assert_eq!(ops.len(), 1);
         assert!(matches!(
-            ops[0].literal().map(|lit| func.literal(lit)),
-            Some(Literal::Int(42))
+            ops[0].constant().map(|lit| func.constant(lit)),
+            Some(Constant::Int(42))
         ));
 
         assert!(matches!(
@@ -545,16 +545,16 @@ mod test {
             let var1 = VarId::from_usize(1);
             let var2 = VarId::from_usize(2);
 
-            let value = builder.emit_literal(Literal::Int(42));
+            let value = builder.emit_constant(Constant::Int(42));
             builder.emit(Instr::set_var(var0, value));
 
-            let value = builder.emit_literal(Literal::Int(314));
+            let value = builder.emit_constant(Constant::Int(314));
             builder.emit(Instr::set_var(var1, value));
 
             let true_bid = builder.alloc_bid();
             let false_bid = builder.alloc_bid();
             let join_bid = builder.alloc_bid();
-            let value = builder.emit_literal(Literal::Bool(true));
+            let value = builder.emit_constant(Constant::Bool(true));
             builder.emit(Instr::jmp_op(
                 value,
                 Predicate::NonZero,
@@ -565,24 +565,24 @@ mod test {
 
             builder.start_block(true_bid);
 
-            let value = builder.emit_literal(Literal::Int(123));
+            let value = builder.emit_constant(Constant::Int(123));
             builder.emit(Instr::set_var(var1, value));
 
-            let value = builder.emit_literal(Literal::Int(1));
+            let value = builder.emit_constant(Constant::Int(1));
             builder.emit(Instr::set_var(var2, value));
 
             builder.emit(Instr::jmp(join_bid, loc));
 
             builder.start_block(false_bid);
 
-            let value = builder.emit_literal(Literal::Int(2));
+            let value = builder.emit_constant(Constant::Int(2));
             builder.emit(Instr::set_var(var2, value));
 
             builder.emit(Instr::jmp(join_bid, loc));
 
             builder.start_block(join_bid);
 
-            let null = builder.emit_literal(Literal::Null);
+            let null = builder.emit_constant(Constant::Null);
             let value0 = builder.emit(Instr::get_var(var0));
             let value1 = builder.emit(Instr::get_var(var1));
             let value2 = builder.emit(Instr::get_var(var2));

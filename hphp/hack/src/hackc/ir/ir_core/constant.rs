@@ -10,10 +10,9 @@ use crate::instr::HasOperands;
 use crate::TypedValue;
 use crate::ValueId;
 
-/// A literal value. Note that since these refer to a LocId they're only valid
-/// in relation to a specific Func.
+/// A constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum Literal<'a> {
+pub enum Constant<'a> {
     Bool(bool),
     Dict(AdataId<'a>),
     Dir,
@@ -31,7 +30,7 @@ pub enum Literal<'a> {
     Vec(AdataId<'a>),
 }
 
-impl HasOperands for Literal<'_> {
+impl HasOperands for Constant<'_> {
     fn operands(&self) -> &[ValueId] {
         // By definition constants don't have operands.
         &[]

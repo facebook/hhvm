@@ -3,8 +3,8 @@
 //! This module contains shared functions for use by tests.
 
 use hash::HashMap;
+use ir_core::constant::Constant;
 use ir_core::instr;
-use ir_core::literal::Literal;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::FuncBuilder;
@@ -33,7 +33,7 @@ pub fn build_test_func<'a>(testcase: &[(&str, Vec<&str>)]) -> Func<'a> {
             );
         }
 
-        let null_iid = fb.emit_literal(Literal::Null);
+        let null_iid = fb.emit_constant(Constant::Null);
 
         for (name, edges) in testcase {
             fb.start_block(name_to_bid[name]);

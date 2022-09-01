@@ -671,25 +671,25 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         }
     }
 
-    fn emit_literal(&mut self, lc: &ir::Literal<'a>) {
-        use ir::Literal::*;
+    fn emit_constant(&mut self, lc: &ir::Constant<'a>) {
+        use ir::Constant;
         let i = match lc {
-            Bool(false) => Opcode::False,
-            Bool(true) => Opcode::True,
-            Dir => Opcode::Dir,
-            Dict(name) => Opcode::Dict(*name),
-            Double(v) => Opcode::Double(*v),
-            File => Opcode::File,
-            FuncCred => Opcode::FuncCred,
-            Int(v) => Opcode::Int(*v),
-            Keyset(name) => Opcode::Keyset(*name),
-            Method => Opcode::Method,
-            Named(name) => Opcode::CnsE(*name),
-            NewCol(k) => Opcode::NewCol(*k),
-            Null => Opcode::Null,
-            String(v) => Opcode::String(*v),
-            Uninit => Opcode::NullUninit,
-            Vec(name) => Opcode::Vec(*name),
+            Constant::Bool(false) => Opcode::False,
+            Constant::Bool(true) => Opcode::True,
+            Constant::Dir => Opcode::Dir,
+            Constant::Dict(name) => Opcode::Dict(*name),
+            Constant::Double(v) => Opcode::Double(*v),
+            Constant::File => Opcode::File,
+            Constant::FuncCred => Opcode::FuncCred,
+            Constant::Int(v) => Opcode::Int(*v),
+            Constant::Keyset(name) => Opcode::Keyset(*name),
+            Constant::Method => Opcode::Method,
+            Constant::Named(name) => Opcode::CnsE(*name),
+            Constant::NewCol(k) => Opcode::NewCol(*k),
+            Constant::Null => Opcode::Null,
+            Constant::String(v) => Opcode::String(*v),
+            Constant::Uninit => Opcode::NullUninit,
+            Constant::Vec(name) => Opcode::Vec(*name),
         };
         self.push_opcode(i);
     }
@@ -917,9 +917,9 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 let local = self.lookup_local(*lid);
                 self.push_opcode(Opcode::PushL(local));
             }
-            IrToBc::PushLiteral(vid) => match vid.full() {
-                FullInstrId::Literal(cid) => self.emit_literal(self.func.literal(cid)),
-                FullInstrId::Instr(_) | FullInstrId::None => panic!("Malformed PushLiteral!"),
+            IrToBc::PushConstant(vid) => match vid.full() {
+                FullInstrId::Constant(cid) => self.emit_constant(self.func.constant(cid)),
+                FullInstrId::Instr(_) | FullInstrId::None => panic!("Malformed PushConstant!"),
             },
             IrToBc::PushUninit => self.push_opcode(Opcode::NullUninit),
             IrToBc::UnsetL(lid) => {

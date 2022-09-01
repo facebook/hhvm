@@ -23,11 +23,11 @@ use crate::BlockIdMap;
 use crate::ClassId;
 use crate::ClassIdMap;
 use crate::Coeffects;
+use crate::Constant;
+use crate::ConstantId;
 use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
-use crate::Literal;
-use crate::LiteralId;
 use crate::LocId;
 use crate::SrcLoc;
 use crate::UnitStringId;
@@ -154,7 +154,7 @@ pub struct Func<'a> {
     pub instrs: IdVec<InstrId, Instr>,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub literals: IdVec<LiteralId, Literal<'a>>,
+    pub constants: IdVec<ConstantId, Constant<'a>>,
     pub locs: IdVec<LocId, SrcLoc>,
     pub num_iters: usize,
     pub params: Vec<Param<'a>>,
@@ -169,10 +169,10 @@ impl<'a> Func<'a> {
     // By definition the entry block is block zero.
     pub const ENTRY_BID: BlockId = BlockId(0);
 
-    pub fn alloc_literal(&mut self, literal: Literal<'a>) -> LiteralId {
-        let lid = LiteralId::from_usize(self.literals.len());
-        self.literals.push(literal);
-        lid
+    pub fn alloc_constant(&mut self, constant: Constant<'a>) -> ConstantId {
+        let cid = ConstantId::from_usize(self.constants.len());
+        self.constants.push(constant);
+        cid
     }
 
     pub fn alloc_instr(&mut self, i: Instr) -> InstrId {
@@ -244,8 +244,8 @@ impl<'a> Func<'a> {
         }
     }
 
-    pub fn literal(&self, lid: LiteralId) -> &Literal<'a> {
-        self.get_literal(lid).unwrap()
+    pub fn constant(&self, cid: ConstantId) -> &Constant<'a> {
+        self.get_constant(cid).unwrap()
     }
 
     pub fn edges(&self, bid: BlockId) -> &[BlockId] {
@@ -266,8 +266,8 @@ impl<'a> Func<'a> {
         self.blocks.get(bid)
     }
 
-    pub fn get_literal(&self, lid: LiteralId) -> Option<&Literal<'a>> {
-        self.literals.get(lid)
+    pub fn get_constant(&self, cid: ConstantId) -> Option<&Constant<'a>> {
+        self.constants.get(cid)
     }
 
     pub fn get_edges(&self, bid: BlockId) -> Option<&[BlockId]> {

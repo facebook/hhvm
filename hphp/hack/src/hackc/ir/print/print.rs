@@ -461,12 +461,12 @@ pub(crate) fn print_func_body(
     if let Some(doc_comment) = func.doc_comment.as_ref() {
         writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment))?;
     }
-    for lid in func.literals.keys() {
+    for cid in func.constants.keys() {
         writeln!(
             w,
             "  .const {} = {}",
-            FmtRawVid(ValueId::from_literal(lid)),
-            FmtLiteralId(func, lid),
+            FmtRawVid(ValueId::from_constant(cid)),
+            FmtConstantId(func, cid),
         )?;
     }
 
@@ -1290,7 +1290,7 @@ pub(crate) fn print_ir_to_bc(
         IrToBc::PushL(lid) => {
             write!(w, "push {}", FmtLid(*lid, ctx.strings))?;
         }
-        IrToBc::PushLiteral(vid) => write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?,
+        IrToBc::PushConstant(vid) => write!(w, "push {}", FmtVid(func, *vid, ctx.verbose))?,
         IrToBc::PushUninit => write!(w, "push_uninit")?,
         IrToBc::UnsetL(lid) => {
             write!(w, "unset_local {}", FmtLid(*lid, ctx.strings))?;

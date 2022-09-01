@@ -268,6 +268,7 @@ class BoolPatch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - invert: If the bool value should be inverted.
   """
 
@@ -296,6 +297,11 @@ class BoolPatch:
           self.assign = iprot.readBool()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.BOOL:
           self.invert = iprot.readBool()
@@ -318,6 +324,10 @@ class BoolPatch:
       oprot.writeFieldBegin('assign', TType.BOOL, 1)
       oprot.writeBool(self.assign)
       oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
+      oprot.writeFieldEnd()
     if self.invert != None:
       oprot.writeFieldBegin('invert', TType.BOOL, 9)
       oprot.writeBool(self.invert)
@@ -339,6 +349,8 @@ class BoolPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = json_obj['assign']
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'invert' in json_obj and json_obj['invert'] is not None:
       self.invert = json_obj['invert']
 
@@ -349,6 +361,10 @@ class BoolPatch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.invert is not None:
       value = pprint.pformat(self.invert, indent=0)
       value = padding.join(value.splitlines(True))
@@ -367,6 +383,7 @@ class BoolPatch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'invert',
     )
 
@@ -396,6 +413,7 @@ class BytePatch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -424,6 +442,11 @@ class BytePatch:
           self.assign = iprot.readByte()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.BYTE:
           self.add = iprot.readByte()
@@ -445,6 +468,10 @@ class BytePatch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.BYTE, 1)
       oprot.writeByte(self.assign)
+      oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.BYTE, 8)
@@ -469,6 +496,8 @@ class BytePatch:
       self.assign = json_obj['assign']
       if self.assign > 0x7f or self.assign < -0x80:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = json_obj['add']
       if self.add > 0x7f or self.add < -0x80:
@@ -481,6 +510,10 @@ class BytePatch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -499,6 +532,7 @@ class BytePatch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -528,6 +562,7 @@ class I16Patch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -556,6 +591,11 @@ class I16Patch:
           self.assign = iprot.readI16()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.I16:
           self.add = iprot.readI16()
@@ -577,6 +617,10 @@ class I16Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.I16, 1)
       oprot.writeI16(self.assign)
+      oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.I16, 8)
@@ -601,6 +645,8 @@ class I16Patch:
       self.assign = json_obj['assign']
       if self.assign > 0x7fff or self.assign < -0x8000:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = json_obj['add']
       if self.add > 0x7fff or self.add < -0x8000:
@@ -613,6 +659,10 @@ class I16Patch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -631,6 +681,7 @@ class I16Patch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -660,6 +711,7 @@ class I32Patch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -688,6 +740,11 @@ class I32Patch:
           self.assign = iprot.readI32()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.I32:
           self.add = iprot.readI32()
@@ -709,6 +766,10 @@ class I32Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.I32, 1)
       oprot.writeI32(self.assign)
+      oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.I32, 8)
@@ -733,6 +794,8 @@ class I32Patch:
       self.assign = json_obj['assign']
       if self.assign > 0x7fffffff or self.assign < -0x80000000:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = json_obj['add']
       if self.add > 0x7fffffff or self.add < -0x80000000:
@@ -745,6 +808,10 @@ class I32Patch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -763,6 +830,7 @@ class I32Patch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -792,6 +860,7 @@ class I64Patch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -820,6 +889,11 @@ class I64Patch:
           self.assign = iprot.readI64()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.I64:
           self.add = iprot.readI64()
@@ -842,6 +916,10 @@ class I64Patch:
       oprot.writeFieldBegin('assign', TType.I64, 1)
       oprot.writeI64(self.assign)
       oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
+      oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.I64, 8)
       oprot.writeI64(self.add)
@@ -863,6 +941,8 @@ class I64Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = long(json_obj['assign'])
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = long(json_obj['add'])
 
@@ -873,6 +953,10 @@ class I64Patch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -891,6 +975,7 @@ class I64Patch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -920,6 +1005,7 @@ class FloatPatch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -948,6 +1034,11 @@ class FloatPatch:
           self.assign = iprot.readFloat()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.FLOAT:
           self.add = iprot.readFloat()
@@ -970,6 +1061,10 @@ class FloatPatch:
       oprot.writeFieldBegin('assign', TType.FLOAT, 1)
       oprot.writeFloat(self.assign)
       oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
+      oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.FLOAT, 8)
       oprot.writeFloat(self.add)
@@ -991,6 +1086,8 @@ class FloatPatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = float(json_obj['assign'])
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = float(json_obj['add'])
 
@@ -1001,6 +1098,10 @@ class FloatPatch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -1019,6 +1120,7 @@ class FloatPatch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -1048,6 +1150,7 @@ class DoublePatch:
    - assign: Assign to a given value.
   
   If set, all other patch operations are ignored.
+   - clear: Clear any set value.
    - add: Add to a given value.
   """
 
@@ -1076,6 +1179,11 @@ class DoublePatch:
           self.assign = iprot.readDouble()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.DOUBLE:
           self.add = iprot.readDouble()
@@ -1098,6 +1206,10 @@ class DoublePatch:
       oprot.writeFieldBegin('assign', TType.DOUBLE, 1)
       oprot.writeDouble(self.assign)
       oprot.writeFieldEnd()
+    if self.clear != None:
+      oprot.writeFieldBegin('clear', TType.BOOL, 2)
+      oprot.writeBool(self.clear)
+      oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.DOUBLE, 8)
       oprot.writeDouble(self.add)
@@ -1119,6 +1231,8 @@ class DoublePatch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = float(json_obj['assign'])
+    if 'clear' in json_obj and json_obj['clear'] is not None:
+      self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = float(json_obj['add'])
 
@@ -1129,6 +1243,10 @@ class DoublePatch:
       value = pprint.pformat(self.assign, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    assign=%s' % (value))
+    if self.clear is not None:
+      value = pprint.pformat(self.clear, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    clear=%s' % (value))
     if self.add is not None:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
@@ -1147,6 +1265,7 @@ class DoublePatch:
   def __dir__(self):
     return (
       'assign',
+      'clear',
       'add',
     )
 
@@ -2978,7 +3097,7 @@ all_structs.append(BoolPatch)
 BoolPatch.thrift_spec = (
   None, # 0
   (1, TType.BOOL, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -2993,14 +3112,16 @@ BoolPatch.thrift_struct_annotations = {
 BoolPatch.thrift_field_annotations = {
 }
 
-def BoolPatch__init__(self, assign=None, invert=None,):
+def BoolPatch__init__(self, assign=None, clear=None, invert=None,):
   self.assign = assign
+  self.clear = clear
   self.invert = invert
 
 BoolPatch.__init__ = BoolPatch__init__
 
 def BoolPatch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('invert', None)
   self.__dict__ = state
 
@@ -3011,7 +3132,7 @@ all_structs.append(BytePatch)
 BytePatch.thrift_spec = (
   None, # 0
   (1, TType.BYTE, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3025,14 +3146,16 @@ BytePatch.thrift_struct_annotations = {
 BytePatch.thrift_field_annotations = {
 }
 
-def BytePatch__init__(self, assign=None, add=None,):
+def BytePatch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 BytePatch.__init__ = BytePatch__init__
 
 def BytePatch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
@@ -3043,7 +3166,7 @@ all_structs.append(I16Patch)
 I16Patch.thrift_spec = (
   None, # 0
   (1, TType.I16, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3057,14 +3180,16 @@ I16Patch.thrift_struct_annotations = {
 I16Patch.thrift_field_annotations = {
 }
 
-def I16Patch__init__(self, assign=None, add=None,):
+def I16Patch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 I16Patch.__init__ = I16Patch__init__
 
 def I16Patch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
@@ -3075,7 +3200,7 @@ all_structs.append(I32Patch)
 I32Patch.thrift_spec = (
   None, # 0
   (1, TType.I32, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3089,14 +3214,16 @@ I32Patch.thrift_struct_annotations = {
 I32Patch.thrift_field_annotations = {
 }
 
-def I32Patch__init__(self, assign=None, add=None,):
+def I32Patch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 I32Patch.__init__ = I32Patch__init__
 
 def I32Patch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
@@ -3107,7 +3234,7 @@ all_structs.append(I64Patch)
 I64Patch.thrift_spec = (
   None, # 0
   (1, TType.I64, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3121,14 +3248,16 @@ I64Patch.thrift_struct_annotations = {
 I64Patch.thrift_field_annotations = {
 }
 
-def I64Patch__init__(self, assign=None, add=None,):
+def I64Patch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 I64Patch.__init__ = I64Patch__init__
 
 def I64Patch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
@@ -3139,7 +3268,7 @@ all_structs.append(FloatPatch)
 FloatPatch.thrift_spec = (
   None, # 0
   (1, TType.FLOAT, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3153,14 +3282,16 @@ FloatPatch.thrift_struct_annotations = {
 FloatPatch.thrift_field_annotations = {
 }
 
-def FloatPatch__init__(self, assign=None, add=None,):
+def FloatPatch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 FloatPatch.__init__ = FloatPatch__init__
 
 def FloatPatch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
@@ -3171,7 +3302,7 @@ all_structs.append(DoublePatch)
 DoublePatch.thrift_spec = (
   None, # 0
   (1, TType.DOUBLE, 'assign', None, None, 1, ), # 1
-  None, # 2
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   None, # 3
   None, # 4
   None, # 5
@@ -3185,14 +3316,16 @@ DoublePatch.thrift_struct_annotations = {
 DoublePatch.thrift_field_annotations = {
 }
 
-def DoublePatch__init__(self, assign=None, add=None,):
+def DoublePatch__init__(self, assign=None, clear=None, add=None,):
   self.assign = assign
+  self.clear = clear
   self.add = add
 
 DoublePatch.__init__ = DoublePatch__init__
 
 def DoublePatch__setstate__(self, state):
   state.setdefault('assign', None)
+  state.setdefault('clear', None)
   state.setdefault('add', None)
   self.__dict__ = state
 

@@ -307,6 +307,10 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::BOOL,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     9 => shape(
       'var' => 'invert',
       'type' => \TType::BOOL,
@@ -314,20 +318,23 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'invert' => 9,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?bool,
+    ?'clear' => ?bool,
     ?'invert' => ?bool,
   );
 
   const type TShape = shape(
     ?'assign' => ?bool,
+    'clear' => bool,
     'invert' => bool,
     ...
   );
-  const int STRUCTURAL_ID = 8755251121021042450;
+  const int STRUCTURAL_ID = 2251787647339945166;
   /**
    * Assign to a given value.
    * 
@@ -338,6 +345,13 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?bool $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * If the bool value should be inverted.
    * 
    * Original thrift field:-
@@ -345,8 +359,9 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public bool $invert;
 
-  public function __construct(?bool $assign = null, ?bool $invert = null)[] {
+  public function __construct(?bool $assign = null, ?bool $clear = null, ?bool $invert = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->invert = $invert ?? false;
   }
 
@@ -357,6 +372,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'invert'),
     );
   }
@@ -380,6 +396,17 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -422,6 +449,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['invert'],
     );
   }
@@ -429,6 +457,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'invert' => $this->invert,
     );
   }
@@ -445,6 +474,9 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
     if (idx($parsed, 'assign') !== null) {
       $this->assign = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['assign']);
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'invert') !== null) {
       $this->invert = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['invert']);
@@ -468,6 +500,10 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::BYTE,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::BYTE,
@@ -475,20 +511,23 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?int,
+    ?'clear' => ?bool,
     ?'add' => ?int,
   );
 
   const type TShape = shape(
     ?'assign' => ?int,
+    'clear' => bool,
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 2211838474069143581;
+  const int STRUCTURAL_ID = 4505194819966548722;
   /**
    * Assign to a given value.
    * 
@@ -499,6 +538,13 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?int $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -506,8 +552,9 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public int $add;
 
-  public function __construct(?int $assign = null, ?int $add = null)[] {
+  public function __construct(?int $assign = null, ?bool $clear = null, ?int $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0;
   }
 
@@ -518,6 +565,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -541,6 +589,17 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -583,6 +642,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -590,6 +650,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -611,6 +672,9 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       } else {
         $this->assign = (int)$_tmp0;
       }
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['add']);
@@ -639,6 +703,10 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::I16,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::I16,
@@ -646,20 +714,23 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?int,
+    ?'clear' => ?bool,
     ?'add' => ?int,
   );
 
   const type TShape = shape(
     ?'assign' => ?int,
+    'clear' => bool,
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 5266422431097931584;
+  const int STRUCTURAL_ID = 5082368378070508743;
   /**
    * Assign to a given value.
    * 
@@ -670,6 +741,13 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?int $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -677,8 +755,9 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public int $add;
 
-  public function __construct(?int $assign = null, ?int $add = null)[] {
+  public function __construct(?int $assign = null, ?bool $clear = null, ?int $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0;
   }
 
@@ -689,6 +768,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -712,6 +792,17 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -754,6 +845,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -761,6 +853,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -782,6 +875,9 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       } else {
         $this->assign = (int)$_tmp0;
       }
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['add']);
@@ -810,6 +906,10 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::I32,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::I32,
@@ -817,20 +917,23 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?int,
+    ?'clear' => ?bool,
     ?'add' => ?int,
   );
 
   const type TShape = shape(
     ?'assign' => ?int,
+    'clear' => bool,
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3653733632732906564;
+  const int STRUCTURAL_ID = 5651774406360207497;
   /**
    * Assign to a given value.
    * 
@@ -841,6 +944,13 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?int $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -848,8 +958,9 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public int $add;
 
-  public function __construct(?int $assign = null, ?int $add = null)[] {
+  public function __construct(?int $assign = null, ?bool $clear = null, ?int $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0;
   }
 
@@ -860,6 +971,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -883,6 +995,17 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -925,6 +1048,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -932,6 +1056,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -953,6 +1078,9 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       } else {
         $this->assign = (int)$_tmp0;
       }
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['add']);
@@ -981,6 +1109,10 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::I64,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::I64,
@@ -988,20 +1120,23 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?int,
+    ?'clear' => ?bool,
     ?'add' => ?int,
   );
 
   const type TShape = shape(
     ?'assign' => ?int,
+    'clear' => bool,
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 6370961107317493914;
+  const int STRUCTURAL_ID = 772578002356738682;
   /**
    * Assign to a given value.
    * 
@@ -1012,6 +1147,13 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?int $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -1019,8 +1161,9 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public int $add;
 
-  public function __construct(?int $assign = null, ?int $add = null)[] {
+  public function __construct(?int $assign = null, ?bool $clear = null, ?int $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0;
   }
 
@@ -1031,6 +1174,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -1054,6 +1198,17 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -1096,6 +1251,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -1103,6 +1259,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -1119,6 +1276,9 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
     if (idx($parsed, 'assign') !== null) {
       $this->assign = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['assign']);
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $this->add = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['add']);
@@ -1142,6 +1302,10 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::FLOAT,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::FLOAT,
@@ -1149,20 +1313,23 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?float,
+    ?'clear' => ?bool,
     ?'add' => ?float,
   );
 
   const type TShape = shape(
     ?'assign' => ?float,
+    'clear' => bool,
     'add' => float,
     ...
   );
-  const int STRUCTURAL_ID = 2446293251068622176;
+  const int STRUCTURAL_ID = 6430265023131058648;
   /**
    * Assign to a given value.
    * 
@@ -1173,6 +1340,13 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?float $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -1180,8 +1354,9 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public float $add;
 
-  public function __construct(?float $assign = null, ?float $add = null)[] {
+  public function __construct(?float $assign = null, ?bool $clear = null, ?float $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0.0;
   }
 
@@ -1192,6 +1367,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -1215,6 +1391,17 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -1257,6 +1444,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -1264,6 +1452,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -1280,6 +1469,9 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
     if (idx($parsed, 'assign') !== null) {
       $this->assign = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['assign']);
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $this->add = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['add']);
@@ -1303,6 +1495,10 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'assign',
       'type' => \TType::DOUBLE,
     ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
     8 => shape(
       'var' => 'add',
       'type' => \TType::DOUBLE,
@@ -1310,20 +1506,23 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
+    'clear' => 2,
     'add' => 8,
   ];
 
   const type TConstructorShape = shape(
     ?'assign' => ?float,
+    ?'clear' => ?bool,
     ?'add' => ?float,
   );
 
   const type TShape = shape(
     ?'assign' => ?float,
+    'clear' => bool,
     'add' => float,
     ...
   );
-  const int STRUCTURAL_ID = 5398809695762940407;
+  const int STRUCTURAL_ID = 8893328759161386606;
   /**
    * Assign to a given value.
    * 
@@ -1334,6 +1533,13 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public ?float $assign;
   /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
    * Add to a given value.
    * 
    * Original thrift field:-
@@ -1341,8 +1547,9 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    */
   public float $add;
 
-  public function __construct(?float $assign = null, ?float $add = null)[] {
+  public function __construct(?float $assign = null, ?bool $clear = null, ?float $add = null)[] {
     $this->assign = $assign;
+    $this->clear = $clear ?? false;
     $this->add = $add ?? 0.0;
   }
 
@@ -1353,6 +1560,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
       Shapes::idx($shape, 'add'),
     );
   }
@@ -1376,6 +1584,17 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "assign",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -1418,6 +1637,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'assign'),
+      $shape['clear'],
       $shape['add'],
     );
   }
@@ -1425,6 +1645,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public function __toShape()[]: self::TShape {
     return shape(
       'assign' => $this->assign,
+      'clear' => $this->clear,
       'add' => $this->add,
     );
   }
@@ -1441,6 +1662,9 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
     if (idx($parsed, 'assign') !== null) {
       $this->assign = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['assign']);
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
     if (idx($parsed, 'add') !== null) {
       $this->add = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['add']);

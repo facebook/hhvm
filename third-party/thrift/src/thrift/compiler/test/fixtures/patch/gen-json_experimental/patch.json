@@ -18,55 +18,55 @@
           "Assign" : {
             "name" : "Assign",
             "docstring" : "Set the value. Supersedes all other ops.\n",
-            "lineno" : 239,
+            "lineno" : 260,
             "value" : 1
           },
           "Clear" : {
             "name" : "Clear",
             "docstring" : "Set to the intrinsic default (which might be 'unset').\n",
-            "lineno" : 242,
+            "lineno" : 263,
             "value" : 2
           },
           "Patch" : {
             "name" : "Patch",
             "docstring" : "Apply a field/value-wise patch.\n",
-            "lineno" : 245,
+            "lineno" : 266,
             "value" : 3
           },
           "EnsureUnion" : {
             "name" : "EnsureUnion",
             "docstring" : "Set to the given default, if not already of the same type.\n\nIn a dynamic context this means the ids/values must match exactly:\n    ensureUnion(Object ensureUnion, Object value) {\n      if (ensureUnion.ids() != value.ids())\n        value = ensureUnion;\n    }\n",
-            "lineno" : 256,
+            "lineno" : 277,
             "value" : 4
           },
           "EnsureStruct" : {
             "name" : "EnsureStruct",
             "docstring" : " * A pair-wise ensure operation.\n *\n * For maps this is an \"add if key not present\".\n *\n * For structs, this can be use to encodes the default state of the fields, based\n * on thier qualifier type:\n * - optional: absent\n * - terse: intrinsic default\n * - fill: custom default\n*\n",
-            "lineno" : 269,
+            "lineno" : 290,
             "value" : 5
           },
           "PatchAfter" : {
             "name" : "PatchAfter",
             "docstring" : "Apply a field/value-wise patch after all other ops.\n",
-            "lineno" : 274,
+            "lineno" : 295,
             "value" : 6
           },
           "Remove" : {
             "name" : "Remove",
             "docstring" : "Remove if present.\n\nA key/value-based remove for set/list, 'saturating subtract' for\nnumeric/'counting' types, and 'remove by key' for maps.\n",
-            "lineno" : 282,
+            "lineno" : 303,
             "value" : 7
           },
           "Add" : {
             "name" : "Add",
             "docstring" : "Add/prepend a value,with the following semantics:\n- Key/value-based 'add' for set;\n- 'prepend' for list, string, or binary; and\n- saturating 'add' for numeric/counting types.\n",
-            "lineno" : 290,
+            "lineno" : 311,
             "value" : 8
           },
           "Put" : {
             "name" : "Put",
             "docstring" : "Put/append/invert a value, with the following semantics:\n- Identical to 'add' for set;\n- 'update or insert' for maps;\n- 'append' for list, string or binary; and\n- 'invert' for boolean.\n",
-            "lineno" : 299,
+            "lineno" : 320,
             "value" : 9
           },
           "Unspecified" : {
@@ -76,7 +76,7 @@
           }
         },
         "docstring" : "The meaning of the patch op field ids, in all properly formulated patch\ndefinitions.\n\nPatch field ids are interpreted at runtime, as a dynamic patch protocol,\nwithout any additional schema derived from IDL patch definitions.\n",
-        "lineno" : 236
+        "lineno" : 257
       }
       },
   "structs" :
@@ -106,11 +106,19 @@
             "required" : "optional",
             "type" : "bool"
           },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 62,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+          },
           "invert" : {
             "name" : "invert",
             "docstring" : "If the bool value should be inverted.\n",
             "key" : 9,
-            "lineno" : 62,
+            "lineno" : 65,
             "required" : "opt-in-req-out",
             "type" : "bool"
           }
@@ -127,22 +135,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 78,
+            "lineno" : 81,
             "required" : "optional",
             "type" : "byte"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 84,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 81,
+            "lineno" : 87,
             "required" : "opt-in-req-out",
             "type" : "byte"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 66
+        "lineno" : 69
       },
       "I16Patch" : {
         "name" : "I16Patch",
@@ -152,22 +168,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 97,
+            "lineno" : 103,
             "required" : "optional",
             "type" : "i16"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 106,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 100,
+            "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "i16"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 85
+        "lineno" : 91
       },
       "I32Patch" : {
         "name" : "I32Patch",
@@ -177,22 +201,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 116,
+            "lineno" : 125,
             "required" : "optional",
             "type" : "i32"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 128,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 119,
+            "lineno" : 131,
             "required" : "opt-in-req-out",
             "type" : "i32"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 104
+        "lineno" : 113
       },
       "I64Patch" : {
         "name" : "I64Patch",
@@ -202,22 +234,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 135,
+            "lineno" : 147,
             "required" : "optional",
             "type" : "i64"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 150,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 138,
+            "lineno" : 153,
             "required" : "opt-in-req-out",
             "type" : "i64"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 123
+        "lineno" : 135
       },
       "FloatPatch" : {
         "name" : "FloatPatch",
@@ -227,22 +267,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 154,
+            "lineno" : 169,
             "required" : "optional",
             "type" : "float"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 172,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 157,
+            "lineno" : 175,
             "required" : "opt-in-req-out",
             "type" : "float"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 142
+        "lineno" : 157
       },
       "DoublePatch" : {
         "name" : "DoublePatch",
@@ -252,22 +300,30 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 173,
+            "lineno" : 191,
             "required" : "optional",
             "type" : "double"
+          },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clear any set value.\n",
+            "key" : 2,
+            "lineno" : 194,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
           },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 176,
+            "lineno" : 197,
             "required" : "opt-in-req-out",
             "type" : "double"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 161
+        "lineno" : 179
       },
       "StringPatch" : {
         "name" : "StringPatch",
@@ -277,7 +333,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 192,
+            "lineno" : 213,
             "required" : "optional",
             "type" : "string"
           },
@@ -285,7 +341,7 @@
             "name" : "clear",
             "docstring" : "Clear a given string.\n",
             "key" : 2,
-            "lineno" : 195,
+            "lineno" : 216,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -293,7 +349,7 @@
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 198,
+            "lineno" : 219,
             "required" : "opt-in-req-out",
             "type" : "string"
           },
@@ -301,14 +357,14 @@
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 201,
+            "lineno" : 222,
             "required" : "opt-in-req-out",
             "type" : "string"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 180
+        "lineno" : 201
       },
       "BinaryPatch" : {
         "name" : "BinaryPatch",
@@ -318,7 +374,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 217,
+            "lineno" : 238,
             "required" : "optional",
             "type" : "binary"
           },
@@ -326,7 +382,7 @@
             "name" : "clear",
             "docstring" : "Clear a given binary.\n",
             "key" : 2,
-            "lineno" : 220,
+            "lineno" : 241,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -334,7 +390,7 @@
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 223,
+            "lineno" : 244,
             "required" : "opt-in-req-out",
             "type" : "binary"
           },
@@ -342,14 +398,14 @@
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 226,
+            "lineno" : 247,
             "required" : "opt-in-req-out",
             "type" : "binary"
           }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 205
+        "lineno" : 226
       },
       "OptionalBoolPatch" : {
         "name" : "OptionalBoolPatch",
@@ -404,7 +460,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 71,
+            "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -412,7 +468,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 71,
+            "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -423,7 +479,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 71,
+            "lineno" : 74,
             "required" : "optional",
             "type" : "byte"
           },
@@ -431,7 +487,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 71,
+            "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -441,7 +497,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 71
+        "lineno" : 74
       },
       "OptionalI16Patch" : {
         "name" : "OptionalI16Patch",
@@ -450,7 +506,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 90,
+            "lineno" : 96,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -458,7 +514,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 90,
+            "lineno" : 96,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -469,7 +525,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 90,
+            "lineno" : 96,
             "required" : "optional",
             "type" : "i16"
           },
@@ -477,7 +533,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 90,
+            "lineno" : 96,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -487,7 +543,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 90
+        "lineno" : 96
       },
       "OptionalI32Patch" : {
         "name" : "OptionalI32Patch",
@@ -496,7 +552,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 109,
+            "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -504,7 +560,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 109,
+            "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -515,7 +571,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 109,
+            "lineno" : 118,
             "required" : "optional",
             "type" : "i32"
           },
@@ -523,7 +579,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 109,
+            "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -533,7 +589,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 109
+        "lineno" : 118
       },
       "OptionalI64Patch" : {
         "name" : "OptionalI64Patch",
@@ -542,7 +598,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 128,
+            "lineno" : 140,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -550,7 +606,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 128,
+            "lineno" : 140,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -561,7 +617,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 128,
+            "lineno" : 140,
             "required" : "optional",
             "type" : "i64"
           },
@@ -569,7 +625,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 128,
+            "lineno" : 140,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -579,7 +635,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 140
       },
       "OptionalFloatPatch" : {
         "name" : "OptionalFloatPatch",
@@ -588,7 +644,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 147,
+            "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -596,7 +652,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 147,
+            "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -607,7 +663,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 147,
+            "lineno" : 162,
             "required" : "optional",
             "type" : "float"
           },
@@ -615,7 +671,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 147,
+            "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -625,7 +681,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 147
+        "lineno" : 162
       },
       "OptionalDoublePatch" : {
         "name" : "OptionalDoublePatch",
@@ -634,7 +690,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 166,
+            "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -642,7 +698,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 166,
+            "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -653,7 +709,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 166,
+            "lineno" : 184,
             "required" : "optional",
             "type" : "double"
           },
@@ -661,7 +717,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 166,
+            "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -671,7 +727,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 166
+        "lineno" : 184
       },
       "OptionalStringPatch" : {
         "name" : "OptionalStringPatch",
@@ -680,7 +736,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 185,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -688,7 +744,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 185,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -699,7 +755,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 185,
+            "lineno" : 206,
             "required" : "optional",
             "type" : "string"
           },
@@ -707,7 +763,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 185,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -717,7 +773,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 185
+        "lineno" : 206
       },
       "OptionalBinaryPatch" : {
         "name" : "OptionalBinaryPatch",
@@ -726,7 +782,7 @@
             "name" : "clear",
             "docstring" : "Clears any set value. Applies first.\n",
             "key" : 2,
-            "lineno" : 205,
+            "lineno" : 226,
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
@@ -734,7 +790,7 @@
             "name" : "patchPrior",
             "docstring" : "Patches any previously set values. Applies second.\n",
             "key" : 3,
-            "lineno" : 205,
+            "lineno" : 226,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -745,7 +801,7 @@
             "name" : "ensure",
             "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
             "key" : 4,
-            "lineno" : 205,
+            "lineno" : 226,
             "required" : "optional",
             "type" : "binary"
           },
@@ -753,7 +809,7 @@
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
             "key" : 6,
-            "lineno" : 205,
+            "lineno" : 226,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -763,7 +819,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 205
+        "lineno" : 226
       }
       },
   "source_path" : "thrift/lib/thrift/patch",

@@ -28,6 +28,7 @@ import com.facebook.thrift.protocol.*;
 public class I64Patch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("I64Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I64, (short)1);
+  private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField ADD_FIELD_DESC = new TField("add", TType.I64, (short)8);
 
   /**
@@ -37,16 +38,23 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
    */
   public final Long assign;
   /**
+   * Clear any set value.
+   */
+  public final Boolean clear;
+  /**
    * Add to a given value.
    */
   public final Long add;
   public static final int ASSIGN = 1;
+  public static final int CLEAR = 2;
   public static final int ADD = 8;
 
   public I64Patch(
       Long assign,
+      Boolean clear,
       Long add) {
     this.assign = assign;
+    this.clear = clear;
     this.add = add;
   }
 
@@ -58,6 +66,11 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
       this.assign = null;
+    }
+    if (other.isSetClear()) {
+      this.clear = TBaseHelper.deepCopy(other.clear);
+    } else {
+      this.clear = null;
     }
     if (other.isSetAdd()) {
       this.add = TBaseHelper.deepCopy(other.add);
@@ -85,6 +98,18 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
+   * Clear any set value.
+   */
+  public Boolean isClear() {
+    return this.clear;
+  }
+
+  // Returns true if field clear is set (has been assigned a value) and false otherwise
+  public boolean isSetClear() {
+    return this.clear != null;
+  }
+
+  /**
    * Add to a given value.
    */
   public Long getAdd() {
@@ -108,6 +133,8 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetClear(), that.isSetClear(), this.clear, that.clear)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.isSetAdd(), that.isSetAdd(), this.add, that.add)) { return false; }
 
     return true;
@@ -115,7 +142,7 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, add});
+    return Arrays.deepHashCode(new Object[] {assign, clear, add});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -125,6 +152,7 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
 
   public static I64Patch deserialize(TProtocol iprot) throws TException {
     Long tmp_assign = null;
+    Boolean tmp_clear = null;
     Long tmp_add = null;
     TField __field;
     iprot.readStructBegin();
@@ -139,6 +167,13 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
         case ASSIGN:
           if (__field.type == TType.I64) {
             tmp_assign = iprot.readI64();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            tmp_clear = iprot.readBool();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -161,6 +196,7 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
     I64Patch _that;
     _that = new I64Patch(
       tmp_assign
+      ,tmp_clear
       ,tmp_add
     );
     _that.validate();
@@ -177,6 +213,11 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable {
         oprot.writeI64(this.assign);
         oprot.writeFieldEnd();
       }
+    }
+    if (this.clear != null) {
+      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+      oprot.writeBool(this.clear);
+      oprot.writeFieldEnd();
     }
     if (this.add != null) {
       oprot.writeFieldBegin(ADD_FIELD_DESC);

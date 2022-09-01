@@ -30,6 +30,7 @@ import com.facebook.thrift.protocol.*;
 public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Comparable<BoolPatch> {
   private static final TStruct STRUCT_DESC = new TStruct("BoolPatch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.BOOL, (short)1);
+  private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField INVERT_FIELD_DESC = new TField("invert", TType.BOOL, (short)9);
 
   /**
@@ -39,22 +40,30 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
    */
   public boolean assign;
   /**
+   * Clear any set value.
+   */
+  public boolean clear;
+  /**
    * If the bool value should be inverted.
    */
   public boolean invert;
   public static final int ASSIGN = 1;
+  public static final int CLEAR = 2;
   public static final int INVERT = 9;
 
   // isset id assignments
   private static final int __ASSIGN_ISSET_ID = 0;
-  private static final int __INVERT_ISSET_ID = 1;
-  private BitSet __isset_bit_vector = new BitSet(2);
+  private static final int __CLEAR_ISSET_ID = 1;
+  private static final int __INVERT_ISSET_ID = 2;
+  private BitSet __isset_bit_vector = new BitSet(3);
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
+        new FieldValueMetaData(TType.BOOL)));
+    tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
     tmpMetaDataMap.put(INVERT, new FieldMetaData("invert", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
@@ -69,27 +78,34 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
   }
 
   public BoolPatch(
+      boolean clear,
       boolean invert) {
     this();
+    this.clear = clear;
+    setClearIsSet(true);
     this.invert = invert;
     setInvertIsSet(true);
   }
 
   public BoolPatch(
       boolean assign,
+      boolean clear,
       boolean invert) {
     this();
     this.assign = assign;
     setAssignIsSet(true);
+    this.clear = clear;
+    setClearIsSet(true);
     this.invert = invert;
     setInvertIsSet(true);
   }
 
   public static class Builder {
     private boolean assign;
+    private boolean clear;
     private boolean invert;
 
-    BitSet __optional_isset = new BitSet(2);
+    BitSet __optional_isset = new BitSet(3);
 
     public Builder() {
     }
@@ -97,6 +113,12 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
     public Builder setAssign(final boolean assign) {
       this.assign = assign;
       __optional_isset.set(__ASSIGN_ISSET_ID, true);
+      return this;
+    }
+
+    public Builder setClear(final boolean clear) {
+      this.clear = clear;
+      __optional_isset.set(__CLEAR_ISSET_ID, true);
       return this;
     }
 
@@ -110,6 +132,9 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
       BoolPatch result = new BoolPatch();
       if (__optional_isset.get(__ASSIGN_ISSET_ID)) {
         result.setAssign(this.assign);
+      }
+      if (__optional_isset.get(__CLEAR_ISSET_ID)) {
+        result.setClear(this.clear);
       }
       if (__optional_isset.get(__INVERT_ISSET_ID)) {
         result.setInvert(this.invert);
@@ -129,6 +154,7 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     this.assign = TBaseHelper.deepCopy(other.assign);
+    this.clear = TBaseHelper.deepCopy(other.clear);
     this.invert = TBaseHelper.deepCopy(other.invert);
   }
 
@@ -170,6 +196,35 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
   }
 
   /**
+   * Clear any set value.
+   */
+  public boolean isClear() {
+    return this.clear;
+  }
+
+  /**
+   * Clear any set value.
+   */
+  public BoolPatch setClear(boolean clear) {
+    this.clear = clear;
+    setClearIsSet(true);
+    return this;
+  }
+
+  public void unsetClear() {
+    __isset_bit_vector.clear(__CLEAR_ISSET_ID);
+  }
+
+  // Returns true if field clear is set (has been assigned a value) and false otherwise
+  public boolean isSetClear() {
+    return __isset_bit_vector.get(__CLEAR_ISSET_ID);
+  }
+
+  public void setClearIsSet(boolean __value) {
+    __isset_bit_vector.set(__CLEAR_ISSET_ID, __value);
+  }
+
+  /**
    * If the bool value should be inverted.
    */
   public boolean isInvert() {
@@ -208,6 +263,14 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
       }
       break;
 
+    case CLEAR:
+      if (__value == null) {
+        unsetClear();
+      } else {
+        setClear((Boolean)__value);
+      }
+      break;
+
     case INVERT:
       if (__value == null) {
         unsetInvert();
@@ -225,6 +288,9 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
     switch (fieldID) {
     case ASSIGN:
       return new Boolean(isAssign());
+
+    case CLEAR:
+      return new Boolean(isClear());
 
     case INVERT:
       return new Boolean(isInvert());
@@ -246,6 +312,8 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.invert, that.invert)) { return false; }
 
     return true;
@@ -253,7 +321,7 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, invert});
+    return Arrays.deepHashCode(new Object[] {assign, clear, invert});
   }
 
   @Override
@@ -273,6 +341,14 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(assign, other.assign);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetClear()).compareTo(other.isSetClear());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(clear, other.clear);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -302,6 +378,14 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
           if (__field.type == TType.BOOL) {
             this.assign = iprot.readBool();
             setAssignIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            this.clear = iprot.readBool();
+            setClearIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -336,6 +420,9 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
       oprot.writeBool(this.assign);
       oprot.writeFieldEnd();
     }
+    oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+    oprot.writeBool(this.clear);
+    oprot.writeFieldEnd();
     oprot.writeFieldBegin(INVERT_FIELD_DESC);
     oprot.writeBool(this.invert);
     oprot.writeFieldEnd();
@@ -368,6 +455,13 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable, Compar
       sb.append(TBaseHelper.toString(this.isAssign(), indent + 1, prettyPrint));
       first = false;
     }
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("clear");
+    sb.append(space);
+    sb.append(":").append(space);
+    sb.append(TBaseHelper.toString(this.isClear(), indent + 1, prettyPrint));
+    first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
     sb.append("invert");

@@ -98,6 +98,14 @@ class BoolPatch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
             9,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "invert",  # name
@@ -142,6 +150,14 @@ class BytePatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -194,6 +210,14 @@ class I16Patch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "add",  # name
@@ -238,6 +262,14 @@ class I32Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -290,6 +322,14 @@ class I64Patch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "add",  # name
@@ -338,6 +378,14 @@ class FloatPatch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "add",  # name
@@ -382,6 +430,14 @@ class DoublePatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
             _fbthrift_python_types.typeinfo_double,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

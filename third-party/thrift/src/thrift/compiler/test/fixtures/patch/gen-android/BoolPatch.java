@@ -28,6 +28,7 @@ import com.facebook.thrift.protocol.*;
 public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("BoolPatch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.BOOL, (short)1);
+  private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField INVERT_FIELD_DESC = new TField("invert", TType.BOOL, (short)9);
 
   /**
@@ -37,16 +38,23 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
    */
   public final Boolean assign;
   /**
+   * Clear any set value.
+   */
+  public final Boolean clear;
+  /**
    * If the bool value should be inverted.
    */
   public final Boolean invert;
   public static final int ASSIGN = 1;
+  public static final int CLEAR = 2;
   public static final int INVERT = 9;
 
   public BoolPatch(
       Boolean assign,
+      Boolean clear,
       Boolean invert) {
     this.assign = assign;
+    this.clear = clear;
     this.invert = invert;
   }
 
@@ -58,6 +66,11 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
       this.assign = null;
+    }
+    if (other.isSetClear()) {
+      this.clear = TBaseHelper.deepCopy(other.clear);
+    } else {
+      this.clear = null;
     }
     if (other.isSetInvert()) {
       this.invert = TBaseHelper.deepCopy(other.invert);
@@ -85,6 +98,18 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
+   * Clear any set value.
+   */
+  public Boolean isClear() {
+    return this.clear;
+  }
+
+  // Returns true if field clear is set (has been assigned a value) and false otherwise
+  public boolean isSetClear() {
+    return this.clear != null;
+  }
+
+  /**
    * If the bool value should be inverted.
    */
   public Boolean isInvert() {
@@ -108,6 +133,8 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetClear(), that.isSetClear(), this.clear, that.clear)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.isSetInvert(), that.isSetInvert(), this.invert, that.invert)) { return false; }
 
     return true;
@@ -115,7 +142,7 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, invert});
+    return Arrays.deepHashCode(new Object[] {assign, clear, invert});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -125,6 +152,7 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
 
   public static BoolPatch deserialize(TProtocol iprot) throws TException {
     Boolean tmp_assign = null;
+    Boolean tmp_clear = null;
     Boolean tmp_invert = null;
     TField __field;
     iprot.readStructBegin();
@@ -139,6 +167,13 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
         case ASSIGN:
           if (__field.type == TType.BOOL) {
             tmp_assign = iprot.readBool();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            tmp_clear = iprot.readBool();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -161,6 +196,7 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
     BoolPatch _that;
     _that = new BoolPatch(
       tmp_assign
+      ,tmp_clear
       ,tmp_invert
     );
     _that.validate();
@@ -177,6 +213,11 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
         oprot.writeBool(this.assign);
         oprot.writeFieldEnd();
       }
+    }
+    if (this.clear != null) {
+      oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+      oprot.writeBool(this.clear);
+      oprot.writeFieldEnd();
     }
     if (this.invert != null) {
       oprot.writeFieldBegin(INVERT_FIELD_DESC);

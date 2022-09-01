@@ -30,6 +30,7 @@ import com.facebook.thrift.protocol.*;
 public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comparable<DoublePatch> {
   private static final TStruct STRUCT_DESC = new TStruct("DoublePatch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.DOUBLE, (short)1);
+  private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField ADD_FIELD_DESC = new TField("add", TType.DOUBLE, (short)8);
 
   /**
@@ -39,16 +40,22 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
    */
   public double assign;
   /**
+   * Clear any set value.
+   */
+  public boolean clear;
+  /**
    * Add to a given value.
    */
   public double add;
   public static final int ASSIGN = 1;
+  public static final int CLEAR = 2;
   public static final int ADD = 8;
 
   // isset id assignments
   private static final int __ASSIGN_ISSET_ID = 0;
-  private static final int __ADD_ISSET_ID = 1;
-  private BitSet __isset_bit_vector = new BitSet(2);
+  private static final int __CLEAR_ISSET_ID = 1;
+  private static final int __ADD_ISSET_ID = 2;
+  private BitSet __isset_bit_vector = new BitSet(3);
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -56,6 +63,8 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.DOUBLE)));
+    tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
+        new FieldValueMetaData(TType.BOOL)));
     tmpMetaDataMap.put(ADD, new FieldMetaData("add", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.DOUBLE)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
@@ -69,27 +78,34 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
   }
 
   public DoublePatch(
+      boolean clear,
       double add) {
     this();
+    this.clear = clear;
+    setClearIsSet(true);
     this.add = add;
     setAddIsSet(true);
   }
 
   public DoublePatch(
       double assign,
+      boolean clear,
       double add) {
     this();
     this.assign = assign;
     setAssignIsSet(true);
+    this.clear = clear;
+    setClearIsSet(true);
     this.add = add;
     setAddIsSet(true);
   }
 
   public static class Builder {
     private double assign;
+    private boolean clear;
     private double add;
 
-    BitSet __optional_isset = new BitSet(2);
+    BitSet __optional_isset = new BitSet(3);
 
     public Builder() {
     }
@@ -97,6 +113,12 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
     public Builder setAssign(final double assign) {
       this.assign = assign;
       __optional_isset.set(__ASSIGN_ISSET_ID, true);
+      return this;
+    }
+
+    public Builder setClear(final boolean clear) {
+      this.clear = clear;
+      __optional_isset.set(__CLEAR_ISSET_ID, true);
       return this;
     }
 
@@ -110,6 +132,9 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
       DoublePatch result = new DoublePatch();
       if (__optional_isset.get(__ASSIGN_ISSET_ID)) {
         result.setAssign(this.assign);
+      }
+      if (__optional_isset.get(__CLEAR_ISSET_ID)) {
+        result.setClear(this.clear);
       }
       if (__optional_isset.get(__ADD_ISSET_ID)) {
         result.setAdd(this.add);
@@ -129,6 +154,7 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     this.assign = TBaseHelper.deepCopy(other.assign);
+    this.clear = TBaseHelper.deepCopy(other.clear);
     this.add = TBaseHelper.deepCopy(other.add);
   }
 
@@ -170,6 +196,35 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
   }
 
   /**
+   * Clear any set value.
+   */
+  public boolean isClear() {
+    return this.clear;
+  }
+
+  /**
+   * Clear any set value.
+   */
+  public DoublePatch setClear(boolean clear) {
+    this.clear = clear;
+    setClearIsSet(true);
+    return this;
+  }
+
+  public void unsetClear() {
+    __isset_bit_vector.clear(__CLEAR_ISSET_ID);
+  }
+
+  // Returns true if field clear is set (has been assigned a value) and false otherwise
+  public boolean isSetClear() {
+    return __isset_bit_vector.get(__CLEAR_ISSET_ID);
+  }
+
+  public void setClearIsSet(boolean __value) {
+    __isset_bit_vector.set(__CLEAR_ISSET_ID, __value);
+  }
+
+  /**
    * Add to a given value.
    */
   public double getAdd() {
@@ -208,6 +263,14 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
       }
       break;
 
+    case CLEAR:
+      if (__value == null) {
+        unsetClear();
+      } else {
+        setClear((Boolean)__value);
+      }
+      break;
+
     case ADD:
       if (__value == null) {
         unsetAdd();
@@ -225,6 +288,9 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
     switch (fieldID) {
     case ASSIGN:
       return new Double(getAssign());
+
+    case CLEAR:
+      return new Boolean(isClear());
 
     case ADD:
       return new Double(getAdd());
@@ -246,6 +312,8 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.add, that.add)) { return false; }
 
     return true;
@@ -253,7 +321,7 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, add});
+    return Arrays.deepHashCode(new Object[] {assign, clear, add});
   }
 
   @Override
@@ -273,6 +341,14 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(assign, other.assign);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetClear()).compareTo(other.isSetClear());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(clear, other.clear);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -302,6 +378,14 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
           if (__field.type == TType.DOUBLE) {
             this.assign = iprot.readDouble();
             setAssignIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            this.clear = iprot.readBool();
+            setClearIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -336,6 +420,9 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
       oprot.writeDouble(this.assign);
       oprot.writeFieldEnd();
     }
+    oprot.writeFieldBegin(CLEAR_FIELD_DESC);
+    oprot.writeBool(this.clear);
+    oprot.writeFieldEnd();
     oprot.writeFieldBegin(ADD_FIELD_DESC);
     oprot.writeDouble(this.add);
     oprot.writeFieldEnd();
@@ -368,6 +455,13 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
       sb.append(TBaseHelper.toString(this.getAssign(), indent + 1, prettyPrint));
       first = false;
     }
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("clear");
+    sb.append(space);
+    sb.append(":").append(space);
+    sb.append(TBaseHelper.toString(this.isClear(), indent + 1, prettyPrint));
+    first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
     sb.append("add");

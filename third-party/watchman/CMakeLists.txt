@@ -3,13 +3,6 @@ add_library(libwatchmanclient INTERFACE)
 include(ExternalProject)
 include(HPHPFunctions)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  WATCHMAN_DOWNLOAD_ARGS
-  SOURCE_URL "https://github.com/facebook/watchman/archive/refs/tags/v2022.07.04.00.tar.gz"
-  SOURCE_HASH "SHA256=33f7e8e3c005ba2e0b81f6552df256d69aab057fb4b26dcd122fb662914b4b21"
-  # The tarball name is just the tag name, which can conflict in the cache
-  FILENAME_PREFIX "watchman-"
-)
 
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
@@ -21,7 +14,7 @@ set(WATCHMAN_DEPS folly boost fmt jemalloc double-conversion)
 
 ExternalProject_Add(
   bundled_watchman
-  ${WATCHMAN_DOWNLOAD_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/cppclient-CMakeLists.txt"

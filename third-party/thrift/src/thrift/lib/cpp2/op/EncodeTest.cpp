@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+#include <type_traits>
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/TypeClass.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -63,6 +65,53 @@ TEST(EncodeTest, TypeTagToTType) {
   EXPECT_EQ(
       (typeTagToTType<type::adapted<void, type::struct_t<void>>>),
       TType::T_STRUCT);
+}
+
+template <
+    conformance::StandardProtocol Protocol,
+    bool ZeroCopy,
+    typename Tag,
+    typename TypeClass,
+    typename T>
+void testSerializedSize(T value) {
+  SCOPED_TRACE(folly::pretty_name<Tag>());
+  protocol_writer_t<Protocol> writer;
+  auto size = op::serialized_size<ZeroCopy, Tag>(writer, value);
+  auto expected = apache::thrift::detail::pm::protocol_methods<TypeClass, T>::
+      template serializedSize<ZeroCopy>(writer, value);
+  EXPECT_EQ(size, expected);
+}
+
+template <
+    conformance::StandardProtocol Protocol,
+    typename Tag,
+    typename TypeClass,
+    typename T>
+void testSerializedSize(T value) {
+  testSerializedSize<Protocol, false, Tag, TypeClass>(value);
+  testSerializedSize<Protocol, true, Tag, TypeClass>(value);
+}
+
+template <conformance::StandardProtocol Protocol>
+void testSerializedSizeBasicTypes() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  testSerializedSize<Protocol, type::bool_t, type_class::integral>(true);
+  testSerializedSize<Protocol, type::byte_t, type_class::integral>((int8_t)1);
+  testSerializedSize<Protocol, type::i16_t, type_class::integral>((int16_t)1);
+  testSerializedSize<Protocol, type::i32_t, type_class::integral>((int32_t)1);
+  testSerializedSize<Protocol, type::i64_t, type_class::integral>((int64_t)1);
+  testSerializedSize<Protocol, type::float_t, type_class::floating_point>(1.5f);
+  testSerializedSize<Protocol, type::double_t, type_class::floating_point>(1.5);
+  testSerializedSize<Protocol, type::string_t, type_class::string>("foo");
+  testSerializedSize<Protocol, type::binary_t, type_class::binary>("foo");
+  enum class MyEnum { value = 1 };
+  testSerializedSize<Protocol, type::enum_t<MyEnum>, type_class::enumeration>(
+      MyEnum::value);
+}
+
+TEST(SerializedSizeTest, SerializedSizeBasicTypes) {
+  testSerializedSizeBasicTypes<conformance::StandardProtocol::Binary>();
+  testSerializedSizeBasicTypes<conformance::StandardProtocol::Compact>();
 }
 
 template <conformance::StandardProtocol Protocol, typename Tag, typename T>

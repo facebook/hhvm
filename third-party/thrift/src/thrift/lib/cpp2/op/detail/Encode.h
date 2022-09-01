@@ -105,6 +105,97 @@ template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr apache::thrift::protocol::TType typeTagToTType =
     detail::TypeTagToTType<Tag>::value;
 
+template <bool, typename>
+struct SerializedSize;
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::bool_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, bool t) const {
+    return prot.serializedSizeBool(t);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::byte_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int8_t i) const {
+    return prot.serializedSizeByte(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::i16_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int16_t i) const {
+    return prot.serializedSizeI16(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::i32_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int32_t i) const {
+    return prot.serializedSizeI32(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::i64_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, int64_t i) const {
+    return prot.serializedSizeI64(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::float_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, float i) const {
+    return prot.serializedSizeFloat(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::double_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, double i) const {
+    return prot.serializedSizeDouble(i);
+  }
+};
+
+template <bool ZeroCopy>
+struct SerializedSize<ZeroCopy, type::string_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.serializedSizeString(s);
+  }
+};
+
+template <>
+struct SerializedSize<false, type::binary_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.serializedSizeBinary(s);
+  }
+};
+
+template <>
+struct SerializedSize<true, type::binary_t> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.serializedSizeZCBinary(s);
+  }
+};
+
+template <bool ZeroCopy, typename T>
+struct SerializedSize<ZeroCopy, type::enum_t<T>> {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& s) const {
+    return prot.serializedSizeI32(static_cast<int32_t>(s));
+  }
+};
+
 template <typename>
 struct Encode;
 

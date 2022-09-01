@@ -8,6 +8,22 @@
 open Aast
 open Hh_prelude
 
+(**
+   Lint on functions/methods that always return the same value. This
+   is usually a copy-paste error.
+
+   function some_prediate(Whatever $value): bool {
+     if ($value->foo()) {
+       return false;
+     }
+
+     if ($value->bar()) {
+       return false;
+     }
+
+     return false; // oops!
+   } *)
+
 let is_expr_same ((_, _, expr1) : Tast.expr) ((_, _, expr2) : Tast.expr) : bool
     =
   match (expr1, expr2) with
@@ -24,6 +40,21 @@ let is_expr_same ((_, _, expr1) : Tast.expr) ((_, _, expr2) : Tast.expr) : bool
       Aast.Class_const ((_, _, Aast.CI (_, enum2)), (_, name2)) )
     when String.equal enum1 enum2 && String.equal name1 name2 ->
     true
+  | _ -> false
+
+(* Does this value look like a success exit code? We don't want to
+   lint on code like this:
+
+   function my_main(): int {
+     if (quick_check()) { return 0; }
+
+     normal_work();
+     return 0;
+   } *)
+let is_success_ish ((_, _, e_) : Tast.expr) : bool =
+  match e_ with
+  | Aast.Int "0" -> true
+  | Aast.Class_const (_, (_, "SUCCESS")) -> true
   | _ -> false
 
 let rec are_return_expressions_same (ret_list : Tast.expr list) : bool =
@@ -61,25 +92,20 @@ let get_return_expr_visitor =
 let get_return_exprs (stmts : Tast.stmt list) : Tast.expr list =
   get_return_expr_visitor#on_block () stmts
 
+let check_block (block : Tast.block) : unit =
+  let ret_list = get_return_exprs block in
+  match ret_list with
+  | expr1 :: _ :: _ when are_return_expressions_same ret_list ->
+    if not (is_success_ish expr1) then
+      List.iter ret_list ~f:(fun (_, pos, _) ->
+          Lints_errors.branches_return_same_value pos)
+  | _ -> ()
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_def _env f =
-      let ret_list = get_return_exprs f.fd_fun.f_body.fb_ast in
-      if List.length ret_list > 1 then (
-        if are_return_expressions_same ret_list then
-          List.iter ret_list ~f:(fun (_, pos, _) ->
-              Lints_errors.branches_return_same_value pos)
-      ) else
-        ()
+    method! at_fun_def _env f = check_block f.fd_fun.f_body.fb_ast
 
-    method! at_method_ _env m =
-      let ret_list = get_return_exprs m.m_body.fb_ast in
-      if List.length ret_list > 1 then (
-        if are_return_expressions_same ret_list then
-          List.iter ret_list ~f:(fun (_, pos, _) ->
-              Lints_errors.branches_return_same_value pos)
-      ) else
-        ()
+    method! at_method_ _env m = check_block m.m_body.fb_ast
   end

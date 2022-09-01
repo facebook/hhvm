@@ -16,6 +16,7 @@
 
 include "thrift/annotation/api.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any.thrift"
 include "thrift/lib/thrift/id.thrift"
@@ -407,6 +408,7 @@ typedef list<ReturnType> ReturnTypes
  *
  *     {qualifier} { ... returnTypes ... } {definition.name}({paramlist}) throws ( ... exceptions ... )
  */
+@hack.Name{name = "TFunction"}
 struct Function {
   /** The qualifier for the function. */
   // TODO(dokwon): Document compatibility semantics, and add conformance tests.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ class Util {
   /**
    * Converts millisecond timestamp into a timespec struct
    *
-   * @param struct timespec& result
-   * @param time or duration in milliseconds
+   * @param result timespec& result
+   * @param value or duration in milliseconds
    */
   static void toTimespec(struct timespec& result, int64_t value) {
     result.tv_sec = value / MS_PER_S; // ms to s

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,6 @@ class TTransport {
   /**
    * Opens the transport for communications.
    *
-   * @return bool Whether the transport was successfully opened
    * @throws TTransportException if opening failed
    */
   virtual void open() {
@@ -116,7 +115,7 @@ class TTransport {
   /**
    * Reads the given amount of data in its entirety no matter what.
    *
-   * @param s     Reference to location for read data
+   * @param buf     Reference to location for read data
    * @param len   How many bytes to read
    * @return How many bytes read, which must be equal to size
    * @throws TTransportException If insufficient data was read

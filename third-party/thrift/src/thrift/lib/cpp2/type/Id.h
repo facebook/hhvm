@@ -91,7 +91,7 @@ FOLLY_INLINE_VARIABLE constexpr bool is_id_v = detail::is_type_tag_v<Id> ||
  * Converts a value into an ordinal. Useful for represending e.g. list indexes
  * allowing 0 represent all elements in the list.
  *
- * @param value to convert to ordinal
+ * @param pos to convert to ordinal
  * @return ordinal
  */
 inline constexpr Ordinal toOrdinal(size_t pos) {
@@ -110,7 +110,7 @@ inline constexpr Ordinal toOrdinal(size_t pos) {
 /**
  * Does reverse conversion from ordinal obtained by toOrdinal()
  *
- * @param value ordinal to convert back to integer
+ * @param ordinal to convert back to integer
  * @return integer
  */
 inline constexpr size_t toPosition(Ordinal ordinal) noexcept {

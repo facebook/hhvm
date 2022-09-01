@@ -97,7 +97,8 @@ let print_diff ~expected_name ~actual_name ~expected_contents ~actual_contents =
     ~file2:actual
     ()
 
-let compare_folded ctx rupro_decls multifile filename text =
+let compare_folded
+    ctx rupro_decls ~print_ocaml ~print_rupro multifile filename text =
   let class_names =
     direct_decl_parse ctx filename text
     |> List.rev_filter_map ~f:(function
@@ -118,7 +119,9 @@ let compare_folded ctx rupro_decls multifile filename text =
     |> String.concat ~sep:"\n"
   in
   let folded = show_folded_decls ocaml_folded_classes in
+  if print_ocaml then Format.eprintf "OCaml folded decls:\n%s\n\n" folded;
   let rupro_folded = show_folded_decls rupro_folded_classes in
+  if print_rupro then Format.eprintf "rupro folded decls:\n%s\n\n" rupro_folded;
   let matched = String.equal folded rupro_folded in
   if not matched then (
     (* All output is printed to stderr because that's the output
@@ -153,6 +156,8 @@ let () =
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
   let enable_strict_const_semantics = ref 0 in
+  let print_ocaml = ref false in
+  let print_rupro = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -183,6 +188,12 @@ let () =
         Arg.Int (fun x -> enable_strict_const_semantics := x),
         " Raise an error when a concrete constants is overridden or multiply defined"
       );
+      ( "--print-ocaml",
+        Arg.Set print_ocaml,
+        " Print OCaml folded decls to stdout" );
+      ( "--print-rupro",
+        Arg.Set print_rupro,
+        " Print rupro folded decls to stdout" );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -260,6 +271,8 @@ let () =
     in
     let enable_strict_const_semantics = !enable_strict_const_semantics in
     let everything_sdt = !everything_sdt in
+    let print_ocaml = !print_ocaml in
+    let print_rupro = !print_rupro in
     let popt =
       popt
         ~auto_namespace_map
@@ -325,6 +338,6 @@ let () =
           Printf.eprintf "%s\n%!" e;
           exit 1
       in
-      iter_files (compare_folded ctx rupro_decls)
+      iter_files (compare_folded ctx rupro_decls ~print_ocaml ~print_rupro)
     in
     if not all_matched then exit 1

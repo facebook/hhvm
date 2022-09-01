@@ -16,5 +16,5 @@
 
 }}{{!
 Adapted type if field has adapter, otherwise the original type
-}}{{#field:has_adapter?}}{{field:adapter_type_hint}}{{/field:has_adapter?}}{{!
+}}{{#field:has_adapter?}}{{adapter:type_hint}}{{/field:has_adapter?}}{{!
 }}{{^field:has_adapter?}}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/field:has_adapter?}}

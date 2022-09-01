@@ -20,13 +20,13 @@ A tuple of:
   2. a lambda that returns transitive annotation (if the adapter is applied via transitive annotation, else None.)
 if the field has an adapter, else None.
 }}{{#field:has_adapter?}}({{!
-  }}{{field:adapter_name}}, lambda: {{!
-  }}{{#field:is_adapter_transitive?}}{{!
-    }}{{#field:transitive_adapter_annotation}}{{> types/constant_value }}{{/field:transitive_adapter_annotation}}{{!
-  }}{{/field:is_adapter_transitive?}}{{!
-  }}{{^field:is_adapter_transitive?}}{{!
+  }}{{adapter:name}}, lambda: {{!
+  }}{{#adapter:is_transitive?}}{{!
+    }}{{#adapter:transitive_annotation}}{{> types/constant_value }}{{/adapter:transitive_annotation}}{{!
+  }}{{/adapter:is_transitive?}}{{!
+  }}{{^adapter:is_transitive?}}{{!
     }}None{{!
-  }}{{/field:is_adapter_transitive?}}{{!
+  }}{{/adapter:is_transitive?}}{{!
 }}){{/field:has_adapter?}}{{!
 }}{{^field:has_adapter?}}{{!
   }}None{{!

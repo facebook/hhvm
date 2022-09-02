@@ -30,7 +30,6 @@ struct FizzConfig {
   std::vector<fizz::PskKeyExchangeMode> supportedPskModes;
   bool acceptEarlyData{false};
   bool earlyDataFbOnly{false};
-  bool enableHybridKeyExchange{false};
 
   // EXPERIMENTAL: Attempt to switch to kTLS based I/O on successful
   // fizz handshakes. This may or may not work depending on platform support

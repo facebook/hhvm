@@ -59,8 +59,6 @@
 
 namespace apache {
 namespace thrift {
-namespace ident {}
-namespace tag = ident; // TODO(afuller): Remove all usage and delete.
 namespace detail {
 
 template <typename T>

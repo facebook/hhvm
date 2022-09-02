@@ -1065,13 +1065,13 @@ TEST(FieldMaskTest, EnsureSmartPointer) {
   {
     SharedConstPointerStruct obj;
     MaskBuilder<SharedConstPointerStruct> builder(noneMask());
-    builder.includes<tag::unique>();
+    builder.includes<ident::unique>();
     builder.ensure(obj);
     assertPointerHasAllValues(obj.unique_ref());
     EXPECT_FALSE(obj.shared_const_ref());
 
     // Cannot ensure the shared const field.
-    builder.includes<tag::shared_const>();
+    builder.includes<ident::shared_const>();
     EXPECT_THROW(builder.ensure(obj), std::runtime_error);
   }
 }
@@ -1240,14 +1240,14 @@ TEST(FieldMaskTest, SchemafulClearSmartPointer) {
   {
     SharedConstPointerStruct obj;
     MaskBuilder<SharedConstPointerStruct> builder(noneMask());
-    builder.includes<tag::unique>();
+    builder.includes<ident::unique>();
     builder.ensure(obj);
     builder.clear(obj);
     EXPECT_FALSE(obj.unique_ref());
     EXPECT_FALSE(obj.shared_const_ref());
 
     // Cannot clear a field inside the shared const field.
-    builder.includes<tag::shared_const, tag::field_1>();
+    builder.includes<ident::shared_const, ident::field_1>();
     obj.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
     EXPECT_THROW(builder.clear(obj), std::runtime_error);
   }
@@ -1394,13 +1394,13 @@ TEST(FieldMaskTest, SchemafulCopySmartPointer) {
   {
     SharedConstPointerStruct src, dst;
     MaskBuilder<SharedConstPointerStruct> builder(noneMask());
-    builder.includes<tag::unique>();
+    builder.includes<ident::unique>();
     builder.ensure(src);
     builder.copy(src, dst);
     assertPointerHasAllValues(dst.unique_ref());
 
     // Cannot copy to a field inside the shared const field.
-    builder.includes<tag::shared_const, tag::field_1>();
+    builder.includes<ident::shared_const, ident::field_1>();
     src.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
     dst.shared_const_ref() = std::make_shared<Foo2>(Foo2{});
     EXPECT_THROW(builder.copy(src, dst), std::runtime_error);
@@ -2370,7 +2370,7 @@ TEST(FieldMaskTest, MaskBuilderMaskNotCompatible) {
   MaskBuilder<Bar> builder(noneMask());
   EXPECT_THROW(builder.includes(mask), std::runtime_error);
   EXPECT_THROW(builder.includes({}, mask), std::runtime_error);
-  EXPECT_THROW(builder.includes<tag::foo>(mask), std::runtime_error);
+  EXPECT_THROW(builder.includes<ident::foo>(mask), std::runtime_error);
   EXPECT_THROW(builder.includes({"foo"}, mask), std::runtime_error);
 }
 

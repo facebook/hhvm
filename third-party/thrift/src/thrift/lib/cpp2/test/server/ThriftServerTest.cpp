@@ -266,7 +266,7 @@ TEST(ThriftServer, HeaderTest) {
   // Set it as a header directly so the client channel won't set a
   // timeout and the test won't throw TTransportException
   options.setWriteHeader(
-      apache::thrift::transport::THeader::CLIENT_TIMEOUT_HEADER,
+      (std::string)apache::thrift::transport::THeader::CLIENT_TIMEOUT_HEADER,
       folly::to<std::string>(10));
   try {
     client.sync_processHeader(options);

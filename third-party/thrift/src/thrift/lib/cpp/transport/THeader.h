@@ -379,8 +379,7 @@ class THeader final {
 
   static const uint32_t MAX_FRAME_SIZE = 0x3FFFFFFF;
   static constexpr std::string_view PRIORITY_HEADER = "thrift_priority";
-  // TODO: change to string_view
-  static const std::string& CLIENT_TIMEOUT_HEADER;
+  static constexpr std::string_view CLIENT_TIMEOUT_HEADER = "client_timeout";
   static constexpr std::string_view QUEUE_TIMEOUT_HEADER = "queue_timeout";
   static constexpr std::string_view QUERY_LOAD_HEADER = "load";
   static constexpr std::string_view kClientId = "client_id";

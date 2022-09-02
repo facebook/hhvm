@@ -66,7 +66,7 @@ object makePythonHeaders(
   for (const auto& it : cppheaders) {
     headers[it.first] = it.second;
   }
-  headers[apache::thrift::THeader::CLIENT_TIMEOUT_HEADER] =
+  headers[(std::string)apache::thrift::THeader::CLIENT_TIMEOUT_HEADER] =
       folly::to<std::string>(
           std::chrono::milliseconds(context->getRequestTimeout()).count());
   return headers;

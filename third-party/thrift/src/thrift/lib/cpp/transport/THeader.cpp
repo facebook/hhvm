@@ -64,8 +64,6 @@ using namespace folly;
 using namespace folly::io;
 using apache::thrift::protocol::TBinaryProtocol;
 
-const string& THeader::CLIENT_TIMEOUT_HEADER = *(new string("client_timeout"));
-
 std::string getReadableChars(Cursor c, size_t limit) {
   size_t size = 0;
   return c.readWhile([&size, limit](char b) {

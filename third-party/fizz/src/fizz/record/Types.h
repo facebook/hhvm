@@ -371,19 +371,18 @@ enum class NamedGroup : uint16_t {
    */
   cecpq2 = 16696,
 
-  // Nearly standardized algorithms. See
-  // https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/G0DoD7lkGPk .
+  // Standardized algorithms. See
+  // https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05#section-5
 
   /**
-   * Experimental, see
-   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L69 .
+   * Experimental ID, see
+   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L69
    */
   x25519_kyber512 = 12089,
 
   /**
-   * Experimental, see
-   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L70 and
-   * T129759634.
+   * Experimental ID, see
+   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L70
    */
   secp256r1_kyber512 = 12090,
 
@@ -392,6 +391,18 @@ enum class NamedGroup : uint16_t {
    * cause security flaws.
    */
   kyber512 = 511,
+
+  /**
+   * Experimental ID. Private use, see
+   * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
+   */
+  x25519_kyber768 = 65024,
+
+  /**
+   * Experimental ID, see
+   * https://github.com/open-quantum-safe/boringssl/blob/master/include/openssl/ssl.h#L2410
+   */
+  secp384r1_kyber768 = 12092,
 };
 
 std::string toString(NamedGroup);

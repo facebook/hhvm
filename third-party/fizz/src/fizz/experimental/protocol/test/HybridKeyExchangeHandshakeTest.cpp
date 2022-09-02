@@ -71,6 +71,36 @@ TEST_F(HandshakeTest, x25519_kyber512) {
   sendAppData();
 }
 
+TEST_F(HandshakeTest, secp384r1_kyber768) {
+  auto factory = std::make_shared<HybridKeyExFactory>();
+  clientContext_->setFactory(factory);
+  serverContext_->setFactory(factory);
+  clientContext_->setSupportedGroups({NamedGroup::secp384r1_kyber768});
+  clientContext_->setDefaultShares({NamedGroup::secp384r1_kyber768});
+  serverContext_->setSupportedGroups({NamedGroup::secp384r1_kyber768});
+  expected_.group = NamedGroup::secp384r1_kyber768;
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
+TEST_F(HandshakeTest, x25519_kyber768) {
+  auto factory = std::make_shared<HybridKeyExFactory>();
+  clientContext_->setFactory(factory);
+  serverContext_->setFactory(factory);
+  clientContext_->setSupportedGroups({NamedGroup::x25519_kyber768});
+  clientContext_->setDefaultShares({NamedGroup::x25519_kyber768});
+  serverContext_->setSupportedGroups({NamedGroup::x25519_kyber768});
+  expected_.group = NamedGroup::x25519_kyber768;
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
 TEST_F(HandshakeTest, x25519UsingHybridFactory) {
   auto factory = std::make_shared<HybridKeyExFactory>();
   clientContext_->setFactory(factory);

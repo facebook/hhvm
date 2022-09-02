@@ -29,10 +29,10 @@ endif()
 
 # google-glog
 find_package(Glog REQUIRED)
-if (LIBGLOG_STATIC)
+if (GLOG_STATIC)
   add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
 endif()
-include_directories(${LIBGLOG_INCLUDE_DIR})
+include_directories(${GLOG_INCLUDE_DIR})
 
 # inotify checks
 find_package(Libinotify)
@@ -361,7 +361,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} ${LIBGLOG_LIBRARY})
+  target_link_libraries(${target} ${VISIBILITY} glog::glog)
   if (LIBJSONC_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBJSONC_LIBRARY})
   endif()

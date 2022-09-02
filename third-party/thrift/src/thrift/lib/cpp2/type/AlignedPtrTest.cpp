@@ -16,28 +16,71 @@
 
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
+#include <folly/ConstexprMath.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
 namespace apache::thrift::type {
 namespace {
 
-TEST(AlignedPtr, ExplicitAlignments) {
+std::uintptr_t nBitMask(int bits) {
+  return (1ULL << bits) - 1;
+}
+
+TEST(AlignedPtr, ImplicitAlignment) {
   detail::AlignedPtr<int16_t> i16;
-  EXPECT_EQ(~i16.kMask, 1);
+  EXPECT_EQ(~i16.kMask, nBitMask(1));
 
   detail::AlignedPtr<int32_t> i32;
-  EXPECT_EQ(~i32.kMask, 3);
+  EXPECT_EQ(~i32.kMask, nBitMask(2));
 
   detail::AlignedPtr<int64_t> i64;
-  EXPECT_EQ(~i64.kMask, 7);
+  EXPECT_EQ(~i64.kMask, nBitMask(3));
 
   struct alignas(16) SixteenByteStruct {
     uint8_t __padding[16];
   };
   EXPECT_EQ(alignof(SixteenByteStruct), 16);
   detail::AlignedPtr<SixteenByteStruct> sixteen;
-  EXPECT_EQ(~sixteen.kMask, 15);
+  EXPECT_EQ(~sixteen.kMask, nBitMask(4));
+}
+
+TEST(AlignedPtr, OverAlignment) {
+  detail::AlignedPtr<int16_t, /*Bits=*/3, /*MaxBits=*/3> i16;
+  EXPECT_EQ(~i16.kMask, nBitMask(3));
+
+  detail::AlignedPtr<int32_t, /*Bits=*/3, /*MaxBits=*/3> i32;
+  EXPECT_EQ(~i32.kMask, nBitMask(3));
+
+  detail::AlignedPtr<int64_t, /*Bits=*/3, /*MaxBits=*/4> i64;
+  EXPECT_EQ(~i64.kMask, nBitMask(3));
+
+  detail::AlignedPtr<
+      unsigned int,
+      /*Bits=*/3,
+      /*MaxBits=*/std::max(3UL, folly::constexpr_log2(alignof(unsigned int)))>
+      uint;
+  EXPECT_EQ(~uint.kMask, nBitMask(3));
+
+  struct alignas(16) SixteenByteStruct {
+    uint8_t __padding[16];
+  };
+  detail::AlignedPtr<SixteenByteStruct, /*Bits=*/5, /*MaxBits=*/5> sixteen;
+  EXPECT_EQ(~sixteen.kMask, nBitMask(5));
+}
+
+TEST(AlignedPtr, UnderAlignment) {
+  detail::AlignedPtr<int32_t, 2> i32;
+  EXPECT_EQ(~i32.kMask, nBitMask(2));
+
+  detail::AlignedPtr<int64_t, 1> i64;
+  EXPECT_EQ(~i64.kMask, nBitMask(1));
+
+  struct alignas(16) SixteenByteStruct {
+    uint8_t __padding[16];
+  };
+  detail::AlignedPtr<SixteenByteStruct, 3> sixteen;
+  EXPECT_EQ(~sixteen.kMask, nBitMask(3));
 }
 
 } // namespace

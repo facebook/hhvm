@@ -29,12 +29,13 @@ namespace detail {
 
 // A pointer for a type that has sufficent alignment to store information
 // in the lower bits.
-template <typename T, size_t Bits = folly::constexpr_log2(alignof(T))>
+template <
+    typename T,
+    size_t Bits = folly::constexpr_log2(alignof(T)),
+    size_t MaxBits = folly::constexpr_log2(alignof(T))>
 class AlignedPtr {
  public:
-  static_assert(
-      Bits > 0 && Bits <= folly::constexpr_log2(alignof(T)),
-      "insufficent alignment");
+  static_assert(Bits > 0 && Bits <= MaxBits, "insufficent alignment");
   constexpr static std::uintptr_t kMask = ~std::uintptr_t{} << Bits;
 
   constexpr AlignedPtr() noexcept = default;

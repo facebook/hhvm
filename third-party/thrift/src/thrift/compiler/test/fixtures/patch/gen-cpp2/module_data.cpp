@@ -183,25 +183,6 @@ const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch:
   TType::T_STRUCT,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyDataPatchStruct>::fields_names = {{
-  "clear",
-  "patchPrior",
-  "ensure",
-  "patch",
-}};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyDataPatchStruct>::fields_ids = {{
-  2,
-  3,
-  4,
-  6,
-}};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyDataPatchStruct>::fields_types = {{
-  TType::T_BOOL,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-}};
-
 const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct>::fields_names = {{
   "innerOption",
 }};
@@ -228,25 +209,6 @@ const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::InnerUn
 }};
 const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::fields_types = {{
   TType::T_STRUCT,
-  TType::T_BOOL,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-}};
-
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::patch::OptionalInnerUnionPatchStruct>::fields_names = {{
-  "clear",
-  "patchPrior",
-  "ensure",
-  "patch",
-}};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::OptionalInnerUnionPatchStruct>::fields_ids = {{
-  2,
-  3,
-  4,
-  6,
-}};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::OptionalInnerUnionPatchStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_STRUCT,
   TType::T_STRUCT,
@@ -285,25 +247,6 @@ const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::MyUnion
 }};
 const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::fields_types = {{
   TType::T_STRUCT,
-  TType::T_BOOL,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-}};
-
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyUnionPatchStruct>::fields_names = {{
-  "clear",
-  "patchPrior",
-  "ensure",
-  "patch",
-}};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyUnionPatchStruct>::fields_ids = {{
-  2,
-  3,
-  4,
-  6,
-}};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyUnionPatchStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_STRUCT,
   TType::T_STRUCT,
@@ -462,25 +405,6 @@ const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::patch::MyStruc
 }};
 const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::fields_types = {{
   TType::T_STRUCT,
-  TType::T_BOOL,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-}};
-
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyStructPatchStruct>::fields_names = {{
-  "clear",
-  "patchPrior",
-  "ensure",
-  "patch",
-}};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyStructPatchStruct>::fields_ids = {{
-  2,
-  3,
-  4,
-  6,
-}};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::patch::OptionalMyStructPatchStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_STRUCT,
   TType::T_STRUCT,

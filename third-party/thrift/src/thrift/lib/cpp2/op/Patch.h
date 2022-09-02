@@ -50,14 +50,6 @@ DoublePatch patchType(type::double_t);
 op::StringPatch patchType(type::string_t);
 op::BinaryPatch patchType(type::binary_t);
 
-OptionalBoolPatch optPatchType(type::bool_t);
-OptionalI16Patch optPatchType(type::byte_t);
-OptionalI16Patch optPatchType(type::i16_t);
-OptionalI32Patch optPatchType(type::i32_t);
-OptionalI64Patch optPatchType(type::i64_t);
-OptionalFloatPatch optPatchType(type::float_t);
-OptionalDoublePatch optPatchType(type::double_t);
-
 } // namespace detail
 
 // The patch represenations for the base thrift types.
@@ -79,9 +71,6 @@ OptionalDoublePatch optPatchType(type::double_t);
 //  patch.apply(value); // Sets value to 2;
 template <typename Tag>
 using patch_type = decltype(detail::patchType(Tag{}));
-
-template <typename Tag>
-using optional_patch_type = decltype(detail::optPatchType(Tag{}));
 
 } // namespace op
 } // namespace thrift

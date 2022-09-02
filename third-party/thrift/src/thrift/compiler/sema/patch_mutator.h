@@ -107,31 +107,6 @@ class patch_generator {
   t_struct& add_union_patch(
       const t_node& annot, t_union& value_type, t_type_ref patch_type);
 
-  // TODO(afuller): This is no longer needed, migrate all usage and remove.
-  //
-  // Add an optional patch representation for the patch type, and return a
-  // reference to it.
-  //
-  // The resulting struct has the form:
-  //
-  //   @cpp.Adapter{name = "::apache::thrift::op::detail::OptionalPatchAdapter"}
-  //   struct OptionalPatch<Value, Patch> {
-  //     // Clears any set value. Applies first.
-  //     bool clear;
-  //
-  //     // Patches any set value. Applies second.
-  //     Patch patch;
-  //
-  //     // Assigns the value, if not already set. Applies third.
-  //     optional Value ensure (thrift.box);
-  //
-  //     // Patches any set value, including newly set values. Applies fourth.
-  //     Patch patchAfter;
-  //   }
-  //
-  t_struct& add_optional_patch(
-      const t_node& annot, t_type_ref value_type, t_struct& patch_type);
-
  private:
   friend class PatchGeneratorTest;
 

@@ -93,17 +93,6 @@ struct ForEachField<::test::fixtures::patch::MyDataPatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyDataPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -120,17 +109,6 @@ struct ForEachField<::test::fixtures::patch::InnerUnionPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::OptionalInnerUnionPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
   }
 };
 
@@ -153,17 +131,6 @@ struct ForEachField<::test::fixtures::patch::MyUnionPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyUnionPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
   }
 };
 
@@ -240,17 +207,6 @@ struct ForEachField<::test::fixtures::patch::MyStructPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::OptionalMyStructPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).clear_ref()...);
-    f(1, static_cast<T&&>(t).patchPrior_ref()...);
-    f(2, static_cast<T&&>(t).ensure_ref()...);
-    f(3, static_cast<T&&>(t).patch_ref()...);
   }
 };
 } // namespace detail

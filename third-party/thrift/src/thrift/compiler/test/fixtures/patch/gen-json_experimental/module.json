@@ -346,55 +346,6 @@
         "is_union" : false,
         "lineno" : 21
       },
-      "OptionalMyDataPatch" : {
-        "name" : "OptionalMyDataPatch",
-        "fields" : {
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears any set value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-          },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyDataPatch"
-}
-          },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
-            "key" : 4,
-            "lineno" : 21,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyData"
-}
-          },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyDataPatch"
-}
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 21
-      },
       "InnerUnionFieldPatch" : {
         "name" : "InnerUnionFieldPatch",
         "fields" : {
@@ -466,55 +417,6 @@
             "type" : {
   "type" : "struct",
   "name" : "InnerUnionFieldPatch"
-}
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 21
-      },
-      "OptionalInnerUnionPatch" : {
-        "name" : "OptionalInnerUnionPatch",
-        "fields" : {
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears any set value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-          },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "InnerUnionPatch"
-}
-          },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
-            "key" : 4,
-            "lineno" : 21,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "InnerUnion"
-}
-          },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "InnerUnionPatch"
 }
           }
         },
@@ -613,55 +515,6 @@
             "type" : {
   "type" : "struct",
   "name" : "MyUnionFieldPatch"
-}
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 21
-      },
-      "OptionalMyUnionPatch" : {
-        "name" : "OptionalMyUnionPatch",
-        "fields" : {
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears any set value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-          },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyUnionPatch"
-}
-          },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
-            "key" : 4,
-            "lineno" : 21,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
-          },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyUnionPatch"
 }
           }
         },
@@ -1120,55 +973,6 @@
             "type" : {
   "type" : "struct",
   "name" : "MyStructFieldPatch"
-}
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 21
-      },
-      "OptionalMyStructPatch" : {
-        "name" : "OptionalMyStructPatch",
-        "fields" : {
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears any set value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : "bool"
-          },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructPatch"
-}
-          },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Assigns the value, if not already set to the same field. Applies third.\n",
-            "key" : 4,
-            "lineno" : 21,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
-          },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 21,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructPatch"
 }
           }
         },

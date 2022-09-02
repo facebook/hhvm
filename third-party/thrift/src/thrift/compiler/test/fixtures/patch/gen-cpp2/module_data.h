@@ -68,13 +68,6 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct
   static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::OptionalMyDataPatchStruct> {
-  static constexpr const std::size_t fields_size = 4;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-};
-
 template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
   static constexpr const std::size_t fields_size = 1;
   static const std::array<folly::StringPiece, fields_size> fields_names;
@@ -89,13 +82,6 @@ template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionPatchSt
   static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::OptionalInnerUnionPatchStruct> {
-  static constexpr const std::size_t fields_size = 4;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-};
-
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct> {
   static constexpr const std::size_t fields_size = 3;
   static const std::array<folly::StringPiece, fields_size> fields_names;
@@ -105,13 +91,6 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatch
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct> {
   static constexpr const std::size_t fields_size = 5;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-};
-
-template <> struct TStructDataStorage<::test::fixtures::patch::OptionalMyUnionPatchStruct> {
-  static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -147,13 +126,6 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldPatc
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct> {
   static constexpr const std::size_t fields_size = 5;
-  static const std::array<folly::StringPiece, fields_size> fields_names;
-  static const std::array<int16_t, fields_size> fields_ids;
-  static const std::array<protocol::TType, fields_size> fields_types;
-};
-
-template <> struct TStructDataStorage<::test::fixtures::patch::OptionalMyStructPatchStruct> {
-  static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

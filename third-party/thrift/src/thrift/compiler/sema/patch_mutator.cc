@@ -27,8 +27,6 @@ namespace compiler {
 namespace {
 
 constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
-constexpr auto kGenerateOptionalPatchUri =
-    "facebook.com/thrift/op/GenerateOptionalPatch";
 
 // TODO(afuller): Index all types by uri, and find them that way.
 const char* getPatchTypeName(t_base_type::type base_type) {
@@ -239,47 +237,16 @@ struct PatchGen : StructGen {
   }
 };
 
-t_type_ref resolve_value_type(t_struct& patch_type) {
-  // All patch types must have an 'optional Value assign' field.
-  t_type_ref result;
-  if (const t_field* field = patch_type.get_field_by_name("assign")) {
-    // The field type is the value_type.
-    result = field->type();
-  }
-  return result;
-}
-
-// Generates an optional patch representation for any patch with the
-// @patch.GenerateOptionalPatch annotation.
-void generate_optional_patch(
-    diagnostic_context& ctx, mutator_context& mctx, t_struct& node) {
-  if (auto* annot =
-          node.find_structured_annotation_or_null(kGenerateOptionalPatchUri)) {
-    // Add a 'optional patch' for the given patch type.
-    if (t_type_ref value_type = resolve_value_type(node)) {
-      patch_generator::get_for(ctx, mctx).add_optional_patch(
-          *annot, value_type, node);
-    } else {
-      ctx.error(
-          "Could not resolve the 'value' type, needed to generate the optional patch struct.");
-    }
-  }
-}
-
 // Generates a patch representation for any struct with the @patch.GeneratePatch
 // annotation.
 void generate_struct_patch(
     diagnostic_context& ctx, mutator_context& mctx, t_struct& node) {
   if (auto* annot =
           ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
-    auto& generator = patch_generator::get_for(ctx, mctx);
-
     // Add a 'field patch' and 'struct patch' using it.
-    auto& patch = generator.add_field_patch(*annot, node);
-    auto& struct_patch = generator.add_struct_patch(*annot, node, patch);
-
-    // Add an 'optional patch' based on the added patch type.
-    generator.add_optional_patch(*annot, node, struct_patch);
+    auto& generator = patch_generator::get_for(ctx, mctx);
+    generator.add_struct_patch(
+        *annot, node, generator.add_field_patch(*annot, node));
   }
 }
 
@@ -287,14 +254,10 @@ void generate_union_patch(
     diagnostic_context& ctx, mutator_context& mctx, t_union& node) {
   if (auto* annot =
           ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
+    // Add a 'field patch' and 'union patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
-
-    // Add a 'structured patch' and 'union value patch' using it.
-    auto& patch = generator.add_field_patch(*annot, node);
-    auto& union_patch = generator.add_union_patch(*annot, node, patch);
-
-    // Add an 'optional patch' based on the added patch type.
-    generator.add_optional_patch(*annot, node, union_patch);
+    generator.add_union_patch(
+        *annot, node, generator.add_field_patch(*annot, node));
   }
 }
 
@@ -303,7 +266,6 @@ void generate_union_patch(
 void add_patch_mutators(ast_mutators& mutators) {
   auto& mutator = mutators[standard_mutator_stage::plugin];
   mutator.add_struct_visitor(&generate_struct_patch);
-  mutator.add_struct_visitor(&generate_optional_patch);
   mutator.add_union_visitor(&generate_union_patch);
 }
 
@@ -313,17 +275,6 @@ patch_generator& patch_generator::get_for(
   return ctx.cache().get(program, [&]() {
     return std::make_unique<patch_generator>(ctx, program);
   });
-}
-
-t_struct& patch_generator::add_optional_patch(
-    const t_node& annot, t_type_ref value_type, t_struct& patch_type) {
-  PatchGen gen{{annot, gen_prefix_struct(annot, patch_type, "Optional")}};
-  gen.clearUnion();
-  gen.patchPrior(patch_type);
-  box(gen.ensureUnion(value_type));
-  gen.patchAfter(patch_type);
-  gen.set_adapter("OptionalPatchAdapter", program_);
-  return gen;
 }
 
 t_struct& patch_generator::add_field_patch(

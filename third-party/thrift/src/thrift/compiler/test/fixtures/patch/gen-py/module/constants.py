@@ -20,5 +20,5 @@ import thrift.annotation.thrift.ttypes
 import thrift.lib.thrift.patch.ttypes
 
 
-from .ttypes import UTF8STRINGS, MyData, InnerUnion, MyUnion, MyStruct, MyDataFieldPatch, MyDataPatch, OptionalMyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, OptionalInnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, OptionalMyUnionPatch, MyStructFieldPatch, MyStructField21Patch, MyStructField22Patch, MyStructField23Patch, MyStructPatch, OptionalMyStructPatch
+from .ttypes import UTF8STRINGS, MyData, InnerUnion, MyUnion, MyStruct, MyDataFieldPatch, MyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, MyStructFieldPatch, MyStructField21Patch, MyStructField22Patch, MyStructField23Patch, MyStructPatch
 

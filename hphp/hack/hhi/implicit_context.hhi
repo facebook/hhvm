@@ -4,7 +4,7 @@ namespace HH {
 
 namespace ImplicitContext {
 
-function get_implicit_context_blame()[zoned]: (vec<string>, vec<string>);
+
 
 
 function soft_run_with<Tout>(

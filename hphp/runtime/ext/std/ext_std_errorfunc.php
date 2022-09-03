@@ -141,9 +141,13 @@ function restore_exception_handler(): bool;
  *   fifth parameter is optional, errcontext, which is an array that points
  *   to the active symbol table at the point the error occurred. In other
  *   words, errcontext will contain an array of every variable that existed
- *   in the scope the error was triggered in. User error handler must not
- *   modify error context.       If the function returns FALSE then the
- *   normal error handler continues.
+ *   in the scope the error was triggered in.
+ *   Sixth parameter is backtrace.
+ *   Seventh parameter is blame associated with the current implicit context.
+ *   First part of it is blame from soft make ic inaccessible; while, the
+ *   second part is blame from soft ic runWith.
+ *   User error handler must not modify error context.
+ *   If the function returns FALSE then the normal error handler continues.
  * @param int $error_types - Can be used to mask the triggering of the
  *   error_handler function just like the error_reporting ini setting
  *   controls which errors are shown. Without this mask set the
@@ -277,6 +281,8 @@ namespace HH {
    *                       tp the error handler)
    * - "error-backtrace" : Backtrace where error occurred (sixth parameter
    *                       to the error handler)
+   * - "error-implicit-context-blame : Blame associated with the current
+   *                                   implicit context
    *
    * If there were more errors than could be queued, the last entry will have an
    * additional field called "overflow" set to true.

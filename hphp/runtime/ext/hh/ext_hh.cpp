@@ -1290,29 +1290,6 @@ Object HHVM_FUNCTION(set_special_implicit_context,
   return ImplicitContext::setByValue(std::move(obj));
 }
 
-Array HHVM_FUNCTION(get_implicit_context_blame) {
-  auto const obj = *ImplicitContext::activeCtx;
-  if (!obj) return empty_vec_array();
-  auto const context = Native::data<ImplicitContext>(obj);
-
-  VecInit ret(2);
-  {
-    VecInit inaccessible(context->m_blameFromSoftInaccessible.size());
-    for (auto const& s : context->m_blameFromSoftInaccessible) {
-      inaccessible.append(String{const_cast<StringData*>(s)});
-    }
-    ret.append(inaccessible.toArray());
-  }
-  {
-    VecInit set(context->m_blameFromSoftSet.size());
-    for (auto const& s : context->m_blameFromSoftSet) {
-      set.append(String{const_cast<StringData*>(s)});
-    }
-    ret.append(set.toArray());
-  }
-  return ret.toArray();
-}
-
 namespace {
 
 Variant coeffects_call_helper(const Variant& function, const char* name,
@@ -1774,8 +1751,6 @@ static struct HHExtension final : Extension {
                   HHVM_FN(set_special_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\get_implicit_context_blame,
-                  HHVM_FN(get_implicit_context_blame));
 
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
                   HHVM_FN(enter_zoned_with));

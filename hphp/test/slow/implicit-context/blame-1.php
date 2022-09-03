@@ -24,10 +24,10 @@ function p($text) {
   echo ">>>>> " . $text . "\n";
 }
 
-function handler($errno, $errstr, $errfile, $errline, $errcontext) {
+function handler($errno, $errstr, $errfile, $errline, $errcontext, $backtrace, $ic_blame) {
   echo $errstr . " on " . $errfile . ":" . $errline . "\n";
   echo "Blame is:\n";
-  var_dump(HH\ImplicitContext\get_implicit_context_blame());
+  var_dump($ic_blame);
 }
 
 <<__EntryPoint>>

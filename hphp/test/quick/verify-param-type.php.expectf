@@ -1,4 +1,4 @@
-vec(6) {
+vec(7) {
   int(2)
   string(59) "Argument 1 to test_soft() must be of type @int, float given"
   string(%d) "%s/test/quick/verify-param-type.php"
@@ -17,10 +17,11 @@ vec(6) {
       string(4) "main"
     }
   }
+  NULL
 }
 in test_soft
 bool(false)
-vec(6) {
+vec(7) {
   int(4096)
   string(72) "Argument 1 passed to test_hard() must be an instance of int, float given"
   string(%d) "%s/test/quick/verify-param-type.php"
@@ -39,6 +40,7 @@ vec(6) {
       string(4) "main"
     }
   }
+  NULL
 }
 
 Fatal error: Error handler tried to recover from typehint violation in %s/test/quick/verify-param-type.php on line 23

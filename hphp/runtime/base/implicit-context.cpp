@@ -15,8 +15,12 @@
 */
 
 #include "hphp/runtime/base/implicit-context.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/type-object.h"
+
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 
@@ -52,6 +56,34 @@ bool ImplicitContext::isStateSoft(ImplicitContext::State state) {
       return true;
   }
   not_reached();
+}
+
+Variant ImplicitContext::getBlameVectors() {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return init_null_variant;
+  auto const context = Native::data<ImplicitContext>(obj);
+  if (context->m_blameFromSoftInaccessible.empty() &&
+      context->m_blameFromSoftSet.empty()) {
+    // Optimization to not waste memory in case they are both empty
+    return init_null_variant;
+  }
+
+  VecInit ret(2);
+  {
+    VecInit inaccessible(context->m_blameFromSoftInaccessible.size());
+    for (auto const& s : context->m_blameFromSoftInaccessible) {
+      inaccessible.append(String{const_cast<StringData*>(s)});
+    }
+    ret.append(inaccessible.toArray());
+  }
+  {
+    VecInit set(context->m_blameFromSoftSet.size());
+    for (auto const& s : context->m_blameFromSoftSet) {
+      set.append(String{const_cast<StringData*>(s)});
+    }
+    ret.append(set.toArray());
+  }
+  return ret.toArray();
 }
 
 } // namespace HPHP

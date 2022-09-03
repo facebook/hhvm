@@ -1,0 +1,58 @@
+Warning: memo is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line 4
+vec(1) {
+  dict(6) {
+    ["error-num"]=>
+    int(2)
+    ["error-string"]=>
+    string(95) "memo is a [defaults] memoized function, but it is called with a soft set state implicit context"
+    ["error-file"]=>
+    %s
+    ["error-line"]=>
+    int(4)
+    ["error-backtrace"]=>
+    vec(6) {
+      dict(2) {
+        ["file"]=>
+        %s
+        ["line"]=>
+        int(4)
+      }
+      dict(1) {
+        ["function"]=>
+        string(4) "memo"
+      }
+      dict(3) {
+        ["file"]=>
+        %s
+        ["line"]=>
+        int(12)
+        ["function"]=>
+        string(32) "HH\ImplicitContext\soft_run_with"
+      }
+      dict(1) {
+        ["function"]=>
+        string(12) "Closure$main"
+      }
+      dict(3) {
+        ["file"]=>
+        %s
+        ["line"]=>
+        int(16)
+        ["function"]=>
+        string(13) "trigger_error"
+      }
+      dict(1) {
+        ["function"]=>
+        string(4) "main"
+      }
+    }
+    ["error-implicit-context-blame"]=>
+    vec(2) {
+      vec(0) {
+      }
+      vec(1) {
+        string(3) "abc"
+      }
+    }
+  }
+}

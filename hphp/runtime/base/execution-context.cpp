@@ -766,6 +766,7 @@ const StaticString
   s_error_file("error-file"),
   s_error_line("error-line"),
   s_error_backtrace("error-backtrace"),
+  s_error_implicit_context_blame("error-implicit-context-blame"),
   s_overflow("overflow");
 
 void ExecutionContext::handleError(const std::string& msg,
@@ -839,7 +840,8 @@ void ExecutionContext::handleError(const std::string& msg,
             s_error_string, msg,
             s_error_file, std::move(fileAndLine.first),
             s_error_line, fileAndLine.second,
-            s_error_backtrace, ee.getBacktrace()
+            s_error_backtrace, ee.getBacktrace(),
+            s_error_implicit_context_blame, ImplicitContext::getBlameVectors()
           )
         );
       } else if (!deferred.empty()) {
@@ -884,7 +886,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, empty_dict_array(),
-                     backtrace),
+                     backtrace, ImplicitContext::getBlameVectors()),
                  RuntimeCoeffects::defaults()),
                 false)) {
         return true;

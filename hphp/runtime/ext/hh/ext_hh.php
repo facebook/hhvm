@@ -331,14 +331,6 @@ function clear_all_coverage_data(): void {
 
 namespace ImplicitContext {
 
-/**
- * Returns blame associated with the current implicit context
- * Return value[0]: Blame from soft make ic inaccessible
- * Return value[1]: Blame from soft ic runWith
- */
-<<__Native>>
-function get_implicit_context_blame()[zoned]: (vec<string>, vec<string>);
-
 async function soft_run_with_async<Tout>(
   (function ()[_]: Awaitable<Tout>) $f,
   string $key,

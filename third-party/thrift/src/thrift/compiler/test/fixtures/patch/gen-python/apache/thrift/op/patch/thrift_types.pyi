@@ -55,20 +55,6 @@ class GeneratePatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "thrift.lib.thrift.patch.ttypes.GeneratePatch": ...  # type: ignore
 
 
-class GenerateOptionalPatch(_fbthrift_python_types.Struct):
-    def __init__(
-        self,
-    ) -> None: ...
-
-    def __call__(
-        self,
-    ) -> GenerateOptionalPatch: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
-    def _to_python(self) -> GenerateOptionalPatch: ...
-    def _to_py3(self) -> "apache.thrift.op.patch.types.GenerateOptionalPatch": ...  # type: ignore
-    def _to_py_deprecated(self) -> "thrift.lib.thrift.patch.ttypes.GenerateOptionalPatch": ...  # type: ignore
-
-
 class BoolPatch(_fbthrift_python_types.Struct):
     assign: _typing.Final[_typing.Optional[bool]] = ...
     clear: _typing.Final[bool] = ...

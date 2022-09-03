@@ -210,89 +210,6 @@ class GeneratePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 }
 
 /**
- * Original thrift struct:-
- * GenerateOptionalPatch
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/GenerateOptionalPatch'))>>
-class GenerateOptionalPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const dict<int, this::TFieldSpec> SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const type TShape = shape(
-    ...
-  );
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'GenerateOptionalPatch';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "patch.GenerateOptionalPatch",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
-          shape(
-          )
-        ),
-      ],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-    );
-  }
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-  }
-
-}
-
-/**
  * A patch for a boolean value.
  *
  * Original thrift struct:-
@@ -434,10 +351,6 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
             "underlyingName" => "BoolPatchStruct",
             "extraNamespace" => "",
-          )
-        ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
           )
         ),
       ],
@@ -627,10 +540,6 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "BytePatchStruct",
             "extraNamespace" => "",
-          )
-        ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
           )
         ),
       ],
@@ -832,10 +741,6 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "extraNamespace" => "",
           )
         ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],
@@ -1033,10 +938,6 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I32PatchStruct",
             "extraNamespace" => "",
-          )
-        ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
           )
         ),
       ],
@@ -1238,10 +1139,6 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "extraNamespace" => "",
           )
         ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],
@@ -1431,10 +1328,6 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "extraNamespace" => "",
           )
         ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],
@@ -1622,10 +1515,6 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "DoublePatchStruct",
             "extraNamespace" => "",
-          )
-        ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
           )
         ),
       ],
@@ -1842,10 +1731,6 @@ class StringPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             "name" => "::apache::thrift::op::detail::StringPatchAdapter",
             "underlyingName" => "StringPatchStruct",
             "extraNamespace" => "",
-          )
-        ),
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
           )
         ),
       ],
@@ -2089,10 +1974,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-          shape(
-          )
-        ),
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",

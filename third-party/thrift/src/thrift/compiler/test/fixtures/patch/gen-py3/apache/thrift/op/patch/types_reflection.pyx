@@ -40,16 +40,3 @@ cdef __StructSpec get_reflection__GeneratePatch():
         },
     )
     return spec
-cdef __StructSpec get_reflection__GenerateOptionalPatch():
-    cdef _apache_thrift_op_patch_types.GenerateOptionalPatch defaults = _apache_thrift_op_patch_types.GenerateOptionalPatch._fbthrift_create(
-        constant_shared_ptr[_apache_thrift_op_patch_types.cGenerateOptionalPatch](
-            default_inst[_apache_thrift_op_patch_types.cGenerateOptionalPatch]()
-        )
-    )
-    cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="GenerateOptionalPatch",
-        kind=__StructType.STRUCT,
-        annotations={
-        },
-    )
-    return spec

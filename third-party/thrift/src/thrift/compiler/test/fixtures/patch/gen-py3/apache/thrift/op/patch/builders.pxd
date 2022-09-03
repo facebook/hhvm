@@ -25,7 +25,3 @@ cdef class GeneratePatch_Builder(thrift.py3.builder.StructBuilder):
     pass
 
 
-cdef class GenerateOptionalPatch_Builder(thrift.py3.builder.StructBuilder):
-    pass
-
-

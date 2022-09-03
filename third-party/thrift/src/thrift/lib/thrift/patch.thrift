@@ -40,16 +40,12 @@ namespace py thrift.lib.thrift.patch
 @scope.Structured
 struct GeneratePatch {}
 
-@scope.Struct
-struct GenerateOptionalPatch {}
-
 /** A patch for a boolean value. */
 @cpp.Adapter{
   underlyingName = "BoolPatchStruct",
   extraNamespace = "",
   name = "::apache::thrift::op::detail::BoolPatchAdapter",
 }
-@GenerateOptionalPatch
 struct BoolPatch {
   /**
    * Assign to a given value.
@@ -71,7 +67,6 @@ struct BoolPatch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct BytePatch {
   /**
    * Assign to a given value.
@@ -93,7 +88,6 @@ struct BytePatch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct I16Patch {
   /**
    * Assign to a given value.
@@ -115,7 +109,6 @@ struct I16Patch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct I32Patch {
   /**
    * Assign to a given value.
@@ -137,7 +130,6 @@ struct I32Patch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct I64Patch {
   /**
    * Assign to a given value.
@@ -159,7 +151,6 @@ struct I64Patch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct FloatPatch {
   /**
    * Assign to a given value.
@@ -181,7 +172,6 @@ struct FloatPatch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
-@GenerateOptionalPatch
 struct DoublePatch {
   /**
    * Assign to a given value.
@@ -203,7 +193,6 @@ struct DoublePatch {
   extraNamespace = "",
   name = "::apache::thrift::op::detail::StringPatchAdapter",
 }
-@GenerateOptionalPatch
 struct StringPatch {
   /**
    * Assign to a given value.
@@ -223,7 +212,6 @@ struct StringPatch {
 }
 
 /** A patch for a binary value. */
-@GenerateOptionalPatch
 @cpp.Adapter{
   underlyingName = "BinaryPatchStruct",
   extraNamespace = "",

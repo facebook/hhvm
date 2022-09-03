@@ -1687,10 +1687,6 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct 
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'data2' => shape(
@@ -1701,10 +1697,6 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct 
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "I32PatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -2151,10 +2143,6 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStr
         'innerOption' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
@@ -2664,10 +2652,6 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'option2' => shape(
@@ -2678,10 +2662,6 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "I32PatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -3844,10 +3824,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'byteVal' => shape(
@@ -3858,10 +3834,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "BytePatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -3876,10 +3848,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'i32Val' => shape(
@@ -3890,10 +3858,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "I32PatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -3908,10 +3872,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'floatVal' => shape(
@@ -3922,10 +3882,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "FloatPatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -3940,10 +3896,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'stringVal' => shape(
@@ -3956,19 +3908,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'binaryVal' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
@@ -4000,10 +3944,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'optByteVal' => shape(
@@ -4014,10 +3954,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "BytePatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -4032,10 +3968,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'optI32Val' => shape(
@@ -4046,10 +3978,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "I32PatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -4064,10 +3992,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'optFloatVal' => shape(
@@ -4078,10 +4002,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
                 "underlyingName" => "FloatPatchStruct",
                 "extraNamespace" => "",
-              )
-            ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
               )
             ),
           ],
@@ -4096,10 +4016,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'optStringVal' => shape(
@@ -4112,19 +4028,11 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 "extraNamespace" => "",
               )
             ),
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
           ],
         ),
         'optBinaryVal' => shape(
           'field' => dict[],
           'type' => dict[
-            '\thrift\op\GenerateOptionalPatch' => \thrift\op\GenerateOptionalPatch::fromShape(
-              shape(
-              )
-            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",

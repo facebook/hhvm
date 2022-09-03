@@ -90,17 +90,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h" name
         bint operator>=(cGeneratePatch&)
 
 
-    cdef cppclass cGenerateOptionalPatch "::apache::thrift::op::GenerateOptionalPatch":
-        cGenerateOptionalPatch() except +
-        cGenerateOptionalPatch(const cGenerateOptionalPatch&) except +
-        bint operator==(cGenerateOptionalPatch&)
-        bint operator!=(cGenerateOptionalPatch&)
-        bint operator<(cGenerateOptionalPatch&)
-        bint operator>(cGenerateOptionalPatch&)
-        bint operator<=(cGenerateOptionalPatch&)
-        bint operator>=(cGenerateOptionalPatch&)
-
-
 
 
 cdef class GeneratePatch(thrift.py3.types.Struct):
@@ -109,15 +98,6 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cGeneratePatch])
-
-
-
-cdef class GenerateOptionalPatch(thrift.py3.types.Struct):
-    cdef shared_ptr[cGenerateOptionalPatch] _cpp_obj
-    cdef _fbthrift_types_fields.__GenerateOptionalPatch_FieldsSetter _fields_setter
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cGenerateOptionalPatch])
 
 
 

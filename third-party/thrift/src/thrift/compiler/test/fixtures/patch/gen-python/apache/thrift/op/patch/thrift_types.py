@@ -55,38 +55,6 @@ class GeneratePatch(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratePatch, self)
 
 
-class GenerateOptionalPatch(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "patch.GenerateOptionalPatch"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "facebook.com/thrift/op/GenerateOptionalPatch"
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_GenerateOptionalPatch()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("apache.thrift.op.patch.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.GenerateOptionalPatch, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.GenerateOptionalPatch, self)
-
-
 class BoolPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -641,8 +609,6 @@ class PatchOp(_fbthrift_python_types.Enum, enum.Enum):
 
 def _fbthrift_metadata__struct_GeneratePatch():
     return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_GeneratePatch()
-def _fbthrift_metadata__struct_GenerateOptionalPatch():
-    return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_GenerateOptionalPatch()
 def _fbthrift_metadata__struct_BoolPatch():
     return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_BoolPatch()
 def _fbthrift_metadata__struct_BytePatch():
@@ -664,7 +630,6 @@ def _fbthrift_metadata__struct_BinaryPatch():
 
 _fbthrift_all_structs = [
     GeneratePatch,
-    GenerateOptionalPatch,
     BoolPatch,
     BytePatch,
     I16Patch,

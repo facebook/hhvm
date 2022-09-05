@@ -44,21 +44,32 @@ std::vector<t_function*> lifecycleFunctions() {
   return {&onStartServing_, &onStopRequested_};
 }
 
-mstch::array createStringArray(const std::vector<std::string>& values) {
-  mstch::array a;
+// TO-DO: remove duplicate in pyi
+mstch::array create_string_array(const std::vector<std::string>& values) {
+  mstch::array mstch_array;
   for (auto it = values.begin(); it != values.end(); ++it) {
-    a.push_back(mstch::map{
+    mstch_array.push_back(mstch::map{
         {"value", *it},
         {"first?", it == values.begin()},
         {"last?", std::next(it) == values.end()},
     });
   }
-  return a;
+
+  return mstch_array;
 }
 
-std::vector<std::string> get_py3_namespace_with_name(const t_program* prog) {
-  auto ns = get_py3_namespace(prog);
-  ns.push_back(prog->name());
+// TO-DO: remove duplicate in pyi
+bool has_types(const t_program* program) {
+  assert(program != nullptr);
+
+  return !(
+      program->objects().empty() && program->enums().empty() &&
+      program->typedefs().empty() && program->consts().empty());
+}
+
+std::vector<std::string> get_py3_namespace_with_name(const t_program* program) {
+  auto ns = get_py3_namespace(program);
+  ns.push_back(program->name());
   return ns;
 }
 
@@ -86,13 +97,17 @@ std::string get_cpp_template(const t_type& type) {
   if (const auto* val =
           type.find_annotation_or_null({"cpp.template", "cpp2.template"})) {
     return *val;
-  } else if (type.is_list()) {
+  }
+  if (type.is_list()) {
     return "std::vector";
-  } else if (type.is_set()) {
+  }
+  if (type.is_set()) {
     return "std::set";
-  } else if (type.is_map()) {
+  }
+  if (type.is_map()) {
     return "std::map";
   }
+
   return {};
 }
 
@@ -157,9 +172,7 @@ class py3_mstch_program : public mstch_program {
     return std::string(has_option("py3cpp") ? "gen-py3cpp" : "gen-cpp2");
   }
 
-  mstch::node getContainerTypes() {
-    return make_mstch_array(containers_, *context_.type_factory);
-  }
+  mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 
   mstch::node getCppIncludes() {
     mstch::array a;
@@ -172,9 +185,9 @@ class py3_mstch_program : public mstch_program {
   mstch::node unique_functions_by_return_type() {
     std::vector<const t_function*> functions;
     bool no_stream = has_option("no_stream");
-    for (auto& kv : uniqueFunctionsByReturnType_) {
-      if (is_func_supported(no_stream, kv.second)) {
-        functions.push_back(kv.second);
+    for (const auto& kvp : uniqueFunctionsByReturnType_) {
+      if (is_func_supported(no_stream, kvp.second)) {
+        functions.push_back(kvp.second);
       }
     }
 
@@ -182,58 +195,58 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node getCustomTemplates() {
-    return generate_types_array(customTemplates_);
+    return make_mstch_types(customTemplates_);
   }
 
-  mstch::node getCustomTypes() { return generate_types_array(customTypes_); }
+  mstch::node getCustomTypes() { return make_mstch_types(customTypes_); }
 
   mstch::node getMoveContainerTypes() {
     std::vector<const t_type*> types;
-    for (auto& it : moveContainers_) {
-      types.push_back(it.second);
+    for (const auto& kvp : moveContainers_) {
+      types.push_back(kvp.second);
     }
-    return generate_types_array(types);
+    return make_mstch_types(types);
   }
 
   mstch::node getResponseAndStreamTypes() {
-    return generate_types_array(responseAndStreamTypes_);
+    return make_mstch_types(responseAndStreamTypes_);
   }
 
   mstch::node getStreamExceptions() {
     std::vector<const t_type*> types;
-    for (auto& it : streamExceptions_) {
-      types.push_back(it.second);
+    for (const auto& kvp : streamExceptions_) {
+      types.push_back(kvp.second);
     }
-    return generate_types_array(types);
+    return make_mstch_types(types);
   }
 
   mstch::node getStreamTypes() {
     std::vector<const t_type*> types;
     if (!has_option("no_stream")) {
-      for (auto& it : streamTypes_) {
-        types.push_back(it.second);
+      for (const auto& kvp : streamTypes_) {
+        types.push_back(kvp.second);
       }
     }
-    return generate_types_array(types);
+    return make_mstch_types(types);
   }
 
   mstch::node includeNamespaces() {
-    mstch::array a;
-    for (auto& it : includeNamespaces_) {
-      a.push_back(mstch::map{
-          {"includeNamespace", createStringArray(it.second.ns)},
-          {"hasServices?", it.second.hasServices},
-          {"hasTypes?", it.second.hasTypes}});
+    mstch::array mstch_array;
+    for (const auto& kvp : includeNamespaces_) {
+      mstch_array.push_back(mstch::map{
+          {"includeNamespace", create_string_array(kvp.second.ns)},
+          {"hasServices?", kvp.second.hasServices},
+          {"hasTypes?", kvp.second.hasTypes}});
     }
-    return a;
+    return mstch_array;
   }
 
   mstch::node getCpp2Namespace() {
-    return createStringArray(cpp2::get_gen_namespace_components(*program_));
+    return create_string_array(cpp2::get_gen_namespace_components(*program_));
   }
 
   mstch::node getPy3Namespace() {
-    return createStringArray(get_py3_namespace(program_));
+    return create_string_array(get_py3_namespace(program_));
   }
 
   mstch::node hasStream() {
@@ -255,38 +268,24 @@ class py3_mstch_program : public mstch_program {
     bool hasTypes;
   };
 
-  mstch::array generate_types_array(const std::vector<const t_type*>& types) {
-    return make_mstch_types(types);
-  }
-
   void gather_included_program_namespaces() {
-    for (const t_program* included_program :
-         program_->get_included_programs()) {
-      bool hasTypes =
-          !(included_program->objects().empty() &&
-            included_program->enums().empty() &&
-            included_program->typedefs().empty() &&
-            included_program->consts().empty());
-      includeNamespaces_[included_program->path()] = Namespace{
-          get_py3_namespace_with_name(included_program),
-          !included_program->services().empty(),
-          hasTypes,
-      };
+    for (const auto* program : program_->get_included_programs()) {
+      includeNamespaces_[program->path()] = Namespace{
+          get_py3_namespace_with_name(program),
+          !program->services().empty(),
+          has_types(program)};
     }
   }
 
   void add_typedef_namespace(const t_type* type) {
-    auto prog = type->program();
-    if (prog && prog != program_) {
+    const auto* prog = type->program();
+    if ((prog != nullptr) && (prog != program_)) {
       const auto& path = prog->path();
       if (includeNamespaces_.find(path) != includeNamespaces_.end()) {
         return;
       }
-      auto ns = Namespace();
-      ns.ns = get_py3_namespace_with_name(prog);
-      ns.hasServices = false;
-      ns.hasTypes = true;
-      includeNamespaces_[path] = std::move(ns);
+      includeNamespaces_[path] =
+          Namespace{get_py3_namespace_with_name(prog), false, true};
     }
   }
 
@@ -320,8 +319,8 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_objects() {
-    for (const auto& object : program_->objects()) {
-      for (auto&& field : object->fields()) {
+    for (auto* object : program_->objects()) {
+      for (const auto& field : object->fields()) {
         visit_type(field.get_type());
       }
       if (!gen::cpp::type_resolver::is_directly_adapted(*object)) {
@@ -337,13 +336,13 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_typedefs() {
-    for (const auto typedef_def : program_->typedefs()) {
+    for (const auto* typedef_def : program_->typedefs()) {
       visit_type(typedef_def->get_type());
     }
   }
 
   void visit_types_for_mixin_fields() {
-    for (const auto& strct : program_->structs()) {
+    for (const auto* strct : program_->structs()) {
       for (const auto& m : cpp2::get_mixins_and_members(*strct)) {
         visit_type(m.member->get_type());
       }
@@ -411,12 +410,12 @@ class py3_mstch_service : public mstch_service {
   mstch::node isExternalProgram() { return prog_ != service_->program(); }
 
   mstch::node cppNamespaces() {
-    return createStringArray(
+    return create_string_array(
         cpp2::get_gen_namespace_components(*service_->program()));
   }
 
   mstch::node py3Namespaces() {
-    return createStringArray(get_py3_namespace(service_->program()));
+    return create_string_array(get_py3_namespace(service_->program()));
   }
 
   mstch::node programName() { return service_->program()->name(); }
@@ -441,7 +440,7 @@ class py3_mstch_service : public mstch_service {
   std::vector<t_function*> supportedFunctions() {
     std::vector<t_function*> funcs;
     bool no_stream = has_option("no_stream");
-    for (auto func : service_->get_functions()) {
+    for (auto* func : service_->get_functions()) {
       if (is_func_supported(no_stream, func)) {
         funcs.push_back(func);
       }
@@ -459,7 +458,7 @@ class py3_mstch_service : public mstch_service {
 
   mstch::node get_supported_functions_with_lifecycle() {
     auto funcs = supportedFunctions();
-    for (auto func : lifecycleFunctions()) {
+    for (auto* func : lifecycleFunctions()) {
       funcs.push_back(func);
     }
     return make_mstch_functions(funcs);
@@ -568,7 +567,7 @@ class py3_mstch_type : public mstch_type {
   mstch::node flatName() { return cached_props_.flatName; }
 
   mstch::node cppNamespaces() {
-    return createStringArray(get_type_cpp2_namespace());
+    return create_string_array(get_type_cpp2_namespace());
   }
 
   mstch::node cppTemplate() { return cached_props_.cppTemplate; }

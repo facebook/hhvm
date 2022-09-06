@@ -1385,17 +1385,10 @@ SSATmp* cmpStrImpl(State& env,
           cmpOp(opc, left->strVal()->same(right->strVal()), true)
         );
       } else if (opc == EqStr || opc == NeqStr) {
-        // if we're going to be converting these to num and then comparing an
-        // int and a float, block this fold because it needs to trigger a notice
-        int64_t lval; double dval;
-        auto ret1 = left->strVal()->isNumericWithVal(lval, dval, 0);
-        auto ret2 = right->strVal()->isNumericWithVal(lval, dval, 0);
-        if (ret1 == ret2 || ret1 == KindOfNull || ret2 == KindOfNull) {
-          return cns(
-            env,
-            cmpOp(opc, left->strVal()->equal(right->strVal()), true)
-          );
-        }
+        return cns(
+          env,
+          cmpOp(opc, left->strVal()->equal(right->strVal()), true)
+        );
       } else{
         return cns(
           env,

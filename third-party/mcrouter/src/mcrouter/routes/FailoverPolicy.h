@@ -13,6 +13,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 #include <folly/dynamic.h>
 
 #include "mcrouter/lib/Ch3HashFunc.h"
@@ -501,7 +503,7 @@ class FailoverDeterministicOrderPolicy {
     // again
     boost::dynamic_bitset<> usedIndexes_;
     size_t index_;
-    std::unordered_set<uint32_t> failedDomains_;
+    folly::F14FastSet<uint32_t> failedDomains_;
     bool active_{true};
   };
   template <class Request>
@@ -595,7 +597,7 @@ class FailoverDeterministicOrderPolicy {
   bool enableFailureDomains_{false};
   bool ignore_normal_reply_index_{false};
   // map of index in children_ to it's failure Domain
-  std::unordered_map<uint32_t, uint32_t> failureDomainMap_;
+  folly::F14FastMap<uint32_t, uint32_t> failureDomainMap_;
 };
 
 template <typename RouteHandleIf, typename RouterInfo, typename HashFunc>

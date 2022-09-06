@@ -48,13 +48,9 @@ TEST(String, Informational) {
   EXPECT_TRUE(String("test").size() == 4);
   EXPECT_TRUE(String("test").length() == 4);
   EXPECT_TRUE(!String("2test").isNumeric());
-  EXPECT_TRUE(!String("2test").isInteger());
   EXPECT_TRUE(!String("test").isNumeric());
-  EXPECT_TRUE(!String("test").isInteger());
   EXPECT_TRUE(String("23").isNumeric());
-  EXPECT_TRUE(String("23").isInteger());
   EXPECT_TRUE(String("23.3").isNumeric());
-  EXPECT_TRUE(!String("23.3").isInteger());
 }
 
 TEST(String, Operators) {

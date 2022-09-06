@@ -340,13 +340,6 @@ struct StringData final : MaybeCountable,
   bool isNumeric() const;
 
   /*
-   * Returns whether this string is numeric and an integer.
-   *
-   * In effect: isNumericWithVal(i, d, false) == KindOfInt64
-   */
-  bool isInteger() const;
-
-  /*
    * Returns true if this string is "strictly" an integer in the sense
    * of is_strictly_integer from util/hash.h, and if so provides the
    * integer value in res.

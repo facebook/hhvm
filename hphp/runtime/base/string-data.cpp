@@ -733,39 +733,6 @@ bool StringData::isNumeric() const {
   not_reached();
 }
 
-bool StringData::isInteger() const {
-  if (m_hash < 0) return false;
-  int64_t lval; double dval;
-  DataType ret = isNumericWithVal(lval, dval, 0);
-  switch (ret) {
-    case KindOfNull:
-    case KindOfDouble:
-      return false;
-    case KindOfInt64:
-      return true;
-    case KindOfUninit:
-    case KindOfBoolean:
-    case KindOfPersistentString:
-    case KindOfString:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfRFunc:
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfLazyClass:
-    case KindOfClsMeth:
-    case KindOfRClsMeth:
-      break;
-  }
-  not_reached();
-}
-
 bool StringData::toBoolean() const {
   return !empty() && !isZero();
 }

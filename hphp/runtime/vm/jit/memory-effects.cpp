@@ -1750,7 +1750,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AHeapAny);
 
   case ReleaseShallow:
-    return may_load_store(AEmpty, AHeapAny);
+    return may_load_store(AHeapAny, AHeapAny);
 
   case GetMemoKey:
     return may_load_store(AHeapAny, AHeapAny);

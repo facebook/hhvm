@@ -581,7 +581,6 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
       gen(env, DecReleaseCheck, taken, closure);
     },
     [&] { // Next: closure RC goes to 0
-      if (ctx->type() <= TObj) decRef(env, ctx, DecRefProfileId::Context);
       for (auto i = 0; i < numUses; ++i) {
         auto const prop = getProp(i);
         gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);

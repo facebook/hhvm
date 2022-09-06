@@ -457,7 +457,7 @@ Flags handle_general_effects(Local& env,
   auto const liveness = env.global.vmRegsLiveness[inst];
   auto const m = general_effects_for_vmreg_liveness(preM, liveness);
 
-  if (inst.is(DecRef, DecRefNZ, ReleaseShallow)) {
+  if (inst.is(DecRef, DecRefNZ)) {
     // DecRef can only free things, which means from load-elim's point
     // of view it only has a kill set, which load-elim
     // ignores. DecRefNZ is always a no-op.

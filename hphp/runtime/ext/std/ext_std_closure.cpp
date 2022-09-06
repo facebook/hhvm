@@ -177,8 +177,6 @@ void c_Closure::initActRecFromClosure(ActRec* ar) {
   // exactly 1 reference. After moving props, closure can be freed.
   if (closure->hasExactlyOneRef()) {
     iterProps([&](tv_rval rval) {tvCopy(*rval, *--loc);});
-
-    if (auto t = c_Closure::fromObject(closure)->getThis()) decRefObj(t);
     releaseShallow(closure);
   } else {
     iterProps([&](tv_rval rval) {tvDup(*rval, *--loc);});
@@ -212,6 +210,8 @@ void c_Closure::releaseShallow(ObjectData* obj) {
   }
 
   auto closure = c_Closure::fromObject(obj);
+  if (auto t = closure->getThis()) decRefObj(t);
+
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());
 }

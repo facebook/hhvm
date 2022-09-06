@@ -215,10 +215,9 @@ const unsafe fn Hd_val(v: value) -> header_t {
     *(v as *const header_t).offset(-1)
 }
 #[inline]
-unsafe fn Hd_val_set(v: value, h: header_t) {
-    *(v as *mut header_t).offset(-1) = h;
+unsafe fn Hd_val_mut(v: value) -> *mut header_t {
+    &mut *(v as *mut header_t).offset(-1)
 }
-//#define Hp_val(val) (((header_t *) (val)) - 1)
 #[inline]
 unsafe fn Hp_val(v: value) -> *mut header_t {
     (v as *mut header_t).offset(-1)
@@ -438,19 +437,19 @@ unsafe fn intern_init(is: &mut intern_state, src: *mut c_void, input: *mut c_voi
 unsafe fn intern_cleanup(is: &mut intern_state) {
     if !is.intern_input.is_null() {
         caml_stat_free(is.intern_input as caml_stat_block);
-        is.intern_input = std::ptr::null_mut::<c_uchar>();
+        is.intern_input = std::ptr::null_mut();
     }
     if !is.intern_obj_table.is_null() {
         caml_stat_free(is.intern_obj_table as caml_stat_block);
-        is.intern_obj_table = std::ptr::null_mut::<value>();
+        is.intern_obj_table = std::ptr::null_mut();
     }
     if !is.intern_extra_block.is_null() {
         // free newly allocated heap chunk
         caml_free_for_heap(is.intern_extra_block);
-        is.intern_extra_block = std::ptr::null_mut::<c_char>();
+        is.intern_extra_block = std::ptr::null_mut();
     } else if is.intern_block != 0 {
         // restore original header for heap block, otherwise GC is confused
-        Hd_val_set(is.intern_block, is.intern_header);
+        *(Hd_val_mut(is.intern_block)) = is.intern_header;
         is.intern_block = 0;
     }
     // free the recursion stack

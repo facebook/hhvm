@@ -69,7 +69,18 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
   vcold = handleSurprise;
   auto const call = CallSpec::stub(tc::ustubs().functionEnterHelper);
   auto const args = v.makeVcallArgs({});
-  vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
+  auto const doneCall = v.makeBlock();
+  vcold << vinvoke{call, args, v.makeTuple({}), {doneCall, catchBlock}, fixup};
+  vcold = doneCall;
+
+  auto const sf = v.makeReg();
+  vcold << testq{rarg(0), rarg(0), sf};
+  ifThen(vcold, CC_NZ, sf, [&] (Vout& v) {
+    // We are intercepting. Return to the caller.
+    v << unrecordbasenativesp{};
+    v << jmpr{rarg(0), php_return_regs()};
+  });
+  vcold << jmp{done};
 
   v = done;
 }
@@ -160,6 +171,14 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
     v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),
                  {done, label(env, inst->taken())}, fixup };
     v = done;
+
+    auto const sf = v.makeReg();
+    v << testq{rarg(0), rarg(0), sf};
+    ifThen(v, CC_NZ, sf, [&] (Vout& v) {
+      // We are intercepting. Return to the caller.
+      v << unrecordbasenativesp{};
+      v << jmpr{rarg(0), php_return_regs()};
+    });
   });
 }
 

@@ -572,17 +572,14 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       loadVMRegs(v);
       loadReturnRegs(v);
 
-      // Drop our call frame; the stublogue{} instruction guarantees that this
-      // is exactly 16 bytes.
-      v << lea{rsp()[kNativeFrameSize], rsp()};
-
-      // Return to the caller.  This unbalances the return stack buffer, but if
-      // we're intercepting, we probably don't care.
-      v << jmpr{interceptRip, php_return_regs()};
+      // Return to CheckSurprise*, which will jump to the intercept rip.
+      v << copy{interceptRip, rarg(0)};
+      v << stubret{RegSet(php_return_regs() | rarg(0)), false};
     });
 
-    // Restore rvmfp() and return to the callee's func entry.
-    v << stubret{RegSet(), true};
+    // Restore rvmfp() and return to the CheckSurprise* logic.
+    v << copy{v.cns(0), rarg(0)};
+    v << stubret{RegSet(php_return_regs() | rarg(0)), true};
   }, name);
 
   meta.process(nullptr);

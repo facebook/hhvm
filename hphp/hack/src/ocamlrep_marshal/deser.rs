@@ -309,28 +309,26 @@ unsafe fn Byte_u_ptr_mut(x: value, i: usize) -> *mut c_uchar {
 
 #[inline]
 const fn Wosize_whsize(size: mlsize_t) -> mlsize_t {
-    size.wrapping_sub(1)
+    size - 1
 }
 
 #[inline]
 const fn Bsize_wsize(size: u64) -> u64 {
-    size.wrapping_mul(std::mem::size_of::<value>() as u64)
+    size * (std::mem::size_of::<value>() as u64)
 }
 
 #[inline]
 const fn Wsize_bsize(size: u64) -> u64 {
-    size.wrapping_div(std::mem::size_of::<value>() as u64)
+    size / (std::mem::size_of::<value>() as u64)
 }
 
 #[inline]
 const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
-    (wosize << 10)
-        .wrapping_add(color as header_t)
-        .wrapping_add(tag as header_t)
+    (wosize << 10) + color as header_t + tag as header_t
 }
 
-const Double_wosize: c_ulong = (std::mem::size_of::<c_double>() as c_ulong)
-    .wrapping_div(std::mem::size_of::<value>() as c_ulong);
+const Double_wosize: c_ulong =
+    ((std::mem::size_of::<c_double>()) / (std::mem::size_of::<value>())) as c_ulong;
 
 const Object_tag: c_uint = 248;
 const String_tag: c_uint = 252;
@@ -439,32 +437,32 @@ unsafe fn read16s() -> int16_t {
 #[inline]
 unsafe fn read32u() -> uint32_t {
     let res: uint32_t = ((*intern_src.offset(0) as uint32_t) << 24)
-        .wrapping_add(((*intern_src.offset(1) as c_int) << 16) as c_uint)
-        .wrapping_add(((*intern_src.offset(2) as c_int) << 8) as c_uint)
-        .wrapping_add(*intern_src.offset(3) as c_uint);
+        + (((*intern_src.offset(1) as c_int) << 16) as c_uint)
+        + (((*intern_src.offset(2) as c_int) << 8) as c_uint)
+        + (*intern_src.offset(3) as c_uint);
     intern_src = intern_src.offset(4);
     res
 }
 
 #[inline]
 unsafe fn read32s() -> int32_t {
-    let res: int32_t = ((*intern_src.offset(0) as uint32_t) << 24 as c_int)
-        .wrapping_add(((*intern_src.offset(1) as c_int) << 16) as c_uint)
-        .wrapping_add(((*intern_src.offset(2) as c_int) << 8) as c_uint)
-        .wrapping_add(*intern_src.offset(3) as c_uint) as int32_t;
+    let res: int32_t = (((*intern_src.offset(0) as uint32_t) << 24 as c_int)
+        + (((*intern_src.offset(1) as c_int) << 16) as c_uint)
+        + (((*intern_src.offset(2) as c_int) << 8) as c_uint)
+        + (*intern_src.offset(3) as c_uint)) as int32_t;
     intern_src = intern_src.offset(4);
     res
 }
 
 unsafe fn read64u() -> uintnat {
     let res: uintnat = ((*intern_src.offset(0) as uintnat) << 56)
-        .wrapping_add((*intern_src.offset(1) as uintnat) << 48)
-        .wrapping_add((*intern_src.offset(2) as uintnat) << 40)
-        .wrapping_add((*intern_src.offset(3) as uintnat) << 32)
-        .wrapping_add((*intern_src.offset(4) as uintnat) << 24)
-        .wrapping_add((*intern_src.offset(5) as uintnat) << 16)
-        .wrapping_add((*intern_src.offset(6) as uintnat) << 8)
-        .wrapping_add(*intern_src.offset(7) as uintnat);
+        + ((*intern_src.offset(1) as uintnat) << 48)
+        + ((*intern_src.offset(2) as uintnat) << 40)
+        + ((*intern_src.offset(3) as uintnat) << 32)
+        + ((*intern_src.offset(4) as uintnat) << 24)
+        + ((*intern_src.offset(5) as uintnat) << 16)
+        + ((*intern_src.offset(6) as uintnat) << 8)
+        + (*intern_src.offset(7) as uintnat);
     intern_src = intern_src.offset(8);
     res
 }
@@ -533,11 +531,9 @@ unsafe fn readfloat(dest: *mut c_double, code: c_uint) {
 unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint) {
     if std::mem::size_of::<c_double>() != 8 {
         intern_cleanup();
-        caml_invalid_argument(
-            b"input_value: non-standard floats\x00" as *const u8 as *const c_char,
-        );
+        caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
     }
-    readblock(dest as *mut c_void, len.wrapping_mul(8) as intnat);
+    readblock(dest as *mut c_void, (len * 8) as intnat);
     // Fix up endianness, if needed
     if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
         // Host is big-endian; fix up if data read is little-endian
@@ -548,7 +544,7 @@ unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint
                     dest.offset(i as isize) as *mut c_char,
                     dest.offset(i as isize) as *mut c_char,
                 );
-                i = i.wrapping_add(1)
+                i += 1
             }
         }
     } else if ARCH_FLOAT_ENDIANNESS == 0x01234567 {
@@ -562,7 +558,7 @@ unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint
                     dest.offset(i as isize) as *mut c_char,
                     dest.offset(i as isize) as *mut c_char,
                 );
-                i = i.wrapping_add(1)
+                i += 1
             }
         }
     } else {
@@ -620,22 +616,21 @@ unsafe fn intern_resize_stack(sp: *mut intern_item) -> *mut intern_item {
     }
 
     if intern_stack == intern_stack_init.as_mut_ptr() {
-        newstack = caml_stat_alloc_noexc(
-            (std::mem::size_of::<intern_item>() as c_ulong).wrapping_mul(newsize),
-        ) as *mut intern_item;
+        newstack = caml_stat_alloc_noexc((std::mem::size_of::<intern_item>() as c_ulong) * newsize)
+            as *mut intern_item;
         if newstack.is_null() {
             intern_stack_overflow();
         }
         memcpy(
             newstack as *mut c_void,
             intern_stack_init.as_mut_ptr() as *const c_void,
-            (std::mem::size_of::<intern_item>() as c_ulong)
-                .wrapping_mul(INTERN_STACK_INIT_SIZE as c_ulong) as usize,
+            ((std::mem::size_of::<intern_item>() as c_ulong) * (INTERN_STACK_INIT_SIZE as c_ulong))
+                as usize,
         );
     } else {
         newstack = caml_stat_resize_noexc(
             intern_stack as caml_stat_block,
-            (std::mem::size_of::<intern_item>() as c_ulong).wrapping_mul(newsize),
+            (std::mem::size_of::<intern_item>() as c_ulong) * newsize,
         ) as *mut intern_item;
         if newstack.is_null() {
             intern_stack_overflow();
@@ -795,12 +790,11 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                 v = Val_hp(intern_dest);
                                 if !intern_obj_table.is_null() {
                                     let fresh5 = obj_counter;
-                                    obj_counter = obj_counter.wrapping_add(1);
+                                    obj_counter += 1;
                                     *intern_obj_table.offset(fresh5 as isize) = v
                                 }
                                 *intern_dest = Make_header(Double_wosize, Double_tag, intern_color);
-                                intern_dest = intern_dest
-                                    .offset((1 as c_ulong).wrapping_add(Double_wosize) as isize);
+                                intern_dest = intern_dest.offset((1 + Double_wosize) as isize);
                                 readfloat(v as *mut c_double, code);
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
@@ -844,18 +838,18 @@ unsafe fn intern_rec(mut dest: *mut value) {
                             _ => {
                                 match current_block {
                                     READ_SHARED_LABEL => {
-                                        v = *intern_obj_table.offset(obj_counter.wrapping_sub(ofs) as isize)
+                                        v = *intern_obj_table.offset((obj_counter - ofs) as isize)
                                     }
                                     _ /* READ_DOUBLE_ARRAY_LABEL */ => {
-                                        size = len.wrapping_mul(Double_wosize);
+                                        size = len * Double_wosize;
                                         v = Val_hp(intern_dest);
                                         if !intern_obj_table.is_null() {
                                             let fresh6 = obj_counter;
-                                            obj_counter = obj_counter.wrapping_add(1);
+                                            obj_counter += 1;
                                             *intern_obj_table.offset(fresh6 as isize) = v
                                         }
                                         *intern_dest = Make_header(size, Double_array_tag, intern_color);
-                                        intern_dest = intern_dest.offset((1 as c_ulong).wrapping_add(size) as isize);
+                                        intern_dest = intern_dest.offset((1 + size) as isize);
                                         readfloats(v as *mut c_double, len, code);
                                     }
                                 }
@@ -867,20 +861,18 @@ unsafe fn intern_rec(mut dest: *mut value) {
                         NOTHING_TO_DO_LABEL => {}
                         READ_BLOCK_LABEL => {}
                         _ /* READ_STRING_LABEL */ => {
-                            size = len
-                                .wrapping_add(std::mem::size_of::<value>() as c_ulong)
-                                .wrapping_div(std::mem::size_of::<value>() as c_ulong);
+                            size = (len + (std::mem::size_of::<value>() as c_ulong)) / (std::mem::size_of::<value>() as c_ulong);
                             v = Val_hp(intern_dest);
                             if !intern_obj_table.is_null() {
                                 let fresh4 = obj_counter;
-                                obj_counter = obj_counter.wrapping_add(1);
+                                obj_counter += 1;
                                 *intern_obj_table.offset(fresh4 as isize) = v
                             }
                             *intern_dest = Make_header(size, String_tag, intern_color);
-                            intern_dest = intern_dest.offset((1 as c_ulong).wrapping_add(size) as isize);
+                            intern_dest = intern_dest.offset((1 + size) as isize);
                             *(Field_ptr_mut(v, (size - 1) as usize)) = 0;
-                            ofs_ind = Bsize_wsize(size).wrapping_sub(1 as c_ulong);
-                            *(Byte_ptr_mut(v, ofs_ind as usize)) = ofs_ind.wrapping_sub(len) as c_char;
+                            ofs_ind = Bsize_wsize(size) - (1 as c_ulong);
+                            *(Byte_ptr_mut(v, ofs_ind as usize)) = (ofs_ind - len) as c_char;
                             readblock(v as *mut c_void, len as intnat);
                             current_block = NOTHING_TO_DO_LABEL;
                         }
@@ -894,20 +886,15 @@ unsafe fn intern_rec(mut dest: *mut value) {
                             v = Val_hp(intern_dest);
                             if !intern_obj_table.is_null() {
                                 let fresh3 = obj_counter;
-                                obj_counter = obj_counter.wrapping_add(1);
+                                obj_counter += 1;
                                 *intern_obj_table.offset(fresh3 as isize) = v
                             }
                             *intern_dest = Make_header(size, tag, intern_color);
-                            intern_dest =
-                                intern_dest.offset((1 as c_ulong).wrapping_add(size) as isize);
+                            intern_dest = intern_dest.offset((1 + size) as isize);
                             // For objects, we need to freshen the oid
                             if tag == Object_tag {
                                 // Request to read rest of the elements of the block
-                                sp = ReadItems(
-                                    Field_ptr_mut(v, 2),
-                                    size.wrapping_sub(2 as c_ulong) as i64,
-                                    sp,
-                                );
+                                sp = ReadItems(Field_ptr_mut(v, 2), (size - 2) as i64, sp);
                                 // Request freshing OID
                                 sp = PushItem(sp);
                                 (*sp).op = OFreshOID;
@@ -938,11 +925,7 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
     let wosize = Wosize_whsize(whsize);
     if wosize > Max_wosize {
         // Round desired size up to next page
-        let request: asize_t = ((Bsize_wsize(whsize)
-            .wrapping_add(Page_size)
-            .wrapping_sub(1 as c_ulong))
-            >> Page_log)
-            << Page_log;
+        let request: asize_t = ((Bsize_wsize(whsize) + Page_size - 1) >> Page_log) << Page_log;
         intern_extra_block = caml_alloc_for_heap(request);
         if intern_extra_block.is_null() {
             intern_cleanup();
@@ -963,9 +946,8 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
                 #undef Setup_for_gc
                 #undef Restore_after_gc
                  */
-                (*Caml_state)._young_ptr = (*Caml_state)
-                    ._young_ptr
-                    .offset(-(wosize.wrapping_add(1 as c_ulong) as isize));
+                (*Caml_state)._young_ptr =
+                    (*Caml_state)._young_ptr.offset(-((wosize + 1) as isize));
                 if (*Caml_state)._young_ptr < (*Caml_state)._young_limit {
                     caml_alloc_small_dispatch(
                         wosize as intnat,
@@ -974,9 +956,8 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
                         std::ptr::null_mut::<c_uchar>(),
                     );
                 }
-                *((*Caml_state)._young_ptr as *mut header_t) = (wosize << 10 as c_int)
-                    .wrapping_add(0 as c_ulong)
-                    .wrapping_add(String_tag as c_ulong);
+                *((*Caml_state)._young_ptr as *mut header_t) =
+                    (wosize << 10 as c_int) + (0 as c_ulong) + (String_tag as c_ulong);
                 intern_block = ((*Caml_state)._young_ptr as *mut header_t).offset(1) as value
             }
         } else {
@@ -994,9 +975,9 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
     }
     obj_counter = 0;
     if num_objects > 0 {
-        intern_obj_table = caml_stat_alloc_noexc(
-            num_objects.wrapping_mul(std::mem::size_of::<value>() as c_ulong),
-        ) as *mut value;
+        intern_obj_table =
+            caml_stat_alloc_noexc(num_objects * (std::mem::size_of::<value>() as c_ulong))
+                as *mut value;
         if intern_obj_table.is_null() {
             intern_cleanup();
             caml_raise_out_of_memory();
@@ -1082,10 +1063,10 @@ unsafe fn parse_header(fun_name: *mut c_char, mut h: *mut marshal_header) {
             (*h).whsize = read64u()
         }
         _ => {
-            errmsg[(std::mem::size_of::<[c_char; 100]>() as c_ulong).wrapping_sub(1) as usize] = 0;
+            errmsg[((std::mem::size_of::<[c_char; 100]>() as c_ulong) - 1) as usize] = 0;
             snprintf(
                 errmsg.as_mut_ptr() as *mut c_char,
-                (std::mem::size_of::<[c_char; 100]>() as c_ulong).wrapping_sub(1) as usize,
+                ((std::mem::size_of::<[c_char; 100]>() as c_ulong) - 1) as usize,
                 b"%s: bad object\x00".as_ptr() as *const c_char,
                 fun_name,
             );
@@ -1135,9 +1116,7 @@ unsafe fn input_val_from_string(mut str: value, ofs: intnat) -> value {
         std::ptr::null_mut::<c_void>(),
     );
     parse_header(b"input_val_from_string\x00".as_ptr() as *mut c_char, &mut h);
-    if ((ofs + h.header_len as c_long) as c_ulong).wrapping_add(h.data_len)
-        > caml_string_length(str)
-    {
+    if ((ofs + h.header_len as c_long) as c_ulong) + h.data_len > caml_string_length(str) {
         caml_failwith(b"input_val_from_string: bad length\x00".as_ptr() as *const c_char);
     }
     // Allocate result

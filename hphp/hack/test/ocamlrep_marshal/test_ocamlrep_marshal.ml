@@ -6,6 +6,8 @@
  *
  *)
 
+open Core_kernel
+
 let assert_eq v =
   let ocaml_marshaled = Marshal.to_string v [] in
   let rust_marshaled = Ocamlrep_marshal_ffi.to_string v [] in
@@ -20,7 +22,7 @@ let test_round_trip show (x : 'a) =
   let bytes = Ocamlrep_marshal_ffi.to_string x [] in
   let y : 'a = Ocamlrep_marshal_ffi.from_string bytes 0 in
   let _ = Printf.printf "y = %s\n" (show y) in
-  assert (x = y)
+  assert (Poly.equal x y)
 
 let show_pair_int_int = [%derive.show: int * int]
 
@@ -43,7 +45,7 @@ let rec print_tree
   match tree with
   | `Node (tag, cs) ->
      let n = List.length cs - 1 in
-     Printf.sprintf "%s%s" pd tag :: List.concat (List.mapi (
+     Printf.sprintf "%s%s" pd tag :: List.concat (Caml.List.mapi (
          fun i c ->
          let pad =
            (pc ^ (if i = n then "`-- " else "|-- "),
@@ -52,7 +54,8 @@ let rec print_tree
        ) cs) [@@ocamlformat "disable"]
 
 (* [show_tree] produces a string of [t]. *)
-let show_tree t = Printf.sprintf "\n%s\n" (String.concat "\n" (print_tree t))
+let show_tree t =
+  Printf.sprintf "\n%s\n" (String.concat ~sep:"\n" (print_tree t))
 
 (* An example tree. *)
 let tree =
@@ -64,6 +67,27 @@ let tree =
                       `Node ("V", [])])
           ;  `Node ("W", [])
           ]) [@@ocamlformat "disable"]
+
+let test_sharing () =
+  let s = "str" in
+  let inner = (s, s) in
+  let outer = (inner, inner) in
+  begin
+    let marshaled = Ocamlrep_marshal_ffi.to_string outer [] in
+    match Ocamlrep_marshal_ffi.from_string marshaled 0 with
+    | (((s1, s2) as tup1), tup2) ->
+      assert (phys_equal tup1 tup2);
+      assert (phys_equal s1 s2);
+      ()
+  end;
+  let marshaled = Ocamlrep_marshal_ffi.to_string outer [Marshal.No_sharing] in
+  match Ocamlrep_marshal_ffi.from_string marshaled 0 with
+  | (((s1, s2) as tup1), (s3, s4)) as tup2 ->
+    assert (not (phys_equal tup1 tup2));
+    assert (not (phys_equal s1 s2));
+    assert (not (phys_equal s2 s3));
+    assert (not (phys_equal s3 s4));
+    ()
 
 let () =
   assert_eq 5;
@@ -77,7 +101,9 @@ let () =
   test_round_trip show_pair_int_int (3, 3);
   test_round_trip (Printf.sprintf "%S") "a";
   test_round_trip show_pair_opt_int_string (Some 42, "foo");
-  test_round_trip show_float_array (Array.make 3 3.14);
+  test_round_trip show_float_array (Caml.Array.make 3 3.14);
   test_round_trip show_tree tree;
+
+  test_sharing ();
 
   ()

@@ -20,7 +20,6 @@ use crate::intext::*;
 
 extern "C" {
     fn caml_alloc_string(len: mlsize_t) -> value;
-    fn caml_convert_flag_list(_: value, _: *const c_int) -> c_int;
 }
 
 type int64_t = c_long;
@@ -104,6 +103,17 @@ const fn Make_header(wosize: mlsize_t, tag: u8, color: color_t) -> header_t {
 const NO_SHARING: c_int = 1; // Flag to ignore sharing
 const CLOSURES: c_int = 2; // Flag to allow marshaling code pointers
 const COMPAT_32: c_int = 4; // Flag to ensure that output can safely be read back on a 32-bit platform
+
+fn convert_flag_list(mut list: Value<'_>, flags: &[c_int]) -> Result<c_int, ocamlrep::FromError> {
+    let mut res = 0;
+    while !list.is_immediate() {
+        let block = ocamlrep::from::expect_tuple(list, 2)?;
+        let idx: usize = ocamlrep::from::field(block, 0)?;
+        res |= flags[idx];
+        list = block[1];
+    }
+    Ok(res)
+}
 
 // Stack for pending values to marshal
 
@@ -680,7 +690,7 @@ impl<'a> State<'a> {
     unsafe fn extern_value(
         &mut self,
         v: Value<'a>,
-        flags: value,
+        flags: Value<'a>,
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
     ) -> intnat {
@@ -688,7 +698,7 @@ impl<'a> State<'a> {
 
         let res_len: intnat;
         // Parse flag list
-        self.extern_flags = caml_convert_flag_list(flags, EXTERN_FLAG_VALUES.as_ptr());
+        self.extern_flags = convert_flag_list(flags, &EXTERN_FLAG_VALUES).unwrap();
         // Initializations
         self.obj_counter = 0;
         self.size_32 = 0;
@@ -727,7 +737,7 @@ impl<'a> State<'a> {
 unsafe fn output_val<W: std::io::Write>(
     w: &mut W,
     v: Value<'_>,
-    flags: value,
+    flags: Value<'_>,
 ) -> std::io::Result<()> {
     let mut header: [u8; 32] = [0; 32];
     let mut header_len = 0;
@@ -744,6 +754,7 @@ unsafe fn output_val<W: std::io::Write>(
 #[no_mangle]
 pub unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(v: value, flags: value) -> value {
     let v = Value::from_bits(v as usize);
+    let flags = Value::from_bits(flags as usize);
     let mut vec = vec![];
     output_val(&mut vec, v, flags).unwrap();
     let res: value = caml_alloc_string(vec.len() as mlsize_t);

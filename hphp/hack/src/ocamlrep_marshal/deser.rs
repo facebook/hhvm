@@ -31,16 +31,12 @@ use crate::intext::*;
 
 extern "C" {
 
-    pub type _IO_wide_data;
-    pub type _IO_codecvt;
-    pub type _IO_marker;
     pub type mark_stack;
-
     pub type caml_custom_table;
     pub type caml_ref_table;
     pub type caml_ephe_ref_table;
-
     pub type longjmp_buffer;
+    pub type FILE;
 
     static mut caml_allocated_words: uintnat;
     static mut Caml_state: *mut caml_domain_state;
@@ -77,41 +73,6 @@ pub type __uint64_t = c_ulong;
 pub type __off_t = c_long;
 pub type __off64_t = c_long;
 
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _IO_FILE {
-    pub _flags: c_int,
-    pub _IO_read_ptr: *mut c_char,
-    pub _IO_read_end: *mut c_char,
-    pub _IO_read_base: *mut c_char,
-    pub _IO_write_base: *mut c_char,
-    pub _IO_write_ptr: *mut c_char,
-    pub _IO_write_end: *mut c_char,
-    pub _IO_buf_base: *mut c_char,
-    pub _IO_buf_end: *mut c_char,
-    pub _IO_save_base: *mut c_char,
-    pub _IO_backup_base: *mut c_char,
-    pub _IO_save_end: *mut c_char,
-    pub _markers: *mut _IO_marker,
-    pub _chain: *mut _IO_FILE,
-    pub _fileno: c_int,
-    pub _flags2: c_int,
-    pub _old_offset: __off_t,
-    pub _cur_column: c_ushort,
-    pub _vtable_offset: c_schar,
-    pub _shortbuf: [c_char; 1],
-    pub _lock: *mut c_void,
-    pub _offset: __off64_t,
-    pub _codecvt: *mut _IO_codecvt,
-    pub _wide_data: *mut _IO_wide_data,
-    pub _freeres_list: *mut _IO_FILE,
-    pub _freeres_buf: *mut c_void,
-    pub __pad5: size_t,
-    pub _mode: c_int,
-    pub _unused2: [c_char; 20],
-}
-
-pub type FILE = _IO_FILE;
 pub type int16_t = __int16_t;
 pub type int32_t = __int32_t;
 pub type uint16_t = __uint16_t;

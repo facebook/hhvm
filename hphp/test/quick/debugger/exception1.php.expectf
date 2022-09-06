@@ -57,11 +57,11 @@ Breakpoint 1 reached: An error occurred at error_undefined_class() on line 19 of
   19*    $x = new NoSuchClass();
   20   }
 
-Error Message: Class undefined: NoSuchClass
+Error Message: Failure to resolve undefined class NoSuchClass
 break clear all
 All breakpoints are cleared.
 continue
-Hit fatal : Class undefined: NoSuchClass
+Hit fatal : Failure to resolve undefined class NoSuchClass
     #0 at %s/exception1.php:19]
     #1 error_undefined_class(), called at [:1]
     #2 include(), called at [:1]
@@ -109,11 +109,11 @@ Breakpoint 1 reached: An error occurred at Outer\error_undefined_class() on line
   37*    $x = new NoSuchClass();
   38   }
 
-Error Message: Class undefined: Outer\NoSuchClass
+Error Message: Failure to resolve undefined class Outer\NoSuchClass
 break clear all
 All breakpoints are cleared.
 continue
-Hit fatal : Class undefined: Outer\NoSuchClass
+Hit fatal : Failure to resolve undefined class Outer\NoSuchClass
     #0 at %s/exception1.php:37]
     #1 Outer\error_undefined_class(), called at [:1]
     #2 include(), called at [:1]
@@ -161,11 +161,11 @@ Breakpoint 1 reached: An error occurred at Outer\Inner\error_undefined_class() o
   55*    $x = new NoSuchClass();
   56   }
 
-Error Message: Class undefined: Outer\Inner\NoSuchClass
+Error Message: Failure to resolve undefined class Outer\Inner\NoSuchClass
 break clear all
 All breakpoints are cleared.
 continue
-Hit fatal : Class undefined: Outer\Inner\NoSuchClass
+Hit fatal : Failure to resolve undefined class Outer\Inner\NoSuchClass
     #0 at %s/exception1.php:55]
     #1 Outer\Inner\error_undefined_class(), called at [:1]
     #2 include(), called at [:1]

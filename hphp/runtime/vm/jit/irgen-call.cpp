@@ -1418,28 +1418,6 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   always_assert(false);
 }
 
-Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
-  auto const cls = curClass(env);
-  if (!cls) return std::nullopt;
-  auto result = [&] (const Class* cls) -> Optional<int> {
-    if (!cls->hasReifiedGenerics()) return std::nullopt;
-    auto const slot = cls->lookupReifiedInitProp();
-    assertx(slot != kInvalidSlot);
-    return slot;
-  };
-  switch (ref) {
-    case SpecialClsRef::LateBoundCls:
-      // Currently we disallow new static on reified classes
-      return std::nullopt;
-    case SpecialClsRef::SelfCls:
-      return result(cls);
-    case SpecialClsRef::ParentCls:
-      if (!cls->parent()) return std::nullopt;
-      return result(cls->parent());
-  }
-  always_assert(false);
-}
-
 void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   if (RuntimeOption::EvalForbidDynamicConstructs <= 0) return;
   if (cls->hasConstVal()) {
@@ -1462,19 +1440,6 @@ void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   );
 }
 
-void emitReifiedClassChecks(IRGS& env, SSATmp* cls, SSATmp* generics) {
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const success = gen(env, ClassHasReifiedGenerics, cls);
-      gen(env, JmpNZero, taken, success);
-    },
-    [&] {
-      gen(env, CheckClsReifiedGenericMismatch, cls, generics);
-    }
-  );
-}
-
 } // namespace
 
 void emitNewObj(IRGS& env) {
@@ -1484,97 +1449,44 @@ void emitNewObj(IRGS& env) {
   push(env, gen(env, AllocObj, cls));
 }
 
-void emitNewObjR(IRGS& env) {
-  auto const generics = popC(env);
-  auto const cls      = popC(env);
-  if (!cls->isA(TCls))     PUNT(NewObjR-NotClass);
-
-  emitDynamicConstructChecks(env, cls);
-  auto const obj = [&] {
-    if (generics->isA(TVec)) {
-      emitReifiedClassChecks(env, cls, generics);
-      return gen(env, AllocObjReified, cls, generics);
-    } else if (generics->isA(TInitNull)) {
-      return gen(env, AllocObj, cls);
-    } else {
-      PUNT(NewObjR-BadReified);
-    }
-  }();
-  push(env, obj);
-}
-
-namespace {
-
-void emitNewObjDImpl(IRGS& env, const StringData* className,
-                     SSATmp* tsList) {
+void emitNewObjD(IRGS& env, const StringData* className) {
   auto const cls = lookupUniqueClass(env, className);
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
-  if (persistentCls && canInstantiate && !cls->hasNativePropHandler() &&
-      !cls->hasReifiedGenerics() && !cls->hasReifiedParent()) {
+  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()){
     emitModuleBoundaryCheckKnown(env, cls);
     push(env, allocObjFast(env, cls));
     return;
   }
-
-  auto const finishWithKnownCls = [&] {
+  if (cls || persistentCls) {
     emitModuleBoundaryCheckKnown(env, cls);
-    if (cls->hasReifiedGenerics()) {
-      if (!tsList) PUNT(NewObjD-ReifiedCls);
-      gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), tsList);
-      push(env, gen(env, AllocObjReified, cns(env, cls), tsList));
-      return;
-    }
     push(env, gen(env, AllocObj, cns(env, cls)));
-  };
-
-  if (persistentCls) return finishWithKnownCls();
-  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
-  if (cls) return finishWithKnownCls();
-  emitModuleBoundaryCheck(env, cachedCls, false);
-  if (tsList) {
-    emitReifiedClassChecks(env, cachedCls, tsList);
-    push(env, gen(env, AllocObjReified, cachedCls, tsList));
     return;
   }
+  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
+  emitModuleBoundaryCheck(env, cachedCls, false);
   push(env, gen(env, AllocObj, cachedCls));
-}
-
-} // namespace
-
-void emitNewObjD(IRGS& env, const StringData* className) {
-  emitNewObjDImpl(env, className, nullptr);
-}
-
-void emitNewObjRD(IRGS& env, const StringData* className) {
-  auto const cell = popC(env);
-  auto const tsList = [&] () -> SSATmp* {
-    if (cell->isA(TVec)) {
-      return cell;
-    } else if (cell->isA(TInitNull)) {
-      return nullptr;
-    } else {
-      PUNT(NewObjRD-BadReified);
-    }
-  }();
-  emitNewObjDImpl(env, className, tsList);
-  decRef(env, cell, DecRefProfileId::Default);
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
-  auto const slot = specialClsReifiedPropSlot(env, ref);
-  if (slot == std::nullopt) {
-    push(env, gen(env, AllocObj, cls));
-    return;
+  if (!cls->isA(TCls)) PUNT(NewObj-NotClass);
+  if (ref == SpecialClsRef::LateBoundCls) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const res = gen(env, ClassHasReifiedGenerics, cls);
+        gen(env, JmpNZero, taken, res);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const err = cns(env, makeStaticString("Cannot call new static since class has reified generics"));
+        gen(env, RaiseError, err);
+      }
+    );
   }
-
-  auto const this_ = checkAndLoadThis(env);
-  auto const addr = ldPropAddr(env, this_, nullptr, curClass(env), *slot, TVec);
-  auto const reified_generic = gen(env, LdMem, TVec, addr);
-  emitReifiedClassChecks(env, cls, reified_generic);
-  push(env, gen(env, AllocObjReified, cls, reified_generic));
+  push(env, gen(env, AllocObj, cls));
 }
 
 void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {

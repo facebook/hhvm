@@ -52,7 +52,6 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(AllocObj)
-IMPL_OPCODE_CALL(AllocObjReified)
 
 namespace {
 

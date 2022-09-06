@@ -3681,6 +3681,14 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
     Ok(emit_pos_then(pos, instrs))
 }
 
+enum NewObjOpInfo<'a, 'arena> {
+    /// true => top of stack contains type structure
+    /// false => top of stack contains class
+    NewObj(bool),
+    NewObjD(&'a hhbc::ClassName<'arena>, Option<&'a Vec<ast::Targ>>),
+    NewObjS(hhbc::SpecialClsRef),
+}
+
 fn emit_new<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -3754,34 +3762,29 @@ fn emit_new<'a, 'arena, 'decl>(
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                 e.add_class_ref(id);
-                match has_generics {
-                    H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::new_obj_d(id)]),
-                    H::HasGenerics => InstrSeq::gather(vec![
-                        emit_pos(pos),
-                        emit_reified_targs(
-                            e,
-                            env,
-                            pos,
-                            &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
-                        )?,
-                        instr::new_obj_rd(id),
-                    ]),
+                let targs = match has_generics {
+                    H::NoGenerics => None,
+                    H::HasGenerics => Some(targs),
                     H::MaybeGenerics => {
                         return Err(Error::unrecoverable(
                             "Internal error: This case should have been transformed",
                         ));
                     }
-                }
+                };
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjD(&id, targs))?
             }
             ClassExpr::Special(cls_ref) => {
-                InstrSeq::gather(vec![emit_pos(pos), instr::new_obj_s(cls_ref)])
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjS(cls_ref))?
             }
             ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
-                InstrSeq::gather(vec![instrs, instr::class_get_ts(), instr::new_obj_r()])
+                InstrSeq::gather(vec![
+                    instrs,
+                    emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(true))?,
+                ])
             }
             _ => InstrSeq::gather(vec![
                 emit_load_class_ref(e, env, pos, cexpr)?,
-                instr::new_obj(),
+                emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(false))?,
             ]),
         };
         scope::with_unnamed_locals(e, |e| {
@@ -3817,6 +3820,207 @@ fn emit_new<'a, 'arena, 'decl>(
             ))
         })
     }
+}
+
+fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    op: NewObjOpInfo<'b, 'arena>,
+) -> Result<InstrSeq<'arena>> {
+    use string_utils::reified::INIT_METH_NAME;
+
+    let call_reified_init = |obj, ts| -> InstrSeq<'_> {
+        InstrSeq::gather(vec![
+            obj,
+            instr::null_uninit(),
+            ts,
+            instr::f_call_obj_method_d(
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
+                hhbc::MethodName::from_raw_string(env.arena, INIT_METH_NAME),
+            ),
+            instr::pop_c(),
+        ])
+    };
+
+    scope::with_unnamed_locals(e, |e| {
+        let class_local = e.local_gen_mut().get_unnamed();
+        let ts_local = e.local_gen_mut().get_unnamed();
+        let obj_local = e.local_gen_mut().get_unnamed();
+
+        let no_reified_generics_passed_in_label = e.label_gen_mut().next_regular();
+        let try_parent_has_reified_generics_label = e.label_gen_mut().next_regular();
+        let end_label = e.label_gen_mut().next_regular();
+
+        let try_parent_has_reified_generics = InstrSeq::gather(vec![
+            instr::label(try_parent_has_reified_generics_label),
+            instr::c_get_l(class_local),
+            instr::has_reified_parent(),
+            instr::jmp_z(end_label),
+            call_reified_init(
+                instr::c_get_l(obj_local),
+                InstrSeq::gather(vec![
+                    instr::new_col(CollectionType::Vector),
+                    instr::cast_vec(),
+                ]),
+            ),
+            instr::jmp(end_label),
+        ]);
+
+        let is_ts_empty = InstrSeq::gather(vec![
+            instr::null_uninit(),
+            instr::null_uninit(),
+            instr::c_get_l(ts_local),
+            instr::f_call_func_d(
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
+                hhbc::FunctionName::from_raw_string(env.arena, "count"),
+            ),
+            instr::int(0),
+            instr::eq(),
+        ]);
+
+        let no_reified_generics_passed_in = InstrSeq::gather(vec![
+            instr::label(no_reified_generics_passed_in_label),
+            instr::c_get_l(class_local),
+            instr::class_has_reified_generics(),
+            instr::jmp_z(try_parent_has_reified_generics_label),
+            instr::c_get_l(class_local),
+            instr::check_cls_rg_soft(),
+            instr::jmp(end_label),
+        ]);
+
+        let reified_generics_passed_in = InstrSeq::gather(vec![
+            instr::c_get_l(class_local),
+            instr::class_has_reified_generics(),
+            instr::jmp_z(try_parent_has_reified_generics_label),
+            call_reified_init(instr::c_get_l(obj_local), instr::c_get_l(ts_local)),
+            instr::jmp(end_label),
+        ]);
+
+        let instrs = match op {
+            NewObjOpInfo::NewObj(false) => InstrSeq::gather(vec![
+                instr::set_l(class_local),
+                instr::new_obj(),
+                instr::pop_l(obj_local),
+                no_reified_generics_passed_in,
+                try_parent_has_reified_generics,
+            ]),
+            NewObjOpInfo::NewObj(true) => InstrSeq::gather(vec![
+                instr::class_get_ts(),
+                instr::pop_l(ts_local),
+                instr::set_l(class_local),
+                instr::new_obj(),
+                instr::pop_l(obj_local),
+                is_ts_empty,
+                instr::jmp_nz(no_reified_generics_passed_in_label),
+                reified_generics_passed_in,
+                no_reified_generics_passed_in,
+                try_parent_has_reified_generics,
+            ]),
+            NewObjOpInfo::NewObjD(id, targs) => {
+                let ts = match targs {
+                    Some(targs) => emit_reified_targs(
+                        e,
+                        env,
+                        pos,
+                        &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
+                    )?,
+                    None => instr::empty(),
+                };
+                let store_cls_and_obj = InstrSeq::gather(vec![
+                    instr::resolve_class(*id),
+                    instr::pop_l(class_local),
+                    instr::new_obj_d(*id),
+                    instr::pop_l(obj_local),
+                ]);
+                if ts.is_empty() {
+                    InstrSeq::gather(vec![
+                        store_cls_and_obj,
+                        no_reified_generics_passed_in,
+                        try_parent_has_reified_generics,
+                    ])
+                } else {
+                    InstrSeq::gather(vec![
+                        ts,
+                        instr::pop_l(ts_local),
+                        store_cls_and_obj,
+                        reified_generics_passed_in,
+                        try_parent_has_reified_generics,
+                    ])
+                }
+            }
+            NewObjOpInfo::NewObjS(cls_ref) => {
+                let get_cls_instr = match cls_ref {
+                    SpecialClsRef::SelfCls => instr::self_cls(),
+                    SpecialClsRef::LateBoundCls => instr::late_bound_cls(),
+                    SpecialClsRef::ParentCls => instr::parent_cls(),
+                    _ => {
+                        return Err(Error::unrecoverable(
+                            "Internal error: This case should never occur",
+                        ));
+                    }
+                };
+                let store_cls_and_obj = InstrSeq::gather(vec![
+                    get_cls_instr,
+                    instr::pop_l(class_local),
+                    instr::new_obj_s(cls_ref),
+                    instr::pop_l(obj_local),
+                ]);
+                let store_ts_if_prop_set = InstrSeq::gather(vec![
+                    instr::c_get_l(class_local),
+                    instr::class_has_reified_generics(),
+                    instr::jmp_z(no_reified_generics_passed_in_label),
+                    instr::c_get_l(class_local),
+                    instr::get_cls_rg_prop(),
+                    instr::set_l(ts_local),
+                    instr::is_type_c(IsTypeOp::Null),
+                    instr::jmp_nz(no_reified_generics_passed_in_label),
+                ]);
+                InstrSeq::gather(vec![
+                    store_cls_and_obj,
+                    store_ts_if_prop_set,
+                    is_ts_empty,
+                    instr::jmp_nz(no_reified_generics_passed_in_label),
+                    reified_generics_passed_in,
+                    no_reified_generics_passed_in,
+                    try_parent_has_reified_generics,
+                ])
+            }
+        };
+
+        let unset_locals = InstrSeq::gather(vec![
+            instr::unset_l(class_local),
+            instr::unset_l(ts_local),
+            instr::unset_l(obj_local),
+        ]);
+
+        Ok((
+            instr::empty(),
+            InstrSeq::gather(vec![
+                emit_pos(pos),
+                instrs,
+                instr::label(end_label),
+                instr::c_get_l(obj_local),
+            ]),
+            unset_locals,
+        ))
+    })
 }
 
 fn emit_obj_get<'a, 'arena, 'decl>(

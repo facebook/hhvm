@@ -426,7 +426,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdFuncCached:
   case LookupFuncCached:
   case AllocObj:
-  case AllocObjReified:
   case NewClsMeth:
   case FuncCred:
   case InitProps:

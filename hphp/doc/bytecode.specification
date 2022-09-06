@@ -1606,9 +1606,7 @@ InitProp <propName> <op> [C] -> []
 --------------------
 
 NewObj                                      [C:Class]              ->  [C:Obj]
-NewObjR                                     [C:Class, C:Vec|Null]  ->  [C:Obj]
 NewObjD   <litstr id>                       []                     ->  [C:Obj]
-NewObjRD  <litstr id>                       [C:Vec|Null]           ->  [C:Obj]
 NewObjS   <mode>                            []                     ->  [C:Obj]
 
   New object. First, these instructions load a class into x as given
@@ -1617,12 +1615,10 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
     instruction   x
     ------------+----
       NewObj    | $1
-      NewObjR   | $2
       NewObjD   | %1
-      NewObjRD  | %1
       NewObjS   | %1
 
-  When loading %1 into x, NewObjD and NewObjRD will perform the work performed
+  When loading %1 into x, NewObjD will perform the work performed
   by the ClassGetC instruction to convert the name given by %1 into a class.
   NewObjS will perform the same work as LateBoundCls/SelfCls/ParentCls depending
   on the specified mode.
@@ -1630,9 +1626,6 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
   This instruction pushes a default-initialized object onto the stack. The
   initialization will complete by running a constructor with FCallCtor, and
   clearing the IsBeingConstructed flag using LockObj.
-
-  NewObjR's and NewObjRD's $1 contains a list of reified generics, or null if
-  none present.
 
 LockObj                                    [C:Obj] -> [C:Obj]
 

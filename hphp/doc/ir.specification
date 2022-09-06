@@ -1364,11 +1364,6 @@ To string conversions:
 
   Allocates a new object of class S1.
 
-| AllocObjReified, DAllocObj, S(Cls) S(Vec), LA|PRc
-
-  Allocates a new object of class S1 and sets S2 as the reified generics of
-  this class. If this class is not reified, this instruction raises an error.
-
 | InitProps<class>, ND, NA, NF
 
   Calls the property initializer function (86pinit) for class.  May throw.

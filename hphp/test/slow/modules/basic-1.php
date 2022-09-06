@@ -15,12 +15,10 @@ function main() {
   __hhvm_intrinsics\launder_value(vec["Cls", "foo_static"])();
   __hhvm_intrinsics\launder_value(vec[new Cls, "foo"])();
 
-  new InternalCls();
   $x = __hhvm_intrinsics\launder_value("InternalCls");
   new $x;
   $x = __hhvm_intrinsics\launder_value(InternalCls::class);
   new $x;
-  new ReifiedInternalCls();
   $y = __hhvm_intrinsics\launder_value("ReifiedInternalCls");
   new $y;
   InternalCls::foo_static();

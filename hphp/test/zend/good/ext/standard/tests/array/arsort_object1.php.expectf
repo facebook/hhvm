@@ -1,3 +1,3 @@
 *** Testing arsort() : object functionality ***
 
-Fatal error: Class undefined: for_integer_asort in %s/arsort_object1.php on line 45
+Fatal error: Failure to resolve undefined class for_integer_asort in %s/arsort_object1.php on line 45

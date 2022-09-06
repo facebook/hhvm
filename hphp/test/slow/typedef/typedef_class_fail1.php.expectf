@@ -1,2 +1,2 @@
 
-Fatal error: Class undefined: Foo in %s on line 8
+Fatal error: Failure to resolve undefined class Foo in %s on line 8

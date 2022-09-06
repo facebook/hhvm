@@ -526,7 +526,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             hhbc::MethodName::new(Str::new_str(alloc, string_utils::reified::INIT_METH_NAME)),
             params,
             false, // is_static
-            Visibility::Protected,
+            Visibility::Public,
             false, // is_abstract
             Span::from_pos(&ast_class.span),
             Coeffects::pure(alloc),

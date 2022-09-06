@@ -1647,9 +1647,7 @@ void dce(Env& env, const bc::MemoSetEager& op) {
 void dce(Env& env, const bc::Method& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NativeImpl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObj& op) { no_dce(env, op); }
-void dce(Env& env, const bc::NewObjR& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { no_dce(env, op); }
-void dce(Env& env, const bc::NewObjRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LockObj& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Nop& op) { no_dce(env, op); }

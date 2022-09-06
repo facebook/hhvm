@@ -1058,8 +1058,6 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::NewKeysetArray => simple!(Hhbc::NewKeysetArray),
         Opcode::NewObj => simple!(Hhbc::NewObj),
         Opcode::NewObjD => simple!(Hhbc::NewObjD),
-        Opcode::NewObjR => simple!(Hhbc::NewObjR),
-        Opcode::NewObjRD => simple!(Hhbc::NewObjRD),
         Opcode::NewObjS => simple!(Hhbc::NewObjS),
         Opcode::NewPair => simple!(Hhbc::NewPair),
         Opcode::NewVec => simple!(Hhbc::NewVec),

@@ -1,0 +1,9 @@
+Warning: Accessing internal class InternalCls in module B from module A is not allowed in %s on line 10
+
+Warning: Accessing internal class InternalCls in module B from module A is not allowed in %s on line 10
+in InternalCls ctor
+
+Warning: Accessing internal class ReifiedInternalCls in module B from module A is not allowed in %s on line 11
+
+Warning: Accessing internal class ReifiedInternalCls in module B from module A is not allowed in %s on line 11
+in ReifiedInternalCls ctor

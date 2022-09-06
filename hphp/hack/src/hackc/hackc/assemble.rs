@@ -2151,22 +2151,11 @@ fn assemble_instr<'arena>(
                         || hhbc::Opcode::NewObj,
                         "NewObj",
                     ),
-                    b"NewObjR" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NewObjR,
-                        "NewObjR",
-                    ),
                     b"NewObjD" => assemble_obj_class_name_instr(
                         alloc,
                         &mut sl_lexer,
                         hhbc::Opcode::NewObjD,
                         "NewObjD",
-                    ),
-                    b"NewObjRD" => assemble_obj_class_name_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::NewObjRD,
-                        "NewObjRD",
                     ),
                     b"NewObjS" => {
                         sl_lexer.next();
@@ -2753,7 +2742,7 @@ fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
     }
 }
 
-/// NewObjD "Foo" or NewObjRD "Foo"
+/// NewObjD "Foo"
 fn assemble_obj_class_name_instr<
     'arena,
     F: FnOnce(hhbc::ClassName<'arena>) -> hhbc::Opcode<'arena>,

@@ -138,8 +138,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::NewKeysetArray(..)
             | Hhbc::NewObj(..)
             | Hhbc::NewObjD(..)
-            | Hhbc::NewObjR(..)
-            | Hhbc::NewObjRD(..)
             | Hhbc::NewObjS(..)
             | Hhbc::NewPair(..)
             | Hhbc::NewStructDict(..)

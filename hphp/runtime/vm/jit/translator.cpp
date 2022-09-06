@@ -254,9 +254,7 @@ static const struct {
   /*** 8. Call instructions ***/
 
   { OpNewObj,      {Stack1,           Stack1,       OutObject       }},
-  { OpNewObjR,     {StackTop2,        Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpLockObj,     {Stack1,           Stack1,       OutSameAsInput1 }},
 
@@ -1016,9 +1014,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::NewObj:
-  case Op::NewObjR:
   case Op::NewObjD:
-  case Op::NewObjRD:
   case Op::NewObjS:
   case Op::Not:
   case Op::Null:

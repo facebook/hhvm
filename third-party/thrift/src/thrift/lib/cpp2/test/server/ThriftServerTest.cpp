@@ -266,7 +266,7 @@ TEST(ThriftServer, HeaderTest) {
   // Set it as a header directly so the client channel won't set a
   // timeout and the test won't throw TTransportException
   options.setWriteHeader(
-      (std::string)apache::thrift::transport::THeader::CLIENT_TIMEOUT_HEADER,
+      apache::thrift::transport::THeader::CLIENT_TIMEOUT_HEADER,
       folly::to<std::string>(10));
   try {
     client.sync_processHeader(options);
@@ -472,8 +472,7 @@ void doLoadHeaderTest(bool isRocket) {
     // Empty load header
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(
-        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
   }
@@ -482,8 +481,7 @@ void doLoadHeaderTest(bool isRocket) {
     // Custom load header
     RpcOptions options;
     const std::string kLoadMetric{"custom_load_metric_789"};
-    options.setWriteHeader(
-        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
   }
@@ -492,8 +490,7 @@ void doLoadHeaderTest(bool isRocket) {
     // Force server overload. Load should still be returned on server overload.
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(
-        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
 
     folly::fibers::Baton baton;
     THeader header;
@@ -530,8 +527,7 @@ void doLoadHeaderTest(bool isRocket) {
     });
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(
-        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setQueueTimeout(std::chrono::milliseconds(10));
 
     folly::fibers::Baton baton;
@@ -568,8 +564,7 @@ void doLoadHeaderTest(bool isRocket) {
 
     RpcOptions options;
     const std::string kLoadMetric;
-    options.setWriteHeader(
-        (std::string)THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setTimeout(std::chrono::seconds(1));
 
     auto prevTaskExpireTime = runner.getThriftServer().getTaskExpireTime();

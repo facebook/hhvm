@@ -170,12 +170,11 @@ const transport::THeader::StringToStringMap& RpcOptions::getReadHeaders()
   return readHeaders_ ? *readHeaders_ : kEmptyMap();
 }
 
-void RpcOptions::setWriteHeader(
-    const std::string& key, const std::string& value) {
+void RpcOptions::setWriteHeader(std::string_view key, std::string value) {
   if (!writeHeaders_) {
     writeHeaders_.emplace();
   }
-  (*writeHeaders_)[key] = value;
+  (*writeHeaders_)[key] = std::move(value);
 }
 
 const transport::THeader::StringToStringMap& RpcOptions::getWriteHeaders()

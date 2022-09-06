@@ -170,18 +170,5 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
   return KindOfDouble;
 }
 
-bool is_valid_var_name(const char *var_name, int len) {
-  if (!var_name ||
-      (!isalpha((int)((unsigned char *)var_name)[0]) && var_name[0] != '_')) {
-    return false;
-  }
-  for (int i = 1; i < len; i++) {
-    if (!isalnum((int)((unsigned char *)var_name)[i]) && var_name[i] != '_') {
-      return false;
-    }
-  }
-  return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

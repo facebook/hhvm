@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <folly/portability/GMock.h>
-
+#include <fizz/crypto/exchange/AsyncKeyExchange.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
+#include <folly/portability/GMock.h>
 
 namespace fizz {
 
@@ -75,4 +75,20 @@ class MockKeyExchange : public KeyExchange {
   }
 };
 
+class MockAsyncKeyExchange : public AsyncKeyExchange {
+ public:
+  MOCK_METHOD(void, generateKeyPair, ());
+  MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
+  MOCK_METHOD(
+      std::unique_ptr<folly::IOBuf>,
+      generateSharedSecret,
+      (folly::ByteRange keyShare),
+      (const));
+  MOCK_METHOD(std::unique_ptr<KeyExchange>, clone, (), (const));
+  MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
+  MOCK_METHOD(
+      folly::SemiFuture<DoKexResult>,
+      doAsyncKexFuture,
+      (std::unique_ptr<folly::IOBuf> peerKeyShare));
+};
 } // namespace fizz

@@ -6569,6 +6569,75 @@ TEST_F(ServerProtocolTest, TestWaitForDataSizeHint) {
   auto wfd = expectAction<WaitForData>(actions);
   EXPECT_EQ(wfd.recordSizeHint, 17);
 }
+
+TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
+  folly::Promise<AsyncKeyExchange::DoKexResult> p;
+  setUpExpectingClientHello();
+  EXPECT_CALL(*factory_, makeKeyExchange(_, _))
+      .WillOnce(InvokeWithoutArgs([&]() {
+        auto asyncKex = std::make_unique<MockAsyncKeyExchange>();
+        EXPECT_CALL(*asyncKex, doAsyncKexFuture(_))
+            .WillOnce(InvokeWithoutArgs([&]() { return p.getSemiFuture(); }));
+        return asyncKex;
+      }));
+
+  // The returned future shouldn't have been fulfilled
+  auto asyncActions = detail::processEvent(state_, TestMessages::clientHello());
+  auto& actionsFuture = strict_get<folly::SemiFuture<Actions>>(asyncActions);
+  executor_.drain();
+
+  // We fulfill the future
+  AsyncKeyExchange::DoKexResult res;
+  res.ourKeyShare = folly::IOBuf::copyBuffer("ourkeyshare");
+  res.sharedSecret = folly::IOBuf::copyBuffer("sharedsecret");
+  p.setValue(std::move(res));
+
+  // Process the remaining stuff
+  auto finalActionsFuture =
+      std::move(actionsFuture).via(folly::getKeepAliveToken(executor_));
+  executor_.drain();
+
+  auto actions = std::move(finalActionsFuture).value();
+  expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
+
+  // Regular check for a normal handshake flow
+  auto write = expectAction<WriteToSocket>(actions);
+  ASSERT_EQ(write.contents.size(), 2);
+
+  EXPECT_EQ(write.contents[0].encryptionLevel, EncryptionLevel::Plaintext);
+  EXPECT_EQ(write.contents[0].contentType, ContentType::handshake);
+
+  EXPECT_EQ(write.contents[1].encryptionLevel, EncryptionLevel::Handshake);
+  EXPECT_EQ(write.contents[1].contentType, ContentType::handshake);
+  EXPECT_TRUE(folly::IOBufEqualTo()(
+      write.contents[1].data, folly::IOBuf::copyBuffer("handshake")));
+
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingFinished);
+  EXPECT_EQ(
+      state_.readRecordLayer()->getEncryptionLevel(),
+      EncryptionLevel::Handshake);
+  EXPECT_EQ(
+      state_.writeRecordLayer()->getEncryptionLevel(),
+      EncryptionLevel::AppTraffic);
+  EXPECT_EQ(state_.serverCert(), cert_);
+  EXPECT_EQ(state_.version(), TestProtocolVersion);
+  EXPECT_EQ(state_.cipher(), CipherSuite::TLS_AES_128_GCM_SHA256);
+  EXPECT_EQ(state_.group(), NamedGroup::x25519);
+  EXPECT_EQ(state_.sigScheme(), SignatureScheme::ecdsa_secp256r1_sha256);
+  EXPECT_EQ(state_.pskType(), PskType::NotAttempted);
+  EXPECT_FALSE(state_.pskMode().has_value());
+  EXPECT_EQ(state_.keyExchangeType(), KeyExchangeType::OneRtt);
+  EXPECT_EQ(state_.earlyDataType(), EarlyDataType::NotAttempted);
+  EXPECT_EQ(state_.replayCacheResult(), ReplayCacheResult::NotChecked);
+  EXPECT_FALSE(state_.clientClockSkew().has_value());
+  EXPECT_EQ(*state_.alpn(), "h2");
+  EXPECT_FALSE(state_.earlyExporterMasterSecret().has_value());
+  ASSERT_TRUE(state_.clientRandom().hasValue());
+  auto cr = state_.clientRandom().value();
+  EXPECT_TRUE(
+      std::all_of(begin(cr), end(cr), [](auto c) { return c == 0x44; }));
+}
 } // namespace test
 } // namespace server
 } // namespace fizz

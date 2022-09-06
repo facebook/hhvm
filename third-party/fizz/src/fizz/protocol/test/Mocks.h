@@ -303,6 +303,15 @@ class MockFactory : public OpenSSLFactory {
   }
 };
 
+class MockAsyncKexFactory : public OpenSSLFactory {
+ public:
+  MOCK_METHOD(
+      std::unique_ptr<KeyExchange>,
+      makeKeyExchange,
+      (NamedGroup group, Factory::KeyExchangeMode mode),
+      (const));
+};
+
 class MockCertificateDecompressor : public CertificateDecompressor {
  public:
   MOCK_METHOD(CertificateCompressionAlgorithm, getAlgorithm, (), (const));

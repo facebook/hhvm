@@ -1480,16 +1480,6 @@ static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
   }
 }
 
-static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
-                                     const Variant& container) {
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  bool convertIntLikeStrs = !isArrayLikeType(container.asTypedValue()->m_type);
-  for (ArrayIter iter(container); iter; ++iter) {
-    addToSetHelper(st, *iter.first().asTypedValue(), strTv, convertIntLikeStrs);
-  }
-}
-
 static inline void raiseIsClsMethWarning(const char* fn, int pos) {
   raise_warning(
    "%s() expects parameter %d to be an array or collection, clsmeth given",
@@ -2031,44 +2021,6 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
       // a key (after various conversions) that occurs in the container more
       // than once.
       updateIntersectMapHelper(mp, c, pos, strTv, true);
-    }
-  }
-  for (ArrayIter iter(mp.get()); iter; ++iter) {
-    // For each key in the map, we copy the key to the set if the
-    // corresponding value is equal to pos exactly (which means it
-    // was present in all of the containers).
-    auto const tv = iter.secondValPlus();
-    assertx(type(tv) == KindOfInt64);
-    if (val(tv).num == count) {
-      st->add(*iter.first().asTypedValue());
-    }
-  }
-}
-
-static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
-                                         TypedValue* containers,
-                                         int count) {
-  assertx(count >= 2);
-  auto mp = req::make<c_Map>();
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  TypedValue intOneTv = make_tv<KindOfInt64>(1);
-  bool convertIntLikeStrs = !isArrayLikeType(containers[0].m_type);
-  for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *key.asTypedValue();
-    // For each key k in containers[0], we add the key/value pair (k, 1)
-    // to the map. If a key (after various conversions) occurs more than
-    // once in the container, we'll simply overwrite the old entry and
-    // that's fine.
-    addToIntersectMapHelper(mp, c, &intOneTv, strTv, convertIntLikeStrs);
-  }
-  for (int pos = 1; pos < count; ++pos) {
-    convertIntLikeStrs = !isArrayLikeType(containers[pos].m_type);
-    for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      auto key = iter.first();
-      const auto& c = *key.asTypedValue();
-      updateIntersectMapHelper(mp, c, pos, strTv, convertIntLikeStrs);
     }
   }
   for (ArrayIter iter(mp.get()); iter; ++iter) {

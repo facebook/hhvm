@@ -38,6 +38,12 @@ extern "C" {
     pub type _IO_marker;
     pub type mark_stack;
 
+    pub type caml_custom_table;
+    pub type caml_ref_table;
+    pub type caml_ephe_ref_table;
+
+    pub type longjmp_buffer;
+
     static mut caml_allocated_words: uintnat;
     static mut Caml_state: *mut caml_domain_state;
     static mut caml_atom_table: *mut header_t;
@@ -196,106 +202,6 @@ struct caml__roots_block {
     pub ntables: intnat,
     pub nitems: intnat,
     pub tables: [*mut value; 5],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct longjmp_buffer {
-    pub buf: sigjmp_buf,
-}
-
-pub type sigjmp_buf = [__jmp_buf_tag; 1];
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct __jmp_buf_tag {
-    pub __jmpbuf: __jmp_buf,
-    pub __mask_was_saved: c_int,
-    pub __saved_mask: __sigset_t,
-}
-pub type __jmp_buf = [c_long; 8];
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct caml_custom_table {
-    pub base: *mut caml_custom_elt,
-    pub end: *mut caml_custom_elt,
-    pub threshold: *mut caml_custom_elt,
-    pub ptr: *mut caml_custom_elt,
-    pub limit: *mut caml_custom_elt,
-    pub size: asize_t,
-    pub reserve: asize_t,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct caml_custom_elt {
-    pub block: value,
-    pub mem: mlsize_t,
-    pub max: mlsize_t,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct caml_ephe_ref_table {
-    pub base: *mut caml_ephe_ref_elt,
-    pub end: *mut caml_ephe_ref_elt,
-    pub threshold: *mut caml_ephe_ref_elt,
-    pub ptr: *mut caml_ephe_ref_elt,
-    pub limit: *mut caml_ephe_ref_elt,
-    pub size: asize_t,
-    pub reserve: asize_t,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct caml_ephe_ref_elt {
-    pub ephe: value,
-    pub offset: mlsize_t,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct caml_ref_table {
-    pub base: *mut *mut value,
-    pub end: *mut *mut value,
-    pub threshold: *mut *mut value,
-    pub ptr: *mut *mut value,
-    pub limit: *mut *mut value,
-    pub size: asize_t,
-    pub reserve: asize_t,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct custom_operations {
-    pub identifier: *const c_char,
-    pub finalize: Option<unsafe extern "C" fn(_: value) -> ()>,
-    pub compare: Option<unsafe extern "C" fn(_: value, _: value) -> c_int>,
-    pub hash: Option<unsafe extern "C" fn(_: value) -> intnat>,
-    pub serialize: Option<unsafe extern "C" fn(_: value, _: *mut uintnat, _: *mut uintnat) -> ()>,
-    pub deserialize: Option<unsafe extern "C" fn(_: *mut c_void) -> uintnat>,
-    pub compare_ext: Option<unsafe extern "C" fn(_: value, _: value) -> c_int>,
-    pub fixed_length: *const custom_fixed_length,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct custom_fixed_length {
-    pub bsize_32: intnat,
-    pub bsize_64: intnat,
-}
-
-pub type digest_status = c_uint;
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct code_fragment {
-    pub code_start: *mut c_char,
-    pub code_end: *mut c_char,
-    pub fragnum: c_int,
-    pub digest: [c_uchar; 16],
-    pub digest_status: digest_status,
 }
 
 #[derive(Copy, Clone)]

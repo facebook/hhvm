@@ -163,7 +163,7 @@ class AdapterTest(unittest.TestCase):
 
     def test_directly_annotated(self) -> None:
         foo = Foo()
-        self.assertEqual(Baz, Wrapped)
+        self.assertEqual(Baz, Wrapped[_fbthrift_unadapted_Baz])
         self.assertIsInstance(foo.baz, Wrapped)
         self.assertIsInstance(foo.baz.obj, _fbthrift_unadapted_Baz)
 

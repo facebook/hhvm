@@ -57,9 +57,9 @@ namespace py thrift.annotation.python
 @scope.Typedef
 @scope.Structured
 struct Adapter {
-  // Fully qualified name of a Python adapter class that's subclass of
-  // thrift/lib/python/adapters/base.py
+  // Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
   1: string name;
-  // Fully qualified type hint the above implmenantion adapts too
+  // Fully qualified type hint the above implmenantion adapts to.
+  // If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
   2: string typeHint;
 } (thrift.uri = "facebook.com/thrift/annotation/python/Adapter")

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 
@@ -94,13 +95,19 @@ mstch::node adapter_node(
   if (!adapter_annotation) {
     return false;
   }
+  auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
+  bool is_generic = boost::algorithm::ends_with(type_hint, "[]");
+  if (is_generic) {
+    type_hint = type_hint.substr(0, type_hint.size() - 2);
+  }
+  bool is_transitive = (transitive_adapter_annotation != nullptr);
   mstch::map node{
       {"adapter:name", get_annotation_property(adapter_annotation, "name")},
-      {"adapter:type_hint",
-       get_annotation_property(adapter_annotation, "typeHint")},
-      {"adapter:is_transitive?", (transitive_adapter_annotation != nullptr)},
+      {"adapter:type_hint", type_hint},
+      {"adapter:is_generic?", is_generic},
+      {"adapter:is_transitive?", is_transitive},
   };
-  if (transitive_adapter_annotation != nullptr) {
+  if (is_transitive) {
     node["adapter:transitive_annotation"] =
         std::make_shared<python_mstch_const_value>(
             transitive_adapter_annotation->value(),

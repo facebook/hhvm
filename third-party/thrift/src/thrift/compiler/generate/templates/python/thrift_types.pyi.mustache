@@ -106,7 +106,7 @@ class {{> structs/unadapted_name}}({{!
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
-{{struct:name}} = {{adapter:type_hint}}
+{{struct:name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
 {{#program:constants?}}
@@ -124,8 +124,12 @@ class {{> structs/unadapted_name}}({{!
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
-{{typedef:name}} = {{#typedef:has_adapter?}}{{adapter:type_hint}}{{/typedef:has_adapter?}}{{!
-}}{{^typedef:has_adapter?}}{{#typedef:type}}{{> types/typedef_const_pep484_type}}{{/typedef:type}}{{/typedef:has_adapter?}}
+{{typedef:name}} = {{#typedef:has_adapter?}}{{!
+    }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{#typedef:type}}{{> types/typedef_const_pep484_type}}{{/typedef:type}}]{{/adapter:is_generic?}}{{!
+}}{{/typedef:has_adapter?}}{{!
+}}{{^typedef:has_adapter?}}{{!
+    }}{{#typedef:type}}{{> types/typedef_const_pep484_type}}{{/typedef:type}}{{!
+}}{{/typedef:has_adapter?}}
 {{/program:typedefs}}
 {{/program:typedefs?}}
 {{/program:services?}}

@@ -39,7 +39,7 @@ typedef string AdaptedInt
 
 @python.Adapter{
   name = "thrift.python.test.adapters.noop.Wrapper",
-  typeHint = "thrift.python.test.adapters.noop.Wrapped",
+  typeHint = "thrift.python.test.adapters.noop.Wrapped[]",
 }
 struct Baz {
   1: string name;

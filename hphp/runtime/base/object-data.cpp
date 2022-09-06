@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -1204,6 +1205,12 @@ ObjectData::PropLookup ObjectData::getPropImpl(
           (declProp.attrs & AttrLateInit)) {
         throw_late_init_prop(declProp.cls, key, false);
       }
+    }
+
+    // If the prop is internal, check that modules are compatible
+    if (lookup.internal &&
+        will_symbol_raise_module_boundary_violation(&declProp, &propCtx)) {
+      raiseModuleBoundaryViolation(m_cls, key, propCtx.moduleName());
     }
 
     return {

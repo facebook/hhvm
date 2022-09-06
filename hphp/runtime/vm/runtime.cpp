@@ -451,6 +451,20 @@ void moduleBoundaryViolationImpl(
 
 } // namespace
 
+void raiseModuleBoundaryViolation(const Class* cls, const StringData* prop, const StringData* callerModule) {
+  if (!RO::EvalEnforceModules) return;
+  assertx(cls);
+  assertx(prop);
+  DEBUG_ONLY auto const propSlot = cls->lookupDeclProp(prop);
+  DEBUG_ONLY auto const attrs = cls->declProperties()[propSlot].attrs;
+  assertx(attrs & AttrInternal);
+  return moduleBoundaryViolationImpl(
+    folly::sformat("property {}::${}", cls->name(), prop->data()),
+    cls->moduleName(),
+    callerModule
+  );
+}
+
 void raiseModuleBoundaryViolation(const Class* ctx,
                                   const Func* callee,
                                   const StringData* callerModule) {

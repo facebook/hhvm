@@ -86,6 +86,8 @@ bool will_symbol_raise_module_boundary_violation(const Sym* symbol,
 
 template bool will_symbol_raise_module_boundary_violation(const Func*, const Func*);
 template bool will_symbol_raise_module_boundary_violation(const Func*, const MemberLookupContext*);
+template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, const MemberLookupContext*);
+template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, const Func*);
 template bool will_symbol_raise_module_boundary_violation(const Class*, const Func*);
 
 } // namespace HPHP

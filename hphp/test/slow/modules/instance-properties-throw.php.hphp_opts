@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/modules/instance-properties.inc
+--inputs=hphp/test/slow/modules/module.inc

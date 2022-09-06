@@ -1230,10 +1230,12 @@ Class::PropSlotLookup Class::getDeclPropSlot(
   auto const ctx = propCtx.cls();
   auto accessible = false;
   auto readonly = false;
+  auto internal = false;
 
   if (propSlot != kInvalidSlot) {
     auto const attrs = m_declProperties[propSlot].attrs;
     readonly = bool(attrs & AttrIsReadonly);
+    internal = bool(attrs & AttrInternal);
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
@@ -1242,10 +1244,10 @@ Class::PropSlotLookup Class::getDeclPropSlot(
       assertx(baseClass);
 
       // If ctx == baseClass, we have the right property and we can stop here.
-      if (ctx == baseClass) return PropSlotLookup { propSlot, true, false, readonly };
+      if (ctx == baseClass) return PropSlotLookup { propSlot, true, false, readonly, internal };
       // The anonymous context cannot access protected or private properties, so
       // we can fail fast here.
-      if (ctx == nullptr) return PropSlotLookup { propSlot, false, false, readonly };
+      if (ctx == nullptr) return PropSlotLookup { propSlot, false, false, readonly, internal };
 
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
@@ -1260,7 +1262,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
-          return PropSlotLookup { propSlot, true, false, readonly };
+          return PropSlotLookup { propSlot, true, false, readonly, internal };
         }
         if (!baseClass->classof(ctx)) {
           // ctx is not the same, an ancestor, or a descendent of baseClass,
@@ -1268,7 +1270,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
           // be the same or an ancestor of this, so we don't need to check if
           // ctx declares a private property with the same name and we can
           // fail fast here.
-          return PropSlotLookup { propSlot, false, false, readonly };
+          return PropSlotLookup { propSlot, false, false, readonly, internal };
         }
         // We now know this protected property is accessible, but we need to
         // keep going because ctx may define a private property with the same
@@ -1282,7 +1284,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
       accessible = true;
       // If ctx == this, we don't have to check if ctx defines a private
       // property with the same name and we can stop here.
-      if (ctx == this) return PropSlotLookup { propSlot, true, false, readonly };
+      if (ctx == this) return PropSlotLookup { propSlot, true, false, readonly, internal };
 
       // We still need to check if ctx defines a private property with the same
       // name.
@@ -1303,7 +1305,8 @@ Class::PropSlotLookup Class::getDeclPropSlot(
       // A private property from ctx trumps any other property we may
       // have found.
       readonly = bool(ctx->m_declProperties[ctxPropSlot].attrs & AttrIsReadonly);
-      return PropSlotLookup { ctxPropSlot, true, false, readonly };
+      internal = bool(ctx->m_declProperties[ctxPropSlot].attrs & AttrInternal);
+      return PropSlotLookup { ctxPropSlot, true, false, readonly, internal };
     }
   }
 
@@ -1318,7 +1321,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
     return m_parent->getDeclPropSlot(propCtx, key);
   }
 
-  return PropSlotLookup { propSlot, accessible, false, readonly };
+  return PropSlotLookup { propSlot, accessible, false, readonly, internal };
 }
 
 Class::PropSlotLookup Class::findSProp(
@@ -1330,7 +1333,7 @@ Class::PropSlotLookup Class::findSProp(
 
   // Non-existent property.
   if (sPropInd == kInvalidSlot)
-    return PropSlotLookup { kInvalidSlot, false, false, false };
+    return PropSlotLookup { kInvalidSlot, false, false, false, false };
 
   auto const& sProp = m_staticProperties[sPropInd];
   auto const sPropAttrs = sProp.attrs;
@@ -1343,7 +1346,7 @@ Class::PropSlotLookup Class::findSProp(
     baseCls = sProp.cls;
   }
   // Property access within this Class's context.
-  if (ctx == baseCls) return PropSlotLookup { sPropInd, true, sPropConst, sPropReadOnly };
+  if (ctx == baseCls) return PropSlotLookup { sPropInd, true, sPropConst, sPropReadOnly, false };
 
   auto const accessible = [&] {
     switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
@@ -1365,8 +1368,8 @@ Class::PropSlotLookup Class::findSProp(
     }
     not_reached();
   }();
-
-  return PropSlotLookup { sPropInd, accessible, sPropConst, sPropReadOnly };
+  // TODO(T130877659): Static property enforcement
+  return PropSlotLookup { sPropInd, accessible, sPropConst, sPropReadOnly, false };
 }
 
 Class::PropValLookup Class::getSPropIgnoreLateInit(

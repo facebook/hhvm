@@ -2259,6 +2259,10 @@ To string conversions:
   attempting to either call, if S0 is Func, or create a pointer to the callee in
   S0 in context `ctx`.
 
+| RaiseModulePropertyViolation<ctx, caller>, ND, S(Cls) S(Str), NF
+  Raises a warning to indicate a module boundary violation resulting from caller
+  attempting to access a property S1 from class S0.
+
 | RaiseImplicitContextStateInvalid<func>, ND, NA, NF
 
   Raises a warning or throws an exception for invalid, soft implicit context

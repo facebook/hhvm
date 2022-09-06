@@ -1249,6 +1249,15 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
 template void emitModuleBoundaryCheckKnown(IRGS&, const Func*);
 template void emitModuleBoundaryCheckKnown(IRGS&, const Class*);
 
+template<>
+void emitModuleBoundaryCheckKnown(IRGS& env, const Class::Prop* prop) {
+  auto const caller = curFunc(env);
+  if (will_symbol_raise_module_boundary_violation(prop, caller)) {
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModulePropertyViolation, data, cns(env, prop->cls.get()), cns(env, prop->name.get()));
+  }
+}
+
 void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
   if (!RO::EvalEnforceModules) return;
   auto const caller = curFunc(env);

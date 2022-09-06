@@ -2896,6 +2896,7 @@ X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
 X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
+X(RaiseModulePropertyViolation, OptClassAndFuncData);
 X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);

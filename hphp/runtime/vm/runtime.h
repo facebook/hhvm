@@ -90,6 +90,7 @@ void raiseModuleBoundaryViolation(const Class* ctx,
                                   const StringData* callerModule);
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const StringData* callerModule);
+void raiseModuleBoundaryViolation(const Class* cls, const StringData* prop, const StringData* callerModule);
 
 void raiseImplicitContextStateInvalidDispatch(const Func*);
 

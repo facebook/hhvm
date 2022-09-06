@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-arith.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -38,6 +39,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/module.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -79,7 +81,7 @@ struct PropInfo {
            Type knownType,
            const HPHP::TypeConstraint* typeConstraint,
            const UpperBoundVec* ubs,
-           const Class* objClass,
+           const Class::Prop* objProp,
            const Class* propClass)
     : slot{slot}
     , index{index}
@@ -90,7 +92,7 @@ struct PropInfo {
     , knownType{std::move(knownType)}
     , typeConstraint{typeConstraint}
     , ubs{ubs}
-    , objClass{objClass}
+    , objProp{objProp}
     , propClass{propClass}
   {}
 
@@ -103,8 +105,9 @@ struct PropInfo {
   Type knownType{TCell};
   const HPHP::TypeConstraint* typeConstraint{nullptr};
   const UpperBoundVec* ubs{nullptr};
-  const Class* objClass{nullptr};
+  const Class::Prop* objProp{nullptr};
   const Class* propClass{nullptr};
+
 };
 
 Type knownTypeForProp(const Class::Prop& prop,
@@ -201,7 +204,7 @@ getPropertyOffset(IRGS& env,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
     &prop.typeConstraint,
     &prop.ubs,
-    baseClass,
+    &prop,
     prop.cls
   );
 }
@@ -337,7 +340,7 @@ SSATmp* emitPropSpecialized(
   assertx(base->isA(TObj));
 
   assertx(IMPLIES(propInfo.lateInitCheck, propInfo.lateInit));
-
+  emitModuleBoundaryCheckKnown(env, propInfo.objProp);
   if (!propInfo.lateInitCheck &&
       (propInfo.lateInit ||
        mode != MOpMode::Warn ||

@@ -1773,6 +1773,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case LdCoeffectFunParamNaive:
   case RaiseModuleBoundaryViolation:
+  case RaiseModulePropertyViolation:
   case RaiseImplicitContextStateInvalid:
     return may_load_store(AEmpty, AEmpty);
 

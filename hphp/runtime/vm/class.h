@@ -207,6 +207,14 @@ struct Class : AtomicCountable {
      * Slot number that is only valid for reflection and serialization.
      */
     Slot serializationIdx;
+
+    bool isInternal() const {
+      return (attrs & AttrInternal);
+    }
+
+    const StringData* moduleName() const {
+      return cls.get()->moduleName();
+    }
   };
 
   /*
@@ -1008,6 +1016,7 @@ public:
     bool accessible;
     bool constant;
     bool readonly;
+    bool internal;
   };
 
   /*

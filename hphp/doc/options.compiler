@@ -57,27 +57,6 @@ resolve file paths at compilation time. It will look like this,
     }
   }
 
-= AutoloadRoots
-
-Only needed when --input-list is not used.
-In this case, compiler needs to understand all autoloads to find a class file.
-It will look like this:
-
-  AutoloadRoots {
-    * {
-      root = $GLOBALS['THRIFT_AUTOLOAD']
-      path = lib/thrift/packages
-    }
-  }
-
-With the above configuration, whenever a class name is added to the array,
-
-  $GLOBALS['THRIFT_AUTOLOAD'][] = 'myclass';
-
-It will be searched against the specified path. Please note that, this is
-not a good way to work around the problem. --include-list is recommended to
-specify all class files explicitly. Then this option isn't needed.
-
 = IncludeSearchPaths
 
 Only needed when --input-list is not used.

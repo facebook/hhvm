@@ -517,7 +517,6 @@ struct RuntimeOption {
    *   RuntimeOption::IncludeRoots["$LIB_ROOT"] = "lib";
    */
   static std::map<std::string, std::string> IncludeRoots;
-  static std::map<std::string, std::string> AutoloadRoots;
 
   static bool AutoloadEnabled;
   static bool AutoloadEnableExternFactExtractor;

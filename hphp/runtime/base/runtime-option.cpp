@@ -828,7 +828,6 @@ std::set<std::string> RuntimeOption::XboxPasswords;
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
-std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
 bool RuntimeOption::AutoloadEnabled;
 bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;

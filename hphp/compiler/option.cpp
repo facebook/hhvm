@@ -91,7 +91,6 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
-  LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
 
   Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
   Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");

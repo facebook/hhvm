@@ -11,6 +11,7 @@
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 
 
 namespace test { namespace fixtures { namespace tablebased {

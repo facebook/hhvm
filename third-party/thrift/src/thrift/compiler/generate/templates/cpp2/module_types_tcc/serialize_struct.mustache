@@ -15,24 +15,28 @@
   limitations under the License.
 
 %>template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::serializedSize(Protocol_ const* prot_) const {
+uint32_t <%struct:cpp_underlying_name%>::serializedSize(Protocol_ const*<%^struct:cpp_use_op_encode%> prot_<%/struct:cpp_use_op_encode%>) const {
   uint32_t xfer = 0;
+<%^struct:cpp_use_op_encode%>
   xfer += prot_->serializedStructSize("<%struct:name%>");
 <%#struct:fields_in_serialization_order%>
 <% > module_types_tcc/serialize_field_size%>
 <%/struct:fields_in_serialization_order%>
   xfer += prot_->serializedSizeStop();
+<%/struct:cpp_use_op_encode%>
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t <%struct:cpp_underlying_name%>::serializedSizeZC(Protocol_ const* prot_) const {
+uint32_t <%struct:cpp_underlying_name%>::serializedSizeZC(Protocol_ const*<%^struct:cpp_use_op_encode%> prot_<%/struct:cpp_use_op_encode%>) const {
   uint32_t xfer = 0;
+<%^struct:cpp_use_op_encode%>
   xfer += prot_->serializedStructSize("<%struct:name%>");
 <%#struct:fields_in_serialization_order%>
 <% > module_types_tcc/serialize_field_size_zc%>
 <%/struct:fields_in_serialization_order%>
   xfer += prot_->serializedSizeStop();
+<%/struct:cpp_use_op_encode%>
   return xfer;
 }
 

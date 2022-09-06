@@ -7,8 +7,6 @@
  *
  *)
 
-include Ast_defs_visitors_ancestors
-
 (*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
@@ -131,35 +129,31 @@ and visibility =
     ord,
     visitors
       {
-        name = "iter_defs";
         variety = "iter";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["iter_defs_base"];
+        ancestors = ["Visitors_runtime.iter_base"];
       },
     visitors
       {
-        name = "endo_defs";
         variety = "endo";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["endo_defs_base"];
+        ancestors = ["Visitors_runtime.endo_base"];
       },
     visitors
       {
-        name = "reduce_defs";
         variety = "reduce";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["reduce_defs_base"];
+        ancestors = ["Visitors_runtime.reduce_base"];
       },
     visitors
       {
-        name = "map_defs";
         variety = "map";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["map_defs_base"];
+        ancestors = ["Visitors_runtime.map_base"];
       }]
 
 (*****************************************************************************)

@@ -207,3 +207,9 @@
  (name gc_utils)
  (modules gc_utils)
  (libraries utils_core))
+
+(library
+ (name visitors_runtime)
+ (wrapped false)
+ (modules visitors_runtime)
+ (libraries core_kernel visitors.runtime))

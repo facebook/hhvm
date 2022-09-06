@@ -49,7 +49,7 @@ let find_in_tree (walker : 'a walker) line char =
   object (self)
     inherit [_] Tast_visitor.reduce
 
-    inherit [_] Ast_defs.option_monoid
+    inherit [_] Visitors_runtime.option_monoid
 
     method merge = walker.plus
 

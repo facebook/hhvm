@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ae765745658e2f1c7d58c994cbb48b3>>
+// @generated SignedSource<<6f8539d8b4801581ea648b6f02f51626>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -636,7 +636,8 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
          variety = "iter";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["iter_defs_base"]
+         ancestors =
+           ["Visitors_runtime.iter"; "Aast_defs_visitors_ancestors.iter"]
        }),
     (visitors
        {
@@ -644,7 +645,8 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
          variety = "reduce";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["reduce_defs_base"]
+         ancestors =
+           ["Visitors_runtime.reduce"; "Aast_defs_visitors_ancestors.reduce"]
        }),
     (visitors
        {
@@ -652,7 +654,8 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
          variety = "map";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["map_defs_base"]
+         ancestors =
+           ["Visitors_runtime.map"; "Aast_defs_visitors_ancestors.map"]
        }),
     (visitors
        {
@@ -660,7 +663,8 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
          variety = "endo";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["endo_defs_base"]
+         ancestors =
+           ["Visitors_runtime.endo"; "Aast_defs_visitors_ancestors.endo"]
        }))"#)]
 #[repr(u8)]
 pub enum ReifyKind {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2ee3ca66784f5d4dee9fc138b1270890>>
+// @generated SignedSource<<c431df1634280a426a024b3d6802e50c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -463,35 +463,31 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
     (visitors
        {
-         name = "iter_defs";
          variety = "iter";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["iter_defs_base"]
+         ancestors = ["Visitors_runtime.iter_base"]
        }),
     (visitors
        {
-         name = "endo_defs";
          variety = "endo";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["endo_defs_base"]
+         ancestors = ["Visitors_runtime.endo_base"]
        }),
     (visitors
        {
-         name = "reduce_defs";
          variety = "reduce";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["reduce_defs_base"]
+         ancestors = ["Visitors_runtime.reduce_base"]
        }),
     (visitors
        {
-         name = "map_defs";
          variety = "map";
          nude = true;
          visit_prefix = "on_";
-         ancestors = ["map_defs_base"]
+         ancestors = ["Visitors_runtime.map_base"]
        }))"#)]
 #[repr(u8)]
 pub enum Visibility {

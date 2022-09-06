@@ -10,9 +10,9 @@
 module SM = Ast_defs.ShapeMap
 module LM = Local_id.Map
 
-class ['self] iter_defs_base =
+class virtual ['self] iter =
   object (self : 'self)
-    inherit [_] Ast_defs.iter_defs
+    inherit [_] Ast_defs.iter
 
     method private on_shape_map
         : 'a. ('env -> 'a -> unit) -> 'env -> 'a SM.t -> unit =
@@ -35,9 +35,9 @@ class ['self] iter_defs_base =
     method on_'en _ _ = ()
   end
 
-class virtual ['self] reduce_defs_base =
+class virtual ['self] reduce =
   object (self : 'self)
-    inherit [_] Ast_defs.reduce_defs
+    inherit [_] Ast_defs.reduce
 
     method private on_shape_map
         : 'a. ('env -> 'a -> 'acc) -> 'env -> 'a SM.t -> 'acc =
@@ -64,9 +64,9 @@ class virtual ['self] reduce_defs_base =
     method on_'en _env _ = self#zero
   end
 
-class ['self] map_defs_base =
+class virtual ['self] map =
   object (self : 'self)
-    inherit [_] Ast_defs.map_defs
+    inherit [_] Ast_defs.map
 
     method private on_shape_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a SM.t -> 'b SM.t =
@@ -85,9 +85,9 @@ class ['self] map_defs_base =
     method private on_xhp_enum_value _env xev = xev
   end
 
-class ['self] endo_defs_base =
+class virtual ['self] endo =
   object (self : 'self)
-    inherit [_] Ast_defs.endo_defs
+    inherit [_] Ast_defs.endo
 
     method private on_shape_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a SM.t -> 'b SM.t =

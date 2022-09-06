@@ -7,7 +7,6 @@
  *
  *)
 
-include Aast_defs_visitors_ancestors
 module ShapeMap = Ast_defs.ShapeMap
 
 type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
@@ -221,7 +220,8 @@ and reify_kind =
         variety = "iter";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["iter_defs_base"];
+        ancestors =
+          ["Visitors_runtime.iter"; "Aast_defs_visitors_ancestors.iter"];
       },
     visitors
       {
@@ -229,7 +229,8 @@ and reify_kind =
         variety = "reduce";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["reduce_defs_base"];
+        ancestors =
+          ["Visitors_runtime.reduce"; "Aast_defs_visitors_ancestors.reduce"];
       },
     visitors
       {
@@ -237,7 +238,7 @@ and reify_kind =
         variety = "map";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["map_defs_base"];
+        ancestors = ["Visitors_runtime.map"; "Aast_defs_visitors_ancestors.map"];
       },
     visitors
       {
@@ -245,7 +246,8 @@ and reify_kind =
         variety = "endo";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["endo_defs_base"];
+        ancestors =
+          ["Visitors_runtime.endo"; "Aast_defs_visitors_ancestors.endo"];
       }]
 
 let string_of_tprim prim =

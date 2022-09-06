@@ -13,7 +13,7 @@ open Option.Monad_infix
 (* Is this expression indexing into a value of type shape?
  * E.g. $some_shope['foo'].
  *
- * If so, return the receiver. 
+ * If so, return the receiver.
  *)
 let shape_indexing_receiver env (_, _, expr_) : Tast.expr option =
   match expr_ with
@@ -90,7 +90,7 @@ let base_visitor ~human_friendly line char =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
-    inherit [Pos.t * _ * _] Ast_defs.option_monoid
+    inherit [Pos.t * _ * _] Visitors_runtime.option_monoid
 
     method private merge lhs rhs =
       (* A node with position P is not always a parent of every other node with
@@ -183,7 +183,7 @@ let range_visitor startl startc endl endc =
   object
     inherit [_] Tast_visitor.reduce as super
 
-    inherit [_] Ast_defs.option_monoid
+    inherit [_] Visitors_runtime.option_monoid
 
     method merge x _ = x
 

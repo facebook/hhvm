@@ -317,144 +317,152 @@ unsafe fn Reverse_64(dest: *mut c_char, src: *mut c_char) {
     *_q.offset(4) = _b
 }
 
-// ---
+struct intern_state {
+    intern_src: *mut c_uchar,
+    // Reading pointer in block holding input data.
+    intern_input: *mut c_uchar,
+    // Pointer to beginning of block holding input data, if non-NULL this
+    // pointer will be freed by the cleanup function.
+    intern_dest: *mut header_t,
+    // Writing pointer in destination block
+    intern_extra_block: *mut c_char,
+    // If non-NULL, point to new heap chunk allocated with caml_alloc_for_heap.
+    obj_counter: asize_t,
+    // Count how many objects seen so far
+    intern_obj_table: *mut value,
+    // The pointers to objects already seen
+    intern_color: color_t,
+    // Color to assign to newly created headers
+    intern_header: header_t,
+    // Original header of the destination block. Meaningful only if
+    // intern_extra_block is NULL.
+    intern_block: value,
+    // Point to the heap block allocated as destination block. Meaningful only
+    // if intern_extra_block is NULL.
+}
 
-static mut intern_src: *mut c_uchar = std::ptr::null_mut::<c_uchar>();
-// Reading pointer in block holding input data.
-
-static mut intern_input: *mut c_uchar = std::ptr::null_mut();
-// Pointer to beginning of block holding input data, if non-NULL this pointer
-// will be freed by the cleanup function.
-
-static mut intern_dest: *mut header_t = std::ptr::null_mut();
-// Writing pointer in destination block
-
-static mut intern_extra_block: *mut c_char = std::ptr::null_mut();
-// If non-NULL, point to new heap chunk allocated with caml_alloc_for_heap.
-
-static mut obj_counter: asize_t = 0;
-// Count how many objects seen so far
-
-static mut intern_obj_table: *mut value = std::ptr::null_mut();
-// The pointers to objects already seen
-
-static mut intern_color: color_t = 0;
-// Color to assign to newly created headers
-
-static mut intern_header: header_t = 0;
-// Original header of the destination block. Meaningful only if
-// intern_extra_block is NULL.
-
-static mut intern_block: value = 0 as value;
-// Point to the heap block allocated as destination block. Meaningful only if
-// intern_extra_block is NULL.
+impl intern_state {
+    const fn new() -> Self {
+        Self {
+            intern_src: std::ptr::null_mut::<c_uchar>(),
+            intern_input: std::ptr::null_mut::<c_uchar>(),
+            intern_dest: std::ptr::null_mut::<header_t>(),
+            intern_extra_block: std::ptr::null_mut::<c_char>(),
+            obj_counter: 0,
+            intern_obj_table: std::ptr::null_mut::<value>(),
+            intern_color: 0,
+            intern_header: 0,
+            intern_block: 0,
+        }
+    }
+}
 
 #[inline]
-unsafe fn read8u() -> c_uchar {
-    let fresh0 = intern_src;
-    intern_src = intern_src.offset(1);
+unsafe fn read8u(is: &mut intern_state) -> c_uchar {
+    let fresh0 = is.intern_src;
+    is.intern_src = is.intern_src.offset(1);
     *fresh0
 }
 
 #[inline]
-unsafe fn read8s() -> c_schar {
-    let fresh1 = intern_src;
-    intern_src = intern_src.offset(1);
+unsafe fn read8s(is: &mut intern_state) -> c_schar {
+    let fresh1 = is.intern_src;
+    is.intern_src = is.intern_src.offset(1);
     *fresh1 as c_schar
 }
 
 #[inline]
-unsafe fn read16u() -> uint16_t {
-    let res: uint16_t =
-        (((*intern_src.offset(0) as c_int) << 8) + *intern_src.offset(1) as c_int) as uint16_t;
-    intern_src = intern_src.offset(2);
+unsafe fn read16u(is: &mut intern_state) -> uint16_t {
+    let res: uint16_t = (((*is.intern_src.offset(0) as c_int) << 8)
+        + *is.intern_src.offset(1) as c_int) as uint16_t;
+    is.intern_src = is.intern_src.offset(2);
     res
 }
 
 #[inline]
-unsafe fn read16s() -> int16_t {
+unsafe fn read16s(is: &mut intern_state) -> int16_t {
     let res: int16_t =
-        (((*intern_src.offset(0) as c_int) << 8) + *intern_src.offset(1) as c_int) as int16_t;
-    intern_src = intern_src.offset(2);
+        (((*is.intern_src.offset(0) as c_int) << 8) + *is.intern_src.offset(1) as c_int) as int16_t;
+    is.intern_src = is.intern_src.offset(2);
     res
 }
 
 #[inline]
-unsafe fn read32u() -> uint32_t {
-    let res: uint32_t = ((*intern_src.offset(0) as uint32_t) << 24)
-        + (((*intern_src.offset(1) as c_int) << 16) as c_uint)
-        + (((*intern_src.offset(2) as c_int) << 8) as c_uint)
-        + (*intern_src.offset(3) as c_uint);
-    intern_src = intern_src.offset(4);
+unsafe fn read32u(is: &mut intern_state) -> uint32_t {
+    let res: uint32_t = ((*is.intern_src.offset(0) as uint32_t) << 24)
+        + (((*is.intern_src.offset(1) as c_int) << 16) as c_uint)
+        + (((*is.intern_src.offset(2) as c_int) << 8) as c_uint)
+        + (*is.intern_src.offset(3) as c_uint);
+    is.intern_src = is.intern_src.offset(4);
     res
 }
 
 #[inline]
-unsafe fn read32s() -> int32_t {
-    let res: int32_t = (((*intern_src.offset(0) as uint32_t) << 24 as c_int)
-        + (((*intern_src.offset(1) as c_int) << 16) as c_uint)
-        + (((*intern_src.offset(2) as c_int) << 8) as c_uint)
-        + (*intern_src.offset(3) as c_uint)) as int32_t;
-    intern_src = intern_src.offset(4);
+unsafe fn read32s(is: &mut intern_state) -> int32_t {
+    let res: int32_t = (((*is.intern_src.offset(0) as uint32_t) << 24 as c_int)
+        + (((*is.intern_src.offset(1) as c_int) << 16) as c_uint)
+        + (((*is.intern_src.offset(2) as c_int) << 8) as c_uint)
+        + (*is.intern_src.offset(3) as c_uint)) as int32_t;
+    is.intern_src = is.intern_src.offset(4);
     res
 }
 
-unsafe fn read64u() -> uintnat {
-    let res: uintnat = ((*intern_src.offset(0) as uintnat) << 56)
-        + ((*intern_src.offset(1) as uintnat) << 48)
-        + ((*intern_src.offset(2) as uintnat) << 40)
-        + ((*intern_src.offset(3) as uintnat) << 32)
-        + ((*intern_src.offset(4) as uintnat) << 24)
-        + ((*intern_src.offset(5) as uintnat) << 16)
-        + ((*intern_src.offset(6) as uintnat) << 8)
-        + (*intern_src.offset(7) as uintnat);
-    intern_src = intern_src.offset(8);
+unsafe fn read64u(is: &mut intern_state) -> uintnat {
+    let res: uintnat = ((*is.intern_src.offset(0) as uintnat) << 56)
+        + ((*is.intern_src.offset(1) as uintnat) << 48)
+        + ((*is.intern_src.offset(2) as uintnat) << 40)
+        + ((*is.intern_src.offset(3) as uintnat) << 32)
+        + ((*is.intern_src.offset(4) as uintnat) << 24)
+        + ((*is.intern_src.offset(5) as uintnat) << 16)
+        + ((*is.intern_src.offset(6) as uintnat) << 8)
+        + (*is.intern_src.offset(7) as uintnat);
+    is.intern_src = is.intern_src.offset(8);
     res
 }
 
 #[inline]
-unsafe fn readblock(dest: *mut c_void, len: intnat) {
-    memcpy(dest, intern_src as *const c_void, len as usize);
-    intern_src = intern_src.offset(len as isize);
+unsafe fn readblock(is: &mut intern_state, dest: *mut c_void, len: intnat) {
+    memcpy(dest, is.intern_src as *const c_void, len as usize);
+    is.intern_src = is.intern_src.offset(len as isize);
 }
 
-unsafe fn intern_init(src: *mut c_void, input: *mut c_void) {
+unsafe fn intern_init(is: &mut intern_state, src: *mut c_void, input: *mut c_void) {
     // This is asserted at the beginning of demarshaling primitives. If it fails,
     // it probably means that an exception was raised without calling
     // intern_cleanup() during the previous demarshaling.
 
-    intern_src = src as *mut c_uchar;
-    intern_input = input as *mut c_uchar;
+    is.intern_src = src as *mut c_uchar;
+    is.intern_input = input as *mut c_uchar;
 }
 
-unsafe fn intern_cleanup() {
-    if !intern_input.is_null() {
-        caml_stat_free(intern_input as caml_stat_block);
-        intern_input = std::ptr::null_mut::<c_uchar>();
+unsafe fn intern_cleanup(is: &mut intern_state) {
+    if !is.intern_input.is_null() {
+        caml_stat_free(is.intern_input as caml_stat_block);
+        is.intern_input = std::ptr::null_mut::<c_uchar>();
     }
-    if !intern_obj_table.is_null() {
-        caml_stat_free(intern_obj_table as caml_stat_block);
-        intern_obj_table = std::ptr::null_mut::<value>();
+    if !is.intern_obj_table.is_null() {
+        caml_stat_free(is.intern_obj_table as caml_stat_block);
+        is.intern_obj_table = std::ptr::null_mut::<value>();
     }
-    if !intern_extra_block.is_null() {
+    if !is.intern_extra_block.is_null() {
         // free newly allocated heap chunk
-        caml_free_for_heap(intern_extra_block);
-        intern_extra_block = std::ptr::null_mut::<c_char>();
-    } else if intern_block != 0 {
+        caml_free_for_heap(is.intern_extra_block);
+        is.intern_extra_block = std::ptr::null_mut::<c_char>();
+    } else if is.intern_block != 0 {
         // restore original header for heap block, otherwise GC is confused
-        Hd_val_set(intern_block, intern_header);
-        intern_block = 0;
+        Hd_val_set(is.intern_block, is.intern_header);
+        is.intern_block = 0;
     }
     // free the recursion stack
     intern_free_stack();
 }
 
-unsafe fn readfloat(dest: *mut c_double, code: c_uint) {
+unsafe fn readfloat(is: &mut intern_state, dest: *mut c_double, code: c_uint) {
     if std::mem::size_of::<c_double>() != 8 {
-        intern_cleanup();
+        intern_cleanup(is);
         caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
     }
-    readblock(dest as *mut c_void, 8 as intnat);
+    readblock(is, dest as *mut c_void, 8 as intnat);
 
     // Fix up endianness, if needed
     if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
@@ -473,12 +481,17 @@ unsafe fn readfloat(dest: *mut c_double, code: c_uint) {
 }
 
 // `len` is a number of floats
-unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint) {
+unsafe extern "C" fn readfloats(
+    is: &mut intern_state,
+    dest: *mut c_double,
+    len: mlsize_t,
+    code: c_uint,
+) {
     if std::mem::size_of::<c_double>() != 8 {
-        intern_cleanup();
+        intern_cleanup(is);
         caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
     }
-    readblock(dest as *mut c_void, (len * 8) as intnat);
+    readblock(is, dest as *mut c_void, (len * 8) as intnat);
     // Fix up endianness, if needed
     if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
         // Host is big-endian; fix up if data read is little-endian
@@ -611,7 +624,7 @@ const READ_SHARED_LABEL: u64 = 8656139126282042408;
 const READ_DOUBLE_ARRAY_LABEL: u64 = 8966088013221564425;
 const NOTHING_TO_DO_LABEL: u64 = 8288085890650723895;
 
-unsafe fn intern_rec(mut dest: *mut value) {
+unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
     let mut current_block: u64;
     let mut header: header_t;
     let mut code: c_uint;
@@ -656,7 +669,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                     sp = sp.offset(-1)
                 }
                 // Read a value and set v to this value
-                code = read8u() as c_uint;
+                code = read8u(is) as c_uint;
                 if code >= PREFIX_SMALL_INT as c_uint {
                     if code >= PREFIX_SMALL_BLOCK as c_uint {
                         // Small block
@@ -676,94 +689,94 @@ unsafe fn intern_rec(mut dest: *mut value) {
                     } else {
                         match code as i32 {
                             CODE_INT8 => {
-                                v = ((read8s() as uintnat) << 1) as intnat + 1 as c_long;
+                                v = ((read8s(is) as uintnat) << 1) as intnat + 1 as c_long;
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
                             CODE_INT16 => {
-                                v = ((read16s() as uintnat) << 1) as intnat + 1 as c_long;
+                                v = ((read16s(is) as uintnat) << 1) as intnat + 1 as c_long;
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
                             CODE_INT32 => {
-                                v = ((read32s() as uintnat) << 1) as intnat + 1 as c_long;
+                                v = ((read32s(is) as uintnat) << 1) as intnat + 1 as c_long;
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
                             CODE_INT64 => {
-                                v = ((read64u() as uintnat) << 1) as intnat + 1 as c_long;
+                                v = ((read64u(is) as uintnat) << 1) as intnat + 1 as c_long;
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
                             CODE_SHARED8 => {
-                                ofs = read8u() as asize_t;
+                                ofs = read8u(is) as asize_t;
                                 current_block = READ_SHARED_LABEL;
                             }
                             CODE_SHARED16 => {
-                                ofs = read16u() as asize_t;
+                                ofs = read16u(is) as asize_t;
                                 current_block = READ_SHARED_LABEL;
                             }
                             CODE_SHARED32 => {
-                                ofs = read32u() as asize_t;
+                                ofs = read32u(is) as asize_t;
                                 current_block = READ_SHARED_LABEL;
                             }
                             CODE_SHARED64 => {
-                                ofs = read64u();
+                                ofs = read64u(is);
                                 current_block = READ_SHARED_LABEL;
                             }
                             CODE_BLOCK32 => {
-                                header = read32u() as header_t;
+                                header = read32u(is) as header_t;
                                 tag = (header & 0xff) as tag_t;
                                 size = header >> 10;
                                 current_block = READ_BLOCK_LABEL;
                             }
                             CODE_BLOCK64 => {
-                                header = read64u();
+                                header = read64u(is);
                                 tag = (header & 0xff) as tag_t;
                                 size = header >> 10;
                                 current_block = READ_BLOCK_LABEL;
                             }
                             CODE_STRING8 => {
-                                len = read8u() as mlsize_t;
+                                len = read8u(is) as mlsize_t;
                                 current_block = READ_STRING_LABEL;
                             }
                             CODE_STRING32 => {
-                                len = read32u() as mlsize_t;
+                                len = read32u(is) as mlsize_t;
                                 current_block = READ_STRING_LABEL;
                             }
                             CODE_STRING64 => {
-                                len = read64u();
+                                len = read64u(is);
                                 current_block = READ_STRING_LABEL;
                             }
                             CODE_DOUBLE_LITTLE | CODE_DOUBLE_BIG => {
-                                v = Val_hp(intern_dest);
-                                if !intern_obj_table.is_null() {
-                                    let fresh5 = obj_counter;
-                                    obj_counter += 1;
-                                    *intern_obj_table.offset(fresh5 as isize) = v
+                                v = Val_hp(is.intern_dest);
+                                if !is.intern_obj_table.is_null() {
+                                    let fresh5 = is.obj_counter;
+                                    is.obj_counter += 1;
+                                    *is.intern_obj_table.offset(fresh5 as isize) = v
                                 }
-                                *intern_dest = Make_header(
+                                *is.intern_dest = Make_header(
                                     ocamlrep::DOUBLE_WOSIZE as c_ulong,
                                     ocamlrep::DOUBLE_TAG as tag_t,
-                                    intern_color,
+                                    is.intern_color,
                                 );
-                                intern_dest = intern_dest.add(1 + ocamlrep::DOUBLE_WOSIZE);
-                                readfloat(v as *mut c_double, code);
+                                is.intern_dest = is.intern_dest.add(1 + ocamlrep::DOUBLE_WOSIZE);
+                                readfloat(is, v as *mut c_double, code);
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
                             CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY8_BIG => {
-                                len = read8u() as mlsize_t;
+                                len = read8u(is) as mlsize_t;
                                 current_block = READ_DOUBLE_ARRAY_LABEL;
                             }
                             CODE_DOUBLE_ARRAY32_LITTLE | CODE_DOUBLE_ARRAY32_BIG => {
-                                len = read32u() as mlsize_t;
+                                len = read32u(is) as mlsize_t;
                                 current_block = READ_DOUBLE_ARRAY_LABEL;
                             }
                             CODE_DOUBLE_ARRAY64_LITTLE | CODE_DOUBLE_ARRAY64_BIG => {
-                                len = read64u();
+                                len = read64u(is);
                                 current_block = READ_DOUBLE_ARRAY_LABEL;
                             }
                             CODE_CODEPOINTER => {
                                 unimplemented!()
                             }
                             CODE_INFIXPOINTER => {
-                                ofs = read32u() as asize_t;
+                                ofs = read32u(is) as asize_t;
                                 sp = PushItem(sp);
                                 (*sp).dest = dest;
                                 (*sp).op = OShift;
@@ -775,7 +788,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                 unimplemented!()
                             }
                             _ => {
-                                intern_cleanup();
+                                intern_cleanup(is);
                                 caml_failwith(b"input_value: ill-formed message\x00".as_ptr()
                                     as *const c_char);
                             }
@@ -787,19 +800,19 @@ unsafe fn intern_rec(mut dest: *mut value) {
                             _ => {
                                 match current_block {
                                     READ_SHARED_LABEL => {
-                                        v = *intern_obj_table.offset((obj_counter - ofs) as isize)
+                                        v = *is.intern_obj_table.offset((is.obj_counter - ofs) as isize)
                                     }
                                     _ /* READ_DOUBLE_ARRAY_LABEL */ => {
                                         size = len * ocamlrep::DOUBLE_WOSIZE as c_ulong;
-                                        v = Val_hp(intern_dest);
-                                        if !intern_obj_table.is_null() {
-                                            let fresh6 = obj_counter;
-                                            obj_counter += 1;
-                                            *intern_obj_table.offset(fresh6 as isize) = v
+                                        v = Val_hp(is.intern_dest);
+                                        if !is.intern_obj_table.is_null() {
+                                            let fresh6 = is.obj_counter;
+                                            is.obj_counter += 1;
+                                            *is.intern_obj_table.offset(fresh6 as isize) = v
                                         }
-                                        *intern_dest = Make_header(size, ocamlrep::DOUBLE_ARRAY_TAG as tag_t, intern_color);
-                                        intern_dest = intern_dest.offset((1 + size) as isize);
-                                        readfloats(v as *mut c_double, len, code);
+                                        *is.intern_dest = Make_header(size, ocamlrep::DOUBLE_ARRAY_TAG as tag_t, is.intern_color);
+                                        is.intern_dest = is.intern_dest.offset((1 + size) as isize);
+                                        readfloats(is, v as *mut c_double, len, code);
                                     }
                                 }
                                 current_block = NOTHING_TO_DO_LABEL;
@@ -811,18 +824,18 @@ unsafe fn intern_rec(mut dest: *mut value) {
                         READ_BLOCK_LABEL => {}
                         _ /* READ_STRING_LABEL */ => {
                             size = (len + (std::mem::size_of::<value>() as c_ulong)) / (std::mem::size_of::<value>() as c_ulong);
-                            v = Val_hp(intern_dest);
-                            if !intern_obj_table.is_null() {
-                                let fresh4 = obj_counter;
-                                obj_counter += 1;
-                                *intern_obj_table.offset(fresh4 as isize) = v
+                            v = Val_hp(is.intern_dest);
+                            if !is.intern_obj_table.is_null() {
+                                let fresh4 = is.obj_counter;
+                                is.obj_counter += 1;
+                                *is.intern_obj_table.offset(fresh4 as isize) = v
                             }
-                            *intern_dest = Make_header(size, ocamlrep::STRING_TAG as tag_t, intern_color);
-                            intern_dest = intern_dest.offset((1 + size) as isize);
+                            *is.intern_dest = Make_header(size, ocamlrep::STRING_TAG as tag_t, is.intern_color);
+                            is.intern_dest = is.intern_dest.offset((1 + size) as isize);
                             *(Field_ptr_mut(v, (size - 1) as usize)) = 0;
                             ofs_ind = Bsize_wsize(size) - (1 as c_ulong);
                             *(Byte_ptr_mut(v, ofs_ind as usize)) = (ofs_ind - len) as c_char;
-                            readblock(v as *mut c_void, len as intnat);
+                            readblock(is, v as *mut c_void, len as intnat);
                             current_block = NOTHING_TO_DO_LABEL;
                         }
                     }
@@ -832,14 +845,14 @@ unsafe fn intern_rec(mut dest: *mut value) {
                         if size == 0 {
                             v = Atom(tag as isize)
                         } else {
-                            v = Val_hp(intern_dest);
-                            if !intern_obj_table.is_null() {
-                                let fresh3 = obj_counter;
-                                obj_counter += 1;
-                                *intern_obj_table.offset(fresh3 as isize) = v
+                            v = Val_hp(is.intern_dest);
+                            if !is.intern_obj_table.is_null() {
+                                let fresh3 = is.obj_counter;
+                                is.obj_counter += 1;
+                                *is.intern_obj_table.offset(fresh3 as isize) = v
                             }
-                            *intern_dest = Make_header(size, tag, intern_color);
-                            intern_dest = intern_dest.offset((1 + size) as isize);
+                            *is.intern_dest = Make_header(size, tag, is.intern_color);
+                            is.intern_dest = is.intern_dest.offset((1 + size) as isize);
                             // For objects, we need to freshen the oid
                             if tag == ocamlrep::OBJECT_TAG as tag_t {
                                 // Request to read rest of the elements of the block
@@ -867,7 +880,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
     intern_free_stack();
 }
 
-unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
+unsafe fn intern_alloc(is: &mut intern_state, whsize: mlsize_t, num_objects: mlsize_t) {
     if whsize == 0 {
         return;
     }
@@ -876,18 +889,18 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
         // Round desired size up to next page
         let request: asize_t =
             ((Bsize_wsize(whsize) + (PAGE_SIZE as mlsize_t) - 1) >> PAGE_LOG) << PAGE_LOG;
-        intern_extra_block = caml_alloc_for_heap(request);
-        if intern_extra_block.is_null() {
-            intern_cleanup();
+        is.intern_extra_block = caml_alloc_for_heap(request);
+        if is.intern_extra_block.is_null() {
+            intern_cleanup(is);
             caml_raise_out_of_memory();
         }
-        intern_color = caml_allocation_color(intern_extra_block as *mut c_void);
-        intern_dest = intern_extra_block as *mut header_t
+        is.intern_color = caml_allocation_color(is.intern_extra_block as *mut c_void);
+        is.intern_dest = is.intern_extra_block as *mut header_t
     } else {
         // This is a specialized version of caml_alloc from 'alloc.c'
         if wosize <= MAX_YOUNG_WOSIZE as c_ulong {
             if wosize == 0 {
-                intern_block = Atom(ocamlrep::STRING_TAG as isize);
+                is.intern_block = Atom(ocamlrep::STRING_TAG as isize);
             } else {
                 /*
                 #define Setup_for_gc
@@ -908,65 +921,66 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
                 }
                 *((*Caml_state)._young_ptr as *mut header_t) =
                     Make_header(wosize, ocamlrep::STRING_TAG as tag_t, 0);
-                intern_block = ((*Caml_state)._young_ptr as *mut header_t).offset(1) as value
+                is.intern_block = ((*Caml_state)._young_ptr as *mut header_t).offset(1) as value
             }
         } else {
-            intern_block = caml_alloc_shr_no_track_noexc(wosize, ocamlrep::STRING_TAG as tag_t);
+            is.intern_block = caml_alloc_shr_no_track_noexc(wosize, ocamlrep::STRING_TAG as tag_t);
             // do not do the urgent_gc check here because it might darken
             // intern_block into gray and break the intern_color assertion below
-            if intern_block == 0 {
-                intern_cleanup();
+            if is.intern_block == 0 {
+                intern_cleanup(is);
                 caml_raise_out_of_memory();
             }
         }
-        intern_header = Hd_val(intern_block);
-        intern_color = Color_hd(intern_header);
-        intern_dest = Hp_val(intern_block);
+        is.intern_header = Hd_val(is.intern_block);
+        is.intern_color = Color_hd(is.intern_header);
+        is.intern_dest = Hp_val(is.intern_block);
     }
-    obj_counter = 0;
+    is.obj_counter = 0;
     if num_objects > 0 {
-        intern_obj_table =
+        is.intern_obj_table =
             caml_stat_alloc_noexc(num_objects * (std::mem::size_of::<value>() as c_ulong))
                 as *mut value;
-        if intern_obj_table.is_null() {
-            intern_cleanup();
+        if is.intern_obj_table.is_null() {
+            intern_cleanup(is);
             caml_raise_out_of_memory();
         }
     };
 }
 
-unsafe fn intern_add_to_heap(_whsize: mlsize_t) -> *mut header_t {
+unsafe fn intern_add_to_heap(is: &mut intern_state, _whsize: mlsize_t) -> *mut header_t {
     let mut res: *mut header_t = std::ptr::null_mut::<header_t>();
-    if !intern_extra_block.is_null() {
+    if !is.intern_extra_block.is_null() {
         // If heap chunk not filled totally, build free block at end
-        let request: asize_t = (*(intern_extra_block as *mut heap_chunk_head).offset(-1)).size;
+        let request: asize_t = (*(is.intern_extra_block as *mut heap_chunk_head).offset(-1)).size;
 
         let end_extra_block: *mut header_t =
-            (intern_extra_block as *mut header_t).offset(Wsize_bsize(request) as isize);
-        if intern_dest < end_extra_block {
+            (is.intern_extra_block as *mut header_t).offset(Wsize_bsize(request) as isize);
+        if is.intern_dest < end_extra_block {
             make_free_blocks(
-                intern_dest as *mut value,
-                end_extra_block.offset_from(intern_dest) as mlsize_t,
+                is.intern_dest as *mut value,
+                end_extra_block.offset_from(is.intern_dest) as mlsize_t,
                 0,
                 ocamlrep::CAML_WHITE as c_int,
             );
         }
-        caml_allocated_words +=
-            Wsize_bsize((intern_dest as *mut c_char).offset_from(intern_extra_block) as c_ulong);
-        if caml_add_to_heap(intern_extra_block) != 0 {
-            intern_cleanup();
+        caml_allocated_words += Wsize_bsize(
+            (is.intern_dest as *mut c_char).offset_from(is.intern_extra_block) as c_ulong,
+        );
+        if caml_add_to_heap(is.intern_extra_block) != 0 {
+            intern_cleanup(is);
             caml_raise_out_of_memory();
         }
-        res = intern_extra_block as *mut header_t;
-        intern_extra_block = std::ptr::null_mut::<c_char>() // To prevent intern_cleanup freeing it
-    } else if intern_block != 0 {
-        res = Hp_val(intern_block);
-        intern_block = 0; // To prevent intern_cleanup rewriting its header
+        res = is.intern_extra_block as *mut header_t;
+        is.intern_extra_block = std::ptr::null_mut::<c_char>() // To prevent intern_cleanup freeing it
+    } else if is.intern_block != 0 {
+        res = Hp_val(is.intern_block);
+        is.intern_block = 0; // To prevent intern_cleanup rewriting its header
     }
     res
 }
 
-unsafe fn intern_end(mut res: value, whsize: mlsize_t) -> value {
+unsafe fn intern_end(is: &mut intern_state, mut res: value, whsize: mlsize_t) -> value {
     let caml__frame: *mut caml__roots_block = (*Caml_state)._local_roots;
     let mut caml__roots_res: caml__roots_block = caml__roots_block {
         next: std::ptr::null_mut::<caml__roots_block>(),
@@ -981,9 +995,9 @@ unsafe fn intern_end(mut res: value, whsize: mlsize_t) -> value {
     caml__roots_res.tables[0] = &mut res;
     let _caml__dummy_res: c_int = 0;
 
-    let block: *mut header_t = intern_add_to_heap(whsize);
-    let blockend: *mut header_t = intern_dest;
-    intern_cleanup();
+    let block: *mut header_t = intern_add_to_heap(is, whsize);
+    let blockend: *mut header_t = is.intern_dest;
+    intern_cleanup(is);
     if !block.is_null() {
         caml_memprof_track_interned(block, blockend);
     }
@@ -994,23 +1008,23 @@ unsafe fn intern_end(mut res: value, whsize: mlsize_t) -> value {
     caml__temp_result
 }
 
-unsafe fn parse_header(fun_name: *mut c_char, mut h: *mut marshal_header) {
+unsafe fn parse_header(is: &mut intern_state, fun_name: *mut c_char, mut h: *mut marshal_header) {
     let mut errmsg: [c_char; 100] = [0; 100];
-    (*h).magic = read32u();
+    (*h).magic = read32u(is);
     match (*h).magic {
         MAGIC_NUMBER_SMALL => {
             (*h).header_len = 20;
-            (*h).data_len = read32u() as uintnat;
-            (*h).num_objects = read32u() as uintnat;
-            read32u();
-            (*h).whsize = read32u() as uintnat
+            (*h).data_len = read32u(is) as uintnat;
+            (*h).num_objects = read32u(is) as uintnat;
+            read32u(is);
+            (*h).whsize = read32u(is) as uintnat
         }
         MAGIC_NUMBER_BIG => {
             (*h).header_len = 32;
-            read32u();
-            (*h).data_len = read64u();
-            (*h).num_objects = read64u();
-            (*h).whsize = read64u()
+            read32u(is);
+            (*h).data_len = read64u(is);
+            (*h).num_objects = read64u(is);
+            (*h).whsize = read64u(is)
         }
         _ => {
             errmsg[((std::mem::size_of::<[c_char; 100]>() as c_ulong) - 1) as usize] = 0;
@@ -1025,7 +1039,7 @@ unsafe fn parse_header(fun_name: *mut c_char, mut h: *mut marshal_header) {
     };
 }
 
-unsafe fn input_val_from_string(mut str: value, ofs: intnat) -> value {
+unsafe fn input_val_from_string(is: &mut intern_state, mut str: value, ofs: intnat) -> value {
     let caml__frame: *mut caml__roots_block = (*Caml_state)._local_roots;
     let mut caml__roots_str: caml__roots_block = caml__roots_block {
         next: std::ptr::null_mut::<caml__roots_block>(),
@@ -1062,25 +1076,31 @@ unsafe fn input_val_from_string(mut str: value, ofs: intnat) -> value {
     };
     // Initialize global state
     intern_init(
+        is,
         Byte_u_ptr_mut(str, ofs as usize) as *mut c_void,
         std::ptr::null_mut::<c_void>(),
     );
-    parse_header(b"input_val_from_string\x00".as_ptr() as *mut c_char, &mut h);
+    parse_header(
+        is,
+        b"input_val_from_string\x00".as_ptr() as *mut c_char,
+        &mut h,
+    );
     if ((ofs + h.header_len as c_long) as c_ulong) + h.data_len > caml_string_length(str) {
         caml_failwith(b"input_val_from_string: bad length\x00".as_ptr() as *const c_char);
     }
     // Allocate result
-    intern_alloc(h.whsize, h.num_objects);
-    intern_src = Byte_u_ptr_mut(str, (ofs + h.header_len as c_long) as usize);
+    intern_alloc(is, h.whsize, h.num_objects);
+    is.intern_src = Byte_u_ptr_mut(str, (ofs + h.header_len as c_long) as usize);
     // Fill it in
-    intern_rec(&mut obj);
+    intern_rec(is, &mut obj);
 
-    let caml__temp_result: value = intern_end(obj, h.whsize);
+    let caml__temp_result: value = intern_end(is, obj, h.whsize);
     (*Caml_state)._local_roots = caml__frame;
     caml__temp_result
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ocamlrep_marshal_input_value_from_string(str: value, ofs: value) -> value {
-    input_val_from_string(str, ofs >> 1)
+    let mut is: intern_state = intern_state::new();
+    input_val_from_string(&mut is, str, ofs >> 1)
 }

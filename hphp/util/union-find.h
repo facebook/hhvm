@@ -25,98 +25,13 @@
 
 namespace HPHP {
 
-template<typename SizeT>
-struct UnionFindSequential {
-  // Create n disjoint sets with a single node each.  Removes all previous data.
-  void presize(SizeT n) {
-    nodes.clear();
-    nodes.reserve(n);
-    for (SizeT i = 0; i < n; ++i) {
-      append();
-    }
-  }
-
-  // Create a new disjoint set with a single node and return its index.
-  SizeT append() {
-    auto const index = nodes.size();
-    nodes.push_back({static_cast<SizeT>(index), 1});
-    return index;
-  }
-
-  // Merge the disjoint sets for the two indexes. The indexes must have been
-  // appended into the data structure already.  Returns the representative
-  // index for the merged set.
-  SizeT merge(const SizeT n1, const SizeT n2) {
-    return merge(n1, n2, [] (const SizeT, const SizeT) {});
-  }
-
-  // This implementation of merge calls a lambda when two disjoint sets are
-  // combined.  mergeLambda is called with the first parameter being the new
-  // representative set the second parameter is being merged into.
-  template<typename Lambda>
-  SizeT merge(const SizeT n1, const SizeT n2, Lambda mergeLambda) {
-    auto index1 = find(n1);
-    auto index2 = find(n2);
-
-    if (index1 == index2) return index1;
-
-    if (nodes[index1].size < nodes[index2].size) {
-      std::swap(index1, index2);
-    }
-    nodes[index2].parent = index1;
-    nodes[index1].size += nodes[index2].size;
-
-    mergeLambda(index1, index2);
-    return index1;
-  }
-
-  // Return the number of disjoint sets.
-  SizeT countGroups() const {
-    auto result = SizeT{0};
-    for (SizeT i = 0; i < nodes.size(); i++) {
-      if (nodes[i].parent == i) result++;
-    }
-    return result;
-  }
-
-  // Execute `f` for each disjoint set. `f` takes std::vector<SizeT>&.
-  template <typename F>
-  void forEachGroup(F&& f) {
-    DEBUG_ONLY auto const count = countGroups();
-    folly::F14FastMap<SizeT, std::vector<SizeT>> groups;
-    for (SizeT i = 0; i < nodes.size(); ++i) {
-      groups[find(i)].emplace_back(i);
-    }
-    assertx(count == countGroups());
-    assertx(count == groups.size());
-    for (auto& pair : groups) {
-      f(pair.second);
-    }
-  }
-
-  SizeT find(SizeT index) {
-    while (nodes[index].parent != index) {
-      auto const grandparent = nodes[nodes[index].parent].parent;
-      index = nodes[index].parent = grandparent;
-    }
-    return index;
-  }
-
-protected:
-  struct Node {
-    SizeT parent;
-    SizeT size;
-  };
-  std::vector<Node> nodes;
-};
-
 template <typename T>
-struct UnionFind : private UnionFindSequential<size_t> {
-  using Base = UnionFindSequential<size_t>;
-
+struct UnionFind {
   // Create a disjoint set containing only the given node. Return its index.
   size_t insert(const T& node) {
-    auto const pair = indices.emplace(node, append());
+    auto const index = nodes.size();
+    nodes.push_back({index, 1});
+    auto const pair = indices.emplace(node, index);
     assertx(pair.second);
     return pair.first->second;
   }
@@ -133,10 +48,25 @@ struct UnionFind : private UnionFindSequential<size_t> {
     assertx(indices.contains(node1));
     assertx(indices.contains(node2));
     if (node1 == node2) return;
-    Base::merge(indices.at(node1), indices.at(node2));
+    auto index1 = find(indices.at(node1));
+    auto index2 = find(indices.at(node2));
+    if (index1 == index2) return;
+
+    if (nodes[index1].size < nodes[index2].size) {
+      std::swap(index1, index2);
+    }
+    nodes[index2].parent = index1;
+    nodes[index1].size += nodes[index2].size;
   }
 
-  using Base::countGroups;
+  // Return the number of disjoint sets.
+  size_t countGroups() const {
+    auto result = size_t{0};
+    for (auto i = 0; i < nodes.size(); i++) {
+      if (nodes[i].parent == i) result++;
+    }
+    return result;
+  }
 
   // Execute `f` for each disjoint set. `f` takes std::vector<T>&.
   template <typename F>
@@ -154,6 +84,19 @@ struct UnionFind : private UnionFindSequential<size_t> {
   }
 
 private:
+  size_t find(size_t index) {
+    while (nodes[index].parent != index) {
+      auto const grandparent = nodes[nodes[index].parent].parent;
+      index = nodes[index].parent = grandparent;
+    }
+    return index;
+  }
+
+  struct Node {
+    size_t parent;
+    size_t size;
+  };
+  std::vector<Node> nodes;
   folly::F14FastMap<T, size_t> indices;
 };
 

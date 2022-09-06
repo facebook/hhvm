@@ -189,7 +189,6 @@ pub struct Env<'a> {
     /// until we can properly set up saved states to surface parse errors during
     /// typechecking properly.
     pub show_all_errors: bool,
-    fail_open: bool,
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
@@ -216,7 +215,6 @@ impl<'a> Env<'a> {
         quick_mode: bool,
         keep_errors: bool,
         show_all_errors: bool,
-        fail_open: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -229,7 +227,6 @@ impl<'a> Env<'a> {
             keep_errors,
             quick_mode,
             show_all_errors,
-            fail_open,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -275,10 +272,6 @@ impl<'a> Env<'a> {
 
     fn source_text(&self) -> &SourceText<'a> {
         self.indexed_source_text.source_text()
-    }
-
-    fn fail_open(&self) -> bool {
-        self.fail_open
     }
 
     fn cls_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
@@ -466,9 +459,7 @@ fn missing_syntax_<N>(
     let text = text(node, env);
     lowering_error(env, &pos, &text, expecting);
     if let Some(x) = fallback {
-        if env.fail_open() {
-            return Ok(x);
-        }
+        return Ok(x);
     }
     Err(Error::MissingSyntax {
         expecting: String::from(expecting),
@@ -5023,8 +5014,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
 fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
     let r = p_class_elt_(class, node, env);
     match r {
-        // match ocaml behavior, don't throw if missing syntax when fail_open is true
-        Err(Error::MissingSyntax { .. }) if env.fail_open() => Ok(()),
+        Err(Error::MissingSyntax { .. }) => Ok(()),
         _ => r,
     }
 }
@@ -5931,7 +5921,7 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program> {
         match &n.children {
             EndOfFile(_) => break,
             _ => match p_def(n, env) {
-                Err(Error::MissingSyntax { .. }) if env.fail_open => {}
+                Err(Error::MissingSyntax { .. }) => {}
                 Err(e) => return Err(e),
                 Ok(mut def) => acc.append(&mut def),
             },

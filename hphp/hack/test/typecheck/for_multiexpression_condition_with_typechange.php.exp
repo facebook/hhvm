@@ -2,3 +2,7 @@ File "for_multiexpression_condition_with_typechange.php", line 14, characters 16
 A semicolon `;` is expected here. (Parsing[1002])
 File "for_multiexpression_condition_with_typechange.php", line 14, characters 18-18:
 Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
+File "for_multiexpression_condition_with_typechange.php", line 14, characters 36-36:
+Unbound name: `)` (a global constant) (Naming[2049])
+File "for_multiexpression_condition_with_typechange.php", line 14, characters 36-36:
+Unbound global constant (Typing) (Typing[4106])

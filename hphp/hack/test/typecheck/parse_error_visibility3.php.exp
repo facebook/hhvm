@@ -2,3 +2,5 @@ File "parse_error_visibility3.php", line 14, characters 3-8:
 Encountered unexpected text `privte`, was expecting a class element. (Parsing[1002])
 File "parse_error_visibility3.php", line 14, characters 10-10:
 A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])
+File "parse_error_visibility3.php", line 14, characters 19-22:
+Methods need to be marked public, private, or protected. (Naming[2086])

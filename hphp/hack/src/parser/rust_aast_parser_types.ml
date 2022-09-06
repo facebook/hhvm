@@ -18,7 +18,6 @@ type env = {
    * until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  fail_open: bool;
   is_systemlib: bool;
   parser_options: ParserOptions.t;
 }

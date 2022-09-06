@@ -125,7 +125,6 @@ let handle_existing_file args filename =
             ~keep_errors:(args.keep_errors || print_errors)
             ~quick_mode:args.quick_mode
             ~parser_options:popt
-            ~fail_open:args.fail_open
             file
         in
         try

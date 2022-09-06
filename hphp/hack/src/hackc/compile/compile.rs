@@ -691,7 +691,6 @@ fn parse_file(
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
         codegen: true,
-        fail_open: false,
         php5_compat_mode: !opts.php7_flags.contains(Php7Flags::UVS),
         keep_errors: false,
         is_systemlib,

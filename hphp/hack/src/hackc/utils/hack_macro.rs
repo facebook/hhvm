@@ -547,7 +547,6 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     let env = Env {
         codegen: true,
         elaborate_namespaces: false,
-        fail_open: false,
         include_line_comments: false,
         keep_errors: true,
         parser_options,

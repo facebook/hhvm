@@ -30,7 +30,6 @@ type t = {
   include_line_comments: bool;
   keep_errors: bool;
   quick_mode: bool;
-  fail_open: bool;
   (* Defining the input *)
   files: string list;
   disable_lval_as_an_expression: bool;
@@ -73,7 +72,6 @@ let make
     include_line_comments
     keep_errors
     quick_mode
-    fail_open
     show_file_name
     files
     disable_lval_as_an_expression
@@ -114,7 +112,6 @@ let make
     include_line_comments;
     keep_errors;
     quick_mode;
-    fail_open;
     show_file_name;
     files;
     disable_lval_as_an_expression;
@@ -174,7 +171,6 @@ let parse_args () =
   let keep_errors = ref true in
   let quick_mode = ref false in
   let enable_hh_syntax = ref false in
-  let fail_open = ref true in
   let show_file_name = ref false in
   let disable_lval_as_an_expression = ref false in
   let set_show_file_name () = show_file_name := true in
@@ -280,12 +276,8 @@ No errors are filtered out."
       ( "--no-quick-mode",
         Arg.Clear quick_mode,
         "Unset the quick_mode option for the parser." );
-      ( "--fail-open",
-        Arg.Set fail_open,
-        "Set the fail_open option for the parser." );
-      ( "--no-fail-open",
-        Arg.Clear fail_open,
-        "Unset the fail_open option for the parser." );
+      ("--fail-open", Arg.Unit (fun () -> ()), "Unused.");
+      ("--no-fail-open", Arg.Unit (fun () -> ()), "Unused");
       ("--force-hh-syntax", Arg.Set enable_hh_syntax, "Ignored. Do not use.");
       ( "--show-file-name",
         Arg.Unit set_show_file_name,
@@ -391,7 +383,6 @@ No errors are filtered out."
     !include_line_comments
     !keep_errors
     !quick_mode
-    !fail_open
     !show_file_name
     (List.rev !files)
     !disable_lval_as_an_expression

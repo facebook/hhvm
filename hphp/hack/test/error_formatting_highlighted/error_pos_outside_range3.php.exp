@@ -12,4 +12,20 @@ error_pos_outside_range3.php:7:1
     6 |   2,
 [1] 7 | _
 
-2 errors found.
+Naming[2049] Unbound name: g (a global function) [1]
+
+error_pos_outside_range3.php:5:3
+    3 | <<__EntryPoint>>
+    4 | function main(): void {
+[1] 5 |   g(1,
+    6 |   2,
+
+Typing[4107] Unbound name (typing): g [1]
+
+error_pos_outside_range3.php:5:3
+    3 | <<__EntryPoint>>
+    4 | function main(): void {
+[1] 5 |   g(1,
+    6 |   2,
+
+4 errors found.

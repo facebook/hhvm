@@ -24,7 +24,6 @@ type env = {
    * until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  fail_open: bool;
   parser_options: ParserOptions.t;
   file: Relative_path.t;
   disable_global_state_mutation: bool;
@@ -40,7 +39,6 @@ let make_env
     ?(keep_errors = true)
     ?(quick_mode = false)
     ?(show_all_errors = false)
-    ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
     ?(disable_global_state_mutation = false)
     ?(is_systemlib = false)
@@ -55,7 +53,6 @@ let make_env
     quick_mode = (not codegen) && quick_mode;
     show_all_errors;
     parser_options;
-    fail_open;
     file;
     disable_global_state_mutation;
     is_systemlib;
@@ -159,7 +156,6 @@ let make_rust_env (env : env) : Rust_aast_parser_types.env =
       keep_errors = env.keep_errors;
       quick_mode = env.quick_mode;
       show_all_errors = env.show_all_errors;
-      fail_open = env.fail_open;
       is_systemlib = env.is_systemlib;
       parser_options = env.parser_options;
     }
@@ -264,8 +260,6 @@ let from_file_with_legacy env = legacy (from_file env)
 let defensive_program
     ?(quick = false)
     ?(show_all_errors = false)
-    ?(fail_open = false)
-    ?(keep_errors = false)
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
     parser_options
@@ -273,14 +267,12 @@ let defensive_program
     content =
   try
     let source = Full_fidelity_source_text.make fn content in
-    (* If we fail open, we don't want errors. *)
     let env =
       make_env
-        ~fail_open
         ~quick_mode:quick
         ~show_all_errors
         ~elaborate_namespaces
-        ~keep_errors:(keep_errors || not fail_open)
+        ~keep_errors:true
         ~parser_options
         ~include_line_comments
         fn
@@ -329,7 +321,6 @@ let ast_and_decls_from_file
     let source = Full_fidelity_source_text.make fn content in
     let env =
       make_env
-        ~fail_open:false
         ~quick_mode:quick
         ~show_all_errors
         ~elaborate_namespaces:true

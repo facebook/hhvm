@@ -4,3 +4,5 @@ File "parse_error_and_bad_fixme.php", line 8, characters 27-27:
 A type specifier is expected here. (Parsing[1002])
 File "parse_error_and_bad_fixme.php", line 8, characters 27-27:
 Encountered unexpected text ``, was expecting a constraint operator. (Parsing[1002])
+File "parse_error_and_bad_fixme.php", line 3, characters 10-12:
+Was expecting a return type hint (Typing[4030])

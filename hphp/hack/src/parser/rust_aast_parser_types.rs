@@ -24,7 +24,6 @@ pub struct Env {
     pub keep_errors: bool,
     pub quick_mode: bool,
     pub show_all_errors: bool,
-    pub fail_open: bool,
     pub is_systemlib: bool,
     pub parser_options: ParserOptions,
 }

@@ -50,17 +50,17 @@ struct SSATmp;
  *                         Unknown
  *                            |
  *                            |
- *                    +-------+-------+---------+
- *                    |               |         |
- *                 UnknownTV         Iter     Other
+ *                    +-------+-------+
+ *                    |               |
+ *                 UnknownTV         Iter
  *                    |
  *                    |
  *                    |
- *      +---------+---+---------------+---------+---------+----------+
- *      |         |                   |         |         |          |
- *      |         |                   |         |         |          |
- *      |         |                   |      OtherTV      |       RdsAny
- *      |         |                   |                   |          |
+ *      +---------+---+---------------+-------------------+----------+
+ *      |         |                   |           |       |          |
+ *      |         |                   |           |       |          |
+ *      |         |                   |           |       |       RdsAny
+ *      |         |                   |         Other     |          |
  *      |         |                HeapAny*               |         ...
  *      |         |                   |                   |
  *      |         |            +------+------+            |
@@ -312,8 +312,7 @@ struct AliasClass {
     BVMPC       = 1U << 16,
     BVMRetAddr  = 1U << 17,
     BVMRegState = 1U << 18,
-    BOtherTV    = 1U << 19,
-    BOther      = 1U << 20,
+    BOther      = 1U << 19,
 
     BVMReg     = BVMFP | BVMSP | BVMPC | BVMRetAddr,
     BElem      = BElemI | BElemS,
@@ -322,7 +321,7 @@ struct AliasClass {
 
     BActRec = BFContext | BFFunc | BFMeta,
 
-    BUnknownTV = ~(BOther | BIter | BMIBase | BActRec | BVMReg | BVMRegState),
+    BUnknownTV = ~(BIter | BMIBase | BActRec | BVMReg | BVMRegState),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -532,7 +531,6 @@ auto const AVMRegAny          = AliasClass{AliasClass::BVMReg};
 auto const AVMRegState        = AliasClass{AliasClass::BVMRegState};
 
 /* For misc things which we don't care to distinguish */
-auto const AOtherTV           = AliasClass{AliasClass::BOtherTV};
 auto const AOther             = AliasClass{AliasClass::BOther};
 
 //////////////////////////////////////////////////////////////////////

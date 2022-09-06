@@ -66,7 +66,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BVMSP:           break;
   case A::BVMPC:           break;
   case A::BVMRetAddr:      break;
-  case A::BOtherTV:        break;
   case A::BOther:          break;
   }
 
@@ -103,7 +102,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BVMSP:           ret += "Vmsp"; break;
     case A::BVMPC:           ret += "Vmpc"; break;
     case A::BVMRetAddr:      ret += "VmRetAddr"; break;
-    case A::BOtherTV:        ret += "OtherTV"; break;
     case A::BOther:          ret += "Other"; break;
     }
   }

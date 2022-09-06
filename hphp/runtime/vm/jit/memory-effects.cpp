@@ -144,28 +144,6 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
   });
 }
 
-/*
- * Construct the alias class representing the frame locations a MemoGet/Set may
- * read from when calculating the memo key.
- */
-template<typename ExtraType>
-AliasClass memo_frame_reads(const IRInstruction& inst) {
-  // MemoGet/Set reads some set of locals for keys based on the instructions
-  // extra data collect these locations and return them.
-  auto const extra = inst.extra<ExtraType>();
-  // For instance cache lookups we can have an empty key range here.
-  if (extra->keys.count == 0) return AEmpty;
-
-  return ALocal {
-    inst.src(0),
-    AliasIdSet{
-      AliasIdSet::IdRange{
-        extra->keys.first,
-        extra->keys.first + extra->keys.count
-      }
-    }
-  };
-}
 /////////////////////////////////////////////////////////////////////
 
 /*
@@ -227,8 +205,8 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   }();
 
   return GeneralEffects {
-    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState | AOther | AOtherTV,
-    x.stores | AHeapAny | ARdsAny | AVMRegAny | AOther | AOtherTV,
+    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
+    x.stores | AHeapAny | ARdsAny | AVMRegAny,
     x.moves,
     new_kills,
     x.inout,
@@ -1085,30 +1063,56 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MemoGetStaticValue:
   case MemoGetLSBValue:
   case MemoGetInstanceValue:
-    // Only reads the memo value (which is modeled as an AOther load here)
-    return may_load_store(AOtherTV, AEmpty);
+    // Only reads the memo value (which isn't modeled here).
+    return may_load_store(AEmpty, AEmpty);
 
   case MemoSetStaticValue:
   case MemoSetLSBValue:
   case MemoSetInstanceValue:
-    // Writes to the memo value (which is modeled as an AOther store here)
-    return may_load_store(AEmpty, AOtherTV);
+    // Writes to the memo value (which isn't modeled)
+    return may_load_store(AEmpty, AEmpty);
 
   case MemoGetStaticCache:
   case MemoGetLSBCache:
-    return may_load_store(memo_frame_reads<MemoCacheStaticData>(inst)
-                          | AOtherTV, AEmpty);
   case MemoSetStaticCache:
-  case MemoSetLSBCache:
-    return may_load_store(memo_frame_reads<MemoCacheStaticData>(inst),
-                          AOtherTV);
+  case MemoSetLSBCache: {
+    // Reads some (non-zero) set of locals for keys, and reads/writes from the
+    // memo cache (which isn't modeled).
+    auto const extra = inst.extra<MemoCacheStaticData>();
+    auto const frame = ALocal {
+      inst.src(0),
+      AliasIdSet{
+        AliasIdSet::IdRange{
+          extra->keys.first,
+          extra->keys.first + extra->keys.count
+        }
+      }
+    };
+
+    return may_load_store(frame, AEmpty);
+  }
 
   case MemoGetInstanceCache:
-    return may_load_store(memo_frame_reads<MemoCacheInstanceData>(inst)
-                          | AOtherTV, AEmpty);
-  case MemoSetInstanceCache:
-    return may_load_store(memo_frame_reads<MemoCacheInstanceData>(inst),
-                          AOtherTV);
+  case MemoSetInstanceCache: {
+    // Reads some set of locals for keys, and reads/writes from the memo cache
+    // (which isn't modeled).
+    auto const extra = inst.extra<MemoCacheInstanceData>();
+    auto const frame = [&]() -> AliasClass {
+      // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
+      if (extra->keys.count == 0) return AEmpty;
+
+      return ALocal {
+        inst.src(0),
+        AliasIdSet{
+          AliasIdSet::IdRange{
+            extra->keys.first,
+            extra->keys.first + extra->keys.count
+          }
+        }
+      };
+    }();
+    return may_load_store(frame, AEmpty);
+  }
 
   case BespokeIterGetKey:
   case LdPtrIterKey:
@@ -1598,23 +1602,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // because we assume (in refcount-opts) that IrrelevantEffects instructions
   // can't even inspect Countable reference count fields, and several of these
   // can.  All GeneralEffects instructions are assumed to possibly do so.
-  //
-  // There are several ways to handle these instructions we can load store
-  // AEmpty, or we can load store AOther or some combination of these.  The
-  // load or store of AOther can be used to prevent sinking and other movement
-  // of these instructions relative to others.
+
   case DecRefNZ:
   case ProfileDecRef:
-  case DecReleaseCheck:
-  case IncRef:
   case AFWHBlockOn:
   case AFWHPushTailFrame:
+  case IncRef:
+  case LdClosureCls:
+  case LdClosureThis:
+  case LdRetVal:
   case ConvStrToInt:
   case ConvResToInt:
   case OrdStr:
   case ChrInt:
   case CreateSSWH:
   case CheckSurpriseFlags:
+  case CheckType:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case CheckCold:
@@ -1623,6 +1626,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncCallCounter:
   case IncStat:
   case ContCheckNext:
+  case CountVec:
+  case CountDict:
+  case CountKeyset:
   case FuncHasReifiedGenerics:
   case ClassHasReifiedGenerics:
   case HasReifiedParent:
@@ -1654,6 +1660,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LtRes:
   case LteRes:
   case CmpRes:
+  case LdBindAddr:
+  case LdSSwitchDest:
   case RBTraceEntry:
   case RBTraceMsg:
   case ConvIntToBool:
@@ -1662,27 +1670,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvStrToDbl:
   case ConvResToDbl:
   case ExtendsClass:
-  case StContArKey:
-  case StContArValue:
-  case StContArState:
-  case ContArIncIdx:
-  case ContArIncKey:
-  case ContArUpdateIdx:
-  case UnwindCheckSideExit:
-  case CallViolatesModuleBoundary:
-  case ProfileSwitchDest:
-  case StringIsset:
-  case LookupClsMethod:
-  case LookupClsRDS:
-  case StrictlyIntegerConv:
-  case DbgAssertFunc:
-  case ProfileCall:
-  case ProfileMethod:
-    return may_load_store(AOther, AOther);
-  case CheckType:
-  case LdRetVal:
-  case LdBindAddr:
-  case LdSSwitchDest:
   case LdUnwinderValue:
   case LdClsName:
   case LdLazyCls:
@@ -1692,8 +1679,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
+  case StContArKey:
+  case StContArValue:
+  case StContArState:
+  case ContArIncIdx:
+  case ContArIncKey:
+  case ContArUpdateIdx:
   case LdClsCachedSafe:
   case LdClsInitData:
+  case UnwindCheckSideExit:
+  case CallViolatesModuleBoundary:
   case LdCns:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -1703,6 +1698,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdTypeCns:
   case LdTypeCnsNoThrow:
   case LdTypeCnsClsName:
+  case ProfileSwitchDest:
   case LdFuncCls:
   case LdFuncInOutBits:
   case LdFuncNumParams:
@@ -1713,15 +1709,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdObjMethodD:
   case LdObjMethodS:
   case LdStrLen:
+  case StringIsset:
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:
-  case CountVec:
-  case CountDict:
-  case CountKeyset:
-  case LdClosureCls:
-  case LdClosureThis:
-    return may_load_store(AOther, AEmpty);
+  case LookupClsMethod:
+  case LookupClsRDS:
+  case StrictlyIntegerConv:
+  case DbgAssertFunc:
+  case ProfileCall:
+  case ProfileMethod:
+  case DecReleaseCheck:
+    return may_load_store(AEmpty, AEmpty);
 
   case BeginCatch:
     return may_load_store(AEmpty, AVMRegAny | AVMRegState);
@@ -1740,7 +1739,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckVecBounds:
   case LdColVec:
   case LdColDict:
-    return may_load_store(AOther, AEmpty);
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that can re-enter the VM and touch most heap things.  They
@@ -1748,10 +1747,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRef:
-    return may_load_store(AHeapAny, AHeapAny | AOther);
+    return may_load_store(AHeapAny, AHeapAny);
 
   case ReleaseShallow:
-    return may_load_store(AOther, AHeapAny | AOther);
+    return may_load_store(AEmpty, AHeapAny);
 
   case GetMemoKey:
     return may_load_store(AHeapAny, AHeapAny);
@@ -1831,6 +1830,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupFuncCached: // autoload
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
+  case AddNewElemKeyset:   // can re-enter
   case DictGet:
   case KeysetGet:
   case DictSet:
@@ -1883,11 +1883,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeEscalateToVanilla:
     return may_load_store(AHeapAny, AHeapAny);
 
-  // AOther is used to track the additions effect on the count of the array.
   case AddNewElemVec:
-  case AddNewElemKeyset:
-    return may_load_store(AElemAny, AOther);
-
   case RaiseErrorOnInvalidIsAsExpressionType:
   case IsTypeStruct:
   case RecordReifiedGenericsAndGetTSList:
@@ -2182,9 +2178,9 @@ AliasClass pointee(const Type& type) {
   if (type.maybe(TMemToMISTemp)) ret = ret | AMIStateTempBase;
   if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
   if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
-  if (type.maybe(TMemToGbl))     ret = ret | AOtherTV | ARdsAny;
-  if (type.maybe(TMemToOther))   ret = ret | AOtherTV | ARdsAny;
-  if (type.maybe(TMemToConst))   ret = ret | AOtherTV;
+  if (type.maybe(TMemToGbl))     ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToOther))   ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToConst))   ret = ret | AOther;
 
   // The pointer type should lie completely within the above
   // locations.

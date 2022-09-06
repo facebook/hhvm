@@ -134,16 +134,34 @@ let compare_marshal ctx fn text =
       add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
   in
   let decls = direct_decl_parse ctx fn text in
+  (* Test that Rust produces the same marshaled bytes as OCaml. *)
   let ocaml_marshaled = Marshal.to_string decls [] in
   let rust_marshaled = Ocamlrep_marshal_ffi.to_string decls [] in
-  let matched = String.equal ocaml_marshaled rust_marshaled in
-  if not matched then begin
-    Printf.printf
-      "OCaml Marshal output does not match Rust ocamlrep_marshal output:\n%!";
-    Printf.printf "ocaml:\t%S\n%!" ocaml_marshaled;
-    Printf.printf "rust:\t%S\n%!" rust_marshaled
-  end;
-  matched
+  let marshaled_bytes_matched = String.equal ocaml_marshaled rust_marshaled in
+  let () =
+    if not marshaled_bytes_matched then begin
+      Printf.printf
+        "OCaml Marshal output does not match Rust ocamlrep_marshal output:\n%!";
+      Printf.printf "ocaml:\t%S\n%!" ocaml_marshaled;
+      Printf.printf "rust:\t%S\n%!" rust_marshaled
+    end
+  in
+  (* Test that Rust unmarshaling works as expected. *)
+  let rust_read_back_decls =
+    Ocamlrep_marshal_ffi.from_string rust_marshaled 0
+  in
+  let rust_read_back_matched =
+    String.equal (show_decls decls) (show_decls rust_read_back_decls)
+  in
+  let () =
+    if not rust_read_back_matched then begin
+      Printf.printf
+        "Rust ocamlrep_marshal from_string decl read-back failed:\n%!";
+      Printf.printf "ocaml:\n%s%!" (show_decls decls);
+      Printf.printf "rust:\n%s%!" (show_decls rust_read_back_decls)
+    end
+  in
+  marshaled_bytes_matched && rust_read_back_matched
 
 type modes =
   | CompareDirectDeclParser

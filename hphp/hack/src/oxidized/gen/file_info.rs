@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<589ee1d5b77f20c5ee16b4d37af92df3>>
+// @generated SignedSource<<678608af2e020d102ce6a05b5609b628>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
+#[rust_to_ocaml(attr = "deriving (eq, show, enum, ord)")]
 #[repr(u8)]
 pub enum Mode {
     /// just declare signatures, don't check anything

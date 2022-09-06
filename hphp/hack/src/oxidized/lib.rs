@@ -8,6 +8,7 @@ extern crate rust_to_ocaml_attr;
 
 mod manual;
 
+pub use manual::aast;
 pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
 pub use manual::ast;
@@ -53,7 +54,6 @@ pub mod aast_visitor;
 
 mod gen;
 
-pub use gen::aast;
 pub use gen::aast_defs;
 pub use gen::ast_defs;
 pub use gen::decl_defs;

@@ -41,7 +41,6 @@ summary "Write oxidized/gen/"
   --rustfmt-path "$RUSTFMT_PATH"                                              \
   --copy-types-file hphp/hack/src/oxidized/copy_types.txt                     \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
-  hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/decl/decl_defs.ml                                             \
@@ -83,8 +82,7 @@ summary "Write oxidized/impl_gen/"
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   enum-helpers                                                                \
-  --input "hphp/hack/src/oxidized/gen/aast.rs|crate::ast_defs|crate::aast::*|crate::LocalIdMap" \
-  --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*"       \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*|crate::ast_defs|crate::LocalIdMap" \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*"         \
   --output "hphp/hack/src/oxidized/impl_gen/"                                 \
 
@@ -93,7 +91,6 @@ summary "Write oxidized/aast_visitor/"
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   visitor                                                                     \
-  --input "hphp/hack/src/oxidized/gen/aast.rs"                                \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
   --input "hphp/hack/src/oxidized/manual/doc_comment.rs"                      \
@@ -110,7 +107,6 @@ summary "Write oxidized_by_ref/gen/"
   --copy-types-file hphp/hack/src/oxidized_by_ref/copy_types.txt              \
   --by-ref                                                                    \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
-  hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/decl/decl_defs.ml                                             \
@@ -157,7 +153,6 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   by-ref-decl-visitor                                                         \
-  --input "hphp/hack/src/oxidized_by_ref/gen/aast_defs.rs"                    \
   --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs"                     \
   --input "hphp/hack/src/oxidized_by_ref/gen/shallow_decl_defs.rs"            \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs"             \
@@ -166,7 +161,6 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --input "hphp/hack/src/oxidized_by_ref/gen/xhp_attribute.rs"                \
   --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs"        \
   --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs"               \
-  --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \
   --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
   --extern-input "hphp/hack/src/oxidized/gen/typing_defs.rs"                  \
   --extern-input "hphp/hack/src/oxidized/gen/typing_defs_core.rs"             \

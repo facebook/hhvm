@@ -49,4 +49,10 @@ val tmp : unit -> t
 
 module Set : module type of Set.Make (S)
 
-module Map : module type of WrappedMap.Make (S)
+module Map : sig
+  include module type of WrappedMap.Make (S)
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+end

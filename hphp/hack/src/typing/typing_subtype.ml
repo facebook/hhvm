@@ -1769,7 +1769,7 @@ and simplify_subtype_i
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && (coercing_to_dynamic subtype_env
               || env.in_support_dynamic_type_method_check) ->
-      let open Aast_defs in
+      let open Ast_defs in
       (match ety_sub with
       | ConstraintType _cty ->
         (* TODO *)

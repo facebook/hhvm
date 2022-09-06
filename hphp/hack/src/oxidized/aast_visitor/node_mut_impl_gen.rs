@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c653d48b33dac3d984ddedcb86d48d8>>
+// @generated SignedSource<<82b2cc1633652259cdc0acc3c2a37bb0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,8 +13,6 @@
 use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor_mut::VisitorMut;
-use crate::aast::*;
-use crate::aast::{self};
 use crate::aast_defs::*;
 use crate::aast_defs::{self};
 use crate::ast_defs::*;

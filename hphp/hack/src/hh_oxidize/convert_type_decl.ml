@@ -134,7 +134,7 @@ end = struct
         "file_info::SavedNames";
         "file_info::Saved";
         "file_info::Diff";
-        "aast::*";
+        "aast_defs::*";
         "nast::*";
         "tast::*";
         "full_fidelity_parser_env::*";
@@ -235,7 +235,7 @@ let tuple_aliases =
     ("typing_reason", "PosId");
   ]
 
-let newtypes = [("aast", "Program")]
+let newtypes = [("aast_defs", "Program")]
 
 (*
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
@@ -245,7 +245,7 @@ let box_variant () =
   (match Configuration.mode () with
   | Configuration.ByRef -> [("typing_defs_core", "Ty_")]
   | Configuration.ByBox -> [])
-  @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
+  @ [("aast_defs", "Expr_"); ("aast_defs", "Stmt_"); ("aast_defs", "Def")]
 
 let equal_s2 = [%derive.eq: string * string]
 
@@ -282,7 +282,7 @@ let unbox_field ty =
     || Convert_type.is_primitive ty []
   | Configuration.ByBox -> false
 
-let add_rcoc = [("aast", "Nsenv")]
+let add_rcoc = [("aast_defs", "Nsenv"); ("aast", "Nsenv")]
 
 let should_add_rcoc ty =
   match Configuration.mode () with

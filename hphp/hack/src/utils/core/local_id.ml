@@ -47,4 +47,11 @@ let tmp () =
   (res, "__tmp" ^ string_of_int res)
 
 module Set = Set.Make (S)
-module Map = WrappedMap.Make (S)
+
+module Map = struct
+  include WrappedMap.Make (S)
+
+  let pp pp_data = make_pp (fun fmt id -> Format.fprintf fmt "%a" pp id) pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+end

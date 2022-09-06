@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub use crate::gen::aast_defs as aast;
+
 pub mod ast;
 pub mod blame_set;
 pub mod decl_counters;

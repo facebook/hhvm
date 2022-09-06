@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42cbdd7cd9b4243d5fbf787f8d0a6581>>
+// @generated SignedSource<<fc79ec95527c1346ba4c51511ad59460>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,6 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 use super::node::Node;
-use crate::aast_defs::*;
-use crate::aast_defs::{self};
 use crate::ast_defs::*;
 use crate::ast_defs::{self};
 use crate::direct_decl_parser::*;

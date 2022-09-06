@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

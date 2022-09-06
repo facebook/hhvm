@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"

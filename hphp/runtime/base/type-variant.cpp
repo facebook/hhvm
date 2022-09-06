@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"

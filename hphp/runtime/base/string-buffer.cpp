@@ -24,7 +24,6 @@
 #include <folly/portability/Fcntl.h>
 
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/conv-10.h"

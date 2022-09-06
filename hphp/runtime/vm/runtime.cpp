@@ -26,10 +26,10 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/conv-10.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include <folly/tracing/StaticTracepoint.h>

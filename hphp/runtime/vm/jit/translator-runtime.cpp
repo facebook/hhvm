@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"

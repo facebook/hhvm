@@ -1,4 +1,5 @@
 /.cargo_vendor/
+/.vscode/tasks.json
 /facebook/cargo/.package-cache
 /facebook/cargo/git
 /facebook/cargo/registry/

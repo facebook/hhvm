@@ -1344,28 +1344,14 @@ void fullDCE(IRUnit& unit) {
       IRInstruction* srcInst = src->inst();
       if (srcInst->op() == DefConst) return;
 
-
-      auto const isPassthrough = [] (IRInstruction* inst) {
-        return inst->is(LdPropAddr);
-      };
-      auto const canonicalize = [&isPassthrough] (SSATmp* src) {
-        while (isPassthrough(src->inst())) {
-          src = src->inst()->src(0);
-        }
-        return src;
-      };
-      auto const canonSrc = canonicalize(src);
-      auto const canonSrcInst = canonSrc->inst();
-      if (canonSrcInst->producesReference() && canDCE(*canonSrcInst)) {
-        ++uses[canonSrc];
+      if (srcInst->producesReference() && canDCE(*srcInst)) {
+        ++uses[src];
         if (inst->is(DecRef, DecReleaseCheck)) {
-          rcInsts[canonSrcInst].decs.emplace_back(inst);
+          rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitVecElem, InitDictElem,
-                     InitStructElem, InitStructPositions,
-                     ReleaseShallow, StClosureArg, StMem)
-            || isPassthrough(inst)) {
-          if (ix == 0) rcInsts[canonSrcInst].aux.emplace_back(inst);
+        if (inst->is(InitVecElem, InitDictElem, InitStructElem,
+                     InitStructPositions, ReleaseShallow, StClosureArg)) {
+          if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }
 

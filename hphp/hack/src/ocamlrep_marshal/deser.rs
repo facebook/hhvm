@@ -10,8 +10,7 @@
     mutable_transmutes,
     non_camel_case_types,
     non_snake_case,
-    non_upper_case_globals,
-    unused_variables
+    non_upper_case_globals
 )]
 
 use libc::c_char;
@@ -359,7 +358,7 @@ unsafe fn Reverse_64(dest: *mut c_char, src: *mut c_char) {
     let mut _q: *mut c_char = std::ptr::null_mut::<c_char>();
     let mut _a: c_char = 0;
     let mut _b: c_char = 0;
-    _p = dest as *mut c_char;
+    _p = src as *mut c_char;
     _q = dest as *mut c_char;
     _a = *_p.offset(0);
     _b = *_p.offset(1);
@@ -1005,7 +1004,7 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
     };
 }
 
-unsafe fn intern_add_to_heap(whsize: mlsize_t) -> *mut header_t {
+unsafe fn intern_add_to_heap(_whsize: mlsize_t) -> *mut header_t {
     let mut res: *mut header_t = std::ptr::null_mut::<header_t>();
     if !intern_extra_block.is_null() {
         // If heap chunk not filled totally, build free block at end
@@ -1049,7 +1048,7 @@ unsafe fn intern_end(mut res: value, whsize: mlsize_t) -> value {
     caml__roots_res.nitems = 1;
     caml__roots_res.ntables = 1;
     caml__roots_res.tables[0] = &mut res;
-    let caml__dummy_res: c_int = 0;
+    let _caml__dummy_res: c_int = 0;
 
     let block: *mut header_t = intern_add_to_heap(whsize);
     let blockend: *mut header_t = intern_dest;
@@ -1108,7 +1107,7 @@ unsafe fn input_val_from_string(mut str: value, ofs: intnat) -> value {
     caml__roots_str.nitems = 1;
     caml__roots_str.ntables = 1;
     caml__roots_str.tables[0] = &mut str;
-    let caml__dummy_str: c_int = 0;
+    let _caml__dummy_str: c_int = 0;
     let mut obj: value = ((0 as uintnat) << 1) as intnat + 1 as c_long;
     let mut caml__roots_obj: caml__roots_block = caml__roots_block {
         next: std::ptr::null_mut::<caml__roots_block>(),
@@ -1121,7 +1120,7 @@ unsafe fn input_val_from_string(mut str: value, ofs: intnat) -> value {
     caml__roots_obj.nitems = 1;
     caml__roots_obj.ntables = 1;
     caml__roots_obj.tables[0] = &mut obj;
-    let caml__dummy_obj: c_int = 0;
+    let _caml__dummy_obj: c_int = 0;
 
     let mut h: marshal_header = marshal_header {
         magic: 0,

@@ -21,22 +21,11 @@ use crate::intext::*;
 extern "C" {
     fn caml_alloc_string(len: mlsize_t) -> value;
     fn caml_convert_flag_list(_: value, _: *const c_int) -> c_int;
-    fn caml_failwith(msg: *const c_char) -> !;
-    fn caml_invalid_argument(msg: *const c_char) -> !;
-    fn caml_raise_out_of_memory() -> !;
-    fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
 }
 
 type int64_t = c_long;
 type intnat = c_long;
 type uintnat = c_ulong;
-
-#[inline]
-unsafe fn caml_umul_overflow(a: uintnat, b: uintnat, res: *mut uintnat) -> c_int {
-    let (product, did_overflow) = a.overflowing_mul(b);
-    *res = product;
-    did_overflow as c_int
-}
 
 type value = intnat;
 type header_t = uintnat;
@@ -256,11 +245,6 @@ impl<'a> State<'a> {
         }
     }
 
-    /// Free the extern stack if needed
-    fn free_stack(&mut self) {
-        drop(std::mem::take(&mut self.stack));
-    }
-
     /// Initialize the position table
     unsafe fn init_position_table(&mut self) {
         if self.extern_flags & NO_SHARING != 0 {
@@ -277,19 +261,9 @@ impl<'a> State<'a> {
         self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE).assume_init();
     }
 
-    /// Free the position table
-    unsafe fn free_position_table(&mut self) {
-        if self.extern_flags & NO_SHARING != 0 {
-            return;
-        }
-        drop(std::mem::take(&mut self.pos_table.present));
-        drop(std::mem::take(&mut self.pos_table.entries));
-    }
-
     /// Grow the position table
     unsafe fn resize_position_table(&mut self) {
         let new_size: mlsize_t;
-        let mut new_byte_size: mlsize_t = 0;
         let new_shift: c_int;
         let new_present: Box<[uintnat]>;
         let new_entries: Box<[object_position<'a>]>;
@@ -305,15 +279,6 @@ impl<'a> State<'a> {
         } else {
             new_size = (self.pos_table.size).wrapping_mul(2);
             new_shift = self.pos_table.shift - 1;
-        }
-        if new_size == 0
-            || caml_umul_overflow(
-                new_size,
-                std::mem::size_of::<object_position<'a>>() as c_ulong,
-                &mut new_byte_size,
-            ) != 0
-        {
-            self.out_of_memory();
         }
         new_entries = Box::new_uninit_slice(new_size as usize).assume_init();
         new_present = Box::new_zeroed_slice(Bitvect_size(new_size as usize)).assume_init();
@@ -398,40 +363,22 @@ impl<'a> State<'a> {
 
     fn close_output(&mut self) {}
 
-    unsafe fn free_output(&mut self) {
-        drop(std::mem::take(&mut self.output));
-        self.free_stack();
-        self.free_position_table();
-    }
-
-    unsafe fn output_length(&mut self) -> intnat {
+    fn output_length(&mut self) -> intnat {
         self.output.len() as intnat
     }
 
-    // Exception raising, with cleanup
+    // Panic raising (cleanup is handled by State's Drop impl)
 
-    unsafe fn out_of_memory(&mut self) -> ! {
-        self.free_output();
-        caml_raise_out_of_memory();
+    fn invalid_argument(&mut self, msg: &str) -> ! {
+        panic!("{}", msg);
     }
 
-    unsafe fn invalid_argument(&mut self, msg: *const c_char) -> ! {
-        self.free_output();
-        caml_invalid_argument(msg);
+    fn failwith(&mut self, msg: &str) -> ! {
+        panic!("{}", msg);
     }
 
-    unsafe fn failwith(&mut self, msg: *const c_char) -> ! {
-        self.free_output();
-        caml_failwith(msg);
-    }
-
-    unsafe fn stack_overflow(&mut self) -> ! {
-        caml_gc_message(
-            0x4,
-            b"Stack overflow in marshaling value\n\x00" as *const u8 as *const c_char,
-        );
-        self.free_output();
-        caml_raise_out_of_memory();
+    fn stack_overflow(&mut self) -> ! {
+        panic!("Stack overflow in marshaling value");
     }
 
     // Write characters, integers, and blocks in the output buffer
@@ -486,10 +433,7 @@ impl<'a> State<'a> {
             self.writecode16(CODE_INT16, n);
         } else if !(-(1 << 30)..(1 << 30)).contains(&n) {
             if self.extern_flags & COMPAT_32 != 0 {
-                self.failwith(
-                    b"output_value: integer cannot be read back on 32-bit platform\x00" as *const u8
-                        as *const c_char,
-                );
+                self.failwith("output_value: integer cannot be read back on 32-bit platform");
             }
             self.writecode64(CODE_INT64, n);
         } else {
@@ -534,10 +478,7 @@ impl<'a> State<'a> {
             let hd: header_t = Make_header(sz, tag, 0 << 8);
 
             if sz > 0x3FFFFF && self.extern_flags & COMPAT_32 != 0 {
-                self.failwith(
-                    b"output_value: array cannot be read back on 32-bit platform\x00" as *const u8
-                        as *const c_char,
-                );
+                self.failwith("output_value: array cannot be read back on 32-bit platform");
             }
             if hd < 1 << 32 {
                 self.writecode32(CODE_BLOCK32, hd as intnat);
@@ -556,10 +497,7 @@ impl<'a> State<'a> {
             self.writecode8(CODE_STRING8, len);
         } else {
             if len > 0xFFFFFB && self.extern_flags & COMPAT_32 != 0 {
-                self.failwith(
-                    b"output_value: string cannot be read back on 32-bit platform\x00" as *const u8
-                        as *const c_char,
-                );
+                self.failwith("output_value: string cannot be read back on 32-bit platform");
             }
             if len < 1 << 32 {
                 self.writecode32(CODE_STRING32, len);
@@ -585,10 +523,7 @@ impl<'a> State<'a> {
             self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats);
         } else {
             if nfloats > 0x1FFFFF && self.extern_flags & COMPAT_32 != 0 {
-                self.failwith(
-                    b"output_value: float array cannot be read back on 32-bit platform\x00"
-                        as *const u8 as *const c_char,
-                );
+                self.failwith("output_value: float array cannot be read back on 32-bit platform");
             }
             if nfloats < 1 << 32 {
                 self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats);
@@ -682,10 +617,7 @@ impl<'a> State<'a> {
                                 self.record_location(v, h);
                             }
                             ocamlrep::ABSTRACT_TAG => {
-                                self.invalid_argument(
-                                    b"output_value: abstract value (Abstract)\x00" as *const u8
-                                        as *const c_char,
-                                );
+                                self.invalid_argument("output_value: abstract value (Abstract)");
                             }
                             ocamlrep::INFIX_TAG => {
                                 self.writecode32(CODE_INFIXPOINTER, Infix_offset_hd(hd) as intnat);
@@ -696,12 +628,10 @@ impl<'a> State<'a> {
                                 continue;
                             }
                             ocamlrep::CUSTOM_TAG => self.invalid_argument(
-                                b"output_value: marshaling of custom blocks not implemented\0"
-                                    as *const u8 as *const c_char,
+                                "output_value: marshaling of custom blocks not implemented",
                             ),
                             ocamlrep::CLOSURE_TAG => self.invalid_argument(
-                                b"output_value: marshaling of closures not implemented\0"
-                                    as *const u8 as *const c_char,
+                                "output_value: marshaling of closures not implemented",
                             ),
                             _ => {
                                 self.extern_header(sz, tag);
@@ -740,9 +670,7 @@ impl<'a> State<'a> {
                     self.stack.pop();
                 }
             } else {
-                // We are done.   Cleanup the stack and leave the function
-                self.free_stack();
-                self.free_position_table();
+                // We are done.
                 return;
             }
         }
@@ -775,11 +703,7 @@ impl<'a> State<'a> {
             // The object is too big for the small header format.
             // Fail if we are in compat32 mode, or use big header.
             if self.extern_flags & COMPAT_32 != 0 {
-                self.free_output();
-                caml_failwith(
-                    b"output_value: object too big to be read back on 32-bit platform\x00"
-                        as *const u8 as *const c_char,
-                );
+                self.failwith("output_value: object too big to be read back on 32-bit platform");
             }
             store32(&mut header, MAGIC_NUMBER_BIG as intnat);
             store32(&mut header, 0);

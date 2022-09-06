@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e1735e2fa974a1d6ce0dccb58b7259a>>
+// @generated SignedSource<<a2d5c262affb20acb440bc2460e1460e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -474,6 +474,35 @@ pub enum Visibility {
 impl TrivialDrop for Visibility {}
 arena_deserializer::impl_deserialize_in_arena!(Visibility);
 
+/// Literal values that can occur in XHP enum properties.
+///
+/// class :my-xhp-class {
+///   attribute enum {'big', 'small'} my-prop;
+/// }
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum XhpEnumValue {
+    #[rust_to_ocaml(name = "XEV_Int")]
+    XEVInt(isize),
+    #[rust_to_ocaml(name = "XEV_String")]
+    XEVString(String),
+}
+
 /// Hack's primitive types (as the typechecker understands them).
 ///
 /// Used in the AST of typehints (Aast_defs.Hprim) and in the representation of
@@ -594,33 +623,3 @@ pub enum ReifyKind {
 }
 impl TrivialDrop for ReifyKind {}
 arena_deserializer::impl_deserialize_in_arena!(ReifyKind);
-
-/// Literal values that can occur in XHP enum properties.
-///
-/// class :my-xhp-class {
-///   attribute enum {'big', 'small'} my-prop;
-/// }
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
-#[repr(C, u8)]
-pub enum XhpEnumValue {
-    #[rust_to_ocaml(name = "XEV_Int")]
-    XEVInt(isize),
-    #[rust_to_ocaml(name = "XEV_String")]
-    XEVString(String),
-}

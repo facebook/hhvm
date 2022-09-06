@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<848b7b8141af6681136bcfe221fb0c03>>
+// @generated SignedSource<<96a667ba32a12390ccccac8d88bbe4b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -202,9 +202,6 @@ pub enum Bop<'a> {
 impl<'a> TrivialDrop for Bop<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Bop<'arena>);
 
-pub use oxidized::ast_defs::ReifyKind;
-pub use oxidized::ast_defs::Tprim;
-pub use oxidized::ast_defs::TypedefVisibility;
 pub use oxidized::ast_defs::Uop;
 pub use oxidized::ast_defs::Visibility;
 
@@ -230,7 +227,6 @@ pub use oxidized::ast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
     #[rust_to_ocaml(name = "XEV_Int")]
@@ -241,3 +237,7 @@ pub enum XhpEnumValue<'a> {
 }
 impl<'a> TrivialDrop for XhpEnumValue<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(XhpEnumValue<'arena>);
+
+pub use oxidized::ast_defs::ReifyKind;
+pub use oxidized::ast_defs::Tprim;
+pub use oxidized::ast_defs::TypedefVisibility;

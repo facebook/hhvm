@@ -6,7 +6,7 @@
       c_implements = [([3:39-47], (Happly (([3:39-47], "\\XHPChild"), [])))]; 
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [(Ast_defs.XEV_String "herp"); (Ast_defs.XEV_String "derp")] }); 
+      [{ cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [(XEV_String "herp"); (XEV_String "derp")] }); 
          cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
          cv_type = ((?string), (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring)))))); 
          cv_id = ([4:35-38], ":bar"); cv_expr = None; cv_user_attributes = []; 

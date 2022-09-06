@@ -20,8 +20,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses =
         [(Rhint ([14:13-17]), (Tapply (([14:13-17], "\\:bar"), [])))];
-        sc_xhp_enum_values =
-        { ":e" -> [(Ast_defs.XEV_String "a"); (Ast_defs.XEV_String "b")] };
+        sc_xhp_enum_values = { ":e" -> [(XEV_String "a"); (XEV_String "b")] };
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts = [];

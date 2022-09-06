@@ -28,8 +28,6 @@ class virtual ['self] iter =
         : 'a. ('env -> 'a -> unit) -> 'env -> 'a LM.t -> unit =
       (fun f env -> LM.iter (fun _ -> f env))
 
-    method private on_xhp_enum_value _ _ : unit = ()
-
     method on_'ex _ _ = ()
 
     method on_'en _ _ = ()
@@ -57,8 +55,6 @@ class virtual ['self] reduce =
       fun f env x ->
         LM.fold (fun _ d acc -> self#plus acc (f env d)) x self#zero
 
-    method private on_xhp_enum_value _ _ = self#zero
-
     method on_'ex _env _ = self#zero
 
     method on_'en _env _ = self#zero
@@ -81,8 +77,6 @@ class virtual ['self] map =
     method private on_local_id_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
       (fun f env -> LM.map (f env))
-
-    method private on_xhp_enum_value _env xev = xev
   end
 
 class virtual ['self] endo =
@@ -104,6 +98,4 @@ class virtual ['self] endo =
     method private on_local_id_map
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
       (fun f env -> LM.map (f env))
-
-    method private on_xhp_enum_value _env xev = xev
   end

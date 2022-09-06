@@ -22,10 +22,6 @@ ExternalProject_Add(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
     &&
     "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/squangle/cmake/FindGlog.cmake
-    &&
-    "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
     <SOURCE_DIR>/squangle/cmake/FindBoost.cmake
     &&

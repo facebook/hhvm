@@ -47,10 +47,6 @@ ExternalProject_Add(
     "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"
     <SOURCE_DIR>/fizz/cmake/FindLibSodium.cmake
     &&
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/fizz/cmake/FindGlog.cmake
-    &&
     "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
     "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   SOURCE_SUBDIR fizz

@@ -406,10 +406,49 @@ InlineFrame implInlineReturn(IRGS& env) {
   return popInlineFrame(env);
 }
 
+void freeInlinedFrameLocals(IRGS& env, const RegionDesc& calleeRegion) {
+  // The IR instructions should be associated with one of the return bytecodes;
+  // all predecessors of this block should be valid options. Choose the hottest
+  // predecessor in order to get the most-likely DecRefProfiles.
+  auto const curBlock = env.irb->curBlock();
+  always_assert(curBlock && !curBlock->preds().empty());
+  auto best = curBlock->preds().front().inst();
+  for (auto const& pred : curBlock->preds()) {
+    if (pred.inst()->block()->profCount() > best->block()->profCount()) {
+      best = pred.inst();
+    }
+  }
+  auto const bcContext = best->bcctx();
+  env.bcState = bcContext.marker.sk();
+  env.irb->setCurMarker(bcContext.marker);
+
+  // At this point, env.profTransIDs and env.region are already set with the
+  // caller's information.  We temporarily reset both of these with the callee's
+  // information, so that the HHIR instructions emitted for the RetC have their
+  // markers associated with the callee.  This is necessary to successfully look
+  // up any profile data associated with them.
+  auto const callerProfTransIDs = env.profTransIDs;
+  auto const callerRegion       = env.region;
+  SCOPE_EXIT{
+    env.profTransIDs = callerProfTransIDs;
+    env.region       = callerRegion;
+  };
+  auto const& calleeTransIDs = bcContext.marker.profTransIDs();
+  env.profTransIDs = calleeTransIDs;
+  env.region = &calleeRegion;
+  updateMarker(env);
+  env.irb->resetCurIROff(bcContext.iroff + 1);
+
+  decRefLocalsInline(env);
+  decRefThis(env);
+}
+
 void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineState.returnTarget.back();
   auto const didStart = env.irb->startBlock(rt.callerTarget, false);
   always_assert(didStart);
+
+  freeInlinedFrameLocals(env, calleeRegion);
 
   auto const callee = curFunc(env);
 
@@ -496,6 +535,7 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
   if (!didStart) return;
 
   hint(env, Block::Hint::Unused);
+  freeInlinedFrameLocals(env, calleeRegion);
 
   auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
@@ -554,8 +594,6 @@ bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
 }
 
 void retFromInlined(IRGS& env) {
-  decRefLocalsInline(env);
-  decRefThis(env);
   gen(env, Jmp, env.inlineState.returnTarget.back().callerTarget);
 }
 
@@ -589,8 +627,6 @@ bool endCatchFromInlined(IRGS& env) {
   while (spOffBCFromStackBase(env) > spOffEmpty(env)) {
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
   }
-  decRefLocalsInline(env);
-  decRefThis(env);
   gen(env, Jmp, env.inlineState.returnTarget.back().endCatchTarget);
   return true;
 }

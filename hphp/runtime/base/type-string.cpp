@@ -112,14 +112,6 @@ StringData* buildStringData(double n) {
   return StringData::Make(buf, AttachString);
 }
 
-std::string convDblToStrWithPhpFormat(double n) {
-  char *buf = nullptr;
-  formatPhpDblStr(&buf, n);
-  std::string retVal(buf);
-  free(buf);
-  return retVal;
-}
-
 String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -56,8 +56,6 @@ StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
 
-std::string convDblToStrWithPhpFormat(double n);
-
 //////////////////////////////////////////////////////////////////////
 
 /**

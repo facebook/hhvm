@@ -11,7 +11,6 @@
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
-    unused_assignments,
     unused_variables
 )]
 
@@ -533,7 +532,6 @@ unsafe fn readfloat(dest: *mut c_double, code: c_uint) {
 
 // `len` is a number of floats
 unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint) {
-    let mut i: mlsize_t = 0;
     if std::mem::size_of::<c_double>() != 8 {
         intern_cleanup();
         caml_invalid_argument(
@@ -545,7 +543,7 @@ unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint
     if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
         // Host is big-endian; fix up if data read is little-endian
         if code != CODE_DOUBLE_ARRAY8_BIG as c_uint && code != CODE_DOUBLE_ARRAY32_BIG as c_uint {
-            i = 0;
+            let mut i = 0;
             while i < len {
                 Reverse_64(
                     dest.offset(i as isize) as *mut c_char,
@@ -559,7 +557,7 @@ unsafe extern "C" fn readfloats(dest: *mut c_double, len: mlsize_t, code: c_uint
         if code != CODE_DOUBLE_ARRAY8_LITTLE as c_uint
             && code != CODE_DOUBLE_ARRAY32_LITTLE as c_uint
         {
-            i = 0;
+            let mut i = 0;
             while i < len {
                 Reverse_64(
                     dest.offset(i as isize) as *mut c_char,
@@ -616,7 +614,7 @@ unsafe fn intern_stack_overflow() -> ! {
 unsafe fn intern_resize_stack(sp: *mut intern_item) -> *mut intern_item {
     let newsize: asize_t = (2 * intern_stack_limit.offset_from(intern_stack) as c_long) as asize_t;
     let sp_offset: asize_t = sp.offset_from(intern_stack) as asize_t;
-    let mut newstack: *mut intern_item = std::ptr::null_mut::<intern_item>();
+    let newstack: *mut intern_item;
 
     if newsize >= INTERN_STACK_MAX_SIZE as c_ulong {
         intern_stack_overflow();
@@ -676,15 +674,16 @@ const NOTHING_TO_DO_LABEL: u64 = 8288085890650723895;
 
 unsafe fn intern_rec(mut dest: *mut value) {
     let mut current_block: u64;
-    let mut code: c_uint = 0;
+    let mut header: header_t;
+    let mut code: c_uint;
+    let mut sp: *mut intern_item;
+
     let mut tag: tag_t = 0;
     let mut size: mlsize_t = 0;
     let mut len: mlsize_t = 0;
-    let mut ofs_ind: mlsize_t = 0;
+    let mut ofs_ind: mlsize_t;
     let mut v: value = 0;
     let mut ofs: asize_t = 0;
-    let mut header: header_t = 0;
-    let mut sp: *mut intern_item = std::ptr::null_mut::<intern_item>();
 
     sp = intern_stack;
 
@@ -934,11 +933,10 @@ unsafe fn intern_rec(mut dest: *mut value) {
 }
 
 unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
-    let mut wosize: mlsize_t = 0;
     if whsize == 0 {
         return;
     }
-    wosize = Wosize_whsize(whsize);
+    let wosize = Wosize_whsize(whsize);
     if wosize > Max_wosize {
         // Round desired size up to next page
         let request: asize_t = ((Bsize_wsize(whsize)

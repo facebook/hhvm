@@ -330,11 +330,6 @@ const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
 const Double_wosize: c_ulong =
     ((std::mem::size_of::<c_double>()) / (std::mem::size_of::<value>())) as c_ulong;
 
-const Object_tag: c_uint = 248;
-const String_tag: c_uint = 252;
-const Double_tag: c_uint = 253;
-const Double_array_tag: c_uint = 254;
-
 const Max_wosize: c_ulong = (((1 as c_long) << 54) - 1) as c_ulong;
 const Page_log: c_ulong = 12; // A page is 4 kilobytes
 const Page_size: c_ulong = ((1 as c_int) << Page_log) as c_ulong;
@@ -793,7 +788,11 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                     obj_counter += 1;
                                     *intern_obj_table.offset(fresh5 as isize) = v
                                 }
-                                *intern_dest = Make_header(Double_wosize, Double_tag, intern_color);
+                                *intern_dest = Make_header(
+                                    Double_wosize,
+                                    ocamlrep::DOUBLE_TAG as tag_t,
+                                    intern_color,
+                                );
                                 intern_dest = intern_dest.offset((1 + Double_wosize) as isize);
                                 readfloat(v as *mut c_double, code);
                                 current_block = NOTHING_TO_DO_LABEL;
@@ -848,7 +847,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                             obj_counter += 1;
                                             *intern_obj_table.offset(fresh6 as isize) = v
                                         }
-                                        *intern_dest = Make_header(size, Double_array_tag, intern_color);
+                                        *intern_dest = Make_header(size, ocamlrep::DOUBLE_ARRAY_TAG as tag_t, intern_color);
                                         intern_dest = intern_dest.offset((1 + size) as isize);
                                         readfloats(v as *mut c_double, len, code);
                                     }
@@ -868,7 +867,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                 obj_counter += 1;
                                 *intern_obj_table.offset(fresh4 as isize) = v
                             }
-                            *intern_dest = Make_header(size, String_tag, intern_color);
+                            *intern_dest = Make_header(size, ocamlrep::STRING_TAG as tag_t, intern_color);
                             intern_dest = intern_dest.offset((1 + size) as isize);
                             *(Field_ptr_mut(v, (size - 1) as usize)) = 0;
                             ofs_ind = Bsize_wsize(size) - (1 as c_ulong);
@@ -892,7 +891,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                             *intern_dest = Make_header(size, tag, intern_color);
                             intern_dest = intern_dest.offset((1 + size) as isize);
                             // For objects, we need to freshen the oid
-                            if tag == Object_tag {
+                            if tag == ocamlrep::OBJECT_TAG as tag_t {
                                 // Request to read rest of the elements of the block
                                 sp = ReadItems(Field_ptr_mut(v, 2), (size - 2) as i64, sp);
                                 // Request freshing OID
@@ -937,7 +936,7 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
         // This is a specialized version of caml_alloc from 'alloc.c'
         if wosize <= Max_young_wosize as c_ulong {
             if wosize == 0 {
-                intern_block = Atom(String_tag as isize);
+                intern_block = Atom(ocamlrep::STRING_TAG as isize);
             } else {
                 /*
                 #define Setup_for_gc
@@ -957,11 +956,11 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
                     );
                 }
                 *((*Caml_state)._young_ptr as *mut header_t) =
-                    (wosize << 10 as c_int) + (0 as c_ulong) + (String_tag as c_ulong);
+                    Make_header(wosize, ocamlrep::STRING_TAG as tag_t, 0);
                 intern_block = ((*Caml_state)._young_ptr as *mut header_t).offset(1) as value
             }
         } else {
-            intern_block = caml_alloc_shr_no_track_noexc(wosize, String_tag);
+            intern_block = caml_alloc_shr_no_track_noexc(wosize, ocamlrep::STRING_TAG as tag_t);
             // do not do the urgent_gc check here because it might darken
             // intern_block into gray and break the intern_color assertion below
             if intern_block == 0 {

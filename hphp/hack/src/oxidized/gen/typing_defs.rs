@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a46644fcd340909833f0653c2116ae7a>>
+// @generated SignedSource<<c06eb1fca20813f44525b00d4a89249f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -496,7 +496,7 @@ pub struct EnumType {
 pub struct TypedefType {
     pub module: Option<ast_defs::Id>,
     pub pos: pos_or_decl::PosOrDecl,
-    pub vis: aast::TypedefVisibility,
+    pub vis: ast_defs::TypedefVisibility,
     pub tparams: Vec<Tparam>,
     pub constraint: Option<Ty>,
     pub type_: Ty,

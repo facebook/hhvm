@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<018bd9417c398597381715d2bc93df71>>
+// @generated SignedSource<<ddc6e45d0277e888121024c80578b5ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -739,6 +739,156 @@ impl Visibility {
     pub fn is_internal(&self) -> bool {
         match self {
             Visibility::Internal => true,
+            _ => false,
+        }
+    }
+}
+impl Tprim {
+    pub fn mk_tnull() -> Self {
+        Tprim::Tnull
+    }
+    pub fn mk_tvoid() -> Self {
+        Tprim::Tvoid
+    }
+    pub fn mk_tint() -> Self {
+        Tprim::Tint
+    }
+    pub fn mk_tbool() -> Self {
+        Tprim::Tbool
+    }
+    pub fn mk_tfloat() -> Self {
+        Tprim::Tfloat
+    }
+    pub fn mk_tstring() -> Self {
+        Tprim::Tstring
+    }
+    pub fn mk_tresource() -> Self {
+        Tprim::Tresource
+    }
+    pub fn mk_tnum() -> Self {
+        Tprim::Tnum
+    }
+    pub fn mk_tarraykey() -> Self {
+        Tprim::Tarraykey
+    }
+    pub fn mk_tnoreturn() -> Self {
+        Tprim::Tnoreturn
+    }
+    pub fn is_tnull(&self) -> bool {
+        match self {
+            Tprim::Tnull => true,
+            _ => false,
+        }
+    }
+    pub fn is_tvoid(&self) -> bool {
+        match self {
+            Tprim::Tvoid => true,
+            _ => false,
+        }
+    }
+    pub fn is_tint(&self) -> bool {
+        match self {
+            Tprim::Tint => true,
+            _ => false,
+        }
+    }
+    pub fn is_tbool(&self) -> bool {
+        match self {
+            Tprim::Tbool => true,
+            _ => false,
+        }
+    }
+    pub fn is_tfloat(&self) -> bool {
+        match self {
+            Tprim::Tfloat => true,
+            _ => false,
+        }
+    }
+    pub fn is_tstring(&self) -> bool {
+        match self {
+            Tprim::Tstring => true,
+            _ => false,
+        }
+    }
+    pub fn is_tresource(&self) -> bool {
+        match self {
+            Tprim::Tresource => true,
+            _ => false,
+        }
+    }
+    pub fn is_tnum(&self) -> bool {
+        match self {
+            Tprim::Tnum => true,
+            _ => false,
+        }
+    }
+    pub fn is_tarraykey(&self) -> bool {
+        match self {
+            Tprim::Tarraykey => true,
+            _ => false,
+        }
+    }
+    pub fn is_tnoreturn(&self) -> bool {
+        match self {
+            Tprim::Tnoreturn => true,
+            _ => false,
+        }
+    }
+}
+impl TypedefVisibility {
+    pub fn mk_transparent() -> Self {
+        TypedefVisibility::Transparent
+    }
+    pub fn mk_opaque() -> Self {
+        TypedefVisibility::Opaque
+    }
+    pub fn mk_opaque_module() -> Self {
+        TypedefVisibility::OpaqueModule
+    }
+    pub fn is_transparent(&self) -> bool {
+        match self {
+            TypedefVisibility::Transparent => true,
+            _ => false,
+        }
+    }
+    pub fn is_opaque(&self) -> bool {
+        match self {
+            TypedefVisibility::Opaque => true,
+            _ => false,
+        }
+    }
+    pub fn is_opaque_module(&self) -> bool {
+        match self {
+            TypedefVisibility::OpaqueModule => true,
+            _ => false,
+        }
+    }
+}
+impl ReifyKind {
+    pub fn mk_erased() -> Self {
+        ReifyKind::Erased
+    }
+    pub fn mk_soft_reified() -> Self {
+        ReifyKind::SoftReified
+    }
+    pub fn mk_reified() -> Self {
+        ReifyKind::Reified
+    }
+    pub fn is_erased(&self) -> bool {
+        match self {
+            ReifyKind::Erased => true,
+            _ => false,
+        }
+    }
+    pub fn is_soft_reified(&self) -> bool {
+        match self {
+            ReifyKind::SoftReified => true,
+            _ => false,
+        }
+    }
+    pub fn is_reified(&self) -> bool {
+        match self {
+            ReifyKind::Reified => true,
             _ => false,
         }
     }

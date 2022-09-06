@@ -38,6 +38,9 @@ ast_defs::FunKind
 ast_defs::OgNullFlavor
 ast_defs::PropOrMethod
 ast_defs::ReadonlyKind
+ast_defs::ReifyKind
+ast_defs::Tprim
+ast_defs::TypedefVisibility
 ast_defs::Uop
 ast_defs::Variance
 ast_defs::Visibility

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f8539d8b4801581ea648b6f02f51626>>
+// @generated SignedSource<<f1d08b49acc1210a2ccfffa9f07c9d3a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,6 +14,9 @@ pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
 pub use ast_defs::PropOrMethod;
 pub use ast_defs::Pstring;
+pub use ast_defs::ReifyKind;
+pub use ast_defs::Tprim;
+pub use ast_defs::TypedefVisibility;
 pub use ast_defs::Visibility;
 use eq_modulo_pos::EqModuloPos;
 use eq_modulo_pos::EqModuloPosAndReason;
@@ -288,41 +291,6 @@ pub enum Hint_ {
     Hvar(String),
 }
 
-/// AST types such as Happly("int", []) are resolved to Hprim values
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum Tprim {
-    Tnull,
-    Tvoid,
-    Tint,
-    Tbool,
-    Tfloat,
-    Tstring,
-    Tresource,
-    Tnum,
-    Tarraykey,
-    Tnoreturn,
-}
-impl TrivialDrop for Tprim {}
-arena_deserializer::impl_deserialize_in_arena!(Tprim);
-
 #[derive(
     Clone,
     Debug,
@@ -543,33 +511,6 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
 
 #[derive(
     Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum TypedefVisibility {
-    Transparent,
-    Opaque,
-    OpaqueModule,
-}
-impl TrivialDrop for TypedefVisibility {}
-arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
-
-#[derive(
-    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -600,27 +541,6 @@ pub struct Enum_ {
     EqModuloPos,
     EqModuloPosAndReason,
     FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -666,11 +586,5 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
          ancestors =
            ["Visitors_runtime.endo"; "Aast_defs_visitors_ancestors.endo"]
        }))"#)]
-#[repr(u8)]
-pub enum ReifyKind {
-    Erased,
-    SoftReified,
-    Reified,
-}
-impl TrivialDrop for ReifyKind {}
-arena_deserializer::impl_deserialize_in_arena!(ReifyKind);
+#[repr(C)]
+pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);

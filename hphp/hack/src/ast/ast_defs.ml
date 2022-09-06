@@ -123,6 +123,33 @@ and visibility =
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
   | Internal [@visitors.name "visibility_Internal"]
+
+(** Hack's primitive types (as the typechecker understands them).
+ *
+ * Used in the AST of typehints (Aast_defs.Hprim) and in the representation of
+ * types (Typing_defs.Tprim).
+ *)
+and tprim =
+  | Tnull
+  | Tvoid
+  | Tint
+  | Tbool
+  | Tfloat
+  | Tstring
+  | Tresource
+  | Tnum
+  | Tarraykey
+  | Tnoreturn
+
+and typedef_visibility =
+  | Transparent
+  | Opaque
+  | OpaqueModule
+
+and reify_kind =
+  | Erased
+  | SoftReified
+  | Reified
 [@@deriving
   show { with_path = false },
     eq,

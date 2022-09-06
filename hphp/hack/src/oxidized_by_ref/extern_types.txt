@@ -49,6 +49,9 @@ oxidized::ast_defs::OgNullFlavor
 oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::Reified
+oxidized::ast_defs::ReifyKind
+oxidized::ast_defs::Tprim
+oxidized::ast_defs::TypedefVisibility
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance
 oxidized::ast_defs::Visibility

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<995629e0ed9a583704153f8148caff0b>>
+// @generated SignedSource<<2c8f940bce44df94f8bda4befbcdc358>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -263,7 +263,7 @@ pub struct Tparam<'a> {
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, &'a Ty<'a>)],
-    pub reified: oxidized::aast::ReifyKind,
+    pub reified: oxidized::ast_defs::ReifyKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a>],
 }
@@ -339,7 +339,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Neg_prim")]
-    NegPrim(&'a aast::Tprim),
+    NegPrim(&'a oxidized::ast_defs::Tprim),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Neg_class")]
     NegClass(&'a PosId<'a>),
@@ -457,7 +457,7 @@ pub enum Ty_<'a> {
     Toption(&'a Ty<'a>),
     /// All the primitive types: int, string, void, etc.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tprim(&'a aast::Tprim),
+    Tprim(&'a oxidized::ast_defs::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

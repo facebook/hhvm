@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<53eb0fd7f1006b8201134d0081e11d44>>
+// @generated SignedSource<<bb7c004064c18fd3efbcae9cd1e7494b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,6 +20,9 @@ pub use local_id::LocalId;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+pub use oxidized::aast_defs::ReifyKind;
+pub use oxidized::aast_defs::Tprim;
+pub use oxidized::aast_defs::TypedefVisibility;
 pub use oxidized::aast_defs::Visibility;
 use serde::Deserialize;
 use serde::Serialize;
@@ -294,8 +297,6 @@ pub enum Hint_<'a> {
 impl<'a> TrivialDrop for Hint_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
 
-pub use oxidized::aast_defs::Tprim;
-
 #[derive(
     Clone,
     Copy,
@@ -488,7 +489,6 @@ impl<'a> TrivialDrop for NastShapeInfo<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(NastShapeInfo<'arena>);
 
 pub use oxidized::aast_defs::KvcKind;
-pub use oxidized::aast_defs::TypedefVisibility;
 pub use oxidized::aast_defs::VcKind;
 
 #[derive(
@@ -536,6 +536,43 @@ arena_deserializer::impl_deserialize_in_arena!(Enum_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
+    (visitors
+       {
+         name = "iter_defs";
+         variety = "iter";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors =
+           ["Visitors_runtime.iter"; "Aast_defs_visitors_ancestors.iter"]
+       }),
+    (visitors
+       {
+         name = "reduce_defs";
+         variety = "reduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors =
+           ["Visitors_runtime.reduce"; "Aast_defs_visitors_ancestors.reduce"]
+       }),
+    (visitors
+       {
+         name = "map_defs";
+         variety = "map";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors =
+           ["Visitors_runtime.map"; "Aast_defs_visitors_ancestors.map"]
+       }),
+    (visitors
+       {
+         name = "endo_defs";
+         variety = "endo";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors =
+           ["Visitors_runtime.endo"; "Aast_defs_visitors_ancestors.endo"]
+       }))"#)]
 #[repr(C)]
 pub struct WhereConstraintHint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint<'a>,
@@ -544,5 +581,3 @@ pub struct WhereConstraintHint<'a>(
 );
 impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(WhereConstraintHint<'arena>);
-
-pub use oxidized::aast_defs::ReifyKind;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9dad392f50a279aa7a93de9d6f0c5e38>>
+// @generated SignedSource<<7f0b390726db397a28e7f944b0b793d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -370,7 +370,7 @@ pub struct Tparam {
     pub name: PosId,
     pub tparams: Vec<Tparam>,
     pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
-    pub reified: aast::ReifyKind,
+    pub reified: ast_defs::ReifyKind,
     pub user_attributes: Vec<UserAttribute>,
 }
 
@@ -459,7 +459,7 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
 #[repr(C, u8)]
 pub enum NegType {
     #[rust_to_ocaml(name = "Neg_prim")]
-    NegPrim(aast::Tprim),
+    NegPrim(ast_defs::Tprim),
     #[rust_to_ocaml(name = "Neg_class")]
     NegClass(PosId),
 }
@@ -564,7 +564,7 @@ pub enum Ty_ {
     /// Nullable, called "option" in the ML parlance.
     Toption(Ty),
     /// All the primitive types: int, string, void, etc.
-    Tprim(aast::Tprim),
+    Tprim(ast_defs::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
     Tfun(FunType),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26fc6ce629cb798478a5205126f760ba>>
+// @generated SignedSource<<7ceb0269c740f9236a92613270d08216>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -553,7 +553,7 @@ pub struct TypedefType<'a> {
     pub module: Option<ast_defs::Id<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-    pub vis: oxidized::aast::TypedefVisibility,
+    pub vis: oxidized::ast_defs::TypedefVisibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

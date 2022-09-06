@@ -41,6 +41,7 @@ ast_defs::Id
 ast_defs::PropOrMethod
 ast_defs::ParamKind
 ast_defs::ShapeFieldName
+ast_defs::Tprim
 ast_defs::XhpEnumValue
 user_error::Severity
 decl_defs::ConditionTypeName
@@ -102,6 +103,9 @@ oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor
 oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::ReadonlyKind
+oxidized::ast_defs::ReifyKind
+oxidized::ast_defs::Tprim
+oxidized::ast_defs::TypedefVisibility
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance
 oxidized::ast_defs::Visibility

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c431df1634280a426a024b3d6802e50c>>
+// @generated SignedSource<<3e1735e2fa974a1d6ce0dccb58b7259a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -460,6 +460,103 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     Serialize,
     ToOcamlRep
 )]
+#[repr(u8)]
+pub enum Visibility {
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Private""#)]
+    Private,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Public""#)]
+    Public,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Protected""#)]
+    Protected,
+    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Internal""#)]
+    Internal,
+}
+impl TrivialDrop for Visibility {}
+arena_deserializer::impl_deserialize_in_arena!(Visibility);
+
+/// Hack's primitive types (as the typechecker understands them).
+///
+/// Used in the AST of typehints (Aast_defs.Hprim) and in the representation of
+/// types (Typing_defs.Tprim).
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(u8)]
+pub enum Tprim {
+    Tnull,
+    Tvoid,
+    Tint,
+    Tbool,
+    Tfloat,
+    Tstring,
+    Tresource,
+    Tnum,
+    Tarraykey,
+    Tnoreturn,
+}
+impl TrivialDrop for Tprim {}
+arena_deserializer::impl_deserialize_in_arena!(Tprim);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(u8)]
+pub enum TypedefVisibility {
+    Transparent,
+    Opaque,
+    OpaqueModule,
+}
+impl TrivialDrop for TypedefVisibility {}
+arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    EqModuloPosAndReason,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
     (visitors
        {
@@ -490,18 +587,13 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
          ancestors = ["Visitors_runtime.map_base"]
        }))"#)]
 #[repr(u8)]
-pub enum Visibility {
-    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Private""#)]
-    Private,
-    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Public""#)]
-    Public,
-    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Protected""#)]
-    Protected,
-    #[rust_to_ocaml(attr = r#"visitors.name "visibility_Internal""#)]
-    Internal,
+pub enum ReifyKind {
+    Erased,
+    SoftReified,
+    Reified,
 }
-impl TrivialDrop for Visibility {}
-arena_deserializer::impl_deserialize_in_arena!(Visibility);
+impl TrivialDrop for ReifyKind {}
+arena_deserializer::impl_deserialize_in_arena!(ReifyKind);
 
 /// Literal values that can occur in XHP enum properties.
 ///

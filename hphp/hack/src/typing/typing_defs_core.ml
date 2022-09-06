@@ -180,7 +180,7 @@ type 'ty tparam = {
   tp_name: pos_id;
   tp_tparams: 'ty tparam list;
   tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
-  tp_reified: Aast.reify_kind;
+  tp_reified: Ast_defs.reify_kind;
   tp_user_attributes: user_attribute list;
 }
 [@@deriving eq, show]
@@ -200,7 +200,7 @@ and decl_ty = decl_phase ty
 and locl_ty = locl_phase ty
 
 and neg_type =
-  | Neg_prim of Aast.tprim
+  | Neg_prim of Ast_defs.tprim
   | Neg_class of pos_id
 
 (** A shape may specify whether or not fields are required. For example, consider
@@ -271,7 +271,7 @@ and _ ty_ =
        *)
   | Toption : 'phase ty -> 'phase ty_
       (** Nullable, called "option" in the ML parlance. *)
-  | Tprim : Aast.tprim -> 'phase ty_
+  | Tprim : Ast_defs.tprim -> 'phase ty_
       (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
       (** A wrapper around fun_type, which contains the full type information for a

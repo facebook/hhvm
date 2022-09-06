@@ -4,32 +4,26 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
+use arena_deserializer::ArenaSeed;
+use arena_deserializer::DeserializeInArena;
 use arena_trait::Arena;
 use arena_trait::TrivialDrop;
+use bumpalo::Bump;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
-use serde::Deserialize;
+use serde::de::Deserializer;
+use serde::de::SeqAccess;
+use serde::de::Visitor;
 use serde::Serialize;
 
-#[derive(
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+#[derive(Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(FromOcamlRepIn, ToOcamlRep)]
 pub enum List<'a, T> {
     Nil,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Cons(&'a (T, List<'a, T>)),
 }
-arena_deserializer::impl_deserialize_in_arena!(List<'arena, T>);
 
 use List::*;
 
@@ -319,6 +313,62 @@ impl<'a, T> IntoIterator for List<'a, T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl<T: Serialize> Serialize for List<'_, T> {
+    fn serialize<S: serde::Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeSeq;
+        let mut seq = ser.serialize_seq(Some(self.len()))?;
+        let mut node = self;
+        while let Cons((e, next)) = node {
+            node = next;
+            seq.serialize_element(e)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'arena, T> DeserializeInArena<'arena> for List<'arena, T>
+where
+    T: DeserializeInArena<'arena>,
+{
+    fn deserialize_in_arena<D>(arena: &'arena Bump, deser: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'arena>,
+    {
+        struct ListVisitor<'arena, T> {
+            arena: &'arena Bump,
+            marker: PhantomData<fn() -> T>,
+        }
+        impl<'arena, T> Visitor<'arena> for ListVisitor<'arena, T>
+        where
+            T: DeserializeInArena<'arena> + 'arena,
+        {
+            type Value = List<'arena, T>;
+            fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str("a sequence")
+            }
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'arena>,
+            {
+                let mut vec = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+                let seed = ArenaSeed::new();
+                while let Some(value) = seq.next_element_seed(seed)? {
+                    vec.push(value);
+                }
+                Ok(vec
+                    .into_iter()
+                    .rev()
+                    .fold(List::empty(), |list, e| Cons(self.arena.alloc((e, list)))))
+            }
+        }
+
+        deser.deserialize_seq(ListVisitor {
+            arena,
+            marker: PhantomData,
+        })
     }
 }
 

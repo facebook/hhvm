@@ -205,7 +205,7 @@ where
             where
                 A: SeqAccess<'arena>,
             {
-                let mut vec = Vec::new();
+                let mut vec = Vec::with_capacity(seq.size_hint().unwrap_or(0));
                 let seed = ArenaSeed::new();
                 while let Some(value) = seq.next_element_seed(seed)? {
                     vec.push(value);

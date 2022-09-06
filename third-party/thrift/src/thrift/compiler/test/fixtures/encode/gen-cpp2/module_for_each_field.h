@@ -44,6 +44,7 @@ struct ForEachField<::facebook::thrift::test::OpEncodeStruct> {
     f(8, static_cast<T&&>(t).map_field_ref()...);
     f(9, static_cast<T&&>(t).nested_field_ref()...);
     f(10, static_cast<T&&>(t).bar_field_ref()...);
+    f(11, static_cast<T&&>(t).adapted_list_field_ref()...);
   }
 };
 } // namespace detail

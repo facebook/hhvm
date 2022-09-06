@@ -277,8 +277,10 @@ OpEncodeStruct::OpEncodeStruct(const OpEncodeStruct& srcObj) :
     __fbthrift_field_map_field(srcObj.__fbthrift_field_map_field),
     __fbthrift_field_nested_field(srcObj.__fbthrift_field_nested_field),
     __fbthrift_field_bar_field(srcObj.__fbthrift_field_bar_field),
+    __fbthrift_field_adapted_list_field(srcObj.__fbthrift_field_adapted_list_field),
     __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
+  ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }
 
 OpEncodeStruct& OpEncodeStruct::operator=(const OpEncodeStruct& other) {
@@ -291,6 +293,7 @@ OpEncodeStruct::OpEncodeStruct() :
       __fbthrift_field_int_field(),
       __fbthrift_field_enum_field() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
+  ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }
 
 
@@ -308,8 +311,10 @@ OpEncodeStruct::OpEncodeStruct(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexce
     __fbthrift_field_map_field(std::move(other.__fbthrift_field_map_field)),
     __fbthrift_field_nested_field(std::move(other.__fbthrift_field_nested_field)),
     __fbthrift_field_bar_field(std::move(other.__fbthrift_field_bar_field)),
+    __fbthrift_field_adapted_list_field(std::move(other.__fbthrift_field_adapted_list_field)),
     __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
+  ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
 }
 
 OpEncodeStruct& OpEncodeStruct::operator=(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexcept {
@@ -324,12 +329,13 @@ OpEncodeStruct& OpEncodeStruct::operator=(FOLLY_MAYBE_UNUSED OpEncodeStruct&& ot
     this->__fbthrift_field_map_field = std::move(other.__fbthrift_field_map_field);
     this->__fbthrift_field_nested_field = std::move(other.__fbthrift_field_nested_field);
     this->__fbthrift_field_bar_field = std::move(other.__fbthrift_field_bar_field);
+    this->__fbthrift_field_adapted_list_field = std::move(other.__fbthrift_field_adapted_list_field);
     __isset = other.__isset;
     return *this;
 }
 
 
-OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::Enum enum_field__arg, ::facebook::thrift::test::Foo foo_field__arg, ::facebook::thrift::test::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::Bar bar_field__arg) :
+OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::Enum enum_field__arg, ::facebook::thrift::test::Foo foo_field__arg, ::facebook::thrift::test::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::Bar bar_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct> adapted_list_field__arg) :
     __fbthrift_field_int_field(std::move(int_field__arg)),
     __fbthrift_field_enum_field(std::move(enum_field__arg)),
     __fbthrift_field_foo_field(std::move(foo_field__arg)),
@@ -340,8 +346,10 @@ OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
     __fbthrift_field_nested_field(std::move(nested_field__arg)),
-    __fbthrift_field_bar_field(std::move(bar_field__arg)) {
+    __fbthrift_field_bar_field(std::move(bar_field__arg)),
+    __fbthrift_field_adapted_list_field(std::move(adapted_list_field__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
+  ::apache::thrift::adapt_detail::construct<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -352,6 +360,7 @@ OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_
   __isset.set(folly::index_constant<7>(), true);
   __isset.set(folly::index_constant<8>(), true);
   __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
 }
 
 
@@ -368,6 +377,7 @@ void OpEncodeStruct::__fbthrift_clear() {
   this->__fbthrift_field_map_field.clear();
   this->__fbthrift_field_nested_field.clear();
   ::apache::thrift::clear(this->__fbthrift_field_bar_field);
+  ::apache::thrift::adapt_detail::clear<::FieldAdapter, 12>(__fbthrift_field_adapted_list_field, *this);
   __isset = {};
 }
 
@@ -413,6 +423,9 @@ bool OpEncodeStruct::operator==(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) co
   if (!(lhs.bar_field_ref() == rhs.bar_field_ref())) {
     return false;
   }
+  if (::apache::thrift::adapt_detail::not_equal<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field)) {
+    return false;
+  }
   return true;
 }
 
@@ -450,6 +463,9 @@ bool OpEncodeStruct::operator<(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) con
   }
   if (!(lhs.bar_field_ref() == rhs.bar_field_ref())) {
     return lhs.bar_field_ref() < rhs.bar_field_ref();
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field)) {
+    return ::apache::thrift::adapt_detail::less<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field);
   }
   return false;
 }
@@ -524,6 +540,7 @@ void swap(FOLLY_MAYBE_UNUSED OpEncodeStruct& a, FOLLY_MAYBE_UNUSED OpEncodeStruc
   swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);
   swap(a.__fbthrift_field_nested_field, b.__fbthrift_field_nested_field);
   swap(a.__fbthrift_field_bar_field, b.__fbthrift_field_bar_field);
+  swap(a.__fbthrift_field_adapted_list_field, b.__fbthrift_field_adapted_list_field);
   swap(a.__isset, b.__isset);
 }
 
@@ -560,5 +577,6 @@ static_assert(
 namespace facebook { namespace thrift { namespace test { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::Foo, ::facebook::thrift::test::OpEncodeStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::Foo>, ::facebook::thrift::test::OpEncodeStruct>();
 }
 }}}} // facebook::thrift::test

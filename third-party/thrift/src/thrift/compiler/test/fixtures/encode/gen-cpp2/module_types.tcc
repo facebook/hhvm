@@ -459,6 +459,22 @@ _readField_bar_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           11,
+          12,
+          apache::thrift::protocol::T_LIST))) {
+    goto _loop;
+  }
+_readField_adapted_list_field:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*iprot, this->__fbthrift_field_adapted_list_field);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(10, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          12,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -563,6 +579,14 @@ _loop:
     {
       if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
         goto _readField_bar_field;
+      } else {
+        goto _skip;
+      }
+    }
+    case 12:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
+        goto _readField_adapted_list_field;
       } else {
         goto _skip;
       }
@@ -672,6 +696,13 @@ uint32_t OpEncodeStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 11, kPrevFieldId>(*prot_, "bar_field", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::op::encode<::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>>(*prot_, this->__fbthrift_field_bar_field);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 11;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 12, kPrevFieldId>(*prot_, "adapted_list_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_adapted_list_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

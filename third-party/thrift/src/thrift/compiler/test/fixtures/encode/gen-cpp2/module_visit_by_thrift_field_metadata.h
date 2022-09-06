@@ -66,6 +66,8 @@ struct VisitByFieldId<::facebook::thrift::test::OpEncodeStruct> {
       return f(9, static_cast<T&&>(t).nested_field_ref());
     case 11:
       return f(10, static_cast<T&&>(t).bar_field_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).adapted_list_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::OpEncodeStruct");
     }

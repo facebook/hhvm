@@ -29,6 +29,7 @@ struct set_field;
 struct map_field;
 struct nested_field;
 struct bar_field;
+struct adapted_list_field;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_field
@@ -82,6 +83,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(nested_field);
 #ifndef APACHE_THRIFT_ACCESSOR_bar_field
 #define APACHE_THRIFT_ACCESSOR_bar_field
 APACHE_THRIFT_DEFINE_ACCESSOR(bar_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_adapted_list_field
+#define APACHE_THRIFT_ACCESSOR_adapted_list_field
+APACHE_THRIFT_DEFINE_ACCESSOR(adapted_list_field);
 #endif
 } // namespace detail
 } // namespace thrift
@@ -502,7 +507,7 @@ class OpEncodeStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static constexpr std::size_t __fbthrift_field_size_v = 11;
+  static constexpr std::size_t __fbthrift_field_size_v = 12;
 
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -517,7 +522,8 @@ class OpEncodeStruct final  {
                                                    ::apache::thrift::field_id<8>,
                                                    ::apache::thrift::field_id<9>,
                                                    ::apache::thrift::field_id<10>,
-                                                   ::apache::thrift::field_id<11>>;
+                                                   ::apache::thrift::field_id<11>,
+                                                   ::apache::thrift::field_id<12>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -532,7 +538,8 @@ class OpEncodeStruct final  {
                                                          ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
                                                          ::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
                                                          ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>>;
+                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>,
+                                                         ::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -547,7 +554,8 @@ class OpEncodeStruct final  {
                                                       ::apache::thrift::ident::set_field,
                                                       ::apache::thrift::ident::map_field,
                                                       ::apache::thrift::ident::nested_field,
-                                                      ::apache::thrift::ident::bar_field>;
+                                                      ::apache::thrift::ident::bar_field,
+                                                      ::apache::thrift::ident::adapted_list_field>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
@@ -574,6 +582,8 @@ class OpEncodeStruct final  {
     template<> static constexpr int value<::apache::thrift::ident::nested_field> = 10;
     template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
     template<> static constexpr int value<::apache::thrift::ident::bar_field> = 11;
+    template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
+    template<> static constexpr int value<::apache::thrift::ident::adapted_list_field> = 12;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
@@ -598,6 +608,8 @@ class OpEncodeStruct final  {
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::nested_field>) { return 10; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::bar_field>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::adapted_list_field>) { return 12; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -615,6 +627,7 @@ class OpEncodeStruct final  {
     template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
     template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>, T, std::enable_if_t<sizeof(T) != -10>> { static constexpr int value = 10; };
     template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>, T, std::enable_if_t<sizeof(T) != -11>> { static constexpr int value = 11; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>, T, std::enable_if_t<sizeof(T) != -12>> { static constexpr int value = 12; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -642,7 +655,7 @@ class OpEncodeStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::Enum enum_field__arg, ::facebook::thrift::test::Foo foo_field__arg, ::facebook::thrift::test::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::Bar bar_field__arg);
+  OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_t int_field__arg, ::facebook::thrift::test::Enum enum_field__arg, ::facebook::thrift::test::Foo foo_field__arg, ::facebook::thrift::test::AdaptedFoo adapted_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field__arg, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_cpp_type_field__arg, ::std::set<::facebook::thrift::test::AdaptedFoo> set_field__arg, ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> map_field__arg, ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_field__arg, ::facebook::thrift::test::Bar bar_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct> adapted_list_field__arg);
 
   OpEncodeStruct(OpEncodeStruct&&) noexcept;
   OpEncodeStruct(const OpEncodeStruct& src);
@@ -676,7 +689,9 @@ class OpEncodeStruct final  {
  private:
   ::facebook::thrift::test::Bar __fbthrift_field_bar_field;
  private:
-  apache::thrift::detail::isset_bitset<10, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct> __fbthrift_field_adapted_list_field;
+ private:
+  apache::thrift::detail::isset_bitset<11, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -1100,6 +1115,46 @@ class OpEncodeStruct final  {
   template <typename..., typename T = ::facebook::thrift::test::Bar>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bar_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_bar_field), __isset.at(9), __isset.bit(9)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_field_ref() const& {
+    return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_field_ref() & {
+    return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_field() const& {
+    return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_field() & {
+    return {this->__fbthrift_field_adapted_list_field, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::AdaptedFoo>, OpEncodeStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_list_field), __isset.at(10), __isset.bit(10)};
   }
 
   ::std::int32_t get_int_field() const {

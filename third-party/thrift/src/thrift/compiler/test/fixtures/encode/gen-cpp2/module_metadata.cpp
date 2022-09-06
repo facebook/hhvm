@@ -97,7 +97,7 @@ StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& me
   module_OpEncodeStruct.name() = "module.OpEncodeStruct";
   module_OpEncodeStruct.is_union() = false;
   static const auto* const
-  module_OpEncodeStruct_fields = new std::array<EncodedThriftField, 11>{{
+  module_OpEncodeStruct_fields = new std::array<EncodedThriftField, 12>{{
     {1, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::Enum>>("module.Enum"), std::vector<ThriftConstStruct>{}},
     {3, "foo_field", false, std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{}},
@@ -109,6 +109,7 @@ StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& me
     {9, "map_field", false, std::make_unique<Map>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), }), std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
     {10, "nested_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), }))), std::vector<ThriftConstStruct>{}},
     {11, "bar_field", false, std::make_unique<Struct<::facebook::thrift::test::Bar>>("module.Bar"), std::vector<ThriftConstStruct>{}},
+    {12, "adapted_list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::TemplatedTestAdapter)")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::FieldAdapter)")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_OpEncodeStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

@@ -51,4 +51,7 @@ struct OpEncodeStruct {
   9: map<AdaptedFoo, AdaptedFoo> map_field;
   10: map<i32, list<AdaptedFoo>> nested_field;
   11: Bar bar_field;
+
+  @cpp.Adapter{name = "::FieldAdapter"}
+  12: list<AdaptedFoo> adapted_list_field;
 }

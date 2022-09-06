@@ -41,7 +41,7 @@ const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test
   TType::T_LIST,
 }};
 
-const std::array<folly::StringPiece, 11> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
+const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
   "int_field",
   "enum_field",
   "foo_field",
@@ -53,8 +53,9 @@ const std::array<folly::StringPiece, 11> TStructDataStorage<::facebook::thrift::
   "map_field",
   "nested_field",
   "bar_field",
+  "adapted_list_field",
 }};
-const std::array<int16_t, 11> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_ids = {{
+const std::array<int16_t, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -66,8 +67,9 @@ const std::array<int16_t, 11> TStructDataStorage<::facebook::thrift::test::OpEnc
   9,
   10,
   11,
+  12,
 }};
-const std::array<protocol::TType, 11> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_types = {{
+const std::array<protocol::TType, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_STRUCT,
@@ -79,6 +81,7 @@ const std::array<protocol::TType, 11> TStructDataStorage<::facebook::thrift::tes
   TType::T_MAP,
   TType::T_MAP,
   TType::T_STRUCT,
+  TType::T_LIST,
 }};
 
 } // namespace thrift

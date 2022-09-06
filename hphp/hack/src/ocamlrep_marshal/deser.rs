@@ -111,7 +111,6 @@ pub struct _IO_FILE {
     pub _unused2: [c_char; 20],
 }
 
-pub type _IO_lock_t = ();
 pub type FILE = _IO_FILE;
 pub type int16_t = __int16_t;
 pub type int32_t = __int32_t;
@@ -119,12 +118,6 @@ pub type uint16_t = __uint16_t;
 pub type uint32_t = __uint32_t;
 pub type intnat = c_long;
 pub type uintnat = c_ulong;
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct __sigset_t {
-    pub __val: [c_ulong; 16],
-}
 
 type asize_t = size_t;
 type backtrace_slot = *mut c_void;
@@ -247,10 +240,15 @@ pub const CAML_FROM_C: caml_alloc_small_flags = 0;
 pub const CAML_DONT_TRACK: caml_alloc_small_flags = 0;
 pub type caml_alloc_small_flags = c_uint;
 
-const Caml_white: c_int = 0 << 8;
-const Caml_black: c_int = 3 << 8;
+// 'config.h'
+pub const PAGE_LOG: usize = 12; // A page is 4 kilobytes
+pub const PAGE_SIZE: usize = (1_isize << PAGE_LOG) as usize;
+// Maximum size of a block allocated in the young generation (words).
+// Must be > 4
+pub const MAX_YOUNG_WOSIZE: usize = 256;
 
 // ---
+
 #[inline]
 const unsafe fn Hd_val(v: value) -> header_t {
     *(v as *const header_t).offset(-1)
@@ -266,7 +264,7 @@ unsafe fn Hp_val(v: value) -> *mut header_t {
 }
 #[inline]
 const fn Color_hd(hd: header_t) -> c_ulong {
-    hd & (Caml_black as c_ulong)
+    hd & (ocamlrep::CAML_BLACK as c_ulong)
 }
 #[inline]
 const fn Val_long(x: value) -> c_long {
@@ -327,16 +325,7 @@ const fn Make_header(wosize: mlsize_t, tag: tag_t, color: color_t) -> header_t {
     (wosize << 10) + color as header_t + tag as header_t
 }
 
-const Double_wosize: c_ulong =
-    ((std::mem::size_of::<c_double>()) / (std::mem::size_of::<value>())) as c_ulong;
-
-const Max_wosize: c_ulong = (((1 as c_long) << 54) - 1) as c_ulong;
-const Page_log: c_ulong = 12; // A page is 4 kilobytes
-const Page_size: c_ulong = ((1 as c_int) << Page_log) as c_ulong;
-
-// Maximum size of a block allocated in the young generation (words).
-// Must be > 4
-const Max_young_wosize: c_ulong = 256;
+// ---
 
 #[inline]
 unsafe fn make_free_blocks(p: *mut value, size: mlsize_t, do_merge: c_int, color: c_int) {
@@ -789,11 +778,11 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                     *intern_obj_table.offset(fresh5 as isize) = v
                                 }
                                 *intern_dest = Make_header(
-                                    Double_wosize,
+                                    ocamlrep::DOUBLE_WOSIZE as c_ulong,
                                     ocamlrep::DOUBLE_TAG as tag_t,
                                     intern_color,
                                 );
-                                intern_dest = intern_dest.offset((1 + Double_wosize) as isize);
+                                intern_dest = intern_dest.add(1 + ocamlrep::DOUBLE_WOSIZE);
                                 readfloat(v as *mut c_double, code);
                                 current_block = NOTHING_TO_DO_LABEL;
                             }
@@ -840,7 +829,7 @@ unsafe fn intern_rec(mut dest: *mut value) {
                                         v = *intern_obj_table.offset((obj_counter - ofs) as isize)
                                     }
                                     _ /* READ_DOUBLE_ARRAY_LABEL */ => {
-                                        size = len * Double_wosize;
+                                        size = len * ocamlrep::DOUBLE_WOSIZE as c_ulong;
                                         v = Val_hp(intern_dest);
                                         if !intern_obj_table.is_null() {
                                             let fresh6 = obj_counter;
@@ -922,9 +911,10 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
         return;
     }
     let wosize = Wosize_whsize(whsize);
-    if wosize > Max_wosize {
+    if wosize > ocamlrep::MAX_WOSIZE as mlsize_t {
         // Round desired size up to next page
-        let request: asize_t = ((Bsize_wsize(whsize) + Page_size - 1) >> Page_log) << Page_log;
+        let request: asize_t =
+            ((Bsize_wsize(whsize) + (PAGE_SIZE as mlsize_t) - 1) >> PAGE_LOG) << PAGE_LOG;
         intern_extra_block = caml_alloc_for_heap(request);
         if intern_extra_block.is_null() {
             intern_cleanup();
@@ -934,7 +924,7 @@ unsafe fn intern_alloc(whsize: mlsize_t, num_objects: mlsize_t) {
         intern_dest = intern_extra_block as *mut header_t
     } else {
         // This is a specialized version of caml_alloc from 'alloc.c'
-        if wosize <= Max_young_wosize as c_ulong {
+        if wosize <= MAX_YOUNG_WOSIZE as c_ulong {
             if wosize == 0 {
                 intern_block = Atom(ocamlrep::STRING_TAG as isize);
             } else {
@@ -997,7 +987,7 @@ unsafe fn intern_add_to_heap(_whsize: mlsize_t) -> *mut header_t {
                 intern_dest as *mut value,
                 end_extra_block.offset_from(intern_dest) as mlsize_t,
                 0,
-                Caml_white,
+                ocamlrep::CAML_WHITE as c_int,
             );
         }
         caml_allocated_words +=

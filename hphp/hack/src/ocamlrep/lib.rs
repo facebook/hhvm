@@ -346,6 +346,18 @@ pub use impls::vec_from_ocaml_set_in;
 pub use value::OpaqueValue;
 pub use value::Value;
 
+// TODO: find the right forever home for these constants
+
+// 'mlvalues.h'
+pub const MAX_WOSIZE: usize = ((1_isize << 54) - 1) as usize;
+pub const DOUBLE_WOSIZE: usize = std::mem::size_of::<f64>() / std::mem::size_of::<usize>();
+
+// 'gc.h'
+pub const CAML_WHITE: usize = 0 << 8;
+pub const CAML_GRAY: usize = 1 << 8;
+pub const CAML_BLUE: usize = 2 << 8;
+pub const CAML_BLACK: usize = 3 << 8;
+
 /// A data structure that can be converted to an OCaml value.
 ///
 /// Types which implement both `ToOcamlRep` and `FromOcamlRep` (or

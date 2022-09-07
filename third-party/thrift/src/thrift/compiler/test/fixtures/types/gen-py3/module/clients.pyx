@@ -66,7 +66,7 @@ cdef void SomeService_bounce_map_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.std_unordered_map__Map__i32_string._fbthrift_create(make_shared[_module_types.std_unordered_map[cint32_t,string]](result.value())))
+            pyfuture.set_result(_module_types.std_unordered_map__Map__i32_string._fbthrift_create(make_shared[_module_types.std_unordered_map[cint32_t,string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -79,7 +79,7 @@ cdef void SomeService_binary_keyed_map_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__binary_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](result.value())))
+            pyfuture.set_result(_module_types.Map__binary_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

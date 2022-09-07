@@ -66,7 +66,7 @@ cdef void MyService_query_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_nolegacy_module_types.TestStruct._fbthrift_create(make_shared[_test_fixtures_nolegacy_module_types.cTestStruct](result.value())))
+            pyfuture.set_result(_test_fixtures_nolegacy_module_types.TestStruct._fbthrift_create(make_shared[_test_fixtures_nolegacy_module_types.cTestStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

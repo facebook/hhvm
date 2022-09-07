@@ -187,7 +187,7 @@ cdef void ReturnService_mapReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__string_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](result.value())))
+            pyfuture.set_result(_module_types.Map__string_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -213,7 +213,7 @@ cdef void ReturnService_complexTypedefReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__Map__Empty_MyStruct._fbthrift_create(make_shared[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](result.value())))
+            pyfuture.set_result(_module_types.List__Map__Empty_MyStruct._fbthrift_create(make_shared[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -226,7 +226,7 @@ cdef void ReturnService_list_mostComplexTypedefReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__List__List__Map__Empty_MyStruct._fbthrift_create(make_shared[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](result.value())))
+            pyfuture.set_result(_module_types.List__List__List__Map__Empty_MyStruct._fbthrift_create(make_shared[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -252,7 +252,7 @@ cdef void ReturnService_list_EnumReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__MyEnumA._fbthrift_create(make_shared[vector[_module_types.cMyEnumA]](result.value())))
+            pyfuture.set_result(_module_types.List__MyEnumA._fbthrift_create(make_shared[vector[_module_types.cMyEnumA]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -265,7 +265,7 @@ cdef void ReturnService_structReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.MyStruct._fbthrift_create(make_shared[_module_types.cMyStruct](result.value())))
+            pyfuture.set_result(_module_types.MyStruct._fbthrift_create(make_shared[_module_types.cMyStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -278,7 +278,7 @@ cdef void ReturnService_set_StructReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__MyStruct._fbthrift_create(make_shared[cset[_module_types.cMyStruct]](result.value())))
+            pyfuture.set_result(_module_types.Set__MyStruct._fbthrift_create(make_shared[cset[_module_types.cMyStruct]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -291,7 +291,7 @@ cdef void ReturnService_unionReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.ComplexUnion._fbthrift_create(make_shared[_module_types.cComplexUnion](result.value())))
+            pyfuture.set_result(_module_types.ComplexUnion._fbthrift_create(make_shared[_module_types.cComplexUnion](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -304,7 +304,7 @@ cdef void ReturnService_list_UnionReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__ComplexUnion._fbthrift_create(make_shared[vector[_module_types.cComplexUnion]](result.value())))
+            pyfuture.set_result(_module_types.List__ComplexUnion._fbthrift_create(make_shared[vector[_module_types.cComplexUnion]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -564,7 +564,7 @@ cdef void ParamService_map_ret_bool_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__string_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](result.value())))
+            pyfuture.set_result(_module_types.Map__string_i64._fbthrift_create(make_shared[cmap[string,cint64_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -577,7 +577,7 @@ cdef void ParamService_list_ret_map_setlist_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__bool._fbthrift_create(make_shared[vector[cbool]](result.value())))
+            pyfuture.set_result(_module_types.List__bool._fbthrift_create(make_shared[vector[cbool]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -590,7 +590,7 @@ cdef void ParamService_mapsetlistmapliststring_ret_listlistlist_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Map__Set__List__i32_Map__List__Set__string_string._fbthrift_create(make_shared[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](result.value())))
+            pyfuture.set_result(_module_types.Map__Set__List__i32_Map__List__Set__string_string._fbthrift_create(make_shared[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -616,7 +616,7 @@ cdef void ParamService_listtypedef_ret_typedef_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__i32._fbthrift_create(make_shared[vector[cint32_t]](result.value())))
+            pyfuture.set_result(_module_types.List__i32._fbthrift_create(make_shared[vector[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -655,7 +655,7 @@ cdef void ParamService_listenum_ret_map_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__MyEnumA._fbthrift_create(make_shared[vector[_module_types.cMyEnumA]](result.value())))
+            pyfuture.set_result(_module_types.List__MyEnumA._fbthrift_create(make_shared[vector[_module_types.cMyEnumA]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -668,7 +668,7 @@ cdef void ParamService_struct_ret_i16_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.MyStruct._fbthrift_create(make_shared[_module_types.cMyStruct](result.value())))
+            pyfuture.set_result(_module_types.MyStruct._fbthrift_create(make_shared[_module_types.cMyStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -681,7 +681,7 @@ cdef void ParamService_setstruct_ret_set_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__MyStruct._fbthrift_create(make_shared[cset[_module_types.cMyStruct]](result.value())))
+            pyfuture.set_result(_module_types.Set__MyStruct._fbthrift_create(make_shared[cset[_module_types.cMyStruct]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -694,7 +694,7 @@ cdef void ParamService_union_ret_i32_i32_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.ComplexUnion._fbthrift_create(make_shared[_module_types.cComplexUnion](result.value())))
+            pyfuture.set_result(_module_types.ComplexUnion._fbthrift_create(make_shared[_module_types.cComplexUnion](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -707,7 +707,7 @@ cdef void ParamService_listunion_string_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.List__ComplexUnion._fbthrift_create(make_shared[vector[_module_types.cComplexUnion]](result.value())))
+            pyfuture.set_result(_module_types.List__ComplexUnion._fbthrift_create(make_shared[vector[_module_types.cComplexUnion]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

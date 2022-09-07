@@ -1,23 +1,47 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# - Try to find Glog
+# Once done, this will define
 #
-# Find libglog
-#
-#  LIBGLOG_INCLUDE_DIR - where to find glog/logging.h, etc.
-#  LIBGLOG_LIBRARY     - List of libraries when using libglog.
-#  LIBGLOG_FOUND       - True if libglog found.
+# GLOG_FOUND - system has Glog
+# GLOG_INCLUDE_DIRS - the Glog include directories
+# GLOG_LIBRARIES - link these to use Glog
 
+include(FindPackageHandleStandardArgs)
+include(SelectLibraryConfigurations)
 
-IF (LIBGLOG_INCLUDE_DIR)
-  # Already in cache, be silent
-  SET(LIBGLOG_FIND_QUIETLY TRUE)
-ENDIF ()
+find_library(GLOG_LIBRARY_RELEASE glog
+  PATHS ${GLOG_LIBRARYDIR})
+find_library(GLOG_LIBRARY_DEBUG glogd
+  PATHS ${GLOG_LIBRARYDIR})
 
-FIND_PATH(LIBGLOG_INCLUDE_DIR glog/logging.h)
+find_path(GLOG_INCLUDE_DIR glog/logging.h
+  PATHS ${GLOG_INCLUDEDIR})
 
-FIND_LIBRARY(LIBGLOG_LIBRARY glog)
+select_library_configurations(GLOG)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBGLOG_FOUND to TRUE if
-# all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBGLOG DEFAULT_MSG LIBGLOG_LIBRARY LIBGLOG_INCLUDE_DIR)
+find_package_handle_standard_args(Glog DEFAULT_MSG
+  GLOG_LIBRARY
+  GLOG_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LIBGLOG_LIBRARY LIBGLOG_INCLUDE_DIR)
+mark_as_advanced(
+  GLOG_LIBRARY
+  GLOG_INCLUDE_DIR)
+
+set(GLOG_LIBRARIES ${GLOG_LIBRARY})
+set(GLOG_INCLUDE_DIRS ${GLOG_INCLUDE_DIR})
+
+if (NOT TARGET glog::glog)
+  add_library(glog::glog UNKNOWN IMPORTED)
+  set_target_properties(glog::glog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${GLOG_INCLUDE_DIRS}")
+  set_target_properties(glog::glog PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C" IMPORTED_LOCATION "${GLOG_LIBRARIES}")
+
+  find_package(Gflags)
+  if(GFLAGS_FOUND)
+    set_target_properties(glog::glog PROPERTIES IMPORTED_LINK_INTERFACE_LIBRARIES ${LIBGFLAGS_LIBRARY})
+  endif()
+endif()
+
+# Backward compatibily for the definitions of LIBGLOG_*
+set(LIBGLOG_INCLUDE_DIR ${GLOG_INCLUDE_DIR})
+set(LIBGLOG_FOUND ${GLOG_FOUND})
+set(LIBGLOG_LIBRARY ${GLOG_LIBRARIES})

@@ -2689,6 +2689,7 @@ class MyService_MyInteraction_encode_FinalResponse implements \IThriftSyncStruct
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -3334,6 +3335,7 @@ class MyService_MyInteractionFast_encode_FinalResponse implements \IThriftSyncSt
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[

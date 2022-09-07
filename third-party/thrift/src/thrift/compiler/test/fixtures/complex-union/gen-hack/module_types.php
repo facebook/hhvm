@@ -762,6 +762,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftUnion<DataUnionEnum> {
       'var' => 'binaryData',
       'union' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     2 => shape(
       'var' => 'stringData',

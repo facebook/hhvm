@@ -571,6 +571,7 @@ class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithRe
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -760,6 +761,7 @@ class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithRe
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[

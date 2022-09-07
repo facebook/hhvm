@@ -2232,6 +2232,7 @@ class AnnotatedTypes implements \IThriftSyncStruct {
     1 => shape(
       'var' => 'binary_field',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     2 => shape(
       'var' => 'list_field',
@@ -2985,14 +2986,17 @@ class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
     5 => shape(
       'var' => 'MyBinaryField',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     6 => shape(
       'var' => 'MyBinaryField2',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     7 => shape(
       'var' => 'MyBinaryField3',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     8 => shape(
       'var' => 'MyBinaryListField4',
@@ -3000,6 +3004,7 @@ class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
       'etype' => \TType::STRING,
       'elem' => shape(
         'type' => \TType::STRING,
+        'is_binary' => true,
       ),
       'format' => 'collection',
     ),

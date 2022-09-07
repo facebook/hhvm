@@ -460,6 +460,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       'var' => 'typeHashPrefixSha2_256',
       'union' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[

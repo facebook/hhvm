@@ -1797,6 +1797,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     2 => shape(
       'var' => 'clear',
@@ -1805,10 +1806,12 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     8 => shape(
       'var' => 'prepend',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     9 => shape(
       'var' => 'append',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[

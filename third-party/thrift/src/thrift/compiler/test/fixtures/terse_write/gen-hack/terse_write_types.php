@@ -281,6 +281,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncS
       'var' => 'binary_field',
       'is_terse' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     10 => shape(
       'var' => 'enum_field',
@@ -912,6 +913,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncSt
       'var' => 'terse_binary_field',
       'is_terse' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     10 => shape(
       'var' => 'terse_enum_field',
@@ -994,6 +996,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncSt
     23 => shape(
       'var' => 'binary_field',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     24 => shape(
       'var' => 'enum_field',
@@ -2196,6 +2199,7 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapis
       'var' => 'binary_field',
       'is_terse' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     10 => shape(
       'var' => 'enum_field',

@@ -229,6 +229,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'binaryField',
       'adapter' => \Adapter1::class,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     9 => shape(
       'var' => 'longField',
@@ -1086,6 +1087,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
       'union' => true,
       'adapter' => \Adapter1::class,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     9 => shape(
       'var' => 'longField',

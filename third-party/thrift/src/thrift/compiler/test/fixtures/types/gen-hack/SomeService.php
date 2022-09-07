@@ -558,6 +558,7 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult {
       'vtype' => \TType::I64,
       'key' => shape(
         'type' => \TType::STRING,
+        'is_binary' => true,
       ),
       'val' => shape(
         'type' => \TType::I64,

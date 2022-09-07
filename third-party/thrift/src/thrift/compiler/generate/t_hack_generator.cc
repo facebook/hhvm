@@ -2851,6 +2851,11 @@ void t_hack_generator::generate_php_type_spec(
   }
   t = t->get_true_type();
   indent(out) << "'type' => " << type_to_enum(t) << ",\n";
+  if (const auto* tbase_type = dynamic_cast<const t_base_type*>(t)) {
+    if (tbase_type->get_base() == t_base_type::TYPE_BINARY) {
+      indent(out) << "'is_binary' => true,\n";
+    }
+  }
 
   if (t->is_base_type()) {
     // Noop, type is all we need

@@ -173,6 +173,7 @@ class InnerUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\patch\In
       'var' => 'innerOption',
       'union' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -655,6 +656,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'var' => 'binaryVal',
       'is_terse' => true,
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     10 => shape(
       'var' => 'structVal',
@@ -697,6 +699,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     19 => shape(
       'var' => 'optBinaryVal',
       'type' => \TType::STRING,
+      'is_binary' => true,
     ),
     20 => shape(
       'var' => 'optStructVal',

@@ -2357,6 +2357,8 @@ dependencies = [
 name = "ocamlrep_derive"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
+ "macro_test_util",
  "proc-macro2",
  "quote",
  "syn",

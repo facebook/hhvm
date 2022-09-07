@@ -7,6 +7,9 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::Attribute;
+use syn::Meta;
+use syn::NestedMeta;
 use synstructure::decl_derive;
 use synstructure::BindingInfo;
 use synstructure::VariantInfo;
@@ -26,11 +29,16 @@ use synstructure::VariantInfo;
 //
 // Even with this stripping, the rust_to_ocaml_attr crate is still required to
 // strip the attribute from type aliases, which cannot use derive macros.
-decl_derive!([ToOcamlRep, attributes(rust_to_ocaml)] => derive_to_ocamlrep);
-decl_derive!([FromOcamlRep, attributes(rust_to_ocaml)] => derive_from_ocamlrep);
-decl_derive!([FromOcamlRepIn, attributes(rust_to_ocaml)] => derive_from_ocamlrep_in);
+decl_derive!([ToOcamlRep, attributes(rust_to_ocaml, ocamlrep)] => derive_to_ocamlrep);
+decl_derive!([FromOcamlRep, attributes(rust_to_ocaml, ocamlrep)] => derive_from_ocamlrep);
+decl_derive!([FromOcamlRepIn, attributes(rust_to_ocaml, ocamlrep)] => derive_from_ocamlrep_in);
 
 fn derive_to_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
+    // remove #[ocamlrep(skip)]
+    for variant in s.variants_mut() {
+        variant.filter(|bi| !has_ocamlrep_skip_attr(&bi.ast().attrs));
+    }
+
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
     // parameter T, but also for every type which appears as a field in X. This
@@ -55,7 +63,7 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
 fn derive_from_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
     s.add_bounds(synstructure::AddBounds::Generics);
 
-    let from_body = from_ocamlrep_body(&s);
+    let from_body = from_ocamlrep_body(&mut s);
     s.gen_impl(quote! {
         gen impl ::ocamlrep::FromOcamlRep for @Self {
             fn from_ocamlrep(value: ::ocamlrep::Value<'_>) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
@@ -75,7 +83,7 @@ fn derive_from_ocamlrep_in(mut s: synstructure::Structure<'_>) -> TokenStream {
         let tparams_implement_from_ocamlrep: TokenStream = tparams
             .map(|t| quote!(#t : ::ocamlrep::FromOcamlRep,))
             .collect();
-        let from_body = from_ocamlrep_body(&s);
+        let from_body = from_ocamlrep_body(&mut s);
         return s.gen_impl(quote! {
             gen impl<'__ocamlrep_derive_allocator> ::ocamlrep::FromOcamlRepIn<'__ocamlrep_derive_allocator> for @Self
             where #tparams_implement_from_ocamlrep
@@ -109,7 +117,7 @@ fn derive_from_ocamlrep_in(mut s: synstructure::Structure<'_>) -> TokenStream {
         .map(|t| quote!(#t : ::arena_trait::TrivialDrop,))
         .collect();
 
-    let from_in_body = from_ocamlrep_in_body(&s);
+    let from_in_body = from_ocamlrep_in_body(&mut s);
     s.gen_impl(quote! {
         gen impl<'__ocamlrep_derive_allocator> ::ocamlrep::FromOcamlRepIn<'__ocamlrep_derive_allocator> for @Self
         where
@@ -134,7 +142,7 @@ fn to_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     }
 }
 
-fn from_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
+fn from_ocamlrep_body(s: &mut synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_from_ocamlrep(s, struct_data, false),
         syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(s), false),
@@ -142,7 +150,7 @@ fn from_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     }
 }
 
-fn from_ocamlrep_in_body(s: &synstructure::Structure<'_>) -> TokenStream {
+fn from_ocamlrep_in_body(s: &mut synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_from_ocamlrep(s, struct_data, true),
         syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(s), true),
@@ -172,12 +180,56 @@ fn struct_to_ocamlrep(
     }
 }
 
+/// Fetch all the parameters from ocamlrep attributes:
+///   #[ocamlrep(foo, bar), ocamlrep(baz)]
+/// yields:
+///   [foo, bar, baz]
+fn parse_ocamlrep_attr(attrs: &[Attribute]) -> Option<Vec<NestedMeta>> {
+    let mut res = None;
+    for attr in attrs {
+        let meta = attr.parse_meta().unwrap();
+        match meta {
+            Meta::Path(_) => {
+                // #[foo]
+            }
+            Meta::List(list) => {
+                // #[foo(bar)]
+                if list.path.is_ident("ocamlrep") {
+                    res.get_or_insert_with(Vec::new)
+                        .extend(list.nested.into_iter());
+                }
+            }
+            Meta::NameValue(_) => {
+                // #[foo = bar]
+            }
+        }
+    }
+
+    res
+}
+
+/// Returns true if the attributes contain an `#[ocamlrep(skip)]`
+fn has_ocamlrep_skip_attr(attrs: &[Attribute]) -> bool {
+    if let Some(ocamlrep) = parse_ocamlrep_attr(attrs) {
+        for rep in ocamlrep {
+            match rep {
+                NestedMeta::Meta(Meta::Path(path)) if path.is_ident("skip") => {
+                    return true;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    false
+}
+
 fn struct_from_ocamlrep(
-    s: &synstructure::Structure<'_>,
+    s: &mut synstructure::Structure<'_>,
     struct_data: &syn::DataStruct,
     from_in: bool,
 ) -> TokenStream {
-    let variant = &s.variants()[0];
+    let variant = &mut s.variants_mut()[0];
     match struct_data.fields {
         syn::Fields::Unit => {
             let constructor = variant.construct(|_, _| quote!(unreachable!()));
@@ -195,10 +247,18 @@ fn struct_from_ocamlrep(
             quote! { Ok(#constructor) }
         }
         syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
-            let size = variant.bindings().len();
-            let constructor = variant.construct(|_, i| field_constructor(i, from_in));
+            let mut binding = 0;
+            let constructor = variant.construct(|field, _| {
+                if has_ocamlrep_skip_attr(&field.attrs) {
+                    quote!(::std::default::Default::default())
+                } else {
+                    let idx = binding;
+                    binding += 1;
+                    field_constructor(idx, from_in)
+                }
+            });
             quote! {
-                let block = ::ocamlrep::from::expect_tuple(value, #size)?;
+                let block = ::ocamlrep::from::expect_tuple(value, #binding)?;
                 Ok(#constructor)
             }
         }
@@ -433,4 +493,93 @@ fn get_boxed_tuple_len(variant: &VariantInfo<'_>) -> Option<usize> {
         _ => return None,
     };
     Some(tuple.elems.len())
+}
+
+#[cfg(test)]
+mod tests {
+    use anyhow::Result;
+    use macro_test_util::assert_pat_eq;
+    use synstructure::Structure;
+
+    use super::*;
+
+    #[test]
+    fn basic_to() -> Result<()> {
+        let input = quote! {
+                struct A {
+                    a: i64,
+                    b: i64,
+                    #[ocamlrep(skip)]
+                    c: f64,
+                    d: String,
+                }
+        };
+        assert_pat_eq(
+            Ok(derive_to_ocamlrep(Structure::new(&syn::parse2(input)?))),
+            quote! {
+                #[allow(non_upper_case_globals)]
+                const _DERIVE_ocamlrep_ToOcamlRep_FOR_A: () = {
+                    impl ::ocamlrep::ToOcamlRep for A {
+                        fn to_ocamlrep<'__ocamlrep_derive_allocator, Alloc: ::ocamlrep::Allocator>(
+                            &'__ocamlrep_derive_allocator self,
+                            arena: &'__ocamlrep_derive_allocator Alloc,
+                        ) -> ::ocamlrep::OpaqueValue<'__ocamlrep_derive_allocator> {
+                            use ::ocamlrep::Allocator;
+                            match self {
+                                A {
+                                    a: ref __binding_0,
+                                    b: ref __binding_1,
+                                    d: ref __binding_3,
+                                    ..
+                                } => {
+                                    let mut block = arena.block_with_size_and_tag(3usize, 0u8);
+                                    arena.set_field(&mut block, 0usize, arena.add(__binding_0));
+                                    arena.set_field(&mut block, 1usize, arena.add(__binding_1));
+                                    arena.set_field(&mut block, 2usize, arena.add(__binding_3));
+                                    block.build()
+                                }
+                            }
+                        }
+                    }
+                };
+            },
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn basic_from() -> Result<()> {
+        let input = quote! {
+              struct A {
+                  a: i64,
+                  b: i64,
+                  #[ocamlrep(skip)]
+                  c: f64,
+                  d: String,
+              }
+        };
+        assert_pat_eq(
+            Ok(derive_from_ocamlrep(Structure::new(&syn::parse2(input)?))),
+            quote! {
+                #[allow(non_upper_case_globals)]
+                const _DERIVE_ocamlrep_FromOcamlRep_FOR_A: () = {
+                    impl ::ocamlrep::FromOcamlRep for A {
+                        fn from_ocamlrep(
+                            value: ::ocamlrep::Value<'_>
+                        ) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
+                            use ::ocamlrep::FromOcamlRep;
+                            let block = ::ocamlrep::from::expect_tuple(value, 3usize)?;
+                            Ok(A {
+                                a: ::ocamlrep::from::field(block, 0usize)?,
+                                b: ::ocamlrep::from::field(block, 1usize)?,
+                                c: ::std::default::Default::default(),
+                                d: ::ocamlrep::from::field(block, 2usize)?,
+                            })
+                        }
+                    }
+                };
+            },
+        );
+        Ok(())
+    }
 }

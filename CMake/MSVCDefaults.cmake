@@ -73,9 +73,9 @@ if (EXISTS "${HPHP_HOME}/deps/")
   set(LIBEVENT_INCLUDE_DIR "${incRoot}" CACHE PATH "")
   set(LIBEVENT_LIB "general;Ws2_32.lib;debug;${libRoot}/eventMTd.lib;debug;${libRoot}/event_coreMTd.lib;debug;${libRoot}/event_extraMTd.lib;optimized;${libRoot}/eventMT.lib;optimized;${libRoot}/event_coreMT.lib;optimized;${libRoot}/event_extraMT.lib" CACHE FILEPATH "")
 
-  set(LIBGLOG_INCLUDE_DIR "${incRoot}" CACHE PATH "")
-  set(LIBGLOG_LIBRARY "debug;${libRoot}/libglogMTd.lib;optimized;${libRoot}/libglogMT.lib" CACHE FILEPATH "")
-  set(LIBGLOG_STATIC ON CACHE BOOL "")
+  set(GLOG_INCLUDE_DIR "${incRoot}" CACHE PATH "")
+  set(GLOG_LIBRARY "debug;${libRoot}/libglogMTd.lib;optimized;${libRoot}/libglogMT.lib" CACHE FILEPATH "")
+  set(GLOG_STATIC ON CACHE BOOL "")
 
   set(LIBICONV_INCLUDE_DIR "${incRoot}" CACHE PATH "")
   set(LIBICONV_LIBRARY "debug;${libRoot}/iconvMTd.lib;optimized;${libRoot}/iconvMT.lib" CACHE FILEPATH "")

@@ -29,19 +29,19 @@ ExternalProject_Add(
   bundled_mcrouter
   ${MCROUTER_DOWNLOAD_ARGS}
   PATCH_COMMAND
-    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_COMMAND}" -E create_symlink
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-CMakeLists.txt"
     "CMakeLists.txt"
     &&
-    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_COMMAND}" -E create_symlink
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-thrift-codegen.cmake"
     "mcrouter-thrift-codegen.cmake"
     &&
-    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/config.h"
     "mcrouter/"
     &&
-    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/config-impl.h"
     "mcrouter/"
   CMAKE_ARGS
@@ -55,7 +55,7 @@ ExternalProject_Add(
 
     "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
     "-DBOOST_INCLUDE_DIR=$<TARGET_PROPERTY:boost,INTERFACE_INCLUDE_DIRECTORIES>"
-    "-DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}"
+    "-DGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR}"
     "-DJEMALLOC_INCLUDE_DIR=$<TARGET_PROPERTY:jemalloc,INTERFACE_INCLUDE_DIRECTORIES>"
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
 

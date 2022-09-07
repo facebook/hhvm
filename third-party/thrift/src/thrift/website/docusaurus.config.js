@@ -19,7 +19,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const {fbContent} = require('internaldocs-fb-helpers');
+const {fbContent} = require('docusaurus-plugin-internaldocs-fb/internal');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {

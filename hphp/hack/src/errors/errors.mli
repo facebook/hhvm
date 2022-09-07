@@ -22,9 +22,7 @@ type phase =
 [@@deriving eq]
 
 module PhaseMap : sig
-  include
-    Reordered_argument_collections.Reordered_argument_map_S
-      with type key = phase
+  include Reordered_argument_collections.Map_S with type key = phase
 
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 

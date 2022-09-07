@@ -56,7 +56,6 @@ WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
 template <typename T, bool EnableControl, typename ControlBlock>
 std::optional<T> WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
     tryDequeue() noexcept {
-  DCHECK(!dequeueWithCapacityCalled_);
   if (auto res = queue_.try_dequeue()) {
     if constexpr (EnableControl) {
       controlBlock_.onDequeue(res->weight);
@@ -72,7 +71,6 @@ typename WeightedRequestPileQueue<T, EnableControl, ControlBlock>::DequeueResult
 WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
     tryDequeueWithCapacity(Weights capacity) noexcept {
   std::lock_guard g(dequeueLock_);
-  dequeueWithCapacityCalled_ = true;
   if (firstElementHolder_) {
     if (capacity < firstElementHolder_->weight) {
       return DequeueRejReason::OverCapacity;

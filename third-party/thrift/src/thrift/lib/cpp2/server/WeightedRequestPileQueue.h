@@ -158,8 +158,9 @@ class WeightedRequestPileQueue {
 
   // This is not a lock-free method
   // a std::mutex is used
-  // The lock can be removed in the future
-  // if the queue is MPMC
+  // Only one version of the tryDequeue should be called
+  // throughout the object lifetime, or an inconsistency
+  // in dequeue order (even loss) could happen
   template <
       bool Q = EnableControl,
       typename = typename std::enable_if<Q, void>::type>
@@ -174,8 +175,6 @@ class WeightedRequestPileQueue {
   Queue queue_;
   ControlBlock controlBlock_{};
 
-  // for dequeueWithCapacity
-  bool dequeueWithCapacityCalled_{false};
   std::optional<Item> firstElementHolder_;
   std::mutex dequeueLock_;
 };

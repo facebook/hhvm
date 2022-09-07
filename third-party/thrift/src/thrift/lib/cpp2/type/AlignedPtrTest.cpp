@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
 #include <folly/ConstexprMath.h>
+#include <folly/Memory.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
@@ -25,6 +26,14 @@ namespace {
 
 std::uintptr_t nBitMask(int bits) {
   return (1ULL << bits) - 1;
+}
+
+template <class T>
+std::unique_ptr<T, decltype(folly::aligned_free)*> alignedUniquePtr(
+    size_t bits) {
+  return std::unique_ptr<T, decltype(folly::aligned_free)*>(
+      reinterpret_cast<T*>(aligned_alloc(sizeof(T), 1 << bits)),
+      folly::aligned_free);
 }
 
 TEST(AlignedPtr, ImplicitAlignment) {
@@ -81,6 +90,63 @@ TEST(AlignedPtr, UnderAlignment) {
   };
   detail::AlignedPtr<SixteenByteStruct, 3> sixteen;
   EXPECT_EQ(~sixteen.kMask, nBitMask(3));
+}
+
+TEST(AlignedPtr, set) {
+  static constexpr size_t kBits = 3;
+  auto a = alignedUniquePtr<int32_t>(kBits);
+  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 2};
+
+  EXPECT_EQ(uut.get(), a.get());
+  EXPECT_EQ(uut.getTag(), 2);
+
+  auto b = alignedUniquePtr<int32_t>(kBits);
+  uut.set(b.get(), 3);
+  EXPECT_EQ(uut.get(), b.get());
+  EXPECT_EQ(uut.getTag(), 3);
+
+  auto c = alignedUniquePtr<int32_t>(kBits);
+  uut.set(c.get());
+  EXPECT_EQ(uut.get(), c.get());
+  EXPECT_EQ(uut.getTag(), 0);
+}
+
+TEST(AlignedPtr, setTag) {
+  static constexpr size_t kBits = 3;
+  auto a = alignedUniquePtr<int32_t>(kBits);
+  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get()};
+
+  EXPECT_EQ(uut.getTag(), 0);
+  for (int i = 0; i < 8; i++) {
+    uut.setTag(i);
+    EXPECT_EQ(i, uut.getTag());
+  }
+}
+
+TEST(AlignedPtr, clear) {
+  static constexpr size_t kBits = 3;
+  auto a = alignedUniquePtr<int32_t>(kBits);
+  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), (1 << kBits) - 1};
+
+  EXPECT_EQ(uut.get(), a.get());
+  EXPECT_EQ(uut.getTag(), (1 << kBits) - 1);
+
+  uut.clear();
+  EXPECT_EQ(uut.get(), nullptr);
+  EXPECT_EQ(uut.getTag(), 0);
+}
+
+TEST(AlignedPtr, clearTag) {
+  static constexpr size_t kBits = 3;
+  auto a = alignedUniquePtr<int32_t>(kBits);
+  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 5};
+
+  EXPECT_EQ(uut.get(), a.get());
+  EXPECT_EQ(uut.getTag(), 5);
+
+  uut.clearTag();
+  EXPECT_EQ(uut.get(), a.get());
+  EXPECT_EQ(uut.getTag(), 0);
 }
 
 } // namespace

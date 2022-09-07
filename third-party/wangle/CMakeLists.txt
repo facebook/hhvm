@@ -33,10 +33,6 @@ ExternalProject_Add(
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"
     <SOURCE_DIR>/wangle/cmake/FindLibSodium.cmake
-    &&
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/wangle/cmake/FindGlog.cmake
   SOURCE_SUBDIR wangle
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"

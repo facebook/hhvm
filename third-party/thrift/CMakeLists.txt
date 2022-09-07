@@ -32,10 +32,6 @@ ExternalProject_Add(
   bundled_thrift
   ${THRIFT_SOURCE_ARGS}
   PATCH_COMMAND
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/thrift/cmake/FindGlog.cmake
-    &&
     "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
     "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS

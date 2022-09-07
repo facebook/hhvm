@@ -22,6 +22,7 @@ use oxidized::ast_defs;
 use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::Pos;
 use oxidized::typing_defs::FunTypeFlags;
+use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use oxidized_by_ref::typing_kinding_defs::FunElt;
 
 use crate::subtype;
@@ -38,6 +39,12 @@ struct Stats {
     original_readonlys: u64,
     redundant_readonlys: u64,
     added_readonlys: u64,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum ClassScopeKind {
+    Static,
+    Nonstatic,
 }
 
 type Ctx = HashMap<String, Tyx>;
@@ -164,7 +171,12 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                         Tyx::Object { class_name },
                         ast_defs::PropOrMethod::IsMethod,
                         ast::Expr(_, _, aast::Expr_::Id(box ast_defs::Id(_, member_name))),
-                    ) => match &self.get_method_type(class_name, member_name, pos) {
+                    ) => match &self.get_method_type(
+                        class_name,
+                        member_name,
+                        ClassScopeKind::Nonstatic,
+                        pos,
+                    ) {
                         Some(ft) => Tyx::Fun(Box::new(ft.clone())),
                         None => Tyx::Todo,
                     },
@@ -191,7 +203,19 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                     ClassGet(box_tup!(class_id.clone(), get_expr, prop_or_meth.clone()));
                 (class_get, Tyx::Todo, ctx)
             }
-            ClassConst(_b) => (exp.clone(), Tyx::Todo, ctx),
+            ClassConst(box (class_id, (pos, member_name))) => {
+                let ty = match class_id_to_name(class_id) {
+                    Some(class_name) => self
+                        .get_method_type(class_name, member_name, ClassScopeKind::Static, pos)
+                        .map_or(Tyx::GiveUp, |ft| Tyx::Fun(Box::new(ft))),
+                    None => Tyx::GiveUp,
+                };
+                let class_const = ClassConst(box_tup!(
+                    class_id.clone(),
+                    (pos.clone(), member_name.clone())
+                ));
+                (class_const, ty, ctx)
+            }
             Call(box (e1, ty_args, params, expr2_opt)) => {
                 let (e1, e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
                 let (param_kinds, param_exprs): (Vec<ast::ParamKind>, Vec<ast::Expr>) =
@@ -221,7 +245,18 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                         Some(ft) => Tyx::Fun(Box::new(ft)),
                         None => Tyx::GiveUp,
                     },
-                    aast::FunctionPtrId::FPClassConst(_, _) => Tyx::Todo,
+                    aast::FunctionPtrId::FPClassConst(class_id, (pos, member_name)) => {
+                        class_id_to_name(class_id)
+                            .and_then(|class_name| {
+                                self.get_method_type(
+                                    class_name,
+                                    member_name,
+                                    ClassScopeKind::Static,
+                                    pos,
+                                )
+                            })
+                            .map_or(Tyx::Todo, |ft| Tyx::Fun(Box::new(ft)))
+                    }
                 };
                 (exp.clone(), ty, ctx)
             }
@@ -344,18 +379,9 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                     e_opt,
                     ex.clone()
                 ));
-                let from_class_name = |class_name| Tyx::Object { class_name };
-                let ty = match &class_id.2 {
-                    aast::ClassId_::CI(ast_defs::Id(_, class_name)) => {
-                        from_class_name(class_name.clone())
-                    }
-                    aast::ClassId_::CIexpr(ast::Expr(
-                        _,
-                        _,
-                        aast::Expr_::Id(box ast_defs::Id(_, class_name)),
-                    )) => from_class_name(class_name.clone()),
-                    _ => Tyx::Todo,
-                };
+                let ty = class_id_to_name(class_id).map_or(Tyx::Todo, |class_name| Tyx::Object {
+                    class_name: class_name.to_string(),
+                });
                 (new, ty, ctx)
             }
             Efun(box (fun, lids)) => {
@@ -817,20 +843,26 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         }
     }
 
-    // TODO: look up methods in parent classes using folded decls
-    // TODO: handle static methods and properties
     fn get_method_type(
         &self,
         class_name: &str,
         method_name: &str,
+        method_scope: ClassScopeKind,
         pos: &Pos,
     ) -> Option<tyx::FunType> {
-        use oxidized_by_ref::shallow_decl_defs::ShallowClass;
+        let shallow_class = self.get_shallow_class(class_name, pos)?;
+        let methods = match method_scope {
+            ClassScopeKind::Static => shallow_class.static_methods,
+            ClassScopeKind::Nonstatic => shallow_class.methods,
+        };
+        let method = methods.iter().find(|method| method.name.1 == method_name)?;
+        tyx::ty_to_fun_type_opt(&method.type_.1)
+    }
+
+    // TODO: look up in parent classes using folded decls
+    fn get_shallow_class(&self, class_name: &str, pos: &Pos) -> Option<&'_ ShallowClass<'_>> {
         match self.decl_provider.type_decl(class_name, 1) {
-            Ok(decl_provider::TypeDecl::Class(ShallowClass { methods, .. })) => methods
-                .iter()
-                .find(|method| method.name.1 == method_name)
-                .and_then(|method| tyx::ty_to_fun_type_opt(&method.type_.1)),
+            Ok(decl_provider::TypeDecl::Class(shallow_class)) => Some(shallow_class),
             Ok(_) => None, // reachable if TypeDecl::Typedef, which is currently not allowed to be an alias for a class
             Err(Error::NotFound) => None,
             Err(err @ Error::Bincode(_)) => {
@@ -882,6 +914,18 @@ fn readonly_wrap_expr_(pos: Pos, expr_: ast::Expr_) -> ast::Expr_ {
 
 fn returns_readonly(ft: &tyx::FunType) -> bool {
     ft.flags.contains(FunTypeFlags::RETURNS_READONLY)
+}
+
+fn class_id_to_name(class_id: &aast::ClassId<(), ()>) -> Option<&str> {
+    match &class_id.2 {
+        aast::ClassId_::CI(ast_defs::Id(_, class_name)) => Some(class_name),
+        aast::ClassId_::CIexpr(ast::Expr(
+            _,
+            _,
+            aast::Expr_::Id(box ast_defs::Id(_, class_name)),
+        )) => Some(class_name),
+        _ => None,
+    }
 }
 
 /// # Panics

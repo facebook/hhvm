@@ -519,7 +519,9 @@ class ConnectionPool
     try {
       connOp->run();
     } catch (db::OperationStateException& e) {
-      LOG(ERROR) << "Client is drain or dying, cannot ask for more connections";
+      LOG(ERROR)
+          << "Client is drain or dying, cannot ask for more connections: "
+          << e.what();
     }
   }
 

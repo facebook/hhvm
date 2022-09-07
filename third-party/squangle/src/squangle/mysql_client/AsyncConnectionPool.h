@@ -54,7 +54,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   // Don't use std::chrono::duration::MAX to avoid overflows
   static std::shared_ptr<AsyncConnectionPool> makePool(
       std::shared_ptr<AsyncMysqlClient> mysql_client,
-      const PoolOptions& pool_options = PoolOptions());
+      PoolOptions pool_options = PoolOptions());
 
   // The destructor will start the shutdown phase
   ~AsyncConnectionPool();
@@ -104,7 +104,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   // Don't use the constructor directly, only public to use make_shared
   AsyncConnectionPool(
       std::shared_ptr<AsyncMysqlClient> mysql_client,
-      const PoolOptions& pool_options);
+      PoolOptions pool_options);
 
   // It will clean the pool and block any new connections or operations
   // Shutting down phase:

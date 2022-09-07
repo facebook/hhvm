@@ -32,16 +32,18 @@ constexpr Duration PoolOptions::kDefaultMaxAge;
 
 std::shared_ptr<AsyncConnectionPool> AsyncConnectionPool::makePool(
     std::shared_ptr<AsyncMysqlClient> mysql_client,
-    const PoolOptions& pool_options) {
-  auto connectionPool =
-      std::make_shared<AsyncConnectionPool>(mysql_client, pool_options);
+    PoolOptions pool_options) {
+  auto connectionPool = std::make_shared<AsyncConnectionPool>(
+      std::move(mysql_client), std::move(pool_options));
   return connectionPool;
 }
 
 AsyncConnectionPool::AsyncConnectionPool(
     std::shared_ptr<AsyncMysqlClient> mysql_client,
-    const PoolOptions& pool_options)
-    : ConnectionPool<AsyncMysqlClient>(std::move(mysql_client), pool_options),
+    PoolOptions pool_options)
+    : ConnectionPool<AsyncMysqlClient>(
+          std::move(mysql_client),
+          std::move(pool_options)),
       cleanup_timer_(mysql_client_->getEventBase(), conn_storage_) {
   if (!mysql_client_->runInThread([this]() {
         cleanup_timer_.scheduleTimeout(PoolOptions::kCleanUpTimeout);

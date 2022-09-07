@@ -18,7 +18,7 @@ async-trait = "0.1.56"
 codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"
 fbthrift = { path = "../../.." }
-futures = { version = "0.3.13", features = ["async-await", "compat"] }
+futures = { version = "0.3.22", features = ["async-await", "compat"] }
 once_cell = "1.12"
 ref-cast = "1.0.2"
 serde = { version = "1.0.136", features = ["derive", "rc"] }

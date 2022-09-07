@@ -38,25 +38,12 @@ macro_rules! interned_hhbc_id {
                 Self { id }
             }
 
-            pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &mut StringInterner<'a>) -> Self {
-                Self::new(strings.intern_str(id.as_ffi_str()))
+            pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &mut StringInterner) -> Self {
+                Self::new(strings.intern_bytes(id.as_bytes()))
             }
 
-            pub fn from_str<'a>(
-                name: &str,
-                alloc: &'a bumpalo::Bump,
-                strings: &mut StringInterner<'a>,
-            ) -> Self {
-                let name = ffi::Str::new_str(alloc, name);
+            pub fn from_str(name: &str, strings: &mut StringInterner) -> Self {
                 Self::new(strings.intern_str(name))
-            }
-
-            pub fn to_hhbc<'a>(
-                self,
-                alloc: &'a bumpalo::Bump,
-                strings: &StringInterner<'a>,
-            ) -> hhbc::$hhbc<'a> {
-                hhbc::$hhbc::new(strings.lookup(self.id).to_ffi_str(alloc))
             }
         }
     };

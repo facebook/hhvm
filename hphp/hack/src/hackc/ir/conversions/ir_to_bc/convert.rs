@@ -7,6 +7,8 @@ use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
 
+use crate::strings::StringCache;
+
 /// Convert an ir::Unit to a hhbc::Unit
 ///
 /// Most of the outer structure of the hhbc::Unit maps 1:1 with ir::Unit. As a
@@ -14,6 +16,8 @@ use ffi::Str;
 /// when converting functions and methods (see `convert_func` in func.rs).
 ///
 pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
+    let strings = StringCache::new(alloc, &ir_unit.strings);
+
     let mut unit = UnitBuilder::new_in(alloc);
 
     unit.adata = Slice::fill_iter(
@@ -25,11 +29,11 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     );
 
     for cls in ir_unit.classes.into_iter() {
-        crate::class::convert_class(alloc, &mut unit, cls, &ir_unit.strings);
+        crate::class::convert_class(alloc, &mut unit, cls, &strings);
     }
 
     for function in ir_unit.functions.into_iter() {
-        crate::func::convert_function(alloc, &mut unit, function, &ir_unit.strings);
+        crate::func::convert_function(alloc, &mut unit, function, &strings);
     }
 
     let mut unit = unit.finish();
@@ -47,7 +51,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         alloc,
         ir_unit.modules.into_iter().map(|module| hhbc::Module {
             attributes: convert_attributes(alloc, module.attributes),
-            name: module.name.to_hhbc(alloc, &ir_unit.strings),
+            name: strings.lookup_class_name(module.name),
             span: module.span,
         }),
     );

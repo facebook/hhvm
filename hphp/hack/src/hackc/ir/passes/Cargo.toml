@@ -16,7 +16,6 @@ newtype = { path = "../../../utils/newtype" }
 print = { path = "../print" }
 
 [dev-dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
 hash = { path = "../../../utils/hash" }
 rand = { version = "0.8", features = ["small_rng"] }
 testutils = { path = "../testutils" }

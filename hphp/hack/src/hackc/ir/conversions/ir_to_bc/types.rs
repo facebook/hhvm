@@ -8,15 +8,16 @@ use ffi::Str;
 use hhbc::Constraint;
 use hhbc::TypeInfo;
 use ir::BaseType;
-use ir::StringInterner;
 use ir::TypeConstraintFlags;
+
+use crate::strings::StringCache;
 
 fn convert_type<'a>(
     alloc: &'a bumpalo::Bump,
     ty: &ir::UserType,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) -> TypeInfo<'a> {
-    let mut user_type = ty.user_type.map(|ut| strings.lookup(ut).to_ffi_str(alloc));
+    let mut user_type = ty.user_type.map(|ut| strings.lookup_ffi_str(ut));
 
     let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
         if user_type.is_none() {
@@ -47,7 +48,7 @@ fn convert_type<'a>(
     } else {
         match ty.enforced.ty {
             BaseType::Mixed | BaseType::Void => None,
-            BaseType::Class(name) => Some(strings.lookup(name.id).to_ffi_str(alloc)),
+            BaseType::Class(name) => Some(strings.lookup_ffi_str(name.id)),
             _ => unreachable!(),
         }
     };
@@ -92,7 +93,7 @@ fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
 pub(crate) fn convert<'a>(
     alloc: &'a bumpalo::Bump,
     ty: &ir::UserType,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) -> Maybe<TypeInfo<'a>> {
     if ty.is_empty() {
         Maybe::Nothing

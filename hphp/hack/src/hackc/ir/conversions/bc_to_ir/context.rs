@@ -154,8 +154,8 @@ impl<'a, 'b> Context<'a, 'b> {
         }
     }
 
-    pub(crate) fn intern_str(&mut self, s: Str<'a>) -> ir::UnitBytesId {
-        self.unit.strings.intern_str(s)
+    pub(crate) fn intern_ffi_str(&mut self, s: Str<'a>) -> ir::UnitBytesId {
+        self.unit.strings.intern_bytes(s.as_ref())
     }
 
     pub(crate) fn pop(&mut self) -> ir::ValueId {

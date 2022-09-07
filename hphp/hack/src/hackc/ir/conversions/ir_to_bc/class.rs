@@ -7,17 +7,17 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ir::class::TraitReqKind;
-use ir::string_intern::StringInterner;
 
 use crate::convert;
 use crate::convert::UnitBuilder;
+use crate::strings::StringCache;
 use crate::types;
 
 pub(crate) fn convert_class<'a>(
     alloc: &'a bumpalo::Bump,
     unit: &mut UnitBuilder<'a>,
     class: ir::Class<'a>,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) {
     let ir::Class {
         attributes,
@@ -42,7 +42,7 @@ pub(crate) fn convert_class<'a>(
     let requirements: Slice<'a, Pair<hhbc::ClassName<'a>, TraitReqKind>> = Slice::fill_iter(
         alloc,
         requirements.iter().map(|(clsid, req_kind)| {
-            let clsid = clsid.to_hhbc(alloc, strings);
+            let clsid = strings.lookup_class_name(*clsid);
             Pair(clsid, *req_kind)
         }),
     );
@@ -58,7 +58,7 @@ pub(crate) fn convert_class<'a>(
         alloc,
         enum_includes
             .into_iter()
-            .map(|id| id.to_hhbc(alloc, strings)),
+            .map(|id| strings.lookup_class_name(id)),
     );
 
     let enum_type: Maybe<_> = enum_type
@@ -82,20 +82,20 @@ pub(crate) fn convert_class<'a>(
         }),
     );
 
-    let base = base.map(|base| base.to_hhbc(alloc, strings)).into();
+    let base = base.map(|base| strings.lookup_class_name(base)).into();
 
     let implements = Slice::fill_iter(
         alloc,
         implements
             .iter()
-            .map(|interface| interface.to_hhbc(alloc, strings)),
+            .map(|interface| strings.lookup_class_name(*interface)),
     );
 
-    let name = name.to_hhbc(alloc, strings);
+    let name = strings.lookup_class_name(name);
 
     let uses = Slice::fill_iter(
         alloc,
-        uses.into_iter().map(|use_| use_.to_hhbc(alloc, strings)),
+        uses.into_iter().map(|use_| strings.lookup_class_name(use_)),
     );
 
     let class = hhbc::Class {

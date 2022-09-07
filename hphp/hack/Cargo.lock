@@ -1847,7 +1847,6 @@ name = "ir_core"
 version = "0.0.0"
 dependencies = [
  "bstr",
- "bumpalo",
  "ffi",
  "hash",
  "hhbc",
@@ -1865,6 +1864,7 @@ name = "ir_to_bc"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "dashmap",
  "ffi",
  "hash",
  "hhbc",
@@ -2593,7 +2593,6 @@ name = "passes"
 version = "0.0.0"
 dependencies = [
  "analysis",
- "bumpalo",
  "hash",
  "ir_core",
  "itertools 0.10.3",

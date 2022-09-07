@@ -90,13 +90,13 @@ pub enum BaseType {
 }
 
 impl BaseType {
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner<'_>) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         match self {
             BaseType::AnyArray => f.write_str("AnyArray"),
             BaseType::Arraykey => f.write_str("Arraykey"),
             BaseType::Bool => f.write_str("Bool"),
             BaseType::Class(cid) => {
-                write!(f, "Class(\"{}\")", strings.lookup(cid.id).as_bstr())
+                write!(f, "Class(\"{}\")", strings.lookup_bstr(cid.id))
             }
             BaseType::Classname => f.write_str("Classname"),
             BaseType::Darray => f.write_str("Darray"),
@@ -144,7 +144,7 @@ pub struct EnforceableType {
 }
 
 impl EnforceableType {
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner<'_>) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         f.write_str("Constraint { ty: ")?;
         self.ty.write(f, strings)?;
         f.write_str(", modifiers: ")?;
@@ -217,10 +217,10 @@ impl UserType {
         )
     }
 
-    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner<'_>) -> fmt::Result {
+    pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         f.write_str("UserType { user_type: ")?;
         if let Some(ut) = self.user_type {
-            write!(f, "\"{}\"", strings.lookup(ut).as_bstr())?;
+            write!(f, "\"{}\"", strings.lookup_bstr(ut))?;
         } else {
             f.write_str("none")?;
         }
@@ -229,9 +229,9 @@ impl UserType {
         f.write_str("}")
     }
 
-    pub fn display<'a>(&'a self, strings: &'a StringInterner<'a>) -> impl fmt::Display + 'a {
+    pub fn display<'a>(&'a self, strings: &'a StringInterner) -> impl fmt::Display + 'a {
         struct D<'a> {
-            strings: &'a StringInterner<'a>,
+            strings: &'a StringInterner,
             self_: &'a UserType,
         }
 

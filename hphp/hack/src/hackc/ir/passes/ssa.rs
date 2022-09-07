@@ -147,11 +147,11 @@ struct MakeSSA<'a> {
     // Values from Local::Declare we have seen.
     decls: VarIdMap<Decl>,
 
-    strings: &'a StringInterner<'a>,
+    strings: &'a StringInterner,
 }
 
 impl<'a> MakeSSA<'a> {
-    fn new(func: &Func<'_>, strings: &'a StringInterner<'a>) -> MakeSSA<'a> {
+    fn new(func: &Func<'_>, strings: &'a StringInterner) -> MakeSSA<'a> {
         let predecessors = compute_predecessor_blocks(
             func,
             PredecessorFlags {
@@ -429,7 +429,7 @@ pub(crate) fn is_ssa(func: &Func<'_>) -> bool {
         .any(|i| matches!(i, Instr::Special(Special::Tmp(..))))
 }
 
-pub fn run(func: &mut Func<'_>, strings: &StringInterner<'_>) -> bool {
+pub fn run(func: &mut Func<'_>, strings: &StringInterner) -> bool {
     if is_ssa(func) {
         false
     } else {
@@ -455,14 +455,13 @@ mod test {
     #[test]
     fn already_ssa() {
         let loc = LocId::NONE;
-        let alloc = bumpalo::Bump::default();
         let mut strings = StringInterner::default();
         let mut func = FuncBuilder::build_func(|builder| {
             // %0 = call("my_fn", [42])
             // %1 = ret null
             let value = builder.emit_constant(Constant::Int(42));
             let null = builder.emit_constant(Constant::Null);
-            let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
+            let id = FunctionId::from_str("my_fn", &mut strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
@@ -475,7 +474,6 @@ mod test {
     #[test]
     fn basic() {
         let loc = LocId::NONE;
-        let alloc = bumpalo::Bump::default();
         let mut strings = StringInterner::default();
         let mut func = FuncBuilder::build_func(|builder| {
             // %0 = declare
@@ -488,7 +486,7 @@ mod test {
             builder.emit(Instr::set_var(var, value));
             let null = builder.emit_constant(Constant::Null);
             let value = builder.emit(Instr::get_var(var));
-            let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
+            let id = FunctionId::from_str("my_fn", &mut strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
@@ -519,7 +517,6 @@ mod test {
     #[test]
     fn diamond() {
         let loc = LocId::NONE;
-        let alloc = bumpalo::Bump::default();
         let mut strings = StringInterner::default();
         let mut func = FuncBuilder::build_func(|builder| {
             //   %0 = declare
@@ -586,7 +583,7 @@ mod test {
             let value0 = builder.emit(Instr::get_var(var0));
             let value1 = builder.emit(Instr::get_var(var1));
             let value2 = builder.emit(Instr::get_var(var2));
-            let id = FunctionId::from_str("my_fn", &alloc, &mut strings);
+            let id = FunctionId::from_str("my_fn", &mut strings);
             builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
             builder.emit(Instr::ret(null, loc));
         });

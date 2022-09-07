@@ -29,7 +29,7 @@ pub use util::FmtSep;
 pub struct DisplayFunc<'a, 'b>(
     pub &'b Func<'a>,
     /* verbose */ pub bool,
-    pub &'b ir_core::string_intern::StringInterner<'a>,
+    pub &'b ir_core::string_intern::StringInterner,
 );
 
 impl std::fmt::Display for DisplayFunc<'_, '_> {

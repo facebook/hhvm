@@ -72,11 +72,11 @@ struct VerifyFunc<'a, 'b> {
     #[allow(dead_code)]
     flags: &'b Flags,
     predecessors: Predecessors,
-    strings: &'b StringInterner<'a>,
+    strings: &'b StringInterner,
 }
 
 impl<'a, 'b> VerifyFunc<'a, 'b> {
-    fn new(func: &'b Func<'a>, flags: &'b Flags, strings: &'b StringInterner<'a>) -> Self {
+    fn new(func: &'b Func<'a>, flags: &'b Flags, strings: &'b StringInterner) -> Self {
         let predecessors = analysis::compute_predecessor_blocks(func, PredecessorFlags::default());
         VerifyFunc {
             dominated_iids: Default::default(),
@@ -87,7 +87,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         }
     }
 
-    fn raw_check_failed(func: &Func<'_>, why: &str, strings: &StringInterner<'_>) -> anyhow::Error {
+    fn raw_check_failed(func: &Func<'_>, why: &str, strings: &StringInterner) -> anyhow::Error {
         panic!(
             "VERIFY FAILED: {}\n{}",
             why,
@@ -513,7 +513,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
     }
 }
 
-pub fn verify_func(func: &Func<'_>, flags: &Flags, strings: &StringInterner<'_>) -> Result {
+pub fn verify_func(func: &Func<'_>, flags: &Flags, strings: &StringInterner) -> Result {
     let mut verify = VerifyFunc::new(func, flags, strings);
     verify.verify_func_body()
 }

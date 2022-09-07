@@ -13,7 +13,7 @@ use ir::UserType;
 use maplit::hashmap;
 use once_cell::sync::OnceCell;
 
-pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner<'a>) -> UserType {
+pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner) -> UserType {
     let user_type = ty.user_type.into_option();
     let name = ty.type_constraint.name.into_option();
     let constraint_ty = if let Some(name) = name {
@@ -38,7 +38,7 @@ pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner<'
     };
 
     UserType {
-        user_type: user_type.map(|u| strings.intern_str(u)),
+        user_type: user_type.map(|u| strings.intern_bytes(u.as_ref())),
         enforced: ir::EnforceableType {
             ty: constraint_ty,
             modifiers: ty.type_constraint.flags,
@@ -48,7 +48,7 @@ pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner<'
 
 pub(crate) fn convert_maybe_type<'a>(
     ty: Maybe<&TypeInfo<'a>>,
-    strings: &mut StringInterner<'a>,
+    strings: &mut StringInterner,
 ) -> ir::UserType {
     match ty {
         Maybe::Just(ty) => convert_type(ty, strings),
@@ -56,7 +56,7 @@ pub(crate) fn convert_maybe_type<'a>(
     }
 }
 
-fn cvt_constraint_type<'a>(name: Str<'a>, strings: &mut StringInterner<'a>) -> BaseType {
+fn cvt_constraint_type<'a>(name: Str<'a>, strings: &mut StringInterner) -> BaseType {
     use std::collections::HashMap;
     static CONSTRAINT_BY_NAME: OnceCell<HashMap<Str<'static>, BaseType>> = OnceCell::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
@@ -87,7 +87,7 @@ fn cvt_constraint_type<'a>(name: Str<'a>, strings: &mut StringInterner<'a>) -> B
     });
 
     constraint_by_name.get(&name).cloned().unwrap_or_else(|| {
-        let name = ClassId::new(strings.intern_str(name));
+        let name = ClassId::new(strings.intern_bytes(name.as_ref()));
         BaseType::Class(name)
     })
 }

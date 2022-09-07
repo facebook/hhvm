@@ -9,7 +9,6 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
-bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../utils/ffi" }
 hash = { path = "../../../utils/hash" }
 hhbc = { path = "../../hhbc/cargo/hhbc" }

@@ -9,6 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
+dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

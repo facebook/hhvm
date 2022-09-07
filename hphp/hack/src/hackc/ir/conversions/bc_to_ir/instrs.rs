@@ -218,7 +218,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
         _ => unreachable!(),
     };
 
-    let context = ctx.intern_str(fcall_args.context);
+    let context = ctx.intern_ffi_str(fcall_args.context);
 
     let mut num_args = fcall_args.num_args as u32;
     // These first two stack entries correspond to an HHVM ActRec (in
@@ -469,7 +469,7 @@ fn convert_member_key<'a, 'b>(
             (instr::MemberKey::EL, readonly, None, Some(lid))
         }
         hhbc::MemberKey::ET(s, readonly) => {
-            let id = ctx.intern_str(s);
+            let id = ctx.intern_ffi_str(s);
             (instr::MemberKey::ET(id), readonly, None, None)
         }
         hhbc::MemberKey::PC(idx, readonly) => {
@@ -788,7 +788,7 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
         } => {
             let s1 = ctx.pop();
             let stack_size = ctx.spill_stack();
-            let cases = cases.iter().map(|case| ctx.intern_str(*case)).collect();
+            let cases = cases.iter().map(|case| ctx.intern_ffi_str(*case)).collect();
             let targets = targets
                 .iter()
                 .map(|label| ctx.target_from_label(*label, stack_size))
@@ -1156,7 +1156,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::NewStructDict(keys) => {
             let keys: Box<[UnitBytesId]> = keys
                 .iter()
-                .map(|key| ctx.unit.strings.intern_str(*key))
+                .map(|key| ctx.unit.strings.intern_bytes(key.as_ref()))
                 .collect();
             let values = collect_args(ctx, keys.len() as u32);
             Action::Push(Instr::Hhbc(Hhbc::NewStructDict(keys, values.into(), loc)))

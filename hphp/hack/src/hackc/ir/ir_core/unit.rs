@@ -95,7 +95,7 @@ pub struct Unit<'a> {
     pub module_use: Option<Str<'a>>,
 
     /// The unit string interning table.
-    pub strings: StringInterner<'a>,
+    pub strings: StringInterner,
 
     /// The list of all external symbols referenced by this Unit.
     //

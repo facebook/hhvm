@@ -7,13 +7,13 @@ use ffi::Pair;
 use ffi::Slice;
 use ffi::Triple;
 use hhbc::Method;
-use ir::string_intern::StringInterner;
 use log::trace;
 
 use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
 use crate::pusher;
+use crate::strings::StringCache;
 
 /// Convert an ir::Func to an hhbc::Body.
 ///
@@ -37,12 +37,12 @@ use crate::pusher;
 pub(crate) fn convert_func<'a>(
     alloc: &'a bumpalo::Bump,
     mut func: ir::Func<'a>,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
-    trace!("{}", ir::print::DisplayFunc(&func, true, strings));
+    trace!("{}", ir::print::DisplayFunc(&func, true, strings.interner));
     trace!("--------------------");
 
     // Start by inserting stack pushes and pops (which are normally not in the
@@ -52,7 +52,7 @@ pub(crate) fn convert_func<'a>(
 
     trace!(
         "-- after pushes:\n{}",
-        ir::print::DisplayFunc(&func, true, strings)
+        ir::print::DisplayFunc(&func, true, strings.interner)
     );
 
     // Now emit the instructions.
@@ -67,7 +67,7 @@ pub(crate) fn convert_func<'a>(
     let params = Slice::fill_iter(
         alloc,
         func.params.into_iter().map(|param| {
-            let name = strings.lookup(param.name).to_ffi_str(alloc);
+            let name = strings.lookup_ffi_str(param.name);
             let user_attributes = convert::convert_attributes(alloc, param.user_attributes);
             let dv = param.default_value.map(|(bid, value)| {
                 let label = labeler.lookup_bid(bid);
@@ -90,7 +90,7 @@ pub(crate) fn convert_func<'a>(
     let upper_bounds = Slice::fill_iter(
         alloc,
         func.tparams.iter().map(|(name, tparam)| {
-            let name = name.to_hhbc(alloc, strings);
+            let name = strings.lookup_class_name(*name);
             let type_info = Slice::fill_iter(
                 alloc,
                 tparam
@@ -106,7 +106,7 @@ pub(crate) fn convert_func<'a>(
         alloc,
         func.shadowed_tparams
             .iter()
-            .map(|name| name.to_hhbc(alloc, strings).as_ffi_str()),
+            .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
     );
 
     hhbc::Body {
@@ -127,7 +127,7 @@ pub(crate) fn convert_function<'a>(
     alloc: &'a bumpalo::Bump,
     unit: &mut UnitBuilder<'a>,
     function: ir::Function<'a>,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) {
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
@@ -148,7 +148,7 @@ pub(crate) fn convert_function<'a>(
 pub(crate) fn convert_method<'a>(
     alloc: &'a bumpalo::Bump,
     method: ir::Method<'a>,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());
     let body = convert_func(alloc, method.func, strings);

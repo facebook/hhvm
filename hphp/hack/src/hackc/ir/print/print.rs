@@ -46,19 +46,14 @@ use itertools::Itertools;
 use crate::formatters::*;
 use crate::util::FmtSep;
 
-pub(crate) struct FuncContext<'a, 'b> {
+pub(crate) struct FuncContext<'a> {
     pub(crate) cur_loc_id: LocId,
     pub(crate) live_instrs: InstrIdSet,
-    pub(crate) strings: &'b StringInterner<'a>,
+    pub(crate) strings: &'a StringInterner,
     pub(crate) verbose: bool,
 }
 
-fn print_binary_op(
-    w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
-    func: &Func<'_>,
-    op: &Hhbc,
-) -> Result {
+fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, op: &Hhbc) -> Result {
     let (prefix, infix, lhs, rhs) = match *op {
         Hhbc::Add([lhs, rhs], _) => ("add", " +", lhs, rhs),
         Hhbc::BitAnd([lhs, rhs], _) => ("bit_and", " &", lhs, rhs),
@@ -107,12 +102,7 @@ fn print_binary_op(
     )
 }
 
-fn print_call(
-    w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
-    func: &Func<'_>,
-    call: &Call,
-) -> Result {
+fn print_call(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, call: &Call) -> Result {
     let verbose = ctx.verbose;
     use instr::CallDetail;
     match &call.detail {
@@ -283,7 +273,7 @@ fn print_call(
 
 fn print_call_async(
     w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
+    ctx: &FuncContext<'_>,
     func: &Func<'_>,
     call: &Call,
     targets: &[BlockId; 2],
@@ -298,7 +288,7 @@ fn print_call_async(
     )
 }
 
-fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner<'_>) -> Result {
+fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -> Result {
     writeln!(
         w,
         "class {} {} {{",
@@ -456,7 +446,7 @@ pub(crate) fn print_func_body(
     w: &mut dyn Write,
     func: &Func<'_>,
     verbose: bool,
-    strings: &StringInterner<'_>,
+    strings: &StringInterner,
 ) -> Result {
     if let Some(doc_comment) = func.doc_comment.as_ref() {
         writeln!(w, "  .doc {}", FmtQuotedStr(doc_comment))?;
@@ -532,7 +522,7 @@ fn print_function(
     w: &mut dyn Write,
     f: &Function<'_>,
     verbose: bool,
-    strings: &StringInterner<'_>,
+    strings: &StringInterner,
 ) -> Result {
     writeln!(
         w,
@@ -548,12 +538,7 @@ fn print_function(
     writeln!(w)
 }
 
-fn print_hhbc(
-    w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
-    func: &Func<'_>,
-    hhbc: &Hhbc,
-) -> Result {
+fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &Hhbc) -> Result {
     let verbose = ctx.verbose;
     match *hhbc {
         Hhbc::Add(..)
@@ -1193,7 +1178,7 @@ fn print_hack_constant(w: &mut dyn Write, c: &HackConstant<'_>) -> Result {
 
 fn print_include_eval(
     w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
+    ctx: &FuncContext<'_>,
     func: &Func<'_>,
     ie: &instr::IncludeEval,
 ) -> Result {
@@ -1211,7 +1196,7 @@ fn print_include_eval(
 
 pub(crate) fn print_instr(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     iid: InstrId,
     instr: &Instr,
@@ -1265,7 +1250,7 @@ pub(crate) fn print_instr(
 
 pub(crate) fn print_ir_to_bc(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     ir_to_bc: &IrToBc,
 ) -> std::result::Result<(), Error> {
@@ -1286,7 +1271,7 @@ pub(crate) fn print_ir_to_bc(
 
 fn print_inner_loc(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     loc_id: LocId,
 ) -> Result {
@@ -1301,7 +1286,7 @@ fn print_inner_loc(
 
 fn print_loc(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     loc_id: LocId,
 ) -> Result {
@@ -1316,7 +1301,7 @@ fn print_loc(
 
 fn print_member_op(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     op: &instr::MemberOp,
 ) -> Result {
@@ -1505,7 +1490,7 @@ fn print_member_op(
 
 fn print_member_key(
     w: &mut dyn Write,
-    ctx: &FuncContext<'_, '_>,
+    ctx: &FuncContext<'_>,
     operands: &mut impl Iterator<Item = ValueId>,
     locals: &mut impl Iterator<Item = LocalId>,
     func: &Func<'_>,
@@ -1542,7 +1527,7 @@ fn print_method(
     clsid: ClassId,
     method: &Method<'_>,
     verbose: bool,
-    strings: &StringInterner<'_>,
+    strings: &StringInterner,
 ) -> Result {
     writeln!(
         w,
@@ -1588,7 +1573,7 @@ fn incdec_what(op: IncDecOp) -> (&'static str, &'static str) {
 
 pub(crate) fn print_param(
     w: &mut dyn Write,
-    strings: &StringInterner<'_>,
+    strings: &StringInterner,
     func: &Func<'_>,
     param: &Param<'_>,
 ) -> Result {
@@ -1638,7 +1623,7 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>) -> Result {
 
 fn print_terminator(
     w: &mut dyn Write,
-    ctx: &mut FuncContext<'_, '_>,
+    ctx: &mut FuncContext<'_>,
     func: &Func<'_>,
     _iid: InstrId,
     terminator: &Terminator,

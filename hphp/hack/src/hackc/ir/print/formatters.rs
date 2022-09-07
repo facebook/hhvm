@@ -176,7 +176,7 @@ impl Display for FmtSetOpOp {
     }
 }
 
-pub(crate) struct FmtFuncParams<'a>(pub &'a Func<'a>, pub &'a StringInterner<'a>);
+pub(crate) struct FmtFuncParams<'a>(pub &'a Func<'a>, pub &'a StringInterner);
 
 impl Display for FmtFuncParams<'_> {
     fn fmt(&self, w: &mut Formatter<'_>) -> Result {
@@ -220,12 +220,12 @@ impl Display for FmtIdentifier<'_> {
     }
 }
 
-pub(crate) struct FmtIdentifierId<'a, 'b>(pub UnitBytesId, pub &'b StringInterner<'a>);
+pub(crate) struct FmtIdentifierId<'a>(pub UnitBytesId, pub &'a StringInterner);
 
-impl Display for FmtIdentifierId<'_, '_> {
+impl Display for FmtIdentifierId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtIdentifierId(id, strings) = *self;
-        let id = strings.lookup(id).as_bytes();
+        let id = strings.lookup_bytes(id);
         FmtIdentifier(id).fmt(f)
     }
 }
@@ -326,7 +326,7 @@ impl Display for FmtInitPropOp {
     }
 }
 
-pub struct FmtInstr<'a, 'b>(pub &'b Func<'a>, pub &'b StringInterner<'a>, pub InstrId);
+pub struct FmtInstr<'a, 'b>(pub &'b Func<'a>, pub &'b StringInterner, pub InstrId);
 
 impl Display for FmtInstr<'_, '_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -370,9 +370,9 @@ impl Display for FmtIsTypeOp {
     }
 }
 
-pub struct FmtLid<'a, 'b>(pub LocalId, pub &'b StringInterner<'a>);
+pub struct FmtLid<'a>(pub LocalId, pub &'a StringInterner);
 
-impl Display for FmtLid<'_, '_> {
+impl Display for FmtLid<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtLid(ref lid, strings) = *self;
         match *lid {
@@ -382,9 +382,9 @@ impl Display for FmtLid<'_, '_> {
     }
 }
 
-pub(crate) struct FmtLids<'a, 'b>(pub(crate) &'b [LocalId], pub &'b StringInterner<'a>);
+pub(crate) struct FmtLids<'a>(pub(crate) &'a [LocalId], pub &'a StringInterner);
 
-impl Display for FmtLids<'_, '_> {
+impl Display for FmtLids<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtLids(slice, strings) = *self;
         write!(
@@ -446,13 +446,9 @@ impl Display for FmtMOpMode {
     }
 }
 
-pub(crate) struct FmtOptKeyValue<'a, 'b>(
-    pub Option<LocalId>,
-    pub LocalId,
-    pub &'b StringInterner<'a>,
-);
+pub(crate) struct FmtOptKeyValue<'a>(pub Option<LocalId>, pub LocalId, pub &'a StringInterner);
 
-impl Display for FmtOptKeyValue<'_, '_> {
+impl Display for FmtOptKeyValue<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtOptKeyValue(key, value, strings) = *self;
         match key {
@@ -470,19 +466,16 @@ impl Display for FmtQuotedStr<'_> {
     }
 }
 
-pub(crate) struct FmtQuotedStringId<'a, 'b>(
-    pub(crate) UnitBytesId,
-    pub(crate) &'b StringInterner<'a>,
-);
+pub(crate) struct FmtQuotedStringId<'a>(pub(crate) UnitBytesId, pub(crate) &'a StringInterner);
 
-impl Display for FmtQuotedStringId<'_, '_> {
+impl Display for FmtQuotedStringId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtQuotedStringId(id, strings) = *self;
         if id == UnitBytesId::NONE {
             write!(f, "none")
         } else {
-            let name = strings.lookup(id);
-            FmtEscapedString(name.as_bytes()).fmt(f)
+            let name = strings.lookup_bytes(id);
+            FmtEscapedString(name).fmt(f)
         }
     }
 }
@@ -555,7 +548,7 @@ impl Display for FmtSpecialClsRef {
 
 pub(crate) struct FmtTParams<'a>(
     pub(crate) &'a ClassIdMap<TParamBounds>,
-    pub &'a StringInterner<'a>,
+    pub &'a StringInterner,
 );
 
 impl Display for FmtTParams<'_> {
@@ -586,7 +579,7 @@ impl Display for FmtTParams<'_> {
 
 pub(crate) struct FmtShadowedTParams<'a>(
     pub(crate) &'a Vec<ClassId>,
-    pub(crate) &'a StringInterner<'a>,
+    pub(crate) &'a StringInterner,
 );
 
 impl Display for FmtShadowedTParams<'_> {

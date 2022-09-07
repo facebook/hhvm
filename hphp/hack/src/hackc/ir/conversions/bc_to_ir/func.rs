@@ -97,7 +97,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
     let tparams: ClassIdMap<_> = upper_bounds
         .iter()
         .map(|Pair(name, bounds)| {
-            let id = unit.strings.intern_str(*name);
+            let id = unit.strings.intern_bytes(name.as_ref());
             let name = ir::ClassId::new(id);
             let bounds = bounds
                 .iter()
@@ -110,7 +110,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
     let shadowed_tparams: Vec<ir::ClassId> = shadowed_tparams
         .iter()
         .map(|name| {
-            let id = unit.strings.intern_str(*name);
+            let id = unit.strings.intern_bytes(name.as_ref());
             ir::ClassId::new(id)
         })
         .collect();
@@ -145,7 +145,7 @@ fn convert_body<'a>(unit: &mut ir::Unit<'a>, body: &Body<'a>) -> ir::Func<'a> {
     }
 
     for decl in decl_vars.as_ref() {
-        let id = ctx.unit.strings.intern_str(*decl);
+        let id = ctx.unit.strings.intern_bytes(decl.as_ref());
         ctx.named_local_lookup.push(LocalId::Named(id));
     }
 
@@ -200,7 +200,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
         Maybe::Nothing => None,
     };
 
-    let name = ctx.unit.strings.intern_str(param.name);
+    let name = ctx.unit.strings.intern_bytes(param.name.as_ref());
     ctx.named_local_lookup.push(LocalId::Named(name));
 
     let user_attributes = param

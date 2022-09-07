@@ -22,7 +22,6 @@ use ir::instr::HasLocals;
 use ir::instr::IrToBc;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
-use ir::string_intern::StringInterner;
 use ir::BlockId;
 use ir::BlockIdMap;
 use ir::LocalId;
@@ -30,12 +29,13 @@ use log::trace;
 
 use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
+use crate::strings::StringCache;
 
 pub(crate) fn emit_func<'a>(
     alloc: &'a bumpalo::Bump,
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
-    strings: &StringInterner<'a>,
+    strings: &StringCache<'a, '_>,
 ) -> (InstrSeq<'a>, Vec<Str<'a>>) {
     let mut ctx = InstrEmitter::new(alloc, func, labeler, strings);
 
@@ -47,7 +47,7 @@ pub(crate) fn emit_func<'a>(
         .named_locals
         .keys()
         .map(|k| match *k {
-            LocalId::Named(name) => strings.lookup(name).to_ffi_str(alloc),
+            LocalId::Named(name) => strings.lookup_ffi_str(name),
             LocalId::Unnamed(_) => unreachable!(),
         })
         .skip(func.params.len())
@@ -148,7 +148,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     instrs: Vec<Instruct<'a>>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
-    strings: &'b StringInterner<'a>,
+    strings: &'b StringCache<'a, 'b>,
     named_locals: IndexMap<LocalId, hhbc::Local>,
     unnamed_locals: HashMap<LocalId, hhbc::Local>,
 }
@@ -175,7 +175,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         alloc: &'a bumpalo::Bump,
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
-        strings: &'b StringInterner<'a>,
+        strings: &'b StringCache<'a, '_>,
     ) -> Self {
         let (named_locals, unnamed_locals) = Self::prealloc_locals(func);
 
@@ -278,7 +278,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             let readonly =
                 convert_indexes_to_bools(self.alloc, num_args as usize, call.readonly.as_deref());
 
-            let context = self.strings.lookup(call.context).to_ffi_str(self.alloc);
+            let context = self.strings.lookup_ffi_str(call.context);
 
             let async_eager_target = if let Some(label) = async_eager_target {
                 label
@@ -302,31 +302,31 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Opcode::FCallClsMethod(fcall_args, hint, *log)
             }
             ir::instr::CallDetail::FCallClsMethodD { clsid, method } => {
-                let class = clsid.to_hhbc(self.alloc, self.strings);
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let class = self.strings.lookup_class_name(*clsid);
+                let method = self.strings.lookup_method_name(*method);
                 Opcode::FCallClsMethodD(fcall_args, class, method)
             }
             ir::instr::CallDetail::FCallClsMethodM { method, log } => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(*method);
                 Opcode::FCallClsMethodM(fcall_args, hint, *log, method)
             }
             ir::instr::CallDetail::FCallClsMethodS { clsref } => {
                 Opcode::FCallClsMethodS(fcall_args, hint, *clsref)
             }
             ir::instr::CallDetail::FCallClsMethodSD { method, clsref } => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(*method);
                 Opcode::FCallClsMethodSD(fcall_args, hint, *clsref, method)
             }
             ir::instr::CallDetail::FCallCtor => Opcode::FCallCtor(fcall_args, hint),
             ir::instr::CallDetail::FCallFunc => Opcode::FCallFunc(fcall_args),
             ir::instr::CallDetail::FCallFuncD { func } => {
-                Opcode::FCallFuncD(fcall_args, func.to_hhbc(self.alloc, self.strings))
+                Opcode::FCallFuncD(fcall_args, self.strings.lookup_function_name(*func))
             }
             ir::instr::CallDetail::FCallObjMethod { flavor } => {
                 Opcode::FCallObjMethod(fcall_args, hint, *flavor)
             }
             ir::instr::CallDetail::FCallObjMethodD { flavor, method } => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(*method);
                 Opcode::FCallObjMethodD(fcall_args, hint, *flavor, method)
             }
         };
@@ -428,7 +428,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::CheckClsRGSoft(..) => Opcode::CheckClsRGSoft,
             Hhbc::ChainFaults(..) => Opcode::ChainFaults,
             Hhbc::CheckProp(prop, _) => {
-                let prop = prop.to_hhbc(self.alloc, self.strings);
+                let prop = self.strings.lookup_prop_name(prop);
                 Opcode::CheckProp(prop)
             }
             Hhbc::CheckThis(_) => Opcode::CheckThis,
@@ -438,12 +438,12 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::ClassName(..) => Opcode::ClassName,
             Hhbc::Clone(..) => Opcode::Clone,
             Hhbc::ClsCns(_, id, _) => {
-                let id = id.to_hhbc(self.alloc, self.strings);
+                let id = self.strings.lookup_const_name(id);
                 Opcode::ClsCns(id)
             }
             Hhbc::ClsCnsD(id, clsid, _) => {
-                let clsid = clsid.to_hhbc(self.alloc, self.strings);
-                let id = id.to_hhbc(self.alloc, self.strings);
+                let clsid = self.strings.lookup_class_name(clsid);
+                let id = self.strings.lookup_const_name(id);
                 Opcode::ClsCnsD(id, clsid)
             }
             Hhbc::ClsCnsL(_, lid, _) => {
@@ -483,7 +483,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 clsid,
                 ..
             } => {
-                let class = clsid.to_hhbc(self.alloc, self.strings);
+                let class = self.strings.lookup_class_name(clsid);
                 Opcode::CreateCl(operands.len() as u32, class)
             }
             Hhbc::CreateCont(_) => Opcode::CreateCont,
@@ -502,11 +502,11 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::IncDecS(_, op, _) => Opcode::IncDecS(op),
             Hhbc::IncludeEval(ref ie) => self.emit_include_eval(ie),
             Hhbc::InitProp(_, prop, op, _) => {
-                let prop = prop.to_hhbc(self.alloc, self.strings);
+                let prop = self.strings.lookup_prop_name(prop);
                 Opcode::InitProp(prop, op)
             }
             Hhbc::InstanceOfD(_, clsid, _) => {
-                let clsid = clsid.to_hhbc(self.alloc, self.strings);
+                let clsid = self.strings.lookup_class_name(clsid);
                 Opcode::InstanceOfD(clsid)
             }
             Hhbc::IsLateBoundCls(_, _) => Opcode::IsLateBoundCls,
@@ -539,7 +539,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::NewKeysetArray(ref operands, _) => Opcode::NewKeysetArray(operands.len() as u32),
             Hhbc::NewObj(_, _) => Opcode::NewObj,
             Hhbc::NewObjD(clsid, _) => {
-                let clsid = clsid.to_hhbc(self.alloc, self.strings);
+                let clsid = self.strings.lookup_class_name(clsid);
                 Opcode::NewObjD(clsid)
             }
             Hhbc::NewObjS(clsref, _) => Opcode::NewObjS(clsref),
@@ -547,8 +547,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::NewStructDict(ref keys, _, _) => {
                 let keys = Slice::fill_iter(
                     self.alloc,
-                    keys.iter()
-                        .map(|key| self.strings.lookup(*key).to_ffi_str(self.alloc)),
+                    keys.iter().map(|key| self.strings.lookup_ffi_str(*key)),
                 );
                 Opcode::NewStructDict(keys)
             }
@@ -560,43 +559,43 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::Print(..) => Opcode::Print,
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
             Hhbc::ResolveClass(clsid, _) => {
-                let class = clsid.to_hhbc(self.alloc, self.strings);
+                let class = self.strings.lookup_class_name(clsid);
                 Opcode::ResolveClass(class)
             }
             Hhbc::ResolveClsMethod(_, method, _) => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveClsMethod(method)
             }
             Hhbc::ResolveClsMethodD(clsid, method, _) => {
-                let class = clsid.to_hhbc(self.alloc, self.strings);
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let class = self.strings.lookup_class_name(clsid);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveClsMethodD(class, method)
             }
             Hhbc::ResolveClsMethodS(clsref, method, _) => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveClsMethodS(clsref, method)
             }
             Hhbc::ResolveRClsMethod(_, method, _) => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethod(method)
             }
             Hhbc::ResolveRClsMethodS(_, clsref, method, _) => {
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodS(clsref, method)
             }
             Hhbc::ResolveFunc(func, _) => {
-                Opcode::ResolveFunc(func.to_hhbc(self.alloc, self.strings))
+                Opcode::ResolveFunc(self.strings.lookup_function_name(func))
             }
             Hhbc::ResolveMethCaller(func, _) => {
-                Opcode::ResolveMethCaller(func.to_hhbc(self.alloc, self.strings))
+                Opcode::ResolveMethCaller(self.strings.lookup_function_name(func))
             }
             Hhbc::ResolveRClsMethodD(_, clsid, method, _) => {
-                let class = clsid.to_hhbc(self.alloc, self.strings);
-                let method = method.to_hhbc(self.alloc, self.strings);
+                let class = self.strings.lookup_class_name(clsid);
+                let method = self.strings.lookup_method_name(method);
                 Opcode::ResolveRClsMethodD(class, method)
             }
             Hhbc::ResolveRFunc(_, func, _) => {
-                Opcode::ResolveRFunc(func.to_hhbc(self.alloc, self.strings))
+                Opcode::ResolveRFunc(self.strings.lookup_function_name(func))
             }
             Hhbc::SelfCls(_) => Opcode::SelfCls,
             Hhbc::SetG(_, _) => Opcode::SetG,
@@ -653,7 +652,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
 
         trace!(
             "    Instr: {}",
-            ir::print::FmtInstr(self.func, self.strings, iid)
+            ir::print::FmtInstr(self.func, self.strings.interner, iid)
         );
 
         use ir::Instr;
@@ -860,7 +859,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 hhbc::MemberKey::EL(local, readonly)
             }
             instr::MemberKey::ET(name) => {
-                let name = self.strings.lookup(name).to_ffi_str(self.alloc);
+                let name = self.strings.lookup_ffi_str(name);
                 hhbc::MemberKey::ET(name, readonly)
             }
             instr::MemberKey::PC => {
@@ -873,11 +872,11 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 hhbc::MemberKey::PL(local, readonly)
             }
             instr::MemberKey::PT(name) => {
-                let name = name.to_hhbc(self.alloc, self.strings);
+                let name = self.strings.lookup_prop_name(name);
                 hhbc::MemberKey::PT(name, readonly)
             }
             instr::MemberKey::QT(name) => {
-                let name = name.to_hhbc(self.alloc, self.strings);
+                let name = self.strings.lookup_prop_name(name);
                 hhbc::MemberKey::QT(name, readonly)
             }
             instr::MemberKey::W => hhbc::MemberKey::W,
@@ -1033,9 +1032,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             } => {
                 let cases = Slice::fill_iter(
                     self.alloc,
-                    cases
-                        .iter()
-                        .map(|case| self.strings.lookup(*case).to_ffi_str(self.alloc)),
+                    cases.iter().map(|case| self.strings.lookup_ffi_str(*case)),
                 );
 
                 let targets = Slice::fill_iter(

@@ -846,7 +846,7 @@ class ConnectPoolOperation : public ConnectOperation {
 
  private:
   friend class ConnectionPool<Client>;
-  friend class PoolStorage<Client>;
+  friend class PoolStorageData<Client>;
 
   void specializedRunImpl() {
     // Initialize all we need from our tevent handler

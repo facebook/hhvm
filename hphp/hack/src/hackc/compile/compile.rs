@@ -6,8 +6,11 @@
 pub mod dump_expr_tree;
 
 use std::fmt;
+use std::time::Duration;
+use std::time::Instant;
 
 use aast_parser::rust_aast_parser_types::Env as AastEnv;
+use aast_parser::rust_aast_parser_types::ParserProfile;
 use aast_parser::rust_aast_parser_types::ParserResult;
 use aast_parser::AastParser;
 use aast_parser::Error as AastError;
@@ -376,63 +379,58 @@ impl NativeEnv {
 /// Compilation profile. All times are in seconds,
 /// except when they are ignored and should not be reported,
 /// such as in the case hhvm.log_extern_compiler_perf is false.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub struct Profile {
-    /// Time in seconds spent in parsing and lowering.
-    pub parsing_t: f64,
+    pub parser_profile: ParserProfile,
 
     /// Time in seconds spent in emitter.
-    pub codegen_t: f64,
+    pub codegen_t: Duration,
 
     /// Time in seconds spent in bytecode_printer.
-    pub printing_t: f64,
+    pub printing_t: Duration,
 
-    /// Parser arena allocation volume in bytes.
-    pub parsing_bytes: i64,
+    /// Time taken by bc_to_ir
+    pub bc_to_ir_t: Duration,
+
+    /// Time taken by ir_to_bc
+    pub ir_to_bc_t: Duration,
 
     /// Emitter arena allocation volume in bytes.
-    pub codegen_bytes: i64,
-
-    /// Peak stack size during parsing, before lowering.
-    pub parse_peak: i64,
-
-    /// Peak stack size during parsing and lowering.
-    pub lower_peak: i64,
-    pub error_peak: i64,
+    pub codegen_bytes: u64,
 
     /// Peak stack size during codegen
-    pub rewrite_peak: i64,
-    pub emitter_peak: i64,
+    pub rewrite_peak: u64,
+    pub emitter_peak: u64,
 
     /// Was the log_extern_compiler_perf flag set?
     pub log_enabled: bool,
 }
 
-impl std::ops::AddAssign for Profile {
-    fn add_assign(&mut self, p: Self) {
-        self.parsing_t += p.parsing_t;
-        self.codegen_t += p.codegen_t;
-        self.printing_t += p.printing_t;
-        self.codegen_bytes += p.codegen_bytes;
-        self.parse_peak += p.parse_peak;
-        self.lower_peak += p.lower_peak;
-        self.error_peak += p.error_peak;
-        self.rewrite_peak += p.rewrite_peak;
-        self.emitter_peak += p.emitter_peak;
-    }
-}
-
-impl std::ops::Add for Profile {
-    type Output = Self;
-    fn add(mut self, p2: Self) -> Self {
-        self += p2;
-        self
-    }
-}
-
 impl Profile {
-    pub fn total_sec(&self) -> f64 {
-        self.parsing_t + self.codegen_t + self.printing_t
+    pub fn fold(a: Self, b: Self) -> Profile {
+        Profile {
+            parser_profile: a.parser_profile.fold(b.parser_profile),
+
+            codegen_t: a.codegen_t + b.codegen_t,
+            printing_t: a.printing_t + b.printing_t,
+            codegen_bytes: a.codegen_bytes + b.codegen_bytes,
+
+            bc_to_ir_t: a.bc_to_ir_t + b.bc_to_ir_t,
+            ir_to_bc_t: a.ir_to_bc_t + b.ir_to_bc_t,
+
+            rewrite_peak: std::cmp::max(a.rewrite_peak, b.rewrite_peak),
+            emitter_peak: std::cmp::max(a.emitter_peak, b.emitter_peak),
+
+            log_enabled: a.log_enabled | b.log_enabled,
+        }
+    }
+
+    pub fn total_t(&self) -> Duration {
+        self.parser_profile.total_t
+            + self.codegen_t
+            + self.bc_to_ir_t
+            + self.ir_to_bc_t
+            + self.printing_t
     }
 }
 
@@ -451,12 +449,17 @@ pub fn from_text<'decl>(
     let mut unit = emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)?;
 
     if native_env.flags.enable_ir {
+        let bc_to_ir_t = Instant::now();
         let ir = bc_to_ir::bc_to_ir(&unit);
+        profile.bc_to_ir_t = bc_to_ir_t.elapsed();
+
+        let ir_to_bc_t = Instant::now();
         unit = ir_to_bc::ir_to_bc(&alloc, ir);
+        profile.ir_to_bc_t = ir_to_bc_t.elapsed();
     }
 
     unit_to_string(native_env, writer, &unit, profile)?;
-    profile.codegen_bytes = alloc.allocated_bytes() as i64;
+    profile.codegen_bytes = alloc.allocated_bytes() as u64;
     Ok(())
 }
 
@@ -469,7 +472,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
     let result = rewrite_program::rewrite_program(emitter, ast, RcOc::clone(&namespace_env));
-    profile.rewrite_peak = stack_limit::peak() as i64;
+    profile.rewrite_peak = stack_limit::peak() as u64;
     stack_limit::reset();
     let unit = match result {
         Ok(()) => {
@@ -483,7 +486,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl>(
             ErrorKind::Unrecoverable(x) => Err(Error::unrecoverable(x)),
         },
     };
-    profile.emitter_peak = stack_limit::peak() as i64;
+    profile.emitter_peak = stack_limit::peak() as u64;
     unit
 }
 
@@ -513,14 +516,14 @@ pub fn unit_to_string(
             }
         }
         let print_result;
-        (print_result, profile.printing_t) = time(|| {
+        (print_result, profile.printing_t) = profile_rust::time(|| {
             let verbose = false;
             ir::print_unit(&mut FmtFromIo(writer), &ir, verbose)
         });
         print_result?;
     } else {
         let print_result;
-        (print_result, profile.printing_t) = time(|| {
+        (print_result, profile.printing_t) = profile_rust::time(|| {
             let opts = NativeEnv::to_options(native_env);
             bytecode_printer::print_unit(
                 &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
@@ -583,23 +586,20 @@ fn emit_unit_from_text<'arena, 'decl>(
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
     ));
 
-    let (parse_result, parsing_t) = time(|| {
-        parse_file(
-            emitter.options(),
-            source_text,
-            !flags.disable_toplevel_elaboration,
-            RcOc::clone(&namespace_env),
-            flags.is_systemlib,
-            type_directed,
-            profile,
-        )
-    });
-    profile.parsing_t = parsing_t;
+    let parse_result = parse_file(
+        emitter.options(),
+        source_text,
+        !flags.disable_toplevel_elaboration,
+        RcOc::clone(&namespace_env),
+        flags.is_systemlib,
+        type_directed,
+        profile,
+    );
 
     let ((unit, profile), codegen_t) = match parse_result {
         Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            time(move || {
+            profile_rust::time(move || {
                 (
                     check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),
                     profile,
@@ -607,7 +607,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             })
         }
         Err(ParseError(pos, msg, fatal_op)) => {
-            time(move || (emit_fatal(emitter.alloc, fatal_op, pos, msg), profile))
+            profile_rust::time(move || (emit_fatal(emitter.alloc, fatal_op, pos, msg), profile))
         }
     };
     profile.codegen_t = codegen_t;
@@ -738,16 +738,10 @@ fn parse_file(
             ParserResult {
                 errors,
                 aast,
-                parse_peak,
-                lower_peak,
-                error_peak,
-                arena_bytes,
+                profile: parser_profile,
                 ..
             } => {
-                profile.parse_peak = parse_peak;
-                profile.lower_peak = lower_peak;
-                profile.error_peak = error_peak;
-                profile.parsing_bytes = arena_bytes;
+                profile.parser_profile = parser_profile;
                 let mut errors = errors.iter().filter(|e| {
                     e.code() != 2086
                         /* Naming.MethodNeedsVisibility */
@@ -769,11 +763,6 @@ fn parse_file(
             }
         },
     }
-}
-
-fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
-    let (r, t) = profile_rust::time(f);
-    (r, t.as_secs_f64())
 }
 
 pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {

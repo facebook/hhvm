@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Borrow;
+use std::time::Instant;
 
 use bumpalo::Bump;
 use lowerer::lower;
@@ -30,6 +31,7 @@ use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
 use parser_core_types::syntax_error::SyntaxError;
 use parser_core_types::syntax_tree::SyntaxTree;
 pub use rust_aast_parser_types::Env;
+pub use rust_aast_parser_types::ParserProfile;
 pub use rust_aast_parser_types::ParserResult;
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
@@ -76,11 +78,13 @@ impl<'src> AastParser {
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
     ) -> Result<ParserResult> {
+        let start_t = Instant::now();
         let arena = Bump::new();
         stack_limit::reset();
         let (language, mode, tree) = Self::parse_text(&arena, env, indexed_source_text)?;
+        let parsing_t = start_t.elapsed();
         let parse_peak = stack_limit::peak();
-        Self::from_tree_with_namespace_env(
+        let mut pr = Self::from_tree_with_namespace_env(
             env,
             ns,
             indexed_source_text,
@@ -88,11 +92,12 @@ impl<'src> AastParser {
             language,
             mode,
             tree,
-        )
-        .map(|mut pr| {
-            pr.parse_peak = parse_peak as i64;
-            pr
-        })
+        )?;
+
+        pr.profile.parse_peak = parse_peak as u64;
+        pr.profile.parsing_t = parsing_t;
+        pr.profile.total_t = start_t.elapsed();
+        Ok(pr)
     }
 
     pub fn from_tree<'arena>(
@@ -128,6 +133,7 @@ impl<'src> AastParser {
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
     ) -> Result<ParserResult> {
+        let lowering_t = Instant::now();
         match language {
             Language::Hack => {}
             _ => return Err(Error::NotAHackFile()),
@@ -149,21 +155,24 @@ impl<'src> AastParser {
         );
         stack_limit::reset();
         let ret = lower(&mut lowerer_env, tree.root());
-        let lower_peak = stack_limit::peak();
+        let (lowering_t, elaboration_t) = (lowering_t.elapsed(), Instant::now());
+        let lower_peak = stack_limit::peak() as u64;
         let mut ret = if env.elaborate_namespaces {
             ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
         } else {
             ret
         };
+        let (elaboration_t, error_t) = (elaboration_t.elapsed(), Instant::now());
         stack_limit::reset();
         let syntax_errors = match &mut ret {
             Ok(aast) => Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast)),
             Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
         };
-        let error_peak = stack_limit::peak();
+        let error_peak = stack_limit::peak() as u64;
         let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
         let errors = lowerer_env.hh_errors().borrow().to_vec();
         let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
+        let error_t = error_t.elapsed();
 
         Ok(ParserResult {
             file_mode: mode,
@@ -173,10 +182,15 @@ impl<'src> AastParser {
             syntax_errors,
             errors,
             lint_errors,
-            parse_peak: 0,
-            lower_peak: lower_peak as i64,
-            error_peak: error_peak as i64,
-            arena_bytes: arena.allocated_bytes() as i64,
+            profile: ParserProfile {
+                lower_peak,
+                lowering_t,
+                elaboration_t,
+                error_t,
+                error_peak,
+                arena_bytes: arena.allocated_bytes() as u64,
+                ..Default::default()
+            },
         })
     }
 

@@ -16,6 +16,7 @@ use std::time::Instant;
 
 use hash::HashMap;
 
+#[derive(Debug)]
 pub(crate) struct Timing {
     total: Duration,
     histogram: hdrhistogram::Histogram<u64>,
@@ -41,12 +42,8 @@ impl Timing {
         }
     }
 
-    pub(crate) fn as_secs_f64(&self) -> f64 {
-        self.total.as_secs_f64()
-    }
-
-    pub(crate) fn from_secs_f64<'a>(t: f64, path: impl Into<Cow<'a, Path>>) -> Self {
-        Self::from_duration(Duration::from_secs_f64(t), path)
+    pub(crate) fn total(&self) -> Duration {
+        self.total
     }
 
     fn is_empty(&self) -> bool {
@@ -283,6 +280,7 @@ impl StatusTicker {
     }
 }
 
+#[derive(Debug)]
 pub(crate) enum MaxValue<T: Ord> {
     Unset,
     Set(T, PathBuf),
@@ -332,5 +330,63 @@ impl<T: Ord> MaxValue<T> {
 impl<T: Ord + Display> MaxValue<T> {
     pub(crate) fn report(&self, w: &mut impl std::io::Write, why: &str) -> std::io::Result<()> {
         writeln!(w, "{} {} (in {})", why, self.value(), self.file().display())
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct ParserProfile {
+    pub parse_peak: MaxValue<u64>,
+    pub lower_peak: MaxValue<u64>,
+    pub error_peak: MaxValue<u64>,
+
+    pub arena_bytes: u64,
+
+    pub parsing_t: Timing,
+    pub lowering_t: Timing,
+    pub elaboration_t: Timing,
+    pub error_t: Timing,
+    pub total_t: Timing,
+}
+
+impl ParserProfile {
+    pub fn from_parser<'s>(
+        parser: aast_parser::ParserProfile,
+        file: impl Into<Cow<'s, Path>>,
+    ) -> Self {
+        let file = file.into();
+        let aast_parser::ParserProfile {
+            parse_peak,
+            lower_peak,
+            error_peak,
+            arena_bytes,
+            parsing_t,
+            lowering_t,
+            elaboration_t,
+            error_t,
+            total_t,
+        } = parser;
+        Self {
+            parse_peak: MaxValue::new(parse_peak, file.to_path_buf()),
+            lower_peak: MaxValue::new(lower_peak, file.to_path_buf()),
+            error_peak: MaxValue::new(error_peak, file.to_path_buf()),
+            arena_bytes,
+            parsing_t: Timing::from_duration(parsing_t, file.to_path_buf()),
+            lowering_t: Timing::from_duration(lowering_t, file.to_path_buf()),
+            elaboration_t: Timing::from_duration(elaboration_t, file.to_path_buf()),
+            error_t: Timing::from_duration(error_t, file.to_path_buf()),
+            total_t: Timing::from_duration(total_t, file.to_path_buf()),
+        }
+    }
+
+    pub fn fold_with(&mut self, other: Self) {
+        self.parse_peak.fold_with(other.parse_peak);
+        self.lower_peak.fold_with(other.lower_peak);
+        self.error_peak.fold_with(other.error_peak);
+        self.arena_bytes += other.arena_bytes;
+        self.parsing_t.fold_with(other.parsing_t);
+        self.lowering_t.fold_with(other.lowering_t);
+        self.elaboration_t.fold_with(other.elaboration_t);
+        self.error_t.fold_with(other.error_t);
+        self.total_t.fold_with(other.total_t);
     }
 }

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::time::Duration;
+
 use file_info::Mode;
 use lint_rust::LintError;
 use ocamlrep_derive::FromOcamlRep;
@@ -28,7 +30,7 @@ pub struct Env {
     pub parser_options: ParserOptions,
 }
 
-#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
+#[derive(Debug, ToOcamlRep)]
 pub struct ParserResult {
     pub file_mode: Mode,
     pub scoured_comments: ScouredComments,
@@ -37,8 +39,39 @@ pub struct ParserResult {
     pub syntax_errors: Vec<SyntaxError>,
     pub errors: Vec<Error>,
     pub lint_errors: Vec<LintError>,
-    pub parse_peak: i64,
-    pub lower_peak: i64,
-    pub error_peak: i64,
-    pub arena_bytes: i64,
+    #[ocamlrep(skip)]
+    pub profile: ParserProfile,
+}
+
+#[derive(Debug, Default)]
+pub struct ParserProfile {
+    pub parse_peak: u64,
+    pub lower_peak: u64,
+    pub error_peak: u64,
+
+    pub arena_bytes: u64,
+
+    pub parsing_t: Duration,
+    pub lowering_t: Duration,
+    pub elaboration_t: Duration,
+    pub error_t: Duration,
+    pub total_t: Duration,
+}
+
+impl ParserProfile {
+    pub fn fold(self, b: Self) -> Self {
+        Self {
+            parse_peak: std::cmp::max(self.parse_peak, b.parse_peak),
+            lower_peak: std::cmp::max(self.lower_peak, b.lower_peak),
+            error_peak: std::cmp::max(self.error_peak, b.error_peak),
+
+            arena_bytes: self.arena_bytes + b.arena_bytes,
+
+            parsing_t: self.parsing_t + b.parsing_t,
+            lowering_t: self.lowering_t + b.lowering_t,
+            elaboration_t: self.elaboration_t + b.elaboration_t,
+            error_t: self.error_t + b.error_t,
+            total_t: self.total_t + b.total_t,
+        }
+    }
 }

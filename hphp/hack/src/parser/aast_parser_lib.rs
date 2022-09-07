@@ -14,3 +14,4 @@ pub use aast_parser::AastParser;
 pub use aast_parser::Error;
 pub use aast_parser::Result;
 pub use rust_aast_parser_types;
+pub use rust_aast_parser_types::ParserProfile;

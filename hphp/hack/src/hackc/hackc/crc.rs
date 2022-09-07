@@ -67,13 +67,13 @@ fn process_one_file(
         match result {
             Ok((Err(e), profile1)) => {
                 // No panic - but called function failed.
-                *profile += profile1;
+                *profile = compile::Profile::fold(std::mem::take(profile), profile1);
                 writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?;
                 bail!("failed");
             }
             Ok((Ok(output), profile1)) => {
                 // No panic and called function succeeded.
-                *profile += profile1;
+                *profile = compile::Profile::fold(std::mem::take(profile), profile1);
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);
                 let crc = hasher.finish();
@@ -92,15 +92,14 @@ fn process_one_file(
 
 #[derive(Default)]
 struct ProfileAcc {
-    codegen_bytes: i64,
-    max_parse: MaxValue<i64>,
-    max_lower: MaxValue<i64>,
-    max_error: MaxValue<i64>,
-    max_rewrite: MaxValue<i64>,
-    max_emitter: MaxValue<i64>,
+    parser_profile: crate::profile::ParserProfile,
+    codegen_bytes: u64,
+    max_rewrite: MaxValue<u64>,
+    max_emitter: MaxValue<u64>,
     total_t: Timing,
-    parsing_t: Timing,
     codegen_t: Timing,
+    bc_to_ir_t: Timing,
+    ir_to_bc_t: Timing,
     printing_t: Timing,
 }
 
@@ -111,36 +110,40 @@ impl ProfileAcc {
     }
 
     fn fold_with(&mut self, other: Self) {
+        self.parser_profile.fold_with(other.parser_profile);
         self.codegen_bytes += other.codegen_bytes;
-        self.max_parse.fold_with(other.max_parse);
-        self.max_lower.fold_with(other.max_lower);
-        self.max_error.fold_with(other.max_error);
         self.max_rewrite.fold_with(other.max_rewrite);
         self.max_emitter.fold_with(other.max_emitter);
         self.total_t.fold_with(other.total_t);
-        self.parsing_t.fold_with(other.parsing_t);
         self.codegen_t.fold_with(other.codegen_t);
+        self.bc_to_ir_t.fold_with(other.bc_to_ir_t);
+        self.ir_to_bc_t.fold_with(other.ir_to_bc_t);
         self.printing_t.fold_with(other.printing_t);
     }
 
-    fn from_compile<'a>(profile: compile::Profile, path: impl Into<Cow<'a, Path>>) -> Self {
+    fn from_compile<'a>(
+        profile: compile::Profile,
+        total_t: Duration,
+        path: impl Into<Cow<'a, Path>>,
+    ) -> Self {
         let path = path.into();
-        let total_t = profile.codegen_t + profile.parsing_t + profile.printing_t;
-        let total_t = Timing::from_secs_f64(total_t, path.clone());
-        let codegen_t = Timing::from_secs_f64(profile.codegen_t, path.clone());
-        let parsing_t = Timing::from_secs_f64(profile.parsing_t, path.clone());
-        let printing_t = Timing::from_secs_f64(profile.printing_t, path.clone());
+        let total_t = Timing::from_duration(total_t, path.clone());
+        let codegen_t = Timing::from_duration(profile.codegen_t, path.clone());
+        let bc_to_ir_t = Timing::from_duration(profile.bc_to_ir_t, path.clone());
+        let ir_to_bc_t = Timing::from_duration(profile.ir_to_bc_t, path.clone());
+        let printing_t = Timing::from_duration(profile.printing_t, path.clone());
+        let parser_profile =
+            crate::profile::ParserProfile::from_parser(profile.parser_profile, path.as_ref());
         ProfileAcc {
             total_t,
             codegen_t,
-            parsing_t,
+            bc_to_ir_t,
+            ir_to_bc_t,
             printing_t,
             codegen_bytes: profile.codegen_bytes,
-            max_parse: MaxValue::new(profile.parse_peak, path.to_path_buf()),
-            max_lower: MaxValue::new(profile.lower_peak, path.to_path_buf()),
-            max_error: MaxValue::new(profile.error_peak, path.to_path_buf()),
             max_rewrite: MaxValue::new(profile.rewrite_peak, path.to_path_buf()),
-            max_emitter: MaxValue::new(profile.emitter_peak, path.into_owned()),
+            max_emitter: MaxValue::new(profile.emitter_peak, path.to_path_buf()),
+            parser_profile,
         }
     }
 
@@ -161,13 +164,20 @@ impl ProfileAcc {
         }
 
         let mut w = std::io::stderr();
+        let p = &self.parser_profile;
         profile::report_stat(&mut w, "", "total time", &self.total_t)?;
-        profile::report_stat(&mut w, "  ", "parsing time", &self.parsing_t)?;
+        profile::report_stat(&mut w, "  ", "ast-gen time", &p.total_t)?;
+        profile::report_stat(&mut w, "    ", "parsing time", &p.parsing_t)?;
+        profile::report_stat(&mut w, "    ", "lowering time", &p.lowering_t)?;
+        profile::report_stat(&mut w, "    ", "elaboration time", &p.elaboration_t)?;
+        profile::report_stat(&mut w, "    ", "error check time", &p.error_t)?;
         profile::report_stat(&mut w, "  ", "codegen time", &self.codegen_t)?;
+        profile::report_stat(&mut w, "  ", "bc_to_ir time", &self.bc_to_ir_t)?;
+        profile::report_stat(&mut w, "  ", "ir_to_bc time", &self.ir_to_bc_t)?;
         profile::report_stat(&mut w, "  ", "printing time", &self.printing_t)?;
-        self.max_parse.report(&mut w, "parser stack peak")?;
-        self.max_lower.report(&mut w, "lowerer stack peak")?;
-        self.max_error.report(&mut w, "check_error stack peak")?;
+        p.parse_peak.report(&mut w, "parser stack peak")?;
+        p.lower_peak.report(&mut w, "lowerer stack peak")?;
+        p.error_peak.report(&mut w, "check_error stack peak")?;
         self.max_rewrite.report(&mut w, "rewrite stack peak")?;
         self.max_emitter.report(&mut w, "emitter stack peak")?;
         Ok(())
@@ -188,12 +198,13 @@ fn crc_files(
     let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> ProfileAcc {
         let mut profile = compile::Profile::default();
         status_ticker.start_file(f);
+        let total_t = Instant::now();
         let file_passed = process_one_file(writer, f.as_path(), compile_opts, &mut profile).is_ok();
         if !file_passed {
             passed.store(false, Ordering::Release);
         }
         status_ticker.finish_file(f);
-        acc.fold(ProfileAcc::from_compile(profile, f))
+        acc.fold(ProfileAcc::from_compile(profile, total_t.elapsed(), f))
     };
 
     let profile = if num_threads == 1 {

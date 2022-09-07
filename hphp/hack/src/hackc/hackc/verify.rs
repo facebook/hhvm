@@ -133,16 +133,17 @@ impl AssembleOpts {
         });
 
         let total_t = compile_profile.codegen_t
-            + compile_profile.parsing_t
+            + compile_profile.parser_profile.total_t
             + print_profile.printing_t
-            + assemble_t.as_secs_f64()
-            + verify_t.as_secs_f64();
+            + assemble_t.total()
+            + verify_t.total();
 
         profile.fold_with(ProfileAcc {
-            total_t: Timing::from_secs_f64(total_t, path),
-            codegen_t: Timing::from_secs_f64(compile_profile.codegen_t, path),
-            parsing_t: Timing::from_secs_f64(compile_profile.parsing_t, path),
-            printing_t: Timing::from_secs_f64(print_profile.printing_t, path),
+            total_t: Timing::from_duration(total_t, path),
+            codegen_t: Timing::from_duration(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_duration(compile_profile.parser_profile.parsing_t, path),
+            lowering_t: Timing::from_duration(compile_profile.parser_profile.lowering_t, path),
+            printing_t: Timing::from_duration(print_profile.printing_t, path),
             assemble_t,
             verify_t,
             ..Default::default()
@@ -178,15 +179,16 @@ impl IrOpts {
             Timing::time(path, || sem_diff::sem_diff_unit(&pre_unit, &post_unit));
 
         let total_t = compile_profile.codegen_t
-            + compile_profile.parsing_t
-            + bc_to_ir_t.as_secs_f64()
-            + ir_to_bc_t.as_secs_f64()
-            + verify_t.as_secs_f64();
+            + compile_profile.parser_profile.total_t
+            + bc_to_ir_t.total()
+            + ir_to_bc_t.total()
+            + verify_t.total();
 
         profile.fold_with(ProfileAcc {
-            total_t: Timing::from_secs_f64(total_t, path),
-            codegen_t: Timing::from_secs_f64(compile_profile.codegen_t, path),
-            parsing_t: Timing::from_secs_f64(compile_profile.parsing_t, path),
+            total_t: Timing::from_duration(total_t, path),
+            codegen_t: Timing::from_duration(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_duration(compile_profile.parser_profile.parsing_t, path),
+            lowering_t: Timing::from_duration(compile_profile.parser_profile.lowering_t, path),
             bc_to_ir_t,
             ir_to_bc_t,
             verify_t,
@@ -292,6 +294,7 @@ struct ProfileAcc {
     codegen_t: Timing,
     ir_to_bc_t: Timing,
     parsing_t: Timing,
+    lowering_t: Timing,
     printing_t: Timing,
     total_t: Timing,
     verify_t: Timing,
@@ -307,6 +310,7 @@ impl std::default::Default for ProfileAcc {
             codegen_t: Default::default(),
             ir_to_bc_t: Default::default(),
             parsing_t: Default::default(),
+            lowering_t: Default::default(),
             printing_t: Default::default(),
             total_t: Default::default(),
             verify_t: Default::default(),
@@ -328,6 +332,7 @@ impl ProfileAcc {
         self.codegen_t.fold_with(other.codegen_t);
         self.ir_to_bc_t.fold_with(other.ir_to_bc_t);
         self.parsing_t.fold_with(other.parsing_t);
+        self.lowering_t.fold_with(other.lowering_t);
         self.printing_t.fold_with(other.printing_t);
         self.total_t.fold_with(other.total_t);
         self.verify_t.fold_with(other.verify_t);
@@ -393,6 +398,7 @@ impl ProfileAcc {
         let mut w = std::io::stdout();
         profile::report_stat(&mut w, "", "total time", &self.total_t)?;
         profile::report_stat(&mut w, "  ", "parsing time", &self.parsing_t)?;
+        profile::report_stat(&mut w, "  ", "lowering time", &self.lowering_t)?;
         profile::report_stat(&mut w, "  ", "codegen time", &self.codegen_t)?;
         profile::report_stat(&mut w, "  ", "printing time", &self.printing_t)?;
         profile::report_stat(&mut w, "  ", "assemble time", &self.assemble_t)?;

@@ -907,16 +907,16 @@ class union1(object):
 
       if fid == 1:
         if ftype == TType.I32:
-          i = iprot.readI32()
+          _fbthrift_i = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i(i)
+          self.set_i(_fbthrift_i)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.DOUBLE:
-          d = iprot.readDouble()
+          _fbthrift_d = iprot.readDouble()
           assert self.field == 0 and self.value is None
-          self.set_d(d)
+          self.set_d(_fbthrift_d)
         else:
           iprot.skip(ftype)
       else:
@@ -1064,32 +1064,32 @@ class union2(object):
 
       if fid == 1:
         if ftype == TType.I32:
-          i = iprot.readI32()
+          _fbthrift_i = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i(i)
+          self.set_i(_fbthrift_i)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.DOUBLE:
-          d = iprot.readDouble()
+          _fbthrift_d = iprot.readDouble()
           assert self.field == 0 and self.value is None
-          self.set_d(d)
+          self.set_d(_fbthrift_d)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          s = struct1()
-          s.read(iprot)
+          _fbthrift_s = struct1()
+          _fbthrift_s.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_s(s)
+          self.set_s(_fbthrift_s)
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.STRUCT:
-          u = union1()
-          u.read(iprot)
+          _fbthrift_u = union1()
+          _fbthrift_u.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_u(u)
+          self.set_u(_fbthrift_u)
         else:
           iprot.skip(ftype)
       else:

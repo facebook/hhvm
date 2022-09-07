@@ -366,16 +366,16 @@ class TypeUri(object):
 
       if fid == 1:
         if ftype == TType.STRING:
-          uri = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          _fbthrift_uri = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_uri(uri)
+          self.set_uri(_fbthrift_uri)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRING:
-          typeHashPrefixSha2_256 = iprot.readString()
+          _fbthrift_typeHashPrefixSha2_256 = iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_typeHashPrefixSha2_256(typeHashPrefixSha2_256)
+          self.set_typeHashPrefixSha2_256(_fbthrift_typeHashPrefixSha2_256)
         else:
           iprot.skip(ftype)
       else:
@@ -422,11 +422,11 @@ class TypeUri(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'uri' in obj:
-      uri = obj['uri']
-      self.set_uri(uri)
+      _fbthrift_uri = obj['uri']
+      self.set_uri(_fbthrift_uri)
     if 'typeHashPrefixSha2_256' in obj:
-      typeHashPrefixSha2_256 = obj['typeHashPrefixSha2_256']
-      self.set_typeHashPrefixSha2_256(typeHashPrefixSha2_256)
+      _fbthrift_typeHashPrefixSha2_256 = obj['typeHashPrefixSha2_256']
+      self.set_typeHashPrefixSha2_256(_fbthrift_typeHashPrefixSha2_256)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
@@ -715,118 +715,118 @@ class TypeName(object):
 
       if fid == 1:
         if ftype == TType.I32:
-          boolType = iprot.readI32()
+          _fbthrift_boolType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_boolType(boolType)
+          self.set_boolType(_fbthrift_boolType)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.I32:
-          byteType = iprot.readI32()
+          _fbthrift_byteType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_byteType(byteType)
+          self.set_byteType(_fbthrift_byteType)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.I32:
-          i16Type = iprot.readI32()
+          _fbthrift_i16Type = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i16Type(i16Type)
+          self.set_i16Type(_fbthrift_i16Type)
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.I32:
-          i32Type = iprot.readI32()
+          _fbthrift_i32Type = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i32Type(i32Type)
+          self.set_i32Type(_fbthrift_i32Type)
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.I32:
-          i64Type = iprot.readI32()
+          _fbthrift_i64Type = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i64Type(i64Type)
+          self.set_i64Type(_fbthrift_i64Type)
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.I32:
-          floatType = iprot.readI32()
+          _fbthrift_floatType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_floatType(floatType)
+          self.set_floatType(_fbthrift_floatType)
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.I32:
-          doubleType = iprot.readI32()
+          _fbthrift_doubleType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_doubleType(doubleType)
+          self.set_doubleType(_fbthrift_doubleType)
         else:
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.I32:
-          stringType = iprot.readI32()
+          _fbthrift_stringType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_stringType(stringType)
+          self.set_stringType(_fbthrift_stringType)
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.I32:
-          binaryType = iprot.readI32()
+          _fbthrift_binaryType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_binaryType(binaryType)
+          self.set_binaryType(_fbthrift_binaryType)
         else:
           iprot.skip(ftype)
       elif fid == 10:
         if ftype == TType.STRUCT:
-          enumType = TypeUri()
-          enumType.read(iprot)
+          _fbthrift_enumType = TypeUri()
+          _fbthrift_enumType.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_enumType(enumType)
+          self.set_enumType(_fbthrift_enumType)
         else:
           iprot.skip(ftype)
       elif fid == 11:
         if ftype == TType.STRUCT:
-          structType = TypeUri()
-          structType.read(iprot)
+          _fbthrift_structType = TypeUri()
+          _fbthrift_structType.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_structType(structType)
+          self.set_structType(_fbthrift_structType)
         else:
           iprot.skip(ftype)
       elif fid == 12:
         if ftype == TType.STRUCT:
-          unionType = TypeUri()
-          unionType.read(iprot)
+          _fbthrift_unionType = TypeUri()
+          _fbthrift_unionType.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_unionType(unionType)
+          self.set_unionType(_fbthrift_unionType)
         else:
           iprot.skip(ftype)
       elif fid == 13:
         if ftype == TType.STRUCT:
-          exceptionType = TypeUri()
-          exceptionType.read(iprot)
+          _fbthrift_exceptionType = TypeUri()
+          _fbthrift_exceptionType.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_exceptionType(exceptionType)
+          self.set_exceptionType(_fbthrift_exceptionType)
         else:
           iprot.skip(ftype)
       elif fid == 14:
         if ftype == TType.I32:
-          listType = iprot.readI32()
+          _fbthrift_listType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_listType(listType)
+          self.set_listType(_fbthrift_listType)
         else:
           iprot.skip(ftype)
       elif fid == 15:
         if ftype == TType.I32:
-          setType = iprot.readI32()
+          _fbthrift_setType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_setType(setType)
+          self.set_setType(_fbthrift_setType)
         else:
           iprot.skip(ftype)
       elif fid == 16:
         if ftype == TType.I32:
-          mapType = iprot.readI32()
+          _fbthrift_mapType = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_mapType(mapType)
+          self.set_mapType(_fbthrift_mapType)
         else:
           iprot.skip(ftype)
       else:
@@ -943,129 +943,129 @@ class TypeName(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'boolType' in obj:
-      boolType = obj['boolType']
-      if not boolType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % boolType
+      _fbthrift_boolType = obj['boolType']
+      if not _fbthrift_boolType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_boolType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_boolType(boolType)
+      self.set_boolType(_fbthrift_boolType)
     if 'byteType' in obj:
-      byteType = obj['byteType']
-      if not byteType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % byteType
+      _fbthrift_byteType = obj['byteType']
+      if not _fbthrift_byteType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_byteType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_byteType(byteType)
+      self.set_byteType(_fbthrift_byteType)
     if 'i16Type' in obj:
-      i16Type = obj['i16Type']
-      if not i16Type in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % i16Type
+      _fbthrift_i16Type = obj['i16Type']
+      if not _fbthrift_i16Type in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_i16Type
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_i16Type(i16Type)
+      self.set_i16Type(_fbthrift_i16Type)
     if 'i32Type' in obj:
-      i32Type = obj['i32Type']
-      if not i32Type in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % i32Type
+      _fbthrift_i32Type = obj['i32Type']
+      if not _fbthrift_i32Type in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_i32Type
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_i32Type(i32Type)
+      self.set_i32Type(_fbthrift_i32Type)
     if 'i64Type' in obj:
-      i64Type = obj['i64Type']
-      if not i64Type in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % i64Type
+      _fbthrift_i64Type = obj['i64Type']
+      if not _fbthrift_i64Type in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_i64Type
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_i64Type(i64Type)
+      self.set_i64Type(_fbthrift_i64Type)
     if 'floatType' in obj:
-      floatType = obj['floatType']
-      if not floatType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % floatType
+      _fbthrift_floatType = obj['floatType']
+      if not _fbthrift_floatType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_floatType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_floatType(floatType)
+      self.set_floatType(_fbthrift_floatType)
     if 'doubleType' in obj:
-      doubleType = obj['doubleType']
-      if not doubleType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % doubleType
+      _fbthrift_doubleType = obj['doubleType']
+      if not _fbthrift_doubleType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_doubleType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_doubleType(doubleType)
+      self.set_doubleType(_fbthrift_doubleType)
     if 'stringType' in obj:
-      stringType = obj['stringType']
-      if not stringType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % stringType
+      _fbthrift_stringType = obj['stringType']
+      if not _fbthrift_stringType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_stringType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_stringType(stringType)
+      self.set_stringType(_fbthrift_stringType)
     if 'binaryType' in obj:
-      binaryType = obj['binaryType']
-      if not binaryType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % binaryType
+      _fbthrift_binaryType = obj['binaryType']
+      if not _fbthrift_binaryType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_binaryType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_binaryType(binaryType)
+      self.set_binaryType(_fbthrift_binaryType)
     if 'enumType' in obj:
-      enumType = TypeUri()
-      enumType.readFromJson(obj['enumType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_enumType(enumType)
+      _fbthrift_enumType = TypeUri()
+      _fbthrift_enumType.readFromJson(obj['enumType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_enumType(_fbthrift_enumType)
     if 'structType' in obj:
-      structType = TypeUri()
-      structType.readFromJson(obj['structType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_structType(structType)
+      _fbthrift_structType = TypeUri()
+      _fbthrift_structType.readFromJson(obj['structType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_structType(_fbthrift_structType)
     if 'unionType' in obj:
-      unionType = TypeUri()
-      unionType.readFromJson(obj['unionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_unionType(unionType)
+      _fbthrift_unionType = TypeUri()
+      _fbthrift_unionType.readFromJson(obj['unionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_unionType(_fbthrift_unionType)
     if 'exceptionType' in obj:
-      exceptionType = TypeUri()
-      exceptionType.readFromJson(obj['exceptionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_exceptionType(exceptionType)
+      _fbthrift_exceptionType = TypeUri()
+      _fbthrift_exceptionType.readFromJson(obj['exceptionType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_exceptionType(_fbthrift_exceptionType)
     if 'listType' in obj:
-      listType = obj['listType']
-      if not listType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % listType
+      _fbthrift_listType = obj['listType']
+      if not _fbthrift_listType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_listType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_listType(listType)
+      self.set_listType(_fbthrift_listType)
     if 'setType' in obj:
-      setType = obj['setType']
-      if not setType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % setType
+      _fbthrift_setType = obj['setType']
+      if not _fbthrift_setType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_setType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_setType(setType)
+      self.set_setType(_fbthrift_setType)
     if 'mapType' in obj:
-      mapType = obj['mapType']
-      if not mapType in Void._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % mapType
+      _fbthrift_mapType = obj['mapType']
+      if not _fbthrift_mapType in Void._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Void' % _fbthrift_mapType
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_mapType(mapType)
+      self.set_mapType(_fbthrift_mapType)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):

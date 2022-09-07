@@ -60,6 +60,9 @@ void mark_file_executable(const boost::filesystem::path& path) {
       path, fs::add_perms | fs::owner_exe | fs::group_exe | fs::others_exe);
 }
 
+string prefix_temporary(const string& name) {
+  return "_fbthrift_" + name;
+}
 } // namespace
 
 /**
@@ -1329,10 +1332,10 @@ void t_py_generator::generate_py_union(ofstream& out, const t_struct* tstruct) {
     indent_up();
     indent(out) << "if ftype == " << t << ":" << endl;
     indent_up();
-    generate_deserialize_field(out, member, "");
+    generate_deserialize_field(out, member, prefix_temporary(""));
     indent(out) << "assert self.field == 0 and self.value is None" << endl;
-    indent(out) << "self.set_" << n << "(" << rename_reserved_keywords(n) << ")"
-                << endl;
+    indent(out) << "self.set_" << n << "("
+                << prefix_temporary(rename_reserved_keywords(n)) << ")" << endl;
     indent_down();
     indent(out) << "else:" << endl;
     indent(out) << "  iprot.skip(ftype)" << endl;
@@ -1400,9 +1403,11 @@ void t_py_generator::generate_py_union(ofstream& out, const t_struct* tstruct) {
       auto n = member->get_name();
       indent(out) << "if '" << n << "' in obj:" << endl;
       indent_up();
-      generate_json_field(out, member, "", "", "obj['" + n + "']");
-      indent(out) << "self.set_" << n << "(" << rename_reserved_keywords(n)
-                  << ")" << endl;
+      generate_json_field(
+          out, member, prefix_temporary(""), "", "obj['" + n + "']");
+      indent(out) << "self.set_" << n << "("
+                  << prefix_temporary(rename_reserved_keywords(n)) << ")"
+                  << endl;
       indent_down();
     }
     indent_down();

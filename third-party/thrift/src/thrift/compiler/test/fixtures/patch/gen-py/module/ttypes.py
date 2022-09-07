@@ -216,9 +216,9 @@ class InnerUnion(object):
 
       if fid == 1:
         if ftype == TType.STRING:
-          innerOption = iprot.readString()
+          _fbthrift_innerOption = iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_innerOption(innerOption)
+          self.set_innerOption(_fbthrift_innerOption)
         else:
           iprot.skip(ftype)
       else:
@@ -260,8 +260,8 @@ class InnerUnion(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'innerOption' in obj:
-      innerOption = obj['innerOption']
-      self.set_innerOption(innerOption)
+      _fbthrift_innerOption = obj['innerOption']
+      self.set_innerOption(_fbthrift_innerOption)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
@@ -368,24 +368,24 @@ class MyUnion(object):
 
       if fid == 1:
         if ftype == TType.STRING:
-          option1 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          _fbthrift_option1 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_option1(option1)
+          self.set_option1(_fbthrift_option1)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.I32:
-          option2 = iprot.readI32()
+          _fbthrift_option2 = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_option2(option2)
+          self.set_option2(_fbthrift_option2)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          option3 = InnerUnion()
-          option3.read(iprot)
+          _fbthrift_option3 = InnerUnion()
+          _fbthrift_option3.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_option3(option3)
+          self.set_option3(_fbthrift_option3)
         else:
           iprot.skip(ftype)
       else:
@@ -437,17 +437,17 @@ class MyUnion(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'option1' in obj:
-      option1 = obj['option1']
-      self.set_option1(option1)
+      _fbthrift_option1 = obj['option1']
+      self.set_option1(_fbthrift_option1)
     if 'option2' in obj:
-      option2 = obj['option2']
-      if option2 > 0x7fffffff or option2 < -0x80000000:
+      _fbthrift_option2 = obj['option2']
+      if _fbthrift_option2 > 0x7fffffff or _fbthrift_option2 < -0x80000000:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-      self.set_option2(option2)
+      self.set_option2(_fbthrift_option2)
     if 'option3' in obj:
-      option3 = InnerUnion()
-      option3.readFromJson(obj['option3'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_option3(option3)
+      _fbthrift_option3 = InnerUnion()
+      _fbthrift_option3.readFromJson(obj['option3'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_option3(_fbthrift_option3)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):

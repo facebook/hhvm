@@ -241,17 +241,17 @@ class MyUnion(object):
 
       if fid == 1:
         if ftype == TType.I32:
-          myEnum = iprot.readI32()
+          _fbthrift_myEnum = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_myEnum(myEnum)
+          self.set_myEnum(_fbthrift_myEnum)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          myDataItem = MyStruct()
-          myDataItem.read(iprot)
+          _fbthrift_myDataItem = MyStruct()
+          _fbthrift_myDataItem.read(iprot)
           assert self.field == 0 and self.value is None
-          self.set_myDataItem(myDataItem)
+          self.set_myDataItem(_fbthrift_myDataItem)
         else:
           iprot.skip(ftype)
       else:
@@ -298,18 +298,18 @@ class MyUnion(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'myEnum' in obj:
-      myEnum = obj['myEnum']
-      if not myEnum in MyEnum._VALUES_TO_NAMES:
-        msg = 'Integer value ''%s'' is not a recognized value of enum type MyEnum' % myEnum
+      _fbthrift_myEnum = obj['myEnum']
+      if not _fbthrift_myEnum in MyEnum._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type MyEnum' % _fbthrift_myEnum
         if relax_enum_validation:
             warnings.warn(msg)
         else:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
-      self.set_myEnum(myEnum)
+      self.set_myEnum(_fbthrift_myEnum)
     if 'myDataItem' in obj:
-      myDataItem = MyStruct()
-      myDataItem.readFromJson(obj['myDataItem'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_myDataItem(myDataItem)
+      _fbthrift_myDataItem = MyStruct()
+      _fbthrift_myDataItem.readFromJson(obj['myDataItem'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_myDataItem(_fbthrift_myDataItem)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):

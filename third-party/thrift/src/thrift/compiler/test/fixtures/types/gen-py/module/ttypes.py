@@ -2620,16 +2620,16 @@ class NoExceptMoveUnion(object):
 
       if fid == 1:
         if ftype == TType.STRING:
-          string_field = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          _fbthrift_string_field = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_string_field(string_field)
+          self.set_string_field(_fbthrift_string_field)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.I32:
-          i32_field = iprot.readI32()
+          _fbthrift_i32_field = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_i32_field(i32_field)
+          self.set_i32_field(_fbthrift_i32_field)
         else:
           iprot.skip(ftype)
       else:

@@ -661,31 +661,31 @@ class Baz(object):
 
       if fid == 1:
         if ftype == TType.I32:
-          intField = iprot.readI32()
+          _fbthrift_intField = iprot.readI32()
           assert self.field == 0 and self.value is None
-          self.set_intField(intField)
+          self.set_intField(_fbthrift_intField)
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.SET:
-          setField = set()
+          _fbthrift_setField = set()
           (_etype83, _size80) = iprot.readSetBegin()
           if _size80 >= 0:
             for _i84 in range(_size80):
               _elem85 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              setField.add(_elem85)
+              _fbthrift_setField.add(_elem85)
           else: 
             while iprot.peekSet():
               _elem86 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              setField.add(_elem86)
+              _fbthrift_setField.add(_elem86)
           iprot.readSetEnd()
           assert self.field == 0 and self.value is None
-          self.set_setField(setField)
+          self.set_setField(_fbthrift_setField)
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.MAP:
-          mapField = {}
+          _fbthrift_mapField = {}
           (_ktype88, _vtype89, _size87 ) = iprot.readMapBegin() 
           if _size87 >= 0:
             for _i91 in range(_size87):
@@ -701,7 +701,7 @@ class Baz(object):
                   _elem100 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
                   _val93.append(_elem100)
               iprot.readListEnd()
-              mapField[_key92] = _val93
+              _fbthrift_mapField[_key92] = _val93
           else: 
             while iprot.peekMap():
               _key101 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
@@ -716,24 +716,24 @@ class Baz(object):
                   _elem109 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
                   _val102.append(_elem109)
               iprot.readListEnd()
-              mapField[_key101] = _val102
+              _fbthrift_mapField[_key101] = _val102
           iprot.readMapEnd()
           assert self.field == 0 and self.value is None
-          self.set_mapField(mapField)
+          self.set_mapField(_fbthrift_mapField)
         else:
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.STRING:
-          binaryField = iprot.readString()
+          _fbthrift_binaryField = iprot.readString()
           assert self.field == 0 and self.value is None
-          self.set_binaryField(binaryField)
+          self.set_binaryField(_fbthrift_binaryField)
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.I64:
-          longField = iprot.readI64()
+          _fbthrift_longField = iprot.readI64()
           assert self.field == 0 and self.value is None
-          self.set_longField(longField)
+          self.set_longField(_fbthrift_longField)
         else:
           iprot.skip(ftype)
       else:
@@ -805,30 +805,30 @@ class Baz(object):
       raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
     
     if 'intField' in obj:
-      intField = obj['intField']
-      if intField > 0x7fffffff or intField < -0x80000000:
+      _fbthrift_intField = obj['intField']
+      if _fbthrift_intField > 0x7fffffff or _fbthrift_intField < -0x80000000:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-      self.set_intField(intField)
+      self.set_intField(_fbthrift_intField)
     if 'setField' in obj:
-      setField = set_cls()
+      _fbthrift_setField = set_cls()
       for _tmp_e114 in obj['setField']:
-        setField.add(_tmp_e114)
-      self.set_setField(setField)
+        _fbthrift_setField.add(_tmp_e114)
+      self.set_setField(_fbthrift_setField)
     if 'mapField' in obj:
-      mapField = dict_cls()
+      _fbthrift_mapField = dict_cls()
       for _tmp_k115, _tmp_v116 in obj['mapField'].items():
         _tmp_kp117 = _tmp_k115
         _list118 = []
         for _tmp_e119 in _tmp_v116:
           _list118.append(_tmp_e119)
-        mapField[_tmp_kp117] = _list118
-      self.set_mapField(mapField)
+        _fbthrift_mapField[_tmp_kp117] = _list118
+      self.set_mapField(_fbthrift_mapField)
     if 'binaryField' in obj:
-      binaryField = obj['binaryField']
-      self.set_binaryField(binaryField)
+      _fbthrift_binaryField = obj['binaryField']
+      self.set_binaryField(_fbthrift_binaryField)
     if 'longField' in obj:
-      longField = long(obj['longField'])
-      self.set_longField(longField)
+      _fbthrift_longField = long(obj['longField'])
+      self.set_longField(_fbthrift_longField)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):

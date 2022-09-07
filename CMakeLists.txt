@@ -10,7 +10,12 @@ cmake_policy(SET CMP0046 NEW)
 INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 
 # includes
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
+SET(
+  CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/CMake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/build/fbcode_builder/CMake"
+  ${CMAKE_MODULE_PATH}
+)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 PROJECT(hhvm C CXX ASM)

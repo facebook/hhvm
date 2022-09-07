@@ -93,6 +93,20 @@ module type Reordered_argument_set_S = sig
 
   val make_pp :
     (Format.formatter -> elt -> unit) -> Format.formatter -> t -> unit
+
+  (** Find an element that satisfies some boolean predicate.
+      No other guarantees are given (decidability, ordering, ...).  *)
+  val find_one_opt : t -> f:(elt -> bool) -> elt option
+
+  val find_first : (elt -> bool) -> t -> elt
+    [@@alert
+      deprecated
+        "`find_first f` requires f to be monotone which is rarely the case, please consider using first_one_opt instead"]
+
+  val find_first_opt : (elt -> bool) -> t -> elt option
+    [@@alert
+      deprecated
+        "`find_first_opt f` requires f to be monotone which is rarely the case, please consider using first_one_opt instead"]
 end
 
 module Reordered_argument_set (S : Set.S) = struct
@@ -132,6 +146,16 @@ module Reordered_argument_set (S : Set.S) = struct
     | [] -> ()
     | _ -> Format.fprintf fmt " ");
     Format.fprintf fmt "}@]"
+
+  (** Find an element that satisfies some boolean predicate.
+      No other guarantees are given (decidability, ordering, ...).  *)
+  let find_one_opt elts ~f =
+    let exception FoundFirst of elt in
+    try
+      iter ~f:(fun elt -> if f elt then raise (FoundFirst elt)) elts;
+      None
+    with
+    | FoundFirst elt -> Some elt
 end
 
 module SSet = struct

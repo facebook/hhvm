@@ -1,7 +1,6 @@
 //// modules.php
 <?hh
 <<file:__EnableUnstableFeatures('modules')>>
-<<file:__EnableUnstableFeatures('module_references')>>
 
 new module Foo.Bar {}
 
@@ -10,7 +9,6 @@ new module Foo.Bar {}
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<file:__EnableUnstableFeatures('modules')>>
-<<file:__EnableUnstableFeatures('module_references')>>
 module Foo.Bar;
 
 class C1 {}

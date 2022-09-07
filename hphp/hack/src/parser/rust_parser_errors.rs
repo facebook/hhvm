@@ -5229,13 +5229,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
             ModuleDeclaration(x) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Modules);
-                if let QualifiedName(x) = &x.name.children {
-                    if let SyntaxList(x) = &x.parts.children {
-                        if x.len() > 1 {
-                            self.check_can_use_feature(node, &UnstableFeatures::ModuleReferences);
-                        }
-                    }
-                }
                 if !x.exports.is_missing() || !x.imports.is_missing() {
                     self.check_can_use_feature(node, &UnstableFeatures::ModuleReferences);
                 }

@@ -1,7 +1,6 @@
 <?hh
 
 <<file:__EnableUnstableFeatures('modules')>>
-<<file:__EnableUnstableFeatures('module_references')>>
 
 module A.B;
 

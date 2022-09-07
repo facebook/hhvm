@@ -28,13 +28,12 @@ namespace proxygen {
 
 // Decodes a base64url encoded string
 std::string Base64::urlDecode(const std::string& urlB64message) {
-  std::unique_ptr<BIO, BIODeleter> bio, b64;
   uint8_t padding = (4 - urlB64message.length() % 4) % 4;
   if (padding == 3) {
     return std::string();
   }
 
-  std::string b64message(urlB64message.length() + padding, 0);
+  std::string b64message(urlB64message.length() + padding, '=');
   std::transform(urlB64message.begin(),
                  urlB64message.end(),
                  b64message.begin(),
@@ -46,10 +45,6 @@ std::string Base64::urlDecode(const std::string& urlB64message) {
                    }
                    return c;
                  });
-  for (auto i = urlB64message.length(); i < urlB64message.length() + padding;
-       i++) {
-    b64message[i] = '=';
-  }
   return decode(b64message, padding);
 }
 

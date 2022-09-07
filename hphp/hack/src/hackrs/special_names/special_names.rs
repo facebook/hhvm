@@ -154,10 +154,6 @@ pub mod user_attributes {
     pub static uaEntryPoint: Lazy<TypeName> = lazy!(sn::user_attributes::ENTRY_POINT);
     pub static uaMemoize: Lazy<TypeName> = lazy!(sn::user_attributes::MEMOIZE);
     pub static uaMemoizeLSB: Lazy<TypeName> = lazy!(sn::user_attributes::MEMOIZE_LSB);
-    pub static uaPolicyShardedMemoize: Lazy<TypeName> =
-        lazy!(sn::user_attributes::POLICY_SHARDED_MEMOIZE);
-    pub static uaPolicyShardedMemoizeLSB: Lazy<TypeName> =
-        lazy!(sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB);
     pub static uaPHPStdLib: Lazy<TypeName> = lazy!(sn::user_attributes::PHP_STD_LIB);
     pub static uaAcceptDisposable: Lazy<TypeName> = lazy!(sn::user_attributes::ACCEPT_DISPOSABLE);
     pub static uaReturnDisposable: Lazy<TypeName> = lazy!(sn::user_attributes::RETURN_DISPOSABLE);

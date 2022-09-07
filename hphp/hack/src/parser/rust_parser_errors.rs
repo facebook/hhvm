@@ -1874,11 +1874,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn methodish_memoize_lsb_on_non_static(&mut self, node: S<'a>) {
-        if (self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
-            || self.methodish_contains_attribute(
-                node,
-                sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
-            ))
+        if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
             && !has_modifier_static(node)
         {
             self.errors.push(make_error_from_node(
@@ -1964,10 +1960,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         ) {
             // a function, not a method
             if self.function_declaration_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
-                || self.function_declaration_contains_attribute(
-                    node,
-                    sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
-                )
             {
                 self.errors.push(make_error_from_node(
                     node,
@@ -2313,8 +2305,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .first_parent_function_attributes_contains(sn::user_attributes::MEMOIZE);
                     let in_memoize_lsb = self.first_parent_function_attributes_contains(
                         sn::user_attributes::MEMOIZE_LSB,
-                    ) || self.first_parent_function_attributes_contains(
-                        sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
                     );
 
                     if (in_memoize || in_memoize_lsb) && !self.is_immediately_in_lambda() {

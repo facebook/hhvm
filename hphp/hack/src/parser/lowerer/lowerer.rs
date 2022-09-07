@@ -4210,28 +4210,9 @@ fn process_attribute_constructor_call<'a>(
             &syntax_error::memoize_too_many_arguments(&name.1),
         );
     }
-    // TODO(T123026333): Remove once migration is over
-    if env.codegen()
-        && naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&name.1)
-    {
-        let memo_name =
-            if name.1 == naming_special_names_rust::user_attributes::POLICY_SHARDED_MEMOIZE {
-                naming_special_names_rust::user_attributes::MEMOIZE
-            } else {
-                naming_special_names_rust::user_attributes::MEMOIZE_LSB
-            };
-        return Ok(ast::UserAttribute {
-            name: ast::Id(name.0, String::from(memo_name)),
-            params: vec![ast::Expr(
-                (),
-                Pos::make_none(),
-                ast::Expr_::String("KeyedByIC".into()),
-            )],
-        });
-    }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);
-        if naming_special_names_rust::user_attributes::is_memoized_regular(&name.1) {
+        if naming_special_names_rust::user_attributes::is_memoized(&name.1) {
             if let Ok(Some(str)) = memoized_attribute_arg_to_string(n, e) {
                 Ok(str)
             } else {
@@ -4260,7 +4241,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
         LiteralExpression(_) => {}
         // Special tokens for memoization
         EnumClassLabelExpression(_)
-            if naming_special_names_rust::user_attributes::is_memoized_regular(attr_name)
+            if naming_special_names_rust::user_attributes::is_memoized(attr_name)
                 && memoized_attribute_arg_to_string(node, env) != Ok(None) => {}
         // ::class strings
         ScopeResolutionExpression(c) => {
@@ -5130,7 +5111,7 @@ fn p_namespace_use_clause<'a>(
 }
 
 fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
-    naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1)
+    naming_special_names_rust::user_attributes::is_memoized(&u.name.1)
         && (match flavor {
             Some(flavor) => u
                 .params

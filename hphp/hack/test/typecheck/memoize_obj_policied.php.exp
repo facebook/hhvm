@@ -1,5 +1,5 @@
 File "memoize_obj_policied.php", line 45, characters 3-11:
-This function can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has zoned context (Parsing[1002])
+This function can only be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC) because it has zoned context (Parsing[1002])
 File "memoize_obj_policied.php", line 19, characters 17-24:
 Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
   File "memoize_obj_policied.php", line 19, characters 29-30:

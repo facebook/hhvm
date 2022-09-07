@@ -271,10 +271,6 @@ module UserAttributes = struct
 
   let uaMemoizeLSB = "__MemoizeLSB"
 
-  let uaPolicyShardedMemoize = "__PolicyShardedMemoize"
-
-  let uaPolicyShardedMemoizeLSB = "__PolicyShardedMemoizeLSB"
-
   let uaPHPStdLib = "__PHPStdLib"
 
   let uaAcceptDisposable = "__AcceptDisposable"
@@ -434,23 +430,6 @@ module UserAttributes = struct
                 "Cache the return values from this method."
                 ^ " Calls with the same arguments will return the cached value."
                 ^ "\n\nCaching is per-request and has Late Static Binding, so subclasses do not share the cache.";
-            } );
-          ( uaPolicyShardedMemoize,
-            {
-              contexts = [fn; mthd];
-              autocomplete = false;
-              doc =
-                "Memoize this function/method independently for each zone.\n\n"
-                ^ "See also `__PolicyShardedMemoizeLSB`.";
-            } );
-          ( uaPolicyShardedMemoizeLSB,
-            {
-              contexts = [mthd];
-              autocomplete = false;
-              doc =
-                "Memoize this function/method independently for each zone. "
-                ^ "Respects Late Static Binding, so subclasses do not share the cache.\n\n"
-                ^ "See also `__PolicyShardedMemoizeLSB` and `__MemoizeLSB`.";
             } );
           ( uaPHPStdLib,
             {

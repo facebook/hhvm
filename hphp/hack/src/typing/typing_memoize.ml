@@ -169,20 +169,11 @@ let check_param : policy_sharded:bool -> env -> Nast.fun_param -> unit =
 
 let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =
  fun env user_attributes params ->
-  let policy_sharded =
-    Naming_attributes.mem
-      SN.UserAttributes.uaPolicyShardedMemoize
-      user_attributes
-    || Naming_attributes.mem
-         SN.UserAttributes.uaPolicyShardedMemoizeLSB
-         user_attributes
-  in
   if
     Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
     || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
-    || policy_sharded
   then
-    List.iter ~f:(check_param ~policy_sharded env) params
+    List.iter ~f:(check_param ~policy_sharded:false env) params
 
 let check_function : env -> Nast.fun_ -> unit =
  fun env { f_user_attributes; f_params; _ } ->

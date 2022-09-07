@@ -67,7 +67,7 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[Attribute<'arena>]>) -> boo
 
 fn is_memoize_with<'arena>(attrs: impl AsRef<[Attribute<'arena>]>, arg: &str) -> bool {
     attrs.as_ref().iter().any(|attr| {
-        ua::is_memoized_regular(attr.name.unsafe_as_str())
+        ua::is_memoized(attr.name.unsafe_as_str())
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
                 TypedValue::String(s0) => s0.unsafe_as_str() == arg,
                 _ => false,

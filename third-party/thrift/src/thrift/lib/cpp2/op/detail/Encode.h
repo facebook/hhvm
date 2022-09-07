@@ -695,6 +695,15 @@ struct Decode<type::adapted<Adapter, Tag>> {
     Decode<Tag>{}(prot, orig);
     m = Adapter::fromThrift(std::move(orig));
   }
+
+  template <typename FieldId, class Struct, class Protocol, class U>
+  void operator()(FieldId, Struct& strct, Protocol& prot, U& m) const {
+    type::native_type<Tag> orig;
+    Decode<Tag>{}(prot, orig);
+    m = adapt_detail::
+        fromThriftField<Adapter, folly::to_underlying(FieldId::value)>(
+            std::move(orig), strct);
+  }
 };
 
 } // namespace detail

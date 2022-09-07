@@ -53,6 +53,8 @@ void testUseOpEncode() {
   auto adaptedInt = test::TemplatedTestAdapter::fromThrift(1);
   original.adapted_int_field() = adaptedInt;
   original.list_int_field().emplace().push_back(adaptedInt);
+  original.meta_ref() = "some metadata";
+  original.adapted_list_field()->value.push_back(adaptedFoo);
 
   original.write(&writer);
 
@@ -62,6 +64,10 @@ void testUseOpEncode() {
   OpEncodeStruct result;
   result.read(&reader);
   EXPECT_EQ(result, original);
+
+  // Test whether field adapter is used
+  EXPECT_EQ(result.adapted_list_field()->fieldId, 14);
+  EXPECT_EQ(*result.adapted_list_field()->meta, "some metadata");
 }
 
 TEST(UseOpEncodeTest, UseOpEncode) {

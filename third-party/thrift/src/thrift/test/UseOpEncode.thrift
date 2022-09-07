@@ -55,4 +55,8 @@ struct OpEncodeStruct {
   11: Bar bar_field;
   12: AdaptedI32 adapted_int_field;
   13: list<AdaptedI32> list_int_field;
+
+  @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
+  14: list<AdaptedFoo> adapted_list_field;
+  15: string meta;
 }

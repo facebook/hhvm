@@ -55,15 +55,10 @@ struct EncodedValue {
   2: standard.ByteBuffer data;
 }
 
-// We cannot have adapted type in a list, so this is the workaround.
-struct ValueStruct {
-  1: Value value;
-}
-
 // MaskedData uses ValueId to get encodedValues and map keys from the lists.
 struct MaskedProtocolData {
   1: type.Protocol protocol;
   2: MaskedData data;
   3: list<EncodedValue> values;
-  4: list<ValueStruct> keys;
+  4: list<Value> keys;
 }

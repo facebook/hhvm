@@ -18,12 +18,6 @@
 
 namespace apache::thrift::protocol::detail {
 
-ValueStruct makeValueStruct(Value value) {
-  ValueStruct valueStruct;
-  valueStruct.value() = value;
-  return valueStruct;
-}
-
 int64_t getMaskKey(MaskRef ref, const Value& newKey) {
   if (ref.isMapMask()) {
     MapIdToMask map = ref.mask.includes_map_ref()

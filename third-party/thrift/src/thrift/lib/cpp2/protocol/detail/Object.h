@@ -457,9 +457,6 @@ const T& getByValueId(const std::vector<T>& values, type::ValueId id) {
   return values[apache::thrift::util::zigzagToI64(static_cast<int64_t>(id))];
 }
 
-// Creates a new ValueStruct from value.
-ValueStruct makeValueStruct(Value value);
-
 // Stores the serialized data of the given type in maskedData and protocolData.
 template <typename Protocol>
 void setMaskedDataFull(
@@ -554,7 +551,7 @@ MaskedDecodeResultValue parseValue(
         }
         if (!apache::thrift::empty(nestedResult.excluded)) {
           auto& keys = protocolData.keys().ensure();
-          keys.push_back(makeValueStruct(keyValue));
+          keys.push_back(keyValue);
           type::ValueId id =
               type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
           result.excluded.values_ref().ensure()[id] = nestedResult.excluded;
@@ -808,8 +805,7 @@ void serializeValue(
         valueType = getTType(value.mapValue_ref()->begin()->second);
       }
       for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
-        const Value& key =
-            *getByValueId(*protocolData.keys(), keyValueId).value();
+        const Value& key = getByValueId(*protocolData.keys(), keyValueId);
         if (size == 0) { // need to set keyType and valueType
           keyType = getTType(key);
           type::ValueId valueId = nestedMaskedData.full_ref().value();
@@ -826,8 +822,7 @@ void serializeValue(
       std::set<Value> keys{};
       prot.writeMapBegin(keyType, valueType, size);
       for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
-        const Value& key =
-            *getByValueId(*protocolData.keys(), keyValueId).value();
+        const Value& key = getByValueId(*protocolData.keys(), keyValueId);
         keys.insert(key);
         ensureSameType(key, keyType);
         serializeValue(prot, key);

@@ -1156,7 +1156,7 @@ void testParseObjectWithMapMask(bool testSerialize) {
   EXPECT_EQ(keys.size(), 3); // 10, 20, and "bar"
 
   auto getKeyValueId = [&](Value& key) {
-    auto it = std::find(keys.begin(), keys.end(), detail::makeValueStruct(key));
+    auto it = std::find(keys.begin(), keys.end(), key);
     EXPECT_NE(it, keys.end()); // It should find the value.
     return type::ValueId{apache::thrift::util::i32ToZigzag(it - keys.begin())};
   };
@@ -1271,7 +1271,7 @@ void testSerializeObjectWithMapMaskError() {
     protocolData.protocol() = convertStandardProtocol(Protocol);
     MaskedData& maskedData = protocolData.data_ref().value();
     auto& keys = protocolData.keys().ensure();
-    keys.push_back(makeValueStruct(asValueStruct<type::i32_t>(2)));
+    keys.push_back(asValueStruct<type::i32_t>(2));
     type::ValueId keyValueId =
         type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
     maskedData.fields_ref()

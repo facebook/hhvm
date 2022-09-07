@@ -4519,25 +4519,121 @@ fn merge_constraints(
     }
 }
 
+fn p_method_vis<'a>(node: S<'a>, name_pos: &Pos, env: &mut Env<'a>) -> Result<ast::Visibility> {
+    match p_visibility_last_win(node, env)? {
+        None => {
+            raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
+            Ok(ast::Visibility::Public)
+        }
+        Some(v) => Ok(v),
+    }
+}
+
+fn has_fun_header(
+    m: &MethodishDeclarationChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+) -> bool {
+    matches!(
+        m.function_decl_header.children,
+        FunctionDeclarationHeader(_)
+    )
+}
+
+fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::XhpAttr, ast::Hint>> {
+    let mk_attr_use = |n: S<'a>, env: &mut Env<'a>| {
+        Ok(Either::Right(ast::Hint(
+            p_pos(n, env),
+            Box::new(ast::Hint_::Happly(pos_name(n, env)?, vec![])),
+        )))
+    };
+    match &node.children {
+        XHPClassAttribute(c) => {
+            let ast::Id(p, name) = pos_name(&c.name, env)?;
+            if let TypeConstant(_) = &c.type_.children {
+                if env.is_typechecker() {
+                    raise_parsing_error(
+                        &c.type_,
+                        env,
+                        &syntax_error::xhp_class_attribute_type_constant,
+                    )
+                }
+            }
+            let req = match &c.required.children {
+                XHPRequired(_) => Some(ast::XhpAttrTag::Required),
+                XHPLateinit(_) => Some(ast::XhpAttrTag::LateInit),
+                _ => None,
+            };
+            let pos = if c.initializer.is_missing() {
+                p.clone()
+            } else {
+                Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(Error::Failwith)?
+            };
+            let (hint, like, enum_values, enum_) = match &c.type_.children {
+                XHPEnumType(c1) => {
+                    let p = p_pos(&c.type_, env);
+                    let like = match &c1.like.children {
+                        Missing => None,
+                        _ => Some(p_pos(&c1.like, env)),
+                    };
+                    let vals = could_map(&c1.values, env, p_expr)?;
+                    let mut enum_vals = vec![];
+                    for val in vals.clone() {
+                        match val {
+                            ast::Expr(_, _, Expr_::String(xev)) => {
+                                enum_vals.push(ast::XhpEnumValue::XEVString(xev.to_string()))
+                            }
+                            ast::Expr(_, _, Expr_::Int(xev)) => match xev.parse() {
+                                Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
+                                Err(_) =>
+                                    // Since we have parse checks for
+                                // malformed integer literals already,
+                                // we assume this won't happen and ignore
+                                // the case.
+                                    {}
+                            },
+                            _ => {}
+                        }
+                    }
+                    (None, like, enum_vals, Some((p, vals)))
+                }
+                _ => (Some(p_hint(&c.type_, env)?), None, vec![], None),
+            };
+            let init_expr = map_optional(&c.initializer, env, p_simple_initializer)?;
+            let xhp_attr = ast::XhpAttr(
+                ast::TypeHint((), hint.clone()),
+                ast::ClassVar {
+                    final_: false,
+                    xhp_attr: Some(ast::XhpAttrInfo {
+                        like,
+                        tag: req,
+                        enum_values,
+                    }),
+                    abstract_: false,
+                    readonly: false,
+                    visibility: ast::Visibility::Public,
+                    type_: ast::TypeHint((), hint),
+                    id: ast::Id(p, String::from(":") + &name),
+                    expr: init_expr,
+                    user_attributes: vec![],
+                    doc_comment: None,
+                    is_promoted_variadic: false,
+                    is_static: false,
+                    span: pos,
+                },
+                req,
+                enum_,
+            );
+            Ok(Either::Left(xhp_attr))
+        }
+        XHPSimpleClassAttribute(c) => mk_attr_use(&c.type_, env),
+        Token(_) => mk_attr_use(node, env),
+        _ => missing_syntax("XHP attribute", node, env),
+    }
+}
+
 fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
     use ast::Visibility;
     let doc_comment_opt = extract_docblock(node, env);
-    let has_fun_header =
-        |m: &MethodishDeclarationChildren<'_, PositionedToken<'a>, PositionedValue<'a>>| {
-            matches!(
-                m.function_decl_header.children,
-                FunctionDeclarationHeader(_)
-            )
-        };
-    let p_method_vis = |node: S<'a>, name_pos: &Pos, env: &mut Env<'a>| -> Result<Visibility> {
-        match p_visibility_last_win(node, env)? {
-            None => {
-                raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
-                Ok(Visibility::Public)
-            }
-            Some(v) => Ok(v),
-        }
-    };
+
     match &node.children {
         ConstDeclaration(c) => {
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
@@ -4872,98 +4968,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(class.reqs.push((hint, require_kind)))
         }
         XHPClassAttributeDeclaration(c) => {
-            type Ret = Result<Either<ast::XhpAttr, ast::Hint>>;
-            let p_attr = |node: S<'a>, env: &mut Env<'a>| -> Ret {
-                let mk_attr_use = |n: S<'a>, env: &mut Env<'a>| {
-                    Ok(Either::Right(ast::Hint(
-                        p_pos(n, env),
-                        Box::new(ast::Hint_::Happly(pos_name(n, env)?, vec![])),
-                    )))
-                };
-                match &node.children {
-                    XHPClassAttribute(c) => {
-                        let ast::Id(p, name) = pos_name(&c.name, env)?;
-                        if let TypeConstant(_) = &c.type_.children {
-                            if env.is_typechecker() {
-                                raise_parsing_error(
-                                    &c.type_,
-                                    env,
-                                    &syntax_error::xhp_class_attribute_type_constant,
-                                )
-                            }
-                        }
-                        let req = match &c.required.children {
-                            XHPRequired(_) => Some(ast::XhpAttrTag::Required),
-                            XHPLateinit(_) => Some(ast::XhpAttrTag::LateInit),
-                            _ => None,
-                        };
-                        let pos = if c.initializer.is_missing() {
-                            p.clone()
-                        } else {
-                            Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(Error::Failwith)?
-                        };
-                        let (hint, like, enum_values, enum_) = match &c.type_.children {
-                            XHPEnumType(c1) => {
-                                let p = p_pos(&c.type_, env);
-                                let like = match &c1.like.children {
-                                    Missing => None,
-                                    _ => Some(p_pos(&c1.like, env)),
-                                };
-                                let vals = could_map(&c1.values, env, p_expr)?;
-                                let mut enum_vals = vec![];
-                                for val in vals.clone() {
-                                    match val {
-                                        ast::Expr(_, _, Expr_::String(xev)) => enum_vals
-                                            .push(ast::XhpEnumValue::XEVString(xev.to_string())),
-                                        ast::Expr(_, _, Expr_::Int(xev)) => match xev.parse() {
-                                            Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
-                                            Err(_) =>
-                                                // Since we have parse checks for
-                                            // malformed integer literals already,
-                                            // we assume this won't happen and ignore
-                                            // the case.
-                                                {}
-                                        },
-                                        _ => {}
-                                    }
-                                }
-                                (None, like, enum_vals, Some((p, vals)))
-                            }
-                            _ => (Some(p_hint(&c.type_, env)?), None, vec![], None),
-                        };
-                        let init_expr = map_optional(&c.initializer, env, p_simple_initializer)?;
-                        let xhp_attr = ast::XhpAttr(
-                            ast::TypeHint((), hint.clone()),
-                            ast::ClassVar {
-                                final_: false,
-                                xhp_attr: Some(ast::XhpAttrInfo {
-                                    like,
-                                    tag: req,
-                                    enum_values,
-                                }),
-                                abstract_: false,
-                                readonly: false,
-                                visibility: ast::Visibility::Public,
-                                type_: ast::TypeHint((), hint),
-                                id: ast::Id(p, String::from(":") + &name),
-                                expr: init_expr,
-                                user_attributes: vec![],
-                                doc_comment: None,
-                                is_promoted_variadic: false,
-                                is_static: false,
-                                span: pos,
-                            },
-                            req,
-                            enum_,
-                        );
-                        Ok(Either::Left(xhp_attr))
-                    }
-                    XHPSimpleClassAttribute(c) => mk_attr_use(&c.type_, env),
-                    Token(_) => mk_attr_use(node, env),
-                    _ => missing_syntax("XHP attribute", node, env),
-                }
-            };
-            let attrs = could_map(&c.attributes, env, p_attr)?;
+            let attrs = could_map(&c.attributes, env, p_xhp_class_attr)?;
             for attr in attrs.into_iter() {
                 match attr {
                     Either::Left(attr) => class.xhp_attrs.push(attr),

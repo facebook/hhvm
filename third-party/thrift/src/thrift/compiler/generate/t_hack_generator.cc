@@ -6040,7 +6040,11 @@ void t_hack_generator::generate_php_function_result_helpers(
     const std::string& prefix,
     const std::string& suffix,
     bool is_void) {
-  if (suffix.find("_result") != 0) {
+  bool is_result_struct =
+      (suffix == "_result" || suffix == "_StreamResponse" ||
+       suffix == "_FirstResponse" || suffix == "_SinkPayload" ||
+       suffix == "_FinalResponse");
+  if (!is_result_struct) {
     t_struct result =
         t_struct(program_, prefix + "_" + find_hack_name(tfunction) + suffix);
 
@@ -6049,7 +6053,7 @@ void t_hack_generator::generate_php_function_result_helpers(
     t_result_struct result_struct = t_result_struct(
         program_,
         prefix + "_" + find_hack_name(tfunction) + suffix,
-        type_to_typehint(ttype));
+        ttype != nullptr ? type_to_typehint(ttype) : "void");
     generate_php_struct_definition_result_helpers(
         &result_struct, ttype, ex, is_void);
   }

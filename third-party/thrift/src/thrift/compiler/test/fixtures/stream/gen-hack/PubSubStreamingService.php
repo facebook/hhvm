@@ -1602,8 +1602,10 @@ class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_returnstream_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -1616,13 +1618,13 @@ class PubSubStreamingService_returnstream_StreamResponse implements \IThriftSync
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -1676,7 +1678,7 @@ class PubSubStreamingService_returnstream_StreamResponse implements \IThriftSync
 
 }
 
-class PubSubStreamingService_returnstream_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1802,8 +1804,10 @@ class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_streamthrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -1822,15 +1826,15 @@ class PubSubStreamingService_streamthrows_StreamResponse implements \IThriftSync
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooStreamEx,
   );
 
   const int STRUCTURAL_ID = 7900894693871902695;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooStreamEx $e;
 
-  public function __construct(?int $success = null, ?FooStreamEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooStreamEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -1899,9 +1903,15 @@ class PubSubStreamingService_streamthrows_StreamResponse implements \IThriftSync
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
-class PubSubStreamingService_streamthrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2027,8 +2037,10 @@ class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_servicethrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2041,13 +2053,13 @@ class PubSubStreamingService_servicethrows_StreamResponse implements \IThriftSyn
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2101,7 +2113,7 @@ class PubSubStreamingService_servicethrows_StreamResponse implements \IThriftSyn
 
 }
 
-class PubSubStreamingService_servicethrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2178,6 +2190,12 @@ class PubSubStreamingService_servicethrows_FirstResponse implements \IThriftSync
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
 class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct {
@@ -2254,8 +2272,10 @@ class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_boththrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2274,15 +2294,15 @@ class PubSubStreamingService_boththrows_StreamResponse implements \IThriftSyncSt
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooStreamEx,
   );
 
   const int STRUCTURAL_ID = 7900894693871902695;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooStreamEx $e;
 
-  public function __construct(?int $success = null, ?FooStreamEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooStreamEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -2351,9 +2371,15 @@ class PubSubStreamingService_boththrows_StreamResponse implements \IThriftSyncSt
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
-class PubSubStreamingService_boththrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2430,6 +2456,12 @@ class PubSubStreamingService_boththrows_FirstResponse implements \IThriftSyncStr
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
 class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThriftSyncStruct {
@@ -2506,8 +2538,10 @@ class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThr
 
 }
 
-class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2526,15 +2560,15 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse implem
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooStreamEx,
   );
 
   const int STRUCTURAL_ID = 7900894693871902695;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooStreamEx $e;
 
-  public function __construct(?int $success = null, ?FooStreamEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooStreamEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -2603,10 +2637,18 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse implem
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
-class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2619,13 +2661,13 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse impleme
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2753,8 +2795,10 @@ class PubSubStreamingService_responseandstreamservicethrows_args implements \ITh
 
 }
 
-class PubSubStreamingService_responseandstreamservicethrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamservicethrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2767,13 +2811,13 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse imple
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2827,8 +2871,10 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse imple
 
 }
 
-class PubSubStreamingService_responseandstreamservicethrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2847,15 +2893,15 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse implem
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooEx,
   );
 
   const int STRUCTURAL_ID = 7792945036684644137;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooEx $e;
 
-  public function __construct(?int $success = null, ?FooEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -2924,6 +2970,12 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse implem
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
 class PubSubStreamingService_responseandstreamboththrows_args implements \IThriftSyncStruct {
@@ -3000,8 +3052,10 @@ class PubSubStreamingService_responseandstreamboththrows_args implements \IThrif
 
 }
 
-class PubSubStreamingService_responseandstreamboththrows_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3020,15 +3074,15 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse implemen
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooStreamEx,
   );
 
   const int STRUCTURAL_ID = 7900894693871902695;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooStreamEx $e;
 
-  public function __construct(?int $success = null, ?FooStreamEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooStreamEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -3097,10 +3151,18 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse implemen
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
-class PubSubStreamingService_responseandstreamboththrows_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3119,15 +3181,15 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse implement
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
     ?'e' => ?FooEx,
   );
 
   const int STRUCTURAL_ID = 7792945036684644137;
-  public ?int $success;
+  public ?this::TResult $success;
   public ?FooEx $e;
 
-  public function __construct(?int $success = null, ?FooEx $e = null)[] {
+  public function __construct(?this::TResult $success = null, ?FooEx $e = null)[] {
     $this->success = $success;
     $this->e = $e;
   }
@@ -3196,6 +3258,12 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse implement
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->e !== null) {
+      return $this->e;
+    }
+    return null;
+  }
 }
 
 class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct {
@@ -3292,8 +3360,10 @@ class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct
 
 }
 
-class PubSubStreamingService_returnstreamFast_StreamResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3306,13 +3376,13 @@ class PubSubStreamingService_returnstreamFast_StreamResponse implements \IThrift
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3366,7 +3436,7 @@ class PubSubStreamingService_returnstreamFast_StreamResponse implements \IThrift
 
 }
 
-class PubSubStreamingService_returnstreamFast_FirstResponse implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

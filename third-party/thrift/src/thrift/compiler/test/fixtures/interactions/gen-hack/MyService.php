@@ -1932,8 +1932,10 @@ class MyService_serialize_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_serialize_StreamResponse implements \IThriftSyncStruct {
+class MyService_serialize_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -1946,13 +1948,13 @@ class MyService_serialize_StreamResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2006,8 +2008,10 @@ class MyService_serialize_StreamResponse implements \IThriftSyncStruct {
 
 }
 
-class MyService_serialize_FirstResponse implements \IThriftSyncStruct {
+class MyService_serialize_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2020,13 +2024,13 @@ class MyService_serialize_FirstResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 3865318819874171525;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2343,8 +2347,10 @@ class MyService_MyInteraction_truthify_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_truthify_StreamResponse implements \IThriftSyncStruct {
+class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = bool;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2357,13 +2363,13 @@ class MyService_MyInteraction_truthify_StreamResponse implements \IThriftSyncStr
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?bool,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 8594383818423018844;
-  public ?bool $success;
+  public ?this::TResult $success;
 
-  public function __construct(?bool $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2417,7 +2423,7 @@ class MyService_MyInteraction_truthify_StreamResponse implements \IThriftSyncStr
 
 }
 
-class MyService_MyInteraction_truthify_FirstResponse implements \IThriftSyncStruct {
+class MyService_MyInteraction_truthify_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2521,8 +2527,10 @@ class MyService_MyInteraction_encode_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_encode_FirstResponse implements \IThriftSyncStruct {
+class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = Set<int>;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2540,13 +2548,13 @@ class MyService_MyInteraction_encode_FirstResponse implements \IThriftSyncStruct
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?Set<int>,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5594803499509360192;
-  public ?Set<int> $success;
+  public ?this::TResult $success;
 
-  public function __construct(?Set<int> $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2608,8 +2616,10 @@ class MyService_MyInteraction_encode_FirstResponse implements \IThriftSyncStruct
 
 }
 
-class MyService_MyInteraction_encode_SinkPayload implements \IThriftSyncStruct {
+class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = string;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2622,13 +2632,13 @@ class MyService_MyInteraction_encode_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?string,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1365128170602685579;
-  public ?string $success;
+  public ?this::TResult $success;
 
-  public function __construct(?string $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2682,8 +2692,10 @@ class MyService_MyInteraction_encode_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_encode_FinalResponse implements \IThriftSyncStruct {
+class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = string;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2697,13 +2709,13 @@ class MyService_MyInteraction_encode_FinalResponse implements \IThriftSyncStruct
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?string,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1365128170602685579;
-  public ?string $success;
+  public ?this::TResult $success;
 
-  public function __construct(?string $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2989,8 +3001,10 @@ class MyService_MyInteractionFast_truthify_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteractionFast_truthify_StreamResponse implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = bool;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3003,13 +3017,13 @@ class MyService_MyInteractionFast_truthify_StreamResponse implements \IThriftSyn
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?bool,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 8594383818423018844;
-  public ?bool $success;
+  public ?this::TResult $success;
 
-  public function __construct(?bool $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3063,7 +3077,7 @@ class MyService_MyInteractionFast_truthify_StreamResponse implements \IThriftSyn
 
 }
 
-class MyService_MyInteractionFast_truthify_FirstResponse implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_truthify_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3167,8 +3181,10 @@ class MyService_MyInteractionFast_encode_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteractionFast_encode_FirstResponse implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = Set<int>;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3186,13 +3202,13 @@ class MyService_MyInteractionFast_encode_FirstResponse implements \IThriftSyncSt
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?Set<int>,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5594803499509360192;
-  public ?Set<int> $success;
+  public ?this::TResult $success;
 
-  public function __construct(?Set<int> $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3254,8 +3270,10 @@ class MyService_MyInteractionFast_encode_FirstResponse implements \IThriftSyncSt
 
 }
 
-class MyService_MyInteractionFast_encode_SinkPayload implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = string;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3268,13 +3286,13 @@ class MyService_MyInteractionFast_encode_SinkPayload implements \IThriftSyncStru
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?string,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1365128170602685579;
-  public ?string $success;
+  public ?this::TResult $success;
 
-  public function __construct(?string $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3328,8 +3346,10 @@ class MyService_MyInteractionFast_encode_SinkPayload implements \IThriftSyncStru
 
 }
 
-class MyService_MyInteractionFast_encode_FinalResponse implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = string;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3343,13 +3363,13 @@ class MyService_MyInteractionFast_encode_FinalResponse implements \IThriftSyncSt
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?string,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1365128170602685579;
-  public ?string $success;
+  public ?this::TResult $success;
 
-  public function __construct(?string $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 

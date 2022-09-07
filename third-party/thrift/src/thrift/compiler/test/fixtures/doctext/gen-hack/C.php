@@ -794,8 +794,10 @@ class C_numbers_args implements \IThriftSyncStruct {
 
 }
 
-class C_numbers_StreamResponse implements \IThriftSyncStruct {
+class C_numbers_StreamResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = int;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -808,13 +810,13 @@ class C_numbers_StreamResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?int,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1815418233987567820;
-  public ?int $success;
+  public ?this::TResult $success;
 
-  public function __construct(?int $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -877,7 +879,7 @@ class C_numbers_StreamResponse implements \IThriftSyncStruct {
 
 }
 
-class C_numbers_FirstResponse implements \IThriftSyncStruct {
+class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

@@ -1745,7 +1745,7 @@ class SinkService_method_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_method_FirstResponse implements \IThriftSyncStruct {
+class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1797,8 +1797,10 @@ class SinkService_method_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_method_SinkPayload implements \IThriftSyncStruct {
+class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -1812,13 +1814,13 @@ class SinkService_method_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5047864711357047518;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
 
-  public function __construct(?SinkPayload $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -1876,8 +1878,10 @@ class SinkService_method_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class SinkService_method_FinalResponse implements \IThriftSyncStruct {
+class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -1891,13 +1895,13 @@ class SinkService_method_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 7640464975912492398;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?FinalResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2007,8 +2011,10 @@ class SinkService_methodAndReponse_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodAndReponse_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = InitialResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2022,13 +2028,13 @@ class SinkService_methodAndReponse_FirstResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?InitialResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 1156060868779247352;
-  public ?InitialResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?InitialResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2086,8 +2092,10 @@ class SinkService_methodAndReponse_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodAndReponse_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2101,13 +2109,13 @@ class SinkService_methodAndReponse_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5047864711357047518;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
 
-  public function __construct(?SinkPayload $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2165,8 +2173,10 @@ class SinkService_methodAndReponse_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodAndReponse_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2180,13 +2190,13 @@ class SinkService_methodAndReponse_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 7640464975912492398;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?FinalResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2296,7 +2306,7 @@ class SinkService_methodThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodThrow_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2373,10 +2383,18 @@ class SinkService_methodThrow_FirstResponse implements \IThriftSyncStruct {
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
-class SinkService_methodThrow_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2390,13 +2408,13 @@ class SinkService_methodThrow_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5047864711357047518;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
 
-  public function __construct(?SinkPayload $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2454,8 +2472,10 @@ class SinkService_methodThrow_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodThrow_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2469,13 +2489,13 @@ class SinkService_methodThrow_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 7640464975912492398;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?FinalResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2585,7 +2605,7 @@ class SinkService_methodSinkThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodSinkThrow_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2637,8 +2657,10 @@ class SinkService_methodSinkThrow_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodSinkThrow_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2658,15 +2680,15 @@ class SinkService_methodSinkThrow_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
     ?'ex' => ?SinkException1,
   );
 
   const int STRUCTURAL_ID = 8919728181176611439;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
   public ?SinkException1 $ex;
 
-  public function __construct(?SinkPayload $success = null, ?SinkException1 $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?SinkException1 $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -2739,10 +2761,18 @@ class SinkService_methodSinkThrow_SinkPayload implements \IThriftSyncStruct {
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
-class SinkService_methodSinkThrow_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2756,13 +2786,13 @@ class SinkService_methodSinkThrow_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 7640464975912492398;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?FinalResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -2872,7 +2902,7 @@ class SinkService_methodFinalThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFinalThrow_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2924,8 +2954,10 @@ class SinkService_methodFinalThrow_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFinalThrow_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -2939,13 +2971,13 @@ class SinkService_methodFinalThrow_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5047864711357047518;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
 
-  public function __construct(?SinkPayload $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3003,8 +3035,10 @@ class SinkService_methodFinalThrow_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFinalThrow_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3024,15 +3058,15 @@ class SinkService_methodFinalThrow_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
     ?'ex' => ?SinkException2,
   );
 
   const int STRUCTURAL_ID = 1352924921392902231;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
   public ?SinkException2 $ex;
 
-  public function __construct(?FinalResponse $success = null, ?SinkException2 $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?SinkException2 $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -3105,6 +3139,12 @@ class SinkService_methodFinalThrow_FinalResponse implements \IThriftSyncStruct {
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
 class SinkService_methodBothThrow_args implements \IThriftSyncStruct {
@@ -3159,7 +3199,7 @@ class SinkService_methodBothThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodBothThrow_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3211,8 +3251,10 @@ class SinkService_methodBothThrow_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodBothThrow_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3232,15 +3274,15 @@ class SinkService_methodBothThrow_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
     ?'ex' => ?SinkException1,
   );
 
   const int STRUCTURAL_ID = 8919728181176611439;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
   public ?SinkException1 $ex;
 
-  public function __construct(?SinkPayload $success = null, ?SinkException1 $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?SinkException1 $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -3313,10 +3355,18 @@ class SinkService_methodBothThrow_SinkPayload implements \IThriftSyncStruct {
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
-class SinkService_methodBothThrow_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3336,15 +3386,15 @@ class SinkService_methodBothThrow_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
     ?'ex' => ?SinkException2,
   );
 
   const int STRUCTURAL_ID = 1352924921392902231;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
   public ?SinkException2 $ex;
 
-  public function __construct(?FinalResponse $success = null, ?SinkException2 $ex = null)[] {
+  public function __construct(?this::TResult $success = null, ?SinkException2 $ex = null)[] {
     $this->success = $success;
     $this->ex = $ex;
   }
@@ -3417,6 +3467,12 @@ class SinkService_methodBothThrow_FinalResponse implements \IThriftSyncStruct {
     return \TCompactSerializer::serialize($this);
   }
 
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
 }
 
 class SinkService_methodFast_args implements \IThriftSyncStruct {
@@ -3471,7 +3527,7 @@ class SinkService_methodFast_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFast_FirstResponse implements \IThriftSyncStruct {
+class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResult {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3523,8 +3579,10 @@ class SinkService_methodFast_FirstResponse implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFast_SinkPayload implements \IThriftSyncStruct {
+class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = SinkPayload;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3538,13 +3596,13 @@ class SinkService_methodFast_SinkPayload implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?SinkPayload,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 5047864711357047518;
-  public ?SinkPayload $success;
+  public ?this::TResult $success;
 
-  public function __construct(?SinkPayload $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 
@@ -3602,8 +3660,10 @@ class SinkService_methodFast_SinkPayload implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFast_FinalResponse implements \IThriftSyncStruct {
+class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult {
   use \ThriftSerializationTrait;
+
+  const type TResult = FinalResponse;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     0 => shape(
@@ -3617,13 +3677,13 @@ class SinkService_methodFast_FinalResponse implements \IThriftSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?FinalResponse,
+    ?'success' => ?this::TResult,
   );
 
   const int STRUCTURAL_ID = 7640464975912492398;
-  public ?FinalResponse $success;
+  public ?this::TResult $success;
 
-  public function __construct(?FinalResponse $success = null)[] {
+  public function __construct(?this::TResult $success = null)[] {
     $this->success = $success;
   }
 

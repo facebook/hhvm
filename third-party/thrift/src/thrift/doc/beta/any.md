@@ -30,8 +30,9 @@ union Mask {
 const Mask allMask = {"excludes": {}}; // Masks all fields/whole field.
 const Mask noneMask = {"includes": {}}; // Masks no fields.`
 ```
+[Debug protocol](../spec/protocol/data/#debug-protocol) can be used to convert Mask to a human readable string.
 
-## APIs
+### APIs
 
 Currently it provides the following APIs (APIs are in [`thrift/lib/cpp2/FieldMask.h`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/FieldMask.h)). These APIs are available for both schemaful (ThriftStruct) and schemaless (protocol::Object) Thrift structs.
 [Package](../spec/definition/program/#packages) name must be defined in thrift file to use field mask APIs. It will give a compile-error without a package name.
@@ -54,7 +55,55 @@ void copy(Mask, ThriftStruct src, ThriftStruct dst);
 void clear(Mask, protocol::Object);
 void copy(Mask, protocol::Object src, protocol::Object dst);
 ```
-Also, [debug protocol](../spec/protocol/data/#debug-protocol) can be used to convert Mask to a human readable string.
+
+### MaskBuilder
+
+MaskBuilder is a wrapper for Mask that works as a strongly typed mask. It is tied to a specific thrift struct type, and it provides APIs to add fields to the Mask with field names and field identifiers like idents.
+
+```
+struct MaskBuilder<Struct> {
+    // All methods for constructing Mask return itself to chain 
+    MaskBuilder& reset_to_none();
+    MaskBuilder& reset_to_all();
+    MaskBuilder& invert();
+    Mask& toThrift();
+    
+    // includes and excludes with field names and all ids
+    MaskBuilder& includes(list<string> fieldNames, const Mask& mask = allMask());
+    MaskBuilder& excludes(list<string> fieldNames, const Mask& mask = allMask());
+    // Id can be Ordinal, FieldId, Ident, TypeTag, FieldTag
+    MaskBuilder& includes<Id...>(const Mask& mask = allMask());
+    MaskBuilder& excludes<Id...>(const Mask& mask = allMask());
+    
+    // reset_and_includes calls reset_to_none() and includes()
+    // reset_and_excludes calls reset_to_all() and excludes()
+    
+    // Mask APIs
+    void ensure(Struct& obj) const;
+    void clear(Struct& obj) const;
+    void copy(const Struct& src, Struct& dst) const;
+}
+```
+
+It also provides `MaskAdapter`, which adapts `Mask` to be `MaskBuilder` in a thrift struct.
+
+### Logical operators
+
+These are logical operators to construct a new mask.
+
+```
+Mask operator&(const Mask&, const Mask&); // intersect
+Mask operator|(const Mask&, const Mask&); // union
+Mask operator-(const Mask&, const Mask&); // subtract
+```
+
+### Compare
+
+Constructs a FieldMask object that includes the fields that are different in the given two Thrift structs.
+
+```
+Mask compare(const Struct& original, const Struct& modified);
+```
 
 ## Protocol Object and Value
 

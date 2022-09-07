@@ -141,7 +141,9 @@ module ParentClassElt = struct
     | x -> x
 end
 
-module ParentClassEltSet = Caml.Set.Make (ParentClassElt)
+module ParentClassEltSet =
+  Reordered_argument_collections.Reordered_argument_set
+    (Caml.Set.Make (ParentClassElt))
 
 module ParentClassConst = struct
   type t = {
@@ -1200,7 +1202,7 @@ let check_members_from_all_parents
           member_kind
           member_name
       in
-      ParentClassEltSet.fold check class_elts env
+      ParentClassEltSet.fold ~f:check class_elts ~init:env
     in
     MemberNameMap.fold check member_map env
   in
@@ -1724,19 +1726,19 @@ let check_trait_diamonds
      * Set.find_first_opt only works for 'monotonic' `f` which is
      * not the case for the equality test, and Set.find_opt
      * uses the polymorphic equaliy: we only want to test for origin.
-     * Set doesn't provide a `find with condition` function so we
-     * do it by filter + choose.
+     * Set doesn't provide a `find with condition` so we do an iteration
+     * and bail at the first occurrence we spot
      *
      * This works in a deterministic way because the set we are working
      * with has the invariant that each element have a unique origin.
      *)
-    let candidates =
-      ParentClassEltSet.filter
-        (fun { ParentClassElt.class_elt = prev_class_elt; _ } ->
-          String.equal class_elt.ce_origin prev_class_elt.ce_origin)
+    let candidate =
+      ParentClassEltSet.find_one_opt
         elts
+        ~f:(fun { ParentClassElt.class_elt = prev_class_elt; _ } ->
+          String.equal class_elt.ce_origin prev_class_elt.ce_origin)
     in
-    match ParentClassEltSet.choose_opt candidates with
+    match candidate with
     | None -> ((default_parent_class_elt (), elts), None)
     | Some
         ({
@@ -1783,7 +1785,7 @@ let check_trait_diamonds
                :: err)
         in
         let elts =
-          ParentClassEltSet.remove (default_parent_class_elt ()) elts
+          ParentClassEltSet.remove elts (default_parent_class_elt ())
         in
         ((parent_class_elt, elts), None)
       else if MemberKind.is_property member_kind then
@@ -2192,7 +2194,7 @@ let merge_member_maps
                                (SMap.find_opt parent !errors_per_diamond
                                |> Option.value ~default:SMap.empty))
                             !errors_per_diamond);
-                    Some (ParentClassEltSet.add elt elts))
+                    Some (ParentClassEltSet.add elts elt))
                 members
                 prev_members
             in

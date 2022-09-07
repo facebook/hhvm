@@ -13,6 +13,7 @@ use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
+use pos::ModuleName;
 use pos::Positioned;
 use pos::PropName;
 use pos::TypeName;
@@ -22,6 +23,7 @@ use shallow_decl_provider::ShallowDeclProvider;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
 use ty::decl::FunDecl;
+use ty::decl::ModuleDecl;
 use ty::decl::ShallowClass;
 use ty::decl::Ty;
 use ty::decl_error::DeclError;
@@ -74,6 +76,14 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         name: ConstName,
     ) -> Result<Option<Arc<ConstDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_const(name)?)
+    }
+
+    fn get_module(
+        &self,
+        _dependent: DeclName,
+        name: ModuleName,
+    ) -> Result<Option<Arc<ModuleDecl<R>>>> {
+        Ok(self.shallow_decl_provider.get_module(name)?)
     }
 
     fn get_type(&self, _dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {

@@ -158,10 +158,10 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_get_module<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        _name: pos::ModuleName,
+        name: pos::ModuleName,
     ) -> Option<Arc<decl::ModuleDecl<BReason>>> {
-        let _backend = unsafe { get_backend(backend) };
-        todo!()
+        let backend = unsafe { get_backend(backend) };
+        backend.folded_decl_provider().get_module(name.into(), name).unwrap()
     }
 
     fn hh_rust_provider_backend_get_prop<'a>(

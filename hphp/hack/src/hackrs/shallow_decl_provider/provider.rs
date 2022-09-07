@@ -12,12 +12,14 @@ use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
+use pos::ModuleName;
 use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
 use ty::decl::shallow::Decl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
+use ty::decl::ModuleDecl;
 use ty::decl::ShallowClass;
 use ty::decl::Ty;
 use ty::decl::TypedefDecl;
@@ -122,6 +124,17 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let Some(path) = self.naming_provider.get_const_path(name)? {
             self.parse_and_cache_decls_in(path)?;
             return Ok(self.store.get_const(name)?);
+        }
+        Ok(None)
+    }
+
+    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>> {
+        if let res @ Some(..) = self.store.get_module(name)? {
+            return Ok(res);
+        }
+        if let Some(path) = self.naming_provider.get_module_path(name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.store.get_module(name)?);
         }
         Ok(None)
     }
@@ -266,6 +279,10 @@ impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
 
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
         Ok(self.store.get_const(name)?)
+    }
+
+    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>> {
+        Ok(self.store.get_module(name)?)
     }
 
     fn get_type_kind(&self, name: TypeName) -> Result<Option<KindOfType>> {

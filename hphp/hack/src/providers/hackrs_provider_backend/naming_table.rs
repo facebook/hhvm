@@ -193,6 +193,9 @@ impl NamingProvider for NamingTable {
     fn get_const_path(&self, name: pos::ConstName) -> Result<Option<RelativePath>> {
         Ok(self.get_const_pos(name)?.map(|pos| pos.path().into()))
     }
+    fn get_module_path(&self, name: pos::ModuleName) -> Result<Option<RelativePath>> {
+        Ok(self.get_module_pos(name)?.map(|pos| pos.path().into()))
+    }
 }
 
 impl std::fmt::Debug for NamingTable {

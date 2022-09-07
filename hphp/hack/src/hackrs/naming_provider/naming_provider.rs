@@ -14,6 +14,7 @@ use oxidized::naming_types::KindOfType;
 use parking_lot::Mutex;
 use pos::ConstName;
 use pos::FunName;
+use pos::ModuleName;
 use pos::RelativePath;
 use pos::TypeName;
 
@@ -27,6 +28,7 @@ pub trait NamingProvider: Debug + Send + Sync {
     }
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>>;
     fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>>;
+    fn get_module_path(&self, name: ModuleName) -> Result<Option<RelativePath>>;
 }
 
 /// A naming table in a SQLite database (with the same database schema as
@@ -70,6 +72,13 @@ impl NamingProvider for SqliteNamingTable {
             .names
             .lock()
             .get_path_by_symbol_hash(ToplevelSymbolHash::from_const(name.as_str()))?;
+        Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
+    }
+    fn get_module_path(&self, name: ModuleName) -> Result<Option<RelativePath>> {
+        let path_opt = self
+            .names
+            .lock()
+            .get_path_by_symbol_hash(ToplevelSymbolHash::from_module(name.as_str()))?;
         Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
     }
 }

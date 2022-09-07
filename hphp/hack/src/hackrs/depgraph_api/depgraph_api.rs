@@ -9,6 +9,7 @@ use deps_rust::Dep;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
+use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
 use typing_deps_hash::DepType;
@@ -26,6 +27,7 @@ pub enum DeclName {
     Fun(FunName),
     Const(ConstName),
     Type(TypeName),
+    Module(ModuleName),
 }
 
 impl DeclName {
@@ -34,6 +36,7 @@ impl DeclName {
             DeclName::Fun(n) => typing_deps_hash::hash1(DepType::Fun, n.as_str().as_bytes()),
             DeclName::Const(n) => typing_deps_hash::hash1(DepType::GConst, n.as_str().as_bytes()),
             DeclName::Type(n) => typing_deps_hash::hash1(DepType::Type, n.as_str().as_bytes()),
+            DeclName::Module(n) => typing_deps_hash::hash1(DepType::Module, n.as_str().as_bytes()),
         })
     }
 }
@@ -47,6 +50,12 @@ impl From<FunName> for DeclName {
 impl From<ConstName> for DeclName {
     fn from(name: ConstName) -> Self {
         Self::Const(name)
+    }
+}
+
+impl From<ModuleName> for DeclName {
+    fn from(name: ModuleName) -> Self {
+        Self::Module(name)
     }
 }
 

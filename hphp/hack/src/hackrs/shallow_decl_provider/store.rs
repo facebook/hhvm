@@ -136,6 +136,10 @@ impl<R: Reason> ShallowDeclStore<R> {
         self.consts.get(name)
     }
 
+    pub fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>> {
+        self.modules.get(name)
+    }
+
     pub fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
         self.classes.get(name)
     }

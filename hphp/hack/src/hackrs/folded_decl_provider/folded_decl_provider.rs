@@ -11,11 +11,13 @@ use itertools::Itertools;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
+use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
 use ty::decl::FunDecl;
+use ty::decl::ModuleDecl;
 use ty::decl::Ty;
 use ty::decl::TypedefDecl;
 use ty::reason::Reason;
@@ -97,6 +99,13 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
 
     /// Fetch the declaration of the global constant with the given name.
     fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
+
+    /// Fetch the declaration of the module with the given name.
+    fn get_module(
+        &self,
+        dependent: DeclName,
+        name: ModuleName,
+    ) -> Result<Option<Arc<ModuleDecl<R>>>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
     fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>>;

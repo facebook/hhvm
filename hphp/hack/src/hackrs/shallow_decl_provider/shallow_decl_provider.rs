@@ -10,11 +10,13 @@ use oxidized::naming_types::KindOfType;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
+use pos::ModuleName;
 use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
 use ty::decl::shallow::ConstDecl;
 use ty::decl::shallow::FunDecl;
+use ty::decl::shallow::ModuleDecl;
 use ty::decl::shallow::TypedefDecl;
 use ty::decl::ShallowClass;
 use ty::decl::Ty;
@@ -73,6 +75,9 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
 
     /// Fetch the declaration of the global constant with the given name.
     fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
+
+    /// Fetch the declaration of the module with the given name.
+    fn get_module(&self, name: ModuleName) -> Result<Option<Arc<ModuleDecl<R>>>>;
 
     /// Indicate whether the type with the given name is a typedef or class.
     fn get_type_kind(&self, name: TypeName) -> Result<Option<KindOfType>>;

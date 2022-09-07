@@ -14,7 +14,7 @@ pub(crate) struct Opts {
     pub files: FileOpts,
 }
 
-pub(crate) fn desugar_expr_trees(hackc_opts: &crate::Opts, mut opts: Opts) -> Result<()> {
+pub(crate) fn desugar_expr_trees(hackc_opts: &crate::Opts, opts: Opts) -> Result<()> {
     for path in opts.files.gather_input_files()? {
         compile::dump_expr_tree::desugar_and_print(
             RelativePath::make(Prefix::Dummy, path),

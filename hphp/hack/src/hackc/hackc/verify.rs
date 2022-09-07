@@ -9,12 +9,10 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
-use std::time::Instant;
 
 use anyhow::ensure;
 use clap::Parser;
 use itertools::Itertools;
-use log::info;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::Prefix;
@@ -67,11 +65,10 @@ thread_local! {
     pub static PANIC_MSG: RefCell<Option<String>> = RefCell::new(None);
 }
 
-#[derive(Clone, Parser, Debug)]
+#[derive(Parser, Debug)]
 struct CommonOpts {
-    /// The input Hack files or directories to process.
-    #[clap(name = "PATH")]
-    paths: Vec<PathBuf>,
+    #[clap(flatten)]
+    files: crate::FileOpts,
 
     /// Print full error messages
     #[clap(short = 'l')]
@@ -94,7 +91,7 @@ struct CommonOpts {
     show_all: bool,
 }
 
-#[derive(Clone, Parser, Debug)]
+#[derive(Parser, Debug)]
 struct AssembleOpts {
     #[clap(flatten)]
     common: CommonOpts,
@@ -153,7 +150,7 @@ impl AssembleOpts {
     }
 }
 
-#[derive(Clone, Parser, Debug)]
+#[derive(Parser, Debug)]
 struct IrOpts {
     #[clap(flatten)]
     common: CommonOpts,
@@ -199,7 +196,7 @@ impl IrOpts {
     }
 }
 
-#[derive(Clone, Parser, Debug)]
+#[derive(Parser, Debug)]
 enum Mode {
     /// Compile files and save the resulting HHAS and interior hhbc::Unit. Assemble the HHAS files and save the resulting Unit. Compare Unit.
     Assemble(AssembleOpts),
@@ -227,7 +224,7 @@ impl Mode {
     }
 }
 
-#[derive(Parser, Clone, Debug)]
+#[derive(Parser, Debug)]
 pub struct Opts {
     #[clap(subcommand)]
     mode: Mode,
@@ -497,21 +494,12 @@ fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
 }
 
 pub fn run(mut opts: Opts) -> anyhow::Result<()> {
-    eprint!("Collecting files...");
-    info!("Collecting files");
-    let files = {
-        let start = Instant::now();
-        let files = crate::util::collect_files(
-            &opts.mode.common().paths,
-            None,
-            opts.mode.common().num_threads,
-        )?;
-        let duration = start.elapsed();
-        info!("{} files found in {}", files.len(), duration.display());
-        files
-    };
-    eprint!("\r");
-
+    let num_threads = opts.mode.common().num_threads;
+    let files = opts
+        .mode
+        .common_mut()
+        .files
+        .collect_input_files(num_threads)?;
     if files.len() == 1 {
         opts.mode.common_mut().panic_fuse = true;
     }

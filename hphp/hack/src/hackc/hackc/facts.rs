@@ -29,7 +29,7 @@ pub(crate) struct Opts {
 /// the result is just the single file's Facts.
 pub(crate) fn extract_facts(
     hackc_opts: &crate::Opts,
-    mut opts: Opts,
+    opts: Opts,
     w: &mut impl Write,
 ) -> Result<()> {
     // If --input-file-list, output a json wrapper object mapping

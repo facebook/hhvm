@@ -139,7 +139,7 @@ fn parse(path: PathBuf, w: &mut impl Write, pretty: bool) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn run(mut opts: Opts) -> Result<()> {
+pub(crate) fn run(opts: Opts) -> Result<()> {
     let filenames = opts.files.gather_input_files()?;
     let mut w = std::io::stdout();
     for path in filenames {

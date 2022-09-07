@@ -16,6 +16,7 @@ mod verify;
 use std::io::BufRead;
 use std::path::Path;
 use std::path::PathBuf;
+use std::time::Instant;
 
 use ::compile::EnvFlags;
 use ::compile::HhbcFlags;
@@ -25,9 +26,12 @@ use anyhow::Result;
 use byte_unit::Byte;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
+use log::info;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
+
+use crate::profile::DurationEx;
 
 /// Hack Compiler
 #[derive(Parser, Debug, Default)]
@@ -90,6 +94,10 @@ struct FileOpts {
     /// Read a list of files (one-per-line) from this file
     #[clap(long)]
     input_file_list: Option<PathBuf>,
+
+    /// change to directory DIR
+    #[clap(long, short = 'C')]
+    directory: Option<PathBuf>,
 }
 
 #[derive(Parser, Debug)]
@@ -142,15 +150,38 @@ struct FlagCommands {
 }
 
 impl FileOpts {
-    pub fn gather_input_files(&mut self) -> Result<Vec<PathBuf>> {
+    pub fn gather_input_files(&self) -> Result<Vec<PathBuf>> {
         use std::io::BufReader;
         let mut files: Vec<PathBuf> = Default::default();
-        if let Some(list_path) = self.input_file_list.take() {
+        if let Some(list_path) = self.input_file_list.as_ref() {
             for line in BufReader::new(std::fs::File::open(list_path)?).lines() {
-                files.push(Path::new(&line?).to_path_buf());
+                let line = line?;
+                let name = if let Some(directory) = self.directory.as_ref() {
+                    directory.join(Path::new(&line))
+                } else {
+                    PathBuf::from(line)
+                };
+                files.push(name);
             }
         }
-        files.append(&mut self.filenames);
+        for name in &self.filenames {
+            let name = if let Some(directory) = self.directory.as_ref() {
+                directory.join(name)
+            } else {
+                name.to_path_buf()
+            };
+            files.push(name);
+        }
+        Ok(files)
+    }
+
+    pub fn collect_input_files(&self, num_threads: usize) -> Result<Vec<PathBuf>> {
+        info!("Collecting files");
+        let gather_t = Instant::now();
+        let files = self.gather_input_files()?;
+        let files = crate::util::collect_files(&files, None, num_threads)?;
+        let gather_t = gather_t.elapsed();
+        info!("{} files found in {}", files.len(), gather_t.display());
         Ok(files)
     }
 

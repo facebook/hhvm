@@ -58,7 +58,7 @@ pub struct Opts {
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
-pub fn run(mut opts: Opts) -> Result<()> {
+pub fn run(opts: Opts) -> Result<()> {
     let writer: SyncWrite = match &opts.output_file {
         None => Mutex::new(Box::new(stdout())),
         Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),

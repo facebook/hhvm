@@ -19,7 +19,7 @@ pub(crate) struct Opts {
 }
 
 /// Write a serialized object to stdout containing Decls for each input file.
-pub(crate) fn binary_decls(hackc_opts: crate::Opts, mut opts: Opts) -> Result<()> {
+pub(crate) fn binary_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
     let filenames = opts.files.gather_input_files()?;
     let dp_opts = hackc_opts.decl_opts();
     let mut parsed_files: IndexMap<PathBuf, ParsedFile<'_>> = Default::default();
@@ -39,7 +39,7 @@ pub(crate) fn binary_decls(hackc_opts: crate::Opts, mut opts: Opts) -> Result<()
     Ok(())
 }
 
-pub(crate) fn json_decls(hackc_opts: crate::Opts, mut opts: Opts) -> Result<()> {
+pub(crate) fn json_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
     let filenames = opts.files.gather_input_files()?;
     let dp_opts = hackc_opts.decl_opts();
     for path in filenames {

@@ -20,7 +20,6 @@ use std::time::Instant;
 use anyhow::bail;
 use anyhow::Result;
 use clap::Parser;
-use log::info;
 use multifile_rust as multifile;
 use rayon::prelude::*;
 
@@ -33,7 +32,7 @@ use crate::profile::Timing;
 
 type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
-#[derive(Parser, Clone, Debug)]
+#[derive(Parser, Debug)]
 pub struct Opts {
     #[allow(dead_code)]
     #[clap(flatten)]
@@ -43,9 +42,8 @@ pub struct Opts {
     #[clap(long, default_value = "0")]
     num_threads: usize,
 
-    /// The input Hack files or directories to process.
-    #[clap(name = "PATH")]
-    paths: Vec<PathBuf>,
+    #[clap(flatten)]
+    files: crate::FileOpts,
 }
 
 fn process_one_file(
@@ -231,16 +229,7 @@ fn crc_files(
 
 pub fn run(opts: Opts) -> Result<()> {
     let writer: SyncWrite = Mutex::new(Box::new(std::io::stdout()));
-
-    info!("Collecting files");
-    let files = {
-        let start = Instant::now();
-        let files = crate::util::collect_files(&opts.paths, None, opts.num_threads)?;
-        let duration = start.elapsed();
-        info!("{} files found in {}", files.len(), duration.display());
-        files
-    };
-
+    let files = opts.files.collect_input_files(opts.num_threads)?;
     crc_files(&writer, &files, opts.num_threads, &opts.single_file_opts)?;
 
     Ok(())

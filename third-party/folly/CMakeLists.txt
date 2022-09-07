@@ -133,7 +133,7 @@ endif()
 if(UNIX AND NOT APPLE)
   # symbolizer implementation details
   find_package(Libiberty)
-  find_package(LibUnwind)
+  find_package(LibUnwind NO_MODULE)
   target_link_libraries(folly INTERFACE ${LIBIBERTY_LIBRARIES} ${LIBELF_LIBRARIES} ${LIBDWARF_LIBRARIES} ${LIBUNWIND_LIBRARIES})
   target_include_directories(folly INTERFACE ${LIBIBERTY_INCLUDE_DIRS} ${LIBUNWIND_INCLUDE_DIRS})
 endif()

@@ -9,28 +9,12 @@ use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
-use nohash_hasher::IntMap;
 use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::RelativePath;
 use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;
-
-/// This is what each row looks like in NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW,
-/// i.e. the reverse naming table. When this struct is used for reading from the
-/// database, we generally join NAMING_FILE_INFO to populate 'path' since there's very
-/// little you can do with a row without turning file_info_id into a pathname;
-/// when used for writing, we generally ignore 'path'.
-#[derive(Clone, Debug)]
-pub struct SymbolRow {
-    pub hash: ToplevelSymbolHash,
-    pub canon_hash: ToplevelCanonSymbolHash,
-    pub decl_hash: DeclHash,
-    pub kind: NameType,
-    pub file_info_id: crate::datatypes::FileInfoId,
-    pub path: RelativePath,
-}
 
 pub struct Names {
     conn: rusqlite::Connection,
@@ -140,7 +124,7 @@ impl Names {
         symbol_hash: ToplevelSymbolHash,
         path: &RelativePath,
     ) -> anyhow::Result<()> {
-        let file_info_id: crate::datatypes::FileInfoId = self
+        let file_info_id: crate::FileInfoId = self
             .conn
             .prepare(
                 "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
@@ -250,7 +234,7 @@ impl Names {
     fn insert_file_summary(
         &self,
         path: &RelativePath,
-        file_info_id: i64,
+        file_info_id: crate::FileInfoId,
         dep_type: typing_deps_hash::DepType,
         items: impl Iterator<Item = crate::DeclSummary>,
     ) -> anyhow::Result<()> {
@@ -283,7 +267,7 @@ impl Names {
             let hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
             item.symbol.make_ascii_lowercase();
             let canon_hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
-            let kind = item.name_type as i64;
+            let kind = item.name_type;
 
             if let Some(symbol) = self.get_row(ToplevelSymbolHash::from_u64(hash as u64))? {
                 // check if new entry appears first alphabetically
@@ -336,10 +320,10 @@ impl Names {
 
     /// Gets all overflow rows in the reverse naming table for a given symbol hash,
     /// and joins with the forward naming table to resolve filenames.
-    fn get_overflow_rows_unordered(
+    pub fn get_overflow_rows_unordered(
         &self,
         symbol_hash: ToplevelSymbolHash,
-    ) -> anyhow::Result<Vec<SymbolRow>> {
+    ) -> anyhow::Result<Vec<crate::SymbolRow>> {
         let select_statement = "
         SELECT
             NAMING_SYMBOLS_OVERFLOW.HASH,
@@ -366,7 +350,7 @@ impl Names {
             let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
             let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
             let path = RelativePath::make(prefix.value, suffix.value);
-            result.push(SymbolRow {
+            result.push(crate::SymbolRow {
                 hash: row.get(0)?,
                 canon_hash: row.get(1)?,
                 decl_hash: row.get(2)?,
@@ -380,7 +364,10 @@ impl Names {
 
     /// Gets the winning entry for a symbol from the reverse naming table,
     /// and joins with forward-naming-table to get filename.
-    fn get_row(&self, symbol_hash: ToplevelSymbolHash) -> anyhow::Result<Option<SymbolRow>> {
+    pub fn get_row(
+        &self,
+        symbol_hash: ToplevelSymbolHash,
+    ) -> anyhow::Result<Option<crate::SymbolRow>> {
         let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
@@ -406,7 +393,7 @@ impl Names {
                 let prefix: crate::datatypes::SqlitePrefix = row.get(5)?;
                 let suffix: crate::datatypes::SqlitePathBuf = row.get(6)?;
                 let path = RelativePath::make(prefix.value, suffix.value);
-                Ok(SymbolRow {
+                Ok(crate::SymbolRow {
                     hash: row.get(0)?,
                     canon_hash: row.get(1)?,
                     decl_hash: row.get(2)?,
@@ -676,11 +663,12 @@ impl Names {
     pub fn get_symbol_and_decl_hashes(
         &self,
         path: &RelativePath,
-    ) -> anyhow::Result<IntMap<ToplevelSymbolHash, DeclHash>> {
+    ) -> anyhow::Result<Vec<(ToplevelSymbolHash, DeclHash, crate::FileInfoId)>> {
         let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH
+            NAMING_SYMBOLS.DECL_HASH,
+            NAMING_SYMBOLS.FILE_INFO_ID
         FROM
             NAMING_SYMBOLS
         LEFT JOIN
@@ -693,12 +681,11 @@ impl Names {
         ";
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut symbol_and_decl_hashes = IntMap::default();
+        let mut result = vec![];
         while let Some(row) = rows.next()? {
-            symbol_and_decl_hashes.insert(row.get(0)?, row.get(1)?);
+            result.push((row.get(0)?, row.get(1)?, row.get(2)?));
         }
-
-        Ok(symbol_and_decl_hashes)
+        Ok(result)
     }
 
     /// This inserts an item into the forward naming table.
@@ -706,7 +693,7 @@ impl Names {
         &self,
         path_rel: &RelativePath,
         file_summary: &crate::FileSummary,
-    ) -> anyhow::Result<i64> {
+    ) -> anyhow::Result<crate::FileInfoId> {
         let prefix_type = path_rel.prefix() as u8; // TODO(ljw): shouldn't this use prefix_to_i64?
         let suffix = path_rel.path().to_str().unwrap();
         let type_checker_mode = crate::datatypes::convert::mode_to_i64(file_summary.mode);
@@ -736,7 +723,7 @@ impl Names {
                 Self::join_with_pipe(file_summary.funs()),
                 Self::join_with_pipe(file_summary.typedefs()),
             ])?;
-        let file_info_id = self.conn.last_insert_rowid();
+        let file_info_id = crate::FileInfoId::last_insert_rowid(&self.conn);
         Ok(file_info_id)
     }
 
@@ -752,7 +739,7 @@ impl Names {
 
     /// This removes an entry from the forward naming table.
     pub fn delete(&self, path: &RelativePath) -> anyhow::Result<()> {
-        let file_info_id: Option<crate::datatypes::FileInfoId> = self
+        let file_info_id: Option<crate::FileInfoId> = self
             .conn
             .prepare_cached(
                 "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO

@@ -8,7 +8,9 @@ mod naming_sqlite;
 mod naming_table;
 mod summary;
 
+pub use datatypes::FileInfoId;
 pub use naming_sqlite::Names;
 pub use naming_table::NamingTable;
 pub use summary::DeclSummary;
 pub use summary::FileSummary;
+pub use summary::SymbolRow;

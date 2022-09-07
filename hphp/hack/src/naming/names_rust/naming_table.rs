@@ -117,7 +117,7 @@ impl NamingTable {
         self.names.delete(path)?;
 
         // Remove combined hashes from checksum
-        for (symbol_hash, decl_hash) in combined_hashes {
+        for (symbol_hash, decl_hash, _file_info_id) in combined_hashes {
             self.checksum.addremove(symbol_hash, decl_hash);
         }
 

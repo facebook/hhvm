@@ -5,9 +5,11 @@
 
 use hh24_types::DeclHash;
 use hh24_types::FileDeclsHash;
+use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info;
 use oxidized::file_info::NameType;
+use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 
@@ -88,5 +90,44 @@ impl DeclSummary {
 impl From<(&str, Decl<'_>)> for DeclSummary {
     fn from((symbol, decl): (&str, Decl<'_>)) -> Self {
         Self::new(symbol, decl)
+    }
+}
+
+/// This is what each row looks like in NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW,
+/// i.e. the reverse naming table. When this struct is used for reading from the
+/// database, we generally join NAMING_FILE_INFO to populate 'path' since there's very
+/// little you can do with a row without turning file_info_id into a pathname;
+/// when used for writing, we generally ignore 'path'.
+/// This structure is a bit like DeclSummary. The difference is that SymbolRow
+/// can be reconstructed from out of the reverse-naming-table (hence can be used
+/// by algorithms that want to retrieve then write-back stuff from the table),
+/// while DeclSummary can't.
+#[derive(Clone, Debug)]
+pub struct SymbolRow {
+    pub hash: ToplevelSymbolHash,
+    pub canon_hash: ToplevelCanonSymbolHash,
+    pub decl_hash: DeclHash,
+    pub kind: NameType,
+    pub file_info_id: crate::FileInfoId,
+    pub path: RelativePath,
+}
+
+impl SymbolRow {
+    /// This method walks the Decl structure to construct a hash for it
+    pub fn new(
+        path: RelativePath,
+        file_info_id: crate::FileInfoId,
+        name: &str,
+        decl: Decl<'_>,
+    ) -> Self {
+        let kind = decl.kind();
+        Self {
+            hash: ToplevelSymbolHash::from(kind.into(), name),
+            canon_hash: ToplevelCanonSymbolHash::from(kind.into(), name.to_owned()),
+            kind,
+            decl_hash: DeclHash::from(decl),
+            file_info_id,
+            path,
+        }
     }
 }

@@ -1244,6 +1244,36 @@ fn rewrite_expr(
         Lfun(lf) => {
             let mut fun_ = lf.0;
 
+            match &fun_ {
+                aast::Fun_ {
+                    // Allow a plain function that isn't async.
+                    fun_kind: ast::FunKind::FSync,
+                    body: _,
+                    span: _,
+                    doc_comment: _,
+                    ret: _,
+                    annotation: (),
+                    name: _,
+                    params: _,
+                    tparams: _,
+                    user_attributes: _,
+                    // The function should not use any of these newer features.
+                    readonly_this: None,
+                    readonly_ret: None,
+                    where_constraints,
+                    ctxs: None,
+                    unsafe_ctxs: None,
+                    external: false,
+                } if where_constraints.is_empty() => {}
+                _ => {
+                    errors.push((
+                            pos.clone(),
+                            "Expression trees only support simple lambdas, without features like `async`, generators or capabilities."
+                                .into(),
+                        ));
+                }
+            }
+
             let mut param_names = Vec::with_capacity(fun_.params.len());
             for param in &fun_.params {
                 if param.expr.is_some() {

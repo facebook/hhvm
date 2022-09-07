@@ -480,6 +480,7 @@ class Connection {
   friend class MysqlClientBase;
   friend class Operation;
   friend class ConnectOperation;
+  template <typename Client>
   friend class ConnectPoolOperation;
   friend class FetchOperation;
   friend class QueryOperation;

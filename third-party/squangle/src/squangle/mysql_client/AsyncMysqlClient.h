@@ -289,6 +289,8 @@ class AsyncMysqlClient : public MysqlClientBase {
 
   // Private methods, primarily used by Operations and its subclasses.
   friend class AsyncConnectionPool;
+  template <typename Client>
+  friend class ConnectionPool;
 
   void init();
 

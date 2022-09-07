@@ -333,13 +333,14 @@ let build_xrefs_json (fact_map : XRefs.fact_map) =
     Fact_id.Map.fold
       (fun _id (target_json, pos_list) acc ->
         let sorted_pos = Caml.List.sort_uniq Pos.compare pos_list in
-        let (byte_spans, _) =
+        let (rev_byte_spans, _) =
           List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
               let start = fst (Pos.info_raw pos) in
               let length = Pos.length pos in
               let span = build_rel_bytespan_json (start - last_start) length in
-              (spans @ [span], start))
+              (span :: spans, start))
         in
+        let byte_spans = List.rev rev_byte_spans in
         let xref =
           JSON_Object
             [("target", target_json); ("ranges", JSON_Array byte_spans)]

@@ -1,5 +1,5 @@
 <?hh
-
+namespace ROTB\ScopeTry1;
 class Foo {
   public int $x = 0;
 }

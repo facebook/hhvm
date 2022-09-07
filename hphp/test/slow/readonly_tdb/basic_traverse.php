@@ -1,5 +1,5 @@
 <?hh
-
+namespace ROTB\BasicTraverse;
 class DisposeMe {
   public function __dispose() {}
 }

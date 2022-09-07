@@ -1,5 +1,5 @@
 <?hh
-
+namespace ROTDB\ScopeBreak2;
 class Foo {
   public int $x = 0;
 }

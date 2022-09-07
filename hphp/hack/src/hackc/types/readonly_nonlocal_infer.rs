@@ -18,6 +18,7 @@ use decl_provider::MemoProvider;
 use itertools::Itertools;
 use oxidized::aast;
 use oxidized::ast;
+use oxidized::ast_defs;
 use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::Pos;
 use oxidized::typing_defs::FunTypeFlags;
@@ -156,18 +157,26 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 (ArrayGet(box_tup!(arr, index_opt)), Tyx::Todo, ctx)
             }
             ObjGet(box (e1, e2, og_null_flavor, prop_or_method)) => {
-                let (e1, _e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
+                let (e1, e1_ty, ctx) = self.infer_expr(e1, ctx, next_where);
                 let (e2, _e2_ty, ctx) = self.infer_expr(e2, ctx, next_where);
-                (
-                    ObjGet(box_tup!(
-                        e1,
-                        e2,
-                        og_null_flavor.clone(),
-                        prop_or_method.clone()
-                    )),
-                    Tyx::Todo,
-                    ctx,
-                )
+                let ty = match (&e1_ty, prop_or_method, &e2) {
+                    (
+                        Tyx::Object { class_name },
+                        ast_defs::PropOrMethod::IsMethod,
+                        ast::Expr(_, _, aast::Expr_::Id(box ast_defs::Id(_, member_name))),
+                    ) => match &self.get_method_type(class_name, member_name, pos) {
+                        Some(ft) => Tyx::Fun(Box::new(ft.clone())),
+                        None => Tyx::Todo,
+                    },
+                    _ => Tyx::Todo,
+                };
+                let obj_get = ObjGet(box_tup!(
+                    e1,
+                    e2,
+                    og_null_flavor.clone(),
+                    prop_or_method.clone()
+                ));
+                (obj_get, ty, ctx)
             }
             ClassGet(box (class_id, get_expr, prop_or_meth)) => {
                 use aast::ClassGetExpr;
@@ -308,7 +317,17 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 (Is(box_tup!(e, hint.clone())), Tyx::Todo, ctx)
             }
             As(box (e, hint, is_nullable)) => {
-                let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
+                let (e, _e_ty, mut ctx) = self.infer_expr(e, ctx, next_where);
+                match &e {
+                    ast::Expr(_, _, ast::Expr_::Lvar(box ast::Lid(_, (_, var)))) => {
+                        // There's demo readonly code that does something like this:
+                        // `$var as dynamic; $_ = $var->method_that_returns_readonly()`
+                        // To ensure that we don't change the bytecode emitted in such cases, remove
+                        // the variable from the context. TODO(T131219582): use type information from the hint
+                        ctx.remove(var);
+                    }
+                    _ => (),
+                }
                 (As(box_tup!(e, hint.clone(), *is_nullable)), Tyx::Todo, ctx)
             }
             Upcast(box (e, hint)) => {
@@ -325,7 +344,19 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                     e_opt,
                     ex.clone()
                 ));
-                (new, Tyx::Todo, ctx)
+                let from_class_name = |class_name| Tyx::Object { class_name };
+                let ty = match &class_id.2 {
+                    aast::ClassId_::CI(ast_defs::Id(_, class_name)) => {
+                        from_class_name(class_name.clone())
+                    }
+                    aast::ClassId_::CIexpr(ast::Expr(
+                        _,
+                        _,
+                        aast::Expr_::Id(box ast_defs::Id(_, class_name)),
+                    )) => from_class_name(class_name.clone()),
+                    _ => Tyx::Todo,
+                };
+                (new, ty, ctx)
             }
             Efun(box (fun, lids)) => {
                 let (fun, _fun_ty, ctx) = self.infer_fun(fun, ctx, next_where);
@@ -786,18 +817,37 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         }
     }
 
+    // TODO: look up methods in parent classes using folded decls
+    // TODO: handle static methods and properties
+    fn get_method_type(
+        &self,
+        class_name: &str,
+        method_name: &str,
+        pos: &Pos,
+    ) -> Option<tyx::FunType> {
+        use oxidized_by_ref::shallow_decl_defs::ShallowClass;
+        match self.decl_provider.type_decl(class_name, 1) {
+            Ok(decl_provider::TypeDecl::Class(ShallowClass { methods, .. })) => methods
+                .iter()
+                .find(|method| method.name.1 == method_name)
+                .and_then(|method| tyx::ty_to_fun_type_opt(&method.type_.1)),
+            Ok(_) => None, // reachable if TypeDecl::Typedef, which is currently not allowed to be an alias for a class
+            Err(Error::NotFound) => None,
+            Err(err @ Error::Bincode(_)) => {
+                panic!(
+                    "Internal error when attempting to read the type of class '{class_name}' at {pos:?}. {err}"
+                )
+            }
+        }
+    }
+
     fn get_fun_decl(&self, id: &ast::Id, pos: &Pos) -> Option<tyx::FunType> {
         let name = id.name();
         match self.decl_provider.func_decl(name) {
             Ok(FunElt {
-                type_:
-                    oxidized_by_ref::typing_defs::Ty(_, oxidized_by_ref::typing_defs::Ty_::Tfun(ft)),
+                type_: oxidized_by_ref::typing_defs::Ty(_, ty_),
                 ..
-            }) => Some(tyx::FunType {
-                flags: ft.flags,
-                ret: Tyx::Todo,
-            }),
-            Ok(_) => None,
+            }) => tyx::ty_to_fun_type_opt(ty_),
             Err(Error::NotFound) => None,
             Err(err @ Error::Bincode(_)) => {
                 panic!(

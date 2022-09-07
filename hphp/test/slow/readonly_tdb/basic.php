@@ -1,5 +1,7 @@
 <?hh
 
+namespace ROTDB\Basic;
+
 class Foo {
   public int $x = 0;
 }

@@ -1,5 +1,5 @@
 <?hh
-
+namespace ROTDB\ScopeIf6;
 class Foo {
   public int $x = 0;
 }

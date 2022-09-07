@@ -128,7 +128,7 @@ class MysqlClientBase {
   friend class ChangeUserOperation;
   friend class MysqlConnectionHolder;
   friend class AsyncConnection;
-  friend class AsyncConnectionPool;
+  friend class SyncConnection;
   virtual db::SquangleLoggingData makeSquangleLoggingData(
       const ConnectionKey* connKey,
       const db::ConnectionContextBase* connContext) = 0;

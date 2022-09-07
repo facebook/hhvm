@@ -168,6 +168,12 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
     return shutdown_data_.rlock()->shutting_down;
   }
 
+  // Nothing needed here - the async connection pool should not wait.
+  void openNewConnectionPrep(AsyncConnectPoolOperation& /*pool_op*/) override {}
+  void openNewConnectionFinish(
+      AsyncConnectPoolOperation& /*pool_op*/,
+      const PoolKey& /*pool_key*/) override {}
+
   AsyncConnectionPool(const AsyncConnectionPool&) = delete;
   AsyncConnectionPool& operator=(const AsyncConnectionPool&) = delete;
 };

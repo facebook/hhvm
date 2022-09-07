@@ -14,6 +14,8 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
+class SyncConnection;
+
 class SyncMysqlClient : public MysqlClientBase {
  public:
   SyncMysqlClient() : SyncMysqlClient(nullptr) {}
@@ -50,9 +52,18 @@ class SyncMysqlClient : public MysqlClientBase {
     return true;
   }
 
+  uint64_t getPoolsConnectionLimit() {
+    // This is used by HHVM in the async client.  We don't need it here in the
+    // sync client.
+    return std::numeric_limits<uint64_t>::max();
+  }
+
+  static std::shared_ptr<SyncMysqlClient> defaultClient();
+
  protected:
   // Private methods, primarily used by Operations and its subclasses.
-  friend class AsyncConnectionPool;
+  template <typename Client>
+  friend class ConnectionPool;
 
   bool runInThread(folly::Cob&& fn, bool wait = false) override {
     fn();
@@ -141,10 +152,15 @@ class SyncMysqlClient : public MysqlClientBase {
 class SyncConnection : public Connection {
  public:
   SyncConnection(
-      MysqlClientBase* async_client,
+      MysqlClientBase* client,
       ConnectionKey conn_key,
-      MYSQL* existing_connection)
-      : Connection(async_client, conn_key, existing_connection) {}
+      std::unique_ptr<MysqlConnectionHolder> conn)
+      : Connection(client, conn_key, std::move(conn)) {}
+
+  SyncConnection(MysqlClientBase* client, ConnectionKey conn_key, MYSQL* conn)
+      : Connection(client, conn_key, conn) {}
+
+  ~SyncConnection();
 
   // Operations call these methods as the operation becomes unblocked, as
   // callers want to wait for completion, etc.

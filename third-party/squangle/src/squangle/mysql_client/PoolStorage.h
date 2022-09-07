@@ -66,6 +66,19 @@ class PoolStorageData {
     list.push_back(std::move(weak_op));
   }
 
+  // Searches for an operation in the queue and removes it
+  bool dequeueOperation(
+      const PoolKey& pool_key,
+      const ConnectPoolOperation<Client>& pool_op) {
+    auto& list = waitList_[pool_key];
+    auto it = std::find_if(list.begin(), list.end(), [&](const auto& weak_op) {
+      auto locked_op = weak_op.lock();
+      return locked_op && locked_op.get() == &pool_op;
+    });
+
+    return it != list.end();
+  }
+
   // Calls failureCallback with the error description and removed all
   // the operations for conn_key from the queue.
   void failOperations(
@@ -278,6 +291,18 @@ class PoolStorage {
     }
   }
 
+  bool dequeueOperation(
+      const PoolKey& pool_key,
+      const ConnectPoolOperation<Client>& pool_op) {
+    if constexpr (uses_one_thread_v<Client>) {
+      return data_.dequeueOperation(pool_key, pool_op);
+    } else {
+      return data_.wlock()->dequeueOperation(pool_key, pool_op);
+    }
+  }
+
+  // Calls failureCallback with the error description and removed all
+  // the operations for conn_key from the queue.
   void failOperations(
       const PoolKey& pool_key,
       OperationResult op_result,

@@ -79,6 +79,7 @@ namespace facebook {
 namespace common {
 namespace mysql_client {
 
+class AsyncConnection;
 class AsyncMysqlClient;
 class SyncMysqlClient;
 class Operation;
@@ -91,6 +92,10 @@ class MysqlConnectionHolder;
 // and use the client it returns, which is shared process-wide.
 class AsyncMysqlClient : public MysqlClientBase {
  public:
+  // Having this type (`uses_one_thread`) tells the pool storage later that we
+  // don't need synchronization - see PoolStorage.h
+  using uses_one_thread = void;
+
   AsyncMysqlClient();
   ~AsyncMysqlClient() override;
 

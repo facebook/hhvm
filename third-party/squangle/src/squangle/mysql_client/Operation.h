@@ -818,6 +818,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
 
   friend class Connection;
   friend class SyncConnection;
+  friend class SyncConnectionPool;
   friend class ConnectionSocketHandler;
 };
 
@@ -1004,6 +1005,10 @@ class ConnectOperation : public Operation {
 
   db::OperationType getOperationType() const override {
     return db::OperationType::Connect;
+  }
+
+  bool isActive() const {
+    return active_in_client_;
   }
 
  protected:

@@ -10,6 +10,7 @@
 
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
+#include <folly/synchronization/Baton.h>
 #include <list>
 #include <memory>
 
@@ -593,6 +594,9 @@ class ConnectionPool
         rawPoolOp->getSharedPointer());
     // Sanity check
     DCHECK(pool_op != nullptr);
+
+    openNewConnectionPrep(*pool_op);
+
     conn_storage_.queueOperation(poolKey, pool_op);
     // Propagate the ConnectionContext from the incoming operation. These
     // contexts contain application specific logging that will be lost if not
@@ -600,6 +604,8 @@ class ConnectionPool
     // miss. Propagating the context pointer ensures that both operations are
     // logged with the expected additional logging
     tryRequestNewConnection(poolKey, pool_op->connection_context_);
+
+    openNewConnectionFinish(*pool_op, poolKey);
   }
 
   void resetConnection(
@@ -752,6 +758,12 @@ class ConnectionPool
     connectionSpotFreed(pool_key);
   }
 
+  virtual void openNewConnectionPrep(ConnectPoolOperation<Client>& pool_op) = 0;
+
+  virtual void openNewConnectionFinish(
+      ConnectPoolOperation<Client>& pool_op,
+      const PoolKey& pool_key) = 0;
+
   virtual std::unique_ptr<Connection> makeNewConnection(
       const ConnectionKey& conn_key,
       std::unique_ptr<MysqlPooledHolder<Client>> mysqlConn) = 0;
@@ -847,6 +859,8 @@ class ConnectPoolOperation : public ConnectOperation {
  private:
   friend class ConnectionPool<Client>;
   friend class PoolStorageData<Client>;
+  friend class AsyncConnectionPool;
+  friend class SyncConnectionPool;
 
   void specializedRunImpl() {
     // Initialize all we need from our tevent handler
@@ -867,9 +881,11 @@ class ConnectPoolOperation : public ConnectOperation {
       return;
     }
 
-    conn()->socketHandler()->scheduleTimeout(
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - now)
-            .count());
+    if constexpr (uses_one_thread_v<Client>) {
+      conn()->socketHandler()->scheduleTimeout(
+          std::chrono::duration_cast<std::chrono::milliseconds>(end - now)
+              .count());
+    }
 
     // Remove before to not count against itself
     removeClientReference();
@@ -888,7 +904,7 @@ class ConnectPoolOperation : public ConnectOperation {
   // Called when the connection is matched by the pool client
   void connectionCallback(
       std::unique_ptr<MysqlPooledHolder<Client>> mysql_conn) {
-    DCHECK(client()->getEventBase()->isInEventBaseThread());
+    // TODO: validate we are in the correct thread (for async)
 
     if (!mysql_conn) {
       LOG(DFATAL) << "Unexpected error";
@@ -921,6 +937,8 @@ class ConnectPoolOperation : public ConnectOperation {
       VLOG(2) << "Error: Failed to acquire connection";
       attemptFailed(OperationResult::Failed);
     }
+
+    signalWaiter();
   }
 
   // Called when the connection that the pool is trying to acquire failed
@@ -938,11 +956,33 @@ class ConnectPoolOperation : public ConnectOperation {
     LOG(DFATAL) << "Should not be called";
   }
 
+  void prepWait() {
+    baton_ = std::make_unique<folly::Baton<>>();
+  }
+
+  bool syncWait() {
+    DCHECK(baton_);
+    auto end = timeout_ + start_time_;
+    return baton_->try_wait_until(end);
+  }
+
+  void cleanupWait() {
+    baton_.reset();
+  }
+
+  void signalWaiter() {
+    if (baton_) {
+      baton_->post();
+    }
+  }
+
   std::string createTimeoutErrorMessage(
       const PoolKeyStats& pool_key_stats,
       size_t per_key_limit);
 
   std::weak_ptr<ConnectionPool<Client>> pool_;
+
+  std::unique_ptr<folly::Baton<>> baton_;
 
   // PreOperation keeps any other operation that needs to be canceled when
   // ConnectPoolOperation is cancelled.

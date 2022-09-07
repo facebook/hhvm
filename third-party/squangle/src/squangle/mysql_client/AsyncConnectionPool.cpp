@@ -157,8 +157,7 @@ std::unique_ptr<Connection> AsyncConnectionPool::connect(
 }
 
 template <>
-ConnectPoolOperation<AsyncMysqlClient>*
-ConnectPoolOperation<AsyncMysqlClient>::specializedRun() {
+AsyncConnectPoolOperation* AsyncConnectPoolOperation::specializedRun() {
   std::weak_ptr<Operation> weakSelf = getSharedPointer();
   if (!client()->runInThread([weakSelf]() {
         // There is a race confition that allows a cancelled or completed
@@ -202,7 +201,7 @@ std::ostream& operator<<(std::ostream& os, PoolKey key) {
 }
 
 template <>
-std::string ConnectPoolOperation<AsyncMysqlClient>::createTimeoutErrorMessage(
+std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
     const PoolKeyStats& pool_key_stats,
     size_t per_key_limit) {
   auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(

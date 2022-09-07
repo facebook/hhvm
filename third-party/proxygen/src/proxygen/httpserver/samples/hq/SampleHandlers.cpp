@@ -51,6 +51,10 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
     return new WaitReleaseHandler(
         folly::EventBaseManager::get()->getEventBase(), params_);
   }
+  if (boost::algorithm::starts_with(path, "/chunked")) {
+    return new ChunkedHandler(params_,
+                              folly::EventBaseManager::get()->getEventBase());
+  }
   if (boost::algorithm::starts_with(path, "/push")) {
     return new ServerPushHandler(params_);
   }

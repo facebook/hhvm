@@ -9,10 +9,15 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <climits>
 #include <cmath>
+#include <folly/futures/Future.h>
+#include <folly/io/IOBuf.h>
 #include <functional>
 #include <mutex>
+#include <proxygen/lib/http/HTTPException.h>
+#include <proxygen/lib/http/HTTPMessage.h>
 #include <random>
 #include <vector>
 
@@ -148,6 +153,115 @@ class BaseSampleHandler : public proxygen::HTTPTransactionHandler {
 
   proxygen::HTTPTransaction* txn_{nullptr};
   const HandlerParams& params_;
+};
+
+/*
+** A handler which returns chunked responses spread over time
+** Generally used to simulat live video downloads where every frame
+** is delivered at 1/30 s (or similar) cadance.
+** Query parameters used:
+**  - keyFrame - size in bytes of the first chunk in the response
+**  - frame - size in bytes of all other chunks
+**  - segment - total time of the response in milliseconds.
+*/
+class ChunkedHandler
+    : public BaseSampleHandler
+    , folly::DelayedDestruction {
+ public:
+  explicit ChunkedHandler(const HandlerParams& params, folly::EventBase* evb)
+      : BaseSampleHandler(params), evb_(evb) {
+  }
+
+  ChunkedHandler() = delete;
+
+  uint32_t getQueryParamAsNumber(std::unique_ptr<proxygen::HTTPMessage>& msg,
+                                 const std::string& name,
+                                 uint32_t defValue) noexcept {
+    uint32_t res{defValue};
+    try {
+      res = folly::to<uint32_t>(msg->getQueryParam(name));
+    } catch (const folly::ConversionError&) {
+    }
+    return res;
+  }
+
+  void onHeadersComplete(
+      std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override {
+    VLOG(10) << "ChunkedHandler::onHeadersComplete";
+    proxygen::HTTPMessage resp;
+    resp.setStatusCode(200);
+    resp.setStatusMessage("Ok");
+    resp.setIsChunked(true);
+    maybeAddAltSvcHeader(resp);
+    txn_->sendHeaders(resp);
+    firstFrameSize_ = getQueryParamAsNumber(msg, "keyFrame", 5000);
+    otherFrameSize_ = getQueryParamAsNumber(msg, "frame", 500);
+    auto segment = getQueryParamAsNumber(msg, "segment", 2000);
+    totalChunkCount_ = segment / frameDelay_.count();
+  }
+  void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override {
+  }
+
+  void onEOM() noexcept override {
+    VLOG(10) << "ChunkedHandler::onEOM";
+    sleepFutureCallback();
+  }
+
+  void onError(const proxygen::HTTPException& /*error*/) noexcept override {
+    txn_->sendAbort();
+    failed_ = true;
+  }
+
+ private:
+  ~ChunkedHandler() override = default;
+
+  std::unique_ptr<folly::IOBuf> genRandBytes(uint32_t len) {
+    auto buffer = folly::IOBuf::create(len);
+    buffer->append(len);
+    std::generate(
+        buffer->writableData(), buffer->writableData() + len, std::ref(rbe_));
+    return buffer;
+  }
+
+  void sendChunkRandomData(uint32_t chunkSize) {
+    auto data = genRandBytes(chunkSize);
+    txn_->sendChunkHeader(chunkSize);
+    if (!failed_) {
+      txn_->sendBody(std::move(data));
+    }
+    if (!failed_) {
+      txn_->sendChunkTerminator();
+    }
+  }
+
+  void sleepFutureCallback() {
+    DestructorGuard destructorGuard(this);
+    uint32_t chunkSize = chunk_ == 0 ? firstFrameSize_ : otherFrameSize_;
+    if (failed_) {
+      return;
+    }
+
+    chunk_++;
+    if (chunk_ > totalChunkCount_) {
+      txn_->sendEOM();
+      return;
+    }
+    sendChunkRandomData(chunkSize);
+    sleepFuture_ =
+        folly::futures::sleep(frameDelay_).via(evb_).then([this](auto&&) {
+          sleepFutureCallback();
+        });
+  }
+
+  uint32_t firstFrameSize_{5000};
+  uint32_t otherFrameSize_{500};
+  std::chrono::milliseconds frameDelay_{33};
+  uint32_t totalChunkCount_{60};
+  uint32_t chunk_{0};
+  folly::EventBase* evb_;
+  folly::SemiFuture<folly::Unit> sleepFuture_;
+  bool failed_{false};
+  random_bytes_engine rbe_;
 };
 
 class EchoHandler : public BaseSampleHandler {

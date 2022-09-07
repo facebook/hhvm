@@ -529,11 +529,6 @@ class AsyncConnectionPool
 
   // It will clean the pool and block any new connections or operations
   // Shutting down phase:
-  // Once the destructor is called, we lock `shutdown_mutex_`, set
-  // shutting_down_ to true and schedule `cleanup_timer_` to cancel (this is
-  // the real reason we need to wait for shutdown_condvar_). shutting_down_
-  // will avoid us to accept new requests for connection or try to recycle
-  // connections
   // The remaining connections or operations that are linked to this pool
   // will know (using their weak_pointer to this pool) that the pool is dead
   // and proceed without the pool.
@@ -815,20 +810,22 @@ class AsyncConnectionPool
 
   folly::Synchronized<Counters> counters_;
 
-  // Used in the destructor to wait cleanup_timer_ be called. It's required by
-  // `shutdown_condvar_`
-  std::mutex shutdown_mutex_;
-
-  // These members help with the control of the shutting down stage
-  bool shutting_down_ = false;
-  std::condition_variable shutdown_condvar_;
-  std::atomic<bool> finished_shutdown_;
-
   // To allow us to pass weak_ptr for the PoolOperation`s
   std::weak_ptr<AsyncConnectionPool> self_pointer_;
 
   // Counters for connections created, cache hits and misses, etc.
   db::PoolStats pool_stats_;
+
+  struct ShutdownData {
+    bool shutting_down = false;
+    bool finished_shutdown = false;
+  };
+
+  folly::Synchronized<ShutdownData> shutdown_data_;
+
+  bool isShuttingDown() const {
+    return shutdown_data_.rlock()->shutting_down;
+  }
 
   AsyncConnectionPool(const AsyncConnectionPool&) = delete;
   AsyncConnectionPool& operator=(const AsyncConnectionPool&) = delete;

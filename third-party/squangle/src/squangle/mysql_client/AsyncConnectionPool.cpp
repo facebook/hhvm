@@ -14,6 +14,7 @@
 
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
+#include <folly/synchronization/Baton.h>
 
 #include <vector>
 
@@ -90,8 +91,7 @@ AsyncConnectionPool::AsyncConnectionPool(
       pool_conn_limit_(pool_options.getPoolLimit()),
       connection_age_timeout_(pool_options.getAgeTimeout()),
       expiration_policy_(pool_options.getExpPolicy()),
-      pool_per_instance_(pool_options.poolPerMysqlInstance()),
-      finished_shutdown_(false) {
+      pool_per_instance_(pool_options.poolPerMysqlInstance()) {
   if (!mysql_client_->runInThread([this]() {
         cleanup_timer_.scheduleTimeout(PoolOptions::kCleanUpTimeout);
       })) {
@@ -102,7 +102,7 @@ AsyncConnectionPool::AsyncConnectionPool(
 AsyncConnectionPool::~AsyncConnectionPool() {
   VLOG(2) << "Connection pool dying";
 
-  if (!finished_shutdown_.load(std::memory_order_acquire)) {
+  if (!shutdown_data_.rlock()->finished_shutdown) {
     shutdown();
   }
 
@@ -111,29 +111,35 @@ AsyncConnectionPool::~AsyncConnectionPool() {
 
 void AsyncConnectionPool::shutdown() {
   VLOG(2) << "Shutting down";
-  std::unique_lock<std::mutex> lock(shutdown_mutex_);
-  // Will block adding anything to the pool
-  shutting_down_ = true;
 
-  // cancelTimeout can only be ran in the tevent thread
-  if (std::this_thread::get_id() == mysql_client_->threadId()) {
+  auto shutdown_func = [&](auto& shutdown_data) {
     cleanup_timer_.cancelTimeout();
     conn_storage_.clearAll();
-    finished_shutdown_.store(true, std::memory_order_relaxed);
-    VLOG(1) << "Shutting down in tevent thread";
-  } else {
-    mysql_client_->runInThread([this]() {
-      cleanup_timer_.cancelTimeout();
-      conn_storage_.clearAll();
-      // Reacquire lock
-      std::unique_lock<std::mutex> shutdown_lock(shutdown_mutex_);
-      finished_shutdown_.store(true, std::memory_order_relaxed);
-      this->shutdown_condvar_.notify_one();
-    });
-    shutdown_condvar_.wait(lock, [this] {
-      return finished_shutdown_.load(std::memory_order_acquire);
-    });
+    shutdown_data.finished_shutdown = true;
+    VLOG(1) << "Shutting down in mysql_client thread";
+  };
+
+  // New scope to limit the lifetime of the write lock
+  {
+    auto shutdown_data = shutdown_data_.wlock();
+    if (shutdown_data->shutting_down) {
+      return;
+    }
+
+    // Will block adding anything to the pool
+    shutdown_data->shutting_down = true;
+
+    // cancelTimeout can only be ran in the mysql_client thread
+    if (std::this_thread::get_id() == mysql_client_->threadId()) {
+      shutdown_func(*shutdown_data);
+      return;
+    }
   }
+
+  // We aren't already in the right thread, cause the shutdown to get run in the
+  // correct thread and wait for it to complete.
+  mysql_client_->runInThread(
+      [&]() { shutdown_func(*shutdown_data_.wlock()); }, /*wait*/ true);
 }
 
 folly::SemiFuture<ConnectResult> AsyncConnectionPool::connectSemiFuture(
@@ -218,11 +224,10 @@ std::shared_ptr<ConnectOperation> AsyncConnectionPool::beginConnection(
     const ConnectionKey& conn_key) {
   std::shared_ptr<ConnectPoolOperation> ret;
   {
-    std::unique_lock<std::mutex> lock(shutdown_mutex_);
     // Assigning here to read from pool safely
     ret = std::make_shared<ConnectPoolOperation>(
         getSelfWeakPointer(), mysql_client_, conn_key);
-    if (shutting_down_) {
+    if (isShuttingDown()) {
       LOG(ERROR)
           << "Attempt to start pool operation while pool is shutting down";
       ret->cancel();
@@ -243,8 +248,7 @@ void AsyncConnectionPool::recycleMysqlConnection(
     std::unique_ptr<MysqlConnectionHolder> mysql_conn) {
   // this method can run by any thread where the Connection is dying
   {
-    std::unique_lock<std::mutex> lock(shutdown_mutex_);
-    if (shutting_down_) {
+    if (isShuttingDown()) {
       return;
     }
   }
@@ -401,8 +405,7 @@ void AsyncConnectionPool::registerForConnection(
   // Runs only in main thread by run() in the ConnectPoolOperation
   DCHECK_EQ(std::this_thread::get_id(), mysql_client_->threadId());
   {
-    std::unique_lock<std::mutex> lock(shutdown_mutex_);
-    if (shutting_down_) {
+    if (isShuttingDown()) {
       VLOG(4) << "Pool is shutting down, operation being canceled";
       raw_pool_op->cancel();
       return;
@@ -565,8 +568,7 @@ void AsyncConnectionPool::tryRequestNewConnection(
   // down
   DCHECK_EQ(std::this_thread::get_id(), mysql_client_->threadId());
   {
-    std::unique_lock<std::mutex> lock(shutdown_mutex_);
-    if (shutting_down_) {
+    if (isShuttingDown()) {
       return;
     }
   }

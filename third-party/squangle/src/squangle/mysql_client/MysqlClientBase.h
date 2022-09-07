@@ -103,7 +103,7 @@ class MysqlClientBase {
       std::unique_ptr<db::DBCounterBase> db_stats =
           std::make_unique<db::SimpleDbCounter>());
 
-  virtual bool runInThread(folly::Cob&& fn) = 0;
+  virtual bool runInThread(folly::Cob&& fn, bool wait = false) = 0;
 
   virtual uint32_t numStartedAndOpenConnections() {
     return 0;

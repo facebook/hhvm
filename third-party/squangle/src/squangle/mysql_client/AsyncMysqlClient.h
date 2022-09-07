@@ -199,7 +199,7 @@ class AsyncMysqlClient : public MysqlClientBase {
       std::unique_ptr<db::SquangleLoggerBase> db_logger,
       std::unique_ptr<db::DBCounterBase> db_stats);
 
-  bool runInThread(folly::Cob&& fn) override;
+  bool runInThread(folly::Cob&& fn, bool wait = false) override;
 
   db::SquangleLoggingData makeSquangleLoggingData(
       const ConnectionKey* connKey,

@@ -54,7 +54,7 @@ class SyncMysqlClient : public MysqlClientBase {
   // Private methods, primarily used by Operations and its subclasses.
   friend class AsyncConnectionPool;
 
-  bool runInThread(folly::Cob&& fn) override {
+  bool runInThread(folly::Cob&& fn, bool wait = false) override {
     fn();
     return true;
   }

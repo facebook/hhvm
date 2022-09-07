@@ -65,16 +65,20 @@ void AsyncMysqlClient::init() {
   eventBase->waitUntilRunning();
 }
 
-bool AsyncMysqlClient::runInThread(folly::Cob&& fn) {
+bool AsyncMysqlClient::runInThread(folly::Cob&& fn, bool wait) {
   auto scheduleTime = std::chrono::steady_clock::now();
-  getEventBase()->runInEventBaseThread(
-      [fn = std::move(fn), scheduleTime, this]() mutable {
-        auto delay = std::chrono::duration_cast<std::chrono::microseconds>(
-                         std::chrono::steady_clock::now() - scheduleTime)
-                         .count();
-        stats_tracker_->callbackDelayAvg.addSample(delay);
-        fn();
-      });
+  auto func = [fn = std::move(fn), scheduleTime, this]() mutable {
+    auto delay = std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::steady_clock::now() - scheduleTime)
+                     .count();
+    stats_tracker_->callbackDelayAvg.addSample(delay);
+    fn();
+  };
+  if (wait) {
+    getEventBase()->runInEventBaseThreadAndWait(std::move(func));
+  } else {
+    getEventBase()->runInEventBaseThread(std::move(func));
+  }
   return true;
 }
 

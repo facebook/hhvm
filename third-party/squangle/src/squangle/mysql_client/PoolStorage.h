@@ -128,21 +128,9 @@ class PoolStorage {
 
   // Checks and removes the connection that reached their idle time or age
   // limit.
-  void cleanupConnections() {
+  auto cleanupConnections() {
     Timepoint now = std::chrono::steady_clock::now();
-    // We keep shared_ptr here to prevent the pool from being destructed in the
-    // middle of traversing the map
-    std::shared_ptr<ConnectionPool<Client>> pool;
-    stock_.cleanup([&](const auto& conn) {
-      if (!pool) {
-        pool = conn->getPoolPtr();
-        if (!pool) {
-          // the pool is already destroyed
-          LOG(DFATAL)
-              << "pool was already destroyed while cleanup was in progress";
-        }
-      }
-
+    return stock_.cleanup([&](const auto& conn) {
       return (conn->getLifeDuration() != Duration::zero() &&
               (conn->getCreationTime() + conn->getLifeDuration() < now)) ||
           conn->getLastActivityTime() + max_idle_time_ < now;

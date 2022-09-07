@@ -101,13 +101,17 @@ class TwoLevelCache {
 
   // Cleans up connections in level2_ (and level1_) cache, which meet the pred.
   template <typename Pred>
-  void cleanup(Pred pred) {
+  std::vector<Value> cleanup(Pred pred) {
+    std::vector<Value> toBeReleased;
     for (auto it1 = level1_.begin(); it1 != level1_.end();) {
       auto& list = it1->second;
       DCHECK(!list.empty());
 
       for (auto it2 = list.begin(); it2 != list.end();) {
         if (pred(*it2)) {
+          // Add the value to the toBeReleased vector so all of them get
+          // destructed after the loop completes.
+          toBeReleased.push_back(std::move(*it2));
           it2 = list.erase(it2);
         } else {
           ++it2;
@@ -122,6 +126,8 @@ class TwoLevelCache {
         ++it1;
       }
     }
+
+    return toBeReleased;
   }
 
   void clear() {

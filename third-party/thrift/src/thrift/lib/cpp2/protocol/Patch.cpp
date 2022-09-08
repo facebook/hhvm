@@ -499,24 +499,23 @@ Mask extractMaskFromPatch(const protocol::Object& patch) {
   if (findOp(patch, PatchOp::Assign)) {
     return allMask();
   }
-  // All other operators are noop if they have the intrinsic default value.
-  if (isIntrinsicDefault(patch)) {
-    return noneMask();
-  }
   // If Clear or Add, it is modified if not intristic default.
   for (auto op : {PatchOp::Clear, PatchOp::Add}) {
-    if (findOp(patch, op)) {
-      return allMask();
+    if (auto* value = findOp(patch, op)) {
+      if (!isIntrinsicDefault(*value)) {
+        return allMask();
+      }
     }
   }
 
-  Mask mask;
+  Mask mask = noneMask();
   // Put should return allMask if not a map patch. Otherwise add keys to mask.
   if (auto* value = findOp(patch, PatchOp::Put)) {
-    if (!value->mapValue_ref()) {
+    if (value->mapValue_ref()) {
+      insertFieldsToMask(mask, *value, false);
+    } else if (!isIntrinsicDefault(*value)) {
       return allMask();
     }
-    insertFieldsToMask(mask, *value, false);
   }
   // Remove always adds keys to map mask. All types (list, set, and map) use
   // a set for Remove, so they are indistinguishable.

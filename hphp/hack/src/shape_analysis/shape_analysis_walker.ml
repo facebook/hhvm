@@ -618,7 +618,15 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
                 Subsets (ent_, Inter (HT.Constant (hint_pos, snd cst_name)));
             }
           in
-          Env.add_constraint env subset_constr
+          let initial_constr =
+            {
+              hack_pos = fst cst_name;
+              origin = __LINE__;
+              constraint_ = HT.ConstantInitial ent_;
+            }
+          in
+          let env = Env.add_constraint env subset_constr in
+          Env.add_inter_constraint env initial_constr
         | None -> env
       in
       [(snd cst_name, ((env.constraints, env.inter_constraints), env.errors))]

@@ -33,7 +33,10 @@ module Inter (I : Intra) = struct
     match (inter_constr_1, inter_constr_2) with
     | ( Arg (param_entity_left, intra_entity_left),
         Arg (param_entity_right, intra_entity_right) ) ->
-      if I.is_same_entity (I.embed_entity param_entity_left) intra_entity_right
+      if
+        I.is_same_entity
+          (I.embed_entity (Param param_entity_left))
+          intra_entity_right
       then
         Some (Arg (param_entity_right, intra_entity_left))
       else
@@ -48,7 +51,8 @@ module Inter (I : Intra) = struct
     | ( Arg (param_entity_left, intra_entity_left),
         Arg (param_entity_right, intra_entity_right) ) ->
       if I.is_same_entity intra_entity_left intra_entity_right then
-        Some (Arg (param_entity_right, I.embed_entity param_entity_left))
+        Some
+          (Arg (param_entity_right, I.embed_entity (Param param_entity_left)))
       else
         Some inter_constr_2
     | _ -> None
@@ -181,7 +185,12 @@ module Inter (I : Intra) = struct
           | Some (Inter (Constant const_ent)) -> const_ent
           | _ -> failwith "Used invalid identifier"
         in
-        let subset_any_constr = Intra (I.subsets ident_ent const_ent) in
+        let subset_any_constr =
+          Intra
+            (I.subsets
+               (I.embed_entity (Identifier ident_ent))
+               (I.embed_entity (Constant const_ent)))
+        in
         let append_opt (any_constr_list_opt : any_constraint list option) :
             any_constraint list option =
           match any_constr_list_opt with

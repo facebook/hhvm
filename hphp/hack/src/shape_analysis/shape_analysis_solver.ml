@@ -562,8 +562,7 @@ let substitute_inter_intra
     end
   | _ -> Some intra_constr
 
-let embed_entity (param_ent : HT.param_entity) : entity_ =
-  Inter (HT.Param param_ent)
+let embed_entity (ent : HT.entity) : entity_ = Inter ent
 
 let replace_backwards
     (param_ent : HT.param_entity)
@@ -579,7 +578,7 @@ let replace_forwards
     (intra_ent_1 : entity_)
     (intra_ent_2 : entity_) : entity =
   if equal_entity_ intra_ent_1 intra_ent_2 then
-    Some (embed_entity param_ent)
+    Some (embed_entity (HT.Param param_ent))
   else
     None
 
@@ -613,6 +612,5 @@ let equiv
     (ConstraintSet.of_list
        (List.filter_map ~f:only_intra_constr any_constr_list_2))
 
-let subsets (ident_ent : HT.identifier_entity) (const_ent : HT.const_entity) :
-    constraint_ =
-  Subsets (Inter (HT.Identifier ident_ent), Inter (HT.Constant const_ent))
+let subsets (ent1 : entity_) (ent2 : entity_) : constraint_ =
+  Subsets (ent1, ent2)

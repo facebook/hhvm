@@ -26,9 +26,21 @@ type ('a, 'b) any_constraint_ =
 
 type 'a inter_constraint_ =
   | Arg of param_entity * 'a
+      (** Captures function calls, e.g. "Arg (f, 0, p)" denotes a call of "f" with
+        "p" as first argument, "f(p, ...)". *)
   | Constant of const_entity
+      (** Captures global constant entities, e.g. "const dict<string, mixed> DICT". *)
+  | ConstantInitial of 'a
+      (** Captures the initial entity of a global constant, e.g. the right hand side of
+        "const dict<string, mixed> DICT = dict['a' => 42];". *)
   | Identifier of identifier_entity
+      (** Captures global constant identifier entities, e.g. the "DICT" part in
+        "DICT['b'];", which identifies a global constant "const dict<string, mixed>
+        DICT". *)
   | Param of param_entity
+      (** Captures function parameter entities, e.g. "$x" and "$y" in "function
+        f(int $x, bool $y)". This constraint is used for function call constraint
+        substitution, where it interacts with "Arg of param_entity * 'a". *)
 
 (** Domain-specific intra-procedural data that can be used to instantiate an
     inter-procedural constraint solver. Examples we have in mind include the
@@ -56,7 +68,7 @@ module type Intra = sig
   val is_same_entity : intra_entity -> intra_entity -> bool
 
   (** Interprets a parameter entity as an intra-procedural entity *)
-  val embed_entity : param_entity -> intra_entity
+  val embed_entity : entity -> intra_entity
 
   (** The maximum number of iterations constraint substitution should be
       performed without reaching a fixpoint. *)
@@ -87,8 +99,8 @@ module type Intra = sig
   (** Deduces a simplified list of intra-procedural constraints.  *)
   val deduce : intra_constraint list -> intra_constraint list
 
-  (** Captures an abstract subset relation between identifiers and constants *)
-  val subsets : identifier_entity -> const_entity -> intra_constraint
+  (** Captures an abstract subset relation, e.g. between identifiers and constants *)
+  val subsets : intra_entity -> intra_entity -> intra_constraint
 end
 
 val equal_entity : entity -> entity -> bool

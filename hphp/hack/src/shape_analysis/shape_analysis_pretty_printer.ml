@@ -53,6 +53,8 @@ let show_inter_constraint _ = function
     Format.asprintf "Arg(%s, %i, %s)" f_id arg_idx (show_entity ent)
   | HT.Constant const ->
     Format.asprintf "Constant %s" (HT.show_const_entity const)
+  | HT.ConstantInitial inst ->
+    Format.asprintf "Constant initialization at %s" (show_entity inst)
   | HT.Identifier ident ->
     Format.asprintf "Identifier %s" (HT.show_identifier_entity ident)
   | HT.Param param ->

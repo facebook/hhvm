@@ -27,6 +27,7 @@ type ('a, 'b) any_constraint_ =
 type 'a inter_constraint_ =
   | Arg of param_entity * 'a
   | Constant of const_entity
+  | ConstantInitial of 'a
   | Identifier of identifier_entity
   | Param of param_entity
 
@@ -41,7 +42,7 @@ module type Intra = sig
 
   val is_same_entity : intra_entity -> intra_entity -> bool
 
-  val embed_entity : param_entity -> intra_entity
+  val embed_entity : entity -> intra_entity
 
   val max_iteration : int
 
@@ -55,7 +56,7 @@ module type Intra = sig
 
   val deduce : intra_constraint list -> intra_constraint list
 
-  val subsets : identifier_entity -> const_entity -> intra_constraint
+  val subsets : intra_entity -> intra_entity -> intra_constraint
 end
 
 let equal_entity (ent1 : entity) (ent2 : entity) : bool =

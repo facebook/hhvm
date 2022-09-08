@@ -26,6 +26,6 @@ val substitute_inter_intra_forwards :
 
 val equiv : any_constraint list -> any_constraint list -> bool
 
-val subsets : HT.identifier_entity -> HT.const_entity -> constraint_
+val subsets : entity_ -> entity_ -> constraint_
 
-val embed_entity : HT.param_entity -> entity_
+val embed_entity : HT.entity -> entity_

@@ -136,6 +136,44 @@ module Inter (I : Intra) = struct
             |> SMap.update
                  current_func_id
                  (Option.map ~f:(fun x -> x @ constr_list_backwards))
+          | Identifier ((_, const_name) as ident_ent) ->
+            let constr_list_at = SMap.find_opt const_name base_constraint_map in
+            let constr_list_backwards =
+              match constr_list_at with
+              | None -> []
+              | Some constr_list_at_ ->
+                let is_const_initial_constr (constr : any_constraint) : bool =
+                  match constr with
+                  | Inter (ConstantInitial _) -> true
+                  | _ -> false
+                in
+                let const_initial_constraint_opt =
+                  List.find ~f:is_const_initial_constr constr_list_at_
+                in
+                let const_initial_ent =
+                  match const_initial_constraint_opt with
+                  | Some (Inter (ConstantInitial const_initial_ent)) ->
+                    const_initial_ent
+                  | _ -> failwith "Used invalid identifier"
+                in
+                List.filter_map
+                  constr_list_at_
+                  ~f:
+                    (substitute_inter_any_backwards
+                       (ConstantInitial const_initial_ent))
+            in
+            let constr_list_forwards =
+              List.filter_map
+                current_func_constr_list
+                ~f:(substitute_inter_any_forwards (Identifier ident_ent))
+            in
+            input_constr_list_map
+            |> SMap.update
+                 const_name
+                 (Option.map ~f:(fun x -> x @ constr_list_forwards))
+            |> SMap.update
+                 current_func_id
+                 (Option.map ~f:(fun x -> x @ constr_list_backwards))
           | _ -> input_constr_list_map)
         (* TODO(T127947010) Add case for inter-procedural return constraint *)
       in
@@ -157,7 +195,7 @@ module Inter (I : Intra) = struct
   let close_identifier (current_constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
     let close
-        (_ : string)
+        (f : string)
         (constr_list : any_constraint list)
         (input_constr_map : any_constraint list SMap.t) :
         any_constraint list SMap.t =
@@ -174,15 +212,25 @@ module Inter (I : Intra) = struct
           | Inter (Constant _) -> true
           | _ -> false
         in
+        let is_const_initial_constr (constr : any_constraint) : bool =
+          match constr with
+          | Inter (ConstantInitial _) -> true
+          | _ -> false
+        in
         let const_constraint_opt =
           List.find ~f:is_const_constr constr_list_at_const_ent
           (* This raises Not_found, if no value in constr_list_at_const_ent
              satisifes is_const_constr. We assume that our map is well-behaved
              in this sense. *)
         in
-        let const_ent =
-          match const_constraint_opt with
-          | Some (Inter (Constant const_ent)) -> const_ent
+        let const_initial_constraint_opt =
+          List.find ~f:is_const_initial_constr constr_list_at_const_ent
+        in
+        let (const_ent, const_initial_ent) =
+          match (const_constraint_opt, const_initial_constraint_opt) with
+          | ( Some (Inter (Constant const_ent)),
+              Some (Inter (ConstantInitial const_initial_ent)) ) ->
+            (const_ent, const_initial_ent)
           | _ -> failwith "Used invalid identifier"
         in
         let subset_any_constr =
@@ -191,14 +239,18 @@ module Inter (I : Intra) = struct
                (I.embed_entity (Identifier ident_ent))
                (I.embed_entity (Constant const_ent)))
         in
-        let append_opt (any_constr_list_opt : any_constraint list option) :
-            any_constraint list option =
-          match any_constr_list_opt with
-          | None -> None
-          | Some any_constr_list ->
-            Some (subset_any_constr :: (any_constr_list @ constr_list))
+        let subset_initial_any_constr =
+          Intra
+            (I.subsets
+               const_initial_ent
+               (I.embed_entity (Identifier ident_ent)))
+        in
+        let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
+        let append_initial_opt =
+          Option.map ~f:(fun x -> subset_initial_any_constr :: x)
         in
         SMap.update (snd const_ent) append_opt input_constr_map_2
+        |> SMap.update f append_initial_opt
       in
       let only_identifier (constr : any_constraint) : identifier_entity option =
         match constr with

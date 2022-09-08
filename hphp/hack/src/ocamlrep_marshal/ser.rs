@@ -174,11 +174,11 @@ impl<'a> State<'a> {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
-        self.pos_table.size = POS_TABLE_INIT_SIZE as usize;
+        self.pos_table.size = POS_TABLE_INIT_SIZE;
         self.pos_table.shift =
             (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as c_int;
-        self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as usize;
-        self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as usize;
+        self.pos_table.mask = POS_TABLE_INIT_SIZE - 1;
+        self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE);
         self.pos_table.present =
             Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
         self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE).assume_init();
@@ -203,15 +203,15 @@ impl<'a> State<'a> {
             new_size = self.pos_table.size * 2;
             new_shift = self.pos_table.shift - 1;
         }
-        new_entries = Box::new_uninit_slice(new_size as usize).assume_init();
-        new_present = Box::new_zeroed_slice(Bitvect_size(new_size as usize)).assume_init();
+        new_entries = Box::new_uninit_slice(new_size).assume_init();
+        new_present = Box::new_zeroed_slice(Bitvect_size(new_size)).assume_init();
         old = std::mem::replace(
             &mut self.pos_table,
             position_table {
                 size: new_size,
                 shift: new_shift,
                 mask: new_size - 1,
-                threshold: Threshold(new_size as usize) as usize,
+                threshold: Threshold(new_size),
                 present: new_present,
                 entries: new_entries,
             },
@@ -394,7 +394,7 @@ impl<'a> State<'a> {
             // this becomes,
             //   let hd: header_t = Make_header(sz, tag, NOT_MARKABLE);
             // where, `NOT_MARKABLE` (`3 << 8`) ('caml/runtime/shared_heap.h').
-            let hd = Header::with_color(sz as usize, tag, ocamlrep::Color::White).to_bits();
+            let hd = Header::with_color(sz, tag, ocamlrep::Color::White).to_bits();
 
             if sz > 0x3FFFFF && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: array cannot be read back on 32-bit platform");
@@ -468,7 +468,7 @@ impl<'a> State<'a> {
             } else {
                 let hd: Header = v.as_block().unwrap().header();
                 let tag: u8 = hd.tag();
-                let sz: usize = hd.size() as usize;
+                let sz: usize = hd.size();
 
                 if tag == ocamlrep::FORWARD_TAG {
                     let f: Value<'a> = v.field(0).unwrap();
@@ -505,7 +505,7 @@ impl<'a> State<'a> {
                         match tag {
                             ocamlrep::STRING_TAG => {
                                 let bytes = v.as_byte_string().unwrap();
-                                let len: usize = bytes.len() as usize;
+                                let len: usize = bytes.len();
                                 self.extern_string(bytes);
                                 self.size_32 += 1 + (len + 4) / 4;
                                 self.size_64 += 1 + (len + 8) / 8;
@@ -520,7 +520,7 @@ impl<'a> State<'a> {
                             ocamlrep::DOUBLE_ARRAY_TAG => {
                                 let slice = v.as_double_array().unwrap();
                                 self.extern_double_array(slice);
-                                let nfloats = slice.len() as usize;
+                                let nfloats = slice.len();
                                 self.size_32 += 1 + nfloats * 2;
                                 self.size_64 += 1 + nfloats;
                                 self.record_location(v, h);

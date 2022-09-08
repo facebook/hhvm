@@ -227,11 +227,11 @@ const fn Color_hd(hd: header_t) -> c_ulong {
     hd & (ocamlrep::CAML_BLACK as c_ulong)
 }
 #[inline]
-const fn Val_long(x: value) -> c_long {
-    (((x as uintnat) << 1) + 1 as uintnat) as c_long
+const fn Val_long(x: isize) -> value {
+    ((x << 1) + 1) as value
 }
 #[inline]
-const fn Val_int(x: value) -> c_long {
+const fn Val_int(x: isize) -> value {
     Val_long(x)
 }
 #[inline]
@@ -677,7 +677,7 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
                         current_block = READ_BLOCK_LABEL;
                     } else {
                         // Small integer
-                        v = Val_int((code & 0x3F) as value);
+                        v = Val_int((code & 0x3F) as isize);
                         current_block = NOTHING_TO_DO_LABEL;
                     }
                 } else {

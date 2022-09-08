@@ -92,6 +92,9 @@ std::pair<std::string_view, std::string_view> parseNameAndCmd(
 std::map<std::string_view, std::string_view> parseCmds(
     std::string_view cmdsStr) {
   std::map<std::string_view, std::string_view> result;
+  if (cmdsStr.empty()) {
+    return result;
+  }
   std::vector<folly::StringPiece> cmds;
   folly::split(',', cmdsStr, cmds);
   for (auto cmd : cmds) {

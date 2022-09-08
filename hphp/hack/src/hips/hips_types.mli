@@ -17,7 +17,7 @@ type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
 
 type entity =
   | Param of param_entity
-  | Const of const_entity
+  | Constant of const_entity
   | Identifier of identifier_entity
 [@@deriving ord, show]
 

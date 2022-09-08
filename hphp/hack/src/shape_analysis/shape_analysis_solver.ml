@@ -451,7 +451,7 @@ let produce_results
       | Inter (HT.Param (_, _, pos)) ->
         Pos.Set.add pos acc
       | Variable _
-      | Inter (HT.Const _)
+      | Inter (HT.Constant _)
       | Inter (HT.Identifier _) ->
         acc
     in
@@ -487,7 +487,7 @@ let produce_results
       match entity with
       | Literal pos
       | Inter (HT.Param (_, _, pos))
-      | Inter (HT.Const (pos, _))
+      | Inter (HT.Constant (pos, _))
       | Inter (HT.Identifier (pos, _)) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map
       | Variable _ -> pos_map

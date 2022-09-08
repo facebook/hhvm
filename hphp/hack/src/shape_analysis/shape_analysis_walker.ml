@@ -582,7 +582,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
               hack_pos = fst cst_name;
               origin = __LINE__;
               constraint_ =
-                Subsets (ent_, Inter (HT.Const (hint_pos, snd cst_name)));
+                Subsets (ent_, Inter (HT.Constant (hint_pos, snd cst_name)));
             }
           in
           Env.add_constraint env subset_constr

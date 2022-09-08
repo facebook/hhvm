@@ -31,14 +31,14 @@ interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyn
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -46,7 +46,7 @@ interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyn
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -54,7 +54,7 @@ interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyn
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -85,7 +85,7 @@ interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyn
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
 }
 
 /**
@@ -99,14 +99,14 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -114,7 +114,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -122,7 +122,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -153,7 +153,7 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>>;
 }
 
 /**
@@ -163,744 +163,6 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
 trait PubSubStreamingServiceClientBase {
   require extends \ThriftClientBase;
 
-
-  protected function recvImpl_returnstream_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_returnstream_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("returnstream failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_returnstream_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('returnstream', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_returnstream_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_returnstream_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_returnstream_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("returnstream failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('returnstream', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('returnstream', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('returnstream', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('returnstream', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('returnstream', $expectedsequenceid, null);
-    return;
-  }
-
-  protected function recvImpl_streamthrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_streamthrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      if ($result->e !== null) {
-        throw $result->e;
-      }
-      throw new \TApplicationException("streamthrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_streamthrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('streamthrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_streamthrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_streamthrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_streamthrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("streamthrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('streamthrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('streamthrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('streamthrows', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('streamthrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('streamthrows', $expectedsequenceid, null);
-    return;
-  }
-
-  protected function recvImpl_servicethrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_servicethrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("servicethrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_servicethrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('servicethrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_servicethrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_servicethrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_servicethrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("servicethrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('servicethrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('servicethrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('servicethrows', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('servicethrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->e !== null) {
-      $x = $result->e;
-      $this->eventHandler_->recvException('servicethrows', $expectedsequenceid, $x);
-      throw $x;
-    }
-    $this->eventHandler_->postRecv('servicethrows', $expectedsequenceid, null);
-    return;
-  }
-
-  protected function recvImpl_boththrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_boththrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      if ($result->e !== null) {
-        throw $result->e;
-      }
-      throw new \TApplicationException("boththrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_boththrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('boththrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_boththrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_boththrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_boththrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("boththrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('boththrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('boththrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('boththrows', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('boththrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->e !== null) {
-      $x = $result->e;
-      $this->eventHandler_->recvException('boththrows', $expectedsequenceid, $x);
-      throw $x;
-    }
-    $this->eventHandler_->postRecv('boththrows', $expectedsequenceid, null);
-    return;
-  }
-
-  protected function recvImpl_responseandstreamstreamthrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      if ($result->e !== null) {
-        throw $result->e;
-      }
-      throw new \TApplicationException("responseandstreamstreamthrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_responseandstreamstreamthrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): int {
-    try {
-      $this->eventHandler_->preRecv('responseandstreamstreamthrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_responseandstreamstreamthrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_responseandstreamstreamthrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("responseandstreamstreamthrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('responseandstreamstreamthrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('responseandstreamstreamthrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('responseandstreamstreamthrows', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('responseandstreamstreamthrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('responseandstreamstreamthrows', $expectedsequenceid, $success);
-      return $success;
-    }
-    $x = new \TApplicationException("responseandstreamstreamthrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('responseandstreamstreamthrows', $expectedsequenceid, $x);
-    throw $x;
-  }
-
-  protected function recvImpl_responseandstreamservicethrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_responseandstreamservicethrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("responseandstreamservicethrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_responseandstreamservicethrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): int {
-    try {
-      $this->eventHandler_->preRecv('responseandstreamservicethrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_responseandstreamservicethrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_responseandstreamservicethrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_responseandstreamservicethrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("responseandstreamservicethrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('responseandstreamservicethrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('responseandstreamservicethrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('responseandstreamservicethrows', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('responseandstreamservicethrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('responseandstreamservicethrows', $expectedsequenceid, $success);
-      return $success;
-    }
-    if ($result->e !== null) {
-      $x = $result->e;
-      $this->eventHandler_->recvException('responseandstreamservicethrows', $expectedsequenceid, $x);
-      throw $x;
-    }
-    $x = new \TApplicationException("responseandstreamservicethrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('responseandstreamservicethrows', $expectedsequenceid, $x);
-    throw $x;
-  }
-
-  protected function recvImpl_responseandstreamboththrows_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_responseandstreamboththrows_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      if ($result->e !== null) {
-        throw $result->e;
-      }
-      throw new \TApplicationException("responseandstreamboththrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_responseandstreamboththrows_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): int {
-    try {
-      $this->eventHandler_->preRecv('responseandstreamboththrows', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_responseandstreamboththrows_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_responseandstreamboththrows_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_responseandstreamboththrows_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("responseandstreamboththrows failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('responseandstreamboththrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('responseandstreamboththrows', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('responseandstreamboththrows', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('responseandstreamboththrows', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('responseandstreamboththrows', $expectedsequenceid, $success);
-      return $success;
-    }
-    if ($result->e !== null) {
-      $x = $result->e;
-      $this->eventHandler_->recvException('responseandstreamboththrows', $expectedsequenceid, $x);
-      throw $x;
-    }
-    $x = new \TApplicationException("responseandstreamboththrows failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('responseandstreamboththrows', $expectedsequenceid, $x);
-    throw $x;
-  }
-
-  protected function recvImpl_returnstreamFast_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = PubSubStreamingService_returnstreamFast_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("returnstreamFast failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_returnstreamFast_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('returnstreamFast', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'PubSubStreamingService_returnstreamFast_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'PubSubStreamingService_returnstreamFast_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = PubSubStreamingService_returnstreamFast_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("returnstreamFast failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('returnstreamFast', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('returnstreamFast', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('returnstreamFast', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('returnstreamFast', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('returnstreamFast', $expectedsequenceid, null);
-    return;
-  }
 }
 
 class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements PubSubStreamingServiceAsyncClientIf {
@@ -912,36 +174,19 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_returnstream_args::fromShape(shape(
       'i32_from' => $i32_from,
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
     $currentseqid = $this->sendImplHelper($args, "returnstream", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_returnstream_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_returnstream_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -949,35 +194,18 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_streamthrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
     $currentseqid = $this->sendImplHelper($args, "streamthrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_streamthrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_streamthrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -986,35 +214,18 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_servicethrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "servicethrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_servicethrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_servicethrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1023,35 +234,18 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_boththrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
     $currentseqid = $this->sendImplHelper($args, "boththrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_boththrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_boththrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1065,29 +259,12 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamstreamthrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamstreamthrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamstreamthrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1102,29 +279,12 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamservicethrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamservicethrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamservicethrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1139,29 +299,12 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamboththrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamboththrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamboththrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1170,36 +313,19 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_returnstreamFast_args::fromShape(shape(
       'i32_from' => $i32_from,
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
     $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_returnstreamFast_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_returnstreamFast_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -1213,36 +339,19 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   returnstream(1: i32 i32_from,
    *                2: i32 i32_to);
    */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_returnstream_args::fromShape(shape(
       'i32_from' => $i32_from,
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
     $currentseqid = $this->sendImplHelper($args, "returnstream", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_returnstream_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_returnstream_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1250,35 +359,18 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   streamthrows(1: i32 foo);
    */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function streamthrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_streamthrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
     $currentseqid = $this->sendImplHelper($args, "streamthrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_streamthrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_streamthrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1287,35 +379,18 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   servicethrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_servicethrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "servicethrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_servicethrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_servicethrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1324,35 +399,18 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
    */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function boththrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_boththrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
     $currentseqid = $this->sendImplHelper($args, "boththrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_boththrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_boththrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1366,29 +424,12 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamstreamthrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamstreamthrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamstreamthrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1403,29 +444,12 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamservicethrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamservicethrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamservicethrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1440,29 +464,12 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_responseandstreamboththrows_args::fromShape(shape(
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
     $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_responseandstreamboththrows_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_responseandstreamboththrows_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1471,36 +478,19 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
    *   returnstreamFast(1: i32 i32_from,
    *                    2: i32 i32_to);
    */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = PubSubStreamingService_returnstreamFast_args::fromShape(shape(
       'i32_from' => $i32_from,
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
     $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_returnstreamFast_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_returnstreamFast_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */

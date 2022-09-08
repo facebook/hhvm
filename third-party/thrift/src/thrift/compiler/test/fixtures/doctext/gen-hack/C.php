@@ -76,7 +76,7 @@ interface CAsyncClientIf extends CAsyncIf {
    * void, stream<number>
    *   numbers();
    */
-  public function numbers(): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function numbers(): Awaitable<\ResponseAndClientStream<null, int>>;
 }
 
 /**
@@ -113,7 +113,7 @@ interface CClientIf extends \IThriftSyncIf {
    * void, stream<number>
    *   numbers();
    */
-  public function numbers(): Awaitable<\ResponseAndClientStream<void, int>>;
+  public function numbers(): Awaitable<\ResponseAndClientStream<null, int>>;
 }
 
 /**
@@ -125,92 +125,6 @@ interface CClientIf extends \IThriftSyncIf {
 trait CClientBase {
   require extends \ThriftClientBase;
 
-
-  protected function recvImpl_numbers_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = C_numbers_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("numbers failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_numbers_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('numbers', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'C_numbers_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'C_numbers_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = C_numbers_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("numbers failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('numbers', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('numbers', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('numbers', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('numbers', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('numbers', $expectedsequenceid, null);
-    return;
-  }
 }
 
 class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
@@ -267,33 +181,16 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
    * void, stream<number>
    *   numbers();
    */
-  public async function numbers(): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function numbers(): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = C_numbers_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "numbers", $args);
     $currentseqid = $this->sendImplHelper($args, "numbers", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_numbers_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_numbers_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -352,33 +249,16 @@ class CClient extends \ThriftClientBase implements CClientIf {
    * void, stream<number>
    *   numbers();
    */
-  public async function numbers(): Awaitable<\ResponseAndClientStream<void, int>> {
+  public async function numbers(): Awaitable<\ResponseAndClientStream<null, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = C_numbers_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "numbers", $args);
     $currentseqid = $this->sendImplHelper($args, "numbers", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_numbers_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_numbers_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, int>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */

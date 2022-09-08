@@ -114,98 +114,6 @@ interface MyServiceClientIf extends \IThriftSyncIf {
 trait MyServiceClientBase {
   require extends \ThriftClientBase;
 
-
-  protected function recvImpl_serialize_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : int) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = MyService_serialize_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("serialize failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_serialize_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): int {
-    try {
-      $this->eventHandler_->preRecv('serialize', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'MyService_serialize_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'MyService_serialize_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = MyService_serialize_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("serialize failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('serialize', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('serialize', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('serialize', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('serialize', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('serialize', $expectedsequenceid, $success);
-      return $success;
-    }
-    $x = new \TApplicationException("serialize failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('serialize', $expectedsequenceid, $x);
-    throw $x;
-  }
   /* interaction handlers factory methods */
   public function createMyInteraction(): MyService_MyInteraction {
     $interaction = new MyService_MyInteraction($this->input_, $this->output_, $this->channel_);
@@ -294,27 +202,10 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_serialize_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "serialize", $args);
     $currentseqid = $this->sendImplHelper($args, "serialize", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_serialize_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_serialize_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(MyService_serialize_FirstResponse::class, MyService_serialize_StreamResponse::class, "serialize", false, $currentseqid, $rpc_options);
   }
 
 }
@@ -386,27 +277,10 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_serialize_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "serialize", $args);
     $currentseqid = $this->sendImplHelper($args, "serialize", false);
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<int>($this->recvImpl_serialize_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_serialize_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<int, int>($first_response, $stream_gen);
+    return await $this->genAwaitStreamResponse(MyService_serialize_FirstResponse::class, MyService_serialize_StreamResponse::class, "serialize", false, $currentseqid, $rpc_options);
   }
 
   /* send and recv functions */
@@ -521,13 +395,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
     $args = MyService_MyInteraction_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteraction.ping", $args);
     $currentseqid = $this->sendImpl_ping();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    if ($channel !== null && $out_transport is \TMemoryBuffer) {
-      $msg = $out_transport->getBuffer();
-      $out_transport->resetBuffer();
-      await $channel->genSendRequestNoResponse($rpc_options, $msg);
-    }
+    await $this->genAwaitNoResponse($rpc_options);
   }
 
   protected function sendImpl_ping(): int {
@@ -573,34 +441,17 @@ class MyService_MyInteraction extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<void, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_MyInteraction_truthify_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteraction.truthify", $args);
     $currentseqid = $this->sendImpl_truthify();
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<bool>($this->recvImpl_truthify_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_truthify_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, bool>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(MyService_MyInteraction_truthify_FirstResponse::class, MyService_MyInteraction_truthify_StreamResponse::class, "truthify", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_truthify(): int {
@@ -641,92 +492,6 @@ class MyService_MyInteraction extends \ThriftClientBase {
     $this->eventHandler_->postSend('MyInteraction.truthify', $args, $currentseqid);
     return $currentseqid;
   }
-
-  protected function recvImpl_truthify_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : bool) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = MyService_MyInteraction_truthify_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("truthify failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_truthify_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('MyInteraction.truthify', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'MyService_MyInteraction_truthify_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'MyService_MyInteraction_truthify_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = MyService_MyInteraction_truthify_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("truthify failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('MyInteraction.truthify', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('MyInteraction.truthify', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('MyInteraction.truthify', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('MyInteraction.truthify', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('MyInteraction.truthify', $expectedsequenceid, null);
-    return;
-  }
   /**
    * Original thrift definition:-
    * set<i32>, sink<string, binary>
@@ -739,39 +504,10 @@ class MyService_MyInteraction extends \ThriftClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
 $rpc_options->setInteractionId($this->interactionId);
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Sink methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_MyInteraction_encode_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteraction.encode", $args);
     $currentseqid = $this->sendImpl_encode();
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $sink) = await $channel->genSendRequestSink($rpc_options, $msg);
-
-    $payload_serializer = $this->sendImpl_encode_SinkEncode();
-    $final_response_deserializer = $this->recvImpl_encode_FinalResponse();
-    $client_sink_func = async function(
-      AsyncGenerator<null, string, void> $pld_generator
-    ) use ($sink, $payload_serializer, $final_response_deserializer) {
-      return await $sink->genSink<string, string>(
-        $pld_generator, 
-        $payload_serializer, 
-        $final_response_deserializer, 
-      );
-    };
-
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_encode_FirstResponse($currentseqid);
-
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientSink<Set<int>, string, string>($first_response, $client_sink_func);
+    return await $this->genAwaitSinkResponse(MyService_MyInteraction_encode_FirstResponse::class, MyService_MyInteraction_encode_SinkPayload::class, MyService_MyInteraction_encode_FinalResponse::class, "encode", false, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_encode(): int {
@@ -811,136 +547,6 @@ $rpc_options->setInteractionId($this->interactionId);
     }
     $this->eventHandler_->postSend('MyInteraction.encode', $args, $currentseqid);
     return $currentseqid;
-  }
-
-  protected function sendImpl_encode_SinkEncode(): (function(?string, ?\Exception) : (string, bool)) {
-    $protocol = $this->output_;
-    return function(
-      ?string $sink_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-
-      $transport = $protocol->getTransport();
-      invariant(
-        $transport is \TMemoryBuffer,
-        "Sink methods require TMemoryBuffer transport"
-      );
-
-      $is_application_ex = false;
-
-      if ($ex !== null) {
-        if ($ex is \TApplicationException) {
-          $is_application_ex = true;
-          $result = $ex;
-        } else {
-          $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-        }
-      } else {
-        $result = MyService_MyInteraction_encode_SinkPayload::fromShape(shape(
-          'success' => $sink_payload,
-        ));
-      }
-
-      $result->write($protocol);
-      $protocol->writeMessageEnd();
-      $transport->flush();
-      $msg = $transport->getBuffer();
-      $transport->resetBuffer();
-      return tuple($msg, $is_application_ex);
-    };
-  }
-
-  protected function recvImpl_encode_FinalResponse(): (function(?string, ?\Exception) : string) {
-    $protocol = $this->input_;
-    return function(
-      ?string $sink_final_response, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($sink_final_response as nonnull);
-        $result = MyService_MyInteraction_encode_FinalResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("encode failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_encode_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): Set<int> {
-    try {
-      $this->eventHandler_->preRecv('MyInteraction.encode', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'MyService_MyInteraction_encode_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'MyService_MyInteraction_encode_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = MyService_MyInteraction_encode_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("encode failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('MyInteraction.encode', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('MyInteraction.encode', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('MyInteraction.encode', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('MyInteraction.encode', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('MyInteraction.encode', $expectedsequenceid, $success);
-      return $success;
-    }
-    $x = new \TApplicationException("encode failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('MyInteraction.encode', $expectedsequenceid, $x);
-    throw $x;
   }
 }
 
@@ -1027,13 +633,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
     $args = MyService_MyInteractionFast_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteractionFast.ping", $args);
     $currentseqid = $this->sendImpl_ping();
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    if ($channel !== null && $out_transport is \TMemoryBuffer) {
-      $msg = $out_transport->getBuffer();
-      $out_transport->resetBuffer();
-      await $channel->genSendRequestNoResponse($rpc_options, $msg);
-    }
+    await $this->genAwaitNoResponse($rpc_options);
   }
 
   protected function sendImpl_ping(): int {
@@ -1079,34 +679,17 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
    * void, stream<bool>
    *   truthify();
    */
-  public async function truthify(): Awaitable<\ResponseAndClientStream<void, bool>> {
+  public async function truthify(): Awaitable<\ResponseAndClientStream<null, bool>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
     }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
     $rpc_options = $rpc_options->setInteractionId($this->interactionId);
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Stream methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_MyInteractionFast_truthify_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteractionFast.truthify", $args);
     $currentseqid = $this->sendImpl_truthify();
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $stream) = await $channel->genSendRequestStreamResponse($rpc_options, $msg);
-
-    $stream_gen = $stream->gen<bool>($this->recvImpl_truthify_StreamDecode());
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $this->recvImpl_truthify_FirstResponse($currentseqid);
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientStream<void, bool>(null, $stream_gen);
+    return await $this->genAwaitStreamResponse(MyService_MyInteractionFast_truthify_FirstResponse::class, MyService_MyInteractionFast_truthify_StreamResponse::class, "truthify", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_truthify(): int {
@@ -1147,92 +730,6 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
     $this->eventHandler_->postSend('MyInteractionFast.truthify', $args, $currentseqid);
     return $currentseqid;
   }
-
-  protected function recvImpl_truthify_StreamDecode(shape(?'read_options' => int) $options = shape()): (function(?string, ?\Exception) : bool) {
-    $protocol = $this->input_;
-    return function(
-      ?string $stream_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        $result = MyService_MyInteractionFast_truthify_StreamResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("truthify failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_truthify_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): void {
-    try {
-      $this->eventHandler_->preRecv('MyInteractionFast.truthify', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'MyService_MyInteractionFast_truthify_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'MyService_MyInteractionFast_truthify_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = MyService_MyInteractionFast_truthify_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("truthify failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('MyInteractionFast.truthify', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('MyInteractionFast.truthify', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('MyInteractionFast.truthify', $expectedsequenceid, $ex->result);
-          return;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('MyInteractionFast.truthify', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    $this->eventHandler_->postRecv('MyInteractionFast.truthify', $expectedsequenceid, null);
-    return;
-  }
   /**
    * Original thrift definition:-
    * set<i32>, sink<string, binary>
@@ -1245,39 +742,10 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? new \RpcOptions();
 $rpc_options->setInteractionId($this->interactionId);
-    $channel = $this->channel_;
-    $out_transport = $this->output_->getTransport();
-    $in_transport = $this->input_->getTransport();
-    invariant(
-      $channel !== null && $out_transport is \TMemoryBuffer && $in_transport is \TMemoryBuffer,
-      "Sink methods require nonnull channel and TMemoryBuffer transport"
-    );
-
     $args = MyService_MyInteractionFast_encode_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteractionFast.encode", $args);
     $currentseqid = $this->sendImpl_encode();
-    $msg = $out_transport->getBuffer();
-    $out_transport->resetBuffer();
-    list($result_msg, $_read_headers, $sink) = await $channel->genSendRequestSink($rpc_options, $msg);
-
-    $payload_serializer = $this->sendImpl_encode_SinkEncode();
-    $final_response_deserializer = $this->recvImpl_encode_FinalResponse();
-    $client_sink_func = async function(
-      AsyncGenerator<null, string, void> $pld_generator
-    ) use ($sink, $payload_serializer, $final_response_deserializer) {
-      return await $sink->genSink<string, string>(
-        $pld_generator, 
-        $payload_serializer, 
-        $final_response_deserializer, 
-      );
-    };
-
-    $in_transport->resetBuffer();
-    $in_transport->write($result_msg);
-    $first_response = $this->recvImpl_encode_FirstResponse($currentseqid);
-
-    await $this->asyncHandler_->genAfter();
-    return new \ResponseAndClientSink<Set<int>, string, string>($first_response, $client_sink_func);
+    return await $this->genAwaitSinkResponse(MyService_MyInteractionFast_encode_FirstResponse::class, MyService_MyInteractionFast_encode_SinkPayload::class, MyService_MyInteractionFast_encode_FinalResponse::class, "encode", false, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_encode(): int {
@@ -1317,136 +785,6 @@ $rpc_options->setInteractionId($this->interactionId);
     }
     $this->eventHandler_->postSend('MyInteractionFast.encode', $args, $currentseqid);
     return $currentseqid;
-  }
-
-  protected function sendImpl_encode_SinkEncode(): (function(?string, ?\Exception) : (string, bool)) {
-    $protocol = $this->output_;
-    return function(
-      ?string $sink_payload, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-
-      $transport = $protocol->getTransport();
-      invariant(
-        $transport is \TMemoryBuffer,
-        "Sink methods require TMemoryBuffer transport"
-      );
-
-      $is_application_ex = false;
-
-      if ($ex !== null) {
-        if ($ex is \TApplicationException) {
-          $is_application_ex = true;
-          $result = $ex;
-        } else {
-          $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-        }
-      } else {
-        $result = MyService_MyInteractionFast_encode_SinkPayload::fromShape(shape(
-          'success' => $sink_payload,
-        ));
-      }
-
-      $result->write($protocol);
-      $protocol->writeMessageEnd();
-      $transport->flush();
-      $msg = $transport->getBuffer();
-      $transport->resetBuffer();
-      return tuple($msg, $is_application_ex);
-    };
-  }
-
-  protected function recvImpl_encode_FinalResponse(): (function(?string, ?\Exception) : string) {
-    $protocol = $this->input_;
-    return function(
-      ?string $sink_final_response, ?\Exception $ex
-    ) use (
-      $protocol,
-    ) {
-      try {
-        if ($ex !== null) {
-          throw $ex;
-        }
-        $transport = $protocol->getTransport();
-        invariant(
-          $transport is \TMemoryBuffer,
-          "Stream methods require TMemoryBuffer transport"
-        );
-
-        $transport->resetBuffer();
-        $transport->write($sink_final_response as nonnull);
-        $result = MyService_MyInteractionFast_encode_FinalResponse::withDefaultValues();
-        $result->read($protocol);
-        $protocol->readMessageEnd();
-      } catch (\THandlerShortCircuitException $ex) {
-        throw $ex->result;
-      }
-      if ($result->success !== null) {
-       return $result->success;
-      }
-      throw new \TApplicationException("encode failed: unknown result", \TApplicationException::MISSING_RESULT);
-    };
-  }
-
-  protected function recvImpl_encode_FirstResponse(?int $expectedsequenceid = null, shape(?'read_options' => int) $options = shape()): Set<int> {
-    try {
-      $this->eventHandler_->preRecv('MyInteractionFast.encode', $expectedsequenceid);
-      if ($this->input_ is \TBinaryProtocolAccelerated) {
-        $result = \thrift_protocol_read_binary($this->input_, 'MyService_MyInteractionFast_encode_FirstResponse', $this->input_->isStrictRead(), Shapes::idx($options, 'read_options', 0));
-      } else if ($this->input_ is \TCompactProtocolAccelerated)
-      {
-        $result = \thrift_protocol_read_compact($this->input_, 'MyService_MyInteractionFast_encode_FirstResponse', Shapes::idx($options, 'read_options', 0));
-      }
-      else
-      {
-        $rseqid = 0;
-        $fname = '';
-        $mtype = 0;
-
-        $this->input_->readMessageBegin(
-          inout $fname,
-          inout $mtype,
-          inout $rseqid,
-        );
-        if ($mtype === \TMessageType::EXCEPTION) {
-          $x = new \TApplicationException();
-          $x->read($this->input_);
-          $this->input_->readMessageEnd();
-          throw $x;
-        }
-        $result = MyService_MyInteractionFast_encode_FirstResponse::withDefaultValues();
-        $result->read($this->input_);
-        $this->input_->readMessageEnd();
-        if ($expectedsequenceid !== null && ($rseqid !== $expectedsequenceid)) {
-          throw new \TProtocolException("encode failed: sequence id is out of order");
-        }
-      }
-    } catch (\THandlerShortCircuitException $ex) {
-      switch ($ex->resultType) {
-        case \THandlerShortCircuitException::R_EXPECTED_EX:
-          $this->eventHandler_->recvException('MyInteractionFast.encode', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_UNEXPECTED_EX:
-          $this->eventHandler_->recvError('MyInteractionFast.encode', $expectedsequenceid, $ex->result);
-          throw $ex->result;
-        case \THandlerShortCircuitException::R_SUCCESS:
-        default:
-          $this->eventHandler_->postRecv('MyInteractionFast.encode', $expectedsequenceid, $ex->result);
-          return $ex->result;
-      }
-    } catch (\Exception $ex) {
-      $this->eventHandler_->recvError('MyInteractionFast.encode', $expectedsequenceid, $ex);
-      throw $ex;
-    }
-    if ($result->success !== null) {
-      $success = $result->success;
-      $this->eventHandler_->postRecv('MyInteractionFast.encode', $expectedsequenceid, $success);
-      return $success;
-    }
-    $x = new \TApplicationException("encode failed: unknown result", \TApplicationException::MISSING_RESULT);
-    $this->eventHandler_->recvError('MyInteractionFast.encode', $expectedsequenceid, $x);
-    throw $x;
   }
 }
 

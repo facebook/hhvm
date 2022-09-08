@@ -251,7 +251,11 @@ void WatchmanConnection::failQueuedCommands(
   // If the user has explicitly closed the connection no need for callback
   if (callback_ && !closing_) {
     cpuExecutor_->add([shared_this = shared_from_this(), ex] {
-      (*(shared_this->callback_))(folly::Try<folly::dynamic>(ex));
+      // Make sure we weren't asked to close between the time we fired this
+      // callback and when the callback ran.
+      if (!shared_this->closing_) {
+        (*(shared_this->callback_))(folly::Try<folly::dynamic>(ex));
+      }
     });
   }
 }

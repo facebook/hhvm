@@ -13,6 +13,12 @@ namespace watchman {
 
 using namespace folly;
 
+WatchmanClient::~WatchmanClient() {
+  // We need to explicitly close the connection so in the case that it outlives
+  // us it doesn't accidentally call our callback.
+  conn_->close();
+}
+
 WatchmanClient::WatchmanClient(
     EventBase* eventBase,
     std::optional<std::string>&& socketPath,

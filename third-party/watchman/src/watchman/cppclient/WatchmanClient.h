@@ -126,6 +126,8 @@ struct Subscription {
 using SubscriptionPtr = std::shared_ptr<Subscription>;
 
 struct WatchmanClient {
+  ~WatchmanClient();
+
   explicit WatchmanClient(
       folly::EventBase* eventBase,
       std::optional<std::string>&& sockPath = {},

@@ -15,7 +15,6 @@ use ocamlrep::Value;
 
 use crate::intext::*;
 
-type int64_t = c_long;
 type intnat = c_long;
 
 // Flags affecting marshaling
@@ -128,8 +127,8 @@ fn store32(dst: &mut impl Write, n: intnat) {
 }
 
 #[inline]
-fn store64(dst: &mut impl Write, n: int64_t) {
-    dst.write_all(&(n as i64).to_be_bytes()).unwrap()
+fn store64(dst: &mut impl Write, n: i64) {
+    dst.write_all(&n.to_be_bytes()).unwrap()
 }
 
 #[repr(C)]
@@ -617,8 +616,8 @@ impl<'a> State<'a> {
             store32(&mut header, MAGIC_NUMBER_BIG as intnat);
             store32(&mut header, 0);
             store64(&mut header, res_len);
-            store64(&mut header, self.obj_counter as int64_t);
-            store64(&mut header, self.size_64 as int64_t);
+            store64(&mut header, self.obj_counter as i64);
+            store64(&mut header, self.size_64 as i64);
             *header_len = 32;
             return res_len;
         }

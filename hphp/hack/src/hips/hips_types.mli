@@ -54,7 +54,10 @@ module type Intra = sig
   (** Verifies whether an entity is the nth argument of a given function.
       For instance, calling with ("f", 0) and "p" should result in "true",
       if p is the first argument of f, and "false" otherwise. *)
-  val is_same_entity : entity -> intra_entity -> bool
+  val is_same_entity : intra_entity -> intra_entity -> bool
+
+  (** Interprets a parameter entity as an intra-procedural entity *)
+  val embed_entity : param_entity -> intra_entity
 
   (** The maximum number of iterations constraint substitution should be
       performed without reaching a fixpoint. *)
@@ -64,14 +67,23 @@ module type Intra = sig
       equivalence of lists of constraints. *)
   val equiv : any_constraint list -> any_constraint list -> bool
 
-  (** Substitutes the intra-procedural constraint in the second argument
+  (** Backwards substitutes the intra-procedural constraint in the second argument
       with respect to the inter-procedural constraint in the first argument.
-      For instance, calling it with the first argument "("f", 0, p)" and
+      For instance, calling it with the first argument "(("f", 0), p)" and
       the second argument "Has_static_key(q, 'a', int)" should result in
       "Has_static_key(p, 'a', int)", if q is the first argument of f, and
       "Has_static_key(q, 'a', int)" otherwise. *)
-  val substitute_inter_intra :
-    inter_constraint -> intra_constraint -> intra_constraint
+  val substitute_inter_intra_backwards :
+    inter_constraint -> intra_constraint -> intra_constraint option
+
+  (** Forwards substitutes the intra-procedural constraint in the second argument
+      with respect to the inter-procedural constraint in the first argument.
+      Calling it with the first argument "(("f", 0), p)" and
+      the second argument "Has_static_key(q, 'a', int)" should result in
+      "Has_static_key(("f", 0), 'a', int)", if q=p, and
+      "Has_static_key(q, 'a', int)" otherwise. *)
+  val substitute_inter_intra_forwards :
+    inter_constraint -> intra_constraint -> intra_constraint option
 
   (** Deduces a simplified list of intra-procedural constraints.  *)
   val deduce : intra_constraint list -> intra_constraint list

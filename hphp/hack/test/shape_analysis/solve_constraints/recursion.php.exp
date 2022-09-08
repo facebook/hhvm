@@ -2,17 +2,9 @@
 Summary after closing and simplifying for \f:
 [3:12-31] [Parameter]:
   shape('a' => mixed, 'b' => mixed)
-[8:12-31] [Parameter]:
-  shape()
 Summary after closing and simplifying for \g:
-[3:12-31] [Parameter]:
-  shape()
 [8:12-31] [Parameter]:
   shape('a' => mixed, 'b' => mixed)
 Summary after closing and simplifying for \main:
-[3:12-31] [Parameter]:
-  shape()
-[8:12-31] [Parameter]:
-  shape()
 [14:5-33] [Allocation]:
-  shape('a' => mixed, 'b' => mixed)
+  shape('a' => mixed, 'b' => int)

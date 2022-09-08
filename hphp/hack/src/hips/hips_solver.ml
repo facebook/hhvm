@@ -27,52 +27,123 @@ module Inter (I : Intra) = struct
       (constraint_map_2 : any_constraint list SMap.t) : bool =
     SMap.equal I.equiv constraint_map_1 constraint_map_2
 
+  let substitute_inter_inter_forwards
+      ~inter_constr_1 (inter_constr_2 : inter_constraint) :
+      inter_constraint option =
+    match (inter_constr_1, inter_constr_2) with
+    | ( Arg (param_entity_left, intra_entity_left),
+        Arg (param_entity_right, intra_entity_right) ) ->
+      if I.is_same_entity (I.embed_entity param_entity_left) intra_entity_right
+      then
+        Some (Arg (param_entity_right, intra_entity_left))
+      else
+        Some inter_constr_2
+    | _ -> None
+  (* TODO(T127947010) Add case for inter-procedural return constraint *)
+
+  let substitute_inter_inter_backwards
+      ~inter_constr_1 (inter_constr_2 : inter_constraint) :
+      inter_constraint option =
+    match (inter_constr_1, inter_constr_2) with
+    | ( Arg (param_entity_left, intra_entity_left),
+        Arg (param_entity_right, intra_entity_right) ) ->
+      if I.is_same_entity intra_entity_left intra_entity_right then
+        Some (Arg (param_entity_right, I.embed_entity param_entity_left))
+      else
+        Some inter_constr_2
+    | _ -> None
+  (* TODO(T127947010) Add case for inter-procedural return constraint *)
+
+  let substitute_inter_any_backwards
+      (inter_constr_1 : inter_constraint) (constr : any_constraint) :
+      any_constraint option =
+    match constr with
+    | Intra intra_constr ->
+      Option.map
+        ~f:(fun x -> Intra x)
+        (I.substitute_inter_intra_backwards inter_constr_1 intra_constr)
+    | Inter inter_constr_2 ->
+      Option.map
+        ~f:(fun x -> Inter x)
+        (substitute_inter_inter_backwards ~inter_constr_1 inter_constr_2)
+
+  let substitute_inter_any_forwards
+      (inter_constr_1 : inter_constraint) (constr : any_constraint) :
+      any_constraint option =
+    match constr with
+    | Intra intra_constr ->
+      Option.map
+        ~f:(fun x -> Intra x)
+        (I.substitute_inter_intra_forwards inter_constr_1 intra_constr)
+    | Inter inter_constr_2 ->
+      Option.map
+        ~f:(fun x -> Inter x)
+        (substitute_inter_inter_forwards ~inter_constr_1 inter_constr_2)
+
   let substitute
       ~base_constraint_map
       (argument_constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let substitute_inter_inter
-        ~inter_constr_1 (inter_constr_2 : inter_constraint) : inter_constraint =
-      match (inter_constr_1, inter_constr_2) with
-      | ( Arg (param_entity_left, intra_entity_left),
-          Arg (param_entity_right, intra_entity_right) ) ->
-        if I.is_same_entity (Param param_entity_left) intra_entity_right then
-          Arg (param_entity_right, intra_entity_left)
-        else
-          inter_constr_2
-      | _ -> inter_constr_2
-      (* TODO(T127947010) Add case for inter-procedural return constraint *)
-    in
-    let substitute_inter_any
-        (inter_constr_1 : inter_constraint) (constr : any_constraint) :
-        any_constraint =
-      match constr with
-      | Intra intra_constr ->
-        Intra (I.substitute_inter_intra inter_constr_1 intra_constr)
-      | Inter inter_constr_2 ->
-        Inter (substitute_inter_inter ~inter_constr_1 inter_constr_2)
-    in
-    let substitute_any (constr : any_constraint) : any_constraint list =
-      match constr with
-      | Intra _ -> [constr]
-      | Inter inter_constr ->
-        begin
-          match inter_constr with
-          | Arg ((f, _, _), _) ->
+    let substitute_any_list
+        (current_func_id : string)
+        (current_func_constr_list : any_constraint list)
+        (input_constr_list_map2 : any_constraint list SMap.t) :
+        any_constraint list SMap.t =
+      let substitute_any
+          (input_constr_list_map : any_constraint list SMap.t)
+          (constr : any_constraint) : any_constraint list SMap.t =
+        match constr with
+        | Intra _ -> input_constr_list_map
+        | Inter inter_constr ->
+          (match inter_constr with
+          | Arg ((f, f_idx, _), intra_ent) ->
             let constr_list_at = SMap.find_opt f base_constraint_map in
-            (match constr_list_at with
-            | None -> []
-            | Some constr_list_at ->
-              List.map constr_list_at ~f:(substitute_inter_any inter_constr))
-          | _ ->
-            []
-            (* TODO(T127947010) Add case for inter-procedural return constraint *)
-        end
+            let param_constr : inter_constraint =
+              match constr_list_at with
+              | Some constr_list_at_ ->
+                let param_ent_opt =
+                  List.find
+                    ~f:(function
+                      | Inter (Param (g, g_idx, _)) ->
+                        String.equal f g && Int.equal f_idx g_idx
+                      | _ -> false)
+                    constr_list_at_
+                in
+                (match param_ent_opt with
+                | Some (Inter (Param param_ent)) -> Arg (param_ent, intra_ent)
+                | _ -> failwith "Used invalid function identifier")
+              | None -> failwith "Used invalid function identifier"
+            in
+            let constr_list_backwards =
+              match constr_list_at with
+              | None -> []
+              | Some constr_list_at_ ->
+                List.filter_map
+                  constr_list_at_
+                  ~f:(substitute_inter_any_backwards inter_constr)
+            in
+            let constr_list_forwards =
+              List.filter_map
+                current_func_constr_list
+                ~f:(substitute_inter_any_forwards param_constr)
+            in
+            input_constr_list_map
+            |> SMap.update f (Option.map ~f:(fun x -> x @ constr_list_forwards))
+            |> SMap.update
+                 current_func_id
+                 (Option.map ~f:(fun x -> x @ constr_list_backwards))
+          | _ -> input_constr_list_map)
+        (* TODO(T127947010) Add case for inter-procedural return constraint *)
+      in
+      List.fold_left
+        ~f:substitute_any
+        ~init:input_constr_list_map2
+        current_func_constr_list
     in
-    let substitute_any_list (xs : any_constraint list) : any_constraint list =
-      List.map xs ~f:substitute_any |> List.concat
-    in
-    SMap.map substitute_any_list argument_constraint_map
+    SMap.fold
+      substitute_any_list
+      argument_constraint_map
+      argument_constraint_map
 
   (** For a given map, at every key, we iterate through its identifier constraints.
       For a fixed identifier, we modify the map by adding to the value/constraints

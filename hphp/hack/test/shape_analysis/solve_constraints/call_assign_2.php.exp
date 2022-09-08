@@ -4,8 +4,6 @@ Summary after closing and simplifying for \f:
   shape('a' => int)
 [6:11-13] [Debug]:
   shape('a' => int)
-[9:12-30] [Parameter]:
-  shape()
 Summary after closing and simplifying for \g:
 [9:12-30] [Parameter]:
-  shape()
+  shape(?'a' => int)

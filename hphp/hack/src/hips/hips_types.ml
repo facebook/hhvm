@@ -39,14 +39,19 @@ module type Intra = sig
 
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
 
-  val is_same_entity : entity -> intra_entity -> bool
+  val is_same_entity : intra_entity -> intra_entity -> bool
+
+  val embed_entity : param_entity -> intra_entity
 
   val max_iteration : int
 
   val equiv : any_constraint list -> any_constraint list -> bool
 
-  val substitute_inter_intra :
-    inter_constraint -> intra_constraint -> intra_constraint
+  val substitute_inter_intra_backwards :
+    inter_constraint -> intra_constraint -> intra_constraint option
+
+  val substitute_inter_intra_forwards :
+    inter_constraint -> intra_constraint -> intra_constraint option
 
   val deduce : intra_constraint list -> intra_constraint list
 

@@ -531,34 +531,63 @@ let produce_results
 
   static_shape_results @ dynamic_shape_results
 
-let is_same_entity (param_ent_1 : HT.entity) (ent : entity_) : bool =
-  match ent with
-  | Literal _
-  | Variable _ ->
-    false
-  | Inter param_ent_2 -> HT.equal_entity param_ent_1 param_ent_2
-
 let substitute_inter_intra
-    (inter_constr : inter_constraint_) (intra_constr : constraint_) :
-    constraint_ =
+    replace (inter_constr : inter_constraint_) (intra_constr : constraint_) :
+    constraint_ option =
   match inter_constr with
   | HT.Arg (param_ent, intra_ent_1) ->
-    let replace intra_ent_2 =
-      if is_same_entity (HT.Param param_ent) intra_ent_2 then
-        intra_ent_1
-      else
-        intra_ent_2
+    let (replace_, forwards) =
+      match replace with
+      | `Backwards replace_ -> (replace_, false)
+      | `Forwards replace_ -> (replace_, true)
     in
+    let replace intra_ent_2 = replace_ param_ent intra_ent_1 intra_ent_2 in
     begin
       match intra_constr with
-      | Marks _ -> intra_constr
-      | Static_key (variety, source, intra_ent_2, key, ty) ->
-        Static_key (variety, source, replace intra_ent_2, key, ty)
-      | Has_dynamic_key intra_ent_2 -> Has_dynamic_key (replace intra_ent_2)
-      | Subsets (intra_ent_2, intra_ent_3) ->
-        Subsets (replace intra_ent_2, replace intra_ent_3)
+      | Marks _
+      | Subsets (_, _) ->
+        None
+      | Static_key (variety, certainty, intra_ent_2, key, ty) ->
+        let (variety, certainty) =
+          if forwards then
+            (Needs, Maybe)
+          else
+            (variety, certainty)
+        in
+        Option.map
+          ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
+          (replace intra_ent_2)
+      | Has_dynamic_key intra_ent_2 ->
+        Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2)
     end
-  | _ -> intra_constr
+  | _ -> Some intra_constr
+
+let embed_entity (param_ent : HT.param_entity) : entity_ =
+  Inter (HT.Param param_ent)
+
+let replace_backwards
+    (param_ent : HT.param_entity)
+    (intra_ent_1 : entity_)
+    (intra_ent_2 : entity_) : entity =
+  if equal_entity_ (Inter (HT.Param param_ent)) intra_ent_2 then
+    Some intra_ent_1
+  else
+    None
+
+let replace_forwards
+    (param_ent : HT.param_entity)
+    (intra_ent_1 : entity_)
+    (intra_ent_2 : entity_) : entity =
+  if equal_entity_ intra_ent_1 intra_ent_2 then
+    Some (embed_entity param_ent)
+  else
+    None
+
+let substitute_inter_intra_backwards =
+  substitute_inter_intra (`Backwards replace_backwards)
+
+let substitute_inter_intra_forwards =
+  substitute_inter_intra (`Forwards replace_forwards)
 
 let equiv
     (any_constr_list_1 : any_constraint list)

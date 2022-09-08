@@ -501,7 +501,7 @@ let produce_results
     |> add_known_keys definitely_has_static_accesses ~is_optional:false
   in
 
-  let backward_satic_shape_results =
+  let backward_static_shape_results =
     let add_known_keys = add_known_keys in
     backward_static_shape_results
     |> add_known_keys maybe_needs_static_accesses ~is_optional:true
@@ -509,7 +509,7 @@ let produce_results
   in
 
   let static_shape_results =
-    Pos.Map.union forward_static_shape_results backward_satic_shape_results
+    Pos.Map.union forward_static_shape_results backward_static_shape_results
   in
 
   (* Convert to individual statically accessed dict results *)

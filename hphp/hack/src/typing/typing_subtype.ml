@@ -2380,6 +2380,11 @@ and simplify_subtype_i
                   Ast_defs.is_c_trait (Cls.kind class_sub)
                   || Ast_defs.is_c_interface (Cls.kind class_sub)
                 then
+                  let reqs_class =
+                    List.map
+                      (Cls.all_ancestor_req_class_requirements class_sub)
+                      ~f:snd
+                  in
                   let rec try_upper_bounds_on_this up_objs env =
                     match up_objs with
                     | [] ->
@@ -2387,6 +2392,12 @@ and simplify_subtype_i
                        * env that were introduced by Phase.localize.
                        * TODO: avoid this requirement *)
                       invalid_env env
+                    | ub_obj_typ :: up_objs
+                      when List.mem reqs_class ub_obj_typ ~equal:equal_decl_ty
+                      ->
+                      (* `require class` constraints do not induce subtyping,
+                       * so skipping them *)
+                      try_upper_bounds_on_this up_objs env
                     | ub_obj_typ :: up_objs ->
                       (* A trait is never the runtime type, but it can be used
                        * as a constraint if it has requirements or where

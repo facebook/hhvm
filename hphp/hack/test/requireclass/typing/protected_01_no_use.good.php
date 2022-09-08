@@ -12,8 +12,9 @@ trait T {
   public function foo(): void { $this->bar(); }
 }
 
-final class C {
-  use T;
+class D {
+  protected function bar(): void {}
+}
 
-  public function bar(): void { }
+final class C extends D {
 }

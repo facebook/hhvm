@@ -6,14 +6,15 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
+final class C {
+
+  protected function foo(): void {}
+}
+
 trait T {
   require class C;
 
-  public function foo(): void { $this->bar(); }
-}
-
-final class C {
-  use T;
-
-  public function bar(): void { }
+  public function bar(): void {
+    $this->foo();
+  }
 }

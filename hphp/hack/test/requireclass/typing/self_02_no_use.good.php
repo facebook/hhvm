@@ -9,11 +9,12 @@
 trait T {
   require class C;
 
-  public function foo(): void { $this->bar(); }
+  public static function foo(): void { self::bar(); }
 }
 
-final class C {
-  use T;
+class D {
+  public static function bar(): void { }
+}
 
-  public function bar(): void { }
+final class C extends D {
 }

@@ -20,8 +20,6 @@ type int64_t = c_long;
 type intnat = c_long;
 type uintnat = c_ulong;
 
-type mlsize_t = uintnat;
-
 // Flags affecting marshaling
 
 const NO_SHARING: c_int = 1; // Flag to ignore sharing
@@ -48,7 +46,7 @@ const EXTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
 #[repr(C)]
 struct extern_item<'a> {
     v: &'a Value<'a>,
-    count: mlsize_t,
+    count: usize,
 }
 
 // Hash table to record already-marshaled objects and their positions
@@ -75,9 +73,9 @@ struct object_position<'a> {
 #[repr(C)]
 struct position_table<'a> {
     shift: c_int,
-    size: mlsize_t,                      // size == 1 << (wordsize - shift)
-    mask: mlsize_t,                      // mask == size - 1
-    threshold: mlsize_t,                 // threshold == a fixed fraction of size
+    size: usize,                         // size == 1 << (wordsize - shift)
+    mask: usize,                         // mask == size - 1
+    threshold: usize,                    // threshold == a fixed fraction of size
     present: Box<[uintnat]>,             // [Bitvect_size(size)]
     entries: Box<[object_position<'a>]>, // [size]
 }
@@ -95,10 +93,10 @@ const POS_TABLE_INIT_SIZE: usize = 1 << POS_TABLE_INIT_SIZE_LOG2;
 // Multiplicative Fibonacci hashing
 // (Knuth, TAOCP vol 3, section 6.4, page 518).
 // HASH_FACTOR is (sqrt(5) - 1) / 2 * 2^wordsize.
-const HASH_FACTOR: uintnat = 11400714819323198486;
+const HASH_FACTOR: usize = 11400714819323198486;
 #[inline]
-const fn Hash(v: Value<'_>, shift: c_int) -> mlsize_t {
-    (v.to_bits() as uintnat).wrapping_mul(HASH_FACTOR) >> shift as uintnat
+const fn Hash(v: Value<'_>, shift: c_int) -> usize {
+    v.to_bits().wrapping_mul(HASH_FACTOR) >> shift
 }
 
 // When the table becomes 2/3 full, its size is increased.
@@ -141,8 +139,8 @@ struct State<'a> {
     extern_flags: c_int, // logical or of some of the flags
 
     obj_counter: uintnat, // Number of objects emitted so far
-    size_32: uintnat,     // Size in words of 32-bit block for struct.
-    size_64: uintnat,     // Size in words of 64-bit block for struct.
+    size_32: usize,       // Size in words of 32-bit block for struct.
+    size_64: usize,       // Size in words of 64-bit block for struct.
 
     // Stack for pending value to marshal
     stack: Vec<extern_item<'a>>,
@@ -182,11 +180,11 @@ impl<'a> State<'a> {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
-        self.pos_table.size = POS_TABLE_INIT_SIZE as mlsize_t;
+        self.pos_table.size = POS_TABLE_INIT_SIZE as usize;
         self.pos_table.shift =
             (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as c_int;
-        self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
-        self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
+        self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as usize;
+        self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as usize;
         self.pos_table.present =
             Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
         self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE).assume_init();
@@ -194,7 +192,7 @@ impl<'a> State<'a> {
 
     /// Grow the position table
     unsafe fn resize_position_table(&mut self) {
-        let new_size: mlsize_t;
+        let new_size: usize;
         let new_shift: c_int;
         let new_present: Box<[uintnat]>;
         let new_entries: Box<[object_position<'a>]>;
@@ -219,7 +217,7 @@ impl<'a> State<'a> {
                 size: new_size,
                 shift: new_shift,
                 mask: new_size - 1,
-                threshold: Threshold(new_size as usize) as mlsize_t,
+                threshold: Threshold(new_size as usize) as usize,
                 present: new_present,
                 entries: new_entries,
             },
@@ -231,11 +229,11 @@ impl<'a> State<'a> {
         let new_present = self.pos_table.present.as_mut_ptr();
         let new_entries = self.pos_table.entries.as_mut_ptr();
         i = 0;
-        while i < old.size {
+        while i < old.size as uintnat {
             if bitvect_test(old_present, i) != 0 {
-                h = Hash((*old_entries.offset(i as isize)).obj, self.pos_table.shift);
+                h = Hash((*old_entries.offset(i as isize)).obj, self.pos_table.shift) as uintnat;
                 while bitvect_test(new_present, h) != 0 {
-                    h = (h + 1) & self.pos_table.mask
+                    h = (h + 1) & self.pos_table.mask as uintnat
                 }
                 bitvect_set(new_present, h);
                 *new_entries.offset(h as isize) = *old_entries.offset(i as isize)
@@ -255,7 +253,7 @@ impl<'a> State<'a> {
         pos_out: *mut uintnat,
         h_out: *mut uintnat,
     ) -> c_int {
-        let mut h: uintnat = Hash(obj, self.pos_table.shift);
+        let mut h: uintnat = Hash(obj, self.pos_table.shift) as uintnat;
         loop {
             if bitvect_test(self.pos_table.present.as_mut_ptr(), h) == 0 {
                 *h_out = h;
@@ -265,7 +263,7 @@ impl<'a> State<'a> {
                 *pos_out = (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos;
                 return 1;
             }
-            h = (h + 1) & self.pos_table.mask
+            h = (h + 1) & self.pos_table.mask as uintnat
         }
     }
 
@@ -281,7 +279,7 @@ impl<'a> State<'a> {
         (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj = obj;
         (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos = self.obj_counter;
         self.obj_counter += 1;
-        if self.obj_counter >= self.pos_table.threshold {
+        if self.obj_counter >= self.pos_table.threshold as uintnat {
             self.resize_position_table();
         };
     }
@@ -388,7 +386,7 @@ impl<'a> State<'a> {
 
     /// Marshaling block headers
     #[inline]
-    unsafe fn extern_header(&mut self, sz: mlsize_t, tag: u8) {
+    unsafe fn extern_header(&mut self, sz: usize, tag: u8) {
         if tag < 16 && sz < 8 {
             self.write(PREFIX_SMALL_BLOCK + (tag as c_int) + ((sz << 4) as c_int));
         } else {
@@ -476,7 +474,7 @@ impl<'a> State<'a> {
             } else {
                 let hd: Header = v.as_block().unwrap().header();
                 let tag: u8 = hd.tag();
-                let sz: mlsize_t = hd.size() as mlsize_t;
+                let sz: usize = hd.size() as usize;
 
                 if tag == ocamlrep::FORWARD_TAG {
                     let f: Value<'a> = v.field(0).unwrap();
@@ -513,7 +511,7 @@ impl<'a> State<'a> {
                         match tag {
                             ocamlrep::STRING_TAG => {
                                 let bytes = v.as_byte_string().unwrap();
-                                let len: mlsize_t = bytes.len() as mlsize_t;
+                                let len: usize = bytes.len() as usize;
                                 self.extern_string(bytes);
                                 self.size_32 += 1 + (len + 4) / 4;
                                 self.size_64 += 1 + (len + 8) / 8;
@@ -528,7 +526,7 @@ impl<'a> State<'a> {
                             ocamlrep::DOUBLE_ARRAY_TAG => {
                                 let slice = v.as_double_array().unwrap();
                                 self.extern_double_array(slice);
-                                let nfloats = slice.len() as mlsize_t;
+                                let nfloats = slice.len() as usize;
                                 self.size_32 += 1 + nfloats * 2;
                                 self.size_64 += 1 + nfloats;
                                 self.record_location(v, h);

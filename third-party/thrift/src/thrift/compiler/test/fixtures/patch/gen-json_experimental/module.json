@@ -1,6 +1,10 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "module",
+  "includes": {
+    "thrift": "thrift/annotation/thrift.thrift",
+    "patch": "thrift/lib/thrift/patch.thrift"
+  },
   "namespaces": {
     "android": "test.fixtures.patch",
     "java": "test.fixtures.patch",

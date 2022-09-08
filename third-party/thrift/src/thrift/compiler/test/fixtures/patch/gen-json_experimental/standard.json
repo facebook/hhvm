@@ -1,6 +1,10 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "standard",
+  "includes": {
+    "thrift": "thrift/annotation/thrift.thrift",
+    "java": "thrift/annotation/java.thrift"
+  },
   "namespaces": {
     "cpp2": "apache.thrift.type",
     "go": "thrift.lib.thrift.standard",

@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "module",
+  "includes": {
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
   "namespaces": {
     "android": "test.fixtures.enums",
     "java": "test.fixtures.enums",

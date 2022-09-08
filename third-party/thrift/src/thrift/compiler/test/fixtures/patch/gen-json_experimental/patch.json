@@ -1,6 +1,12 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "patch",
+  "includes": {
+    "thrift": "thrift/annotation/thrift.thrift",
+    "scope": "thrift/annotation/scope.thrift",
+    "cpp": "thrift/annotation/cpp.thrift",
+    "standard": "thrift/lib/thrift/standard.thrift"
+  },
   "namespaces": {
     "cpp2": "apache.thrift.op",
     "go": "thrift.lib.thrift.patch",

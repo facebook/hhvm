@@ -1,6 +1,10 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "terse_write",
+  "includes": {
+    "cpp": "thrift/annotation/cpp.thrift",
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
   "enumerations" :
   {
       "MyEnum" : {

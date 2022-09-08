@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "hack",
+  "includes": {
+    "scope": "thrift/annotation/scope.thrift"
+  },
   "namespaces": {
     "go": "thrift.annotation.hack",
     "hs2": "facebook.thrift.annotation.hack",

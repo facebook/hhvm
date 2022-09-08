@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <memory>
 
+#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/json.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -56,6 +57,8 @@ class json_experimental_program : public mstch_program {
         {
             {"program:py_namespace",
              &json_experimental_program::get_py_namespace},
+            {"program:includes?", &json_experimental_program::has_includes},
+            {"program:includes", &json_experimental_program::includes},
             {"program:namespaces?", &json_experimental_program::has_namespaces},
             {"program:namespaces", &json_experimental_program::namespaces},
             {"program:docstring?", &json_experimental_program::has_docstring},
@@ -65,6 +68,18 @@ class json_experimental_program : public mstch_program {
         });
   }
   mstch::node get_py_namespace() { return program_->get_namespace("py"); }
+  mstch::node has_includes() { return !program_->includes().empty(); }
+  mstch::node includes() {
+    mstch::array includes;
+    auto last = program_->includes().size();
+    for (auto program : program_->get_included_programs()) {
+      includes.push_back(mstch::map{
+          {"name", program->get_name()},
+          {"path", program->include_prefix() + program->name() + ".thrift"},
+          {"last?", (--last) == 0}});
+    }
+    return includes;
+  }
   mstch::node has_namespaces() { return !program_->namespaces().empty(); }
   mstch::node namespaces() {
     mstch::array result;

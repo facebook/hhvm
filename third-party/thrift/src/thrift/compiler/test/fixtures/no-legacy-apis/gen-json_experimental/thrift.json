@@ -1,6 +1,9 @@
 {
   "__fbthrift": "@generated",
   "thrift_module" : "thrift",
+  "includes": {
+    "scope": "thrift/annotation/scope.thrift"
+  },
   "namespaces": {
     "go": "thrift.annotation.thrift",
     "java": "com.facebook.thrift.annotation_deprecated",

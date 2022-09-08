@@ -2,6 +2,12 @@
 {
   "__fbthrift": "@{{%!%}}generated",
   "thrift_module" : "{{program:name}}",{{%!
+  %}}{{#program:includes?}}
+  "includes": {
+    {{#program:includes}}
+    "{{name}}": "{{path}}"{{^last?}},{{/last?}}
+    {{/program:includes}}
+  },{{/program:includes?}}{{%!
   %}}{{#program:namespaces?}}
   "namespaces": {
     {{#program:namespaces}}

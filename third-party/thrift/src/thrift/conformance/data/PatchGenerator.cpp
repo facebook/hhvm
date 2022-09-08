@@ -318,6 +318,29 @@ PatchOpTestCase makeValueContainerClearTC(
   return tascase;
 }
 
+template <typename ContainerTag, typename ValueTag>
+PatchOpTestCase makeValueContainerRemoveTC(
+    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+
+  using Container = type::native_type<ContainerTag>;
+
+  Container initial = {value.value};
+  Container expected;
+
+  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.patch() = registry.store(
+      makePatchObject<type::set<ValueTag>>(
+          op::PatchOp::Remove,
+          std::set<type::standard_type<ValueTag>>{value.value}),
+      protocol);
+  tascase.request() = req;
+  tascase.result() =
+      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  return tascase;
+}
+
 } // namespace
 
 template <typename TT>
@@ -348,6 +371,16 @@ Test createListSetPatchTest(
           value.name);
       clearCase.test().emplace().objectPatch_ref() =
           makeValueContainerClearTC<ContainerTag>(registry, protocol, value);
+
+      auto& removeCase = test.testCases()->emplace_back();
+      removeCase.name() = fmt::format(
+          "{}<{}>/remove.{}",
+          type::getName<CC>(),
+          type::getName<TT>(),
+          value.name);
+      removeCase.test().emplace().objectPatch_ref() =
+          makeValueContainerRemoveTC<ContainerTag, TT>(
+              registry, protocol, value);
     }
   });
 

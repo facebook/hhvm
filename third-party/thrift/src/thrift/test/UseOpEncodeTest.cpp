@@ -16,6 +16,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/test/gen-cpp2/UseOpEncode_types.h>
 
@@ -29,6 +30,7 @@ namespace apache::thrift::test {
 
 template <StandardProtocol Protocol>
 void testUseOpEncode() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
   protocol_writer_t<Protocol> writer;
   folly::IOBufQueue queue;
   writer.setOutput(&queue);
@@ -73,5 +75,42 @@ void testUseOpEncode() {
 TEST(UseOpEncodeTest, UseOpEncode) {
   testUseOpEncode<StandardProtocol::Binary>();
   testUseOpEncode<StandardProtocol::Compact>();
+}
+
+template <StandardProtocol Protocol>
+void testSerializedSize() {
+  SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  protocol_writer_t<Protocol> writer;
+  // Construct BazWithUseOpEncode and Baz such that they have the same
+  // serialized data.
+  BazWithUseOpEncode bazWithUseOpEncode;
+  Baz baz;
+  bazWithUseOpEncode.int_field() = 5;
+  baz.int_field() = 5;
+  bazWithUseOpEncode.enum_field() = Enum::second;
+  baz.enum_field() = Enum::second;
+  Foo foo;
+  foo.field() = 3;
+  auto adaptedFoo = test::TemplatedTestAdapter::fromThrift(foo);
+  bazWithUseOpEncode.adapted_field() = adaptedFoo;
+  baz.adapted_field() = adaptedFoo;
+  bazWithUseOpEncode.list_field().emplace().push_back(adaptedFoo);
+  baz.list_field().emplace().push_back(foo);
+  bazWithUseOpEncode.map_field().emplace()[3] = adaptedFoo;
+  baz.map_field().emplace()[3] = foo;
+  bazWithUseOpEncode.list_shared_ptr_field() =
+      std::make_shared<std::vector<test::Wrapper<Foo>>>(
+          bazWithUseOpEncode.list_field().value());
+  baz.list_shared_ptr_field() =
+      std::make_shared<std::vector<Foo>>(baz.list_field().value());
+
+  auto size = bazWithUseOpEncode.serializedSize(&writer);
+  auto expected = baz.serializedSize(&writer);
+  EXPECT_EQ(size, expected);
+}
+
+TEST(UseOpEncodeTest, SerializedSize) {
+  testSerializedSize<StandardProtocol::Binary>();
+  testSerializedSize<StandardProtocol::Compact>();
 }
 } // namespace apache::thrift::test

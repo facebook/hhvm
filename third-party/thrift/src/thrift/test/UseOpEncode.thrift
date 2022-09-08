@@ -60,3 +60,24 @@ struct OpEncodeStruct {
   14: list<AdaptedFoo> adapted_list_field;
   15: string meta;
 }
+
+struct Baz {
+  1: i32 int_field;
+  2: Enum enum_field;
+  3: AdaptedFoo adapted_field;
+  4: list<Foo> list_field;
+  5: map<i32, Foo> map_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: optional list<Foo> list_shared_ptr_field;
+}
+
+@cpp.UseOpEncode
+struct BazWithUseOpEncode {
+  1: i32 int_field;
+  2: Enum enum_field;
+  3: AdaptedFoo adapted_field;
+  4: list<AdaptedFoo> list_field;
+  5: map<i32, AdaptedFoo> map_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: optional list<AdaptedFoo> list_shared_ptr_field;
+}

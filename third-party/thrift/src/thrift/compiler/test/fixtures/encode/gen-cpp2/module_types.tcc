@@ -234,14 +234,26 @@ _skip:
 }
 
 template <class Protocol_>
-uint32_t Bar::serializedSize(Protocol_ const*) const {
+uint32_t Bar::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("Bar");
+  {
+    xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 1);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
+  }
+  xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t Bar::serializedSizeZC(Protocol_ const*) const {
+uint32_t Bar::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("Bar");
+  {
+    xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 1);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
+  }
+  xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
@@ -603,14 +615,114 @@ _skip:
 }
 
 template <class Protocol_>
-uint32_t OpEncodeStruct::serializedSize(Protocol_ const*) const {
+uint32_t OpEncodeStruct::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("OpEncodeStruct");
+  {
+    xfer += prot_->serializedFieldSize("int_field", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i32_t>(*prot_, this->__fbthrift_field_int_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::enum_t<::facebook::thrift::test::Enum>>(*prot_, this->__fbthrift_field_enum_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("foo_field", apache::thrift::protocol::T_STRUCT, 3);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>(*prot_, this->__fbthrift_field_foo_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("adapted_field", apache::thrift::protocol::T_STRUCT, 4);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>(*prot_, this->__fbthrift_field_adapted_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 5);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
+  }
+  if (this->list_shared_ptr_field) {
+    xfer += prot_->serializedFieldSize("list_shared_ptr_field", apache::thrift::protocol::T_LIST, 6);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->list_shared_ptr_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("list_cpp_type_field", apache::thrift::protocol::T_LIST, 7);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_cpp_type_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("set_field", apache::thrift::protocol::T_SET, 8);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_set_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("map_field", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_map_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("nested_field", apache::thrift::protocol::T_MAP, 10);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_nested_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("bar_field", apache::thrift::protocol::T_STRUCT, 11);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>>(*prot_, this->__fbthrift_field_bar_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("adapted_list_field", apache::thrift::protocol::T_LIST, 12);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_adapted_list_field);
+  }
+  xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t OpEncodeStruct::serializedSizeZC(Protocol_ const*) const {
+uint32_t OpEncodeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("OpEncodeStruct");
+  {
+    xfer += prot_->serializedFieldSize("int_field", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::i32_t>(*prot_, this->__fbthrift_field_int_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("enum_field", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::enum_t<::facebook::thrift::test::Enum>>(*prot_, this->__fbthrift_field_enum_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("foo_field", apache::thrift::protocol::T_STRUCT, 3);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>(*prot_, this->__fbthrift_field_foo_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("adapted_field", apache::thrift::protocol::T_STRUCT, 4);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>(*prot_, this->__fbthrift_field_adapted_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 5);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
+  }
+  if (this->list_shared_ptr_field) {
+    xfer += prot_->serializedFieldSize("list_shared_ptr_field", apache::thrift::protocol::T_LIST, 6);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->list_shared_ptr_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("list_cpp_type_field", apache::thrift::protocol::T_LIST, 7);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_cpp_type_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("set_field", apache::thrift::protocol::T_SET, 8);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_set_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("map_field", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_map_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("nested_field", apache::thrift::protocol::T_MAP, 10);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_nested_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("bar_field", apache::thrift::protocol::T_STRUCT, 11);
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::struct_t<::facebook::thrift::test::Bar>>(*prot_, this->__fbthrift_field_bar_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("adapted_list_field", apache::thrift::protocol::T_LIST, 12);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::FieldAdapter, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>>(*prot_, this->__fbthrift_field_adapted_list_field);
+  }
+  xfer += prot_->serializedSizeStop();
   return xfer;
 }
 

@@ -19,7 +19,9 @@
 #include <thrift/conformance/cpp2/Any.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
+#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/cpp2/Protocol.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::conformance {
 
@@ -33,6 +35,18 @@ void ConformanceHandler::roundTrip(
       : getProtocol(*req->value());
   // Store the value and return the result.
   res.value() = AnyRegistry::generated().store(std::move(val), protocol);
+}
+
+void ConformanceHandler::patch(
+    PatchOpResponse& res, std::unique_ptr<PatchOpRequest> req) {
+  // Load the value.
+  auto value = AnyRegistry::generated().load<protocol::Value>(*req->value());
+  auto patch = AnyRegistry::generated().load<protocol::Value>(*req->patch());
+
+  protocol::applyPatch(*patch.objectValue_ref(), value);
+
+  res.result() = AnyRegistry::generated().store(
+      std::move(value), getProtocol(*req->value()));
 }
 
 } // namespace apache::thrift::conformance

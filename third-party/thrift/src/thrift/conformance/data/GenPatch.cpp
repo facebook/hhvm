@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-#pragma once
+#include <folly/init/Init.h>
+#include <thrift/conformance/data/PatchGenerator.h>
+#include <thrift/conformance/data/TestGenerator.h>
 
-#include <thrift/conformance/if/gen-cpp2/ConformanceService.h>
+using apache::thrift::conformance::data::createPatchSuite;
+using apache::thrift::conformance::data::serializeToFile;
 
-namespace apache::thrift::conformance {
-
-class ConformanceHandler
-    : public apache::thrift::ServiceHandler<ConformanceService> {
- public:
-  void roundTrip(
-      RoundTripResponse& res, std::unique_ptr<RoundTripRequest> req) override;
-
-  void patch(
-      PatchOpResponse& res, std::unique_ptr<PatchOpRequest> req) override;
-};
-
-} // namespace apache::thrift::conformance
+int main(int argc, char** argv) {
+  folly::Init(&argc, &argv);
+  serializeToFile<apache::thrift::BinaryProtocolWriter>(
+      createPatchSuite(), stdout);
+}

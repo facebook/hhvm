@@ -22,6 +22,8 @@ import com.facebook.thrift.util.SerializationProtocol;
 import org.apache.thrift.TException;
 import org.apache.thrift.conformance.Any;
 import org.apache.thrift.conformance.ConformanceService;
+import org.apache.thrift.conformance.PatchOpRequest;
+import org.apache.thrift.conformance.PatchOpResponse;
 import org.apache.thrift.conformance.RoundTripRequest;
 import org.apache.thrift.conformance.RoundTripResponse;
 import org.apache.thrift.conformance.StandardProtocol;
@@ -64,6 +66,16 @@ public class ConformanceServiceImpl implements ConformanceService {
   public RoundTripResponse roundTrip(RoundTripRequest request, RpcOptions rpcOptions)
       throws TException {
     return roundTrip(request);
+  }
+
+  @Override
+  public PatchOpResponse patch(PatchOpRequest roundTripRequest) throws TException {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public PatchOpResponse patch(PatchOpRequest request, RpcOptions rpcOptions) throws TException {
+    return patch(request);
   }
 
   @Override

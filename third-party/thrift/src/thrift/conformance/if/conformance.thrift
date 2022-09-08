@@ -22,6 +22,7 @@ namespace py3 thrift.conformance
 namespace java.swift org.apache.thrift.conformance
 
 include "thrift/conformance/if/serialization.thrift"
+include "thrift/conformance/if/patch_data.thrift"
 
 // The conformance test service.
 service ConformanceService {
@@ -29,4 +30,6 @@ service ConformanceService {
   serialization.RoundTripResponse roundTrip(
     1: serialization.RoundTripRequest request,
   );
+
+  patch_data.PatchOpResponse patch(1: patch_data.PatchOpRequest request);
 }

@@ -15,6 +15,7 @@
 import asyncio
 
 from thrift.conformance.conformance.thrift_services import ConformanceServiceInterface
+from thrift.conformance.patch_data.thrift_types import PatchOpRequest, PatchOpResponse
 from thrift.conformance.serialization.thrift_types import (
     RoundTripRequest,
     RoundTripResponse,
@@ -32,6 +33,9 @@ class Handler(ConformanceServiceInterface):
         if protocol is None:
             protocol = request.value.protocol
         return RoundTripResponse(value=registry.store(obj, protocol))
+
+    async def patch(self, request: PatchOpRequest) -> PatchOpResponse:
+        raise NotImplementedError
 
     async def sendTestCase(self, testCase: TestCase):
         pass

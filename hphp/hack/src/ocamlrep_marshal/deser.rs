@@ -56,11 +56,9 @@ extern "C" {
     fn caml_stat_alloc_noexc(_: asize_t) -> caml_stat_block;
     fn caml_raise_out_of_memory() -> !;
     fn caml_stat_free(_: caml_stat_block);
-    fn caml_stat_resize_noexc(_: caml_stat_block, _: asize_t) -> caml_stat_block;
     fn caml_alloc_small_dispatch(_: intnat, _: c_int, _: c_int, _: *mut c_uchar);
     fn caml_string_length(_: value) -> mlsize_t;
     fn caml_set_oo_id(obj: value) -> value;
-    fn caml_gc_message(_: c_int, _: *const c_char, _: ...);
 }
 
 pub type size_t = c_ulong;
@@ -173,6 +171,7 @@ pub struct intern_item {
     pub arg: intnat,
     pub op: c_uint,
 }
+
 pub const OReadItems: c_uint = 0; // read arg items and store them in dest[0], dest[1], ...
 pub const OFreshOID: c_uint = 1; // generate a fresh OID and store it in *dest
 pub const OShift: c_uint = 2; // offset *dest by arg
@@ -338,10 +337,12 @@ struct intern_state {
     intern_block: value,
     // Point to the heap block allocated as destination block. Meaningful only
     // if intern_extra_block is NULL.
+    stack: Vec<intern_item>,
+    // The recursion stack used in `intern_rec`.
 }
 
 impl intern_state {
-    const fn new() -> Self {
+    fn new() -> Self {
         Self {
             intern_src: std::ptr::null_mut::<c_uchar>(),
             intern_input: std::ptr::null_mut::<c_uchar>(),
@@ -352,6 +353,7 @@ impl intern_state {
             intern_color: 0,
             intern_header: 0,
             intern_block: 0,
+            stack: Vec::with_capacity(INTERN_STACK_INIT_SIZE),
         }
     }
 }
@@ -452,8 +454,7 @@ unsafe fn intern_cleanup(is: &mut intern_state) {
         *(Hd_val_mut(is.intern_block)) = is.intern_header;
         is.intern_block = 0;
     }
-    // free the recursion stack
-    intern_free_stack();
+    is.stack.clear()
 }
 
 unsafe fn readfloat(is: &mut intern_state, dest: *mut c_double, code: c_uint) {
@@ -524,98 +525,6 @@ unsafe extern "C" fn readfloats(
 }
 
 const INTERN_STACK_INIT_SIZE: usize = 256;
-const INTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
-
-static mut intern_stack_init: [intern_item; INTERN_STACK_INIT_SIZE] = [intern_item {
-    dest: std::ptr::null_mut::<value>(),
-    arg: 0,
-    op: OReadItems,
-}; INTERN_STACK_INIT_SIZE];
-
-static mut intern_stack: *mut intern_item = unsafe { intern_stack_init.as_ptr() as *mut _ };
-// Initialized in `run_static_initializers`
-static mut intern_stack_limit: *mut intern_item = std::ptr::null_mut::<intern_item>();
-unsafe extern "C" fn run_static_initializers() {
-    intern_stack_limit = intern_stack_init.as_mut_ptr().add(INTERN_STACK_INIT_SIZE)
-}
-#[used]
-#[cfg_attr(target_os = "linux", link_section = ".init_array")]
-#[cfg_attr(target_os = "windows", link_section = ".CRT$XIB")]
-#[cfg_attr(target_os = "macos", link_section = "__DATA,__mod_init_func")]
-static INIT_ARRAY: [unsafe extern "C" fn(); 1] = [run_static_initializers];
-
-// Free the recursion stack if needed
-unsafe fn intern_free_stack() {
-    if intern_stack != intern_stack_init.as_mut_ptr() {
-        caml_stat_free(intern_stack as caml_stat_block);
-        intern_stack = intern_stack_init.as_mut_ptr();
-        intern_stack_limit = intern_stack.offset(256)
-    };
-}
-
-// Same, then raise `Out_of_memory`
-unsafe fn intern_stack_overflow() -> ! {
-    caml_gc_message(
-        0x4,
-        b"Stack overflow in un-marshaling value\n\x00".as_ptr() as *const c_char,
-    );
-    intern_free_stack();
-    caml_raise_out_of_memory();
-}
-
-unsafe fn intern_resize_stack(sp: *mut intern_item) -> *mut intern_item {
-    let newsize: asize_t = (2 * intern_stack_limit.offset_from(intern_stack) as c_long) as asize_t;
-    let sp_offset: asize_t = sp.offset_from(intern_stack) as asize_t;
-    let newstack: *mut intern_item;
-
-    if newsize >= INTERN_STACK_MAX_SIZE as c_ulong {
-        intern_stack_overflow();
-    }
-
-    if intern_stack == intern_stack_init.as_mut_ptr() {
-        newstack = caml_stat_alloc_noexc((std::mem::size_of::<intern_item>() as c_ulong) * newsize)
-            as *mut intern_item;
-        if newstack.is_null() {
-            intern_stack_overflow();
-        }
-        memcpy(
-            newstack as *mut c_void,
-            intern_stack_init.as_mut_ptr() as *const c_void,
-            ((std::mem::size_of::<intern_item>() as c_ulong) * (INTERN_STACK_INIT_SIZE as c_ulong))
-                as usize,
-        );
-    } else {
-        newstack = caml_stat_resize_noexc(
-            intern_stack as caml_stat_block,
-            (std::mem::size_of::<intern_item>() as c_ulong) * newsize,
-        ) as *mut intern_item;
-        if newstack.is_null() {
-            intern_stack_overflow();
-        }
-    }
-    intern_stack = newstack;
-    intern_stack_limit = newstack.offset(newsize as isize);
-
-    newstack.offset(sp_offset as isize)
-}
-
-// Convenience functions for requesting operation on the stack
-unsafe fn PushItem(mut sp: *mut intern_item) -> *mut intern_item {
-    sp = sp.offset(1);
-    if sp >= intern_stack_limit {
-        sp = intern_resize_stack(sp);
-    }
-    sp
-}
-unsafe fn ReadItems(dest: *mut value, n: intnat, mut sp: *mut intern_item) -> *mut intern_item {
-    if n > 0 {
-        sp = PushItem(sp);
-        (*sp).op = OReadItems;
-        (*sp).dest = dest;
-        (*sp).arg = n;
-    }
-    sp
-}
 
 const READ_BLOCK_LABEL: u64 = 16649699497103515194;
 const READ_STRING_LABEL: u64 = 11970676656440271524;
@@ -627,7 +536,6 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
     let mut current_block: u64;
     let mut header: header_t;
     let mut code: c_uint;
-    let mut sp: *mut intern_item;
 
     let mut tag: tag_t = 0;
     let mut size: mlsize_t = 0;
@@ -636,36 +544,38 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
     let mut v: value = 0;
     let mut ofs: asize_t = 0;
 
-    sp = intern_stack;
-
     // Initially let's try to read the first object from the stream
-    sp = ReadItems(dest, 1, sp);
+    is.stack.push(intern_item {
+        op: OReadItems,
+        dest,
+        arg: 1,
+    });
 
     // The un-marshaler loop, the recursion is unrolled
-    while sp != intern_stack {
+    while let Some(top) = is.stack.last_mut() {
         // Interpret next item on the stack
+        dest = top.dest;
 
-        dest = (*sp).dest;
-        match (*sp).op as c_uint {
+        match top.op as c_uint {
             OFreshOID => {
                 if Long_val(Field(dest as value, 1)) >= 0 {
                     caml_set_oo_id(dest as value);
                 }
                 // Pop item and iterate
-                sp = sp.offset(-1)
+                is.stack.pop();
             }
             OShift => {
                 // Shift value by an offset
-                *dest += (*sp).arg;
+                *dest += top.arg;
                 // Pop item and iterate
-                sp = sp.offset(-1)
+                is.stack.pop();
             }
             OReadItems => {
                 // Pop item
-                (*sp).dest = (*sp).dest.offset(1);
-                (*sp).arg -= 1;
-                if (*sp).arg == 0 {
-                    sp = sp.offset(-1)
+                top.dest = top.dest.offset(1);
+                top.arg -= 1;
+                if top.arg == 0 {
+                    is.stack.pop();
                 }
                 // Read a value and set v to this value
                 code = read8u(is) as c_uint;
@@ -776,11 +686,16 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
                             }
                             CODE_INFIXPOINTER => {
                                 ofs = read32u(is) as asize_t;
-                                sp = PushItem(sp);
-                                (*sp).dest = dest;
-                                (*sp).op = OShift;
-                                (*sp).arg = ofs as intnat;
-                                sp = ReadItems(dest, 1, sp);
+                                is.stack.push(intern_item {
+                                    op: OShift,
+                                    dest,
+                                    arg: ofs as intnat,
+                                });
+                                is.stack.push(intern_item {
+                                    op: OReadItems,
+                                    dest,
+                                    arg: 1,
+                                });
                                 continue;
                             }
                             CODE_CUSTOM | CODE_CUSTOM_LEN | CODE_CUSTOM_FIXED => {
@@ -855,17 +770,32 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
                             // For objects, we need to freshen the oid
                             if tag == ocamlrep::OBJECT_TAG as tag_t {
                                 // Request to read rest of the elements of the block
-                                sp = ReadItems(Field_ptr_mut(v, 2), (size - 2) as i64, sp);
+                                if size - 2 > 0 {
+                                    is.stack.push(intern_item {
+                                        op: OReadItems,
+                                        dest: Field_ptr_mut(v, 2),
+                                        arg: (size - 2) as i64,
+                                    });
+                                }
                                 // Request freshing OID
-                                sp = PushItem(sp);
-                                (*sp).op = OFreshOID;
-                                (*sp).dest = v as *mut value;
-                                (*sp).arg = 1;
+                                is.stack.push(intern_item {
+                                    op: OFreshOID,
+                                    dest: v as *mut value,
+                                    arg: 1,
+                                });
                                 // Finally read first two block elements: method table and old OID
-                                sp = ReadItems(Field_ptr_mut(v, 0), 2, sp);
+                                is.stack.push(intern_item {
+                                    op: OReadItems,
+                                    dest: Field_ptr_mut(v, 0),
+                                    arg: 2,
+                                });
                             } else {
                                 // If it's not an object then read the conents of the block
-                                sp = ReadItems(Field_ptr_mut(v, 0), size as i64, sp);
+                                is.stack.push(intern_item {
+                                    op: OReadItems,
+                                    dest: Field_ptr_mut(v, 0),
+                                    arg: size as i64,
+                                });
                             }
                         }
                     }
@@ -876,7 +806,6 @@ unsafe fn intern_rec(is: &mut intern_state, mut dest: *mut value) {
             _ => {}
         }
     }
-    intern_free_stack();
 }
 
 unsafe fn intern_alloc(is: &mut intern_state, whsize: mlsize_t, num_objects: mlsize_t) {

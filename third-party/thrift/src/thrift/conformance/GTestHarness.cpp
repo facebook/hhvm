@@ -242,19 +242,23 @@ ClientTestResult runClientSteps(
 
 testing::AssertionResult runRpcTest(
     Client<RPCConformanceService>& client, const RpcTestCase& rpc) {
-  client.sync_sendTestCase(rpc);
-  auto actualClientResult = runClientSteps(client, *rpc.clientInstruction());
-  if (!equal(actualClientResult, *rpc.clientTestResult())) {
-    return testing::AssertionFailure();
-  }
+  try {
+    client.sync_sendTestCase(rpc);
+    auto actualClientResult = runClientSteps(client, *rpc.clientInstruction());
+    if (!equal(actualClientResult, *rpc.clientTestResult())) {
+      return testing::AssertionFailure();
+    }
 
-  // Get result from server
-  ServerTestResult actualServerResult;
-  client.sync_getTestResult(actualServerResult);
-  if (actualServerResult != *rpc.serverTestResult()) {
+    // Get result from server
+    ServerTestResult actualServerResult;
+    client.sync_getTestResult(actualServerResult);
+    if (actualServerResult != *rpc.serverTestResult()) {
+      return testing::AssertionFailure();
+    }
+    return testing::AssertionSuccess();
+  } catch (...) {
     return testing::AssertionFailure();
   }
-  return testing::AssertionSuccess();
 }
 
 } // namespace apache::thrift::conformance

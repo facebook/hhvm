@@ -285,7 +285,7 @@ void ApplyPatch::operator()(
       auto& to_add = *add->setValue_ref();
       for (const auto& element : to_add) {
         if (std::find(value.begin(), value.end(), element) == value.end()) {
-          value.push_back(element);
+          value.insert(value.begin(), element);
         }
       }
     } else {

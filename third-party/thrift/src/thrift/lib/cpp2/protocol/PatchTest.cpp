@@ -459,7 +459,7 @@ TEST_F(PatchTest, List) {
   }
   {
     auto expected = *value.listValue_ref();
-    expected.push_back(asValueStruct<type::binary_t>("best"));
+    expected.insert(expected.begin(), asValueStruct<type::binary_t>("best"));
     Object patchObj = makePatch(
         op::PatchOp::Add,
         asValueStruct<type::set<type::binary_t>>(std::set{"best"}));

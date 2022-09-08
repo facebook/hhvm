@@ -117,13 +117,13 @@ unsafe fn bitvect_set(bv: *mut usize, i: usize) {
 // Conversion to big-endian
 
 #[inline]
-fn store16(dst: &mut impl Write, n: c_int) {
-    dst.write_all(&(n as i16).to_be_bytes()).unwrap()
+fn store16(dst: &mut impl Write, n: i16) {
+    dst.write_all(&n.to_be_bytes()).unwrap()
 }
 
 #[inline]
-fn store32(dst: &mut impl Write, n: intnat) {
-    dst.write_all(&(n as i32).to_be_bytes()).unwrap()
+fn store32(dst: &mut impl Write, n: i32) {
+    dst.write_all(&n.to_be_bytes()).unwrap()
 }
 
 #[inline]
@@ -329,21 +329,21 @@ impl<'a> State<'a> {
         }
     }
 
-    fn writecode8(&mut self, code: c_int, val: intnat) {
+    fn writecode8(&mut self, code: c_int, val: i8) {
         self.output.write_all(&[code as u8, val as u8]).unwrap();
     }
 
-    fn writecode16(&mut self, code: c_int, val: intnat) {
+    fn writecode16(&mut self, code: c_int, val: i16) {
         self.output.write_all(&[code as u8]).unwrap();
-        store16(&mut self.output, val as c_int);
+        store16(&mut self.output, val);
     }
 
-    fn writecode32(&mut self, code: c_int, val: intnat) {
+    fn writecode32(&mut self, code: c_int, val: i32) {
         self.output.write_all(&[code as u8]).unwrap();
         store32(&mut self.output, val);
     }
 
-    fn writecode64(&mut self, code: c_int, val: intnat) {
+    fn writecode64(&mut self, code: c_int, val: i64) {
         self.output.write_all(&[code as u8]).unwrap();
         store64(&mut self.output, val);
     }
@@ -354,16 +354,16 @@ impl<'a> State<'a> {
         if (0..0x40).contains(&n) {
             self.write(PREFIX_SMALL_INT + n as c_int);
         } else if (-(1 << 7)..(1 << 7)).contains(&n) {
-            self.writecode8(CODE_INT8, n);
+            self.writecode8(CODE_INT8, n as i8);
         } else if (-(1 << 15)..(1 << 15)).contains(&n) {
-            self.writecode16(CODE_INT16, n);
+            self.writecode16(CODE_INT16, n as i16);
         } else if !(-(1 << 30)..(1 << 30)).contains(&n) {
             if self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: integer cannot be read back on 32-bit platform");
             }
-            self.writecode64(CODE_INT64, n);
+            self.writecode64(CODE_INT64, n as i64);
         } else {
-            self.writecode32(CODE_INT32, n);
+            self.writecode32(CODE_INT32, n as i32);
         };
     }
 
@@ -371,13 +371,13 @@ impl<'a> State<'a> {
     #[inline]
     unsafe fn extern_shared_reference(&mut self, d: usize) {
         if d < 0x100 {
-            self.writecode8(CODE_SHARED8, d as intnat);
+            self.writecode8(CODE_SHARED8, d as i8);
         } else if d < 0x10000 {
-            self.writecode16(CODE_SHARED16, d as intnat);
+            self.writecode16(CODE_SHARED16, d as i16);
         } else if d >= 1 << 32 {
-            self.writecode64(CODE_SHARED64, d as intnat);
+            self.writecode64(CODE_SHARED64, d as i64);
         } else {
-            self.writecode32(CODE_SHARED32, d as intnat);
+            self.writecode32(CODE_SHARED32, d as i32);
         };
     }
 
@@ -403,9 +403,9 @@ impl<'a> State<'a> {
                 self.failwith("output_value: array cannot be read back on 32-bit platform");
             }
             if hd < 1 << 32 {
-                self.writecode32(CODE_BLOCK32, hd as intnat);
+                self.writecode32(CODE_BLOCK32, hd as i32);
             } else {
-                self.writecode64(CODE_BLOCK64, hd as intnat);
+                self.writecode64(CODE_BLOCK64, hd as i64);
             }
         };
     }
@@ -416,15 +416,15 @@ impl<'a> State<'a> {
         if len < 0x20 {
             self.write(PREFIX_SMALL_STRING + (len as c_int));
         } else if len < 0x100 {
-            self.writecode8(CODE_STRING8, len);
+            self.writecode8(CODE_STRING8, len as i8);
         } else {
             if len > 0xFFFFFB && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: string cannot be read back on 32-bit platform");
             }
             if len < 1 << 32 {
-                self.writecode32(CODE_STRING32, len);
+                self.writecode32(CODE_STRING32, len as i32);
             } else {
-                self.writecode64(CODE_STRING64, len);
+                self.writecode64(CODE_STRING64, len as i64);
             }
         }
         self.writeblock(bytes.as_ptr() as *const c_char, len);
@@ -442,15 +442,15 @@ impl<'a> State<'a> {
     unsafe fn extern_double_array(&mut self, slice: &[f64]) {
         let nfloats = slice.len() as intnat;
         if nfloats < 0x100 {
-            self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats);
+            self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as i8);
         } else {
             if nfloats > 0x1FFFFF && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: float array cannot be read back on 32-bit platform");
             }
             if nfloats < 1 << 32 {
-                self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats);
+                self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats as i32);
             } else {
-                self.writecode64(CODE_DOUBLE_ARRAY64_NATIVE, nfloats);
+                self.writecode64(CODE_DOUBLE_ARRAY64_NATIVE, nfloats as i64);
             }
         }
         self.writeblock_float8(slice.as_ptr() as *const c_double, nfloats);
@@ -533,7 +533,7 @@ impl<'a> State<'a> {
                             }
                             ocamlrep::INFIX_TAG => {
                                 let infix_offset = hd.size() * std::mem::size_of::<Value<'_>>();
-                                self.writecode32(CODE_INFIXPOINTER, infix_offset as intnat);
+                                self.writecode32(CODE_INFIXPOINTER, infix_offset as i32);
                                 v = Value::from_bits(v.to_bits() - infix_offset); // PR#5772
                                 continue;
                             }
@@ -613,20 +613,20 @@ impl<'a> State<'a> {
             if self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: object too big to be read back on 32-bit platform");
             }
-            store32(&mut header, MAGIC_NUMBER_BIG as intnat);
+            store32(&mut header, MAGIC_NUMBER_BIG as i32);
             store32(&mut header, 0);
-            store64(&mut header, res_len);
+            store64(&mut header, res_len as i64);
             store64(&mut header, self.obj_counter as i64);
             store64(&mut header, self.size_64 as i64);
             *header_len = 32;
             return res_len;
         }
         // Use the small header format
-        store32(&mut header, MAGIC_NUMBER_SMALL as intnat);
-        store32(&mut header, res_len);
-        store32(&mut header, self.obj_counter as intnat);
-        store32(&mut header, self.size_32 as intnat);
-        store32(&mut header, self.size_64 as intnat);
+        store32(&mut header, MAGIC_NUMBER_SMALL as i32);
+        store32(&mut header, res_len as i32);
+        store32(&mut header, self.obj_counter as i32);
+        store32(&mut header, self.size_32 as i32);
+        store32(&mut header, self.size_64 as i32);
         *header_len = 20;
         res_len
     }

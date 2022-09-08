@@ -2062,12 +2062,15 @@ module EnumClassLabelOps = struct
         (env, Success (te, lty))
       | None ->
         let consts =
-          List.map (Cls.consts cls) ~f:(fun (name, const) ->
-              ( (if full then
-                  Render.strip_ns enum_name ^ "#" ^ name
-                else
-                  "#" ^ name),
-                const.cc_pos ))
+          Cls.consts cls
+          |> List.filter ~f:(fun (name, _) ->
+                 not (String.equal name SN.Members.mClass))
+          |> List.map ~f:(fun (name, const) ->
+                 ( (if full then
+                     Render.strip_ns enum_name ^ "#" ^ name
+                   else
+                     "#" ^ name),
+                   const.cc_pos ))
         in
         let most_similar = Env.most_similar label_name consts fst in
         Errors.add_typing_error

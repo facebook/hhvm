@@ -29,28 +29,9 @@ type module_decl = Typing_defs.module_def_type
 
 let ( let* ) = Caml.Option.bind
 
-let err_not_found (file : Relative_path.t) (name : string) : 'a =
-  let err_str =
-    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
-  in
-  raise (Decl_defs.Decl_not_found err_str)
+let err_not_found = Typedef_provider.err_not_found
 
-let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
-    =
-  let parse_result =
-    if cache_results then
-      Direct_decl_utils.direct_decl_parse_and_cache ctx filename
-    else
-      Direct_decl_utils.direct_decl_parse ctx filename
-  in
-  match parse_result with
-  | None -> err_not_found filename name
-  | Some parsed_file ->
-    let decls = parsed_file.Direct_decl_utils.pfh_decls in
-    List.find_map decls ~f:(function
-        | (decl_name, decl, _) when String.equal decl_name name ->
-          extract_decl_opt decl
-        | _ -> None)
+let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
 
 let use_direct_decl_parser ctx =
   TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
@@ -258,15 +239,6 @@ let get_fun
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_fun backend fun_name
 
-let declare_typedef_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
-    Typing_defs.typedef_type =
-  match Ast_provider.find_typedef_in_file ctx file name with
-  | Some t ->
-    let (_name, decl) = Decl_nast.typedef_naming_and_decl_DEPRECATED ctx t in
-    decl
-  | None -> err_not_found file name
-
 let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -276,26 +248,7 @@ let get_typedef
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
-    (match Decl_store.((get ()).get_typedef typedef_name) with
-    | Some c -> Some c
-    | None ->
-      (match Naming_provider.get_typedef_path ctx typedef_name with
-      | Some filename ->
-        if use_direct_decl_parser ctx then
-          find_in_direct_decl_parse
-            ~cache_results:true
-            ctx
-            filename
-            typedef_name
-            Shallow_decl_defs.to_typedef_decl_opt
-        else
-          let tdecl =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
-          in
-          Decl_store.((get ()).add_typedef typedef_name tdecl);
-          Some tdecl
-      | None -> None))
+    Typedef_provider.get_typedef ctx typedef_name
   | Provider_backend.Pessimised_shared_memory info ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -337,7 +290,10 @@ let get_typedef
           else
             let tdecl =
               Errors.run_in_decl_mode filename (fun () ->
-                  declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
+                  Typedef_provider.declare_typedef_in_file_DEPRECATED
+                    ctx
+                    filename
+                    typedef_name)
             in
             Some tdecl
         | None -> None)

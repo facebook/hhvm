@@ -101,6 +101,7 @@
   shallow_classes_provider
   shallow_decl_defs
   linearization_provider
+  typedef_provider
   typing_heap)
  (preprocess
   (pps ppx_deriving.std)))
@@ -223,3 +224,13 @@
   typechecker_options)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+ (name typedef_provider)
+ (modules typedef_provider)
+ (libraries
+  decl_counters
+  decl_nast 
+  direct_decl_utils 
+  provider_context 
+  naming_provider))

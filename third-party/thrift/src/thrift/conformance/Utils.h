@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include <folly/json.h>
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
@@ -101,6 +103,13 @@ std::string genTagLinks(const T& tagged) {
     result += "    sdoc thrift/docs/" + tag + "\n";
   }
   return result;
+}
+
+template <class T>
+std::string jsonify(const T& o) {
+  std::string json =
+      apache::thrift::SimpleJSONSerializer::serialize<std::string>(o);
+  return folly::toPrettyJson(folly::parseJson(std::move(json)));
 }
 
 } // namespace apache::thrift::conformance

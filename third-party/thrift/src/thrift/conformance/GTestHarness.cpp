@@ -23,6 +23,7 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <thrift/conformance/RpcStructComparator.h>
+#include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_types.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
@@ -290,14 +291,18 @@ testing::AssertionResult runRpcTest(
     client.sync_sendTestCase(rpc);
     auto actualClientResult = runClientSteps(client, *rpc.clientInstruction());
     if (!equal(actualClientResult, *rpc.clientTestResult())) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure()
+          << "\nExpected client result: " << jsonify(*rpc.clientTestResult())
+          << "\nActual client result: " << jsonify(actualClientResult);
     }
 
     // Get result from server
     ServerTestResult actualServerResult;
     client.sync_getTestResult(actualServerResult);
     if (actualServerResult != *rpc.serverTestResult()) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure()
+          << "\nExpected server result: " << jsonify(*rpc.serverTestResult())
+          << "\nActual server result: " << jsonify(actualServerResult);
     }
     return testing::AssertionSuccess();
   } catch (...) {

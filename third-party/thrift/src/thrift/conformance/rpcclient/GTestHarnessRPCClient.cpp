@@ -253,13 +253,17 @@ class RPCClientConformanceTest : public testing::Test {
 
     auto& expectedClientResult = *testCase_.rpc_ref()->clientTestResult();
     if (!equal(*actualClientResult, expectedClientResult)) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure()
+          << "\nExpected client result: " << jsonify(expectedClientResult)
+          << "\nActual client result: " << jsonify(*actualClientResult);
     }
 
     auto& actualServerResult = handler_->serverResult();
     auto& expectedServerResult = *testCase_.rpc_ref()->serverTestResult();
     if (actualServerResult != expectedServerResult) {
-      return testing::AssertionFailure();
+      return testing::AssertionFailure()
+          << "\nExpected server result: " << jsonify(expectedServerResult)
+          << "\nActual server result: " << jsonify(actualServerResult);
     }
 
     return testing::AssertionSuccess();

@@ -66,7 +66,7 @@ struct object_position<'a> {
 
 #[repr(C)]
 struct position_table<'a> {
-    shift: c_int,
+    shift: u8,
     size: usize,                         // size == 1 << (wordsize - shift)
     mask: usize,                         // mask == size - 1
     threshold: usize,                    // threshold == a fixed fraction of size
@@ -89,7 +89,7 @@ const POS_TABLE_INIT_SIZE: usize = 1 << POS_TABLE_INIT_SIZE_LOG2;
 // HASH_FACTOR is (sqrt(5) - 1) / 2 * 2^wordsize.
 const HASH_FACTOR: usize = 11400714819323198486;
 #[inline]
-const fn Hash(v: Value<'_>, shift: c_int) -> usize {
+const fn Hash(v: Value<'_>, shift: u8) -> usize {
     v.to_bits().wrapping_mul(HASH_FACTOR) >> shift
 }
 
@@ -176,7 +176,7 @@ impl<'a> State<'a> {
         }
         self.pos_table.size = POS_TABLE_INIT_SIZE;
         self.pos_table.shift =
-            (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as c_int;
+            (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as u8;
         self.pos_table.mask = POS_TABLE_INIT_SIZE - 1;
         self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE);
         self.pos_table.present =
@@ -187,7 +187,7 @@ impl<'a> State<'a> {
     /// Grow the position table
     unsafe fn resize_position_table(&mut self) {
         let new_size: usize;
-        let new_shift: c_int;
+        let new_shift: u8;
         let new_present: Box<[usize]>;
         let new_entries: Box<[object_position<'a>]>;
         let mut i: usize;

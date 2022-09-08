@@ -174,12 +174,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
       | None -> (xrefs, prog)
       | Some override_con_pred_types ->
         (match ServerSymbolDefinition.go ctx None attr with
-        | None ->
-          Hh_logger.log
-            "WARNING: could not find source method for <<__Override>> %s::%s"
-            class_name
-            method_name;
-          (xrefs, prog)
+        | None -> (xrefs, prog)
         | Some sym_def ->
           (match
              Str.split (Str.regexp "::") sym_def.SymbolDefinition.full_name

@@ -1,6 +1,20 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "patch",
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    },
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    },
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    },
+    "standard" : {
+      "path" : "thrift/lib/thrift/standard.thrift"
+    }
+  },
   "enumerations" : {
     "PatchOp" : {
       "lineno" : 245,

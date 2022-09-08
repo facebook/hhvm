@@ -1,6 +1,14 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "module",
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    },
+    "patch" : {
+      "path" : "thrift/lib/thrift/patch.thrift"
+    }
+  },
   "structs" : {
     "MyData" : {
       "lineno" : 28,

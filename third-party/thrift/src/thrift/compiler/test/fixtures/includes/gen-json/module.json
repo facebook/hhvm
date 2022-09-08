@@ -1,6 +1,11 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "module",
+  "includes": {
+    "includes" : {
+      "path" : "includes.thrift"
+    }
+  },
   "structs" : {
     "MyStruct" : {
       "lineno" : 20,

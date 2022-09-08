@@ -1,6 +1,14 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "cpp",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
   "enumerations" : {
     "RefType" : {
       "lineno" : 27,

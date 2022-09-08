@@ -1,6 +1,14 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "service",
+  "includes": {
+    "module" : {
+      "path" : "module.thrift"
+    },
+    "includes" : {
+      "path" : "includes.thrift"
+    }
+  },
   "typedefs" : {
     "IncludesIncluded" : {
       "lineno" : 32,

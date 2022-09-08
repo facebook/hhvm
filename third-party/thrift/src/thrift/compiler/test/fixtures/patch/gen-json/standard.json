@@ -35,6 +35,14 @@
       }
     }
   },
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    },
+    "java" : {
+      "path" : "thrift/annotation/java.thrift"
+    }
+  },
   "enumerations" : {
     "StandardProtocol" : {
       "lineno" : 69,

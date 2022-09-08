@@ -1,6 +1,11 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "hack",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
   "structs" : {
     "FieldWrapper" : {
       "lineno" : 35,

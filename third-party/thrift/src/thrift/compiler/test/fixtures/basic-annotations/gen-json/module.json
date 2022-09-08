@@ -19,6 +19,11 @@
       }
     }
   },
+  "includes": {
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    }
+  },
   "enumerations" : {
     "MyEnum" : {
       "lineno" : 22,

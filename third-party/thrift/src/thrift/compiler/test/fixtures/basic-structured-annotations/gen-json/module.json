@@ -22,6 +22,14 @@
       }
     }
   },
+  "includes": {
+    "included" : {
+      "path" : "included.thrift"
+    },
+    "namespaced" : {
+      "path" : "namespaced.thrift"
+    }
+  },
   "enumerations" : {
     "MyEnum" : {
       "lineno" : 112,

@@ -1,6 +1,11 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "module",
+  "includes": {
+    "hack" : {
+      "path" : "thrift/annotation/hack.thrift"
+    }
+  },
   "enumerations" : {
     "MyEnum" : {
       "lineno" : 25,

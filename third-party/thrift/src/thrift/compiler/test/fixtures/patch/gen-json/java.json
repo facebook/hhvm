@@ -1,6 +1,11 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "java",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
   "structs" : {
     "Adapter" : {
       "lineno" : 31,

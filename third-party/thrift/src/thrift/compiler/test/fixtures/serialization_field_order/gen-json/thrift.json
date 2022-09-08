@@ -1,6 +1,11 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "thrift",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
   "structs" : {
     "Beta" : {
       "lineno" : 31,

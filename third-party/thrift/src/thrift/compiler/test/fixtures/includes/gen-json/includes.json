@@ -35,6 +35,11 @@
       }
     }
   },
+  "includes": {
+    "transitive" : {
+      "path" : "transitive.thrift"
+    }
+  },
   "typedefs" : {
     "IncludedInt64" : {
       "lineno" : 32,

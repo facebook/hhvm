@@ -99,6 +99,23 @@
       }
     }
   },
+  "includes": {
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    },
+    "python" : {
+      "path" : "thrift/annotation/python.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    },
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    },
+    "hack" : {
+      "path" : "thrift/annotation/hack.thrift"
+    }
+  },
   "typedefs" : {
     "SetWithAdapter" : {
       "lineno" : 29,

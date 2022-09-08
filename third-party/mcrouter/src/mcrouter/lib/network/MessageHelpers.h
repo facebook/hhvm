@@ -77,6 +77,16 @@ uint64_t getQueryTagsImpl(std::false_type, Message&) {
 }
 } // namespace detail
 
+// // ReadConditions helpers
+template <class Message, typename = std::enable_if_t<true>>
+struct HasReadConditionsTrait : public std::false_type {};
+
+template <class Message>
+struct HasReadConditionsTrait<
+    Message,
+    std::void_t<decltype(std::declval<Message>().readConditions_ref())>>
+    : public std::true_type {};
+
 // Flags helpers
 template <typename Message, typename = std::enable_if_t<true>>
 class HasFlagsTrait : public std::false_type {};

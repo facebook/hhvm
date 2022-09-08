@@ -69,7 +69,7 @@
 <%/field:non_opt_cpp_ref?%>
 <%#field:lazy?%>
 <%#struct:union?%>  <%/struct:union?%>    written_lazy_field_<%field:cpp_name%>:
-<%#struct:union?%>  <%/struct:union?%>    indexWriter.template recordFieldEnd<decltype(<% > module_types_tcc/pm_value%>)>(<% > common/type_class%>{}, <%field:key%>);
+<%#struct:union?%>  <%/struct:union?%>    indexWriter.template recordFieldEnd<decltype(<% > module_types_tcc/pm_value%>)>(<%type:type_class_with_indirection%>{}, <%field:key%>);
 <%/field:lazy?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += prot_->writeFieldEnd();
 <%#struct:union?%>

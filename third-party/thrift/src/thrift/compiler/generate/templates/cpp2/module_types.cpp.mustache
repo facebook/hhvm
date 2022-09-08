@@ -223,7 +223,7 @@ constexpr ::apache::thrift::detail::StructInfoN<<%struct:fields_size%>> __fbthri
     %><%#struct:union?%>
     /* .issetOffset */ 0,<%!
     %><%/struct:union?%><%#field:type%>
-    /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<<% > common/type_class%>, <%field:cpp_storage_type%>>::typeInfo,<%!
+    /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<<%type:type_class_with_indirection%>, <%field:cpp_storage_type%>>::typeInfo,<%!
     %><%/field:type%>
   }<% > common/comma_newline%><%!
   %><%/struct:fields_in_key_order%>}

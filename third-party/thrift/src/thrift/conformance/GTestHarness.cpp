@@ -78,6 +78,39 @@ testing::AssertionResult runRoundTripTest(
   return testing::AssertionSuccess();
 }
 
+testing::AssertionResult runPatchTest(
+    Client<ConformanceService>& client, const PatchOpTestCase& patchTestCase) {
+  PatchOpResponse res;
+
+  try {
+    client.sync_patch(res, *patchTestCase.request());
+  } catch (const apache::thrift::TApplicationException&) {
+    return testing::AssertionFailure();
+  }
+
+  const Any& expectedAny = *patchTestCase.result();
+
+  auto parseAny = [](const Any& a) {
+    switch (auto protocol = a.protocol().value_or(StandardProtocol::Compact)) {
+      case StandardProtocol::Compact:
+        return parseObject<apache::thrift::CompactProtocolReader>(*a.data());
+      case StandardProtocol::Binary:
+        return parseObject<apache::thrift::BinaryProtocolReader>(*a.data());
+      default:
+        throw std::invalid_argument(
+            "Unsupported protocol: " + util::enumNameSafe(protocol));
+    }
+  };
+
+  Object actual = parseAny(*res.result());
+  Object expected = parseAny(expectedAny);
+  if (!op::identical<type::struct_t<Object>>(actual, expected)) {
+    // TODO: Report out the delta
+    return testing::AssertionFailure();
+  }
+  return testing::AssertionSuccess();
+}
+
 // =================== Request-Response ===================
 RequestResponseBasicClientTestResult runRequestResponseBasic(
     Client<RPCConformanceService>& client,

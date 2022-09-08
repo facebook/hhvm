@@ -159,6 +159,9 @@ client_fn_map<Client> getServers(ChannelType type = ChannelType::Header) {
 testing::AssertionResult runRoundTripTest(
     Client<ConformanceService>& client, const RoundTripTestCase& roundTrip);
 
+testing::AssertionResult runPatchTest(
+    Client<ConformanceService>& client, const PatchOpTestCase& patchTestCase);
+
 testing::AssertionResult runRpcTest(
     Client<RPCConformanceService>& client, const RpcTestCase& rpc);
 
@@ -220,6 +223,13 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
                         Client,
                         apache::thrift::Client<RPCConformanceService>>) {
         return runRpcTest(client, *testCase.rpc_ref());
+      }
+      return testing::AssertionFailure() << "Invalid test client.";
+    case TestCaseUnion::Type::objectPatch:
+      if constexpr (std::is_same_v<
+                        Client,
+                        apache::thrift::Client<ConformanceService>>) {
+        return runPatchTest(client, *testCase.objectPatch_ref());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     default:

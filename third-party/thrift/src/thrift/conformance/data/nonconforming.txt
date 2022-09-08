@@ -39,6 +39,18 @@ cpp2/CompatibilityTest/testset.float/ExceptionToUnion/NaN.Binary
 cpp2/CompatibilityTest/testset.float/ExceptionToUnion/NaN.Compact
 cpp2/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Binary
 cpp2/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
+cpp2/PatchTest/float/assign.NaN.Binary
+cpp2/PatchTest/double/add.NaN.Compact
+cpp2/PatchTest/double/assign.NaN.Compact
+cpp2/PatchTest/float/add.NaN.Compact
+cpp2/PatchTest/float/assign.NaN.Compact
+cpp2/PatchTest/double/assign.NaN.Binary
+cpp2/PatchTest/float/add.NaN.Binary
+cpp2/PatchTest/double/add.NaN.Binary
+cpp2/PatchTest/float/add.NaN_1.Binary
+cpp2/PatchTest/double/add.NaN_1.Binary
+cpp2/PatchTest/float/add.NaN_1.Compact
+cpp2/PatchTest/double/add.NaN_1.Compact
 #
 #
 # Python: NaN

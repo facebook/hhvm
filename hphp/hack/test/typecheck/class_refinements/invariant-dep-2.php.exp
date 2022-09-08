@@ -1,0 +1,16 @@
+File "invariant-dep-2.php", line 32, characters 19-24:
+The method `boxGet` is not compatible with the overridden method (Typing[4341])
+  File "invariant-dep-2.php", line 24, characters 7-7:
+  Expected `T`
+  File "invariant-dep-2.php", line 34, characters 6-8:
+  But got `int`
+File "invariant-dep-2.php", line 53, characters 11-35:
+Invalid return type (Typing[4110])
+  File "invariant-dep-2.php", line 49, characters 6-7:
+  Expected `T2`
+  File "invariant-dep-2.php", line 15, characters 18-20:
+  But got `int`
+  File "invariant-dep-2.php", line 16, characters 26-32:
+    resulting from expanding the type constant `<expr#1> as ConcreteIntBox::T`
+  File "invariant-dep-2.php", line 53, characters 11-28:
+    where `<expr#1>` is a reference to this expression

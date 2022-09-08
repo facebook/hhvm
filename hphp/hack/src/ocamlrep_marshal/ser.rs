@@ -9,13 +9,10 @@ use std::io::Write;
 use libc::c_char;
 use libc::c_double;
 use libc::c_int;
-use libc::c_long;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
 use crate::intext::*;
-
-type intnat = c_long;
 
 // Flags affecting marshaling
 
@@ -289,8 +286,8 @@ impl<'a> State<'a> {
 
     fn close_output(&mut self) {}
 
-    fn output_length(&mut self) -> intnat {
-        self.output.len() as intnat
+    fn output_length(&mut self) -> usize {
+        self.output.len()
     }
 
     // Panic raising (cleanup is handled by State's Drop impl)
@@ -314,14 +311,14 @@ impl<'a> State<'a> {
         self.output.write_all(&[c as u8]).unwrap();
     }
 
-    unsafe fn writeblock(&mut self, data: *const c_char, len: intnat) {
+    unsafe fn writeblock(&mut self, data: *const c_char, len: usize) {
         self.output
             .write_all(std::slice::from_raw_parts(data as *const u8, len as usize))
             .unwrap();
     }
 
     #[inline]
-    unsafe fn writeblock_float8(&mut self, data: *const c_double, ndoubles: intnat) {
+    unsafe fn writeblock_float8(&mut self, data: *const c_double, ndoubles: usize) {
         if ARCH_FLOAT_ENDIANNESS == 0x01234567 || ARCH_FLOAT_ENDIANNESS == 0x76543210 {
             self.writeblock(data as *const c_char, ndoubles * 8);
         } else {
@@ -350,7 +347,7 @@ impl<'a> State<'a> {
 
     /// Marshaling integers
     #[inline]
-    unsafe fn extern_int(&mut self, n: intnat) {
+    unsafe fn extern_int(&mut self, n: isize) {
         if (0..0x40).contains(&n) {
             self.write(PREFIX_SMALL_INT + n as c_int);
         } else if (-(1 << 7)..(1 << 7)).contains(&n) {
@@ -412,7 +409,7 @@ impl<'a> State<'a> {
 
     #[inline]
     unsafe fn extern_string(&mut self, bytes: &'a [u8]) {
-        let len: intnat = bytes.len().try_into().unwrap();
+        let len = bytes.len();
         if len < 0x20 {
             self.write(PREFIX_SMALL_STRING + (len as c_int));
         } else if len < 0x100 {
@@ -434,13 +431,13 @@ impl<'a> State<'a> {
     #[inline]
     unsafe fn extern_double(&mut self, v: f64) {
         self.write(CODE_DOUBLE_NATIVE);
-        self.writeblock_float8(&v, 1 as intnat);
+        self.writeblock_float8(&v, 1);
     }
 
     /// Marshaling FP arrays
     #[inline]
     unsafe fn extern_double_array(&mut self, slice: &[f64]) {
-        let nfloats = slice.len() as intnat;
+        let nfloats = slice.len();
         if nfloats < 0x100 {
             self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as i8);
         } else {
@@ -467,7 +464,7 @@ impl<'a> State<'a> {
 
         loop {
             if v.is_immediate() {
-                self.extern_int(v.as_int().unwrap() as intnat);
+                self.extern_int(v.as_int().unwrap());
             } else {
                 let hd: Header = v.as_block().unwrap().header();
                 let tag: u8 = hd.tag();
@@ -591,10 +588,10 @@ impl<'a> State<'a> {
         flags: Value<'a>,
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
-    ) -> intnat {
+    ) -> usize {
         static EXTERN_FLAG_VALUES: [c_int; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
 
-        let res_len: intnat;
+        let res_len: usize;
         // Parse flag list
         self.extern_flags = convert_flag_list(flags, &EXTERN_FLAG_VALUES).unwrap();
         // Initializations

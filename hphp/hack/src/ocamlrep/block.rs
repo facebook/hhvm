@@ -169,14 +169,29 @@ impl Debug for Block<'_> {
     }
 }
 
+// values from ocaml 'gc.h'
+#[repr(usize)]
+#[derive(Clone, Copy)]
+pub enum Color {
+    White = crate::CAML_WHITE,
+    Gray = crate::CAML_GRAY,
+    Blue = crate::CAML_BLUE,
+    Black = crate::CAML_BLACK,
+}
+
 #[repr(transparent)]
 #[derive(Clone, Copy)]
 pub struct Header(usize);
 
 impl Header {
     #[inline(always)]
-    pub(crate) const fn new(size: usize, tag: u8) -> Self {
-        let bits = size << 10 | (tag as usize);
+    pub const fn new(size: usize, tag: u8) -> Self {
+        Self::with_color(size, tag, Color::White)
+    }
+
+    #[inline(always)]
+    pub const fn with_color(size: usize, tag: u8, color: Color) -> Self {
+        let bits = size << 10 | (color as usize) | (tag as usize);
         Header(bits)
     }
 
@@ -188,6 +203,17 @@ impl Header {
     #[inline(always)]
     pub const fn tag(self) -> u8 {
         self.0 as u8
+    }
+
+    #[inline(always)]
+    pub const fn color(self) -> Color {
+        match self.0 & Color::Black as usize {
+            crate::CAML_WHITE => Color::White,
+            crate::CAML_GRAY => Color::Gray,
+            crate::CAML_BLUE => Color::Blue,
+            crate::CAML_BLACK => Color::Black,
+            _ => unreachable!(),
+        }
     }
 
     #[inline(always)]

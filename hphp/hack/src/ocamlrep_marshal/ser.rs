@@ -27,76 +27,7 @@ type intnat = c_long;
 type uintnat = c_ulong;
 
 type value = intnat;
-type header_t = uintnat;
 type mlsize_t = uintnat;
-type color_t = uintnat;
-
-#[inline]
-const fn Is_long(x: Value<'_>) -> bool {
-    x.is_immediate()
-}
-#[inline]
-const fn Is_block(x: Value<'_>) -> bool {
-    !x.is_immediate()
-}
-
-// Conversion macro names are always of the form  "to_from".
-// Example: Val_long as in "Val from long" or "Val of long".
-
-#[inline]
-fn Long_val(x: Value<'_>) -> intnat {
-    x.as_int().unwrap() as intnat
-}
-#[inline]
-const fn Tag_hd(hd: Header) -> u8 {
-    hd.tag()
-}
-#[inline]
-const fn Wosize_hd(hd: Header) -> mlsize_t {
-    hd.size() as mlsize_t
-}
-#[inline]
-fn Hd_val(v: Value<'_>) -> Header {
-    v.as_block().unwrap().header()
-}
-#[inline]
-const fn Bsize_wsize(sz: mlsize_t) -> mlsize_t {
-    sz.wrapping_mul(std::mem::size_of::<Value<'_>>() as mlsize_t)
-}
-#[inline]
-const fn Bosize_hd(hd: Header) -> mlsize_t {
-    Bsize_wsize(Wosize_hd(hd))
-}
-#[inline]
-fn Tag_val(val: Value<'_>) -> u8 {
-    val.as_block().unwrap().header().tag()
-}
-
-/// Fields are numbered from 0.
-#[inline]
-fn Field(x: Value<'_>, i: usize) -> Value<'_> {
-    x.field(i).unwrap()
-}
-#[inline]
-fn Field_ref<'a>(x: Value<'a>, i: usize) -> &'a Value<'a> {
-    x.field_ref(i).unwrap()
-}
-
-#[inline]
-fn Forward_val(v: Value<'_>) -> Value<'_> {
-    Field(v, 0)
-}
-#[inline]
-const fn Infix_offset_hd(hd: Header) -> mlsize_t {
-    Bosize_hd(hd)
-}
-
-#[inline]
-const fn Make_header(wosize: mlsize_t, tag: u8, color: color_t) -> header_t {
-    (wosize << 10)
-        .wrapping_add(color as header_t)
-        .wrapping_add(tag as header_t)
-}
 
 // Flags affecting marshaling
 
@@ -485,7 +416,7 @@ impl<'a> State<'a> {
             // this becomes,
             //   let hd: header_t = Make_header(sz, tag, NOT_MARKABLE);
             // where, `NOT_MARKABLE` (`3 << 8`) ('caml/runtime/shared_heap.h').
-            let hd: header_t = Make_header(sz, tag, 0 << 8);
+            let hd = Header::with_color(sz as usize, tag, ocamlrep::Color::White).to_bits();
 
             if sz > 0x3FFFFF && self.extern_flags & COMPAT_32 != 0 {
                 self.failwith("output_value: array cannot be read back on 32-bit platform");
@@ -554,20 +485,20 @@ impl<'a> State<'a> {
         self.init_position_table();
 
         loop {
-            if Is_long(v) {
-                self.extern_int(Long_val(v));
+            if v.is_immediate() {
+                self.extern_int(v.as_int().unwrap() as intnat);
             } else {
-                let hd: Header = Hd_val(v);
-                let tag: u8 = Tag_hd(hd);
-                let sz: mlsize_t = Wosize_hd(hd);
+                let hd: Header = v.as_block().unwrap().header();
+                let tag: u8 = hd.tag();
+                let sz: mlsize_t = hd.size() as mlsize_t;
 
                 if tag == ocamlrep::FORWARD_TAG {
-                    let f: Value<'a> = Forward_val(v);
-                    if Is_block(f)
-                        && (Tag_val(f) == ocamlrep::FORWARD_TAG
-                            || Tag_val(f) == ocamlrep::LAZY_TAG
-                            || Tag_val(f) == ocamlrep::FORCING_TAG
-                            || Tag_val(f) == ocamlrep::DOUBLE_TAG)
+                    let f: Value<'a> = v.field(0).unwrap();
+                    if f.is_block()
+                        && (f.as_block().unwrap().tag() == ocamlrep::FORWARD_TAG
+                            || f.as_block().unwrap().tag() == ocamlrep::LAZY_TAG
+                            || f.as_block().unwrap().tag() == ocamlrep::FORCING_TAG
+                            || f.as_block().unwrap().tag() == ocamlrep::DOUBLE_TAG)
                     {
                         // Do not short-circuit the pointer.
                     } else {
@@ -630,9 +561,11 @@ impl<'a> State<'a> {
                                 self.invalid_argument("output_value: abstract value (Abstract)");
                             }
                             ocamlrep::INFIX_TAG => {
-                                self.writecode32(CODE_INFIXPOINTER, Infix_offset_hd(hd) as intnat);
+                                let infix_offset =
+                                    hd.size().wrapping_mul(std::mem::size_of::<Value<'_>>());
+                                self.writecode32(CODE_INFIXPOINTER, infix_offset as intnat);
                                 v = Value::from_bits(
-                                    (v.to_bits() as uintnat).wrapping_sub(Infix_offset_hd(hd))
+                                    (v.to_bits() as uintnat).wrapping_sub(infix_offset as uintnat)
                                         as usize,
                                 ); // PR#5772
                                 continue;
@@ -656,12 +589,12 @@ impl<'a> State<'a> {
                                         self.stack_overflow();
                                     }
                                     self.stack.push(extern_item {
-                                        v: Field_ref(v, 1),
+                                        v: v.field_ref(1).unwrap(),
                                         count: sz.wrapping_sub(1),
                                     });
                                 }
                                 // Continue serialization with the first field
-                                v = Field(v, 0);
+                                v = v.field(0).unwrap();
                                 continue;
                             }
                         }

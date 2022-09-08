@@ -45,6 +45,11 @@ impl<'a> Value<'a> {
     }
 
     #[inline(always)]
+    pub const fn is_block(self) -> bool {
+        !self.is_immediate()
+    }
+
+    #[inline(always)]
     pub const fn int(value: isize) -> Value<'static> {
         Value(isize_to_ocaml_int(value), PhantomData)
     }

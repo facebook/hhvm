@@ -315,6 +315,7 @@ pub mod slab;
 pub use arena::Arena;
 pub use block::Block;
 pub use block::BlockBuilder;
+pub use block::Color;
 pub use block::Header;
 pub use block::ABSTRACT_TAG;
 pub use block::CLOSURE_TAG;

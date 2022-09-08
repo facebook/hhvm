@@ -28,8 +28,8 @@ using namespace std;
 namespace apache::thrift::protocol {
 
 // Testcase 1 uses an object with a large bool list and patch doesn't contain
-// the field.
-Object getObject1(int n) {
+// the field. Testcase 4 uses the same object and clears the field.
+Object getObject1And4(int n) {
   Object obj;
   std::vector<Value> boolList;
   while (n--) {
@@ -40,13 +40,20 @@ Object getObject1(int n) {
   return obj;
 }
 
-Object getPatchObj1() {
+Object getPatchObj1And4(bool clear) {
   Value intPatch;
   intPatch.objectValue_ref()
       .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
       asValueStruct<type::i32_t>(1);
   Value objPatch;
   objPatch.objectValue_ref().ensure()[FieldId{2}] = intPatch;
+  if (clear) {
+    Value listPatch;
+    listPatch.objectValue_ref()
+        .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Clear)}] =
+        asValueStruct<type::bool_t>(true);
+    objPatch.objectValue_ref().ensure()[FieldId{1}] = listPatch;
+  }
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::Patch)}] = objPatch;
   return patchObj;
@@ -105,19 +112,23 @@ Object getPatchObj3(int n) {
   return patchObj;
 }
 
-std::unique_ptr<folly::IOBuf> serialized1, serialized2, serialized3;
-Object patchObj1, patchObj2, patchObj3;
+std::unique_ptr<folly::IOBuf> serialized1, serialized2, serialized3,
+    serialized4;
+Object patchObj1, patchObj2, patchObj3, patchObj4;
 
 void init(int n) {
   serialized1 =
-      serializeObject<apache::thrift::CompactProtocolWriter>(getObject1(n));
-  patchObj1 = getPatchObj1();
+      serializeObject<apache::thrift::CompactProtocolWriter>(getObject1And4(n));
+  patchObj1 = getPatchObj1And4(false);
   serialized2 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject2(n));
   patchObj2 = getPatchObj2();
   serialized3 =
       serializeObject<apache::thrift::CompactProtocolWriter>(getObject3(n));
   patchObj3 = getPatchObj3(n);
+  serialized4 =
+      serializeObject<apache::thrift::CompactProtocolWriter>(getObject1And4(n));
+  patchObj4 = getPatchObj1And4(true);
 }
 
 void runOriginalApproach(
@@ -153,6 +164,15 @@ BENCHMARK(patch_all_small_fields_without_partial_deser) {
 BENCHMARK(patch_all_small_fields_with_partial_deser) {
   applyPatchToSerializedData<type::StandardProtocol::Compact>(
       patchObj3, *serialized3);
+}
+
+BENCHMARK(patch_clear_large_fields_without_partial_deser) {
+  runOriginalApproach(serialized4, patchObj4);
+}
+
+BENCHMARK(patch_clear_large_fields_with_partial_deser) {
+  applyPatchToSerializedData<type::StandardProtocol::Compact>(
+      patchObj4, *serialized4);
 }
 } // namespace apache::thrift::protocol
 

@@ -235,6 +235,11 @@ struct ProxygenTransport final
     m_localPort = localAddr.getPort();
   };
 
+  proxygen::HTTPTransaction* getTransaction() noexcept {
+    Lock lock(this);
+    return m_clientTxn;
+  }
+
   void detachTransaction() noexcept override {
     VLOG(5) << "detachTransaction ProxygenTransport=" << (uint64_t) this;
     {

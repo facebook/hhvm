@@ -11,22 +11,15 @@ use libc::c_double;
 use libc::c_int;
 use libc::c_long;
 use libc::c_ulong;
-use libc::c_void;
-use libc::memcpy;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
 use crate::intext::*;
 
-extern "C" {
-    fn caml_alloc_string(len: mlsize_t) -> value;
-}
-
 type int64_t = c_long;
 type intnat = c_long;
 type uintnat = c_ulong;
 
-type value = intnat;
 type mlsize_t = uintnat;
 
 // Flags affecting marshaling
@@ -667,7 +660,7 @@ impl<'a> State<'a> {
     }
 }
 
-unsafe fn output_val<W: std::io::Write>(
+pub unsafe fn output_val<W: std::io::Write>(
     w: &mut W,
     v: Value<'_>,
     flags: Value<'_>,
@@ -682,15 +675,4 @@ unsafe fn output_val<W: std::io::Write>(
     w.write_all(&header[0..header_len])?;
     w.write_all(&output)?;
     w.flush()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(v: value, flags: value) -> value {
-    let v = Value::from_bits(v as usize);
-    let flags = Value::from_bits(flags as usize);
-    let mut vec = vec![];
-    output_val(&mut vec, v, flags).unwrap();
-    let res: value = caml_alloc_string(vec.len() as mlsize_t);
-    memcpy(res as *mut c_void, vec.as_ptr() as *const c_void, vec.len());
-    res
 }

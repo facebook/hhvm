@@ -6,12 +6,12 @@
  (wrapped false)
  (libraries ocamlpool)
  (c_library_flags -lpthread)
- (foreign_archives ocamlrep_marshal))
+ (foreign_archives ocamlrep_marshal_ffi_bindings))
 
 (rule
-  (targets libocamlrep_marshal.a)
+  (targets libocamlrep_marshal_ffi_bindings.a)
   (deps
    (source_tree %{workspace_root}/src))
   (locks cargo)
   (action
-   (run %{workspace_root}/scripts/invoke_cargo.sh ocamlrep_marshal ocamlrep_marshal)))
+   (run %{workspace_root}/scripts/invoke_cargo.sh ocamlrep_marshal_ffi_bindings ocamlrep_marshal_ffi_bindings)))

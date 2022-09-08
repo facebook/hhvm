@@ -8,3 +8,5 @@
 mod deser; // deserialize; c.f 'runtime/intern.c'
 mod intext; // c.f. 'runtime/caml/intext.h'
 mod ser; // serialize; c.f. 'runtime/extern.c'
+
+pub use ser::output_val;

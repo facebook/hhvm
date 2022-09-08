@@ -521,10 +521,10 @@ let produce_results
   in
 
   let dynamic_shape_results =
-    markers
-    |> List.map ~f:(fun (_, pos) -> Literal pos)
-    |> EntitySet.of_list
-    |> EntitySet.inter dynamic_accesses
+    dynamic_accesses
+    |> EntitySet.filter (function
+           | Variable _ -> false
+           | _ -> true)
     |> EntitySet.elements
     |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict entity_)
   in

@@ -770,7 +770,7 @@ void ConnectOperation::timeoutHandler(
   // Overall the message looks like this:
   //   [<errno>](Mysql Client) Connect[Pool] to <host>:<port> timed out
   //   [at stage <connect_stage>] (took Nms, timeout was Nms)
-  //   [(THREAD_OVERLOAD: cb delay Nms, N active conns)] [TcpTimeout:N]
+  //   [(CLIENT_OVERLOADED: cb delay Nms, N active conns)] [TcpTimeout:N]
   std::vector<std::string> parts;
   parts.push_back(fmt::format(
       "[{}]({})Connect{} to {}:{} timed out",
@@ -2012,7 +2012,7 @@ std::unique_ptr<Connection>&& Operation::ConnectionProxy::releaseConnection() {
 
 std::string Operation::threadOverloadMessage(double cbDelayUs) const {
   return fmt::format(
-      "(THREAD_OVERLOAD: cb delay {}ms, {} active conns)",
+      "(CLIENT_OVERLOADED: cb delay {}ms, {} active conns)",
       std::lround(cbDelayUs / 1000.0),
       client()->numStartedAndOpenConnections());
 }

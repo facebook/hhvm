@@ -96,7 +96,7 @@ module Inter (I : Intra) = struct
         | Intra _ -> input_constr_list_map
         | Inter inter_constr ->
           (match inter_constr with
-          | Arg ((f, f_idx, _), intra_ent) ->
+          | Arg (((_, f), f_idx), intra_ent) ->
             let constr_list_at = SMap.find_opt f base_constraint_map in
             let param_constr : inter_constraint =
               match constr_list_at with
@@ -104,7 +104,7 @@ module Inter (I : Intra) = struct
                 let param_ent_opt =
                   List.find
                     ~f:(function
-                      | Inter (Param (g, g_idx, _)) ->
+                      | Inter (Param ((_, g), g_idx)) ->
                         String.equal f g && Int.equal f_idx g_idx
                       | _ -> false)
                     constr_list_at_

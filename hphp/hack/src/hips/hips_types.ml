@@ -12,7 +12,7 @@ type const_entity = A.id [@@deriving ord, show]
 
 type identifier_entity = A.id [@@deriving ord, show]
 
-type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
+type param_entity = A.id * int [@@deriving ord, show]
 
 type entity =
   | Param of param_entity
@@ -60,7 +60,7 @@ end
 
 let equal_entity (ent1 : entity) (ent2 : entity) : bool =
   match (ent1, ent2) with
-  | (Param (f_id, f_idx, _), Param (g_id, g_idx, _)) ->
+  | (Param ((_, f_id), f_idx), Param ((_, g_id), g_idx)) ->
     String.equal f_id g_id && Int.equal f_idx g_idx
   | (Constant (pos1, id1), Constant (pos2, id2)) ->
     A.equal_pos pos1 pos2 && String.equal id1 id2

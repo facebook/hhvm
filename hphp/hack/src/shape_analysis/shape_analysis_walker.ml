@@ -274,7 +274,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
           else
             let inter_constraint_ =
               decorate ~origin:__LINE__
-              @@ HT.Arg ((f_id, arg_idx, pos), arg_entity_)
+              @@ HT.Arg (((pos, f_id), arg_idx), arg_entity_)
             in
             Env.add_inter_constraint env inter_constraint_
         in
@@ -501,7 +501,7 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     let hint_pos = dict_pos_of_hint hint in
     let entity_ =
       match kind with
-      | `Parameter (id, idx) -> Inter (HT.Param (id, idx, hint_pos))
+      | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
       | `Return -> Literal hint_pos
     in
     let decorate ~origin constraint_ =
@@ -510,7 +510,7 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     let inter_constraints =
       match kind with
       | `Parameter (id, idx) ->
-        [decorate ~origin:__LINE__ @@ HT.Param (id, idx, hint_pos)]
+        [decorate ~origin:__LINE__ @@ HT.Param ((hint_pos, id), idx)]
       | `Return -> []
     in
     let kind =

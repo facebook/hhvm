@@ -12,8 +12,7 @@ type const_entity = A.id [@@deriving ord, show]
 
 type identifier_entity = A.id [@@deriving ord, show]
 
-(** TODO(T129452182) Replace A.id_ * Pos with A.id *)
-type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
+type param_entity = A.id * int [@@deriving ord, show]
 
 type entity =
   | Param of param_entity

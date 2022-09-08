@@ -448,7 +448,7 @@ let produce_results
     let add entity acc =
       match entity with
       | Literal pos
-      | Inter (HT.Param (_, _, pos)) ->
+      | Inter (HT.Param ((pos, _), _)) ->
         Pos.Set.add pos acc
       | Variable _
       | Inter (HT.Constant _)
@@ -486,7 +486,7 @@ let produce_results
     let add_entity (entity, key, ty) pos_map =
       match entity with
       | Literal pos
-      | Inter (HT.Param (_, _, pos))
+      | Inter (HT.Param ((pos, _), _))
       | Inter (HT.Constant (pos, _))
       | Inter (HT.Identifier (pos, _)) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map

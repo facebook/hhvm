@@ -368,6 +368,29 @@ PatchOpTestCase makeValueContainerPrependTC(
   return tascase;
 }
 
+template <typename ContainerTag, typename TT>
+PatchOpTestCase makeValueContainerAppendTC(
+    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+
+  using Container = type::native_type<ContainerTag>;
+
+  auto patchValue = value.value;
+  op::clear<TT>(patchValue);
+  Container initial = {value.value};
+  Container expected = {value.value, patchValue};
+  Container patchData = {patchValue};
+
+  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.patch() = registry.store(
+      makePatchObject<ContainerTag>(op::PatchOp::Put, patchData), protocol);
+  tascase.request() = req;
+  tascase.result() =
+      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  return tascase;
+}
+
 } // namespace
 
 template <typename TT>
@@ -430,6 +453,16 @@ Test createListSetPatchTest(
             makeValueContainerPrependTC<ContainerTag, TT, type::set<TT>>(
                 registry, protocol, value);
       }
+
+      auto& appendCase = test.testCases()->emplace_back();
+      appendCase.name() = fmt::format(
+          "{}<{}>/append.{}",
+          type::getName<CC>(),
+          type::getName<TT>(),
+          value.name);
+      appendCase.test().emplace().objectPatch_ref() =
+          makeValueContainerAppendTC<ContainerTag, TT>(
+              registry, protocol, value);
     }
   });
 

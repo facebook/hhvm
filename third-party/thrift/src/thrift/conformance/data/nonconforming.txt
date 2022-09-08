@@ -71,6 +71,14 @@ cpp2/PatchTest/list<double>/prepend_set.NaN.Binary
 cpp2/PatchTest/list<float>/prepend_set.NaN.Compact
 cpp2/PatchTest/list<double>/prepend_set.NaN.Compact
 cpp2/PatchTest/list<float>/prepend_set.NaN.Binary
+cpp2/PatchTest/list<double>/append.NaN.Compact
+cpp2/PatchTest/list<float>/append.NaN.Compact
+cpp2/PatchTest/set<float>/append.NaN.Compact
+cpp2/PatchTest/set<double>/append.NaN.Binary
+cpp2/PatchTest/list<float>/append.NaN.Binary
+cpp2/PatchTest/set<double>/append.NaN.Compact
+cpp2/PatchTest/set<float>/append.NaN.Binary
+cpp2/PatchTest/list<double>/append.NaN.Binary
 #
 #
 # Python: NaN

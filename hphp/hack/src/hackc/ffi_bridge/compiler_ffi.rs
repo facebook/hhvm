@@ -17,6 +17,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use compile::EnvFlags;
 use compile::HhbcFlags;
+use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
 use external_decl_provider::ExternalDeclProvider;
@@ -44,10 +45,7 @@ pub mod compile_ffi {
         check_int_overflow: i32,
 
         hhbc_flags: HhbcFlags,
-
-        /// compiler::ParserFlags
-        parser_flags: u32,
-
+        parser_flags: ParserFlags,
         flags: EnvFlags,
     }
 
@@ -70,6 +68,22 @@ pub mod compile_ffi {
         emit_cls_meth_pointers: bool,
         emit_meth_caller_func_pointers: bool,
         fold_lazy_class_keys: bool,
+    }
+
+    struct ParserFlags {
+        abstract_static_props: bool,
+        allow_new_attribute_syntax: bool,
+        allow_unstable_features: bool,
+        const_default_func_args: bool,
+        const_static_props: bool,
+        disable_lval_as_an_expression: bool,
+        disallow_inst_meth: bool,
+        disable_xhp_element_mangling: bool,
+        disallow_fun_and_cls_meth_pseudo_funcs: bool,
+        disallow_func_ptrs_in_constants: bool,
+        enable_enum_classes: bool,
+        enable_xhp_class_modifier: bool,
+        enable_class_level_where_clauses: bool,
     }
 
     pub struct DeclResult {
@@ -232,7 +246,26 @@ impl compile_ffi::NativeEnv {
                 fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
                 ..Default::default()
             },
-            parser_flags: compile::ParserFlags::from_bits(self.parser_flags)?,
+            parser_flags: ParserFlags {
+                abstract_static_props: self.parser_flags.abstract_static_props,
+                allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
+                allow_unstable_features: self.parser_flags.allow_unstable_features,
+                const_default_func_args: self.parser_flags.const_default_func_args,
+                const_static_props: self.parser_flags.const_static_props,
+                disable_lval_as_an_expression: self.parser_flags.disable_lval_as_an_expression,
+                disallow_inst_meth: self.parser_flags.disallow_inst_meth,
+                disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
+                disallow_fun_and_cls_meth_pseudo_funcs: self
+                    .parser_flags
+                    .disallow_fun_and_cls_meth_pseudo_funcs,
+                disallow_func_ptrs_in_constants: self.parser_flags.disallow_func_ptrs_in_constants,
+                enable_enum_classes: self.parser_flags.enable_enum_classes,
+                enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
+                enable_class_level_where_clauses: self
+                    .parser_flags
+                    .enable_class_level_where_clauses,
+                ..Default::default()
+            },
             flags: EnvFlags {
                 is_systemlib: self.flags.is_systemlib,
                 for_debugger_eval: self.flags.for_debugger_eval,

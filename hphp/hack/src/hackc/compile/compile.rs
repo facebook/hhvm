@@ -16,7 +16,6 @@ use aast_parser::AastParser;
 use aast_parser::Error as AastError;
 use anyhow::anyhow;
 use anyhow::Result;
-use bitflags::bitflags;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
@@ -70,7 +69,7 @@ impl Default for NativeEnv {
             emit_class_pointers: 0,
             check_int_overflow: 0,
             hhbc_flags: HhbcFlags::default(),
-            parser_flags: ParserFlags::empty(),
+            parser_flags: ParserFlags::default(),
             flags: EnvFlags::default(),
         }
     }
@@ -127,28 +126,34 @@ pub struct HhbcFlags {
     pub fold_lazy_class_keys: bool,
 }
 
-// Mapping must match getParserFlags() in runtime-option.cpp and compiler_ffi.rs
-bitflags! {
-    pub struct ParserFlags: u32 {
-        const ABSTRACT_STATIC_PROPS=1 << 0;
-        const ALLOW_NEW_ATTRIBUTE_SYNTAX=1 << 1;
-        const ALLOW_UNSTABLE_FEATURES=1 << 2;
-        const CONST_DEFAULT_FUNC_ARGS=1 << 3;
-        const CONST_STATIC_PROPS=1 << 4;
-        // No longer using bits 5-7
-        const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
-        // No longer using bit 9
-        const DISALLOW_INST_METH=1 << 10;
-        const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
-        const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
-        const DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13;
-        // No longer using bit 14.
-        // No longer using bit 15.
-        const ENABLE_ENUM_CLASSES=1 << 16;
-        const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
-        // No longer using bits 18-19.
-        const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
-  }
+#[derive(Debug, Default, Clone, clap::Parser)]
+pub struct ParserFlags {
+    #[clap(long)]
+    pub abstract_static_props: bool,
+    #[clap(long)]
+    pub allow_new_attribute_syntax: bool,
+    #[clap(long)]
+    pub allow_unstable_features: bool,
+    #[clap(long)]
+    pub const_default_func_args: bool,
+    #[clap(long)]
+    pub const_static_props: bool,
+    #[clap(long)]
+    pub disable_lval_as_an_expression: bool,
+    #[clap(long)]
+    pub disallow_inst_meth: bool,
+    #[clap(long)]
+    pub disable_xhp_element_mangling: bool,
+    #[clap(long)]
+    pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
+    #[clap(long)]
+    pub disallow_func_ptrs_in_constants: bool,
+    #[clap(long)]
+    pub enable_enum_classes: bool,
+    #[clap(long)]
+    pub enable_xhp_class_modifier: bool,
+    #[clap(long)]
+    pub enable_class_level_where_clauses: bool,
 }
 
 impl HhbcFlags {
@@ -251,98 +256,125 @@ impl HhbcFlags {
 
 impl ParserFlags {
     pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
-        let mut parser_options = ParserFlags::empty();
+        let mut flags = Self::default();
+
+        // Use the config setting if provided; otherwise preserve default.
+        let init = |flag: &mut bool, name: &str| -> Result<()> {
+            match config.get_bool(name)? {
+                Some(b) => Ok(*flag = b),
+                None => Ok(()),
+            }
+        };
+
         // Note: Could only find examples of Hack.Lang.AbstractStaticProps
-        if let Some(true) = config.get_bool("Hack.Lang.AbstractStaticProps")? {
-            parser_options |= ParserFlags::ABSTRACT_STATIC_PROPS;
-        }
+        init(
+            &mut flags.abstract_static_props,
+            "Hack.Lang.AbstractStaticProps",
+        )?;
+
         // TODO: I'm pretty sure allow_new_attribute_syntax is dead and we can kill this option
-        if let Some(true) = config.get_bool("hack.lang.allow_new_attribute_syntax")? {
-            parser_options |= ParserFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
-        }
+        init(
+            &mut flags.allow_new_attribute_syntax,
+            "hack.lang.allow_new_attribute_syntax",
+        )?;
+
         // Both hdf and ini versions are being used
-        if let Some(true) = config.get_bool("Hack.Lang.AllowUnstableFeatures")? {
-            parser_options |= ParserFlags::ALLOW_UNSTABLE_FEATURES;
-        }
+        init(
+            &mut flags.allow_unstable_features,
+            "Hack.Lang.AllowUnstableFeatures",
+        )?;
+
         // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
-        if let Some(true) = config.get_bool("Hack.Lang.ConstDefaultFuncArgs")? {
-            parser_options |= ParserFlags::CONST_DEFAULT_FUNC_ARGS;
-        }
+        init(
+            &mut flags.const_default_func_args,
+            "Hack.Lang.ConstDefaultFuncArgs",
+        )?;
+
         // Only hdf version found in use
-        if let Some(true) = config.get_bool("Hack.Lang.ConstStaticProps")? {
-            parser_options |= ParserFlags::CONST_STATIC_PROPS;
-        }
+        init(&mut flags.const_static_props, "Hack.Lang.ConstStaticProps")?;
+
         // TODO: Kill disable_lval_as_an_expression
+
         // Only hdf option in use
-        if let Some(true) = config.get_bool("Hack.Lang.DisallowInstMeth")? {
-            parser_options |= ParserFlags::DISALLOW_INST_METH;
-        }
+        init(&mut flags.disallow_inst_meth, "Hack.Lang.DisallowInstMeth")?;
+
         // Both ini and hdf variants in use
-        if let Some(true) = config.get_bool("Hack.Lang.DisableXHPElementMangling")? {
-            parser_options |= ParserFlags::DISABLE_XHP_ELEMENT_MANGLING;
-        }
+        init(
+            &mut flags.disable_xhp_element_mangling,
+            "Hack.Lang.DisableXHPElementMangling",
+        )?;
+
         // Both ini and hdf variants in use
-        if let Some(true) = config.get_bool("Hack.Lang.DisallowFunAndClsMethPseudoFuncs")? {
-            parser_options |= ParserFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
-        }
+        init(
+            &mut flags.disallow_fun_and_cls_meth_pseudo_funcs,
+            "Hack.Lang.DisallowFunAndClsMethPseudoFuncs",
+        )?;
+
         // Only hdf option in use
-        if let Some(true) = config.get_bool("Hack.Lang.DisallowFuncPtrsInConstants")? {
-            parser_options |= ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
-        }
+        init(
+            &mut flags.disallow_func_ptrs_in_constants,
+            "Hack.Lang.DisallowFuncPtrsInConstants",
+        )?;
+
         // Only hdf option in use
-        if let Some(true) = config.get_bool("Hack.Lang.EnableEnumClasses")? {
-            parser_options |= ParserFlags::ENABLE_ENUM_CLASSES;
-        }
+        init(
+            &mut flags.enable_enum_classes,
+            "Hack.Lang.EnableEnumClasses",
+        )?;
+
         // Both options in use
-        if let Some(true) = config.get_bool("Hack.Lang.EnableXHPClassModifier")? {
-            parser_options |= ParserFlags::ENABLE_XHP_CLASS_MODIFIER;
-        }
+        init(
+            &mut flags.enable_xhp_class_modifier,
+            "Hack.Lang.EnableXHPClassModifier",
+        )?;
+
         // Only hdf option in use. Kill variant in options_cli.rs
-        if let Some(true) = config.get_bool("Hack.Lang.EnableClassLevelWhereClauses")? {
-            parser_options |= ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
-        }
-        Ok(parser_options)
+        init(
+            &mut flags.enable_class_level_where_clauses,
+            "Hack.Lang.EnableClassLevelWhereClauses",
+        )?;
+        Ok(flags)
     }
 
-    fn to_lang_flags(self) -> LangFlags {
+    fn to_lang_flags(&self) -> LangFlags {
         let mut f = LangFlags::empty();
-        if self.contains(Self::ABSTRACT_STATIC_PROPS) {
+        if self.abstract_static_props {
             f |= LangFlags::ABSTRACT_STATIC_PROPS;
         }
-        if self.contains(Self::ALLOW_NEW_ATTRIBUTE_SYNTAX) {
+        if self.allow_new_attribute_syntax {
             f |= LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
         }
-        if self.contains(Self::ALLOW_UNSTABLE_FEATURES) {
+        if self.allow_unstable_features {
             f |= LangFlags::ALLOW_UNSTABLE_FEATURES;
         }
-        if self.contains(Self::CONST_DEFAULT_FUNC_ARGS) {
+        if self.const_default_func_args {
             f |= LangFlags::CONST_DEFAULT_FUNC_ARGS;
         }
-        if self.contains(Self::CONST_STATIC_PROPS) {
+        if self.const_static_props {
             f |= LangFlags::CONST_STATIC_PROPS;
         }
-        if self.contains(Self::DISABLE_LVAL_AS_AN_EXPRESSION) {
+        if self.disable_lval_as_an_expression {
             f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
         }
-        if self.contains(Self::DISALLOW_INST_METH) {
+        if self.disallow_inst_meth {
             f |= LangFlags::DISALLOW_INST_METH;
         }
-        if self.contains(Self::DISABLE_XHP_ELEMENT_MANGLING) {
+        if self.disable_xhp_element_mangling {
             f |= LangFlags::DISABLE_XHP_ELEMENT_MANGLING;
         }
-        if self.contains(Self::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS) {
+        if self.disallow_fun_and_cls_meth_pseudo_funcs {
             f |= LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
         }
-        if self.contains(Self::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
+        if self.disallow_func_ptrs_in_constants {
             f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
         }
-        if self.contains(Self::ENABLE_ENUM_CLASSES) {
+        if self.enable_enum_classes {
             f |= LangFlags::ENABLE_ENUM_CLASSES;
         }
-        if self.contains(Self::ENABLE_XHP_CLASS_MODIFIER) {
+        if self.enable_xhp_class_modifier {
             f |= LangFlags::ENABLE_XHP_CLASS_MODIFIER;
         }
-        if self.contains(Self::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
+        if self.enable_class_level_where_clauses {
             f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
         }
         f

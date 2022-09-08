@@ -77,6 +77,11 @@ enum class RepoMode {
   ReadWrite = 2,
 };
 
+namespace hackc {
+  struct HhbcFlags;
+  struct ParserFlags;
+}
+
 /*
  * The bare RepoOptions information that the parser cares about.
  */
@@ -116,11 +121,9 @@ struct RepoOptionsFlags {
 
   ParserEnv getParserEnvironment() const;
   std::uint32_t getDeclFlags() const;
-  std::uint32_t getParserFlags() const;
+  void initHhbcFlags(hackc::HhbcFlags&) const;
+  void initParserFlags(hackc::ParserFlags&) const;
   std::string getAliasedNamespacesConfig() const;
-
-  bool ltrAssign() const { return LTRAssign; }
-  bool uvs() const { return UVS; }
 
   std::string autoloadQuery() const { return Query; }
   std::string trustedDBPath() const { return TrustedDBPath; }

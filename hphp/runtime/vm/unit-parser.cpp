@@ -185,7 +185,7 @@ CompilerResult hackc_compile(
 ) {
   auto aliased_namespaces = options.getAliasedNamespacesConfig();
 
-  hackc::NativeEnv const native_env{
+  hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
     .aliased_namespaces = aliased_namespaces,
@@ -193,8 +193,6 @@ CompilerResult hackc_compile(
     .emit_class_pointers = RuntimeOption::EvalEmitClassPointers,
     .check_int_overflow = RuntimeOption::CheckIntOverflow,
     .hhbc_flags = hackc::HhbcFlags {
-      .ltr_assign = options.ltrAssign(),
-      .uvs = options.uvs(),
       .repo_authoritative = RO::RepoAuthoritative,
       .jit_enable_rename_function = RO::EvalJitEnableRenameFunction,
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
@@ -203,7 +201,9 @@ CompilerResult hackc_compile(
       .emit_meth_caller_func_pointers = RO::EvalEmitMethCallerFuncPointers,
       .fold_lazy_class_keys = RO::EvalFoldLazyClassKeys,
     },
-    .parser_flags = options.getParserFlags(),
+    .parser_flags = hackc::ParserFlags {
+      .enable_class_level_where_clauses = RO::EnableClassLevelWhereClauses,
+    },
     .flags = hackc::EnvFlags {
       .is_systemlib = isSystemLib,
       .for_debugger_eval = forDebuggerEval,
@@ -211,6 +211,8 @@ CompilerResult hackc_compile(
       .enable_ir = false,
     }
   };
+  options.initHhbcFlags(native_env.hhbc_flags);
+  options.initParserFlags(native_env.parser_flags);
 
   // Invoke hackc, producing a rust Vec<u8> containing HHAS.
   rust::Vec<uint8_t> hhas_vec = [&] {

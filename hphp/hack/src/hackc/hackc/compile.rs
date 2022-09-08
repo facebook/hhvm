@@ -127,7 +127,10 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Nativ
             log_extern_compiler_perf: true,
             ..Default::default()
         },
-        parser_flags: ParserFlags::ENABLE_ENUM_CLASSES,
+        parser_flags: ParserFlags {
+            enable_enum_classes: true,
+            ..Default::default()
+        },
         flags: opts.env_flags.clone(),
         ..Default::default()
     }

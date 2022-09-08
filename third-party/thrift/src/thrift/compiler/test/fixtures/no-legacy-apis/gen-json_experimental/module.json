@@ -85,7 +85,7 @@
       },
   "services" :
   {
-      "MyService" : {
+      "MyService" : { 
         "name" : "MyService",
         "lineno" : 43,
         "functions" : {

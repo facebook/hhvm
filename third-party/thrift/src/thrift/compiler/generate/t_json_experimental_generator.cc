@@ -118,6 +118,7 @@ class json_experimental_service : public mstch_service {
             {"service:lineno", &json_experimental_service::get_lineno},
             {"service:docstring?", &json_experimental_service::has_docstring},
             {"service:docstring", &json_experimental_service::get_docstring},
+            {"service:path", &json_experimental_service::path},
         });
   }
   mstch::node get_lineno() {
@@ -125,6 +126,10 @@ class json_experimental_service : public mstch_service {
   }
   mstch::node has_docstring() { return service_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(service_->get_doc()); }
+  mstch::node path() {
+    return service_->program()->include_prefix() + service_->program()->name() +
+        ".thrift";
+  }
 
  private:
   source_manager& source_mgr_;

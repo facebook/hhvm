@@ -113,7 +113,7 @@
       },
   "services" :
   {
-      "SinkService" : {
+      "SinkService" : { 
         "name" : "SinkService",
         "lineno" : 48,
         "functions" : {

@@ -20,7 +20,7 @@
       },
   "services" :
   {
-      "PubSubStreamingService" : {
+      "PubSubStreamingService" : { 
         "name" : "PubSubStreamingService",
         "lineno" : 22,
         "functions" : {

@@ -28,7 +28,7 @@
       },
   "services" :
   {
-      "TestService" : {
+      "TestService" : { 
         "name" : "TestService",
         "lineno" : 35,
         "functions" : {

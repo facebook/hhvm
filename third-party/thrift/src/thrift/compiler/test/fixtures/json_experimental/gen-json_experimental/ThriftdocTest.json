@@ -363,7 +363,7 @@
       },
   "services" :
   {
-      "ThriftTest" : {
+      "ThriftTest" : { 
         "name" : "ThriftTest",
         "lineno" : 124,
         "docstring" : "This is where you would document a Service\n",

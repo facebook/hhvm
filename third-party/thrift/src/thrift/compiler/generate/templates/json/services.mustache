@@ -1,6 +1,11 @@
 <%={{ }}=%>
 {{#program:services}}
-  "{{service:name}}" : {
+  "{{service:name}}" : { {{#service:extends?}}
+    {{#service:extends}}
+    "extends" : {
+      "name" : "{{service:name}}",
+      "path" : "{{service:path}}"
+    },{{/service:extends}}{{/service:extends?}}
     "name" : "{{service:name}}",
     "lineno" : {{service:lineno}},
     {{#service:docstring?}}

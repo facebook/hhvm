@@ -213,7 +213,7 @@
       },
   "services" :
   {
-      "FooService" : {
+      "FooService" : { 
         "name" : "FooService",
         "lineno" : 74,
         "functions" : {
@@ -224,7 +224,7 @@
           }
         }
       },
-      "FB303Service" : {
+      "FB303Service" : { 
         "name" : "FB303Service",
         "lineno" : 79,
         "functions" : {
@@ -247,7 +247,7 @@
           }
         }
       },
-      "MyService" : {
+      "MyService" : { 
         "name" : "MyService",
         "lineno" : 87,
         "functions" : {
@@ -374,7 +374,7 @@
           }
         }
       },
-      "DbMixedStackArguments" : {
+      "DbMixedStackArguments" : { 
         "name" : "DbMixedStackArguments",
         "lineno" : 105,
         "functions" : {

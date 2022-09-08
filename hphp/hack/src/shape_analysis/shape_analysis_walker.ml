@@ -326,6 +326,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, _) = expr_ env e1 in
     let (env, _) = expr_ env e2 in
     (env, None)
+  | A.Id name -> (env, Some (Inter (HT.Identifier name)))
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)
@@ -560,6 +561,34 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
         (id, callable id tast_env m_params ~return:m_ret m_body)
       in
       List.map ~f:handle_method c_methods
+    | A.Constant A.{ cst_name; cst_value; cst_type; _ } ->
+      let hint_pos = dict_pos_of_hint cst_type in
+      let (env, ent) =
+        expr_ (Env.init tast_env [] [] ~return:None LMap.empty) cst_value
+      in
+      let marker_constraint =
+        {
+          hack_pos = hint_pos;
+          origin = __LINE__;
+          constraint_ = Marks (Constant, hint_pos);
+        }
+      in
+      let env = Env.add_constraint env marker_constraint in
+      let env =
+        match ent with
+        | Some ent_ ->
+          let subset_constr =
+            {
+              hack_pos = fst cst_name;
+              origin = __LINE__;
+              constraint_ =
+                Subsets (ent_, Inter (HT.Const (hint_pos, snd cst_name)));
+            }
+          in
+          Env.add_constraint env subset_constr
+        | None -> env
+      in
+      [(snd cst_name, ((env.constraints, env.inter_constraints), env.errors))]
     | _ -> failwith "A definition is not yet handled"
   in
   List.concat_map ~f:def tast |> SMap.of_list

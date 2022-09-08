@@ -816,10 +816,14 @@ let get_static_member is_method env class_ mid =
 
   ce_opt
 
-(* Given a list of things whose name we can extract with `f`, return
-   the item whose name is closest to `name`. *)
+(* Given a list of [possibilities] whose name we can extract with [f], return
+   the item whose name is closest to [name]. *)
 let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string) :
     'a option =
+  (* Compare strings case-insensitively. *)
+  let name = String.lowercase name in
+  let f x = String.lowercase (f x) in
+
   let distance upper_bound = String_utils.levenshtein_distance ~upper_bound in
   let choose_closest ~best:(best, best_distance) candidate =
     let candidate_distance = distance (best_distance + 1) (f candidate) name in

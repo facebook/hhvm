@@ -1,4 +1,5 @@
 === Shape analysis results for parameter2.php
 Constraints for \f:
    5: Parameter at [5:12-33]
+   5: Parameter ("\\f", 0, [5:12-33])
 

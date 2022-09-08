@@ -496,7 +496,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
-    constraint_ decorated list * entity =
+    (constraint_ decorated list * inter_constraint_ decorated list) * entity =
   if is_suitable_target_ty tast_env ty then
     let hint_pos = dict_pos_of_hint hint in
     let entity_ =
@@ -504,17 +504,24 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
       | `Parameter (id, idx) -> Inter (HT.Param (id, idx, hint_pos))
       | `Return -> Literal hint_pos
     in
+    let decorate ~origin constraint_ =
+      { hack_pos = hint_pos; origin; constraint_ }
+    in
+    let inter_constraints =
+      match kind with
+      | `Parameter (id, idx) ->
+        [decorate ~origin:__LINE__ @@ HT.Param (id, idx, hint_pos)]
+      | `Return -> []
+    in
     let kind =
       match kind with
       | `Parameter _ -> Parameter
       | `Return -> Return
     in
-    let decorate ~origin constraint_ =
-      { hack_pos = hint_pos; origin; constraint_ }
-    in
     let marker_constraint =
       decorate ~origin:__LINE__ @@ Marks (kind, hint_pos)
     in
+
     let constraints = [marker_constraint] in
     let constraints =
       when_local_mode tast_env ~default:constraints @@ fun () ->
@@ -523,35 +530,44 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
       in
       invalidation_constraint :: constraints
     in
-    (constraints, Some entity_)
+    ((constraints, inter_constraints), Some entity_)
   else
-    ([], None)
+    (([], []), None)
 
 let init_params id tast_env (params : T.fun_param list) :
-    constraint_ decorated list * entity LMap.t =
+    (constraint_ decorated list * inter_constraint_ decorated list)
+    * entity LMap.t =
   let add_param
       idx
-      (constraints, lmap)
+      ((intra_constraints, inter_constraints), lmap)
       A.{ param_name; param_type_hint; param_is_variadic; _ } =
     if param_is_variadic then
       (* TODO(T125878781): Handle variadic paramseters *)
-      (constraints, lmap)
+      ((intra_constraints, inter_constraints), lmap)
     else
-      let (new_constraints, entity) =
+      let ((new_intra_constraints, new_inter_constraints), entity) =
         decl_hint (`Parameter (id, idx)) tast_env param_type_hint
       in
       let param_lid = Local_id.make_unscoped param_name in
       let lmap = LMap.add param_lid entity lmap in
-      let constraints = new_constraints @ constraints in
-      (constraints, lmap)
+      let intra_constraints = new_intra_constraints @ intra_constraints in
+      let inter_constraints = new_inter_constraints @ inter_constraints in
+      ((intra_constraints, inter_constraints), lmap)
   in
-  List.foldi ~f:add_param ~init:([], LMap.empty) params
+  List.foldi ~f:add_param ~init:(([], []), LMap.empty) params
 
 let callable id tast_env params ~return body =
-  let (param_constraints, param_env) = init_params id tast_env params in
-  let (return_constraints, return) = decl_hint `Return tast_env return in
-  let constraints = return_constraints @ param_constraints in
-  let env = Env.init tast_env constraints [] param_env ~return in
+  let ((param_intra_constraints, param_inter_constraints), param_env) =
+    init_params id tast_env params
+  in
+  let ((return_intra_constraints, return_inter_constraints), return) =
+    decl_hint `Return tast_env return
+  in
+  let intra_constraints = return_intra_constraints @ param_intra_constraints in
+  let inter_constraints = return_inter_constraints @ param_inter_constraints in
+  let env =
+    Env.init tast_env intra_constraints inter_constraints param_env ~return
+  in
   let env = block env body.A.fb_ast in
   ((env.constraints, env.inter_constraints), env.errors)
 

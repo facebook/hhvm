@@ -21,4 +21,5 @@ Constraints for \idx_ife:
   12: ! SK ?2 : shape('c2' => mixed)
   13: ? SK ?2 : shape(?'d2' => mixed)
   13: ! SK ?2 : shape(?'d2' => mixed)
+   3: Parameter ("\\idx_ife", 0, [3:18-37])
 

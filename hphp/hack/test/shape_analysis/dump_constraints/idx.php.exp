@@ -5,4 +5,5 @@ Constraints for \idx_with_and_without_opt:
    4: ! SK (Param ("\\idx_with_and_without_opt", 0, [3:35-54])) : shape(?'x' => mixed)
    5: ? SK (Param ("\\idx_with_and_without_opt", 0, [3:35-54])) : shape(?'y' => mixed)
    5: ! SK (Param ("\\idx_with_and_without_opt", 0, [3:35-54])) : shape(?'y' => mixed)
+   3: Parameter ("\\idx_with_and_without_opt", 0, [3:35-54])
 

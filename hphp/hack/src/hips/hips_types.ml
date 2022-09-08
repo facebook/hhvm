@@ -28,6 +28,7 @@ type 'a inter_constraint_ =
   | Arg of param_entity * 'a
   | Constant of const_entity
   | Identifier of identifier_entity
+  | Param of param_entity
 
 module type Intra = sig
   type intra_entity

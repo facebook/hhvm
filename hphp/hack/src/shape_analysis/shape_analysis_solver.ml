@@ -536,7 +536,24 @@ let embed_entity (ent : HT.entity) : entity_ = Inter ent
 let substitute_inter_intra
     replace (inter_constr : inter_constraint_) (intra_constr : constraint_) :
     constraint_ option =
-  (* TODO(T130840313) Remove duplicated code *)
+  let replace_intra intra_constr replace forwards =
+    match intra_constr with
+    | Marks _
+    | Subsets (_, _) ->
+      None
+    | Static_key (variety, certainty, intra_ent_2, key, ty) ->
+      let (variety, certainty) =
+        if forwards then
+          (Needs, Maybe)
+        else
+          (variety, certainty)
+      in
+      Option.map
+        ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
+        (replace intra_ent_2)
+    | Has_dynamic_key intra_ent_2 ->
+      Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2)
+  in
   match inter_constr with
   | HT.Arg (param_ent, intra_ent_1) ->
     let (replace_, forwards) =
@@ -545,24 +562,7 @@ let substitute_inter_intra
       | `Forwards replace_ -> (replace_, true)
     in
     let replace intra_ent_2 = replace_ param_ent intra_ent_1 intra_ent_2 in
-    begin
-      match intra_constr with
-      | Marks _
-      | Subsets (_, _) ->
-        None
-      | Static_key (variety, certainty, intra_ent_2, key, ty) ->
-        let (variety, certainty) =
-          if forwards then
-            (Needs, Maybe)
-          else
-            (variety, certainty)
-        in
-        Option.map
-          ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
-          (replace intra_ent_2)
-      | Has_dynamic_key intra_ent_2 ->
-        Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2)
-    end
+    replace_intra intra_constr replace forwards
   | HT.ConstantInitial ent ->
     let replace intra_ent_2 =
       if equal_entity_ ent intra_ent_2 then
@@ -570,16 +570,7 @@ let substitute_inter_intra
       else
         None
     in
-    (match intra_constr with
-    | Marks _
-    | Subsets (_, _) ->
-      None
-    | Static_key (variety, certainty, intra_ent_2, key, ty) ->
-      Option.map
-        ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
-        (replace intra_ent_2)
-    | Has_dynamic_key intra_ent_2 ->
-      Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2))
+    replace_intra intra_constr replace false
   | HT.Identifier ident_ent ->
     let ent = embed_entity (HT.Identifier ident_ent) in
     let replace intra_ent_2 =
@@ -588,16 +579,7 @@ let substitute_inter_intra
       else
         None
     in
-    (match intra_constr with
-    | Marks _
-    | Subsets (_, _) ->
-      None
-    | Static_key (variety, certainty, intra_ent_2, key, ty) ->
-      Option.map
-        ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
-        (replace intra_ent_2)
-    | Has_dynamic_key intra_ent_2 ->
-      Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2))
+    replace_intra intra_constr replace false
   | _ -> Some intra_constr
 
 let replace_backwards

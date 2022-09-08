@@ -2065,14 +2065,18 @@ module EnumClassLabelOps = struct
           Cls.consts cls
           |> List.filter ~f:(fun (name, _) ->
                  not (String.equal name SN.Members.mClass))
-          |> List.map ~f:(fun (name, const) ->
-                 ( (if full then
-                     Render.strip_ns enum_name ^ "#" ^ name
-                   else
-                     "#" ^ name),
-                   const.cc_pos ))
         in
-        let most_similar = Env.most_similar label_name consts fst in
+        let most_similar =
+          match Env.most_similar label_name consts fst with
+          | Some (name, const) ->
+            Some
+              ( (if full then
+                  Render.strip_ns enum_name ^ "#" ^ name
+                else
+                  "#" ^ name),
+                const.cc_pos )
+          | None -> None
+        in
         Errors.add_typing_error
           Typing_error.(
             enum

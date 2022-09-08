@@ -95,7 +95,7 @@ val expand_internal_type : env -> internal_type -> env * internal_type
 val is_typedef : env -> type_key -> bool
 
 val is_typedef_visible :
-  env -> ?expand_visible_newtype:bool -> typedef_type -> bool
+  env -> ?expand_visible_newtype:bool -> name:string -> typedef_type -> bool
 
 val get_enum : env -> type_key -> class_decl option
 

@@ -120,7 +120,7 @@ class virtual type_validator =
             in
             let subst = Decl_instantiate.make_subst td_tparams tyl in
             let td_type = Decl_instantiate.instantiate subst td_type in
-            if Env.is_typedef_visible acc.env td then
+            if Env.is_typedef_visible acc.env ~name td then
               this#on_alias acc r (pos, name) tyl td_type
             else
               let td_constraint =

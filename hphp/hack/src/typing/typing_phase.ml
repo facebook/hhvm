@@ -578,7 +578,7 @@ and localize_with_kind
           else
             ((env, None), mk (Reason.none, Terr))
         | Some (Env.TypedefResult typedef) ->
-          if Typing_env.is_typedef_visible env typedef then
+          if Typing_env.is_typedef_visible env ~name typedef then
             ((env, None), mk (r, Tunapplied_alias name))
           else
             (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)

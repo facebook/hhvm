@@ -58,6 +58,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
       || Typing_env.is_typedef_visible
            env
            ~expand_visible_newtype:ety_env.expand_visible_newtype
+           ~name:x
            td
     in
     let ety_env =

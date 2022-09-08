@@ -657,14 +657,16 @@ let is_typedef env x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
-let is_typedef_visible env ?(expand_visible_newtype = true) td =
-  let { Typing_defs.td_vis; td_pos; td_module; _ } = td in
+let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
+  let { Typing_defs.td_vis; td_module; _ } = td in
   match td_vis with
   | Aast.Opaque ->
     expand_visible_newtype
-    && Relative_path.equal
-         (Pos.filename (Pos_or_decl.unsafe_to_raw_pos td_pos))
-         (get_file env)
+    &&
+    let td_path = Naming_provider.get_typedef_path (get_ctx env) name in
+    (match td_path with
+    | Some s -> Relative_path.equal s (get_file env)
+    | None -> (* Not the right place to raise an error *) false)
   | Aast.OpaqueModule ->
     expand_visible_newtype
     && Option.equal

@@ -237,25 +237,25 @@ impl<'a> State<'a> {
     }
 
     /// Determine whether the given object [obj] is in the hash table.
-    /// If so, set `*pos_out` to its position in the output and return 1.
+    /// If so, set `*pos_out` to its position in the output and return true.
     /// If not, set `*h_out` to the hash value appropriate for
-    /// `record_location` and return 0.
+    /// `record_location` and return false.
     #[inline]
     unsafe fn lookup_position(
         &mut self,
         obj: Value<'a>,
         pos_out: *mut usize,
         h_out: *mut usize,
-    ) -> c_int {
+    ) -> bool {
         let mut h: usize = Hash(obj, self.pos_table.shift);
         loop {
             if bitvect_test(self.pos_table.present.as_mut_ptr(), h) == 0 {
                 *h_out = h;
-                return 0;
+                return false;
             }
             if (*self.pos_table.entries.as_mut_ptr().add(h)).obj == obj {
                 *pos_out = (*self.pos_table.entries.as_mut_ptr().add(h)).pos;
-                return 1;
+                return true;
             }
             h = (h + 1) & self.pos_table.mask
         }
@@ -491,7 +491,7 @@ impl<'a> State<'a> {
                 } else {
                     // Check if object already seen
                     if self.extern_flags & NO_SHARING == 0 {
-                        if self.lookup_position(v, &mut pos, &mut h) != 0 {
+                        if self.lookup_position(v, &mut pos, &mut h) {
                             self.extern_shared_reference(self.obj_counter - pos);
                             goto_next_item = true;
                         } else {

@@ -101,16 +101,17 @@ T makeAddExpectedResult(T value, int add = 1) {
   }
 }
 
-template <typename TT, typename GeneratedValue>
+template <typename TT, typename GeneratedValue, typename T>
 PatchOpTestCase makeAddTest(
     const GeneratedValue& value,
     const AnyRegistry& registry,
-    const Protocol& protocol) {
+    const Protocol& protocol,
+    T toAdd) {
   PatchOpTestCase opTest;
   PatchOpRequest req;
   req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
-  auto addOp = [&](auto& patch, int toAdd = 1) {
+  auto addOp = [&](auto& patch) {
     if constexpr (std::is_same_v<TT, type::bool_t>) {
       patch.invert();
     } else {
@@ -183,10 +184,22 @@ Test createNumericPatchTest(
 
     // TODO(afuller): decide if bool and numeric should have clear()
 
-    auto& addCase = test.testCases()->emplace_back();
-    addCase.name() = fmt::format("{}/add.{}", type::getName<TT>(), value.name);
-    auto& tadcase = addCase.test().emplace().objectPatch_ref().emplace();
-    tadcase = makeAddTest<TT>(value, registry, protocol);
+    using ValueType = decltype(value.value);
+    auto addAddTestCase = [&](ValueType toAdd) {
+      auto& addCase = test.testCases()->emplace_back();
+      addCase.name() =
+          fmt::format("{}/add.{}_{}", type::getName<TT>(), value.name, toAdd);
+      auto& tadcase = addCase.test().emplace().objectPatch_ref().emplace();
+      tadcase = makeAddTest<TT>(value, registry, protocol, toAdd);
+    };
+
+    addAddTestCase(1);
+    if constexpr (!std::is_same_v<TT, type::bool_t>) {
+      addAddTestCase(-1);
+      if (value.value > 0) {
+        addAddTestCase(-value.value);
+      }
+    }
   }
 
   return test;

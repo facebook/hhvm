@@ -74,6 +74,9 @@ module type Intra = sig
 
   (** Deduces a simplified list of intra-procedural constraints.  *)
   val deduce : intra_constraint list -> intra_constraint list
+
+  (** Captures an abstract subset relation between identifiers and constants *)
+  val subsets : identifier_entity -> const_entity -> intra_constraint
 end
 
 val equal_entity : entity -> entity -> bool

@@ -22,3 +22,5 @@ val is_same_entity : HT.entity -> entity_ -> bool
 val substitute_inter_intra : inter_constraint_ -> constraint_ -> constraint_
 
 val equiv : any_constraint list -> any_constraint list -> bool
+
+val subsets : HT.identifier_entity -> HT.const_entity -> constraint_

@@ -74,6 +74,67 @@ module Inter (I : Intra) = struct
     in
     SMap.map substitute_any_list argument_constraint_map
 
+  (** For a given map, at every key, we iterate through its identifier constraints.
+      For a fixed identifier, we modify the map by adding to the value/constraints
+      at the respective global constant key: i) a subset constraint between identifier
+      and global constant; and ii) the constraints/value of the map at the identifier
+      key. *)
+  let close_identifier (current_constraint_map : any_constraint list SMap.t) :
+      any_constraint list SMap.t =
+    let close
+        (_ : string)
+        (constr_list : any_constraint list)
+        (input_constr_map : any_constraint list SMap.t) :
+        any_constraint list SMap.t =
+      let add_constraints
+          (input_constr_map_2 : any_constraint list SMap.t)
+          (ident_ent : identifier_entity) : any_constraint list SMap.t =
+        let constr_list_at_const_ent =
+          SMap.find (snd ident_ent) current_constraint_map
+          (* This raises Not_found, if no binding exists. We assume
+             that identifiers only refer to existing constants. *)
+        in
+        let is_const_constr (constr : any_constraint) : bool =
+          match constr with
+          | Inter (Constant _) -> true
+          | _ -> false
+        in
+        let const_constraint_opt =
+          List.find ~f:is_const_constr constr_list_at_const_ent
+          (* This raises Not_found, if no value in constr_list_at_const_ent
+             satisifes is_const_constr. We assume that our map is well-behaved
+             in this sense. *)
+        in
+        let const_ent =
+          match const_constraint_opt with
+          | Some (Inter (Constant const_ent)) -> const_ent
+          | _ -> failwith "Used invalid identifier"
+        in
+        let subset_any_constr = Intra (I.subsets ident_ent const_ent) in
+        let append_opt (any_constr_list_opt : any_constraint list option) :
+            any_constraint list option =
+          match any_constr_list_opt with
+          | None -> None
+          | Some any_constr_list ->
+            Some (subset_any_constr :: (any_constr_list @ constr_list))
+        in
+        SMap.update (snd const_ent) append_opt input_constr_map_2
+      in
+      let only_identifier (constr : any_constraint) : identifier_entity option =
+        match constr with
+        | Inter (Identifier ident_ent) -> Some ident_ent
+        | _ -> None
+      in
+      let only_identifier_list =
+        List.filter_map ~f:only_identifier constr_list
+      in
+      List.fold_left
+        ~f:add_constraints
+        ~init:input_constr_map
+        only_identifier_list
+    in
+    SMap.fold close current_constraint_map current_constraint_map
+
   let analyse (base_constraint_map : any_constraint list SMap.t) : solution =
     let deduce_any_list (any_constraint_list : any_constraint list) :
         any_constraint list =
@@ -120,5 +181,5 @@ module Inter (I : Intra) = struct
         else
           analyse_help (completed_iterations + 1) deduced_constraint_map
     in
-    analyse_help 0 base_constraint_map
+    analyse_help 0 (close_identifier base_constraint_map)
 end

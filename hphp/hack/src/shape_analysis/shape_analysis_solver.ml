@@ -583,3 +583,7 @@ let equiv
        (List.filter_map ~f:only_intra_constr any_constr_list_1))
     (ConstraintSet.of_list
        (List.filter_map ~f:only_intra_constr any_constr_list_2))
+
+let subsets (ident_ent : HT.identifier_entity) (const_ent : HT.const_entity) :
+    constraint_ =
+  Subsets (Inter (HT.Identifier ident_ent), Inter (HT.Constant const_ent))

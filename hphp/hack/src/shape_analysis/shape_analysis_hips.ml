@@ -33,4 +33,6 @@ module Intra_shape :
   let substitute_inter_intra = SS.substitute_inter_intra
 
   let deduce = SS.deduce
+
+  let subsets = SS.subsets
 end

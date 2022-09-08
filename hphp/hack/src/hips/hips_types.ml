@@ -48,6 +48,8 @@ module type Intra = sig
     inter_constraint -> intra_constraint -> intra_constraint
 
   val deduce : intra_constraint list -> intra_constraint list
+
+  val subsets : identifier_entity -> const_entity -> intra_constraint
 end
 
 let equal_entity (ent1 : entity) (ent2 : entity) : bool =

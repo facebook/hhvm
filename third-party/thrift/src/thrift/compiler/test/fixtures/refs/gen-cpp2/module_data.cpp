@@ -51,6 +51,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::MyUnion>::fields
   TType::T_I32,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+  "anInteger",
+  "aString",
+}};
+const std::array<int, 2> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyField>::fields_names = {{
   "opt_value",
@@ -85,6 +93,28 @@ const std::array<protocol::TType, 9> TStructDataStorage<::cpp2::MyField>::fields
   TType::T_STRING,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyField>::storage_names = {{
+  "opt_value",
+  "value",
+  "req_value",
+  "opt_enum_value",
+  "enum_value",
+  "req_enum_value",
+  "opt_str_value",
+  "str_value",
+  "req_str_value",
+}};
+const std::array<int, 9> TStructDataStorage<::cpp2::MyField>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "opt_ref",
@@ -100,6 +130,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::MyStruct>::field
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
+  "opt_ref",
+  "ref",
+  "req_ref",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithUnion>::fields_names = {{
@@ -117,6 +157,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithUnion>
   TType::T_DOUBLE,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithUnion>::storage_names = {{
+  "u",
+  "aDouble",
+  "__fbthrift_field_f",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithUnion>::isset_indexes = {{
+  -1,
+  -1,
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::RecursiveStruct>::fields_names = {{
   "mes",
@@ -126,6 +176,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::RecursiveStruct>::fields
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::RecursiveStruct>::fields_types = {{
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::RecursiveStruct>::storage_names = {{
+  "__fbthrift_field_mes",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::RecursiveStruct>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::StructWithContainers>::fields_names = {{
@@ -152,6 +208,22 @@ const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::StructWithContai
   TType::T_SET,
   TType::T_LIST,
 }};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::StructWithContainers>::storage_names = {{
+  "list_ref",
+  "set_ref",
+  "map_ref",
+  "list_ref_unique",
+  "set_ref_shared",
+  "list_ref_shared_const",
+}};
+const std::array<int, 6> TStructDataStorage<::cpp2::StructWithContainers>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::fields_names = {{
   "opt_shared_const",
@@ -168,12 +240,26 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithShared
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::storage_names = {{
+  "opt_shared_const",
+  "shared_const",
+  "req_shared_const",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::Empty>::fields_names = {{
 }};
 const std::array<int16_t, 0> TStructDataStorage<::cpp2::Empty>::fields_ids = {{
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::Empty>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::Empty>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::Empty>::isset_indexes = {{
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRef>::fields_names = {{
@@ -191,6 +277,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRef>::
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRef>::storage_names = {{
+  "def_field",
+  "opt_field",
+  "req_field",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRef>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithBox>::fields_names = {{
   "a",
@@ -206,6 +302,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithBox>::
   TType::T_STRING,
   TType::T_LIST,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithBox>::storage_names = {{
+  "__fbthrift_field_a",
+  "__fbthrift_field_b",
+  "__fbthrift_field_c",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithBox>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::fields_names = {{
@@ -223,6 +329,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::storage_names = {{
+  "def_field",
+  "opt_field",
+  "req_field",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::fields_names = {{
   "def_field",
@@ -238,6 +354,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::storage_names = {{
+  "def_field",
+  "opt_field",
+  "req_field",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::fields_names = {{
@@ -255,6 +381,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::storage_names = {{
+  "def_field",
+  "opt_field",
+  "req_field",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::fields_names = {{
   "def_field",
@@ -264,6 +400,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCpp
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::fields_types = {{
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::storage_names = {{
+  "def_field",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::isset_indexes = {{
+  -1,
 }};
 
 const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::StructWithString>::fields_names = {{
@@ -286,6 +428,20 @@ const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::StructWithString
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::StructWithString>::storage_names = {{
+  "def_unique_string_ref",
+  "def_shared_string_ref",
+  "def_shared_string_const_ref",
+  "unique_string_ref",
+  "shared_string_ref",
+}};
+const std::array<int, 5> TStructDataStorage<::cpp2::StructWithString>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
 }};
 
 } // namespace thrift

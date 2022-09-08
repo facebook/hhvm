@@ -24,6 +24,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::module2::Struct>::fiel
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::Struct>::storage_names = {{
+  "__fbthrift_field_first",
+  "__fbthrift_field_second",
+}};
+const std::array<int, 2> TStructDataStorage<::module2::Struct>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::BigStruct>::fields_names = {{
   "s",
@@ -36,6 +44,14 @@ const std::array<int16_t, 2> TStructDataStorage<::module2::BigStruct>::fields_id
 const std::array<protocol::TType, 2> TStructDataStorage<::module2::BigStruct>::fields_types = {{
   TType::T_STRUCT,
   TType::T_I32,
+}};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::module2::BigStruct>::storage_names = {{
+  "__fbthrift_field_s",
+  "__fbthrift_field_id",
+}};
+const std::array<int, 2> TStructDataStorage<::module2::BigStruct>::isset_indexes = {{
+  0,
+  1,
 }};
 
 } // namespace thrift

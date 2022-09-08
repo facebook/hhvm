@@ -57,6 +57,36 @@ const std::array<protocol::TType, 13> TStructDataStorage<::extra::svc::container
   TType::T_STRING,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
+  "__fbthrift_field_fieldA",
+  "__fbthrift_field_req_fieldA",
+  "__fbthrift_field_opt_fieldA",
+  "__fbthrift_field_fieldB",
+  "__fbthrift_field_req_fieldB",
+  "__fbthrift_field_opt_fieldB",
+  "__fbthrift_field_fieldC",
+  "__fbthrift_field_req_fieldC",
+  "__fbthrift_field_opt_fieldC",
+  "__fbthrift_field_fieldD",
+  "__fbthrift_field_fieldE",
+  "__fbthrift_field_req_fieldE",
+  "__fbthrift_field_opt_fieldE",
+}};
+const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = {{
+  0,
+  -1,
+  1,
+  2,
+  -1,
+  3,
+  4,
+  -1,
+  5,
+  6,
+  7,
+  -1,
+  8,
+}};
 
 } // namespace thrift
 } // namespace apache

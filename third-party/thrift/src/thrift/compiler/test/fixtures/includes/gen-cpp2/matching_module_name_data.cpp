@@ -21,6 +21,12 @@ const std::array<int16_t, 1> TStructDataStorage<::matching_module_name::MyStruct
 const std::array<protocol::TType, 1> TStructDataStorage<::matching_module_name::MyStruct>::fields_types = {{
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::matching_module_name::MyStruct>::storage_names = {{
+  "__fbthrift_field_OtherStructField",
+}};
+const std::array<int, 1> TStructDataStorage<::matching_module_name::MyStruct>::isset_indexes = {{
+  0,
+}};
 
 } // namespace thrift
 } // namespace apache

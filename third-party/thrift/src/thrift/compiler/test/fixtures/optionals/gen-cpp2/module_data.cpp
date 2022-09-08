@@ -41,6 +41,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Color>::fields_t
   TType::T_DOUBLE,
   TType::T_DOUBLE,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Color>::storage_names = {{
+  "__fbthrift_field_red",
+  "__fbthrift_field_green",
+  "__fbthrift_field_blue",
+  "__fbthrift_field_alpha",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::fields_names = {{
   "color",
@@ -62,6 +74,20 @@ const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::Vehicle>::fields
   TType::T_STRING,
   TType::T_STRING,
   TType::T_BOOL,
+}};
+const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::storage_names = {{
+  "__fbthrift_field_color",
+  "__fbthrift_field_licensePlate",
+  "__fbthrift_field_description",
+  "__fbthrift_field_name",
+  "__fbthrift_field_hasAC",
+}};
+const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
 }};
 
 const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::fields_names = {{
@@ -99,6 +125,30 @@ const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields
   TType::T_MAP,
   TType::T_I32,
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::storage_names = {{
+  "__fbthrift_field_id",
+  "__fbthrift_field_name",
+  "__fbthrift_field_age",
+  "__fbthrift_field_address",
+  "__fbthrift_field_favoriteColor",
+  "__fbthrift_field_friends",
+  "__fbthrift_field_bestFriend",
+  "__fbthrift_field_petNames",
+  "__fbthrift_field_afraidOfAnimal",
+  "__fbthrift_field_vehicles",
+}};
+const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
 }};
 
 } // namespace thrift

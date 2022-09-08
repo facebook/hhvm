@@ -30,6 +30,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_LIST,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::Foo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::apache::thrift::test::Foo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyFoo>::fields_names = {{
   "field1",
@@ -48,6 +60,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyFoo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::apache::thrift::test::LazyFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
 }};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalFoo>::fields_names = {{
@@ -68,6 +92,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_LIST,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalFoo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::apache::thrift::test::OptionalFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalLazyFoo>::fields_names = {{
   "field1",
@@ -87,6 +123,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_LIST,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalLazyFoo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::apache::thrift::test::OptionalLazyFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyCppRef>::fields_names = {{
   "field1",
@@ -105,6 +153,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyCppRef>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::apache::thrift::test::LazyCppRef>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::IndexedFoo>::fields_names = {{
@@ -131,6 +191,22 @@ const std::array<protocol::TType, 6> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_MAP,
 }};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::IndexedFoo>::storage_names = {{
+  "__fbthrift_field_serialized_data_size",
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+  "__fbthrift_field_field_id_to_size",
+}};
+const std::array<int, 6> TStructDataStorage<::apache::thrift::test::IndexedFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
 
 const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::OptionalIndexedFoo>::fields_names = {{
   "serialized_data_size",
@@ -156,12 +232,32 @@ const std::array<protocol::TType, 6> TStructDataStorage<::apache::thrift::test::
   TType::T_LIST,
   TType::T_MAP,
 }};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::OptionalIndexedFoo>::storage_names = {{
+  "__fbthrift_field_serialized_data_size",
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+  "__fbthrift_field_field_id_to_size",
+}};
+const std::array<int, 6> TStructDataStorage<::apache::thrift::test::OptionalIndexedFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
 
 const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::Empty>::fields_names = {{
 }};
 const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::Empty>::fields_ids = {{
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::Empty>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::Empty>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::apache::thrift::test::Empty>::isset_indexes = {{
 }};
 
 } // namespace thrift

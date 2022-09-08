@@ -67,6 +67,16 @@ const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%s
   TType::<% > module_types_tcc/struct_type%>,
   <%/field:type%><%/struct:fields%>
 }};
+const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
+  <%#struct:fields%>
+  "<%field:cpp_storage_name%>",
+  <%/struct:fields%>
+}};
+const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{
+  <%#struct:fields%>
+  <%#field:has_isset?%><%field:isset_index%><%/field:has_isset?%><%^field:has_isset?%>-1<%/field:has_isset?%>,
+  <%/struct:fields%>
+}};
 <%/program:structs%>
 
 } // namespace thrift

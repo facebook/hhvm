@@ -21,6 +21,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialResponse>::fields
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialResponse>::storage_names = {{
+  "__fbthrift_field_content",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::InitialResponse>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_names = {{
   "content",
@@ -30,6 +36,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_i
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_types = {{
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::storage_names = {{
+  "__fbthrift_field_content",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::FinalResponse>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_names = {{
@@ -41,6 +53,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_ids
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::storage_names = {{
+  "__fbthrift_field_content",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::SinkPayload>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_names = {{
   "sink",
@@ -50,6 +68,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSin
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_types = {{
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::storage_names = {{
+  "__fbthrift_field_sink",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::fields_names = {{
@@ -61,6 +85,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialException>::field
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialException>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::storage_names = {{
+  "__fbthrift_field_reason",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::InitialException>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::fields_names = {{
   "reason",
@@ -71,6 +101,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException1>::fields_
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException1>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::storage_names = {{
+  "__fbthrift_field_reason",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::SinkException1>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::fields_names = {{
   "reason",
@@ -80,6 +116,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException2>::fields_
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException2>::fields_types = {{
   TType::T_I64,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::storage_names = {{
+  "__fbthrift_field_reason",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::SinkException2>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

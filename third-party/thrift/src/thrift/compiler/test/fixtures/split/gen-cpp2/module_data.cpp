@@ -38,6 +38,10 @@ const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids 
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 7> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "MyIntField",
@@ -66,6 +70,24 @@ const std::array<protocol::TType, 7> TStructDataStorage<::cpp2::MyStruct>::field
   TType::T_BOOL,
   TType::T_BOOL,
 }};
+const std::array<folly::StringPiece, 7> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
+  "__fbthrift_field_MyIntField",
+  "__fbthrift_field_MyStringField",
+  "__fbthrift_field_MyDataField",
+  "__fbthrift_field_myEnum",
+  "__fbthrift_field_oneway",
+  "__fbthrift_field_readonly",
+  "__fbthrift_field_idempotent",
+}};
+const std::array<int, 7> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
   "myEnum",
@@ -81,6 +103,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::MyUnion>::fields
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+  "myEnum",
+  "myStruct",
+  "myDataItem",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+  0,
+  1,
+  2,
 }};
 
 } // namespace thrift

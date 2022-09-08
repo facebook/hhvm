@@ -27,6 +27,10 @@ const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::MyStruct
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = {{
   "bool_field",
@@ -75,6 +79,38 @@ const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test:
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
 }};
 
 const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_names = {{
@@ -125,6 +161,38 @@ const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test:
   TType::T_MAP,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = {{
   "bool_field",
@@ -173,6 +241,38 @@ const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test:
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
 }};
 
 } // namespace thrift

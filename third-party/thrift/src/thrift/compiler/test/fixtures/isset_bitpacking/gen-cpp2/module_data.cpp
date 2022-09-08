@@ -30,6 +30,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Default>::fields
   TType::T_STRING,
   TType::T_DOUBLE,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Default>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::Default>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::NonAtomic>::fields_names = {{
   "field1",
@@ -48,6 +60,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::NonAtomic>::fiel
   TType::T_I32,
   TType::T_STRING,
   TType::T_DOUBLE,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::NonAtomic>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::NonAtomic>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
 }};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Atomic>::fields_names = {{
@@ -68,6 +92,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Atomic>::fields_
   TType::T_STRING,
   TType::T_DOUBLE,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Atomic>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::Atomic>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AtomicFoo>::fields_names = {{
   "field1",
@@ -86,6 +122,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::AtomicFoo>::fiel
   TType::T_I32,
   TType::T_STRING,
   TType::T_DOUBLE,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AtomicFoo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::AtomicFoo>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
 }};
 
 } // namespace thrift

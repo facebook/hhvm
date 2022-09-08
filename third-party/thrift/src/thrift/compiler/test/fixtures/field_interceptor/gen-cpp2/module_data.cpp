@@ -36,6 +36,22 @@ const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::test
   TType::T_I32,
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::storage_names = {{
+  "__fbthrift_field_access_field",
+  "__fbthrift_field_access_shared_field",
+  "__fbthrift_field_access_optional_shared_field",
+  "__fbthrift_field_access_shared_const_field",
+  "__fbthrift_field_access_optional_shared_const_field",
+  "__fbthrift_field_access_optional_boxed_field",
+}};
+const std::array<int, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::isset_indexes = {{
+  0,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
 
 } // namespace thrift
 } // namespace apache

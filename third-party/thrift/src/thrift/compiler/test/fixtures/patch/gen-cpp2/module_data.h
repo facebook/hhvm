@@ -31,6 +31,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyData> {
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnion> {
@@ -38,6 +46,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnion> {
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnion> {
@@ -45,6 +61,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnion> {
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStruct> {
@@ -52,6 +76,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStruct> {
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchStruct> {
@@ -59,6 +91,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyDataFieldPatchS
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct> {
@@ -66,6 +106,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
@@ -73,6 +121,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionFieldPa
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct> {
@@ -80,6 +136,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::InnerUnionPatchSt
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct> {
@@ -87,6 +151,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatch
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct> {
@@ -94,6 +166,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruc
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField21PatchStruct> {
@@ -101,6 +181,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField21Pa
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField22PatchStruct> {
@@ -108,6 +196,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField22Pa
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct> {
@@ -115,6 +211,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField23Pa
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldPatchStruct> {
@@ -122,6 +226,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldPatc
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct> {
@@ -129,6 +241,14 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructPatchStru
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
 };
 
 }} // apache::thrift

@@ -37,6 +37,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::A>::fields_ids = {{
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::A>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::A>::storage_names = {{
+  "__fbthrift_field_useless_field",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::A>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::U>::fields_names = {{
   "i",
@@ -50,6 +56,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::U>::fields_types
   TType::T_I32,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::U>::storage_names = {{
+  "i",
+  "s",
+}};
+const std::array<int, 2> TStructDataStorage<::cpp2::U>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Bang>::fields_names = {{
   "message",
@@ -59,6 +73,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::Bang>::fields_ids = {{
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::Bang>::fields_types = {{
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Bang>::storage_names = {{
+  "__fbthrift_field_message",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::Bang>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

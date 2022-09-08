@@ -42,6 +42,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic:
   TType::T_I64,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic::MyStruct>::storage_names = {{
+  "__fbthrift_field_myIntField",
+  "__fbthrift_field_myStringField",
+}};
+const std::array<int, 2> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{
   "myEnum",
@@ -54,6 +62,14 @@ const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic::MyUnion
 const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_types = {{
   TType::T_I32,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic::MyUnion>::storage_names = {{
+  "myEnum",
+  "myDataItem",
+}};
+const std::array<int, 2> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = {{
+  0,
+  1,
 }};
 
 } // namespace thrift

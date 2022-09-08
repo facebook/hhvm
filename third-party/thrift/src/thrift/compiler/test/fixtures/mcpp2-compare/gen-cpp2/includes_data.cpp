@@ -30,6 +30,12 @@ const std::array<int16_t, 1> TStructDataStorage<::a::different::ns::AStruct>::fi
 const std::array<protocol::TType, 1> TStructDataStorage<::a::different::ns::AStruct>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::a::different::ns::AStruct>::storage_names = {{
+  "__fbthrift_field_FieldA",
+}};
+const std::array<int, 1> TStructDataStorage<::a::different::ns::AStruct>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::a::different::ns::AStructB>::fields_names = {{
   "FieldA",
@@ -39,6 +45,12 @@ const std::array<int16_t, 1> TStructDataStorage<::a::different::ns::AStructB>::f
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::a::different::ns::AStructB>::fields_types = {{
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::a::different::ns::AStructB>::storage_names = {{
+  "FieldA",
+}};
+const std::array<int, 1> TStructDataStorage<::a::different::ns::AStructB>::isset_indexes = {{
+  -1,
 }};
 
 } // namespace thrift

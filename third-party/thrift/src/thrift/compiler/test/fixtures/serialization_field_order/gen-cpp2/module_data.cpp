@@ -27,6 +27,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::Foo>::fields_typ
   TType::T_I32,
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Foo>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::Foo>::isset_indexes = {{
+  0,
+  1,
+  2,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Foo2>::fields_names = {{
   "field1",
@@ -42,6 +52,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::Foo2>::fields_ty
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Foo2>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::Foo2>::isset_indexes = {{
+  0,
+  1,
+  2,
 }};
 
 } // namespace thrift

@@ -27,6 +27,10 @@ const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::terse_
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::fields_names = {{
   "field1",
@@ -36,6 +40,12 @@ const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::terse_
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::fields_types = {{
   TType::T_I64,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::storage_names = {{
+  "__fbthrift_field_field1",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_names = {{
@@ -85,6 +95,38 @@ const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::tes
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_names = {{
@@ -177,6 +219,66 @@ const std::array<protocol::TType, 28> TStructDataStorage<::facebook::thrift::tes
   TType::T_MAP,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::storage_names = {{
+  "__fbthrift_field_terse_bool_field",
+  "__fbthrift_field_terse_byte_field",
+  "__fbthrift_field_terse_short_field",
+  "__fbthrift_field_terse_int_field",
+  "__fbthrift_field_terse_long_field",
+  "__fbthrift_field_terse_float_field",
+  "__fbthrift_field_terse_double_field",
+  "__fbthrift_field_terse_string_field",
+  "__fbthrift_field_terse_binary_field",
+  "__fbthrift_field_terse_enum_field",
+  "__fbthrift_field_terse_list_field",
+  "__fbthrift_field_terse_set_field",
+  "__fbthrift_field_terse_map_field",
+  "__fbthrift_field_terse_struct_field",
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+}};
 
 const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::fields_names = {{
   "bool_field",
@@ -226,6 +328,38 @@ const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::tes
   TType::T_MAP,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_struct_field",
+}};
+const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>::fields_names = {{
   "field1",
@@ -242,6 +376,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::facebook::thrift::test
   TType::T_I32,
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+}};
+const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::fields_names = {{
   "msg",
@@ -251,6 +395,12 @@ const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::terse_
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::fields_types = {{
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::storage_names = {{
+  "__fbthrift_field_msg",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::isset_indexes = {{
+  -1,
 }};
 
 } // namespace thrift

@@ -21,6 +21,12 @@ const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::B>::fiel
 const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::B>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::B>::storage_names = {{
+  "__fbthrift_field_field",
+}};
+const std::array<int, 1> TStructDataStorage<::apache::thrift::test::B>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::A>::fields_names = {{
   "some_map",
@@ -30,6 +36,12 @@ const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::A>::fiel
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::A>::fields_types = {{
   TType::T_MAP,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::test::A>::storage_names = {{
+  "__fbthrift_field_some_map",
+}};
+const std::array<int, 1> TStructDataStorage<::apache::thrift::test::A>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

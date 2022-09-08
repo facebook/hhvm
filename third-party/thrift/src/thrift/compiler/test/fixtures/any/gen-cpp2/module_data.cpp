@@ -28,6 +28,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStruct>::fields_ids = 
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStruct>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
+  "__fbthrift_field_myString",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
   "myString",
@@ -38,6 +44,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+  "myString",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::fields_names = {{
   "myString",
@@ -47,6 +59,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyException>::fields_ids
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyException>::fields_types = {{
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::storage_names = {{
+  "__fbthrift_field_myString",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::MyException>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

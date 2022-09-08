@@ -66,6 +66,36 @@ const std::array<protocol::TType, 13> TStructDataStorage<::apache::thrift::test:
   TType::T_SET,
   TType::T_MAP,
 }};
+const std::array<folly::StringPiece, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::storage_names = {{
+  "__fbthrift_field_bool_field",
+  "__fbthrift_field_byte_field",
+  "__fbthrift_field_short_field",
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_long_field",
+  "__fbthrift_field_float_field",
+  "__fbthrift_field_double_field",
+  "__fbthrift_field_string_field",
+  "__fbthrift_field_binary_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_list_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+}};
+const std::array<int, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+}};
 
 } // namespace thrift
 } // namespace apache

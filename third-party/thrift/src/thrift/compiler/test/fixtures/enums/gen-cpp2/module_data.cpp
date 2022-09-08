@@ -131,6 +131,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums:
   TType::T_I32,
   TType::T_SET,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = {{
+  "__fbthrift_field_reasonable",
+  "__fbthrift_field_fine",
+  "__fbthrift_field_questionable",
+  "__fbthrift_field_tags",
+}};
+const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_names = {{
   "me2_3",
@@ -149,6 +161,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums:
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = {{
+  "__fbthrift_field_me2_3",
+  "__fbthrift_field_me3_n3",
+  "__fbthrift_field_me1_t1",
+  "__fbthrift_field_me1_t2",
+}};
+const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
 }};
 
 } // namespace thrift

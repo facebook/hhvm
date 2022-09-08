@@ -43,6 +43,22 @@ const std::array<protocol::TType, 6> TStructDataStorage<::some::ns::ModuleA>::fi
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::some::ns::ModuleA>::storage_names = {{
+  "__fbthrift_field_i32Field",
+  "__fbthrift_field_strField",
+  "__fbthrift_field_listField",
+  "__fbthrift_field_mapField",
+  "__fbthrift_field_inclAField",
+  "__fbthrift_field_inclBField",
+}};
+const std::array<int, 6> TStructDataStorage<::some::ns::ModuleA>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::some::ns::ModuleB>::fields_names = {{
   "i32Field",
@@ -56,6 +72,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::some::ns::ModuleB>::fi
   TType::T_I32,
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::some::ns::ModuleB>::storage_names = {{
+  "__fbthrift_field_i32Field",
+  "__fbthrift_field_inclEnumB",
+}};
+const std::array<int, 2> TStructDataStorage<::some::ns::ModuleB>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_names = {{
   "field",
@@ -65,6 +89,12 @@ const std::array<int16_t, 1> TStructDataStorage<::some::ns::detail::DirectlyAdap
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_types = {{
   TType::T_I32,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::storage_names = {{
+  "__fbthrift_field_field",
+}};
+const std::array<int, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

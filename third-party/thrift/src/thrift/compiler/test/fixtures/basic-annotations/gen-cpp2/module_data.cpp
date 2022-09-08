@@ -37,6 +37,12 @@ const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation
 const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_types = {{
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::storage_names = {{
+  "__fbthrift_field_name",
+}};
+const std::array<int, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = {{
 }};
@@ -44,12 +50,20 @@ const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fiel
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourUnion>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourUnion>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = {{
 }};
 const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_ids = {{
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourException>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourException>::isset_indexes = {{
 }};
 
 const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
@@ -88,6 +102,30 @@ const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::detail::YourStr
   TType::T_STRUCT,
   TType::T_I16,
 }};
+const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
+  "__fbthrift_field_majorVer",
+  "__fbthrift_field_package",
+  "__fbthrift_field_annotation_with_quote",
+  "__fbthrift_field_class_",
+  "__fbthrift_field_annotation_with_trailing_comma",
+  "__fbthrift_field_empty_annotations",
+  "__fbthrift_field_my_enum",
+  "__fbthrift_field_cpp_type_annotation",
+  "__fbthrift_field_my_union",
+  "__fbthrift_field_my_id",
+}};
+const std::array<int, 10> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = {{
   "id",
@@ -100,6 +138,14 @@ const std::array<int16_t, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_id
 const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SecretStruct>::storage_names = {{
+  "__fbthrift_field_id",
+  "__fbthrift_field_password",
+}};
+const std::array<int, 2> TStructDataStorage<::cpp2::SecretStruct>::isset_indexes = {{
+  0,
+  1,
 }};
 
 } // namespace thrift

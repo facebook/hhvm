@@ -30,6 +30,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::BasicTypes>::fie
   TType::T_I64,
   TType::T_BOOL,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::BasicTypes>::storage_names = {{
+  "__fbthrift_field_first",
+  "__fbthrift_field_second",
+  "__fbthrift_field_third",
+  "__fbthrift_field_isTrue",
+}};
+const std::array<int, 4> TStructDataStorage<::cpp2::BasicTypes>::isset_indexes = {{
+  -1,
+  0,
+  1,
+  2,
+}};
 
 } // namespace thrift
 } // namespace apache

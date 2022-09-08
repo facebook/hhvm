@@ -83,6 +83,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::enumst
   TType::T_I32,
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = {{
+  "__fbthrift_field_myEnum",
+  "__fbthrift_field_myBigEnum",
+}};
+const std::array<int, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::isset_indexes = {{
+  0,
+  1,
+}};
 
 } // namespace thrift
 } // namespace apache

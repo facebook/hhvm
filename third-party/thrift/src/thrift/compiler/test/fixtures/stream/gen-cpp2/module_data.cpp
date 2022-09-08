@@ -18,12 +18,20 @@ const std::array<int16_t, 0> TStructDataStorage<::cpp2::FooStreamEx>::fields_ids
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::FooStreamEx>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::FooStreamEx>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::FooStreamEx>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::FooEx>::fields_names = {{
 }};
 const std::array<int16_t, 0> TStructDataStorage<::cpp2::FooEx>::fields_ids = {{
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::FooEx>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::FooEx>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::FooEx>::isset_indexes = {{
 }};
 
 } // namespace thrift

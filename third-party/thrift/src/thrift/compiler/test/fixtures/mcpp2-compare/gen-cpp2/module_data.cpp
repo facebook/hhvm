@@ -137,6 +137,10 @@ const std::array<int16_t, 0> TStructDataStorage<::some::valid::ns::Empty>::field
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::some::valid::ns::Empty>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::some::valid::ns::Empty>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::some::valid::ns::Empty>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct>::fields_names = {{
   "boolField",
@@ -147,6 +151,12 @@ const std::array<int16_t, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct
 const std::array<protocol::TType, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct>::fields_types = {{
   TType::T_I64,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct>::storage_names = {{
+  "__fbthrift_field_boolField",
+}};
+const std::array<int, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::fields_names = {{
   "boolField",
@@ -156,6 +166,12 @@ const std::array<int16_t, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::fields_types = {{
   TType::T_I64,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::storage_names = {{
+  "__fbthrift_field_boolField",
+}};
+const std::array<int, 1> TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 11> TStructDataStorage<::some::valid::ns::MyStruct>::fields_names = {{
@@ -197,6 +213,32 @@ const std::array<protocol::TType, 11> TStructDataStorage<::some::valid::ns::MySt
   TType::T_STRING,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 11> TStructDataStorage<::some::valid::ns::MyStruct>::storage_names = {{
+  "__fbthrift_field_MyBoolField",
+  "__fbthrift_field_MyIntField",
+  "__fbthrift_field_MyStringField",
+  "__fbthrift_field_MyStringField2",
+  "__fbthrift_field_MyBinaryField",
+  "__fbthrift_field_MyBinaryField2",
+  "__fbthrift_field_MyBinaryField3",
+  "__fbthrift_field_MyBinaryListField4",
+  "__fbthrift_field_MyMapEnumAndInt",
+  "__fbthrift_field_MyCustomField",
+  "__fbthrift_field_MyOptCustomField",
+}};
+const std::array<int, 11> TStructDataStorage<::some::valid::ns::MyStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  -1,
+  6,
+  7,
+  8,
+  9,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>::fields_names = {{
   "intValue",
@@ -209,6 +251,14 @@ const std::array<int16_t, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>:
 const std::array<protocol::TType, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>::storage_names = {{
+  "intValue",
+  "stringValue",
+}};
+const std::array<int, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>::isset_indexes = {{
+  0,
+  1,
 }};
 
 const std::array<folly::StringPiece, 28> TStructDataStorage<::some::valid::ns::ComplexUnion>::fields_names = {{
@@ -301,6 +351,66 @@ const std::array<protocol::TType, 28> TStructDataStorage<::some::valid::ns::Comp
   TType::T_STRUCT,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 28> TStructDataStorage<::some::valid::ns::ComplexUnion>::storage_names = {{
+  "intValue",
+  "opt_intValue",
+  "stringValue",
+  "opt_stringValue",
+  "intValue2",
+  "intValue3",
+  "doubelValue",
+  "boolValue",
+  "union_list",
+  "union_set",
+  "union_map",
+  "opt_union_map",
+  "enum_field",
+  "enum_container",
+  "a_struct",
+  "a_set_struct",
+  "a_union",
+  "opt_a_union",
+  "a_union_list",
+  "a_union_typedef",
+  "a_union_typedef_list",
+  "MyBinaryField",
+  "MyBinaryField2",
+  "MyBinaryListField4",
+  "ref_field",
+  "ref_field2",
+  "excp_field",
+  "MyCustomField",
+}};
+const std::array<int, 28> TStructDataStorage<::some::valid::ns::ComplexUnion>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  -1,
+  -1,
+  24,
+  25,
+}};
 
 const std::array<folly::StringPiece, 17> TStructDataStorage<::some::valid::ns::AnException>::fields_names = {{
   "code",
@@ -359,6 +469,44 @@ const std::array<protocol::TType, 17> TStructDataStorage<::some::valid::ns::AnEx
   TType::T_STRING,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 17> TStructDataStorage<::some::valid::ns::AnException>::storage_names = {{
+  "__fbthrift_field_code",
+  "__fbthrift_field_req_code",
+  "__fbthrift_field_message2",
+  "__fbthrift_field_req_message",
+  "__fbthrift_field_exception_list",
+  "__fbthrift_field_exception_set",
+  "__fbthrift_field_exception_map",
+  "__fbthrift_field_req_exception_map",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_enum_container",
+  "__fbthrift_field_a_struct",
+  "__fbthrift_field_a_set_struct",
+  "__fbthrift_field_a_union_list",
+  "__fbthrift_field_union_typedef",
+  "__fbthrift_field_a_union_typedef_list",
+  "__fbthrift_field_MyCustomField",
+  "__fbthrift_field_MyOptCustomField",
+}};
+const std::array<int, 17> TStructDataStorage<::some::valid::ns::AnException>::isset_indexes = {{
+  0,
+  -1,
+  1,
+  -1,
+  2,
+  3,
+  4,
+  -1,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+}};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::some::valid::ns::AnotherException>::fields_names = {{
   "code",
@@ -374,6 +522,16 @@ const std::array<protocol::TType, 3> TStructDataStorage<::some::valid::ns::Anoth
   TType::T_I32,
   TType::T_I32,
   TType::T_STRING,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::some::valid::ns::AnotherException>::storage_names = {{
+  "__fbthrift_field_code",
+  "__fbthrift_field_req_code",
+  "__fbthrift_field_message",
+}};
+const std::array<int, 3> TStructDataStorage<::some::valid::ns::AnotherException>::isset_indexes = {{
+  0,
+  -1,
+  1,
 }};
 
 const std::array<folly::StringPiece, 46> TStructDataStorage<::some::valid::ns::containerStruct>::fields_names = {{
@@ -520,6 +678,102 @@ const std::array<protocol::TType, 46> TStructDataStorage<::some::valid::ns::cont
   TType::T_MAP,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 46> TStructDataStorage<::some::valid::ns::containerStruct>::storage_names = {{
+  "fieldA",
+  "req_fieldA",
+  "opt_fieldA",
+  "fieldB",
+  "req_fieldB",
+  "opt_fieldB",
+  "fieldC",
+  "req_fieldC",
+  "opt_fieldC",
+  "fieldD",
+  "fieldE",
+  "req_fieldE",
+  "opt_fieldE",
+  "fieldF",
+  "fieldG",
+  "fieldH",
+  "fieldI",
+  "fieldJ",
+  "fieldK",
+  "fieldL",
+  "fieldM",
+  "fieldN",
+  "fieldO",
+  "fieldP",
+  "fieldQ",
+  "fieldR",
+  "req_fieldR",
+  "opt_fieldR",
+  "fieldS",
+  "fieldT",
+  "fieldU",
+  "fieldV",
+  "req_fieldV",
+  "opt_fieldV",
+  "fieldW",
+  "fieldX",
+  "req_fieldX",
+  "opt_fieldX",
+  "fieldY",
+  "fieldZ",
+  "fieldAA",
+  "fieldAB",
+  "fieldAC",
+  "fieldAD",
+  "fieldAE",
+  "fieldSD",
+}};
+const std::array<int, 46> TStructDataStorage<::some::valid::ns::containerStruct>::isset_indexes = {{
+  0,
+  -1,
+  1,
+  2,
+  -1,
+  3,
+  4,
+  -1,
+  5,
+  6,
+  7,
+  -1,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  -1,
+  22,
+  23,
+  24,
+  25,
+  26,
+  -1,
+  27,
+  28,
+  29,
+  -1,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::fields_names = {{
   "MyIncludedInt",
@@ -538,6 +792,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::some::valid::ns::MyInc
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::storage_names = {{
+  "__fbthrift_field_MyIncludedInt",
+  "__fbthrift_field_MyIncludedStruct",
+  "ARefField",
+  "__fbthrift_field_ARequiredField",
+}};
+const std::array<int, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::isset_indexes = {{
+  0,
+  1,
+  -1,
+  -1,
 }};
 
 const std::array<folly::StringPiece, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_names = {{
@@ -666,6 +932,90 @@ const std::array<protocol::TType, 40> TStructDataStorage<::some::valid::ns::Anno
   TType::T_STRING,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::storage_names = {{
+  "no_annotation",
+  "cpp_unique_ref",
+  "cpp2_unique_ref",
+  "container_with_ref",
+  "req_cpp_unique_ref",
+  "req_cpp2_unique_ref",
+  "req_container_with_ref",
+  "opt_cpp_unique_ref",
+  "opt_cpp2_unique_ref",
+  "opt_container_with_ref",
+  "ref_type_unique",
+  "ref_type_shared",
+  "ref_type_const",
+  "req_ref_type_shared",
+  "req_ref_type_const",
+  "req_ref_type_unique",
+  "opt_ref_type_const",
+  "opt_ref_type_unique",
+  "opt_ref_type_shared",
+  "base_type",
+  "list_type",
+  "set_type",
+  "map_type",
+  "map_struct_type",
+  "iobuf_type",
+  "iobuf_ptr",
+  "list_i32_template",
+  "list_string_template",
+  "set_template",
+  "map_template",
+  "typedef_list_template",
+  "typedef_deque_template",
+  "typedef_set_template",
+  "typedef_map_template",
+  "indirection_a",
+  "indirection_b",
+  "indirection_c",
+  "iobuf_type_val",
+  "iobuf_ptr_val",
+  "struct_struct",
+}};
+const std::array<int, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::isset_indexes = {{
+  0,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::fields_names = {{
   "map_of_iobufs",
@@ -678,6 +1028,14 @@ const std::array<int16_t, 2> TStructDataStorage<::some::valid::ns::ComplexContai
 const std::array<protocol::TType, 2> TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::fields_types = {{
   TType::T_MAP,
   TType::T_MAP,
+}};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::storage_names = {{
+  "__fbthrift_field_map_of_iobufs",
+  "__fbthrift_field_map_of_iobuf_ptrs",
+}};
+const std::array<int, 2> TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::isset_indexes = {{
+  0,
+  1,
 }};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatStruct>::fields_names = {{
@@ -692,6 +1050,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::some::valid::ns::Float
   TType::T_FLOAT,
   TType::T_DOUBLE,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatStruct>::storage_names = {{
+  "__fbthrift_field_floatField",
+  "__fbthrift_field_doubleField",
+}};
+const std::array<int, 2> TStructDataStorage<::some::valid::ns::FloatStruct>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatUnion>::fields_names = {{
   "floatSide",
@@ -705,6 +1071,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::some::valid::ns::Float
   TType::T_FLOAT,
   TType::T_DOUBLE,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatUnion>::storage_names = {{
+  "floatSide",
+  "doubleSide",
+}};
+const std::array<int, 2> TStructDataStorage<::some::valid::ns::FloatUnion>::isset_indexes = {{
+  0,
+  1,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::fields_names = {{
   "intField",
@@ -714,6 +1088,12 @@ const std::array<int16_t, 1> TStructDataStorage<::some::valid::ns::AllRequiredNo
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::fields_types = {{
   TType::T_I64,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::storage_names = {{
+  "__fbthrift_field_intField",
+}};
+const std::array<int, 1> TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::isset_indexes = {{
+  -1,
 }};
 
 } // namespace thrift

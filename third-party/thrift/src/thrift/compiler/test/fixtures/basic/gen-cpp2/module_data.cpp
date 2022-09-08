@@ -56,6 +56,10 @@ const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataI
 }};
 const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = {{
 }};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
+}};
 
 const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
   "MyIntField",
@@ -90,6 +94,28 @@ const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic:
   TType::T_SET,
   TType::T_STRING,
 }};
+const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::storage_names = {{
+  "__fbthrift_field_MyIntField",
+  "__fbthrift_field_MyStringField",
+  "__fbthrift_field_MyDataField",
+  "__fbthrift_field_myEnum",
+  "__fbthrift_field_oneway",
+  "__fbthrift_field_readonly",
+  "__fbthrift_field_idempotent",
+  "__fbthrift_field_floatSet",
+  "__fbthrift_field_no_hack_codegen_field",
+}};
+const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+}};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{
   "myEnum",
@@ -109,6 +135,18 @@ const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic:
   TType::T_STRUCT,
   TType::T_SET,
 }};
+const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::storage_names = {{
+  "myEnum",
+  "myStruct",
+  "myDataItem",
+  "floatSet",
+}};
+const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = {{
   "reserved_field",
@@ -119,6 +157,12 @@ const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::Reserve
 const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::storage_names = {{
+  "__fbthrift_field_reserved_field",
+}};
+const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = {{
   "reserved_field",
@@ -128,6 +172,12 @@ const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::UnionTo
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = {{
   TType::T_I32,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::storage_names = {{
+  "reserved_field",
+}};
+const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = {{
+  0,
 }};
 
 } // namespace thrift

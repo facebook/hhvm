@@ -30,6 +30,12 @@ const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Foo>::
 const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Foo>::storage_names = {{
+  "__fbthrift_field_field",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = {{
+  0,
+}};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = {{
   "list_field",
@@ -39,6 +45,12 @@ const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Bar>::
 }};
 const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = {{
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Bar>::storage_names = {{
+  "__fbthrift_field_list_field",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
@@ -82,6 +94,34 @@ const std::array<protocol::TType, 12> TStructDataStorage<::facebook::thrift::tes
   TType::T_MAP,
   TType::T_STRUCT,
   TType::T_LIST,
+}};
+const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::storage_names = {{
+  "__fbthrift_field_int_field",
+  "__fbthrift_field_enum_field",
+  "__fbthrift_field_foo_field",
+  "__fbthrift_field_adapted_field",
+  "__fbthrift_field_list_field",
+  "list_shared_ptr_field",
+  "__fbthrift_field_list_cpp_type_field",
+  "__fbthrift_field_set_field",
+  "__fbthrift_field_map_field",
+  "__fbthrift_field_nested_field",
+  "__fbthrift_field_bar_field",
+  "__fbthrift_field_adapted_list_field",
+}};
+const std::array<int, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  -1,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
 }};
 
 } // namespace thrift

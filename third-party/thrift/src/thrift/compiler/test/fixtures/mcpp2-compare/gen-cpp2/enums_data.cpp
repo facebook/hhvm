@@ -58,6 +58,12 @@ const std::array<int16_t, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStru
 const std::array<protocol::TType, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_types = {{
   TType::T_I32,
 }};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::storage_names = {{
+  "__fbthrift_field_fieldA",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::isset_indexes = {{
+  0,
+}};
 
 } // namespace thrift
 } // namespace apache

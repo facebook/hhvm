@@ -24,6 +24,14 @@ const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::Included>::field
   TType::T_I64,
   TType::T_STRUCT,
 }};
+const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::Included>::storage_names = {{
+  "__fbthrift_field_MyIntField",
+  "__fbthrift_field_MyTransitiveField",
+}};
+const std::array<int, 2> TStructDataStorage<::cpp2::Included>::isset_indexes = {{
+  0,
+  1,
+}};
 
 } // namespace thrift
 } // namespace apache

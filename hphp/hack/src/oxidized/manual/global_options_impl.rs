@@ -143,6 +143,7 @@ impl Default for GlobalOptions {
             tco_loop_iteration_upper_bound: None,
             tco_expression_tree_virtualize_functions: false,
             tco_substitution_mutation: false,
+            tco_use_type_alias_heap: false,
         }
     }
 }

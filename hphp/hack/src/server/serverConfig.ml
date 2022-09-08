@@ -493,6 +493,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "allow_all_files_for_module_declarations" config)
       ?tco_expression_tree_virtualize_functions:
         (bool_opt "expression_tree_virtualize_functions" config)
+      ?tco_use_type_alias_heap:(bool_opt "use_type_alias_heap" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

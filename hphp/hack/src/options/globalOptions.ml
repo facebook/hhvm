@@ -160,6 +160,7 @@ type t = {
   tco_loop_iteration_upper_bound: int option;
   tco_expression_tree_virtualize_functions: bool;
   tco_substitution_mutation: bool;
+  tco_use_type_alias_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -297,6 +298,7 @@ let default =
     tco_loop_iteration_upper_bound = None;
     tco_expression_tree_virtualize_functions = false;
     tco_substitution_mutation = false;
+    tco_use_type_alias_heap = false;
   }
 
 let make
@@ -461,6 +463,7 @@ let make
     ?(tco_expression_tree_virtualize_functions =
       default.tco_expression_tree_virtualize_functions)
     ?(tco_substitution_mutation = default.tco_substitution_mutation)
+    ?(tco_use_type_alias_heap = default.tco_use_type_alias_heap)
     () =
   {
     tco_experimental_features;
@@ -595,6 +598,7 @@ let make
     tco_loop_iteration_upper_bound;
     tco_expression_tree_virtualize_functions;
     tco_substitution_mutation;
+    tco_use_type_alias_heap;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

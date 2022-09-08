@@ -330,6 +330,7 @@ type t = {
   (* When set, mutates generic entities by substituting type parameters and
      typechecks the mutated program *)
   tco_substitution_mutation: bool;
+  tco_use_type_alias_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -465,6 +466,7 @@ val make :
   ?tco_loop_iteration_upper_bound:int option ->
   ?tco_expression_tree_virtualize_functions:bool ->
   ?tco_substitution_mutation:bool ->
+  ?tco_use_type_alias_heap:bool ->
   unit ->
   t
 

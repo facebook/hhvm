@@ -306,3 +306,5 @@ let log_fanout t ~fanout_cardinal =
   | Some threshold -> Int.(fanout_cardinal >= threshold)
 
 let substitution_mutation t = t.GlobalOptions.tco_substitution_mutation
+
+let use_type_alias_heap t = t.GlobalOptions.tco_use_type_alias_heap

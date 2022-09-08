@@ -627,6 +627,7 @@ type t = {
       (** A manifold path to a shallow_decls to be used for Hulk Lite when typechecking. *)
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
+  use_type_alias_heap: bool;  (** optimize type alias expansions *)
 }
 
 let default =
@@ -743,6 +744,7 @@ let default =
     use_shallow_decls_saved_state = false;
     shallow_decls_manifold_path = None;
     disable_naming_table_fallback_loading = false;
+    use_type_alias_heap = false;
   }
 
 let path =
@@ -1569,6 +1571,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_type_alias_heap =
+    bool_if_min_version
+      "use_type_alias_heap"
+      ~default:default.use_type_alias_heap
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1690,6 +1699,7 @@ let load_ fn ~silent ~current_version overrides =
     use_shallow_decls_saved_state;
     shallow_decls_manifold_path;
     disable_naming_table_fallback_loading;
+    use_type_alias_heap;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1735,4 +1745,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_manifold_cython_client = options.use_manifold_cython_client;
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
+      use_type_alias_heap = options.use_type_alias_heap;
     }

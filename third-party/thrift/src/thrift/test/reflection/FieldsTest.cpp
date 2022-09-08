@@ -104,14 +104,14 @@ void checkField(const char* identName) {
   test::same_tag<op::get_type_tag<Struct, Ordinal>, TypeTag>;
   test::same_tag<op::get_ident<Struct, Ordinal>, Ident>;
   test::same_tag<op::get_field_tag<Struct, Ordinal>, FieldTag>;
-  EXPECT_EQ((op::get_name<Struct, Ordinal>), identName);
+  EXPECT_EQ((op::get_name_v<Struct, Ordinal>), identName);
 
   test::same_tag<op::get_ordinal<Struct, Id>, Ordinal>;
   test::same_tag<op::get_field_id<Struct, Id>, Id>;
   test::same_tag<op::get_type_tag<Struct, Id>, TypeTag>;
   test::same_tag<op::get_ident<Struct, Id>, Ident>;
   test::same_tag<op::get_field_tag<Struct, Id>, FieldTag>;
-  EXPECT_EQ((op::get_name<Struct, Id>), identName);
+  EXPECT_EQ((op::get_name_v<Struct, Id>), identName);
 
   if constexpr (is_type_tag_unique && !std::is_void_v<TypeTag>) {
     test::same_tag<op::get_ordinal<Struct, TypeTag>, Ordinal>;
@@ -119,7 +119,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_type_tag<Struct, TypeTag>, TypeTag>;
     test::same_tag<op::get_ident<Struct, TypeTag>, Ident>;
     test::same_tag<op::get_field_tag<Struct, TypeTag>, FieldTag>;
-    EXPECT_EQ((op::get_name<Struct, TypeTag>), identName);
+    EXPECT_EQ((op::get_name_v<Struct, TypeTag>), identName);
   }
 
   if constexpr (!std::is_void_v<Ident>) {
@@ -128,7 +128,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_type_tag<Struct, Ident>, TypeTag>;
     test::same_tag<op::get_ident<Struct, Ident>, Ident>;
     test::same_tag<op::get_field_tag<Struct, Ident>, FieldTag>;
-    EXPECT_EQ((op::get_name<Struct, Ident>), identName);
+    EXPECT_EQ((op::get_name_v<Struct, Ident>), identName);
   }
 
   if constexpr (!std::is_void_v<FieldTag>) {
@@ -137,7 +137,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_type_tag<Struct, FieldTag>, TypeTag>;
     test::same_tag<op::get_ident<Struct, FieldTag>, Ident>;
     test::same_tag<op::get_field_tag<Struct, FieldTag>, FieldTag>;
-    EXPECT_EQ((op::get_name<Struct, FieldTag>), identName);
+    EXPECT_EQ((op::get_name_v<Struct, FieldTag>), identName);
   }
 }
 
@@ -331,6 +331,6 @@ TEST(FieldsTest, HelperAPIs) {
 }
 
 TEST(FieldsTest, GetFieldNameCppName) {
-  EXPECT_EQ((op::get_name<test_cpp2::cpp_reflection::struct_with_renamed_field, field_ordinal<1>>), "fancy.idl.name");
+  EXPECT_EQ((op::get_name_v<test_cpp2::cpp_reflection::struct_with_renamed_field, field_ordinal<1>>), "fancy.idl.name");
 }
 } // namespace apache::thrift::type

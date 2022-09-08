@@ -172,7 +172,7 @@ void ensure_fields(MaskRef ref, Struct& t) {
       // Need to ensure the struct object.
       using FieldType = op::get_native_type<Struct, OrdinalTag>;
       if constexpr (is_thrift_struct_v<FieldType>) {
-        auto& value = *op::get_value_or_null(field_ref);
+        auto& value = *op::getValueOrNull(field_ref);
         ensure_fields(next, value);
       }
     });
@@ -197,7 +197,7 @@ void clear_fields(MaskRef ref, Struct& t) {
         op::clear_field<FieldTag>(field_ref, t);
         return;
       }
-      auto* field_value = op::get_value_or_null(field_ref);
+      auto* field_value = op::getValueOrNull(field_ref);
       if (!field_value) {
         return;
       }
@@ -243,8 +243,8 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       using FieldTag = op::get_field_tag<DstStruct, OrdinalTag>;
       auto&& src_ref = op::get<DstStruct, OrdinalTag>(src);
       auto&& dst_ref = op::get<DstStruct, OrdinalTag>(dst);
-      bool srcHasValue = bool(op::get_value_or_null(src_ref));
-      bool dstHasValue = bool(op::get_value_or_null(dst_ref));
+      bool srcHasValue = bool(op::getValueOrNull(src_ref));
+      bool dstHasValue = bool(op::getValueOrNull(dst_ref));
       if (!srcHasValue && !dstHasValue) { // skip
         return;
       }
@@ -262,22 +262,20 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       if constexpr (is_thrift_struct_v<FieldType>) {
         // Field doesn't exist in src, so just clear dst with the mask.
         if (!srcHasValue) {
-          clear_fields(next, *op::get_value_or_null(dst_ref));
+          clear_fields(next, *op::getValueOrNull(dst_ref));
           return;
         }
         // Field exists in both src and dst, so call copy recursively.
         if (dstHasValue) {
           copied |= copy_fields(
-              next,
-              *op::get_value_or_null(src_ref),
-              *op::get_value_or_null(dst_ref));
+              next, *op::getValueOrNull(src_ref), *op::getValueOrNull(dst_ref));
           return;
         }
         // Field only exists in src. Need to construct object only if there's
         // a field to add.
         FieldType newObject;
         bool constructObject =
-            copy_fields(next, *op::get_value_or_null(src_ref), newObject);
+            copy_fields(next, *op::getValueOrNull(src_ref), newObject);
         if (constructObject) {
           moveObject(dst_ref, std::move(newObject));
           copied = true;
@@ -328,7 +326,7 @@ Mask path(
       if (mask.includes_ref()) { // already set
         return;
       }
-      if (op::get_name<Struct, decltype(fieldId)> == fieldNames[index]) {
+      if (op::get_name_v<Struct, decltype(fieldId)> == fieldNames[index]) {
         using FieldType = op::get_native_type<Struct, decltype(fieldId)>;
         mask.includes_ref().emplace()[static_cast<int16_t>(fieldId())] =
             path<FieldType>(fieldNames, index + 1, other);
@@ -353,8 +351,8 @@ void compare_impl(
     int16_t fieldId = static_cast<int16_t>(fieldIdTag());
     auto&& original_field = op::get<Struct, FieldIdTag>(original);
     auto&& modified_field = op::get<Struct, FieldIdTag>(modified);
-    auto* original_ptr = op::get_value_or_null(original_field);
-    auto* modified_ptr = op::get_value_or_null(modified_field);
+    auto* original_ptr = op::getValueOrNull(original_field);
+    auto* modified_ptr = op::getValueOrNull(modified_field);
 
     if (!original_ptr && !modified_ptr) { // same
       return;

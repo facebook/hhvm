@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/FieldRef.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
@@ -24,6 +25,7 @@ namespace apache {
 namespace thrift {
 namespace op {
 namespace detail {
+using pa = ::apache::thrift::detail::st::private_access;
 
 template <class Tag, class Id>
 struct GetOrdinalImpl;

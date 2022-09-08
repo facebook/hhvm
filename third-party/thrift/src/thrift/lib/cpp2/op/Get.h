@@ -18,7 +18,6 @@
 
 #include <folly/Traits.h>
 #include <thrift/lib/cpp/Field.h>
-#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/detail/Get.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -30,7 +29,7 @@ namespace op {
 // Resolves to the number of definitions contained in Thrift class.
 template <typename S>
 FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
-    ::apache::thrift::detail::st::private_access::__fbthrift_field_size_v<S>;
+    detail::pa::__fbthrift_field_size_v<S>;
 
 // Gets the ordinal, for example:
 //
@@ -60,8 +59,7 @@ template <class S, class Id>
 using get_field_id = folly::conditional_t<
     get_ordinal<S, Id>::value == type::Ordinal{},
     field_id<0>,
-    ::apache::thrift::detail::st::private_access::
-        field_id<S, get_ordinal<S, Id>>>;
+    detail::pa::field_id<S, get_ordinal<S, Id>>>;
 template <class S, class Id>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
     get_field_id<S, Id>::value;
@@ -78,8 +76,7 @@ void for_each_field_id(F&& f) {
 //   using Ident = get_field_id<MyS, field_id<7>>
 //
 template <class S, class Id>
-using get_ident =
-    ::apache::thrift::detail::st::private_access::ident<S, get_ordinal<S, Id>>;
+using get_ident = detail::pa::ident<S, get_ordinal<S, Id>>;
 
 // It calls the given function with each folly::tag<thrift::ident::*>{} in
 // Thrift class.
@@ -89,24 +86,13 @@ void for_each_ident(F&& f) {
       [&](auto ord) { f(folly::tag_t<get_ident<S, decltype(ord)>>{}); });
 }
 
-// Gets the thrift field name, for example:
-//
-//   // Returns the thrift field name associated with field 7 in MyStruct.
-//   get_name<MyStruct, field_id<7>>
-//
-template <typename S, class Id>
-FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
-    ::apache::thrift::detail::st::private_access::
-        __fbthrift_get_field_name<S, get_ordinal<S, Id>>();
-
 // Gets the Thrift type tag, for example:
 //
 //   // Resolves to Thrift type tag for the field "foo" in MyS.
 //   using Tag = get_field_id<MyS, ident::foo>
 //
 template <typename S, typename Id>
-using get_type_tag = ::apache::thrift::detail::st::private_access::
-    type_tag<S, get_ordinal<S, Id>>;
+using get_type_tag = detail::pa::type_tag<S, get_ordinal<S, Id>>;
 
 template <class S, class Id>
 using get_field_tag = typename std::conditional_t<
@@ -119,17 +105,44 @@ using get_field_tag = typename std::conditional_t<
 template <class S, class Id>
 using get_native_type = type::native_type<get_field_tag<S, Id>>;
 
+// Gets the thrift field name, for example:
+//
+//   // Returns the thrift field name associated with field 7 in MyStruct.
+//   op::get_name_v<MyStruct, field_id<7>>
+//
+template <typename S, class Id>
+FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
+    detail::pa::__fbthrift_get_field_name<S, get_ordinal<S, Id>>();
+// TODO(afuller): Migrate usage a remove.
+template <typename S, class Id>
+FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
+    detail::pa::__fbthrift_get_field_name<S, get_ordinal<S, Id>>();
+
+// Gets the Thrift field, for example:
+//
+//   op::get<MyStruct, type::field_id<7>>(myStruct) = 4;
 template <typename S, class Id>
 FOLLY_INLINE_VARIABLE constexpr auto get = access_field<get_ident<S, Id>>;
 
+// Returns pointer to the value from the given field.
+// Returns nullptr if it doesn't have a value.
+// For example:
+//   // returns foo.field_ref().value()
+//   get_value_or_null(foo.field_ref())
+//   // returns *foo.smart_ptr_ref()
+//   get_value_or_null(foo.smart_ptr_ref())
+//   // returns nullptr if optional field doesn't have a value.
+//   get_value_or_null(foo.optional_ref())
+FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull getValueOrNull;
+
+// Implementation details.
 namespace detail {
 template <class Tag, class Id>
 struct GetOrdinalImpl {
   // TODO(ytj): To reduce build time, only check whether Id is reflection
   // metadata if we couldn't find Id.
   static_assert(type::is_id_v<Id>, "");
-  using type = ::apache::thrift::detail::st::private_access::
-      ordinal<type::native_type<Tag>, Id>;
+  using type = detail::pa::ordinal<type::native_type<Tag>, Id>;
 };
 
 template <class Tag, type::Ordinal Ord>
@@ -155,16 +168,6 @@ void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
 }
 
 } // namespace detail
-// Returns pointer to the value from the given field.
-// Returns nullptr if it doesn't have a value.
-// For example:
-//   // returns foo.field_ref().value()
-//   get_value_or_null(foo.field_ref())
-//   // returns *foo.smart_ptr_ref()
-//   get_value_or_null(foo.smart_ptr_ref())
-//   // returns nullptr if optional field doesn't have a value.
-//   get_value_or_null(foo.optional_ref())
-constexpr detail::GetValueOrNull get_value_or_null{};
 
 } // namespace op
 } // namespace thrift

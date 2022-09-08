@@ -235,9 +235,10 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
     }
 
     private void emit() {
-      int wip = WIP.getAndIncrement(ReconnectingRpcClientMono.this);
-      if (state == State.CONNECTED && wip == 0) {
-        fastPath(ReconnectingRpcClientMono.this.rpcClient);
+      final int wip = WIP.getAndIncrement(ReconnectingRpcClientMono.this);
+      final RpcClient r = ReconnectingRpcClientMono.this.rpcClient;
+      if (state == State.CONNECTED && wip == 0 && r != null) {
+        fastPath(r);
       } else {
         slowPath(wip);
       }

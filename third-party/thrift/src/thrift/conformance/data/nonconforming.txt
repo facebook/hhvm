@@ -51,6 +51,14 @@ cpp2/PatchTest/float/add.NaN_1.Binary
 cpp2/PatchTest/double/add.NaN_1.Binary
 cpp2/PatchTest/float/add.NaN_1.Compact
 cpp2/PatchTest/double/add.NaN_1.Compact
+cpp2/PatchTest/set<float>/assign.NaN.Binary
+cpp2/PatchTest/list<float>/assign.NaN.Compact
+cpp2/PatchTest/set<float>/assign.NaN.Compact
+cpp2/PatchTest/set<double>/assign.NaN.Compact
+cpp2/PatchTest/set<double>/assign.NaN.Binary
+cpp2/PatchTest/list<float>/assign.NaN.Binary
+cpp2/PatchTest/list<double>/assign.NaN.Binary
+cpp2/PatchTest/list<double>/assign.NaN.Compact
 #
 #
 # Python: NaN

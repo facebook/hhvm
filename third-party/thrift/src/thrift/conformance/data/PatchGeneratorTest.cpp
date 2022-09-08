@@ -27,7 +27,6 @@ TEST(PatchGeneratorTest, Basic) {
   constexpr size_t kNumTypes = 9;
   EXPECT_EQ(*suite.name(), "PatchTest");
   EXPECT_EQ(*suite.tests()->at(0 * kNumTypes).name(), "Binary");
-  EXPECT_EQ(*suite.tests()->at(1 * kNumTypes).name(), "Compact");
 
   const auto& test = suite.tests()->at(1);
   EXPECT_EQ(*test.name(), "Binary");

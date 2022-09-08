@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+#include <iterator>
 #include <limits>
+#include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <thrift/conformance/data/PatchGenerator.h>
 
 #include <boost/mp11.hpp>
@@ -215,7 +218,6 @@ Test createStringLikePatchTest(
     auto& assignCase = test.testCases()->emplace_back();
     assignCase.name() =
         fmt::format("{}/assign.{}", type::getName<TT>(), value.name);
-
     auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
 
@@ -240,6 +242,118 @@ Test createStringLikePatchTest(
   return test;
 }
 
+namespace {
+template <typename T>
+struct container_from_class {
+  static_assert(std::is_same_v<T, type::container_c>, "Not a container class");
+};
+
+template <>
+struct container_from_class<type::list_c> {
+  template <typename ValueType>
+  using type = type::list<ValueType>;
+};
+
+template <>
+struct container_from_class<type::set_c> {
+  template <typename ValueType>
+  using type = type::set<ValueType>;
+};
+
+template <typename C, typename... Types>
+using container_from_class_t =
+    typename container_from_class<C>::template type<Types...>;
+
+template <typename Tag>
+Object patchAddOperation(Object&& patch, op::PatchOp operation, auto value) {
+  auto opId = static_cast<int16_t>(operation);
+  patch.members().ensure()[opId] = asValueStruct<Tag>(value);
+  return std::move(patch);
+}
+
+template <typename Tag>
+Value makePatchObject(auto operation, auto value) {
+  Value result;
+  result.objectValue_ref() = patchAddOperation<Tag>(Object{}, operation, value);
+  return result;
+}
+
+template <typename ContainerTag>
+PatchOpTestCase makeValueContainerAssignTC(
+    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+
+  using Container = type::standard_type<ContainerTag>;
+
+  Container initial;
+  Container expected = {value.value};
+
+  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.patch() = registry.store(
+      makePatchObject<ContainerTag>(op::PatchOp::Assign, expected), protocol);
+  tascase.request() = req;
+  tascase.result() =
+      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  return tascase;
+}
+
+template <typename ContainerTag>
+PatchOpTestCase makeValueContainerClearTC(
+    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+
+  using Container = type::standard_type<ContainerTag>;
+
+  Container initial = {value.value};
+  Container expected;
+
+  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.patch() = registry.store(
+      makePatchObject<type::bool_t>(op::PatchOp::Clear, true), protocol);
+  tascase.request() = req;
+  tascase.result() =
+      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  return tascase;
+}
+
+} // namespace
+
+template <typename TT>
+Test createListSetPatchTest(
+    const AnyRegistry& registry, const Protocol& protocol) {
+  Test test;
+  test.name() = protocol.name();
+
+  using ValueContainers = boost::mp11::mp_list<type::list_c, type::set_c>;
+  mp11::mp_for_each<ValueContainers>([&](auto cc) {
+    using CC = decltype(cc);
+    for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
+      using ContainerTag = container_from_class_t<CC, TT>;
+      auto& assignCase = test.testCases()->emplace_back();
+      assignCase.name() = fmt::format(
+          "{}<{}>/assign.{}",
+          type::getName<CC>(),
+          type::getName<TT>(),
+          value.name);
+      assignCase.test().emplace().objectPatch_ref() =
+          makeValueContainerAssignTC<ContainerTag>(registry, protocol, value);
+
+      auto& clearCase = test.testCases()->emplace_back();
+      clearCase.name() = fmt::format(
+          "{}<{}>/clear.{}",
+          type::getName<CC>(),
+          type::getName<TT>(),
+          value.name);
+      clearCase.test().emplace().objectPatch_ref() =
+          makeValueContainerClearTC<ContainerTag>(registry, protocol, value);
+    }
+  });
+
+  return test;
+}
+
 void addPatchToSuite(
     const AnyRegistry& registry, const Protocol& protocol, TestSuite& suite) {
   mp11::mp_for_each<detail::PrimaryTypeTags>([&](auto tt) {
@@ -252,6 +366,11 @@ void addPatchToSuite(
     } else {
       suite.tests()->emplace_back(
           createStringLikePatchTest<TT>(registry, protocol));
+    }
+
+    if constexpr (!std::is_same_v<TT, type::bool_t>) {
+      suite.tests()->emplace_back(
+          createListSetPatchTest<TT>(registry, protocol));
     }
   });
 }

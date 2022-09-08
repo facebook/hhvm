@@ -10,7 +10,6 @@ use libc::c_char;
 use libc::c_double;
 use libc::c_int;
 use libc::c_long;
-use libc::c_ulong;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
@@ -18,7 +17,6 @@ use crate::intext::*;
 
 type int64_t = c_long;
 type intnat = c_long;
-type uintnat = c_ulong;
 
 // Flags affecting marshaling
 
@@ -55,7 +53,7 @@ struct extern_item<'a> {
 #[repr(C)]
 struct object_position<'a> {
     obj: Value<'a>,
-    pos: uintnat,
+    pos: usize,
 }
 
 // The hash table uses open addressing, linear probing, and a redundant
@@ -76,11 +74,11 @@ struct position_table<'a> {
     size: usize,                         // size == 1 << (wordsize - shift)
     mask: usize,                         // mask == size - 1
     threshold: usize,                    // threshold == a fixed fraction of size
-    present: Box<[uintnat]>,             // [Bitvect_size(size)]
+    present: Box<[usize]>,               // [Bitvect_size(size)]
     entries: Box<[object_position<'a>]>, // [size]
 }
 
-const Bits_word: usize = 8 * std::mem::size_of::<uintnat>();
+const Bits_word: usize = 8 * std::mem::size_of::<usize>();
 
 #[inline]
 const fn Bitvect_size(n: usize) -> usize {
@@ -108,13 +106,13 @@ const fn Threshold(sz: usize) -> usize {
 // Accessing bitvectors
 
 #[inline]
-unsafe fn bitvect_test(bv: *mut uintnat, i: uintnat) -> uintnat {
-    *bv.offset((i / (Bits_word as uintnat)) as isize) & (1 << (i & (Bits_word - 1) as uintnat))
+unsafe fn bitvect_test(bv: *mut usize, i: usize) -> usize {
+    *bv.add(i / Bits_word) & (1 << (i & (Bits_word - 1)))
 }
 
 #[inline]
-unsafe fn bitvect_set(bv: *mut uintnat, i: uintnat) {
-    *bv.offset((i / (Bits_word as uintnat)) as isize) |= 1 << (i & (Bits_word - 1) as uintnat);
+unsafe fn bitvect_set(bv: *mut usize, i: usize) {
+    *bv.add(i / Bits_word) |= 1 << (i & (Bits_word - 1));
 }
 
 // Conversion to big-endian
@@ -138,9 +136,9 @@ fn store64(dst: &mut impl Write, n: int64_t) {
 struct State<'a> {
     extern_flags: c_int, // logical or of some of the flags
 
-    obj_counter: uintnat, // Number of objects emitted so far
-    size_32: usize,       // Size in words of 32-bit block for struct.
-    size_64: usize,       // Size in words of 64-bit block for struct.
+    obj_counter: usize, // Number of objects emitted so far
+    size_32: usize,     // Size in words of 32-bit block for struct.
+    size_64: usize,     // Size in words of 64-bit block for struct.
 
     // Stack for pending value to marshal
     stack: Vec<extern_item<'a>>,
@@ -194,10 +192,10 @@ impl<'a> State<'a> {
     unsafe fn resize_position_table(&mut self) {
         let new_size: usize;
         let new_shift: c_int;
-        let new_present: Box<[uintnat]>;
+        let new_present: Box<[usize]>;
         let new_entries: Box<[object_position<'a>]>;
-        let mut i: uintnat;
-        let mut h: uintnat;
+        let mut i: usize;
+        let mut h: usize;
         let mut old: position_table<'a>;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
@@ -229,14 +227,14 @@ impl<'a> State<'a> {
         let new_present = self.pos_table.present.as_mut_ptr();
         let new_entries = self.pos_table.entries.as_mut_ptr();
         i = 0;
-        while i < old.size as uintnat {
+        while i < old.size {
             if bitvect_test(old_present, i) != 0 {
-                h = Hash((*old_entries.offset(i as isize)).obj, self.pos_table.shift) as uintnat;
+                h = Hash((*old_entries.add(i)).obj, self.pos_table.shift);
                 while bitvect_test(new_present, h) != 0 {
-                    h = (h + 1) & self.pos_table.mask as uintnat
+                    h = (h + 1) & self.pos_table.mask
                 }
                 bitvect_set(new_present, h);
-                *new_entries.offset(h as isize) = *old_entries.offset(i as isize)
+                *new_entries.add(h) = *old_entries.add(i)
             }
             i += 1
         }
@@ -250,20 +248,20 @@ impl<'a> State<'a> {
     unsafe fn lookup_position(
         &mut self,
         obj: Value<'a>,
-        pos_out: *mut uintnat,
-        h_out: *mut uintnat,
+        pos_out: *mut usize,
+        h_out: *mut usize,
     ) -> c_int {
-        let mut h: uintnat = Hash(obj, self.pos_table.shift) as uintnat;
+        let mut h: usize = Hash(obj, self.pos_table.shift);
         loop {
             if bitvect_test(self.pos_table.present.as_mut_ptr(), h) == 0 {
                 *h_out = h;
                 return 0;
             }
-            if (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj == obj {
-                *pos_out = (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos;
+            if (*self.pos_table.entries.as_mut_ptr().add(h)).obj == obj {
+                *pos_out = (*self.pos_table.entries.as_mut_ptr().add(h)).pos;
                 return 1;
             }
-            h = (h + 1) & self.pos_table.mask as uintnat
+            h = (h + 1) & self.pos_table.mask
         }
     }
 
@@ -271,15 +269,15 @@ impl<'a> State<'a> {
     ///
     /// The [h] parameter is the index in the hash table where the object
     /// must be inserted.  It was determined during lookup.
-    unsafe fn record_location(&mut self, obj: Value<'a>, h: uintnat) {
+    unsafe fn record_location(&mut self, obj: Value<'a>, h: usize) {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
         bitvect_set(self.pos_table.present.as_mut_ptr(), h);
-        (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj = obj;
-        (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos = self.obj_counter;
+        (*self.pos_table.entries.as_mut_ptr().add(h)).obj = obj;
+        (*self.pos_table.entries.as_mut_ptr().add(h)).pos = self.obj_counter;
         self.obj_counter += 1;
-        if self.obj_counter >= self.pos_table.threshold as uintnat {
+        if self.obj_counter >= self.pos_table.threshold {
             self.resize_position_table();
         };
     }
@@ -372,7 +370,7 @@ impl<'a> State<'a> {
 
     /// Marshaling references to previously-marshaled blocks
     #[inline]
-    unsafe fn extern_shared_reference(&mut self, d: uintnat) {
+    unsafe fn extern_shared_reference(&mut self, d: usize) {
         if d < 0x100 {
             self.writecode8(CODE_SHARED8, d as intnat);
         } else if d < 0x10000 {
@@ -463,8 +461,8 @@ impl<'a> State<'a> {
     unsafe fn extern_rec(&mut self, mut v: Value<'a>) {
         let mut goto_next_item: bool;
 
-        let mut h: uintnat = 0;
-        let mut pos: uintnat = 0;
+        let mut h: usize = 0;
+        let mut pos: usize = 0;
 
         self.init_position_table();
 

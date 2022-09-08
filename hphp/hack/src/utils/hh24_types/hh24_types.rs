@@ -56,6 +56,12 @@ impl<T> HhErrorContext<T> for Result<T, serde_json::error::Error> {
     }
 }
 
+impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
+    fn hh_context(self, context: &'static str) -> Result<T, HhError> {
+        self.map_err(|err| HhError::Unexpected(err.context(context)))
+    }
+}
+
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]

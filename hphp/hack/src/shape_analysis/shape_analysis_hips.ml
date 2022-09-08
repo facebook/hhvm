@@ -28,7 +28,9 @@ module Intra_shape :
 
   let embed_entity = SS.embed_entity
 
-  let max_iteration = 2
+  let max_iteration = 15
+
+  let compare_any_constraint = ST.compare_any_constraint
 
   let equiv = SS.equiv
 

@@ -308,10 +308,21 @@ module Inter (I : Intra) = struct
         let deduced_constraint_map =
           SMap.map deduce_any_list substituted_constraint_map
         in
-        if equiv argument_constraint_map deduced_constraint_map then
-          Convergent argument_constraint_map
+        let no_dupl_deduced_constraint_map =
+          SMap.map
+            (List.dedup_and_sort ~compare:I.compare_any_constraint)
+            deduced_constraint_map
+        in
+        let no_dupl_argument_constraint_map =
+          SMap.map
+            (List.dedup_and_sort ~compare:I.compare_any_constraint)
+            argument_constraint_map
+        in
+        if equiv no_dupl_argument_constraint_map no_dupl_deduced_constraint_map
+        then
+          Convergent no_dupl_argument_constraint_map
         else
-          analyse_help (completed_iterations + 1) deduced_constraint_map
+          analyse_help (completed_iterations + 1) no_dupl_deduced_constraint_map
     in
     analyse_help 0 (close_identifier base_constraint_map)
 end

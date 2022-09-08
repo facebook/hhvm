@@ -23,6 +23,7 @@ type entity =
 type ('a, 'b) any_constraint_ =
   | Intra of 'a
   | Inter of 'b
+[@@deriving ord]
 
 type 'a inter_constraint_ =
   | Arg of param_entity * 'a
@@ -30,6 +31,7 @@ type 'a inter_constraint_ =
   | ConstantInitial of 'a
   | Identifier of identifier_entity
   | Param of param_entity
+[@@deriving ord]
 
 module type Intra = sig
   type intra_entity
@@ -39,6 +41,7 @@ module type Intra = sig
   type inter_constraint = intra_entity inter_constraint_
 
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
+  [@@deriving ord]
 
   val is_same_entity : intra_entity -> intra_entity -> bool
 

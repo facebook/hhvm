@@ -23,6 +23,7 @@ type entity =
 type ('a, 'b) any_constraint_ =
   | Intra of 'a
   | Inter of 'b
+[@@deriving ord]
 
 type 'a inter_constraint_ =
   | Arg of param_entity * 'a
@@ -41,6 +42,7 @@ type 'a inter_constraint_ =
       (** Captures function parameter entities, e.g. "$x" and "$y" in "function
         f(int $x, bool $y)". This constraint is used for function call constraint
         substitution, where it interacts with "Arg of param_entity * 'a". *)
+[@@deriving ord]
 
 (** Domain-specific intra-procedural data that can be used to instantiate an
     inter-procedural constraint solver. Examples we have in mind include the
@@ -61,6 +63,7 @@ module type Intra = sig
   (** The union of inter- and intra-procedural constraint types. For example,
       "Intra Has_static_key(f0, 'a', int)" or "Inter Arg("f", 1, p)". *)
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
+  [@@deriving ord]
 
   (** Verifies whether an entity is the nth argument of a given function.
       For instance, calling with ("f", 0) and "p" should result in "true",

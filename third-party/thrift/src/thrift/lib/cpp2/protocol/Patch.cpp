@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/protocol/Patch.h>
 
+#include <cmath>
+#include <limits>
 #include <stdexcept>
 
 #include <fmt/core.h>
@@ -23,6 +25,7 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/FieldMask.h>
 #include <thrift/lib/cpp2/op/Get.h>
@@ -115,7 +118,7 @@ void applyNumericPatch(const Object& patch, T& value) {
   }
 
   if (auto* arg = findOp(patch, PatchOp::Add)) {
-    value += argAs<Tag>(*arg);
+    value = util::add_saturating<T>(value, argAs<Tag>(*arg));
   }
 }
 

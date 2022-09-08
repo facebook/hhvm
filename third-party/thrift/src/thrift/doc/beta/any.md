@@ -105,6 +105,28 @@ Constructs a FieldMask object that includes the fields that are different in the
 Mask compare(const Struct& original, const Struct& modified);
 ```
 
+### Serialization with Mask
+Mask can be used with parseObject to construct a partial protocol::Object with only the masked fields. This also returns MaskedProtocolData, which stores the serialized data of the other fields, and serializeObject with MaskedProtocolData reserializes the object.
+```
+struct MaskedDecodeResult {
+  Object included;
+  MaskedProtocolData excluded;
+};
+
+// Only parses values that are masked. Unmasked fields are stored in MaskedProtocolData.
+MaskedDecodeResult parseObject<Protocol>(const folly::IOBuf& buf, Mask mask);
+
+// serialize the fields from the Object and MaskedProtocolData
+std::unique_ptr<folly::IOBuf>
+serializeObject<Protocol>(const protocol::Object& obj, MaskedProtocolData& protocolData);
+```
+This is useful when updating a small part of the object from serialized data, as it doesn’t need to deserialize the entire object. The function applyPatchToSerializedData performs this by extracting a mask from patch with only the updated fields.
+```
+std::unique_ptr<folly::IOBuf> applyPatchToSerializedData<Protocol>(
+    const protocol::Object& patch, const folly::IOBuf& buf);
+```
+
+
 ## Protocol Object and Value
 
 How to manipulate any value.

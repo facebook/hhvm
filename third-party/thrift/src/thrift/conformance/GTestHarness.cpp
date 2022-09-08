@@ -58,11 +58,22 @@ testing::AssertionResult runRoundTripTest(
     }
   };
 
+  auto toJson = [](const Object& obj) {
+    folly::json::serialization_opts opts;
+    opts.pretty_formatting = true;
+    opts.sort_keys = true;
+    opts.allow_non_string_keys = true;
+    opts.allow_nan_inf = true;
+    return folly::json::serialize(protocol::toDynamic(obj), opts);
+  };
+
   Object actual = parseAny(*res.value());
   Object expected = parseAny(expectedAny);
   if (!op::identical<type::struct_t<Object>>(actual, expected)) {
     // TODO(afuller): Report out the delta
-    return testing::AssertionFailure();
+    return testing::AssertionFailure()
+        << "\nInput: " << toJson(parseAny(*roundTrip.request()->value()))
+        << "\nExpected: " << toJson(expected) << "\nActual: " << toJson(actual);
   }
   return testing::AssertionSuccess();
 }

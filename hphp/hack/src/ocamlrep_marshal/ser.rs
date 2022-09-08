@@ -104,21 +104,19 @@ const fn Hash(v: Value<'_>, shift: c_int) -> mlsize_t {
 // When the table becomes 2/3 full, its size is increased.
 #[inline]
 const fn Threshold(sz: usize) -> usize {
-    sz.wrapping_mul(2).wrapping_div(3)
+    (sz * 2) / 3
 }
 
 // Accessing bitvectors
 
 #[inline]
 unsafe fn bitvect_test(bv: *mut uintnat, i: uintnat) -> uintnat {
-    *bv.offset(i.wrapping_div(Bits_word as uintnat) as isize)
-        & (1 << (i & (Bits_word - 1) as uintnat))
+    *bv.offset((i / (Bits_word as uintnat)) as isize) & (1 << (i & (Bits_word - 1) as uintnat))
 }
 
 #[inline]
 unsafe fn bitvect_set(bv: *mut uintnat, i: uintnat) {
-    *bv.offset(i.wrapping_div(Bits_word as uintnat) as isize) |=
-        1 << (i & (Bits_word - 1) as uintnat);
+    *bv.offset((i / (Bits_word as uintnat)) as isize) |= 1 << (i & (Bits_word - 1) as uintnat);
 }
 
 // Conversion to big-endian
@@ -185,9 +183,8 @@ impl<'a> State<'a> {
             return;
         }
         self.pos_table.size = POS_TABLE_INIT_SIZE as mlsize_t;
-        self.pos_table.shift = 8usize
-            .wrapping_mul(std::mem::size_of::<Value<'a>>())
-            .wrapping_sub(POS_TABLE_INIT_SIZE_LOG2) as c_int;
+        self.pos_table.shift =
+            (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as c_int;
         self.pos_table.mask = (POS_TABLE_INIT_SIZE - 1) as mlsize_t;
         self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE) as mlsize_t;
         self.pos_table.present =
@@ -208,10 +205,10 @@ impl<'a> State<'a> {
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
         if self.pos_table.size < 1000000 {
-            new_size = (self.pos_table.size).wrapping_mul(8);
+            new_size = self.pos_table.size * 8;
             new_shift = self.pos_table.shift - 3;
         } else {
-            new_size = (self.pos_table.size).wrapping_mul(2);
+            new_size = self.pos_table.size * 2;
             new_shift = self.pos_table.shift - 1;
         }
         new_entries = Box::new_uninit_slice(new_size as usize).assume_init();
@@ -221,7 +218,7 @@ impl<'a> State<'a> {
             position_table {
                 size: new_size,
                 shift: new_shift,
-                mask: new_size.wrapping_sub(1),
+                mask: new_size - 1,
                 threshold: Threshold(new_size as usize) as mlsize_t,
                 present: new_present,
                 entries: new_entries,
@@ -238,12 +235,12 @@ impl<'a> State<'a> {
             if bitvect_test(old_present, i) != 0 {
                 h = Hash((*old_entries.offset(i as isize)).obj, self.pos_table.shift);
                 while bitvect_test(new_present, h) != 0 {
-                    h = h.wrapping_add(1) & self.pos_table.mask
+                    h = (h + 1) & self.pos_table.mask
                 }
                 bitvect_set(new_present, h);
                 *new_entries.offset(h as isize) = *old_entries.offset(i as isize)
             }
-            i = i.wrapping_add(1)
+            i += 1
         }
     }
 
@@ -268,7 +265,7 @@ impl<'a> State<'a> {
                 *pos_out = (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos;
                 return 1;
             }
-            h = h.wrapping_add(1) & self.pos_table.mask
+            h = (h + 1) & self.pos_table.mask
         }
     }
 
@@ -283,7 +280,7 @@ impl<'a> State<'a> {
         bitvect_set(self.pos_table.present.as_mut_ptr(), h);
         (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).obj = obj;
         (*self.pos_table.entries.as_mut_ptr().offset(h as isize)).pos = self.obj_counter;
-        self.obj_counter = self.obj_counter.wrapping_add(1);
+        self.obj_counter += 1;
         if self.obj_counter >= self.pos_table.threshold {
             self.resize_position_table();
         };
@@ -393,11 +390,7 @@ impl<'a> State<'a> {
     #[inline]
     unsafe fn extern_header(&mut self, sz: mlsize_t, tag: u8) {
         if tag < 16 && sz < 8 {
-            self.write(
-                PREFIX_SMALL_BLOCK
-                    .wrapping_add(tag as c_int)
-                    .wrapping_add((sz << 4) as c_int),
-            );
+            self.write(PREFIX_SMALL_BLOCK + (tag as c_int) + ((sz << 4) as c_int));
         } else {
             // Note: ocaml-14.4.0 uses `Caml_white` (`0 << 8`)
             // ('caml/runtime/gc.h'). That's why we use this here, so that we
@@ -426,7 +419,7 @@ impl<'a> State<'a> {
     unsafe fn extern_string(&mut self, bytes: &'a [u8]) {
         let len: intnat = bytes.len().try_into().unwrap();
         if len < 0x20 {
-            self.write(PREFIX_SMALL_STRING.wrapping_add(len as c_int));
+            self.write(PREFIX_SMALL_STRING + (len as c_int));
         } else if len < 0x100 {
             self.writecode8(CODE_STRING8, len);
         } else {
@@ -507,7 +500,7 @@ impl<'a> State<'a> {
                     // Check if object already seen
                     if self.extern_flags & NO_SHARING == 0 {
                         if self.lookup_position(v, &mut pos, &mut h) != 0 {
-                            self.extern_shared_reference(self.obj_counter.wrapping_sub(pos));
+                            self.extern_shared_reference(self.obj_counter - pos);
                             goto_next_item = true;
                         } else {
                             goto_next_item = false;
@@ -522,45 +515,31 @@ impl<'a> State<'a> {
                                 let bytes = v.as_byte_string().unwrap();
                                 let len: mlsize_t = bytes.len() as mlsize_t;
                                 self.extern_string(bytes);
-                                self.size_32 = self.size_32.wrapping_add(
-                                    (1 as uintnat)
-                                        .wrapping_add(len.wrapping_add(4).wrapping_div(4)),
-                                );
-                                self.size_64 = self.size_64.wrapping_add(
-                                    (1 as uintnat)
-                                        .wrapping_add(len.wrapping_add(8).wrapping_div(8)),
-                                );
+                                self.size_32 += 1 + (len + 4) / 4;
+                                self.size_64 += 1 + (len + 8) / 8;
                                 self.record_location(v, h);
                             }
                             ocamlrep::DOUBLE_TAG => {
                                 self.extern_double(v.as_float().unwrap());
-                                self.size_32 = self.size_32.wrapping_add(1 + 2);
-                                self.size_64 = self.size_64.wrapping_add(1 + 1);
+                                self.size_32 += 1 + 2;
+                                self.size_64 += 1 + 1;
                                 self.record_location(v, h);
                             }
                             ocamlrep::DOUBLE_ARRAY_TAG => {
                                 let slice = v.as_double_array().unwrap();
                                 self.extern_double_array(slice);
                                 let nfloats = slice.len() as mlsize_t;
-                                self.size_32 = (*self).size_32.wrapping_add(
-                                    (1 as uintnat).wrapping_add(nfloats.wrapping_mul(2)),
-                                );
-                                self.size_64 = (*self)
-                                    .size_64
-                                    .wrapping_add((1 as uintnat).wrapping_add(nfloats));
+                                self.size_32 += 1 + nfloats * 2;
+                                self.size_64 += 1 + nfloats;
                                 self.record_location(v, h);
                             }
                             ocamlrep::ABSTRACT_TAG => {
                                 self.invalid_argument("output_value: abstract value (Abstract)");
                             }
                             ocamlrep::INFIX_TAG => {
-                                let infix_offset =
-                                    hd.size().wrapping_mul(std::mem::size_of::<Value<'_>>());
+                                let infix_offset = hd.size() * std::mem::size_of::<Value<'_>>();
                                 self.writecode32(CODE_INFIXPOINTER, infix_offset as intnat);
-                                v = Value::from_bits(
-                                    (v.to_bits() as uintnat).wrapping_sub(infix_offset as uintnat)
-                                        as usize,
-                                ); // PR#5772
+                                v = Value::from_bits(v.to_bits() - infix_offset); // PR#5772
                                 continue;
                             }
                             ocamlrep::CUSTOM_TAG => self.invalid_argument(
@@ -571,10 +550,8 @@ impl<'a> State<'a> {
                             ),
                             _ => {
                                 self.extern_header(sz, tag);
-                                self.size_32 =
-                                    self.size_32.wrapping_add((1 as uintnat).wrapping_add(sz));
-                                self.size_64 =
-                                    self.size_64.wrapping_add((1 as uintnat).wrapping_add(sz));
+                                self.size_32 += 1 + sz;
+                                self.size_64 += 1 + sz;
                                 self.record_location(v, h);
                                 // Remember that we still have to serialize fields 1 ... sz - 1
                                 if sz > 1 {
@@ -583,7 +560,7 @@ impl<'a> State<'a> {
                                     }
                                     self.stack.push(extern_item {
                                         v: v.field_ref(1).unwrap(),
-                                        count: sz.wrapping_sub(1),
+                                        count: sz - 1,
                                     });
                                 }
                                 // Continue serialization with the first field
@@ -601,7 +578,7 @@ impl<'a> State<'a> {
                 let fresh8 = item.v;
                 item.v = &*(item.v as *const Value<'a>).offset(1) as &'a Value<'a>;
                 v = *fresh8;
-                item.count = item.count.wrapping_sub(1);
+                item.count -= 1;
                 if item.count == 0 {
                     self.stack.pop();
                 }

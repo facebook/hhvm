@@ -18,7 +18,7 @@ Data conformance test framework consist of a test runner and a C++ client. Test 
 
 All languages must be able to represent and correctly round trip all valid Thrift values. Note that not all target languages may be able to natively represent all valid Thrift values. However, these values still must roundtrip successfully. Known representational limitations include:
 
-| Limitation | Langauge | Notes |
+| Limitation | Language | Notes |
 | :--- | :----------- | :---- |
 | Set values and map keys | Hack | String, binary and integer only |
 | | C++ | Undefined behavior for NaN |
@@ -72,18 +72,18 @@ The tables below list the test cases for compatibility.
 #### Types
 Supported conversions.
 
-| From | To | Strict | Lenient |
-| :--- | :--- | :--- | :--- |
-| integer | larger integer | error | widened |
-| integer | smaller integer | error | truncated or saturated? |
-| string | binary | allowed | allowed |
-| binary | string | error if not valid UTF8 | error if not valid UTF8 |
-| enum | integer | treats enum as i32 | treats enum as i32 |
-| integer | enum | treats enum as i32 | treats enum as i32 |
-| set | list | error | allowed |
-| list | set | error | duplicates removed |
-| set<pair\> | map | error | error |
-| list<pair\> | map | error | error |
+| From | To | Notes |
+| :--- | :--- | :--- |
+| integer | larger integer | error |
+| integer | smaller integer | error |
+| string | binary | allowed |
+| binary | string | error if not valid UTF8 |
+| enum | integer | treats enum as i32 |
+| integer | enum | treats enum as i32 |
+| set | list | error |
+| list | set | error |
+| set<pair\> | map | error |
+| list<pair\> | map | error |
 
 All other conversions produce an error when deserializing.
 
@@ -110,8 +110,6 @@ The following outlines the compatibility for changes to structured types.
 | Unspecified to optional | yes | no | |
 | Optional to required | yes | no | |
 | Required to optional | yes | no | |
-| Mixin to non-mixin | yes | no | Only code gen changes |
-| Non-mixin to mixin | yes | yes | Only code gen changes |
 | Struct to union | no | no | |
 | Union to struct | no | no | |
 | Struct to exception | yes | yes | |
@@ -121,34 +119,10 @@ The following outlines the compatibility for changes to structured types.
 | Singular to container | no | no | |
 | Container to singular | no | no | |
 
-#### Services
-The following changes to a service are supported.
-
-| Change | Notes |
-| :--- | :--- |
-| Add a method | Unimplemented error from old servers |
-| Remove a method | Unimplemented error from new servers |
-| Non-struct to struct return | non-structured value interpreted as id 1? |
-| Change arguments | See 'Struct' |
-| Change from multiple arguments to single struct with out id (wishful thinking) | Previous args interpreted as fields in the new struct? |
-
 ### Tolerance Tests
 
 The tables below list the test cases for tolerance.
 
 | Issue |
 | :--- |
-| Bad length |
-| Empty varint bytes |
-| Unknown type |
-| Multiple equivilent set values |
-| Multiple equal set values |
-| Multiple equivilent map keys |
-| Multiple equal map keys |
-| Multiple container values for the same field |
-| Extra values for singular |
-| Out of range for integer |
-| Invalid UTF-8 in string field |
 | Union with multiple fields set |
-| Custom NaN |
-| Set with 2 different custom NaNs |

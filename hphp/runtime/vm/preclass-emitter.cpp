@@ -30,6 +30,8 @@
 
 namespace HPHP {
 
+const StaticString s_SoftInternal("__SoftInternal");
+
 //=============================================================================
 // PreClassEmitter::Prop.
 
@@ -53,6 +55,10 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
   , m_userAttributes(userAttributes)
 {
   memcpy(&m_val, val, sizeof(TypedValue));
+  if (m_attrs & AttrInternal &&
+      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+    m_attrs |= AttrInternalSoft;
+  }
 }
 
 PreClassEmitter::Prop::~Prop() {
@@ -243,6 +249,11 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
         assertx(invoke->coeffectRules[0].isCaller());
       }
     }
+  }
+
+  if (attrs & AttrInternal &&
+      m_userAttributes.find(s_SoftInternal.get()) != m_userAttributes.end()) {
+    attrs |= AttrInternalSoft;
   }
 
   assertx(attrs & AttrPersistent || SystemLib::s_inited);

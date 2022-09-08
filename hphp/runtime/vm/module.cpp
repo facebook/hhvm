@@ -90,4 +90,9 @@ template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, co
 template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, const Func*);
 template bool will_symbol_raise_module_boundary_violation(const Class*, const Func*);
 
+bool Module::warningsEnabled(const Func* f) {
+  if (RO::EvalEnforceModules == 0) return false;
+  return RO::EvalEnforceModules == 1 || f->attrs() & AttrInternalSoft;
+}
+
 } // namespace HPHP

@@ -1,0 +1,20 @@
+Accessing internal method Cls::foo in module B from module A is not allowed
+
+Warning: Accessing internal method Cls::foo_soft in module B from module A is not allowed in %s on line 13
+in foo_soft
+Accessing internal function foo in module B from module A is not allowed
+
+Warning: Accessing internal function foo_soft in module B from module A is not allowed in %s on line 18
+in foo_soft
+Accessing internal class InternalCls in module B from module A is not allowed
+
+Warning: Accessing internal class InternalClsSoft in module B from module A is not allowed in %s on line 23%A
+in InternalClsSoft ctor
+in Cls2 ctor
+Accessing internal property Cls2::$x in module B from module A is not allowed
+
+Warning: Accessing internal property Cls2::$x_soft in module B from module A is not allowed in %s on line 30
+Accessing internal property Cls2::$y in module B from module A is not allowed
+
+Warning: Accessing internal property Cls2::$y_soft in module B from module A is not allowed in %s on line 35
+Done

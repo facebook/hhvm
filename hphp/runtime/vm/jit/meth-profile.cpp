@@ -33,7 +33,7 @@ namespace HPHP::jit {
 void MethProfile::reportMeth(const Class* cls, const Func* meth,
                              const Func* callerFunc) {
   auto const checkModule = [&](const Func* f) {
-    return RO::EvalEnforceModules == 1 &&
+    return Module::warningsEnabled(f) &&
            callerFunc &&
            will_symbol_raise_module_boundary_violation(f, callerFunc);
   };

@@ -204,7 +204,8 @@ const StaticString
   s_MemoizeLSB("__MemoizeLSB"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
-  s_SoftMakeICInaccessible("SoftMakeICInaccessible");
+  s_SoftMakeICInaccessible("SoftMakeICInaccessible"),
+  s_SoftInternal("__SoftInternal");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -236,6 +237,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs |= AttrSupportsAsyncEagerReturn;
   }
   if (!coeffectRules.empty()) attrs |= AttrHasCoeffectRules;
+
+  if (attrs & AttrInternal &&
+      userAttributes.find(s_SoftInternal.get()) != userAttributes.end()) {
+    attrs |= AttrInternalSoft;
+  }
 
   auto const dynCallSampleRate = [&] () -> Optional<int64_t> {
     if (!(attrs & AttrDynamicallyCallable)) return {};

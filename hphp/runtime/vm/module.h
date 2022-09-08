@@ -60,6 +60,11 @@ struct Module {
    * Define module m for this request.
    */
   static void def(Module* m);
+
+  /*
+   * Are module warnings enabled for this func?
+   */
+  static bool warningsEnabled(const Func* f);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

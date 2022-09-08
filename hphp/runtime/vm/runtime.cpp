@@ -427,7 +427,8 @@ namespace {
 void moduleBoundaryViolationImpl(
   std::string symbol,
   const StringData* symbolModule,
-  const StringData* fromModule
+  const StringData* fromModule,
+  bool soft
 ) {
   assertx(RO::EvalEnforceModules);
   // Internal symbols must always have a module
@@ -443,7 +444,7 @@ void moduleBoundaryViolationImpl(
       ? folly::sformat("module {}", fromModule)
       : "outside of a module"
   );
-  if (RO::EvalEnforceModules > 1) {
+  if (RO::EvalEnforceModules > 1 && !soft) {
     SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
   }
   raise_warning(errMsg);
@@ -451,17 +452,20 @@ void moduleBoundaryViolationImpl(
 
 } // namespace
 
-void raiseModuleBoundaryViolation(const Class* cls, const StringData* prop, const StringData* callerModule) {
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const StringData* prop,
+                                  const StringData* callerModule) {
   if (!RO::EvalEnforceModules) return;
   assertx(cls);
   assertx(prop);
-  DEBUG_ONLY auto const propSlot = cls->lookupDeclProp(prop);
-  DEBUG_ONLY auto const attrs = cls->declProperties()[propSlot].attrs;
+  auto const propSlot = cls->lookupDeclProp(prop);
+  auto const attrs = cls->declProperties()[propSlot].attrs;
   assertx(attrs & AttrInternal);
   return moduleBoundaryViolationImpl(
     folly::sformat("property {}::${}", cls->name(), prop->data()),
     cls->moduleName(),
-    callerModule
+    callerModule,
+    attrs & AttrInternalSoft
   );
 }
 
@@ -477,7 +481,8 @@ void raiseModuleBoundaryViolation(const Class* ctx,
     ctx ? folly::sformat("method {}::{}", ctx->name(), callee->name())
         : folly::sformat("function {}", callee->name()),
     callee->moduleName(),
-    callerModule
+    callerModule,
+    callee->attrs() & AttrInternalSoft
   );
 }
 
@@ -490,7 +495,8 @@ void raiseModuleBoundaryViolation(const Class* cls,
   return moduleBoundaryViolationImpl(
     folly::sformat("class {}", cls->name()),
     cls->moduleName(),
-    callerModule
+    callerModule,
+    cls->attrs() & AttrInternalSoft
   );
 }
 

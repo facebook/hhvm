@@ -290,7 +290,7 @@ handleStaticCall(const Class* cls, const StringData* name,
     if (UNLIKELY(mcePrime & 0x1)) {
       // First fill the request local cache for this call.
       auto const func = lookup(cls, name, callCtx);
-      if (RO::EvalEnforceModules == 1 &&
+      if (Module::warningsEnabled(func) &&
           will_symbol_raise_module_boundary_violation(func, &callCtx)) {
         // If we raised a warning, do not cache/smash the func
         return func;
@@ -321,7 +321,7 @@ handleStaticCall(const Class* cls, const StringData* name,
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
     auto const func = lookup(cls, name, callCtx);
-    if (RO::EvalEnforceModules == 1 &&
+    if (Module::warningsEnabled(func) &&
         will_symbol_raise_module_boundary_violation(func, &callCtx)) {
       // If we raised a warning, do not cache the func
       return func;
@@ -415,7 +415,7 @@ handleStaticCall(const Class* cls, const StringData* name,
   }
 
   auto const func = lookup(cls, name, callCtx);
-  if (RO::EvalEnforceModules == 1 &&
+  if (Module::warningsEnabled(func) &&
       will_symbol_raise_module_boundary_violation(func, &callCtx)) {
     // If we raised a warning, do not cache the func
     return func;

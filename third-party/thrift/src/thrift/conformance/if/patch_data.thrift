@@ -23,8 +23,16 @@ namespace java.swift org.apache.thrift.conformance
 
 include "thrift/conformance/if/any.thrift"
 
-struct PatchOpTestCase {
+struct PatchOpResponse {
+  1: any.Any result;
+}
+
+struct PatchOpRequest {
   1: any.Any value;
   2: any.Any patch;
+}
+
+struct PatchOpTestCase {
+  1: PatchOpRequest request;
   3: any.Any result;
 }

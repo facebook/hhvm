@@ -52,14 +52,16 @@ PatchOpTestCase makeAssignTest(
     const AnyRegistry& registry,
     const Protocol& protocol) {
   PatchOpTestCase opTest;
+  PatchOpRequest req;
   auto initialValue = value.value;
   op::clear<TT>(initialValue);
-  opTest.value() = registry.store(asValueStruct<TT>(initialValue), protocol);
+  req.value() = registry.store(asValueStruct<TT>(initialValue), protocol);
 
   auto patch = op::patch_type<TT>();
   patch = toValue<TT>(value.value);
-  opTest.patch() =
+  req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  opTest.request() = req;
   opTest.result() = registry.store(asValueStruct<TT>(value.value), protocol);
   return opTest;
 }
@@ -70,15 +72,17 @@ PatchOpTestCase makeClearTest(
     const AnyRegistry& registry,
     const Protocol& protocol) {
   PatchOpTestCase opTest;
-  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
   auto patch = op::patch_type<TT>();
-  patch.reset();
-  opTest.patch() =
+  patch.clear();
+  req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
 
   auto clearValue = value.value;
   op::clear<TT>(clearValue);
+  opTest.request() = req;
   opTest.result() = registry.store(asValueStruct<TT>(clearValue), protocol);
   return opTest;
 }
@@ -103,7 +107,8 @@ PatchOpTestCase makeAddTest(
     const AnyRegistry& registry,
     const Protocol& protocol) {
   PatchOpTestCase opTest;
-  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
   auto addOp = [&](auto& patch, int toAdd = 1) {
     if constexpr (std::is_same_v<TT, type::bool_t>) {
@@ -115,8 +120,9 @@ PatchOpTestCase makeAddTest(
 
   auto patch = op::patch_type<TT>();
   addOp(patch);
-  opTest.patch() =
+  req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  opTest.request() = req;
   opTest.result() = registry.store(
       asValueStruct<TT>(makeAddExpectedResult<TT>(value.value)), protocol);
   return opTest;
@@ -128,12 +134,14 @@ PatchOpTestCase makePrependTest(
     const AnyRegistry& registry,
     const Protocol& protocol) {
   PatchOpTestCase opTest;
-  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
   auto patch = op::patch_type<TT>();
   patch.prepend(toValue<TT>(value.value));
-  opTest.patch() =
+  req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  opTest.request() = req;
   auto expected = value.value + value.value;
   opTest.result() =
       registry.store(asValueStruct<TT>(toValue<TT>(expected)), protocol);
@@ -146,12 +154,14 @@ PatchOpTestCase makeAppendTest(
     const AnyRegistry& registry,
     const Protocol& protocol) {
   PatchOpTestCase opTest;
-  opTest.value() = registry.store(asValueStruct<TT>(value.value), protocol);
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
   auto patch = op::patch_type<TT>();
   patch.append(toValue<TT>(value.value));
-  opTest.patch() =
+  req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
+  opTest.request() = req;
   auto expected = value.value + value.value;
   opTest.result() =
       registry.store(asValueStruct<TT>(toValue<TT>(expected)), protocol);
@@ -166,17 +176,15 @@ Test createNumericPatchTest(
 
   for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
     auto& assignCase = test.testCases()->emplace_back();
-    assignCase.name() = fmt::format("{}/assign", type::getName<TT>());
+    assignCase.name() =
+        fmt::format("{}/assign.{}", type::getName<TT>(), value.name);
     auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
 
-    auto& clearCase = test.testCases()->emplace_back();
-    clearCase.name() = fmt::format("{}/clear", type::getName<TT>());
-    auto& tclcase = clearCase.test().emplace().objectPatch_ref().emplace();
-    tclcase = makeClearTest<TT>(value, registry, protocol);
+    // TODO(afuller): decide if bool and numeric should have clear()
 
     auto& addCase = test.testCases()->emplace_back();
-    addCase.name() = fmt::format("{}/add", type::getName<TT>());
+    addCase.name() = fmt::format("{}/add.{}", type::getName<TT>(), value.name);
     auto& tadcase = addCase.test().emplace().objectPatch_ref().emplace();
     tadcase = makeAddTest<TT>(value, registry, protocol);
   }
@@ -192,7 +200,8 @@ Test createStringLikePatchTest(
 
   for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
     auto& assignCase = test.testCases()->emplace_back();
-    assignCase.name() = fmt::format("{}/assign", type::getName<TT>());
+    assignCase.name() =
+        fmt::format("{}/assign.{}", type::getName<TT>(), value.name);
 
     auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
@@ -203,12 +212,14 @@ Test createStringLikePatchTest(
     tclcase = makeClearTest<TT>(value, registry, protocol);
 
     auto& prependCase = test.testCases()->emplace_back();
-    prependCase.name() = fmt::format("{}/prepend", type::getName<TT>());
+    prependCase.name() =
+        fmt::format("{}/prepend.{}", type::getName<TT>(), value.name);
     auto& tprcase = prependCase.test().emplace().objectPatch_ref().emplace();
     tprcase = makePrependTest<TT>(value, registry, protocol);
 
     auto& appendCase = test.testCases()->emplace_back();
-    appendCase.name() = fmt::format("{}/append", type::getName<TT>());
+    appendCase.name() =
+        fmt::format("{}/append.{}", type::getName<TT>(), value.name);
     auto& tapcase = appendCase.test().emplace().objectPatch_ref().emplace();
     tapcase = makeAppendTest<TT>(value, registry, protocol);
   }

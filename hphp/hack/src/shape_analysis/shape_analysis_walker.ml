@@ -326,7 +326,16 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, _) = expr_ env e1 in
     let (env, _) = expr_ env e2 in
     (env, None)
-  | A.Id name -> (env, Some (Inter (HT.Identifier name)))
+  | A.Id name ->
+    let constr_ =
+      {
+        hack_pos = fst name;
+        origin = __LINE__;
+        constraint_ = HT.Identifier name;
+      }
+    in
+    let env = Env.add_inter_constraint env constr_ in
+    (env, Some (Inter (HT.Identifier name)))
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)
@@ -574,6 +583,14 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
         }
       in
       let env = Env.add_constraint env marker_constraint in
+      let constant_constraint =
+        {
+          hack_pos = fst cst_name;
+          origin = __LINE__;
+          constraint_ = HT.Constant (hint_pos, snd cst_name);
+        }
+      in
+      let env = Env.add_inter_constraint env constant_constraint in
       let env =
         match ent with
         | Some ent_ ->

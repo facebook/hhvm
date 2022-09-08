@@ -25,7 +25,10 @@ type ('a, 'b) any_constraint_ =
   | Intra of 'a
   | Inter of 'b
 
-type 'a inter_constraint_ = Arg of param_entity * 'a
+type 'a inter_constraint_ =
+  | Arg of param_entity * 'a
+  | Constant of const_entity
+  | Identifier of identifier_entity
 
 (** Domain-specific intra-procedural data that can be used to instantiate an
     inter-procedural constraint solver. Examples we have in mind include the

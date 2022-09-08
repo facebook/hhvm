@@ -24,7 +24,10 @@ type ('a, 'b) any_constraint_ =
   | Intra of 'a
   | Inter of 'b
 
-type 'a inter_constraint_ = Arg of param_entity * 'a
+type 'a inter_constraint_ =
+  | Arg of param_entity * 'a
+  | Constant of const_entity
+  | Identifier of identifier_entity
 
 module type Intra = sig
   type intra_entity

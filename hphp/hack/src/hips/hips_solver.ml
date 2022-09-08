@@ -40,6 +40,7 @@ module Inter (I : Intra) = struct
           Arg (param_entity_right, intra_entity_left)
         else
           inter_constr_2
+      | _ -> inter_constr_2
       (* TODO(T127947010) Add case for inter-procedural return constraint *)
     in
     let substitute_inter_any
@@ -63,6 +64,8 @@ module Inter (I : Intra) = struct
             | None -> []
             | Some constr_list_at ->
               List.map constr_list_at ~f:(substitute_inter_any inter_constr))
+          | _ ->
+            []
             (* TODO(T127947010) Add case for inter-procedural return constraint *)
         end
     in

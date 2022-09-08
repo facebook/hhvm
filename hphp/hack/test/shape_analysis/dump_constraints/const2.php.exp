@@ -4,8 +4,10 @@ Constraints for \DICT:
    3: [3:34-49] ⊆ (Constant ([3:7-26], "\\DICT"))
    3: ! SK [3:34-49] : shape('a' => int)
    3: Allocation at [3:34-49]
+   3: Constant ([3:7-26], "\\DICT")
 
 Constraints for \main:
    6: ? SK (Identifier ([6:3-7], "\\DICT")) : shape('b' => mixed)
    6: ! SK (Identifier ([6:3-7], "\\DICT")) : shape('b' => mixed)
+   6: Identifier ([6:3-7], "\\DICT")
 

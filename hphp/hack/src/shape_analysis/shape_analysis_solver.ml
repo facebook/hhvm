@@ -558,6 +558,7 @@ let substitute_inter_intra
       | Subsets (intra_ent_2, intra_ent_3) ->
         Subsets (replace intra_ent_2, replace intra_ent_3)
     end
+  | _ -> intra_constr
 
 let equiv
     (any_constr_list_1 : any_constraint list)

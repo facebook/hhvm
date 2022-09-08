@@ -51,6 +51,10 @@ let show_constraint env =
 let show_inter_constraint _ = function
   | HT.Arg ((f_id, arg_idx, _), ent) ->
     Format.asprintf "Arg(%s, %i, %s)" f_id arg_idx (show_entity ent)
+  | HT.Constant const ->
+    Format.asprintf "Constant %s" (HT.show_const_entity const)
+  | HT.Identifier ident ->
+    Format.asprintf "Identifier %s" (HT.show_identifier_entity ident)
 
 let show_decorated_constraint_general
     ~verbosity

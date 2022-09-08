@@ -244,13 +244,22 @@ struct SerializedSize<ZeroCopy, type::enum_t<T>> {
   }
 };
 
+inline uint32_t checked_container_size(size_t size) {
+  const size_t limit = std::numeric_limits<int32_t>::max();
+  if (size > limit) {
+    TProtocolException::throwExceededSizeLimit(size, limit);
+  }
+  return static_cast<uint32_t>(size);
+}
+
 template <bool ZeroCopy, typename Tag>
 struct SerializedSize<ZeroCopy, type::list<Tag>> {
   template <typename Protocol>
   uint32_t operator()(
       Protocol& prot, const type::native_type<type::list<Tag>>& list) const {
-    std::size_t xfer = 0;
-    xfer += prot.serializedSizeListBegin(typeTagToTType<Tag>, list.size());
+    uint32_t xfer = 0;
+    xfer += prot.serializedSizeListBegin(
+        typeTagToTType<Tag>, checked_container_size(list.size()));
     for (const auto& elem : list) {
       xfer += SerializedSize<ZeroCopy, Tag>{}(prot, elem);
     }
@@ -264,8 +273,9 @@ struct SerializedSize<ZeroCopy, type::set<Tag>> {
   template <typename Protocol>
   uint32_t operator()(
       Protocol& prot, const type::native_type<type::set<Tag>>& set) const {
-    std::size_t xfer = 0;
-    xfer += prot.serializedSizeSetBegin(typeTagToTType<Tag>, set.size());
+    uint32_t xfer = 0;
+    xfer += prot.serializedSizeSetBegin(
+        typeTagToTType<Tag>, checked_container_size(set.size()));
     for (const auto& elem : set) {
       xfer += SerializedSize<ZeroCopy, Tag>{}(prot, elem);
     }
@@ -280,9 +290,11 @@ struct SerializedSize<ZeroCopy, type::map<Key, Value>> {
   uint32_t operator()(
       Protocol& prot,
       const type::native_type<type::map<Key, Value>>& map) const {
-    std::size_t xfer = 0;
+    uint32_t xfer = 0;
     xfer += prot.serializedSizeMapBegin(
-        typeTagToTType<Key>, typeTagToTType<Value>, map.size());
+        typeTagToTType<Key>,
+        typeTagToTType<Value>,
+        checked_container_size(map.size()));
     for (const auto& kv : map) {
       xfer += SerializedSize<ZeroCopy, Key>{}(prot, kv.first);
       xfer += SerializedSize<ZeroCopy, Value>{}(prot, kv.second);
@@ -424,8 +436,9 @@ struct Encode<type::list<Tag>> {
   template <typename Protocol>
   uint32_t operator()(
       Protocol& prot, const type::native_type<type::list<Tag>>& list) const {
-    std::size_t xfer = 0;
-    xfer += prot.writeListBegin(typeTagToTType<Tag>, list.size());
+    uint32_t xfer = 0;
+    xfer += prot.writeListBegin(
+        typeTagToTType<Tag>, checked_container_size(list.size()));
     for (const auto& elem : list) {
       xfer += Encode<Tag>{}(prot, elem);
     }
@@ -439,8 +452,9 @@ struct Encode<type::set<Tag>> {
   template <typename Protocol>
   uint32_t operator()(
       Protocol& prot, const type::native_type<type::set<Tag>>& set) const {
-    std::size_t xfer = 0;
-    xfer += prot.writeSetBegin(typeTagToTType<Tag>, set.size());
+    uint32_t xfer = 0;
+    xfer += prot.writeSetBegin(
+        typeTagToTType<Tag>, checked_container_size(set.size()));
     for (const auto& elem : set) {
       xfer += Encode<Tag>{}(prot, elem);
     }
@@ -455,9 +469,11 @@ struct Encode<type::map<Key, Value>> {
   uint32_t operator()(
       Protocol& prot,
       const type::native_type<type::map<Key, Value>>& map) const {
-    std::size_t xfer = 0;
+    uint32_t xfer = 0;
     xfer += prot.writeMapBegin(
-        typeTagToTType<Key>, typeTagToTType<Value>, map.size());
+        typeTagToTType<Key>,
+        typeTagToTType<Value>,
+        checked_container_size(map.size()));
     for (const auto& kv : map) {
       xfer += Encode<Key>{}(prot, kv.first);
       xfer += Encode<Value>{}(prot, kv.second);

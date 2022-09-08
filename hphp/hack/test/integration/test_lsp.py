@@ -6394,18 +6394,18 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${php_file_uri}",
+                        "uri": "${unsaved2_file_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "${php_file}",
+                        "text": "${unsaved2_file}",
                     }
                 },
             )
             .wait_for_notification(
-                comment="After didOpen(file1), the hh_server_status diagnostic should appear in file1",
+                comment="After didOpen(file2), the hh_server_status diagnostic should appear in file1",
                 method="textDocument/publishDiagnostics",
                 params={
-                    "uri": "${php_file_uri}",
+                    "uri": "${unsaved2_file_uri}",
                     "diagnostics": [
                         {
                             "range": {
@@ -6426,49 +6426,15 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${unsaved2_file_uri}",
+                        "uri": "${php_file_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "${unsaved2_file}",
+                        "text": "${php_file}",
                     }
                 },
             )
             .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should disappear from file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [],
-                    "isStatusFB": True,
-                },
-            )
-            .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should reappear in file2",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${unsaved2_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 0, "character": 0},
-                                "end": {"line": 0, "character": 1},
-                            },
-                            "severity": 1,
-                            "source": "hh_server",
-                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        }
-                    ],
-                    "isStatusFB": True,
-                },
-            )
-            .notification(
-                method="textDocument/didClose",
-                params={"textDocument": {"uri": "${unsaved2_file_uri}"}},
-            )
-            .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should disappear from file2",
+                comment="After didOpen(file1), the hh_server_status diagnostic should disappear from file2",
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${unsaved2_file_uri}",
@@ -6477,7 +6443,7 @@ function unsaved_bar(): string { return "hello"; }
                 },
             )
             .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should reappear in file1",
+                comment="After didOpen(file1), the hh_server_status diagnostic should reappear in file1",
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${php_file_uri}",
@@ -6506,6 +6472,40 @@ function unsaved_bar(): string { return "hello"; }
                 method="textDocument/publishDiagnostics",
                 params={
                     "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                    "isStatusFB": True,
+                },
+            )
+            .wait_for_notification(
+                comment="After didClose(file1), the hh_server_status diagnostic should reappear in file2",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${unsaved2_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 0, "character": 0},
+                                "end": {"line": 0, "character": 1},
+                            },
+                            "severity": 1,
+                            "source": "hh_server",
+                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                    "isStatusFB": True,
+                },
+            )
+            .notification(
+                method="textDocument/didClose",
+                params={"textDocument": {"uri": "${unsaved2_file_uri}"}},
+            )
+            .wait_for_notification(
+                comment="After didClose(file2), the hh_server_status diagnostic should disappear from file2",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${unsaved2_file_uri}",
                     "diagnostics": [],
                     "isStatusFB": True,
                 },

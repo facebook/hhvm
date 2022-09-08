@@ -310,7 +310,10 @@ let get_editor_open_files (state : state) :
   | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
 
 (** This is the most recent file that was subject of an LSP request
-from the client. There's no guarantee that the file is still open. *)
+from the client. There's no guarantee that the file is still open.
+CARE! VSCode might send requests from files that aren't even
+active, e.g. codeAction requests in response to publishDiagnostics.
+CARE! We probably shouldn't even use this at all. *)
 let get_most_recent_file (state : state) : documentUri option =
   match state with
   | Pre_init
@@ -1791,11 +1794,11 @@ let hh_server_status_to_diagnostic
 let publish_hh_server_status_diagnostic
     (state : state) (hh_server_status : ShowStatusFB.params option) : state =
   let uri =
-    match (get_most_recent_file state, get_editor_open_files state) with
-    | (Some uri, Some open_files) when UriMap.mem uri open_files -> Some uri
-    | (_, Some open_files) when not (UriMap.is_empty open_files) ->
-      Some (UriMap.choose open_files |> fst)
-    | (_, _) -> None
+    match get_editor_open_files state with
+    | Some open_files ->
+      (* deterministically pick the first uri, if there is one *)
+      UriMap.keys open_files |> List.rev |> List.hd
+    | _ -> None
   in
   let desired_diagnostic =
     Option.bind hh_server_status ~f:(hh_server_status_to_diagnostic uri)

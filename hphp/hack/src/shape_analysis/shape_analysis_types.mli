@@ -83,6 +83,7 @@ type marker_kind =
   | Debug
       (** A dict argument to a function or method such as `$d = dict[]; f($d)`
        *)
+  | Constant  (** A dict constant such as `const dict<string, mixed> DICT` *)
 [@@deriving ord, show]
 
 module Codemod : sig

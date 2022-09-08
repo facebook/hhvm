@@ -450,7 +450,10 @@ let produce_results
       | Literal pos
       | Inter (HT.Param (_, _, pos)) ->
         Pos.Set.add pos acc
-      | Variable _ -> acc
+      | Variable _
+      | Inter (HT.Const _)
+      | Inter (HT.Identifier _) ->
+        acc
     in
     EntitySet.fold add dynamic_accesses Pos.Set.empty
   in
@@ -466,7 +469,8 @@ let produce_results
         | Parameter -> false
         | Debug
         | Return
-        | Allocation ->
+        | Allocation
+        | Constant ->
           true)
       static_shape_results
   in
@@ -482,7 +486,9 @@ let produce_results
     let add_entity (entity, key, ty) pos_map =
       match entity with
       | Literal pos
-      | Inter (HT.Param (_, _, pos)) ->
+      | Inter (HT.Param (_, _, pos))
+      | Inter (HT.Const (pos, _))
+      | Inter (HT.Identifier (pos, _)) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map
       | Variable _ -> pos_map
     in

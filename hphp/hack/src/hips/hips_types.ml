@@ -8,9 +8,16 @@
 
 module A = Ast_defs
 
+type const_entity = A.id [@@deriving ord, show]
+
+type identifier_entity = A.id [@@deriving ord, show]
+
 type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
 
-type entity = Param of param_entity
+type entity =
+  | Param of param_entity
+  | Const of const_entity
+  | Identifier of identifier_entity
 [@@deriving ord, show { with_path = false }]
 
 type ('a, 'b) any_constraint_ =
@@ -40,5 +47,12 @@ module type Intra = sig
   val deduce : intra_constraint list -> intra_constraint list
 end
 
-let equal_entity (Param (f_id, f_idx, _)) (Param (g_id, g_idx, _)) : bool =
-  String.equal f_id g_id && Int.equal f_idx g_idx
+let equal_entity (ent1 : entity) (ent2 : entity) : bool =
+  match (ent1, ent2) with
+  | (Param (f_id, f_idx, _), Param (g_id, g_idx, _)) ->
+    String.equal f_id g_id && Int.equal f_idx g_idx
+  | (Const (pos1, id1), Const (pos2, id2)) ->
+    A.equal_pos pos1 pos2 && String.equal id1 id2
+  | (Identifier (pos1, name1), Identifier (pos2, name2)) ->
+    A.equal_pos pos1 pos2 && String.equal name1 name2
+  | _ -> false

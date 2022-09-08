@@ -8,9 +8,18 @@
 
 module A = Ast_defs
 
+type const_entity = A.id [@@deriving ord, show]
+
+type identifier_entity = A.id [@@deriving ord, show]
+
+(** TODO(T129452182) Replace A.id_ * Pos with A.id *)
 type param_entity = A.id_ * int * Pos.t [@@deriving ord, show]
 
-type entity = Param of param_entity [@@deriving eq, ord, show]
+type entity =
+  | Param of param_entity
+  | Const of const_entity
+  | Identifier of identifier_entity
+[@@deriving ord, show]
 
 type ('a, 'b) any_constraint_ =
   | Intra of 'a
@@ -63,3 +72,5 @@ module type Intra = sig
   (** Deduces a simplified list of intra-procedural constraints.  *)
   val deduce : intra_constraint list -> intra_constraint list
 end
+
+val equal_entity : entity -> entity -> bool

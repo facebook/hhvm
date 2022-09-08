@@ -34,7 +34,8 @@ let of_marker env pos fields kind =
 let codemod_kind_of_marker_kind = function
   | Allocation -> Some Codemod.Allocation
   | Parameter
-  | Return ->
+  | Return
+  | Constant ->
     Some Codemod.Hint
   | Debug -> None
 

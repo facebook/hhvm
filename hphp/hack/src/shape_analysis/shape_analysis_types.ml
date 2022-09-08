@@ -60,6 +60,7 @@ type marker_kind =
   | Parameter
   | Return
   | Debug
+  | Constant
 [@@deriving ord, show { with_path = false }]
 
 module Codemod = struct

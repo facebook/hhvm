@@ -13,8 +13,8 @@ bincode = "1.3.3"
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 datastore = { path = "../../../datastore" }
 decl_parser = { path = "../../../decl_parser/cargo/decl_parser" }
+depgraph = { path = "../../../../depgraph/cargo/depgraph" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
-deps_rust = { path = "../../../../deps/cargo/deps_rust" }
 folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl_provider" }
 indicatif = { version = "0.16", features = ["with_rayon"] }
 intern = { path = "../../../../../../../relay/oss/crates/intern" }

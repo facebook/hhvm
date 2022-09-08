@@ -12,7 +12,6 @@ use depgraph_api::DepGraphReader;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
 use depgraph_api::Result;
-use deps_rust::Dep;
 
 pub type DeclNameSet = HashSet<DeclName>;
 
@@ -38,7 +37,10 @@ impl DependencyGraph {
 }
 
 impl DepGraphReader for DependencyGraph {
-    fn get_dependents(&self, dependency: DependencyName) -> Box<dyn Iterator<Item = Dep> + '_> {
+    fn get_dependents(
+        &self,
+        dependency: DependencyName,
+    ) -> Box<dyn Iterator<Item = depgraph::dep::Dep> + '_> {
         match self.rdeps.get(&dependency) {
             Some(e) => Box::new(e.value().clone().into_iter().map(|n| n.hash1())),
             None => Box::new(std::iter::empty()),

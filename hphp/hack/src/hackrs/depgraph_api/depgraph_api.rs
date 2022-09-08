@@ -5,7 +5,6 @@
 
 use std::fmt::Debug;
 
-use deps_rust::Dep;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
@@ -31,8 +30,8 @@ pub enum DeclName {
 }
 
 impl DeclName {
-    pub fn hash1(&self) -> deps_rust::Dep {
-        deps_rust::Dep::new(match self {
+    pub fn hash1(&self) -> depgraph::dep::Dep {
+        depgraph::dep::Dep::new(match self {
             DeclName::Fun(n) => typing_deps_hash::hash1(DepType::Fun, n.as_str().as_bytes()),
             DeclName::Const(n) => typing_deps_hash::hash1(DepType::GConst, n.as_str().as_bytes()),
             DeclName::Type(n) => typing_deps_hash::hash1(DepType::Type, n.as_str().as_bytes()),
@@ -109,7 +108,10 @@ pub trait DepGraphWriter: Debug + Send + Sync {
 /// Query dependency records.
 pub trait DepGraphReader: Debug + Send + Sync {
     /// Retrieve dependents of a name.
-    fn get_dependents(&self, dependency: DependencyName) -> Box<dyn Iterator<Item = Dep> + '_>;
+    fn get_dependents(
+        &self,
+        dependency: DependencyName,
+    ) -> Box<dyn Iterator<Item = depgraph::dep::Dep> + '_>;
 }
 
 /// A no-op implementation of the `DepGraphReader` & `DepGraphWriter` traits.
@@ -130,7 +132,10 @@ impl DepGraphWriter for NoDepGraph {
 }
 
 impl DepGraphReader for NoDepGraph {
-    fn get_dependents(&self, _dependency: DependencyName) -> Box<dyn Iterator<Item = Dep>> {
+    fn get_dependents(
+        &self,
+        _dependency: DependencyName,
+    ) -> Box<dyn Iterator<Item = depgraph::dep::Dep>> {
         Box::new(std::iter::empty())
     }
 }

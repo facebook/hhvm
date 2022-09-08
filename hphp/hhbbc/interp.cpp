@@ -4440,6 +4440,21 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   fcallClsMethodImpl(env, op, clsTy, methName, true, 2, op.str2, updateBC);
 }
 
+namespace {
+
+bool module_check_always_passes(ISS& env, const php::Class* cls) {
+  if (!(cls->attrs & AttrInternal)) return true;
+  return env.index.lookup_func_unit(*env.ctx.func)->moduleName ==
+         env.index.lookup_class_unit(*cls)->moduleName;
+}
+
+bool module_check_always_passes(ISS& env, const res::Class& rcls) {
+  if (auto const cls = rcls.cls()) return module_check_always_passes(env, cls);
+  return false;
+}
+
+} // namespace
+
 void in(ISS& env, const bc::FCallClsMethodM& op) {
   auto const t = topC(env);
   if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
@@ -4480,6 +4495,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).isExact() &&
+      module_check_always_passes(env, dcls_of(clsTy).cls()) &&
       (!rfunc.mightCareAboutDynCalls() ||
         !maybeDynamicCall ||
         skipLogAsDynamicCall
@@ -4530,9 +4546,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   auto moduleCheck = [&] {
     auto const func = rfunc.exactFunc();
     assertx(func);
-    if (!(func->cls->attrs & AttrInternal)) return true;
-    return env.index.lookup_func_unit(*env.ctx.func)->moduleName ==
-           env.index.lookup_func_unit(*func)->moduleName;
+    return module_check_always_passes(env, func->cls);
   };
 
   if (rfunc.exactFunc() && op.str2->empty() && moduleCheck()) {

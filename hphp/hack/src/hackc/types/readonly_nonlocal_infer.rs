@@ -22,7 +22,6 @@ use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::Pos;
-use oxidized::typing_defs::FunTypeFlags;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use oxidized_by_ref::typing_kinding_defs::FunElt;
 
@@ -198,17 +197,29 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
                 (obj_get, ty, ctx)
             }
             ClassGet(box (class_id, get_expr, prop_or_meth)) => {
-                use aast::ClassGetExpr;
-                let (get_expr, _get_ty, ctx) = match get_expr {
-                    ClassGetExpr::CGstring(_) => (get_expr.clone(), Tyx::Todo, ctx),
+                let (get_expr, ctx, prop_name_opt) = match get_expr {
+                    ClassGetExpr::CGstring((_, prop_name)) => {
+                        (get_expr.clone(), ctx, Some(prop_name))
+                    }
                     ClassGetExpr::CGexpr(e) => {
-                        let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
-                        (ClassGetExpr::CGexpr(e), Tyx::Todo, ctx)
+                        let (e, _, ctx) = self.infer_expr(e, ctx, next_where);
+                        (ClassGetExpr::CGexpr(e), ctx, None)
                     }
                 };
+                let ty = match (prop_name_opt, class_id_to_name(class_id, where_)) {
+                    (Some(prop_name), Some(class_name)) => self
+                        .get_prop_type(class_name, prop_name, ClassScopeKind::Static, pos)
+                        .unwrap_or(Tyx::GiveUp),
+                    _ => Tyx::GiveUp,
+                };
+                use aast::ClassGetExpr;
                 let class_get =
                     ClassGet(box_tup!(class_id.clone(), get_expr, prop_or_meth.clone()));
-                (class_get, Tyx::Todo, ctx)
+                let class_get = match &ty {
+                    Tyx::Readonly(_) => readonly_wrap_expr_(pos.clone(), class_get),
+                    _ => class_get,
+                };
+                (class_get, ty, ctx)
             }
             ClassConst(box (class_id, (pos, member_name))) => {
                 let ty = match class_id_to_name(class_id, where_) {
@@ -855,6 +866,28 @@ impl<'arena, 'decl> Infer<'arena, 'decl> {
         }
     }
 
+    fn get_prop_type(
+        &self,
+        class_name: &str,
+        prop_name: &str,
+        prop_scope: ClassScopeKind,
+        pos: &Pos,
+    ) -> Option<Tyx> {
+        let shallow_class = self.get_shallow_class(class_name, pos)?;
+        let props = match prop_scope {
+            ClassScopeKind::Static => shallow_class.sprops,
+            ClassScopeKind::Nonstatic => shallow_class.props,
+        };
+        let prop = props.iter().find(|prop| prop.name.1 == prop_name)?;
+        let ty = tyx::convert(&prop.type_?.1);
+        let ty = if prop.flags.is_readonly() {
+            Tyx::Readonly(Box::new(ty))
+        } else {
+            ty
+        };
+        Some(ty)
+    }
+
     fn get_method_type(
         &self,
         class_name: &str,
@@ -925,7 +958,7 @@ fn readonly_wrap_expr_(pos: Pos, expr_: ast::Expr_) -> ast::Expr_ {
 }
 
 fn returns_readonly(ft: &tyx::FunType) -> bool {
-    ft.flags.contains(FunTypeFlags::RETURNS_READONLY)
+    matches!(ft.ret, Tyx::Readonly(_))
 }
 
 fn class_id_to_name<'c>(class_id: &'c aast::ClassId<(), ()>, where_: Where<'c>) -> Option<&'c str> {

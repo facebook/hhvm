@@ -163,11 +163,7 @@ impl AstProvider {
         self.process_non_syntax_errors(&mut errs, parsed_file.errors);
         self.process_lint_errors(parsed_file.lint_errors);
 
-        let mut ast = parsed_file.aast.map_err(|msg| ParsingError::Other {
-            file: fln.clone(),
-            msg,
-        })?;
-
+        let mut ast = parsed_file.aast;
         naming::program(&mut ast);
 
         Ok((ast, errs))

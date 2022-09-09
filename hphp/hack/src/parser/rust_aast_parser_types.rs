@@ -34,7 +34,7 @@ pub struct Env {
 pub struct ParserResult {
     pub file_mode: Mode,
     pub scoured_comments: ScouredComments,
-    pub aast: Result<Program<(), ()>, String>,
+    pub aast: Program<(), ()>,
     pub lowpri_errors: Vec<(Pos, String)>,
     pub syntax_errors: Vec<SyntaxError>,
     pub errors: Vec<Error>,

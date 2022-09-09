@@ -22,19 +22,15 @@ type env = {
   parser_options: ParserOptions.t;
 }
 
-type 'aast result_ = {
+type result = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: ('aast, string) Stdlib.result;
+  aast: (unit, unit) Aast.program;
   lowpri_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
   lint_errors: Pos.t Lints_core.t list;
 }
-
-type result = (unit, unit) Aast.program result_
-
-type tast_result = Tast.program result_
 
 type error =
   | NotAHackFile

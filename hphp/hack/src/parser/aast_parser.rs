@@ -175,8 +175,7 @@ impl<'src> AastParser {
         Ok(ParserResult {
             file_mode: mode,
             scoured_comments,
-            // TODO: this doesn't need to be a result
-            aast: Ok(ret),
+            aast: ret,
             lowpri_errors,
             syntax_errors,
             errors,

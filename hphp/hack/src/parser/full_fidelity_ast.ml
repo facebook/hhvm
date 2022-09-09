@@ -197,19 +197,16 @@ let process_lowerer_result
     process_lowpri_errors env r.lowpri_errors;
     process_non_syntax_errors env r.errors;
     process_lint_errors env r.lint_errors;
-    match r.aast with
-    | Error msg -> failwith msg
-    | Ok aast ->
-      {
-        fi_mode = r.file_mode;
-        ast = aast;
-        content =
-          (if env.codegen then
-            ""
-          else
-            SourceText.text source_text);
-        comments = r.scoured_comments;
-      })
+    {
+      fi_mode = r.file_mode;
+      ast = r.aast;
+      content =
+        (if env.codegen then
+          ""
+        else
+          SourceText.text source_text);
+      comments = r.scoured_comments;
+    })
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   process_lowerer_result env source_text (from_text_rust env source_text)

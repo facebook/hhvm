@@ -787,10 +787,7 @@ fn parse_file(
                         String::from(e.msg()),
                         FatalOp::Parse,
                     )),
-                    None => match aast {
-                        Ok(aast) => Ok(aast),
-                        Err(msg) => Err(ParseError(Pos::make_none(), msg, FatalOp::Parse)),
-                    },
+                    None => Ok(aast),
                 }
             }
         },

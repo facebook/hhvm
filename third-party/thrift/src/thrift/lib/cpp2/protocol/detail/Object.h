@@ -23,6 +23,7 @@
 #include <folly/CPortability.h>
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/GetStandardProtocol.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/lib/cpp2/type/Traits.h>
@@ -577,10 +578,7 @@ MaskedDecodeResult parseObject(
   prot.setInput(&buf);
   MaskedDecodeResult result;
   MaskedProtocolData& protocolData = result.excluded;
-  // TODO: change this to use get_standard_protocol
-  protocolData.protocol() = std::is_same_v<Protocol, BinaryProtocolReader>
-      ? type::StandardProtocol::Binary
-      : type::StandardProtocol::Compact;
+  protocolData.protocol() = detail::get_standard_protocol<Protocol>;
   MaskedDecodeResultValue parseValueResult = detail::parseValue(
       prot,
       T_STRUCT,

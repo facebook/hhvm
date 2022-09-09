@@ -97,14 +97,7 @@ std::unique_ptr<folly::IOBuf> serializeObject(const Object& obj) {
 template <class Protocol>
 std::unique_ptr<folly::IOBuf> serializeObject(
     const Object& obj, MaskedProtocolData& protocolData) {
-  // TODO: change this to use get_standard_protocol
-  static_assert(
-      std::is_same_v<Protocol, BinaryProtocolWriter> ||
-      std::is_same_v<Protocol, CompactProtocolWriter>);
-  auto expectedProtocol = std::is_same_v<Protocol, BinaryProtocolWriter>
-      ? type::StandardProtocol::Binary
-      : type::StandardProtocol::Compact;
-  assert(*protocolData.protocol() == expectedProtocol);
+  assert(*protocolData.protocol() == detail::get_standard_protocol<Protocol>);
   Protocol prot;
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);

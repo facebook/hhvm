@@ -64,7 +64,8 @@ void CookieSync::setCookieDir(const w_string& dir) {
 
 std::vector<w_string> CookieSync::getOutstandingCookieFileList() const {
   std::vector<w_string> result;
-  for (auto& it : *cookies_.rlock()) {
+  auto cookiesLocked = cookies_.rlock();
+  for (auto& it : *cookiesLocked) {
     result.push_back(it.first);
   }
 

@@ -293,6 +293,33 @@ void testEncodeCppType() {
             1, TType::T_I16);
     EXPECT_EQ(result, asValueStruct<type::i16_t>(1));
   }
+  {
+    // test cpp_type with list
+    using T = std::list<int64_t>;
+    auto value = T{1, 2, 3};
+    using Tag = type::list<type::i64_t>;
+    auto result = encodeAndParseValue<Protocol, type::cpp_type<T, Tag>>(
+        value, TType::T_LIST);
+    EXPECT_EQ(result, asValueStruct<Tag>(value));
+  }
+  {
+    // test cpp_type with set
+    using T = std::unordered_set<std::string>;
+    auto value = T{"foo", "bar"};
+    using Tag = type::set<type::string_t>;
+    auto result = encodeAndParseValue<Protocol, type::cpp_type<T, Tag>>(
+        value, TType::T_SET, false);
+    EXPECT_EQ(result, asValueStruct<Tag>(value));
+  }
+  {
+    // test cpp_type with map
+    using T = std::unordered_map<std::string, int32_t>;
+    auto value = T{{"foo", 1}, {"bar", 2}};
+    using Tag = type::map<type::string_t, type::i32_t>;
+    auto result = encodeAndParseValue<Protocol, type::cpp_type<T, Tag>>(
+        value, TType::T_MAP, false);
+    EXPECT_EQ(result, asValueStruct<Tag>(value));
+  }
 }
 
 // If IsAdapted is true, test op::encode with the given object with

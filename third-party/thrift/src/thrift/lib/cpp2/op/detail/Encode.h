@@ -433,9 +433,8 @@ struct Encode<type::enum_t<T>> {
 // TODO: add optimization used in protocol_methods.h
 template <typename Tag>
 struct Encode<type::list<Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot, const type::native_type<type::list<Tag>>& list) const {
+  template <typename Protocol, typename T>
+  uint32_t operator()(Protocol& prot, const T& list) const {
     uint32_t xfer = 0;
     xfer += prot.writeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
@@ -449,9 +448,8 @@ struct Encode<type::list<Tag>> {
 
 template <typename Tag>
 struct Encode<type::set<Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot, const type::native_type<type::set<Tag>>& set) const {
+  template <typename Protocol, typename T>
+  uint32_t operator()(Protocol& prot, const T& set) const {
     uint32_t xfer = 0;
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
@@ -465,10 +463,8 @@ struct Encode<type::set<Tag>> {
 
 template <typename Key, typename Value>
 struct Encode<type::map<Key, Value>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot,
-      const type::native_type<type::map<Key, Value>>& map) const {
+  template <typename Protocol, typename T>
+  uint32_t operator()(Protocol& prot, const T& map) const {
     uint32_t xfer = 0;
     xfer += prot.writeMapBegin(
         typeTagToTType<Key>,
@@ -483,14 +479,8 @@ struct Encode<type::map<Key, Value>> {
   }
 };
 
-// TODO: Handle cpp_type with containers that cannot use static_cast.
 template <typename T, typename Tag>
-struct Encode<type::cpp_type<T, Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& t) const {
-    return Encode<Tag>{}(prot, static_cast<type::native_type<Tag>>(t));
-  }
-};
+struct Encode<type::cpp_type<T, Tag>> : Encode<Tag> {};
 
 template <typename Adapter, typename Tag>
 struct Encode<type::adapted<Adapter, Tag>> {

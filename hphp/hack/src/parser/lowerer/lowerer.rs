@@ -5295,14 +5295,15 @@ fn p_module_exports<'a>(
     name: &ast::Sid,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<Vec<ast::MdNameKind>> {
+) -> Result<Option<Vec<ast::MdNameKind>>> {
     match &node.children {
-        Missing => Ok(vec![]),
-        ModuleExports(e) => Ok(e
-            .exports
-            .syntax_node_to_list_skip_separator()
-            .map(|n| pos_qualified_referenced_module_name(name, n, env))
-            .collect::<Result<Vec<_>, _>>()?),
+        Missing => Ok(None),
+        ModuleExports(e) => Ok(Some(
+            e.exports
+                .syntax_node_to_list_skip_separator()
+                .map(|n| pos_qualified_referenced_module_name(name, n, env))
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
         _ => missing_syntax("module exports", node, env),
     }
 }
@@ -5311,14 +5312,15 @@ fn p_module_imports<'a>(
     name: &ast::Sid,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<Vec<ast::MdNameKind>> {
+) -> Result<Option<Vec<ast::MdNameKind>>> {
     match &node.children {
-        Missing => Ok(vec![]),
-        ModuleImports(e) => Ok(e
-            .imports
-            .syntax_node_to_list_skip_separator()
-            .map(|n| pos_qualified_referenced_module_name(name, n, env))
-            .collect::<Result<Vec<_>, _>>()?),
+        Missing => Ok(None),
+        ModuleImports(e) => Ok(Some(
+            e.imports
+                .syntax_node_to_list_skip_separator()
+                .map(|n| pos_qualified_referenced_module_name(name, n, env))
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
         _ => missing_syntax("module imports", node, env),
     }
 }

@@ -518,8 +518,8 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ModuleDefType<'_>> for shallow::Mo
     fn from(x: &obr::shallow_decl_defs::ModuleDefType<'_>) -> Self {
         Self {
             pos: x.pos.into(),
-            exports: slice(x.exports),
-            imports: slice(x.imports),
+            exports: x.exports.map(slice),
+            imports: x.imports.map(slice),
         }
     }
 }

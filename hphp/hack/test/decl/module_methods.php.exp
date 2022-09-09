@@ -1,7 +1,8 @@
 File root|module_methods.php--modules.php
 [("A",
   (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [4:12-13]; mdt_exports = []; mdt_imports = [] }))
+     { Typing_defs.mdt_pos = [4:12-13]; mdt_exports = None;
+       mdt_imports = None }))
   ]
 
 File root|module_methods.php--A.php

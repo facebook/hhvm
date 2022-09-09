@@ -1045,8 +1045,8 @@ and ('ex, 'en) module_def = {
   md_span: pos;
   md_mode: FileInfo.mode; [@visitors.opaque]
   md_doc_comment: doc_comment option;
-  md_exports: md_name_kind list;
-  md_imports: md_name_kind list;
+  md_exports: md_name_kind list option;
+  md_imports: md_name_kind list option;
 }
 
 and md_name_kind =

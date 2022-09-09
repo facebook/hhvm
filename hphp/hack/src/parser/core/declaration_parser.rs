@@ -2467,7 +2467,7 @@ where
                 TokenKind::Exports => {
                     let exports = self.require_token(TokenKind::Exports, Errors::error1004);
                     let exports_lb = self.require_left_brace();
-                    let (clauses, _) = self.parse_comma_list_allow_trailing(
+                    let clauses = self.parse_comma_list_allow_trailing_opt(
                         TokenKind::RightBrace,
                         Errors::error1004,
                         |x: &mut Self| x.require_qualified_referenced_module_name(),
@@ -2485,7 +2485,7 @@ where
                 TokenKind::Imports => {
                     let imports = self.require_token(TokenKind::Imports, Errors::error1004);
                     let imports_lb = self.require_left_brace();
-                    let (clauses, _) = self.parse_comma_list_allow_trailing(
+                    let clauses = self.parse_comma_list_allow_trailing_opt(
                         TokenKind::RightBrace,
                         Errors::error1004,
                         |x: &mut Self| x.require_qualified_referenced_module_name(),

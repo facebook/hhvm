@@ -806,8 +806,8 @@ pub enum ModuleReference {
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub struct ModuleDefType<R: Reason> {
     pub pos: R::Pos,
-    pub exports: Box<[ModuleReference]>,
-    pub imports: Box<[ModuleReference]>,
+    pub exports: Option<Box<[ModuleReference]>>,
+    pub imports: Option<Box<[ModuleReference]>>,
 }
 
 walkable!(ModuleDefType<R> => []);

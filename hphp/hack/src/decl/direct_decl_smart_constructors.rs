@@ -6014,15 +6014,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         if let Node::ModuleName(&(parts, pos)) = name {
             let module_name = self.module_name_string_from_parts(parts, pos);
             let map_references = |references_list| match references_list {
-                Node::List(&references) => {
-                    self.slice(references.iter().filter_map(|reference| match reference {
+                Node::List(&references) => Some(self.slice(references.iter().filter_map(
+                    |reference| match reference {
                         Node::ModuleName(&(name, _)) => {
                             Some(self.module_reference_from_parts(module_name, name))
                         }
                         _ => None,
-                    }))
-                }
-                _ => bumpalo::vec![in self.arena;].into_bump_slice(),
+                    },
+                ))),
+                _ => None,
             };
             let exports = map_references(exports);
             let imports = map_references(imports);

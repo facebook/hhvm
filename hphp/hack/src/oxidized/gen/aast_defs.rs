@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb61729a3c74c281de553b3caa2eef5d>>
+// @generated SignedSource<<1b80622707af7ea5da87aaee5e9b3812>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1854,8 +1854,8 @@ pub struct ModuleDef<Ex, En> {
     #[rust_to_ocaml(attr = "visitors.opaque")]
     pub mode: file_info::Mode,
     pub doc_comment: Option<DocComment>,
-    pub exports: Vec<MdNameKind>,
-    pub imports: Vec<MdNameKind>,
+    pub exports: Option<Vec<MdNameKind>>,
+    pub imports: Option<Vec<MdNameKind>>,
 }
 
 #[derive(

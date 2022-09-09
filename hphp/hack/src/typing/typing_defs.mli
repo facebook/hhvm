@@ -90,8 +90,8 @@ type module_reference =
 
 type module_def_type = {
   mdt_pos: Pos_or_decl.t;
-  mdt_exports: module_reference list;
-  mdt_imports: module_reference list;
+  mdt_exports: module_reference list option;
+  mdt_imports: module_reference list option;
 }
 [@@deriving show]
 

@@ -247,6 +247,12 @@ let module_naming_and_decl_DEPRECATED
   ( snd md.md_name,
     {
       mdt_pos = Pos_or_decl.of_raw_pos @@ fst md.md_name;
-      mdt_exports = List.map md.md_exports ~f:module_reference_decl;
-      mdt_imports = List.map md.md_imports ~f:module_reference_decl;
+      mdt_exports =
+        Option.map
+          ~f:(fun exports -> List.map ~f:module_reference_decl exports)
+          md.md_exports;
+      mdt_imports =
+        Option.map
+          ~f:(fun imports -> List.map ~f:module_reference_decl imports)
+          md.md_imports;
     } )

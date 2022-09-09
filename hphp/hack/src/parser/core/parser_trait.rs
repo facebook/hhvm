@@ -899,6 +899,24 @@ where
         )
     }
 
+    fn parse_comma_list_allow_trailing_opt<F>(
+        &mut self,
+        close_predicate: TokenKind,
+        error: Error,
+        parse_item: F,
+    ) -> S::Output
+    where
+        F: Fn(&mut Self) -> S::Output,
+    {
+        self.parse_separated_list_opt(
+            TokenKind::Comma,
+            SeparatedListKind::TrailingAllowed,
+            close_predicate,
+            error,
+            parse_item,
+        )
+    }
+
     fn parse_separated_list_predicate<P, SP, F>(
         &mut self,
         separator_predicate: SP,

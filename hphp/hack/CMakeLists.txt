@@ -121,15 +121,6 @@ invoke_dune(hack_dune all)
 
 set(INVOKE_CARGO "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/invoke_cargo.sh")
 
-set(OPCODE_DATA "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
-
-add_executable(gen-rust1 "${CMAKE_SOURCE_DIR}/hphp/tools/hhbc-gen/gen-rust.cpp")
-add_custom_command(
-  OUTPUT "${OPCODE_DATA}"
-  COMMAND gen-rust1 > "${OPCODE_DATA}"
-  COMMENT "Generating opcode data"
-)
-
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()

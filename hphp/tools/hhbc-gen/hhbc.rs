@@ -16,7 +16,7 @@ use once_cell::sync::OnceCell;
 mod opcodes;
 #[cfg(not(fbcode_build))]
 mod opcodes {
-    include!(concat!(env!("CMAKE_BINARY_DIR"), "/hphp/tools/opcodes.rs"));
+    include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

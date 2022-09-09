@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
@@ -629,28 +630,37 @@ void emitInitRegularLocals(IRGS& env, const Func* callee) {
   }
 }
 
-void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
+void emitSurpriseCheck(IRGS& env, const Func* callee) {
   if (isInlining(env)) return;
 
-  // Check surprise flags in the same place as the interpreter: after setting
-  // up the callee's frame but before executing any of its code.
+  // Check surprise flags in the same place as the interpreter: after func entry
+  // and DV initializers, right before entering the main body.
   if (stack_check_kind(callee) == StackCheck::Combine) {
-    gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
+    gen(env, CheckSurpriseAndStack, FuncData { callee }, fp(env));
   } else {
-    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
+    gen(env, CheckSurpriseFlagsEnter, FuncData { callee }, fp(env));
   }
 }
 
 }
 
+void emitEnter(IRGS& env, Offset relOffset) {
+  emitSurpriseCheck(env, curFunc(env));
+
+  jmpImpl(env, bcOff(env) + relOffset);
+}
+
 void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
   auto const callee = curFunc(env);
-  auto const argc = curSrcKey(env).numEntryArgs();
 
   emitInitClosureLocals(env, callee);
   emitInitRegularLocals(env, callee);
-  emitSurpriseCheck(env, callee, argc);
+
+  // DV initializers delay the function call event hook until the Enter opcode.
+  if (curSrcKey(env).numEntryArgs() < callee->numNonVariadicParams()) return;
+
+  emitSurpriseCheck(env, callee);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

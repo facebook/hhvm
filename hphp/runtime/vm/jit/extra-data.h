@@ -2307,35 +2307,6 @@ struct StackRange : IRExtraData {
   uint32_t count;
 };
 
-struct FuncEntryData : IRExtraData {
-  FuncEntryData(const Func* func, uint32_t argc)
-    : func(func)
-    , argc(argc)
-  {}
-
-  std::string show() const {
-    return folly::format(
-      "{}({} args)",
-      func->fullName(),
-      argc
-    ).str();
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      func->stableHash(),
-      std::hash<uint32_t>()(argc)
-    );
-  }
-
-  bool equals(const FuncEntryData& o) const {
-    return func == o.func && argc == o.argc;
-  }
-
-  const Func* func;
-  uint32_t argc;
-};
-
 struct BoolVecArgsData : IRExtraData {
   BoolVecArgsData(uint32_t numArgs, const uint8_t* args)
     : numArgs(numArgs)
@@ -2985,8 +2956,8 @@ X(LdInitPropAddr,               IndexData);
 X(DeserializeLazyProp,          IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
-X(CheckSurpriseFlagsEnter,      FuncEntryData);
-X(CheckSurpriseAndStack,        FuncEntryData);
+X(CheckSurpriseFlagsEnter,      FuncData);
+X(CheckSurpriseAndStack,        FuncData);
 X(ContCheckNext,                IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);

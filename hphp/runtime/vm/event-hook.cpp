@@ -741,6 +741,12 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
     return 0;
   }
 
+  // We may have entered with the CLEAN_VERIFY state set by the JIT, but
+  // the functionEnterHelper is going to return to the parent frame, bypassing
+  // the JIT logic that resets this state. Set the state to DIRTY so it won't
+  // leak to other C++ calls.
+  regState() = VMRegState::DIRTY;
+
   // If we entered this frame from the interpreter, use the resumeHelper,
   // as the retHelper logic has been already performed and the frame has
   // been overwritten by the return value.

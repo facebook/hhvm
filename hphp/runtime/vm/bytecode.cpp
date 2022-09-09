@@ -813,7 +813,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       // argArray was exhausted, so there are no "extra" arguments but there
       // may be a deficit of non-variadic arguments, and the need to push an
       // empty array for the variadic argument ... that work is left to
-      // prepareFuncEntry.
+      // initFuncInputs.
       assertx(numArgs + numUnpackArgs <= numParams);
       return numArgs + numUnpackArgs;
     }
@@ -1812,10 +1812,6 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   }
 }
 
-OPTBLD_INLINE void iopEnter(PC& pc, PC targetpc) {
-  pc = targetpc;
-}
-
 OPTBLD_INLINE void iopJmp(PC& pc, PC targetpc) {
   jmpSurpriseCheck(targetpc - pc);
   pc = targetpc;
@@ -2148,6 +2144,20 @@ OPTBLD_INLINE JitResumeAddr iopRetM(PC& pc, uint32_t numRet) {
   returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE JitResumeAddr iopEnter(PC& pc, PC targetpc) {
+  auto const jitReturn = jitReturnPre(vmfp());
+  auto const intercepted = !EventHook::FunctionCall(
+    vmfp(), EventHook::NormalFunc, EventHook::Source::Interpreter);
+  if (intercepted) {
+    // The callee was intercepted, return to the caller.
+    pc = vmpc();
+    return jitReturnPost(jitReturn);
+  }
+
+  pc = targetpc;
+  return JitResumeAddr::none();
 }
 
 OPTBLD_INLINE void iopThrow(PC&) {
@@ -3445,6 +3455,9 @@ bool funcEntry() {
 
   initClosureLocals();
   initRegularLocals();
+
+  // DV initializers delay the function call event hook until the Enter opcode.
+  if (vmpc() != vmfp()->func()->entry()) return true;
 
   // If this returns false, the callee was intercepted and should be skipped.
   return EventHook::FunctionCall(

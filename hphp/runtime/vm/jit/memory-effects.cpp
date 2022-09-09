@@ -702,9 +702,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IrrelevantEffects{};
 
   case CheckStackOverflow:
-  case CheckSurpriseFlagsEnter:
-  case CheckSurpriseAndStack:
     return may_load_store(AEmpty, AEmpty);
+
+  case CheckSurpriseFlagsEnter:
+  case CheckSurpriseAndStack: {
+    // Function call event hook inspects parameters.
+    auto const fp = inst.src(0);
+    auto const callee = inst.extra<FuncData>()->func;
+    return may_load_store(
+      callee->numParams() > 0
+        ? ALocal { fp, AliasIdSet::IdRange(0, callee->numParams()) }
+        : AEmpty,
+      AEmpty
+    );
+  }
 
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions

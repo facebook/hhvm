@@ -141,11 +141,8 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<CheckSurpriseFlagsEnter>();
-  auto const func = extra->func;
 
-  auto const off = func->getEntryForNumArgs(extra->argc);
-  auto const fixup = Fixup::direct(off, SBInvOffset{0});
+  auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
 
   auto const catchBlock = label(env, inst->taken());
   emitCheckSurpriseFlagsEnter(vmain(env), vcold(env), fp, fixup, catchBlock);
@@ -153,11 +150,9 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<CheckSurpriseAndStack>();
-  auto const func = extra->func;
+  auto const func = inst->extra<CheckSurpriseAndStack>()->func;
 
-  auto const off = func->getEntryForNumArgs(extra->argc);
-  auto const fixup = Fixup::direct(off, SBInvOffset{0});
+  auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();

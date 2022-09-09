@@ -93,8 +93,10 @@ vec(3) {
   string(22) "Exception::__construct"
   dict(1) {
     ["args"]=>
-    vec(1) {
+    vec(3) {
       string(4) "test"
+      int(0)
+      NULL
     }
   }
 }
@@ -350,8 +352,11 @@ vec(3) {
   string(13) "fb_setprofile"
   dict(1) {
     ["args"]=>
-    vec(1) {
+    vec(3) {
       NULL
+      int(3)
+      vec(0) {
+      }
     }
   }
 }

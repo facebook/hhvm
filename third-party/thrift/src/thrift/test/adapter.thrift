@@ -196,6 +196,13 @@ struct AlsoMoveOnly {
   1: i64 ptr;
 }
 
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+@scope.Transitive
+struct ApplyAdapter {}
+
+@ApplyAdapter
+struct TransitiveAdapted {}
+
 @cpp.Adapter{name = "::apache::thrift::test::CountingAdapter<true, int>"}
 typedef i64 CountingInt
 struct CountingStruct {

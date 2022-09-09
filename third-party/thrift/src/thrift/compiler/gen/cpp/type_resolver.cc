@@ -172,7 +172,7 @@ const std::string& type_resolver::get_storage_type(
 }
 
 const t_const* type_resolver::find_nontransitive_adapter(const t_type& node) {
-  if (!node.find_structured_annotation_or_null(kTransitiveUri)) {
+  if (!is_transitive_annotation(node)) {
     return node.find_structured_annotation_or_null(kCppAdapterUri);
   }
   return nullptr;

@@ -780,6 +780,11 @@ TEST(AdaptTest, ComposedAdapter) {
   EXPECT_EQ(*obj2.double_wrapped_integer()->meta, "foo");
 }
 
+TEST(AdaptTest, TransitiveAdapter) {
+  basic::TransitiveAdapted obj;
+  EXPECT_EQ(obj.value, basic::detail::TransitiveAdapted{});
+}
+
 TEST(AdaptTest, MoveOnlyAdapter) {
   basic::MoveOnly obj;
   obj.ptr() = std::make_unique<basic::detail::HeapAllocated>();

@@ -238,7 +238,7 @@ typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::std::set<::std
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::string> StringWithAdapter;
 typedef ::std::vector<::facebook::thrift::test::StringWithAdapter> ListWithElemAdapter;
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter> ListWithElemAdapter_withAdapter;
-typedef ::std::int64_t MyI64;
+typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int64_t> MyI64;
 typedef ::facebook::thrift::test::MyI64 DoubleTypedefI64;
 typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int32_t> MyI32;
 

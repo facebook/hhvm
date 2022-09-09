@@ -41,7 +41,7 @@
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/if/gen-cpp2/ConformanceServiceAsyncClient.h>
-#include <thrift/conformance/if/gen-cpp2/RPCConformanceServiceAsyncClient.h>
+#include <thrift/conformance/if/gen-cpp2/rpc_clients.h>
 #include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
@@ -191,6 +191,9 @@ testing::AssertionResult runPatchTest(
 testing::AssertionResult runRpcTest(
     Client<RPCConformanceService>& client, const RpcTestCase& rpc);
 
+testing::AssertionResult runBasicRpcTest(
+    Client<BasicRPCConformanceService>& client, const RpcTestCase& rpc);
+
 template <typename Client>
 class ConformanceTest : public testing::Test {
  public:
@@ -249,6 +252,11 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
                         Client,
                         apache::thrift::Client<RPCConformanceService>>) {
         return runRpcTest(client, *testCase.rpc_ref());
+      } else if constexpr (std::is_same_v<
+                               Client,
+                               apache::thrift::Client<
+                                   BasicRPCConformanceService>>) {
+        return runBasicRpcTest(client, *testCase.rpc_ref());
       }
       return testing::AssertionFailure() << "Invalid test client.";
     case TestCaseUnion::Type::objectPatch:

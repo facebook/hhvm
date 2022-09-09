@@ -34,4 +34,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
       "Unimplemented Method create_rpc_conformance_service_client_");
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<Client<BasicRPCConformanceService>>,
+    create_basic_rpc_conformance_service_client_,
+    std::string /*service_name or smc tier*/) {
+  throw std::invalid_argument(
+      "Unimplemented Method create_basic_rpc_conformance_service_client_");
+}
+
 } // namespace apache::thrift::conformance

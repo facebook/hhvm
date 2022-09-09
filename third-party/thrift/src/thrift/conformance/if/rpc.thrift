@@ -317,3 +317,13 @@ service RPCConformanceService {
   sink<Request, Response> sinkBasic(1: Request req);
   sink<Request, Response> sinkChunkTimeout(1: Request req);
 }
+
+service BasicRPCConformanceService {
+  // =================== Request-Response ===================
+  ServerTestResult requestResponseBasic(1: Request req);
+  void requestResponseDeclaredException(
+    1: ServerInstruction serverInstr,
+  ) throws (1: UserException e);
+  void requestResponseUndeclaredException(1: ServerInstruction serverInstr);
+  void requestResponseNoArgVoidResponse();
+}

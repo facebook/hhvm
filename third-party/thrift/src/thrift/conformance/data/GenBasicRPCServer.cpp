@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-#pragma once
-#include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
+#include <folly/init/Init.h>
+#include <thrift/conformance/data/RPCGenerator.h>
+#include <thrift/conformance/data/TestGenerator.h>
 
-namespace apache::thrift::conformance::data {
+using apache::thrift::conformance::data::createBasicRPCServerTestSuite;
+using apache::thrift::conformance::data::serializeToFile;
 
-TestSuite createRPCServerTestSuite();
-TestSuite createBasicRPCServerTestSuite();
-TestSuite createRPCClientTestSuite();
-
-} // namespace apache::thrift::conformance::data
+int main(int argc, char** argv) {
+  folly::Init(&argc, &argv);
+  serializeToFile<apache::thrift::BinaryProtocolWriter>(
+      createBasicRPCServerTestSuite(), stdout);
+}

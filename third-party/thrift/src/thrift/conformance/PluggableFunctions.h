@@ -16,7 +16,7 @@
 
 #pragma once
 #include <thrift/conformance/if/gen-cpp2/ConformanceServiceAsyncClient.h>
-#include <thrift/conformance/if/gen-cpp2/RPCConformanceServiceAsyncClient.h>
+#include <thrift/conformance/if/gen-cpp2/rpc_clients.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
 namespace apache::thrift::conformance {
@@ -29,5 +29,10 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<Client<RPCConformanceService>>,
     create_rpc_conformance_service_client_,
+    std::string /*service_name or smc tier*/);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::unique_ptr<Client<BasicRPCConformanceService>>,
+    create_basic_rpc_conformance_service_client_,
     std::string /*service_name or smc tier*/);
 } // namespace apache::thrift::conformance

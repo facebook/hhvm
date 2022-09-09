@@ -122,6 +122,14 @@ RequestResponseBasicClientTestResult runRequestResponseBasic(
   return result;
 }
 
+ServerTestResult runRequestResponseBasic(
+    Client<BasicRPCConformanceService>& client,
+    const RequestResponseBasicClientInstruction& instruction) {
+  ServerTestResult result;
+  client.sync_requestResponseBasic(result, *instruction.request());
+  return result;
+}
+
 RequestResponseDeclaredExceptionClientTestResult
 runRequestResponseDeclaredException(
     RPCConformanceServiceAsyncClient& client,
@@ -129,6 +137,19 @@ runRequestResponseDeclaredException(
   RequestResponseDeclaredExceptionClientTestResult result;
   try {
     client.sync_requestResponseDeclaredException(*instruction.request());
+  } catch (const UserException& ue) {
+    result.userException() = ue;
+  }
+  return result;
+}
+
+RequestResponseDeclaredExceptionClientTestResult
+runRequestResponseDeclaredException(
+    BasicRPCConformanceServiceAsyncClient& client,
+    const ServerInstruction& serverInstruction) {
+  RequestResponseDeclaredExceptionClientTestResult result;
+  try {
+    client.sync_requestResponseDeclaredException(serverInstruction);
   } catch (const UserException& ue) {
     result.userException() = ue;
   }
@@ -148,10 +169,29 @@ runRequestResponseUndeclaredException(
   return result;
 }
 
+RequestResponseUndeclaredExceptionClientTestResult
+runRequestResponseUndeclaredException(
+    BasicRPCConformanceServiceAsyncClient& client,
+    const ServerInstruction& serverInstruction) {
+  RequestResponseUndeclaredExceptionClientTestResult result;
+  try {
+    client.sync_requestResponseUndeclaredException(serverInstruction);
+  } catch (const TApplicationException& e) {
+    result.exceptionMessage() = e.getMessage();
+  }
+  return result;
+}
+
+RequestResponseNoArgVoidResponseClientTestResult
+runRequestResponseNoArgVoidResponse(RPCConformanceServiceAsyncClient& client) {
+  RequestResponseNoArgVoidResponseClientTestResult result;
+  client.sync_requestResponseNoArgVoidResponse();
+  return result;
+}
+
 RequestResponseNoArgVoidResponseClientTestResult
 runRequestResponseNoArgVoidResponse(
-    RPCConformanceServiceAsyncClient& client,
-    const RequestResponseNoArgVoidResponseClientInstruction&) {
+    BasicRPCConformanceServiceAsyncClient& client) {
   RequestResponseNoArgVoidResponseClientTestResult result;
   client.sync_requestResponseNoArgVoidResponse();
   return result;
@@ -259,9 +299,7 @@ ClientTestResult runClientSteps(
       break;
     case ClientInstruction::Type::requestResponseNoArgVoidResponse:
       result.requestResponseNoArgVoidResponse_ref() =
-          runRequestResponseNoArgVoidResponse(
-              client,
-              *clientInstruction.requestResponseNoArgVoidResponse_ref());
+          runRequestResponseNoArgVoidResponse(client);
       break;
     case ClientInstruction::Type::streamBasic:
       result.streamBasic_ref() =
@@ -305,6 +343,50 @@ testing::AssertionResult runRpcTest(
           << "\nActual server result: " << jsonify(actualServerResult);
     }
     return testing::AssertionSuccess();
+  } catch (...) {
+    return testing::AssertionFailure();
+  }
+}
+
+testing::AssertionResult runBasicRpcTest(
+    Client<BasicRPCConformanceService>& client, const RpcTestCase& rpc) {
+  try {
+    ClientTestResult result;
+    auto clientInstruction = *rpc.clientInstruction();
+    auto serverInstruction = *rpc.serverInstruction();
+    ServerTestResult actualServerTestResult;
+    switch (clientInstruction.getType()) {
+      case ClientInstruction::Type::requestResponseBasic:
+        actualServerTestResult = runRequestResponseBasic(
+            client, *clientInstruction.requestResponseBasic_ref());
+
+        if (actualServerTestResult != *rpc.serverTestResult()) {
+          return testing::AssertionFailure();
+        } else {
+          return testing::AssertionSuccess();
+        }
+        break;
+      case ClientInstruction::Type::requestResponseDeclaredException:
+        result.requestResponseDeclaredException_ref() =
+            runRequestResponseDeclaredException(client, serverInstruction);
+        break;
+      case ClientInstruction::Type::requestResponseUndeclaredException:
+        result.requestResponseUndeclaredException_ref() =
+            runRequestResponseUndeclaredException(client, serverInstruction);
+        break;
+      case ClientInstruction::Type::requestResponseNoArgVoidResponse:
+        result.requestResponseNoArgVoidResponse_ref() =
+            runRequestResponseNoArgVoidResponse(client);
+        break;
+      default:
+        throw std::runtime_error("Invalid TestCase Type.");
+    }
+
+    if (!equal(result, *rpc.clientTestResult())) {
+      return testing::AssertionFailure();
+    }
+    return testing::AssertionSuccess();
+
   } catch (...) {
     return testing::AssertionFailure();
   }

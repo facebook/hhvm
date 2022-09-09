@@ -665,13 +665,18 @@ Test createSinkChunkTimeoutTest() {
   return ret;
 }
 
-void addCommonRPCTests(TestSuite& suite) {
+void addCommonRequestResponseTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
   suite.tests()->push_back(createRequestResponseDeclaredExceptionTest());
   suite.tests()->push_back(createRequestResponseUndeclaredExceptionTest());
   suite.tests()->push_back(createRequestResponseNoArgVoidResponse());
   suite.tests()->push_back(createRequestResponseFragmentationTest());
+}
+
+void addCommonRPCTests(TestSuite& suite) {
+  // =================== Request-Response ===================
+  addCommonRequestResponseTests(suite);
   // =================== Stream ===================
   suite.tests()->push_back(createStreamBasicTest());
   suite.tests()->push_back(createStreamFragmentationTest());
@@ -692,6 +697,14 @@ TestSuite createRPCServerTestSuite() {
   addCommonRPCTests(suite);
   // =================== Sink ===================
   suite.tests()->push_back(createSinkChunkTimeoutTest());
+  return suite;
+}
+
+TestSuite createBasicRPCServerTestSuite() {
+  TestSuite suite;
+  suite.name() = "ThriftBasicRPCServerTest";
+  suite.tags()->emplace("spec/protocol/interface/");
+  addCommonRequestResponseTests(suite);
   return suite;
 }
 

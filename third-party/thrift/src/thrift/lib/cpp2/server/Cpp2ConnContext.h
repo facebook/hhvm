@@ -346,7 +346,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
    * Throws std::out_of_range if not found
    */
   Tile& getTile(int64_t id) { return *tiles_.at(id); }
-  friend class GeneratedAsyncProcessor;
+  friend class GeneratedAsyncProcessorBase;
   friend class Tile;
   friend class TilePromise;
   friend class HandlerCallbackBase;

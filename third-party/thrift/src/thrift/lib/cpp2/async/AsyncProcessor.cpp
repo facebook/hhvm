@@ -99,7 +99,7 @@ void AsyncProcessor::executeRequest(
   LOG(FATAL) << "Unimplemented executeRequest called";
 }
 
-bool GeneratedAsyncProcessor::createInteraction(
+bool GeneratedAsyncProcessorBase::createInteraction(
     const ResponseChannelRequest::UniquePtr& req,
     int64_t id,
     std::string&& name,
@@ -180,12 +180,12 @@ bool GeneratedAsyncProcessor::createInteraction(
   return true;
 }
 
-std::unique_ptr<Tile> GeneratedAsyncProcessor::createInteractionImpl(
+std::unique_ptr<Tile> GeneratedAsyncProcessorBase::createInteractionImpl(
     const std::string&) {
   return nullptr;
 }
 
-void GeneratedAsyncProcessor::terminateInteraction(
+void GeneratedAsyncProcessorBase::terminateInteraction(
     int64_t id, Cpp2ConnContext& conn, folly::EventBase& eb) noexcept {
   eb.dcheckIsInEventBaseThread();
 
@@ -194,7 +194,7 @@ void GeneratedAsyncProcessor::terminateInteraction(
   }
 }
 
-void GeneratedAsyncProcessor::destroyAllInteractions(
+void GeneratedAsyncProcessorBase::destroyAllInteractions(
     Cpp2ConnContext& conn, folly::EventBase& eb) noexcept {
   eb.dcheckIsInEventBaseThread();
 
@@ -212,7 +212,7 @@ void GeneratedAsyncProcessor::destroyAllInteractions(
   }
 }
 
-bool GeneratedAsyncProcessor::validateRpcKind(
+bool GeneratedAsyncProcessorBase::validateRpcKind(
     const ResponseChannelRequest::UniquePtr& req, RpcKind kind) {
   switch (kind) {
     case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
@@ -250,7 +250,7 @@ bool GeneratedAsyncProcessor::validateRpcKind(
   return false;
 }
 
-bool GeneratedAsyncProcessor::setUpRequestProcessing(
+bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
     const ResponseChannelRequest::UniquePtr& req,
     Cpp2RequestContext* ctx,
     folly::EventBase* eb,

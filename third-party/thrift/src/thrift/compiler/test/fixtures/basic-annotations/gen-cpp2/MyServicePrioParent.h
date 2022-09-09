@@ -81,7 +81,7 @@ class MyServicePrioParentSvNull : public ::apache::thrift::ServiceHandler<MyServ
   void pong() override;
 };
 
-class MyServicePrioParentAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor {
+class MyServicePrioParentAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
  public:
   const char* getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
@@ -96,8 +96,8 @@ class MyServicePrioParentAsyncProcessor : public ::apache::thrift::GeneratedAsyn
   void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
   void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
  public:
-  using ProcessFuncs = GeneratedAsyncProcessor::ProcessFuncs<MyServicePrioParentAsyncProcessor>;
-  using ProcessMap = GeneratedAsyncProcessor::ProcessMap<ProcessFuncs>;
+  using ProcessFuncs = GeneratedAsyncProcessorBase::ProcessFuncs<MyServicePrioParentAsyncProcessor>;
+  using ProcessMap = GeneratedAsyncProcessorBase::ProcessMap<ProcessFuncs>;
   static const MyServicePrioParentAsyncProcessor::ProcessMap& getOwnProcessMap();
  private:
   static const MyServicePrioParentAsyncProcessor::ProcessMap kOwnProcessMap_;

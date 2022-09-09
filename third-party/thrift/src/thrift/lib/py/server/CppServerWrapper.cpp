@@ -298,7 +298,7 @@ class PythonAsyncProcessor : public AsyncProcessor {
   }
 
   // Create a task and add it to thread manager's queue. Essentially the same
-  // as GeneratedAsyncProcessor's processInThread method.
+  // as GeneratedAsyncProcessorBase's processInThread method.
   void processSerializedRequest(
       ResponseChannelRequest::UniquePtr req,
       apache::thrift::SerializedRequest&& serializedRequest,

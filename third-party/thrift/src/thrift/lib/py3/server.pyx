@@ -95,7 +95,7 @@ def getServiceName(ServiceInterface svc not None):
     processor = deref(svc._cpp_obj).getProcessor()
     gen_proc = dynamic_cast_gen(processor.get())
     if not gen_proc:
-        raise TypeError('processor was not a GeneratedAsyncProcessor')
+        raise TypeError('processor was not a GeneratedAsyncProcessorBase')
     cdef const char* name = gen_proc.getServiceName()
     return (<bytes>name).decode('utf-8')
 

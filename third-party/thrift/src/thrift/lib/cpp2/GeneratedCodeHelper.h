@@ -802,28 +802,28 @@ inline constexpr bool is_root_async_processor =
     std::is_void_v<typename T::BaseAsyncProcessor>;
 
 template <typename Derived>
-GeneratedAsyncProcessor::ProcessFunc<Derived> getProcessFuncFromProtocol(
+GeneratedAsyncProcessorBase::ProcessFunc<Derived> getProcessFuncFromProtocol(
     folly::tag_t<CompactProtocolReader> /* unused */,
-    const GeneratedAsyncProcessor::ProcessFuncs<Derived>& funcs) {
+    const GeneratedAsyncProcessorBase::ProcessFuncs<Derived>& funcs) {
   return funcs.compact;
 }
 template <typename Derived>
-GeneratedAsyncProcessor::ProcessFunc<Derived> getProcessFuncFromProtocol(
+GeneratedAsyncProcessorBase::ProcessFunc<Derived> getProcessFuncFromProtocol(
     folly::tag_t<BinaryProtocolReader> /* unused */,
-    const GeneratedAsyncProcessor::ProcessFuncs<Derived>& funcs) {
+    const GeneratedAsyncProcessorBase::ProcessFuncs<Derived>& funcs) {
   return funcs.binary;
 }
 
 template <typename Derived>
-GeneratedAsyncProcessor::ExecuteFunc<Derived> getExecuteFuncFromProtocol(
+GeneratedAsyncProcessorBase::ExecuteFunc<Derived> getExecuteFuncFromProtocol(
     folly::tag_t<CompactProtocolReader> /* unused */,
-    const GeneratedAsyncProcessor::ProcessFuncs<Derived>& funcs) {
+    const GeneratedAsyncProcessorBase::ProcessFuncs<Derived>& funcs) {
   return funcs.compactExecute;
 }
 template <typename Derived>
-GeneratedAsyncProcessor::ExecuteFunc<Derived> getExecuteFuncFromProtocol(
+GeneratedAsyncProcessorBase::ExecuteFunc<Derived> getExecuteFuncFromProtocol(
     folly::tag_t<BinaryProtocolReader> /* unused */,
-    const GeneratedAsyncProcessor::ProcessFuncs<Derived>& funcs) {
+    const GeneratedAsyncProcessorBase::ProcessFuncs<Derived>& funcs) {
   return funcs.binaryExecute;
 }
 
@@ -969,7 +969,7 @@ inline void processViaExecuteRequest(
   DCHECK(untypedMethodMetadata.rpcKind || untypedMethodMetadata.isWildcard());
 
   if (!untypedMethodMetadata.isWildcard() &&
-      !apache::thrift::GeneratedAsyncProcessor::validateRpcKind(
+      !apache::thrift::GeneratedAsyncProcessorBase::validateRpcKind(
           req, *untypedMethodMetadata.rpcKind)) {
     return;
   }
@@ -1272,10 +1272,11 @@ MessageBegin deserializeMessageBegin(
 template <class DerivedProcessor, class BaseProcessor>
 std::enable_if_t<
     std::is_base_of_v<BaseProcessor, DerivedProcessor>,
-    GeneratedAsyncProcessor::ProcessFuncs<DerivedProcessor>>
+    GeneratedAsyncProcessorBase::ProcessFuncs<DerivedProcessor>>
 downcastProcessFuncs(
-    const GeneratedAsyncProcessor::ProcessFuncs<BaseProcessor>& processFuncs) {
-  return GeneratedAsyncProcessor::ProcessFuncs<DerivedProcessor>{
+    const GeneratedAsyncProcessorBase::ProcessFuncs<BaseProcessor>&
+        processFuncs) {
+  return GeneratedAsyncProcessorBase::ProcessFuncs<DerivedProcessor>{
       processFuncs.compact,
       processFuncs.binary,
       processFuncs.compactExecute,

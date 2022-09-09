@@ -51,7 +51,7 @@ cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" \
     cdef cppclass cAsyncProcessor "apache::thrift::AsyncProcessor":
         pass
 
-    cdef cppclass cGeneratedAsyncProcessor "apache::thrift::GeneratedAsyncProcessor"(cAsyncProcessor):
+    cdef cppclass cGeneratedAsyncProcessorBase "apache::thrift::GeneratedAsyncProcessorBase"(cAsyncProcessor):
         const char* getServiceName()
 
     cdef cppclass cAsyncProcessorFactory \
@@ -62,7 +62,7 @@ cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" \
             "apache::thrift::ServerInterface"(cAsyncProcessorFactory):
         pass
 
-    cdef cGeneratedAsyncProcessor* dynamic_cast_gen "dynamic_cast<apache::thrift::GeneratedAsyncProcessor*>"(...)
+    cdef cGeneratedAsyncProcessorBase* dynamic_cast_gen "dynamic_cast<apache::thrift::GeneratedAsyncProcessorBase*>"(...)
 
 cdef extern from "thrift/lib/cpp2/server/TransportRoutingHandler.h" \
         namespace "apache::thrift":

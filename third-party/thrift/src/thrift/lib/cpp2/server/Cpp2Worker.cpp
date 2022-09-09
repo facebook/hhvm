@@ -450,7 +450,7 @@ void Cpp2Worker::dispatchRequest(
 
         // Once we remove the old code we'll move validateRpcKind to a helper.
         if (!found->metadata.isWildcard() &&
-            !GeneratedAsyncProcessor::validateRpcKind(
+            !GeneratedAsyncProcessorBase::validateRpcKind(
                 serverRequest.request(), *found->metadata.rpcKind)) {
           return;
         }

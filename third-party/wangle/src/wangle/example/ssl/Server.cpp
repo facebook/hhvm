@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
     VLOG(0) << "Configuring SSL";
     SSLContextConfig sslCfg;
     sslCfg.addCertificate(FLAGS_cert_path, FLAGS_key_path, "");
-    sslCfg.clientCAFile = FLAGS_ca_path;
+    sslCfg.clientCAFiles = std::vector<std::string>{FLAGS_ca_path};
     sslCfg.isDefault = true;
     cfg.sslContextConfigs.push_back(sslCfg);
     // IMPORTANT: when allowing both plaintext and ssl on the same port,

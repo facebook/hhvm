@@ -213,12 +213,13 @@ class ConformanceTest : public testing::Test {
   void TestBody() override {
     testing::AssertionResult conforming = runTestCase(client_, testCase_);
     if (conforming_) {
-      EXPECT_TRUE(conforming) << "For more detail see:"
-                              << std::endl
-                              // Most specific to least specific.
-                              << genTagLinks(testCase_) << genTagLinks(test_)
-                              << genTagLinks(suite_);
-      ;
+      EXPECT_TRUE(conforming)
+          // Most specific to least specific.
+          << genDescription(testCase_) << genDescription(test_)
+          << genDescription(suite_) << std::endl
+          << "For more detail see:" << std::endl
+          << genTagLinks(testCase_) << genTagLinks(test_)
+          << genTagLinks(suite_);
     } else {
       EXPECT_FALSE(conforming)
           << "If intentional, please remove the associated entry from:"

@@ -17,7 +17,6 @@
 #include <thrift/conformance/data/CompatibilityGenerator.h>
 
 #include <cstdio>
-#include <optional>
 #include <random>
 #include <set>
 #include <stdexcept>
@@ -277,7 +276,8 @@ template <class Old, class New>
     Old old_data,
     int32_t old_value,
     New new_data,
-    int32_t new_value) {
+    int32_t new_value,
+    std::string description) {
   setEnum(old_data.field().ensure(), old_value);
   setEnum(new_data.field().ensure(), new_value);
   auto name = fmt::format(
@@ -291,7 +291,8 @@ template <class Old, class New>
       c = '_';
     }
   }
-  return genCompatibilityRoundTripTestCase(protocol, name, old_data, new_data);
+  return genCompatibilityRoundTripTestCase(
+      protocol, name, old_data, new_data, std::move(description));
 }
 
 [[nodiscard]] std::vector<TestCase> changeEnumValueTestCases(
@@ -307,28 +308,62 @@ template <class Old, class New>
 
   folly::for_each(Enums{}, [&](auto old_data) {
     folly::for_each(Enums{}, [&](auto new_data) {
-      ret.push_back(
-          changeEnumValueTestCase(protocol, old_data, 0, new_data, 0));
-      ret.push_back(
-          changeEnumValueTestCase(protocol, old_data, 1, new_data, 1));
+      ret.push_back(changeEnumValueTestCase(
+          protocol,
+          old_data,
+          0,
+          new_data,
+          0,
+          "Testing `0` as enum value, it should not change after round-trip."));
+      ret.push_back(changeEnumValueTestCase(
+          protocol,
+          old_data,
+          1,
+          new_data,
+          1,
+          "Testing non-zero as enum value, it should not change after round-trip."));
     });
   });
 
   // Remove field 0
   ret.push_back(changeEnumValueTestCase(
-      protocol, StandardEnumStruct{}, 0, NoZeroEnumStruct{}, 0));
+      protocol,
+      StandardEnumStruct{},
+      0,
+      NoZeroEnumStruct{},
+      0,
+      "Test when removing `0` from Enum Struct. "
+      "The old value `0` should be unchanged since we should generate implicit `0`."));
 
   // Remove field
   ret.push_back(changeEnumValueTestCase(
-      protocol, StandardEnumStruct{}, 2, LessFieldEnumStruct{}, -1));
+      protocol,
+      StandardEnumStruct{},
+      2,
+      LessFieldEnumStruct{},
+      -1,
+      "Test when removing non-zero enum value. "
+      "The old value should be treated as `-1`."));
 
   // Rename field
   ret.push_back(changeEnumValueTestCase(
-      protocol, StandardEnumStruct{}, 2, DifferentNameEnumStruct{}, 2));
+      protocol,
+      StandardEnumStruct{},
+      2,
+      DifferentNameEnumStruct{},
+      2,
+      "Test when renaming enum value. "
+      "The old value should be unchanged."));
 
   // Change value
   ret.push_back(changeEnumValueTestCase(
-      protocol, StandardEnumStruct{}, 2, DifferentValueEnumStruct{}, -1));
+      protocol,
+      StandardEnumStruct{},
+      2,
+      DifferentValueEnumStruct{},
+      -1,
+      "Test when changing enum value. "
+      "The old value should be treated as `-1` since becomes unrecognized."));
 
   return ret;
 }

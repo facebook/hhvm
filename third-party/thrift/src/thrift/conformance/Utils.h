@@ -94,6 +94,15 @@ inline testing::TestInfo* registerTest(
       new FactoryImpl{std::move(factory)});
 }
 
+// Get conformance test description
+template <typename T>
+std::string genDescription(const T& test) {
+  if (test.description().has_value()) {
+    return *test.description() + "\n";
+  }
+  return "";
+}
+
 // Converts conformance test tags into helpful links, so they can be reported
 // with failures.
 template <typename T>

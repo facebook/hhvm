@@ -17,6 +17,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <optional>
 #include <set>
 
 #include <boost/mp11.hpp>
@@ -84,7 +85,8 @@ template <class Old, class New>
     const Protocol& protocol,
     std::string name,
     const Old& oldData,
-    const New& newData) {
+    const New& newData,
+    std::optional<std::string> description = {}) {
   RoundTripTestCase roundTrip;
   auto newAny = AnyRegistry::generated().store(newData, protocol);
   roundTrip.request()->value() = newAny;
@@ -95,6 +97,7 @@ template <class Old, class New>
   TestCase testCase;
   testCase.name() = std::move(name);
   testCase.test()->roundTrip_ref() = std::move(roundTrip);
+  testCase.description().from_optional(description);
   return testCase;
 }
 

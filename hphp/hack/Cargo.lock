@@ -1709,7 +1709,9 @@ dependencies = [
 name = "hhbc-gen"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "bitflags",
+ "cc",
  "maplit",
  "once_cell",
 ]

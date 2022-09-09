@@ -54,6 +54,18 @@ const string default_thrift_import =
 static std::string package_flag;
 
 /**
+ * get_func_name returns the name of the method defined by thrift,
+ * considering annotations (if any are set).
+ */
+const string get_func_name(const t_function* tfunction) {
+  auto func_name_override = tfunction->find_annotation_or_null("go.name");
+  if (func_name_override == nullptr) {
+    return tfunction->get_name();
+  }
+  return *func_name_override;
+}
+
+/**
  * Go code generator.
  */
 class t_go_generator : public t_concat_generator {
@@ -2987,7 +2999,8 @@ void t_go_generator::generate_run_function(
   }
 
   // Generate the function call
-  f_service_ << "err := p.handler." << publicize(tfunction->get_name()) << "(";
+  f_service_ << "err := p.handler." << publicize(get_func_name(tfunction))
+             << "(";
   if (gen_use_context_) {
     f_service_ << "ctx" << (fields.empty() ? "" : ", ");
   }
@@ -3745,7 +3758,7 @@ string t_go_generator::function_signature(
  */
 string t_go_generator::function_signature_if(
     const t_function* tfunction, string prefix, bool useContext) {
-  string signature = publicize(prefix + tfunction->get_name()) + "(";
+  string signature = publicize(prefix + get_func_name(tfunction)) + "(";
   string args = argument_list(tfunction->get_paramlist());
   if (useContext) {
     signature += "ctx context.Context";

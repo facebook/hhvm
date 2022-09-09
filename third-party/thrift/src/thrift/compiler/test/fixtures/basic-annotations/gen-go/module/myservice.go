@@ -39,7 +39,7 @@ type MyService interface {
   //  - Id
   //  - Data
   LobDataById(id int64, data string) (err error)
-  DoNothing() (err error)
+  GoDoNothing() (err error)
 }
 
 type MyServiceClientInterface interface {
@@ -60,7 +60,7 @@ type MyServiceClientInterface interface {
   //  - Id
   //  - Data
   LobDataById(id int64, data string) (err error)
-  DoNothing() (err error)
+  GoDoNothing() (err error)
 }
 
 type MyServiceClient struct {
@@ -199,7 +199,7 @@ func (p *MyServiceClient) LobDataById(id int64, data string) (err error) {
   return
 }
 
-func (p *MyServiceClient) DoNothing() (err error) {
+func (p *MyServiceClient) GoDoNothing() (err error) {
   var args MyServiceDoNothingArgs
   err = p.CC.SendMsg("doNothing", &args, thrift.CALL)
   if err != nil { return }
@@ -368,7 +368,7 @@ func (p *MyServiceThreadsafeClient) LobDataById(id int64, data string) (err erro
   return
 }
 
-func (p *MyServiceThreadsafeClient) DoNothing() (err error) {
+func (p *MyServiceThreadsafeClient) GoDoNothing() (err error) {
   p.Mu.Lock()
   defer p.Mu.Unlock()
   var args MyServiceDoNothingArgs
@@ -482,7 +482,7 @@ func (p *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
   return nil
 }
 
-func (p *MyServiceChannelClient) DoNothing(ctx context.Context) (err error) {
+func (p *MyServiceChannelClient) GoDoNothing(ctx context.Context) (err error) {
   args := MyServiceDoNothingArgs{
   }
   var __result MyServiceDoNothingResult
@@ -907,7 +907,7 @@ func (p *myServiceProcessorDoNothing) Write(seqId int32, result thrift.WritableS
 
 func (p *myServiceProcessorDoNothing) Run(argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
   var __result MyServiceDoNothingResult
-  if err := p.handler.DoNothing(); err != nil {
+  if err := p.handler.GoDoNothing(); err != nil {
     switch err.(type) {
     default:
       x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doNothing: " + err.Error(), err)

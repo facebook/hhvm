@@ -750,6 +750,20 @@
                 }
               }
             }
+,
+            "go.name" : {
+              "value" : "GoDoNothing",
+              "source_range" : {
+                "begin" : {
+                  "line" : 81,
+                  "column" : 48
+                },
+                "end" : {
+                  "line" : 81,
+                  "column" : 71
+                }
+              }
+            }
           },
           "source_range" : {
             "begin" : {
@@ -758,7 +772,7 @@
             },
             "end" : {
               "line" : 81,
-              "column" : 47
+              "column" : 72
             }
           }
         }

@@ -155,7 +155,7 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """cpp.name""": """cppDoNothing""",            },
+                """cpp.name""": """cppDoNothing""",                """go.name""": """GoDoNothing""",            },
         )
     )
     return spec

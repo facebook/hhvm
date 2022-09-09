@@ -78,7 +78,7 @@ service MyService {
     2: string data,
   );
   oneway void lobDataById(1: i64 id, 2: string data (cpp.name = "dataStr"));
-  void doNothing() (cpp.name = 'cppDoNothing');
+  void doNothing() (cpp.name = 'cppDoNothing', go.name = 'GoDoNothing');
 }
 
 service MyServicePrioParent {

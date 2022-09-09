@@ -153,17 +153,35 @@ class AsyncProcessorFactory {
           rpcKind(kind),
           priority(prio) {}
 
+    MethodMetadata(const MethodMetadata& other)
+        : executorType(other.executorType),
+          interactionType(other.interactionType),
+          rpcKind(other.rpcKind),
+          priority(other.priority) {}
+
     virtual ~MethodMetadata() = default;
 
     bool isWildcard() const {
-      // This dynamic_cast is cheap because WildcardMethodMetadata is final.
-      return dynamic_cast<const WildcardMethodMetadata*>(this);
+      if (auto status = isWildcard_.load(); status != WildcardStatus::UNKNOWN) {
+        return status == WildcardStatus::YES;
+      }
+      auto status = dynamic_cast<const WildcardMethodMetadata*>(this)
+          ? WildcardStatus::YES
+          : WildcardStatus::NO;
+      auto expected = WildcardStatus::UNKNOWN;
+      isWildcard_.compare_exchange_strong(expected, status);
+      return status == WildcardStatus::YES;
     }
 
     const ExecutorType executorType{ExecutorType::UNKNOWN};
     const InteractionType interactionType{InteractionType::UNKNOWN};
     const std::optional<RpcKind> rpcKind{};
     const std::optional<concurrency::PRIORITY> priority{};
+
+   private:
+    enum class WildcardStatus : std::uint8_t { UNKNOWN, NO, YES };
+    mutable folly::relaxed_atomic<WildcardStatus> isWildcard_{
+        WildcardStatus::UNKNOWN};
   };
 
   /**

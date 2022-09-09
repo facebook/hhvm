@@ -27,35 +27,16 @@
 struct <%program:name%>_constants {
 
 <%#program:constants%><%#constant:type%><%#constant:value%>
-<%^constant:cpp_adapter%>
-  <%^type:resolves_to_container_or_struct?%>
-    <%#type:string?%>
-  static constexpr char const * const <%constant:name%>_ = <% > common/cxx_value_prefix%><% > common/const_value%><% > common/cxx_value_suffix%>;
-  static constexpr char const * <%constant:name%>() {
+<%^constant:outline_init?%>
+  static constexpr <% > types/const_value_type%> const <%constant:name%>_ = <% > common/cxx_value_prefix%><% > common/const_value%><% > common/cxx_value_suffix%>;
+  static constexpr <% > types/const_value_type%> <%constant:name%>() {
     return <%constant:name%>_;
   }
-    <%/type:string?%>
-    <%#type:enum?%>
-  static constexpr <%type:cpp_type%> const <%constant:name%>_ = <% > common/const_value%>;
-  static constexpr <%type:cpp_type%> <%constant:name%>() {
-    return <%constant:name%>_;
-  }
-    <%/type:enum?%>
-    <%^type:string?%><%^type:enum?%>
-  static constexpr <%type:cpp_type%> const <%constant:name%>_ = <% > common/cxx_value_prefix%><% > common/const_value%><% > common/cxx_value_suffix%>;
-  static constexpr <%type:cpp_type%> <%constant:name%>() {
-    return <%constant:name%>_;
-  }
-    <%/type:enum?%><%/type:string?%>
-  <%/type:resolves_to_container_or_struct?%>
-  <%#type:resolves_to_container_or_struct?%>
-  static <%type:cpp_type%> const& <%constant:name%>();
-  <%/type:resolves_to_container_or_struct?%>
+<%/constant:outline_init?%>
+<%#constant:outline_init?%>
+  static <%constant:cpp_type%> const& <%constant:name%>();
+<%/constant:outline_init?%>
 
-<%/constant:cpp_adapter%>
-<%#constant:cpp_adapter%>
-  const static <%constant:cpp_type%>& <%constant:name%>();
-<%/constant:cpp_adapter%>
 <%/constant:value%><%/constant:type%><%/program:constants%>
 };
 

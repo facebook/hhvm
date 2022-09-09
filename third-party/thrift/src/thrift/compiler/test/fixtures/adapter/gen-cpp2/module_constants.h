@@ -14,12 +14,18 @@ namespace facebook { namespace thrift { namespace test {
 
 struct module_constants {
 
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t>& var1();
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string>& var2();
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct>& var3();
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t>& var4();
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string>& var5();
-  const static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct>& var6();
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var1();
+
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var2();
+
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var3();
+
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::int32_t> const& var4();
+
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::std::string> const& var5();
+
+  static ::apache::thrift::adapt_detail::adapted_t<MyVarAdapter, ::facebook::thrift::test::MyStruct> const& var6();
+
 };
 
 }}} // facebook::thrift::test

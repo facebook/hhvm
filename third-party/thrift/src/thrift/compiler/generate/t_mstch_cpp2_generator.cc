@@ -185,6 +185,10 @@ bool should_mangle_field_storage_name_in_struct(const t_struct& s) {
   return !s.has_annotation({"cpp.methods", "cpp2.methods"});
 }
 
+bool resolves_to_container_or_struct(const t_type* type) {
+  return type->is_container() || type->is_struct() || type->is_xception();
+}
+
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -879,8 +883,8 @@ class cpp_mstch_type : public mstch_type {
   }
   mstch::node resolves_to_container() { return resolved_type_->is_container(); }
   mstch::node resolves_to_container_or_struct() {
-    return resolved_type_->is_container() || resolved_type_->is_struct() ||
-        resolved_type_->is_xception();
+    return ::apache::thrift::compiler::resolves_to_container_or_struct(
+        resolved_type_);
   }
   mstch::node resolves_to_container_or_enum() {
     return resolved_type_->is_container() || resolved_type_->is_enum();
@@ -2057,6 +2061,7 @@ class cpp_mstch_const : public mstch_const {
             {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
+            {"constant:outline_init?", &cpp_mstch_const::outline_init},
         });
   }
   mstch::node enum_value() {
@@ -2101,6 +2106,11 @@ class cpp_mstch_const : public mstch_const {
     auto anno = cpp2::get_transitive_annotation_of_adapter_or_null(*const_);
     return std::shared_ptr<mstch_base>(std::make_shared<cpp_mstch_type>(
         &*anno->type(), context_, pos_, cpp_context_));
+  }
+  mstch::node outline_init() {
+    return resolves_to_container_or_struct(
+               const_->get_type()->get_true_type()) ||
+        cpp_context_->resolver().find_structured_adapter_annotation(*const_);
   }
 
  private:

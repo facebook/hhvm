@@ -14,4 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%^type:string_or_binary?%><%^type:enum?%>static_cast<<%type:cpp_standard_type%>>(<%/type:enum?%><%/type:string_or_binary?%>
+%><%#type:string?%>char const *<%/type:string?%><%!
+%><%^type:string?%><%constant:cpp_type%><%/type:string?%><%!
+%>

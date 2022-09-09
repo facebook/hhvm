@@ -39,13 +39,13 @@ const Mask& getMask(const MapIdToMask& map, MapId id) {
 
 void MaskRef::throwIfNotFieldMask() const {
   if (!isFieldMask()) {
-    throw std::runtime_error("not a field mask");
+    folly::throw_exception<std::runtime_error>("not a field mask");
   }
 }
 
 void MaskRef::throwIfNotMapMask() const {
   if (!isMapMask()) {
-    throw std::runtime_error("not a map mask");
+    folly::throw_exception<std::runtime_error>("not a map mask");
   }
 }
 
@@ -106,7 +106,8 @@ int64_t getIntFromValue(Value v) {
   if (v.is_i64()) {
     return v.i64Value_ref().value();
   }
-  throw std::runtime_error("mask map only works with an integer key.");
+  folly::throw_exception<std::runtime_error>(
+      "mask map only works with an integer key.");
 }
 
 // call clear based on the type of the value.
@@ -119,7 +120,8 @@ void clear(MaskRef ref, Value& value) {
     ref.clear(value.mapValue_ref().value());
     return;
   }
-  throw std::runtime_error("The mask and object are incompatible.");
+  folly::throw_exception<std::runtime_error>(
+      "The mask and object are incompatible.");
 }
 
 template <typename T, typename Id>
@@ -162,7 +164,8 @@ void copy(MaskRef ref, const Value& src, Value& dst) {
     ref.copy(src.mapValue_ref().value(), dst.mapValue_ref().value());
     return;
   }
-  throw std::runtime_error("The mask and object are incompatible.");
+  folly::throw_exception<std::runtime_error>(
+      "The mask and object are incompatible.");
 }
 
 template <typename T, typename Id>
@@ -223,7 +226,8 @@ void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
     }
     return;
   }
-  throw std::runtime_error("The mask and object are incompatible.");
+  folly::throw_exception<std::runtime_error>(
+      "The mask and object are incompatible.");
 }
 
 void MaskRef::copy(const protocol::Object& src, protocol::Object& dst) const {
@@ -288,7 +292,7 @@ std::set<Value> MaskRef::getKeysToCopy(
 
 void throwIfContainsMapMask(const Mask& mask) {
   if (mask.includes_map_ref() || mask.excludes_map_ref()) {
-    throw std::runtime_error("map mask is not implemented");
+    folly::throw_exception<std::runtime_error>("map mask is not implemented");
   }
   const FieldIdToMask& map = mask.includes_ref() ? mask.includes_ref().value()
                                                  : mask.excludes_ref().value();

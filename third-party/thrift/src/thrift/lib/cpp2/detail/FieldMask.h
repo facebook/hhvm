@@ -161,8 +161,8 @@ bool is_compatible_with(const Mask& mask) {
 template <typename T>
 void errorIfNotCompatible(const Mask& mask) {
   if (!detail::is_compatible_with<T>(mask)) {
-    // TODO: use folly::throw_exception
-    throw std::runtime_error("The mask and struct are incompatible.");
+    folly::throw_exception<std::runtime_error>(
+        "The mask and struct are incompatible.");
   }
 }
 
@@ -170,7 +170,8 @@ void errorIfNotCompatible(const Mask& mask) {
 template <typename Struct>
 void ensure_fields(MaskRef ref, Struct& t) {
   if (!validate_mask<Struct>(ref)) {
-    throw std::runtime_error("The mask and struct are incompatible.");
+    folly::throw_exception<std::runtime_error>(
+        "The mask and struct are incompatible.");
   }
   if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
     op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
@@ -190,11 +191,12 @@ void ensure_fields(MaskRef ref, Struct& t) {
         return;
       }
       if (!next.isAllMask()) {
-        throw std::runtime_error("The mask and struct are incompatible.");
+        folly::throw_exception<std::runtime_error>(
+            "The mask and struct are incompatible.");
       }
     });
   } else {
-    throw std::runtime_error("Cannot ensure a const object");
+    folly::throw_exception<std::runtime_error>("Cannot ensure a const object");
   }
 }
 
@@ -202,7 +204,8 @@ void ensure_fields(MaskRef ref, Struct& t) {
 template <typename Struct>
 void clear_fields(MaskRef ref, Struct& t) {
   if (!validate_mask<Struct>(ref)) {
-    throw std::runtime_error("The mask and struct are incompatible.");
+    folly::throw_exception<std::runtime_error>(
+        "The mask and struct are incompatible.");
   }
   if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
     op::for_each_ordinal<Struct>([&](auto fieldOrdinalTag) {
@@ -228,10 +231,11 @@ void clear_fields(MaskRef ref, Struct& t) {
         clear_fields(next, *field_value);
         return;
       }
-      throw std::runtime_error("The mask and struct are incompatible.");
+      folly::throw_exception<std::runtime_error>(
+          "The mask and struct are incompatible.");
     });
   } else {
-    throw std::runtime_error("Cannot clear a const object");
+    folly::throw_exception<std::runtime_error>("Cannot clear a const object");
   }
 }
 
@@ -255,7 +259,8 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
                 folly::remove_cvref_t<SrcStruct>,
                 folly::remove_cvref_t<DstStruct>>);
   if (!validate_mask<DstStruct>(ref)) {
-    throw std::runtime_error("The mask and struct are incompatible.");
+    folly::throw_exception<std::runtime_error>(
+        "The mask and struct are incompatible.");
   }
   if constexpr (!std::is_const_v<std::remove_reference_t<DstStruct>>) {
     bool copied = false;
@@ -309,11 +314,12 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
         }
         return;
       }
-      throw std::runtime_error("The mask and struct are incompatible.");
+      folly::throw_exception<std::runtime_error>(
+          "The mask and struct are incompatible.");
     });
     return copied;
   } else {
-    throw std::runtime_error("Cannot copy to a const field");
+    folly::throw_exception<std::runtime_error>("Cannot copy to a const field");
   }
 }
 
@@ -362,11 +368,12 @@ Mask path(
       }
     });
     if (!mask.includes_ref()) { // field not found
-      throw std::runtime_error("field doesn't exist");
+      folly::throw_exception<std::runtime_error>("field doesn't exist");
     }
     return mask;
   }
-  throw std::runtime_error("Path contains a non thrift struct field.");
+  folly::throw_exception<std::runtime_error>(
+      "Path contains a non thrift struct field.");
 }
 
 // Throws a runtime error if the mask contains a map mask.

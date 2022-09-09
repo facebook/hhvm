@@ -31,12 +31,12 @@ constexpr char const * const module_constants::A_WORD_;
 constexpr ::std::string const module_constants::SOME_BYTES_;
 
 ::py3::simple::SimpleStruct const& module_constants::A_STRUCT() {
-  static folly::Indestructible<::py3::simple::SimpleStruct> const instance(::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(static_cast<bool>(true)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(5)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(6)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(7)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(9.9))));
+  static folly::Indestructible<::py3::simple::SimpleStruct> const instance{::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(static_cast<bool>(true)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(5)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(6)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(7)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(9.9)))};
   return *instance;
 }
 
 ::std::vector<::std::string> const& module_constants::WORD_LIST() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance(std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
+  static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("quick"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("brown"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("fox"),
@@ -44,35 +44,35 @@ constexpr ::std::string const module_constants::SOME_BYTES_;
   apache::thrift::StringTraits<std::string>::fromStringLiteral("over"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("lazy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("dog")});
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("dog")}};
   return *instance;
 }
 
 ::std::vector<::std::map<::std::int32_t, double>> const& module_constants::SOME_MAP() {
-  static folly::Indestructible<::std::vector<::std::map<::std::int32_t, double>>> const instance(std::initializer_list<::std::map<::std::int32_t, double>>{std::initializer_list<std::pair<const ::std::int32_t, double>>{{1, 1.1},
+  static folly::Indestructible<::std::vector<::std::map<::std::int32_t, double>>> const instance{std::initializer_list<::std::map<::std::int32_t, double>>{std::initializer_list<std::pair<const ::std::int32_t, double>>{{1, 1.1},
   {2, 2.2}},
-  std::initializer_list<std::pair<const ::std::int32_t, double>>{{3, 3.3}}});
+  std::initializer_list<std::pair<const ::std::int32_t, double>>{{3, 3.3}}}};
   return *instance;
 }
 
 ::std::set<::std::int32_t> const& module_constants::DIGITS() {
-  static folly::Indestructible<::std::set<::std::int32_t>> const instance(std::initializer_list<::std::int32_t>{1,
+  static folly::Indestructible<::std::set<::std::int32_t>> const instance{std::initializer_list<::std::int32_t>{1,
   2,
   3,
   4,
-  5});
+  5}};
   return *instance;
 }
 
 ::std::map<::std::string, ::py3::simple::SimpleStruct> const& module_constants::A_CONST_MAP() {
-  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance(std::initializer_list<std::pair<const ::std::string, ::py3::simple::SimpleStruct>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(static_cast<bool>(false)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9)))}});
+  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance{std::initializer_list<std::pair<const ::std::string, ::py3::simple::SimpleStruct>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(static_cast<bool>(false)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9)))}}};
   return *instance;
 }
 
 ::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t> const& module_constants::ANOTHER_CONST_MAP() {
-  static folly::Indestructible<::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t>> const instance(std::initializer_list<std::pair<const ::py3::simple::AnEnumRenamed, ::std::int32_t>>{{ ::py3::simple::AnEnumRenamed::name, 0},
+  static folly::Indestructible<::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::py3::simple::AnEnumRenamed, ::std::int32_t>>{{ ::py3::simple::AnEnumRenamed::name, 0},
   { ::py3::simple::AnEnumRenamed::value, 1},
-  { ::py3::simple::AnEnumRenamed::normal, 2}});
+  { ::py3::simple::AnEnumRenamed::normal, 2}}};
   return *instance;
 }
 

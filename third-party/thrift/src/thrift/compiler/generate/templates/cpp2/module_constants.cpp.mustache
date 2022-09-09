@@ -38,13 +38,13 @@ constexpr <% > types/const_value_type%> const <%program:name%>_constants::<%cons
   <%#value:enable_referencing%>
 <%constant:cpp_type%> const& <%program:name%>_constants::<%constant:name%>() {
 <%^constant:cpp_adapter%>
-  static folly::Indestructible<<%type:cpp_type%>> const instance<%^value:default_construct?%>(<% > common/iterate_const_values_adapted%>)<%/value:default_construct?%>;
+  static folly::Indestructible<<%type:cpp_type%>> const instance{<% > common/iterate_const_values_adapted%>};
 <%/constant:cpp_adapter%>
 <%#constant:cpp_adapter%>
-  static folly::Indestructible<<%constant:cpp_type%>> const instance(
+  static folly::Indestructible<<%constant:cpp_type%>> const instance{
       <%constant:cpp_adapter%>::fromThrift(<%type:cpp_type%>(<% > common/iterate_const_values%>)<%#constant:has_extra_arg?%>,
                                            <%#constant:extra_arg%><%#constant:extra_arg_type%><% > common/iterate_const_values%><%/constant:extra_arg_type%><%/constant:extra_arg%>,
-                                           "<%constant:uri%>"<%/constant:has_extra_arg?%>));
+                                           "<%constant:uri%>"<%/constant:has_extra_arg?%>)};
 <%/constant:cpp_adapter%>
   return *instance;
 }

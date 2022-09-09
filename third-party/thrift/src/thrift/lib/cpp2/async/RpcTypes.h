@@ -75,7 +75,7 @@ struct LegacySerializedRequest {
 };
 
 struct ResponsePayload {
-  ResponsePayload() = default;
+  ResponsePayload() : buffer_(folly::IOBuf::createCombined(0)) {}
 
   std::unique_ptr<folly::IOBuf> buffer() && { return std::move(buffer_); }
 

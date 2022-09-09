@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-#include <thrift/conformance/GTestHarness.h>
 #include <thrift/conformance/PluggableFunctions.h>
-#include <thrift/conformance/Utils.h>
-#include <thrift/conformance/if/gen-cpp2/RPCConformanceServiceAsyncClient.h>
 
 namespace apache::thrift::conformance {
 
-template <>
-std::unique_ptr<Client<RPCConformanceService>>
-createClient<Client<RPCConformanceService>>(std::string service_name) {
-  return create_rpc_conformance_service_client_(service_name);
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<Client<ConformanceService>>,
+    create_conformance_service_client_,
+    std::string /*service_name or smc tier*/) {
+  throw std::invalid_argument(
+      "Unimplemented Method create_conformance_service_client_");
 }
 
-// Register the tests with gtest.
-THRIFT_CONFORMANCE_TEST(
-    getSuites(),
-    getServers<Client<RPCConformanceService>>(ChannelType::Rocket),
-    getNonconforming());
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<Client<RPCConformanceService>>,
+    create_rpc_conformance_service_client_,
+    std::string /*service_name or smc tier*/) {
+  throw std::invalid_argument(
+      "Unimplemented Method create_rpc_conformance_service_client_");
+}
 
 } // namespace apache::thrift::conformance

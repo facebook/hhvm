@@ -87,6 +87,12 @@ std::unique_ptr<Client> createClient(
       }));
 }
 
+// Creates a client for the localhost.
+template <typename Client>
+std::unique_ptr<Client> createClient(std::string) {
+  throw std::invalid_argument("Unimplemented Method createClient");
+}
+
 // Bundles a server process and client.
 template <typename Client>
 class ClientAndServer {
@@ -151,6 +157,26 @@ client_fn_map<Client> getServers(ChannelType type = ChannelType::Header) {
                 std::make_unique<ClientAndServer<Client>>(cmd, type));
           }
           return itr->second->getClient();
+        });
+  }
+  auto servers = parseCmds(getEnvOrThrow("THRIFT_CONFORMANCE_SERVERS"));
+  for (const auto& entry : servers) {
+    result.emplace(
+        entry.first,
+        [name = std::string(entry.first),
+         server = std::string(entry.second)]() -> Client& {
+          static folly::Synchronized<
+              std::map<std::string_view, std::unique_ptr<Client>>>
+              clients;
+          auto lockedClients = clients.wlock();
+
+          // Get or create Client in the static map.
+          auto itr = lockedClients->find(name);
+          if (itr == lockedClients->end()) {
+            itr = lockedClients->emplace_hint(
+                itr, name, createClient<Client>(server));
+          }
+          return *itr->second;
         });
   }
   return result;

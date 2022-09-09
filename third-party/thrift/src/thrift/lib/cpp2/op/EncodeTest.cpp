@@ -541,7 +541,29 @@ void testDecodeStruct() {
 template <conformance::StandardProtocol Protocol>
 void testDecodeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  // test cpp_type with primitive type
   testDecode<Protocol, type::cpp_type<int, type::i16_t>>(1);
+  {
+    // test cpp_type with list
+    using T = std::deque<int64_t>;
+    auto value = T{1, 2, 3};
+    using Tag = type::list<type::i64_t>;
+    testDecode<Protocol, type::cpp_type<T, Tag>>(value);
+  }
+  {
+    // test cpp_type with set
+    using T = std::unordered_set<std::string>;
+    auto value = T{"foo", "bar"};
+    using Tag = type::set<type::string_t>;
+    testDecode<Protocol, type::cpp_type<T, Tag>>(value);
+  }
+  {
+    // test cpp_type with map
+    using T = std::unordered_map<std::string, int32_t>;
+    auto value = T{{"foo", 1}, {"bar", 2}};
+    using Tag = type::map<type::string_t, type::i32_t>;
+    testDecode<Protocol, type::cpp_type<T, Tag>>(value);
+  }
 }
 
 template <conformance::StandardProtocol Protocol>

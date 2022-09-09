@@ -609,8 +609,7 @@ struct Decode<type::enum_t<T>> {
 // TODO: add optimization used in protocol_methods.h
 template <typename Tag>
 struct Decode<type::list<Tag>> {
-  using ListType = type::native_type<type::list<Tag>>;
-  template <typename Protocol>
+  template <typename Protocol, typename ListType>
   void operator()(Protocol& prot, ListType& list) const {
     TType t;
     uint32_t s;
@@ -632,8 +631,7 @@ struct Decode<type::list<Tag>> {
 
 template <typename Tag>
 struct Decode<type::set<Tag>> {
-  using SetType = type::native_type<type::set<Tag>>;
-  template <typename Protocol>
+  template <typename Protocol, typename SetType>
   void operator()(Protocol& prot, SetType& set) const {
     TType t;
     uint32_t s;
@@ -656,8 +654,7 @@ struct Decode<type::set<Tag>> {
 
 template <typename Key, typename Value>
 struct Decode<type::map<Key, Value>> {
-  using MapType = type::native_type<type::map<Key, Value>>;
-  template <typename Protocol>
+  template <typename Protocol, typename MapType>
   void operator()(Protocol& prot, MapType& map) const {
     TType keyType, valueType;
     uint32_t s;
@@ -681,7 +678,6 @@ struct Decode<type::map<Key, Value>> {
   }
 };
 
-// TODO: Handle cpp_type with containers that cannot use static_cast.
 template <typename T, typename Tag>
 struct Decode<type::cpp_type<T, Tag>> {
   template <typename Protocol>
@@ -691,6 +687,16 @@ struct Decode<type::cpp_type<T, Tag>> {
     t = static_cast<T>(u);
   }
 };
+
+template <typename T, typename Tag>
+struct Decode<type::cpp_type<T, type::list<Tag>>> : Decode<type::list<Tag>> {};
+
+template <typename T, typename Tag>
+struct Decode<type::cpp_type<T, type::set<Tag>>> : Decode<type::set<Tag>> {};
+
+template <typename T, typename Key, typename Value>
+struct Decode<type::cpp_type<T, type::map<Key, Value>>>
+    : Decode<type::map<Key, Value>> {};
 
 // TODO: Use inplace adapter deserialization as optimization.
 template <typename Adapter, typename Tag>

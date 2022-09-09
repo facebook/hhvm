@@ -54,15 +54,20 @@ struct ApplyPatch {
  */
 FOLLY_INLINE_VARIABLE constexpr detail::ApplyPatch applyPatch{};
 
+struct ExtractedMasks {
+  Mask read; // read mask from patch
+  Mask write; // write mask from patch
+};
+
 // Constructs a Mask that only contains fields that are modified by the Patch.
 // It will construct nested Mask for map and object patches.
 // For map, it uses the address of Value key as the key for the mask.
 // Note that Mask contains pointer to `protocol::Value` in patch, so
 // caller needs to make sure Patch has longer lifetime than the mask.
-Mask extractMaskFromPatch(const protocol::Object& patch);
+ExtractedMasks extractMaskFromPatch(const protocol::Object& patch);
 
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
-protocol::Mask extractMaskFromPatch(Object&& patch) = delete;
+ExtractedMasks extractMaskFromPatch(Object&& patch) = delete;
 
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(

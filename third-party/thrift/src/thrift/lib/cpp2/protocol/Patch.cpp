@@ -464,71 +464,112 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
   }
 }
 
-// Returns the map mask for the given key.
-Mask& getMapMaskByValue(Mask& mask, const Value& newKey) {
-  if (mask.includes_map_ref()) {
-    // Need to check if mask has the same key already.
-    for (auto& [key, next] : mask.includes_map_ref().value()) {
-      if (*(reinterpret_cast<Value*>(key)) == newKey) {
-        return next;
-      }
-    }
+// Returns the MapId for the given key.
+int64_t getMapIdByValue(Mask& mask, const Value& newKey) {
+  int64_t mapId = reinterpret_cast<int64_t>(&newKey);
+  if (!mask.includes_map_ref()) {
+    return mapId;
   }
-  return mask.includes_map_ref().ensure()[reinterpret_cast<int64_t>(&newKey)];
+  const auto& includes = *mask.includes_map_ref();
+  auto it =
+      std::find_if(includes.begin(), includes.end(), [&newKey](const auto& kv) {
+        return *(reinterpret_cast<Value*>(kv.first)) == newKey;
+      });
+  return it == includes.end() ? mapId : it->first;
+}
+
+// Inserts the next mask to getIncludesRef(mask)[id].
+// Skips if mask is allMask (already includes all fields), or next is noneMask.
+template <typename Id, typename F>
+void insertMask(Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
+  if (mask != allMask() && next != noneMask()) {
+    getIncludesRef(mask).ensure()[id] = next;
+  }
+}
+
+template <typename Id, typename F>
+void insertNextMask(
+    ExtractedMasks& masks,
+    const Value& nextPatch,
+    Id readId,
+    Id writeId,
+    bool recursive,
+    const F& getIncludesRef) {
+  if (recursive) {
+    auto nextMasks = extractMaskFromPatch(nextPatch.as_object());
+    insertMask(masks.read, readId, nextMasks.read, getIncludesRef);
+    insertMask(masks.write, writeId, nextMasks.write, getIncludesRef);
+  } else {
+    insertMask(masks.read, readId, allMask(), getIncludesRef);
+    insertMask(masks.write, writeId, allMask(), getIncludesRef);
+  }
 }
 
 // if recursive, it constructs the mask from the patch object for the field.
-void insertFieldsToMask(Mask& mask, const Value& patchFields, bool recursive) {
+void insertFieldsToMask(
+    ExtractedMasks& masks, const Value& patchFields, bool recursive) {
+  auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
   if (auto* obj = patchFields.if_object()) {
     for (const auto& [id, value] : *obj) {
-      Mask& next = mask.includes_ref().ensure()[id];
-      next = recursive ? extractMaskFromPatch(value.as_object()) : allMask();
+      insertNextMask(masks, value, id, id, recursive, [&](Mask& mask) {
+        return mask.includes_ref();
+      });
     }
   } else if (auto* map = patchFields.if_map()) {
     for (const auto& [key, value] : *map) {
-      Mask& next = getMapMaskByValue(mask, key);
-      next = recursive ? extractMaskFromPatch(value.as_object()) : allMask();
+      auto readId = getMapIdByValue(masks.read, key);
+      auto writeId = getMapIdByValue(masks.write, key);
+      insertNextMask(
+          masks, value, readId, writeId, recursive, getIncludesMapRef);
     }
   } else { // set of map keys (Remove)
     for (const auto& key : patchFields.as_set()) {
-      getMapMaskByValue(mask, key) = allMask();
+      auto readId = getMapIdByValue(masks.read, key);
+      auto writeId = getMapIdByValue(masks.write, key);
+      insertMask(masks.read, readId, allMask(), getIncludesMapRef);
+      insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
     }
   }
 }
 
 // TODO: Handle EnsureUnion
-Mask extractMaskFromPatch(const protocol::Object& patch) {
-  // If Assign, it is modified.
+ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
+  ExtractedMasks masks = {noneMask(), noneMask()};
+  // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
-    return allMask();
+    masks = {noneMask(), allMask()};
   }
-  // If Clear or Add, it is modified if not intristic default.
-  for (auto op : {PatchOp::Clear, PatchOp::Add}) {
-    if (auto* value = findOp(patch, op)) {
-      if (!isIntrinsicDefault(*value)) {
-        return allMask();
-      }
+  // If Clear, it is a write operation if not intristic default.
+  if (auto* clear = findOp(patch, PatchOp::Clear)) {
+    if (!isIntrinsicDefault(*clear)) {
+      masks = {noneMask(), allMask()};
+    }
+  }
+  // If Add, it is a read-write operation if not intristic default.
+  if (auto* add = findOp(patch, PatchOp::Add)) {
+    if (!isIntrinsicDefault(*add)) {
+      return {allMask(), allMask()};
     }
   }
 
-  Mask mask = noneMask();
-  // Put should return allMask if not a map patch. Otherwise add keys to mask.
+  // Put is a read-write operation if not a map patch. Otherwise add keys to
+  // mask.
   if (auto* value = findOp(patch, PatchOp::Put)) {
     if (value->mapValue_ref()) {
-      insertFieldsToMask(mask, *value, false);
+      insertFieldsToMask(masks, *value, false);
     } else if (!isIntrinsicDefault(*value)) {
-      return allMask();
+      return {allMask(), allMask()};
     }
   }
   // Remove always adds keys to map mask. All types (list, set, and map) use
   // a set for Remove, so they are indistinguishable.
   if (auto* value = findOp(patch, PatchOp::Remove)) {
-    insertFieldsToMask(mask, *value, false);
+    insertFieldsToMask(masks, *value, false);
   }
 
   // If EnsureStruct, add the fields/ keys to mask
   if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
-    insertFieldsToMask(mask, *ensureStruct, false);
+    insertFieldsToMask(masks, *ensureStruct, false);
   }
 
   // If Patch or PatchAfter, recursively constructs the mask for the fields.
@@ -536,16 +577,16 @@ Mask extractMaskFromPatch(const protocol::Object& patch) {
   // map (both uses a map), we just treat it as a map patch.
   for (auto op : {PatchOp::Patch, PatchOp::PatchAfter}) {
     if (auto* patchFields = findOp(patch, op)) {
-      insertFieldsToMask(mask, *patchFields, true);
+      insertFieldsToMask(masks, *patchFields, true);
     }
   }
 
-  return mask;
+  return masks;
 }
 
 } // namespace detail
 
-Mask extractMaskFromPatch(const protocol::Object& patch) {
+ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
   return detail::extractMaskFromPatch(patch);
 }
 
@@ -564,8 +605,9 @@ std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
       Protocol == type::StandardProtocol::Binary,
       BinaryProtocolWriter,
       CompactProtocolWriter>;
-  Mask mask = protocol::extractMaskFromPatch(patch);
-  MaskedDecodeResult result = parseObject<ProtocolReader>(buf, mask);
+  auto masks = protocol::extractMaskFromPatch(patch);
+  MaskedDecodeResult result =
+      parseObject<ProtocolReader>(buf, masks.read, masks.write);
   applyPatch(patch, result.included);
   return serializeObject<ProtocolWriter>(result.included, result.excluded);
 }

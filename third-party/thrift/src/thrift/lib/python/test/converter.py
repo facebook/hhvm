@@ -21,6 +21,7 @@ import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.python.converter import to_python_struct
+from thrift.python.types import BadEnum
 
 
 class Py3ToPythonConverterTest(unittest.TestCase):
@@ -278,6 +279,26 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         )
         self.assertEqual(tomahto.to, 42)
         self.assertEqual(tomahto.mahto, "mahto")
+
+    def test_py_bad_enum(self) -> None:
+        simple = py_deprecated_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=[1, 2, 3],
+            strSet={"hello", "world"},
+            strToIntMap={"one": 1, "two": 2},
+            color=1234,  # pyre-ignore[6]: In call `py_deprecated_types.Simple.__init__`, for 6th parameter `color` expected `Optional[Color]` but got `int`.
+            name="myname",
+        )._to_python()
+        self.assertIsInstance(simple.color, BadEnum)
+        self.assertEqual(
+            # pyre-ignore[16]: `python_types.Color` has no attribute `enum`. It's actually a BadEnum.
+            simple.color.enum,
+            python_types.Color,
+        )
+
+        # pyre-ignore[6]: This is a BadEnum not an enum, so it can have int called on it
+        self.assertEqual(int(simple.color), 1234)
 
     def test_union_with_mismatching_field(self) -> None:
         po = to_python_struct(

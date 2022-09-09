@@ -365,6 +365,8 @@ cdef class EnumTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
+        if isinstance(value, BadEnum):
+            return int(value)
         if not isinstance(value, self._class):
             raise TypeError(f"value {value} is not '{self._class}'.")
         return value._value_

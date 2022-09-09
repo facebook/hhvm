@@ -23,6 +23,7 @@ from thrift.python.types cimport (
     SetTypeInfo,
     MapTypeInfo,
     EnumTypeInfo,
+    BadEnum,
 )
 cimport thrift.py3.types as py3_types
 
@@ -100,6 +101,9 @@ cdef object _to_python_field(object obj, object type_info):
             for k, v in obj.items()
         }
     elif isinstance(type_info, EnumTypeInfo):
-        return (<EnumTypeInfo>type_info)._class(int(obj))
+        try:
+            return (<EnumTypeInfo>type_info)._class(int(obj))
+        except ValueError:
+            return BadEnum((<EnumTypeInfo>type_info)._class, int(obj))
     else:
         return obj

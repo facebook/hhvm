@@ -899,11 +899,9 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   void stopDuplex(std::shared_ptr<ThriftServer> thisServer);
 
-  void setEnableCodel(bool enableCodel) override final {
-    THRIFT_SERVER_EVENT(call.setEnableCodel).log(*this, [enableCodel]() {
-      return folly::dynamic::object("enableCodel", enableCodel);
-    });
-    BaseThriftServer::setEnableCodel(enableCodel);
+  void setEnableCodel(bool) override final {
+    LOG(INFO) << "setEnableCodel has been deprecated "
+              << "and treated as a no-op operation";
   }
 
   void setQueueTimeout(std::chrono::milliseconds timeout) override final {

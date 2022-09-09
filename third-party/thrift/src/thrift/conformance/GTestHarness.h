@@ -198,20 +198,20 @@ template <typename Client>
 class ConformanceTest : public testing::Test {
  public:
   ConformanceTest(
-      Client* client,
-      const TestSuite* suite,
-      const conformance::Test* test,
-      const TestCase* testCase,
+      Client& client,
+      const TestSuite& suite,
+      const conformance::Test& test,
+      const TestCase& testCase,
       bool conforming)
       : client_(client),
-        suite_(*suite),
-        test_(*test),
-        testCase_(*testCase),
+        suite_(suite),
+        test_(test),
+        testCase_(testCase),
         conforming_(conforming) {}
 
  protected:
   void TestBody() override {
-    testing::AssertionResult conforming = runTestCase(*client_, testCase_);
+    testing::AssertionResult conforming = runTestCase(client_, testCase_);
     if (conforming_) {
       EXPECT_TRUE(conforming) << "For more detail see:"
                               << std::endl
@@ -228,8 +228,7 @@ class ConformanceTest : public testing::Test {
   }
 
  private:
-  Client* const client_;
-
+  Client& client_;
   const TestSuite& suite_;
   const conformance::Test& test_;
   const TestCase& testCase_;
@@ -276,15 +275,15 @@ testing::AssertionResult runTestCase(Client& client, const TestCase& testCase) {
 template <typename Client>
 void registerTests(
     std::string_view category,
-    const TestSuite* suite,
+    const TestSuite& suite,
     const std::set<std::string>& nonconforming,
     std::function<Client&()> clientFn,
     const char* file,
     int line) {
-  for (const auto& test : *suite->tests()) {
+  for (const auto& test : *suite.tests()) {
     for (const auto& testCase : *test.testCases()) {
       std::string suiteName =
-          fmt::format("{}/{}/{}", category, *suite->name(), *testCase.name());
+          fmt::format("{}/{}/{}", category, *suite.name(), *testCase.name());
       std::string fullName = fmt::format("{}.{}", suiteName, *test.name());
       bool conforming = nonconforming.find(fullName) == nonconforming.end();
       registerTest(
@@ -294,9 +293,9 @@ void registerTests(
           conforming ? nullptr : "nonconforming",
           file,
           line,
-          [&test, &testCase, suite, clientFn, conforming]() {
+          [clientFn, &suite, &test, &testCase, conforming]() {
             return new ConformanceTest<Client>(
-                &clientFn(), suite, &test, &testCase, conforming);
+                clientFn(), suite, test, testCase, conforming);
           });
     }
   }
@@ -317,7 +316,7 @@ class ConformanceTestRegistration {
     for (const auto& entry : clientFns) {
       for (const auto& suite : suites_) {
         registerTests<Client>(
-            entry.first, &suite, nonconforming, entry.second, file, line);
+            entry.first, suite, nonconforming, entry.second, file, line);
       }
     }
   }

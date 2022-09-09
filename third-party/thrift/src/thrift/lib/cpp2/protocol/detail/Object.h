@@ -476,9 +476,6 @@ void setMaskedDataFull(
       type::ValueId{apache::thrift::util::i32ToZigzag(values.size() - 1)};
 }
 
-// Returns the map mask for the given key.
-int64_t getMaskKey(MaskRef ref, const Value& newKey);
-
 // parseValue with readMask and writeMask
 template <typename Protocol>
 MaskedDecodeResultValue parseValue(
@@ -541,9 +538,10 @@ MaskedDecodeResultValue parseValue(
       prot.readMapBegin(keyType, valType, size);
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
-        MaskRef nextRead = readMask.get(MapId{getMaskKey(readMask, keyValue)});
+        MaskRef nextRead =
+            readMask.get(findMapIdByValue(readMask.mask, keyValue));
         MaskRef nextWrite =
-            writeMask.get(MapId{getMaskKey(writeMask, keyValue)});
+            writeMask.get(findMapIdByValue(writeMask.mask, keyValue));
         MaskedDecodeResultValue nestedResult = parseValue(
             prot, valType, nextRead, nextWrite, protocolData, string_to_binary);
         // Set nested MaskedDecodeResult if not empty.

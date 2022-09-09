@@ -463,21 +463,6 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     applyFieldPatch(patchFields);
   }
 }
-
-// Returns the MapId for the given key.
-int64_t getMapIdByValue(Mask& mask, const Value& newKey) {
-  int64_t mapId = reinterpret_cast<int64_t>(&newKey);
-  if (!mask.includes_map_ref()) {
-    return mapId;
-  }
-  const auto& includes = *mask.includes_map_ref();
-  auto it =
-      std::find_if(includes.begin(), includes.end(), [&newKey](const auto& kv) {
-        return *(reinterpret_cast<Value*>(kv.first)) == newKey;
-      });
-  return it == includes.end() ? mapId : it->first;
-}
-
 // Inserts the next mask to getIncludesRef(mask)[id].
 // Skips if mask is allMask (already includes all fields), or next is noneMask.
 template <typename Id, typename F>
@@ -517,15 +502,15 @@ void insertFieldsToMask(
     }
   } else if (auto* map = patchFields.if_map()) {
     for (const auto& [key, value] : *map) {
-      auto readId = getMapIdByValue(masks.read, key);
-      auto writeId = getMapIdByValue(masks.write, key);
+      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
+      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
       insertNextMask(
           masks, value, readId, writeId, recursive, getIncludesMapRef);
     }
   } else { // set of map keys (Remove)
     for (const auto& key : patchFields.as_set()) {
-      auto readId = getMapIdByValue(masks.read, key);
-      auto writeId = getMapIdByValue(masks.write, key);
+      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
+      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
       insertMask(masks.read, readId, allMask(), getIncludesMapRef);
       insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
     }

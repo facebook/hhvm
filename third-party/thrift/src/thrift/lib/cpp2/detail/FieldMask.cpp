@@ -297,4 +297,18 @@ void throwIfContainsMapMask(const Mask& mask) {
   }
 }
 
+// Returns the MapId for the given key.
+MapId findMapIdByValue(const Mask& mask, const Value& newKey) {
+  MapId mapId = MapId{reinterpret_cast<int64_t>(&newKey)};
+  if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {
+    return mapId;
+  }
+  const auto& mapIdToMask = mask.includes_map_ref() ? *mask.includes_map_ref()
+                                                    : *mask.excludes_map_ref();
+  auto it = std::find_if(
+      mapIdToMask.begin(), mapIdToMask.end(), [&newKey](const auto& kv) {
+        return *(reinterpret_cast<Value*>(kv.first)) == newKey;
+      });
+  return it == mapIdToMask.end() ? mapId : MapId{it->first};
+}
 } // namespace apache::thrift::protocol::detail

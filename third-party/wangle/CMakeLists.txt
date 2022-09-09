@@ -18,17 +18,9 @@ get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  WANGLE_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/wangle/releases/download/v2022.07.04.00/wangle-v2022.07.04.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=8c7b538f9e9d84162056d6dc757bea1d0d4c0978889469f10e9d05b1dc4e5a83"
-)
-
 ExternalProject_Add(
   bundled_wangle
-  ${WANGLE_SOURCE_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"

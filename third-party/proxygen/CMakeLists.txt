@@ -16,17 +16,9 @@ get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  PROXYGEN_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/proxygen/releases/download/v2022.07.04.00/proxygen-v2022.07.04.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=4de47545a5beb9f3ac2ccdd62ae9def112b3cc361bb71820b9306a04f4bb40e9"
-)
-
 ExternalProject_Add(
   bundled_proxygen
-  ${PROXYGEN_SOURCE_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"

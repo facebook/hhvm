@@ -78,6 +78,7 @@ template <typename TT>
 Test createToleranceTest(const Protocol& protocol) {
   Test test;
   test.name() = protocol.name();
+  test.tags()->emplace("spec/definition/tolerance/");
 
   auto addToTest = [&](std::vector<TestCase>&& tests) {
     for (auto& t : tests) {

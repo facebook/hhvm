@@ -63,6 +63,8 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
 
   static constexpr bool kHasIndexSupport() { return true; }
 
+  static constexpr uint32_t kEmptyStructSize() { return 1; }
+
   /**
    * ...
    * The IOBuf itself is managed by the caller.
@@ -152,6 +154,9 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
 
   // Get last n bytes we just wrote
   folly::io::Cursor tail(size_t n);
+
+  // Rewind last n bytes and clean up.
+  void rewind(uint32_t n);
 
  private:
   template <bool kWriteSize>

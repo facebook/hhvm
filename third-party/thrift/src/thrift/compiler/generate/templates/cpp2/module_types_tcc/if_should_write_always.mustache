@@ -15,8 +15,9 @@
   limitations under the License.
 
   // Note: terse_writes is mutually exclusive with optional.
-%>
-<%#struct:union?%>
+%><%!
+TODO(dokwon): Remove this after serializedSize and serializedSizeZC optimization for terse struct field.
+%><%#struct:union?%>
     case <%struct:cpp_underlying_name%>::Type::<%field:cpp_name%>:
     {
 <%/struct:union?%>
@@ -29,8 +30,8 @@
 %>if (<%#field:lazy?%>!(__fbthrift_isDeserialized_.<%field:cpp_name%> & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
       <%/field:lazy?%><% > module_types_tcc/deprecated_terse_has_value %>) <%!
 %><%/field:deprecated_terse_writes?%><%!
-%><%#field:terse_not_struct?%><%!
+%><%#field:terse?%><%!
 %>if (<%#field:lazy?%>!(__fbthrift_isDeserialized_.<%field:cpp_name%> & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
       <%/field:lazy?%><% > module_types_tcc/terse_has_value %>) <%!
-%><%/field:terse_not_struct?%>{
+%><%/field:terse?%>{
 <%/struct:union?%>

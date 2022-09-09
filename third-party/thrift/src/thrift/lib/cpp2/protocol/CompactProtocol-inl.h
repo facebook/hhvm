@@ -153,7 +153,7 @@ inline uint32_t CompactProtocolWriter::writeFieldBeginInternal(
     wsize += writeByte(typeToWrite);
     wsize += writeI16(fieldId);
   }
-
+  lastWrittenFieldId_ = lastFieldId_;
   lastFieldId_ = fieldId;
   return wsize;
 }
@@ -374,6 +374,12 @@ inline folly::io::Cursor CompactProtocolWriter::tail(size_t n) {
   auto cursor = RWCursor(out_);
   cursor.advanceToEnd();
   return {cursor - n, n};
+}
+
+inline void CompactProtocolWriter::rewind(uint32_t n) {
+  out_.trimEnd(n);
+  // Clean up context.
+  lastFieldId_ = lastWrittenFieldId_;
 }
 
 /**

@@ -18,9 +18,17 @@
 <%#field:type%>
 <% > module_types_tcc/if_should_write%>
 <%#struct:union?%>  <%/struct:union?%>    constexpr int16_t kPrevFieldId = <%#first?%><%#struct:indexing?%>::apache::thrift::detail::kSizeField.id<%/struct:indexing?%><%^struct:indexing?%>0<%/struct:indexing?%><%/first?%><%^first?%><%field:serialization_prev_field_key%><%/first?%>;
+<%#field:terse_struct?%>
+<%#struct:union?%>  <%/struct:union?%>    uint32_t xfer_before_field_begin = xfer;
+<%/field:terse_struct?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::<% > module_types_tcc/struct_type%>, <%field:key%>, kPrevFieldId>(*prot_, "<%field:name%>", <%^struct:union?%>previousFieldHasValue<%/struct:union?%><%#struct:union?%>false<%/struct:union?%>);
 <%^struct:union?%>
+<%#field:terse_struct?%>
+<%#struct:union?%>  <%/struct:union?%>    uint32_t xfer_after_field_begin = xfer;
+<%/field:terse_struct?%>
+<%^field:terse_struct?%>
 <%#struct:union?%>  <%/struct:union?%>    previousFieldHasValue = true;
+<%/field:terse_struct?%>
 <%/struct:union?%>
 <%#field:lazy?%>
 <%#struct:union?%>  <%/struct:union?%>    indexWriter.recordFieldStart();
@@ -71,7 +79,12 @@
 <%#struct:union?%>  <%/struct:union?%>    written_lazy_field_<%field:cpp_name%>:
 <%#struct:union?%>  <%/struct:union?%>    indexWriter.template recordFieldEnd<decltype(<% > module_types_tcc/pm_value%>)>(<%type:type_class_with_indirection%>{}, <%field:key%>);
 <%/field:lazy?%>
+<%#field:terse_struct?%>
+<%#struct:union?%>  <%/struct:union?%>    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+<%/field:terse_struct?%>
+<%^field:terse_struct?%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += prot_->writeFieldEnd();
+<%/field:terse_struct?%>
 <%#struct:union?%>
 <% > module_types_tcc/if_should_write_end%>
 <%/struct:union?%>
@@ -86,13 +99,13 @@
     previousFieldHasValue = false;
   }
 <%/field:deprecated_terse_writes?%>
-<%#field:terse?%>
+<%#field:terse_not_struct?%>
   } else {
     previousFieldHasValue = false;
   }
-<%/field:terse?%>
-<%^field:optional?%><%^field:deprecated_terse_writes?%><%^field:terse?%>
+<%/field:terse_not_struct?%>
+<%^field:optional?%><%^field:deprecated_terse_writes?%><%^field:terse_not_struct?%>
   }
-<%/field:terse?%><%/field:deprecated_terse_writes?%><%/field:optional?%>
+<%/field:terse_not_struct?%><%/field:deprecated_terse_writes?%><%/field:optional?%>
 <%/struct:union?%>
 <%/field:type%>

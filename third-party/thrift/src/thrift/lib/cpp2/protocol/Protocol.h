@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -340,6 +341,28 @@ struct StringTraits<std::unique_ptr<folly::IOBuf>> {
     return folly::IOBufLess{}(lhs, rhs);
   }
 };
+
+/**
+ * Rewind the underlying buffer if a struct field is empty.
+ */
+template <class Protocol_>
+inline void rewindIfEmptyStructField(
+    Protocol_& prot,
+    bool& previousFieldHasValue,
+    uint32_t& xfer,
+    uint32_t xfer_after_field_begin,
+    uint32_t xfer_before_field_begin) {
+  if (xfer == xfer_after_field_begin + Protocol_::kEmptyStructSize()) {
+    // Finish writing struct field.
+    xfer += prot.writeFieldEnd();
+    prot.rewind(xfer - xfer_before_field_begin);
+    xfer = xfer_before_field_begin;
+    previousFieldHasValue = false;
+  } else {
+    xfer += prot.writeFieldEnd();
+    previousFieldHasValue = true;
+  }
+}
 
 } // namespace thrift
 } // namespace apache

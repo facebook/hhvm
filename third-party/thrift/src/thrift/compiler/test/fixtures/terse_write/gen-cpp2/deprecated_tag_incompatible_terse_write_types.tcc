@@ -861,14 +861,13 @@ uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::empty(this->__fbthrift_field_struct_field))) {
+  {
     constexpr int16_t kPrevFieldId = 13;
+    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
-    previousFieldHasValue = true;
+    uint32_t xfer_after_field_begin = xfer;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
-    xfer += prot_->writeFieldEnd();
-  } else {
-    previousFieldHasValue = false;
+    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -1916,14 +1915,13 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::empty(this->__fbthrift_field_terse_struct_field))) {
+  {
     constexpr int16_t kPrevFieldId = 13;
+    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "terse_struct_field", previousFieldHasValue);
-    previousFieldHasValue = true;
+    uint32_t xfer_after_field_begin = xfer;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyStruct>::write(*prot_, this->__fbthrift_field_terse_struct_field);
-    xfer += prot_->writeFieldEnd();
-  } else {
-    previousFieldHasValue = false;
+    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   {
     constexpr int16_t kPrevFieldId = 14;
@@ -2638,14 +2636,13 @@ uint32_t TerseStructWithCustomDefault::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::empty(this->__fbthrift_field_struct_field))) {
+  {
     constexpr int16_t kPrevFieldId = 13;
+    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
-    previousFieldHasValue = true;
+    uint32_t xfer_after_field_begin = xfer;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyStructWithCustomDefault>::write(*prot_, this->__fbthrift_field_struct_field);
-    xfer += prot_->writeFieldEnd();
-  } else {
-    previousFieldHasValue = false;
+    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

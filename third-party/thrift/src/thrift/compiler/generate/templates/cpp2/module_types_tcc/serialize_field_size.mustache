@@ -16,7 +16,7 @@
 
 %>
 <%#field:type%>
-<% > module_types_tcc/if_should_write%>
+<% > module_types_tcc/if_should_write_always%>
 <%#struct:union?%>  <%/struct:union?%>    xfer += prot_->serializedFieldSize("<%field:name%>", apache::thrift::protocol::<% > module_types_tcc/struct_type%>, <%field:key%>);
 <%^field:non_opt_cpp_ref?%>
 <%#struct:cpp_use_op_encode%>

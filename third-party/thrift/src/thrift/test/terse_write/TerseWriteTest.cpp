@@ -456,6 +456,47 @@ TYPED_TEST_P(
   EXPECT_EQ(obj, objd);
 }
 
+TYPED_TEST_P(TerseWriteSerializerTests, TerseStructs) {
+  SCOPED_TRACE(folly::pretty_name<TypeParam>());
+  terse_write::EmptyStruct empty;
+  terse_write::TerseStructs obj;
+  // 'TerseStruct1' has 'field1'.
+  terse_write::TerseStructs1 obj1;
+  // 'TerseStruct2' has 'field2'.
+  terse_write::TerseStructs2 obj2;
+  // 'TerseStruct3' has 'field3'.
+  terse_write::TerseStructs3 obj3;
+
+  EXPECT_EQ(
+      TypeParam::template serialize<std::string>(obj),
+      TypeParam::template serialize<std::string>(empty));
+
+  obj.field1()->field1() = 1;
+  obj1.field1()->field1() = 1;
+
+  EXPECT_EQ(
+      TypeParam::template serialize<std::string>(obj),
+      TypeParam::template serialize<std::string>(obj1));
+
+  apache::thrift::clear(obj);
+
+  obj.field2()->field1() = 1;
+  obj2.field2()->field1() = 1;
+
+  EXPECT_EQ(
+      TypeParam::template serialize<std::string>(obj),
+      TypeParam::template serialize<std::string>(obj2));
+
+  apache::thrift::clear(obj);
+
+  obj.field3()->field1() = 1;
+  obj3.field3()->field1() = 1;
+
+  EXPECT_EQ(
+      TypeParam::template serialize<std::string>(obj),
+      TypeParam::template serialize<std::string>(obj3));
+}
+
 TYPED_TEST_P(TerseWriteSerializerTests, AdaptedFields) {
   terse_write::AdaptedFields obj;
   terse_write::EmptyStruct empty;
@@ -601,6 +642,7 @@ REGISTER_TYPED_TEST_CASE_P(
     TerseStructWithCustomDefault,
     TerseStructWithCustomDefaultDeserialization,
     TerseStructWithCustomDefaultClearTerseFields,
+    TerseStructs,
     TableBasedTerseStructWithCustomDefaultDeserialization);
 
 using Serializers = ::testing::Types<

@@ -1639,6 +1639,8 @@ class cpp_mstch_field : public mstch_field {
             {"field:raw_binary?", &cpp_mstch_field::raw_binary},
             {"field:raw_string_or_binary?",
              &cpp_mstch_field::raw_string_or_binary},
+            {"field:terse_struct?", &cpp_mstch_field::terse_struct},
+            {"field:terse_not_struct?", &cpp_mstch_field::terse_not_struct},
         });
     register_has_option("field:deprecated_clear?", "deprecated_clear");
   }
@@ -1886,6 +1888,18 @@ class cpp_mstch_field : public mstch_field {
   mstch::node raw_string_or_binary() {
     return field_->type()->get_true_type()->is_string_or_binary() &&
         !gen::cpp::type_resolver::find_first_adapter(*field_);
+  }
+
+  mstch::node terse_struct() {
+    const auto* ttype = field_->type()->get_true_type();
+    return (ttype->is_struct() || ttype->is_exception()) &&
+        field_->qualifier() == t_field_qualifier::terse;
+  }
+
+  mstch::node terse_not_struct() {
+    const auto* ttype = field_->type()->get_true_type();
+    return !ttype->is_struct() && !ttype->is_exception() &&
+        field_->qualifier() == t_field_qualifier::terse;
   }
 
  private:

@@ -125,6 +125,9 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
       const std::unique_ptr<folly::IOBuf>& /*v*/) const;
   uint32_t serializedSizeZCBinary(const folly::IOBuf& /*v*/) const;
 
+  // Rewind last n bytes and clean up.
+  void rewind(uint32_t n);
+
  protected:
   enum class ContextType { MAP, ARRAY };
   uint32_t beginContext(ContextType);

@@ -226,6 +226,10 @@ inline folly::io::Cursor BinaryProtocolWriter::tail(size_t n) {
   return {cursor - n, n};
 }
 
+inline void BinaryProtocolWriter::rewind(uint32_t n) {
+  out_.trimEnd(n);
+}
+
 /**
  * Functions that return the serialized size
  */

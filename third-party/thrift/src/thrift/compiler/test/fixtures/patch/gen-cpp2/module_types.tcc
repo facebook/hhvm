@@ -1432,14 +1432,13 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>>(this->__fbthrift_field_structVal))) {
+  {
     constexpr int16_t kPrevFieldId = 9;
+    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 10, kPrevFieldId>(*prot_, "structVal", previousFieldHasValue);
-    previousFieldHasValue = true;
+    uint32_t xfer_after_field_begin = xfer;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyData>::write(*prot_, this->__fbthrift_field_structVal);
-    xfer += prot_->writeFieldEnd();
-  } else {
-    previousFieldHasValue = false;
+    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   if (this->__isset.get(0)) {
     constexpr int16_t kPrevFieldId = 10;
@@ -1558,14 +1557,13 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>>(this->__fbthrift_field_unionVal))) {
+  {
     constexpr int16_t kPrevFieldId = 23;
+    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 30, kPrevFieldId>(*prot_, "unionVal", previousFieldHasValue);
-    previousFieldHasValue = true;
+    uint32_t xfer_after_field_begin = xfer;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::write(*prot_, this->__fbthrift_field_unionVal);
-    xfer += prot_->writeFieldEnd();
-  } else {
-    previousFieldHasValue = false;
+    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

@@ -76,6 +76,8 @@ class CompactProtocolWriter : public detail::ProtocolBase {
 
   static constexpr bool kHasIndexSupport() { return true; }
 
+  static constexpr uint32_t kEmptyStructSize() { return 1; }
+
   /**
    * The IOBufQueue itself is managed by the caller.
    * It must exist for the life of the CompactProtocol as well,
@@ -174,6 +176,9 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   // Get last n bytes we just wrote
   folly::io::Cursor tail(size_t n);
 
+  // Rewind last n bytes and clean up.
+  void rewind(uint32_t n);
+
  protected:
   /**
    * Cursor to write the data out to. Must support some of the interface of
@@ -193,6 +198,7 @@ class CompactProtocolWriter : public detail::ProtocolBase {
 
   std::stack<int16_t, folly::small_vector<int16_t, 10>> lastField_;
   int16_t lastFieldId_{-1};
+  int16_t lastWrittenFieldId_{-1};
 
   uint32_t writeCollectionBegin(int8_t elemType, int32_t size);
   template <bool kWriteSize>

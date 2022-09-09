@@ -224,6 +224,12 @@ inline uint32_t JSONProtocolWriterCommon::endContext() {
   return 1;
 }
 
+inline void JSONProtocolWriterCommon::rewind(uint32_t n) {
+  out_.trimEnd(n);
+  // Clean up context.
+  context.back().meta -= 2;
+}
+
 inline uint32_t JSONProtocolWriterCommon::writeContext() {
   if (context.empty()) {
     return 0;

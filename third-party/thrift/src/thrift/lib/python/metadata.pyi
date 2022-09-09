@@ -50,7 +50,7 @@ from apache.thrift.metadata.thrift_types import (
 from thrift.python.client import Client
 from thrift.python.exceptions import GeneratedError
 from thrift.python.server import ServiceInterface
-from thrift.python.types import Enum as ThriftEnumClass, Struct, Union as ThriftUnion
+from thrift.python.types import Enum as ThriftEnumClass, StructOrUnion
 
 class ThriftKind(Enum):
     PRIMITIVE: ThriftKind = ...
@@ -204,7 +204,7 @@ class ThriftServiceProxy(Protocol):
 def gen_metadata(cls: Metadata) -> ThriftMetadata: ...
 @overload
 def gen_metadata(
-    cls: Union[Struct, Type[Struct], ThriftUnion, Type[ThriftUnion]]
+    cls: Union[StructOrUnion, Type[StructOrUnion]]
 ) -> ThriftStructProxy: ...
 @overload
 def gen_metadata(

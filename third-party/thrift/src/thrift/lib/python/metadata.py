@@ -44,7 +44,7 @@ from apache.thrift.metadata.thrift_types import (
 from thrift.python.client import Client
 from thrift.python.exceptions import GeneratedError
 from thrift.python.server import ServiceInterface
-from thrift.python.types import Enum, Struct, Union as ThriftUnion
+from thrift.python.types import Enum, StructOrUnion
 
 
 class ThriftKind(enum.Enum):
@@ -551,8 +551,8 @@ class ThriftServiceProxy:
 
 def gen_metadata(
     obj_or_cls: Union[
-        Struct,
-        Type[Struct],
+        StructOrUnion,
+        Type[StructOrUnion],
         GeneratedError,
         Type[GeneratedError],
         ServiceInterface,
@@ -565,14 +565,14 @@ def gen_metadata(
     cls = obj_or_cls if isinstance(obj_or_cls, type) else type(obj_or_cls)
 
     if not issubclass(
-        cls, (Struct, ThriftUnion, GeneratedError, ServiceInterface, Enum, Client)
+        cls, (StructOrUnion, GeneratedError, ServiceInterface, Enum, Client)
     ):
         raise TypeError(f"{cls!r} is not a thrift-python type.")
 
     meta: ThriftMetadata = cls.__get_metadata__()
     name: str = cls.__get_thrift_name__()
 
-    if issubclass(cls, (Struct, ThriftUnion)):
+    if issubclass(cls, StructOrUnion):
         return ThriftStructProxy(name, meta)
     elif issubclass(cls, GeneratedError):
         return ThriftExceptionProxy(name, meta)

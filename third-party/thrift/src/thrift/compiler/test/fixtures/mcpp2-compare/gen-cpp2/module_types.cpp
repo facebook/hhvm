@@ -2793,7 +2793,7 @@ AnnotatedStruct::AnnotatedStruct() :
       indirection_a(),
       iobuf_type_val(apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("value")),
       iobuf_ptr_val(apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("value2")),
-      struct_struct(static_cast<::some::valid::ns::containerStruct>(::apache::thrift::detail::make_constant< ::some::valid::ns::containerStruct>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(static_cast<bool>(false))))) {
+      struct_struct(static_cast<::some::valid::ns::containerStruct>(::apache::thrift::detail::make_structured_constant<::some::valid::ns::containerStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldD>(apache::thrift::StringTraits<std::string>::fromStringLiteral("some string")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::fieldI>(static_cast<bool>(false))))) {
 }
 
 

@@ -68,7 +68,7 @@ constexpr ptrdiff_t issetOffset(std::int16_t fieldIndex);
 template <typename T>
 constexpr ptrdiff_t unionTypeOffset();
 
-template <typename A, typename Ref>
+template <typename Ident, typename Adapter, FieldId Id, typename Ref>
 struct wrapped_struct_argument {
   static_assert(std::is_reference<Ref>::value, "not a reference");
   Ref ref;
@@ -76,48 +76,81 @@ struct wrapped_struct_argument {
       : ref(static_cast<Ref>(ref_)) {}
 };
 
-template <typename A, typename T>
-struct wrapped_struct_argument<A, std::initializer_list<T>> {
+template <typename Ident, typename Adapter, FieldId Id, typename T>
+struct wrapped_struct_argument<Ident, Adapter, Id, std::initializer_list<T>> {
   std::initializer_list<T> ref;
   FOLLY_ERASE explicit wrapped_struct_argument(std::initializer_list<T> list)
       : ref(list) {}
 };
 
-template <typename A, typename T>
-FOLLY_ERASE wrapped_struct_argument<A, std::initializer_list<T>>
-wrap_struct_argument(std::initializer_list<T> value) {
-  return wrapped_struct_argument<A, std::initializer_list<T>>(value);
+template <
+    typename Ident,
+    typename Adapter = void,
+    FieldId Id = static_cast<FieldId>(0),
+    typename T>
+FOLLY_ERASE
+    wrapped_struct_argument<Ident, Adapter, Id, std::initializer_list<T>>
+    wrap_struct_argument(std::initializer_list<T> value) {
+  return wrapped_struct_argument<Ident, Adapter, Id, std::initializer_list<T>>(
+      value);
 }
 
-template <typename A, typename T>
-FOLLY_ERASE wrapped_struct_argument<A, T&&> wrap_struct_argument(T&& value) {
-  return wrapped_struct_argument<A, T&&>(static_cast<T&&>(value));
+template <
+    typename Ident,
+    typename Adapter = void,
+    FieldId Id = static_cast<FieldId>(0),
+    typename T>
+FOLLY_ERASE wrapped_struct_argument<Ident, Adapter, Id, T&&>
+wrap_struct_argument(T&& value) {
+  return wrapped_struct_argument<Ident, Adapter, Id, T&&>(
+      static_cast<T&&>(value));
 }
 
-template <typename F, typename T>
-FOLLY_ERASE void assign_struct_field(F f, T&& t) {
+template <typename Adapter, FieldId Id, typename F, typename T, typename S>
+FOLLY_ERASE typename std::enable_if<std::is_void<Adapter>::value>::type
+assign_struct_field(F f, T&& t, S&) {
   f = static_cast<T&&>(t);
 }
-template <typename F, typename T>
-FOLLY_ERASE void assign_struct_field(std::unique_ptr<F>& f, T&& t) {
+template <typename Adapter, FieldId Id, typename F, typename T, typename S>
+FOLLY_ERASE void assign_struct_field(std::unique_ptr<F>& f, T&& t, S&) {
   f = std::make_unique<folly::remove_cvref_t<T>>(static_cast<T&&>(t));
 }
-template <typename F, typename T>
-FOLLY_ERASE void assign_struct_field(std::shared_ptr<F>& f, T&& t) {
+template <typename Adapter, FieldId Id, typename F, typename T, typename S>
+FOLLY_ERASE void assign_struct_field(std::shared_ptr<F>& f, T&& t, S&) {
   f = std::make_shared<folly::remove_cvref_t<T>>(static_cast<T&&>(t));
 }
+template <typename Adapter, FieldId Id, typename F, typename T, typename S>
+FOLLY_ERASE typename std::enable_if<!std::is_void<Adapter>::value>::type
+assign_struct_field(F f, T&& t, S& s) {
+  f = ::apache::thrift::adapt_detail::
+      fromThriftField<Adapter, folly::to_underlying(Id)>(
+          static_cast<T&&>(t), s);
+}
 
-// TODO(ytj): Remove TypeClass after migrating existing callsites
-template <typename S, typename... A, typename... T, typename TypeClass>
-FOLLY_ERASE constexpr S make_constant(
-    TypeClass, wrapped_struct_argument<A, T>... arg) {
+template <
+    typename Struct,
+    typename... Ident,
+    typename... Adapter,
+    FieldId... Id,
+    typename... T>
+FOLLY_ERASE constexpr Struct make_structured_constant(
+    wrapped_struct_argument<Ident, Adapter, Id, T>... arg) {
   using _ = int[];
-  S s;
+  Struct s;
   void(
       _{0,
-        (void(assign_struct_field(access_field<A>(s), static_cast<T>(arg.ref))),
+        (void(assign_struct_field<Adapter, Id>(
+             access_field<Ident>(s), static_cast<T>(arg.ref), s)),
          0)...});
   return s;
+}
+
+// TODO(ytj): Remove after migrating existing callsites
+template <typename S, typename... A, typename... T, typename TypeClass>
+FOLLY_ERASE constexpr S make_constant(
+    TypeClass,
+    wrapped_struct_argument<A, void, static_cast<FieldId>(0), T>... arg) {
+  return make_structured_constant<S>(arg...);
 }
 
 template <typename T, std::enable_if_t<st::IsThriftClass<T>{}, int> = 0>

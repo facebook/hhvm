@@ -15,7 +15,7 @@
 namespace module2 {
 
 ::module2::Struct const& module2_constants::c2() {
-  static folly::Indestructible<::module2::Struct> const instance(::apache::thrift::detail::make_constant< ::module2::Struct>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::first>(static_cast<::module0::Struct>(::module0::module0_constants::c0())), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::second>(static_cast<::module1::Struct>(::module1::module1_constants::c1()))));
+  static folly::Indestructible<::module2::Struct> const instance(::apache::thrift::detail::make_structured_constant<::module2::Struct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::first>(static_cast<::module0::Struct>(::module0::module0_constants::c0())), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::second>(static_cast<::module1::Struct>(::module1::module1_constants::c1()))));
   return *instance;
 }
 

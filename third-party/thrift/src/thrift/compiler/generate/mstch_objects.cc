@@ -556,6 +556,11 @@ mstch::node mstch_const::program() {
       const_->get_program(), context_, pos_);
 }
 
+mstch::node mstch_const::field() {
+  return context_.field_factory->make_mstch_object(
+      field_, context_, pos_, nullptr);
+}
+
 mstch::node mstch_program::has_thrift_uris() {
   for (const auto& strct : program_->structs()) {
     if (!strct->uri().empty()) {

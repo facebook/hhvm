@@ -815,6 +815,19 @@ TEST(AdaptTest, NumAdapterConversions) {
   EXPECT_EQ((CountingAdapter<false, std::string>::count), 2);
 }
 
+TEST(AdaptTest, Constants) {
+  // const AdaptedBool type_adapted = true;
+  EXPECT_EQ(basic::adapter_constants::type_adapted().value, true);
+
+  // const MoveOnly nested_adapted = {"ptr": {}};
+  EXPECT_TRUE(basic::adapter_constants::nested_adapted().ptr()->get());
+
+  // const list<AdaptedByte> container_of_adapted = [1, 2, 3];
+  EXPECT_EQ(basic::adapter_constants::container_of_adapted()[0].value, 1);
+  EXPECT_EQ(basic::adapter_constants::container_of_adapted()[1].value, 2);
+  EXPECT_EQ(basic::adapter_constants::container_of_adapted()[2].value, 3);
+}
+
 static_assert(
     std::is_same_v<
         folly::remove_cvref_t<decltype(basic::adapter_constants::timeout())>,

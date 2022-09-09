@@ -1069,6 +1069,7 @@ class mstch_const : public mstch_base {
             {"constant:type", &mstch_const::type},
             {"constant:value", &mstch_const::value},
             {"constant:program", &mstch_const::program},
+            {"constant:field", &mstch_const::field},
         });
   }
   mstch::node name() { return const_->get_name(); }
@@ -1076,6 +1077,7 @@ class mstch_const : public mstch_base {
   mstch::node type();
   mstch::node value();
   mstch::node program();
+  mstch::node field();
 
  protected:
   const t_const* const_;

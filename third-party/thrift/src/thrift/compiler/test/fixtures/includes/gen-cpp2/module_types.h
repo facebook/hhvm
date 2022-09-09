@@ -75,7 +75,7 @@ class MyStruct final  {
  public:
 
   MyStruct() :
-      __fbthrift_field_MyIncludedField(static_cast<::cpp2::Included>(::apache::thrift::detail::make_constant< ::cpp2::Included>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyIntField>(static_cast<::std::int64_t>(2)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyTransitiveField>(static_cast<::cpp2::Foo>(::apache::thrift::detail::make_constant< ::cpp2::Foo>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int64_t>(2)))))))),
+      __fbthrift_field_MyIncludedField(static_cast<::cpp2::Included>(::apache::thrift::detail::make_structured_constant<::cpp2::Included>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyIntField>(static_cast<::std::int64_t>(2)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyTransitiveField>(static_cast<::cpp2::Foo>(::apache::thrift::detail::make_structured_constant<::cpp2::Foo>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int64_t>(2)))))))),
       __fbthrift_field_MyIncludedInt(static_cast<::cpp2::IncludedInt64>(42)) {
   }
   // FragileConstructor for use in initialization lists only.

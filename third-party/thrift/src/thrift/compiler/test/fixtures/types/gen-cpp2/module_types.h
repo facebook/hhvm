@@ -1818,7 +1818,7 @@ class TrivialNestedWithDefault final  {
 
   TrivialNestedWithDefault() :
       __fbthrift_field_z(static_cast<::std::int32_t>(4)),
-      __fbthrift_field_n(static_cast<::apache::thrift::fixtures::types::TrivialNumeric>(::apache::thrift::detail::make_constant< ::apache::thrift::fixtures::types::TrivialNumeric>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(3)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<bool>(true))))) {
+      __fbthrift_field_n(static_cast<::apache::thrift::fixtures::types::TrivialNumeric>(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::TrivialNumeric>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(static_cast<::std::int32_t>(3)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<bool>(true))))) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2166,7 +2166,7 @@ class ComplexNestedWithDefault final  {
 
   ComplexNestedWithDefault() :
       __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
-      __fbthrift_field_n(static_cast<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::make_constant< ::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::type_class::structure{}, ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::map<::std::string, ::std::int32_t>>(std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), 3}}))))) {
+      __fbthrift_field_n(static_cast<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(static_cast<::std::map<::std::string, ::std::int32_t>>(std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), 3}}))))) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

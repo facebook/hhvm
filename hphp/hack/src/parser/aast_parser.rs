@@ -158,16 +158,14 @@ impl<'src> AastParser {
         let (lowering_t, elaboration_t) = (lowering_t.elapsed(), Instant::now());
         let lower_peak = stack_limit::peak() as u64;
         let mut ret = if env.elaborate_namespaces {
-            ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
+            namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ret)
         } else {
             ret
         };
         let (elaboration_t, error_t) = (elaboration_t.elapsed(), Instant::now());
         stack_limit::reset();
-        let syntax_errors = match &mut ret {
-            Ok(aast) => Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast)),
-            Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
-        };
+        let syntax_errors =
+            Self::check_syntax_error(env, indexed_source_text, &tree, Some(&mut ret));
         let error_peak = stack_limit::peak() as u64;
         let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
         let errors = lowerer_env.hh_errors().borrow().to_vec();
@@ -177,7 +175,8 @@ impl<'src> AastParser {
         Ok(ParserResult {
             file_mode: mode,
             scoured_comments,
-            aast: ret,
+            // TODO: this doesn't need to be a result
+            aast: Ok(ret),
             lowpri_errors,
             syntax_errors,
             errors,

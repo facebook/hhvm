@@ -378,6 +378,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             ast::Expr_::As(x) if (x.1).1.is_hlike() => {
                 expr_to_typed_value_(emitter, &x.0, allow_maps, false)
             }
+            Expr_::Upcast(e) => expr_to_typed_value(emitter, &e.0),
             _ => Err(Error::NotLiteral),
         }
     })

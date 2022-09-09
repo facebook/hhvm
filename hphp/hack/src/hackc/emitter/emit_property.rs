@@ -251,6 +251,7 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
             },
             None => true,
         },
+        Expr_::Upcast(e) => expr_requires_deep_init_(&e.0),
         _ => true,
     }
 }

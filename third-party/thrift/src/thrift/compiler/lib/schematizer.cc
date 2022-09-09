@@ -100,7 +100,10 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
     case t_type::type::t_enum:
       type_name->add_map(val("enumType"), val(type.uri()));
       break;
-    case t_type::type::t_struct:
+    case t_type::type::t_struct: {
+      auto structured = val();
+      structured->set_map();
+      structured->add_map(val("uri"), val(type.uri()));
       type_name->add_map(
           val([&] {
             if (dynamic_cast<const t_union*>(&type)) {
@@ -111,8 +114,9 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
               return "structType";
             }
           }()),
-          val(type.uri()));
+          std::move(structured));
       break;
+    }
     default:
       assert(false);
   }
@@ -157,13 +161,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
       assert(false);
       return 0; // Default
     }();
-    auto qualifier = val();
+    auto qualifier = val(qualifierVal);
     if (field_qualifier_enum) {
       qualifier->set_is_enum();
       qualifier->set_enum(field_qualifier_enum);
       qualifier->set_enum_value(field_qualifier_enum->find_value(qualifierVal));
-    } else {
-      qualifier->set_integer(qualifierVal);
     }
     field_schema->add_map(val("qualifier"), std::move(qualifier));
     field_schema->add_map(

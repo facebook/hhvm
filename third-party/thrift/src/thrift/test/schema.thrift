@@ -25,3 +25,10 @@ struct Empty {}
 
 @thrift.GenerateRuntimeSchema{name = "RenamedSchema"}
 struct Renamed {}
+
+@thrift.GenerateRuntimeSchema
+struct Fields {
+  1: i32 num;
+  3: optional set<string> keyset;
+  7: Empty strct;
+}

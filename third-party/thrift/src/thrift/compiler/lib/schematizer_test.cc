@@ -73,7 +73,13 @@ TEST(SchematizerTest, Structured) {
   EXPECT_EQ(
       type2.at("name")->get_map().at(0).first->get_string(), "structType");
   EXPECT_EQ(
-      type2.at("name")->get_map().at(0).second->get_string(), "path/to/Struct");
+      type2.at("name")
+          ->get_map()
+          .at(0)
+          .second->get_map()
+          .at(0)
+          .second->get_string(),
+      "path/to/Struct");
   EXPECT_FALSE(type2.count("params"));
 
   auto field3 = flatten_map(*fields.at(2));

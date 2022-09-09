@@ -2100,7 +2100,9 @@ let handle_mode
         in
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
-    let nasts = create_nasts ctx files_info in
+    let (errors, nasts) = Errors.do_ (fun () -> create_nasts ctx files_info) in
+    print_errors_if_present (Errors.get_sorted_error_list errors);
+
     print_nasts
       ~should_print_position
       nasts

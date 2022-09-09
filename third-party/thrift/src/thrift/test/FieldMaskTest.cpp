@@ -1093,6 +1093,10 @@ TEST(FieldMaskTest, EnsureException) {
   Baz baz;
   // adapted field cannot be masked.
   EXPECT_THROW(ensure(mask, baz), std::runtime_error);
+
+  // includes{3: excludes{}}
+  mask.includes_ref().emplace()[3] = allMask();
+  EXPECT_THROW(ensure(mask, bar), std::runtime_error); // incompatible
 }
 
 TEST(FieldMaskTest, SchemafulClear) {

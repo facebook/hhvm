@@ -60,7 +60,6 @@ template <typename Struct>
 void ensure(const Mask& mask, Struct& t) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<Struct>(mask);
   return detail::ensure_fields(detail::MaskRef{mask, false}, t);
 }
 
@@ -71,7 +70,6 @@ template <typename Struct>
 void clear(const Mask& mask, Struct& t) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<Struct>(mask);
   return detail::clear_fields(detail::MaskRef{mask, false}, t);
 }
 
@@ -82,7 +80,6 @@ template <typename Struct>
 void copy(const Mask& mask, const Struct& src, Struct& dst) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::errorIfNotCompatible<Struct>(mask);
   detail::copy_fields(detail::MaskRef{mask, false}, src, dst);
 }
 

@@ -59,7 +59,6 @@ ExternalProject_add(
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
     # Options
-    -DWITHOUT_GFLAGS=ON
     -DWITHOUT_LIBLZMA=ON
     -DWITHOUT_LIBSNAPPY=ON
     -DWITHOUT_LIBUNWIND=ON
@@ -85,9 +84,6 @@ ExternalProject_add(
   BUILD_COMMAND
     ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
   INSTALL_COMMAND
-    ${CMAKE_COMMAND} -E copy_directory
-      "${CMAKE_CURRENT_LIST_DIR}/include"
-      "<INSTALL_DIR>/include" &&
 # Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib

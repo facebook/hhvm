@@ -254,9 +254,8 @@ inline uint32_t checked_container_size(size_t size) {
 
 template <bool ZeroCopy, typename Tag>
 struct SerializedSize<ZeroCopy, type::list<Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot, const type::native_type<type::list<Tag>>& list) const {
+  template <typename Protocol, typename ListType>
+  uint32_t operator()(Protocol& prot, const ListType& list) const {
     uint32_t xfer = 0;
     xfer += prot.serializedSizeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
@@ -270,9 +269,8 @@ struct SerializedSize<ZeroCopy, type::list<Tag>> {
 
 template <bool ZeroCopy, typename Tag>
 struct SerializedSize<ZeroCopy, type::set<Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot, const type::native_type<type::set<Tag>>& set) const {
+  template <typename Protocol, typename SetType>
+  uint32_t operator()(Protocol& prot, const SetType& set) const {
     uint32_t xfer = 0;
     xfer += prot.serializedSizeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
@@ -286,10 +284,8 @@ struct SerializedSize<ZeroCopy, type::set<Tag>> {
 
 template <bool ZeroCopy, typename Key, typename Value>
 struct SerializedSize<ZeroCopy, type::map<Key, Value>> {
-  template <typename Protocol>
-  uint32_t operator()(
-      Protocol& prot,
-      const type::native_type<type::map<Key, Value>>& map) const {
+  template <typename Protocol, typename MapType>
+  uint32_t operator()(Protocol& prot, const MapType& map) const {
     uint32_t xfer = 0;
     xfer += prot.serializedSizeMapBegin(
         typeTagToTType<Key>,
@@ -304,15 +300,9 @@ struct SerializedSize<ZeroCopy, type::map<Key, Value>> {
   }
 };
 
-// TODO: Handle cpp_type with containers that cannot use static_cast.
 template <bool ZeroCopy, typename T, typename Tag>
-struct SerializedSize<ZeroCopy, type::cpp_type<T, Tag>> {
-  template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& t) const {
-    return SerializedSize<ZeroCopy, Tag>{}(
-        prot, static_cast<type::native_type<Tag>>(t));
-  }
-};
+struct SerializedSize<ZeroCopy, type::cpp_type<T, Tag>>
+    : SerializedSize<ZeroCopy, Tag> {};
 
 // TODO: Use serializedSize in adapter to optimize.
 template <bool ZeroCopy, typename Adapter, typename Tag>

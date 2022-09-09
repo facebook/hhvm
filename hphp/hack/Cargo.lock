@@ -509,7 +509,6 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
- "bitflags",
  "bumpalo",
  "bytecode_printer",
  "clap 3.2.17",
@@ -1709,9 +1708,7 @@ dependencies = [
 name = "hhbc-gen"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "bitflags",
- "cc",
  "maplit",
  "once_cell",
 ]

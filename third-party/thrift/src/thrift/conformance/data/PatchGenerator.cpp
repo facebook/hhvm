@@ -319,21 +319,24 @@ PatchOpTestCase makeContainerClearTC(
 }
 
 template <typename ContainerTag, typename ValueTag>
-PatchOpTestCase makeValueContainerRemoveTC(
-    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+PatchOpTestCase makeContainerRemoveTC(
+    const AnyRegistry& registry,
+    const Protocol& protocol,
+    auto value,
+    auto toRemove) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
 
   using Container = type::native_type<ContainerTag>;
 
-  Container initial = {value.value};
+  Container initial = {value};
   Container expected;
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
       makePatchObject<type::set<ValueTag>>(
           op::PatchOp::Remove,
-          std::set<type::standard_type<ValueTag>>{value.value}),
+          std::set<type::standard_type<ValueTag>>{toRemove}),
       protocol);
   tascase.request() = req;
   tascase.result() =
@@ -429,8 +432,8 @@ Test createListSetPatchTest(
           type::getName<TT>(),
           value.name);
       removeCase.test().emplace().objectPatch_ref() =
-          makeValueContainerRemoveTC<ContainerTag, TT>(
-              registry, protocol, value);
+          makeContainerRemoveTC<ContainerTag, TT>(
+              registry, protocol, value.value, value.value);
 
       auto& prependCase = test.testCases()->emplace_back();
       prependCase.name() = fmt::format(
@@ -483,29 +486,37 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
   mp11::mp_for_each<KeyTypeTags>([&](auto kk) {
     using KK = decltype(kk);
     using ContainerTag = type::map<KK, TT>;
+
+    auto makeTestName = [](const auto& key, auto op) {
+      return fmt::format(
+          "map<{},{}>/{}.{}",
+          type::getName<KK>(),
+          type::getName<TT>(),
+          op,
+          key.name);
+    };
+
     for (const auto& key : ValueGenerator<KK>::getInterestingValues()) {
       type::standard_type<TT> value;
       op::clear<TT>(value);
 
       auto& assignCase = test.testCases()->emplace_back();
-      assignCase.name() = fmt::format(
-          "map<{},{}>/assign.{}",
-          type::getName<KK>(),
-          type::getName<TT>(),
-          key.name);
+      assignCase.name() = makeTestName(key, "assign");
       assignCase.test().emplace().objectPatch_ref() =
           makeContainerAssignTC<ContainerTag>(
-              registry, protocol, std::make_pair(key.value, value));
+              registry, protocol, std::pair{key.value, value});
 
       auto& clearCase = test.testCases()->emplace_back();
-      clearCase.name() = fmt::format(
-          "map<{},{}>/clear.{}",
-          type::getName<KK>(),
-          type::getName<TT>(),
-          key.name);
+      clearCase.name() = makeTestName(key, "clear");
       clearCase.test().emplace().objectPatch_ref() =
           makeContainerClearTC<ContainerTag>(
-              registry, protocol, std::make_pair(key.value, value));
+              registry, protocol, std::pair{key.value, value});
+
+      auto& removeCase = test.testCases()->emplace_back();
+      removeCase.name() = makeTestName(key, "remove");
+      removeCase.test().emplace().objectPatch_ref() =
+          makeContainerRemoveTC<ContainerTag, KK>(
+              registry, protocol, std::pair{key.value, value}, key.value);
     }
   });
 

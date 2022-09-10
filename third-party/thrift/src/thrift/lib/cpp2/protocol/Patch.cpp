@@ -385,17 +385,22 @@ void ApplyPatch::operator()(
     }
   }
 
-  auto patchElements = [&](auto patchFields) {
-    if (const auto* keyPatches = patchFields->if_map()) {
-      for (const auto& [keyv, valv] : *keyPatches) {
-        // Only patch values for fields that exist for now
-        if (auto* field = folly::get_ptr(value, keyv)) {
-          applyPatch(*valv.objectValue_ref(), *field);
-        }
-      }
-    } else {
+  auto validated_map = [](auto patchOp, auto patchOpName) {
+    auto opData = patchOp->if_map();
+    if (!opData) {
       throw std::runtime_error(
-          "struct patch PatchPrior/Patch should contain a map");
+          fmt::format("map {} patch should contain map", patchOpName));
+    }
+    return opData;
+  };
+
+  auto patchElements = [&](auto patchFields) {
+    for (const auto& [keyv, valv] :
+         *validated_map(patchFields, "patch/patchPrior")) {
+      // Only patch values for fields that exist for now
+      if (auto* field = folly::get_ptr(value, keyv)) {
+        applyPatch(*valv.objectValue_ref(), *field);
+      }
     }
   };
 
@@ -405,18 +410,22 @@ void ApplyPatch::operator()(
 
   // This is basicly inserting key/value pair into the map if key doesn't exist
   if (auto* ensure = findOp(patch, PatchOp::EnsureStruct)) {
-    value.insert(
-        ensure->mapValue_ref()->begin(), ensure->mapValue_ref()->end());
+    const auto* mapVal = validated_map(ensure, "ensureStruct");
+    value.insert(mapVal->begin(), mapVal->end());
   }
 
   if (auto* remove = findOp(patch, PatchOp::Remove)) {
-    for (const auto& key : *remove->setValue_ref()) {
+    const auto* to_remove = remove->if_set();
+    if (!to_remove) {
+      throw std::runtime_error("map remove patch should contain set");
+    }
+    for (const auto& key : *to_remove) {
       value.erase(key);
     }
   }
 
   if (auto* put = findOp(patch, PatchOp::Put)) {
-    for (const auto& [key, val] : *put->mapValue_ref()) {
+    for (const auto& [key, val] : *validated_map(put, "put")) {
       value.insert_or_assign(key, val);
     }
   }
@@ -448,16 +457,16 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 
   auto applyFieldPatch = [&](auto patchFields) {
     value.members().ensure();
-    if (const auto* obj = patchFields->if_object()) {
-      for (const auto& [id, field_value] : *obj->members()) {
-        // Only patch values for fields that exist for now
-        if (auto* field = folly::get_ptr(*value.members(), id)) {
-          applyPatch(*field_value.objectValue_ref(), *field);
-        }
-      }
-    } else {
+    const auto* obj = patchFields->if_object();
+    if (!obj) {
       throw std::runtime_error(
           "struct patch PatchPrior/Patch should contain an object");
+    }
+    for (const auto& [id, field_value] : *obj->members()) {
+      // Only patch values for fields that exist for now
+      if (auto* field = folly::get_ptr(*value.members(), id)) {
+        applyPatch(*field_value.objectValue_ref(), *field);
+      }
     }
   };
 
@@ -474,22 +483,23 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
   }
 
   if (const auto* uensure = findOp(patch, PatchOp::EnsureUnion)) {
-    if (const auto* ensureUnion = uensure->if_object()) {
-      if (ensureUnion->size() != 1) {
-        throw std::runtime_error(
-            "union patch Ensure should contain an object with only one field set");
-      }
-
-      auto& id = ensureUnion->begin()->first;
-      auto itr = value.members()->find(id);
-      if (itr == value.end()) {
-        value = *ensureUnion;
-      } else if (value.size() != 1) {
-        // Clear other values, without copying the current value
-        value.members() = {{itr->first, std::move(itr->second)}};
-      }
-    } else {
+    const auto* ensureUnion = uensure->if_object();
+    if (!ensureUnion) {
       throw std::runtime_error("union patch Ensure should contain an object");
+    }
+
+    if (ensureUnion->size() != 1) {
+      throw std::runtime_error(
+          "union patch Ensure should contain an object with only one field set");
+    }
+
+    auto& id = ensureUnion->begin()->first;
+    auto itr = value.members()->find(id);
+    if (itr == value.end()) {
+      value = *ensureUnion;
+    } else if (value.size() != 1) {
+      // Clear other values, without copying the current value
+      value.members() = {{itr->first, std::move(itr->second)}};
     }
   }
 

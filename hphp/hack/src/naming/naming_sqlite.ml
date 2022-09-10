@@ -494,6 +494,7 @@ module SymbolTable = struct
   let insert
       db stmt_cache ~name ~hash ~canon_hash ~name_kind ~file_info_id ~decl_hash
       : (unit, insertion_error) result =
+    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     let flags = name_kind |> Naming_types.name_kind_to_enum |> Int64.of_int in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -501,7 +502,6 @@ module SymbolTable = struct
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 
   let get db stmt_cache dep stmt =

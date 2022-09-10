@@ -124,11 +124,13 @@ impl NamingTable {
         Ok(changed_symbol_hashes)
     }
 
-    pub fn create_rich_checksum(&mut self, example_symbol: String) -> RichChecksum {
+    /// Based on the current checksum value, creates a RichChecksum structure for it,
+    /// stores it in the mutable rich_checksums history, and returns it.
+    pub fn create_rich_checksum(&mut self, example_symbol: &str) -> RichChecksum {
         let rich_checksum = RichChecksum {
             checksum: self.checksum,
             timestamp: hh24_types::Timestamp::now(),
-            example_symbol,
+            example_symbol: example_symbol.to_owned(),
         };
         self.rich_checksums
             .insert(self.checksum, rich_checksum.clone());

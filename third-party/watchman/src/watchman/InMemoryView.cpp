@@ -623,7 +623,7 @@ void InMemoryView::pathGenerator(const Query* query, QueryContext* ctx) const {
     auto full_name = w_string::pathCat({relative_root, path.name});
 
     // special case of root dir itself
-    if (w_string_equal(rootPath_, full_name)) {
+    if (rootPath_ == full_name) {
       // dirname on the root is outside the root, which is useless
       dir = view->resolveDir(full_name);
       goto is_dir;

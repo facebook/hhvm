@@ -453,6 +453,10 @@ bool w_string::operator==(const w_string& other) const {
   if (str_ == other.str_) {
     // identity fast path
     return true;
+  } else if (
+      str_->hval_computed && other.str_->hval_computed &&
+      str_->_hval != other.str_->_hval) {
+    return false;
   } else {
     return view() == other.view();
   }
@@ -639,19 +643,6 @@ bool w_string_equal_cstring(const w_string_t* a, const char* b) {
   if (a->len != blen)
     return false;
   return memcmp(a->buf, b, a->len) == 0 ? true : false;
-}
-
-bool w_string_equal(const w_string_t* a, const w_string_t* b) {
-  if (a == b)
-    return true;
-  if (a == nullptr || b == nullptr)
-    return false;
-  if (a->len != b->len)
-    return false;
-  if (a->hval_computed && b->hval_computed && a->_hval != b->_hval) {
-    return false;
-  }
-  return memcmp(a->buf, b->buf, a->len) == 0 ? true : false;
 }
 
 bool w_string_equal_caseless(w_string_piece a, w_string_piece b) {

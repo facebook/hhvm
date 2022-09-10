@@ -401,8 +401,7 @@ void InMemoryView::processPath(
     return;
   }
 
-  if (w_string_equal(pending.path, rootPath_) ||
-      (pending.flags & W_PENDING_CRAWL_ONLY)) {
+  if (pending.path == rootPath_ || (pending.flags & W_PENDING_CRAWL_ONLY)) {
     crawler(root, view, coll, pending, pendingCookies);
   } else {
     statPath(*root, root->cookies, view, coll, pending, pre_stat);

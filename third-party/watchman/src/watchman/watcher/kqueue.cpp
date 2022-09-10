@@ -273,7 +273,7 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
     if ((fflags & (NOTE_DELETE | NOTE_RENAME | NOTE_REVOKE))) {
       struct kevent k;
 
-      if (w_string_equal(path, root->root_path)) {
+      if (path == root->root_path) {
         logf(
             ERR,
             "root dir {} has been (re)moved [code {:x}], canceling watch\n",

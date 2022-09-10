@@ -338,7 +338,7 @@ bool InotifyWatcher::process_inotify_event(
     if (dir_name) {
       if ((ine->mask &
            (IN_UNMOUNT | IN_IGNORED | IN_DELETE_SELF | IN_MOVE_SELF))) {
-        if (w_string_equal(root->root_path, name)) {
+        if (root->root_path == name) {
           logf(
               ERR,
               "root dir {} has been (re)moved, canceling watch\n",

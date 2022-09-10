@@ -477,12 +477,13 @@ pub fn from_text<'decl>(
     profile: &mut Profile,
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
+    let path = source_text.file_path().path().to_path_buf();
     let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, &alloc);
     let mut unit = emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)?;
 
     if native_env.flags.enable_ir {
         let bc_to_ir_t = Instant::now();
-        let ir = bc_to_ir::bc_to_ir(&unit);
+        let ir = bc_to_ir::bc_to_ir(&unit, &path);
         profile.bc_to_ir_t = bc_to_ir_t.elapsed();
 
         let ir_to_bc_t = Instant::now();
@@ -540,7 +541,7 @@ pub fn unit_to_string(
     profile: &mut Profile,
 ) -> Result<()> {
     if native_env.flags.dump_ir {
-        let ir = bc_to_ir::bc_to_ir(program);
+        let ir = bc_to_ir::bc_to_ir(program, native_env.filepath.path());
         struct FmtFromIo<'a>(&'a mut dyn std::io::Write);
         impl fmt::Write for FmtFromIo<'_> {
             fn write_str(&mut self, s: &str) -> fmt::Result {

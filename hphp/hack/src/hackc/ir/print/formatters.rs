@@ -21,6 +21,7 @@ use std::fmt::Result;
 
 use ffi::Pair;
 use ffi::Str;
+use ir_core::func::SrcLoc;
 use ir_core::instr::BareThisOp;
 use ir_core::instr::CollectionType;
 use ir_core::instr::HasLoc;

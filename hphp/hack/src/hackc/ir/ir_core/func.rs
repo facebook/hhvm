@@ -8,7 +8,6 @@ pub use hhbc::FunctionFlags;
 pub use hhbc::FunctionName;
 pub use hhbc::MethodFlags;
 pub use hhbc::MethodName;
-pub use hhbc::Span;
 pub use hhbc::Visibility;
 use newtype::newtype_int;
 use newtype::IdVec;
@@ -29,11 +28,60 @@ use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
-use crate::SrcLoc;
 use crate::UnitBytesId;
 use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
+
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
+pub struct Filename(pub UnitBytesId);
+
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+pub struct SrcLoc {
+    pub filename: Filename,
+    pub line_begin: i32,
+    pub col_begin: i32,
+    pub line_end: i32,
+    pub col_end: i32,
+}
+
+impl SrcLoc {
+    pub fn to_hhbc(&self) -> hhbc::SrcLoc {
+        hhbc::SrcLoc {
+            line_begin: self.line_begin,
+            col_begin: self.col_begin,
+            line_end: self.line_end,
+            col_end: self.col_end,
+        }
+    }
+
+    pub fn to_span(&self) -> hhbc::Span {
+        hhbc::Span {
+            line_begin: self.line_begin,
+            line_end: self.line_end,
+        }
+    }
+
+    pub fn from_hhbc(filename: Filename, src_loc: &hhbc::SrcLoc) -> Self {
+        Self {
+            filename,
+            line_begin: src_loc.line_begin,
+            col_begin: src_loc.col_begin,
+            line_end: src_loc.line_end,
+            col_end: src_loc.col_end,
+        }
+    }
+
+    pub fn from_span(filename: Filename, span: &hhbc::Span) -> Self {
+        Self {
+            filename,
+            line_begin: span.line_begin,
+            col_begin: 0,
+            line_end: span.line_end,
+            col_end: 0,
+        }
+    }
+}
 
 /// Func parameters.
 #[derive(Debug)]
@@ -385,7 +433,7 @@ pub struct Function<'a> {
     pub flags: FunctionFlags,
     pub name: FunctionName<'a>,
     pub func: Func<'a>,
-    pub span: Span,
+    pub span: SrcLoc,
 }
 
 /// A Hack method contained within a Class.
@@ -397,7 +445,7 @@ pub struct Method<'a> {
     pub flags: MethodFlags,
     pub func: Func<'a>,
     pub name: MethodName<'a>,
-    pub span: Span,
+    pub span: SrcLoc,
     pub visibility: Visibility,
 }
 

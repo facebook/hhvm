@@ -5,6 +5,7 @@
 
 use hash::HashMap;
 
+use crate::func::SrcLoc;
 use crate::instr::HasOperands;
 use crate::instr::Special;
 use crate::Block;
@@ -16,7 +17,6 @@ use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
 use crate::LocId;
-use crate::SrcLoc;
 use crate::ValueId;
 
 pub struct FuncBuilder<'a> {

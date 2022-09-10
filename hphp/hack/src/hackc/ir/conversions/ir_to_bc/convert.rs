@@ -52,7 +52,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         ir_unit.modules.into_iter().map(|module| hhbc::Module {
             attributes: convert_attributes(alloc, module.attributes),
             name: strings.lookup_class_name(module.name),
-            span: module.span,
+            span: module.span.to_span(),
         }),
     );
     unit.module_use = ir_unit.module_use.into();
@@ -69,7 +69,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
                 ir::FatalOp::Runtime(..) => hhbc::FatalOp::Runtime,
                 ir::FatalOp::RuntimeOmitFrame(..) => hhbc::FatalOp::RuntimeOmitFrame,
             };
-            unit.fatal = Maybe::Just(ffi::Triple(op, *loc, *msg))
+            unit.fatal = Maybe::Just(ffi::Triple(op, loc.to_hhbc(), *msg))
         }
     }
 

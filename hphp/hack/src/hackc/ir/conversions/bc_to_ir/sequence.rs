@@ -47,11 +47,13 @@ pub(crate) struct Sequence {
 impl Sequence {
     pub(crate) fn compute(
         builder: &mut FuncBuilder<'_>,
+        filename: ir::Filename,
         body_instrs: &[Instruct<'_>],
     ) -> (LabelMap<Addr>, BlockIdMap<Addr>, AddrMap<Sequence>) {
         let seq_builder = SeqBuilder {
             sequences: Default::default(),
             builder,
+            filename,
             seq_addr: Addr::ENTRY,
             next_exid: ExFrameId::from_usize(1),
             tc_stack: Default::default(),
@@ -69,6 +71,7 @@ pub(crate) enum SequenceKind {
 struct SeqBuilder<'a, 'b> {
     sequences: Vec<(Addr, Sequence)>,
     builder: &'b mut FuncBuilder<'a>,
+    filename: ir::Filename,
     seq_addr: Addr,
     next_exid: ExFrameId,
     tc_stack: Vec<TryCatchId>,
@@ -83,7 +86,7 @@ impl SeqBuilder<'_, '_> {
         next: Option<Addr>,
     ) -> BlockId {
         let bid = self.builder.alloc_bid();
-        let loc_id = crate::context::add_loc(self.builder, src_loc);
+        let loc_id = crate::context::add_loc(self.builder, self.filename, src_loc);
         let tcid = self.tc_stack.last().copied().unwrap_or_default();
         self.builder.func.block_mut(bid).tcid = tcid;
         let sequence = Sequence {

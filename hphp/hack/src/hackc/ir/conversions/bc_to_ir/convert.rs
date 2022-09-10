@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::path::Path;
+
 use ffi::Maybe;
 use hash::HashMap;
 use hhbc::Unit;
@@ -16,8 +18,11 @@ use hhbc::Unit;
 /// NOTE: hhbc::Unit has to be by-ref because it unfortunately contains a bunch
 /// of ffi::Slice<T> which cannot own T.
 ///
-pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
+pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
+    use std::os::unix::ffi::OsStrExt;
     let mut strings = ir::StringInterner::default();
+
+    let filename = ir::Filename(strings.intern_bytes(filename.as_os_str().as_bytes()));
 
     let adata: HashMap<_, _> = unit.adata.iter().map(|a| (a.id, a.value.clone())).collect();
 
@@ -36,7 +41,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
         .map(|module| ir::Module {
             attributes: module.attributes.iter().map(convert_attribute).collect(),
             name: ir::ClassId::from_hhbc(module.name, &mut strings),
-            span: module.span,
+            span: ir::SrcLoc::from_span(filename, &module.span),
         })
         .collect();
 
@@ -65,17 +70,18 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>) -> ir::Unit<'a> {
     }
 
     for f in unit.functions.as_ref() {
-        crate::func::convert_function(&mut ir_unit, f);
+        crate::func::convert_function(&mut ir_unit, filename, f);
     }
 
     // This is where we convert the methods for all the classes.
     for (idx, c) in unit.classes.as_ref().iter().enumerate() {
         for m in c.methods.as_ref() {
-            crate::func::convert_method(&mut ir_unit, idx, m);
+            crate::func::convert_method(&mut ir_unit, filename, idx, m);
         }
     }
 
     if let Maybe::Just(ffi::Triple(op, loc, msg)) = unit.fatal {
+        let loc = ir::func::SrcLoc::from_hhbc(filename, &loc);
         ir_unit.fatal = match op {
             hhbc::FatalOp::Parse => ir::FatalOp::Parse(loc, msg),
             hhbc::FatalOp::Runtime => ir::FatalOp::Runtime(loc, msg),

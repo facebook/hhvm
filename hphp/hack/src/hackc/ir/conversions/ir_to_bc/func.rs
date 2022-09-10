@@ -139,7 +139,7 @@ pub(crate) fn convert_function<'a>(
         coeffects: convert_coeffects(alloc, &function.coeffects),
         flags: function.flags,
         name,
-        span: function.span,
+        span: function.span.to_span(),
         attrs: function.attrs,
     };
     unit.functions.push(hhas_func);
@@ -157,7 +157,7 @@ pub(crate) fn convert_method<'a>(
         attributes,
         name: method.name,
         body,
-        span: method.span,
+        span: method.span.to_span(),
         coeffects: convert_coeffects(alloc, &method.coeffects),
         flags: method.flags,
         visibility: method.visibility,

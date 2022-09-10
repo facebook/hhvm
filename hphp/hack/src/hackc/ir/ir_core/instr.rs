@@ -22,7 +22,6 @@ pub use hhbc::SetOpOp;
 pub use hhbc::SetRangeOp;
 pub use hhbc::SilenceOp;
 pub use hhbc::SpecialClsRef;
-pub use hhbc::SrcLoc;
 pub use hhbc::SwitchKind;
 pub use hhbc::TypeStructResolveOp;
 use macros::HasLoc;

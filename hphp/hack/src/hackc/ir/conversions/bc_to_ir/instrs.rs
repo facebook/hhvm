@@ -101,7 +101,7 @@ pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
                 }
             }
             Instruct::Pseudo(Pseudo::SrcLoc(src_loc)) => {
-                ctx.loc = crate::context::add_loc(&mut ctx.builder, src_loc);
+                ctx.loc = crate::context::add_loc(&mut ctx.builder, ctx.filename, src_loc);
             }
             Instruct::Pseudo(
                 Pseudo::Label(_)

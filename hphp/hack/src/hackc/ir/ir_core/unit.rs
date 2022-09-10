@@ -12,13 +12,13 @@ pub use hhbc::IncludePath;
 pub use hhbc::Typedef;
 
 use crate::constant::AdataId;
+use crate::func::SrcLoc;
 use crate::string_intern::StringInterner;
 use crate::Attribute;
 use crate::Class;
 use crate::Function;
 use crate::HackConstant;
 use crate::Module;
-use crate::SrcLoc;
 use crate::TypedValue;
 
 pub enum FatalOp<'a> {

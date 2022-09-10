@@ -169,7 +169,7 @@ impl IrOpts {
         )?;
 
         let post_alloc = bumpalo::Bump::default();
-        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit));
+        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit, path));
         let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(&post_alloc, ir));
 
         let (result, verify_t) =

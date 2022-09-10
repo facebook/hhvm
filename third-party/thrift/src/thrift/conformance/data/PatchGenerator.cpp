@@ -279,18 +279,37 @@ struct target_type_impl<Tag, T, folly::void_t<type::standard_type<Tag>>> {
 template <typename Tag, typename T>
 using target_type = typename target_type_impl<Tag, T>::type;
 
-template <typename Tag>
-Object patchAddOperation(Object&& patch, op::PatchOp operation, auto value) {
-  auto opId = static_cast<int16_t>(operation);
-  patch.members().ensure()[opId] = asValueStruct<Tag>(value);
-  return std::move(patch);
+Object setObjectMemeber(Object&& object, int16_t id, Value value) {
+  object.members().ensure()[id] = value;
+  return std::move(object);
+}
+
+Value wrapObjectInValue(Object object) {
+  Value result;
+  result.objectValue_ref() = object;
+  return result;
 }
 
 template <typename Tag>
-Value makePatchObject(auto operation, auto value) {
-  Value result;
-  result.objectValue_ref() = patchAddOperation<Tag>(Object{}, operation, value);
-  return result;
+Object patchAddOperation(Object&& patch, op::PatchOp operation, auto value) {
+  return setObjectMemeber(
+      std::move(patch),
+      static_cast<int16_t>(operation),
+      asValueStruct<Tag>(value));
+}
+
+Object patchAddOperation(Object&& patch, op::PatchOp operation, Value value) {
+  return setObjectMemeber(
+      std::move(patch), static_cast<int16_t>(operation), value);
+}
+
+template <typename Tag>
+Value makePatchValue(auto operation, auto value) {
+  return wrapObjectInValue(patchAddOperation<Tag>(Object{}, operation, value));
+}
+
+Value makePatchValue(auto operation, Value value) {
+  return wrapObjectInValue(patchAddOperation(Object{}, operation, value));
 }
 
 template <typename Tag, typename Type>
@@ -306,7 +325,7 @@ PatchOpTestCase makeAssignTC(
 
   req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<Tag>(op::PatchOp::Assign, expected), protocol);
+      makePatchValue<Tag>(op::PatchOp::Assign, expected), protocol);
   tascase.request() = req;
   tascase.result() = registry.store(asValueStruct<Tag>(expected), protocol);
   return tascase;
@@ -325,7 +344,7 @@ PatchOpTestCase makeClearTC(
 
   req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<type::bool_t>(op::PatchOp::Clear, true), protocol);
+      makePatchValue<type::bool_t>(op::PatchOp::Clear, true), protocol);
   tascase.request() = req;
   auto expectedValue = asValueStruct<Tag>(expected);
   if (auto obj = expectedValue.if_object()) {
@@ -351,7 +370,7 @@ PatchOpTestCase makeContainerRemoveTC(
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<type::set<ValueTag>>(
+      makePatchValue<type::set<ValueTag>>(
           op::PatchOp::Remove,
           std::set<type::standard_type<ValueTag>>{toRemove}),
       protocol);
@@ -381,7 +400,7 @@ PatchOpTestCase makeValueContainerPrependTC(
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<PatchTag>(op::PatchOp::Add, patchData), protocol);
+      makePatchValue<PatchTag>(op::PatchOp::Add, patchData), protocol);
   tascase.request() = req;
   tascase.result() =
       registry.store(asValueStruct<ContainerTag>(expected), protocol);
@@ -405,11 +424,37 @@ PatchOpTestCase makeContainerAppendTC(
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<ContainerTag>(op::PatchOp::Put, patchData), protocol);
+      makePatchValue<ContainerTag>(op::PatchOp::Put, patchData), protocol);
   tascase.request() = req;
   tascase.result() =
       registry.store(asValueStruct<ContainerTag>(expected), protocol);
   return tascase;
+}
+
+template <typename Tag, typename Type>
+PatchOpTestCase makePatchXTC(
+    const AnyRegistry& registry,
+    const Protocol& protocol,
+    Type initial,
+    op::PatchOp patchOp,
+    protocol::Value valuePatch,
+    Type expected) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
+  req.patch() = registry.store(makePatchValue(patchOp, valuePatch), protocol);
+  tascase.request() = req;
+  tascase.result() = registry.store(asValueStruct<Tag>(expected), protocol);
+  return tascase;
+}
+
+template <typename TT>
+type::standard_type<TT> valueToAssign() {
+  if constexpr (std::is_convertible_v<TT, type::number_c>) {
+    return 1;
+  } else {
+    return "test";
+  }
 }
 
 } // namespace
@@ -553,18 +598,46 @@ Test createStructPatchTest(
   type::standard_type<TT> value;
   op::clear<TT>(value);
 
-  Struct patchVal;
-  patchVal.field_1_ref() = value;
+  Struct initial;
+  initial.field_1_ref() = value;
 
   auto& assignCase = test.testCases()->emplace_back();
   assignCase.name() = makeTestName("assign");
   assignCase.test().emplace().objectPatch_ref() =
-      makeAssignTC<type::struct_c>(registry, protocol, patchVal);
+      makeAssignTC<type::struct_c>(registry, protocol, initial);
 
   auto& clearCase = test.testCases()->emplace_back();
   clearCase.name() = makeTestName("clear");
   clearCase.test().emplace().objectPatch_ref() =
-      makeClearTC<type::struct_c>(registry, protocol, patchVal);
+      makeClearTC<type::struct_c>(registry, protocol, initial);
+
+  Struct expected = initial;
+  expected.field_1_ref() = valueToAssign<TT>();
+  auto patch = op::patch_type<TT>();
+  patch = toValue<TT>(*expected.field_1_ref());
+  auto patchValue = wrapObjectInValue(setObjectMemeber(
+      Object{}, 1, asValueStruct<type::struct_c>(patch.toThrift())));
+
+  auto& patchPriorCase = test.testCases()->emplace_back();
+  patchPriorCase.name() = makeTestName("patch_prior");
+  patchPriorCase.test().emplace().objectPatch_ref() =
+      makePatchXTC<type::struct_c>(
+          registry,
+          protocol,
+          initial,
+          op::PatchOp::PatchPrior,
+          patchValue,
+          expected);
+
+  auto& patchCase = test.testCases()->emplace_back();
+  patchCase.name() = makeTestName("patch");
+  patchCase.test().emplace().objectPatch_ref() = makePatchXTC<type::struct_c>(
+      registry,
+      protocol,
+      initial,
+      op::PatchOp::PatchAfter,
+      patchValue,
+      expected);
 
   return test;
 }

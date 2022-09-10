@@ -418,12 +418,16 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 
   auto applyFieldPatch = [&](auto patchFields) {
     value.members().ensure();
-    for (const auto& [id, field_value] :
-         *patchFields->objectValue_ref()->members()) {
-      // Only patch values for fields that exist for now
-      if (auto* field = folly::get_ptr(*value.members(), id)) {
-        applyPatch(*field_value.objectValue_ref(), *field);
+    if (const auto* obj = patchFields->if_object()) {
+      for (const auto& [id, field_value] : *obj->members()) {
+        // Only patch values for fields that exist for now
+        if (auto* field = folly::get_ptr(*value.members(), id)) {
+          applyPatch(*field_value.objectValue_ref(), *field);
+        }
       }
+    } else {
+      throw std::runtime_error(
+          "struct patch PatchPrior/Patch should contain an object");
     }
   };
 

@@ -194,7 +194,7 @@ void spawn_command(
       "WATCHMAN_CLOCK", res->clockAtStartOfQuery.position().toClockString());
 
   if (cmd->query->relative_root) {
-    cmd->env.set("WATCHMAN_RELATIVE_ROOT", cmd->query->relative_root);
+    cmd->env.set("WATCHMAN_RELATIVE_ROOT", *cmd->query->relative_root);
   } else {
     cmd->env.unset("WATCHMAN_RELATIVE_ROOT");
   }
@@ -255,10 +255,8 @@ void spawn_command(
   }
 
   // Figure out the appropriate cwd
-  w_string working_dir(cmd->query->relative_root);
-  if (!working_dir) {
-    working_dir = root->root_path;
-  }
+  w_string working_dir =
+      cmd->query->relative_root ? *cmd->query->relative_root : root->root_path;
 
   auto cwd = cmd->definition.get_optional("chdir");
   if (cwd) {

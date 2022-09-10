@@ -607,7 +607,7 @@ void InMemoryView::pathGenerator(const Query* query, QueryContext* ctx) const {
   struct watchman_file* f;
 
   if (query->relative_root) {
-    relative_root = query->relative_root;
+    relative_root = *query->relative_root;
   } else {
     relative_root = rootPath_;
   }
@@ -879,7 +879,7 @@ void InMemoryView::globGenerator(const Query* query, QueryContext* ctx) const {
   w_string relative_root;
 
   if (query->relative_root) {
-    relative_root = query->relative_root;
+    relative_root = *query->relative_root;
   } else {
     relative_root = rootPath_;
   }

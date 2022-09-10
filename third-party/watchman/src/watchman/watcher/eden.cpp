@@ -863,7 +863,7 @@ class EdenView final : public QueryableView {
   w_string_piece computeRelativePathPiece(QueryContext* ctx) const {
     w_string_piece rel;
     if (ctx->query->relative_root) {
-      rel = ctx->query->relative_root;
+      rel = ctx->query->relative_root->piece();
       rel.advance(ctx->root->root_path.size() + 1);
     }
     return rel;
@@ -1113,7 +1113,7 @@ class EdenView final : public QueryableView {
 
     std::string globPattern;
     if (ctx->query->relative_root) {
-      w_string_piece rel(ctx->query->relative_root);
+      w_string_piece rel(*ctx->query->relative_root);
       rel.advance(ctx->root->root_path.size() + 1);
       globPattern.append(rel.data(), rel.size());
       globPattern.append("/");

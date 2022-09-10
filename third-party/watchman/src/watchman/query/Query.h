@@ -51,7 +51,7 @@ struct Query {
   /**
    * Optional full path to relative root, without and with trailing slash.
    */
-  w_string relative_root;
+  std::optional<w_string> relative_root;
   w_string relative_root_slash;
 
   std::optional<std::vector<QueryPath>> paths;

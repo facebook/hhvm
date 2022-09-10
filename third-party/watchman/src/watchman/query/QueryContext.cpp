@@ -59,7 +59,7 @@ w_string QueryContext::computeWholeName(FileResult* file) const {
   if (query->relative_root) {
     // At this point every path should start with the relative root, so this is
     // legal
-    name_start = query->relative_root.size() + 1;
+    name_start = query->relative_root->size() + 1;
   } else {
     name_start = root->root_path.size() + 1;
   }

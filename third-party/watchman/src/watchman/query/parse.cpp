@@ -106,7 +106,7 @@ void parse_relative_root(
 
   auto canon_path = w_string_canon_path(path);
   res->relative_root = w_string::pathCat({root->root_path, canon_path});
-  res->relative_root_slash = w_string::build(res->relative_root, "/");
+  res->relative_root_slash = w_string::build(res->relative_root.value(), "/");
 }
 
 void parse_query_expression(Query* res, const json_ref& query) {

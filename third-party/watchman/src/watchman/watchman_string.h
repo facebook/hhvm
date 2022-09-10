@@ -60,7 +60,11 @@ inline uint32_t w_string_hval(w_string_t* str) {
   return w_string_compute_hval(str);
 }
 
-w_string_piece w_string_canon_path(w_string_t* str);
+/**
+ * Trims all trailing slashes from a path.
+ */
+w_string_piece w_string_canon_path(w_string_piece str);
+
 int w_string_compare(const w_string_t* a, const w_string_t* b);
 
 bool w_string_equal(const w_string_t* a, const w_string_t* b);
@@ -133,6 +137,8 @@ class w_string_piece {
       : s_(cstr), e_(cstr + strlen(cstr)) {}
 
   w_string_piece(const char* cstr, size_t len) : s_(cstr), e_(cstr + len) {}
+
+  w_string_piece(const char* begin, const char* end) : s_{begin}, e_{end} {}
 
   /* implicit */ w_string_piece(std::string_view sv)
       : w_string_piece{sv.data(), sv.size()} {}
@@ -216,9 +222,17 @@ class w_string_piece {
     return std::string_view{s_, count};
   }
 
-  bool operator==(w_string_piece other) const;
-  bool operator!=(w_string_piece other) const;
-  bool operator<(w_string_piece other) const;
+  friend bool operator==(w_string_piece lhs, w_string_piece rhs) {
+    return lhs.view() == rhs.view();
+  }
+
+  friend bool operator!=(w_string_piece lhs, w_string_piece rhs) {
+    return lhs.view() != rhs.view();
+  }
+
+  friend bool operator<(w_string_piece lhs, w_string_piece rhs) {
+    return lhs.view() < rhs.view();
+  }
 
   bool contains(w_string_piece needle) const;
   bool startsWith(w_string_piece prefix) const;

@@ -216,34 +216,6 @@ w_string_piece w_string_piece::suffix() const {
   return nullptr;
 }
 
-bool w_string_piece::operator<(w_string_piece other) const {
-  int res;
-  if (size() < other.size()) {
-    res = memcmp(data(), other.data(), size());
-    return (res == 0 ? -1 : res) < 0;
-  } else if (size() > other.size()) {
-    res = memcmp(data(), other.data(), other.size());
-    return (res == 0 ? +1 : res) < 0;
-  }
-  return memcmp(data(), other.data(), size()) < 0;
-}
-
-bool w_string_piece::operator==(w_string_piece other) const {
-  if (s_ == other.s_ && e_ == other.e_) {
-    return true;
-  }
-  if (size() != other.size()) {
-    return false;
-  } else if (size() == 0) {
-    return true;
-  }
-  return memcmp(data(), other.data(), size()) == 0;
-}
-
-bool w_string_piece::operator!=(w_string_piece other) const {
-  return !operator==(other);
-}
-
 bool w_string_piece::startsWith(w_string_piece prefix) const {
   if (prefix.size() > size()) {
     return false;
@@ -754,17 +726,13 @@ bool w_string_piece::contains(w_string_piece needle) const {
 #endif
 }
 
-w_string_piece w_string_canon_path(w_string_t* str) {
-  int end;
-  int trim = 0;
-
-  for (end = str->len - 1; end >= 0 && is_slash(str->buf[end]); end--) {
-    trim++;
+w_string_piece w_string_canon_path(w_string_piece str) {
+  const char* begin = str.data();
+  const char* end = str.data() + str.size();
+  while (end != begin && is_slash(end[-1])) {
+    --end;
   }
-  if (trim) {
-    return w_string_piece(str->buf, str->len - trim);
-  }
-  return w_string_piece(str);
+  return w_string_piece{begin, end};
 }
 
 bool w_string_is_known_unicode(w_string_t* str) {

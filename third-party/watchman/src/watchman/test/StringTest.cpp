@@ -122,6 +122,14 @@ TEST(String, double) {
   EXPECT_EQ(str, w_string("5.5"));
 }
 
+TEST(String, canon_path) {
+  EXPECT_EQ("foo", w_string_canon_path("foo"));
+  EXPECT_EQ("foo", w_string_canon_path("foo/"));
+  EXPECT_EQ("foo", w_string_canon_path("foo//"));
+  EXPECT_EQ("/foo", w_string_canon_path("/foo"));
+  EXPECT_EQ("foo/bar", w_string_canon_path("foo/bar"));
+}
+
 TEST(String, concat) {
   auto str =
       w_string::build("one", 2, "three", 1.2, false, w_string(nullptr).view());

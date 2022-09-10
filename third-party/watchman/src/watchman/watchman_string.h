@@ -65,8 +65,6 @@ inline uint32_t w_string_hval(w_string_t* str) {
  */
 w_string_piece w_string_canon_path(w_string_piece str);
 
-bool w_string_equal_cstring(const w_string_t* a, const char* b);
-
 bool w_string_path_is_absolute(const w_string_t* str);
 
 bool w_string_startswith(w_string_t* str, w_string_t* prefix);

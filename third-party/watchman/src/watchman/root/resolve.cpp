@@ -98,15 +98,13 @@ static void check_allowed_fs(const char* filename, const w_string& fs_type) {
       continue;
     }
 
-    if (!w_string_equal_cstring(fs_type, name)) {
-      continue;
+    if (fs_type == name) {
+      RootResolveError::throwf(
+          "path uses the \"{}\" filesystem "
+          "and is disallowed by global config illegal_fstypes: {}",
+          fs_type,
+          advice);
     }
-
-    RootResolveError::throwf(
-        "path uses the \"{}\" filesystem "
-        "and is disallowed by global config illegal_fstypes: {}",
-        fs_type,
-        advice);
   }
 }
 

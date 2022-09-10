@@ -638,13 +638,6 @@ void w_string_delref(w_string_t* str) {
   delete[](char*) str;
 }
 
-bool w_string_equal_cstring(const w_string_t* a, const char* b) {
-  uint32_t blen = strlen_uint32(b);
-  if (a->len != blen)
-    return false;
-  return memcmp(a->buf, b, a->len) == 0 ? true : false;
-}
-
 bool w_string_equal_caseless(w_string_piece a, w_string_piece b) {
   uint32_t i;
 
